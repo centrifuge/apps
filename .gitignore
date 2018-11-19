@@ -61,7 +61,7 @@ typings/
 .next
 
 # frontend build files
-frontend/build
+build
 
 # IntelliJ config files
 .idea
