@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header matches snapshot 1`] = `
+<Box
+  align="center"
+  direction="row"
+  gridArea="header"
+  justify="between"
+>
+  <Button>
+    <Link
+      label="Centrifuge"
+      size="large"
+      to="/"
+    />
+  </Button>
+  <Box
+    direction="row"
+    gap="small"
+  >
+    <Link
+      label="Invoices"
+      to="/invoices"
+    />
+    <Link
+      label="Purchase orders"
+      to="/orders"
+    />
+    <Link
+      label="Contacts"
+      to="/contacts"
+    />
+  </Box>
+</Box>
+`;
