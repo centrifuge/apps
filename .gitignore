@@ -59,3 +59,9 @@ typings/
 
 # next.js build output
 .next
+
+# frontend build files
+frontend/build
+
+# IntelliJ config files
+.idea
