@@ -7,8 +7,8 @@ async function bootstrap() {
 
   app
     .setViewEngine('html')
-    .setBaseViewsDir(path.resolve('./frontend/build'))
-    .useStaticAssets(path.resolve('./frontend/build'));
+    .setBaseViewsDir(path.resolve('./build'))
+    .useStaticAssets(path.resolve('./build'));
 
   await app.listen(3000);
 }
