@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Body matches snapshot 1`] = `
+<Box
+  align="center"
+  direction="row"
+  gridArea="main"
+  justify="center"
+>
+  <Switch>
+    <Route
+      component={[Function]}
+      path="/invoices"
+    />
+    <Route
+      component={[Function]}
+      path="/orders"
+    />
+    <Route
+      component={[Function]}
+      path="/contacts"
+    />
+  </Switch>
+</Box>
+`;
