@@ -1,10 +1,10 @@
 import React, { FunctionComponent } from 'react';
 
-import { Box, Button, Text } from 'grommet';
-import Link from './Link';
+import { Box, Button } from 'grommet';
+import Link from '../components/Link';
 
 const Header: FunctionComponent = () => (
-  <Box gridArea="header" direction="row" align="center" justify="between">
+  <Box gridArea="header" direction="row" align="center" justify="between" width="xlarge">
     <Button>
       <Link label="Centrifuge" to="/" size="large" />
     </Button>

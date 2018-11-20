@@ -6,6 +6,7 @@ exports[`Header matches snapshot 1`] = `
   direction="row"
   gridArea="header"
   justify="between"
+  width="xlarge"
 >
   <Button>
     <Link

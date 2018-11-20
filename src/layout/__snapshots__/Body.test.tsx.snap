@@ -2,24 +2,29 @@
 
 exports[`Body matches snapshot 1`] = `
 <Box
-  align="center"
+  background="#f9f9fa"
   direction="row"
-  gridArea="main"
+  fill="true"
   justify="center"
 >
-  <Switch>
-    <Route
-      component={[Function]}
-      path="/invoices"
-    />
-    <Route
-      component={[Function]}
-      path="/orders"
-    />
-    <Route
-      component={[Function]}
-      path="/contacts"
-    />
-  </Switch>
+  <Box
+    justify="start"
+    width="xlarge"
+  >
+    <Switch>
+      <Route
+        component={[Function]}
+        path="/invoices"
+      />
+      <Route
+        component={[Function]}
+        path="/orders"
+      />
+      <Route
+        component={[Function]}
+        path="/contacts"
+      />
+    </Switch>
+  </Box>
 </Box>
 `;
