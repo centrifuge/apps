@@ -7,12 +7,19 @@ import Orders from '../orders/Orders';
 import Contacts from '../contacts/Contacts';
 
 const Body: FunctionComponent = () => (
-  <Box gridArea="main" justify="center" align="center" direction="row">
-    <Switch>
-      <Route path={routes.invoices} component={Invoices} />
-      <Route path={routes.orders} component={Orders} />
-      <Route path={routes.contacts} component={Contacts} />
-    </Switch>
+  <Box
+    justify="center"
+    direction="row"
+    fill="true"
+    background="#f9f9fa"
+  >
+    <Box width="xlarge" justify="start">
+      <Switch>
+        <Route path={routes.invoices} component={Invoices} />
+        <Route path={routes.orders} component={Orders} />
+        <Route path={routes.contacts} component={Contacts} />
+      </Switch>
+    </Box>
   </Box>
 );
 
