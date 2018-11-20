@@ -4,7 +4,6 @@ exports[`Header matches snapshot 1`] = `
 <Box
   align="center"
   direction="row"
-  gridArea="header"
   justify="between"
   width="xlarge"
 >
