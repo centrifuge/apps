@@ -1,6 +1,6 @@
-const base = '/invoices';
+const index = '/invoices';
 
 export default {
-  base,
-  new: `${base}/new`,
+  index,
+  new: `${index}/new`,
 };

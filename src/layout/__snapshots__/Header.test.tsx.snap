@@ -24,7 +24,7 @@ exports[`Header matches snapshot 1`] = `
     />
     <Link
       label="Purchase orders"
-      to="/orders"
+      to="/purchaseOrders"
     />
     <Link
       label="Contacts"

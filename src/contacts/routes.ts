@@ -1,5 +1,5 @@
-const base = '/contacts';
+const index = '/contacts';
 
 export default {
-  base,
+  index,
 };

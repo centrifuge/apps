@@ -4,15 +4,17 @@ import { Link } from 'react-router-dom';
 import { Box, Button, Heading, TextInput } from 'grommet';
 import { Field, Form } from 'react-final-form';
 
-const onFormSubmit = values => console.log(values);
-
 export default class CreateInvoice extends React.Component {
   displayName = 'CreateInvoice';
+
+  onFormSubmit(values) {
+    console.log(values);
+  }
 
   render() {
     return (
       <Form
-        onSubmit={onFormSubmit}
+        onSubmit={this.onFormSubmit}
         render={({ handleSubmit, values, reset }) => (
           <Box fill="true">
             <Box justify="between" direction="row">

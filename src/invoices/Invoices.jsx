@@ -1,8 +1,8 @@
 // Converted to JSX until https://github.com/grommet/grommet/issues/2464 is fixed
 
 import React from 'react';
-import { Box, DataTable, Heading, Text } from 'grommet';
-import { Add } from 'grommet-icons';
+import { Box, DataTable, Heading } from 'grommet';
+import { Add, Edit, More } from 'grommet-icons';
 import { Link } from 'react-router-dom';
 
 import invoiceRoutes from './routes';
@@ -10,7 +10,7 @@ import invoiceRoutes from './routes';
 const columns = [
   {
     property: 'number',
-    header: <Text>Number</Text>,
+    header: 'Number',
   },
   {
     property: 'customer',
@@ -25,9 +25,14 @@ const columns = [
     header: 'Status',
   },
   {
-    property: 'actions',
+    property: 'number',
     header: 'Actions',
-    render: () => <Text>tes</Text>,
+    render: () => (
+      <Box direction="row" gap="small">
+        <Edit />
+        <More />
+      </Box>
+    ),
   },
 ];
 
