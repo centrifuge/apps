@@ -4,7 +4,6 @@ exports[`Header matches snapshot 1`] = `
 <Box
   align="center"
   direction="row"
-  gridArea="header"
   justify="between"
   width="xlarge"
 >
@@ -25,7 +24,7 @@ exports[`Header matches snapshot 1`] = `
     />
     <Link
       label="Purchase orders"
-      to="/orders"
+      to="/purchaseOrders"
     />
     <Link
       label="Contacts"

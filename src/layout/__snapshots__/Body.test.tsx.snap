@@ -8,17 +8,20 @@ exports[`Body matches snapshot 1`] = `
   justify="center"
 >
   <Box
-    justify="start"
     width="xlarge"
   >
     <Switch>
+      <Route
+        component={[Function]}
+        path="/invoices/new"
+      />
       <Route
         component={[Function]}
         path="/invoices"
       />
       <Route
         component={[Function]}
-        path="/orders"
+        path="/purchaseOrders"
       />
       <Route
         component={[Function]}
