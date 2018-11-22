@@ -44,6 +44,7 @@
     "@types/node": "^10.7.1",
     "@types/supertest": "^2.0.5",
     "@types/react-router": "^4.3.1",
+    "@types/nedb": "^1.8.6",
     "jest": "^23.5.0",
     "nodemon": "^1.18.3",
     "prettier": "^1.14.2",
