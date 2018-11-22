@@ -23,9 +23,11 @@
     "cross-env": "^5.2.0"
   },
   "scripts": {
-    "start": "run-p start:frontend start:backend",
+    "start": "react-scripts build && nodemon",
     "test": "cross-env CI=true react-scripts test && jest --config server/jest.config.js",
+    "start:dev": "run-p start:frontend start:backend",
     "start:frontend": "react-scripts start",
+    "build:frontend": "react-scripts build",
     "test:frontend": "react-scripts test",
     "start:backend": "nodemon",
     "test:backend": "jest --config server/jest.config.js --watch",
