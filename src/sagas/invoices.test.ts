@@ -1,20 +1,13 @@
 import { call, fork, put, take } from 'redux-saga/effects';
-import { goBack } from 'connected-react-router';
+import { push } from 'connected-react-router';
 
-import {
-  createInvoice,
-  getInvoices,
-  watchCreateInvoice,
-  watchGetInvoicesPage,
-} from './invoices';
+import { createInvoice, getInvoices, watchCreateInvoice, watchGetInvoicesPage } from './invoices';
 
-import {
-  CREATE_INVOICE_ACTION_TYPES,
-  GET_INVOICE_ACTION_TYPES,
-} from '../actions/invoices';
+import { createInvoiceActionTypes, getInvoiceActionTypes } from '../actions/invoices';
 
 import { Invoice } from '../common/models/dto/invoice';
 import { httpClient } from '../http-client';
+import routes from '../invoices/routes';
 
 const invoice = new Invoice(1, 'mickey', 'goofy', 'created');
 
@@ -23,7 +16,7 @@ describe('watchGetInvoicesPage', () => {
     const gen = watchGetInvoicesPage();
 
     const onGetInvoiceAction = gen.next().value;
-    expect(onGetInvoiceAction).toEqual(take(GET_INVOICE_ACTION_TYPES.start));
+    expect(onGetInvoiceAction).toEqual(take(getInvoiceActionTypes.start));
 
     const getInvoicesInvocation = gen.next().value;
     expect(getInvoicesInvocation).toEqual(fork(getInvoices));
@@ -35,16 +28,16 @@ describe('watchCreateInvoice', () => {
     const gen = watchCreateInvoice();
 
     const onGetInvoiceAction = gen.next().value;
-    expect(onGetInvoiceAction).toEqual(take(CREATE_INVOICE_ACTION_TYPES.start));
+    expect(onGetInvoiceAction).toEqual(take(createInvoiceActionTypes.start));
 
     const getInvoicesInvocation = gen.next({
-      type: CREATE_INVOICE_ACTION_TYPES.start,
+      type: createInvoiceActionTypes.start,
       invoice,
     }).value;
     expect(getInvoicesInvocation).toEqual(fork(createInvoice, invoice));
 
     const goBackInvocation = gen.next().value;
-    expect(goBackInvocation).toEqual(put(goBack()));
+    expect(goBackInvocation).toEqual(put(push(routes.index)));
   });
 });
 
@@ -58,7 +51,7 @@ describe('getInvoices', () => {
     const successResponse = gen.next({ data: invoice }).value;
     expect(successResponse).toEqual(
       put({
-        type: GET_INVOICE_ACTION_TYPES.success,
+        type: getInvoiceActionTypes.success,
         payload: invoice,
       }),
     );
@@ -74,7 +67,7 @@ describe('getInvoices', () => {
     const errorResponse = gen.throw && gen.throw(error).value;
     expect(errorResponse).toEqual(
       put({
-        type: GET_INVOICE_ACTION_TYPES.fail,
+        type: getInvoiceActionTypes.fail,
         payload: error,
       }),
     );
@@ -91,7 +84,7 @@ describe('createInvoice', () => {
     const successResponse = gen.next({ data: invoice }).value;
     expect(successResponse).toEqual(
       put({
-        type: CREATE_INVOICE_ACTION_TYPES.success,
+        type: createInvoiceActionTypes.success,
         payload: invoice,
       }),
     );
@@ -107,7 +100,7 @@ describe('createInvoice', () => {
     const errorResponse = gen.throw && gen.throw(error).value;
     expect(errorResponse).toEqual(
       put({
-        type: CREATE_INVOICE_ACTION_TYPES.fail,
+        type: createInvoiceActionTypes.fail,
         payload: error,
       }),
     );

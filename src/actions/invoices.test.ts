@@ -1,7 +1,7 @@
 import {
-  CREATE_INVOICE_ACTION_TYPES,
+  createInvoiceActionTypes,
   createInvoice,
-  GET_INVOICE_ACTION_TYPES,
+  getInvoiceActionTypes,
   getInvoices,
 } from './invoices';
 import { Invoice } from '../common/models/dto/invoice';
@@ -27,12 +27,12 @@ testActions([
   {
     name: 'getInvoices',
     action: getInvoices,
-    type: GET_INVOICE_ACTION_TYPES.start,
+    type: getInvoiceActionTypes.start,
   },
   {
     name: 'createInvoice',
     action: () => createInvoice(invoiceToCreate),
-    type: CREATE_INVOICE_ACTION_TYPES.start,
+    type: createInvoiceActionTypes.start,
     payload: { invoice: invoiceToCreate },
   },
 ]);

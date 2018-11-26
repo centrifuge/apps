@@ -8,8 +8,8 @@ export class InvoicesController {
   constructor(private readonly invoicesService: InvoicesService) {}
 
   @Post()
-  async create(@Body() invoiceDto: Invoice) {
-    return await this.invoicesService.create(invoiceDto);
+  async create(@Body() invoice: Invoice) {
+    return await this.invoicesService.create(invoice);
   }
 
   @Get()

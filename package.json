@@ -27,9 +27,9 @@
     "connected-react-router": "^5.0.1"
   },
   "scripts": {
-    "start": "react-scripts build && nodemon",
+    "start:prod": "react-scripts build && nodemon",
     "test": "cross-env CI=true react-scripts test && jest --config server/jest.config.js",
-    "start:dev": "run-p start:frontend start:backend",
+    "start": "run-p start:frontend start:backend",
     "start:frontend": "react-scripts start",
     "build:frontend": "react-scripts build",
     "test:frontend": "react-scripts test",
