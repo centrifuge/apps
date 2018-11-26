@@ -2,8 +2,8 @@ import React, { FunctionComponent } from 'react';
 import { Box } from 'grommet';
 import { Route, Switch } from 'react-router';
 import routes from '../routes';
-import Invoices from '../invoices/Invoices';
-import CreateInvoice from '../invoices/CreateInvoice';
+import Invoices from '../invoices/view';
+import CreateInvoice from '../invoices/create';
 import PurchaseOrders from '../purchaseorders/PurchaseOrders';
 import Contacts from '../contacts/Contacts';
 

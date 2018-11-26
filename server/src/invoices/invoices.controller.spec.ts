@@ -1,13 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { InvoicesController } from './invoices.controller';
 import { InvoicesService } from './invoices.service';
-import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { Invoice } from '../../../src/common/models/dto/invoice';
 
 describe('InvoicesController', () => {
   let invoicesModule: TestingModule;
 
-  const invoiceToCreate = new CreateInvoiceDto(999, 'cinderella');
-  const fetchedInvoices = [new CreateInvoiceDto(100, 'pumpkin')];
+  const invoiceToCreate = new Invoice(
+    999,
+    'cinderella',
+    'step mother',
+    'in queue',
+  );
+  const fetchedInvoices = [new Invoice(100, 'pumpkin', 'godmother', 'done')];
 
   class InvoicesServiceMock {
     create = jest.fn(val => val);

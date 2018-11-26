@@ -1,11 +1,13 @@
-// Converted to JSX until https://github.com/grommet/grommet/issues/2464 is fixed
-
 import React from 'react';
 import { Box, DataTable, Heading } from 'grommet';
 import { Add, Edit, More } from 'grommet-icons';
 import { Link } from 'react-router-dom';
 
-import invoiceRoutes from './routes';
+import invoiceRoutes from '../routes';
+import { Invoice } from '../../common/models/dto/invoice';
+
+// Casting to "any" until https://github.com/grommet/grommet/issues/2464 is fixed
+const DataTableSupressedWarning = DataTable as any;
 
 const columns = [
   {
@@ -25,7 +27,7 @@ const columns = [
     header: 'Status',
   },
   {
-    property: 'number',
+    property: 'actions',
     header: 'Actions',
     render: () => (
       <Box direction="row" gap="small">
@@ -36,21 +38,14 @@ const columns = [
   },
 ];
 
-const SAMPLE_DATA = [
-  {
-    number: '111',
-    customer: 'John doe',
-    supplier: 'amazon.com',
-    status: 'in queue',
-  },
-];
+type InvoicesProps = { invoices: Invoice[] };
 
-export default class Invoices extends React.Component {
+export default class Invoices extends React.Component<InvoicesProps> {
   displayName = 'Invoices';
 
   render() {
     return (
-      <Box fill>
+      <Box fill="true">
         <Box justify="between" direction="row" align="center">
           <Heading level="3">Invoices</Heading>
           <Link to={invoiceRoutes.new}>
@@ -62,7 +57,10 @@ export default class Invoices extends React.Component {
         </Box>
 
         <Box>
-          <DataTable data={SAMPLE_DATA} columns={columns} />
+          <DataTableSupressedWarning
+            data={this.props.invoices}
+            columns={columns}
+          />
         </Box>
       </Box>
     );

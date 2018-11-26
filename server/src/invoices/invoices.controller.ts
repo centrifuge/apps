@@ -1,15 +1,15 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { Invoice } from '../../../src/common/models/dto/invoice';
 import { InvoicesService } from './invoices.service';
-import { API_BASE } from '../constants';
+import { ROUTES } from '../../../src/common/constants';
 
-@Controller(`${API_BASE}/invoices`)
+@Controller(ROUTES.INVOICES)
 export class InvoicesController {
   constructor(private readonly invoicesService: InvoicesService) {}
 
   @Post()
-  async create(@Body() createInvoiceDto: CreateInvoiceDto) {
-    return await this.invoicesService.create(createInvoiceDto);
+  async create(@Body() invoiceDto: Invoice) {
+    return await this.invoicesService.create(invoiceDto);
   }
 
   @Get()
