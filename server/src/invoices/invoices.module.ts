@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
+
 import { InvoicesController } from './invoices.controller';
 import { InvoicesService } from './invoices.service';
 import { invoicesRepository } from './invoices.repository';
 import { databaseConnectionFactory } from '../database/database.providers';
 import { DatabaseModule } from '../database/database.module';
 import { invoiceProviderFactory } from './invoice.providers';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   controllers: [InvoicesController],
@@ -14,6 +16,6 @@ import { invoiceProviderFactory } from './invoice.providers';
     databaseConnectionFactory,
     invoiceProviderFactory,
   ],
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, AuthModule],
 })
 export class InvoicesModule {}

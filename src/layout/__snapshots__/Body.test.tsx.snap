@@ -27,6 +27,10 @@ exports[`Body matches snapshot 1`] = `
         component={[Function]}
         path="/contacts"
       />
+      <Route
+        component={[Function]}
+        path="/"
+      />
     </Switch>
   </Box>
 </Box>

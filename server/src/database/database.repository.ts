@@ -11,7 +11,21 @@ export class DatabaseRepository<T> {
   }
 
   async get() {
-    const cursor = this.databaseConnection.find({});
+    return this._findByQuery({});
+  }
+
+  async find(query: any) {
+    return this._findByQuery(query);
+  }
+
+  async findOne(query: any) {
+    return util.promisify(
+      this.databaseConnection.findOne.bind(this.databaseConnection),
+    )(query);
+  }
+
+  private async _findByQuery(query: any) {
+    const cursor = this.databaseConnection.find(query);
     return util.promisify(cursor.exec.bind(cursor))();
   }
 }

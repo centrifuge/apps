@@ -6,5 +6,5 @@ export default {
   invoices: invoiceRoutes,
   purchaseOrders: purchaseOrdersRoutes,
   contacts: contactsRoutes,
-  user: '/user'
+  index: '/'
 }

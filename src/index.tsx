@@ -7,6 +7,8 @@ import { ConnectedRouter } from 'connected-react-router';
 
 import store, { history } from './store';
 
+import 'normalize.css'
+
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
