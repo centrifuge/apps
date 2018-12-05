@@ -1,5 +1,5 @@
 import { getInvoiceActionTypes } from '../../actions/invoices';
-import { Invoice } from '../../common/models/dto/invoice';
 import { httpRequestReducer } from '../http-request-reducer';
+import { InvoiceInvoiceData } from '../../../clients/centrifuge-node/generated-client';
 
-export default httpRequestReducer<Invoice[]>(getInvoiceActionTypes);
+export default httpRequestReducer<InvoiceInvoiceData[]>(getInvoiceActionTypes);

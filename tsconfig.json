@@ -20,7 +20,8 @@
     "resolveJsonModule": true,
     "noEmit": true,
     "jsx": "preserve",
-    "isolatedModules": true
+    "isolatedModules": true,
+    "strictPropertyInitialization": false // https://github.com/swagger-api/swagger-codegen/issues/8180
   },
   "include": [
     "src/**/*"

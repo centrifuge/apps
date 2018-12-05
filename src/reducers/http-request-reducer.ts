@@ -8,7 +8,7 @@ export type RequestState<T> = {
 };
 
 const defaultState = {
-  loading: true,
+  loading: false,
   hasError: false,
   data: undefined,
   error: undefined,
@@ -21,13 +21,13 @@ export function httpRequestReducer<T>(actionType: ActionType) {
   ): RequestState<T> => {
     switch (type) {
       case actionType.start: {
-        return defaultState;
+        return { ...defaultState, loading: true };
       }
       case actionType.success: {
         return {
           ...defaultState,
           data: payload as T,
-          loading: false
+          loading: false,
         };
       }
       case actionType.fail: {

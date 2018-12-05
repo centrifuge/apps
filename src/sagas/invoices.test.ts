@@ -1,9 +1,17 @@
 import { call, fork, put, take } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 
-import { createInvoice, getInvoices, watchCreateInvoice, watchGetInvoicesPage } from './invoices';
+import {
+  createInvoice,
+  getInvoices,
+  watchCreateInvoice,
+  watchGetInvoicesPage,
+} from './invoices';
 
-import { createInvoiceActionTypes, getInvoiceActionTypes } from '../actions/invoices';
+import {
+  createInvoiceActionTypes,
+  getInvoiceActionTypes,
+} from '../actions/invoices';
 
 import { Invoice } from '../common/models/dto/invoice';
 import { httpClient } from '../http-client';
@@ -24,7 +32,7 @@ describe('watchGetInvoicesPage', () => {
 });
 
 describe('watchCreateInvoice', () => {
-  it('should call createInvoice and then go back', function() {
+  it('should call createInvoice and go back on success', function() {
     const gen = watchCreateInvoice();
 
     const onGetInvoiceAction = gen.next().value;
@@ -35,6 +43,9 @@ describe('watchCreateInvoice', () => {
       invoice,
     }).value;
     expect(getInvoicesInvocation).toEqual(fork(createInvoice, invoice));
+
+    const onSuccess = gen.next().value;
+    expect(onSuccess).toEqual(take(createInvoiceActionTypes.success));
 
     const goBackInvocation = gen.next().value;
     expect(goBackInvocation).toEqual(put(push(routes.index)));
@@ -79,7 +90,9 @@ describe('createInvoice', () => {
     const gen = createInvoice(invoice);
 
     const invocationResponse = gen.next().value;
-    expect(invocationResponse).toEqual(call(httpClient.invoices.create, invoice));
+    expect(invocationResponse).toEqual(
+      call(httpClient.invoices.create, invoice),
+    );
 
     const successResponse = gen.next({ data: invoice }).value;
     expect(successResponse).toEqual(
@@ -94,7 +107,9 @@ describe('createInvoice', () => {
     const gen = createInvoice(invoice);
 
     const invocationResponse = gen.next().value;
-    expect(invocationResponse).toEqual(call(httpClient.invoices.create, invoice));
+    expect(invocationResponse).toEqual(
+      call(httpClient.invoices.create, invoice),
+    );
 
     const error = new Error('Oh, no, something broke!');
     const errorResponse = gen.throw && gen.throw(error).value;

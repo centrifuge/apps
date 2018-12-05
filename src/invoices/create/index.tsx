@@ -6,9 +6,12 @@ import CreateInvoice from './CreateInvoice';
 import { createInvoice } from '../../actions/invoices';
 import { Invoice } from '../../common/models/dto/invoice';
 import { RouteComponentProps, withRouter } from 'react-router';
+import { RequestState } from '../../reducers/http-request-reducer';
+import { InvoiceInvoiceData } from '../../../clients/centrifuge-node/generated-client';
 
 type ConnectedCreateInvoiceProps = {
   createInvoice: (invoice: Invoice) => void;
+  loading: boolean;
 } & RouteComponentProps;
 
 class ConnectedCreateInvoice extends React.Component<
@@ -23,16 +26,21 @@ class ConnectedCreateInvoice extends React.Component<
   };
 
   render() {
+    if (this.props.loading) {
+      return 'Creating invoice';
+    }
+
     return (
-      <CreateInvoice
-        onSubmit={this.createInvoice}
-        onCancel={this.onCancel}
-      />
+      <CreateInvoice onSubmit={this.createInvoice} onCancel={this.onCancel} />
     );
   }
 }
 
 export default connect(
-  null,
+  (state: { invoices: { create: RequestState<InvoiceInvoiceData> } }) => {
+    return {
+      loading: state.invoices.create.loading,
+    };
+  },
   { createInvoice },
 )(withRouter(ConnectedCreateInvoice));

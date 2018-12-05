@@ -43,6 +43,7 @@ export function* watchCreateInvoice() {
   while (true) {
     const { invoice } = yield take(createInvoiceActionTypes.start);
     yield fork(createInvoice, invoice);
+    yield take(createInvoiceActionTypes.success);
     yield put(push(routes.index));
   }
 }

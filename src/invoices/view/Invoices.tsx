@@ -4,30 +4,36 @@ import { Add, Edit, More } from 'grommet-icons';
 import { Link } from 'react-router-dom';
 
 import invoiceRoutes from '../routes';
-import { Invoice } from '../../common/models/dto/invoice';
+import { InvoiceInvoiceData } from '../../../clients/centrifuge-node/generated-client';
+
+interface InvoiceTableColumn {
+  property: keyof InvoiceInvoiceData | '_id',
+  header: string;
+  render?: () => JSX.Element
+}
 
 // Casting to "any" until https://github.com/grommet/grommet/issues/2464 is fixed
 const DataTableSupressedWarning = DataTable as any;
 
-const columns = [
+const columns: InvoiceTableColumn[] = [
   {
-    property: 'number',
+    property: "invoice_number",
     header: 'Number',
   },
   {
-    property: 'customer',
+    property: 'recipient_name',
     header: 'Customer',
   },
   {
-    property: 'supplier',
+    property: 'sender_name',
     header: 'Supplier',
   },
   {
-    property: 'status',
+    property: 'invoice_status',
     header: 'Status',
   },
   {
-    property: 'actions',
+    property: '_id',
     header: 'Actions',
     render: () => (
       <Box direction="row" gap="small">
@@ -38,7 +44,7 @@ const columns = [
   },
 ];
 
-type InvoicesProps = { invoices: Invoice[] };
+type InvoicesProps = { invoices: InvoiceInvoiceData[] };
 
 export default class Invoices extends React.Component<InvoicesProps> {
   displayName = 'Invoices';

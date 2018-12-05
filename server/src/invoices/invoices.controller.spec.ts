@@ -3,6 +3,8 @@ import { InvoicesController } from './invoices.controller';
 import { InvoicesService } from './invoices.service';
 import { Invoice } from '../../../src/common/models/dto/invoice';
 import { SessionGuard } from '../auth/SessionGuard';
+import { centrifugeClientFactory } from '../centrifuge-client/centrifuge.client';
+import { tokens } from '../centrifuge-client/centrifuge.constants';
 
 describe('InvoicesController', () => {
   let invoicesModule: TestingModule;
@@ -22,13 +24,21 @@ describe('InvoicesController', () => {
 
   const invoiceServiceMock = new InvoicesServiceMock();
 
+  class CentrifugeClientMock {
+    create = jest.fn(data => ({ data }));
+  }
+
+  const centrifugeClientMock = new CentrifugeClientMock();
+
   beforeEach(async () => {
     invoicesModule = await Test.createTestingModule({
       controllers: [InvoicesController],
-      providers: [SessionGuard],
+      providers: [SessionGuard, centrifugeClientFactory],
     })
       .overrideProvider(InvoicesService)
       .useValue(invoiceServiceMock)
+      .overrideProvider(tokens.centrifugeClientFactory)
+      .useValue(centrifugeClientMock)
       .compile();
 
     invoiceServiceMock.create.mockClear();
@@ -42,7 +52,16 @@ describe('InvoicesController', () => {
       );
 
       const result = await invoicesController.create(invoiceToCreate);
-      expect(result).toBe(invoiceToCreate);
+      expect(result).toEqual({
+        data: {
+          invoice_number: invoiceToCreate.number.toString(),
+          sender_name: invoiceToCreate.supplier,
+          recipient_name: invoiceToCreate.customer,
+          invoice_status: invoiceToCreate.status,
+          currency: 'USD',
+        },
+      });
+
       expect(invoiceServiceMock.create).toHaveBeenCalledTimes(1);
     });
   });
