@@ -9,8 +9,8 @@ import {
 } from './invoices';
 
 import {
-  createInvoiceActionTypes,
-  getInvoiceActionTypes,
+  createInvoiceAction,
+  getInvoiceAction,
 } from '../actions/invoices';
 
 import { Invoice } from '../common/models/dto/invoice';
@@ -24,7 +24,7 @@ describe('watchGetInvoicesPage', () => {
     const gen = watchGetInvoicesPage();
 
     const onGetInvoiceAction = gen.next().value;
-    expect(onGetInvoiceAction).toEqual(take(getInvoiceActionTypes.start));
+    expect(onGetInvoiceAction).toEqual(take(getInvoiceAction.start));
 
     const getInvoicesInvocation = gen.next().value;
     expect(getInvoicesInvocation).toEqual(fork(getInvoices));
@@ -36,16 +36,16 @@ describe('watchCreateInvoice', () => {
     const gen = watchCreateInvoice();
 
     const onGetInvoiceAction = gen.next().value;
-    expect(onGetInvoiceAction).toEqual(take(createInvoiceActionTypes.start));
+    expect(onGetInvoiceAction).toEqual(take(createInvoiceAction.start));
 
     const getInvoicesInvocation = gen.next({
-      type: createInvoiceActionTypes.start,
+      type: createInvoiceAction.start,
       invoice,
     }).value;
     expect(getInvoicesInvocation).toEqual(fork(createInvoice, invoice));
 
     const onSuccess = gen.next().value;
-    expect(onSuccess).toEqual(take(createInvoiceActionTypes.success));
+    expect(onSuccess).toEqual(take(createInvoiceAction.success));
 
     const goBackInvocation = gen.next().value;
     expect(goBackInvocation).toEqual(put(push(routes.index)));
@@ -62,7 +62,7 @@ describe('getInvoices', () => {
     const successResponse = gen.next({ data: invoice }).value;
     expect(successResponse).toEqual(
       put({
-        type: getInvoiceActionTypes.success,
+        type: getInvoiceAction.success,
         payload: invoice,
       }),
     );
@@ -78,7 +78,7 @@ describe('getInvoices', () => {
     const errorResponse = gen.throw && gen.throw(error).value;
     expect(errorResponse).toEqual(
       put({
-        type: getInvoiceActionTypes.fail,
+        type: getInvoiceAction.fail,
         payload: error,
       }),
     );
@@ -97,7 +97,7 @@ describe('createInvoice', () => {
     const successResponse = gen.next({ data: invoice }).value;
     expect(successResponse).toEqual(
       put({
-        type: createInvoiceActionTypes.success,
+        type: createInvoiceAction.success,
         payload: invoice,
       }),
     );
@@ -115,7 +115,7 @@ describe('createInvoice', () => {
     const errorResponse = gen.throw && gen.throw(error).value;
     expect(errorResponse).toEqual(
       put({
-        type: createInvoiceActionTypes.fail,
+        type: createInvoiceAction.fail,
         payload: error,
       }),
     );

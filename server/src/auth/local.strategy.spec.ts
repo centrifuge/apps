@@ -6,7 +6,7 @@ import { User } from '../../../src/common/models/dto/user';
 import { Test } from '@nestjs/testing';
 
 describe('LocalStrategy', function() {
-  const mockUser = new User('my_username', 'my_password');
+  const mockUser = new User('my_username', 'my_password', 'my_id');
 
   it('should return user validation succeeds', async () => {
     const mockAuthService = {

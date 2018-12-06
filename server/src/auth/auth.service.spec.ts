@@ -9,6 +9,7 @@ describe('LocalStrategy', function() {
   const mockUser = new User(
     'my_username',
     '$2b$12$qI.Lyik/2lJvLwfK74xFee7mOVWyKm0K20YPv4zlfis2dNOh2LJdO',
+    'user_id',
   );
   let authService: AuthService;
 

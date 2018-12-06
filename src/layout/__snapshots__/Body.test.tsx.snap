@@ -25,6 +25,10 @@ exports[`Body matches snapshot 1`] = `
       />
       <Route
         component={[Function]}
+        path="/contacts/create"
+      />
+      <Route
+        component={[Function]}
         path="/contacts"
       />
       <Route

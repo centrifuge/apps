@@ -11,4 +11,5 @@ export const ROUTES = {
   API_BASE,
   INVOICES: `${API_BASE}/invoices`,
   USERS: userRoutes,
+  CONTACTS: `${API_BASE}/contacts`,
 };

@@ -5,11 +5,13 @@ import { User } from '../../../src/common/models/dto/user';
 export interface DatabaseProvider {
   invoices: Nedb;
   users: Nedb;
+  contacts: Nedb
 }
 
 const testUser = new User(
   'test',
   '$2b$12$o7HxJQsEl0jjwZ6FoGiEv.uQs9hLDFo2fOj5S3BnLL4nGpLfy/yW2', // password is test
+  'test_user_1',
 );
 
 export const databaseConnectionFactory = {
@@ -23,6 +25,9 @@ export const databaseConnectionFactory = {
     databaseConnections.users = new Nedb();
     await databaseConnections.users.loadDatabase();
     await databaseConnections.users.insert(testUser);
+
+    databaseConnections.contacts = new Nedb();
+    await databaseConnections.contacts.loadDatabase();
 
     return databaseConnections;
   },

@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Invoice } from '../common/models/dto/invoice';
 import { ROUTES } from '../common/constants';
 import { User } from '../common/models/dto/user';
+import { Contact } from '../common/models/dto/contact';
 
 const instance = axios.create();
 
@@ -14,5 +15,9 @@ export const httpClient = {
   },
   users: {
     login: async (user: User) => instance.post(ROUTES.USERS.login, user),
+  },
+  contacts: {
+    create: async (contact: Contact) => instance.post(ROUTES.CONTACTS, contact),
+    read: async () => instance.get(ROUTES.CONTACTS),
   },
 };
