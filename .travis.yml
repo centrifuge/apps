@@ -1,15 +1,23 @@
 language: node_js
+
 node_js:
-- '10'
+  - '10'
+
 services:
-- docker
-before_install:
-- docker build -t "$DOCKER_USERNAME"/centrifuge-ui-kit .
+  - docker
+
+env:
+  global:
+  - secure: XDK6tU10HRQOLqYBquB69KJ0ZcA/avqWZ3o73ET+RurApvlYqEY1YA1FtPs2+vY9BlvvzN0c7v9RoxIqwYsYl7m/qoZHBcl4gpjCcFJtjPqpudkrigFZmb5voSelqKXdh4UmwQa4hQPq4W002eju82FHXEtdFSThNi1jAPMitLEmFhG22JoKda2M810HbPqrBctye6RD/2ZSsSLMZQgeTDkwvU5FFDzO2qfKQqtYrMqfpvcqTsfqr6vpUyZyaOVsr2AzLtu3qLB9UBSHw98yOoSsTpZ+rg6d2X5PWn8ndOKSyswelHoPCdNjTwPOxRie+P7tEClr90LtdWrtXbQDxp0j6dutP0FQALv38sSioazag0sDePl6yjGvSH9s8UgvnpSIHUZsS+ZxntVEOSNnxzP+wFwP05XEpzd5XL+dn9CjH8PtXOX+lv+KHc8NGHeKdnw/eiwD5eikW13V9u6Fm2ZyAOeLSqXb+m0Hfj0+OirUnisZII1dO2AAWbigop7tk0xn/UPQQaT/TEREdhM9cSXhQOyHB4UoHac7zipbDKtBveJPbaGNe9iRqPaLViPO9XwUAHkOGrNv8gl+WaNzrmiOFgWpVg7KUUxzKu5n2QyuNZb5H27+u4RpUbv6qTQiU0VhSW9F2xcwgHLVoJGSDVwyOM1XuTidX/aTQ/G0pZQ=
+  - secure: Id6nD7LQ//FySnKgFAae4Gi60JEnpXw1lWARfcJbYOVIH7usbyKm+lHyyCb9tsj5eJmdHovpzd4ZO52arMdDbvzGmnBHbWMXhjJe7oGJNgJ4ifI0GTSCCHOshox5kzhom3OekjOs5QZgcg/DN0Aflt5JkJY+PQy0KGqSo449uvB86QMesrDI2FVZlCL/a81HaSRIB9UhWfgyQrpEY6CqmIQtWY4MTHPnb1YegG04OKrUVdmD0iPbN3diDciiS5xCXi4JyiP+hSbUbnAakEr071CptRaGiJXkCkMK28AUvn5ox6xffDNeA2snDfE36EUUZYLkcs89fUKAp8Quu4i18HTFCtfC8o82mt2nAu+ZNEuU+SJzK4mKUwdSwt/kDMMxdHZ5ss7aoTlreHGDehts12OGBMsp7w/cYqKnnaLf8uHFfcasOD+51SDGyo5jzA5QDM6lrt28Cptb/3NwH+xmFTY85YxE9tnTAKkBd/NRPlB8Q1HNzLWu4QGC4u0wnWeM0IvWhtEFguEb8E9MtcvKHHC5iVyyxJUavJ9s+41Xg4x0KF2Z0fmmsZTu1WYrcFLhWtBnkUGeS70NfQpGZ5UkuL9yJN3SvVApdku9QMbw6Bn/ep05V5JnFSOGlHx5HztyMpkq/CJRcuzq1lxnoUWhXVulhwBrDelvsgO8pBVALJw=
+
+before_deploy:
+  - docker build -t "$DOCKER_USERNAME"/centrifuge-ui-kit .
+
 deploy:
   provider: script
   script: bash ./scripts/docker_push.sh
   on:
+    repo: centrifuge/centrifuge-ui-kit
     branch: master
-env:
-  matrix:
-    secure: dZXYKpikYWyqBSo5HqMsIzOBqLQJA5DFMWBPJMzmDZambJqq3dfMvxo7eFt9QcsA45usGJ6XeL7qfBY7+B/dyFpwGfZ4OkM9KuqWYk8+pFduglfIff+F8M8FZQYiXZMV+tsr3Rv+5TBxwzxkcaRAGh3w+BqmxwUldE+749IAk8uygw6l6zpULr6RO1S2Kga7xf77e38bjLWCFF/6U9KTZ7rdRwWXWhgMkmbbjU9+eIxouVNXkigFhHgwtdmphc9ilMYkkVEoy8h0RSU2J9XwvNDKxNYSfqak2AnOiLq33Ih6cTPpGasy+y3QCm+cDOWVz6sAZZo3Mqz2fLNvIoUHcaDeP/c8KOLneLX/lNlMMHJgrdplbg4bCPzWNz8n4BAahsxOLeRgqtJ4ALdXwKwkpAMwr6CLM0Oa7NTDnoxawzfoh8gpcpcZrtxQ+ehFucfUm6tblYmJRY1VnJDqWoG/TkKXQXtwwvVjN4SBsa5/7a/garPYrvzfKSWxtMhTR62jMmdD2j6ScfqjGBCR1rCUS/d9AQd1U5xybzjExhIRijnqYpfsomliuY7ma285l2FJJUbhniSpJIZX7hWtNPRA7b17efnEj97Mea7c6bPgMF2NHsmkjHxdQRvkV2YQtgMIvr2bDIS1e/DlYjBgr2GA9tSzZ/M1Pnll8lr/i/LjTtQ=
+    condition: NOT type IN (pull_request)
