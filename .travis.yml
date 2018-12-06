@@ -15,4 +15,3 @@ deploy:
   on:
     repo: centrifuge/centrifuge-ui-kit
     branch: master
-    condition: NOT type IN (pull_request)
