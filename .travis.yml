@@ -1,4 +1,15 @@
 language: node_js
-
 node_js:
-  - "10"
+- '10'
+services:
+- docker
+before_install:
+- docker build -t "$DOCKER_USERNAME"/centrifuge-ui-kit .
+deploy:
+  provider: script
+  script: bash ./scripts/docker_push.sh
+  on:
+    branch: master
+env:
+  matrix:
+    secure: dZXYKpikYWyqBSo5HqMsIzOBqLQJA5DFMWBPJMzmDZambJqq3dfMvxo7eFt9QcsA45usGJ6XeL7qfBY7+B/dyFpwGfZ4OkM9KuqWYk8+pFduglfIff+F8M8FZQYiXZMV+tsr3Rv+5TBxwzxkcaRAGh3w+BqmxwUldE+749IAk8uygw6l6zpULr6RO1S2Kga7xf77e38bjLWCFF/6U9KTZ7rdRwWXWhgMkmbbjU9+eIxouVNXkigFhHgwtdmphc9ilMYkkVEoy8h0RSU2J9XwvNDKxNYSfqak2AnOiLq33Ih6cTPpGasy+y3QCm+cDOWVz6sAZZo3Mqz2fLNvIoUHcaDeP/c8KOLneLX/lNlMMHJgrdplbg4bCPzWNz8n4BAahsxOLeRgqtJ4ALdXwKwkpAMwr6CLM0Oa7NTDnoxawzfoh8gpcpcZrtxQ+ehFucfUm6tblYmJRY1VnJDqWoG/TkKXQXtwwvVjN4SBsa5/7a/garPYrvzfKSWxtMhTR62jMmdD2j6ScfqjGBCR1rCUS/d9AQd1U5xybzjExhIRijnqYpfsomliuY7ma285l2FJJUbhniSpJIZX7hWtNPRA7b17efnEj97Mea7c6bPgMF2NHsmkjHxdQRvkV2YQtgMIvr2bDIS1e/DlYjBgr2GA9tSzZ/M1Pnll8lr/i/LjTtQ=
