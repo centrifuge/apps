@@ -1,6 +1,5 @@
 #!/bin/bash
 GIT_SHORT_COMMIT=`git rev-parse --short HEAD`
-TRAVIS_BRANCH=`git rev-parse --abbrev-ref HEAD`
 TIMESTAMP=`date -u +%Y%m%d%H`
 TAG="${TRAVIS_BRANCH}-${TIMESTAMP}-${GIT_SHORT_COMMIT}"
 IMAGE_NAME="centrifugeio/centrifuge-ui-kit"
