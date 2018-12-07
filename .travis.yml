@@ -6,9 +6,6 @@ node_js:
 services:
   - docker
 
-before_deploy:
-  - docker build -t "$DOCKER_USERNAME"/centrifuge-ui-kit .
-
 deploy:
   provider: script
   script: bash ./scripts/docker_push.sh
