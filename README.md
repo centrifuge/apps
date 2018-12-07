@@ -1,2 +1,4 @@
 # centrifuge-ui-kit [![Build Status](https://travis-ci.com/centrifuge/centrifuge-ui-kit.svg?token=buLcsC3335i9MfFGMLcv&branch=master)](https://travis-ci.com/centrifuge/centrifuge-ui-kit)
-The centrifuge-ui-kit showcases interacting with a `go-centrifuge` node and other Centrifuge users. It's main purpose is to act as a testing tool and rapid prototyping tool for simple integrations with Centrifuge.
+`centrifuge-ui-kit` showcases interacting with a [go-centrifuge](https://github.com/centrifuge/go-centrifuge/) node and other Centrifuge users. It's main purpose is to act as a testing tool and rapid prototyping tool for simple integrations with Centrifuge.
+
+**Getting help:** Head over to our developer documentation at [developer.centrifuge.io](http://developer.centrifuge.io) to learn how to setup a node and interact with it. If you have any questions, feel free to join our [slack channel](https://join.slack.com/t/centrifuge-io/shared_invite/enQtNDYwMzQ5ODA3ODc0LTU4ZjU0NDNkOTNhMmUwNjI2NmQ2MjRiNzA4MGIwYWViNTkxYzljODU2OTk4NzM4MjhlOTNjMDAwNWZkNzY2YWY) 
