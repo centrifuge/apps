@@ -13,5 +13,4 @@ deploy:
   provider: script
   script: bash ./scripts/docker_push.sh
   on:
-    repo: centrifuge/centrifuge-ui-kit
     branch: master
