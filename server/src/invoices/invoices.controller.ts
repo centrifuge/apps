@@ -1,17 +1,19 @@
 import { Body, Controller, Get, Inject, Post, UseGuards } from '@nestjs/common';
 import { Invoice } from '../../../src/common/models/dto/invoice';
-import { InvoicesService } from './invoices.service';
 import { ROUTES } from '../../../src/common/constants';
 import { SessionGuard } from '../auth/SessionGuard';
-import { tokens } from '../centrifuge-client/centrifuge.constants';
+import { tokens as clientTokens } from '../centrifuge-client/centrifuge.constants';
+import { tokens as databaseTokens } from '../database/database.constants';
 import { DocumentServiceApi } from '../../../clients/centrifuge-node/generated-client';
+import { DatabaseProvider } from '../database/database.providers';
 
 @Controller(ROUTES.INVOICES)
 @UseGuards(SessionGuard)
 export class InvoicesController {
   constructor(
-    private readonly invoicesService: InvoicesService,
-    @Inject(tokens.centrifugeClientFactory)
+    @Inject(databaseTokens.databaseConnectionFactory)
+    private readonly database: DatabaseProvider,
+    @Inject(clientTokens.centrifugeClientFactory)
     private readonly centrifugeClient: DocumentServiceApi,
   ) {}
 
@@ -27,11 +29,11 @@ export class InvoicesController {
       },
     });
 
-    return await this.invoicesService.create(createResult.data);
+    return await this.database.invoices.create(createResult.data);
   }
 
   @Get()
   async get() {
-    return this.invoicesService.get();
+    return this.database.invoices.find({});
   }
 }

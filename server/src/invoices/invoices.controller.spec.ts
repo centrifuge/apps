@@ -1,10 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { InvoicesController } from './invoices.controller';
-import { InvoicesService } from './invoices.service';
 import { Invoice } from '../../../src/common/models/dto/invoice';
 import { SessionGuard } from '../auth/SessionGuard';
 import { centrifugeClientFactory } from '../centrifuge-client/centrifuge.client';
-import { tokens } from '../centrifuge-client/centrifuge.constants';
+import { tokens as clientTokens } from '../centrifuge-client/centrifuge.constants';
+import { tokens as databaseTokens } from '../database/database.constants';
+import { databaseConnectionFactory } from '../database/database.providers';
 
 describe('InvoicesController', () => {
   let invoicesModule: TestingModule;
@@ -17,12 +18,14 @@ describe('InvoicesController', () => {
   );
   const fetchedInvoices = [new Invoice(100, 'pumpkin', 'godmother', 'done')];
 
-  class InvoicesServiceMock {
-    create = jest.fn(val => val);
-    get = jest.fn(() => fetchedInvoices);
+  class DatabaseServiceMock {
+    invoices = {
+      create: jest.fn(val => val),
+      find: jest.fn(() => fetchedInvoices),
+    };
   }
 
-  const invoiceServiceMock = new InvoicesServiceMock();
+  const databaseServiceMock = new DatabaseServiceMock();
 
   class CentrifugeClientMock {
     create = jest.fn(data => ({ data }));
@@ -33,16 +36,20 @@ describe('InvoicesController', () => {
   beforeEach(async () => {
     invoicesModule = await Test.createTestingModule({
       controllers: [InvoicesController],
-      providers: [SessionGuard, centrifugeClientFactory],
+      providers: [
+        SessionGuard,
+        centrifugeClientFactory,
+        databaseConnectionFactory,
+      ],
     })
-      .overrideProvider(InvoicesService)
-      .useValue(invoiceServiceMock)
-      .overrideProvider(tokens.centrifugeClientFactory)
+      .overrideProvider(databaseTokens.databaseConnectionFactory)
+      .useValue(databaseServiceMock)
+      .overrideProvider(clientTokens.centrifugeClientFactory)
       .useValue(centrifugeClientMock)
       .compile();
 
-    invoiceServiceMock.create.mockClear();
-    invoiceServiceMock.get.mockClear();
+    databaseServiceMock.invoices.create.mockClear();
+    databaseServiceMock.invoices.find.mockClear();
   });
 
   describe('create', () => {
@@ -62,7 +69,7 @@ describe('InvoicesController', () => {
         },
       });
 
-      expect(invoiceServiceMock.create).toHaveBeenCalledTimes(1);
+      expect(databaseServiceMock.invoices.create).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -74,7 +81,7 @@ describe('InvoicesController', () => {
 
       const result = await invoicesController.get();
       expect(result).toBe(fetchedInvoices);
-      expect(invoiceServiceMock.get).toHaveBeenCalledTimes(1);
+      expect(databaseServiceMock.invoices.find).toHaveBeenCalledTimes(1);
     });
   });
 });

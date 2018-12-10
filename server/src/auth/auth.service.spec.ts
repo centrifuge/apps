@@ -2,7 +2,8 @@ import { Test } from '@nestjs/testing';
 
 import { AuthService } from './auth.service';
 import { User } from '../../../src/common/models/dto/user';
-import { UsersService } from '../users/users.service';
+import { databaseConnectionFactory } from '../database/database.providers';
+import { tokens as databaseTokens } from '../database/database.constants';
 
 describe('LocalStrategy', function() {
   const unhashedPassword = 'my_password';
@@ -14,17 +15,19 @@ describe('LocalStrategy', function() {
   let authService: AuthService;
 
   beforeEach(async () => {
-    const mockUsersService = {
-      findByUsername: jest.fn(username =>
-        username === mockUser.username ? mockUser : null,
-      ),
-    };
+    class DatabaseServiceMock {
+      users = {
+        findOne: jest.fn(() => mockUser),
+      };
+    }
+
+    const databaseServiceMock = new DatabaseServiceMock();
 
     const module = await Test.createTestingModule({
-      providers: [AuthService, UsersService],
+      providers: [AuthService, databaseConnectionFactory],
     })
-      .overrideProvider(UsersService)
-      .useValue(mockUsersService)
+      .overrideProvider(databaseTokens.databaseConnectionFactory)
+      .useValue(databaseServiceMock)
       .compile();
 
     authService = module.get<AuthService>(AuthService);

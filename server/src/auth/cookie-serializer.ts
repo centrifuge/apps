@@ -1,11 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PassportSerializer } from '@nestjs/passport';
 import { User } from '../../../src/common/models/dto/user';
-import { UsersService } from '../users/users.service';
+import { DatabaseProvider } from '../database/database.providers';
+import { tokens } from '../database/database.constants';
 
 @Injectable()
 export class CookieSerializer extends PassportSerializer {
-  constructor(private readonly usersService: UsersService) {
+  constructor(
+    @Inject(tokens.databaseConnectionFactory)
+    private readonly databaseService: DatabaseProvider,
+  ) {
     super();
   }
 
@@ -15,8 +19,11 @@ export class CookieSerializer extends PassportSerializer {
 
   async deserializeUser(username: string, done: Function): Promise<void> {
     try {
-      const dbUser = await this.usersService.findByUsername(username);
-      return done(null, dbUser);
+      const user = await this.databaseService.users.findOne({
+        username,
+      });
+
+      return done(null, user);
     } catch (err) {
       done(err);
     }
