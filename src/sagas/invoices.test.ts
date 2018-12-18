@@ -1,17 +1,13 @@
-import { call, fork, put, take } from 'redux-saga/effects';
+import { call, fork, put, take, takeEvery } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 
 import {
   createInvoice,
   getInvoices,
-  watchCreateInvoice,
-  watchGetInvoicesPage,
+  default as defaultExports,
 } from './invoices';
 
-import {
-  createInvoiceAction,
-  getInvoiceAction,
-} from '../actions/invoices';
+import { createInvoiceAction, getInvoiceAction } from '../actions/invoices';
 
 import { Invoice } from '../common/models/dto/invoice';
 import { httpClient } from '../http-client';
@@ -20,35 +16,22 @@ import routes from '../invoices/routes';
 const invoice = new Invoice(1, 'mickey', 'goofy', 'created');
 
 describe('watchGetInvoicesPage', () => {
-  it('should call getInvoices', function() {
-    const gen = watchGetInvoicesPage();
+  it('should call getInvoices', async function() {
+    const onWatchGetInvoicesPage = await defaultExports.watchGetInvoicesPage();
 
-    const onGetInvoiceAction = gen.next().value;
-    expect(onGetInvoiceAction).toEqual(take(getInvoiceAction.start));
-
-    const getInvoicesInvocation = gen.next().value;
-    expect(getInvoicesInvocation).toEqual(fork(getInvoices));
+    expect(onWatchGetInvoicesPage).toEqual(
+      takeEvery(getInvoiceAction.start, getInvoices),
+    );
   });
 });
 
 describe('watchCreateInvoice', () => {
   it('should call createInvoice and go back on success', function() {
-    const gen = watchCreateInvoice();
+    const onWatchCreateInvoice = defaultExports.watchCreateInvoice();
 
-    const onGetInvoiceAction = gen.next().value;
-    expect(onGetInvoiceAction).toEqual(take(createInvoiceAction.start));
-
-    const getInvoicesInvocation = gen.next({
-      type: createInvoiceAction.start,
-      invoice,
-    }).value;
-    expect(getInvoicesInvocation).toEqual(fork(createInvoice, invoice));
-
-    const onSuccess = gen.next().value;
-    expect(onSuccess).toEqual(take(createInvoiceAction.success));
-
-    const goBackInvocation = gen.next().value;
-    expect(goBackInvocation).toEqual(put(push(routes.index)));
+    expect(onWatchCreateInvoice).toEqual(
+      takeEvery(createInvoiceAction.start, createInvoice),
+    );
   });
 });
 
@@ -87,7 +70,7 @@ describe('getInvoices', () => {
 
 describe('createInvoice', () => {
   it('should call the http client on success', function() {
-    const gen = createInvoice(invoice);
+    const gen = createInvoice({ invoice });
 
     const invocationResponse = gen.next().value;
     expect(invocationResponse).toEqual(
@@ -104,7 +87,7 @@ describe('createInvoice', () => {
   });
 
   it('should set error on exception', function() {
-    const gen = createInvoice(invoice);
+    const gen = createInvoice({ invoice });
 
     const invocationResponse = gen.next().value;
     expect(invocationResponse).toEqual(

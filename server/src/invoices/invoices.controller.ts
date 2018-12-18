@@ -18,6 +18,12 @@ export class InvoicesController {
   ) {}
 
   @Post()
+  /**
+   * Create an invoice and save in the centrifuge node and the local database
+   * @async
+   * @param {Invoice} invoice - the body of the request
+   * @return {Promise<Invoice>} result
+   */
   async create(@Body() invoice: Invoice) {
     const createResult = await this.centrifugeClient.create({
       data: {
@@ -33,6 +39,11 @@ export class InvoicesController {
   }
 
   @Get()
+  /**
+   * Get the list of all invoices
+   * @async
+   * @param {Promise<Invoice[]>} result
+   */
   async get() {
     return this.database.invoices.find({});
   }

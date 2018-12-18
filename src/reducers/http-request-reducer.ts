@@ -14,6 +14,10 @@ const defaultState = {
   error: undefined,
 };
 
+/**'
+ * Creates a reducer for http requests
+ * @param actionType - the http action type
+ */
 export function httpRequestReducer<T>(actionType: ActionType) {
   return (
     state: RequestState<T> = defaultState,

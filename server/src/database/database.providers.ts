@@ -18,6 +18,9 @@ const testUser = new User(
   'test_user_1',
 );
 
+/**
+ * Initialize the database and the separate collections.
+ */
 const initializeDatabase = async function() {
   const invoicesDb = new Nedb();
   await promisify(invoicesDb.loadDatabase.bind(invoicesDb))();
@@ -36,6 +39,9 @@ const initializeDatabase = async function() {
   };
 };
 
+/**
+ * Initialize database lock. Used in order to provide a singleton connection to the database.
+ */
 let initializeDatabasePromise;
 
 export const databaseConnectionFactory = {

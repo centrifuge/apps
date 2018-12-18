@@ -31,7 +31,8 @@
     "rimraf": "^2.6.2",
     "rxjs": "^6.2.2",
     "styled-components": "^4.1.1",
-    "typescript": "^3.0.1"
+    "typescript": "^3.0.1",
+    "ethereumjs-util": "^6.0.0"
   },
   "scripts": {
     "start:prod": "react-scripts build && nodemon",
@@ -64,6 +65,7 @@
     "@types/react-redux": "^6.0.10",
     "@types/react-router": "^4.3.1",
     "@types/supertest": "^2.0.5",
+    "@types/web3": "^1.0.12",
     "enzyme": "^3.7.0",
     "enzyme-adapter-react-16": "^1.7.0",
     "enzyme-to-json": "^3.3.4",

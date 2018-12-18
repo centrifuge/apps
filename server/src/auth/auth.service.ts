@@ -13,6 +13,15 @@ export class AuthService {
     private readonly database: DatabaseProvider,
   ) {}
 
+  /**
+   * Checks that a user/password pair exists in the database
+   * @async
+   * @param {string} username
+   * @param {string} password
+   *
+   * @return {Promise<User|null>} promise - a promise with the validation results. If successful
+   * will return the user, otherwise it returns null.
+   */
   async validateUser(username: string, password: string): Promise<User | null> {
     const user = await this.database.users.findOne({ username });
     if (user) {

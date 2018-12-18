@@ -1,11 +1,7 @@
-import { call, fork, put, take } from 'redux-saga/effects';
+import { call, put, takeEvery } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import { httpClient } from '../http-client';
-import {
-  createContactAction,
-  getContactsAction,
-} from '../actions/contacts';
-import { Contact } from '../common/models/dto/contact';
+import { createContactAction, getContactsAction } from '../actions/contacts';
 import routes from '../contacts/routes';
 
 export function* getContacts() {
@@ -20,35 +16,21 @@ export function* getContacts() {
   }
 }
 
-export function* createContact(contact: Contact) {
+export function* createContact(action) {
   try {
+    const { contact } = action;
     const response = yield call(httpClient.contacts.create, contact);
     yield put({
       type: createContactAction.success,
       payload: response.data,
     });
+    yield put(push(routes.index));
   } catch (e) {
     yield put({ type: createContactAction.fail, payload: e });
   }
 }
 
-export function* watchGetContactsPage() {
-  while (true) {
-    yield take(getContactsAction.start);
-    yield fork(getContacts);
-  }
-}
-
-export function* watchCreateContact() {
-  while (true) {
-    const { contact } = yield take(createContactAction.start);
-    yield fork(createContact, contact);
-    yield take(createContactAction.success);
-    yield put(push(routes.index));
-  }
-}
-
 export default {
-  watchGetContactsPage,
-  watchCreateContact,
+  watchGetContactsPage: () => takeEvery(getContactsAction.start, getContacts),
+  watchCreateContact: () => takeEvery(createContactAction.start, createContact),
 };

@@ -13,10 +13,35 @@ export class CookieSerializer extends PassportSerializer {
     super();
   }
 
+  /**
+   * Callback for serializing a user
+   * @callback CookieSerializer~serializeUserCallback
+   * @param {Error|null} error
+   * @param {string} username
+   */
+
+  /**
+   * Serializes a user by their username
+   * @param {User} user - the user to serialize
+   * @param {CookieSerializer~serializeUserCallback} done
+   */
   serializeUser(user: User, done: Function): void {
     done(null, user.username);
   }
 
+  /**
+   * Callback for serializing a user
+   * @callback CookieSerializer~deserializeUserCallback
+   * @param {Error|null} error
+   * @param {User} user
+   */
+
+  /**
+   * Deserializes a user by specifying a username
+   * @async
+   * @param {string} username
+   * @param {CookieSerializer~deserializeUserCallback} done
+   */
   async deserializeUser(username: string, done: Function): Promise<void> {
     try {
       const user = await this.databaseService.users.findOne({
