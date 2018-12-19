@@ -3,12 +3,15 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import Login from './Login';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { Redirect, RouteComponentProps, withRouter } from 'react-router';
 import { User } from '../../common/models/dto/user';
 import { login } from '../../actions/users';
+import { RequestState } from '../../reducers/http-request-reducer';
+import routes from '../../routes';
 
 type ConnectedLoginPageProps = {
   login: (user: User) => void;
+  loggedIn: boolean;
 } & RouteComponentProps;
 
 class ConnectedLoginPage extends React.Component<ConnectedLoginPageProps> {
@@ -17,11 +20,21 @@ class ConnectedLoginPage extends React.Component<ConnectedLoginPageProps> {
   };
 
   render() {
-    return <Login onSubmit={this.login} />;
+    return this.props.loggedIn ? (
+      <Redirect to={routes.invoices.index} />
+    ) : (
+      <Login onSubmit={this.login} />
+    );
   }
 }
 
+const mapStateToProps = (state: { users: { login: RequestState<string> } }) => {
+  return {
+    loggedIn: !!state.users.login.data,
+  };
+};
+
 export default connect(
-  null,
+  mapStateToProps,
   { login },
 )(withRouter(ConnectedLoginPage));

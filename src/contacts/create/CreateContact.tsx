@@ -1,9 +1,10 @@
 import React from 'react';
-import { Add } from 'grommet-icons';
+import { Add, Checkmark } from 'grommet-icons';
 import { Link } from 'react-router-dom';
-import { Box, Button, Heading, TextInput } from 'grommet';
+import { Box, Button, Heading } from 'grommet';
 import { Field, Form } from 'react-final-form';
 import { Contact } from '../../common/models/dto/contact';
+import StyledTextInput from '../../components/StyledTextInput';
 
 type CreateContactProps = {
   onSubmit: (contact: Contact) => void;
@@ -18,6 +19,20 @@ export default class CreateContact extends React.Component<CreateContactProps> {
     return this.props.onSubmit(contact);
   };
 
+  private renderButtons() {
+    return (
+      <Box direction="row" gap="small" height="30px">
+        <Button
+          icon={<Checkmark color="white" size="12px" />}
+          type="submit"
+          primary
+          label="Save"
+        />
+        <Button onClick={this.props.onCancel} label="Discard" />
+      </Box>
+    );
+  }
+
   render() {
     return (
       <Form
@@ -25,47 +40,36 @@ export default class CreateContact extends React.Component<CreateContactProps> {
         render={({ handleSubmit }) => (
           <Box fill="true">
             <form onSubmit={handleSubmit}>
-              <Box justify="between" direction="row">
+              <Box justify="between" direction="row" align="center">
                 <Heading level="3">Create New Contact</Heading>
-                <Box direction="row" gap="small">
-                  <Button type="submit">Save</Button>
-                  <Button onClick={this.props.onCancel}>Cancel</Button>
-                </Box>
+                {this.renderButtons()}
               </Box>
               <Box>
                 <Box direction="row" gap="small">
                   <Field name="name">
                     {({ input, meta }) => (
                       <Box fill="true">
-                        <label>Name</label>
-                        <TextInput
-                          {...input}
+                        <StyledTextInput
+                          input={input}
+                          meta={meta}
+                          label="Name"
                           placeholder="Please enter the contact name"
                         />
-                        {meta.error && meta.touched && (
-                          <span>{meta.error}</span>
-                        )}
                       </Box>
                     )}
                   </Field>
                   <Field name="address">
                     {({ input, meta }) => (
                       <Box fill="true">
-                        <label>Address</label>
-                        <TextInput
-                          {...input}
+                        <StyledTextInput
+                          input={input}
+                          meta={meta}
+                          label="Address"
                           placeholder="Please enter the contact address"
                         />
-                        {meta.error && meta.touched && (
-                          <span>{meta.error}</span>
-                        )}
                       </Box>
                     )}
                   </Field>
-                </Box>
-                <Box direction="row" gap="small" justify="end">
-                  <Button type="submit">Save</Button>
-                  <Button onClick={this.props.onCancel}>Cancel</Button>
                 </Box>
               </Box>
             </form>

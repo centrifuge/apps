@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { Box, Grommet } from 'grommet';
+import { Box } from 'grommet';
 import { grommet } from 'grommet/themes';
-import { ConnectedRouter } from 'connected-react-router';
+import UIKitTheme from './theme';
 
 import Body from './layout/Body';
 import Header from './layout/Header';
@@ -10,12 +10,12 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Grommet theme={grommet} full>
+        <UIKitTheme>
           <Box fill="true" align="center">
             <Header />
             <Body />
           </Box>
-        </Grommet>
+        </UIKitTheme>
       </div>
     );
   }

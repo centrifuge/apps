@@ -7,7 +7,7 @@ export default class PurchaseOrders extends React.Component {
   render() {
     return (
       <div>
-        <Heading level="3">PurchaseOrders</Heading>
+        <Heading level="3">Purchase Orders</Heading>
       </div>
     );
   }

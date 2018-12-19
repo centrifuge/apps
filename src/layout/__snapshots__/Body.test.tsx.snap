@@ -2,7 +2,8 @@
 
 exports[`Body matches snapshot 1`] = `
 <Box
-  background="#f9f9fa"
+  background="bodyBackground"
+  border="top"
   direction="row"
   fill="true"
   justify="center"
@@ -11,23 +12,23 @@ exports[`Body matches snapshot 1`] = `
     width="xlarge"
   >
     <Switch>
-      <Route
+      <Connect(ProtectedRoute)
         component={[Function]}
         path="/invoices/new"
       />
-      <Route
+      <Connect(ProtectedRoute)
         component={[Function]}
         path="/invoices"
       />
-      <Route
+      <Connect(ProtectedRoute)
         component={[Function]}
         path="/purchaseOrders"
       />
-      <Route
+      <Connect(ProtectedRoute)
         component={[Function]}
         path="/contacts/create"
       />
-      <Route
+      <Connect(ProtectedRoute)
         component={[Function]}
         path="/contacts"
       />

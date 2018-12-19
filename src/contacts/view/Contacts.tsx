@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, DataTable, Heading } from 'grommet';
+import { Box, Button, DataTable, Heading } from 'grommet';
 import { Add, Edit, More } from 'grommet-icons';
 import { Link } from 'react-router-dom';
 
@@ -46,10 +46,11 @@ export default class Contacts extends React.Component<ContactsProps> {
         <Box justify="between" direction="row" align="center">
           <Heading level="3">Contacts</Heading>
           <Link to={contactsRoutes.new}>
-            <Box justify="center" align="center" direction="row">
-              <Add />
-              Add new
-            </Box>
+            <Button
+              icon={<Add color="white" size="12px" />}
+              primary
+              label="Add new"
+            />
           </Link>
         </Box>
 
