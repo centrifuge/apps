@@ -21,9 +21,9 @@ export default class CreateContact extends React.Component<CreateContactProps> {
 
   private renderButtons() {
     return (
-      <Box direction="row" gap="small" height="30px">
+      <Box direction="row" gap="small">
         <Button
-          icon={<Checkmark color="white" size="12px" />}
+          icon={<Checkmark color="white" size="small" />}
           type="submit"
           primary
           label="Save"

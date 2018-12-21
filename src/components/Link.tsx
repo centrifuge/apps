@@ -14,7 +14,6 @@ const Link: FunctionComponent<LinkProps> = ({
     path={to}
     children={({ match }) => (
       <Box
-        height="100%"
         justify="center"
         border={
           match ? { color: 'brand', side: 'bottom', size: 'small' } : false

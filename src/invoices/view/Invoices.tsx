@@ -60,7 +60,7 @@ export default class Invoices extends React.Component<InvoicesProps> {
           <Heading level="3">Invoices</Heading>
           <Link to={invoiceRoutes.new}>
             <Button
-              icon={<Add color="white" size="12px" />}
+              icon={<Add color="white" size="small" />}
               primary
               label="Add new"
             />

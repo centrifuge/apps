@@ -26,9 +26,9 @@ export default class CreateInvoice extends React.Component<CreateInvoiceProps> {
 
   private renderButtons() {
     return (
-      <Box direction="row" gap="small" height="30px">
+      <Box direction="row" gap="small">
         <Button
-          icon={<Checkmark color="white" size="12px" />}
+          icon={<Checkmark color="white" size="small" />}
           type="submit"
           primary
           label="Save"
@@ -89,7 +89,7 @@ export default class CreateInvoice extends React.Component<CreateInvoiceProps> {
                     )}
                   />
                 </Box>
-                <Box justify="end" direction="row" margin="10px 0 0 0">
+                <Box justify="end" direction="row" margin={{ top: 'small' }}>
                   {this.renderButtons()}
                 </Box>
               </Box>
