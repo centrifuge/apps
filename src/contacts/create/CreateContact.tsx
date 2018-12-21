@@ -38,7 +38,7 @@ export default class CreateContact extends React.Component<CreateContactProps> {
       <Form
         onSubmit={this.onSubmit}
         render={({ handleSubmit }) => (
-          <Box fill="true">
+          <Box fill>
             <form onSubmit={handleSubmit}>
               <Box justify="between" direction="row" align="center">
                 <Heading level="3">Create New Contact</Heading>
@@ -48,7 +48,7 @@ export default class CreateContact extends React.Component<CreateContactProps> {
                 <Box direction="row" gap="small">
                   <Field name="name">
                     {({ input, meta }) => (
-                      <Box fill="true">
+                      <Box fill>
                         <StyledTextInput
                           input={input}
                           meta={meta}
@@ -60,7 +60,7 @@ export default class CreateContact extends React.Component<CreateContactProps> {
                   </Field>
                   <Field name="address">
                     {({ input, meta }) => (
-                      <Box fill="true">
+                      <Box fill>
                         <StyledTextInput
                           input={input}
                           meta={meta}

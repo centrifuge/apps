@@ -21,7 +21,7 @@ export class ProtectedRoute extends Component<ProtectedRouteProps> {
         <Route path={this.props.path} render={() => <Text>Loading</Text>} />
       );
     }
-    return this.props.loggedIn || 1 == 1 ? (
+    return this.props.loggedIn ? (
       <Route path={this.props.path} component={this.props.component} />
     ) : (
       <Redirect to={routes.index} />

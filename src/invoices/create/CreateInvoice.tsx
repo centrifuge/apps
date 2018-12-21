@@ -4,11 +4,14 @@ import { Link } from 'react-router-dom';
 import { Box, Button, Heading } from 'grommet';
 import { Field, Form } from 'react-final-form';
 import { Invoice } from '../../common/models/dto/invoice';
+import SearchableDropdown from '../../components/form/SearchableDropdown';
+import { LabelValuePair } from '../../interfaces';
 import StyledTextInput from '../../components/StyledTextInput';
 
 type CreateInvoiceProps = {
   onSubmit: (invoice: Invoice) => void;
   onCancel: () => void;
+  contacts: LabelValuePair[];
 };
 
 export default class CreateInvoice extends React.Component<CreateInvoiceProps> {
@@ -40,7 +43,7 @@ export default class CreateInvoice extends React.Component<CreateInvoiceProps> {
       <Form
         onSubmit={this.onSubmit}
         render={({ handleSubmit }) => (
-          <Box fill="true">
+          <Box fill>
             <form onSubmit={handleSubmit}>
               <Box justify="between" direction="row" align="center">
                 <Heading level="3">Create New Invoice</Heading>
@@ -70,16 +73,21 @@ export default class CreateInvoice extends React.Component<CreateInvoiceProps> {
                   </Field>
                 </Box>
                 <Box direction="row" gap="small">
-                  <Field name="supplier">
-                    {({ input, meta }) => (
-                      <StyledTextInput
-                        input={input}
-                        meta={meta}
-                        label="Recipient name"
-                        placeholder="Please enter the recipient name"
-                      />
+                  <Field
+                    name="supplier"
+                    items={this.props.contacts}
+                    // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
+                    render={({ input, meta, items }) => (
+                      <Box>
+                        <label htmlFor="supplier">Supplier</label>
+                        <SearchableDropdown
+                          input={input}
+                          meta={meta}
+                          items={items}
+                        />
+                      </Box>
                     )}
-                  </Field>
+                  />
                 </Box>
                 <Box justify="end" direction="row" margin="10px 0 0 0">
                   {this.renderButtons()}

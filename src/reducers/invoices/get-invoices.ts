@@ -1,5 +1,5 @@
 import { getInvoiceAction } from '../../actions/invoices';
 import { httpRequestReducer } from '../http-request-reducer';
-import { InvoiceInvoiceData } from '../../../clients/centrifuge-node/generated-client';
+import { InvoiceData } from '../../interfaces';
 
-export default httpRequestReducer<InvoiceInvoiceData[]>(getInvoiceAction);
+export default httpRequestReducer<InvoiceData>(getInvoiceAction);

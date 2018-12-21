@@ -30,7 +30,7 @@ class Login extends React.Component<LoginProps> {
                 <Box>
                   <Field name="username">
                     {({ input, meta }) => (
-                      <Box fill="true">
+                      <Box fill>
                         <label>Username</label>
                         <TextInput
                           {...input}
@@ -44,7 +44,7 @@ class Login extends React.Component<LoginProps> {
                   </Field>
                   <Field name="password">
                     {({ input, meta }) => (
-                      <Box fill="true">
+                      <Box fill>
                         <label>Password</label>
                         <TextInput
                           {...input}
@@ -59,7 +59,7 @@ class Login extends React.Component<LoginProps> {
                   <Box justify="between" direction="row">
                     <Text>username: test, password: test</Text>
                   </Box>
-                  <Box direction="row" fill="true">
+                  <Box direction="row" fill>
                     <Button type="submit" primary label="Login" fill={true} />
                   </Box>
                 </Box>

@@ -11,7 +11,7 @@ class App extends Component {
     return (
       <div className="App">
         <UIKitTheme>
-          <Box fill="true" align="center">
+          <Box fill align="center">
             <Header />
             <Body />
           </Box>

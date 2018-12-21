@@ -5,10 +5,10 @@ import { connect } from 'react-redux';
 import Invoices from './Invoices';
 import { getInvoices } from '../../actions/invoices';
 import { RequestState } from '../../reducers/http-request-reducer';
-import { InvoiceInvoiceData } from '../../../clients/centrifuge-node/generated-client';
+import { InvoiceData } from '../../interfaces';
 
 const mapStateToProps = (state: {
-  invoices: { get: RequestState<InvoiceInvoiceData[]> };
+  invoices: { get: RequestState<InvoiceData[]> };
 }) => {
   return {
     invoices: state.invoices.get.data,
@@ -19,7 +19,7 @@ const mapStateToProps = (state: {
 type ViewInvoicesProps = {
   getInvoices: () => void;
   clearInvoices: () => void;
-  invoices?: InvoiceInvoiceData[];
+  invoices?: InvoiceData[];
   loading: boolean;
 };
 
@@ -29,11 +29,11 @@ class ViewInvoices extends React.Component<ViewInvoicesProps> {
   }
 
   render() {
-    if (this.props.loading) {
+    if (this.props.loading || !this.props.invoices) {
       return 'Loading';
     }
 
-    return <Invoices invoices={this.props.invoices as InvoiceInvoiceData[]} />;
+    return <Invoices invoices={this.props.invoices} />;
   }
 }
 

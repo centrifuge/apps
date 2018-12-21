@@ -14,7 +14,7 @@ const Body: FunctionComponent = () => (
   <Box
     justify="center"
     direction="row"
-    fill="true"
+    fill
     background="bodyBackground"
     border="top"
   >

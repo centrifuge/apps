@@ -42,7 +42,7 @@ export default class Contacts extends React.Component<ContactsProps> {
 
   render() {
     return (
-      <Box fill="true">
+      <Box fill>
         <Box justify="between" direction="row" align="center">
           <Heading level="3">Contacts</Heading>
           <Link to={contactsRoutes.new}>

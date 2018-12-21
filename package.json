@@ -31,7 +31,7 @@
     "rimraf": "^2.6.2",
     "rxjs": "^6.2.2",
     "styled-components": "^4.1.1",
-    "typescript": "^3.0.1",
+    "typescript": "^3.2.2",
     "ethereumjs-util": "^6.0.0"
   },
   "scripts": {
@@ -43,7 +43,8 @@
     "test:frontend": "react-scripts test",
     "start:backend": "nodemon",
     "test:backend": "jest --config server/jest.config.js --watch",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "postinstall": "rimraf ./node_modules/grommet/components/Select/index.d.ts"
   },
   "eslintConfig": {
     "extends": "react-app"

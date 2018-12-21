@@ -21,7 +21,7 @@ const Header: FunctionComponent = () => (
     <Link label="Centrifuge" to="/" size="large">
       <ImageSuppressedWarnings src={logo} />
     </Link>
-    <Box direction="row" gap="small" fill="true" justify="end">
+    <Box direction="row" gap="small" fill justify="end">
       <CentrifugeLink label="Invoices" to={invoicesRoutes.index} />
       <CentrifugeLink label="Purchase orders" to={purchaseOrdersRoutes.index} />
       <CentrifugeLink label="Contacts" to={contactsRoutes.index} />
