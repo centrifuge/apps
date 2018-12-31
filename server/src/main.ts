@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import config from './config';
+import { HttpExceptionFilter } from './filters/http-exception.filter';
 
 // accept self-signed certificate
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
@@ -29,6 +30,8 @@ async function bootstrap() {
     .setViewEngine('html')
     .setBaseViewsDir(path.resolve('./build'))
     .useStaticAssets(path.resolve('./build'));
+
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   await app.listen(3001);
 }
