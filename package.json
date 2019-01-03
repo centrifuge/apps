@@ -32,7 +32,9 @@
     "rxjs": "^6.2.2",
     "styled-components": "^4.1.1",
     "typescript": "^3.2.2",
-    "ethereumjs-util": "^6.0.0"
+    "ethereumjs-util": "^6.0.0",
+    "final-form-arrays": "^1.1.1",
+    "react-final-form-arrays": "^2.0.1"
   },
   "scripts": {
     "start:prod": "react-scripts build && nodemon",

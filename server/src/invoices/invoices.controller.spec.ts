@@ -12,12 +12,7 @@ import { InvoiceInvoiceData } from '../../../clients/centrifuge-node/generated-c
 describe('InvoicesController', () => {
   let invoicesModule: TestingModule;
 
-  const invoiceToCreate = new Invoice(
-    999,
-    'cinderella',
-    'step mother',
-    'in queue',
-  );
+  const invoiceToCreate = new Invoice(999, 'cinderella', 'step mother');
   let fetchedInvoices;
 
   const supplier = new Contact(
@@ -35,7 +30,7 @@ describe('InvoicesController', () => {
             invoice_number: data.number.toString(),
             sender_name: data.supplier,
             recipient_name: data.customer,
-            invoice_status: data.status,
+            invoice_status: 'CREATED',
             currency: 'USD',
           }),
         ),
@@ -49,14 +44,14 @@ describe('InvoicesController', () => {
   const databaseServiceMock = new DatabaseServiceMock();
 
   class CentrifugeClientMock {
-    create = jest.fn(data => ({ data }));
+    create = jest.fn(data => data);
   }
 
   const centrifugeClientMock = new CentrifugeClientMock();
 
   beforeEach(async () => {
     fetchedInvoices = [
-      new Invoice(100, 'pumpkin', 'godmother', 'done', 'fairy_id'),
+      new Invoice(100, 'pumpkin', 'godmother', [], 'fairy_id'),
     ];
 
     invoicesModule = await Test.createTestingModule({
@@ -90,7 +85,7 @@ describe('InvoicesController', () => {
           invoice_number: invoiceToCreate.number.toString(),
           sender_name: invoiceToCreate.supplier,
           recipient_name: invoiceToCreate.customer,
-          invoice_status: invoiceToCreate.status,
+          invoice_status: 'CREATED',
           currency: 'USD',
         },
       });

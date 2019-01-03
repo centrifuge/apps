@@ -1,10 +1,9 @@
 import React, { ReactNode } from 'react';
-import { Box, DataTable, Heading, Text, Button } from 'grommet';
+import { Box, Button, DataTable, Heading, Text } from 'grommet';
 import { Add, Edit, More } from 'grommet-icons';
 import { Link } from 'react-router-dom';
 
 import invoiceRoutes from '../routes';
-import { InvoiceInvoiceData } from '../../../clients/centrifuge-node/generated-client';
 import { Contact } from '../../common/models/dto/contact';
 import { InvoiceData } from '../../interfaces';
 
@@ -48,7 +47,7 @@ const columns: InvoiceTableColumn[] = [
   },
 ];
 
-type InvoicesProps = { invoices: InvoiceInvoiceData[] };
+type InvoicesProps = { invoices: InvoiceData[] };
 
 export default class Invoices extends React.Component<InvoicesProps> {
   displayName = 'Invoices';

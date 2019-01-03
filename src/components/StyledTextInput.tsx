@@ -1,9 +1,16 @@
 import { Box, TextInput } from 'grommet';
 import React from 'react';
 
-const StyledTextInput = ({ input, meta, placeholder, label }) => (
+interface StyledTextInputProps {
+  input;
+  meta;
+  placeholder: string;
+  label?: string;
+}
+
+const StyledTextInput = ({ input, meta, placeholder, label }: StyledTextInputProps) => (
   <Box fill>
-    <label>{label}</label>
+    {label && <label>{label}</label>}
     <Box background="white">
       <TextInput {...input} placeholder={placeholder} />
     </Box>

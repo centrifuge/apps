@@ -3,12 +3,12 @@ import { promisify } from 'util';
 import { tokens } from './database.constants';
 import { User } from '../../../src/common/models/dto/user';
 import { DatabaseRepository } from './database.repository';
-import { InvoiceInvoiceData } from '../../../clients/centrifuge-node/generated-client';
+import { InvoiceInvoiceData, InvoiceInvoiceResponse } from '../../../clients/centrifuge-node/generated-client';
 import { Contact } from '../../../src/common/models/dto/contact';
 import config from '../config';
 
 export interface DatabaseProvider {
-  invoices: DatabaseRepository<InvoiceInvoiceData>;
+  invoices: DatabaseRepository<InvoiceInvoiceResponse>;
   users: DatabaseRepository<User>;
   contacts: DatabaseRepository<Contact>;
 }

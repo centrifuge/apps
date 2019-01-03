@@ -5,13 +5,24 @@ import { connect } from 'react-redux';
 import Invoices from './Invoices';
 import { getInvoices } from '../../actions/invoices';
 import { RequestState } from '../../reducers/http-request-reducer';
-import { InvoiceData } from '../../interfaces';
+import {
+  InvoiceInvoiceData,
+  InvoiceInvoiceResponse,
+} from '../../../clients/centrifuge-node/generated-client';
+
+interface InvoiceResponse extends InvoiceInvoiceResponse {
+  data: InvoiceInvoiceData & { _id: string };
+}
 
 const mapStateToProps = (state: {
-  invoices: { get: RequestState<InvoiceData[]> };
+  invoices: {
+    get: RequestState<InvoiceResponse[]>;
+  };
 }) => {
   return {
-    invoices: state.invoices.get.data,
+    invoices:
+      state.invoices.get.data &&
+      state.invoices.get.data.map(response => response.data),
     loading: state.invoices.get.loading,
   };
 };
@@ -19,7 +30,7 @@ const mapStateToProps = (state: {
 type ViewInvoicesProps = {
   getInvoices: () => void;
   clearInvoices: () => void;
-  invoices?: InvoiceData[];
+  invoices?: InvoiceInvoiceData & { _id: string }[];
   loading: boolean;
 };
 
