@@ -1,10 +1,11 @@
 import React, { FunctionComponent } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Box, Image } from 'grommet';
+import { Anchor, Box, Image, Text } from 'grommet';
 import logo from '../logo.png';
 import invoicesRoutes from '../invoices/routes';
 import purchaseOrdersRoutes from '../purchaseorders/routes';
+import { ROUTES } from '../common/constants';
 import contactsRoutes from '../contacts/routes';
 import CentrifugeLink from '../components/Link';
 
@@ -25,6 +26,12 @@ const Header: FunctionComponent = () => (
       <CentrifugeLink label="Invoices" to={invoicesRoutes.index} />
       <CentrifugeLink label="Purchase orders" to={purchaseOrdersRoutes.index} />
       <CentrifugeLink label="Contacts" to={contactsRoutes.index} />
+      <CentrifugeLink label="Contacts" to={contactsRoutes.index} />
+      <Anchor href={ROUTES.USERS.logout}>
+        <Box fill="vertical" justify="center">
+          <Text size="small">Logout</Text>
+        </Box>
+      </Anchor>
     </Box>
   </Box>
 );

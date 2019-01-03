@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { RequestState } from '../reducers/http-request-reducer';
 import { Redirect, Route, RouteComponentProps } from 'react-router';
 import { Text } from 'grommet';
 import routes from '../routes';
+import { LoginState } from '../reducers/user/auth';
 
 interface ProtectedRouteProps {
   loggedIn: boolean;
@@ -29,10 +29,10 @@ export class ProtectedRoute extends Component<ProtectedRouteProps> {
   }
 }
 
-const mapStateToProps = (state: { users: { login: RequestState<string> } }) => {
+const mapStateToProps = (state: { user: { auth: LoginState } }) => {
   return {
-    loggedIn: !!state.users.login.data,
-    loading: state.users.login.loading,
+    loggedIn: !!state.user.auth.loggedIn,
+    loading: state.user.auth.loading,
   };
 };
 

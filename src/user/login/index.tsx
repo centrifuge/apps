@@ -6,8 +6,8 @@ import Login from './Login';
 import { Redirect, RouteComponentProps, withRouter } from 'react-router';
 import { User } from '../../common/models/dto/user';
 import { login } from '../../actions/users';
-import { RequestState } from '../../reducers/http-request-reducer';
 import routes from '../../routes';
+import { LoginState } from '../../reducers/user/auth';
 
 type ConnectedLoginPageProps = {
   login: (user: User) => void;
@@ -28,9 +28,9 @@ class ConnectedLoginPage extends React.Component<ConnectedLoginPageProps> {
   }
 }
 
-const mapStateToProps = (state: { users: { login: RequestState<string> } }) => {
+const mapStateToProps = (state: { user: { auth: LoginState } }) => {
   return {
-    loggedIn: !!state.users.login.data,
+    loggedIn: !!state.user.auth.loggedIn,
   };
 };
 

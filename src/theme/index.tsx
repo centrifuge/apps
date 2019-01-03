@@ -38,12 +38,10 @@ const theme = deepMerge(base, {
       },
     },
   },
-  table: {
-    header: {
-      background: {
-        color: "#e3e3e8"
-      }
-    }
+  anchor: {
+    color: 'black',
+    fontWeight: 'normal',
+    hover: false
   },
   button: {
     primary: {
@@ -71,6 +69,13 @@ const theme = deepMerge(base, {
   control: {
     border: {
       width: 0,
+    },
+  },
+  table: {
+    header: {
+      background: {
+        color: '#e3e3e8',
+      },
     },
   },
 });
