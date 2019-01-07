@@ -21,7 +21,11 @@ const testActions = arr => {
   });
 };
 
-const invoiceToCreate = new Invoice(1, 'mickey', 'goofy', 'created');
+const invoiceToCreate: Invoice = {
+  invoice_number: "1",
+  sender_name: 'mickey',
+  recipient_name: 'goofy'
+};
 
 testActions([
   {

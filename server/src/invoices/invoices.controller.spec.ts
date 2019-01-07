@@ -12,8 +12,12 @@ import { InvoiceInvoiceData } from '../../../clients/centrifuge-node/generated-c
 describe('InvoicesController', () => {
   let invoicesModule: TestingModule;
 
-  const invoiceToCreate = new Invoice(999, 'cinderella', 'step mother');
-  let fetchedInvoices;
+  const invoiceToCreate: Invoice = {
+    invoice_number: '999',
+    sender_name: 'cinderella',
+    recipient_name: 'step mother',
+  };
+  let fetchedInvoices: Invoice[];
 
   const supplier = new Contact(
     'fast',
@@ -27,11 +31,7 @@ describe('InvoicesController', () => {
       find: jest.fn(() =>
         fetchedInvoices.map(
           (data: Invoice): InvoiceInvoiceData => ({
-            invoice_number: data.number.toString(),
-            sender_name: data.supplier,
-            recipient_name: data.customer,
-            invoice_status: 'CREATED',
-            currency: 'USD',
+            ...data,
           }),
         ),
       ),
@@ -51,7 +51,12 @@ describe('InvoicesController', () => {
 
   beforeEach(async () => {
     fetchedInvoices = [
-      new Invoice(100, 'pumpkin', 'godmother', [], 'fairy_id'),
+      {
+        invoice_number: '100',
+        recipient_name: 'pumpkin',
+        sender_name: 'godmother',
+        _id: 'fairy_id',
+      },
     ];
 
     invoicesModule = await Test.createTestingModule({
@@ -82,11 +87,7 @@ describe('InvoicesController', () => {
       const result = await invoicesController.create(invoiceToCreate);
       expect(result).toEqual({
         data: {
-          invoice_number: invoiceToCreate.number.toString(),
-          sender_name: invoiceToCreate.supplier,
-          recipient_name: invoiceToCreate.customer,
-          invoice_status: 'CREATED',
-          currency: 'USD',
+          ...invoiceToCreate
         },
       });
 

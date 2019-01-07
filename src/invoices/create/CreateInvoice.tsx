@@ -20,9 +20,57 @@ export default class CreateInvoice extends React.Component<CreateInvoiceProps> {
   displayName = 'CreateInvoice';
 
   onSubmit = values => {
-    const { number, supplier, customer, collaborators } = values;
-    const invoice = new Invoice(number, supplier, customer, collaborators);
-    return this.props.onSubmit(invoice);
+    const {
+      invoice_number,
+      sender_name,
+      sender_street,
+      sender_city,
+      sender_zipcode,
+      sender_country,
+      recipient_name,
+      recipient_street,
+      recipient_city,
+      recipient_zipcode,
+      recipient_country,
+      currency,
+      gross_amount,
+      net_amount,
+      tax_amount,
+      tax_rate,
+      recipient,
+      sender,
+      payee,
+      comment,
+      due_date,
+      date_created,
+      collaborators,
+    } = values;
+
+    return this.props.onSubmit({
+      invoice_number,
+      sender_name,
+      sender_street,
+      sender_city,
+      sender_zipcode,
+      sender_country,
+      recipient_name,
+      recipient_street,
+      recipient_city,
+      recipient_zipcode,
+      recipient_country,
+      currency,
+      gross_amount,
+      net_amount,
+      tax_amount,
+      tax_rate,
+      recipient,
+      sender,
+      payee,
+      comment,
+      collaborators,
+      due_date: new Date(due_date).toISOString() as any,
+      date_created: new Date(date_created).toISOString() as any,
+    });
   };
 
   private renderButtons() {
@@ -34,7 +82,305 @@ export default class CreateInvoice extends React.Component<CreateInvoiceProps> {
           primary
           label="Save"
         />
-        <Button onClick={this.props.onCancel} label="Discard" />
+        <Button active={false} onClick={this.props.onCancel} label="Discard" />
+      </Box>
+    );
+  }
+
+  private renderInvoiceNumberSection() {
+    return (
+      <Box background="white" pad="medium">
+        <Field name="invoice_number">
+          {({ input, meta }) => (
+            <StyledTextInput
+              input={input}
+              meta={meta}
+              label="Invoice number"
+              description="Invoice number or reference number"
+              placeholder="Please enter invoice number"
+            />
+          )}
+        </Field>
+      </Box>
+    );
+  }
+
+  private renderSenderSection() {
+    return (
+      <Box background="white" pad="medium" gap="small">
+        <Box direction="row" gap="small">
+          <Field
+            name="sender"
+            items={this.props.contacts}
+            // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
+            render={({ input, meta, items }) => (
+              <SearchableDropdown
+                label="Sender"
+                input={input}
+                meta={meta}
+                items={items}
+              />
+            )}
+          />
+          <Field name="sender_name">
+            {({ input, meta }) => (
+              <StyledTextInput
+                input={input}
+                meta={meta}
+                label="Sender name"
+                description="Name of the sender company"
+                placeholder="Please enter the sender name"
+              />
+            )}
+          </Field>
+        </Box>
+        <Box direction="row" gap="small">
+          <Field name="sender_street">
+            {({ input, meta }) => (
+              <StyledTextInput
+                input={input}
+                meta={meta}
+                label="Sender street"
+                placeholder="Please enter the sender street"
+              />
+            )}
+          </Field>
+          <Field name="sender_country">
+            {({ input, meta }) => (
+              <StyledTextInput
+                input={input}
+                meta={meta}
+                label="Sender country"
+                description="Country ISO code of the sender of this invoice"
+                placeholder="Please enter the sender country"
+              />
+            )}
+          </Field>
+        </Box>
+        <Box direction="row" gap="small">
+          <Field name="sender_city">
+            {({ input, meta }) => (
+              <StyledTextInput
+                input={input}
+                meta={meta}
+                label="Sender city"
+                placeholder="Please enter the sender city"
+              />
+            )}
+          </Field>
+          <Field name="sender_zipcode">
+            {({ input, meta }) => (
+              <StyledTextInput
+                input={input}
+                meta={meta}
+                label="Sender ZIP code"
+                placeholder="Please enter the sender ZIP code"
+              />
+            )}
+          </Field>
+        </Box>
+      </Box>
+    );
+  }
+
+  private renderRecipientSection() {
+    return (
+      <Box background="white" pad="medium" gap="small">
+        <Box direction="row" gap="small">
+          <Field
+            name="recipient"
+            items={this.props.contacts}
+            // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
+            render={({ input, meta, items }) => (
+              <SearchableDropdown
+                label="Recipient"
+                input={input}
+                meta={meta}
+                items={items}
+              />
+            )}
+          />
+          <Field name="recipient_name">
+            {({ input, meta }) => (
+              <StyledTextInput
+                input={input}
+                meta={meta}
+                label="Recipient name"
+                description="Name of the recipient company"
+                placeholder="Please enter the recipient name"
+              />
+            )}
+          </Field>
+        </Box>
+        <Box direction="row" gap="small">
+          <Field name="recipient_street">
+            {({ input, meta }) => (
+              <StyledTextInput
+                input={input}
+                meta={meta}
+                label="Recipient street"
+                placeholder="Please enter the recipient street"
+              />
+            )}
+          </Field>
+          <Field name="recipient_country">
+            {({ input, meta }) => (
+              <StyledTextInput
+                input={input}
+                meta={meta}
+                label="Recipient country"
+                description="Country ISO code of the recipient of this invoice"
+                placeholder="Please enter the recipient country"
+              />
+            )}
+          </Field>
+        </Box>
+        <Box direction="row" gap="small">
+          <Field name="recipient_city">
+            {({ input, meta }) => (
+              <StyledTextInput
+                input={input}
+                meta={meta}
+                label="Recipient city"
+                placeholder="Please enter the recipient city"
+              />
+            )}
+          </Field>
+          <Field name="recipient_zipcode">
+            {({ input, meta }) => (
+              <StyledTextInput
+                input={input}
+                meta={meta}
+                label="Recipient ZIP code"
+                placeholder="Please enter the recipient ZIP code"
+              />
+            )}
+          </Field>
+        </Box>
+      </Box>
+    );
+  }
+
+  private renderPaymentSection() {
+    return (
+      <Box background="white" pad="medium" gap="small">
+        <Box direction="row" gap="small" align="stretch">
+          <Field name="currency">
+            {({ input, meta }) => (
+              <StyledTextInput input={input} meta={meta} label="Currency" />
+            )}
+          </Field>
+          <Field name="gross_amount">
+            {({ input, meta }) => (
+              <StyledTextInput
+                input={input}
+                meta={meta}
+                label="Gross amount"
+                placeholder="Please enter the gross amount"
+              />
+            )}
+          </Field>
+          <Field name="net_amount">
+            {({ input, meta }) => (
+              <StyledTextInput
+                input={input}
+                meta={meta}
+                label="Net amount"
+                placeholder="Please enter the net amount"
+              />
+            )}
+          </Field>
+          <Field name="tax_amount">
+            {({ input, meta }) => (
+              <StyledTextInput
+                input={input}
+                meta={meta}
+                label="Tax amount"
+                placeholder="Tax amount"
+              />
+            )}
+          </Field>
+          <Field name="tax_rate">
+            {({ input, meta }) => (
+              <StyledTextInput input={input} meta={meta} label="Tax Rate" />
+            )}
+          </Field>
+        </Box>
+        <Box direction="row" gap="small">
+          <Field
+            name="payee"
+            items={this.props.contacts}
+            // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
+            render={({ input, meta, items }) => (
+              <SearchableDropdown
+                label="Payee"
+                input={input}
+                meta={meta}
+                items={items}
+              />
+            )}
+          />
+          <Field name="due_date">
+            {({ input, meta }) => (
+              <StyledTextInput
+                input={input}
+                meta={meta}
+                label="Due date"
+                placeholder="Please enter due date"
+                type="date"
+              />
+            )}
+          </Field>
+          <Field name="date_created">
+            {({ input, meta }) => (
+              <StyledTextInput
+                input={input}
+                meta={meta}
+                label="Date created"
+                placeholder="Please enter creation date"
+                type="date"
+              />
+            )}
+          </Field>
+        </Box>
+      </Box>
+    );
+  }
+
+  private renderCommentsSection() {
+    return (
+      <Box background="white" pad="medium">
+        <Field name="comment">
+          {({ input, meta }) => (
+            <StyledTextInput
+              input={input}
+              meta={meta}
+              label="Comments"
+              placeholder="Please enter extra comments"
+            />
+          )}
+        </Field>
+      </Box>
+    );
+  }
+
+  private renderCollaboratorsSection() {
+    return (
+      <Box background="white" pad="medium">
+        <Field
+          name="collaborators"
+          items={this.props.contacts}
+          // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
+          render={({ input, meta, items }) => (
+            <SearchableDropdown
+              multiple
+              label="Collaborators"
+              input={input}
+              meta={meta}
+              items={items}
+            />
+          )}
+        />
       </Box>
     );
   }
@@ -43,89 +389,21 @@ export default class CreateInvoice extends React.Component<CreateInvoiceProps> {
     return (
       <Form
         onSubmit={this.onSubmit}
-        mutators={{ ...arrayMutators }}
-        render={({ handleSubmit, mutators: { push, pop } }) => (
-          <Box fill>
+        render={({ handleSubmit }) => (
+          <Box>
             <form onSubmit={handleSubmit}>
               <Box justify="between" direction="row" align="center">
                 <Heading level="3">Create New Invoice</Heading>
                 {this.renderButtons()}
               </Box>
               <Box>
-                <Box direction="row" gap="small">
-                  <Field name="number">
-                    {({ input, meta }) => (
-                      <StyledTextInput
-                        input={input}
-                        meta={meta}
-                        label="Invoice number"
-                        placeholder="Please enter invoice number"
-                      />
-                    )}
-                  </Field>
-                  <Field name="customer">
-                    {({ input, meta }) => (
-                      <StyledTextInput
-                        input={input}
-                        meta={meta}
-                        label="Sender name"
-                        placeholder="Please enter the sender name"
-                      />
-                    )}
-                  </Field>
-                </Box>
-                <Box direction="row" gap="small">
-                  <Field
-                    name="supplier"
-                    items={this.props.contacts}
-                    // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
-                    render={({ input, meta, items }) => (
-                      <Box>
-                        <label htmlFor="supplier">Supplier</label>
-                        <SearchableDropdown
-                          input={input}
-                          meta={meta}
-                          items={items}
-                        />
-                      </Box>
-                    )}
-                  />
-                </Box>
-                <Box gap="small">
-                  <label htmlFor="collaborators">Collaborators</label>
-                  <FieldArray name="collaborators">
-                    {({ fields }) => (
-                      <Box gap="small">
-                        {fields.map(name => (
-                          <Field
-                            name={name}
-                            key={name}
-                            placeholder="Please enter the collaborator address"
-                          >
-                            {({ input, meta }) => (
-                              <StyledTextInput
-                                input={input}
-                                meta={meta}
-                                placeholder="Please enter the collaborator address"
-                              />
-                            )}
-                          </Field>
-                        ))}
-                      </Box>
-                    )}
-                  </FieldArray>
-
-                  <Box gap="small" justify="between" direction="row">
-                    <Button
-                      type="button"
-                      onClick={() => push('collaborators', undefined)}
-                    >
-                      Add collaborator
-                    </Button>
-                    <Button type="button" onClick={() => pop('collaborators')}>
-                      Remove last collaborator
-                    </Button>
-                  </Box>
+                <Box direction="column" gap="small">
+                  {this.renderInvoiceNumberSection()}
+                  {this.renderSenderSection()}
+                  {this.renderRecipientSection()}
+                  {this.renderPaymentSection()}
+                  {this.renderCollaboratorsSection()}
+                  {this.renderCommentsSection()}
                 </Box>
                 <Box justify="end" direction="row" margin={{ top: 'small' }}>
                   {this.renderButtons()}

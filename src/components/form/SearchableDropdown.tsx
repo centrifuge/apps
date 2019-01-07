@@ -1,36 +1,40 @@
 import { Component } from 'react';
-import { Select } from 'grommet';
+import { Box, Select, Text } from 'grommet';
 import React from 'react';
 import { FieldRenderProps } from 'react-final-form';
 
-interface SearchableDropdownItem {
+export interface SearchableDropdownItem {
   label: string;
   value: string;
 }
 
 interface SearchableDropdownState {
   items: SearchableDropdownItem[];
-  selectedItem: SearchableDropdownItem;
+  selected: SearchableDropdownItem | SearchableDropdownItem[];
 }
 
 export default class SearchableDropdown<
   SearchableDropdownItem
 > extends Component<
-  FieldRenderProps & { items: any[] },
+  FieldRenderProps & { items: any[]; multiple?: boolean; label: string },
   SearchableDropdownState
 > {
   constructor(props) {
     super(props);
     this.state = {
       items: props.items,
-      selectedItem: { label: '', value: '' },
+      selected: props.multiple ? [] : { label: '', value: '' },
     };
   }
 
   onChange = change => {
-    this.setState({ selectedItem: change.option }, () =>
-      this.props.input.onChange(change.option.value),
-    );
+    this.setState({ selected: change.value }, () => {
+      this.props.input.onChange(
+        Array.isArray(this.state.selected)
+          ? this.state.selected.map(opt => opt.value)
+          : this.state.selected.value,
+      );
+    });
   };
 
   onSearch = text => {
@@ -43,16 +47,24 @@ export default class SearchableDropdown<
 
   render() {
     return (
-      <Select
-        size="medium"
-        placeholder="Select"
-        options={this.state.items}
-        value={this.state.selectedItem}
-        labelKey="label"
-        valueKey="value"
-        onChange={this.onChange}
-        onSearch={this.onSearch}
-      />
+      <Box gap="small" fill>
+        <label>
+          <Text weight="bold" size="small">
+            {this.props.label}
+          </Text>
+        </label>
+        <Select
+          multiple={this.props.multiple}
+          size="medium"
+          placeholder="Select"
+          options={this.state.items}
+          value={this.state.selected}
+          labelKey="label"
+          valueKey="value"
+          onChange={this.onChange}
+          onSearch={this.onSearch}
+        />
+      </Box>
     );
   }
 }

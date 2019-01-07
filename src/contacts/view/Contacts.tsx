@@ -26,6 +26,7 @@ const columns: ContactsTableColumn[] = [
   },
   {
     property: '_id',
+    header: 'Actions',
     render: (contactId: string) => (
       <Box direction="row" gap="small">
         <Edit />

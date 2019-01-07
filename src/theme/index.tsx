@@ -12,9 +12,28 @@ export const GlobalStyle = createGlobalStyle`
   
   a {
     text-decoration: none;
+    
+    color: black;
+    
     :hover, :visited, :active {
       text-decoration: none;
       color: black;
+    }
+  }
+  
+  // fixes for FF and Edge
+  table {
+    width: 100%;
+    tr {
+      height: initial !important;
+      
+      th {
+        height: initial !important;
+      }
+      
+      td {
+        height: initial !important;
+      }
     }
   }
 `;
@@ -22,19 +41,32 @@ export const GlobalStyle = createGlobalStyle`
 const theme = deepMerge(base, {
   global: {
     colors: {
-      background: 'white',
+      background: '#F9F9FA',
       black: '#000000',
       brand: '#FFA91A',
-      focus: '#FD6FFF',
-      placeholder: '#cbcbcd',
+      focus: 'brand',
+      placeholder: '#CBCBCD',
       text: {
         dark: '#444444',
         light: '#444444',
       },
-      bodyBackground: '#f9f9fa',
+      bodyBackground: '#F9F9FA',
       border: {
-        dark: '#e0e0e6',
-        light: '#e0e0e6',
+        dark: '#E0E0E6',
+        light: '#E0E0E6',
+      }
+    },
+    input: {
+      weight: 400,
+    },
+    font: {
+      size: '14px',
+    }
+  },
+  table: {
+    header: {
+      background: {
+        color: '#E3E3E8',
       },
     },
   },
@@ -58,10 +90,10 @@ const theme = deepMerge(base, {
       horizontal: '10px',
     },
     extend: props => {
-      if (!props.primary) {
+      if (!props.primary && !props.active) {
         return `
-          background-color: #e3e3e8;
-          color: #3b3d40
+          background-color: #E3E3E8;
+          color: #3B3D40
         `;
       }
     },
@@ -71,12 +103,8 @@ const theme = deepMerge(base, {
       width: 0,
     },
   },
-  table: {
-    header: {
-      background: {
-        color: '#e3e3e8',
-      },
-    },
+  select: {
+    background: 'white',
   },
 });
 

@@ -112,31 +112,6 @@ describe('ContactsController', () => {
         expect(err instanceof HttpException).toEqual(true);
       }
     });
-
-    it('should throw error when invalid address specified', async function() {
-      expect.assertions(3);
-      const contactsController = contactsModule.get<ContactsController>(
-        ContactsController,
-      );
-
-      const userId = 'owner_id';
-
-      try {
-        await contactsController.create(
-          { user: { id: userId } },
-          {
-            name: 'Joe',
-            address: 'invalid address',
-          },
-        );
-      } catch (err) {
-        expect(err.message).toEqual(
-          'The format of the Ethereum Address is incorrect',
-        );
-        expect(err.status).toEqual(400);
-        expect(err instanceof HttpException).toEqual(true);
-      }
-    });
   });
 
   describe('get', () => {

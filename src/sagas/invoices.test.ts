@@ -1,19 +1,21 @@
-import { call, fork, put, take, takeEvery } from 'redux-saga/effects';
-import { push } from 'connected-react-router';
+import { call, put, takeEvery } from 'redux-saga/effects';
 
 import {
   createInvoice,
-  getInvoices,
   default as defaultExports,
+  getInvoices,
 } from './invoices';
 
 import { createInvoiceAction, getInvoiceAction } from '../actions/invoices';
 
 import { Invoice } from '../common/models/dto/invoice';
 import { httpClient } from '../http-client';
-import routes from '../invoices/routes';
 
-const invoice = new Invoice(1, 'mickey', 'goofy', 'created');
+const invoice: Invoice = {
+  invoice_number: '1',
+  sender_name: 'mickey',
+  recipient_name: 'goofy',
+};
 
 describe('watchGetInvoicesPage', () => {
   it('should call getInvoices', async function() {

@@ -16,9 +16,5 @@ export class Contact {
     if (!contact.address) {
       throw new Error('Contact address not specified');
     }
-
-    if (!isValidAddress(contact.address)) {
-      throw new Error('The format of the Ethereum Address is incorrect');
-    }
   }
 }

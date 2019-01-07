@@ -27,7 +27,7 @@ class Login extends React.Component<LoginProps> {
               pad="medium"
             >
               <form onSubmit={handleSubmit}>
-                <Box>
+                <Box gap="small">
                   <Field name="username">
                     {({ input, meta }) => (
                       <Box fill>
@@ -56,10 +56,7 @@ class Login extends React.Component<LoginProps> {
                       </Box>
                     )}
                   </Field>
-                  <Box justify="between" direction="row">
-                    <Text>username: test, password: test</Text>
-                  </Box>
-                  <Box direction="row" fill>
+                  <Box direction="row" height="50px">
                     <Button type="submit" primary label="Login" fill={true} />
                   </Box>
                 </Box>

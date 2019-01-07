@@ -67,7 +67,7 @@ export default connect(
       contacts: state.contacts.get.data
         ? (state.contacts.get.data.map(contact => ({
             label: contact.name,
-            value: contact._id,
+            value: contact.address,
           })) as LabelValuePair[])
         : undefined,
     };

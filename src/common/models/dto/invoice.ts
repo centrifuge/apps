@@ -1,9 +1,6 @@
-export class Invoice {
-  constructor(
-    readonly number: number,
-    readonly supplier: string,
-    readonly customer: string,
-    readonly collaborators?: string[],
-    readonly _id?: string,
-  ) {}
+import { InvoiceInvoiceData } from '../../../../clients/centrifuge-node/generated-client';
+
+export interface Invoice extends InvoiceInvoiceData {
+  _id?: string;
+  collaborators?: string[];
 }
