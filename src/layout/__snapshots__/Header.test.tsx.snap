@@ -2364,10 +2364,6 @@ exports[`Header matches snapshot 1`] = `
       label="Contacts"
       to="/contacts"
     />
-    <Link
-      label="Contacts"
-      to="/contacts"
-    />
     <WithTheme(Anchor)
       href="/api/users/logout"
       theme={
