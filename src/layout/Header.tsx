@@ -26,7 +26,6 @@ const Header: FunctionComponent = () => (
       <CentrifugeLink label="Invoices" to={invoicesRoutes.index} />
       <CentrifugeLink label="Purchase orders" to={purchaseOrdersRoutes.index} />
       <CentrifugeLink label="Contacts" to={contactsRoutes.index} />
-      <CentrifugeLink label="Contacts" to={contactsRoutes.index} />
       <Anchor href={ROUTES.USERS.logout}>
         <Box fill="vertical" justify="center">
           <Text size="small">Logout</Text>
