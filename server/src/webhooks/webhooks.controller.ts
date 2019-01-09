@@ -35,13 +35,10 @@ export class WebhooksController {
   @Post()
   async receiveMessage(@Body() notification: NotificationNotificationMessage) {
     if (
-      // @ts-ignore
-      notification.documentType === documentTypes.invoice &&
-      // @ts-ignore
-      notification.eventType === eventTypes.success
+      notification.document_type === documentTypes.invoice &&
+      notification.event_type=== eventTypes.success
     ) {
-      //@ts-ignore
-      const result = await this.centrifugeClient.get(notification.documentId);
+      const result = await this.centrifugeClient.get(notification.document_id);
       await this.databaseService.invoices.create(result);
     }
 
