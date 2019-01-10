@@ -2,7 +2,7 @@ import React from 'react';
 
 import { connect } from 'react-redux';
 
-import { getContacts } from '../../actions/contacts';
+import { createContact, getContacts } from '../../actions/contacts';
 import { RequestState } from '../../reducers/http-request-reducer';
 import { Contact } from '../../common/models/dto/contact';
 import Contacts from './Contacts';
@@ -18,6 +18,7 @@ const mapStateToProps = (state: {
 
 type ViewContactsProps = {
   getContacts: () => void;
+  createContact: (contact: Contact) => void;
   contacts?: Contact[];
   loading: boolean;
 };
@@ -32,11 +33,17 @@ class ViewContacts extends React.Component<ViewContactsProps> {
       return 'Loading';
     }
 
-    return <Contacts contacts={this.props.contacts as Contact[]} />;
+    return (
+      <Contacts
+        contacts={this.props.contacts as Contact[]}
+        refresh={this.props.getContacts}
+        createContact={this.props.createContact}
+      />
+    );
   }
 }
 
 export default connect(
   mapStateToProps,
-  { getContacts },
+  { getContacts, createContact },
 )(ViewContacts);

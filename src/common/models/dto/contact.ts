@@ -2,8 +2,8 @@ import { isValidAddress } from 'ethereumjs-util';
 
 export class Contact {
   constructor(
-    readonly name: string,
-    readonly address: string,
+    readonly name?: string,
+    readonly address?: string,
     readonly ownerId?: string,
     readonly _id?: string,
   ) {}

@@ -1581,10 +1581,6 @@ exports[`Body matches snapshot 1`] = `
       />
       <Connect(ProtectedRoute)
         component={[Function]}
-        path="/contacts/create"
-      />
-      <Connect(ProtectedRoute)
-        component={[Function]}
         path="/contacts"
       />
       <Route

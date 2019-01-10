@@ -1,6 +1,10 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
 
-import { createContact, default as defaultExports, getContacts } from './contacts';
+import {
+  createContact,
+  default as defaultExports,
+  getContacts,
+} from './contacts';
 
 import { createContactAction, getContactsAction } from '../actions/contacts';
 

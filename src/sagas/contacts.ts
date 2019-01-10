@@ -1,8 +1,6 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
-import { push } from 'connected-react-router';
 import { httpClient } from '../http-client';
 import { createContactAction, getContactsAction } from '../actions/contacts';
-import routes from '../contacts/routes';
 
 export function* getContacts() {
   try {
@@ -24,7 +22,7 @@ export function* createContact(action) {
       type: createContactAction.success,
       payload: response.data,
     });
-    yield put(push(routes.index));
+    yield getContacts();
   } catch (e) {
     yield put({ type: createContactAction.fail, payload: e });
   }

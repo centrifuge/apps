@@ -7,7 +7,6 @@ import CreateInvoice from '../invoices/create';
 import PurchaseOrders from '../purchaseorders/PurchaseOrders';
 import Contacts from '../contacts/view';
 import LoginPage from '../user/login';
-import CreateContact from '../contacts/create';
 import ProtectedRoute from '../components/ProtectedRoute';
 
 const Body: FunctionComponent = () => (
@@ -26,7 +25,6 @@ const Body: FunctionComponent = () => (
           path={routes.purchaseOrders.index}
           component={PurchaseOrders}
         />
-        <ProtectedRoute path={routes.contacts.new} component={CreateContact} />
         <ProtectedRoute path={routes.contacts.index} component={Contacts} />
         <Route path={routes.index} component={LoginPage} />
       </Switch>
