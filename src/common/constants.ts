@@ -14,4 +14,5 @@ export const ROUTES = Object.freeze({
   USERS: userRoutes,
   CONTACTS: `${API_BASE}/contacts`,
   WEBHOOKS: `${API_BASE}/webhooks`,
+  PURCHASE_ORDERS: `${API_BASE}/purchase_orders`,
 });

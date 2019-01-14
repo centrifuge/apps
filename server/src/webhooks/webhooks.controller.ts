@@ -11,6 +11,8 @@ import { DatabaseProvider } from '../database/database.providers';
 export const documentTypes = {
   invoice:
     'http://github.com/centrifuge/centrifuge-protobufs/invoice/#invoice.InvoiceData',
+  purchaseOrder:
+    'http://github.com/centrifuge/centrifuge-protobufs/purchaseorder/#purchaseorder.PurchaseOrderData',
 };
 
 export const eventTypes = {
@@ -34,12 +36,18 @@ export class WebhooksController {
    */
   @Post()
   async receiveMessage(@Body() notification: NotificationNotificationMessage) {
-    if (
-      notification.document_type === documentTypes.invoice &&
-      notification.event_type=== eventTypes.success
+ if (
+      notification.event_type === eventTypes.success
     ) {
-      const result = await this.centrifugeClient.get(notification.document_id);
-      await this.databaseService.invoices.create(result);
+      if (notification.document_type === documentTypes.invoice) {
+        const result = await this.centrifugeClient.get(notification.document_id);
+        await this.databaseService.invoices.create(result);
+      } else if (notification.document_type === documentTypes.purchaseOrder) {
+        const result = await this.centrifugeClient.get_3(
+          notification.document_id,
+        );
+        await this.databaseService.purchaseOrders.create(result);
+      }
     }
 
     return 'OK';

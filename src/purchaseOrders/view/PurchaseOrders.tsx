@@ -1,25 +1,27 @@
 import React, { ReactNode } from 'react';
-import { Box, Button, DataTable, Heading, Text } from 'grommet';
+import { Box, Button, DataTable, Heading } from 'grommet';
 import { Add, Edit, More } from 'grommet-icons';
 import { Link } from 'react-router-dom';
 
-import invoiceRoutes from '../routes';
+import purchaseOrderRoutes from '../routes';
 import { Contact } from '../../common/models/dto/contact';
-import { InvoiceData } from '../../interfaces';
+import { PurchaseorderPurchaseOrderData } from '../../../clients/centrifuge-node/generated-client';
 
-interface InvoiceTableColumn {
-  property: keyof InvoiceData | keyof [keyof { supplier: Contact }];
+interface PurchaseOrdersTableColumn {
+  property:
+    | keyof (PurchaseorderPurchaseOrderData & { _id?: string })
+    | keyof [keyof { supplier: Contact }];
   header: string;
-  render?: (datum: InvoiceData) => ReactNode;
+  render?: (datum: PurchaseorderPurchaseOrderData) => ReactNode;
   format?: Function;
 }
 
 // Casting to "any" until https://github.com/grommet/grommet/issues/2464 is fixed
 const DataTableSupressedWarning = DataTable as any;
 
-const columns: InvoiceTableColumn[] = [
+const columns: PurchaseOrdersTableColumn[] = [
   {
-    property: 'invoice_number',
+    property: 'po_number',
     header: 'Number',
   },
   {
@@ -27,12 +29,7 @@ const columns: InvoiceTableColumn[] = [
     header: 'Customer',
   },
   {
-    property: 'supplier',
-    header: 'Supplier',
-    render: data => (data.supplier ? <Text>{data.supplier.name}</Text> : null),
-  },
-  {
-    property: 'invoice_status',
+    property: 'po_status',
     header: 'Status',
   },
   {
@@ -46,17 +43,19 @@ const columns: InvoiceTableColumn[] = [
   },
 ];
 
-type InvoicesProps = { invoices: InvoiceData[] };
+type PurchaseOrdersProps = { purchaseOrders: PurchaseorderPurchaseOrderData[] };
 
-export default class Invoices extends React.Component<InvoicesProps> {
-  displayName = 'Invoices';
+export default class PurchaseOrders extends React.Component<
+  PurchaseOrdersProps
+> {
+  displayName = 'PurchaseOrders';
 
   render() {
     return (
       <Box fill>
         <Box justify="between" direction="row" align="center">
-          <Heading level="3">Invoices</Heading>
-          <Link to={invoiceRoutes.new}>
+          <Heading level="3">Purchase orders</Heading>
+          <Link to={purchaseOrderRoutes.new}>
             <Button
               icon={<Add color="white" size="small" />}
               primary
@@ -67,7 +66,7 @@ export default class Invoices extends React.Component<InvoicesProps> {
 
         <Box>
           <DataTableSupressedWarning
-            data={this.props.invoices}
+            data={this.props.purchaseOrders}
             columns={columns}
           />
         </Box>

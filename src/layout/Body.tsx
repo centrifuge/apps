@@ -4,10 +4,11 @@ import { Route, Switch } from 'react-router';
 import routes from '../routes';
 import Invoices from '../invoices/view';
 import CreateInvoice from '../invoices/create';
-import PurchaseOrders from '../purchaseorders/PurchaseOrders';
+import PurchaseOrders from '../purchaseOrders/view';
 import Contacts from '../contacts/view';
 import LoginPage from '../user/login';
 import ProtectedRoute from '../components/ProtectedRoute';
+import CreatePurchaseOrder from '../purchaseOrders/create';
 
 const Body: FunctionComponent = () => (
   <Box
@@ -21,6 +22,10 @@ const Body: FunctionComponent = () => (
       <Switch>
         <ProtectedRoute path={routes.invoices.new} component={CreateInvoice} />
         <ProtectedRoute path={routes.invoices.index} component={Invoices} />
+        <ProtectedRoute
+          path={routes.purchaseOrders.new}
+          component={CreatePurchaseOrder}
+        />
         <ProtectedRoute
           path={routes.purchaseOrders.index}
           component={PurchaseOrders}

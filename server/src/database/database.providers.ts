@@ -3,7 +3,11 @@ import { promisify } from 'util';
 import { tokens } from './database.constants';
 import { User } from '../../../src/common/models/dto/user';
 import { DatabaseRepository } from './database.repository';
-import { InvoiceInvoiceData, InvoiceInvoiceResponse } from '../../../clients/centrifuge-node/generated-client';
+import {
+  InvoiceInvoiceData,
+  InvoiceInvoiceResponse,
+  PurchaseorderPurchaseOrderResponse,
+} from '../../../clients/centrifuge-node/generated-client';
 import { Contact } from '../../../src/common/models/dto/contact';
 import config from '../config';
 
@@ -11,6 +15,7 @@ export interface DatabaseProvider {
   invoices: DatabaseRepository<InvoiceInvoiceResponse>;
   users: DatabaseRepository<User>;
   contacts: DatabaseRepository<Contact>;
+  purchaseOrders: DatabaseRepository<PurchaseorderPurchaseOrderResponse>;
 }
 
 const testUser = new User(
@@ -33,10 +38,18 @@ const initializeDatabase = async function() {
   const contactsDb = new Nedb({ filename: `${config.dbPath}/contactsDb` });
   await promisify(contactsDb.loadDatabase.bind(contactsDb))();
 
+  const purchaseOrdersDb = new Nedb({
+    filename: `${config.dbPath}/purchaseOrdersDb`,
+  });
+  await promisify(purchaseOrdersDb.loadDatabase.bind(purchaseOrdersDb))();
+
   return {
     invoices: new DatabaseRepository<InvoiceInvoiceData>(invoicesDb),
     users: new DatabaseRepository<User>(usersDb),
     contacts: new DatabaseRepository<Contact>(contactsDb),
+    purchaseOrders: new DatabaseRepository<PurchaseorderPurchaseOrderResponse>(
+      purchaseOrdersDb,
+    ),
   };
 };
 

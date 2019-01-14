@@ -5,7 +5,11 @@ import { Invoice } from '../common/models/dto/invoice';
 import { ROUTES } from '../common/constants';
 import { User } from '../common/models/dto/user';
 import { Contact } from '../common/models/dto/contact';
-import { InvoiceInvoiceResponse } from '../../clients/centrifuge-node/generated-client';
+import {
+  InvoiceInvoiceResponse,
+  PurchaseorderPurchaseOrderResponse,
+} from '../../clients/centrifuge-node/generated-client';
+import { PurchaseOrder } from '../common/models/dto/purchase-order';
 
 const instance = axios.create();
 
@@ -23,5 +27,13 @@ export const httpClient = {
   contacts: {
     create: async (contact: Contact) => instance.post(ROUTES.CONTACTS, contact),
     read: async () => instance.get(ROUTES.CONTACTS),
+  },
+  purchaseOrders: {
+    create: async (
+      purchaseOrder: PurchaseOrder,
+    ): Promise<PurchaseorderPurchaseOrderResponse> =>
+      instance.post(ROUTES.PURCHASE_ORDERS, purchaseOrder),
+    read: async (): Promise<PurchaseorderPurchaseOrderResponse> =>
+      instance.get(ROUTES.PURCHASE_ORDERS),
   },
 };

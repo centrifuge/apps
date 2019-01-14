@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Anchor, Box, Image, Text } from 'grommet';
 import logo from '../logo.png';
 import invoicesRoutes from '../invoices/routes';
-import purchaseOrdersRoutes from '../purchaseorders/routes';
+import purchaseOrdersRoutes from '../purchaseOrders/routes';
 import { ROUTES } from '../common/constants';
 import contactsRoutes from '../contacts/routes';
 import CentrifugeLink from '../components/Link';
