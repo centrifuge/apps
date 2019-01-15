@@ -71,10 +71,10 @@ export default class SearchableDropdown<
         </Box>
         <Select
           multiple={this.props.multiple}
-          size="medium"
+          size={"medium" as any}
           placeholder="Select"
           options={this.state.items}
-          value={this.state.selected}
+          value={this.state.selected as any}
           labelKey="label"
           valueKey="value"
           onChange={this.onChange}

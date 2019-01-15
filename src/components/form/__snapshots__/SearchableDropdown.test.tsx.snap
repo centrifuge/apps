@@ -510,9 +510,9 @@ exports[`Searchable dropdown when multiple item select should match snapshot 1`]
               "size": "34px",
             },
             "medium": Object {
-              "height": "28px",
-              "maxWidth": "528px",
-              "size": "22px",
+              "height": "32px",
+              "maxWidth": "624px",
+              "size": "26px",
             },
             "small": Object {
               "height": "28px",
@@ -546,6 +546,52 @@ exports[`Searchable dropdown when multiple item select should match snapshot 1`]
               "height": "24px",
               "maxWidth": "432px",
               "size": "18px",
+            },
+          },
+          "5": Object {
+            "font": Object {},
+            "large": Object {
+              "height": "22px",
+              "maxWidth": "384px",
+              "size": "16px",
+            },
+            "medium": Object {
+              "height": "22px",
+              "maxWidth": "384px",
+              "size": "16px",
+            },
+            "small": Object {
+              "height": "22px",
+              "maxWidth": "384px",
+              "size": "16px",
+            },
+            "xlarge": Object {
+              "height": "22px",
+              "maxWidth": "384px",
+              "size": "16px",
+            },
+          },
+          "6": Object {
+            "font": Object {},
+            "large": Object {
+              "height": "20px",
+              "maxWidth": "336px",
+              "size": "14px",
+            },
+            "medium": Object {
+              "height": "20px",
+              "maxWidth": "336px",
+              "size": "14px",
+            },
+            "small": Object {
+              "height": "20px",
+              "maxWidth": "336px",
+              "size": "14px",
+            },
+            "xlarge": Object {
+              "height": "20px",
+              "maxWidth": "336px",
+              "size": "14px",
             },
           },
         },
@@ -1290,9 +1336,9 @@ exports[`Searchable dropdown when multiple item select should match snapshot 1`]
                 "size": "34px",
               },
               "medium": Object {
-                "height": "28px",
-                "maxWidth": "528px",
-                "size": "22px",
+                "height": "32px",
+                "maxWidth": "624px",
+                "size": "26px",
               },
               "small": Object {
                 "height": "28px",
@@ -1326,6 +1372,52 @@ exports[`Searchable dropdown when multiple item select should match snapshot 1`]
                 "height": "24px",
                 "maxWidth": "432px",
                 "size": "18px",
+              },
+            },
+            "5": Object {
+              "font": Object {},
+              "large": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+              "medium": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+              "small": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+              "xlarge": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+            },
+            "6": Object {
+              "font": Object {},
+              "large": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
+              },
+              "medium": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
+              },
+              "small": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
+              },
+              "xlarge": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
               },
             },
           },
@@ -2108,9 +2200,9 @@ exports[`Searchable dropdown when multiple item select should match snapshot 1`]
                 "size": "34px",
               },
               "medium": Object {
-                "height": "28px",
-                "maxWidth": "528px",
-                "size": "22px",
+                "height": "32px",
+                "maxWidth": "624px",
+                "size": "26px",
               },
               "small": Object {
                 "height": "28px",
@@ -2144,6 +2236,52 @@ exports[`Searchable dropdown when multiple item select should match snapshot 1`]
                 "height": "24px",
                 "maxWidth": "432px",
                 "size": "18px",
+              },
+            },
+            "5": Object {
+              "font": Object {},
+              "large": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+              "medium": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+              "small": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+              "xlarge": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+            },
+            "6": Object {
+              "font": Object {},
+              "large": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
+              },
+              "medium": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
+              },
+              "small": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
+              },
+              "xlarge": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
               },
             },
           },
@@ -2896,9 +3034,9 @@ exports[`Searchable dropdown when single item select should match snapshot 1`] =
               "size": "34px",
             },
             "medium": Object {
-              "height": "28px",
-              "maxWidth": "528px",
-              "size": "22px",
+              "height": "32px",
+              "maxWidth": "624px",
+              "size": "26px",
             },
             "small": Object {
               "height": "28px",
@@ -2932,6 +3070,52 @@ exports[`Searchable dropdown when single item select should match snapshot 1`] =
               "height": "24px",
               "maxWidth": "432px",
               "size": "18px",
+            },
+          },
+          "5": Object {
+            "font": Object {},
+            "large": Object {
+              "height": "22px",
+              "maxWidth": "384px",
+              "size": "16px",
+            },
+            "medium": Object {
+              "height": "22px",
+              "maxWidth": "384px",
+              "size": "16px",
+            },
+            "small": Object {
+              "height": "22px",
+              "maxWidth": "384px",
+              "size": "16px",
+            },
+            "xlarge": Object {
+              "height": "22px",
+              "maxWidth": "384px",
+              "size": "16px",
+            },
+          },
+          "6": Object {
+            "font": Object {},
+            "large": Object {
+              "height": "20px",
+              "maxWidth": "336px",
+              "size": "14px",
+            },
+            "medium": Object {
+              "height": "20px",
+              "maxWidth": "336px",
+              "size": "14px",
+            },
+            "small": Object {
+              "height": "20px",
+              "maxWidth": "336px",
+              "size": "14px",
+            },
+            "xlarge": Object {
+              "height": "20px",
+              "maxWidth": "336px",
+              "size": "14px",
             },
           },
         },
@@ -3676,9 +3860,9 @@ exports[`Searchable dropdown when single item select should match snapshot 1`] =
                 "size": "34px",
               },
               "medium": Object {
-                "height": "28px",
-                "maxWidth": "528px",
-                "size": "22px",
+                "height": "32px",
+                "maxWidth": "624px",
+                "size": "26px",
               },
               "small": Object {
                 "height": "28px",
@@ -3712,6 +3896,52 @@ exports[`Searchable dropdown when single item select should match snapshot 1`] =
                 "height": "24px",
                 "maxWidth": "432px",
                 "size": "18px",
+              },
+            },
+            "5": Object {
+              "font": Object {},
+              "large": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+              "medium": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+              "small": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+              "xlarge": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+            },
+            "6": Object {
+              "font": Object {},
+              "large": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
+              },
+              "medium": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
+              },
+              "small": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
+              },
+              "xlarge": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
               },
             },
           },
@@ -4493,9 +4723,9 @@ exports[`Searchable dropdown when single item select should match snapshot 1`] =
                 "size": "34px",
               },
               "medium": Object {
-                "height": "28px",
-                "maxWidth": "528px",
-                "size": "22px",
+                "height": "32px",
+                "maxWidth": "624px",
+                "size": "26px",
               },
               "small": Object {
                 "height": "28px",
@@ -4529,6 +4759,52 @@ exports[`Searchable dropdown when single item select should match snapshot 1`] =
                 "height": "24px",
                 "maxWidth": "432px",
                 "size": "18px",
+              },
+            },
+            "5": Object {
+              "font": Object {},
+              "large": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+              "medium": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+              "small": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+              "xlarge": Object {
+                "height": "22px",
+                "maxWidth": "384px",
+                "size": "16px",
+              },
+            },
+            "6": Object {
+              "font": Object {},
+              "large": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
+              },
+              "medium": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
+              },
+              "small": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
+              },
+              "xlarge": Object {
+                "height": "20px",
+                "maxWidth": "336px",
+                "size": "14px",
               },
             },
           },
