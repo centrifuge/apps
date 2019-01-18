@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Inject, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { Invoice } from '../../../src/common/models/dto/invoice';
 import { ROUTES } from '../../../src/common/constants';
 import { SessionGuard } from '../auth/SessionGuard';
@@ -7,6 +16,7 @@ import { tokens as databaseTokens } from '../database/database.constants';
 import {
   DocumentServiceApi,
   InvoiceInvoiceData,
+  InvoiceInvoiceResponse,
 } from '../../../clients/centrifuge-node/generated-client';
 import { DatabaseProvider } from '../database/database.providers';
 import { InvoiceData } from '../../../src/interfaces';
@@ -44,10 +54,8 @@ export class InvoicesController {
    * @async
    * @param {Promise<Invoice[]>} result
    */
-  async get(): Promise<InvoiceData[]> {
-    const invoices = (await this.database.invoices.find(
-      {},
-    )) as (InvoiceInvoiceData & { _id: string })[];
+  async get(): Promise<(Invoice & { supplier?: string })[]> {
+    const invoices = (await this.database.invoices.find({})) as (Invoice)[];
 
     return await Promise.all(
       invoices.map(async invoice => {
@@ -64,5 +72,25 @@ export class InvoicesController {
         return invoice;
       }),
     );
+  }
+
+  @Get(':id')
+  async getById(@Param() params): Promise<Invoice | null> {
+    return this.database.invoices.findOne({ _id: params.id });
+  }
+
+  @Put(':id')
+  async updateById(@Param() params, @Body() updateInvoiceRequest: Invoice) {
+    let id = params.id;
+    const invoice: InvoiceInvoiceResponse = await this.database.invoices.findOne(
+      { _id: id },
+    );
+
+    const updateResult = await this.centrifugeClient.update(
+      invoice.header.document_id,
+      updateInvoiceRequest,
+    );
+
+    return await this.database.invoices.updateById(id, updateResult);
   }
 }

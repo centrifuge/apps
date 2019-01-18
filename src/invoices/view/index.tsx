@@ -11,7 +11,7 @@ import {
 } from '../../../clients/centrifuge-node/generated-client';
 
 interface InvoiceResponse extends InvoiceInvoiceResponse {
-  data: InvoiceInvoiceData & { _id: string };
+  _id: string;
 }
 
 const mapStateToProps = (state: {
@@ -22,7 +22,10 @@ const mapStateToProps = (state: {
   return {
     invoices:
       state.invoices.get.data &&
-      state.invoices.get.data.map(response => response.data),
+      state.invoices.get.data.map(response => ({
+        _id: response._id,
+        ...response.data,
+      })),
     loading: state.invoices.get.loading,
   };
 };

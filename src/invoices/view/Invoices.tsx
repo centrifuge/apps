@@ -1,54 +1,18 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { Box, Button, DataTable, Heading, Text } from 'grommet';
 import { Add, Edit, More } from 'grommet-icons';
 import { Link } from 'react-router-dom';
 
 import invoiceRoutes from '../routes';
-import { Contact } from '../../common/models/dto/contact';
 import { InvoiceData } from '../../interfaces';
-
-interface InvoiceTableColumn {
-  property: keyof InvoiceData | keyof [keyof { supplier: Contact }];
-  header: string;
-  render?: (datum: InvoiceData) => ReactNode;
-  format?: Function;
-}
+import { RouteComponentProps, withRouter } from 'react-router';
 
 // Casting to "any" until https://github.com/grommet/grommet/issues/2464 is fixed
 const DataTableSupressedWarning = DataTable as any;
 
-const columns: InvoiceTableColumn[] = [
-  {
-    property: 'invoice_number',
-    header: 'Number',
-  },
-  {
-    property: 'recipient_name',
-    header: 'Customer',
-  },
-  {
-    property: 'supplier',
-    header: 'Supplier',
-    render: data => (data.supplier ? <Text>{data.supplier.name}</Text> : null),
-  },
-  {
-    property: 'invoice_status',
-    header: 'Status',
-  },
-  {
-    property: '_id',
-    header: 'Actions',
-    render: () => (
-      <Box direction="row" gap="small">
-        <Edit />
-      </Box>
-    ),
-  },
-];
-
 type InvoicesProps = { invoices: InvoiceData[] };
 
-export default class Invoices extends React.Component<InvoicesProps> {
+class Invoices extends React.Component<InvoicesProps & RouteComponentProps> {
   displayName = 'Invoices';
 
   render() {
@@ -68,10 +32,46 @@ export default class Invoices extends React.Component<InvoicesProps> {
         <Box>
           <DataTableSupressedWarning
             data={this.props.invoices}
-            columns={columns}
+            columns={[
+              {
+                property: 'invoice_number',
+                header: 'Number',
+              },
+              {
+                property: 'recipient_name',
+                header: 'Customer',
+              },
+              {
+                property: 'supplier',
+                header: 'Supplier',
+                render: data =>
+                  data.supplier ? <Text>{data.supplier.name}</Text> : null,
+              },
+              {
+                property: 'invoice_status',
+                header: 'Status',
+              },
+              {
+                property: '_id',
+                header: 'Actions',
+                render: datum => (
+                  <Box direction="row" gap="small">
+                    <Edit
+                      onClick={() =>
+                        this.props.history.push(
+                          `${invoiceRoutes.index}/${datum._id}`,
+                        )
+                      }
+                    />
+                  </Box>
+                ),
+              },
+            ]}
           />
         </Box>
       </Box>
     );
   }
 }
+
+export default withRouter(Invoices);

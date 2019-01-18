@@ -7,7 +7,9 @@ import purchaseOrders from './purchase-orders';
 export default function*() {
   yield all([
     fork(invoices.watchGetInvoicesPage),
+    fork(invoices.watchGetInvoiceById),
     fork(invoices.watchCreateInvoice),
+    fork(invoices.watchUpdateInvoice),
     fork(users.watchLoginPage),
     fork(contacts.watchGetContactsPage),
     fork(contacts.watchCreateContact),

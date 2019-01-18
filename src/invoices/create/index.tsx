@@ -2,7 +2,7 @@ import React from 'react';
 
 import { connect } from 'react-redux';
 
-import CreateInvoice from './CreateInvoice';
+import CreateEditInvoice from '../CreateEditInvoice';
 import { createInvoice } from '../../actions/invoices';
 import { Invoice } from '../../common/models/dto/invoice';
 import { RouteComponentProps, withRouter } from 'react-router';
@@ -47,7 +47,7 @@ class ConnectedCreateInvoice extends React.Component<
     }
 
     return (
-      <CreateInvoice
+      <CreateEditInvoice
         onSubmit={this.createInvoice}
         onCancel={this.onCancel}
         contacts={this.props.contacts}

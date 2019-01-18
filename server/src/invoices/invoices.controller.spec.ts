@@ -12,7 +12,7 @@ import { InvoiceInvoiceData } from '../../../clients/centrifuge-node/generated-c
 describe('InvoicesController', () => {
   let invoicesModule: TestingModule;
 
-  const invoiceToCreate: Invoice = {
+  const invoice: Invoice = {
     invoice_number: '999',
     sender_name: 'cinderella',
     recipient_name: 'step mother',
@@ -35,6 +35,13 @@ describe('InvoicesController', () => {
           }),
         ),
       ),
+      findOne: jest.fn(() => ({
+        data: invoice,
+        header: {
+          document_id: 'find_one_invoice_id',
+        },
+      })),
+      updateById: jest.fn((id, value) => value),
     };
     contacts = {
       findOne: jest.fn(() => supplier),
@@ -45,6 +52,7 @@ describe('InvoicesController', () => {
 
   class CentrifugeClientMock {
     create = jest.fn(data => data);
+    update = jest.fn((id, data) => data);
   }
 
   const centrifugeClientMock = new CentrifugeClientMock();
@@ -84,10 +92,10 @@ describe('InvoicesController', () => {
         InvoicesController,
       );
 
-      const result = await invoicesController.create(invoiceToCreate);
+      const result = await invoicesController.create(invoice);
       expect(result).toEqual({
         data: {
-          ...invoiceToCreate
+          ...invoice,
         },
       });
 
@@ -121,6 +129,63 @@ describe('InvoicesController', () => {
         const result = await invoicesController.get();
         expect(result[0].supplier).toBe(undefined);
         expect(databaseServiceMock.invoices.find).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe('update', function() {
+    it('should update the specified invoice', async function() {
+      const invoiceController = invoicesModule.get<InvoicesController>(
+        InvoicesController,
+      );
+
+      const updatedInvoice: Invoice = {
+        ...invoice,
+        invoice_number: 'updated_number',
+        collaborators: ['new_collaborator'],
+      };
+
+      const updateResult = await invoiceController.updateById(
+        { id: 'id_to_update' },
+        { ...updatedInvoice },
+      );
+
+      expect(databaseServiceMock.invoices.findOne).toHaveBeenCalledWith({
+        _id: 'id_to_update',
+      });
+      expect(centrifugeClientMock.update).toHaveBeenCalledWith(
+        'find_one_invoice_id',
+        {
+          ...updatedInvoice,
+          collaborators: ['new_collaborator'],
+        },
+      );
+
+      expect(databaseServiceMock.invoices.updateById).toHaveBeenCalledWith(
+        'id_to_update',
+        {
+          ...updateResult,
+        },
+      );
+    });
+  });
+
+  describe('get by id', function() {
+    it('should return the purchase order by id', async function() {
+      const invoiceController = invoicesModule.get<InvoicesController>(
+        InvoicesController,
+      );
+
+      const result = await invoiceController.getById({ id: 'some_id' });
+      expect(databaseServiceMock.invoices.findOne).toHaveBeenCalledWith({
+        _id: 'some_id',
+      });
+
+      expect(result).toEqual({
+        data: invoice,
+        header: {
+          document_id: 'find_one_invoice_id',
+        },
       });
     });
   });

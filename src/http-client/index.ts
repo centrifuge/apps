@@ -17,8 +17,12 @@ export const httpClient = {
   invoices: {
     create: async (invoice: Invoice): Promise<InvoiceInvoiceResponse> =>
       instance.post(ROUTES.INVOICES, invoice),
+    update: async (invoice: Invoice): Promise<InvoiceInvoiceResponse> =>
+      instance.put(`${ROUTES.INVOICES}/${invoice._id}`, invoice),
     read: async (): Promise<InvoiceInvoiceResponse> =>
       instance.get(ROUTES.INVOICES),
+    readById: async (id): Promise<InvoiceInvoiceResponse> =>
+      instance.get(`${ROUTES.INVOICES}/${id}`),
   },
   user: {
     login: async (user: User) => instance.post(ROUTES.USERS.login, user),

@@ -3,10 +3,17 @@ import { call, put, takeEvery } from 'redux-saga/effects';
 import {
   createInvoice,
   default as defaultExports,
+  getInvoiceById,
   getInvoices,
+  updateInvoice,
 } from './invoices';
 
-import { createInvoiceAction, getInvoiceAction } from '../actions/invoices';
+import {
+  createInvoiceAction,
+  getInvoiceAction,
+  getInvoiceByIdAction,
+  updateInvoiceAction,
+} from '../actions/invoices';
 
 import { Invoice } from '../common/models/dto/invoice';
 import { httpClient } from '../http-client';
@@ -101,6 +108,66 @@ describe('createInvoice', () => {
     expect(errorResponse).toEqual(
       put({
         type: createInvoiceAction.fail,
+        payload: error,
+      }),
+    );
+  });
+});
+
+describe('getInvoiceById', function() {
+  it('should call the client with the appropriate id', function() {});
+
+  it('should set error on exception', function() {
+    let idAction = { id: 'invoice_id' };
+    const gen = getInvoiceById(idAction);
+
+    const invocationResponse = gen.next().value;
+    expect(invocationResponse).toEqual(
+      call(httpClient.invoices.readById, idAction.id),
+    );
+
+    const error = new Error('Oh, no, something broke!');
+    const errorResponse = gen.throw && gen.throw(error).value;
+    expect(errorResponse).toEqual(
+      put({
+        type: getInvoiceByIdAction.fail,
+        payload: error,
+      }),
+    );
+  });
+});
+
+describe('updateInvoice', function() {
+  it('should update the invoice and redirect to index', function() {
+    const gen = updateInvoice({ invoice });
+
+    const invocationResponse = gen.next().value;
+    expect(invocationResponse).toEqual(
+      call(httpClient.invoices.update, invoice),
+    );
+
+    const successResponse = gen.next({ data: invoice }).value;
+    expect(successResponse).toEqual(
+      put({
+        type: updateInvoiceAction.success,
+        payload: invoice,
+      }),
+    );
+  });
+
+  it('should set error on exception ', function() {
+    const gen = updateInvoice({ invoice });
+
+    const invocationResponse = gen.next().value;
+    expect(invocationResponse).toEqual(
+      call(httpClient.invoices.update, invoice),
+    );
+
+    const error = new Error('Oh, no, something broke!');
+    const errorResponse = gen.throw && gen.throw(error).value;
+    expect(errorResponse).toEqual(
+      put({
+        type: updateInvoiceAction.fail,
         payload: error,
       }),
     );

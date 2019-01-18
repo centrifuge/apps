@@ -1,7 +1,12 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import { httpClient } from '../http-client';
-import { createInvoiceAction, getInvoiceAction } from '../actions/invoices';
+import {
+  createInvoiceAction,
+  getInvoiceAction,
+  getInvoiceByIdAction,
+  updateInvoiceAction,
+} from '../actions/invoices';
 import routes from '../invoices/routes';
 
 export function* getInvoices() {
@@ -13,6 +18,19 @@ export function* getInvoices() {
     });
   } catch (e) {
     yield put({ type: getInvoiceAction.fail, payload: e });
+  }
+}
+
+export function* getInvoiceById(action) {
+  try {
+    const { id } = action;
+    const response = yield call(httpClient.invoices.readById, id);
+    yield put({
+      type: getInvoiceByIdAction.success,
+      payload: response.data,
+    });
+  } catch (e) {
+    yield put({ type: getInvoiceByIdAction.fail, payload: e });
   }
 }
 
@@ -30,7 +48,24 @@ export function* createInvoice(action) {
   }
 }
 
+export function* updateInvoice(action) {
+  try {
+    const { invoice } = action;
+    const response = yield call(httpClient.invoices.update, invoice);
+    yield put({
+      type: updateInvoiceAction.success,
+      payload: response.data,
+    });
+    yield put(push(routes.index));
+  } catch (e) {
+    yield put({ type: updateInvoiceAction.fail, payload: e });
+  }
+}
+
 export default {
   watchGetInvoicesPage: () => takeEvery(getInvoiceAction.start, getInvoices),
+  watchGetInvoiceById: () =>
+    takeEvery(getInvoiceByIdAction.start, getInvoiceById),
   watchCreateInvoice: () => takeEvery(createInvoiceAction.start, createInvoice),
+  watchUpdateInvoice: () => takeEvery(updateInvoiceAction.start, updateInvoice),
 };
