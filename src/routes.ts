@@ -1,5 +1,5 @@
 import invoiceRoutes from './invoices/routes';
-import purchaseOrdersRoutes from './purchaseOrders/routes';
+import purchaseOrdersRoutes from './purchase-orders/routes';
 import contactsRoutes from './contacts/routes';
 import userRoutes from './user/routes';
 

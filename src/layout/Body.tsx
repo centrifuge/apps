@@ -5,11 +5,12 @@ import routes from '../routes';
 import Invoices from '../invoices/view';
 import CreateInvoice from '../invoices/create';
 import EditInvoice from '../invoices/edit';
-import PurchaseOrders from '../purchaseOrders/view';
+import PurchaseOrders from '../purchase-orders/view';
 import Contacts from '../contacts/view';
 import LoginPage from '../user/login';
 import ProtectedRoute from '../components/ProtectedRoute';
-import CreatePurchaseOrder from '../purchaseOrders/create';
+import CreatePurchaseOrder from '../purchase-orders/create';
+import EditPurchaseOrder from '../purchase-orders/edit';
 
 const Body: FunctionComponent = () => (
   <Box
@@ -27,6 +28,10 @@ const Body: FunctionComponent = () => (
         <ProtectedRoute
           path={routes.purchaseOrders.new}
           component={CreatePurchaseOrder}
+        />
+        <ProtectedRoute
+          path={routes.purchaseOrders.update}
+          component={EditPurchaseOrder}
         />
         <ProtectedRoute
           path={routes.purchaseOrders.index}

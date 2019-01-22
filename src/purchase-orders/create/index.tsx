@@ -2,7 +2,7 @@ import React from 'react';
 
 import { connect } from 'react-redux';
 
-import CreatePurchaseOrder from './CreatePurchaseOrder';
+import CreatePurchaseOrder from '../CreateEditPurchaseOrder';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { RequestState } from '../../reducers/http-request-reducer';
 import { PurchaseorderPurchaseOrderData } from '../../../clients/centrifuge-node/generated-client';

@@ -10,10 +10,11 @@ import { PurchaseOrder } from '../../../src/common/models/dto/purchase-order';
 describe('PurchaseOrdersController', () => {
   let purchaseOrdersModule: TestingModule;
 
-  const purchaseOrderToCreate: PurchaseOrder = {
+  const purchaseOrder: PurchaseOrder = {
     po_number: '999',
     order_name: 'cinderella',
     recipient_name: 'step mother',
+    collaborators: ['new_collaborator'],
   };
 
   const fetchedPurchaseOrders: PurchaseOrder[] = [
@@ -27,6 +28,13 @@ describe('PurchaseOrdersController', () => {
     purchaseOrders = {
       create: jest.fn(val => val),
       find: jest.fn(() => fetchedPurchaseOrders),
+      findOne: jest.fn(() => ({
+        data: purchaseOrder,
+        header: {
+          document_id: 'find_one_document_id',
+        },
+      })),
+      updateById: jest.fn((id, value) => value),
     };
   }
 
@@ -34,6 +42,7 @@ describe('PurchaseOrdersController', () => {
 
   class CentrifugeClientMock {
     create_1 = jest.fn(data => data);
+    update_4 = jest.fn((id, data) => data);
   }
 
   const centrifugeClientMock = new CentrifugeClientMock();
@@ -64,13 +73,11 @@ describe('PurchaseOrdersController', () => {
         PurchaseOrdersController
       >(PurchaseOrdersController);
 
-      const result = await purchaseOrdersController.create(
-        purchaseOrderToCreate,
-      );
+      const result = await purchaseOrdersController.create(purchaseOrder);
 
       expect(result).toEqual({
-        collaborators: undefined,
-        data: purchaseOrderToCreate,
+        collaborators: ['new_collaborator'],
+        data: purchaseOrder,
       });
 
       expect(databaseServiceMock.purchaseOrders.create).toHaveBeenCalledTimes(
@@ -90,6 +97,60 @@ describe('PurchaseOrdersController', () => {
       });
       expect(result).toBe(fetchedPurchaseOrders);
       expect(databaseServiceMock.purchaseOrders.find).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('update', function() {
+    it('should update the specified purchase order', async function() {
+      const purchaseOrdersController = purchaseOrdersModule.get<
+        PurchaseOrdersController
+      >(PurchaseOrdersController);
+
+      const updatedOrder = { ...purchaseOrder, po_number: 'updated_number' };
+
+      const updateResult = await purchaseOrdersController.update(
+        { id: 'id_to_update' },
+        { ...updatedOrder },
+      );
+
+      expect(databaseServiceMock.purchaseOrders.findOne).toHaveBeenCalledWith({
+        _id: 'id_to_update',
+      });
+      expect(centrifugeClientMock.update_4).toHaveBeenCalledWith(
+        'find_one_document_id',
+        {
+          data: {
+            ...updatedOrder,
+          },
+          collaborators: ['new_collaborator'],
+        },
+      );
+
+      expect(
+        databaseServiceMock.purchaseOrders.updateById,
+      ).toHaveBeenCalledWith('id_to_update', {
+        ...updateResult
+      });
+    });
+  });
+
+  describe('get by id', function() {
+    it('should return the purchase order by id', async function() {
+      const purchaseOrdersController = purchaseOrdersModule.get<
+        PurchaseOrdersController
+      >(PurchaseOrdersController);
+
+      const result = await purchaseOrdersController.getById({ id: 'some_id' });
+      expect(databaseServiceMock.purchaseOrders.findOne).toHaveBeenCalledWith({
+        _id: 'some_id',
+      });
+
+      expect(result).toEqual({
+        data: purchaseOrder,
+        header: {
+          document_id: 'find_one_document_id',
+        },
+      });
     });
   });
 });

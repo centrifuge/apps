@@ -3,7 +3,9 @@ import {
   Controller,
   Get,
   Inject,
+  Param,
   Post,
+  Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -13,7 +15,10 @@ import { DatabaseProvider } from '../database/database.providers';
 import { tokens as databaseTokens } from '../database/database.constants';
 import { PurchaseOrder } from '../../../src/common/models/dto/purchase-order';
 import { tokens as clientTokens } from '../centrifuge-client/centrifuge.constants';
-import { DocumentServiceApi } from '../../../clients/centrifuge-node/generated-client';
+import {
+  DocumentServiceApi,
+  PurchaseorderPurchaseOrderResponse,
+} from '../../../clients/centrifuge-node/generated-client';
 
 @Controller(ROUTES.PURCHASE_ORDERS)
 @UseGuards(SessionGuard)
@@ -44,6 +49,32 @@ export class PurchaseOrdersController {
     return await this.database.purchaseOrders.create(createResult);
   }
 
+  /**
+   * Updates a purchase order and saves in the centrifuge node and local database
+   * @async
+   * @param {Param} params - the query params
+   * @param {PurchaseOrder} purchaseOrder - the updated purchase order
+   * @return {Promise<PurchaseOrder>} result
+   */
+  @Put(':id')
+  async update(@Param() params, @Body() purchaseOrder: PurchaseOrder) {
+    const id = params.id;
+    const dbPurchaseOrder: PurchaseorderPurchaseOrderResponse = await this.database.purchaseOrders.findOne(
+      { _id: id },
+    );
+    const updateResult = await this.centrifugeClient.update_4(
+      dbPurchaseOrder.header.document_id,
+      {
+        data: {
+          ...purchaseOrder,
+        },
+        collaborators: purchaseOrder.collaborators,
+      },
+    );
+
+    return await this.database.purchaseOrders.updateById(id, updateResult);
+  }
+
   @Get()
   /**
    * Get the list of all purchase orders
@@ -52,5 +83,15 @@ export class PurchaseOrdersController {
    */
   async get(@Req() request) {
     return await this.database.purchaseOrders.find({});
+  }
+
+  @Get(':id')
+  /**
+   * Get a specific purchase order by id
+   * @async
+   * @param {Promise<PurchaseOrder|null>} result
+   */
+  async getById(@Param() params) {
+    return await this.database.purchaseOrders.findOne({ _id: params.id });
   }
 }

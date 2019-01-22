@@ -37,7 +37,16 @@ export const httpClient = {
       purchaseOrder: PurchaseOrder,
     ): Promise<PurchaseorderPurchaseOrderResponse> =>
       instance.post(ROUTES.PURCHASE_ORDERS, purchaseOrder),
+    update: async (
+      purchaseOrder: PurchaseOrder,
+    ): Promise<PurchaseorderPurchaseOrderResponse> =>
+      instance.put(
+        `${ROUTES.PURCHASE_ORDERS}/${purchaseOrder._id}`,
+        purchaseOrder,
+      ),
     read: async (): Promise<PurchaseorderPurchaseOrderResponse> =>
       instance.get(ROUTES.PURCHASE_ORDERS),
+    readById: async (id): Promise<PurchaseorderPurchaseOrderResponse> =>
+      instance.get(`${ROUTES.PURCHASE_ORDERS}/${id}`),
   },
 };

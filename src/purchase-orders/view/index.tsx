@@ -2,7 +2,7 @@ import React from 'react';
 
 import { connect } from 'react-redux';
 
-import PurchaseOrders from './PurchaseOrders';
+import PurchaseOrders from './PurchaseOrdersList';
 import { RequestState } from '../../reducers/http-request-reducer';
 import {
   InvoiceInvoiceData,
@@ -12,18 +12,22 @@ import {
 import { getPurchaseOrders } from '../../actions/purchase-orders';
 
 interface PurchaseOrderResponse extends PurchaseorderPurchaseOrderResponse {
-  data: InvoiceInvoiceData & { _id: string };
+  data: InvoiceInvoiceData;
+  _id: string;
 }
 
 const mapStateToProps = (state: {
   purchaseOrders: {
-    get: RequestState<PurchaseOrderResponse[]>;
+    get: RequestState<(PurchaseOrderResponse)[]>;
   };
 }) => {
   return {
     purchaseOrders:
       state.purchaseOrders.get.data &&
-      state.purchaseOrders.get.data.map(response => response.data),
+      state.purchaseOrders.get.data.map(response => ({
+        _id: response._id,
+        ...response.data,
+      })),
     loading: state.purchaseOrders.get.loading,
   };
 };
