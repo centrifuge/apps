@@ -13,6 +13,7 @@ export default function*() {
     fork(users.watchLoginPage),
     fork(contacts.watchGetContactsPage),
     fork(contacts.watchCreateContact),
+    fork(contacts.watchUpdateContact),
     fork(purchaseOrders.watchCreatePurchaseOrder),
     fork(purchaseOrders.watchUpdatePurchaseOrder),
     fork(purchaseOrders.watchGetPurchaseOrdersPage),

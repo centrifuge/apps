@@ -1,6 +1,10 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
 import { httpClient } from '../http-client';
-import { createContactAction, getContactsAction } from '../actions/contacts';
+import {
+  createContactAction,
+  getContactsAction,
+  updateContactAction,
+} from '../actions/contacts';
 
 export function* getContacts() {
   try {
@@ -22,13 +26,32 @@ export function* createContact(action) {
       type: createContactAction.success,
       payload: response.data,
     });
-    yield getContacts();
+    yield put({
+      type: getContactsAction.start,
+    });
   } catch (e) {
     yield put({ type: createContactAction.fail, payload: e });
+  }
+}
+
+export function* updateContact(action) {
+  try {
+    const { contact } = action;
+    const response = yield call(httpClient.contacts.update, contact);
+    yield put({
+      type: updateContactAction.success,
+      payload: response.data,
+    });
+    yield put({
+      type: getContactsAction.start,
+    });
+  } catch (e) {
+    yield put({ type: updateContactAction.fail, payload: e });
   }
 }
 
 export default {
   watchGetContactsPage: () => takeEvery(getContactsAction.start, getContacts),
   watchCreateContact: () => takeEvery(createContactAction.start, createContact),
+  watchUpdateContact: () => takeEvery(updateContactAction.start, updateContact),
 };

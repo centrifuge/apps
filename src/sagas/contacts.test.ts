@@ -1,12 +1,12 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
 
 import {
-  createContact,
-  default as defaultExports,
-  getContacts,
+    createContact,
+    default as defaultExports,
+    getContacts, updateContact,
 } from './contacts';
 
-import { createContactAction, getContactsAction } from '../actions/contacts';
+import {createContactAction, getContactsAction, updateContactAction} from '../actions/contacts';
 
 import { httpClient } from '../http-client';
 import { Contact } from '../common/models/dto/contact';
@@ -97,6 +97,49 @@ describe('createContact', () => {
     expect(errorResponse).toEqual(
       put({
         type: createContactAction.fail,
+        payload: error,
+      }),
+    );
+  });
+});
+
+
+describe('updateContact', () => {
+  it('should call the http client and fetch the contacts', function() {
+    const gen = updateContact({ contact });
+
+    const invocationResponse = gen.next().value;
+    expect(invocationResponse).toEqual(
+      call(httpClient.contacts.update, contact),
+    );
+
+    const successResponse = gen.next({ data: contact }).value;
+    expect(successResponse).toEqual(
+      put({
+        type: updateContactAction.success,
+        payload: contact,
+      }),
+    );
+    expect(gen.next().value).toEqual(
+      put({
+        type: getContactsAction.start,
+      }),
+    );
+  });
+
+  it('should set error on exception', function() {
+    const gen = updateContact({ contact });
+
+    const invocationResponse = gen.next().value;
+    expect(invocationResponse).toEqual(
+      call(httpClient.contacts.update, contact),
+    );
+
+    const error = new Error('Oh, no, something broke!');
+    const errorResponse = gen.throw && gen.throw(error).value;
+    expect(errorResponse).toEqual(
+      put({
+        type: updateContactAction.fail,
         payload: error,
       }),
     );

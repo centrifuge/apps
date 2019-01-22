@@ -48,8 +48,12 @@ export class DatabaseRepository<T> {
    * @returns {Promise<T|null>} promise
    */
   async updateById(id: string, updateObject: T) {
-    return util.promisify(
-      this.databaseConnection.update.bind(this.databaseConnection),
-    )({ _id: id }, updateObject);
+    return this.updateByQuery({_id: id}, updateObject);
+  }
+
+  async updateByQuery(query: any, updateObject: T) {
+      return util.promisify(
+          this.databaseConnection.update.bind(this.databaseConnection),
+      )(query, updateObject);
   }
 }

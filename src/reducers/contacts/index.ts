@@ -1,5 +1,16 @@
 import { combineReducers } from 'redux';
-import create from './create-contact';
-import get from './get-contacts';
 
-export default combineReducers({ create, get });
+import {
+  getContactsAction,
+  createContactAction,
+  updateContactAction,
+} from '../../actions/contacts';
+import { httpRequestReducer } from '../http-request-reducer';
+import { Contact } from '../../common/models/dto/contact';
+
+const create = httpRequestReducer<Contact>(createContactAction);
+
+const get = httpRequestReducer<Contact[]>(getContactsAction);
+const update = httpRequestReducer<Contact>(updateContactAction);
+
+export default combineReducers({ create, get, update });

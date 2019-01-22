@@ -23,6 +23,7 @@ describe('ContactsController', () => {
     contacts = {
       create: jest.fn(val => val),
       find: jest.fn(() => fetchedContacts),
+      updateByQuery: jest.fn(data => data),
     };
   }
 
@@ -125,6 +126,41 @@ describe('ContactsController', () => {
       });
       expect(result).toBe(fetchedContacts);
       expect(databaseServiceMock.contacts.find).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('update', function() {
+    it('should call the database service', async function() {
+      const contactsController = contactsModule.get<ContactsController>(
+        ContactsController,
+      );
+
+      const updateContactObject = {
+        name: 'Snow white',
+        address: 'Dark forest',
+        _id: 'snow_white_7',
+      };
+
+      const userId = 'some_user_id';
+
+      await contactsController.updateById(
+        { id: updateContactObject._id },
+        updateContactObject,
+        {
+          user: { id: userId },
+        },
+      );
+
+      expect(databaseServiceMock.contacts.updateByQuery).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(databaseServiceMock.contacts.updateByQuery).toHaveBeenCalledWith(
+        {
+          _id: updateContactObject._id,
+          ownerId: userId,
+        },
+        { ...updateContactObject, ownerId: userId },
+      );
     });
   });
 });

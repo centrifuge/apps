@@ -19,13 +19,15 @@ import StyledTextInput from '../../components/StyledTextInput';
 import { required } from '../../validators';
 
 interface ContactsProps {
-  contacts?: (Contact)[];
+  contacts?: (Contact & { isEditing?: boolean })[];
   refresh: () => void;
   createContact: (contact: Contact) => void;
+  updateContact: (contact: Contact) => void;
 }
 
 interface ContactsState {
   newContact?: Contact;
+  contacts: (Contact & { isEditing?: boolean })[];
 }
 
 export default class Contacts extends React.Component<
@@ -34,21 +36,33 @@ export default class Contacts extends React.Component<
 > {
   displayName = 'Contacts';
 
-  state: ContactsState = {};
+  constructor(props) {
+    super(props);
+    this.state = {
+      contacts: props.contacts ? [...props.contacts] : [],
+    };
+  }
 
   renderRow(contact: Contact) {
     return (
       <TableRow>
         <TableCell>
-          <Text>{contact.name}</Text>
-        </TableCell>
-        <TableCell>
-          <Text>{contact.address}</Text>
-        </TableCell>
-        <TableCell>
-          <Box direction="row" gap="small">
-            <Edit />
-            <More />
+          <Box direction="row" fill gap="xsmall">
+            <Box fill>
+              <Text>{contact.name}</Text>
+            </Box>
+            <Box fill>
+              <Text>{contact.address}</Text>
+            </Box>
+            <Box fill direction="row" gap="small">
+              <Edit
+                onClick={() => {
+                  // @ts-ignore
+                  contact.isEditing = true;
+                  this.setState({ contacts: this.state.contacts });
+                }}
+              />
+            </Box>
           </Box>
         </TableCell>
       </TableRow>
@@ -61,50 +75,91 @@ export default class Contacts extends React.Component<
     });
   };
 
-  onCreateNewContactSubmit = values => {
-    const { name, address } = values;
-    this.props.createContact({ name, address });
-    this.setState({ newContact: undefined });
+  onContactSave = values => {
+    const { name, address, _id } = values;
+    if (_id) {
+      this.props.updateContact({ name, address, _id });
+      const contactsUpdated = this.state.contacts.map(contact => {
+        if (_id === contact._id) {
+          contact.isEditing = false;
+        }
+
+        return contact;
+      });
+
+      this.setState({ contacts: contactsUpdated });
+    } else {
+      this.props.createContact({ name, address });
+      this.setState({ newContact: undefined });
+    }
   };
 
-  cancelCreate = () => {
-    this.setState({ newContact: undefined });
-  };
-
-  renderNewContactRow = () => {
+  renderCreateEditRow = (contact?) => {
     return (
       <TableRow>
         <TableCell>
-          <Field name="name" validate={required}>
-            {({ input, meta }) => (
-              <StyledTextInput
-                labelInline
-                input={input}
-                meta={meta}
-                label="Name"
-                placeholder="Please enter the contact name"
-              />
+          <Form
+            onSubmit={this.onContactSave}
+            initialValues={contact}
+            render={({ handleSubmit }) => (
+              <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+                <Box direction="row" align="start" fill gap="xsmall">
+                  <Box fill>
+                    <Field name="name" validate={required}>
+                      {({ input, meta }) => (
+                        <StyledTextInput
+                          labelInline
+                          input={input}
+                          meta={meta}
+                          placeholder="Please enter the contact name"
+                        />
+                      )}
+                    </Field>
+                  </Box>
+                  <Box fill>
+                    <Field name="address" validate={required}>
+                      {({ input, meta }) => (
+                        <StyledTextInput
+                          labelInline
+                          input={input}
+                          meta={meta}
+                          placeholder="Please enter the contact address"
+                        />
+                      )}
+                    </Field>
+                  </Box>
+                  <Box
+                    fill
+                    direction="row"
+                    gap="xsmall"
+                    justify="start"
+                    align="center"
+                  >
+                    <Box>
+                      <Button
+                        type="submit"
+                        primary
+                        label={contact ? 'Update' : 'Add'}
+                      />
+                    </Box>
+                    <Box>
+                      <Button
+                        onClick={() => {
+                          if (contact) {
+                            contact.isEditing = false;
+                            this.setState({ contacts: this.state.contacts });
+                          } else {
+                            this.setState({ newContact: undefined });
+                          }
+                        }}
+                        label="Cancel"
+                      />
+                    </Box>
+                  </Box>
+                </Box>
+              </form>
             )}
-          </Field>
-        </TableCell>
-        <TableCell>
-          <Field name="address" validate={required}>
-            {({ input, meta }) => (
-              <StyledTextInput
-                labelInline
-                input={input}
-                meta={meta}
-                label="ID"
-                placeholder="Please enter the contact address"
-              />
-            )}
-          </Field>
-        </TableCell>
-        <TableCell>
-          <Box direction="row" gap="xsmall" justify="center">
-            <Button type="submit" primary label="Add" />
-            <Button onClick={this.cancelCreate} label="Cancel" />
-          </Box>
+          />
         </TableCell>
       </TableRow>
     );
@@ -125,35 +180,33 @@ export default class Contacts extends React.Component<
         </Box>
 
         <Box>
-          <Form
-            onSubmit={this.onCreateNewContactSubmit}
-            render={({ handleSubmit }) => (
-              <form onSubmit={handleSubmit}>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableCell>
-                        <Text>Name</Text>
-                      </TableCell>
-                      <TableCell>
-                        <Text>Address</Text>
-                      </TableCell>
-                      <TableCell>
-                        <Text>Actions</Text>
-                      </TableCell>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {this.state.newContact && this.renderNewContactRow()}
-                    {this.props.contacts &&
-                      this.props.contacts.map(contact =>
-                        this.renderRow(contact),
-                      )}
-                  </TableBody>
-                </Table>
-              </form>
-            )}
-          />
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableCell>
+                  <Box fill direction="row" gap="xsmall">
+                    <Box fill>
+                      <Text>Name</Text>
+                    </Box>
+                    <Box fill>
+                      <Text>Address</Text>
+                    </Box>
+                    <Box fill>
+                      <Text>Actions</Text>
+                    </Box>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {this.state.newContact && this.renderCreateEditRow()}
+              {this.state.contacts.map(contact =>
+                contact.isEditing
+                  ? this.renderCreateEditRow(contact)
+                  : this.renderRow(contact),
+              )}
+            </TableBody>
+          </Table>
         </Box>
       </Box>
     );
