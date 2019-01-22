@@ -86,7 +86,7 @@ const theme = deepMerge(base, {
       color: 'transparent',
     },
     padding: {
-      vertical: '2px',
+      vertical: '4px',
       horizontal: '10px',
     },
     extend: props => {

@@ -1,6 +1,5 @@
-import React, { Component } from 'react';
-import { Box } from 'grommet';
-import { grommet } from 'grommet/themes';
+import React, {Component} from 'react';
+import {Box} from 'grommet';
 import UIKitTheme from './theme';
 
 import Body from './layout/Body';
