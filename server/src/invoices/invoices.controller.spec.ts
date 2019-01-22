@@ -92,11 +92,16 @@ describe('InvoicesController', () => {
         InvoicesController,
       );
 
-      const result = await invoicesController.create(invoice);
+      const result = await invoicesController.create(
+        { user: { id: 'user_id' } },
+        invoice,
+      );
       expect(result).toEqual({
         data: {
           ...invoice,
         },
+        collaborators: undefined,
+        ownerId: 'user_id',
       });
 
       expect(databaseServiceMock.invoices.create).toHaveBeenCalledTimes(1);
@@ -110,7 +115,9 @@ describe('InvoicesController', () => {
           InvoicesController,
         );
 
-        const result = await invoicesController.get();
+        const result = await invoicesController.get({
+          user: { id: 'user_id' },
+        });
         expect(result[0].supplier).toBe(supplier);
         expect(databaseServiceMock.invoices.find).toHaveBeenCalledTimes(1);
       });
@@ -126,7 +133,9 @@ describe('InvoicesController', () => {
           InvoicesController,
         );
 
-        const result = await invoicesController.get();
+        const result = await invoicesController.get({
+          user: { id: 'user_id' },
+        });
         expect(result[0].supplier).toBe(undefined);
         expect(databaseServiceMock.invoices.find).toHaveBeenCalledTimes(1);
       });
@@ -147,16 +156,18 @@ describe('InvoicesController', () => {
 
       const updateResult = await invoiceController.updateById(
         { id: 'id_to_update' },
+        { user: { id: 'user_id' } },
         { ...updatedInvoice },
       );
 
       expect(databaseServiceMock.invoices.findOne).toHaveBeenCalledWith({
         _id: 'id_to_update',
+        ownerId: 'user_id',
       });
       expect(centrifugeClientMock.update).toHaveBeenCalledWith(
         'find_one_invoice_id',
         {
-          ...updatedInvoice,
+          data: { ...updatedInvoice },
           collaborators: ['new_collaborator'],
         },
       );
@@ -176,9 +187,13 @@ describe('InvoicesController', () => {
         InvoicesController,
       );
 
-      const result = await invoiceController.getById({ id: 'some_id' });
+      const result = await invoiceController.getById(
+        { id: 'some_id' },
+        { user: { id: 'user_id' } },
+      );
       expect(databaseServiceMock.invoices.findOne).toHaveBeenCalledWith({
         _id: 'some_id',
+        ownerId: 'user_id',
       });
 
       expect(result).toEqual({

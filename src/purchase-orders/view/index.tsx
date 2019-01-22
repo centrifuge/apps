@@ -4,17 +4,9 @@ import { connect } from 'react-redux';
 
 import PurchaseOrders from './PurchaseOrdersList';
 import { RequestState } from '../../reducers/http-request-reducer';
-import {
-  InvoiceInvoiceData,
-  PurchaseorderPurchaseOrderData,
-  PurchaseorderPurchaseOrderResponse,
-} from '../../../clients/centrifuge-node/generated-client';
+import { PurchaseorderPurchaseOrderData } from '../../../clients/centrifuge-node/generated-client';
 import { getPurchaseOrders } from '../../actions/purchase-orders';
-
-interface PurchaseOrderResponse extends PurchaseorderPurchaseOrderResponse {
-  data: InvoiceInvoiceData;
-  _id: string;
-}
+import { PurchaseOrderResponse } from '../../interfaces';
 
 const mapStateToProps = (state: {
   purchaseOrders: {
@@ -24,10 +16,10 @@ const mapStateToProps = (state: {
   return {
     purchaseOrders:
       state.purchaseOrders.get.data &&
-      state.purchaseOrders.get.data.map(response => ({
-        _id: response._id,
+      (state.purchaseOrders.get.data.map(response => ({
         ...response.data,
-      })),
+        _id: response._id,
+      })) as PurchaseorderPurchaseOrderData[]),
     loading: state.purchaseOrders.get.loading,
   };
 };

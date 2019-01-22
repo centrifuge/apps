@@ -1,4 +1,8 @@
-import { InvoiceInvoiceData } from '../../clients/centrifuge-node/generated-client';
+import {
+  InvoiceInvoiceData,
+  InvoiceInvoiceResponse,
+  PurchaseorderPurchaseOrderResponse,
+} from '../../clients/centrifuge-node/generated-client';
 import { Contact } from '../common/models/dto/contact';
 
 export interface LabelValuePair {
@@ -8,5 +12,16 @@ export interface LabelValuePair {
 
 export interface InvoiceData extends InvoiceInvoiceData {
   supplier?: Contact;
-  _id: string;
+}
+
+export interface InvoiceResponse extends InvoiceInvoiceResponse {
+  data?: InvoiceData;
+  ownerId?: string;
+  _id?: string;
+}
+
+export interface PurchaseOrderResponse
+  extends PurchaseorderPurchaseOrderResponse {
+  ownerId?: string;
+  _id?: string;
 }

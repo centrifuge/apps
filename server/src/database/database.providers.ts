@@ -10,12 +10,13 @@ import {
 } from '../../../clients/centrifuge-node/generated-client';
 import { Contact } from '../../../src/common/models/dto/contact';
 import config from '../config';
+import {InvoiceResponse, PurchaseOrderResponse} from "../../../src/interfaces";
 
 export interface DatabaseProvider {
-  invoices: DatabaseRepository<InvoiceInvoiceResponse>;
+  invoices: DatabaseRepository<InvoiceResponse>;
   users: DatabaseRepository<User>;
   contacts: DatabaseRepository<Contact>;
-  purchaseOrders: DatabaseRepository<PurchaseorderPurchaseOrderResponse>;
+  purchaseOrders: DatabaseRepository<PurchaseOrderResponse>;
 }
 
 const testUser = new User(
