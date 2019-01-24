@@ -50,7 +50,7 @@ export class PurchaseOrdersController {
 
     return await this.database.purchaseOrders.create({
       ...createResult,
-      ownerId: request.user.id,
+      ownerId: request.user._id,
     });
   }
 
@@ -71,7 +71,7 @@ export class PurchaseOrdersController {
     try {
       const id = params.id;
       const dbPurchaseOrder: PurchaseorderPurchaseOrderResponse = await this.database.purchaseOrders.findOne(
-        { _id: id, ownerId: request.user.id },
+        { _id: id, ownerId: request.user._id },
       );
       const updateResult = await this.centrifugeClient.update_4(
         dbPurchaseOrder.header.document_id,
@@ -85,7 +85,7 @@ export class PurchaseOrdersController {
 
       return await this.database.purchaseOrders.updateById(id, {
         ...updateResult,
-        ownerId: request.user.id,
+        ownerId: request.user._id,
       });
     } catch (err) {}
   }
@@ -98,7 +98,7 @@ export class PurchaseOrdersController {
    */
   async get(@Req() request) {
     return await this.database.purchaseOrders.find({
-      ownerId: request.user.id,
+      ownerId: request.user._id,
     });
   }
 
@@ -113,7 +113,7 @@ export class PurchaseOrdersController {
   async getById(@Param() params, @Req() request) {
     return await this.database.purchaseOrders.findOne({
       _id: params.id,
-      ownerId: request.user.id,
+      ownerId: request.user._id,
     });
   }
 }

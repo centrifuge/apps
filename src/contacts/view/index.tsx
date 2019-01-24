@@ -5,6 +5,9 @@ import { connect } from 'react-redux';
 import {
   createContact,
   getContacts,
+  resetCreateContact,
+  resetGetContacts,
+  resetUpdateContact,
   updateContact,
 } from '../../actions/contacts';
 import { RequestState } from '../../reducers/http-request-reducer';
@@ -22,8 +25,11 @@ const mapStateToProps = (state: {
 
 type ViewContactsProps = {
   getContacts: () => void;
+  resetCreateContact: () => void;
   createContact: (contact: Contact) => void;
+  resetGetContacts: () => void;
   updateContact: (contact: Contact) => void;
+  resetUpdateContact: () => void;
   contacts?: Contact[];
   loading: boolean;
 };
@@ -31,6 +37,12 @@ type ViewContactsProps = {
 class ViewContacts extends React.Component<ViewContactsProps> {
   componentDidMount() {
     this.props.getContacts();
+  }
+
+  componentWillUnmount() {
+    this.props.resetCreateContact();
+    this.props.resetGetContacts();
+    this.props.resetUpdateContact();
   }
 
   render() {
@@ -51,5 +63,12 @@ class ViewContacts extends React.Component<ViewContactsProps> {
 
 export default connect(
   mapStateToProps,
-  { getContacts, createContact, updateContact },
+  {
+    getContacts,
+    resetGetContacts,
+    createContact,
+    resetCreateContact,
+    updateContact,
+    resetUpdateContact,
+  },
 )(ViewContacts);

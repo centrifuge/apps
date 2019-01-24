@@ -6,6 +6,7 @@ const userRoutes = {
   base: baseUsersRoute,
   login: `${baseUsersRoute}/login`,
   logout: `${baseUsersRoute}/logout`,
+  register: `${baseUsersRoute}/register`,
 };
 
 export const ROUTES = Object.freeze({

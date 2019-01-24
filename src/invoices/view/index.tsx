@@ -3,7 +3,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import Invoices from './Invoices';
-import { getInvoices } from '../../actions/invoices';
+import { getInvoices, resetGetInvoices } from '../../actions/invoices';
 import { RequestState } from '../../reducers/http-request-reducer';
 import { InvoiceData, InvoiceResponse } from '../../interfaces';
 
@@ -25,7 +25,7 @@ const mapStateToProps = (state: {
 
 type ViewInvoicesProps = {
   getInvoices: () => void;
-  clearInvoices: () => void;
+  resetGetInvoices: () => void;
   invoices?: InvoiceData[];
   loading: boolean;
 };
@@ -33,6 +33,10 @@ type ViewInvoicesProps = {
 class ViewInvoices extends React.Component<ViewInvoicesProps> {
   componentDidMount() {
     this.props.getInvoices();
+  }
+
+  componentWillUnmount() {
+    this.props.resetGetInvoices();
   }
 
   render() {
@@ -46,5 +50,5 @@ class ViewInvoices extends React.Component<ViewInvoicesProps> {
 
 export default connect(
   mapStateToProps,
-  { getInvoices },
+  { getInvoices, resetGetInvoices },
 )(ViewInvoices);

@@ -1,6 +1,5 @@
-import {
-  userLoginAction,
-} from '../../actions/users';
+import { userLoginAction } from '../../actions/users';
+import { LOCATION_CHANGE } from 'connected-react-router';
 
 export type LoginState = {
   loading: boolean;
@@ -21,6 +20,8 @@ const auth = (
   { type, payload }: { type: string; payload?: string | Error },
 ): LoginState => {
   switch (type) {
+    case LOCATION_CHANGE:
+      return { ...state, error: undefined };
     case userLoginAction.start: {
       return { ...state, loading: true };
     }

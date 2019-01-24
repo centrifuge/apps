@@ -1,7 +1,8 @@
 import React from 'react';
-import { Box, Button, Text, TextInput } from 'grommet';
+import { Anchor, Box, Button, Text, TextInput } from 'grommet';
 import { Field, Form } from 'react-final-form';
 import { User } from '../../common/models/dto/user';
+import routes from '../routes';
 
 interface LoginProps {
   onSubmit: (values: any) => void;
@@ -48,6 +49,7 @@ class Login extends React.Component<LoginProps> {
                         <label>Password</label>
                         <TextInput
                           {...input}
+                          type="password"
                           placeholder="Please enter your password"
                         />
                         {meta.error && meta.touched && (
@@ -56,6 +58,10 @@ class Login extends React.Component<LoginProps> {
                       </Box>
                     )}
                   </Field>
+                  <Text>
+                    Not registered yet?{' '}
+                    <Anchor href={routes.register}>Register</Anchor>
+                  </Text>
                   <Box direction="row" height="50px">
                     <Button type="submit" primary label="Login" fill={true} />
                   </Box>

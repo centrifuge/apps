@@ -54,8 +54,8 @@ export default class CreateEditPurchaseOrder extends React.Component<
               <Box justify="between" direction="row" align="center">
                 <Heading level="3">
                   {this.props.purchaseOrder
-                    ? 'Create New Purchase Order'
-                    : 'Update Purchase Order'}
+                    ? 'Update Purchase Order'
+                    : 'Create New Purchase Order'}
                 </Heading>
                 {this.renderButtons()}
               </Box>

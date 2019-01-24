@@ -74,7 +74,7 @@ describe('PurchaseOrdersController', () => {
       >(PurchaseOrdersController);
 
       const result = await purchaseOrdersController.create(
-        { user: { id: 'user_id' } },
+        { user: { _id: 'user_id' } },
         purchaseOrder,
       );
 
@@ -97,7 +97,7 @@ describe('PurchaseOrdersController', () => {
       >(PurchaseOrdersController);
 
       const result = await purchaseOrdersController.get({
-        user: { id: 'some_user_id' },
+        user: { _id: 'some_user_id' },
       });
       expect(result).toBe(fetchedPurchaseOrders);
       expect(databaseServiceMock.purchaseOrders.find).toHaveBeenCalledTimes(1);
@@ -114,7 +114,7 @@ describe('PurchaseOrdersController', () => {
 
       const updateResult = await purchaseOrdersController.update(
         { id: 'id_to_update' },
-        { user: { id: 'user_id' } },
+        { user: { _id: 'user_id' } },
         { ...updatedOrder },
       );
 
@@ -148,7 +148,7 @@ describe('PurchaseOrdersController', () => {
 
       const result = await purchaseOrdersController.getById(
         { id: 'some_id' },
-        { user: { id: 'user_id' } },
+        { user: { _id: 'user_id' } },
       );
       expect(databaseServiceMock.purchaseOrders.findOne).toHaveBeenCalledWith({
         _id: 'some_id',

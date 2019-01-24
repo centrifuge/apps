@@ -50,7 +50,7 @@ export class InvoicesController {
 
     return await this.database.invoices.create({
       ...createResult,
-      ownerId: request.user.id,
+      ownerId: request.user._id,
     });
   }
 
@@ -62,7 +62,7 @@ export class InvoicesController {
    */
   async get(@Req() request): Promise<InvoiceData[]> {
     const invoices = (await this.database.invoices.find({
-      ownerId: request.user.id,
+      ownerId: request.user._id,
     })) as (InvoiceInvoiceData & { _id: string })[];
 
     return await Promise.all(
@@ -93,7 +93,7 @@ export class InvoicesController {
   async getById(@Param() params, @Req() request): Promise<Invoice | null> {
     return this.database.invoices.findOne({
       _id: params.id,
-      ownerId: request.user.id,
+      ownerId: request.user._id,
     });
   }
 
@@ -113,7 +113,7 @@ export class InvoicesController {
   ) {
     let id = params.id;
     const invoice: InvoiceInvoiceResponse = await this.database.invoices.findOne(
-      { _id: id, ownerId: request.user.id },
+      { _id: id, ownerId: request.user._id },
     );
 
     const updateResult = await this.centrifugeClient.update(
@@ -126,7 +126,7 @@ export class InvoicesController {
 
     return await this.database.invoices.updateById(id, {
       ...updateResult,
-      ownerId: request.user.id,
+      ownerId: request.user._id,
     });
   }
 }

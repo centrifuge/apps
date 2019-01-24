@@ -15,6 +15,9 @@ function action(type, payload = {}) {
 
 export const createContact = (contact: Contact) =>
   action(createContactAction.start, { contact });
+export const resetCreateContact = () => action(createContactAction.reset);
 export const getContacts = () => action(getContactsAction.start);
+export const resetGetContacts = () => action(getContactsAction.reset);
 export const updateContact = (contact: Contact) =>
   action(updateContactAction.start, { contact: contact });
+export const resetUpdateContact = () => action(updateContactAction.reset);

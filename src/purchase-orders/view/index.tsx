@@ -5,7 +5,10 @@ import { connect } from 'react-redux';
 import PurchaseOrders from './PurchaseOrdersList';
 import { RequestState } from '../../reducers/http-request-reducer';
 import { PurchaseorderPurchaseOrderData } from '../../../clients/centrifuge-node/generated-client';
-import { getPurchaseOrders } from '../../actions/purchase-orders';
+import {
+  getPurchaseOrders,
+  resetGetPurchaseOrders,
+} from '../../actions/purchase-orders';
 import { PurchaseOrderResponse } from '../../interfaces';
 
 const mapStateToProps = (state: {
@@ -26,6 +29,7 @@ const mapStateToProps = (state: {
 
 type ViewInvoicesProps = {
   getPurchaseOrders: () => void;
+  resetGetPurchaseOrders: () => void;
   clearInvoices: () => void;
   purchaseOrders?: PurchaseorderPurchaseOrderData[];
   loading: boolean;
@@ -34,6 +38,10 @@ type ViewInvoicesProps = {
 class ViewInvoices extends React.Component<ViewInvoicesProps> {
   componentDidMount() {
     this.props.getPurchaseOrders();
+  }
+
+  componentWillUnmount() {
+    this.props.resetGetPurchaseOrders();
   }
 
   render() {
@@ -47,5 +55,5 @@ class ViewInvoices extends React.Component<ViewInvoicesProps> {
 
 export default connect(
   mapStateToProps,
-  { getPurchaseOrders },
+  { getPurchaseOrders, resetGetPurchaseOrders },
 )(ViewInvoices);

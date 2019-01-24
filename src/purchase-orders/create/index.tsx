@@ -7,14 +7,19 @@ import { RouteComponentProps, withRouter } from 'react-router';
 import { RequestState } from '../../reducers/http-request-reducer';
 import { PurchaseorderPurchaseOrderData } from '../../../clients/centrifuge-node/generated-client';
 import { Contact } from '../../common/models/dto/contact';
-import { getContacts } from '../../actions/contacts';
+import { getContacts, resetGetContacts } from '../../actions/contacts';
 import { LabelValuePair } from '../../interfaces';
-import { createPurchaseOrder } from '../../actions/purchase-orders';
+import {
+  createPurchaseOrder,
+  resetCreatePurchaseOrder,
+} from '../../actions/purchase-orders';
 import { PurchaseOrder } from '../../common/models/dto/purchase-order';
 
 type ConnectedCreatePurchaseOrderProps = {
   createPurchaseOrder: (purchaseOrder: PurchaseOrder) => void;
+  resetCreatePurchaseOrder: () => void;
   getContacts: () => void;
+  resetGetContacts: () => void;
   purchaseOrdersLoading: boolean;
   contactsLoading: boolean;
   contacts?: LabelValuePair[];
@@ -27,6 +32,11 @@ class ConnectedCreatePurchaseOrder extends React.Component<
     if (!this.props.contacts) {
       this.props.getContacts();
     }
+  }
+
+  componentWillUnmount() {
+    this.props.resetGetContacts();
+    this.props.resetCreatePurchaseOrder();
   }
 
   createPurchaseOrder = (purchaseOrder: PurchaseOrder) => {
@@ -72,5 +82,10 @@ export default connect(
         : undefined,
     };
   },
-  { createPurchaseOrder, getContacts },
+  {
+    createPurchaseOrder,
+    resetCreatePurchaseOrder,
+    getContacts,
+    resetGetContacts,
+  },
 )(withRouter(ConnectedCreatePurchaseOrder));

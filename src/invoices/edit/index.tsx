@@ -3,19 +3,27 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import CreateEditInvoice from '../CreateEditInvoice';
-import { getInvoiceById, updateInvoice } from '../../actions/invoices';
+import {
+  getInvoiceById,
+  resetGetInvoiceById,
+  resetUpdateInvoice,
+  updateInvoice,
+} from '../../actions/invoices';
 import { Invoice } from '../../common/models/dto/invoice';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { RequestState } from '../../reducers/http-request-reducer';
 import { InvoiceInvoiceResponse } from '../../../clients/centrifuge-node/generated-client';
 import { Contact } from '../../common/models/dto/contact';
-import { getContacts } from '../../actions/contacts';
+import { getContacts, resetGetContacts } from '../../actions/contacts';
 import { LabelValuePair } from '../../interfaces';
 
 type ConnectedEditInvoiceProps = {
   updateInvoice: (invoice: Invoice) => void;
+  resetUpdateInvoice: () => void;
   getInvoiceById: (id: string) => void;
+  resetGetInvoiceById: () => void;
   getContacts: () => void;
+  resetGetContacts: () => void;
   invoiceLoading: boolean;
   contactsLoading: boolean;
   invoice?: Invoice;
@@ -31,6 +39,12 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
     if (this.props.match.params.id) {
       this.props.getInvoiceById(this.props.match.params.id);
     }
+  }
+
+  componentWillUnmount() {
+    this.props.resetGetContacts();
+    this.props.resetGetInvoiceById();
+    this.props.resetUpdateInvoice();
   }
 
   updateInvoice = (invoice: Invoice) => {
@@ -84,5 +98,12 @@ export default connect(
         : undefined,
     };
   },
-  { updateInvoice, getContacts, getInvoiceById },
+  {
+    updateInvoice,
+    resetUpdateInvoice,
+    getContacts,
+    resetGetContacts,
+    getInvoiceById,
+    resetGetInvoiceById,
+  },
 )(withRouter(ConnectedEditInvoice));

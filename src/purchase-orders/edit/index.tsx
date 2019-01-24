@@ -7,20 +7,25 @@ import { RouteComponentProps, withRouter } from 'react-router';
 import { RequestState } from '../../reducers/http-request-reducer';
 import { PurchaseorderPurchaseOrderResponse } from '../../../clients/centrifuge-node/generated-client';
 import { Contact } from '../../common/models/dto/contact';
-import { getContacts } from '../../actions/contacts';
+import { getContacts, resetGetContacts } from '../../actions/contacts';
 import { LabelValuePair } from '../../interfaces';
 import {
   getPurchaseOrderById,
+  resetGetPurchaseOrderById,
+  resetUpdatePurchaseOrder,
   updatePurchaseOrder,
 } from '../../actions/purchase-orders';
 import { PurchaseOrder } from '../../common/models/dto/purchase-order';
 
 type ConnectedEditPurchaseOrderProps = {
   updatePurchaseOrder: (purchaseOrder: PurchaseOrder) => void;
+  resetUpdatePurchaseOrder: () => void;
   purchaseOrder?: PurchaseOrder;
   getPurchaseOrderById: (id: string) => void;
+  resetGetPurchaseOrderById: () => void;
   purchaseOrderId: string;
   getContacts: () => void;
+  resetGetContacts: () => void;
   purchaseOrderLoading: boolean;
   contactsLoading: boolean;
   contacts?: LabelValuePair[];
@@ -37,6 +42,12 @@ class ConnectedEditPurchaseOrder extends React.Component<
     if (this.props.match.params.id) {
       this.props.getPurchaseOrderById(this.props.match.params.id);
     }
+  }
+
+  componentWillUnmount() {
+    this.props.resetGetContacts();
+    this.props.resetGetPurchaseOrderById();
+    this.props.resetUpdatePurchaseOrder();
   }
 
   updatePurchaseOrder = (purchaseOrder: PurchaseOrder) => {
@@ -94,7 +105,10 @@ export default connect(
   },
   {
     getContacts,
+    resetGetContacts,
     updatePurchaseOrder,
+    resetUpdatePurchaseOrder,
     getPurchaseOrderById,
+    resetGetPurchaseOrderById,
   },
 )(withRouter(ConnectedEditPurchaseOrder));

@@ -11,6 +11,7 @@ export default function*() {
     fork(invoices.watchCreateInvoice),
     fork(invoices.watchUpdateInvoice),
     fork(users.watchLoginPage),
+    fork(users.watchUserRegister),
     fork(contacts.watchGetContactsPage),
     fork(contacts.watchCreateContact),
     fork(contacts.watchUpdateContact),

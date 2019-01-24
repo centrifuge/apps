@@ -1689,6 +1689,10 @@ exports[`Body matches snapshot 1`] = `
       />
       <Route
         component={[Function]}
+        path="/user/register"
+      />
+      <Route
+        component={[Function]}
         path="/"
       />
     </Switch>
