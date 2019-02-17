@@ -19,6 +19,7 @@ import {
   DocumentServiceApi,
   PurchaseorderPurchaseOrderResponse,
 } from '../../../clients/centrifuge-node/generated-client';
+import config from '../config';
 
 @Controller(ROUTES.PURCHASE_ORDERS)
 @UseGuards(SessionGuard)
@@ -39,12 +40,17 @@ export class PurchaseOrdersController {
    * @return {Promise<PurchaseOrder>} result
    */
   async create(@Req() request, @Body() purchaseOrder: PurchaseOrder) {
+    const collaborators = purchaseOrder.collaborators
+      ? [...purchaseOrder.collaborators]
+      : [];
+    collaborators.push(config.centrifugeId);
+
     const createResult: PurchaseorderPurchaseOrderResponse = await this.centrifugeClient.create_1(
       {
         data: {
           ...purchaseOrder,
         },
-        collaborators: purchaseOrder.collaborators,
+        collaborators,
       },
     );
 

@@ -60,10 +60,38 @@ export default class CreateEditPurchaseOrder extends React.Component<
                 {this.renderButtons()}
               </Box>
               <Box>
+                {/* Collaborators section */}
+                <Box background="white" pad="medium">
+                  <Field
+                    validate={required}
+                    name="collaborators"
+                    items={this.props.contacts}
+                    // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
+                    render={({ input, meta, items }) => (
+                      <SearchableDropdown
+                        multiple
+                        label="Collaborators"
+                        input={input}
+                        meta={meta}
+                        items={items}
+                        selected={
+                          this.props.purchaseOrder &&
+                          this.props.contacts.filter(
+                            contact =>
+                              this.props.purchaseOrder!.collaborators!.indexOf(
+                                contact.value,
+                              ) !== -1,
+                          )
+                        }
+                      />
+                    )}
+                  />
+                </Box>
+
                 {/* Puchase order number */}
                 <Box direction="column" gap="small">
                   <Box background="white" pad="medium">
-                    <Field validate={required} name="po_number">
+                    <Field name="po_number">
                       {({ input, meta }) => (
                         <StyledTextInput
                           input={input}
@@ -80,7 +108,6 @@ export default class CreateEditPurchaseOrder extends React.Component<
                   <Box background="white" pad="medium" gap="small">
                     <Box direction="row" gap="small">
                       <Field
-                        validate={required}
                         name="order"
                         items={this.props.contacts}
                         // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
@@ -101,7 +128,7 @@ export default class CreateEditPurchaseOrder extends React.Component<
                           />
                         )}
                       />
-                      <Field validate={required} name="order_name">
+                      <Field name="order_name">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -114,7 +141,7 @@ export default class CreateEditPurchaseOrder extends React.Component<
                       </Field>
                     </Box>
                     <Box direction="row" gap="small">
-                      <Field validate={required} name="order_street">
+                      <Field name="order_street">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -124,7 +151,7 @@ export default class CreateEditPurchaseOrder extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="order_country">
+                      <Field name="order_country">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -137,7 +164,7 @@ export default class CreateEditPurchaseOrder extends React.Component<
                       </Field>
                     </Box>
                     <Box direction="row" gap="small">
-                      <Field validate={required} name="order_city">
+                      <Field name="order_city">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -147,7 +174,7 @@ export default class CreateEditPurchaseOrder extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="order_zipcode">
+                      <Field name="order_zipcode">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -164,7 +191,6 @@ export default class CreateEditPurchaseOrder extends React.Component<
                   <Box background="white" pad="medium" gap="small">
                     <Box direction="row" gap="small">
                       <Field
-                        validate={required}
                         name="recipient"
                         items={this.props.contacts}
                         // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
@@ -185,7 +211,7 @@ export default class CreateEditPurchaseOrder extends React.Component<
                           />
                         )}
                       />
-                      <Field validate={required} name="recipient_name">
+                      <Field name="recipient_name">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -198,7 +224,7 @@ export default class CreateEditPurchaseOrder extends React.Component<
                       </Field>
                     </Box>
                     <Box direction="row" gap="small">
-                      <Field validate={required} name="recipient_street">
+                      <Field name="recipient_street">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -208,7 +234,7 @@ export default class CreateEditPurchaseOrder extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="recipient_country">
+                      <Field name="recipient_country">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -221,7 +247,7 @@ export default class CreateEditPurchaseOrder extends React.Component<
                       </Field>
                     </Box>
                     <Box direction="row" gap="small">
-                      <Field validate={required} name="recipient_city">
+                      <Field name="recipient_city">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -231,7 +257,7 @@ export default class CreateEditPurchaseOrder extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="recipient_zipcode">
+                      <Field name="recipient_zipcode">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -247,7 +273,7 @@ export default class CreateEditPurchaseOrder extends React.Component<
                   {/* Payment section */}
                   <Box background="white" pad="medium" gap="small">
                     <Box direction="row" gap="small" align="stretch">
-                      <Field validate={required} name="currency">
+                      <Field name="currency">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -256,7 +282,7 @@ export default class CreateEditPurchaseOrder extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="net_amount">
+                      <Field name="net_amount">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -266,7 +292,7 @@ export default class CreateEditPurchaseOrder extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="order_amount">
+                      <Field name="order_amount">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -276,7 +302,7 @@ export default class CreateEditPurchaseOrder extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="tax_amount">
+                      <Field name="tax_amount">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -286,7 +312,7 @@ export default class CreateEditPurchaseOrder extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="tax_rate">
+                      <Field name="tax_rate">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -298,7 +324,6 @@ export default class CreateEditPurchaseOrder extends React.Component<
                     </Box>
                     <Box direction="row" gap="small">
                       <Field
-                        validate={required}
                         name="delivery_date"
                         parse={dateParser}
                         format={dateFormatter}
@@ -314,7 +339,6 @@ export default class CreateEditPurchaseOrder extends React.Component<
                         )}
                       </Field>
                       <Field
-                        validate={required}
                         name="date_created"
                         parse={dateParser}
                         format={dateFormatter}
@@ -332,37 +356,9 @@ export default class CreateEditPurchaseOrder extends React.Component<
                     </Box>
                   </Box>
 
-                  {/* Collaborators section */}
-                  <Box background="white" pad="medium">
-                    <Field
-                      validate={required}
-                      name="collaborators"
-                      items={this.props.contacts}
-                      // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
-                      render={({ input, meta, items }) => (
-                        <SearchableDropdown
-                          multiple
-                          label="Collaborators"
-                          input={input}
-                          meta={meta}
-                          items={items}
-                          selected={
-                            this.props.purchaseOrder &&
-                            this.props.contacts.filter(
-                              contact =>
-                                this.props.purchaseOrder!.collaborators!.indexOf(
-                                  contact.value,
-                                ) !== -1,
-                            )
-                          }
-                        />
-                      )}
-                    />
-                  </Box>
-
                   {/* Comments section */}
                   <Box background="white" pad="medium">
-                    <Field validate={required} name="comment">
+                    <Field name="comment">
                       {({ input, meta }) => (
                         <StyledTextInput
                           input={input}

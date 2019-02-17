@@ -6,8 +6,20 @@ import { tokens as clientTokens } from '../centrifuge-client/centrifuge.constant
 import { tokens as databaseTokens } from '../database/database.constants';
 import { databaseConnectionFactory } from '../database/database.providers';
 import { PurchaseOrder } from '../../../src/common/models/dto/purchase-order';
+import config from '../config';
 
 describe('PurchaseOrdersController', () => {
+  let centrifugeId;
+
+  beforeAll(() => {
+    centrifugeId = config.centrifugeId;
+    config.centrifugeId = 'centrifuge_id';
+  });
+
+  afterAll(() => {
+    config.centrifugeId = centrifugeId;
+  });
+
   let purchaseOrdersModule: TestingModule;
 
   const purchaseOrder: PurchaseOrder = {
@@ -78,8 +90,11 @@ describe('PurchaseOrdersController', () => {
         purchaseOrder,
       );
 
+      const collaborators = purchaseOrder.collaborators ? [...purchaseOrder.collaborators] : [];
+      collaborators.push(config.centrifugeId!);
+
       expect(result).toEqual({
-        collaborators: purchaseOrder.collaborators,
+        collaborators,
         data: purchaseOrder,
         ownerId: 'user_id',
       });

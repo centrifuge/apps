@@ -55,11 +55,40 @@ export default class CreateEditInvoice extends React.Component<
                 </Heading>
                 {this.renderButtons()}
               </Box>
+
+              {/* Collaborators section */}
+              <Box background="white" pad="medium">
+                <Field
+                  validate={required}
+                  name="collaborators"
+                  items={this.props.contacts}
+                  // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
+                  render={({ input, meta, items }) => (
+                    <SearchableDropdown
+                      multiple
+                      label="Collaborators"
+                      input={input}
+                      meta={meta}
+                      items={items}
+                      selected={
+                        this.props.invoice &&
+                        this.props.contacts.filter(
+                          contact =>
+                            this.props.invoice!.collaborators!.indexOf(
+                              contact.value,
+                            ) !== -1,
+                        )
+                      }
+                    />
+                  )}
+                />
+              </Box>
+
               <Box>
                 <Box direction="column" gap="small">
                   {/* Invoice number section */}
                   <Box background="white" pad="medium">
-                    <Field validate={required} name="invoice_number">
+                    <Field name="invoice_number">
                       {({ input, meta }) => (
                         <StyledTextInput
                           input={input}
@@ -76,7 +105,6 @@ export default class CreateEditInvoice extends React.Component<
                   <Box background="white" pad="medium" gap="small">
                     <Box direction="row" gap="small">
                       <Field
-                        validate={required}
                         name="sender"
                         items={this.props.contacts}
                         // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
@@ -96,7 +124,7 @@ export default class CreateEditInvoice extends React.Component<
                           />
                         )}
                       />
-                      <Field validate={required} name="sender_name">
+                      <Field name="sender_name">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -109,7 +137,7 @@ export default class CreateEditInvoice extends React.Component<
                       </Field>
                     </Box>
                     <Box direction="row" gap="small">
-                      <Field validate={required} name="sender_street">
+                      <Field name="sender_street">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -119,7 +147,7 @@ export default class CreateEditInvoice extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="sender_country">
+                      <Field name="sender_country">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -132,7 +160,7 @@ export default class CreateEditInvoice extends React.Component<
                       </Field>
                     </Box>
                     <Box direction="row" gap="small">
-                      <Field validate={required} name="sender_city">
+                      <Field name="sender_city">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -142,7 +170,7 @@ export default class CreateEditInvoice extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="sender_zipcode">
+                      <Field name="sender_zipcode">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -159,7 +187,6 @@ export default class CreateEditInvoice extends React.Component<
                   <Box background="white" pad="medium" gap="small">
                     <Box direction="row" gap="small">
                       <Field
-                        validate={required}
                         name="recipient"
                         items={this.props.contacts}
                         // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
@@ -180,7 +207,7 @@ export default class CreateEditInvoice extends React.Component<
                           />
                         )}
                       />
-                      <Field validate={required} name="recipient_name">
+                      <Field name="recipient_name">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -193,7 +220,7 @@ export default class CreateEditInvoice extends React.Component<
                       </Field>
                     </Box>
                     <Box direction="row" gap="small">
-                      <Field validate={required} name="recipient_street">
+                      <Field name="recipient_street">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -203,7 +230,7 @@ export default class CreateEditInvoice extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="recipient_country">
+                      <Field name="recipient_country">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -216,7 +243,7 @@ export default class CreateEditInvoice extends React.Component<
                       </Field>
                     </Box>
                     <Box direction="row" gap="small">
-                      <Field validate={required} name="recipient_city">
+                      <Field name="recipient_city">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -226,7 +253,7 @@ export default class CreateEditInvoice extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="recipient_zipcode">
+                      <Field name="recipient_zipcode">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -242,7 +269,7 @@ export default class CreateEditInvoice extends React.Component<
                   {/* Payment section */}
                   <Box background="white" pad="medium" gap="small">
                     <Box direction="row" gap="small" align="stretch">
-                      <Field validate={required} name="currency">
+                      <Field name="currency">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -251,7 +278,7 @@ export default class CreateEditInvoice extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="gross_amount">
+                      <Field name="gross_amount">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -261,7 +288,7 @@ export default class CreateEditInvoice extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="net_amount">
+                      <Field name="net_amount">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -271,7 +298,7 @@ export default class CreateEditInvoice extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="tax_amount">
+                      <Field name="tax_amount">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -281,7 +308,7 @@ export default class CreateEditInvoice extends React.Component<
                           />
                         )}
                       </Field>
-                      <Field validate={required} name="tax_rate">
+                      <Field name="tax_rate">
                         {({ input, meta }) => (
                           <StyledTextInput
                             input={input}
@@ -294,7 +321,6 @@ export default class CreateEditInvoice extends React.Component<
                     <Box direction="row" gap="small">
                       <Field
                         name="payee"
-                        validate={required}
                         items={this.props.contacts}
                         // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
                         render={({ input, meta, items }) => (
@@ -314,7 +340,6 @@ export default class CreateEditInvoice extends React.Component<
                         )}
                       />
                       <Field
-                        validate={required}
                         name="due_date"
                         parse={dateParser}
                         format={dateFormatter}
@@ -330,7 +355,6 @@ export default class CreateEditInvoice extends React.Component<
                         )}
                       </Field>
                       <Field
-                        validate={required}
                         name="date_created"
                         parse={dateParser}
                         format={dateFormatter}
@@ -348,37 +372,9 @@ export default class CreateEditInvoice extends React.Component<
                     </Box>
                   </Box>
 
-                  {/* Collaborators section */}
-                  <Box background="white" pad="medium">
-                    <Field
-                      validate={required}
-                      name="collaborators"
-                      items={this.props.contacts}
-                      // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
-                      render={({ input, meta, items }) => (
-                        <SearchableDropdown
-                          multiple
-                          label="Collaborators"
-                          input={input}
-                          meta={meta}
-                          items={items}
-                          selected={
-                            this.props.invoice &&
-                            this.props.contacts.filter(
-                              contact =>
-                                this.props.invoice!.collaborators!.indexOf(
-                                  contact.value,
-                                ) !== -1,
-                            )
-                          }
-                        />
-                      )}
-                    />
-                  </Box>
-
                   {/* Comments section */}
                   <Box background="white" pad="medium">
-                    <Field validate={required} name="comment">
+                    <Field name="comment">
                       {({ input, meta }) => (
                         <StyledTextInput
                           input={input}

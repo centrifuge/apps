@@ -8,8 +8,20 @@ import { tokens as databaseTokens } from '../database/database.constants';
 import { databaseConnectionFactory } from '../database/database.providers';
 import { Contact } from '../../../src/common/models/dto/contact';
 import { InvoiceInvoiceData } from '../../../clients/centrifuge-node/generated-client';
+import config from '../config';
 
 describe('InvoicesController', () => {
+  let centrifugeId;
+
+  beforeAll(() => {
+    centrifugeId = config.centrifugeId;
+    config.centrifugeId = 'centrifuge_id';
+  });
+
+  afterAll(() => {
+    config.centrifugeId = centrifugeId;
+  });
+
   let invoicesModule: TestingModule;
 
   const invoice: Invoice = {
@@ -92,6 +104,11 @@ describe('InvoicesController', () => {
         InvoicesController,
       );
 
+      const collaborators = invoice.collaborators
+        ? [...invoice.collaborators]
+        : [];
+      collaborators.push(config.centrifugeId!);
+
       const result = await invoicesController.create(
         { user: { _id: 'user_id' } },
         invoice,
@@ -100,7 +117,7 @@ describe('InvoicesController', () => {
         data: {
           ...invoice,
         },
-        collaborators: undefined,
+        collaborators,
         ownerId: 'user_id',
       });
 

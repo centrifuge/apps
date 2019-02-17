@@ -21,6 +21,7 @@ import {
 } from '../../../clients/centrifuge-node/generated-client';
 import { DatabaseProvider } from '../database/database.providers';
 import { InvoiceData } from '../../../src/interfaces';
+import config from '../config';
 
 @Controller(ROUTES.INVOICES)
 @UseGuards(SessionGuard)
@@ -41,11 +42,16 @@ export class InvoicesController {
    * @return {Promise<InvoiceInvoiceResponse>} result
    */
   async create(@Req() request, @Body() invoice: Invoice) {
+    const collaborators = invoice.collaborators
+      ? [...invoice.collaborators]
+      : [];
+    collaborators.push(config.centrifugeId);
+
     const createResult = await this.centrifugeClient.create({
       data: {
         ...invoice,
       },
-      collaborators: invoice.collaborators,
+      collaborators,
     });
 
     return await this.database.invoices.create({
