@@ -84,6 +84,7 @@ exports[`Header matches snapshot 1`] = `
           "previous": [Function],
         },
       },
+      "chart": Object {},
       "checkBox": Object {
         "border": Object {
           "color": Object {
@@ -220,6 +221,11 @@ exports[`Header matches snapshot 1`] = `
           },
         },
       },
+      "diagram": Object {
+        "line": Object {
+          "color": "accent-1",
+        },
+      },
       "formField": Object {
         "border": Object {
           "color": "border",
@@ -232,10 +238,20 @@ exports[`Header matches snapshot 1`] = `
           "position": "inner",
           "side": "bottom",
         },
+        "content": Object {
+          "pad": Object {
+            "bottom": "small",
+            "horizontal": "small",
+          },
+        },
         "error": Object {
           "color": Object {
             "dark": "status-critical",
             "light": "status-critical",
+          },
+          "margin": Object {
+            "horizontal": "small",
+            "vertical": "xsmall",
           },
         },
         "help": Object {
@@ -243,8 +259,19 @@ exports[`Header matches snapshot 1`] = `
             "dark": "dark-3",
             "light": "dark-3",
           },
+          "margin": Object {
+            "left": "small",
+          },
         },
-        "label": Object {},
+        "label": Object {
+          "margin": Object {
+            "horizontal": "small",
+            "vertical": "xsmall",
+          },
+        },
+        "margin": Object {
+          "bottom": "small",
+        },
       },
       "global": Object {
         "animation": Object {
@@ -628,6 +655,9 @@ exports[`Header matches snapshot 1`] = `
           "down": [Function],
         },
       },
+      "meter": Object {
+        "color": "accent-1",
+      },
       "paragraph": Object {
         "large": Object {
           "height": "28px",
@@ -689,11 +719,27 @@ exports[`Header matches snapshot 1`] = `
           "height": "4px",
         },
       },
+      "rangeSelector": Object {
+        "background": Object {
+          "invert": Object {
+            "color": "light-4",
+          },
+        },
+      },
       "select": Object {
         "container": Object {},
         "control": Object {},
         "icons": Object {
           "down": [Function],
+        },
+        "options": Object {
+          "box": Object {
+            "align": "start",
+            "pad": "small",
+          },
+          "text": Object {
+            "margin": "none",
+          },
         },
         "step": 20,
       },
@@ -814,6 +860,9 @@ exports[`Header matches snapshot 1`] = `
           "reduceVolume": [Function],
           "volume": [Function],
         },
+        "scrubber": Object {
+          "color": "light-4",
+        },
       },
       "worldMap": Object {
         "color": "light-3",
@@ -913,6 +962,7 @@ exports[`Header matches snapshot 1`] = `
             "previous": [Function],
           },
         },
+        "chart": Object {},
         "checkBox": Object {
           "border": Object {
             "color": Object {
@@ -1049,6 +1099,11 @@ exports[`Header matches snapshot 1`] = `
             },
           },
         },
+        "diagram": Object {
+          "line": Object {
+            "color": "accent-1",
+          },
+        },
         "formField": Object {
           "border": Object {
             "color": "border",
@@ -1061,10 +1116,20 @@ exports[`Header matches snapshot 1`] = `
             "position": "inner",
             "side": "bottom",
           },
+          "content": Object {
+            "pad": Object {
+              "bottom": "small",
+              "horizontal": "small",
+            },
+          },
           "error": Object {
             "color": Object {
               "dark": "status-critical",
               "light": "status-critical",
+            },
+            "margin": Object {
+              "horizontal": "small",
+              "vertical": "xsmall",
             },
           },
           "help": Object {
@@ -1072,8 +1137,19 @@ exports[`Header matches snapshot 1`] = `
               "dark": "dark-3",
               "light": "dark-3",
             },
+            "margin": Object {
+              "left": "small",
+            },
           },
-          "label": Object {},
+          "label": Object {
+            "margin": Object {
+              "horizontal": "small",
+              "vertical": "xsmall",
+            },
+          },
+          "margin": Object {
+            "bottom": "small",
+          },
         },
         "global": Object {
           "animation": Object {
@@ -1457,6 +1533,9 @@ exports[`Header matches snapshot 1`] = `
             "down": [Function],
           },
         },
+        "meter": Object {
+          "color": "accent-1",
+        },
         "paragraph": Object {
           "large": Object {
             "height": "28px",
@@ -1518,11 +1597,27 @@ exports[`Header matches snapshot 1`] = `
             "height": "4px",
           },
         },
+        "rangeSelector": Object {
+          "background": Object {
+            "invert": Object {
+              "color": "light-4",
+            },
+          },
+        },
         "select": Object {
           "container": Object {},
           "control": Object {},
           "icons": Object {
             "down": [Function],
+          },
+          "options": Object {
+            "box": Object {
+              "align": "start",
+              "pad": "small",
+            },
+            "text": Object {
+              "margin": "none",
+            },
           },
           "step": 20,
         },
@@ -1643,6 +1738,9 @@ exports[`Header matches snapshot 1`] = `
             "reduceVolume": [Function],
             "volume": [Function],
           },
+          "scrubber": Object {
+            "color": "light-4",
+          },
         },
         "worldMap": Object {
           "color": "light-3",
@@ -1743,6 +1841,7 @@ exports[`Header matches snapshot 1`] = `
                 "previous": [Function],
               },
             },
+            "chart": Object {},
             "checkBox": Object {
               "border": Object {
                 "color": Object {
@@ -1879,6 +1978,11 @@ exports[`Header matches snapshot 1`] = `
                 },
               },
             },
+            "diagram": Object {
+              "line": Object {
+                "color": "accent-1",
+              },
+            },
             "formField": Object {
               "border": Object {
                 "color": "border",
@@ -1891,10 +1995,20 @@ exports[`Header matches snapshot 1`] = `
                 "position": "inner",
                 "side": "bottom",
               },
+              "content": Object {
+                "pad": Object {
+                  "bottom": "small",
+                  "horizontal": "small",
+                },
+              },
               "error": Object {
                 "color": Object {
                   "dark": "status-critical",
                   "light": "status-critical",
+                },
+                "margin": Object {
+                  "horizontal": "small",
+                  "vertical": "xsmall",
                 },
               },
               "help": Object {
@@ -1902,8 +2016,19 @@ exports[`Header matches snapshot 1`] = `
                   "dark": "dark-3",
                   "light": "dark-3",
                 },
+                "margin": Object {
+                  "left": "small",
+                },
               },
-              "label": Object {},
+              "label": Object {
+                "margin": Object {
+                  "horizontal": "small",
+                  "vertical": "xsmall",
+                },
+              },
+              "margin": Object {
+                "bottom": "small",
+              },
             },
             "global": Object {
               "animation": Object {
@@ -2287,6 +2412,9 @@ exports[`Header matches snapshot 1`] = `
                 "down": [Function],
               },
             },
+            "meter": Object {
+              "color": "accent-1",
+            },
             "paragraph": Object {
               "large": Object {
                 "height": "28px",
@@ -2348,11 +2476,27 @@ exports[`Header matches snapshot 1`] = `
                 "height": "4px",
               },
             },
+            "rangeSelector": Object {
+              "background": Object {
+                "invert": Object {
+                  "color": "light-4",
+                },
+              },
+            },
             "select": Object {
               "container": Object {},
               "control": Object {},
               "icons": Object {
                 "down": [Function],
+              },
+              "options": Object {
+                "box": Object {
+                  "align": "start",
+                  "pad": "small",
+                },
+                "text": Object {
+                  "margin": "none",
+                },
               },
               "step": 20,
             },
@@ -2473,6 +2617,9 @@ exports[`Header matches snapshot 1`] = `
                 "reduceVolume": [Function],
                 "volume": [Function],
               },
+              "scrubber": Object {
+                "color": "light-4",
+              },
             },
             "worldMap": Object {
               "color": "light-3",
@@ -2573,6 +2720,7 @@ exports[`Header matches snapshot 1`] = `
               "previous": [Function],
             },
           },
+          "chart": Object {},
           "checkBox": Object {
             "border": Object {
               "color": Object {
@@ -2709,6 +2857,11 @@ exports[`Header matches snapshot 1`] = `
               },
             },
           },
+          "diagram": Object {
+            "line": Object {
+              "color": "accent-1",
+            },
+          },
           "formField": Object {
             "border": Object {
               "color": "border",
@@ -2721,10 +2874,20 @@ exports[`Header matches snapshot 1`] = `
               "position": "inner",
               "side": "bottom",
             },
+            "content": Object {
+              "pad": Object {
+                "bottom": "small",
+                "horizontal": "small",
+              },
+            },
             "error": Object {
               "color": Object {
                 "dark": "status-critical",
                 "light": "status-critical",
+              },
+              "margin": Object {
+                "horizontal": "small",
+                "vertical": "xsmall",
               },
             },
             "help": Object {
@@ -2732,8 +2895,19 @@ exports[`Header matches snapshot 1`] = `
                 "dark": "dark-3",
                 "light": "dark-3",
               },
+              "margin": Object {
+                "left": "small",
+              },
             },
-            "label": Object {},
+            "label": Object {
+              "margin": Object {
+                "horizontal": "small",
+                "vertical": "xsmall",
+              },
+            },
+            "margin": Object {
+              "bottom": "small",
+            },
           },
           "global": Object {
             "animation": Object {
@@ -3117,6 +3291,9 @@ exports[`Header matches snapshot 1`] = `
               "down": [Function],
             },
           },
+          "meter": Object {
+            "color": "accent-1",
+          },
           "paragraph": Object {
             "large": Object {
               "height": "28px",
@@ -3178,11 +3355,27 @@ exports[`Header matches snapshot 1`] = `
               "height": "4px",
             },
           },
+          "rangeSelector": Object {
+            "background": Object {
+              "invert": Object {
+                "color": "light-4",
+              },
+            },
+          },
           "select": Object {
             "container": Object {},
             "control": Object {},
             "icons": Object {
               "down": [Function],
+            },
+            "options": Object {
+              "box": Object {
+                "align": "start",
+                "pad": "small",
+              },
+              "text": Object {
+                "margin": "none",
+              },
             },
             "step": 20,
           },
@@ -3303,6 +3496,9 @@ exports[`Header matches snapshot 1`] = `
               "reduceVolume": [Function],
               "volume": [Function],
             },
+            "scrubber": Object {
+              "color": "light-4",
+            },
           },
           "worldMap": Object {
             "color": "light-3",
@@ -3408,6 +3604,7 @@ exports[`Header matches snapshot 1`] = `
                 "previous": [Function],
               },
             },
+            "chart": Object {},
             "checkBox": Object {
               "border": Object {
                 "color": Object {
@@ -3544,6 +3741,11 @@ exports[`Header matches snapshot 1`] = `
                 },
               },
             },
+            "diagram": Object {
+              "line": Object {
+                "color": "accent-1",
+              },
+            },
             "formField": Object {
               "border": Object {
                 "color": "border",
@@ -3556,10 +3758,20 @@ exports[`Header matches snapshot 1`] = `
                 "position": "inner",
                 "side": "bottom",
               },
+              "content": Object {
+                "pad": Object {
+                  "bottom": "small",
+                  "horizontal": "small",
+                },
+              },
               "error": Object {
                 "color": Object {
                   "dark": "status-critical",
                   "light": "status-critical",
+                },
+                "margin": Object {
+                  "horizontal": "small",
+                  "vertical": "xsmall",
                 },
               },
               "help": Object {
@@ -3567,8 +3779,19 @@ exports[`Header matches snapshot 1`] = `
                   "dark": "dark-3",
                   "light": "dark-3",
                 },
+                "margin": Object {
+                  "left": "small",
+                },
               },
-              "label": Object {},
+              "label": Object {
+                "margin": Object {
+                  "horizontal": "small",
+                  "vertical": "xsmall",
+                },
+              },
+              "margin": Object {
+                "bottom": "small",
+              },
             },
             "global": Object {
               "animation": Object {
@@ -3952,6 +4175,9 @@ exports[`Header matches snapshot 1`] = `
                 "down": [Function],
               },
             },
+            "meter": Object {
+              "color": "accent-1",
+            },
             "paragraph": Object {
               "large": Object {
                 "height": "28px",
@@ -4013,11 +4239,27 @@ exports[`Header matches snapshot 1`] = `
                 "height": "4px",
               },
             },
+            "rangeSelector": Object {
+              "background": Object {
+                "invert": Object {
+                  "color": "light-4",
+                },
+              },
+            },
             "select": Object {
               "container": Object {},
               "control": Object {},
               "icons": Object {
                 "down": [Function],
+              },
+              "options": Object {
+                "box": Object {
+                  "align": "start",
+                  "pad": "small",
+                },
+                "text": Object {
+                  "margin": "none",
+                },
               },
               "step": 20,
             },
@@ -4138,6 +4380,9 @@ exports[`Header matches snapshot 1`] = `
                 "reduceVolume": [Function],
                 "volume": [Function],
               },
+              "scrubber": Object {
+                "color": "light-4",
+              },
             },
             "worldMap": Object {
               "color": "light-3",
@@ -4236,6 +4481,7 @@ exports[`Header matches snapshot 1`] = `
                   "previous": [Function],
                 },
               },
+              "chart": Object {},
               "checkBox": Object {
                 "border": Object {
                   "color": Object {
@@ -4372,6 +4618,11 @@ exports[`Header matches snapshot 1`] = `
                   },
                 },
               },
+              "diagram": Object {
+                "line": Object {
+                  "color": "accent-1",
+                },
+              },
               "formField": Object {
                 "border": Object {
                   "color": "border",
@@ -4384,10 +4635,20 @@ exports[`Header matches snapshot 1`] = `
                   "position": "inner",
                   "side": "bottom",
                 },
+                "content": Object {
+                  "pad": Object {
+                    "bottom": "small",
+                    "horizontal": "small",
+                  },
+                },
                 "error": Object {
                   "color": Object {
                     "dark": "status-critical",
                     "light": "status-critical",
+                  },
+                  "margin": Object {
+                    "horizontal": "small",
+                    "vertical": "xsmall",
                   },
                 },
                 "help": Object {
@@ -4395,8 +4656,19 @@ exports[`Header matches snapshot 1`] = `
                     "dark": "dark-3",
                     "light": "dark-3",
                   },
+                  "margin": Object {
+                    "left": "small",
+                  },
                 },
-                "label": Object {},
+                "label": Object {
+                  "margin": Object {
+                    "horizontal": "small",
+                    "vertical": "xsmall",
+                  },
+                },
+                "margin": Object {
+                  "bottom": "small",
+                },
               },
               "global": Object {
                 "animation": Object {
@@ -4780,6 +5052,9 @@ exports[`Header matches snapshot 1`] = `
                   "down": [Function],
                 },
               },
+              "meter": Object {
+                "color": "accent-1",
+              },
               "paragraph": Object {
                 "large": Object {
                   "height": "28px",
@@ -4841,11 +5116,27 @@ exports[`Header matches snapshot 1`] = `
                   "height": "4px",
                 },
               },
+              "rangeSelector": Object {
+                "background": Object {
+                  "invert": Object {
+                    "color": "light-4",
+                  },
+                },
+              },
               "select": Object {
                 "container": Object {},
                 "control": Object {},
                 "icons": Object {
                   "down": [Function],
+                },
+                "options": Object {
+                  "box": Object {
+                    "align": "start",
+                    "pad": "small",
+                  },
+                  "text": Object {
+                    "margin": "none",
+                  },
                 },
                 "step": 20,
               },
@@ -4965,6 +5256,9 @@ exports[`Header matches snapshot 1`] = `
                   "play": [Function],
                   "reduceVolume": [Function],
                   "volume": [Function],
+                },
+                "scrubber": Object {
+                  "color": "light-4",
                 },
               },
               "worldMap": Object {

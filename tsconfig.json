@@ -21,7 +21,12 @@
     "noEmit": true,
     "jsx": "preserve",
     "isolatedModules": true,
-    "strictPropertyInitialization": false // https://github.com/swagger-api/swagger-codegen/issues/8180
+    "strictPropertyInitialization": false,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ]
   },
   "include": [
     "src/**/*"
