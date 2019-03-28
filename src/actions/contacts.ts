@@ -1,5 +1,5 @@
 import { getActions } from './action-type-generator';
-import { Contact } from '../common/models/dto/contact';
+import { Contact } from '../common/models/contact';
 
 const CREATE_CONTACT_BASE_TYPE = 'CREATE_CONTACT_ACTION';
 const GET_CONTACTS_BASE_TYPE = 'GET_CONTACTS_ACTION';

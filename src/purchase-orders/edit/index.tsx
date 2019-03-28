@@ -6,7 +6,7 @@ import CreateEditPurchaseOrder from '../CreateEditPurchaseOrder';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { RequestState } from '../../reducers/http-request-reducer';
 import { PurchaseorderPurchaseOrderResponse } from '../../../clients/centrifuge-node/generated-client';
-import { Contact } from '../../common/models/dto/contact';
+import { Contact } from '../../common/models/contact';
 import { getContacts, resetGetContacts } from '../../actions/contacts';
 import { LabelValuePair } from '../../interfaces';
 import {
@@ -15,7 +15,7 @@ import {
   resetUpdatePurchaseOrder,
   updatePurchaseOrder,
 } from '../../actions/purchase-orders';
-import { PurchaseOrder } from '../../common/models/dto/purchase-order';
+import { PurchaseOrder } from '../../common/models/purchase-order';
 
 type ConnectedEditPurchaseOrderProps = {
   updatePurchaseOrder: (purchaseOrder: PurchaseOrder) => void;

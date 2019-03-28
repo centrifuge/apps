@@ -1,5 +1,5 @@
 import { getActions } from './action-type-generator';
-import { PurchaseOrder } from '../common/models/dto/purchase-order';
+import { PurchaseOrder } from '../common/models/purchase-order';
 
 const CREATE_PURCHASE_ORDER_BASE_TYPE = 'CREATE_PURCHASE_ORDER_ACTION';
 const UPDATE_PURCHASE_ORDER_BASE_TYPE = 'UPDATE_PURCHASE_ORDER_ACTION';

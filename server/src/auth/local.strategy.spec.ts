@@ -2,11 +2,18 @@ import { LocalStrategy } from './local.strategy';
 import { UnauthorizedException } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
-import { User } from '../../../src/common/models/dto/user';
+import { User } from '../../../src/common/models/user';
 import { Test } from '@nestjs/testing';
 
 describe('LocalStrategy', function() {
-  const mockUser = new User('my_username', 'my_password', 'my_id');
+  const mockUser: User = {
+    username: 'my_username',
+    password: 'my_password',
+    _id: 'my_id',
+    enabled: true,
+    invited: false,
+    permissions: [],
+  };
 
   it('should return user validation succeeds', async () => {
     const mockAuthService = {

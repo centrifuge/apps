@@ -13,7 +13,7 @@ import {
 import { Add, Edit, More } from 'grommet-icons';
 import { Link } from 'react-router-dom';
 
-import { Contact } from '../../common/models/dto/contact';
+import { Contact } from '../../common/models/contact';
 import { Field, Form } from 'react-final-form';
 import StyledTextInput from '../../components/StyledTextInput';
 import { required } from '../../validators';
@@ -45,7 +45,7 @@ export default class Contacts extends React.Component<
 
   renderRow(contact: Contact) {
     return (
-      <TableRow>
+      <TableRow key={contact.address}>
         <TableCell>
           <Box direction="row" fill gap="xsmall">
             <Box fill>

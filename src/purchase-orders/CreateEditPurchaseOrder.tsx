@@ -7,7 +7,7 @@ import SearchableDropdown from '../components/form/SearchableDropdown';
 import { LabelValuePair } from '../interfaces';
 import StyledTextInput from '../components/StyledTextInput';
 import { required } from '../validators';
-import { PurchaseOrder } from '../common/models/dto/purchase-order';
+import { PurchaseOrder } from '../common/models/purchase-order';
 import { dateParser } from '../parsers';
 import { dateFormatter } from '../formatters';
 

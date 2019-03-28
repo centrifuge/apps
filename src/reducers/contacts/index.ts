@@ -6,7 +6,7 @@ import {
   updateContactAction,
 } from '../../actions/contacts';
 import { httpRequestReducer } from '../http-request-reducer';
-import { Contact } from '../../common/models/dto/contact';
+import { Contact } from '../../common/models/contact';
 
 const create = httpRequestReducer<Contact>(createContactAction);
 

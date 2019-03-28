@@ -1,7 +1,8 @@
 import React from 'react';
-import { Anchor, Box, Button, Text, TextInput } from 'grommet';
 import { Field, Form } from 'react-final-form';
-import { User } from '../../common/models/dto/user';
+import { Link } from 'react-router-dom';
+import { Box, Button, Text, TextInput } from 'grommet';
+import { User } from '../../common/models/user';
 import routes from '../routes';
 import { required } from '../../validators';
 
@@ -60,7 +61,7 @@ class Register extends React.Component<RegisterProps> {
                   </Field>
                   <Text>
                     Already registered?{' '}
-                    <Anchor href={routes.index}>Register</Anchor>
+                    <Link to={routes.index}>Log in</Link>
                   </Text>
                   <Box direction="row" height="50px">
                     <Button

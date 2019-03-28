@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 
 import Register from './Register';
 import { Redirect, RouteComponentProps, withRouter } from 'react-router';
-import { User } from '../../common/models/dto/user';
+import { User } from '../../common/models/user';
 import { register } from '../../actions/users';
 import { RequestState } from '../../reducers/http-request-reducer';
 import routes from '../../routes';

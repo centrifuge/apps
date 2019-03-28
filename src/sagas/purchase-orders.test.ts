@@ -11,7 +11,7 @@ import {
   getPurchaseOrdersAction,
 } from '../actions/purchase-orders';
 
-import { PurchaseOrder } from '../common/models/dto/purchase-order';
+import { PurchaseOrder } from '../common/models/purchase-order';
 import { httpClient } from '../http-client';
 
 const purchaseOrder: PurchaseOrder = {

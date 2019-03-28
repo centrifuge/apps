@@ -9,11 +9,11 @@ import {
   resetUpdateInvoice,
   updateInvoice,
 } from '../../actions/invoices';
-import { Invoice } from '../../common/models/dto/invoice';
+import { Invoice } from '../../common/models/invoice';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { RequestState } from '../../reducers/http-request-reducer';
 import { InvoiceInvoiceResponse } from '../../../clients/centrifuge-node/generated-client';
-import { Contact } from '../../common/models/dto/contact';
+import { Contact } from '../../common/models/contact';
 import { getContacts, resetGetContacts } from '../../actions/contacts';
 import { LabelValuePair } from '../../interfaces';
 

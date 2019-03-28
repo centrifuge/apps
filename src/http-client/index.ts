@@ -1,15 +1,15 @@
 import axios from 'axios';
 
 // TODO: extract common models and constants in a better place (separate npm module?)
-import { Invoice } from '../common/models/dto/invoice';
+import { Invoice } from '../common/models/invoice';
 import { ROUTES } from '../common/constants';
-import { User } from '../common/models/dto/user';
-import { Contact } from '../common/models/dto/contact';
+import { User } from '../common/models/user';
+import { Contact } from '../common/models/contact';
 import {
   InvoiceInvoiceResponse,
   PurchaseorderPurchaseOrderResponse,
 } from '../../clients/centrifuge-node/generated-client';
-import { PurchaseOrder } from '../common/models/dto/purchase-order';
+import { PurchaseOrder } from '../common/models/purchase-order';
 
 const instance = axios.create();
 

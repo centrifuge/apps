@@ -1,10 +1,15 @@
 import { env } from 'process';
 
 const config = {
-  centrifugeUrl: env.CENTRIFUGE_URL || 'https://35.184.66.29:8082',
+  centrifugeUrl: env.CENTRIFUGE_URL || 'https://127.0.0.1:8081',
   sessionSecret: env.SESSION_SECRET || 'centrifuge',
   dbPath: env.DB_PATH || './db',
-  centrifugeId: env.CENTRIFUGE_ID || '0xf77402CA591ba52d51949FF12dC3c1f5c3e0f790',
+  admin: {
+    username: env.CENTRIFUGE_ADMIN_USER || 'admin',
+    password: env.CENTRIFUGE_ADMIN_PASSWORD || 'admin',
+    account: env.CENTRIFUGE_ID || env.CENTRIFUGE_ADMIN_ACCOUNT || '0x0b06ef9F1559143E3aa204884c8B1Db47ef7c2C1',
+  },
+  inviteOnly: Boolean(env.INVITE_ONLY || false),
 };
 
 export default config;

@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException } from '@nestjs/common';
 import { ContactsController } from './contacts.controller';
-import { Contact } from '../../../src/common/models/dto/contact';
+import { Contact } from '../../../src/common/models/contact';
 import { SessionGuard } from '../auth/SessionGuard';
-import { centrifugeClientFactory } from '../centrifuge-client/centrifuge.client';
-import { tokens as clientTokens } from '../centrifuge-client/centrifuge.constants';
-import { tokens as databaseTokens } from '../database/database.constants';
-import { databaseConnectionFactory } from '../database/database.providers';
+import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.provider';
+import { databaseServiceProvider } from '../database/database.providers';
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
+import { DatabaseService } from '../database/database.service';
 
 describe('ContactsController', () => {
   let contactsModule: TestingModule;
@@ -21,7 +21,8 @@ describe('ContactsController', () => {
 
   class DatabaseServiceMock {
     contacts = {
-      create: jest.fn(val => val),
+      insert: jest.fn(val => val),
+      update: jest.fn(val => val),
       find: jest.fn(() => fetchedContacts),
       updateByQuery: jest.fn(data => data),
     };
@@ -30,7 +31,9 @@ describe('ContactsController', () => {
   const databaseServiceMock = new DatabaseServiceMock();
 
   class CentrifugeClientMock {
-    create = jest.fn(data => data);
+    documents = {
+      create: jest.fn(data => data),
+    };
   }
 
   const centrifugeClientMock = new CentrifugeClientMock();
@@ -40,17 +43,17 @@ describe('ContactsController', () => {
       controllers: [ContactsController],
       providers: [
         SessionGuard,
-        centrifugeClientFactory,
-        databaseConnectionFactory,
+        centrifugeServiceProvider,
+        databaseServiceProvider,
       ],
     })
-      .overrideProvider(databaseTokens.databaseConnectionFactory)
+      .overrideProvider(DatabaseService)
       .useValue(databaseServiceMock)
-      .overrideProvider(clientTokens.centrifugeClientFactory)
+      .overrideProvider(CentrifugeService)
       .useValue(centrifugeClientMock)
       .compile();
 
-    databaseServiceMock.contacts.create.mockClear();
+    databaseServiceMock.contacts.insert.mockClear();
     databaseServiceMock.contacts.find.mockClear();
   });
 
@@ -73,7 +76,7 @@ describe('ContactsController', () => {
         address: contactToCreate.address,
       });
 
-      expect(databaseServiceMock.contacts.create).toHaveBeenCalledTimes(1);
+      expect(databaseServiceMock.contacts.insert).toHaveBeenCalledTimes(1);
     });
 
     it('should throw error when no name specified', async function() {
@@ -151,10 +154,10 @@ describe('ContactsController', () => {
         },
       );
 
-      expect(databaseServiceMock.contacts.updateByQuery).toHaveBeenCalledTimes(
+      expect(databaseServiceMock.contacts.update).toHaveBeenCalledTimes(
         1,
       );
-      expect(databaseServiceMock.contacts.updateByQuery).toHaveBeenCalledWith(
+      expect(databaseServiceMock.contacts.update).toHaveBeenCalledWith(
         {
           _id: updateContactObject._id,
           ownerId: userId,

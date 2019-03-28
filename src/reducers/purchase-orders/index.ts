@@ -6,7 +6,7 @@ import {
 } from '../../actions/purchase-orders';
 import { httpRequestReducer } from '../http-request-reducer';
 import { PurchaseorderPurchaseOrderData } from '../../../clients/centrifuge-node/generated-client';
-import { PurchaseOrder } from '../../common/models/dto/purchase-order';
+import { PurchaseOrder } from '../../common/models/purchase-order';
 
 const create = httpRequestReducer<PurchaseOrder>(createPurchaseOrderAction);
 const get = httpRequestReducer<PurchaseorderPurchaseOrderData>(getPurchaseOrdersAction);

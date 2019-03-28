@@ -1,57 +1,60 @@
-import * as Nedb from 'nedb';
 import { promisify } from 'util';
-import { tokens } from './database.constants';
-import { User } from '../../../src/common/models/dto/user';
+import * as bcrypt from 'bcrypt';
+import { User } from '../../../src/common/models/user';
 import { DatabaseRepository } from './database.repository';
-import {
-  InvoiceInvoiceData,
-  PurchaseorderPurchaseOrderResponse,
-} from '../../../clients/centrifuge-node/generated-client';
-import { Contact } from '../../../src/common/models/dto/contact';
+import { Contact } from '../../../src/common/models/contact';
 import config from '../config';
 import {
   InvoiceResponse,
   PurchaseOrderResponse,
 } from '../../../src/interfaces';
+import { ROLE } from '../../../src/common/constants';
+import { DatabaseService } from './database.service';
 
-export interface DatabaseProvider {
-  invoices: DatabaseRepository<InvoiceResponse>;
-  users: DatabaseRepository<User>;
-  contacts: DatabaseRepository<Contact>;
-  purchaseOrders: DatabaseRepository<PurchaseOrderResponse>;
-}
+// TODO refactor this in mutiple providers,services
 
-const testUser = new User(
-  'test',
-  '$2b$12$o7HxJQsEl0jjwZ6FoGiEv.uQs9hLDFo2fOj5S3BnLL4nGpLfy/yW2', // password is test
-);
+
 
 /**
  * Initialize the database and the separate collections.
  */
-const initializeDatabase = async function() {
-  const invoicesDb = new Nedb({ filename: `${config.dbPath}/invoicesDb` });
-  await promisify(invoicesDb.loadDatabase.bind(invoicesDb))();
+const initializeDatabase = async () => {
+  const invoicesRepository = new DatabaseRepository<InvoiceResponse>(
+    `${config.dbPath}/invoicesDb`,
+  );
+  const usersRepository =  new DatabaseRepository<User>(
+    `${config.dbPath}/usersDb`,
+  );
+  const admin: User = {
+    username: config.admin.username,
+    password: await promisify(bcrypt.hash)(config.admin.password, 10),
+    enabled: true,
+    invited: false,
+    account: config.admin.account,
+    permissions: [ROLE.CAN_INVITE, ROLE.CAN_MANAGE_USERS, ROLE.CAN_MANAGE_ACCOUNTS],
+  };
 
-  const usersDb = new Nedb({ filename: `${config.dbPath}/usersDb` });
-  await promisify(usersDb.loadDatabase.bind(usersDb))();
-  await promisify(usersDb.insert.bind(usersDb))(testUser);
-
-  const contactsDb = new Nedb({ filename: `${config.dbPath}/contactsDb` });
-  await promisify(contactsDb.loadDatabase.bind(contactsDb))();
-
-  const purchaseOrdersDb = new Nedb({
-    filename: `${config.dbPath}/purchaseOrdersDb`,
+  const userExists = await usersRepository.findOne({
+    username: admin.username,
   });
-  await promisify(purchaseOrdersDb.loadDatabase.bind(purchaseOrdersDb))();
+
+  if (!userExists) {
+    await usersRepository.insert(admin);
+  }
+
+  const contactsRepository =  new DatabaseRepository<Contact>(
+    `${config.dbPath}/contactsDb`,
+  );
+
+  const purchaseOrdersRepository =  new DatabaseRepository<PurchaseOrderResponse>(
+    `${config.dbPath}/purchaseOrdersDb`,
+  );
 
   return {
-    invoices: new DatabaseRepository<InvoiceInvoiceData>(invoicesDb),
-    users: new DatabaseRepository<User>(usersDb),
-    contacts: new DatabaseRepository<Contact>(contactsDb),
-    purchaseOrders: new DatabaseRepository<PurchaseorderPurchaseOrderResponse>(
-      purchaseOrdersDb,
-    ),
+    invoices: invoicesRepository,
+    users: usersRepository,
+    contacts: contactsRepository,
+    purchaseOrders: purchaseOrdersRepository,
   };
 };
 
@@ -60,9 +63,11 @@ const initializeDatabase = async function() {
  */
 let initializeDatabasePromise;
 
-export const databaseConnectionFactory = {
-  provide: tokens.databaseConnectionFactory,
-  useFactory: async (): Promise<DatabaseProvider> => {
+
+
+export const databaseServiceProvider = {
+  provide: DatabaseService,
+  useFactory: async (): Promise<DatabaseService> => {
     if (!initializeDatabasePromise) {
       initializeDatabasePromise = initializeDatabase();
     }
@@ -70,3 +75,4 @@ export const databaseConnectionFactory = {
     return initializeDatabasePromise;
   },
 };
+

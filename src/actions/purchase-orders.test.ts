@@ -4,7 +4,7 @@ import {
   getPurchaseOrdersAction,
   getPurchaseOrders,
 } from './purchase-orders';
-import { PurchaseOrder } from '../common/models/dto/purchase-order';
+import { PurchaseOrder } from '../common/models/purchase-order';
 
 const assertActionEmitted = (action, type, payload?) => {
   const actionResult = action();

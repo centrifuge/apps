@@ -11,7 +11,7 @@ import {
   updateContact,
 } from '../../actions/contacts';
 import { RequestState } from '../../reducers/http-request-reducer';
-import { Contact } from '../../common/models/dto/contact';
+import { Contact } from '../../common/models/contact';
 import Contacts from './Contacts';
 
 const mapStateToProps = (state: {

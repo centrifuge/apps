@@ -1,23 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PurchaseOrdersController } from './purchase-orders.controller';
 import { SessionGuard } from '../auth/SessionGuard';
-import { centrifugeClientFactory } from '../centrifuge-client/centrifuge.client';
-import { tokens as clientTokens } from '../centrifuge-client/centrifuge.constants';
-import { tokens as databaseTokens } from '../database/database.constants';
-import { databaseConnectionFactory } from '../database/database.providers';
-import { PurchaseOrder } from '../../../src/common/models/dto/purchase-order';
+import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.provider';
+import { databaseServiceProvider } from '../database/database.providers';
+import { PurchaseOrder } from '../../../src/common/models/purchase-order';
 import config from '../config';
+import { DatabaseService } from '../database/database.service';
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 
 describe('PurchaseOrdersController', () => {
   let centrifugeId;
 
   beforeAll(() => {
-    centrifugeId = config.centrifugeId;
-    config.centrifugeId = 'centrifuge_id';
+    centrifugeId = config.admin.account;
+    config.admin.account = 'centrifuge_id';
   });
 
   afterAll(() => {
-    config.centrifugeId = centrifugeId;
+    config.admin.account = centrifugeId;
   });
 
   let purchaseOrdersModule: TestingModule;
@@ -38,7 +38,7 @@ describe('PurchaseOrdersController', () => {
 
   class DatabaseServiceMock {
     purchaseOrders = {
-      create: jest.fn(val => val),
+      insert: jest.fn(val => val),
       find: jest.fn(() => fetchedPurchaseOrders),
       findOne: jest.fn(() => ({
         data: purchaseOrder,
@@ -53,8 +53,10 @@ describe('PurchaseOrdersController', () => {
   const databaseServiceMock = new DatabaseServiceMock();
 
   class CentrifugeClientMock {
-    create_1 = jest.fn(data => data);
-    update_4 = jest.fn((id, data) => data);
+    documents = {
+      create_1: jest.fn(data => data),
+      update_4: jest.fn((id, data) => data),
+    };
   }
 
   const centrifugeClientMock = new CentrifugeClientMock();
@@ -64,19 +66,19 @@ describe('PurchaseOrdersController', () => {
       controllers: [PurchaseOrdersController],
       providers: [
         SessionGuard,
-        centrifugeClientFactory,
-        databaseConnectionFactory,
+        centrifugeServiceProvider,
+        databaseServiceProvider,
       ],
     })
-      .overrideProvider(databaseTokens.databaseConnectionFactory)
+      .overrideProvider(DatabaseService)
       .useValue(databaseServiceMock)
-      .overrideProvider(clientTokens.centrifugeClientFactory)
+      .overrideProvider(CentrifugeService)
       .useValue(centrifugeClientMock)
       .compile();
 
-    databaseServiceMock.purchaseOrders.create.mockClear();
+    databaseServiceMock.purchaseOrders.insert.mockClear();
     databaseServiceMock.purchaseOrders.find.mockClear();
-    centrifugeClientMock.create_1.mockClear();
+    centrifugeClientMock.documents.create_1.mockClear();
   });
 
   describe('create', () => {
@@ -90,16 +92,13 @@ describe('PurchaseOrdersController', () => {
         purchaseOrder,
       );
 
-      const collaborators = purchaseOrder.collaborators ? [...purchaseOrder.collaborators] : [];
-      collaborators.push(config.centrifugeId!);
-
       expect(result).toEqual({
-        collaborators,
+        collaborators: [...purchaseOrder.collaborators],
         data: purchaseOrder,
         ownerId: 'user_id',
       });
 
-      expect(databaseServiceMock.purchaseOrders.create).toHaveBeenCalledTimes(
+      expect(databaseServiceMock.purchaseOrders.insert).toHaveBeenCalledTimes(
         1,
       );
     });
@@ -137,7 +136,7 @@ describe('PurchaseOrdersController', () => {
         _id: 'id_to_update',
         ownerId: 'user_id',
       });
-      expect(centrifugeClientMock.update_4).toHaveBeenCalledWith(
+      expect(centrifugeClientMock.documents.update_4).toHaveBeenCalledWith(
         'find_one_document_id',
         {
           data: {
@@ -145,6 +144,7 @@ describe('PurchaseOrdersController', () => {
           },
           collaborators: ['new_collaborator'],
         },
+        config.admin.account,
       );
 
       expect(

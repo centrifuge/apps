@@ -3,7 +3,7 @@ import {
   InvoiceInvoiceResponse,
   PurchaseorderPurchaseOrderResponse,
 } from '../../clients/centrifuge-node/generated-client';
-import { Contact } from '../common/models/dto/contact';
+import { Contact } from '../common/models/contact';
 
 export interface LabelValuePair {
   label: string;

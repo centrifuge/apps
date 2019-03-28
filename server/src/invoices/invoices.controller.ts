@@ -9,28 +9,24 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { Invoice } from '../../../src/common/models/dto/invoice';
+import { Invoice } from '../../../src/common/models/invoice';
 import { ROUTES } from '../../../src/common/constants';
 import { SessionGuard } from '../auth/SessionGuard';
-import { tokens as clientTokens } from '../centrifuge-client/centrifuge.constants';
-import { tokens as databaseTokens } from '../database/database.constants';
 import {
-  DocumentServiceApi,
   InvoiceInvoiceData,
   InvoiceInvoiceResponse,
 } from '../../../clients/centrifuge-node/generated-client';
-import { DatabaseProvider } from '../database/database.providers';
+import { DatabaseService } from '../database/database.service';
 import { InvoiceData } from '../../../src/interfaces';
 import config from '../config';
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 
 @Controller(ROUTES.INVOICES)
 @UseGuards(SessionGuard)
 export class InvoicesController {
   constructor(
-    @Inject(databaseTokens.databaseConnectionFactory)
-    private readonly database: DatabaseProvider,
-    @Inject(clientTokens.centrifugeClientFactory)
-    private readonly centrifugeClient: DocumentServiceApi,
+    private readonly database: DatabaseService,
+    private readonly centrifugeService: CentrifugeService,
   ) {}
 
   @Post()
@@ -45,16 +41,17 @@ export class InvoicesController {
     const collaborators = invoice.collaborators
       ? [...invoice.collaborators]
       : [];
-    collaborators.push(config.centrifugeId);
-
-    const createResult = await this.centrifugeClient.create({
-      data: {
-        ...invoice,
+    const createResult = await this.centrifugeService.documents.create(
+      {
+        data: {
+          ...invoice,
+        },
+        collaborators,
       },
-      collaborators,
-    });
+      config.admin.account,
+    );
 
-    return await this.database.invoices.create({
+    return await this.database.invoices.insert({
       ...createResult,
       ownerId: request.user._id,
     });
@@ -117,20 +114,20 @@ export class InvoicesController {
     @Req() request,
     @Body() updateInvoiceRequest: Invoice,
   ) {
-    let id = params.id;
     const invoice: InvoiceInvoiceResponse = await this.database.invoices.findOne(
-      { _id: id, ownerId: request.user._id },
+      { _id:  params.id, ownerId: request.user._id },
     );
 
-    const updateResult = await this.centrifugeClient.update(
+    const updateResult = await this.centrifugeService.documents.update(
       invoice.header.document_id,
       {
         data: { ...updateInvoiceRequest },
         collaborators: updateInvoiceRequest.collaborators,
       },
+      config.admin.account,
     );
 
-    return await this.database.invoices.updateById(id, {
+    return await this.database.invoices.updateById( params.id, {
       ...updateResult,
       ownerId: request.user._id,
     });

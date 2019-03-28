@@ -3,7 +3,7 @@ import { Add, Checkmark } from 'grommet-icons';
 import { Link } from 'react-router-dom';
 import { Box, Button, Heading } from 'grommet';
 import { Field, Form } from 'react-final-form';
-import { Invoice } from '../common/models/dto/invoice';
+import { Invoice } from '../common/models/invoice';
 import SearchableDropdown from '../components/form/SearchableDropdown';
 import { LabelValuePair } from '../interfaces';
 import StyledTextInput from '../components/StyledTextInput';

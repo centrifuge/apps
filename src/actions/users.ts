@@ -1,5 +1,5 @@
 import { getActions } from './action-type-generator';
-import { User } from '../common/models/dto/user';
+import { User } from '../common/models/user';
 
 const USER_LOGIN_BASE_TYPE = 'USER_LOGIN_ACTION';
 const USER_REGISTER_TYPE = 'USER_REGISTER_ACTION';

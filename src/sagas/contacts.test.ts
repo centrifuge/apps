@@ -9,7 +9,7 @@ import {
 import {createContactAction, getContactsAction, updateContactAction} from '../actions/contacts';
 
 import { httpClient } from '../http-client';
-import { Contact } from '../common/models/dto/contact';
+import { Contact } from '../common/models/contact';
 
 const contact = new Contact('alfred', '0xbatman_manor');
 

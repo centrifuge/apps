@@ -1,5 +1,5 @@
 import { getActions } from './action-type-generator';
-import { Invoice } from '../common/models/dto/invoice';
+import { Invoice } from '../common/models/invoice';
 
 const CREATE_INVOICE_BASE_TYPE = 'CREATE_INVOICE_ACTION';
 const UPDATE_INVOICE_BASE_TYPE = 'UPDATE_INVOICE_ACTION';

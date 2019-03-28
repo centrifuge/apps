@@ -1,7 +1,7 @@
 import { call, fork, put, take, takeEvery } from 'redux-saga/effects';
 import { httpClient } from '../http-client';
 import { userLoginAction, userRegisterAction } from '../actions/users';
-import { User } from '../common/models/dto/user';
+import { User } from '../common/models/user';
 import routes from '../routes';
 import { push } from 'connected-react-router';
 

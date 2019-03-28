@@ -4,23 +4,24 @@ import {
   eventTypes,
   WebhooksController,
 } from './webhooks.controller';
-import { centrifugeClientFactory } from '../centrifuge-client/centrifuge.client';
-import { tokens as clientTokens } from '../centrifuge-client/centrifuge.constants';
-import { tokens as databaseTokens } from '../database/database.constants';
-import { databaseConnectionFactory } from '../database/database.providers';
+import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.provider';
+import { databaseServiceProvider } from '../database/database.providers';
 import {
   InvoiceInvoiceResponse,
   PurchaseorderPurchaseOrderResponse,
 } from '../../../clients/centrifuge-node/generated-client';
+import config from '../config';
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
+import { DatabaseService } from '../database/database.service';
 
 describe('WebhooksController', () => {
   let webhooksModule: TestingModule;
   const databaseServiceMock = {
     invoices: {
-      create: jest.fn(data => data),
+      insert: jest.fn(data => data),
     },
     purchaseOrders: {
-      create: jest.fn(data => data),
+      insert: jest.fn(data => data),
     },
   };
 
@@ -34,23 +35,25 @@ describe('WebhooksController', () => {
   };
 
   const centrifugeClient = {
-    get: jest.fn((): InvoiceInvoiceResponse => getResponse),
-    get_3: jest.fn((): PurchaseorderPurchaseOrderResponse => getResponse),
+    documents: {
+      get: jest.fn((): InvoiceInvoiceResponse => getResponse),
+      get_3: jest.fn((): PurchaseorderPurchaseOrderResponse => getResponse),
+    },
   };
 
   beforeEach(async () => {
     webhooksModule = await Test.createTestingModule({
       controllers: [WebhooksController],
-      providers: [databaseConnectionFactory, centrifugeClientFactory],
+      providers: [databaseServiceProvider, centrifugeServiceProvider],
     })
-      .overrideProvider(databaseTokens.databaseConnectionFactory)
+      .overrideProvider(DatabaseService)
       .useValue(databaseServiceMock)
-      .overrideProvider(clientTokens.centrifugeClientFactory)
+      .overrideProvider(CentrifugeService)
       .useValue(centrifugeClient)
       .compile();
 
-    databaseServiceMock.invoices.create.mockClear();
-    centrifugeClient.get.mockClear();
+    databaseServiceMock.invoices.insert.mockClear();
+    centrifugeClient.documents.get.mockClear();
   });
 
   describe('when it receives success invoice creation', function() {
@@ -66,8 +69,11 @@ describe('WebhooksController', () => {
       });
 
       expect(result).toEqual('OK');
-      expect(centrifugeClient.get).toHaveBeenCalledWith(documentId);
-      expect(databaseServiceMock.invoices.create).toHaveBeenCalledWith(
+      expect(centrifugeClient.documents.get).toHaveBeenCalledWith(
+        documentId,
+        config.admin.account,
+      );
+      expect(databaseServiceMock.invoices.insert).toHaveBeenCalledWith(
         getResponse,
       );
     });
@@ -86,8 +92,11 @@ describe('WebhooksController', () => {
       });
 
       expect(result).toEqual('OK');
-      expect(centrifugeClient.get_3).toHaveBeenCalledWith(documentId);
-      expect(databaseServiceMock.purchaseOrders.create).toHaveBeenCalledWith(
+      expect(centrifugeClient.documents.get_3).toHaveBeenCalledWith(
+        documentId,
+        config.admin.account,
+      );
+      expect(databaseServiceMock.purchaseOrders.insert).toHaveBeenCalledWith(
         getResponse,
       );
     });
@@ -101,8 +110,8 @@ describe('WebhooksController', () => {
 
       const result = await webhooksController.receiveMessage({});
       expect(result).toBe('OK');
-      expect(centrifugeClient.get).not.toHaveBeenCalled();
-      expect(databaseServiceMock.invoices.create).not.toHaveBeenCalled();
+      expect(centrifugeClient.documents.get).not.toHaveBeenCalled();
+      expect(databaseServiceMock.invoices.insert).not.toHaveBeenCalled();
     });
   });
 });

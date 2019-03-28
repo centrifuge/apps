@@ -12,17 +12,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SessionGuard } from '../auth/SessionGuard';
-import { Contact } from '../../../src/common/models/dto/contact';
+import { Contact } from '../../../src/common/models/contact';
 import { ROUTES } from '../../../src/common/constants';
-import { DatabaseProvider } from '../database/database.providers';
-import { tokens as databaseTokens } from '../database/database.constants';
+import { DatabaseService } from '../database/database.service';
 
 @Controller(ROUTES.CONTACTS)
 @UseGuards(SessionGuard)
 export class ContactsController {
   constructor(
-    @Inject(databaseTokens.databaseConnectionFactory)
-    private readonly databaseService: DatabaseProvider,
+    private readonly databaseService: DatabaseService,
   ) {}
 
   @Post()
@@ -45,7 +43,7 @@ export class ContactsController {
       contact.address,
       request.user._id,
     );
-    return await this.databaseService.contacts.create(newContact);
+    return await this.databaseService.contacts.insert(newContact);
   }
 
   @Get()
@@ -75,7 +73,7 @@ export class ContactsController {
     @Body() updateContactObject: Contact,
     @Req() request,
   ) {
-    return this.databaseService.contacts.updateByQuery(
+    return this.databaseService.contacts.update(
       { _id: params.id, ownerId: request.user._id },
       { ...updateContactObject, ownerId: request.user._id },
     );

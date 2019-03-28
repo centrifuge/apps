@@ -1,21 +1,25 @@
+import * as DataStore from 'nedb-promises';
 import * as Nedb from 'nedb';
-import * as util from 'util';
 
 /**
  * A repository class for accessing database data. Class methods promisify the equivalent Nedb methods
  * @type T - the entity model as saved in the database
  */
 export class DatabaseRepository<T> {
-  constructor(private readonly databaseConnection: Nedb) {}
+
+  private repository: DataStore;
+
+  constructor(
+    private readonly path: string) {
+    this.repository = DataStore.create({ filename: path });
+  }
 
   /**
    * Inserts an object in the collection.
    * @param {T} object
    */
-  async create(object: T) {
-    return await util.promisify(
-      this.databaseConnection.insert.bind(this.databaseConnection),
-    )(object);
+  insert(object: T): Promise<T> {
+    return this.repository.insert(object);
   }
 
   /**
@@ -24,9 +28,8 @@ export class DatabaseRepository<T> {
    * @param {any} query - Nedb query object
    * @returns {Promise<T[]>} promise
    */
-  async find(query: any) {
-    const cursor = this.databaseConnection.find(query);
-    return util.promisify(cursor.exec.bind(cursor))();
+  find(query: any): Promise<T[]> {
+    return this.repository.find(query).exec();
   }
 
   /**
@@ -35,10 +38,8 @@ export class DatabaseRepository<T> {
    * @param {any} query - Nedb query object
    * @returns {Promise<T|null>} promise
    */
-  async findOne(query: any) {
-    return util.promisify(
-      this.databaseConnection.findOne.bind(this.databaseConnection),
-    )(query);
+  findOne(query: any): Promise<T | null> {
+    return this.repository.findOne(query);
   }
 
   /**
@@ -47,13 +48,18 @@ export class DatabaseRepository<T> {
    * @param {object} updateObject - The update object query
    * @returns {Promise<T|null>} promise
    */
-  async updateById(id: string, updateObject: T) {
-    return this.updateByQuery({_id: id}, updateObject);
+  updateById(id: string, updateObject: T, upsert: boolean = false): Promise<T | null> {
+    return this.update({ _id: id }, updateObject, { returnUpdatedDocs: true, upsert });
   }
 
-  async updateByQuery(query: any, updateObject: T) {
-      return util.promisify(
-          this.databaseConnection.update.bind(this.databaseConnection),
-      )(query, updateObject);
+  /**
+   * Update object
+   * @param {any} query - Nedb query object
+   * @param {object} updateObject - The update object query
+   * @param {Nedb.UpdateOptions} options - {multi,usert,returnUpdatedDocs}
+   * @returns {Promise<T|null>} promise
+   */
+  update(query: any, updateObject: T, options?: Nedb.UpdateOptions): Promise<T | null> {
+    return this.repository.update(query, updateObject, options);
   }
 }

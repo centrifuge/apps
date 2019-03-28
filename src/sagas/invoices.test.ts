@@ -15,7 +15,7 @@ import {
   updateInvoiceAction,
 } from '../actions/invoices';
 
-import { Invoice } from '../common/models/dto/invoice';
+import { Invoice } from '../common/models/invoice';
 import { httpClient } from '../http-client';
 
 const invoice: Invoice = {

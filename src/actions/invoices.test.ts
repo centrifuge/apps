@@ -4,7 +4,7 @@ import {
   getInvoiceAction,
   getInvoices,
 } from './invoices';
-import { Invoice } from '../common/models/dto/invoice';
+import { Invoice } from '../common/models/invoice';
 
 const assertActionEmitted = (action, type, payload?) => {
   const actionResult = action();

@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ContactsController } from './contacts.controller';
-import { databaseConnectionFactory } from '../database/database.providers';
+import { DatabaseModule } from '../database/database.module';
 
 @Module({
   controllers: [ContactsController],
-  providers: [databaseConnectionFactory],
+  imports: [DatabaseModule],
+
 })
 export class ContactsModule {}

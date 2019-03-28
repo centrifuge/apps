@@ -4,11 +4,11 @@ import { connect } from 'react-redux';
 
 import CreateEditInvoice from '../CreateEditInvoice';
 import { createInvoice, resetCreateInvoice } from '../../actions/invoices';
-import { Invoice } from '../../common/models/dto/invoice';
+import { Invoice } from '../../common/models/invoice';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { RequestState } from '../../reducers/http-request-reducer';
 import { InvoiceInvoiceData } from '../../../clients/centrifuge-node/generated-client';
-import { Contact } from '../../common/models/dto/contact';
+import { Contact } from '../../common/models/contact';
 import { getContacts, resetGetContacts } from '../../actions/contacts';
 import { LabelValuePair } from '../../interfaces';
 

@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { PurchaseOrdersController } from './purchase-orders.controller';
-import { databaseConnectionFactory } from '../database/database.providers';
-import { centrifugeClientFactory } from '../centrifuge-client/centrifuge.client';
+import { DatabaseModule } from '../database/database.module';
+import { CentrifugeModule } from '../centrifuge-client/centrifuge.module';
 
 @Module({
   controllers: [PurchaseOrdersController],
-  providers: [databaseConnectionFactory, centrifugeClientFactory],
+  imports: [DatabaseModule, CentrifugeModule],
 })
 export class PurchaseOrdersModule {}

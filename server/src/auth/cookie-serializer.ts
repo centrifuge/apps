@@ -1,14 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PassportSerializer } from '@nestjs/passport';
-import { User } from '../../../src/common/models/dto/user';
-import { DatabaseProvider } from '../database/database.providers';
-import { tokens } from '../database/database.constants';
+import { User } from '../../../src/common/models/user';
+import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class CookieSerializer extends PassportSerializer {
   constructor(
-    @Inject(tokens.databaseConnectionFactory)
-    private readonly databaseService: DatabaseProvider,
+    private readonly databaseService: DatabaseService,
   ) {
     super();
   }

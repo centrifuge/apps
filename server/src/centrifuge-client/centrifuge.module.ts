@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
-import { centrifugeClientFactory } from './centrifuge.client';
+import { centrifugeServiceProvider } from './centrifuge.provider';
 
 @Module({
-  providers: [centrifugeClientFactory],
-  exports: [centrifugeClientFactory],
+  providers: [centrifugeServiceProvider],
+  exports: [centrifugeServiceProvider],
 })
-export class CentrifugeModule {}
+export class CentrifugeModule {
+}
