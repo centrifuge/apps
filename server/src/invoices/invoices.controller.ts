@@ -17,7 +17,7 @@ import {
   InvoiceInvoiceResponse,
 } from '../../../clients/centrifuge-node/generated-client';
 import { DatabaseService } from '../database/database.service';
-import { InvoiceData } from '../../../src/interfaces';
+import { InvoiceData } from '../../../src/common/interfaces';
 import config from '../config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 

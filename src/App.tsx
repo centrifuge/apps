@@ -1,9 +1,9 @@
-import React, {Component} from 'react';
-import {Box} from 'grommet';
-import {AxisTheme} from '@centrifuge/axis-theme';
+import React, { Component } from 'react';
+import { Box } from 'grommet';
+import { AxisTheme } from '@centrifuge/axis-theme';
 
-import Body from './layout/Body';
-import Header from './layout/Header';
+import Routing from './Routing';
+import Header from './Header';
 
 class App extends Component {
   render() {
@@ -11,8 +11,19 @@ class App extends Component {
       <div className="App">
         <AxisTheme>
           <Box fill align="center">
-            <Header />
-            <Body />
+            <Header/>
+            <Box
+              justify="center"
+              direction="row"
+              fill
+              background="bodyBackground"
+              border="top"
+            >
+              <Box width="xlarge">
+                <Routing/>
+              </Box>
+            </Box>
+
           </Box>
         </AxisTheme>
       </div>

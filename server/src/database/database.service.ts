@@ -1,5 +1,5 @@
 import { DatabaseRepository } from './database.repository';
-import { InvoiceResponse, PurchaseOrderResponse } from '../../../src/interfaces';
+import { InvoiceResponse, PurchaseOrderResponse } from '../../../src/common/interfaces';
 import { User } from '../../../src/common/models/user';
 import { Contact } from '../../../src/common/models/contact';
 

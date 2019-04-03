@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Redirect, Route, RouteComponentProps } from 'react-router';
 import { Text } from 'grommet';
 import routes from '../routes';
-import { LoginState } from '../reducers/user/auth';
+import { LoginState } from '../store/reducers/user/auth';
 
 interface ProtectedRouteProps {
   loggedIn: boolean;

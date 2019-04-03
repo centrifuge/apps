@@ -7,7 +7,7 @@ import config from '../config';
 import {
   InvoiceResponse,
   PurchaseOrderResponse,
-} from '../../../src/interfaces';
+} from '../../../src/common/interfaces';
 import { ROLE } from '../../../src/common/constants';
 import { DatabaseService } from './database.service';
 
