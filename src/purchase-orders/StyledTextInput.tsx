@@ -2,6 +2,7 @@ import { Box, TextInput, Text } from 'grommet';
 import { Alert } from 'grommet-icons';
 import React from 'react';
 
+//TODO this should be removed when we refactor purchase orders
 interface StyledTextInputProps {
   input;
   meta;
@@ -22,8 +23,9 @@ const StyledTextInput = ({
   description,
   type,
   labelInline,
-}: StyledTextInputProps) => (
-  <Box gap="small" fill direction={labelInline ? 'row' : 'column'}>
+}: StyledTextInputProps) => {
+  console.log(meta.error);
+  return <Box gap="small" fill direction={labelInline ? 'row' : 'column'}>
     {label && (
       <Box direction="row" align="center" gap="xsmall">
         <Text weight="bold" size="small" margin={{ right: 'xsmall' }}>
@@ -32,7 +34,7 @@ const StyledTextInput = ({
         {description && <Text size="small">{description}</Text>}
         {!labelInline && meta.error && meta.touched && (
           <Box direction="row" align="center" gap="xsmall">
-            <Alert color={errorColor} size="small" />
+            <Alert color={errorColor} size="small"/>
             <Text size="xsmall" color={errorColor}>
               {meta.error}
             </Text>
@@ -51,7 +53,7 @@ const StyledTextInput = ({
       />
       {labelInline && meta.error && meta.touched && (
         <Box direction="row" align="center" gap="xsmall">
-          <Alert color={errorColor} size="small" />
+          <Alert color={errorColor} size="small"/>
           <Text size="xsmall" color={errorColor}>
             {meta.error}
           </Text>
@@ -59,7 +61,7 @@ const StyledTextInput = ({
       )}
     </Box>
   </Box>
-);
+};
 
 StyledTextInput.displayName = 'StyledTextInput';
 

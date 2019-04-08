@@ -3,9 +3,9 @@ import { Add, Checkmark } from 'grommet-icons';
 import { Link } from 'react-router-dom';
 import { Box, Button, Heading } from 'grommet';
 import { Field, Form } from 'react-final-form';
-import SearchableDropdown from '../components/form/SearchableDropdown';
+import SearchSelect from '../components/form/SearchSelect';
 import { LabelValuePair } from '../common/interfaces';
-import StyledTextInput from '../components/StyledTextInput';
+import StyledTextInput from './StyledTextInput';
 import { required } from '../common/validators';
 import { PurchaseOrder } from '../common/models/purchase-order';
 import { dateParser } from '../common/parsers';
@@ -68,7 +68,7 @@ export default class PurchaseOrderForm extends React.Component<
                     items={this.props.contacts}
                     // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
                     render={({ input, meta, items }) => (
-                      <SearchableDropdown
+                      <SearchSelect
                         multiple
                         label="Collaborators"
                         input={input}
@@ -112,7 +112,7 @@ export default class PurchaseOrderForm extends React.Component<
                         items={this.props.contacts}
                         // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
                         render={({ input, meta, items }) => (
-                          <SearchableDropdown
+                          <SearchSelect
                             label="Buyer"
                             input={input}
                             meta={meta}
@@ -195,7 +195,7 @@ export default class PurchaseOrderForm extends React.Component<
                         items={this.props.contacts}
                         // @ts-ignore - necessary until https://github.com/final-form/react-final-form/issues/398 is fixed
                         render={({ input, meta, items }) => (
-                          <SearchableDropdown
+                          <SearchSelect
                             label="Recipient"
                             input={input}
                             meta={meta}

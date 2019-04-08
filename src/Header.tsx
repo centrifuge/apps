@@ -32,10 +32,12 @@ const Header: FunctionComponent = () => (
       </Link>
       <Box direction="row" gap="small" fill justify="end">
         <CentrifugeLink label="Invoices" to={invoicesRoutes.index} />
-        <CentrifugeLink
+       {/*
+       Disable purchase orders for now
+       <CentrifugeLink
           label="Purchase orders"
           to={purchaseOrdersRoutes.index}
-        />
+        />*/}
         <CentrifugeLink label="Contacts" to={contactsRoutes.index} />
         <Anchor href={ROUTES.USERS.logout}>
           <Box fill="vertical" justify="center">

@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Box,
   Button,
+  FormField,
   Heading,
   Table,
   TableBody,
@@ -9,14 +10,13 @@ import {
   TableHeader,
   TableRow,
   Text,
+  TextInput,
 } from 'grommet';
-import { Add, Edit, More } from 'grommet-icons';
+import { Add, Edit } from 'grommet-icons';
 import { Link } from 'react-router-dom';
 
 import { Contact } from '../common/models/contact';
-import { Field, Form } from 'react-final-form';
-import StyledTextInput from '../components/StyledTextInput';
-import { required } from '../common/validators';
+import { Formik } from 'formik';
 
 interface ContactsProps {
   contacts?: (Contact & { isEditing?: boolean })[];
@@ -30,10 +30,11 @@ interface ContactsState {
   contacts: (Contact & { isEditing?: boolean })[];
 }
 
-export default class ContactList extends React.Component<
-  ContactsProps,
-  ContactsState
-> {
+
+//TODO break this down
+
+export default class ContactList extends React.Component<ContactsProps,
+  ContactsState> {
   displayName = 'Contacts';
 
   constructor(props) {
@@ -98,68 +99,91 @@ export default class ContactList extends React.Component<
     return (
       <TableRow>
         <TableCell>
-          <Form
-            onSubmit={this.onContactSave}
+
+          <Formik
+            validate={values => {
+              const errors = {};
+              // Parse Values and do errors
+              return errors;
+            }}
             initialValues={contact}
-            render={({ handleSubmit }) => (
-              <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-                <Box direction="row" align="start" fill gap="xsmall">
-                  <Box fill>
-                    <Field name="name" validate={required}>
-                      {({ input, meta }) => (
-                        <StyledTextInput
-                          labelInline
-                          input={input}
-                          meta={meta}
-                          placeholder="Please enter the contact name"
+            onSubmit={(values) => {
+              this.onContactSave(values);
+            }}
+          >
+            {
+              ({
+                 values,
+                 errors,
+                 handleChange,
+                 handleSubmit,
+                 setFieldValue,
+               }) => (
+                <form style={{ width: '100%' }}
+                      onSubmit={event => {
+                        event.preventDefault();
+                        this.setState({ submitted: true });
+                        handleSubmit();
+                      }}
+                >
+
+                  <Box direction="row" align="start" fill gap="xsmall">
+                    <Box fill>
+                      <FormField
+                        error={errors.name}
+                      >
+                        <TextInput
+                          name="name"
+                          value={values.name || ''}
+                          onChange={handleChange}
                         />
-                      )}
-                    </Field>
-                  </Box>
-                  <Box fill>
-                    <Field name="address" validate={required}>
-                      {({ input, meta }) => (
-                        <StyledTextInput
-                          labelInline
-                          input={input}
-                          meta={meta}
-                          placeholder="Please enter the contact address"
+                      </FormField>
+
+                    </Box>
+                    <Box fill>
+                      <FormField
+                        error={errors.password}
+                      >
+                        <TextInput
+                          name="address"
+                          value={values.address || ''}
+                          onChange={handleChange}
                         />
-                      )}
-                    </Field>
-                  </Box>
-                  <Box
-                    fill
-                    direction="row"
-                    gap="xsmall"
-                    justify="start"
-                    align="center"
-                  >
-                    <Box>
-                      <Button
-                        type="submit"
-                        primary
-                        label={contact ? 'Update' : 'Add'}
-                      />
+                      </FormField>
                     </Box>
-                    <Box>
-                      <Button
-                        onClick={() => {
-                          if (contact) {
-                            contact.isEditing = false;
-                            this.setState({ contacts: this.state.contacts });
-                          } else {
-                            this.setState({ newContact: undefined });
-                          }
-                        }}
-                        label="Cancel"
-                      />
+                    <Box
+                      fill
+                      direction="row"
+                      gap="xsmall"
+                      justify="start"
+                      align="center"
+                    >
+                      <Box>
+                        <Button
+                          type="submit"
+                          primary
+                          label={contact ? 'Update' : 'Add'}
+                        />
+                      </Box>
+                      <Box>
+                        <Button
+                          onClick={() => {
+                            if (contact) {
+                              contact.isEditing = false;
+                              this.setState({ contacts: this.state.contacts });
+                            } else {
+                              this.setState({ newContact: undefined });
+                            }
+                          }}
+                          label="Cancel"
+                        />
+                      </Box>
                     </Box>
                   </Box>
-                </Box>
-              </form>
-            )}
-          />
+                </form>
+              )
+            }
+          </Formik>
         </TableCell>
       </TableRow>
     );
@@ -171,7 +195,7 @@ export default class ContactList extends React.Component<
         <Box justify="between" direction="row" align="center">
           <Heading level="3">Contacts</Heading>
           <Button
-            icon={<Add color="white" size="small" />}
+            icon={<Add color="white" size="small"/>}
             primary
             onClick={this.onAddNewClick}
             label="Add new"
