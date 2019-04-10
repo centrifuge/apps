@@ -16,7 +16,6 @@ class App extends Component {
               justify="center"
               direction="row"
               fill
-              background="bodyBackground"
               border="top"
             >
               <Box width="xlarge">

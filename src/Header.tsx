@@ -1,21 +1,38 @@
 import React, { FunctionComponent } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Anchor, Box, Image, Text } from 'grommet';
+import { Anchor, Box, Image } from 'grommet';
 import logo from './logo.png';
 import invoicesRoutes from './invoices/routes';
-import { ROUTES } from './common/constants';
 import contactsRoutes from './contacts/routes';
-import CentrifugeLink from './components/Link';
+import userRoutes from './user/routes';
+import { connect } from 'react-redux';
+import { push } from 'connected-react-router';
 
-const ImageSuppressedWarnings = Image as any;
+interface MenuItem {
+  label: string,
+  route: string,
+  external?: boolean
+}
 
-// TODO Replace this with NAVBAR component
-const Header: FunctionComponent = () => (
-  <Box
+interface NavBarProps {
+  selectedRoute: string,
+  push: (route: string) => void
+}
+
+const Header: FunctionComponent<NavBarProps> = (props) => {
+
+  const { selectedRoute, push } = props;
+
+  const mainMenuItems: MenuItem[] = [
+    { label: 'Invoices', route: invoicesRoutes.index },
+    { label: 'Contacts', route: contactsRoutes.index },
+    { label: 'Logout', route: userRoutes.logout, external: true },
+  ];
+
+  return <Box
     justify="center"
     align="center"
-    background="white"
     height="xsmall"
     fill="horizontal"
   >
@@ -27,21 +44,34 @@ const Header: FunctionComponent = () => (
       width="xlarge"
     >
       <Link label="Centrifuge" to="/" size="large">
-        <ImageSuppressedWarnings src={logo}/>
+        <Image src={logo}/>
       </Link>
-      <Box direction="row" gap="small" fill justify="end">
-        <CentrifugeLink label="Invoices" to={invoicesRoutes.index}/>
-        <CentrifugeLink label="Contacts" to={contactsRoutes.index}/>
-        <Anchor href={ROUTES.USERS.logout}>
-          <Box fill="vertical" justify="center">
-            <Text size="small">Logout</Text>
-          </Box>
-        </Anchor>
+      <Box direction="row" gap="small" fill align="center" justify="end">
+        {mainMenuItems.map((item) => {
+            const anchorProps = {
+              ...(item.external ? { href: item.route } : { onClick: () => push(item.route) }),
+              ...(selectedRoute === item.route ? { className: 'selected' } : {}),
+            };
+            return <Anchor
+              key={item.label}
+              label={item.label}
+              {...anchorProps}
+            />;
+          },
+        )}
       </Box>
     </Box>
-  </Box>
-);
+  </Box>;
+};
 
 Header.displayName = 'Header';
 
-export default Header;
+const mapStateToProps = (state) => {
+  return {
+    selectedRoute: state.router.location.pathname,
+  };
+};
+export default connect(
+  mapStateToProps,
+  { push },
+)(Header);

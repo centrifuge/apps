@@ -7,7 +7,7 @@ import { createStore } from 'redux';
 import getRootReducer from './store/reducers';
 import App from './App';
 
-const store = createStore(getRootReducer({}));
+const store = createStore(getRootReducer({}),{router:{location: {pathname:'/'}}});
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
