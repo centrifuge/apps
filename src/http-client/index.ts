@@ -7,9 +7,7 @@ import { User } from '../common/models/user';
 import { Contact } from '../common/models/contact';
 import {
   InvoiceInvoiceResponse,
-  PurchaseorderPurchaseOrderResponse,
 } from '../../clients/centrifuge-node/generated-client';
-import { PurchaseOrder } from '../common/models/purchase-order';
 
 const instance = axios.create();
 
@@ -34,22 +32,5 @@ export const httpClient = {
     read: async () => instance.get(ROUTES.CONTACTS),
     update: async (contact: Contact) =>
       instance.put(`${ROUTES.CONTACTS}/${contact._id}`, contact),
-  },
-  purchaseOrders: {
-    create: async (
-      purchaseOrder: PurchaseOrder,
-    ): Promise<PurchaseorderPurchaseOrderResponse> =>
-      instance.post(ROUTES.PURCHASE_ORDERS, purchaseOrder),
-    update: async (
-      purchaseOrder: PurchaseOrder,
-    ): Promise<PurchaseorderPurchaseOrderResponse> =>
-      instance.put(
-        `${ROUTES.PURCHASE_ORDERS}/${purchaseOrder._id}`,
-        purchaseOrder,
-      ),
-    read: async (): Promise<PurchaseorderPurchaseOrderResponse> =>
-      instance.get(ROUTES.PURCHASE_ORDERS),
-    readById: async (id): Promise<PurchaseorderPurchaseOrderResponse> =>
-      instance.get(`${ROUTES.PURCHASE_ORDERS}/${id}`),
-  },
+  }
 };
