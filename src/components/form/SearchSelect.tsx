@@ -8,13 +8,12 @@ export interface SearchSelectItem {
 }
 
 interface SearchSelectState {
-  items: SearchSelectItem[];
+  options: SearchSelectItem[];
   selected: SearchSelectItem | SearchSelectItem[];
 }
 
 interface SearchSelectProps extends Omit<SelectProps,"selected">{
-  items: any[];
-  label: string;
+  options: any[];
   selected?: SearchSelectItem | SearchSelectItem[];
 }
 
@@ -25,14 +24,14 @@ export default class SearchSelect<SearchSelectItem> extends Component<
   constructor(props) {
     super(props);
     this.state = {
-      items: props.items,
+      options: props.options,
       selected:
         props.selected || (props.multiple ? [] : { label: '', value: '' }),
     };
   }
 
-  onChange = change => {
-    this.setState({ selected: change.value }, () => {
+  onChange = event => {
+    this.setState({ selected: event.value }, () => {
       this.props.onChange && this.props.onChange(
         Array.isArray(this.state.selected)
           ? this.state.selected.map(opt => opt.value)
@@ -45,7 +44,7 @@ export default class SearchSelect<SearchSelectItem> extends Component<
     const exp = new RegExp(text, 'i');
     this.setState({
       /// @ts-ignore - https://github.com/final-form/react-final-form/issues/398
-      items: this.props.items.filter(o => exp.test(o.label)),
+      options: this.props.options.filter(o => exp.test(o.label)),
     });
   };
 
@@ -55,7 +54,7 @@ export default class SearchSelect<SearchSelectItem> extends Component<
         plain
         size={'medium'}
         placeholder="Select"
-        options={this.state.items}
+        options={this.state.options}
         value={this.state.selected}
         labelKey="label"
         valueKey="value"

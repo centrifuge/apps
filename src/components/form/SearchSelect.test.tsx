@@ -32,9 +32,8 @@ describe('Search Select', () => {
     beforeEach(() => {
       searchSelectShallow = shallow(
         <SearchSelect
-          label="Some field"
           {...inputProps}
-          items={items}
+          options={items}
         />,
       );
 
@@ -49,7 +48,7 @@ describe('Search Select', () => {
 
     it('should initialize the state', function() {
       const state = searchSelectShallow.state();
-      expect(state.items).toBe(items);
+      expect(state.options).toBe(items);
       expect(state.selected).toEqual({ label: '', value: '' });
     });
 
@@ -78,8 +77,8 @@ describe('Search Select', () => {
           instance.onSearch('co');
 
           const state = searchSelectShallow.state();
-          expect(state.items.length).toBe(2);
-          expect(state.items).toEqual(items.slice(1));
+          expect(state.options.length).toBe(2);
+          expect(state.options).toEqual(items.slice(1));
         });
       });
 
@@ -89,7 +88,7 @@ describe('Search Select', () => {
           instance.onSearch('non matching search string');
 
           const state = searchSelectShallow.state();
-          expect(state.items.length).toBe(0);
+          expect(state.options.length).toBe(0);
         });
       });
     });
