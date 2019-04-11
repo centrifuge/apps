@@ -2,7 +2,7 @@ import {
   InvoiceInvoiceData,
   InvoiceInvoiceResponse,
   PurchaseorderPurchaseOrderResponse,
-} from '../../clients/centrifuge-node/generated-client';
+} from '../../clients/centrifuge-node';
 import { Contact } from './models/contact';
 
 //TODO break all interfaces up and move to models

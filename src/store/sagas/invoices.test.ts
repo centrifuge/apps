@@ -19,9 +19,9 @@ import { Invoice } from '../../common/models/invoice';
 import { httpClient } from '../../http-client';
 
 const invoice: Invoice = {
-  invoice_number: '1',
-  sender_name: 'mickey',
-  recipient_name: 'goofy',
+  number: '1',
+  sender_company_name: 'mickey',
+  bill_to_company_name: 'goofy',
 };
 
 describe('watchGetInvoicesPage', () => {

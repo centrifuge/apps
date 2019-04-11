@@ -87,11 +87,11 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
                   <Box>
                     <FormField
                       label="Invoice number"
-                      error={errors!.invoice_number}
+                      error={errors!.number}
                     >
                       <TextInput
-                        name="invoice_number"
-                        value={values!.invoice_number || ''}
+                        name="number"
+                        value={values!.number || ''}
                         onChange={handleChange}
                       />
                     </FormField>
@@ -305,54 +305,54 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
                         <Box gap={columnGap}>
                           <FormField
                             label="Street"
-                            error={errors!.ship_ro_street1}
+                            error={errors!.ship_to_street1}
                           >
                             <TextInput
                               placeholder="Street name and number"
-                              name="ship_ro_street1"
-                              value={values!.ship_ro_street1 || ''}
+                              name="ship_to_street1"
+                              value={values!.ship_to_street1 || ''}
                               onChange={handleChange}
                             />
                           </FormField>
                           <FormField
                             label="Street"
-                            error={errors!.ship_ro_street2}
+                            error={errors!.ship_to_street2}
                           >
                             <TextInput
                               placeholder="Apartment, unit, office, etc"
-                              name="ship_ro_street2"
-                              value={values!.ship_ro_street2 || ''}
+                              name="ship_to_street2"
+                              value={values!.ship_to_street2 || ''}
                               onChange={handleChange}
                             />
                           </FormField>
                           <FormField
                             label="City"
-                            error={errors!.ship_ro_city}
+                            error={errors!.ship_to_city}
                           >
                             <TextInput
-                              name="ship_ro_city"
+                              name="ship_to_city"
                               placeholder="City or state"
-                              value={values!.ship_ro_city || ''}
+                              value={values!.ship_to_city || ''}
                               onChange={handleChange}
                             />
                           </FormField>
                           <FormField
                             label="Country"
-                            error={errors!.ship_ro_country}
+                            error={errors!.ship_to_country}
                           >
                             <TextInput
-                              name="ship_ro_country"
-                              value={values!.ship_ro_country || ''}
+                              name="ship_to_country"
+                              value={values!.ship_to_country || ''}
                               onChange={handleChange}
                             />
                           </FormField>
                           <FormField
                             label="ZIP code"
-                            error={errors!.ship_ro_zipcode}
+                            error={errors!.ship_to_zipcode}
                           >
                             <TextInput
-                              name="ship_ro_zipcode"
-                              value={values!.ship_ro_zipcode || ''}
+                              name="ship_to_zipcode"
+                              value={values!.ship_to_zipcode || ''}
                               onChange={handleChange}
                             />
                           </FormField>
@@ -536,12 +536,12 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
                       </FormField>
                       <FormField
                         label="Due date"
-                        error={errors!.due_date}
+                        error={errors!.date_due}
                       >
                         <TextInput
-                          name="due_date"
+                          name="date_due"
                           type="date"
-                          value={dateFormatter(values!.due_date) || ''}
+                          value={dateFormatter(values!.date_due) || ''}
                           onChange={handleChange}
                         />
                       </FormField>

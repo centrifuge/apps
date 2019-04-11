@@ -5,7 +5,7 @@ import { SessionGuard } from '../auth/SessionGuard';
 import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.provider';
 import { databaseServiceProvider } from '../database/database.providers';
 import { Contact } from '../../../src/common/models/contact';
-import { InvoiceInvoiceData } from '../../../clients/centrifuge-node/generated-client';
+import { InvoiceInvoiceData } from '../../../clients/centrifuge-node';
 import config from '../config';
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
@@ -25,9 +25,9 @@ describe('InvoicesController', () => {
   let invoicesModule: TestingModule;
 
   const invoice: Invoice = {
-    invoice_number: '999',
-    sender_name: 'cinderella',
-    recipient_name: 'step mother',
+    number: '999',
+    sender_company_name: 'cinderella',
+    bill_to_company_name: 'step mother',
     collaborators:[],
   };
   let fetchedInvoices: Invoice[];
@@ -64,7 +64,7 @@ describe('InvoicesController', () => {
   const databaseServiceMock = new DatabaseServiceMock();
 
   class CentrifugeClientMock {
-    documents = {
+    invoices = {
       create: jest.fn(data => data),
       update: jest.fn((id, data) => data),
     };
@@ -75,9 +75,9 @@ describe('InvoicesController', () => {
   beforeEach(async () => {
     fetchedInvoices = [
       {
-        invoice_number: '100',
-        recipient_name: 'pumpkin',
-        sender_name: 'godmother',
+        number: '100',
+        bill_to_company_name: 'pumpkin',
+        sender_company_name: 'godmother',
         _id: 'fairy_id',
       },
     ];
@@ -115,7 +115,9 @@ describe('InvoicesController', () => {
         data: {
           ...invoice,
         },
-        collaborators:[...invoice.collaborators],
+        write_access: {
+          collaborators:[...invoice.collaborators]
+        },
         ownerId: 'user_id',
       });
 
@@ -165,7 +167,7 @@ describe('InvoicesController', () => {
 
       const updatedInvoice: Invoice = {
         ...invoice,
-        invoice_number: 'updated_number',
+        number: 'updated_number',
         collaborators: ['new_collaborator'],
       };
 
@@ -179,11 +181,14 @@ describe('InvoicesController', () => {
         _id: 'id_to_update',
         ownerId: 'user_id',
       });
-      expect(centrifugeClientMock.documents.update).toHaveBeenCalledWith(
+      expect(centrifugeClientMock.invoices.update).toHaveBeenCalledWith(
         'find_one_invoice_id',
         {
           data: { ...updatedInvoice },
-          collaborators: ['new_collaborator'],
+          write_access: {
+            collaborators: ['new_collaborator'],
+          },
+
         },
         config.admin.account,
       );

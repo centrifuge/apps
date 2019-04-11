@@ -7,7 +7,7 @@ import { createInvoice, resetCreateInvoice } from '../store/actions/invoices';
 import { Invoice } from '../common/models/invoice';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { RequestState } from '../store/reducers/http-request-reducer';
-import { InvoiceInvoiceData } from '../../clients/centrifuge-node/generated-client';
+import { InvoiceInvoiceData } from '../../clients/centrifuge-node';
 import { Contact } from '../common/models/contact';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
 import { LabelValuePair } from '../common/interfaces';

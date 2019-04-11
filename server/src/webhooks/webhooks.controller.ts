@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ROUTES } from '../../../src/common/constants';
-import { NotificationNotificationMessage } from '../../../clients/centrifuge-node/generated-client';
+import { NotificationNotificationMessage } from '../../../clients/centrifuge-node';
 import { DatabaseService } from '../database/database.service';
 import config from '../config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
@@ -33,13 +33,13 @@ export class WebhooksController {
   async receiveMessage(@Body() notification: NotificationNotificationMessage) {
     if (notification.event_type === eventTypes.success) {
       if (notification.document_type === documentTypes.invoice) {
-        const result = await this.centrifugeService.documents.get(
+        const result = await this.centrifugeService.invoices.get(
           notification.document_id,
           config.admin.account,
         );
         await this.databaseService.invoices.insert(result);
       } else if (notification.document_type === documentTypes.purchaseOrder) {
-        const result = await this.centrifugeService.documents.get_3(
+        const result = await this.centrifugeService.purchaseOrders.get(
           notification.document_id,
           config.admin.account,
         );

@@ -7,7 +7,7 @@ import { User } from '../common/models/user';
 import { Contact } from '../common/models/contact';
 import {
   InvoiceInvoiceResponse,
-} from '../../clients/centrifuge-node/generated-client';
+} from '../../clients/centrifuge-node';
 
 const instance = axios.create();
 

@@ -13,7 +13,7 @@ import { SessionGuard } from '../auth/SessionGuard';
 import { ROUTES } from '../../../src/common/constants';
 import { DatabaseService } from '../database/database.service';
 import { PurchaseOrder } from '../../../src/common/models/purchase-order';
-import { PurchaseorderPurchaseOrderResponse } from '../../../clients/centrifuge-node/generated-client';
+import { PurchaseorderPurchaseOrderResponse } from '../../../clients/centrifuge-node';
 import config from '../config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 
@@ -37,12 +37,14 @@ export class PurchaseOrdersController {
     const collaborators = purchaseOrder.collaborators
       ? [...purchaseOrder.collaborators]
       : [];
-    const createResult: PurchaseorderPurchaseOrderResponse = await this.centrifugeService.documents.create_1(
+    const createResult: PurchaseorderPurchaseOrderResponse = await this.centrifugeService.purchaseOrders.create(
       {
         data: {
           ...purchaseOrder,
         },
-        collaborators,
+        write_access: {
+          collaborators,
+        },
       },
       config.admin.account,
     );
@@ -72,13 +74,15 @@ export class PurchaseOrdersController {
       const dbPurchaseOrder: PurchaseorderPurchaseOrderResponse = await this.databaseService.purchaseOrders.findOne(
         { _id: id, ownerId: request.user._id },
       );
-      const updateResult = await this.centrifugeService.documents.update_4(
+      const updateResult = await this.centrifugeService.purchaseOrders.update(
         dbPurchaseOrder.header.document_id,
         {
           data: {
             ...purchaseOrder,
           },
-          collaborators: purchaseOrder.collaborators,
+          write_access: {
+            collaborators: purchaseOrder.collaborators,
+          },
         },
         config.admin.account,
       );

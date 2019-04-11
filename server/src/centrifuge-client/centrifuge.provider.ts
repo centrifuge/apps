@@ -1,14 +1,15 @@
 
 import {
   AccountServiceApi,
-  DocumentServiceApi,
-} from '../../../clients/centrifuge-node/generated-client';
+  DocumentServiceApi, InvoiceServiceApi, PurchaseOrderServiceApi,
+} from '../../../clients/centrifuge-node';
 import config from '../config';
 import { CentrifugeService } from './centrifuge.service';
 
 const documentsClient = new DocumentServiceApi({}, config.centrifugeUrl);
-
 const accountsClient = new AccountServiceApi({}, config.centrifugeUrl);
+const invoiceClient = new InvoiceServiceApi({}, config.centrifugeUrl);
+const purchaseOrderClient = new PurchaseOrderServiceApi({}, config.centrifugeUrl);
 
 export const centrifugeServiceProvider = {
   provide: CentrifugeService,
@@ -16,6 +17,8 @@ export const centrifugeServiceProvider = {
     return {
       documents: documentsClient,
       accounts: accountsClient,
+      invoices: invoiceClient,
+      purchaseOrders: purchaseOrderClient,
     };
   },
 };

@@ -34,11 +34,11 @@ class InvoiceList extends React.Component<InvoicesProps & RouteComponentProps> {
             data={this.props.invoices}
             columns={[
               {
-                property: 'invoice_number',
+                property: 'number',
                 header: 'Number',
               },
               {
-                property: 'recipient_name',
+                property: 'bill_to_company_name',
                 header: 'Customer',
               },
               {

@@ -23,16 +23,16 @@ describe('PurchaseOrdersController', () => {
   let purchaseOrdersModule: TestingModule;
 
   const purchaseOrder: PurchaseOrder = {
-    po_number: '999',
-    order_name: 'cinderella',
-    recipient_name: 'step mother',
+    number: '999',
+    requester_name: 'cinderella',
+    ship_to_company_name: 'step mother',
     collaborators: ['new_collaborator'],
   };
 
   const fetchedPurchaseOrders: PurchaseOrder[] = [
     {
-      order_name: 'alberta',
-      order: '0xc111111111a4e539741ca11b590b9447b26a8057',
+      requester_name: 'alberta',
+      sender_order_id: '0xc111111111a4e539741ca11b590b9447b26a8057',
     },
   ];
 
@@ -53,9 +53,10 @@ describe('PurchaseOrdersController', () => {
   const databaseServiceMock = new DatabaseServiceMock();
 
   class CentrifugeClientMock {
-    documents = {
-      create_1: jest.fn(data => data),
-      update_4: jest.fn((id, data) => data),
+    purchaseOrders = {
+      create: jest.fn(data => data),
+      get: jest.fn((id, data) => data),
+      update: jest.fn((id, data) => data),
     };
   }
 
@@ -78,7 +79,7 @@ describe('PurchaseOrdersController', () => {
 
     databaseServiceMock.purchaseOrders.insert.mockClear();
     databaseServiceMock.purchaseOrders.find.mockClear();
-    centrifugeClientMock.documents.create_1.mockClear();
+    centrifugeClientMock.purchaseOrders.create.mockClear();
   });
 
   describe('create', () => {
@@ -93,7 +94,9 @@ describe('PurchaseOrdersController', () => {
       );
 
       expect(result).toEqual({
-        collaborators: [...purchaseOrder.collaborators],
+        write_access: {
+          collaborators: [...purchaseOrder.collaborators],
+        },
         data: purchaseOrder,
         ownerId: 'user_id',
       });
@@ -124,7 +127,7 @@ describe('PurchaseOrdersController', () => {
         PurchaseOrdersController
       >(PurchaseOrdersController);
 
-      const updatedOrder = { ...purchaseOrder, po_number: 'updated_number' };
+      const updatedOrder = { ...purchaseOrder, number: 'updated_number' };
 
       const updateResult = await purchaseOrdersController.update(
         { id: 'id_to_update' },
@@ -136,13 +139,15 @@ describe('PurchaseOrdersController', () => {
         _id: 'id_to_update',
         ownerId: 'user_id',
       });
-      expect(centrifugeClientMock.documents.update_4).toHaveBeenCalledWith(
+      expect(centrifugeClientMock.purchaseOrders.update).toHaveBeenCalledWith(
         'find_one_document_id',
         {
           data: {
             ...updatedOrder,
           },
-          collaborators: ['new_collaborator'],
+          write_access: {
+            collaborators: ['new_collaborator']
+          },
         },
         config.admin.account,
       );

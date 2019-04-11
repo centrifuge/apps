@@ -15,7 +15,7 @@ import { SessionGuard } from '../auth/SessionGuard';
 import {
   InvoiceInvoiceData,
   InvoiceInvoiceResponse,
-} from '../../../clients/centrifuge-node/generated-client';
+} from '../../../clients/centrifuge-node';
 import { DatabaseService } from '../database/database.service';
 import { InvoiceData } from '../../../src/common/interfaces';
 import config from '../config';
@@ -41,12 +41,14 @@ export class InvoicesController {
     const collaborators = invoice.collaborators
       ? [...invoice.collaborators]
       : [];
-    const createResult = await this.centrifugeService.documents.create(
+    const createResult = await this.centrifugeService.invoices.create(
       {
         data: {
           ...invoice,
         },
-        collaborators,
+        write_access: {
+          collaborators,
+        },
       },
       config.admin.account,
     );
@@ -71,7 +73,7 @@ export class InvoicesController {
     return await Promise.all(
       invoices.map(async invoice => {
         const supplier = await this.database.contacts.findOne({
-          _id: invoice.sender_name,
+          _id: invoice.sender_company_name,
         });
 
         if (supplier) {
@@ -118,11 +120,13 @@ export class InvoicesController {
       { _id:  params.id, ownerId: request.user._id },
     );
 
-    const updateResult = await this.centrifugeService.documents.update(
+    const updateResult = await this.centrifugeService.invoices.update(
       invoice.header.document_id,
       {
         data: { ...updateInvoiceRequest },
-        collaborators: updateInvoiceRequest.collaborators,
+        write_access: {
+          collaborators: updateInvoiceRequest.collaborators,
+        }
       },
       config.admin.account,
     );
