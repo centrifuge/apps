@@ -4,14 +4,33 @@ import { AxisTheme } from '@centrifuge/axis-theme';
 
 import Routing from './Routing';
 import Header from './Header';
+import { connect } from 'react-redux';
+import { User } from './common/models/user';
+import { push, RouterAction } from 'connected-react-router';
 
-class App extends Component {
+interface AppPros {
+  selectedRoute: string;
+  loggedInUser: User | null;
+  push: (route) => RouterAction
+}
+
+
+class App extends Component<AppPros> {
   render() {
+    const {
+      selectedRoute,
+      loggedInUser,
+      push,
+    } = this.props;
     return (
       <div className="App">
         <AxisTheme>
           <Box fill align="center">
-            <Header/>
+            <Header
+              selectedRoute={selectedRoute}
+              loggedInUser={loggedInUser}
+              push={push}
+            />
             <Box
               justify="center"
               direction="row"
@@ -19,7 +38,7 @@ class App extends Component {
               border="top"
             >
               <Box width="xlarge">
-                <Routing/>
+                <Routing loggedInUser={loggedInUser}/>
               </Box>
             </Box>
 
@@ -30,4 +49,14 @@ class App extends Component {
   }
 }
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    selectedRoute: state.router.location.pathname,
+    loggedInUser: state.user.auth.loggedInUser,
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  { push },
+)(App);

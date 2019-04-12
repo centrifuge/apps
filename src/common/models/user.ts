@@ -2,7 +2,7 @@ import { ROLE } from '../constants';
 
 export interface IUser {
   username: string;
-  password: string;
+  password?: string;
   _id?: string;
   account?: string;
   permissions: ROLE[];
@@ -10,9 +10,9 @@ export interface IUser {
   invited: boolean;
 }
 
-export class User {
+export class User implements IUser{
   username: string;
-  password: string;
+  password?: string = "";
   _id?: string;
   account?: string;
   permissions: ROLE[] = [];

@@ -6,8 +6,7 @@ import logo from './logo.png';
 import invoicesRoutes from './invoices/routes';
 import contactsRoutes from './contacts/routes';
 import userRoutes from './user/routes';
-import { connect } from 'react-redux';
-import { push } from 'connected-react-router';
+import { User } from './common/models/user';
 
 interface MenuItem {
   label: string,
@@ -15,20 +14,21 @@ interface MenuItem {
   external?: boolean
 }
 
-interface NavBarProps {
+interface HeaderProps {
   selectedRoute: string,
+  loggedInUser: User | null,
   push: (route: string) => void
 }
 
-const Header: FunctionComponent<NavBarProps> = (props) => {
+const Header: FunctionComponent<HeaderProps> = (props) => {
 
-  const { selectedRoute, push } = props;
+  const { selectedRoute, push, loggedInUser } = props;
 
-  const mainMenuItems: MenuItem[] = [
+  const mainMenuItems: MenuItem[] = loggedInUser ? [
     { label: 'Invoices', route: invoicesRoutes.index },
     { label: 'Contacts', route: contactsRoutes.index },
     { label: 'Logout', route: userRoutes.logout, external: true },
-  ];
+  ] : [];
 
   return <Box
     justify="center"
@@ -66,12 +66,4 @@ const Header: FunctionComponent<NavBarProps> = (props) => {
 
 Header.displayName = 'Header';
 
-const mapStateToProps = (state) => {
-  return {
-    selectedRoute: state.router.location.pathname,
-  };
-};
-export default connect(
-  mapStateToProps,
-  { push },
-)(Header);
+export default Header

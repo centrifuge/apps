@@ -11,7 +11,7 @@ import { LoginState } from '../store/reducers/user/auth';
 
 type ConnectedLoginPageProps = {
   login: (user: User) => void;
-  loggedIn: boolean;
+  loggedInUser: boolean;
 } & RouteComponentProps;
 
 class ConnectedLoginPage extends React.Component<ConnectedLoginPageProps> {
@@ -20,7 +20,7 @@ class ConnectedLoginPage extends React.Component<ConnectedLoginPageProps> {
   };
 
   render() {
-    return this.props.loggedIn ? (
+    return this.props.loggedInUser ? (
       <Redirect to={routes.invoices.index} />
     ) : (
       <LoginForm onSubmit={this.login} />
@@ -30,7 +30,7 @@ class ConnectedLoginPage extends React.Component<ConnectedLoginPageProps> {
 
 const mapStateToProps = (state: { user: { auth: LoginState } }) => {
   return {
-    loggedIn: !!state.user.auth.loggedIn,
+    loggedInUser: !!state.user.auth.loggedInUser,
   };
 };
 

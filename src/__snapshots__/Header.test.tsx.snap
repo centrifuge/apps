@@ -1,3 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Header matches snapshot 1`] = `<Connect(Header) />`;
+exports[`Header Should not render main menu 1`] = `
+<Header
+  loggedInUser={null}
+  push={[Function]}
+  selectedRoute="/"
+/>
+`;
+
+exports[`Header Should render main menu 1`] = `
+<Header
+  loggedInUser={
+    User {
+      "_id": undefined,
+      "account": undefined,
+      "enabled": false,
+      "invited": false,
+      "password": "",
+      "permissions": Array [],
+      "username": undefined,
+    }
+  }
+  push={[Function]}
+  selectedRoute="/"
+/>
+`;

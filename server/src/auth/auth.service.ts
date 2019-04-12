@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { promisify } from 'util';
 
@@ -9,34 +9,33 @@ import { DatabaseService } from '../database/database.service';
 export class AuthService {
   constructor(
     private readonly database: DatabaseService,
-  ) {}
+  ) {
+  }
 
   /**
    * Checks that a user/password pair exists in the database
    * @async
-   * @param {string} username
-   * @param {string} password
+   * @param {string} usernameValue
+   * @param {string} passwordValue
    *
    * @return {Promise<User|null>} promise - a promise with the validation results. If successful
    * will return the user, otherwise it returns null.
    */
-  async validateUser(username: string, password: string): Promise<User | null> {
-    const user: User = await this.database.users.findOne({ username });
-    if (user) {
-      if (!user.enabled) {
-        return null;
-      }
+  async validateUser(usernameValue: string, passwordValue: string): Promise<User | null> {
+    const databaseUser: User = await this.database.users.findOne({ username: usernameValue });
+    if (!databaseUser || !databaseUser.enabled)
+      return null;
+    // make sure we do not return the password
+    const { password, ...user } = databaseUser;
+    const passwordMatch = await promisify(bcrypt.compare)(
+      passwordValue,
+      password,
+    );
 
-      const passwordMatch = await promisify(bcrypt.compare)(
-        password,
-        user.password,
-      );
-
-      if (passwordMatch) {
-        return user;
-      }
+    if (!passwordMatch) {
+      return null;
     }
 
-    return null;
+    return user;
   }
 }

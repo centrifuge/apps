@@ -1,21 +1,9 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpException,
-  HttpStatus,
-  Post,
-  Request,
-  Response,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Post, Request, Response } from '@nestjs/common';
 
 import * as bcrypt from 'bcrypt';
 import { promisify } from 'util';
 import { ROUTES } from '../../../src/common/constants';
 import { User } from '../../../src/common/models/user';
-import { SessionGuard } from '../auth/SessionGuard';
 import { DatabaseService } from '../database/database.service';
 import config from '../config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
@@ -30,12 +18,11 @@ export class UsersController {
 
   @Post('login')
   @HttpCode(200)
-  async login(@Body() user: User,@Request() req) {
-    return 'OK';
+  async login(@Body() user: User, @Request() req): Promise<User> {
+    return req.user;
   }
 
   @Get('logout')
-  @UseGuards(new SessionGuard())
   async logout(@Request() req, @Response() res) {
     req.logout();
     return res.redirect('/');
@@ -61,7 +48,7 @@ export class UsersController {
           existingUser._id,
         );
       } else {
-          throw new HttpException('Username taken!', HttpStatus.FORBIDDEN);
+        throw new HttpException('Username taken!', HttpStatus.FORBIDDEN);
       }
     } else {
       if (existingUser) {
@@ -99,24 +86,22 @@ export class UsersController {
     });
   }
 
-    private async upsertUser(user: User, id: string = '') {
+  private async upsertUser(user: User, id: string = '') {
 
-      // Create centrifuge identity in case user does not have one
-      if (!user.account) {
-        const account = await this.centrifugeService.accounts.generateAccount(
-          config.admin.account,
-        );
-        user.account = account.identity_id;
-      }
+    // Create centrifuge identity in case user does not have one
+    if (!user.account) {
+      const account = await this.centrifugeService.accounts.generateAccount(
+        config.admin.account,
+      );
+      user.account = account.identity_id;
+    }
 
-      // Hash Password, and invited one should not have a password
-      if (user.password) {
-        user.password = await promisify(bcrypt.hash)(user.password, 10);
-      }
-      const result: User = await this.databaseService.users.updateById(id, user,true );
-      // TODO return "public" User here not just the id
-      return result._id;
+    // Hash Password, and invited one should not have a password
+    if (user.password) {
+      user.password = await promisify(bcrypt.hash)(user.password, 10);
+    }
+    const result: User = await this.databaseService.users.updateById(id, user, true);
+    // TODO return "public" User here not just the id
+    return result._id;
   }
-
-
 }

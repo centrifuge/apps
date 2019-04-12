@@ -45,7 +45,7 @@
     "build:frontend": "react-scripts build",
     "test:frontend": "react-scripts test --coverage",
     "start:backend": "nodemon",
-    "test:backend": "jest --config server/jest.config.js --watch",
+    "test:backend": "jest --config server/jest.config.js",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

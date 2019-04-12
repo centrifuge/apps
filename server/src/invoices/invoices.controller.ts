@@ -126,7 +126,7 @@ export class InvoicesController {
         data: { ...updateInvoiceRequest },
         write_access: {
           collaborators: updateInvoiceRequest.collaborators,
-        }
+        },
       },
       config.admin.account,
     );
