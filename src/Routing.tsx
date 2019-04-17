@@ -19,12 +19,12 @@ const Routing: FunctionComponent<RoutingProps> = (props) => {
     const authorized = !!props.loggedInUser;
     return (
       <Switch>
-        <ProtectedRoute exact path={routes.user.register} component={RegisterPage} authorized={authorized}/>
+        <Route exact path={routes.index} component={LoginPage}/>
+        <Route exact path={routes.user.register} component={RegisterPage}/>
         <ProtectedRoute exact path={routes.invoices.new} component={CreateInvoice} authorized={authorized}/>
         <ProtectedRoute exact path={routes.invoices.update} component={EditInvoice} authorized={authorized}/>
         <ProtectedRoute exact path={routes.invoices.index} component={Invoices} authorized={authorized}/>
         <ProtectedRoute exact path={routes.contacts.index} component={Contacts} authorized={authorized}/>
-        <Route exact path={routes.index} component={LoginPage}/>
         <Redirect to={routes.index}/>
       </Switch>
     );
