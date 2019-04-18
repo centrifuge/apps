@@ -1,36 +1,53 @@
 import React from 'react';
-import { Box, Button, DataTable, Heading, Text } from 'grommet';
-import { Add, Edit, More } from 'grommet-icons';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-
+import { getInvoices, resetGetInvoices } from '../store/actions/invoices';
+import { RequestState } from '../store/reducers/http-request-reducer';
+import { InvoiceData, InvoiceResponse } from '../common/interfaces';
+import { Box, Button, DataTable, Heading, Text } from 'grommet';
 import invoiceRoutes from './routes';
-import { InvoiceData } from '../common/interfaces';
+import { Edit, View } from 'grommet-icons';
 import { RouteComponentProps, withRouter } from 'react-router';
 
-// Casting to "any" until https://github.com/grommet/grommet/issues/2464 is fixed
-const DataTableSupressedWarning = DataTable as any;
 
-type InvoicesProps = { invoices: InvoiceData[] };
+type ViewInvoicesProps = {
+  getInvoices: () => void;
+  resetGetInvoices: () => void;
+  invoices?: InvoiceData[];
+  loading: boolean;
+};
 
-class InvoiceList extends React.Component<InvoicesProps & RouteComponentProps> {
-  displayName = 'Invoices';
+class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProps> {
+  displayName = 'InvoiceList';
+  componentDidMount() {
+    this.props.getInvoices();
+  }
+
+  componentWillUnmount() {
+    this.props.resetGetInvoices();
+  }
+
 
   render() {
-    return (
+
+    if (this.props.loading || !this.props.invoices) {
+      return 'Loading';
+    }
+
+    return  (
       <Box fill>
         <Box justify="between" direction="row" align="center">
           <Heading level="3">Invoices</Heading>
           <Link to={invoiceRoutes.new}>
             <Button
-              icon={<Add color="white" size="small" />}
               primary
-              label="Add new"
+              label="Create Invoice"
             />
           </Link>
         </Box>
 
         <Box>
-          <DataTableSupressedWarning
+          <DataTable
             data={this.props.invoices}
             columns={[
               {
@@ -56,10 +73,17 @@ class InvoiceList extends React.Component<InvoicesProps & RouteComponentProps> {
                 header: 'Actions',
                 render: datum => (
                   <Box direction="row" gap="small">
+                    <View
+                      onClick={() =>
+                        this.props.history.push(
+                          invoiceRoutes.view.replace(':id',datum._id),
+                        )
+                      }
+                    />
                     <Edit
                       onClick={() =>
                         this.props.history.push(
-                          `${invoiceRoutes.index}/${datum._id}`,
+                          invoiceRoutes.edit.replace(':id',datum._id),
                         )
                       }
                     />
@@ -74,4 +98,23 @@ class InvoiceList extends React.Component<InvoicesProps & RouteComponentProps> {
   }
 }
 
-export default withRouter(InvoiceList);
+const mapStateToProps = (state: {
+  invoices: {
+    get: RequestState<InvoiceResponse[]>;
+  };
+}) => {
+  return {
+    invoices:
+      state.invoices.get.data &&
+      (state.invoices.get.data.map(response => ({
+        ...response.data,
+        _id: response._id,
+      })) as InvoiceData[]),
+    loading: state.invoices.get.loading,
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  { getInvoices, resetGetInvoices },
+)(withRouter(InvoiceList));

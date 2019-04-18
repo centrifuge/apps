@@ -1,11 +1,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import renderer from 'react-test-renderer';
-import { createStore } from 'redux';
-import getRootReducer from './../store/reducers';
 import InvoiceForm from './InvoiceForm';
-
-const store = createStore(getRootReducer({}), { router: { location: { pathname: '/' } } });
+import { BrowserRouter } from 'react-router-dom';
 
 describe('InvoiceForm', () => {
 
@@ -22,17 +19,17 @@ describe('InvoiceForm', () => {
   ];
 
   const onSubmit = jest.fn(() => {
-
   });
 
   const onCancel = jest.fn(() => {
-
   });
 
   it('Should not render empty form', () => {
     const invoice = {};
     const bodyShallow = renderer.create(
-      <InvoiceForm invoice={invoice}  contacts={contacts} onCancel={onCancel} onSubmit={onSubmit}/>,
+      <BrowserRouter>
+        <InvoiceForm invoice={invoice} contacts={contacts} onCancel={onCancel} onSubmit={onSubmit}/>
+      </BrowserRouter>,
     ).toJSON();
     expect(bodyShallow).toMatchSnapshot();
   });
@@ -43,7 +40,9 @@ describe('InvoiceForm', () => {
       recipient: contacts[1].value,
     };
     const bodyShallow = renderer.create(
-      <InvoiceForm invoice={invoice}  contacts={contacts} onCancel={onCancel} onSubmit={onSubmit}/>,
+      <BrowserRouter>
+        <InvoiceForm invoice={invoice} contacts={contacts} onCancel={onCancel} onSubmit={onSubmit}/>
+      </BrowserRouter>,
     ).toJSON();
     expect(bodyShallow).toMatchSnapshot();
   });

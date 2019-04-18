@@ -24,8 +24,6 @@ type ConnectedEditInvoiceProps = {
   resetGetInvoiceById: () => void;
   getContacts: () => void;
   resetGetContacts: () => void;
-  invoiceLoading: boolean;
-  contactsLoading: boolean;
   invoice?: Invoice;
   contacts?: LabelValuePair[];
 } & RouteComponentProps<{ id?: string }>;
@@ -56,11 +54,7 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
   };
 
   render() {
-    if (this.props.invoiceLoading) {
-      return 'Loading invoice';
-    }
-
-    if (this.props.contactsLoading || !this.props.contacts) {
+    if (!this.props.invoice || !this.props.contacts) {
       return 'Loading';
     }
 
@@ -83,13 +77,10 @@ export default connect(
     contacts: { get: RequestState<Contact[]> };
   }) => {
     return {
-      invoiceLoading: state.invoices.getById.loading,
       invoice: state.invoices.getById.data && {
         _id: state.invoices.getById.data._id,
-        ...state.invoices.getById.data.data,
-        collaborators: state.invoices.getById.data.header!.write_access!.collaborators,
+        ...state.invoices.getById.data.data
       },
-      contactsLoading: state.contacts.get.loading,
       contacts: state.contacts.get.data
         ? (state.contacts.get.data.map(contact => ({
             label: contact.name,

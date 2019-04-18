@@ -11,21 +11,27 @@ import { ConnectedShipToForm } from './invoice-form-partials/ShipToForm';
 import { ConnectedRemitToForm } from './invoice-form-partials/RemitToForm';
 import { ConnectedPaymentForm } from './invoice-form-partials/PaymentForm';
 import { ConnectedCreditNoteForm } from './invoice-form-partials/CreditNoteForm';
+import routes from '../routes';
+import { LinkPrevious } from 'grommet-icons';
 
 type InvoiceFormProps = {
-  onSubmit: (invoice: Invoice) => void;
-  onCancel: () => void;
+  onSubmit?: (invoice: Invoice) => void;
+  onCancel?: () => void;
   contacts: LabelValuePair[];
-  invoice?: Invoice;
+  invoice: Invoice;
 };
 
 export default class InvoiceForm extends React.Component<InvoiceFormProps> {
   displayName = 'CreateEditInvoice';
+  static defaultProps: InvoiceFormProps = {
+    invoice: {},
+    contacts: [],
+  };
 
   state = { submitted: false };
 
   onSubmit = (values: Invoice) => {
-    return this.props.onSubmit({ ...values });
+    return this.props.onSubmit && this.props.onSubmit({ ...values });
   };
 
 
@@ -37,52 +43,58 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
     const sectionGap = 'xlarge';
 
     return (
-      <Formik
-        validate={values => {
-          const errors = {};
-          // Parse Values and do errors
-          return errors;
-        }}
-        initialValues={invoice}
-        validateOnBlur={submitted}
-        validateOnChange={submitted}
-        onSubmit={(values, { setSubmitting }) => {
-          if (!values) return;
-          this.onSubmit(values);
-          setSubmitting(true);
-        }}
-      >
-        {
-          ({
-             values,
-             errors,
-             handleChange,
-             handleSubmit,
-           }) => (
-            <form
-              onSubmit={event => {
-                event.preventDefault();
-                this.setState({ submitted: true });
-                handleSubmit();
-              }}
-            >
-              {/* Header */}
-              <Box justify="between" direction="row" align="center">
-                <Heading level="3">
-                  {this.props.invoice ? 'Update Invoice' : 'New Invoice'}
-                </Heading>
-                <Box direction="row" gap={columnGap}>
-                  <Button
-                    type="submit"
-                    primary
-                    label="Send"
-                  />
-                  <Button active={false} onClick={this.props.onCancel} label="Discard"/>
-                </Box>
-              </Box>
+      <Box pad={{ bottom: 'large' }}>
+        <Formik
+          validate={values => {
+            const errors = {};
+            // Parse Values and do errors
+            return errors;
+          }}
+          initialValues={invoice}
+          validateOnBlur={submitted}
+          validateOnChange={submitted}
+          onSubmit={(values, { setSubmitting }) => {
+            if (!values) return;
+            this.onSubmit(values);
+            setSubmitting(true);
+          }}
+        >
+          {
+            ({
+               values,
+               errors,
+               handleChange,
+               handleSubmit,
+             }) => (
+              <form
+                onSubmit={event => {
+                  event.preventDefault();
+                  this.setState({ submitted: true });
+                  handleSubmit();
+                }}
+              >
+                {/* Header */}
+                <Box justify="between" direction="row" align="center">
+                  <Box direction="row" gap="small" align="center">
+                    <Link to={routes.invoices.index} size="large">
+                      <LinkPrevious/>
+                    </Link>
+                    <Heading level="3">
+                      {this.props.invoice ? 'Update Invoice' : 'New Invoice'}
+                    </Heading>
+                  </Box>
 
-              {/* Body */}
-              <Box>
+                  <Box direction="row" gap={columnGap}>
+                    <Button
+                      type="submit"
+                      primary
+                      label="Send"
+                    />
+                    <Button active={false} onClick={this.props.onCancel} label="Discard"/>
+                  </Box>
+                </Box>
+
+                {/* Body */}
                 <Box direction="column" gap={sectionGap}>
                   {/* Invoice number section */}
                   <Box>
@@ -92,22 +104,22 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
                     >
                       <TextInput
                         name="number"
-                        value={values!.number || ''}
+                        value={values!.number}
                         onChange={handleChange}
                       />
                     </FormField>
                   </Box>
 
                   {/*Sender and Recipient */}
-                  <Box direction="row" gap={columnGap} >
+                  <Box direction="row" gap={columnGap}>
                     <ConnectedSenderForm columnGap={columnGap} contacts={this.props.contacts}/>
                     <ConnectedRecipientForm columnGap={columnGap} contacts={this.props.contacts}/>
                   </Box>
 
                   {/*Ship to and Remit to */}
                   <Box direction="row" gap={columnGap}>
-                      <ConnectedShipToForm columnGap={columnGap}/>
-                      <ConnectedRemitToForm columnGap={columnGap}/>
+                    <ConnectedShipToForm columnGap={columnGap}/>
+                    <ConnectedRemitToForm columnGap={columnGap}/>
                   </Box>
 
                   {/* Payment section */}
@@ -134,11 +146,12 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
                     </FormField>
                   </Box>
                 </Box>
-              </Box>
-            </form>
-          )
-        }
-      </Formik>);
+              </form>
+            )
+          }
+        </Formik>
+      </Box>
+    );
 
   }
 }
