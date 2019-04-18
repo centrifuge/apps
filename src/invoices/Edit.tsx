@@ -87,7 +87,7 @@ export default connect(
       invoice: state.invoices.getById.data && {
         _id: state.invoices.getById.data._id,
         ...state.invoices.getById.data.data,
-        collaborators: state.invoices.getById.data.header!.collaborators,
+        collaborators: state.invoices.getById.data.header!.write_access!.collaborators,
       },
       contactsLoading: state.contacts.get.loading,
       contacts: state.contacts.get.data
