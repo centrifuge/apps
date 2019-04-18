@@ -79,9 +79,8 @@ export class InvoiceDetails extends React.Component<CoonectedInvoiceDetailsProps
               <Box>
                 <DisplayField
                   label="Invoice number"
-                >
-                  <Text>{invoice!.number}</Text>
-                </DisplayField>
+                  value={invoice!.number}
+                />
               </Box>
             </Box>
 
@@ -132,9 +131,8 @@ export class InvoiceDetails extends React.Component<CoonectedInvoiceDetailsProps
             <Box>
               <DisplayField
                 label="Comments"
-              >
-                <Text>{invoice!.comment}</Text>
-              </DisplayField>
+                value={invoice!.comment}
+              />
             </Box>
           </Box>
         </Box>
