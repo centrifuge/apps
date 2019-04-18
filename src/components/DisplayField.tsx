@@ -17,7 +17,7 @@ export const DisplayField = styled(FormFieldWrapper)`
   // Change the border color to a lighter gray
    & > div {
     padding: 2px 0px;
-    // Force height on display field when 
+    // Force height on display field when value is empty
     > p:after {
       content: '';
       display: inline-block;
