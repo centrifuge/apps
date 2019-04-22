@@ -21,7 +21,7 @@ import { RemitTo } from './invoice-details-partials/RemitTo';
 import { Payment } from './invoice-details-partials/Payment';
 import { CreditNote } from './invoice-details-partials/CreditNote';
 
-type CoonectedInvoiceDetailsProps = {
+type ConnectedInvoiceDetailsProps = {
   getInvoiceById: (id: string) => void;
   resetGetInvoiceById: () => void;
   getContacts: () => void;
@@ -30,7 +30,7 @@ type CoonectedInvoiceDetailsProps = {
   contacts?: LabelValuePair[];
 } & RouteComponentProps<{ id?: string }>;
 
-export class InvoiceDetails extends React.Component<CoonectedInvoiceDetailsProps> {
+export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps> {
   displayName = 'InvoiceDetails';
 
   componentDidMount() {
