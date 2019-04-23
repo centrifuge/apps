@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from 'react';
 import { Redirect, Route, Switch } from 'react-router';
 import routes from './routes';
-import Invoices from './invoices/View';
+import InvoiceList from './invoices/InvoiceList';
 import CreateInvoice from './invoices/Create';
 import EditInvoice from './invoices/Edit';
 import Contacts from './contacts/View';
@@ -9,6 +9,7 @@ import LoginPage from './user/Login';
 import RegisterPage from './user/Register';
 import { User } from './common/models/user';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ConnectedInvoiceDetails } from './invoices/InvoiceDetails';
 
 
 interface RoutingProps {
@@ -16,14 +17,17 @@ interface RoutingProps {
 }
 
 const Routing: FunctionComponent<RoutingProps> = (props) => {
-    const authorized = !!props.loggedInUser;
+    //TODO remove this when store is injected from middleware
+    // Hack to not login every time
+    const authorized = process.env.NODE_ENV === 'development' ? true : !!props.loggedInUser;
     return (
       <Switch>
         <Route exact path={routes.index} component={LoginPage}/>
         <Route exact path={routes.user.register} component={RegisterPage}/>
         <ProtectedRoute exact path={routes.invoices.new} component={CreateInvoice} authorized={authorized}/>
-        <ProtectedRoute exact path={routes.invoices.update} component={EditInvoice} authorized={authorized}/>
-        <ProtectedRoute exact path={routes.invoices.index} component={Invoices} authorized={authorized}/>
+        <ProtectedRoute exact path={routes.invoices.view} component={ConnectedInvoiceDetails} authorized={authorized}/>
+        <ProtectedRoute exact path={routes.invoices.edit} component={EditInvoice} authorized={authorized}/>
+        <ProtectedRoute exact path={routes.invoices.index} component={InvoiceList} authorized={authorized}/>
         <ProtectedRoute exact path={routes.contacts.index} component={Contacts} authorized={authorized}/>
         <Redirect to={routes.index}/>
       </Switch>
@@ -32,5 +36,5 @@ const Routing: FunctionComponent<RoutingProps> = (props) => {
 ;
 
 Routing.displayName = 'Body';
-export default Routing
+export default Routing;
 

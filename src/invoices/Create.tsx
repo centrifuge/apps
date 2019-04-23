@@ -11,6 +11,7 @@ import { InvoiceInvoiceData } from '../../clients/centrifuge-node';
 import { Contact } from '../common/models/contact';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
 import { LabelValuePair } from '../common/interfaces';
+import routes from './routes';
 
 type ConnectedCreateInvoiceProps = {
   createInvoice: (invoice: Invoice) => void;
@@ -18,13 +19,11 @@ type ConnectedCreateInvoiceProps = {
   getContacts: () => void;
   resetGetContacts: () => void;
   creatingInvoice: boolean;
-  contactsLoading: boolean;
   contacts?: LabelValuePair[];
 } & RouteComponentProps;
 
-class ConnectedCreateInvoice extends React.Component<
-  ConnectedCreateInvoiceProps
-> {
+class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps> {
+
   componentDidMount() {
     if (!this.props.contacts) {
       this.props.getContacts();
@@ -41,16 +40,17 @@ class ConnectedCreateInvoice extends React.Component<
   };
 
   onCancel = () => {
-    this.props.history.goBack();
+    this.props.history.push(routes.index);
   };
 
   render() {
-    if (this.props.creatingInvoice) {
-      return 'Creating invoice';
+
+    if (!this.props.contacts) {
+      return 'Loading';
     }
 
-    if (this.props.contactsLoading || !this.props.contacts) {
-      return 'Loading';
+    if (this.props.creatingInvoice) {
+      return 'Creating invoice';
     }
 
     return (
@@ -70,12 +70,11 @@ export default connect(
   }) => {
     return {
       creatingInvoice: state.invoices.create.loading,
-      contactsLoading: state.contacts.get.loading,
       contacts: state.contacts.get.data
         ? (state.contacts.get.data.map(contact => ({
-            label: contact.name,
-            value: contact.address,
-          })) as LabelValuePair[])
+          label: contact.name,
+          value: contact.address,
+        })) as LabelValuePair[])
         : undefined,
     };
   },
