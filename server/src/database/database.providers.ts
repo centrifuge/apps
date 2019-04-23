@@ -8,7 +8,7 @@ import {
   InvoiceResponse,
   PurchaseOrderResponse,
 } from '../../../src/common/interfaces';
-import { ROLE } from '../../../src/common/constants';
+import { PERMISSIONS } from '../../../src/common/constants';
 import { DatabaseService } from './database.service';
 
 // TODO refactor this in mutiple providers,services
@@ -31,7 +31,7 @@ const initializeDatabase = async () => {
     enabled: true,
     invited: false,
     account: config.admin.account,
-    permissions: [ROLE.CAN_INVITE, ROLE.CAN_MANAGE_USERS, ROLE.CAN_MANAGE_ACCOUNTS],
+    permissions: [PERMISSIONS.CAN_INVITE, PERMISSIONS.CAN_MANAGE_USERS, PERMISSIONS.CAN_MANAGE_ACCOUNTS],
   };
 
   const userExists = await usersRepository.findOne({
