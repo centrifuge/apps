@@ -6,14 +6,13 @@ import {
   resetGetAllUsers
 } from '../../store/actions/users';
 import { RequestState } from '../../store/reducers/http-request-reducer';
-import {Box, Button, DataTable, Heading, Text, Layer, FormField, TextInput } from 'grommet';
+import { Box, Button, DataTable, Heading, Text, Layer, FormField, TextInput } from 'grommet';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup'
 import { User } from "../../common/models/user";
 
 type UsersListProps = {
-
   getAllUsers: () => void;
   resetGetAllUsers: () => void;
   loading: boolean;
@@ -30,6 +29,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
   }
 
   componentWillUnmount() {
+    this.props.resetGetAllUsers()
   }
 
   // onSubmit = (values: Invoice) => {
