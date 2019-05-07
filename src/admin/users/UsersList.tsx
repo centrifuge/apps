@@ -16,11 +16,6 @@ type UsersListProps = {
 
   getAllUsers: () => void;
   resetGetAllUsers: () => void;
-  // getAllAccounts: () => void;
-  // resetGetAllAccounts: () => void;
-  // resetGenerateAccount: () => void;
-  // generateAccount: () => void;
-  // accounts?: AccountGetAllAccountResponse[];
   loading: boolean;
 };
 
