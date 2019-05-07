@@ -28,6 +28,13 @@ export class UsersController {
     return res.redirect('/');
   }
 
+  @Get()
+  async getAllUsers(@Request() req, @Response() res) {
+    const users = await this.databaseService.users.find({});
+    console.log(users, 'users')
+    return users
+  }
+
   @Post('register')
   async register(@Body() user: User) {
 

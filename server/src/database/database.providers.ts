@@ -1,15 +1,12 @@
-import { promisify } from 'util';
+import {promisify} from 'util';
 import * as bcrypt from 'bcrypt';
-import { User } from '../../../src/common/models/user';
-import { DatabaseRepository } from './database.repository';
-import { Contact } from '../../../src/common/models/contact';
+import {User} from '../../../src/common/models/user';
+import {DatabaseRepository} from './database.repository';
+import {Contact} from '../../../src/common/models/contact';
 import config from '../config';
-import {
-  InvoiceResponse,
-  PurchaseOrderResponse,
-} from '../../../src/common/interfaces';
-import { PERMISSIONS } from '../../../src/common/constants';
-import { DatabaseService } from './database.service';
+import {InvoiceResponse, PurchaseOrderResponse,} from '../../../src/common/interfaces';
+import {PERMISSIONS} from '../../../src/common/constants';
+import {DatabaseService} from './database.service';
 
 // TODO refactor this in mutiple providers,services
 
@@ -31,7 +28,7 @@ const initializeDatabase = async () => {
     enabled: true,
     invited: false,
     account: config.admin.account,
-    permissions: [PERMISSIONS.CAN_INVITE, PERMISSIONS.CAN_MANAGE_USERS, PERMISSIONS.CAN_MANAGE_ACCOUNTS, PERMISSIONS.CAN_LIST_USERS],
+    permissions: [PERMISSIONS.CAN_MANAGE_USERS, PERMISSIONS.CAN_MANAGE_ACCOUNTS, PERMISSIONS.CAN_CREATE_INVOICES, PERMISSIONS.CAN_FUND_INVOICES],
   };
 
   const userExists = await usersRepository.findOne({

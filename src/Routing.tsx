@@ -7,10 +7,10 @@ import EditInvoice from './invoices/Edit';
 import Contacts from './contacts/View';
 import LoginPage from './user/Login';
 import RegisterPage from './user/Register';
+import UsersList from './admin/users/UsersList';
 import { User } from './common/models/user';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ConnectedInvoiceDetails } from './invoices/InvoiceDetails';
-
 
 interface RoutingProps {
   loggedInUser: User | null;
@@ -24,6 +24,7 @@ const Routing: FunctionComponent<RoutingProps> = (props) => {
       <Switch>
         <Route exact path={routes.index} component={LoginPage}/>
         <Route exact path={routes.user.register} component={RegisterPage}/>
+        <ProtectedRoute exact path={routes.user.list} component={UsersList} authorized={authorized}/>
         <ProtectedRoute exact path={routes.invoices.new} component={CreateInvoice} authorized={authorized}/>
         <ProtectedRoute exact path={routes.invoices.view} component={ConnectedInvoiceDetails} authorized={authorized}/>
         <ProtectedRoute exact path={routes.invoices.edit} component={EditInvoice} authorized={authorized}/>
