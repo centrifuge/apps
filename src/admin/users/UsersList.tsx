@@ -133,11 +133,9 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
   }
 
   render() {
-    console.log(this.props, this.state, 'props')
-  if (this.props.loading || !this.props.users
-  ) {
-  return 'There are no whitelisted accounts for this application yet. As an admin, you can create and whitelist new user accounts.';
-  }
+    if (this.props.loading || !this.props.users) {
+      return 'There are no whitelisted accounts for this application yet. As an admin, you can create and whitelist new user accounts.';
+    }
 
     return  (
         <Box fill>
@@ -161,12 +159,11 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
 export default connect(
     (state: {
       user: {
-        get: RequestState<User[]>;
+        list: RequestState<User[]>;
       };
     }) => {
       return {
-        users: state.user.get.data,
-        show: false
+        users: state.user.list.data,
       };
     },
     {

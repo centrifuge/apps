@@ -4,11 +4,12 @@ import { DatabaseModule } from '../database/database.module';
 import * as passport from 'passport';
 import { ROUTES } from '../../../src/common/constants';
 import { CentrifugeModule } from '../centrifuge-client/centrifuge.module';
+import {AuthModule} from "../auth/auth.module";
 
 @Module({
   controllers: [UsersController],
   providers: [],
-  imports: [DatabaseModule, CentrifugeModule],
+  imports: [DatabaseModule, AuthModule, CentrifugeModule],
 })
 export class UsersModule implements NestModule {
   configure(consumer: MiddlewareConsumer): MiddlewareConsumer | void {

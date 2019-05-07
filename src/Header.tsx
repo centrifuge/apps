@@ -37,7 +37,7 @@ const Header: FunctionComponent<HeaderProps> = (props) => {
 
     if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
       mainMenuItems.unshift(
-          {label: 'Users', route: userRoutes.list},
+          {label: 'Users', route: userRoutes.index},
       )
     }
   }

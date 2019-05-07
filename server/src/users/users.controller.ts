@@ -1,4 +1,15 @@
-import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Post, Request, Response } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpException,
+  HttpStatus,
+  Post,
+  Request,
+  Response,
+  UseGuards
+} from '@nestjs/common';
 
 import * as bcrypt from 'bcrypt';
 import { promisify } from 'util';
@@ -7,6 +18,7 @@ import { User } from '../../../src/common/models/user';
 import { DatabaseService } from '../database/database.service';
 import config from '../config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
+import {UserAuthGuard} from "../auth/admin.auth.guard";
 
 @Controller(ROUTES.USERS.base)
 export class UsersController {
@@ -29,10 +41,9 @@ export class UsersController {
   }
 
   @Get()
-  async getAllUsers(@Request() req, @Response() res) {
-    const users = await this.databaseService.users.find({});
-    console.log(users, 'users')
-    return users
+  @UseGuards(UserAuthGuard)
+  async getAllUsers(@Request() request) {
+    return await this.databaseService.users.find({});
   }
 
   @Post('register')

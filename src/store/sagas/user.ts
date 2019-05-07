@@ -38,8 +38,7 @@ export function* registerUser(action) {
 
 export function* getAllUsers() {
   try {
-    const response = yield call(httpClient.user.read);
-    console.log('************', response)
+    const response = yield call(httpClient.user.list);
     yield put({
       type: getAllUsersAction.success,
       payload: response.data,

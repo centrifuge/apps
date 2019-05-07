@@ -8,6 +8,6 @@ import {
 import { User } from '../../../common/models/user';
 
 const register = httpRequestReducer(userRegisterAction);
-const get = httpRequestReducer<User[]>(getAllUsersAction);
+const list = httpRequestReducer<User[]>(getAllUsersAction);
 // TODO this needs to be refactored. The store needs a user list for the invite functionality
-export default combineReducers({ auth, register, get });
+export default combineReducers({ auth, register, list });
