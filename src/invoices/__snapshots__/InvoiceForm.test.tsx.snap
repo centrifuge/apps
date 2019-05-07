@@ -8,69 +8,6 @@ exports[`InvoiceForm Should not render empty form 1`] = `
     onSubmit={[Function]}
   >
     <div
-      className="StyledBox-sc-13pk1d4-0 erazuK"
-    >
-      <div
-        className="StyledBox-sc-13pk1d4-0 gQLnBt"
-      >
-        <a
-          href="/invoices"
-          onClick={[Function]}
-          size="large"
-        >
-          <svg
-            aria-label="LinkPrevious"
-            className="StyledIcon-ofa7kd-0 iOkQrb"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M2,12 L22,12 M13,3 L22,12 L13,21"
-              fill="none"
-              stroke="#000"
-              strokeWidth="2"
-              transform="matrix(-1 0 0 1 24 0)"
-            />
-          </svg>
-        </a>
-        <div
-          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 iChEkS"
-        />
-        <h3
-          className="StyledHeading-sc-1rdh4aw-0 gRvHvF"
-        >
-          Update Invoice
-        </h3>
-      </div>
-      <div
-        className="StyledBox-sc-13pk1d4-0 ffeAql"
-      >
-        <button
-          className="StyledButton-sc-323bzc-0 aNlbA"
-          onBlur={[Function]}
-          onFocus={[Function]}
-          onMouseOut={[Function]}
-          onMouseOver={[Function]}
-          type="submit"
-        >
-          Send
-        </button>
-        <div
-          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-        />
-        <button
-          className="StyledButton-sc-323bzc-0 kHrfdt"
-          onBlur={[Function]}
-          onClick={[MockFunction]}
-          onFocus={[Function]}
-          onMouseOut={[Function]}
-          onMouseOver={[Function]}
-          type="button"
-        >
-          Discard
-        </button>
-      </div>
-    </div>
-    <div
       className="StyledBox-sc-13pk1d4-0 IRSNj"
     >
       <div
@@ -1612,69 +1549,6 @@ exports[`InvoiceForm Should not render form with sender and recipient selected 1
   <form
     onSubmit={[Function]}
   >
-    <div
-      className="StyledBox-sc-13pk1d4-0 erazuK"
-    >
-      <div
-        className="StyledBox-sc-13pk1d4-0 gQLnBt"
-      >
-        <a
-          href="/invoices"
-          onClick={[Function]}
-          size="large"
-        >
-          <svg
-            aria-label="LinkPrevious"
-            className="StyledIcon-ofa7kd-0 iOkQrb"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M2,12 L22,12 M13,3 L22,12 L13,21"
-              fill="none"
-              stroke="#000"
-              strokeWidth="2"
-              transform="matrix(-1 0 0 1 24 0)"
-            />
-          </svg>
-        </a>
-        <div
-          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 iChEkS"
-        />
-        <h3
-          className="StyledHeading-sc-1rdh4aw-0 gRvHvF"
-        >
-          Update Invoice
-        </h3>
-      </div>
-      <div
-        className="StyledBox-sc-13pk1d4-0 ffeAql"
-      >
-        <button
-          className="StyledButton-sc-323bzc-0 aNlbA"
-          onBlur={[Function]}
-          onFocus={[Function]}
-          onMouseOut={[Function]}
-          onMouseOver={[Function]}
-          type="submit"
-        >
-          Send
-        </button>
-        <div
-          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-        />
-        <button
-          className="StyledButton-sc-323bzc-0 kHrfdt"
-          onBlur={[Function]}
-          onClick={[MockFunction]}
-          onFocus={[Function]}
-          onMouseOut={[Function]}
-          onMouseOver={[Function]}
-          type="button"
-        >
-          Discard
-        </button>
-      </div>
-    </div>
     <div
       className="StyledBox-sc-13pk1d4-0 IRSNj"
     >

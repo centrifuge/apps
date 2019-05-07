@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import InvoiceForm from './InvoiceForm';
@@ -12,6 +12,8 @@ import { Contact } from '../common/models/contact';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
 import { LabelValuePair } from '../common/interfaces';
 import routes from './routes';
+import { Box, Button, Heading } from 'grommet';
+import { LinkPrevious } from 'grommet-icons';
 
 type ConnectedCreateInvoiceProps = {
   createInvoice: (invoice: Invoice) => void;
@@ -56,9 +58,28 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
     return (
       <InvoiceForm
         onSubmit={this.createInvoice}
-        onCancel={this.onCancel}
         contacts={this.props.contacts}
-      />
+      >
+        <Box justify="between" direction="row" align="center">
+          <Box direction="row" gap="small" align="center">
+            <Link to={routes.index} size="large">
+              <LinkPrevious/>
+            </Link>
+            <Heading level="3">
+              {'New Invoice'}
+            </Heading>
+          </Box>
+
+          <Box direction="row" gap="medium">
+            <Button
+              type="submit"
+              primary
+              label="Send"
+            />
+            <Button active={false} onClick={this.onCancel} label="Discard"/>
+          </Box>
+        </Box>
+      </InvoiceForm>
     );
   }
 }

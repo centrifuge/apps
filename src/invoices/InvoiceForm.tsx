@@ -11,12 +11,10 @@ import { ConnectedShipToForm } from './invoice-form-partials/ShipToForm';
 import { ConnectedRemitToForm } from './invoice-form-partials/RemitToForm';
 import { ConnectedPaymentForm } from './invoice-form-partials/PaymentForm';
 import { ConnectedCreditNoteForm } from './invoice-form-partials/CreditNoteForm';
-import routes from '../routes';
-import { LinkPrevious } from 'grommet-icons';
+
 
 type InvoiceFormProps = {
   onSubmit?: (invoice: Invoice) => void;
-  onCancel?: () => void;
   contacts: LabelValuePair[];
   invoice: Invoice;
 };
@@ -74,25 +72,7 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
                 }}
               >
                 {/* Header */}
-                <Box justify="between" direction="row" align="center">
-                  <Box direction="row" gap="small" align="center">
-                    <Link to={routes.invoices.index} size="large">
-                      <LinkPrevious/>
-                    </Link>
-                    <Heading level="3">
-                      {this.props.invoice ? 'Update Invoice' : 'New Invoice'}
-                    </Heading>
-                  </Box>
-
-                  <Box direction="row" gap={columnGap}>
-                    <Button
-                      type="submit"
-                      primary
-                      label="Send"
-                    />
-                    <Button active={false} onClick={this.props.onCancel} label="Discard"/>
-                  </Box>
-                </Box>
+                {this.props.children}
 
                 {/* Body */}
                 <Box direction="column" gap={sectionGap}>
