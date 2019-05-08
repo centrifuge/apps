@@ -82,6 +82,7 @@ export class UsersController {
   }
 
   @Post('invite')
+  @UseGuards(UserAuthGuard)
   async invite(@Body() user: { username: string }) {
     if (!config.inviteOnly) {
       throw new HttpException('Invite functionality not enabled!', HttpStatus.FORBIDDEN);
