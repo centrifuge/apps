@@ -2,11 +2,6 @@ import React, { FunctionComponent } from 'react';
 import { Link } from 'react-router-dom';
 import { Anchor, Box, Image } from 'grommet';
 import logo from './logo.png';
-import invoicesRoutes from './invoices/routes';
-import contactsRoutes from './contacts/routes';
-import userRoutes from './user/routes';
-import { User } from './common/models/user';
-import { PERMISSIONS } from './common/constants';
 
 
 interface MenuItem {
@@ -17,30 +12,13 @@ interface MenuItem {
 
 interface HeaderProps {
   selectedRoute: string,
-  loggedInUser: User | null,
+  menuItems: MenuItem[],
   push: (route: string) => void
 }
 
 const Header: FunctionComponent<HeaderProps> = (props) => {
 
-  const { selectedRoute, push, loggedInUser } = props;
-
-  let mainMenuItems: MenuItem[] = [];
-  const commonItems = [
-    { label: 'Invoices', route: invoicesRoutes.index },
-    { label: 'Contacts', route: contactsRoutes.index },
-    { label: 'Logout', route: userRoutes.logout, external: true },
-  ];
-
-  if (loggedInUser) {
-    mainMenuItems.push(...commonItems)
-
-    if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
-      mainMenuItems.unshift(
-          {label: 'Users', route: userRoutes.index},
-      )
-    }
-  }
+  const { selectedRoute, menuItems, push } = props;
 
   return <Box
     justify="center"
@@ -59,7 +37,7 @@ const Header: FunctionComponent<HeaderProps> = (props) => {
         <Image src={logo}/>
       </Link>
       <Box direction="row" gap="small" fill align="center" justify="end">
-        {mainMenuItems.map((item) => {
+        {menuItems.map((item) => {
             const anchorProps = {
               ...(item.external ? { href: item.route } : { onClick: () => push(item.route) }),
               ...(selectedRoute === item.route ? { className: 'selected' } : {}),
