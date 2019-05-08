@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { LocalStrategy } from './local.strategy';
 import { CookieSerializer } from './cookie-serializer';
 import { DatabaseModule } from '../database/database.module';
+import {UserAuthGuard} from './admin.auth.guard';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { DatabaseModule } from '../database/database.module';
   providers: [
     AuthService,
     LocalStrategy,
+    UserAuthGuard,
     CookieSerializer,
   ],
 })

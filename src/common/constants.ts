@@ -19,8 +19,8 @@ export const ROUTES = Object.freeze({
 });
 
 export enum PERMISSIONS {
-  CAN_INVITE = 'can_invite',
-  CAN_LIST_USERS = 'can_list_users',
+  CAN_FUND_INVOICES = 'can_fund_invoices',
+  CAN_CREATE_INVOICES = 'can_create_invoices',
   CAN_MANAGE_USERS = 'can_manage_users',
   CAN_MANAGE_ACCOUNTS = 'can_manage_accounts',
 }

@@ -6,6 +6,9 @@ import getRootReducer from './store/reducers';
 import { User } from './common/models/user';
 import renderer from 'react-test-renderer';
 import { BrowserRouter } from "react-router-dom";
+import invoicesRoutes from "./invoices/routes";
+import contactsRoutes from "./contacts/routes";
+import userRoutes from "./user/routes";
 
 const store = createStore(getRootReducer({}),{router:{location: {pathname:'/'}}});
 
@@ -18,7 +21,7 @@ describe('Header', () => {
 
       <Provider store={store}>
         <BrowserRouter >
-          <Header selectedRoute={'/'} loggedInUser={null} push={push}/>
+          <Header selectedRoute={'/'} menuItems={[]} push={push}/>
         </BrowserRouter>
       </Provider>,
     ).toJSON();
@@ -26,10 +29,17 @@ describe('Header', () => {
   });
 
   it('Should render main menu', () => {
+
+    const commonItems = [
+      { label: 'Invoices', route: invoicesRoutes.index },
+      { label: 'Contacts', route: contactsRoutes.index },
+      { label: 'Logout', route: userRoutes.logout, external: true },
+    ];
+
     const bodyShallow = renderer.create(
       <Provider store={store}>
         <BrowserRouter >
-          <Header selectedRoute={'/'} loggedInUser={user} push={push}/>
+          <Header selectedRoute={'/'} menuItems={commonItems} push={push}/>
         </BrowserRouter>
       </Provider>,
     ).toJSON();
