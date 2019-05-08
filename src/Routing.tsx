@@ -2,7 +2,6 @@ import React, { FunctionComponent } from 'react';
 import { Redirect, Route, Switch } from 'react-router';
 import routes from './routes';
 import LoginPage from './user/Login';
-import RegisterPage from './user/Register';
 
 interface RouteItem {
   path: string,
@@ -14,13 +13,9 @@ interface RoutingProps {
 }
 
 const Routing: FunctionComponent<RoutingProps> = (props) => {
-    //TODO remove this when store is injected from middleware
-    // Hack to not login every time
-
     return (
       <Switch>
         <Route exact path={routes.index} component={LoginPage}/>
-        {/*<Route exact path={routes.user.register} component={RegisterPage}/>*/}
           {props.routes.map( item => {
               return <Route exact path={item.path} component={item.component}/>
           })}

@@ -45,19 +45,30 @@ class App extends Component<AppPros> {
       push,
     } = this.props;
 
-
-    let menuItems: MenuItem[] = []
-    let routeItems: RouteItem[] = []
-
-    const commonItems = [
-      { label: 'Invoices', route: invoicesRoutes.index },
-      { label: 'Contacts', route: contactsRoutes.index },
-      { label: 'Logout', route: userRoutes.logout, external: true },
-    ];
+    let menuItems: MenuItem[] = [];
+    let routeItems: RouteItem[] = [];
 
     if (loggedInUser) {
-      menuItems.push(...commonItems)
-      routeItems.push(
+
+      if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
+        menuItems.unshift(
+            {label: 'Users', route: userRoutes.index},
+        )
+        routeItems.push(
+            {
+              path: routes.user.index,
+              component: UsersList,
+            }
+        )
+      }
+
+      if(loggedInUser.permissions.includes(PERMISSIONS.CAN_CREATE_INVOICES)) {
+        menuItems.push(...[
+          { label: 'Invoices', route: invoicesRoutes.index },
+          { label: 'Contacts', route: contactsRoutes.index }
+        ])
+
+        routeItems.push(
           {
             path: routes.invoices.index,
             component: InvoiceList,
@@ -78,29 +89,15 @@ class App extends Component<AppPros> {
             path: routes.contacts.index,
             component: Contacts,
           }
-      )
-
-      if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
-        menuItems.unshift(
-            {label: 'Users', route: userRoutes.index},
         )
-        routeItems.push(
-            {
-              path: routes.user.index,
-              component: UsersList,
-            }
-        )
-      }
-
-      if(loggedInUser.permissions.includes(PERMISSIONS.CAN_CREATE_INVOICES)) {
-        // add items to menuItems
-        // add routes to routes
       }
 
       if(loggedInUser.permissions.includes(PERMISSIONS.CAN_FUND_INVOICES)) {
         // add items to menuItems
         // add routes to routes
       }
+
+      menuItems.push({ label: 'Logout', route: userRoutes.logout, external: true })
 
     }
 
