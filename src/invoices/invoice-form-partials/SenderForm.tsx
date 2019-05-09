@@ -35,14 +35,17 @@ export class SenderForm extends React.Component<ConnectedSenderFormProps> {
     } = this.props;
 
     return (
-      <Box direction="row" gap={columnGap} basis={'1/2'}>
+      <Box direction="row" gap={columnGap} >
         <Box gap={columnGap} basis={'1/2'}>
           <FormField
-            label="Centrifuge ID"
+            label="Name"
             error={errors!.sender}
           >
             <SearchSelect
-              onChange={(value) => setFieldValue('sender', value)}
+              onChange={(item) => {
+                setFieldValue('sender', item.value)
+                setFieldValue('sender_company_name', item.label)
+              }}
               options={contacts}
               selected={
                 contacts.find(
@@ -52,16 +55,7 @@ export class SenderForm extends React.Component<ConnectedSenderFormProps> {
               }
             />
           </FormField>
-          <FormField
-            label="Company name"
-            error={errors!.sender_company_name}
-          >
-            <TextInput
-              name="sender_company_name"
-              value={values!.sender_company_name}
-              onChange={handleChange}
-            />
-          </FormField>
+
         </Box>
         <Box gap={columnGap} basis={'1/2'}>
           <FormField

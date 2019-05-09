@@ -16,8 +16,8 @@ const Routing: FunctionComponent<RoutingProps> = (props) => {
     return (
       <Switch>
         <Route exact path={routes.index} component={LoginPage}/>
-          {props.routes.map( item => {
-              return <Route exact path={item.path} component={item.component}/>
+          {props.routes.map( (item,index) => {
+              return <Route key={index} exact path={item.path} component={item.component}/>
           })}
         <Redirect to={routes.index}/>
       </Switch>

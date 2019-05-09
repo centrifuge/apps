@@ -1,1 +1,1 @@
-export const dateParser = value => new Date(value).toISOString();
+export const parseDate = value => new Date(value).toISOString();

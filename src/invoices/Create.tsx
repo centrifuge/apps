@@ -72,11 +72,16 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
 
           <Box direction="row" gap="medium">
             <Button
+              active={false}
+              onClick={this.onCancel}
+              label="Discard"
+            />
+
+            <Button
               type="submit"
               primary
               label="Send"
             />
-            <Button active={false} onClick={this.onCancel} label="Discard"/>
           </Box>
         </Box>
       </InvoiceForm>

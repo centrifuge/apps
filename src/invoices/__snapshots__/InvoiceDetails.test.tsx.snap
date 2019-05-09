@@ -41,6 +41,34 @@ exports[`InvoiceDetails Should not render an empty form 1`] = `
           Invoice #
         </h3>
       </div>
+      <div
+        className="StyledBox-sc-13pk1d4-0 ffeAql"
+      >
+        <button
+          className="StyledButton-sc-323bzc-0 kHrfdt"
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+          type="button"
+        >
+          Edit
+        </button>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+        />
+        <button
+          className="StyledButton-sc-323bzc-0 aNlbA"
+          onBlur={[Function]}
+          onFocus={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+          type="button"
+        >
+          Request Funding
+        </button>
+      </div>
     </div>
     <div
       className="StyledBox-sc-13pk1d4-0 IRSNj"
@@ -836,9 +864,7 @@ exports[`InvoiceDetails Should not render an empty form 1`] = `
                       className="StyledParagraph-tbetod-0 fbHsbZ"
                       onBlur={[Function]}
                       onFocus={[Function]}
-                    >
-                      
-                    </p>
+                    />
                   </div>
                 </div>
               </div>
@@ -942,9 +968,7 @@ exports[`InvoiceDetails Should not render an empty form 1`] = `
                       className="StyledParagraph-tbetod-0 fbHsbZ"
                       onBlur={[Function]}
                       onFocus={[Function]}
-                    >
-                      
-                    </p>
+                    />
                   </div>
                 </div>
               </div>
@@ -1053,9 +1077,7 @@ exports[`InvoiceDetails Should not render an empty form 1`] = `
                     className="StyledParagraph-tbetod-0 fbHsbZ"
                     onBlur={[Function]}
                     onFocus={[Function]}
-                  >
-                    
-                  </p>
+                  />
                 </div>
               </div>
             </div>
@@ -1132,6 +1154,34 @@ exports[`InvoiceDetails Should render the form with proper values for contact fi
         >
           Invoice #
         </h3>
+      </div>
+      <div
+        className="StyledBox-sc-13pk1d4-0 ffeAql"
+      >
+        <button
+          className="StyledButton-sc-323bzc-0 kHrfdt"
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+          type="button"
+        >
+          Edit
+        </button>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+        />
+        <button
+          className="StyledButton-sc-323bzc-0 aNlbA"
+          onBlur={[Function]}
+          onFocus={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+          type="button"
+        >
+          Request Funding
+        </button>
       </div>
     </div>
     <div
@@ -1934,9 +1984,7 @@ exports[`InvoiceDetails Should render the form with proper values for contact fi
                       className="StyledParagraph-tbetod-0 fbHsbZ"
                       onBlur={[Function]}
                       onFocus={[Function]}
-                    >
-                      
-                    </p>
+                    />
                   </div>
                 </div>
               </div>
@@ -2040,9 +2088,7 @@ exports[`InvoiceDetails Should render the form with proper values for contact fi
                       className="StyledParagraph-tbetod-0 fbHsbZ"
                       onBlur={[Function]}
                       onFocus={[Function]}
-                    >
-                      
-                    </p>
+                    />
                   </div>
                 </div>
               </div>
@@ -2151,9 +2197,7 @@ exports[`InvoiceDetails Should render the form with proper values for contact fi
                     className="StyledParagraph-tbetod-0 fbHsbZ"
                     onBlur={[Function]}
                     onFocus={[Function]}
-                  >
-                    
-                  </p>
+                  />
                 </div>
               </div>
             </div>

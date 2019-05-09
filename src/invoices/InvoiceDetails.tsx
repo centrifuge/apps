@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Heading, Text } from 'grommet';
+import { Box, Button, Heading } from 'grommet';
 import { Section } from '@centrifuge/axis-section';
 import { Invoice } from '../common/models/invoice';
 import { LabelValuePair } from '../common/interfaces';
@@ -20,6 +20,7 @@ import { ShipTo } from './invoice-details-partials/ShipTo';
 import { RemitTo } from './invoice-details-partials/RemitTo';
 import { Payment } from './invoice-details-partials/Payment';
 import { CreditNote } from './invoice-details-partials/CreditNote';
+import invoiceRoutes from './routes';
 
 type ConnectedInvoiceDetailsProps = {
   getInvoiceById: (id: string) => void;
@@ -69,6 +70,21 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
             <Heading level="3">
               Invoice #{invoice!.number}
             </Heading>
+          </Box>
+          <Box direction="row" gap="medium">
+            <Button
+              active={false}
+              onClick={() => {
+                invoice._id && this.props.history.push(
+                  invoiceRoutes.edit.replace(':id', invoice._id),
+                );
+              }}
+              label="Edit"
+            />
+            <Button
+              primary
+              label="Request Funding"
+            />
           </Box>
         </Box>
 

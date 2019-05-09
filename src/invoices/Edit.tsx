@@ -74,11 +74,15 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
 
           <Box direction="row" gap="medium">
             <Button
+              active={false}
+              onClick={this.onCancel}
+              label="Discard"
+            />
+            <Button
               type="submit"
               primary
               label="Update"
             />
-            <Button active={false} onClick={this.onCancel} label="Discard"/>
           </Box>
         </Box>
       </InvoiceForm>

@@ -66,7 +66,7 @@ describe('Search Select', () => {
 
         const updatedState = searchSelectShallow.state();
         expect(updatedState.selected).toEqual(orangeJuice);
-        expect(inputProps.onChange).toHaveBeenCalledWith(orangeJuice.value);
+        expect(inputProps.onChange).toHaveBeenCalledWith(orangeJuice);
       });
     });
 

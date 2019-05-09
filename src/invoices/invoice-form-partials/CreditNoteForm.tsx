@@ -6,6 +6,7 @@ import { Section } from '@centrifuge/axis-section';
 import { connect, FormikContext } from 'formik';
 import { dateFormatter } from '../../common/formaters';
 import { Invoice } from '../../common/models/invoice';
+import { parseDate } from '../../common/parsers';
 
 interface CreditNoteFormProps {
   columnGap: string;
@@ -23,7 +24,7 @@ export class CreditNoteForm extends React.Component<ConnectedCreditNoteFormProps
       errors,
       values,
       handleChange,
-
+      setFieldValue
     } = this.props.formik;
     const {
       columnGap,
@@ -53,9 +54,12 @@ export class CreditNoteForm extends React.Component<ConnectedCreditNoteFormProps
               <TextInput
                 name="credit_for_invoice_date"
                 type="date"
-                value={dateFormatter(values!.credit_for_invoice_date)}
-                onChange={handleChange}
+                value={dateFormatter(values!.date_due)}
+                onChange={ ev => {
+                  setFieldValue('credit_for_invoice_date',  parseDate(ev.target.value))
+                }}
               />
+             
             </FormField>
           </Box>
 
