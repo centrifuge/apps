@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Box } from 'grommet';
-import { Section } from '@centrifuge/axis-section';
+import { Box, Paragraph } from 'grommet';
 
-import { Invoice } from '../../common/models/invoice';
+import { Invoice, invoiceHasShipTo } from '../../common/models/invoice';
 import { DisplayField } from '../../components/DisplayField';
+import { Section } from '../../components/Section';
 
 
 interface ShipToProps {
@@ -21,8 +21,11 @@ export class ShipTo extends React.Component<ShipToProps> {
       columnGap,
     } = this.props;
 
+    const hasValues = invoiceHasShipTo(invoice);
+
     return (
-      <Box direction="row" gap={columnGap} basis={'1/2'}>
+      <Section headingLevel="5" title="Ship to" basis={'1/2'}>
+        { hasValues ? <Box direction="row" gap={columnGap} basis={'1/2'}>
         <Box gap={columnGap} basis={'1/2'}>
           <DisplayField
             label="Ship to company"
@@ -55,7 +58,8 @@ export class ShipTo extends React.Component<ShipToProps> {
             value={invoice!.ship_to_zipcode}
           />
         </Box>
-      </Box>
+      </Box> : <Paragraph>Shipment was not sent to a third-party</Paragraph> }
+      </Section>
 
     );
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Button, FormField, Heading, TextArea, TextInput } from 'grommet';
+import { Box, FormField, TextArea, TextInput } from 'grommet';
 import { Invoice } from '../common/models/invoice';
 import { LabelValuePair } from '../common/interfaces';
 import { Formik } from 'formik';
@@ -10,9 +10,9 @@ import { ConnectedShipToForm } from './invoice-form-partials/ShipToForm';
 import { ConnectedRemitToForm } from './invoice-form-partials/RemitToForm';
 import { ConnectedDetailsForm } from './invoice-form-partials/DetailsForm';
 import { ConnectedCreditNoteForm } from './invoice-form-partials/CreditNoteForm';
-import { Section } from '../components/Section';
 import { ConnectedInvoiceTotalForm } from './invoice-form-partials/InvoiceTotalForm';
-import * as Yup from 'yup'
+import * as Yup from 'yup';
+import { Section } from '../components/Section';
 
 type InvoiceFormProps = {
   onSubmit?: (invoice: Invoice) => void;
@@ -45,21 +45,21 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
     const invoiceValidation = Yup.object().shape({
       number: Yup.string()
         .max(40, 'Please enter no more than 20 characters')
-        .required( 'This field is required'),
+        .required('This field is required'),
       sender: Yup.string()
-        .required( 'This field is required'),
+        .required('This field is required'),
       recipient: Yup.string()
-        .required( 'This field is required'),
+        .required('This field is required'),
       currency: Yup.string()
-        .required( 'This field is required'),
+        .required('This field is required'),
       status: Yup.string()
-        .required( 'This field is required'),
+        .required('This field is required'),
       date_created: Yup.date()
         .typeError('Wrong date format')
-        .required( 'This field is required'),
+        .required('This field is required'),
       date_due: Yup.date()
         .typeError('Wrong date format')
-        .required( 'This field is required'),
+        .required('This field is required'),
     });
 
     return (
@@ -111,51 +111,36 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
                   </Box>
 
                   {/*Sender and Recipient */}
-                  <Box direction="row" gap={columnGap} >
-                    <Section headingLevel="5" title="Sender" basis={'1/2'} >
-                      <ConnectedSenderForm columnGap={columnGap} contacts={this.props.contacts}/>
-                    </Section>
-                    <Section headingLevel="5" title="Recipient"  basis={'1/2'} >
-                      <ConnectedRecipientForm columnGap={columnGap} contacts={this.props.contacts}/>
-                    </Section>
+                  <Box direction="row" gap={columnGap}>
+                    <ConnectedSenderForm columnGap={columnGap} contacts={this.props.contacts}/>
+                    <ConnectedRecipientForm columnGap={columnGap} contacts={this.props.contacts}/>
                   </Box>
 
                   {/* Invoice details section */}
                   <Box gap={columnGap}>
-                    <Section headingLevel="5" title="Details" >
-                      <ConnectedDetailsForm columnGap={columnGap}/>
-                    </Section>
+                    <ConnectedDetailsForm columnGap={columnGap}/>
                   </Box>
 
                   {/* Invoice Total section */}
                   <Box gap={columnGap}>
-                    <Section headingLevel="5" title="Invoice Total" >
-                      <ConnectedInvoiceTotalForm columnGap={columnGap}/>
-                    </Section>
+                    <ConnectedInvoiceTotalForm columnGap={columnGap}/>
                   </Box>
 
                   {/*Ship to and Remit to */}
                   <Box direction="row" gap={columnGap}>
-                    <Section headingLevel="5" title="Ship to" basis={'1/2'} collapsed={true} collapsibleLabel="Shipment was send to a third-party">
-                      <ConnectedShipToForm columnGap={columnGap}/>
-                    </Section>
-                    <Section headingLevel="5" title="Remit to" basis={'1/2'} collapsed={true} collapsibleLabel="Pay this invoice to a third-party">
-                      <ConnectedRemitToForm columnGap={columnGap}/>
-                    </Section>
+                    <ConnectedShipToForm columnGap={columnGap}/>
+                    <ConnectedRemitToForm columnGap={columnGap}/>
                   </Box>
 
                   {/* Credit note section */}
                   <Box direction="row" gap={columnGap}>
-                    <Section headingLevel="5" title="Credit note" basis={'1/2'} collapsed={true} collapsibleLabel="invoice is credit">
-                      <ConnectedCreditNoteForm columnGap={columnGap}/>
-                    </Section>
+                    <ConnectedCreditNoteForm columnGap={columnGap}/>
                   </Box>
 
-                  <Box direction="row" gap={columnGap} >
+                  <Box direction="row" gap={columnGap}>
                     {/* Comments section */}
-                    <Box basis={"1/2"}>
+                    <Section headingLevel="5" title="Comments" basis={'1/2'}>
                       <FormField
-                        label="Comments"
                         error={errors!.comment}
                       >
                       <TextArea
@@ -164,7 +149,8 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
                         onChange={handleChange}
                       />
                       </FormField>
-                    </Box>
+                    </Section>
+
                   </Box>
                 </Box>
               </form>

@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FormField, TextInput,Box } from 'grommet';
-import { Section } from '@centrifuge/axis-section';
+import { Box, FormField, TextInput } from 'grommet';
 
 import { connect, FormikContext } from 'formik';
 import { LabelValuePair } from '../../common/interfaces';
 import SearchSelect from '../../components/form/SearchSelect';
 import { Invoice } from '../../common/models/invoice';
+import { Section } from '../../components/Section';
 
 interface RecipientFormProps {
   contacts: LabelValuePair[];
@@ -34,85 +34,88 @@ export class RecipientForm extends React.Component<ConnectedRecipientFormProps> 
     } = this.props;
 
     return (
-      <Box direction="row" gap={columnGap} basis={'1/2'}>
-        <Box gap={columnGap} basis={'1/2'}>
-          <FormField
-            label="Name"
-            error={errors!.recipient}
-          >
-            <SearchSelect
-              onChange={(item) => {
-                setFieldValue('recipient', item.value)
-                setFieldValue('bill_to_company_name', item.label)
-              }}
+      <Section headingLevel="5" title="Recipient" basis={'1/2'}>
+        <Box direction="row" gap={columnGap} basis={'1/2'}>
+          <Box gap={columnGap} basis={'1/2'}>
+            <FormField
+              label="Name"
+              error={errors!.recipient}
+            >
+              <SearchSelect
+                onChange={(item) => {
+                  setFieldValue('recipient', item.value);
+                  setFieldValue('bill_to_company_name', item.label);
+                }}
 
-              options={contacts}
-              selected={
-                contacts.find(
-                  contact =>
-                    contact.value === values!.recipient,
-                )
-              }
-            />
-          </FormField>
+                options={contacts}
+                selected={
+                  contacts.find(
+                    contact =>
+                      contact.value === values!.recipient,
+                  )
+                }
+              />
+            </FormField>
 
+          </Box>
+          <Box gap={columnGap} basis={'1/2'}>
+            <FormField
+              label="Street"
+              error={errors!.bill_to_street1}
+            >
+              <TextInput
+                name="bill_to_street1"
+                placeholder="Street name and number"
+                value={values!.bill_to_street1}
+                onChange={handleChange}
+              />
+            </FormField>
+            <FormField
+              label="Street"
+              error={errors!.bill_to_street2}
+            >
+              <TextInput
+                name="bill_to_street2"
+                placeholder="Apartment, unit, office, etc"
+                value={values!.bill_to_street2}
+                onChange={handleChange}
+              />
+            </FormField>
+            <FormField
+              label="City"
+              error={errors!.bill_to_city}
+            >
+              <TextInput
+                name="bill_to_city"
+                placeholder="City or state"
+                value={values!.bill_to_city}
+                onChange={handleChange}
+              />
+            </FormField>
+            <FormField
+              label="Country"
+              error={errors!.bill_to_country}
+            >
+              <TextInput
+                name="bill_to_country"
+                value={values!.bill_to_country}
+                onChange={handleChange}
+              />
+            </FormField>
+            <FormField
+              label="ZIP code"
+              error={errors!.bill_to_zipcode}
+            >
+              <TextInput
+                name="bill_to_zipcode"
+                value={values!.bill_to_zipcode}
+                onChange={handleChange}
+              />
+            </FormField>
+          </Box>
         </Box>
-        <Box gap={columnGap} basis={'1/2'}>
-          <FormField
-            label="Street"
-            error={errors!.bill_to_street1}
-          >
-            <TextInput
-              name="bill_to_street1"
-              placeholder="Street name and number"
-              value={values!.bill_to_street1}
-              onChange={handleChange}
-            />
-          </FormField>
-          <FormField
-            label="Street"
-            error={errors!.bill_to_street2}
-          >
-            <TextInput
-              name="bill_to_street2"
-              placeholder="Apartment, unit, office, etc"
-              value={values!.bill_to_street2}
-              onChange={handleChange}
-            />
-          </FormField>
-          <FormField
-            label="City"
-            error={errors!.bill_to_city}
-          >
-            <TextInput
-              name="bill_to_city"
-              placeholder="City or state"
-              value={values!.bill_to_city}
-              onChange={handleChange}
-            />
-          </FormField>
-          <FormField
-            label="Country"
-            error={errors!.bill_to_country}
-          >
-            <TextInput
-              name="bill_to_country"
-              value={values!.bill_to_country}
-              onChange={handleChange}
-            />
-          </FormField>
-          <FormField
-            label="ZIP code"
-            error={errors!.bill_to_zipcode}
-          >
-            <TextInput
-              name="bill_to_zipcode"
-              value={values!.bill_to_zipcode}
-              onChange={handleChange}
-            />
-          </FormField>
-        </Box>
-      </Box>
+      </Section>
+
     );
 
   }

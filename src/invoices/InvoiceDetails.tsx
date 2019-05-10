@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Button, Heading } from 'grommet';
-import { Section } from '@centrifuge/axis-section';
 import { Invoice } from '../common/models/invoice';
 import { LabelValuePair } from '../common/interfaces';
 import { connect } from 'react-redux';
@@ -18,9 +17,11 @@ import { Sender } from './invoice-details-partials/Sender';
 import { Recipient } from './invoice-details-partials/Recipient';
 import { ShipTo } from './invoice-details-partials/ShipTo';
 import { RemitTo } from './invoice-details-partials/RemitTo';
-import { Payment } from './invoice-details-partials/Payment';
+import { Details } from './invoice-details-partials/Details';
 import { CreditNote } from './invoice-details-partials/CreditNote';
 import invoiceRoutes from './routes';
+import { Section } from '../components/Section';
+import { InvoiceTotal } from './invoice-details-partials/InvoiceTotal';
 
 type ConnectedInvoiceDetailsProps = {
   getInvoiceById: (id: string) => void;
@@ -53,7 +54,7 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
 
     const { invoice, contacts } = this.props;
     const columnGap = 'medium';
-    const sectionGap = 'xlarge';
+    const sectionGap = 'medium';
 
     if (!invoice || !contacts) {
       return 'Loading invoice';
@@ -114,6 +115,24 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
               />
             </Box>
 
+
+
+            {/* Details section */}
+            <Box gap={columnGap}>
+              <Details
+                invoice={invoice}
+                columnGap={columnGap}
+              />
+            </Box>
+
+            {/* Invoice total section */}
+            <Box gap={columnGap}>
+              <InvoiceTotal
+                invoice={invoice}
+                columnGap={columnGap}
+              />
+            </Box>
+
             {/*Ship to and Remit to */}
             <Box direction="row" gap={columnGap}>
               <ShipTo
@@ -126,15 +145,6 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
               />
             </Box>
 
-            {/* Payment section */}
-            <Box gap={columnGap}>
-              <Payment
-                invoice={invoice}
-                columnGap={columnGap}
-                contacts={contacts}
-              />
-            </Box>
-
             {/* Credit note section */}
             <Box direction="row" gap={columnGap}>
               <CreditNote
@@ -144,11 +154,13 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
             </Box>
 
             {/* Comments section */}
-            <Box>
-              <DisplayField
-                label="Comments"
-                value={invoice!.comment}
-              />
+            <Box direction="row">
+              <Section headingLevel="5" title="Comments" basis={'1/2'}>
+                <DisplayField
+                  value={invoice!.comment}
+                />
+              </Section>
+
             </Box>
           </Box>
         </Box>

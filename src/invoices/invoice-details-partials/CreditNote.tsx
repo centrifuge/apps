@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Box } from 'grommet';
-import { Section } from '@centrifuge/axis-section';
+import { Box, Paragraph } from 'grommet';
 import { dateFormatter } from '../../common/formaters';
-import { Invoice } from '../../common/models/invoice';
+import { Invoice, invoiceHasCreditNote } from '../../common/models/invoice';
 import { DisplayField } from '../../components/DisplayField';
+import { Section } from '../../components/Section';
 
 interface CreditNoteProps {
   invoice: Invoice;
@@ -19,12 +19,13 @@ export class CreditNote extends React.Component<CreditNoteProps> {
     const {
       columnGap,
       invoice,
-
     } = this.props;
 
+    const hasValues = invoiceHasCreditNote(invoice);
+
     return (
-      <>
-        <Box direction="row" basis={'1/2'} gap={columnGap}>
+      <Section headingLevel="5" title="Credit note" basis={'1/2'}>
+        {hasValues ? <Box direction="row" gap={columnGap}>
           <Box flex="grow">
             <DisplayField
               label="Original invoice number"
@@ -38,8 +39,9 @@ export class CreditNote extends React.Component<CreditNoteProps> {
               value={dateFormatter(invoice!.credit_for_invoice_date)}
             />
           </Box>
-        </Box>
-      </>
+        </Box> : <Paragraph>Invoice is not credit note</Paragraph>}
+
+      </Section>
     );
 
   }

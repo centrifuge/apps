@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Box, FormField, Select, TextInput } from 'grommet';
-import { Section } from '@centrifuge/axis-section';
 
 import { connect, FormikContext } from 'formik';
-import { dateFormatter } from '../../common/formaters';
 import { Invoice } from '../../common/models/invoice';
+import { Section } from '../../components/Section';
+import { Box, FormField, Select, TextInput } from 'grommet';
+import { dateFormatter } from '../../common/formaters';
 import { parseDate } from '../../common/parsers';
 
 
@@ -33,72 +33,72 @@ export class DetailsForm extends React.Component<ConnectedDetailsFormProps> {
     } = this.props;
 
     return (
-      <Box direction="row" gap={columnGap}>
+      <Section headingLevel="5" title="Details">
+        <Box direction="row" gap={columnGap}>
+          <Box basis={'1/4'}>
+            <FormField
+              label="Invoice Status"
+              error={errors!.status}
+            >
+              <Select
+                placeholder="Select"
+                value={values!.status}
+                options={['unpaid', 'paid']}
+                onChange={({ option }) => setFieldValue('status', option)}
+              />
+            </FormField>
+          </Box>
+
+          <Box basis={'1/4'}>
+            <FormField
+              label="Currency"
+              error={errors!.currency}
+            >
+              <Select
+                placeholder="Select"
+                value={values!.currency}
+                options={['USD', 'EUR']}
+                onChange={({ option }) => setFieldValue('currency', option)}
+              />
+
+            </FormField>
+          </Box>
+
+          <Box basis={'1/4'}>
+            <FormField
+              label="Invoice date"
+              error={errors!.date_created}
+            >
+              <TextInput
+                name="date_created"
+                type="date"
+                value={dateFormatter(values!.date_created)}
+                onChange={ev => {
+                  setFieldValue('date_created', parseDate(ev.target.value));
+                }}
+              />
+            </FormField>
+          </Box>
 
 
-        <Box basis={'1/4'}>
-          <FormField
-            label="Invoice Status"
-            error={errors!.status}
-          >
-            <Select
-              placeholder="Select"
-              value={values!.status}
-              options={['unpaid', 'paid']}
-              onChange={({ option }) => setFieldValue('status', option)}
-            />
-          </FormField>
+          <Box basis={'1/4'}>
+            <FormField
+              label="Due date"
+              error={errors!.date_due}
+            >
+              <TextInput
+                name="date_due"
+                type="date"
+                value={dateFormatter(values!.date_due)}
+                onChange={ev => {
+                  setFieldValue('date_due', parseDate(ev.target.value));
+                }}
+              />
+            </FormField>
+          </Box>
         </Box>
+      </Section>
 
-        <Box basis={'1/4'}>
-          <FormField
-            label="Currency"
-            error={errors!.currency}
-          >
-            <Select
-              placeholder="Select"
-              value={values!.currency}
-              options={['USD', 'EUR']}
-              onChange={({ option }) => setFieldValue('currency', option)}
-            />
-
-          </FormField>
-        </Box>
-
-        <Box basis={'1/4'}>
-          <FormField
-            label="Invoice date"
-            error={errors!.date_created}
-          >
-            <TextInput
-              name="date_created"
-              type="date"
-              value={dateFormatter(values!.date_created)}
-              onChange={ ev => {
-                setFieldValue('date_created',  parseDate(ev.target.value))
-              }}
-            />
-          </FormField>
-        </Box>
-
-
-        <Box basis={'1/4'}>
-          <FormField
-            label="Due date"
-            error={errors!.date_due}
-          >
-            <TextInput
-              name="date_due"
-              type="date"
-              value={dateFormatter(values!.date_due)}
-              onChange={ ev => {
-                setFieldValue('date_due',  parseDate(ev.target.value))
-              }}
-            />
-          </FormField>
-        </Box>
-
-      </Box>
     );
 
   }

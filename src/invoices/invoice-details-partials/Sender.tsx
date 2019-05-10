@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box } from 'grommet';
-import { Section } from '@centrifuge/axis-section';
 import { LabelValuePair } from '../../common/interfaces';
 import { Invoice } from '../../common/models/invoice';
 import { DisplayField } from '../../components/DisplayField';
+import { Section } from '../../components/Section';
 
 
 interface SenderProps {
@@ -30,7 +30,8 @@ export class Sender extends React.Component<SenderProps> {
     ).map(contact => contact.label).shift();
 
     return (
-      <Box direction="row" gap={columnGap} basis={'1/2'}>
+      <Section headingLevel="5" title="Sender" basis={'1/2'}>
+        <Box direction="row" gap={columnGap} basis={'1/2'}>
         <Box gap={columnGap} basis={'1/2'}>
           <DisplayField
             label="Centrifuge ID"
@@ -64,6 +65,7 @@ export class Sender extends React.Component<SenderProps> {
           />
         </Box>
       </Box>
+      </Section>
     );
 
   }

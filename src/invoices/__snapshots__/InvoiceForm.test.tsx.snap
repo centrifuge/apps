@@ -1036,7 +1036,7 @@ exports[`InvoiceForm Should not render empty form 1`] = `
                 />
               </div>
               <span>
-                Shipment was send to a third-party
+                Shipment was sent to a third-party
               </span>
             </label>
           </div>
@@ -1046,7 +1046,7 @@ exports[`InvoiceForm Should not render empty form 1`] = `
             open={false}
           >
             <div
-              className="StyledBox-sc-13pk1d4-0 Tiesv"
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
             >
               <div
                 className="StyledBox-sc-13pk1d4-0 clLqce"
@@ -1759,25 +1759,40 @@ exports[`InvoiceForm Should not render empty form 1`] = `
           className="StyledBox-sc-13pk1d4-0 clLqce"
         >
           <div
-            className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+            className="StyledBox-sc-13pk1d4-0 ffeAql"
           >
-            <label
-              className="StyledText-sc-1sadyjn-0 bMXxti"
+            <h5
+              className="StyledHeading-sc-1rdh4aw-0 djDvmr"
+              style={
+                Object {
+                  "minWidth": "100px",
+                }
+              }
             >
               Comments
-            </label>
+            </h5>
+          </div>
+          <div
+            aria-hidden={false}
+            className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+            open={true}
+          >
             <div
-              className="StyledBox-sc-13pk1d4-0 gZSidW"
+              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
             >
-              <textarea
-                className="StyledTextArea-sc-17i3mwp-0 fpkVeD"
-                name="comment"
-                onBlur={[Function]}
-                onChange={[Function]}
-                onFocus={[Function]}
-                onKeyDown={[Function]}
-                value=""
-              />
+              <div
+                className="StyledBox-sc-13pk1d4-0 gZSidW"
+              >
+                <textarea
+                  className="StyledTextArea-sc-17i3mwp-0 fpkVeD"
+                  name="comment"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  onKeyDown={[Function]}
+                  value=""
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -2823,7 +2838,7 @@ exports[`InvoiceForm Should not render form with sender and recipient selected 1
                 />
               </div>
               <span>
-                Shipment was send to a third-party
+                Shipment was sent to a third-party
               </span>
             </label>
           </div>
@@ -2833,7 +2848,7 @@ exports[`InvoiceForm Should not render form with sender and recipient selected 1
             open={false}
           >
             <div
-              className="StyledBox-sc-13pk1d4-0 Tiesv"
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
             >
               <div
                 className="StyledBox-sc-13pk1d4-0 clLqce"
@@ -3546,25 +3561,40 @@ exports[`InvoiceForm Should not render form with sender and recipient selected 1
           className="StyledBox-sc-13pk1d4-0 clLqce"
         >
           <div
-            className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+            className="StyledBox-sc-13pk1d4-0 ffeAql"
           >
-            <label
-              className="StyledText-sc-1sadyjn-0 bMXxti"
+            <h5
+              className="StyledHeading-sc-1rdh4aw-0 djDvmr"
+              style={
+                Object {
+                  "minWidth": "100px",
+                }
+              }
             >
               Comments
-            </label>
+            </h5>
+          </div>
+          <div
+            aria-hidden={false}
+            className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+            open={true}
+          >
             <div
-              className="StyledBox-sc-13pk1d4-0 gZSidW"
+              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
             >
-              <textarea
-                className="StyledTextArea-sc-17i3mwp-0 fpkVeD"
-                name="comment"
-                onBlur={[Function]}
-                onChange={[Function]}
-                onFocus={[Function]}
-                onKeyDown={[Function]}
-                value=""
-              />
+              <div
+                className="StyledBox-sc-13pk1d4-0 gZSidW"
+              >
+                <textarea
+                  className="StyledTextArea-sc-17i3mwp-0 fpkVeD"
+                  name="comment"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  onKeyDown={[Function]}
+                  value=""
+                />
+              </div>
             </div>
           </div>
         </div>
