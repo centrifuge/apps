@@ -13,12 +13,13 @@ import {
 
 import * as bcrypt from 'bcrypt';
 import { promisify } from 'util';
-import { ROUTES } from '../../../src/common/constants';
+import {PERMISSIONS, ROUTES} from '../../../src/common/constants';
 import { User } from '../../../src/common/models/user';
 import { DatabaseService } from '../database/database.service';
 import config from '../config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import {UserAuthGuard} from "../auth/admin.auth.guard";
+import {dateFormatter} from "../../../src/common/formaters";
 
 @Controller(ROUTES.USERS.base)
 export class UsersController {
@@ -50,7 +51,7 @@ export class UsersController {
   async register(@Body() user: User) {
 
     const existingUser: User = await this.databaseService.users.findOne({
-      username: user.username,
+      email: user.email,
     });
 
     if (!user.password || !user.password.trim()) {
@@ -66,46 +67,50 @@ export class UsersController {
           existingUser._id,
         );
       } else {
-        throw new HttpException('Username taken!', HttpStatus.FORBIDDEN);
+        throw new HttpException('Email taken!', HttpStatus.FORBIDDEN);
       }
     } else {
       if (existingUser) {
-        throw new HttpException('Username taken!', HttpStatus.FORBIDDEN);
+        throw new HttpException('Email taken!', HttpStatus.FORBIDDEN);
       }
 
       return this.upsertUser({
         ...user,
         enabled: true,
-        invited: false,
+        invited: true,
       });
     }
   }
 
   @Post('invite')
   @UseGuards(UserAuthGuard)
-  async invite(@Body() user: { username: string }) {
+  async invite(@Body() user: { name:string; email: string, permissions: PERMISSIONS[] }) {
     if (!config.inviteOnly) {
       throw new HttpException('Invite functionality not enabled!', HttpStatus.FORBIDDEN);
     }
     const userExists = await this.databaseService.users.findOne({
-      username: user.username,
+      email: user.email,
     });
 
     if (userExists) {
       throw new HttpException('User already invited!', HttpStatus.FORBIDDEN);
     }
 
+
     return this.upsertUser({
       ...user,
-      username: user.username,
+      name: user.name,
+      email: user.email,
+      date_added: dateFormatter(new Date()),
       password: undefined,
       enabled: false,
       invited: true,
-      permissions: [],
+      permissions: user.permissions,
     });
   }
 
   private async upsertUser(user: User, id: string = '') {
+
 
     // Create centrifuge identity in case user does not have one
     if (!user.account) {

@@ -6,6 +6,7 @@ const userRoutes = {
   base: baseUsersRoute,
   login: `${baseUsersRoute}/login`,
   logout: `${baseUsersRoute}/logout`,
+  invite: `${baseUsersRoute}/invite`,
   register: `${baseUsersRoute}/register`,
 };
 

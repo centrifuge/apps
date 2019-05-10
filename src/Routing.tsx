@@ -2,6 +2,7 @@ import React, { FunctionComponent } from 'react';
 import { Redirect, Route, Switch } from 'react-router';
 import routes from './routes';
 import LoginPage from './user/Login';
+import RegisterPage from './user/Register';
 
 interface RouteItem {
   path: string,
@@ -16,7 +17,8 @@ const Routing: FunctionComponent<RoutingProps> = (props) => {
     return (
       <Switch>
         <Route exact path={routes.index} component={LoginPage}/>
-          {props.routes.map( (item,index) => {
+        <Route exact path={routes.user.register} component={RegisterPage}/>
+          {props.routes.map( (item, index) => {
               return <Route key={index} exact path={item.path} component={item.component}/>
           })}
         <Redirect to={routes.index}/>

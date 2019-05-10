@@ -21,8 +21,8 @@ export class AuthService {
    * @return {Promise<User|null>} promise - a promise with the validation results. If successful
    * will return the user, otherwise it returns null.
    */
-  async validateUser(usernameValue: string, passwordValue: string): Promise<User | null> {
-    const databaseUser: User = await this.database.users.findOne({ username: usernameValue });
+  async validateUser(emailValue: string, passwordValue: string): Promise<User | null> {
+    const databaseUser: User = await this.database.users.findOne({ email: emailValue });
     if (!databaseUser || !databaseUser.enabled)
       return null;
     // make sure we do not return the password

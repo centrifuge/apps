@@ -1,12 +1,14 @@
-import { UsersController } from './users.controller';
-import { databaseServiceProvider } from '../database/database.providers';
-import { User } from '../../../src/common/models/user';
+import {UsersController} from './users.controller';
+import {databaseServiceProvider} from '../database/database.providers';
+import {User} from '../../../src/common/models/user';
 import config from '../config';
-import { Test, TestingModule } from '@nestjs/testing';
-import { SessionGuard } from '../auth/SessionGuard';
-import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.provider';
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
-import { DatabaseService } from '../database/database.service';
+import {Test, TestingModule} from '@nestjs/testing';
+import {SessionGuard} from '../auth/SessionGuard';
+import {centrifugeServiceProvider} from '../centrifuge-client/centrifuge.provider';
+import {CentrifugeService} from '../centrifuge-client/centrifuge.service';
+import {DatabaseService} from '../database/database.service';
+import {PERMISSIONS} from "../../../src/common/constants";
+import {dateFormatter} from "../../../src/common/formaters";
 
 describe('Users controller', () => {
   const userAccount = 'generated_identity_id';
@@ -29,7 +31,7 @@ describe('Users controller', () => {
     users = {
       findOne: (user): User | undefined => {
         for (let key in insertedUsers) {
-          if (insertedUsers[key].username === user.username) {
+          if (insertedUsers[key].email === user.email) {
             return insertedUsers[key];
           }
         }
@@ -88,7 +90,9 @@ describe('Users controller', () => {
       jest.clearAllMocks();
       registeredUser = {
         _id: 'user',
-        username: 'username',
+        name: 'username',
+        email: 'test',
+        date_added: dateFormatter(new Date()),
         password: 'password',
         enabled: true,
         invited: false,
@@ -122,8 +126,10 @@ describe('Users controller', () => {
         const user: User = {
           ...new User(),
           _id: 'random' + Math.random(),
-          username: 'new_user',
+          name: 'new_user',
           password: 'password',
+          email: 'test1',
+          date_added: dateFormatter(new Date()),
         };
 
         const invite = await usersController.invite(user);
@@ -144,26 +150,28 @@ describe('Users controller', () => {
         registeredUser.invited = true;
         registeredUser.enabled = true;
         await expect(usersController.register(registeredUser)).rejects.toThrow(
-          'Username taken!',
+          'Email taken!',
         );
       });
 
       it('should throw if the user has not been invited', async () => {
         const notInvitedUser: User = {
           _id: 'some_user_id',
-          username: 'new_user',
+          name: 'new_user',
+          email: 'test',
           password: 'password',
+          date_added: dateFormatter(new Date()),
           invited: false,
           enabled: true,
           permissions: [],
         };
 
         await expect(usersController.register(notInvitedUser)).rejects.toThrow(
-          'Username taken!',
+          'Email taken!',
         );
       });
 
-      it('should create the user if the username is not taken and the user has been invited', async () => {
+      it('should create the user if the email is not taken and the user has been invited', async () => {
         registeredUser.invited = true;
         registeredUser.enabled = false;
         const result = await usersController.register(registeredUser);
@@ -193,8 +201,10 @@ describe('Users controller', () => {
         jest.clearAllMocks();
         registeredUser = {
           _id: 'user',
-          username: 'username',
+          name: 'username',
           password: 'password',
+          email: 'test',
+          date_added: dateFormatter(new Date()),
           enabled: true,
           invited: false,
           permissions: [],
@@ -204,16 +214,17 @@ describe('Users controller', () => {
 
       });
 
-      it('should return error if the username is taken', async () => {
+      it('should return error if the email is taken', async () => {
         await expect(usersController.register(registeredUser)).rejects.toThrow(
-          'Username taken!',
+          'Email taken!',
         );
       });
 
       it('should create the user if the username is not taken', async () => {
         const newUser = {
           _id: 'some_user_id',
-          username: 'new_user',
+          name: 'new_user',
+          email: 'new_email',
           password: 'password',
           enabled: false,
           invited: false,
@@ -228,7 +239,8 @@ describe('Users controller', () => {
         await expect(
           usersController.register({
             _id: 'undefinedPassword',
-            username: 'new_user',
+            name: 'new_user',
+            email: 'new_email',
             password: undefined,
             enabled: false,
             invited: false,
@@ -241,7 +253,8 @@ describe('Users controller', () => {
         await expect(
           usersController.register({
             _id: 'undefinedPassword',
-            username: 'new_user',
+            name: 'new_user',
+            email: 'new_email',
             password: null,
             enabled: false,
             invited: false,
@@ -255,7 +268,8 @@ describe('Users controller', () => {
         await expect(
           usersController.register({
             _id: 'undefinedPassword',
-            username: 'new_user',
+            name: 'new_user',
+            email: 'new_email',
             password: '  ',
             enabled: false,
             invited: false,
@@ -277,7 +291,7 @@ describe('Users controller', () => {
 
       it('should throw error', async () => {
         await expect(
-          usersController.invite({ username: 'any_username' }),
+          usersController.invite({ name: 'any_username', email: 'test', permissions: [PERMISSIONS.CAN_CREATE_INVOICES] }),
         ).rejects.toThrow('Invite functionality not enabled!');
       });
     });

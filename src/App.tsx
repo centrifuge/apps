@@ -18,6 +18,7 @@ import CreateInvoice from "./invoices/Create";
 import {ConnectedInvoiceDetails} from "./invoices/InvoiceDetails";
 import EditInvoice from "./invoices/Edit";
 import Contacts from "./contacts/View";
+import RegisterForm from "./user/RegisterForm";
 
 interface AppPros {
   selectedRoute: string;
@@ -51,24 +52,28 @@ class App extends Component<AppPros> {
     if (loggedInUser) {
 
       if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
-        menuItems.unshift(
+        menuItems.push(
             {label: 'Users', route: userRoutes.index},
         )
         routeItems.push(
             {
               path: routes.user.index,
               component: UsersList,
-            }
+            },
         )
       }
 
       if(loggedInUser.permissions.includes(PERMISSIONS.CAN_CREATE_INVOICES)) {
         menuItems.push(...[
+          { label: 'Contacts', route: contactsRoutes.index },
           { label: 'Invoices', route: invoicesRoutes.index },
-          { label: 'Contacts', route: contactsRoutes.index }
         ])
 
         routeItems.push(
+          {
+            path: routes.contacts.index,
+            component: Contacts,
+          },
           {
             path: routes.invoices.index,
             component: InvoiceList,
@@ -85,10 +90,6 @@ class App extends Component<AppPros> {
             path: routes.invoices.edit,
             component: EditInvoice,
           },
-          {
-            path: routes.contacts.index,
-            component: Contacts,
-          }
         )
       }
 

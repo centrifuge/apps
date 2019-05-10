@@ -3,16 +3,18 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import {
   getAllUsers,
-  resetGetAllUsers
+  resetGetAllUsers,
 } from '../../store/actions/users';
 import { RequestState } from '../../store/reducers/http-request-reducer';
-import { Box, Button, DataTable, Heading, Text, Layer, FormField, TextInput } from 'grommet';
+import { Box, Button, DataTable, Heading, Text } from 'grommet';
 import { RouteComponentProps, withRouter } from 'react-router';
-import { Formik, Form } from 'formik';
-import * as Yup from 'yup'
 import { User } from "../../common/models/user";
+import {PERMISSIONS} from "../../common/constants";
+import { Modal } from '@centrifuge/axis-modal'
+import InviteForm from "./InviteForm";
 
 type UsersListProps = {
+  users: any;
   getAllUsers: () => void;
   resetGetAllUsers: () => void;
   loading: boolean;
@@ -20,8 +22,9 @@ type UsersListProps = {
 
 class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
   displayName = 'UsersList';
+
   state = {
-    show: false,
+    show: false
   }
 
   componentDidMount() {
@@ -32,22 +35,36 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
     this.props.resetGetAllUsers()
   }
 
-  // onSubmit = (values: Invoice) => {
-  //   return this.props.onSubmit && this.props.onSubmit({ ...values });
-  // };
+  clickOut = () => {
+    this.setState({show: false})
+  }
+
+  renderPermission = (permission) => {
+      if (permission === PERMISSIONS.CAN_MANAGE_USERS) {
+        return( <Text>Admin</Text>)
+      }
+      if (permission === PERMISSIONS.CAN_FUND_INVOICES) {
+        return (<Text>Funder</Text>)
+      }
+      if (permission === PERMISSIONS.CAN_CREATE_INVOICES) {
+        return (<Text>Supplier</Text>)
+      }
+  }
 
 
   renderUsers = (data) => {
+
     return (
         <Box>
           <DataTable
               data={data}
+              sortable={true}
               columns={[
                 {
-                  property: 'username',
+                  property: 'name',
                   header: 'Name',
                   render: data =>
-                      data.username ? <Text>{data.username}</Text> : null,
+                      data.name ? <Text>{data.name}</Text> : null,
                 },
                 {
                   property: 'email',
@@ -61,6 +78,19 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
                   render: data =>
                       data.account ? <Text>{data.account}</Text> : null,
                 },
+                {
+                  property: 'date_added',
+                  header: 'Date Added',
+                  render: data =>
+                      data.date_added ? <Text>{data.date_added}</Text> : null,
+                },
+                {
+                  property: 'permissions',
+                  header: 'User Rights',
+                  render: data =>
+                  {
+                    data.permissions.length > 0 ? this.renderPermission(data.permissions[0]) : null
+                  }},
               ]}
           />
         </Box>
@@ -69,84 +99,23 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
 
   renderForm = () => {
 
-    const newAccountValidation = Yup.object().shape({
-      name: Yup.string()
-          .max(40, 'Please enter no more than 40 characters')
-          .required( 'This field is required'),
-      email: Yup.string()
-          .email('Please enter a valid email')
-          .required('This field is required')
-    });
-
     return (
-        <Layer onEsc={() => this.setState({show: false})} onClickOutside={() => this.setState({show: false})}>
-          <Formik
-              initialValues={{ name: '', email: '' }}
-              validationSchema={newAccountValidation}
-              onSubmit={(values, { setSubmitting }) => {
-                // if (!values) return;
-                // this.onSubmit(values);
-                // setSubmitting(true);
-              }}
-          >
-            {({ values,errors,handleChange, handleSubmit }) => (
-                <Box direction='column'>
-                  <Heading margin='medium' level='5'>Invite New User</Heading>
-                  <Form>
-                    <Box fill pad='medium' gap="medium">
-
-                      <FormField
-                          label="Name"
-                          error={errors!.name}
-                      >
-                        <TextInput
-                            name="name"
-                            value={values!.name}
-                            onChange={handleChange}
-                        />
-                      </FormField>
-
-                      <FormField
-                          label="Email"
-                          error={errors!.email}
-                      >
-                        <TextInput
-                            name="email"
-                            value={values!.email}
-                            onChange={handleChange}
-                        />
-                      </FormField>
-                      <Box direction="row" gap="large" pad="large">
-                        <Button label="Discard" onClick={() => this.setState({show: false})} />
-                        <Button type="submit" primary label="Save" onClick={() => {
-                          this.setState({show: false})
-                        }}
-                        />
-                      </Box>
-                    </Box>
-                  </Form>
-                </Box>
-            )}
-          </Formik>
-        </Layer>
-    )
+        <InviteForm
+            reveal={this.clickOut}
+        />
+        )
   }
 
   render() {
     if (this.props.loading || !this.props.users) {
       return 'There are no whitelisted accounts for this application yet. As an admin, you can create and whitelist new user accounts.';
     }
-
     return  (
         <Box fill>
           <Box justify="between" direction="row" align="center">
             <Heading level="3">User Management</Heading>
               <Box>
-                <Button primary label="Invite User" onClick={
-                  () => {
-                    this.setState({show: true})
-                  }
-                } />
+                <Button primary label="Invite User" onClick={() => {this.setState({show: true})}} />
               </Box>
             { this.state.show && this.renderForm() }
           </Box>
@@ -167,6 +136,6 @@ export default connect(
       };
     },
     {
-      getAllUsers, resetGetAllUsers,
+      getAllUsers, resetGetAllUsers
     },
 )(withRouter(UsersList));

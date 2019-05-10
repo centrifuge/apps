@@ -4,12 +4,15 @@ import { AuthService } from './auth.service';
 import { User } from '../../../src/common/models/user';
 import { databaseServiceProvider } from '../database/database.providers';
 import { DatabaseService } from '../database/database.service';
+import {dateFormatter} from "../../../src/common/formaters";
 
 describe('LocalStrategy', () => {
   const unhashedPassword = 'my_password';
   const mockUser: User = {
-    username: 'my_username',
+    name: 'my_username',
     _id: 'user_id',
+    email: 'test@test.test',
+    date_added: dateFormatter(new Date()),
     enabled: true,
     invited: false,
     permissions: [],
@@ -42,7 +45,7 @@ describe('LocalStrategy', () => {
 
   it('should return user if credentials are valid', async () => {
     const result = await authService.validateUser(
-      mockUser.username,
+      mockUser.name,
       unhashedPassword,
     );
     expect(result).toEqual(mockUser);
@@ -58,7 +61,7 @@ describe('LocalStrategy', () => {
 
   it('should return null if password is invalid', async () => {
     const result = await authService.validateUser(
-      mockUser.username,
+      mockUser.name,
       'invalid password',
     );
     expect(result).toBe(null);

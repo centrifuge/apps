@@ -4,11 +4,14 @@ import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { User } from '../../../src/common/models/user';
 import { Test } from '@nestjs/testing';
+import {dateFormatter} from "../../../src/common/formaters";
 
 describe('LocalStrategy', function() {
   const mockUser: User = {
-    username: 'my_username',
+    name: 'my_username',
     password: 'my_password',
+    email: 'test@test.com',
+    date_added: dateFormatter(new Date()),
     _id: 'my_id',
     enabled: true,
     invited: false,
@@ -28,7 +31,7 @@ describe('LocalStrategy', function() {
 
     const httpStrategy = module.get<LocalStrategy>(LocalStrategy);
     const result = await httpStrategy.validate(
-      mockUser.username,
+      mockUser.email,
       mockUser.password,
     );
     expect(result).toBe(mockUser);

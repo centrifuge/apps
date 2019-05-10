@@ -7,6 +7,7 @@ import config from '../config';
 import {InvoiceResponse, PurchaseOrderResponse,} from '../../../src/common/interfaces';
 import {PERMISSIONS} from '../../../src/common/constants';
 import {DatabaseService} from './database.service';
+import {dateFormatter} from "../../../src/common/formaters";
 
 // TODO refactor this in mutiple providers,services
 
@@ -23,16 +24,18 @@ const initializeDatabase = async () => {
     `${config.dbPath}/usersDb`,
   );
   const admin: User = {
-    username: config.admin.username,
+    name: config.admin.name,
     password: await promisify(bcrypt.hash)(config.admin.password, 10),
+    email: 'test@test.org',
+    date_added: dateFormatter(new Date()),
     enabled: true,
     invited: false,
     account: config.admin.account,
-    permissions: [PERMISSIONS.CAN_MANAGE_USERS, PERMISSIONS.CAN_MANAGE_ACCOUNTS, PERMISSIONS.CAN_CREATE_INVOICES, PERMISSIONS.CAN_FUND_INVOICES],
+    permissions: [PERMISSIONS.CAN_MANAGE_USERS],
   };
 
   const userExists = await usersRepository.findOne({
-    username: admin.username,
+    email: admin.email,
   });
 
   if (!userExists) {
