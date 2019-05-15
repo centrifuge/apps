@@ -19,6 +19,7 @@ import {ConnectedInvoiceDetails} from "./invoices/InvoiceDetails";
 import EditInvoice from "./invoices/Edit";
 import Contacts from "./contacts/View";
 import RegisterForm from "./user/RegisterForm";
+import { NotificationProvider } from './notifications/NotificationContext';
 
 interface AppPros {
   selectedRoute: string;
@@ -105,24 +106,26 @@ class App extends Component<AppPros> {
     return (
       <div className="App">
         <AxisTheme>
-          <Box fill align="center">
-            <Header
-              selectedRoute={selectedRoute}
-              menuItems={menuItems}
-              push={push}
-            />
-            <Box
-              justify="center"
-              direction="row"
-              fill
-              border="top"
-            >
-              <Box width="xlarge">
-                <Routing routes={routeItems}/>
+          <NotificationProvider>
+            <Box fill align="center">
+              <Header
+                selectedRoute={selectedRoute}
+                menuItems={menuItems}
+                push={push}
+              />
+              <Box
+                justify="center"
+                direction="row"
+                fill
+                border="top"
+              >
+                <Box width="xlarge">
+                  <Routing routes={routeItems}/>
+                </Box>
               </Box>
-            </Box>
 
-          </Box>
+            </Box>
+          </NotificationProvider>
         </AxisTheme>
       </div>
     );
