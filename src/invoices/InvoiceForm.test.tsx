@@ -24,25 +24,21 @@ describe('InvoiceForm', () => {
   const onCancel = jest.fn(() => {
   });
 
-  it('Should not render empty form', () => {
+  it('Should render empty form', () => {
     const invoice = {};
     const bodyShallow = renderer.create(
-      <BrowserRouter>
         <InvoiceForm invoice={invoice} contacts={contacts} onCancel={onCancel} onSubmit={onSubmit}/>
-      </BrowserRouter>,
     ).toJSON();
     expect(bodyShallow).toMatchSnapshot();
   });
 
-  it('Should not render form with sender and recipient selected', () => {
+  it('Should render form with sender and recipient selected', () => {
     const invoice = {
       sender: contacts[0].value,
       recipient: contacts[1].value,
     };
     const bodyShallow = renderer.create(
-      <BrowserRouter>
         <InvoiceForm invoice={invoice} contacts={contacts} onCancel={onCancel} onSubmit={onSubmit}/>
-      </BrowserRouter>,
     ).toJSON();
     expect(bodyShallow).toMatchSnapshot();
   });

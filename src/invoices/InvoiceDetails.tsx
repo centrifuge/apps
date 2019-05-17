@@ -22,6 +22,11 @@ import { CreditNote } from './invoice-details-partials/CreditNote';
 import invoiceRoutes from './routes';
 import { Section } from '../components/Section';
 import { InvoiceTotal } from './invoice-details-partials/InvoiceTotal';
+import invoices from '../store/sagas/invoices';
+import {Modal} from '@centrifuge/axis-modal';
+import FundingRequestForm from './FundingRequestForm';
+import { FundingRequest } from '../common/models/funding-request';
+import { dateFormatter } from '../common/formaters';
 
 type ConnectedInvoiceDetailsProps = {
   getInvoiceById: (id: string) => void;
@@ -34,6 +39,9 @@ type ConnectedInvoiceDetailsProps = {
 
 export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps> {
   displayName = 'InvoiceDetails';
+  state = {
+    requestFunding:false,
+  }
 
   componentDidMount() {
     if (!this.props.contacts) {
@@ -45,126 +53,162 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
     }
   }
 
+
+  cancelFundingRequest = () => {
+   this.setState({requestFunding:false})
+  };
+
+  openFundingRequest = () => {
+    this.setState({requestFunding:true})
+  }
+
   componentWillUnmount() {
     this.props.resetGetContacts();
     this.props.resetGetInvoiceById();
   }
 
   render() {
-
     const { invoice, contacts } = this.props;
+    const {requestFunding} = this.state;
     const columnGap = 'medium';
     const sectionGap = 'medium';
+    const fundingRequest: FundingRequest = new FundingRequest();
 
     if (!invoice || !contacts) {
       return 'Loading invoice';
     }
 
+    // TODO make currency and due_date mandatory in invoice
+    //@ts-ignore
+    fundingRequest.currency = invoice.currency;
+    //@ts-ignore
+    fundingRequest.repayment_due_date = invoice.date_due || dateFormatter(new Date());
+
+    // We can fund invoices only that have date due greated then today
+    // and have the status unpaid
+    //@ts-ignore
+    const canRequestFunding = (new Date(invoice.date_due)) > (new Date())
+      && invoice.status === 'unpaid'
+      && invoice.currency
+      && invoice.date_due;
+
     return (
-      <Box pad={{ bottom: 'large' }}>
-        <Box justify="between" direction="row" align="center">
-          <Box direction="row" gap="small" align="center">
-            <Link to={routes.invoices.index} size="large">
-              <LinkPrevious/>
-            </Link>
+      <>
+        <Modal
+          opened={requestFunding}
+          headingProps={{level:3}}
+          title={`Request funding for invoice #${invoice.number}`}
+          onClose={this.cancelFundingRequest}
+        >
+          <FundingRequestForm onSubmit={()=>{}} onDiscard={this.cancelFundingRequest} contacts={contacts} fundingRequest={fundingRequest}/>
+        </Modal>
+        <Box pad={{ bottom: 'large' }}>
+          <Box justify="between" direction="row" align="center">
+            <Box direction="row" gap="small" align="center">
+              <Link to={routes.invoices.index} size="large">
+                <LinkPrevious/>
+              </Link>
 
-            <Heading level="3">
-              Invoice #{invoice!.number}
-            </Heading>
+              <Heading level="3">
+                Invoice #{invoice!.number}
+              </Heading>
+            </Box>
+            <Box direction="row" gap="medium">
+              <Button
+                active={false}
+                onClick={() => {
+                  invoice._id && this.props.history.push(
+                    invoiceRoutes.edit.replace(':id', invoice._id),
+                  );
+                }}
+                label="Edit"
+              />
+              <Button
+                disabled={!canRequestFunding}
+                primary
+                onClick={ this.openFundingRequest }
+                label="Request Funding"
+              />
+            </Box>
           </Box>
-          <Box direction="row" gap="medium">
-            <Button
-              active={false}
-              onClick={() => {
-                invoice._id && this.props.history.push(
-                  invoiceRoutes.edit.replace(':id', invoice._id),
-                );
-              }}
-              label="Edit"
-            />
-            <Button
-              primary
-              label="Request Funding"
-            />
-          </Box>
-        </Box>
 
-        <Box>
-          <Box direction="column" gap={sectionGap}>
-            <Box>
-              {/* Invoice number section */}
+          <Box>
+            <Box direction="column" gap={sectionGap}>
               <Box>
-                <DisplayField
-                  label="Invoice number"
-                  value={invoice!.number}
+                {/* Invoice number section */}
+                <Box>
+                  <DisplayField
+                    label="Invoice number"
+                    value={invoice!.number}
+                  />
+                </Box>
+              </Box>
+
+              {/*Sender and Recipient */}
+              <Box direction="row" gap={columnGap}>
+                <Sender
+                  invoice={invoice}
+                  columnGap={columnGap}
+                  contacts={contacts}
+                />
+                <Recipient
+                  invoice={invoice}
+                  columnGap={columnGap}
+                  contacts={contacts}
                 />
               </Box>
-            </Box>
-
-            {/*Sender and Recipient */}
-            <Box direction="row" gap={columnGap}>
-              <Sender
-                invoice={invoice}
-                columnGap={columnGap}
-                contacts={contacts}
-              />
-              <Recipient
-                invoice={invoice}
-                columnGap={columnGap}
-                contacts={contacts}
-              />
-            </Box>
 
 
 
-            {/* Details section */}
-            <Box gap={columnGap}>
-              <Details
-                invoice={invoice}
-                columnGap={columnGap}
-              />
-            </Box>
-
-            {/* Invoice total section */}
-            <Box gap={columnGap}>
-              <InvoiceTotal
-                invoice={invoice}
-                columnGap={columnGap}
-              />
-            </Box>
-
-            {/*Ship to and Remit to */}
-            <Box direction="row" gap={columnGap}>
-              <ShipTo
-                invoice={invoice}
-                columnGap={columnGap}
-              />
-              <RemitTo
-                invoice={invoice}
-                columnGap={columnGap}
-              />
-            </Box>
-
-            {/* Credit note section */}
-            <Box direction="row" gap={columnGap}>
-              <CreditNote
-                invoice={invoice}
-                columnGap={columnGap}
-              />
-            </Box>
-
-            {/* Comments section */}
-            <Box direction="row">
-              <Section headingLevel="5" title="Comments" basis={'1/2'}>
-                <DisplayField
-                  value={invoice!.comment}
+              {/* Details section */}
+              <Box gap={columnGap}>
+                <Details
+                  invoice={invoice}
+                  columnGap={columnGap}
                 />
-              </Section>
+              </Box>
 
+              {/* Invoice total section */}
+              <Box gap={columnGap}>
+                <InvoiceTotal
+                  invoice={invoice}
+                  columnGap={columnGap}
+                />
+              </Box>
+
+              {/*Ship to and Remit to */}
+              <Box direction="row" gap={columnGap}>
+                <ShipTo
+                  invoice={invoice}
+                  columnGap={columnGap}
+                />
+                <RemitTo
+                  invoice={invoice}
+                  columnGap={columnGap}
+                />
+              </Box>
+
+              {/* Credit note section */}
+              <Box direction="row" gap={columnGap}>
+                <CreditNote
+                  invoice={invoice}
+                  columnGap={columnGap}
+                />
+              </Box>
+
+              {/* Comments section */}
+              <Box direction="row">
+                <Section headingLevel="5" title="Comments" basis={'1/2'}>
+                  <DisplayField
+                    value={invoice!.comment}
+                  />
+                </Section>
+
+              </Box>
             </Box>
           </Box>
         </Box>
-      </Box>
+      </>
     );
 
   }

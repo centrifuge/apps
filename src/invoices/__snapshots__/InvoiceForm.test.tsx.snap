@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`InvoiceForm Should not render empty form 1`] = `
+exports[`InvoiceForm Should render empty form 1`] = `
 <div
   className="StyledBox-sc-13pk1d4-0 hOJKqu"
 >
@@ -1802,7 +1802,7 @@ exports[`InvoiceForm Should not render empty form 1`] = `
 </div>
 `;
 
-exports[`InvoiceForm Should not render form with sender and recipient selected 1`] = `
+exports[`InvoiceForm Should render form with sender and recipient selected 1`] = `
 <div
   className="StyledBox-sc-13pk1d4-0 hOJKqu"
 >

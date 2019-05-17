@@ -47,7 +47,7 @@ describe('InvoiceDetails', () => {
     ];
     const bodyShallow = renderer.create(
       // TODO Test fails when using Axis Theme. Investigate!!!
-      <Grommet>
+      <AxisTheme>
         <BrowserRouter>
           <DynamicParamInvoiceDetails
             invoice={invoice}
@@ -57,7 +57,7 @@ describe('InvoiceDetails', () => {
 
           />
         </BrowserRouter>
-      </Grommet>,
+      </AxisTheme>,
     ).toJSON();
     expect(bodyShallow).toMatchSnapshot();
   });
@@ -80,7 +80,7 @@ describe('InvoiceDetails', () => {
       },
     ];
     const bodyShallow = renderer.create(
-      <Grommet>
+      <AxisTheme>
         <BrowserRouter>
           <DynamicParamInvoiceDetails
             invoice={invoice}
@@ -90,7 +90,7 @@ describe('InvoiceDetails', () => {
 
           />
         </BrowserRouter>
-      </Grommet>,
+      </AxisTheme>,
     ).toJSON();
     expect(bodyShallow).toMatchSnapshot();
   });
@@ -108,7 +108,7 @@ describe('InvoiceDetails', () => {
       },
     ];
     const bodyShallow = renderer.create(
-      <Grommet>
+      <AxisTheme>
         <BrowserRouter>
           <DynamicParamInvoiceDetails
             invoice={invoice}
@@ -118,7 +118,7 @@ describe('InvoiceDetails', () => {
 
           />
         </BrowserRouter>
-      </Grommet>,
+      </AxisTheme>,
     ).toJSON();
     expect(bodyShallow).toMatchSnapshot();
   });

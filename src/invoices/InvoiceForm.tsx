@@ -15,7 +15,7 @@ import * as Yup from 'yup';
 import { Section } from '../components/Section';
 
 type InvoiceFormProps = {
-  onSubmit?: (invoice: Invoice) => void;
+  onSubmit: (invoice: Invoice) => void;
   contacts: LabelValuePair[];
   invoice: Invoice;
 };
@@ -23,14 +23,17 @@ type InvoiceFormProps = {
 export default class InvoiceForm extends React.Component<InvoiceFormProps> {
   displayName = 'CreateEditInvoice';
   static defaultProps: InvoiceFormProps = {
-    invoice: {},
+    onSubmit: (invoice: Invoice) => {
+      // do nothing
+    },
+    invoice: {currency:"USD"},
     contacts: [],
   };
 
   state = { submitted: false };
 
   onSubmit = (values: Invoice) => {
-    return this.props.onSubmit && this.props.onSubmit({ ...values });
+    return this.props.onSubmit({ ...values });
   };
 
 
@@ -44,7 +47,7 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
 
     const invoiceValidation = Yup.object().shape({
       number: Yup.string()
-        .max(40, 'Please enter no more than 20 characters')
+        .max(40, 'Please enter no more than 40 characters')
         .required('This field is required'),
       sender: Yup.string()
         .required('This field is required'),
@@ -84,7 +87,6 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
              }) => (
               <form
                 onSubmit={event => {
-                  event.preventDefault();
                   this.setState({ submitted: true });
                   handleSubmit();
                 }}
