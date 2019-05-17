@@ -6,20 +6,20 @@ import { ROUTES } from '../common/constants';
 import { User } from '../common/models/user';
 import { Contact } from '../common/models/contact';
 import {
-  InvoiceInvoiceResponse,
+  InvInvoiceResponse,
 } from '../../clients/centrifuge-node';
 
 const instance = axios.create();
 
 export const httpClient = {
   invoices: {
-    create: async (invoice: Invoice): Promise<InvoiceInvoiceResponse> =>
+    create: async (invoice: Invoice): Promise<InvInvoiceResponse> =>
       instance.post(ROUTES.INVOICES, invoice),
-    update: async (invoice: Invoice): Promise<InvoiceInvoiceResponse> =>
+    update: async (invoice: Invoice): Promise<InvInvoiceResponse> =>
       instance.put(`${ROUTES.INVOICES}/${invoice._id}`, invoice),
-    read: async (): Promise<InvoiceInvoiceResponse> =>
+    read: async (): Promise<InvInvoiceResponse> =>
       instance.get(ROUTES.INVOICES),
-    readById: async (id): Promise<InvoiceInvoiceResponse> =>
+    readById: async (id): Promise<InvInvoiceResponse> =>
       instance.get(`${ROUTES.INVOICES}/${id}`),
   },
   user: {

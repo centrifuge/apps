@@ -5,7 +5,7 @@ import { SessionGuard } from '../auth/SessionGuard';
 import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.provider';
 import { databaseServiceProvider } from '../database/database.providers';
 import { Contact } from '../../../src/common/models/contact';
-import { InvoiceInvoiceData } from '../../../clients/centrifuge-node';
+import { InvInvoiceData } from '../../../clients/centrifuge-node';
 import config from '../config';
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
@@ -43,7 +43,7 @@ describe('InvoicesController', () => {
       insert: jest.fn(val => val),
       find: jest.fn(() =>
         fetchedInvoices.map(
-          (data: Invoice): InvoiceInvoiceData => ({
+          (data: Invoice): InvInvoiceData => ({
             ...data,
           }),
         ),

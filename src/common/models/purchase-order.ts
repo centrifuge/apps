@@ -1,6 +1,6 @@
-import { PurchaseorderPurchaseOrderData } from '../../../clients/centrifuge-node';
+import { PoPurchaseOrderData } from '../../../clients/centrifuge-node';
 
-export interface PurchaseOrder extends PurchaseorderPurchaseOrderData {
+export interface PurchaseOrder extends PoPurchaseOrderData {
   _id?: string;
   collaborators?: string[];
 }

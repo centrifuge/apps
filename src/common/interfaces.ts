@@ -1,7 +1,7 @@
 import {
-  InvoiceInvoiceData,
-  InvoiceInvoiceResponse,
-  PurchaseorderPurchaseOrderResponse,
+  InvInvoiceData,
+  InvInvoiceResponse,
+  PoPurchaseOrderResponse,
 } from '../../clients/centrifuge-node';
 import { Contact } from './models/contact';
 
@@ -12,18 +12,18 @@ export interface LabelValuePair {
   value: string;
 }
 
-export interface InvoiceData extends InvoiceInvoiceData {
+export interface InvoiceData extends InvInvoiceData {
   supplier?: Contact;
 }
 
-export interface InvoiceResponse extends InvoiceInvoiceResponse {
+export interface InvoiceResponse extends InvInvoiceResponse {
   data?: InvoiceData;
   ownerId?: string;
   _id?: string;
 }
 
 export interface PurchaseOrderResponse
-  extends PurchaseorderPurchaseOrderResponse {
+  extends PoPurchaseOrderResponse {
   ownerId?: string;
   _id?: string;
 }

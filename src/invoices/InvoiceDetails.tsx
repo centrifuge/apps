@@ -5,7 +5,7 @@ import { Invoice } from '../common/models/invoice';
 import { LabelValuePair } from '../common/interfaces';
 import { connect } from 'react-redux';
 import { RequestState } from '../store/reducers/http-request-reducer';
-import { InvoiceInvoiceResponse } from '../../clients/centrifuge-node';
+import { InvInvoiceResponse } from '../../clients/centrifuge-node';
 import { Contact } from '../common/models/contact';
 import { getInvoiceById, resetGetInvoiceById } from '../store/actions/invoices';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
@@ -173,7 +173,7 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
 export const ConnectedInvoiceDetails = connect(
   (state: {
     invoices: {
-      getById: RequestState<InvoiceInvoiceResponse & { _id: string }>;
+      getById: RequestState<InvInvoiceResponse & { _id: string }>;
     };
     contacts: { get: RequestState<Contact[]> };
   }) => {

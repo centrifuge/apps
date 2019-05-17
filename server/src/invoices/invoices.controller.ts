@@ -13,8 +13,8 @@ import { Invoice } from '../../../src/common/models/invoice';
 import { ROUTES } from '../../../src/common/constants';
 import { SessionGuard } from '../auth/SessionGuard';
 import {
-  InvoiceInvoiceData,
-  InvoiceInvoiceResponse,
+  InvInvoiceData,
+  InvInvoiceResponse,
 } from '../../../clients/centrifuge-node';
 import { DatabaseService } from '../database/database.service';
 import { InvoiceData } from '../../../src/common/interfaces';
@@ -35,7 +35,7 @@ export class InvoicesController {
    * @async
    * @param request - the http request
    * @param {Invoice} invoice - the body of the request
-   * @return {Promise<InvoiceInvoiceResponse>} result
+   * @return {Promise<InvInvoiceResponse>} result
    */
   async create(@Req() request, @Body() invoice: Invoice) {
     const collaborators =  [invoice!.sender, invoice!.recipient].filter(item => item );
@@ -69,7 +69,7 @@ export class InvoicesController {
   async get(@Req() request): Promise<InvoiceData[]> {
     const invoices = (await this.database.invoices.find({
       ownerId: request.user._id,
-    })) as (InvoiceInvoiceData & { _id: string })[];
+    })) as (InvInvoiceData & { _id: string })[];
 
     return await Promise.all(
       invoices.map(async invoice => {
@@ -117,7 +117,7 @@ export class InvoicesController {
     @Req() request,
     @Body() updateInvoiceRequest: Invoice,
   ) {
-    const invoice: InvoiceInvoiceResponse = await this.database.invoices.findOne(
+    const invoice: InvInvoiceResponse = await this.database.invoices.findOne(
       { _id:  params.id, ownerId: request.user._id },
     );
 

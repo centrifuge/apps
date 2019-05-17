@@ -7,7 +7,7 @@ import { createInvoice, resetCreateInvoice } from '../store/actions/invoices';
 import { Invoice } from '../common/models/invoice';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { RequestState } from '../store/reducers/http-request-reducer';
-import { InvoiceInvoiceData } from '../../clients/centrifuge-node';
+import { InvInvoiceData } from '../../clients/centrifuge-node';
 import { Contact } from '../common/models/contact';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
 import { LabelValuePair } from '../common/interfaces';
@@ -90,7 +90,7 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
 
 export default connect(
   (state: {
-    invoices: { create: RequestState<InvoiceInvoiceData> };
+    invoices: { create: RequestState<InvInvoiceData> };
     contacts: { get: RequestState<Contact[]> };
   }) => {
     return {

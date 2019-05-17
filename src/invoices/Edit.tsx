@@ -7,7 +7,7 @@ import { getInvoiceById, resetGetInvoiceById, resetUpdateInvoice, updateInvoice 
 import { Invoice } from '../common/models/invoice';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { RequestState } from '../store/reducers/http-request-reducer';
-import { InvoiceInvoiceResponse } from '../../clients/centrifuge-node';
+import { InvInvoiceResponse } from '../../clients/centrifuge-node';
 import { Contact } from '../common/models/contact';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
 import { LabelValuePair } from '../common/interfaces';
@@ -92,7 +92,7 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
 export default connect(
   (state: {
     invoices: {
-      getById: RequestState<InvoiceInvoiceResponse & { _id: string }>;
+      getById: RequestState<InvInvoiceResponse & { _id: string }>;
     };
     contacts: { get: RequestState<Contact[]> };
   }) => {

@@ -1,6 +1,6 @@
-import { InvoiceInvoiceData } from '../../../clients/centrifuge-node';
+import { InvInvoiceData } from '../../../clients/centrifuge-node';
 
-export interface Invoice extends InvoiceInvoiceData {
+export interface Invoice extends InvInvoiceData {
   _id?: string;
   collaborators?: string[];
 }
