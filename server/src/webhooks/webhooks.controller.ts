@@ -2,7 +2,7 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { ROUTES } from '../../../src/common/constants';
 import { NotificationNotificationMessage } from '../../../clients/centrifuge-node';
 import { DatabaseService } from '../database/database.service';
-import config from '../config';
+import config from '../../../src/common/config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 
 export const documentTypes = {

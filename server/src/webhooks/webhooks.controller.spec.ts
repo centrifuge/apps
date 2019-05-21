@@ -10,7 +10,7 @@ import {
   InvInvoiceResponse,
   PoPurchaseOrderResponse,
 } from '../../../clients/centrifuge-node';
-import config from '../config';
+import config from '../../../src/common/config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { DatabaseService } from '../database/database.service';
 

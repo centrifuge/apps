@@ -14,8 +14,8 @@ import { ROUTES } from '../../../src/common/constants';
 import { DatabaseService } from '../database/database.service';
 import { PurchaseOrder } from '../../../src/common/models/purchase-order';
 import { PoPurchaseOrderResponse } from '../../../clients/centrifuge-node';
-import config from '../config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
+import config from '../../../src/common/config';
 
 @Controller(ROUTES.PURCHASE_ORDERS)
 @UseGuards(SessionGuard)

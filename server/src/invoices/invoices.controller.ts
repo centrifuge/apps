@@ -18,7 +18,7 @@ import {
 } from '../../../clients/centrifuge-node';
 import { DatabaseService } from '../database/database.service';
 import { InvoiceData } from '../../../src/common/interfaces';
-import config from '../config';
+import config from '../../../src/common/config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 
 @Controller(ROUTES.INVOICES)

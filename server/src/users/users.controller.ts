@@ -16,7 +16,7 @@ import { promisify } from 'util';
 import {PERMISSIONS, ROUTES} from '../../../src/common/constants';
 import { User } from '../../../src/common/models/user';
 import { DatabaseService } from '../database/database.service';
-import config from '../config';
+import config from '../../../src/common/config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import {UserAuthGuard} from "../auth/admin.auth.guard";
 import {dateFormatter} from "../../../src/common/formaters";
@@ -28,6 +28,7 @@ export class UsersController {
     private readonly centrifugeService: CentrifugeService,
   ) {
   }
+
 
   @Post('login')
   @HttpCode(200)

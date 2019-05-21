@@ -4,7 +4,7 @@ import { SessionGuard } from '../auth/SessionGuard';
 import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.provider';
 import { databaseServiceProvider } from '../database/database.providers';
 import { PurchaseOrder } from '../../../src/common/models/purchase-order';
-import config from '../config';
+import config from '../../../src/common/config';
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 

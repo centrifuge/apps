@@ -6,9 +6,10 @@ import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.provi
 import { databaseServiceProvider } from '../database/database.providers';
 import { Contact } from '../../../src/common/models/contact';
 import { InvInvoiceData } from '../../../clients/centrifuge-node';
-import config from '../config';
+
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
+import config from '../../../src/common/config';
 
 describe('InvoicesController', () => {
   let centrifugeId;
@@ -116,7 +117,7 @@ describe('InvoicesController', () => {
           ...invoice,
         },
         write_access: {
-          collaborators:[...invoice.collaborators]
+          collaborators:[...invoice.collaborators],
         },
         ownerId: 'user_id',
       });

@@ -1,7 +1,7 @@
 import {UsersController} from './users.controller';
 import {databaseServiceProvider} from '../database/database.providers';
 import {User} from '../../../src/common/models/user';
-import config from '../config';
+import config from '../../../src/common/config';
 import {Test, TestingModule} from '@nestjs/testing';
 import {SessionGuard} from '../auth/SessionGuard';
 import {centrifugeServiceProvider} from '../centrifuge-client/centrifuge.provider';

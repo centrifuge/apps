@@ -3,7 +3,7 @@ import * as bcrypt from 'bcrypt';
 import {User} from '../../../src/common/models/user';
 import {DatabaseRepository} from './database.repository';
 import {Contact} from '../../../src/common/models/contact';
-import config from '../config';
+import config from '../../../src/common/config';
 import {InvoiceResponse, PurchaseOrderResponse,} from '../../../src/common/interfaces';
 import {PERMISSIONS} from '../../../src/common/constants';
 import {DatabaseService} from './database.service';
@@ -26,12 +26,12 @@ const initializeDatabase = async () => {
   const admin: User = {
     name: config.admin.name,
     password: await promisify(bcrypt.hash)(config.admin.password, 10),
-    email: 'test@test.org',
+    email: config.admin.email,
     date_added: dateFormatter(new Date()),
     enabled: true,
     invited: false,
     account: config.admin.account,
-    permissions: [PERMISSIONS.CAN_MANAGE_USERS],
+    permissions: config.admin.permissions,
   };
 
   const userExists = await usersRepository.findOne({

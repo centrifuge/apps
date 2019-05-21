@@ -3,7 +3,7 @@ import {
   AccountServiceApi,
   DocumentServiceApi, InvoiceServiceApi, PurchaseOrderServiceApi,
 } from '../../../clients/centrifuge-node';
-import config from '../config';
+import config from '../../../src/common/config';
 import { CentrifugeService } from './centrifuge.service';
 
 const documentsClient = new DocumentServiceApi({}, config.centrifugeUrl);

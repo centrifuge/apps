@@ -25,17 +25,14 @@ export class AuthService {
     const databaseUser: User = await this.database.users.findOne({ email: emailValue });
     if (!databaseUser || !databaseUser.enabled)
       return null;
-    // make sure we do not return the password
-    const { password, ...user } = databaseUser;
     const passwordMatch = await promisify(bcrypt.compare)(
       passwordValue,
-      password,
+      databaseUser.password,
     );
 
     if (!passwordMatch) {
       return null;
     }
-
-    return user;
+    return databaseUser;
   }
 }

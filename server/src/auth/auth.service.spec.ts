@@ -4,10 +4,11 @@ import { AuthService } from './auth.service';
 import { User } from '../../../src/common/models/user';
 import { databaseServiceProvider } from '../database/database.providers';
 import { DatabaseService } from '../database/database.service';
-import {dateFormatter} from "../../../src/common/formaters";
+import { dateFormatter } from '../../../src/common/formaters';
 
 describe('LocalStrategy', () => {
   const unhashedPassword = 'my_password';
+  const hashedPassword = '$2b$12$qI.Lyik/2lJvLwfK74xFee7mOVWyKm0K20YPv4zlfis2dNOh2LJdO';
   const mockUser: User = {
     name: 'my_username',
     _id: 'user_id',
@@ -25,7 +26,7 @@ describe('LocalStrategy', () => {
       users = {
         findOne: jest.fn(() => ({
             ...mockUser,
-            password: '$2b$12$qI.Lyik/2lJvLwfK74xFee7mOVWyKm0K20YPv4zlfis2dNOh2LJdO',
+            password: hashedPassword,
           }),
         ),
       };
@@ -48,7 +49,10 @@ describe('LocalStrategy', () => {
       mockUser.name,
       unhashedPassword,
     );
-    expect(result).toEqual(mockUser);
+    expect(result).toEqual({
+      ...mockUser,
+      password: hashedPassword,
+    });
   });
 
   it('should return null if username is invalid', async () => {
