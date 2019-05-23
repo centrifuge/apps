@@ -706,7 +706,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
                     onFocus={[Function]}
                     onKeyDown={[Function]}
                     type="date"
-                    value="2019-06-17"
+                    value="2019-06-19"
                   />
                 </div>
               </div>
@@ -1103,7 +1103,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
                     onFocus={[Function]}
                     onKeyDown={[Function]}
                     type="date"
-                    value="2019-06-21"
+                    value="2019-06-23"
                   />
                 </div>
               </div>
@@ -1500,7 +1500,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
                     onFocus={[Function]}
                     onKeyDown={[Function]}
                     type="date"
-                    value="2019-06-21"
+                    value="2019-06-23"
                   />
                 </div>
               </div>

@@ -195,7 +195,6 @@ export default class ContactList extends React.Component<ContactsProps,
         <Box justify="between" direction="row" align="center">
           <Heading level="3">Contacts</Heading>
           <Button
-            icon={<Add color="white" size="small"/>}
             primary
             onClick={this.onAddNewClick}
             label="Add new"

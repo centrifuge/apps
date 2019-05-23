@@ -44,6 +44,10 @@ export function* inviteUser(action) {
       type: userInviteAction.success,
       payload: response.data,
     });
+    // reload the users
+    yield put({
+      type:getAllUsersAction.start
+    })
   } catch (e) {
     yield put({ type: userRegisterAction.fail, payload: e });
   }

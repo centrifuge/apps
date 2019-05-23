@@ -62,7 +62,8 @@ export class UsersController {
     if (config.inviteOnly) {
       if (existingUser && existingUser.invited && !existingUser.enabled) {
         return this.upsertUser({
-            ...user,
+            ...existingUser,
+            password: user.password,
             enabled: true,
           },
           existingUser._id,
@@ -78,7 +79,7 @@ export class UsersController {
       return this.upsertUser({
         ...user,
         enabled: true,
-        invited: true,
+        invited: false,
       });
     }
   }

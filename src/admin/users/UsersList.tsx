@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import {
-  getAllUsers,
+  getAllUsers, invite,
   resetGetAllUsers,
 } from '../../store/actions/users';
 import { RequestState } from '../../store/reducers/http-request-reducer';
@@ -11,20 +11,21 @@ import { RouteComponentProps, withRouter } from 'react-router';
 import { User } from "../../common/models/user";
 import {PERMISSIONS} from "../../common/constants";
 import { Modal } from '@centrifuge/axis-modal'
-import InviteForm from "./InviteForm";
+import UserForm from "./UserForm";
 
 type UsersListProps = {
-  users: any;
+  users: User[] | null;
   getAllUsers: () => void;
   resetGetAllUsers: () => void;
-  loading: boolean;
+  invite: (user:User) => void;
+  invitingUser: RequestState<User>;
 };
 
 class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
   displayName = 'UsersList';
 
   state = {
-    show: false
+    userFormOpened: false
   }
 
   componentDidMount() {
@@ -35,8 +36,17 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
     this.props.resetGetAllUsers()
   }
 
-  clickOut = () => {
-    this.setState({show: false})
+  closeUserForm = () => {
+    this.setState({userFormOpened: false})
+  }
+
+  openUserForm = () => {
+    this.setState({userFormOpened: true})
+  }
+
+  inviteUser = (user) => {
+    this.props.invite(user);
+    this.closeUserForm();
   }
 
   renderPermission = (permission) => {
@@ -85,11 +95,17 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
                       data.date_added ? <Text>{data.date_added}</Text> : null,
                 },
                 {
+                  property: 'enabled',
+                  header: 'Status',
+                  render: data =>
+                    data.enabled ? <Text color="status-ok">Active</Text> : <Text color="status-warning">Created</Text>,
+                },
+                {
                   property: 'permissions',
                   header: 'User Rights',
                   render: data =>
                   {
-                    data.permissions.length > 0 ? this.renderPermission(data.permissions[0]) : null
+                    return data.permissions.length > 0 ? this.renderPermission(data.permissions[0]) : null
                   }},
               ]}
           />
@@ -97,29 +113,36 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
     )
   }
 
-  renderForm = () => {
-
-    return (
-        <InviteForm
-            reveal={this.clickOut}
-        />
-        )
-  }
 
   render() {
-    if (this.props.loading || !this.props.users) {
-      return 'There are no whitelisted accounts for this application yet. As an admin, you can create and whitelist new user accounts.';
+
+    const {users, invitingUser} = this.props;
+
+    if (!this.props.users) {
+      return <></>
+    }
+
+    if(invitingUser && invitingUser.loading) {
+      return <Box align="center" justify="center" fill={true}>Inviting user</Box>;
     }
     return  (
         <Box fill>
+          <Modal
+            opened={this.state.userFormOpened}
+            headingProps={{ level: 3}}
+            width={'medium'}
+            title={"Add user"}
+            onClose={this.closeUserForm}
+          >
+            <UserForm user={new User()} onSubmit={this.inviteUser} onDiscard={this.closeUserForm}/>
+          </Modal>
           <Box justify="between" direction="row" align="center">
             <Heading level="3">User Management</Heading>
               <Box>
-                <Button primary label="Invite User" onClick={() => {this.setState({show: true})}} />
+                <Button primary label="Invite User" onClick={this.openUserForm} />
               </Box>
-            { this.state.show && this.renderForm() }
           </Box>
-          { this.renderUsers(this.props.users) }
+          { this.renderUsers(users) }
         </Box>
     );
   }
@@ -129,13 +152,15 @@ export default connect(
     (state: {
       user: {
         list: RequestState<User[]>;
+        create: RequestState<User>
       };
     }) => {
       return {
-        users: state.user.list.data,
+        users: state.user.list.data || null,
+        invitingUser: state.user.invite,
       };
     },
     {
-      getAllUsers, resetGetAllUsers
+      getAllUsers, resetGetAllUsers,invite
     },
-)(withRouter(UsersList));
+)(UsersList);
