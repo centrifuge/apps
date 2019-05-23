@@ -1,5 +1,6 @@
 import * as DataStore from 'nedb-promises';
 import * as Nedb from 'nedb';
+import { Cursor } from 'nedb';
 
 /**
  * A repository class for accessing database data. Class methods promisify the equivalent Nedb methods
@@ -11,7 +12,7 @@ export class DatabaseRepository<T> {
 
   constructor(
     private readonly path: string) {
-    this.repository = DataStore.create({ filename: path });
+    this.repository = DataStore.create({ filename: path, timestampData:true });
   }
 
   /**
@@ -28,9 +29,14 @@ export class DatabaseRepository<T> {
    * @param {any} query - Nedb query object
    * @returns {Promise<T[]>} promise
    */
-  find(query: any): Promise<T[]> {
+  find(query: any): Promise<T[]>  {
     return this.repository.find(query).exec();
   }
+
+  getCursor(query: any): any  {
+    return this.repository.find(query);
+  }
+
 
   /**
    * Find a single objects from the database, based on a specified query. Directly passes the query specified to Nedb.

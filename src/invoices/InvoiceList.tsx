@@ -4,10 +4,11 @@ import { Link } from 'react-router-dom';
 import { getInvoices, resetGetInvoices } from '../store/actions/invoices';
 import { RequestState } from '../store/reducers/http-request-reducer';
 import { InvoiceData, InvoiceResponse } from '../common/interfaces';
-import { Box, Button, DataTable, Heading, Text } from 'grommet';
+import { Box, Button, DataTable, Heading, Text, Anchor } from 'grommet';
 import invoiceRoutes from './routes';
 import { Edit, View } from 'grommet-icons';
 import { RouteComponentProps, withRouter } from 'react-router';
+import { dateFormatter } from '../common/formaters';
 
 
 type ViewInvoicesProps = {
@@ -48,39 +49,51 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
 
         <Box>
           <DataTable
+            sortable={true}
             data={this.props.invoices}
             columns={[
               {
                 property: 'number',
-                header: 'Number',
+                header: 'Invoice Number',
+              },
+              {
+                property: 'sender_company_name',
+                header: 'Supplier',
               },
               {
                 property: 'bill_to_company_name',
-                header: 'Customer',
+                header: 'Recipient',
               },
               {
-                property: 'supplier',
-                header: 'Supplier',
-                render: data =>
-                  data.supplier ? <Text>{data.supplier.name}</Text> : null,
+                property: 'date_created',
+                header: 'Date Sent',
+                render: datum => {
+                  return dateFormatter(datum.createdAt)
+                }
               },
+
               {
                 property: 'invoice_status',
-                header: 'Status',
+                header: 'Document Status',
+                render: datum => {
+                  return <Text color={"status-ok"}>Created</Text>
+                }
               },
               {
                 property: '_id',
                 header: 'Actions',
                 render: datum => (
                   <Box direction="row" gap="small">
-                    <View
+                    <Anchor
+                      label={"View"}
                       onClick={() =>
                         this.props.history.push(
                           invoiceRoutes.view.replace(':id',datum._id),
                         )
                       }
                     />
-                    <Edit
+                    <Anchor
+                      label={"Edit"}
                       onClick={() =>
                         this.props.history.push(
                           invoiceRoutes.edit.replace(':id',datum._id),
@@ -109,6 +122,8 @@ const mapStateToProps = (state: {
       (state.invoices.get.data.map(response => ({
         ...response.data,
         _id: response._id,
+        createdAt: response.createdAt,
+
       })) as InvoiceData[]),
     loading: state.invoices.get.loading,
   };

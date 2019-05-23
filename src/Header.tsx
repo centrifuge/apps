@@ -1,16 +1,19 @@
 import React, { FunctionComponent } from 'react';
 import { Link } from 'react-router-dom';
-import { Anchor, Box, Image } from 'grommet';
+import { Anchor, Box, Button, Image, Text } from 'grommet';
 import logo from './logo.png';
+import { User } from './common/models/user';
 
 
-interface MenuItem {
+export interface MenuItem {
   label: string,
   route: string,
-  external?: boolean
+  external?: boolean,
+  secondary?: boolean
 }
 
 interface HeaderProps {
+  user: User | null,
   selectedRoute: string,
   menuItems: MenuItem[],
   push: (route: string) => void
@@ -18,26 +21,52 @@ interface HeaderProps {
 
 const Header: FunctionComponent<HeaderProps> = (props) => {
 
-  const { selectedRoute, menuItems, push } = props;
+  const { selectedRoute, menuItems, push, user } = props;
+
+  const sectionGap = 'medium';
+  const itemGap = 'small';
 
   return <Box
     justify="center"
     align="center"
     height="xsmall"
     fill="horizontal"
+    border={{side:'bottom',color:'light-4'}}
   >
     <Box
       direction="row"
       fill="vertical"
       align="center"
       justify="between"
-      width="xlarge"
+      gap={sectionGap}
+      width='xlarge'
     >
       <Link label="Centrifuge" to="/" size="large">
         <Image src={logo}/>
       </Link>
-      <Box direction="row" gap="small" fill align="center" justify="end">
-        {menuItems.map((item) => {
+      <Box direction="row" gap={itemGap}>
+
+        {menuItems.filter(item => !item.secondary).map((item) => {
+            const anchorProps = {
+              ...(item.external ? { href: item.route } : { onClick: () => push(item.route) }),
+              ...(selectedRoute === item.route ? { className: 'selected' } : {}),
+            };
+            return <Button
+              plain
+              key={item.label}
+              label={item.label}
+              {...anchorProps}
+            />;
+          },
+        )}
+      </Box>
+      {user && <Box direction="row" gap={itemGap} align="center" justify="end">
+        <Text>My Centrifuge ID: {user.account}</Text>
+        <Text> {user.email}</Text>
+      </Box>}
+      <Box direction="row" gap={itemGap} align="center" justify="end">
+
+        {menuItems.filter(item => item.secondary).map((item) => {
             const anchorProps = {
               ...(item.external ? { href: item.route } : { onClick: () => push(item.route) }),
               ...(selectedRoute === item.route ? { className: 'selected' } : {}),
@@ -56,4 +85,4 @@ const Header: FunctionComponent<HeaderProps> = (props) => {
 
 Header.displayName = 'Header';
 
-export default Header
+export default Header;

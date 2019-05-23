@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Anchor,
   Box,
   Button,
   FormField,
@@ -26,6 +27,7 @@ interface ContactsProps {
 }
 
 interface ContactsState {
+  submitted:boolean
   newContact?: Contact;
   contacts: (Contact & { isEditing?: boolean })[];
 }
@@ -40,6 +42,7 @@ export default class ContactList extends React.Component<ContactsProps,
   constructor(props) {
     super(props);
     this.state = {
+      submitted: false,
       contacts: props.contacts ? [...props.contacts] : [],
     };
   }
@@ -56,7 +59,8 @@ export default class ContactList extends React.Component<ContactsProps,
               <Text>{contact.address}</Text>
             </Box>
             <Box fill direction="row" gap="small">
-              <Edit
+              <Anchor
+                label={"Edit"}
                 onClick={() => {
                   // @ts-ignore
                   contact.isEditing = true;

@@ -48,6 +48,22 @@ describe('InvoicesController', () => {
           }),
         ),
       ),
+      getCursor: jest.fn(() => {
+        return {
+          sort: jest.fn(() => {
+            return {
+              exec: jest.fn(() => {
+                return fetchedInvoices.map(
+                  (data: Invoice): InvInvoiceData => ({
+                    ...data,
+                  }),
+                )
+              },
+              ),
+            };
+          }),
+        };
+      }),
       findOne: jest.fn((query) => ({
         data: invoice,
         header: {
@@ -120,6 +136,7 @@ describe('InvoicesController', () => {
 
     databaseServiceMock.invoices.insert.mockClear();
     databaseServiceMock.invoices.find.mockClear();
+    databaseServiceMock.invoices.getCursor.mockClear();
     databaseServiceMock.contacts.findOne.mockClear();
   });
 
@@ -151,9 +168,6 @@ describe('InvoicesController', () => {
   });
 
   describe('get invoices', () => {
-      beforeEach(() => {
-        databaseServiceMock.contacts.findOne = jest.fn(() => undefined);
-      });
 
       it('should get the list of invoices from the database', async () => {
         const invoicesController = invoicesModule.get<InvoicesController>(
@@ -163,7 +177,8 @@ describe('InvoicesController', () => {
         const result = await invoicesController.get({
           user: { _id: 'user_id' },
         });
-        expect(databaseServiceMock.invoices.find).toHaveBeenCalledTimes(1);
+
+        expect(databaseServiceMock.invoices.getCursor).toHaveBeenCalledTimes(1);
       });
 
   });

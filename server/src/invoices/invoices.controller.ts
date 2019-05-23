@@ -57,10 +57,10 @@ export class InvoicesController {
    * @async
    * @return {Promise<Invoice[]>} result
    */
-  async get(@Req() request): Promise<InvoiceData[]> {
-    const invoices = (await this.database.invoices.find({
+  async get(@Req() request): Promise<InvoiceResponse[]> {
+    const invoices = this.database.invoices.getCursor({
       ownerId: request.user._id,
-    })) as (InvInvoiceData & { _id: string })[];
+    }).sort({updatedAt: -1}).exec();
     return invoices;
   }
 

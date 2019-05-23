@@ -1,24 +1,23 @@
-import React, {Component, ComponentClass} from 'react';
+import React, { Component } from 'react';
 import { Box } from 'grommet';
 import { AxisTheme } from '@centrifuge/axis-theme';
 
-import Routing from './Routing';
-import Header from './Header';
+import Routing, { RouteItem } from './Routing';
+import Header, { MenuItem } from './Header';
 import { connect } from 'react-redux';
 import { User } from './common/models/user';
 import { push, RouterAction } from 'connected-react-router';
-import {PERMISSIONS} from "./common/constants";
-import invoicesRoutes from "./invoices/routes";
-import contactsRoutes from "./contacts/routes";
-import userRoutes from "./user/routes";
-import routes from "./routes";
-import InvoiceList from "./invoices/InvoiceList";
-import UsersList from "./admin/users/UsersList";
-import CreateInvoice from "./invoices/Create";
-import {ConnectedInvoiceDetails} from "./invoices/InvoiceDetails";
-import EditInvoice from "./invoices/Edit";
-import Contacts from "./contacts/View";
-import RegisterForm from "./user/RegisterForm";
+import { PERMISSIONS } from './common/constants';
+import invoicesRoutes from './invoices/routes';
+import contactsRoutes from './contacts/routes';
+import userRoutes from './user/routes';
+import routes from './routes';
+import InvoiceList from './invoices/InvoiceList';
+import UsersList from './admin/users/UsersList';
+import CreateInvoice from './invoices/Create';
+import { ConnectedInvoiceDetails } from './invoices/InvoiceDetails';
+import EditInvoice from './invoices/Edit';
+import Contacts from './contacts/View';
 import { NotificationProvider } from './notifications/NotificationContext';
 
 interface AppPros {
@@ -27,16 +26,7 @@ interface AppPros {
   push: (route) => RouterAction
 }
 
-interface MenuItem {
-  label: string,
-  route: string,
-  external?: boolean
-}
 
-interface RouteItem {
-  path: string,
-  component: any
-}
 
 class App extends Component<AppPros> {
   render() {
@@ -54,21 +44,21 @@ class App extends Component<AppPros> {
 
       if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
         menuItems.push(
-            {label: 'Users', route: userRoutes.index},
-        )
+          { label: 'Users', route: userRoutes.index },
+        );
         routeItems.push(
-            {
-              path: routes.user.index,
-              component: UsersList,
-            },
-        )
+          {
+            path: routes.user.index,
+            component: UsersList,
+          },
+        );
       }
 
-      if(loggedInUser.permissions.includes(PERMISSIONS.CAN_CREATE_INVOICES)) {
+      if (loggedInUser.permissions.includes(PERMISSIONS.CAN_CREATE_INVOICES)) {
         menuItems.push(...[
           { label: 'Contacts', route: contactsRoutes.index },
           { label: 'Invoices', route: invoicesRoutes.index },
-        ])
+        ]);
 
         routeItems.push(
           {
@@ -91,15 +81,15 @@ class App extends Component<AppPros> {
             path: routes.invoices.edit,
             component: EditInvoice,
           },
-        )
+        );
       }
 
-      if(loggedInUser.permissions.includes(PERMISSIONS.CAN_FUND_INVOICES)) {
+      if (loggedInUser.permissions.includes(PERMISSIONS.CAN_FUND_INVOICES)) {
         // add items to menuItems
         // add routes to routes
       }
 
-      menuItems.push({ label: 'Logout', route: userRoutes.logout, external: true })
+      menuItems.push({ label: 'Log out', route: userRoutes.logout, external: true, secondary: true });
 
     }
 
@@ -109,6 +99,7 @@ class App extends Component<AppPros> {
           <NotificationProvider>
             <Box fill align="center">
               <Header
+                user={loggedInUser}
                 selectedRoute={selectedRoute}
                 menuItems={menuItems}
                 push={push}
@@ -117,11 +108,10 @@ class App extends Component<AppPros> {
                 justify="center"
                 direction="row"
                 fill
-                overflow={"scroll"}
-                border="top"
+                overflow={'scroll'}
               >
-                <Box width="xlarge" >
-                  <div style={{minHeight:"100%"}}>
+                <Box width="xlarge">
+                  <div style={{ minHeight: '100%' }}>
                     <Routing routes={routeItems}/>
                   </div>
 

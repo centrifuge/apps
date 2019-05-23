@@ -4,7 +4,7 @@ import routes from './routes';
 import LoginPage from './user/Login';
 import RegisterPage from './user/Register';
 
-interface RouteItem {
+export interface RouteItem {
   path: string,
   component: any
 }
