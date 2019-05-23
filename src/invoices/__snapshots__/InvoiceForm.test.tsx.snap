@@ -20,7 +20,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
             className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
           >
             <label
-              className="StyledText-sc-1sadyjn-0 bMXxti"
+              className="StyledText-sc-1sadyjn-0 bKLvLm"
             >
               Invoice number
             </label>
@@ -32,7 +32,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
               >
                 <input
                   autoComplete="off"
-                  className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                  className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                   name="number"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -82,7 +82,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Name
                   </label>
@@ -111,7 +111,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                           >
                             <input
                               autoComplete="off"
-                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 hqTYSR"
+                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 jfnKzs"
                               onBlur={[Function]}
                               onChange={[Function]}
                               onClick={[Function]}
@@ -162,7 +162,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -174,7 +174,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="sender_street1"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -192,7 +192,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -204,7 +204,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="sender_street2"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -222,7 +222,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     City
                   </label>
@@ -234,7 +234,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="sender_city"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -252,7 +252,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Country
                   </label>
@@ -264,7 +264,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="sender_country"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -281,7 +281,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     ZIP code
                   </label>
@@ -293,7 +293,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="sender_zipcode"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -342,73 +342,26 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Name
                   </label>
                   <div
                     className="StyledBox-sc-13pk1d4-0 gZSidW"
                   >
-                    <button
-                      aria-label="Open Drop"
-                      className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS StyledButton-sc-323bzc-0 jfbKsv"
-                      onBlur={[Function]}
-                      onClick={[Function]}
-                      onFocus={[Function]}
-                      onKeyDown={[Function]}
-                      onMouseOut={[Function]}
-                      onMouseOver={[Function]}
-                      type="button"
+                    <div
+                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
                     >
-                      <div
-                        className="StyledBox-sc-13pk1d4-0 erazuK"
-                      >
-                        <div
-                          className="StyledBox-sc-13pk1d4-0 XINUX"
-                        >
-                          <div
-                            className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                          >
-                            <input
-                              autoComplete="off"
-                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 hqTYSR"
-                              onBlur={[Function]}
-                              onChange={[Function]}
-                              onClick={[Function]}
-                              onFocus={[Function]}
-                              onKeyDown={[Function]}
-                              placeholder="Select"
-                              readOnly={true}
-                              size="medium"
-                              tabIndex="-1"
-                              type="text"
-                              value=""
-                            />
-                          </div>
-                        </div>
-                        <div
-                          className="StyledBox-sc-13pk1d4-0 eLQtUu"
-                          style={
-                            Object {
-                              "minWidth": "auto",
-                            }
-                          }
-                        >
-                          <svg
-                            aria-label="FormDown"
-                            className="StyledIcon-ofa7kd-0 dSllCE"
-                            viewBox="0 0 24 24"
-                          >
-                            <polyline
-                              fill="none"
-                              points="18 9 12 15 6 9"
-                              stroke="#000"
-                              strokeWidth="2"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                    </button>
+                      <input
+                        autoComplete="off"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                        name="bill_to_company_name"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onFocus={[Function]}
+                        onKeyDown={[Function]}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -422,7 +375,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -434,7 +387,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="bill_to_street1"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -452,7 +405,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -464,7 +417,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="bill_to_street2"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -482,7 +435,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     City
                   </label>
@@ -494,7 +447,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="bill_to_city"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -512,7 +465,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Country
                   </label>
@@ -524,7 +477,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="bill_to_country"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -541,7 +494,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     ZIP code
                   </label>
@@ -553,7 +506,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="bill_to_zipcode"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -606,7 +559,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Invoice Status
                   </label>
@@ -635,7 +588,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                           >
                             <input
                               autoComplete="off"
-                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 duvNfq"
                               onBlur={[Function]}
                               onChange={[Function]}
                               onClick={[Function]}
@@ -684,7 +637,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Currency
                   </label>
@@ -713,7 +666,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                           >
                             <input
                               autoComplete="off"
-                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 duvNfq"
                               onBlur={[Function]}
                               onChange={[Function]}
                               onClick={[Function]}
@@ -762,7 +715,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Invoice date
                   </label>
@@ -774,7 +727,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="date_created"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -796,7 +749,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Due date
                   </label>
@@ -808,7 +761,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="date_due"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -862,7 +815,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Net amount
                   </label>
@@ -874,7 +827,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="net_amount"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -895,7 +848,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Tax rate
                   </label>
@@ -907,7 +860,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="tax_rate"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -928,7 +881,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Tax amount
                   </label>
@@ -940,7 +893,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="tax_amount"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -961,7 +914,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Gross amount
                   </label>
@@ -973,7 +926,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="gross_amount"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1055,7 +1008,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Ship to company
                   </label>
@@ -1067,7 +1020,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="ship_to_company_name"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1084,7 +1037,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Name
                   </label>
@@ -1096,7 +1049,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="ship_to_contact_person_name"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1117,7 +1070,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -1129,7 +1082,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="ship_to_street1"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1147,7 +1100,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -1159,7 +1112,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="ship_to_street2"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1177,7 +1130,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     City
                   </label>
@@ -1189,7 +1142,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="ship_to_city"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1207,7 +1160,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Country
                   </label>
@@ -1219,7 +1172,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="ship_to_country"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1236,7 +1189,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     ZIP code
                   </label>
@@ -1248,7 +1201,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="ship_to_zipcode"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1326,7 +1279,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Remit to company
                   </label>
@@ -1338,7 +1291,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_company_name"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1355,7 +1308,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Name
                   </label>
@@ -1367,7 +1320,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_contact_person_name"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1384,7 +1337,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     VAT number
                   </label>
@@ -1396,7 +1349,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_vat_number"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1413,7 +1366,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Local tax ID
                   </label>
@@ -1425,7 +1378,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_local_tax_id"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1442,7 +1395,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Tax country
                   </label>
@@ -1454,7 +1407,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_tax_country"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1475,7 +1428,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -1487,7 +1440,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_street1"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1505,7 +1458,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -1517,7 +1470,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_street2"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1535,7 +1488,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     City
                   </label>
@@ -1547,7 +1500,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_city"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1565,7 +1518,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Country
                   </label>
@@ -1577,7 +1530,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_country"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1594,7 +1547,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     ZIP code
                   </label>
@@ -1606,7 +1559,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_zipcode"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1688,7 +1641,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Original invoice number
                   </label>
@@ -1700,7 +1653,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="credit_note_invoice_number"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1721,7 +1674,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Original invoice date
                   </label>
@@ -1733,7 +1686,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="credit_for_invoice_date"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1784,7 +1737,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
               >
                 <textarea
-                  className="StyledTextArea-sc-17i3mwp-0 fpkVeD"
+                  className="StyledTextArea-sc-17i3mwp-0 ctlBar"
                   name="comment"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -1822,7 +1775,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
             className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
           >
             <label
-              className="StyledText-sc-1sadyjn-0 bMXxti"
+              className="StyledText-sc-1sadyjn-0 bKLvLm"
             >
               Invoice number
             </label>
@@ -1834,7 +1787,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
               >
                 <input
                   autoComplete="off"
-                  className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                  className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                   name="number"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -1884,7 +1837,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Name
                   </label>
@@ -1913,7 +1866,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                           >
                             <input
                               autoComplete="off"
-                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 hqTYSR"
+                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 jfnKzs"
                               onBlur={[Function]}
                               onChange={[Function]}
                               onClick={[Function]}
@@ -1964,7 +1917,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -1976,7 +1929,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="sender_street1"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -1994,7 +1947,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -2006,7 +1959,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="sender_street2"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2024,7 +1977,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     City
                   </label>
@@ -2036,7 +1989,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="sender_city"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2054,7 +2007,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Country
                   </label>
@@ -2066,7 +2019,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="sender_country"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2083,7 +2036,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     ZIP code
                   </label>
@@ -2095,7 +2048,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="sender_zipcode"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2144,73 +2097,26 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Name
                   </label>
                   <div
                     className="StyledBox-sc-13pk1d4-0 gZSidW"
                   >
-                    <button
-                      aria-label="Open Drop"
-                      className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS StyledButton-sc-323bzc-0 jfbKsv"
-                      onBlur={[Function]}
-                      onClick={[Function]}
-                      onFocus={[Function]}
-                      onKeyDown={[Function]}
-                      onMouseOut={[Function]}
-                      onMouseOver={[Function]}
-                      type="button"
+                    <div
+                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
                     >
-                      <div
-                        className="StyledBox-sc-13pk1d4-0 erazuK"
-                      >
-                        <div
-                          className="StyledBox-sc-13pk1d4-0 XINUX"
-                        >
-                          <div
-                            className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                          >
-                            <input
-                              autoComplete="off"
-                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 hqTYSR"
-                              onBlur={[Function]}
-                              onChange={[Function]}
-                              onClick={[Function]}
-                              onFocus={[Function]}
-                              onKeyDown={[Function]}
-                              placeholder="Select"
-                              readOnly={true}
-                              size="medium"
-                              tabIndex="-1"
-                              type="text"
-                              value="Bob"
-                            />
-                          </div>
-                        </div>
-                        <div
-                          className="StyledBox-sc-13pk1d4-0 eLQtUu"
-                          style={
-                            Object {
-                              "minWidth": "auto",
-                            }
-                          }
-                        >
-                          <svg
-                            aria-label="FormDown"
-                            className="StyledIcon-ofa7kd-0 dSllCE"
-                            viewBox="0 0 24 24"
-                          >
-                            <polyline
-                              fill="none"
-                              points="18 9 12 15 6 9"
-                              stroke="#000"
-                              strokeWidth="2"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                    </button>
+                      <input
+                        autoComplete="off"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                        name="bill_to_company_name"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onFocus={[Function]}
+                        onKeyDown={[Function]}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2224,7 +2130,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -2236,7 +2142,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="bill_to_street1"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2254,7 +2160,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -2266,7 +2172,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="bill_to_street2"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2284,7 +2190,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     City
                   </label>
@@ -2296,7 +2202,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="bill_to_city"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2314,7 +2220,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Country
                   </label>
@@ -2326,7 +2232,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="bill_to_country"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2343,7 +2249,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     ZIP code
                   </label>
@@ -2355,7 +2261,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="bill_to_zipcode"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2408,7 +2314,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Invoice Status
                   </label>
@@ -2437,7 +2343,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                           >
                             <input
                               autoComplete="off"
-                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 duvNfq"
                               onBlur={[Function]}
                               onChange={[Function]}
                               onClick={[Function]}
@@ -2486,7 +2392,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Currency
                   </label>
@@ -2515,7 +2421,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                           >
                             <input
                               autoComplete="off"
-                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 duvNfq"
                               onBlur={[Function]}
                               onChange={[Function]}
                               onClick={[Function]}
@@ -2564,7 +2470,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Invoice date
                   </label>
@@ -2576,7 +2482,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="date_created"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2598,7 +2504,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Due date
                   </label>
@@ -2610,7 +2516,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="date_due"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2664,7 +2570,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Net amount
                   </label>
@@ -2676,7 +2582,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="net_amount"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2697,7 +2603,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Tax rate
                   </label>
@@ -2709,7 +2615,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="tax_rate"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2730,7 +2636,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Tax amount
                   </label>
@@ -2742,7 +2648,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="tax_amount"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2763,7 +2669,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Gross amount
                   </label>
@@ -2775,7 +2681,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="gross_amount"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2857,7 +2763,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Ship to company
                   </label>
@@ -2869,7 +2775,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="ship_to_company_name"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2886,7 +2792,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Name
                   </label>
@@ -2898,7 +2804,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="ship_to_contact_person_name"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2919,7 +2825,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -2931,7 +2837,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="ship_to_street1"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2949,7 +2855,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -2961,7 +2867,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="ship_to_street2"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2979,7 +2885,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     City
                   </label>
@@ -2991,7 +2897,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="ship_to_city"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -3009,7 +2915,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Country
                   </label>
@@ -3021,7 +2927,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="ship_to_country"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -3038,7 +2944,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     ZIP code
                   </label>
@@ -3050,7 +2956,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="ship_to_zipcode"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -3128,7 +3034,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Remit to company
                   </label>
@@ -3140,7 +3046,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_company_name"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -3157,7 +3063,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Name
                   </label>
@@ -3169,7 +3075,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_contact_person_name"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -3186,7 +3092,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     VAT number
                   </label>
@@ -3198,7 +3104,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_vat_number"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -3215,7 +3121,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Local tax ID
                   </label>
@@ -3227,7 +3133,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_local_tax_id"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -3244,7 +3150,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Tax country
                   </label>
@@ -3256,7 +3162,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_tax_country"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -3277,7 +3183,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -3289,7 +3195,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_street1"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -3307,7 +3213,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Street
                   </label>
@@ -3319,7 +3225,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_street2"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -3337,7 +3243,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     City
                   </label>
@@ -3349,7 +3255,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_city"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -3367,7 +3273,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Country
                   </label>
@@ -3379,7 +3285,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_country"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -3396,7 +3302,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     ZIP code
                   </label>
@@ -3408,7 +3314,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="remit_to_zipcode"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -3490,7 +3396,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Original invoice number
                   </label>
@@ -3502,7 +3408,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="credit_note_invoice_number"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -3523,7 +3429,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                 >
                   <label
-                    className="StyledText-sc-1sadyjn-0 bMXxti"
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
                     Original invoice date
                   </label>
@@ -3535,7 +3441,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 bYBgFP"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
                         name="credit_for_invoice_date"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -3586,7 +3492,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
               >
                 <textarea
-                  className="StyledTextArea-sc-17i3mwp-0 fpkVeD"
+                  className="StyledTextArea-sc-17i3mwp-0 ctlBar"
                   name="comment"
                   onBlur={[Function]}
                   onChange={[Function]}

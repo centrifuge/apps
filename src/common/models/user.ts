@@ -6,7 +6,7 @@ export interface IUser {
   email: string;
   date_added: string;
   _id?: string;
-  account?: string;
+  account: string;
   permissions: PERMISSIONS[];
   enabled: boolean;
   invited: boolean;
@@ -18,7 +18,7 @@ export class User implements IUser{
   email: string;
   date_added: string;
   _id?: string;
-  account?: string;
+  account: string = "";
   permissions: PERMISSIONS[] = [];
   enabled: boolean;
   invited: boolean;

@@ -21,13 +21,8 @@ export class Sender extends React.Component<SenderProps> {
 
     const {
       invoice,
-      contacts,
       columnGap,
     } = this.props;
-
-    const senderName = contacts.filter(contact =>
-      contact.value === invoice!.sender,
-    ).map(contact => contact.label).shift();
 
     return (
       <Section headingLevel="5" title="Sender" basis={'1/2'}>
@@ -35,7 +30,7 @@ export class Sender extends React.Component<SenderProps> {
         <Box gap={columnGap} basis={'1/2'}>
           <DisplayField
             label="Centrifuge ID"
-            value={senderName}
+            value={invoice.sender}
           />
           <DisplayField
             label="Company name"

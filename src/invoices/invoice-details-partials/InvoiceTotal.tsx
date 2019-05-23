@@ -42,7 +42,7 @@ export class InvoiceTotal extends React.Component<InvoiceTotalProps> {
           <Box basis={'1/4'}>
             <DisplayField
               label="Tax amount"
-              value={dateFormatter(invoice!.tax_amount)}
+              value={invoice!.tax_amount}
             />
           </Box>
 

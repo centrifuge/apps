@@ -39,21 +39,12 @@ export class RecipientForm extends React.Component<ConnectedRecipientFormProps> 
           <Box gap={columnGap} basis={'1/2'}>
             <FormField
               label="Name"
-              error={errors!.recipient}
+              error={errors!.bill_to_company_name}
             >
-              <SearchSelect
-                onChange={(item) => {
-                  setFieldValue('recipient', item.value);
-                  setFieldValue('bill_to_company_name', item.label);
-                }}
-
-                options={contacts}
-                selected={
-                  contacts.find(
-                    contact =>
-                      contact.value === values!.recipient,
-                  )
-                }
+              <TextInput
+                name="bill_to_company_name"
+                value={values!.bill_to_company_name}
+                onChange={handleChange}
               />
             </FormField>
 

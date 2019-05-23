@@ -103,6 +103,7 @@ export class UsersController {
       ...user,
       name: user.name,
       email: user.email,
+      account: '',
       date_added: dateFormatter(new Date()),
       password: undefined,
       enabled: false,

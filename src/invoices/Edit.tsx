@@ -3,7 +3,13 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import InvoiceForm from './InvoiceForm';
-import { getInvoiceById, resetGetInvoiceById, resetUpdateInvoice, updateInvoice } from '../store/actions/invoices';
+import {
+  createInvoice,
+  getInvoiceById, resetCreateInvoice,
+  resetGetInvoiceById,
+  resetUpdateInvoice,
+  updateInvoice,
+} from '../store/actions/invoices';
 import { Invoice } from '../common/models/invoice';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { RequestState } from '../store/reducers/http-request-reducer';
@@ -14,6 +20,7 @@ import { LabelValuePair } from '../common/interfaces';
 import { Box, Button, Heading } from 'grommet';
 import routes from './routes';
 import { LinkPrevious } from 'grommet-icons';
+import { User } from '../common/models/user';
 
 type ConnectedEditInvoiceProps = {
   updateInvoice: (invoice: Invoice) => void;
@@ -24,6 +31,8 @@ type ConnectedEditInvoiceProps = {
   resetGetContacts: () => void;
   invoice?: Invoice;
   contacts?: LabelValuePair[];
+  loggedInUser: User;
+  updatingInvoice: boolean;
 } & RouteComponentProps<{ id?: string }>;
 
 class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
@@ -49,14 +58,28 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
   };
 
   render() {
+    const { loggedInUser,updatingInvoice } = this.props;
+
     if (!this.props.invoice || !this.props.contacts) {
       return <Box align="center" justify="center" fill={true}>Loading</Box>;
     }
 
+    console.log("updateing",updatingInvoice)
+
+    if (updatingInvoice) {
+      return <Box align="center" justify="center" fill={true}>Updating invoice</Box>;
+    }
+
+    // Add logged in user to contacts
+    const contacts: LabelValuePair[] = [
+      { label: loggedInUser.name, value: loggedInUser.account },
+      ...this.props.contacts
+    ];
+
     return (
       <InvoiceForm
         onSubmit={this.updateInvoice}
-        contacts={this.props.contacts}
+        contacts={contacts}
         invoice={this.props.invoice}
       >
         <Box justify="between" direction="row" align="center">
@@ -86,26 +109,26 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
   }
 }
 
+
+const mapStateToProps = (state) => {
+  return {
+    loggedInUser: state.user.auth.loggedInUser,
+    invoice: state.invoices.getById.data && {
+      _id: state.invoices.getById.data._id,
+      ...state.invoices.getById.data.data,
+    },
+    updatingInvoice: state.invoices.update.loading,
+    contacts: state.contacts.get.data
+      ? (state.contacts.get.data.map(contact => ({
+        label: contact.name,
+        value: contact.address,
+      })) as LabelValuePair[])
+      : undefined,
+  };
+};
+
 export default connect(
-  (state: {
-    invoices: {
-      getById: RequestState<InvInvoiceResponse & { _id: string }>;
-    };
-    contacts: { get: RequestState<Contact[]> };
-  }) => {
-    return {
-      invoice: state.invoices.getById.data && {
-        _id: state.invoices.getById.data._id,
-        ...state.invoices.getById.data.data,
-      },
-      contacts: state.contacts.get.data
-        ? (state.contacts.get.data.map(contact => ({
-          label: contact.name,
-          value: contact.address,
-        })) as LabelValuePair[])
-        : undefined,
-    };
-  },
+  mapStateToProps,
   {
     updateInvoice,
     resetUpdateInvoice,
@@ -113,5 +136,5 @@ export default connect(
     resetGetContacts,
     getInvoiceById,
     resetGetInvoiceById,
-  },
+  }
 )(withRouter(ConnectedEditInvoice));

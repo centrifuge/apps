@@ -51,7 +51,7 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
         .required('This field is required'),
       sender: Yup.string()
         .required('This field is required'),
-      recipient: Yup.string()
+      bill_to_company_name: Yup.string()
         .required('This field is required'),
       currency: Yup.string()
         .required('This field is required'),

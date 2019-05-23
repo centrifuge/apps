@@ -301,6 +301,16 @@ exports[`Search Select when single item select should match snapshot 1`] = `
         },
       },
       "global": Object {
+        "active": Object {
+          "background": Object {
+            "color": "active",
+            "opacity": "medium",
+          },
+          "color": Object {
+            "dark": "white",
+            "light": "black",
+          },
+        },
         "animation": Object {
           "duration": "1s",
           "jiggle": Object {
@@ -472,14 +482,8 @@ exports[`Search Select when single item select should match snapshot 1`] = `
         },
         "hover": Object {
           "background": Object {
-            "dark": Object {
-              "color": "active",
-              "opacity": "medium",
-            },
-            "light": Object {
-              "color": "active",
-              "opacity": "medium",
-            },
+            "color": "active",
+            "opacity": "medium",
           },
           "color": Object {
             "dark": "white",
@@ -761,6 +765,9 @@ exports[`Search Select when single item select should match snapshot 1`] = `
         "control": Object {},
         "icons": Object {
           "down": [Function],
+          "margin": Object {
+            "horizontal": "small",
+          },
         },
         "options": Object {
           "box": Object {

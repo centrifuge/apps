@@ -101,7 +101,7 @@ class App extends Component<AppPros> {
               <Header
                 user={loggedInUser}
                 selectedRoute={selectedRoute}
-                menuItems={menuItems}
+                menuItems={menuItems.reverse()}
                 push={push}
               />
               <Box

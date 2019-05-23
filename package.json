@@ -15,7 +15,7 @@
     "ethereumjs-util": "^6.0.0",
     "express-session": "^1.15.6",
     "formik": "^1.5.2",
-    "grommet": "2.6.5",
+    "grommet": "2.7.0",
     "grommet-icons": "^4.2.0",
     "hbs": "^4.0.4",
     "nedb": "^1.8.0",

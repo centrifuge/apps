@@ -32,10 +32,7 @@ export class Recipient extends React.Component<RecipientProps> {
       <Section headingLevel="5" title="Recipient" basis={'1/2'}>
         <Box direction="row" gap={columnGap} basis={'1/2'}>
         <Box gap={columnGap} basis={'1/2'}>
-          <DisplayField
-            label="Centrifuge ID"
-            value={recipientName}
-          />
+
           <DisplayField
             label="Company name"
             value={invoice!.bill_to_company_name}

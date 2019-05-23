@@ -142,7 +142,7 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
             </Box>
             <Box direction="row" gap="medium">
               <Button
-                active={false}
+                disabled={!canRequestFunding}
                 onClick={() => {
                   id && this.props.history.push(
                     invoiceRoutes.edit.replace(':id', id),
