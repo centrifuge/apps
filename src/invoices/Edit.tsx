@@ -28,11 +28,8 @@ type ConnectedEditInvoiceProps = {
 
 class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
   componentDidMount() {
-    if (!this.props.contacts) {
-      this.props.getContacts();
-    }
-
     if (this.props.match.params.id) {
+      this.props.getContacts();
       this.props.getInvoiceById(this.props.match.params.id);
     }
   }
@@ -53,7 +50,7 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
 
   render() {
     if (!this.props.invoice || !this.props.contacts) {
-      return 'Loading';
+      return <Box align="center" justify="center" fill={true}>Loading</Box>;
     }
 
     return (

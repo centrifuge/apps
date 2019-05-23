@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PurchaseOrdersController } from './purchase-orders.controller';
 import { SessionGuard } from '../auth/SessionGuard';
-import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.provider';
 import { databaseServiceProvider } from '../database/database.providers';
 import { PurchaseOrder } from '../../../src/common/models/purchase-order';
 import config from '../../../src/common/config';
@@ -67,7 +66,7 @@ describe('PurchaseOrdersController', () => {
       controllers: [PurchaseOrdersController],
       providers: [
         SessionGuard,
-        centrifugeServiceProvider,
+        CentrifugeService,
         databaseServiceProvider,
       ],
     })

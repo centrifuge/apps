@@ -1,14 +1,13 @@
-import {UsersController} from './users.controller';
-import {databaseServiceProvider} from '../database/database.providers';
-import {User} from '../../../src/common/models/user';
+import { UsersController } from './users.controller';
+import { databaseServiceProvider } from '../database/database.providers';
+import { User } from '../../../src/common/models/user';
 import config from '../../../src/common/config';
-import {Test, TestingModule} from '@nestjs/testing';
-import {SessionGuard} from '../auth/SessionGuard';
-import {centrifugeServiceProvider} from '../centrifuge-client/centrifuge.provider';
-import {CentrifugeService} from '../centrifuge-client/centrifuge.service';
-import {DatabaseService} from '../database/database.service';
-import {PERMISSIONS} from "../../../src/common/constants";
-import {dateFormatter} from "../../../src/common/formaters";
+import { Test, TestingModule } from '@nestjs/testing';
+import { SessionGuard } from '../auth/SessionGuard';
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
+import { DatabaseService } from '../database/database.service';
+import { PERMISSIONS } from '../../../src/common/constants';
+import { dateFormatter } from '../../../src/common/formaters';
 
 describe('Users controller', () => {
   const userAccount = 'generated_identity_id';
@@ -54,7 +53,7 @@ describe('Users controller', () => {
       controllers: [UsersController],
       providers: [
         SessionGuard,
-        centrifugeServiceProvider,
+        CentrifugeService,
         databaseServiceProvider,
       ],
     })
@@ -291,7 +290,11 @@ describe('Users controller', () => {
 
       it('should throw error', async () => {
         await expect(
-          usersController.invite({ name: 'any_username', email: 'test', permissions: [PERMISSIONS.CAN_CREATE_INVOICES] }),
+          usersController.invite({
+            name: 'any_username',
+            email: 'test',
+            permissions: [PERMISSIONS.CAN_CREATE_INVOICES],
+          }),
         ).rejects.toThrow('Invite functionality not enabled!');
       });
     });

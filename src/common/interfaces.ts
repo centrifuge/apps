@@ -1,4 +1,5 @@
 import {
+  FunFundingResponseData,
   InvInvoiceData,
   InvInvoiceResponse,
   PoPurchaseOrderResponse,
@@ -20,6 +21,10 @@ export interface InvoiceResponse extends InvInvoiceResponse {
   data?: InvoiceData;
   ownerId?: string;
   _id?: string;
+}
+
+export interface InvoiceResponseWithFunding extends InvoiceResponse {
+  fundingAgreement: FunFundingResponseData | null
 }
 
 export interface PurchaseOrderResponse

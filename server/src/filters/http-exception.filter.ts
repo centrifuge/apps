@@ -32,7 +32,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       }
       return response.status(status).json(exception.getResponse());
     } else {
-      console.log(exception);
+      console.log("Exception",exception);
       return response.status(500);
     }
   }

@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { InvoicesController } from './invoices.controller';
 import { Invoice } from '../../../src/common/models/invoice';
 import { SessionGuard } from '../auth/SessionGuard';
-import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.provider';
 import { databaseServiceProvider } from '../database/database.providers';
 import { Contact } from '../../../src/common/models/contact';
 import { InvInvoiceData } from '../../../clients/centrifuge-node';
@@ -29,7 +28,7 @@ describe('InvoicesController', () => {
     number: '999',
     sender_company_name: 'cinderella',
     bill_to_company_name: 'step mother',
-    collaborators:[],
+    collaborators: [],
   };
   let fetchedInvoices: Invoice[];
 
@@ -49,10 +48,10 @@ describe('InvoicesController', () => {
           }),
         ),
       ),
-      findOne: jest.fn(() => ({
+      findOne: jest.fn((query) => ({
         data: invoice,
         header: {
-          document_id: 'find_one_invoice_id',
+          document_id: `document_${query._id}`,
         },
       })),
       updateById: jest.fn((id, value) => value),
@@ -66,9 +65,31 @@ describe('InvoicesController', () => {
 
   class CentrifugeClientMock {
     invoices = {
-      create: jest.fn(data => data),
-      update: jest.fn((id, data) => data),
+      create: jest.fn(data => {
+       return {
+         header: {
+           job_id: 'some_job_id',
+         },
+         ...data,
+       }
+      }),
+      update: jest.fn(data => {
+        return {
+          header: {
+            job_id: 'some_job_id',
+          },
+          ...data,
+        }
+      }),
     };
+    funding = {
+      getList: jest.fn((documentId, auth) => {
+        if (documentId === 'document_find_id') return { data: [{ funding_id: 'some_funding_id' }] };
+        return { data: null };
+      }),
+    };
+
+    pullForJobComplete = () => true;
   }
 
   const centrifugeClientMock = new CentrifugeClientMock();
@@ -87,7 +108,7 @@ describe('InvoicesController', () => {
       controllers: [InvoicesController],
       providers: [
         SessionGuard,
-        centrifugeServiceProvider,
+        CentrifugeService,
         databaseServiceProvider,
       ],
     })
@@ -117,7 +138,10 @@ describe('InvoicesController', () => {
           ...invoice,
         },
         write_access: {
-          collaborators:[...invoice.collaborators],
+          collaborators: [...invoice.collaborators],
+        },
+        header: {
+          job_id: 'some_job_id',
         },
         ownerId: 'user_id',
       });
@@ -126,27 +150,12 @@ describe('InvoicesController', () => {
     });
   });
 
-  describe('get', () => {
-    describe('when supplier has been set', async () => {
-      it('should add the supplier to the response', async () => {
-        const invoicesController = invoicesModule.get<InvoicesController>(
-          InvoicesController,
-        );
-
-        const result = await invoicesController.get({
-          user: { _id: 'user_id' },
-        });
-        expect(result[0].supplier).toBe(supplier);
-        expect(databaseServiceMock.invoices.find).toHaveBeenCalledTimes(1);
-      });
-    });
-
-    describe('when supplier id is invalid', async () => {
+  describe('get invoices', () => {
       beforeEach(() => {
         databaseServiceMock.contacts.findOne = jest.fn(() => undefined);
       });
 
-      it('should not add the supplier to the response', async () => {
+      it('should get the list of invoices from the database', async () => {
         const invoicesController = invoicesModule.get<InvoicesController>(
           InvoicesController,
         );
@@ -154,10 +163,9 @@ describe('InvoicesController', () => {
         const result = await invoicesController.get({
           user: { _id: 'user_id' },
         });
-        expect(result[0].supplier).toBe(undefined);
         expect(databaseServiceMock.invoices.find).toHaveBeenCalledTimes(1);
       });
-    });
+
   });
 
   describe('update', function() {
@@ -183,7 +191,7 @@ describe('InvoicesController', () => {
         ownerId: 'user_id',
       });
       expect(centrifugeClientMock.invoices.update).toHaveBeenCalledWith(
-        'find_one_invoice_id',
+        'document_id_to_update',
         {
           data: { ...updatedInvoice },
           write_access: {
@@ -204,7 +212,7 @@ describe('InvoicesController', () => {
   });
 
   describe('get by id', function() {
-    it('should return the purchase order by id', async function() {
+    it('should return the invoice by id', async function() {
       const invoiceController = invoicesModule.get<InvoicesController>(
         InvoicesController,
       );
@@ -220,8 +228,34 @@ describe('InvoicesController', () => {
 
       expect(result).toEqual({
         data: invoice,
+        fundingAgreement: null,
         header: {
-          document_id: 'find_one_invoice_id',
+          document_id: 'document_some_id',
+        },
+      });
+    });
+
+    it('should return the invoice by id with a funding request', async function() {
+      const invoiceController = invoicesModule.get<InvoicesController>(
+        InvoicesController,
+      );
+
+      const result = await invoiceController.getById(
+        { id: 'find_id' },
+        { user: { _id: 'user_id' } },
+      );
+      expect(databaseServiceMock.invoices.findOne).toHaveBeenCalledWith({
+        _id: 'find_id',
+        ownerId: 'user_id',
+      });
+
+      expect(result).toEqual({
+        data: invoice,
+        fundingAgreement: {
+          funding_id: 'some_funding_id',
+        },
+        header: {
+          document_id: 'document_find_id',
         },
       });
     });

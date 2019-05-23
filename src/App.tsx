@@ -105,7 +105,7 @@ class App extends Component<AppPros> {
 
     return (
       <div className="App">
-        <AxisTheme>
+        <AxisTheme full={true}>
           <NotificationProvider>
             <Box fill align="center">
               <Header
@@ -117,10 +117,14 @@ class App extends Component<AppPros> {
                 justify="center"
                 direction="row"
                 fill
+                overflow={"scroll"}
                 border="top"
               >
-                <Box width="xlarge">
-                  <Routing routes={routeItems}/>
+                <Box width="xlarge" >
+                  <div style={{minHeight:"100%"}}>
+                    <Routing routes={routeItems}/>
+                  </div>
+
                 </Box>
               </Box>
 

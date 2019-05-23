@@ -18,6 +18,11 @@ export const DisplayField = styled(FormFieldWrapper)`
    & > div {
     padding: 2px 0px;
     // Force height on display field when value is empty
+    >p {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
     > p:after {
       content: '';
       display: inline-block;

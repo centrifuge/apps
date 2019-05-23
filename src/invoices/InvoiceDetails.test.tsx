@@ -24,7 +24,10 @@ describe('InvoiceDetails', () => {
     }),
   };
 
-  const routerProps = {
+  const defaultProps = {
+    header: {
+      document_id:"document_id",
+    },
     match: {
       params: {
         id: '3333',
@@ -53,7 +56,7 @@ describe('InvoiceDetails', () => {
             invoice={invoice}
             contacts={contacts}
             {...methods}
-            {...routerProps}
+            {...defaultProps}
 
           />
         </BrowserRouter>
@@ -86,7 +89,7 @@ describe('InvoiceDetails', () => {
             invoice={invoice}
             contacts={contacts}
             {...methods}
-            {...routerProps}
+            {...defaultProps}
 
           />
         </BrowserRouter>
@@ -114,7 +117,7 @@ describe('InvoiceDetails', () => {
             invoice={invoice}
             contacts={contacts}
             {...methods}
-            {...routerProps}
+            {...defaultProps}
 
           />
         </BrowserRouter>

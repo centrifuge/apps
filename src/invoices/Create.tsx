@@ -48,11 +48,11 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
   render() {
 
     if (!this.props.contacts) {
-      return 'Loading';
+      return <Box align="center" justify="center" fill={true}>Loading</Box>;
     }
 
     if (this.props.creatingInvoice) {
-      return 'Creating invoice';
+      return <Box align="center" justify="center" fill={true}>Creating Invoice</Box>;
     }
 
     return (

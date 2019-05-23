@@ -1,23 +1,10 @@
-import {
-  Body,
-  Controller,
-  Get, HttpException, HttpStatus,
-  Inject,
-  Param,
-  Post,
-  Put,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpException, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { Invoice } from '../../../src/common/models/invoice';
 import { ROUTES } from '../../../src/common/constants';
 import { SessionGuard } from '../auth/SessionGuard';
-import {
-  InvInvoiceData,
-  InvInvoiceResponse,
-} from '../../../clients/centrifuge-node';
+import { FunFundingListResponse, InvInvoiceData, InvInvoiceResponse } from '../../../clients/centrifuge-node';
 import { DatabaseService } from '../database/database.service';
-import { InvoiceData } from '../../../src/common/interfaces';
+import { InvoiceData, InvoiceResponse, InvoiceResponseWithFunding } from '../../../src/common/interfaces';
 import config from '../../../src/common/config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 
@@ -27,7 +14,8 @@ export class InvoicesController {
   constructor(
     private readonly database: DatabaseService,
     private readonly centrifugeService: CentrifugeService,
-  ) {}
+  ) {
+  }
 
   @Post()
   /**
@@ -37,8 +25,8 @@ export class InvoicesController {
    * @param {Invoice} invoice - the body of the request
    * @return {Promise<InvInvoiceResponse>} result
    */
-  async create(@Req() request, @Body() invoice: Invoice) {
-    const collaborators =  [invoice!.sender, invoice!.recipient].filter(item => item );
+  async create(@Req() request, @Body() invoice: Invoice): Promise<InvInvoiceResponse> {
+    const collaborators = [invoice!.sender, invoice!.recipient].filter(item => item);
     try {
       const createResult = await this.centrifugeService.invoices.create(
         {
@@ -49,14 +37,17 @@ export class InvoicesController {
             collaborators,
           },
         },
-        config.admin.account,
+        request.user.account,
       );
+
+      await this.centrifugeService.pullForJobComplete(createResult.header.job_id, request.user.account);
+
       return await this.database.invoices.insert({
         ...createResult,
         ownerId: request.user._id,
       });
     } catch (error) {
-      throw new HttpException( await error.json(), error.status);
+      throw new HttpException(await error.json(), error.status);
     }
   }
 
@@ -70,22 +61,7 @@ export class InvoicesController {
     const invoices = (await this.database.invoices.find({
       ownerId: request.user._id,
     })) as (InvInvoiceData & { _id: string })[];
-
-    return await Promise.all(
-      invoices.map(async invoice => {
-        const supplier = await this.database.contacts.findOne({
-          _id: invoice.sender_company_name,
-        });
-
-        if (supplier) {
-          return Object.assign({}, invoice, {
-            supplier,
-          });
-        }
-
-        return invoice;
-      }),
-    );
+    return invoices;
   }
 
   @Get(':id')
@@ -96,11 +72,16 @@ export class InvoicesController {
    * @param request - the http request
    * @return {Promise<Invoice|null>} result
    */
-  async getById(@Param() params, @Req() request): Promise<Invoice | null> {
-    return this.database.invoices.findOne({
+  async getById(@Param() params, @Req() request): Promise<InvoiceResponseWithFunding | null> {
+    const invoice: InvoiceResponse = await this.database.invoices.findOne({
       _id: params.id,
       ownerId: request.user._id,
     });
+    const fundingList: FunFundingListResponse = await this.centrifugeService.funding.getList(invoice.header.document_id, request.user.account);
+    return {
+      ...invoice,
+      fundingAgreement: (fundingList.data ? fundingList.data.shift() : null),
+    };
   }
 
   /**
@@ -118,7 +99,7 @@ export class InvoicesController {
     @Body() updateInvoiceRequest: Invoice,
   ) {
     const invoice: InvInvoiceResponse = await this.database.invoices.findOne(
-      { _id:  params.id, ownerId: request.user._id },
+      { _id: params.id, ownerId: request.user._id },
     );
 
     const updateResult = await this.centrifugeService.invoices.update(
@@ -132,7 +113,9 @@ export class InvoicesController {
       config.admin.account,
     );
 
-    return await this.database.invoices.updateById( params.id, {
+    await this.centrifugeService.pullForJobComplete(updateResult.header.job_id, request.user.account);
+
+    return await this.database.invoices.updateById(params.id, {
       ...updateResult,
       ownerId: request.user._id,
     });

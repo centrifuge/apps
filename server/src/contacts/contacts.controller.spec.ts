@@ -3,7 +3,6 @@ import { HttpException } from '@nestjs/common';
 import { ContactsController } from './contacts.controller';
 import { Contact } from '../../../src/common/models/contact';
 import { SessionGuard } from '../auth/SessionGuard';
-import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.provider';
 import { databaseServiceProvider } from '../database/database.providers';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { DatabaseService } from '../database/database.service';
@@ -43,7 +42,7 @@ describe('ContactsController', () => {
       controllers: [ContactsController],
       providers: [
         SessionGuard,
-        centrifugeServiceProvider,
+        CentrifugeService,
         databaseServiceProvider,
       ],
     })

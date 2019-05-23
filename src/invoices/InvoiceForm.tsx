@@ -88,7 +88,7 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
               <form
                 onSubmit={event => {
                   this.setState({ submitted: true });
-                  handleSubmit();
+                  handleSubmit(event);
                 }}
               >
                 {/* Header */}

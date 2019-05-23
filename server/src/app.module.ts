@@ -9,6 +9,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
+import { FundingModule } from './funding/funding.module';
 
 @Module({
   controllers: [AppController],
@@ -20,11 +21,12 @@ import { HttpExceptionFilter } from './filters/http-exception.filter';
     },
   ],
   imports: [
-    InvoicesModule,
-    UsersModule,
     AuthModule,
     ContactsModule,
+    FundingModule,
+    InvoicesModule,
     PurchaseOrdersModule,
+    UsersModule,
     WebhooksModule,
   ],
 })

@@ -31,7 +31,7 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
   render() {
 
     if (this.props.loading || !this.props.invoices) {
-      return 'Loading';
+      <Box align="center" justify="center" fill={true}>Loading</Box>;
     }
 
     return  (

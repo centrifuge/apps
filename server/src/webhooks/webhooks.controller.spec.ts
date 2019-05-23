@@ -4,7 +4,6 @@ import {
   eventTypes,
   WebhooksController,
 } from './webhooks.controller';
-import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.provider';
 import { databaseServiceProvider } from '../database/database.providers';
 import {
   InvInvoiceResponse,
@@ -47,7 +46,7 @@ describe('WebhooksController', () => {
   beforeEach(async () => {
     webhooksModule = await Test.createTestingModule({
       controllers: [WebhooksController],
-      providers: [databaseServiceProvider, centrifugeServiceProvider],
+      providers: [databaseServiceProvider, CentrifugeService],
     })
       .overrideProvider(DatabaseService)
       .useValue(databaseServiceMock)
