@@ -1,0 +1,1727 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FundingAgreementView Should not render an empty form 1`] = `
+<div
+  className="StyledGrommet-sc-19lkkz7-0 eWRwfm"
+>
+  <div
+    className="StyledBox-sc-13pk1d4-0 hOJKqu"
+  >
+    <div
+      className="StyledBox-sc-13pk1d4-0 erazuK"
+    >
+      <div
+        className="StyledBox-sc-13pk1d4-0 gQLnBt"
+      >
+        <a
+          href="/invoices"
+          onClick={[Function]}
+          size="large"
+        >
+          <svg
+            aria-label="LinkPrevious"
+            className="StyledIcon-ofa7kd-0 cgOtHq"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M2,12 L22,12 M13,3 L22,12 L13,21"
+              fill="none"
+              stroke="#000"
+              strokeWidth="2"
+              transform="matrix(-1 0 0 1 24 0)"
+            />
+          </svg>
+        </a>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 iChEkS"
+        />
+        <h3
+          className="StyledHeading-sc-1rdh4aw-0 YlnAZ"
+        >
+          Funding Agreement for Invoice #
+        </h3>
+      </div>
+      <div
+        className="StyledBox-sc-13pk1d4-0 ffeAql"
+      >
+        <button
+          className="StyledButton-sc-323bzc-0 SBKZb"
+          disabled={true}
+          onBlur={[Function]}
+          onFocus={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+          type="button"
+        >
+          Approve
+        </button>
+      </div>
+    </div>
+    <div
+      className="StyledBox-sc-13pk1d4-0 IRSNj"
+    >
+      <div
+        className="StyledBox-sc-13pk1d4-0 IRSNj"
+      >
+        <div
+          className="StyledBox-sc-13pk1d4-0 IRSNj"
+        >
+          <div
+            className="StyledBox-sc-13pk1d4-0 IRSNj"
+          >
+            <div
+              className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+            >
+              <label
+                className="StyledText-sc-1sadyjn-0 gtjeKK"
+              >
+                Invoice number
+              </label>
+              <div
+                className="StyledBox-sc-13pk1d4-0 exlMvl"
+              >
+                <p
+                  className="StyledParagraph-tbetod-0 dBXmID"
+                  onBlur={[Function]}
+                  onFocus={[Function]}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+        />
+        <div
+          className="StyledBox-sc-13pk1d4-0 ffeAql"
+        >
+          <div
+            className="StyledBox-sc-13pk1d4-0 clLqce"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Sender
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <div
+                className="StyledBox-sc-13pk1d4-0 Tiesv"
+              >
+                <div
+                  className="StyledBox-sc-13pk1d4-0 clLqce"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Centrifuge ID
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Company name
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 clLqce"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Street
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Street
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      City
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Country
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      ZIP code
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
+          <div
+            className="StyledBox-sc-13pk1d4-0 clLqce"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Recipient
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <div
+                className="StyledBox-sc-13pk1d4-0 Tiesv"
+              >
+                <div
+                  className="StyledBox-sc-13pk1d4-0 clLqce"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Company name
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 clLqce"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Street
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Street
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      City
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Country
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      ZIP code
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+        />
+        <div
+          className="StyledBox-sc-13pk1d4-0 IRSNj"
+        >
+          <div
+            className="StyledBox-sc-13pk1d4-0 IRSNj"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Details
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <div
+                className="StyledBox-sc-13pk1d4-0 kmJoJj"
+              >
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Invoice Status
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Currency
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Date created
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Due date
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+        />
+        <div
+          className="StyledBox-sc-13pk1d4-0 IRSNj"
+        >
+          <div
+            className="StyledBox-sc-13pk1d4-0 IRSNj"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Invoice Total
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <div
+                className="StyledBox-sc-13pk1d4-0 ffeAql"
+              >
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Net amount
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Tax rate
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Tax amount
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Gross amount
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+        />
+        <div
+          className="StyledBox-sc-13pk1d4-0 ffeAql"
+        >
+          <div
+            className="StyledBox-sc-13pk1d4-0 clLqce"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Ship to
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <p
+                className="StyledParagraph-tbetod-0 dIDtVY"
+              >
+                Shipment was not sent to a third-party
+              </p>
+            </div>
+          </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
+          <div
+            className="StyledBox-sc-13pk1d4-0 clLqce"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Remit to
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <p
+                className="StyledParagraph-tbetod-0 dIDtVY"
+              >
+                This invoice will not be paid to a third-party
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+        />
+        <div
+          className="StyledBox-sc-13pk1d4-0 ffeAql"
+        >
+          <div
+            className="StyledBox-sc-13pk1d4-0 clLqce"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Credit note
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <p
+                className="StyledParagraph-tbetod-0 dIDtVY"
+              >
+                Invoice is not credit note
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+        />
+        <div
+          className="StyledBox-sc-13pk1d4-0 ffeAql"
+        >
+          <div
+            className="StyledBox-sc-13pk1d4-0 clLqce"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Comments
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <div
+                className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+              >
+                <div
+                  className="StyledBox-sc-13pk1d4-0 exlMvl"
+                >
+                  <p
+                    className="StyledParagraph-tbetod-0 dBXmID"
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`FundingAgreementView Should render the form with proper values for contact fields 1`] = `
+<div
+  className="StyledGrommet-sc-19lkkz7-0 eWRwfm"
+>
+  <div
+    className="StyledBox-sc-13pk1d4-0 hOJKqu"
+  >
+    <div
+      className="StyledBox-sc-13pk1d4-0 erazuK"
+    >
+      <div
+        className="StyledBox-sc-13pk1d4-0 gQLnBt"
+      >
+        <a
+          href="/invoices"
+          onClick={[Function]}
+          size="large"
+        >
+          <svg
+            aria-label="LinkPrevious"
+            className="StyledIcon-ofa7kd-0 cgOtHq"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M2,12 L22,12 M13,3 L22,12 L13,21"
+              fill="none"
+              stroke="#000"
+              strokeWidth="2"
+              transform="matrix(-1 0 0 1 24 0)"
+            />
+          </svg>
+        </a>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 iChEkS"
+        />
+        <h3
+          className="StyledHeading-sc-1rdh4aw-0 YlnAZ"
+        >
+          Funding Agreement for Invoice #
+        </h3>
+      </div>
+      <div
+        className="StyledBox-sc-13pk1d4-0 ffeAql"
+      >
+        <button
+          className="StyledButton-sc-323bzc-0 SBKZb"
+          disabled={true}
+          onBlur={[Function]}
+          onFocus={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+          type="button"
+        >
+          Approve
+        </button>
+      </div>
+    </div>
+    <div
+      className="StyledBox-sc-13pk1d4-0 IRSNj"
+    >
+      <div
+        className="StyledBox-sc-13pk1d4-0 IRSNj"
+      >
+        <div
+          className="StyledBox-sc-13pk1d4-0 IRSNj"
+        >
+          <div
+            className="StyledBox-sc-13pk1d4-0 IRSNj"
+          >
+            <div
+              className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+            >
+              <label
+                className="StyledText-sc-1sadyjn-0 gtjeKK"
+              >
+                Invoice number
+              </label>
+              <div
+                className="StyledBox-sc-13pk1d4-0 exlMvl"
+              >
+                <p
+                  className="StyledParagraph-tbetod-0 dBXmID"
+                  onBlur={[Function]}
+                  onFocus={[Function]}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+        />
+        <div
+          className="StyledBox-sc-13pk1d4-0 ffeAql"
+        >
+          <div
+            className="StyledBox-sc-13pk1d4-0 clLqce"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Sender
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <div
+                className="StyledBox-sc-13pk1d4-0 Tiesv"
+              >
+                <div
+                  className="StyledBox-sc-13pk1d4-0 clLqce"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Centrifuge ID
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      >
+                        0x1111
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Company name
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 clLqce"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Street
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Street
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      City
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Country
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      ZIP code
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
+          <div
+            className="StyledBox-sc-13pk1d4-0 clLqce"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Recipient
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <div
+                className="StyledBox-sc-13pk1d4-0 Tiesv"
+              >
+                <div
+                  className="StyledBox-sc-13pk1d4-0 clLqce"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Company name
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 clLqce"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Street
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Street
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      City
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Country
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  />
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      ZIP code
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+        />
+        <div
+          className="StyledBox-sc-13pk1d4-0 IRSNj"
+        >
+          <div
+            className="StyledBox-sc-13pk1d4-0 IRSNj"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Details
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <div
+                className="StyledBox-sc-13pk1d4-0 kmJoJj"
+              >
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Invoice Status
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Currency
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Date created
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Due date
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+        />
+        <div
+          className="StyledBox-sc-13pk1d4-0 IRSNj"
+        >
+          <div
+            className="StyledBox-sc-13pk1d4-0 IRSNj"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Invoice Total
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <div
+                className="StyledBox-sc-13pk1d4-0 ffeAql"
+              >
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Net amount
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Tax rate
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Tax amount
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 gtjeKK"
+                    >
+                      Gross amount
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 exlMvl"
+                    >
+                      <p
+                        className="StyledParagraph-tbetod-0 dBXmID"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+        />
+        <div
+          className="StyledBox-sc-13pk1d4-0 ffeAql"
+        >
+          <div
+            className="StyledBox-sc-13pk1d4-0 clLqce"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Ship to
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <p
+                className="StyledParagraph-tbetod-0 dIDtVY"
+              >
+                Shipment was not sent to a third-party
+              </p>
+            </div>
+          </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
+          <div
+            className="StyledBox-sc-13pk1d4-0 clLqce"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Remit to
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <p
+                className="StyledParagraph-tbetod-0 dIDtVY"
+              >
+                This invoice will not be paid to a third-party
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+        />
+        <div
+          className="StyledBox-sc-13pk1d4-0 ffeAql"
+        >
+          <div
+            className="StyledBox-sc-13pk1d4-0 clLqce"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Credit note
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <p
+                className="StyledParagraph-tbetod-0 dIDtVY"
+              >
+                Invoice is not credit note
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+        />
+        <div
+          className="StyledBox-sc-13pk1d4-0 ffeAql"
+        >
+          <div
+            className="StyledBox-sc-13pk1d4-0 clLqce"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+            >
+              <h5
+                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
+                style={
+                  Object {
+                    "minWidth": "100px",
+                  }
+                }
+              >
+                Comments
+              </h5>
+            </div>
+            <div
+              aria-hidden={false}
+              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+              open={true}
+            >
+              <div
+                className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 KIPoQ StyledBox-sc-13pk1d4-0 hehMJe"
+              >
+                <div
+                  className="StyledBox-sc-13pk1d4-0 exlMvl"
+                >
+                  <p
+                    className="StyledParagraph-tbetod-0 dBXmID"
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`FundingAgreementView Should render the loading state 1`] = `
+<div
+  className="StyledGrommet-sc-19lkkz7-0 eWRwfm"
+>
+  <div
+    className="StyledBox-sc-13pk1d4-0 bTrVGp"
+  >
+    Loading Funding Agreement
+  </div>
+</div>
+`;

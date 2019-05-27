@@ -28,7 +28,7 @@ class ConnectedLoginPage extends React.Component<ConnectedLoginPageProps> {
           return <Redirect to={routes.invoices.index} />
         }
         case PERMISSIONS.CAN_FUND_INVOICES: {
-          // return <Redirect to={routes.invoices.index} />
+           return <Redirect to={routes.funding.index} />
         }
         case PERMISSIONS.CAN_MANAGE_USERS: {
           return <Redirect to={routes.user.index} />

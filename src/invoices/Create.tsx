@@ -8,7 +8,7 @@ import { Invoice } from '../common/models/invoice';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
 import { LabelValuePair } from '../common/interfaces';
-import routes from './routes';
+import { invoiceRoutes } from './routes';
 import { Box, Button, Heading } from 'grommet';
 import { LinkPrevious } from 'grommet-icons';
 import { User } from '../common/models/user';
@@ -41,7 +41,7 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
   };
 
   onCancel = () => {
-    this.props.history.push(routes.index);
+    this.props.history.push(invoiceRoutes.index);
   };
 
   render() {
@@ -58,7 +58,7 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
     // Add logged in user to contacts
     const contacts: LabelValuePair[] = [
       { label: loggedInUser.name, value: loggedInUser.account },
-      ...this.props.contacts
+      ...this.props.contacts,
     ];
 
     // Create default data for invoice. The sender should be the logged in user
@@ -76,7 +76,7 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
       >
         <Box justify="between" direction="row" align="center">
           <Box direction="row" gap="small" align="center">
-            <Link to={routes.index} size="large">
+            <Link to={invoiceRoutes.index} size="large">
               <LinkPrevious/>
             </Link>
             <Heading level="3">
@@ -104,7 +104,6 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
 
 
 const mapStateToProps = (state) => {
-  console.log('here')
   return {
     loggedInUser: state.user.auth.loggedInUser,
     creatingInvoice: state.invoices.create.loading,

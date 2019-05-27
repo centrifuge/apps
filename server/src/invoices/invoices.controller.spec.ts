@@ -25,18 +25,14 @@ describe('InvoicesController', () => {
   let invoicesModule: TestingModule;
 
   const invoice: Invoice = {
+    _id: 'invoice_id',
     number: '999',
     sender_company_name: 'cinderella',
     bill_to_company_name: 'step mother',
     collaborators: [],
   };
-  let fetchedInvoices: Invoice[];
 
-  const supplier = new Contact(
-    'fast',
-    '0xc111111111a4e539741ca11b590b9447b26a8057',
-    'fairy_id',
-  );
+  let fetchedInvoices: Invoice[];
 
   class DatabaseServiceMock {
     invoices = {
@@ -64,16 +60,16 @@ describe('InvoicesController', () => {
           }),
         };
       }),
-      findOne: jest.fn((query) => ({
-        data: invoice,
-        header: {
-          document_id: `document_${query._id}`,
-        },
-      })),
+      findOne: jest.fn((query) => {
+        const found = fetchedInvoices.find(i => i._id === query._id);
+        return found ? {
+          data: found,
+          header: {
+            document_id: `document_${query._id}`,
+          },
+        } : null;
+      }),
       updateById: jest.fn((id, value) => value),
-    };
-    contacts = {
-      findOne: jest.fn(() => supplier),
     };
   }
 
@@ -98,12 +94,6 @@ describe('InvoicesController', () => {
         }
       }),
     };
-    funding = {
-      getList: jest.fn((documentId, auth) => {
-        if (documentId === 'document_find_id') return { data: [{ funding_id: 'some_funding_id' }] };
-        return { data: null };
-      }),
-    };
 
     pullForJobComplete = () => true;
   }
@@ -111,14 +101,7 @@ describe('InvoicesController', () => {
   const centrifugeClientMock = new CentrifugeClientMock();
 
   beforeEach(async () => {
-    fetchedInvoices = [
-      {
-        number: '100',
-        bill_to_company_name: 'pumpkin',
-        sender_company_name: 'godmother',
-        _id: 'fairy_id',
-      },
-    ];
+    fetchedInvoices = [invoice];
 
     invoicesModule = await Test.createTestingModule({
       controllers: [InvoicesController],
@@ -137,7 +120,6 @@ describe('InvoicesController', () => {
     databaseServiceMock.invoices.insert.mockClear();
     databaseServiceMock.invoices.find.mockClear();
     databaseServiceMock.invoices.getCursor.mockClear();
-    databaseServiceMock.contacts.findOne.mockClear();
   });
 
   describe('create', () => {
@@ -196,17 +178,17 @@ describe('InvoicesController', () => {
       };
 
       const updateResult = await invoiceController.updateById(
-        { id: 'id_to_update' },
+        { id: invoice._id },
         { user: { _id: 'user_id' } },
         { ...updatedInvoice },
       );
 
       expect(databaseServiceMock.invoices.findOne).toHaveBeenCalledWith({
-        _id: 'id_to_update',
+        _id: invoice._id,
         ownerId: 'user_id',
       });
       expect(centrifugeClientMock.invoices.update).toHaveBeenCalledWith(
-        'document_id_to_update',
+        'document_invoice_id',
         {
           data: { ...updatedInvoice },
           write_access: {
@@ -218,7 +200,7 @@ describe('InvoicesController', () => {
       );
 
       expect(databaseServiceMock.invoices.updateById).toHaveBeenCalledWith(
-        'id_to_update',
+        'invoice_id',
         {
           ...updateResult,
         },
@@ -233,46 +215,21 @@ describe('InvoicesController', () => {
       );
 
       const result = await invoiceController.getById(
-        { id: 'some_id' },
+        { id: invoice._id },
         { user: { _id: 'user_id' } },
       );
       expect(databaseServiceMock.invoices.findOne).toHaveBeenCalledWith({
-        _id: 'some_id',
+        _id: invoice._id,
         ownerId: 'user_id',
       });
 
       expect(result).toEqual({
         data: invoice,
-        fundingAgreement: null,
         header: {
-          document_id: 'document_some_id',
+          document_id: `document_${invoice._id}`,
         },
       });
     });
 
-    it('should return the invoice by id with a funding request', async function() {
-      const invoiceController = invoicesModule.get<InvoicesController>(
-        InvoicesController,
-      );
-
-      const result = await invoiceController.getById(
-        { id: 'find_id' },
-        { user: { _id: 'user_id' } },
-      );
-      expect(databaseServiceMock.invoices.findOne).toHaveBeenCalledWith({
-        _id: 'find_id',
-        ownerId: 'user_id',
-      });
-
-      expect(result).toEqual({
-        data: invoice,
-        fundingAgreement: {
-          funding_id: 'some_funding_id',
-        },
-        header: {
-          document_id: 'document_find_id',
-        },
-      });
-    });
   });
 });

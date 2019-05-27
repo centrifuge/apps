@@ -3,22 +3,13 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import InvoiceForm from './InvoiceForm';
-import {
-  createInvoice,
-  getInvoiceById, resetCreateInvoice,
-  resetGetInvoiceById,
-  resetUpdateInvoice,
-  updateInvoice,
-} from '../store/actions/invoices';
+import { getInvoiceById, resetGetInvoiceById, resetUpdateInvoice, updateInvoice } from '../store/actions/invoices';
 import { Invoice } from '../common/models/invoice';
 import { RouteComponentProps, withRouter } from 'react-router';
-import { RequestState } from '../store/reducers/http-request-reducer';
-import { InvInvoiceResponse } from '../../clients/centrifuge-node';
-import { Contact } from '../common/models/contact';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
 import { LabelValuePair } from '../common/interfaces';
 import { Box, Button, Heading } from 'grommet';
-import routes from './routes';
+import { invoiceRoutes } from './routes';
 import { LinkPrevious } from 'grommet-icons';
 import { User } from '../common/models/user';
 
@@ -58,13 +49,11 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
   };
 
   render() {
-    const { loggedInUser,updatingInvoice } = this.props;
+    const { loggedInUser, updatingInvoice } = this.props;
 
     if (!this.props.invoice || !this.props.contacts) {
       return <Box align="center" justify="center" fill={true}>Loading</Box>;
     }
-
-    console.log("updateing",updatingInvoice)
 
     if (updatingInvoice) {
       return <Box align="center" justify="center" fill={true}>Updating invoice</Box>;
@@ -73,7 +62,7 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
     // Add logged in user to contacts
     const contacts: LabelValuePair[] = [
       { label: loggedInUser.name, value: loggedInUser.account },
-      ...this.props.contacts
+      ...this.props.contacts,
     ];
 
     return (
@@ -84,7 +73,7 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
       >
         <Box justify="between" direction="row" align="center">
           <Box direction="row" gap="small" align="center">
-            <Link to={routes.index} size="large">
+            <Link to={invoiceRoutes.index} size="large">
               <LinkPrevious/>
             </Link>
             <Heading level="3">
@@ -136,5 +125,5 @@ export default connect(
     resetGetContacts,
     getInvoiceById,
     resetGetInvoiceById,
-  }
+  },
 )(withRouter(ConnectedEditInvoice));

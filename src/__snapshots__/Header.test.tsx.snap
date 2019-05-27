@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Header Should not render main menu 1`] = `
+exports[`Header Should render an empty header 1`] = `
 <div
   className="StyledBox-sc-13pk1d4-0 iFsBNS"
 >
@@ -34,7 +34,7 @@ exports[`Header Should not render main menu 1`] = `
 </div>
 `;
 
-exports[`Header Should render main menu 1`] = `
+exports[`Header Should render the Header 1`] = `
 <div
   className="StyledBox-sc-13pk1d4-0 iFsBNS"
 >
@@ -83,26 +83,43 @@ exports[`Header Should render main menu 1`] = `
       >
         Contacts
       </button>
-      <div
-        className="StyledBox__StyledBoxGap-sc-13pk1d4-1 iChEkS"
-      />
-      <a
-        className="StyledButton-sc-323bzc-0 jfbKsv"
-        href="/api/users/logout"
-        onBlur={[Function]}
-        onFocus={[Function]}
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
-      >
-        Logout
-      </a>
     </div>
     <div
       className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
     />
     <div
       className="StyledBox-sc-13pk1d4-0 BclQN"
+    >
+      <span
+        className="StyledText-sc-1sadyjn-0 fWSbXS"
+      >
+        My Centrifuge ID: 
+        0x33333
+      </span>
+      <div
+        className="StyledBox__StyledBoxGap-sc-13pk1d4-1 iChEkS"
+      />
+      <span
+        className="StyledText-sc-1sadyjn-0 fWSbXS"
+      >
+         
+      </span>
+    </div>
+    <div
+      className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
     />
+    <div
+      className="StyledBox-sc-13pk1d4-0 BclQN"
+    >
+      <a
+        className="StyledAnchor-sc-1rp7lwl-0 jgeOSx"
+        href="/api/users/logout"
+        onBlur={[Function]}
+        onFocus={[Function]}
+      >
+        Logout
+      </a>
+    </div>
   </div>
 </div>
 `;

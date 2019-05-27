@@ -2,16 +2,15 @@ import React from 'react';
 import { mount } from 'enzyme';
 import renderer from 'react-test-renderer';
 import { BrowserRouter } from 'react-router-dom';
-import { InvoiceDetails } from './InvoiceDetails';
+import { FundingAgreementView } from './FundingAgreementView';
 import { createStore } from 'redux';
 import getRootReducer from '../store/reducers';
 import { AxisTheme } from '@centrifuge/axis-theme';
-import { Grommet } from 'grommet';
 
 
-const DynamicParamInvoiceDetails = InvoiceDetails as any;
+const DynamicParamFundingAgreementView = FundingAgreementView as any;
 const store = createStore(getRootReducer({}), { router: { location: { pathname: '/' } } });
-describe('InvoiceDetails', () => {
+describe('FundingAgreementView', () => {
 
   const methods = {
     getInvoiceById: jest.fn(() => {
@@ -26,7 +25,7 @@ describe('InvoiceDetails', () => {
 
   const defaultProps = {
     header: {
-      document_id:"document_id",
+      document_id: 'document_id',
     },
     match: {
       params: {
@@ -52,7 +51,7 @@ describe('InvoiceDetails', () => {
       // TODO Test fails when using Axis Theme. Investigate!!!
       <AxisTheme>
         <BrowserRouter>
-          <DynamicParamInvoiceDetails
+          <DynamicParamFundingAgreementView
             invoice={invoice}
             contacts={contacts}
             {...methods}
@@ -68,9 +67,9 @@ describe('InvoiceDetails', () => {
 
   it('Should render the form with proper values for contact fields', () => {
     const invoice = {
-      sender: "0x1111",
-      recipient:"0x1111",
-      payee:"0x11112"
+      sender: '0x1111',
+      recipient: '0x1111',
+      payee: '0x11112',
     };
     const contacts = [
       {
@@ -85,7 +84,7 @@ describe('InvoiceDetails', () => {
     const bodyShallow = renderer.create(
       <AxisTheme>
         <BrowserRouter>
-          <DynamicParamInvoiceDetails
+          <DynamicParamFundingAgreementView
             invoice={invoice}
             contacts={contacts}
             {...methods}
@@ -113,7 +112,7 @@ describe('InvoiceDetails', () => {
     const bodyShallow = renderer.create(
       <AxisTheme>
         <BrowserRouter>
-          <DynamicParamInvoiceDetails
+          <DynamicParamFundingAgreementView
             invoice={invoice}
             contacts={contacts}
             {...methods}

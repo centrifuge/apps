@@ -23,11 +23,9 @@ export interface InvoiceResponse extends InvInvoiceResponse {
   _id?: string;
   createdAt?: Date,
   updatedAt?: Date
+  fundingAgreement?: FunFundingResponseData | null
 }
 
-export interface InvoiceResponseWithFunding extends InvoiceResponse {
-  fundingAgreement: FunFundingResponseData | null
-}
 
 export interface PurchaseOrderResponse
   extends PoPurchaseOrderResponse {

@@ -2,23 +2,31 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { getInvoices, resetGetInvoices } from '../store/actions/invoices';
-import { InvoiceData } from '../common/interfaces';
 import { Anchor, Box, Button, DataTable, Heading, Text } from 'grommet';
-import { invoiceRoutes } from './routes';
-import { Edit, View } from 'grommet-icons';
+import { fundingRoutes } from './routes';
+import { View } from 'grommet-icons';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { dateFormatter } from '../common/formaters';
+import { FunFundingData, FunFundingSignature } from '../../clients/centrifuge-node';
 
+
+type FundingAgreements = FunFundingData & {
+  _id: string,
+  signatures: Array<FunFundingSignature>,
+  sender_company_name: string,
+  net_amount: string,
+  number: string
+}[];
 
 type ViewInvoicesProps = {
   getInvoices: () => void;
   resetGetInvoices: () => void;
-  invoices?: InvoiceData[];
+  fundingAgreements?: FundingAgreements;
   loading: boolean;
 };
 
-class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProps> {
-  displayName = 'InvoiceList';
+class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComponentProps> {
+  displayName = 'FundingAgreementList';
 
   componentDidMount() {
     this.props.getInvoices();
@@ -31,15 +39,18 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
 
   render() {
 
-    if (this.props.loading || !this.props.invoices) {
+    if (this.props.loading || !this.props.fundingAgreements) {
       return <></>;
     }
 
+    console.log(this.props.fundingAgreements);
+
     return (
+
       <Box fill>
         <Box justify="between" direction="row" align="center">
           <Heading level="3">Invoices</Heading>
-          <Link to={invoiceRoutes.new}>
+          <Link to={fundingRoutes.new}>
             <Button
               primary
               label="Create Invoice"
@@ -50,25 +61,40 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
         <Box>
           <DataTable
             sortable={true}
-            data={this.props.invoices}
+            data={this.props.fundingAgreements}
+            primaryKey={'funding_id'}
             columns={[
+              {
+                property: 'sender_company_name',
+                header: 'Borrower',
+              },
+              {
+                property: 'funding_id',
+                header: 'Funding Agreement ID',
+                render: datum => {
+                  return <Box width={'small'}>
+                    <Text style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>{datum.funding_id}</Text>
+                  </Box>;
+                },
+
+              },
               {
                 property: 'number',
                 header: 'Invoice Number',
               },
               {
-                property: 'sender_company_name',
-                header: 'Supplier',
+                property: 'net_amount',
+                header: 'Invoice Total',
               },
               {
-                property: 'bill_to_company_name',
-                header: 'Recipient',
+                property: 'amount',
+                header: 'Funding Amount',
               },
               {
-                property: 'date_created',
-                header: 'Date Sent',
+                property: 'repayment_due_date',
+                header: 'Repayment Due Date',
                 render: datum => {
-                  return dateFormatter(datum.createdAt);
+                  return dateFormatter(datum.repayment_due_date);
                 },
               },
 
@@ -76,7 +102,7 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
                 property: 'invoice_status',
                 header: 'Document Status',
                 render: datum => {
-                  return <Text color={'status-ok'}>Created</Text>;
+                  return datum.signatures ? <Text color={'status-ok'}>Accepted</Text> : <Text>Received</Text>;
                 },
               },
               {
@@ -88,15 +114,7 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
                       label={'View'}
                       onClick={() =>
                         this.props.history.push(
-                          invoiceRoutes.view.replace(':id', datum._id),
-                        )
-                      }
-                    />
-                    <Anchor
-                      label={'Edit'}
-                      onClick={() =>
-                        this.props.history.push(
-                          invoiceRoutes.edit.replace(':id', datum._id),
+                          fundingRoutes.view.replace(':id', datum._id),
                         )
                       }
                     />
@@ -113,14 +131,16 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
 
 const mapStateToProps = (state) => {
   return {
-    invoices:
+    fundingAgreements:
       state.invoices.get.data &&
-      (state.invoices.get.data.map(response => ({
-        ...response.data,
+      (state.invoices.get.data.filter(item => item.fundingAgreement).map(response => ({
+        ...response.fundingAgreement.funding,
+        signatures: response.fundingAgreement.signatures,
+        sender_company_name: response.data.sender_company_name,
+        net_amount: response.data.net_amount,
+        number: response.data.number,
         _id: response._id,
-        createdAt: response.createdAt,
-
-      })) as InvoiceData[]),
+      }))),
     loading: state.invoices.get.loading,
   };
 };
@@ -128,4 +148,4 @@ const mapStateToProps = (state) => {
 export default connect(
   mapStateToProps,
   { getInvoices, resetGetInvoices },
-)(withRouter(InvoiceList));
+)(withRouter(FundingAgreementList));

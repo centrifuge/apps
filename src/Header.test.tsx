@@ -5,44 +5,45 @@ import { createStore } from 'redux';
 import getRootReducer from './store/reducers';
 import { User } from './common/models/user';
 import renderer from 'react-test-renderer';
-import { BrowserRouter } from "react-router-dom";
-import invoicesRoutes from "./invoices/routes";
-import contactsRoutes from "./contacts/routes";
-import userRoutes from "./user/routes";
+import { BrowserRouter } from 'react-router-dom';
+import routes from './routes';
 
-const store = createStore(getRootReducer({}),{router:{location: {pathname:'/'}}});
+const store = createStore(getRootReducer({}), { router: { location: { pathname: '/' } } });
 
 describe('Header', () => {
 
   const user = new User();
-  const push = (route:string) => route;
-  it('Should not render main menu', () => {
+  const push = (route: string) => route;
+  it('Should render an empty header', () => {
     const bodyShallow = renderer.create(
-
       <Provider store={store}>
-        <BrowserRouter >
-          <Header selectedRoute={'/'} menuItems={[]} push={push}/>
+        <BrowserRouter>
+          <Header selectedRoute={'/'} menuItems={[]} user={null} push={push}/>
         </BrowserRouter>
       </Provider>,
     ).toJSON();
     expect(bodyShallow).toMatchSnapshot();
   });
 
-  it('Should render main menu', () => {
+  it('Should render the Header', () => {
 
-    const commonItems = [
-      { label: 'Invoices', route: invoicesRoutes.index },
-      { label: 'Contacts', route: contactsRoutes.index },
-      { label: 'Logout', route: userRoutes.logout, external: true },
+    const items = [
+      { label: 'Invoices', route: routes.invoices.index },
+      { label: 'Contacts', route: routes.contacts.index },
+      { label: 'Logout', route: routes.user.logout, external: true, secondary: true },
     ];
 
+    const user = new User();
+    user.account = '0x33333';
+
     const bodyShallow = renderer.create(
       <Provider store={store}>
-        <BrowserRouter >
-          <Header selectedRoute={'/'} menuItems={commonItems} push={push}/>
+        <BrowserRouter>
+          <Header selectedRoute={'/'} user={user} menuItems={items} push={push}/>
         </BrowserRouter>
       </Provider>,
     ).toJSON();
     expect(bodyShallow).toMatchSnapshot();
   });
+
 });

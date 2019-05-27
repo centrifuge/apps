@@ -7,7 +7,7 @@ import {
   getInvoiceByIdAction,
   updateInvoiceAction,
 } from '../actions/invoices';
-import routes from '../../invoices/routes';
+import routes from '../../routes';
 
 export function* getInvoices() {
   try {
@@ -42,7 +42,7 @@ export function* createInvoice(action) {
       type: createInvoiceAction.success,
       payload: response.data,
     });
-    yield put(push(routes.index));
+    yield put(push(routes.invoices.index));
   } catch (e) {
     yield put({ type: createInvoiceAction.fail, payload: e });
   }

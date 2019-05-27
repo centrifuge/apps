@@ -1,8 +1,17 @@
-const index = '/invoices';
+const invoiceIndex = '/invoices';
 
-export default {
-  index,
-  new: `${index}/new`,
-  view: `${index}/:id`,
-  edit: `${index}/:id/edit`,
+export const invoiceRoutes = {
+  index: invoiceIndex,
+  new: `${invoiceIndex}/new`,
+  view: `${invoiceIndex}/:id`,
+  edit: `${invoiceIndex}/:id/edit`,
+};
+
+const fundingIndex = '/funding-agreements';
+
+export const fundingRoutes = {
+  index: fundingIndex,
+  new: `${fundingIndex}/new`,
+  view: `${fundingIndex}/:id`,
+  edit: `${fundingIndex}/:id/edit`,
 };

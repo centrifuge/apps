@@ -2,9 +2,9 @@ import { Body, Controller, Get, HttpException, Param, Post, Put, Req, UseGuards 
 import { Invoice } from '../../../src/common/models/invoice';
 import { ROUTES } from '../../../src/common/constants';
 import { SessionGuard } from '../auth/SessionGuard';
-import { FunFundingListResponse, InvInvoiceData, InvInvoiceResponse } from '../../../clients/centrifuge-node';
+import { InvInvoiceResponse } from '../../../clients/centrifuge-node';
 import { DatabaseService } from '../database/database.service';
-import { InvoiceData, InvoiceResponse, InvoiceResponseWithFunding } from '../../../src/common/interfaces';
+import { InvoiceResponse } from '../../../src/common/interfaces';
 import config from '../../../src/common/config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 
@@ -60,7 +60,7 @@ export class InvoicesController {
   async get(@Req() request): Promise<InvoiceResponse[]> {
     const invoices = this.database.invoices.getCursor({
       ownerId: request.user._id,
-    }).sort({updatedAt: -1}).exec();
+    }).sort({ updatedAt: -1 }).exec();
     return invoices;
   }
 
@@ -72,16 +72,11 @@ export class InvoicesController {
    * @param request - the http request
    * @return {Promise<Invoice|null>} result
    */
-  async getById(@Param() params, @Req() request): Promise<InvoiceResponseWithFunding | null> {
-    const invoice: InvoiceResponse = await this.database.invoices.findOne({
+  async getById(@Param() params, @Req() request): Promise<InvoiceResponse | null> {
+    return await this.database.invoices.findOne({
       _id: params.id,
       ownerId: request.user._id,
     });
-    const fundingList: FunFundingListResponse = await this.centrifugeService.funding.getList(invoice.header.document_id, request.user.account);
-    return {
-      ...invoice,
-      fundingAgreement: (fundingList.data ? fundingList.data.shift() : null),
-    };
   }
 
   /**

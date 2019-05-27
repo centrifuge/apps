@@ -1,31 +1,32 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  documentTypes,
-  eventTypes,
-  WebhooksController,
-} from './webhooks.controller';
+import { documentTypes, eventTypes, WebhooksController } from './webhooks.controller';
 import { databaseServiceProvider } from '../database/database.providers';
-import {
-  InvInvoiceResponse,
-  PoPurchaseOrderResponse,
-} from '../../../clients/centrifuge-node';
+import { InvInvoiceResponse, PoPurchaseOrderResponse } from '../../../clients/centrifuge-node';
 import config from '../../../src/common/config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { DatabaseService } from '../database/database.service';
+import { User } from '../../../src/common/models/user';
 
 describe('WebhooksController', () => {
   let webhooksModule: TestingModule;
+  const user = new User();
+  user.account = '0x1111';
+  const documentId = '112233';
   const databaseServiceMock = {
     invoices: {
       insert: jest.fn(data => data),
+      get: jest.fn(data => data),
+    },
+    users: {
+      findOne: jest.fn((query) => {
+        if (query.account === user.account) return user;
+        return null;
+      }),
     },
     purchaseOrders: {
       insert: jest.fn(data => data),
     },
   };
-
-  const documentId = '112233';
-
   const getResponse = {
     data: {},
     header: {
@@ -65,9 +66,10 @@ describe('WebhooksController', () => {
       );
 
       const result = await webhooksController.receiveMessage({
-        event_type: eventTypes.success,
+        event_type: eventTypes.DOCUMENT,
         document_type: documentTypes.invoice,
         document_id: documentId,
+        to_id: user.account,
       });
 
       expect(result).toEqual('OK');
@@ -81,6 +83,22 @@ describe('WebhooksController', () => {
     });
   });
 
+  describe('when it receives success invoice creation', function() {
+    it('should fetch it from the node and persist it in the database', async function() {
+      const webhooksController = webhooksModule.get<WebhooksController>(
+        WebhooksController,
+      );
+
+      const result = await webhooksController.receiveMessage({
+        event_type: eventTypes.DOCUMENT,
+        document_type: documentTypes.invoice,
+        document_id: documentId,
+      });
+
+      expect(result).toEqual('User is not present in database');
+    });
+  });
+
   describe('when it receives success purchase order creation', function() {
     it('should fetch it from the node and persist it in the database', async function() {
       const webhooksController = webhooksModule.get<WebhooksController>(
@@ -88,9 +106,10 @@ describe('WebhooksController', () => {
       );
 
       const result = await webhooksController.receiveMessage({
-        event_type: eventTypes.success,
+        event_type: eventTypes.DOCUMENT,
         document_type: documentTypes.purchaseOrder,
         document_id: documentId,
+        to_id: user.account,
       });
 
       expect(result).toEqual('OK');
