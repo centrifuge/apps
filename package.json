@@ -1,0 +1,27 @@
+{
+  "name": "tinlake",
+  "version": "0.0.1",
+  "description": "Centrifuge Tinlake Contracts Client",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "dependencies": {
+    "ethjs": "^0.4.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "nodemon": "nodemon node inspect src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/centrifuge/tinlake.js.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/centrifuge/tinlake.js/issues"
+  },
+  "homepage": "https://github.com/centrifuge/tinlake.js#readme"
+}
