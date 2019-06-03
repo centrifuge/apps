@@ -17,7 +17,7 @@ export class FundingAgreement extends React.Component<FundingAgreementProps> {
 
   render() {
     const {
-      fundingAgreement: { funding, signature },
+      fundingAgreement: { funding, signatures },
       columnGap,
     } = this.props;
     return (
@@ -78,7 +78,7 @@ export class FundingAgreement extends React.Component<FundingAgreementProps> {
             <Box basis={'1/4'}>
               <DisplayField
                 label="Funding Status"
-                value={signature ? "Accepted" : "Pending"}
+                value={signatures ? "Accepted" : "Pending"}
               />
             </Box>
 

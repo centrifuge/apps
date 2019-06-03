@@ -6,10 +6,11 @@ import { FundingRequest } from '../../../src/common/models/funding-request';
 import {
   FunFundingCreatePayload,
   FunFundingResponse,
+  FunRequest,
   NftNFTMintInvoiceUnpaidRequest,
 } from '../../../clients/centrifuge-node';
 
-@Controller(ROUTES.FUNDING)
+@Controller()
 export class FundingController {
   constructor(
     private readonly databaseService: DatabaseService,
@@ -17,7 +18,30 @@ export class FundingController {
   ) {
   }
 
-  @Post('')
+  @Post(ROUTES.FUNDING.sign)
+  async sign(@Body() payload: FunRequest, @Request() req): Promise<FunFundingResponse | null> {
+    const signatureResonse = await this.centrifugeService.funding.sign(payload.identifier, payload.funding_id, payload, req.user.account)
+      .catch(async error => {
+        throw new HttpException(await error.json(), error.status);
+      });
+
+    await this.centrifugeService.pullForJobComplete(signatureResonse.header.job_id, req.user.account);
+    const updatedInvoice = await this.centrifugeService.invoices.get(payload.identifier, req.user.account);
+    delete updatedInvoice.data.attributes;
+    // Find all the invoices for the document ID
+    await this.databaseService.invoices.update(
+      { 'header.document_id': payload.identifier, 'ownerId': req.user._id },
+      {
+        ...updatedInvoice,
+        ownerId: req.user._id,
+        fundingAgreement: signatureResonse.data,
+      },
+    );
+
+    return signatureResonse;
+  }
+
+  @Post(ROUTES.FUNDING.base)
   async create(@Body() fundingRequest: FundingRequest, @Request() req): Promise<FunFundingResponse | null> {
     const nftPayload: NftNFTMintInvoiceUnpaidRequest = {
       identifier: fundingRequest.document_id,
@@ -64,11 +88,10 @@ export class FundingController {
     const invoiceWithFunding = await this.centrifugeService.invoices.get(fundingRequest.document_id, req.user.account);
     // We need to delete the attributes prop because NEDB does not allow for . in field names
     // Ex: funding[0].amount
-
     delete invoiceWithFunding.data.attributes;
     // Update the document in the database
     await this.databaseService.invoices.update(
-      { 'header.document_id': fundingRequest.document_id },
+      { 'header.document_id': fundingRequest.document_id, 'ownerId': req.user._id },
       {
         ...invoiceWithFunding,
         ownerId: req.user._id,

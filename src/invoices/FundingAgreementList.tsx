@@ -49,13 +49,8 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
 
       <Box fill>
         <Box justify="between" direction="row" align="center">
-          <Heading level="3">Invoices</Heading>
-          <Link to={fundingRoutes.new}>
-            <Button
-              primary
-              label="Create Invoice"
-            />
-          </Link>
+          <Heading level="3">Funding Agreements</Heading>
+
         </Box>
 
         <Box>
@@ -100,7 +95,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
 
               {
                 property: 'invoice_status',
-                header: 'Document Status',
+                header: 'Funding Status',
                 render: datum => {
                   return datum.signatures ? <Text color={'status-ok'}>Accepted</Text> : <Text>Received</Text>;
                 },

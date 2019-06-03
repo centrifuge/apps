@@ -10,11 +10,13 @@ import { User } from '../../../src/common/models/user';
 describe('WebhooksController', () => {
   let webhooksModule: TestingModule;
   const user = new User();
+  user._id = 'id01';
   user.account = '0x1111';
   const documentId = '112233';
   const databaseServiceMock = {
     invoices: {
       insert: jest.fn(data => data),
+      update: jest.fn((id, value) => value),
       get: jest.fn(data => data),
     },
     users: {
@@ -32,6 +34,7 @@ describe('WebhooksController', () => {
     header: {
       document_id: documentId,
     },
+    ownerId: user._id
   };
 
   const centrifugeClient = {
@@ -55,6 +58,7 @@ describe('WebhooksController', () => {
       .useValue(centrifugeClient)
       .compile();
 
+    databaseServiceMock.invoices.update.mockClear();
     databaseServiceMock.invoices.insert.mockClear();
     centrifugeClient.invoices.get.mockClear();
   });
@@ -75,10 +79,15 @@ describe('WebhooksController', () => {
       expect(result).toEqual('OK');
       expect(centrifugeClient.invoices.get).toHaveBeenCalledWith(
         documentId,
-        config.admin.account,
+        user.account,
       );
-      expect(databaseServiceMock.invoices.insert).toHaveBeenCalledWith(
+      expect(databaseServiceMock.invoices.update).toHaveBeenCalledWith(
+        {
+          'header.document_id': getResponse.header.document_id,
+          'ownerId': user._id,
+        },
         getResponse,
+        {upsert:true},
       );
     });
   });
@@ -115,7 +124,7 @@ describe('WebhooksController', () => {
       expect(result).toEqual('OK');
       expect(centrifugeClient.purchaseOrders.get).toHaveBeenCalledWith(
         documentId,
-        config.admin.account,
+        user.account,
       );
       expect(databaseServiceMock.purchaseOrders.insert).toHaveBeenCalledWith(
         getResponse,

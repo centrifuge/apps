@@ -1,6 +1,7 @@
 const API_BASE = '/api';
 
 const baseUsersRoute = `${API_BASE}/users`;
+const baseFundingRoute = `${API_BASE}/funding`;
 
 const userRoutes = {
   base: baseUsersRoute,
@@ -10,11 +11,17 @@ const userRoutes = {
   register: `${baseUsersRoute}/register`,
 };
 
+const fundingRoutes = {
+  base: baseFundingRoute,
+  sign: `${baseFundingRoute}/sign`,
+};
+
+
 export const ROUTES = Object.freeze({
   API_BASE,
   INVOICES: `${API_BASE}/invoices`,
   USERS: userRoutes,
-  FUNDING: `${API_BASE}/funding`,
+  FUNDING: fundingRoutes,
   CONTACTS: `${API_BASE}/contacts`,
   WEBHOOKS: `${API_BASE}/webhooks`,
   PURCHASE_ORDERS: `${API_BASE}/purchase_orders`,

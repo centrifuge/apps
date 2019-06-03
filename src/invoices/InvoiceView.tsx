@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Box, Button, Heading } from 'grommet';
 import { InvoiceData, LabelValuePair } from '../common/interfaces';
 import { connect } from 'react-redux';
-import { DocumentResponseHeader, FunFundingResponseData } from '../../clients/centrifuge-node';
+import { DocumentResponseHeader, FunFundingResponse, FunFundingResponseData } from '../../clients/centrifuge-node';
 import { getInvoiceById, resetGetInvoiceById } from '../store/actions/invoices';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
 import { RouteComponentProps, withRouter } from 'react-router';
@@ -16,6 +16,7 @@ import { FundingRequest } from '../common/models/funding-request';
 import { dateFormatter } from '../common/formaters';
 import { createFunding, resetCreateFunding } from '../store/actions/funding';
 import { InvoiceDetails } from './InvoiceDetails';
+import { RequestState } from '../store/reducers/http-request-reducer';
 
 type ConnectedInvoiceViewProps = {
   getInvoiceById: (id: string) => void;
@@ -29,7 +30,7 @@ type ConnectedInvoiceViewProps = {
   fundingAgreement: FunFundingResponseData | null,
   id: string | null,
   contacts?: LabelValuePair[];
-  creatingFunding: any;
+  creatingFunding: RequestState<FunFundingResponse>;
 } & RouteComponentProps<{ id?: string }>;
 
 export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
@@ -79,7 +80,7 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
     }
 
     if (creatingFunding && creatingFunding.loading) {
-      return <Box align="center" justify="center" fill={true}>Create Funding Agreement</Box>;
+      return <Box align="center" justify="center" fill={true}>Creating Funding Agreement</Box>;
     }
 
     // TODO make currency and due_date mandatory in invoice

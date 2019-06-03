@@ -18,5 +18,6 @@ export default function*() {
     fork(contacts.watchCreateContact),
     fork(contacts.watchUpdateContact),
     fork(funding.watchCreateFunding),
+    fork(funding.watchSignFunding),
   ]);
 }

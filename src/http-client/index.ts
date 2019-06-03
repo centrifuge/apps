@@ -35,6 +35,7 @@ export const httpClient = {
       instance.put(`${ROUTES.CONTACTS}/${contact._id}`, contact),
   },
   funding: {
-    create: async (fundingRequest: FundingRequest) => instance.post(ROUTES.FUNDING, fundingRequest),
+    create: async (fundingRequest: FundingRequest) => instance.post(ROUTES.FUNDING.base, fundingRequest),
+    sign: async (fundingRequest: FundingRequest) => instance.post(ROUTES.FUNDING.sign, fundingRequest),
   },
 };

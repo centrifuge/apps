@@ -44,7 +44,7 @@ export class WebhooksController {
       if (notification.document_type === documentTypes.invoice) {
         const result = await this.centrifugeService.invoices.get(
           notification.document_id,
-          config.admin.account,
+          user.account,
         );
 
         const invoice: InvoiceResponse = {
@@ -55,14 +55,19 @@ export class WebhooksController {
         if (invoice.data.attributes && invoice.data.attributes.funding_agreement) {
           const fundingList: FunFundingListResponse = await this.centrifugeService.funding.getList(invoice.header.document_id, user.account);
           invoice.fundingAgreement = (fundingList.data ? fundingList.data.shift() : undefined);
+          // We need to delete the attributes prop because nedb does not allow for . in field names
           delete invoice.data.attributes;
         }
-        // We need to delete the attributes prop because nebd does not allow for . in field names
-        await this.databaseService.invoices.insert(invoice);
+        await this.databaseService.invoices.update(
+          { 'header.document_id': notification.document_id, 'ownerId': user._id },
+          invoice,
+          { upsert: true },
+        );
+
       } else if (notification.document_type === documentTypes.purchaseOrder) {
         const result = await this.centrifugeService.purchaseOrders.get(
           notification.document_id,
-          config.admin.account,
+          user.account,
         );
         await this.databaseService.purchaseOrders.insert(result);
       }

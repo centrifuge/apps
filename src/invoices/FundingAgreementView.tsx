@@ -1,45 +1,31 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Button, Heading } from 'grommet';
-import { InvoiceData, InvoiceResponse, LabelValuePair } from '../common/interfaces';
+import { InvoiceData, LabelValuePair } from '../common/interfaces';
 import { connect } from 'react-redux';
 import { RequestState } from '../store/reducers/http-request-reducer';
-import { DocumentResponseHeader, FunFundingResponseData } from '../../clients/centrifuge-node';
-import { Contact } from '../common/models/contact';
+import { DocumentResponseHeader, FunFundingResponse, FunFundingResponseData } from '../../clients/centrifuge-node';
 import { getInvoiceById, resetGetInvoiceById } from '../store/actions/invoices';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
 import { RouteComponentProps, withRouter } from 'react-router';
-import { DisplayField } from '../components/DisplayField';
 import { LinkPrevious } from 'grommet-icons';
 import routes from '../routes';
-import { Sender } from './invoice-details-partials/Sender';
-import { Recipient } from './invoice-details-partials/Recipient';
-import { ShipTo } from './invoice-details-partials/ShipTo';
-import { RemitTo } from './invoice-details-partials/RemitTo';
-import { Details } from './invoice-details-partials/Details';
-import { CreditNote } from './invoice-details-partials/CreditNote';
-import { invoiceRoutes } from './routes';
-import { Section } from '../components/Section';
-import { InvoiceTotal } from './invoice-details-partials/InvoiceTotal';
 import { Modal } from '@centrifuge/axis-modal';
-import FundingRequestForm from './FundingRequestForm';
-import { FundingRequest } from '../common/models/funding-request';
-import { dateFormatter } from '../common/formaters';
-import { createFunding, resetCreateFunding } from '../store/actions/funding';
-import { FundingAgreement } from './invoice-details-partials/FundingAgreement';
+import { signFunding } from '../store/actions/funding';
 import { InvoiceDetails } from './InvoiceDetails';
 
 type ConnectedFundingAgreementViewProps = {
-  getInvoiceById: (id: string) => void;
-  resetGetInvoiceById: () => void;
-  createFunding: (fundingRequest: FundingRequest) => void;
-  getContacts: () => void;
-  resetGetContacts: () => void;
+  getInvoiceById: typeof getInvoiceById;
+  resetGetInvoiceById: typeof resetGetInvoiceById;
+  getContacts: typeof getContacts;
+  signFunding: typeof signFunding;
+  resetGetContacts: typeof resetGetInvoiceById;
   invoice: InvoiceData | null;
   header: DocumentResponseHeader | null,
   fundingAgreement: FunFundingResponseData | null,
   id: string | null,
   contacts?: LabelValuePair[];
+  signingFunding: RequestState<FunFundingResponse>;
 } & RouteComponentProps<{ id?: string }>;
 
 export class FundingAgreementView extends React.Component<ConnectedFundingAgreementViewProps> {
@@ -53,17 +39,31 @@ export class FundingAgreementView extends React.Component<ConnectedFundingAgreem
     }
   }
 
+
+  signFundingAgreement = () => {
+    const { id, fundingAgreement, header, signFunding } = this.props;
+    signFunding({
+      identifier: header!.document_id,
+      funding_id: fundingAgreement!.funding!.funding_id,
+      invoice_id: id!,
+    });
+  };
+
   componentWillUnmount() {
     this.props.resetGetContacts();
     this.props.resetGetInvoiceById();
   }
 
   render() {
-    const { invoice, contacts, fundingAgreement } = this.props;
+    const { invoice, contacts, fundingAgreement, signingFunding,header, id } = this.props;
     if (!invoice || !contacts) {
       return <Box align="center" justify="center" fill={true}>Loading Funding Agreement</Box>;
     }
-    const canApproveFunding = false;
+
+    if (signingFunding && signingFunding.loading) {
+      return <Box align="center" justify="center" fill={true}>Signing Funding Agreement</Box>;
+    }
+    const canApproveFunding = !(fundingAgreement && fundingAgreement.signatures);
 
     return (
       <>
@@ -82,13 +82,14 @@ export class FundingAgreementView extends React.Component<ConnectedFundingAgreem
             <Box direction="row" gap="medium">
               <Button
                 disabled={!canApproveFunding}
+                onClick={this.signFundingAgreement}
                 primary
                 label="Approve"
               />
             </Box>
           </Box>
 
-         <InvoiceDetails invoice={invoice} fundingAgreement={fundingAgreement} contacts={contacts}/>
+          <InvoiceDetails invoice={invoice} fundingAgreement={fundingAgreement} contacts={contacts}/>
         </Box>
       </>
     );
@@ -109,6 +110,7 @@ const mapStateToProps = (state) => {
       id: state.invoices.getById.data._id,
       fundingAgreement: state.invoices.getById.data.fundingAgreement,
       header: state.invoices.getById.data.header,
+      signingFunding: state.funding.sign,
     }),
     contacts: state.contacts.get.data
       ? (state.contacts.get.data.map(contact => ({
@@ -126,6 +128,7 @@ export const ConnectedFundingAgreementView = connect(
     resetGetContacts,
     getInvoiceById,
     resetGetInvoiceById,
+    signFunding,
   },
 )(withRouter(FundingAgreementView));
 
