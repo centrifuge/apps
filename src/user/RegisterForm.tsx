@@ -4,6 +4,7 @@ import { Box, Button, FormField, Text, TextInput } from 'grommet';
 import { User } from '../common/models/user';
 import routes from './routes';
 import { Formik } from 'formik';
+import * as Yup from 'yup';
 
 interface RegisterProps {
   onSubmit: (values: any) => void;
@@ -11,12 +12,31 @@ interface RegisterProps {
 
 class RegisterForm extends React.Component<RegisterProps> {
 
+  state = { submitted: false };
+
   onSubmit = values => {
     this.props.onSubmit(values as User);
   };
 
   render() {
-    const user = new User();
+
+    const { submitted } = this.state;
+    const user = {
+      email: '',
+      password: '',
+      passwordConfirm: '',
+    };
+
+    const registrationValidation = Yup.object({
+      email: Yup.string()
+        .email('Please enter a valid email')
+        .required('This field is required'),
+      password: Yup.string().required('Password is required'),
+      passwordConfirm: Yup.string()
+        .oneOf([Yup.ref('password')], 'Password does not match')
+        .required('Password confirm is required'),
+    });
+
     return (
       <Box align="center" justify="center">
         <Box
@@ -28,6 +48,9 @@ class RegisterForm extends React.Component<RegisterProps> {
         >
           <Formik
             initialValues={user}
+            validationSchema={registrationValidation}
+            validateOnBlur={submitted}
+            validateOnChange={submitted}
             validate={values => {
               const errors = {};
               // Parse Values and do errors
@@ -47,8 +70,8 @@ class RegisterForm extends React.Component<RegisterProps> {
                }) => (
                 <form
                   onSubmit={event => {
-                    event.preventDefault();
-                    handleSubmit();
+                    this.setState({ submitted: true });
+                    handleSubmit(event);
                   }}
                 >
 
@@ -60,7 +83,7 @@ class RegisterForm extends React.Component<RegisterProps> {
                     >
                       <TextInput
                         name="email"
-                        value={values.email || ''}
+                        value={values.email}
                         onChange={handleChange}
                       />
                     </FormField>
@@ -73,7 +96,18 @@ class RegisterForm extends React.Component<RegisterProps> {
                       <TextInput
                         type="password"
                         name="password"
-                        value={values.password || ''}
+                        value={values.password}
+                        onChange={handleChange}
+                      />
+                    </FormField>
+                    <FormField
+                      label="Confirm Password"
+                      error={errors.passwordConfirm}
+                    >
+                      <TextInput
+                        type="password"
+                        name="passwordConfirm"
+                        value={values.passwordConfirm}
                         onChange={handleChange}
                       />
                     </FormField>
