@@ -36,7 +36,9 @@ describe('FundingAgreementView', () => {
 
 
   it('Should not render an empty form', () => {
-    const invoice = {};
+    const invoice = {
+      currency: "EUR"
+    };
     const contacts = [
       {
         label: 'Alice',
@@ -70,6 +72,7 @@ describe('FundingAgreementView', () => {
       sender: '0x1111',
       recipient: '0x1111',
       payee: '0x11112',
+      currency:"USD",
     };
     const contacts = [
       {

@@ -4,7 +4,7 @@ import { Box } from 'grommet';
 import { DisplayField } from '../../components/DisplayField';
 import { Section } from '../../components/Section';
 import { FunFundingResponseData } from '../../../clients/centrifuge-node';
-import { dateFormatter } from '../../common/formaters';
+import { extractDate, formatCurrency, formatPercent } from '../../common/formaters';
 
 
 interface FundingAgreementProps {
@@ -33,22 +33,22 @@ export class FundingAgreement extends React.Component<FundingAgreementProps> {
 
             <Box basis={'1/4'}>
               <DisplayField
-                label={`Finance amount,${funding!.currency}`}
-                value={funding!.funding_id}
+                label={`Finance amount`}
+                value={formatCurrency(funding!.amount,funding!.currency)}
               />
             </Box>
 
             <Box basis={'1/4'}>
               <DisplayField
-                label="Finance APR. %"
-                value={funding!.apr}
+                label="Finance APR"
+                value={formatPercent(funding!.apr)}
               />
             </Box>
 
             <Box basis={'1/4'}>
               <DisplayField
-                label="Fee. %"
-                value={funding!.fee}
+                label="Fee"
+                value={formatPercent(funding!.fee)}
               />
             </Box>
           </Box>
@@ -57,14 +57,14 @@ export class FundingAgreement extends React.Component<FundingAgreementProps> {
             <Box basis={'1/4'}>
               <DisplayField
                 label="Repayment Due Date"
-                value={dateFormatter(funding!.repayment_due_date)}
+                value={extractDate(funding!.repayment_due_date)}
               />
             </Box>
 
             <Box basis={'1/4'}>
               <DisplayField
-                label={`Repayment Amount,${funding!.currency}`}
-                value={funding!.repayment_amount}
+                label={`Repayment Amount`}
+                value={formatCurrency(funding!.repayment_amount,funding!.currency)}
               />
             </Box>
 
@@ -78,7 +78,7 @@ export class FundingAgreement extends React.Component<FundingAgreementProps> {
             <Box basis={'1/4'}>
               <DisplayField
                 label="Funding Status"
-                value={signatures ? "Accepted" : "Pending"}
+                value={signatures ? 'Accepted' : 'Pending'}
               />
             </Box>
 

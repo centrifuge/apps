@@ -183,7 +183,7 @@ exports[`RequestFundingForm Should render empty form 1`] = `
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Finance amount
+                Finance amount, 
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -327,7 +327,7 @@ exports[`RequestFundingForm Should render empty form 1`] = `
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Repayment amount
+                Repayment amount, 
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -580,7 +580,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Finance amount
+                Finance amount, USD
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -724,7 +724,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Repayment amount
+                Repayment amount, USD
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -977,7 +977,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Finance amount
+                Finance amount, USD
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -1121,7 +1121,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Repayment amount
+                Repayment amount, USD
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -1374,7 +1374,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Finance amount
+                Finance amount, USD
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -1518,7 +1518,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Repayment amount
+                Repayment amount, USD
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"

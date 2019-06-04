@@ -7,7 +7,7 @@ import { Anchor, Box, Button, DataTable, Heading, Text } from 'grommet';
 import { invoiceRoutes } from './routes';
 import { Edit, View } from 'grommet-icons';
 import { RouteComponentProps, withRouter } from 'react-router';
-import { dateFormatter } from '../common/formaters';
+import { formatDate } from '../common/formaters';
 
 
 type ViewInvoicesProps = {
@@ -51,6 +51,7 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
           <DataTable
             sortable={true}
             data={this.props.invoices}
+            primaryKey={'_id'}
             columns={[
               {
                 property: 'number',
@@ -68,7 +69,7 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
                 property: 'date_created',
                 header: 'Date Sent',
                 render: datum => {
-                  return dateFormatter(datum.createdAt);
+                  return formatDate(datum.createdAt);
                 },
               },
 

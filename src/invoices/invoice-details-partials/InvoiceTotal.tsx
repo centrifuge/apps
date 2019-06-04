@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box } from 'grommet';
-import { dateFormatter } from '../../common/formaters';
 import { Invoice } from '../../common/models/invoice';
 import { DisplayField } from '../../components/DisplayField';
 import { Section } from '../../components/Section';
+import { formatCurrency, formatPercent } from '../../common/formaters';
 
 
 interface InvoiceTotalProps {
@@ -28,28 +28,28 @@ export class InvoiceTotal extends React.Component<InvoiceTotalProps> {
           <Box basis={'1/4'}>
             <DisplayField
               label="Net amount"
-              value={invoice!.net_amount}
+              value={formatCurrency(invoice!.net_amount,invoice.currency)}
             />
           </Box>
 
           <Box basis={'1/4'}>
             <DisplayField
               label="Tax rate"
-              value={invoice!.tax_rate}
+              value={formatPercent(invoice!.tax_rate)}
             />
           </Box>
 
           <Box basis={'1/4'}>
             <DisplayField
               label="Tax amount"
-              value={invoice!.tax_amount}
+              value={formatCurrency(invoice!.tax_amount,invoice.currency)}
             />
           </Box>
 
           <Box basis={'1/4'}>
             <DisplayField
               label="Gross amount"
-              value={invoice!.gross_amount}
+              value={formatCurrency(invoice!.gross_amount, invoice.currency)}
             />
           </Box>
 

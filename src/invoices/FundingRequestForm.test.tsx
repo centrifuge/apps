@@ -4,7 +4,7 @@ import renderer from 'react-test-renderer';
 import { BrowserRouter } from 'react-router-dom';
 import FundingRequestForm from './FundingRequestForm';
 import { FundingRequest } from '../common/models/funding-request';
-import { dateFormatter } from '../common/formaters';
+import { dateToString } from '../common/formaters';
 import { Formik } from 'formik';
 
 describe('RequestFundingForm', () => {
@@ -49,9 +49,9 @@ describe('RequestFundingForm', () => {
       funding_id: 'SOMEID',
       amount: 1000,
       days: 0,
-      apr: 5,
-      fee: 1,
-      repayment_due_date: dateFormatter(date),
+      apr: 0.05,
+      fee: 0.01,
+      repayment_due_date: dateToString(date),
       repayment_amount: 0,
       currency: 'USD',
 
@@ -81,9 +81,9 @@ describe('RequestFundingForm', () => {
       funding_id: 'SOMEID',
       amount: 1000,
       days: 0,
-      apr: 5,
-      fee: 1,
-      repayment_due_date: dateFormatter(date),
+      apr: 0.05,
+      fee: 0.01,
+      repayment_due_date: dateToString(date),
       repayment_amount: 0,
       currency: 'USD',
 
@@ -113,9 +113,9 @@ describe('RequestFundingForm', () => {
       funding_id: 'SOMEID',
       amount: 1000,
       days: 0,
-      apr: 5,
+      apr: 0.05,
       fee: 0,
-      repayment_due_date: dateFormatter(date),
+      repayment_due_date: dateToString(date),
       repayment_amount: 0,
       currency: 'USD',
 
@@ -145,9 +145,9 @@ describe('RequestFundingForm', () => {
       funding_id: 'SOMEID',
       amount: 1000,
       days: 0,
-      apr: 5,
-      fee: 1,
-      repayment_due_date: dateFormatter(date),
+      apr: 0.05,
+      fee: 0.01,
+      repayment_due_date: dateToString(date),
       repayment_amount: 0,
       currency: 'USD',
 

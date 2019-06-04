@@ -64,6 +64,9 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
     // Create default data for invoice. The sender should be the logged in user
     const defaultInvoice: Invoice = {
       sender: loggedInUser.account,
+      net_amount: '0',
+      tax_rate: '0',
+      status:'unpaid',
       sender_company_name: loggedInUser.name,
       currency: 'USD',
     };

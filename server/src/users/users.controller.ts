@@ -19,7 +19,7 @@ import { DatabaseService } from '../database/database.service';
 import config from '../../../src/common/config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import {UserAuthGuard} from "../auth/admin.auth.guard";
-import {dateFormatter} from "../../../src/common/formaters";
+import {dateToString} from "../../../src/common/formaters";
 
 @Controller(ROUTES.USERS.base)
 export class UsersController {
@@ -104,7 +104,7 @@ export class UsersController {
       name: user.name,
       email: user.email,
       account: '',
-      date_added: dateFormatter(new Date()),
+      date_added: dateToString(new Date()),
       password: undefined,
       enabled: false,
       invited: true,

@@ -26,6 +26,7 @@ describe('InvoicesController', () => {
 
   const invoice: Invoice = {
     _id: 'invoice_id',
+    currency: 'USD',
     number: '999',
     sender_company_name: 'cinderella',
     bill_to_company_name: 'step mother',

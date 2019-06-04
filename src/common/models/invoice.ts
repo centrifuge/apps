@@ -3,6 +3,7 @@ import { InvInvoiceData } from '../../../clients/centrifuge-node';
 export interface Invoice extends InvInvoiceData {
   _id?: string;
   collaborators?: string[];
+  currency:string
 }
 
 

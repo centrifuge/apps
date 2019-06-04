@@ -3,9 +3,8 @@ import { Link } from 'react-router-dom';
 import { FormField, TextInput,Box } from 'grommet';
 
 import { connect, FormikContext } from 'formik';
-import { dateFormatter } from '../../common/formaters';
+import { dateToString, extractDate } from '../../common/formaters';
 import { Invoice, invoiceHasCreditNote } from '../../common/models/invoice';
-import { parseDate } from '../../common/parsers';
 import { Section } from '../../components/Section';
 
 interface CreditNoteFormProps {
@@ -24,7 +23,7 @@ export class CreditNoteForm extends React.Component<ConnectedCreditNoteFormProps
       errors,
       values,
       handleChange,
-      setFieldValue
+      setFieldValue,
     } = this.props.formik;
     const {
       columnGap,
@@ -57,9 +56,9 @@ export class CreditNoteForm extends React.Component<ConnectedCreditNoteFormProps
               <TextInput
                 name="credit_for_invoice_date"
                 type="date"
-                value={dateFormatter(values!.credit_for_invoice_date)}
+                value={extractDate(values!.credit_for_invoice_date)}
                 onChange={ ev => {
-                  setFieldValue('credit_for_invoice_date',  parseDate(ev.target.value))
+                  setFieldValue('credit_for_invoice_date',  dateToString(ev.target.value));
                 }}
               />
 

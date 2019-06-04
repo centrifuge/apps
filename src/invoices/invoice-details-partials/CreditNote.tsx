@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Paragraph } from 'grommet';
-import { dateFormatter } from '../../common/formaters';
+import { formatDate } from '../../common/formaters';
 import { Invoice, invoiceHasCreditNote } from '../../common/models/invoice';
 import { DisplayField } from '../../components/DisplayField';
 import { Section } from '../../components/Section';
@@ -36,7 +36,7 @@ export class CreditNote extends React.Component<CreditNoteProps> {
           <Box flex="grow">
             <DisplayField
               label="Original invoice date"
-              value={dateFormatter(invoice!.credit_for_invoice_date)}
+              value={formatDate(invoice!.credit_for_invoice_date)}
             />
           </Box>
         </Box> : <Paragraph>Invoice is not credit note</Paragraph>}

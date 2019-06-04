@@ -817,7 +817,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   <label
                     className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
-                    Net amount
+                    Net amount, undefined
                   </label>
                   <div
                     className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -828,6 +828,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                       <input
                         autoComplete="off"
                         className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                        maxLength={22}
                         name="net_amount"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -850,7 +851,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   <label
                     className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
-                    Tax rate
+                    Tax rate, %
                   </label>
                   <div
                     className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -866,6 +867,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                         onChange={[Function]}
                         onFocus={[Function]}
                         onKeyDown={[Function]}
+                        value={NaN}
                       />
                     </div>
                   </div>
@@ -883,7 +885,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   <label
                     className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
-                    Tax amount
+                    Tax amount, undefined
                   </label>
                   <div
                     className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -893,12 +895,14 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                        className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                        disabled={true}
                         name="tax_amount"
                         onBlur={[Function]}
                         onChange={[Function]}
                         onFocus={[Function]}
                         onKeyDown={[Function]}
+                        value="NaN"
                       />
                     </div>
                   </div>
@@ -916,7 +920,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                   <label
                     className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
-                    Gross amount
+                    Gross amount, undefined
                   </label>
                   <div
                     className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -926,12 +930,14 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                        className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                        disabled={true}
                         name="gross_amount"
                         onBlur={[Function]}
                         onChange={[Function]}
                         onFocus={[Function]}
                         onKeyDown={[Function]}
+                        value="NaN"
                       />
                     </div>
                   </div>
@@ -2572,7 +2578,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   <label
                     className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
-                    Net amount
+                    Net amount, undefined
                   </label>
                   <div
                     className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -2583,6 +2589,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                       <input
                         autoComplete="off"
                         className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                        maxLength={22}
                         name="net_amount"
                         onBlur={[Function]}
                         onChange={[Function]}
@@ -2605,7 +2612,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   <label
                     className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
-                    Tax rate
+                    Tax rate, %
                   </label>
                   <div
                     className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -2621,6 +2628,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                         onChange={[Function]}
                         onFocus={[Function]}
                         onKeyDown={[Function]}
+                        value={NaN}
                       />
                     </div>
                   </div>
@@ -2638,7 +2646,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   <label
                     className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
-                    Tax amount
+                    Tax amount, undefined
                   </label>
                   <div
                     className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -2648,12 +2656,14 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                        className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                        disabled={true}
                         name="tax_amount"
                         onBlur={[Function]}
                         onChange={[Function]}
                         onFocus={[Function]}
                         onKeyDown={[Function]}
+                        value="NaN"
                       />
                     </div>
                   </div>
@@ -2671,7 +2681,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                   <label
                     className="StyledText-sc-1sadyjn-0 bKLvLm"
                   >
-                    Gross amount
+                    Gross amount, undefined
                   </label>
                   <div
                     className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -2681,12 +2691,14 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     >
                       <input
                         autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                        className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                        disabled={true}
                         name="gross_amount"
                         onBlur={[Function]}
                         onChange={[Function]}
                         onFocus={[Function]}
                         onKeyDown={[Function]}
+                        value="NaN"
                       />
                     </div>
                   </div>

@@ -513,7 +513,9 @@ exports[`FundingAgreementView Should not render an empty form 1`] = `
                         className="StyledParagraph-tbetod-0 dBXmID"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        EUR
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -538,7 +540,9 @@ exports[`FundingAgreementView Should not render an empty form 1`] = `
                         className="StyledParagraph-tbetod-0 dBXmID"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -563,7 +567,9 @@ exports[`FundingAgreementView Should not render an empty form 1`] = `
                         className="StyledParagraph-tbetod-0 dBXmID"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -620,7 +626,9 @@ exports[`FundingAgreementView Should not render an empty form 1`] = `
                         className="StyledParagraph-tbetod-0 dBXmID"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        EURNaN
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -645,7 +653,9 @@ exports[`FundingAgreementView Should not render an empty form 1`] = `
                         className="StyledParagraph-tbetod-0 dBXmID"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        NaN%
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -670,7 +680,9 @@ exports[`FundingAgreementView Should not render an empty form 1`] = `
                         className="StyledParagraph-tbetod-0 dBXmID"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        EURNaN
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -695,7 +707,9 @@ exports[`FundingAgreementView Should not render an empty form 1`] = `
                         className="StyledParagraph-tbetod-0 dBXmID"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        EURNaN
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1372,7 +1386,9 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                         className="StyledParagraph-tbetod-0 dBXmID"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        USD
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1397,7 +1413,9 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                         className="StyledParagraph-tbetod-0 dBXmID"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1422,7 +1440,9 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                         className="StyledParagraph-tbetod-0 dBXmID"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1479,7 +1499,9 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                         className="StyledParagraph-tbetod-0 dBXmID"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        USDNaN
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1504,7 +1526,9 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                         className="StyledParagraph-tbetod-0 dBXmID"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        NaN%
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1529,7 +1553,9 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                         className="StyledParagraph-tbetod-0 dBXmID"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        USDNaN
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1554,7 +1580,9 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                         className="StyledParagraph-tbetod-0 dBXmID"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        USDNaN
+                      </p>
                     </div>
                   </div>
                 </div>

@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { User } from '../../../src/common/models/user';
 import { databaseServiceProvider } from '../database/database.providers';
 import { DatabaseService } from '../database/database.service';
-import { dateFormatter } from '../../../src/common/formaters';
+import { dateToString } from '../../../src/common/formaters';
 
 describe('LocalStrategy', () => {
   const unhashedPassword = 'my_password';
@@ -13,7 +13,7 @@ describe('LocalStrategy', () => {
     name: 'my_username',
     _id: 'user_id',
     email: 'test@test.test',
-    date_added: dateFormatter(new Date()),
+    date_added: dateToString(new Date()),
     account:"0x3333",
     enabled: true,
     invited: false,

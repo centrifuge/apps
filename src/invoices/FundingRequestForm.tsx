@@ -6,8 +6,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { FundingRequest } from '../common/models/funding-request';
 import SearchSelect from '../components/form/SearchSelect';
-import { dateFormatter } from '../common/formaters';
-import { parseDate } from '../common/parsers';
+import { dateToString, extractDate } from '../common/formaters';
 import { isValidAddress } from 'ethereumjs-util';
 type FundingRequestFormProps = {
   onSubmit: (fundingRequest: FundingRequest) => void;
@@ -98,7 +97,7 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
               const repaymentDate = new Date(values.repayment_due_date);
               const diff = repaymentDate.getTime() - today.getTime();
               days =  Math.ceil(diff / (1000 * 60 * 60 * 24));
-              repaymentAmount = values.amount * (1 + (values.apr / 100) /  365 * days) + (values.amount * (values.fee / 100));
+              repaymentAmount = values.amount * (1 + (values.apr) /  365 * days) + (values.amount * (values.fee));
 
               if(isNaN(repaymentAmount)) repaymentAmount = 0;
               if(isNaN(days)) days = 0;
@@ -172,7 +171,7 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                         </Box>
                         <Box basis={'1/4'} gap={columnGap}>
                           <FormField
-                            label="Finance amount"
+                            label={`Finance amount, ${values!.currency}`}
                             error={errors!.amount}
                           >
                             <TextInput
@@ -191,7 +190,7 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                             <TextInput
                               disabled={true}
                               name="apr"
-                              value={values!.apr}
+                              value={values!.apr * 100}
                               onChange={handleChange}
                             />
                           </FormField>
@@ -204,7 +203,7 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                             <TextInput
                               name="fee"
                               disabled={true}
-                              value={values!.fee}
+                              value={values!.fee * 100}
                               onChange={(ev) => {
                                 handleChange(ev)
                               }}
@@ -222,16 +221,16 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                               disabled={true}
                               name="repayment_due_date"
                               type="date"
-                              value={dateFormatter(values!.repayment_due_date)}
+                              value={extractDate(values!.repayment_due_date)}
                               onChange={ev => {
-                                setFieldValue('repayment_due_date', parseDate(ev.target.value));
+                                setFieldValue('repayment_due_date', dateToString(ev.target.value));
                               }}
                             />
                           </FormField>
                         </Box>
                         <Box basis={'1/4'} gap={columnGap}>
                           <FormField
-                            label="Repayment amount"
+                            label={`Repayment amount, ${values!.currency}`}
                             error={errors!.repayment_amount}
                           >
                             <TextInput

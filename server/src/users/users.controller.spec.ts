@@ -7,7 +7,7 @@ import { SessionGuard } from '../auth/SessionGuard';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { DatabaseService } from '../database/database.service';
 import { PERMISSIONS } from '../../../src/common/constants';
-import { dateFormatter } from '../../../src/common/formaters';
+import { dateToString } from '../../../src/common/formaters';
 
 describe('Users controller', () => {
   const userAccount = 'generated_identity_id';
@@ -91,7 +91,7 @@ describe('Users controller', () => {
         _id: 'user',
         name: 'username',
         email: 'test',
-        date_added: dateFormatter(new Date()),
+        date_added: dateToString(new Date()),
         account: '0x333',
         password: 'password',
         enabled: true,
@@ -129,7 +129,7 @@ describe('Users controller', () => {
           name: 'new_user',
           password: 'password',
           email: 'test1',
-          date_added: dateFormatter(new Date()),
+          date_added: dateToString(new Date()),
         };
 
         const invite = await usersController.invite(user);
@@ -161,7 +161,7 @@ describe('Users controller', () => {
           email: 'test',
           account: '0x55',
           password: 'password',
-          date_added: dateFormatter(new Date()),
+          date_added: dateToString(new Date()),
           invited: false,
           enabled: true,
           permissions: [],
@@ -206,7 +206,7 @@ describe('Users controller', () => {
           password: 'password',
           account: '0x44',
           email: 'test',
-          date_added: dateFormatter(new Date()),
+          date_added: dateToString(new Date()),
           enabled: true,
           invited: false,
           permissions: [],

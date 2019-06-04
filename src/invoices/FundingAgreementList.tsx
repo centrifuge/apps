@@ -2,11 +2,11 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { getInvoices, resetGetInvoices } from '../store/actions/invoices';
-import { Anchor, Box, Button, DataTable, Heading, Text } from 'grommet';
+import { Anchor, Box, DataTable, Heading, Text } from 'grommet';
 import { fundingRoutes } from './routes';
 import { View } from 'grommet-icons';
 import { RouteComponentProps, withRouter } from 'react-router';
-import { dateFormatter } from '../common/formaters';
+import { formatCurrency, formatDate } from '../common/formaters';
 import { FunFundingData, FunFundingSignature } from '../../clients/centrifuge-node';
 
 
@@ -43,7 +43,6 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
       return <></>;
     }
 
-    console.log(this.props.fundingAgreements);
 
     return (
 
@@ -80,16 +79,24 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
               {
                 property: 'net_amount',
                 header: 'Invoice Total',
+                align: 'end',
+                render: datum => {
+                  return formatCurrency(datum.amount, datum.currency);
+                },
               },
               {
                 property: 'amount',
                 header: 'Funding Amount',
+                align: 'end',
+                render: datum => {
+                  return formatCurrency(datum.amount, datum.currency);
+                },
               },
               {
                 property: 'repayment_due_date',
                 header: 'Repayment Due Date',
                 render: datum => {
-                  return dateFormatter(datum.repayment_due_date);
+                  return formatDate(datum.repayment_due_date);
                 },
               },
 

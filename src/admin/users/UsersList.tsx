@@ -12,6 +12,7 @@ import { User } from "../../common/models/user";
 import {PERMISSIONS} from "../../common/constants";
 import { Modal } from '@centrifuge/axis-modal'
 import UserForm from "./UserForm";
+import { formatDate } from '../../common/formaters';
 
 type UsersListProps = {
   users: User[] | null;
@@ -92,7 +93,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
                   property: 'date_added',
                   header: 'Date Added',
                   render: data =>
-                      data.date_added ? <Text>{data.date_added}</Text> : null,
+                      data.date_added ? <Text>{formatDate(data.date_added)}</Text> : null,
                 },
                 {
                   property: 'enabled',

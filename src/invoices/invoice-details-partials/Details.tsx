@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box } from 'grommet';
-import { dateFormatter } from '../../common/formaters';
+import { formatDate } from '../../common/formaters';
 import { Invoice } from '../../common/models/invoice';
 import { DisplayField } from '../../components/DisplayField';
 import { Section } from '../../components/Section';
@@ -42,14 +42,14 @@ export class Details extends React.Component<DetailsProps> {
           <Box basis={'1/4'}>
             <DisplayField
               label="Date created"
-              value={dateFormatter(invoice!.date_created)}
+              value={formatDate(invoice!.date_created)}
             />
           </Box>
 
           <Box basis={'1/4'}>
             <DisplayField
               label="Due date"
-              value={dateFormatter(invoice!.date_due)}
+              value={formatDate(invoice!.date_due)}
             />
           </Box>
 

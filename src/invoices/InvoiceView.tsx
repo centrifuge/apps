@@ -13,7 +13,7 @@ import { invoiceRoutes } from './routes';
 import { Modal } from '@centrifuge/axis-modal';
 import FundingRequestForm from './FundingRequestForm';
 import { FundingRequest } from '../common/models/funding-request';
-import { dateFormatter } from '../common/formaters';
+import { dateToString } from '../common/formaters';
 import { createFunding, resetCreateFunding } from '../store/actions/funding';
 import { InvoiceDetails } from './InvoiceDetails';
 import { RequestState } from '../store/reducers/http-request-reducer';
@@ -91,7 +91,7 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
     //@ts-ignore
     fundingRequest.document_id = header.document_id;
     //@ts-ignore
-    fundingRequest.repayment_due_date = invoice.date_due || dateFormatter(new Date());
+    fundingRequest.repayment_due_date = invoice.date_due || dateToString(new Date());
 
     // We can fund invoices only that have date due greated then today
     // and have the status unpaid
