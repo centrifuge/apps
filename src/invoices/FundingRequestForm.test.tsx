@@ -70,7 +70,7 @@ describe('RequestFundingForm', () => {
 
   it('Should render form with sender default values and correctly calculate the computed values for days 31, apr 5% and fee 1%', () => {
 
-    var date = new Date();
+    var date = new Date('2019-06-04');
     date.setDate(date.getDate() + 31);
 
     const fundingRequest = {
@@ -102,7 +102,7 @@ describe('RequestFundingForm', () => {
 
   it('Should render form with sender default values and correctly calculate the computed values for days 31, apr 5% and fee 0%', () => {
 
-    var date = new Date();
+    var date = new Date('2019-06-04');
     date.setDate(date.getDate() + 31);
 
     const fundingRequest = {
@@ -134,7 +134,7 @@ describe('RequestFundingForm', () => {
 
   it('Should call the callback functions', () => {
 
-    var date = new Date();
+    var date = new Date('2019-06-04');
     date.setDate(date.getDate() + 31);
 
     const fundingRequest = {
