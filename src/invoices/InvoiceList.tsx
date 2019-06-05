@@ -7,7 +7,7 @@ import { Anchor, Box, Button, DataTable, Heading, Text } from 'grommet';
 import { invoiceRoutes } from './routes';
 import { Edit, View } from 'grommet-icons';
 import { RouteComponentProps, withRouter } from 'react-router';
-import { formatDate } from '../common/formaters';
+import { formatCurrency, formatDate } from '../common/formaters';
 
 
 type ViewInvoicesProps = {
@@ -57,19 +57,36 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
                 property: 'number',
                 header: 'Invoice Number',
               },
-              {
-                property: 'sender_company_name',
-                header: 'Supplier',
-              },
+
               {
                 property: 'bill_to_company_name',
-                header: 'Recipient',
+                header: 'Customer',
+              },
+              {
+                property: 'net_amount',
+                header: 'Net Amount',
+                align: 'end',
+                render: datum => {
+                  return formatCurrency(datum.net_amount, datum.currency);
+                },
+              },
+              {
+                property: 'currency',
+                header: 'Currency',
               },
               {
                 property: 'date_created',
-                header: 'Date Sent',
+                header: 'Date Created',
                 render: datum => {
-                  return formatDate(datum.createdAt);
+                  return formatDate(datum.date_created);
+                },
+              },
+
+              {
+                property: 'date_due',
+                header: 'Date Due',
+                render: datum => {
+                  return formatDate(datum.date_due);
                 },
               },
 
