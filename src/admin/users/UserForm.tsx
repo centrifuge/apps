@@ -14,8 +14,10 @@ type InviteProps = {
 
 export default class UserForm extends React.Component<InviteProps> {
 
+  state = { submitted: false };
+
   onSubmit = async (user: User) => {
-    await this.props.onSubmit(user);
+    this.props.onSubmit(user);
   };
 
 
@@ -33,13 +35,19 @@ export default class UserForm extends React.Component<InviteProps> {
     });
 
     const { user } = this.props;
+    const { submitted } = this.state;
+
     return (
       <Box width={'medium'} margin={{ vertical: 'medium' }}>
         <Formik
           initialValues={user}
+          validateOnBlur={submitted}
+          validateOnChange={submitted}
           validationSchema={newUserValidation}
-          onSubmit={async (values) => {
-            await this.onSubmit(values);
+          onSubmit={(values, { setSubmitting }) => {
+            if (!values) return;
+            this.onSubmit(values);
+            setSubmitting(true);
           }}
         >
           {
@@ -52,8 +60,8 @@ export default class UserForm extends React.Component<InviteProps> {
              }) => (
               <form
                 onSubmit={event => {
-                  event.preventDefault();
-                  handleSubmit();
+                  this.setState({ submitted: true });
+                  handleSubmit(event);
                 }}
               >
                 <Box gap="small">
@@ -79,19 +87,26 @@ export default class UserForm extends React.Component<InviteProps> {
                   </FormField>
 
                   <Box margin={{ vertical: 'medium' }}>
-                    <RadioButtonGroup
-                      direction="row"
-                      name="radio"
-                      options={[
-                        { label: 'Funder', value: PERMISSIONS.CAN_FUND_INVOICES },
-                        { label: 'Supplier', value: PERMISSIONS.CAN_CREATE_INVOICES },
-                        { label: 'Admin', value: PERMISSIONS.CAN_MANAGE_USERS },
-                      ]}
-                      value={values.permissions[0]}
-                      onChange={(ev) => {
-                        setFieldValue('permissions', [ev.target.value]);
-                      }}
-                    />
+                    <FormField
+                      label="Permissions"
+                      error={errors!.permissions}
+                    >
+                      <RadioButtonGroup
+                        pad={{ vertical: 'medium' }}
+                        direction="row"
+                        name="radio"
+                        options={[
+                          { label: 'Funder', value: PERMISSIONS.CAN_FUND_INVOICES },
+                          { label: 'Supplier', value: PERMISSIONS.CAN_CREATE_INVOICES },
+                          { label: 'Admin', value: PERMISSIONS.CAN_MANAGE_USERS },
+                        ]}
+                        value={values.permissions[0]}
+                        onChange={(ev) => {
+                          setFieldValue('permissions', [ev.target.value]);
+                        }}
+                      />
+                    </FormField>
+
 
                   </Box>
 
@@ -103,7 +118,7 @@ export default class UserForm extends React.Component<InviteProps> {
                     <Button
                       type="submit"
                       primary
-                      label="Save"
+                      label="Create"
                     />
                   </Box>
                 </Box>
