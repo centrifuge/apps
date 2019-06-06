@@ -1,4 +1,4 @@
-import { Body, Controller, HttpException, Post, Request } from '@nestjs/common';
+import { Body, Controller, HttpException, HttpStatus, Post, Request } from '@nestjs/common';
 import { ROUTES } from '../../../src/common/constants';
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
@@ -28,15 +28,56 @@ export class FundingController {
     await this.centrifugeService.pullForJobComplete(signatureResponse.header.job_id, req.user.account);
     const updatedInvoice = await this.centrifugeService.invoices.get(payload.identifier, req.user.account);
     delete updatedInvoice.data.attributes;
+
+
     // Find all the invoices for the document ID
-    await this.databaseService.invoices.update(
+    const invoiceWithNft = await this.databaseService.invoices.update(
       { 'header.document_id': payload.identifier, 'ownerId': req.user._id },
       {
         ...updatedInvoice,
         ownerId: req.user._id,
         fundingAgreement: signatureResponse.data,
       },
+      { returnUpdatedDocs: true },
     );
+    
+    // transfer should eventually be its own method so we don't couple signing and transfer
+    // this block needs to be adjusted, only accounts for two signatures for now, transfers the token to the second signature
+    if (
+      signatureResponse.data.signatures &&
+      signatureResponse.data.signatures.length > 0
+    ) {
+
+      const nfts = invoiceWithNft.header.nfts;
+      let nft = nfts.find(nft => {
+        return nft.token_id === invoiceWithNft.fundingAgreement.funding.nft_address;
+      });
+
+      // to be enabled
+      
+      if (nft === undefined) {
+        throw new HttpException(await 'NFT not attached to Invoice, NFT not found', HttpStatus.CONFLICT);
+      }
+
+      const registry = nft.registry
+      const tokenId = nft.token_id
+      const newOwner = invoiceWithNft.fundingAgreement.funding.funder_id
+
+      if (nft.owner.toLowerCase() === invoiceWithNft.fundingAgreement.funding.borrower_id.toLowerCase()) {
+        const transferResponse = await this.centrifugeService.nft.tokenTransfer(tokenId, {
+            token_id: tokenId,
+            registry_address: registry,
+            to: newOwner,
+          },
+          nft.owner).catch(async error => {
+          throw new HttpException(await error.json(), error.status);
+        });
+
+        await this.centrifugeService.pullForJobComplete(transferResponse.header.job_id, nft.owner);
+      } else {
+        throw new HttpException(await 'token owner does not correspond to the borrower', HttpStatus.FORBIDDEN);
+      }
+    }
 
     return signatureResponse;
   }
