@@ -27,7 +27,7 @@ export class FundingAgreement extends React.Component<FundingAgreementProps> {
             <Box basis={'1/4'}>
               <DisplayField
                 label="Funding Agreement ID"
-                value={funding!.funding_id}
+                value={funding!.agreement_id}
               />
             </Box>
 

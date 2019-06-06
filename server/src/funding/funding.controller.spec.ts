@@ -40,7 +40,7 @@ describe('Funding controller', () => {
           resolve(result);
         });
       }),
-      sign: jest.fn((document_id, funding_id, payload, account) => {
+      sign: jest.fn((document_id, agreement_id, payload, account) => {
         return new Promise((resolve, reject) => {
           const result = {
             header: {
@@ -112,8 +112,7 @@ describe('Funding controller', () => {
         invoice_id: 'some_id',
         document_id: 'document_id',
         funder: 'funder',
-        wallet_address: 'wallet_address',
-        funding_id: 'funder_id',
+        agreement_id: 'agreement_id',
         amount: 0,
         days: 0,
         apr: 5,
@@ -132,13 +131,14 @@ describe('Funding controller', () => {
         { user: { _id: 'user_id' } },
       );
       expect(result).toEqual({
-        'write_access': { 'collaborators': [fundingRequest.funder] },
         header: {
           job_id: 'some_job_id',
         },
         data: {
           'amount': '0',
           'apr': '5',
+          'borrower_id': undefined,
+          'funder_id': 'funder',
           'currency': 'USD',
           'days': '0',
           'fee': '0',
@@ -156,7 +156,7 @@ describe('Funding controller', () => {
 
       const fundingRequest = {
         identifier:"0x4444",
-        funding_id: 'funder_id',
+        agreement_id: 'agreement_id',
       };
 
       const fundingController = fundingModule.get<FundingController>(

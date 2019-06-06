@@ -45,7 +45,7 @@ export class FundingAgreementView extends React.Component<ConnectedFundingAgreem
     const { id, fundingAgreement, header, signFunding } = this.props;
     signFunding({
       identifier: header!.document_id,
-      funding_id: fundingAgreement!.funding!.funding_id,
+      agreement_id: fundingAgreement!.funding!.agreement_id,
       invoice_id: id!,
     });
   };

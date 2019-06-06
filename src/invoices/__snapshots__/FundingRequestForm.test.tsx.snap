@@ -93,41 +93,6 @@ exports[`RequestFundingForm Should render empty form 1`] = `
               </div>
             </div>
           </div>
-          <div
-            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-          />
-          <div
-            className="StyledBox-sc-13pk1d4-0 clLqce"
-          >
-            <div
-              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-            >
-              <label
-                className="StyledText-sc-1sadyjn-0 bKLvLm"
-              >
-                NFT deposit address
-              </label>
-              <div
-                className="StyledBox-sc-13pk1d4-0 gZSidW"
-              >
-                <div
-                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                >
-                  <input
-                    autoComplete="off"
-                    className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                    name="wallet_address"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    placeholder="Your NFT will be deposited into this Ethereum account"
-                    value=""
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       <div
@@ -487,41 +452,6 @@ exports[`RequestFundingForm Should render form with sender default values and co
                     </div>
                   </div>
                 </button>
-              </div>
-            </div>
-          </div>
-          <div
-            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-          />
-          <div
-            className="StyledBox-sc-13pk1d4-0 clLqce"
-          >
-            <div
-              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-            >
-              <label
-                className="StyledText-sc-1sadyjn-0 bKLvLm"
-              >
-                NFT deposit address
-              </label>
-              <div
-                className="StyledBox-sc-13pk1d4-0 gZSidW"
-              >
-                <div
-                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                >
-                  <input
-                    autoComplete="off"
-                    className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                    name="wallet_address"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    placeholder="Your NFT will be deposited into this Ethereum account"
-                    value="0x9967094155de5A4D3969b69071B9F601Ac25f89e"
-                  />
-                </div>
               </div>
             </div>
           </div>
@@ -887,41 +817,6 @@ exports[`RequestFundingForm Should render form with sender default values and co
               </div>
             </div>
           </div>
-          <div
-            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-          />
-          <div
-            className="StyledBox-sc-13pk1d4-0 clLqce"
-          >
-            <div
-              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-            >
-              <label
-                className="StyledText-sc-1sadyjn-0 bKLvLm"
-              >
-                NFT deposit address
-              </label>
-              <div
-                className="StyledBox-sc-13pk1d4-0 gZSidW"
-              >
-                <div
-                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                >
-                  <input
-                    autoComplete="off"
-                    className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                    name="wallet_address"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    placeholder="Your NFT will be deposited into this Ethereum account"
-                    value="0x9967094155de5A4D3969b69071B9F601Ac25f89e"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       <div
@@ -1281,41 +1176,6 @@ exports[`RequestFundingForm Should render form with sender default values and co
                     </div>
                   </div>
                 </button>
-              </div>
-            </div>
-          </div>
-          <div
-            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-          />
-          <div
-            className="StyledBox-sc-13pk1d4-0 clLqce"
-          >
-            <div
-              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-            >
-              <label
-                className="StyledText-sc-1sadyjn-0 bKLvLm"
-              >
-                NFT deposit address
-              </label>
-              <div
-                className="StyledBox-sc-13pk1d4-0 gZSidW"
-              >
-                <div
-                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                >
-                  <input
-                    autoComplete="off"
-                    className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                    name="wallet_address"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    placeholder="Your NFT will be deposited into this Ethereum account"
-                    value="0x9967094155de5A4D3969b69071B9F601Ac25f89e"
-                  />
-                </div>
               </div>
             </div>
           </div>

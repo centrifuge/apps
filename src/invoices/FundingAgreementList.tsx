@@ -56,18 +56,18 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
           <DataTable
             sortable={true}
             data={this.props.fundingAgreements}
-            primaryKey={'funding_id'}
+            primaryKey={'agreement_id'}
             columns={[
               {
                 property: 'sender_company_name',
                 header: 'Borrower',
               },
               {
-                property: 'funding_id',
-                header: 'Funding agreement ID',
+                property: 'agreement_id',
+                header: 'Funding Agreement ID',
                 render: datum => {
                   return <Box width={'small'}>
-                    <Text style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>{datum.funding_id}</Text>
+                    <Text style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>{datum.agreement_id}</Text>
                   </Box>;
                 },
 

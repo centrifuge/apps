@@ -53,12 +53,6 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
     const fundingRequestValidation = Yup.object().shape({
       funder: Yup.string()
         .required('This field is required'),
-      //TODO add eth address validation here
-      wallet_address: Yup.string()
-        .test('is-eth-address', 'Please enter a valid eth address', (value) => {
-          return isValidAddress(value);
-        })
-        .required('This field is required'),
       amount: Yup.number()
         .required('This field is required'),
       apr: Yup.number()
@@ -139,19 +133,6 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                             />
                           </FormField>
 
-                        </Box>
-                        <Box basis={'1/2'} gap={columnGap}>
-                          <FormField
-                            label="NFT deposit address"
-                            error={errors!.wallet_address}
-                          >
-                            <TextInput
-                              name="wallet_address"
-                              placeholder="Your NFT will be deposited into this Ethereum account"
-                              value={values!.wallet_address}
-                              onChange={handleChange}
-                            />
-                          </FormField>
                         </Box>
                       </Box>
 
