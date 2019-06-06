@@ -1,22 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box } from 'grommet';
-import { InvoiceData, LabelValuePair } from '../common/interfaces';
+import { LabelValuePair } from '../common/interfaces';
 import { FunFundingResponseData } from '../../clients/centrifuge-node';
 import { DisplayField } from '../components/DisplayField';
 import { Sender } from './invoice-details-partials/Sender';
 import { Recipient } from './invoice-details-partials/Recipient';
-import { ShipTo } from './invoice-details-partials/ShipTo';
-import { RemitTo } from './invoice-details-partials/RemitTo';
 import { Details } from './invoice-details-partials/Details';
-import { CreditNote } from './invoice-details-partials/CreditNote';
 import { Section } from '../components/Section';
-import { InvoiceTotal } from './invoice-details-partials/InvoiceTotal';
 import { Modal } from '@centrifuge/axis-modal';
 import { FundingAgreement } from './invoice-details-partials/FundingAgreement';
+import { Invoice } from '../common/models/invoice';
 
 type ConnectedInvoiceDetailsProps = {
-  invoice: InvoiceData;
+  invoice: Invoice;
   fundingAgreement: FunFundingResponseData | null,
   contacts: LabelValuePair[];
 }
@@ -70,16 +67,9 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
             />
           </Box>
 
-          {/* Invoice total section */}
-          <Box gap={columnGap}>
-            <InvoiceTotal
-              invoice={invoice}
-              columnGap={columnGap}
-            />
-          </Box>
 
           {/*Ship to and Remit to */}
-          <Box direction="row" gap={columnGap}>
+          {/*<Box direction="row" gap={columnGap}>
             <ShipTo
               invoice={invoice}
               columnGap={columnGap}
@@ -88,15 +78,15 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
               invoice={invoice}
               columnGap={columnGap}
             />
-          </Box>
+          </Box>*/}
 
           {/* Credit note section */}
-          <Box direction="row" gap={columnGap}>
+          {/*<Box direction="row" gap={columnGap}>
             <CreditNote
               invoice={invoice}
               columnGap={columnGap}
             />
-          </Box>
+          </Box>*/}
 
           {/* Comments section */}
           <Box direction="row">

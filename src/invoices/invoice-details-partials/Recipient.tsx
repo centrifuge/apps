@@ -34,22 +34,26 @@ export class Recipient extends React.Component<RecipientProps> {
         <Box gap={columnGap} basis={'1/2'}>
 
           <DisplayField
-            label="Company name"
+            label="Name"
             value={invoice!.bill_to_company_name}
           />
         </Box>
         <Box gap={columnGap} basis={'1/2'}>
           <DisplayField
-            label="Street"
+            label="Street 1"
             value={invoice!.bill_to_street1}
           />
           <DisplayField
-            label="Street"
+            label="Street 2"
             value={invoice!.bill_to_street2}
           />
           <DisplayField
             label="City"
             value={invoice!.bill_to_city}
+          />
+          <DisplayField
+            label="State"
+            value={invoice!.bill_to_state}
           />
           <DisplayField
             label="Country"

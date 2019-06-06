@@ -201,7 +201,7 @@ export default class ContactList extends React.Component<ContactsProps,
           <Button
             primary
             onClick={this.onAddNewClick}
-            label="Add new"
+            label="Add Contact"
             disabled={!!this.state.newContact}
           />
         </Box>
@@ -213,13 +213,13 @@ export default class ContactList extends React.Component<ContactsProps,
                 <TableCell>
                   <Box fill direction="row" gap="xsmall">
                     <Box fill>
-                      <Text>Name</Text>
+                      <Text weight={500}>Name</Text>
                     </Box>
                     <Box fill>
-                      <Text>Address</Text>
+                      <Text weight={500}>Centrifuge ID</Text>
                     </Box>
                     <Box fill>
-                      <Text>Actions</Text>
+                      <Text weight={500}>Actions</Text>
                     </Box>
                   </Box>
                 </TableCell>

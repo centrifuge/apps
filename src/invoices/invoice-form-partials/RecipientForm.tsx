@@ -78,8 +78,17 @@ export class RecipientForm extends React.Component<ConnectedRecipientFormProps> 
             >
               <TextInput
                 name="bill_to_city"
-                placeholder="City or state"
                 value={values!.bill_to_city}
+                onChange={handleChange}
+              />
+            </FormField>
+            <FormField
+              label="State"
+              error={errors!.bill_to_state}
+            >
+              <TextInput
+                name="bill_to_state"
+                value={values!.bill_to_state}
                 onChange={handleChange}
               />
             </FormField>

@@ -53,7 +53,7 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
     }
 
     if (this.props.creatingInvoice) {
-      return <Box align="center" justify="center" fill={true}>Creating Invoice</Box>;
+      return <Box align="center" justify="center" fill={true}>Saving Invoice</Box>;
     }
     // Add logged in user to contacts
     const contacts: LabelValuePair[] = [
@@ -96,7 +96,7 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
             <Button
               type="submit"
               primary
-              label="Send"
+              label="Save"
             />
           </Box>
         </Box>

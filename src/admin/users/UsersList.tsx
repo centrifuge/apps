@@ -88,7 +88,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
             },
             {
               property: 'date_added',
-              header: 'Date Added',
+              header: 'Date added',
               render: data =>
                 data.date_added ? <Text>{formatDate(data.date_added)}</Text> : null,
             },
@@ -100,7 +100,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
             },
             {
               property: 'permissions',
-              header: 'User Rights',
+              header: 'User rights',
               render: data => {
                 return data.permissions.length > 0 ? this.renderPermission(data.permissions[0]) : null;
               },

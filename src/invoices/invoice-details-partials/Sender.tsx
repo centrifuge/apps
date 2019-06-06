@@ -28,27 +28,32 @@ export class Sender extends React.Component<SenderProps> {
       <Section headingLevel="5" title="Sender" basis={'1/2'}>
         <Box direction="row" gap={columnGap} basis={'1/2'}>
         <Box gap={columnGap} basis={'1/2'}>
+
+          <DisplayField
+            label="Name"
+            value={invoice!.sender_company_name}
+          />
           <DisplayField
             label="Centrifuge ID"
             value={invoice.sender}
           />
-          <DisplayField
-            label="Company name"
-            value={invoice!.sender_company_name}
-          />
         </Box>
         <Box gap={columnGap} basis={'1/2'}>
           <DisplayField
-            label="Street"
+            label="Street 1"
             value={invoice!.sender_street1}
           />
           <DisplayField
-            label="Street"
+            label="Street 2"
             value={invoice!.sender_street2}
           />
           <DisplayField
             label="City"
             value={invoice!.sender_city}
+          />
+          <DisplayField
+            label="State"
+            value={invoice!.sender_state}
           />
           <DisplayField
             label="Country"

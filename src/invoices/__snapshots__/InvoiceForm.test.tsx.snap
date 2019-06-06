@@ -240,7 +240,35 @@ exports[`InvoiceForm Should render empty form 1`] = `
                         onChange={[Function]}
                         onFocus={[Function]}
                         onKeyDown={[Function]}
-                        placeholder="City or state"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                />
+                <div
+                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                >
+                  <label
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
+                  >
+                    State
+                  </label>
+                  <div
+                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                  >
+                    <div
+                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                    >
+                      <input
+                        autoComplete="off"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                        name="sender_state"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onFocus={[Function]}
+                        onKeyDown={[Function]}
                       />
                     </div>
                   </div>
@@ -453,7 +481,35 @@ exports[`InvoiceForm Should render empty form 1`] = `
                         onChange={[Function]}
                         onFocus={[Function]}
                         onKeyDown={[Function]}
-                        placeholder="City or state"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                />
+                <div
+                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                >
+                  <label
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
+                  >
+                    State
+                  </label>
+                  <div
+                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                  >
+                    <div
+                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                    >
+                      <input
+                        autoComplete="off"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                        name="bill_to_state"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onFocus={[Function]}
+                        onKeyDown={[Function]}
                       />
                     </div>
                   </div>
@@ -541,7 +597,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                 }
               }
             >
-              Details
+              Invoice Details
             </h5>
           </div>
           <div
@@ -550,1156 +606,371 @@ exports[`InvoiceForm Should render empty form 1`] = `
             open={true}
           >
             <div
-              className="StyledBox-sc-13pk1d4-0 ffeAql"
+              className="StyledBox-sc-13pk1d4-0 IRSNj"
             >
               <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                className="StyledBox-sc-13pk1d4-0 ffeAql"
               >
                 <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
                 >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Invoice Status
-                  </label>
                   <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                   >
-                    <button
-                      aria-label="Open Drop"
-                      className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS StyledButton-sc-323bzc-0 jfbKsv"
-                      onBlur={[Function]}
-                      onClick={[Function]}
-                      onFocus={[Function]}
-                      onKeyDown={[Function]}
-                      onMouseOut={[Function]}
-                      onMouseOver={[Function]}
-                      type="button"
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
                     >
-                      <div
-                        className="StyledBox-sc-13pk1d4-0 erazuK"
+                      Status
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    >
+                      <button
+                        aria-label="Open Drop"
+                        className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS StyledButton-sc-323bzc-0 jfbKsv"
+                        onBlur={[Function]}
+                        onClick={[Function]}
+                        onFocus={[Function]}
+                        onKeyDown={[Function]}
+                        onMouseOut={[Function]}
+                        onMouseOver={[Function]}
+                        type="button"
                       >
                         <div
-                          className="StyledBox-sc-13pk1d4-0 XINUX"
+                          className="StyledBox-sc-13pk1d4-0 erazuK"
                         >
                           <div
-                            className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                            className="StyledBox-sc-13pk1d4-0 XINUX"
                           >
-                            <input
-                              autoComplete="off"
-                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 duvNfq"
-                              onBlur={[Function]}
-                              onChange={[Function]}
-                              onClick={[Function]}
-                              onFocus={[Function]}
-                              onKeyDown={[Function]}
-                              placeholder="Select"
-                              readOnly={true}
-                              tabIndex="-1"
-                              type="text"
-                            />
+                            <div
+                              className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                            >
+                              <input
+                                autoComplete="off"
+                                className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 duvNfq"
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onClick={[Function]}
+                                onFocus={[Function]}
+                                onKeyDown={[Function]}
+                                placeholder="Select"
+                                readOnly={true}
+                                tabIndex="-1"
+                                type="text"
+                              />
+                            </div>
+                          </div>
+                          <div
+                            className="StyledBox-sc-13pk1d4-0 eLQtUu"
+                            style={
+                              Object {
+                                "minWidth": "auto",
+                              }
+                            }
+                          >
+                            <svg
+                              aria-label="FormDown"
+                              className="StyledIcon-ofa7kd-0 dSllCE"
+                              viewBox="0 0 24 24"
+                            >
+                              <polyline
+                                fill="none"
+                                points="18 9 12 15 6 9"
+                                stroke="#000"
+                                strokeWidth="2"
+                              />
+                            </svg>
                           </div>
                         </div>
-                        <div
-                          className="StyledBox-sc-13pk1d4-0 eLQtUu"
-                          style={
-                            Object {
-                              "minWidth": "auto",
-                            }
-                          }
-                        >
-                          <svg
-                            aria-label="FormDown"
-                            className="StyledIcon-ofa7kd-0 dSllCE"
-                            viewBox="0 0 24 24"
-                          >
-                            <polyline
-                              fill="none"
-                              points="18 9 12 15 6 9"
-                              stroke="#000"
-                              strokeWidth="2"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                    </button>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
-              >
                 <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
                 >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Currency
-                  </label>
                   <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                   >
-                    <button
-                      aria-label="Open Drop"
-                      className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS StyledButton-sc-323bzc-0 jfbKsv"
-                      onBlur={[Function]}
-                      onClick={[Function]}
-                      onFocus={[Function]}
-                      onKeyDown={[Function]}
-                      onMouseOut={[Function]}
-                      onMouseOver={[Function]}
-                      type="button"
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
                     >
-                      <div
-                        className="StyledBox-sc-13pk1d4-0 erazuK"
+                      Currency
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    >
+                      <button
+                        aria-label="Open Drop"
+                        className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS StyledButton-sc-323bzc-0 jfbKsv"
+                        onBlur={[Function]}
+                        onClick={[Function]}
+                        onFocus={[Function]}
+                        onKeyDown={[Function]}
+                        onMouseOut={[Function]}
+                        onMouseOver={[Function]}
+                        type="button"
                       >
                         <div
-                          className="StyledBox-sc-13pk1d4-0 XINUX"
+                          className="StyledBox-sc-13pk1d4-0 erazuK"
                         >
                           <div
-                            className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                            className="StyledBox-sc-13pk1d4-0 XINUX"
                           >
-                            <input
-                              autoComplete="off"
-                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 duvNfq"
-                              onBlur={[Function]}
-                              onChange={[Function]}
-                              onClick={[Function]}
-                              onFocus={[Function]}
-                              onKeyDown={[Function]}
-                              placeholder="Select"
-                              readOnly={true}
-                              tabIndex="-1"
-                              type="text"
-                            />
+                            <div
+                              className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                            >
+                              <input
+                                autoComplete="off"
+                                className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 duvNfq"
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onClick={[Function]}
+                                onFocus={[Function]}
+                                onKeyDown={[Function]}
+                                placeholder="Select"
+                                readOnly={true}
+                                tabIndex="-1"
+                                type="text"
+                              />
+                            </div>
+                          </div>
+                          <div
+                            className="StyledBox-sc-13pk1d4-0 eLQtUu"
+                            style={
+                              Object {
+                                "minWidth": "auto",
+                              }
+                            }
+                          >
+                            <svg
+                              aria-label="FormDown"
+                              className="StyledIcon-ofa7kd-0 dSllCE"
+                              viewBox="0 0 24 24"
+                            >
+                              <polyline
+                                fill="none"
+                                points="18 9 12 15 6 9"
+                                stroke="#000"
+                                strokeWidth="2"
+                              />
+                            </svg>
                           </div>
                         </div>
-                        <div
-                          className="StyledBox-sc-13pk1d4-0 eLQtUu"
-                          style={
-                            Object {
-                              "minWidth": "auto",
-                            }
-                          }
-                        >
-                          <svg
-                            aria-label="FormDown"
-                            className="StyledIcon-ofa7kd-0 dSllCE"
-                            viewBox="0 0 24 24"
-                          >
-                            <polyline
-                              fill="none"
-                              points="18 9 12 15 6 9"
-                              stroke="#000"
-                              strokeWidth="2"
-                            />
-                          </svg>
-                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
+                    >
+                      Date created
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    >
+                      <div
+                        className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      >
+                        <input
+                          autoComplete="off"
+                          className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                          name="date_created"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          onKeyDown={[Function]}
+                          type="date"
+                        />
                       </div>
-                    </button>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
+                    >
+                      Date due
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    >
+                      <div
+                        className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      >
+                        <input
+                          autoComplete="off"
+                          className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                          name="date_due"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          onKeyDown={[Function]}
+                          type="date"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
               <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
               />
               <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                className="StyledBox-sc-13pk1d4-0 ffeAql"
               >
                 <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
                 >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Invoice date
-                  </label>
                   <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                   >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
                     >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="date_created"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        type="date"
-                      />
+                      Net amount, undefined
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    >
+                      <div
+                        className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      >
+                        <input
+                          autoComplete="off"
+                          className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                          maxLength={22}
+                          name="net_amount"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          onKeyDown={[Function]}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
-              >
                 <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Due date
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="date_due"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        type="date"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-      />
-      <div
-        className="StyledBox-sc-13pk1d4-0 IRSNj"
-      >
-        <div
-          className="StyledBox-sc-13pk1d4-0 IRSNj"
-        >
-          <div
-            className="StyledBox-sc-13pk1d4-0 ffeAql"
-          >
-            <h5
-              className="StyledHeading-sc-1rdh4aw-0 djDvmr"
-              style={
-                Object {
-                  "minWidth": "100px",
-                }
-              }
-            >
-              Invoice Total
-            </h5>
-          </div>
-          <div
-            aria-hidden={false}
-            className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
-            open={true}
-          >
-            <div
-              className="StyledBox-sc-13pk1d4-0 ffeAql"
-            >
-              <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Net amount, undefined
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        maxLength={22}
-                        name="net_amount"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Tax rate, %
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="tax_rate"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        value={NaN}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Tax amount, undefined
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
-                        disabled={true}
-                        name="tax_amount"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        value="NaN"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Gross amount, undefined
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
-                        disabled={true}
-                        name="gross_amount"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        value="NaN"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-      />
-      <div
-        className="StyledBox-sc-13pk1d4-0 ffeAql"
-      >
-        <div
-          className="StyledBox-sc-13pk1d4-0 clLqce"
-        >
-          <div
-            className="StyledBox-sc-13pk1d4-0 ffeAql"
-          >
-            <h5
-              className="StyledHeading-sc-1rdh4aw-0 djDvmr"
-              style={
-                Object {
-                  "minWidth": "100px",
-                }
-              }
-            >
-              Ship to
-            </h5>
-            <div
-              className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-            />
-            <label
-              checked={false}
-              className="StyledCheckBox__StyledCheckBoxContainer-sc-1dbk5ju-1 bVmNDQ"
-              onClick={[Function]}
-            >
-              <div
-                checked={false}
-                className="StyledCheckBox-sc-1dbk5ju-6 jXdLin StyledBox-sc-13pk1d4-0 emCRMK"
-              >
-                <input
-                  checked={false}
-                  className="StyledCheckBox__StyledCheckBoxInput-sc-1dbk5ju-2 dmEAHg"
-                  onBlur={[Function]}
-                  onChange={[Function]}
-                  onFocus={[Function]}
-                  type="checkbox"
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
                 />
                 <div
-                  checked={false}
-                  className="StyledCheckBox__StyledCheckBoxBox-sc-1dbk5ju-3 fxKnpz StyledBox-sc-13pk1d4-0 jFlQDV"
-                />
-              </div>
-              <span>
-                Shipment was sent to a third-party
-              </span>
-            </label>
-          </div>
-          <div
-            aria-hidden={true}
-            className="Collapsible__AnimatedBox-sc-15kniua-0 cHrNEL StyledBox-sc-13pk1d4-0 IRSNj"
-            open={false}
-          >
-            <div
-              className="StyledBox-sc-13pk1d4-0 ffeAql"
-            >
-              <div
-                className="StyledBox-sc-13pk1d4-0 clLqce"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
                 >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Ship to company
-                  </label>
                   <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                   >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
                     >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="ship_to_company_name"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
+                      Tax rate, %
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    >
+                      <div
+                        className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      >
+                        <input
+                          autoComplete="off"
+                          className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                          name="tax_rate"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          onKeyDown={[Function]}
+                          value={NaN}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
                 />
                 <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
                 >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Name
-                  </label>
                   <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                   >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
                     >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="ship_to_contact_person_name"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 clLqce"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Street
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
+                      Tax amount, undefined
+                    </label>
                     <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
                     >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="ship_to_street1"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        placeholder="Street name and number"
-                      />
+                      <div
+                        className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      >
+                        <input
+                          autoComplete="off"
+                          className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                          disabled={true}
+                          name="tax_amount"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          onKeyDown={[Function]}
+                          value="NaN"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
                 />
                 <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
                 >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Street
-                  </label>
                   <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                   >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
                     >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="ship_to_street2"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        placeholder="Apartment, unit, office, etc"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    City
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
+                      Gross amount, undefined
+                    </label>
                     <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
                     >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="ship_to_city"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        placeholder="City or state"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Country
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="ship_to_country"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    ZIP code
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="ship_to_zipcode"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-        />
-        <div
-          className="StyledBox-sc-13pk1d4-0 clLqce"
-        >
-          <div
-            className="StyledBox-sc-13pk1d4-0 ffeAql"
-          >
-            <h5
-              className="StyledHeading-sc-1rdh4aw-0 djDvmr"
-              style={
-                Object {
-                  "minWidth": "100px",
-                }
-              }
-            >
-              Remit to
-            </h5>
-            <div
-              className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-            />
-            <label
-              checked={false}
-              className="StyledCheckBox__StyledCheckBoxContainer-sc-1dbk5ju-1 bVmNDQ"
-              onClick={[Function]}
-            >
-              <div
-                checked={false}
-                className="StyledCheckBox-sc-1dbk5ju-6 jXdLin StyledBox-sc-13pk1d4-0 emCRMK"
-              >
-                <input
-                  checked={false}
-                  className="StyledCheckBox__StyledCheckBoxInput-sc-1dbk5ju-2 dmEAHg"
-                  onBlur={[Function]}
-                  onChange={[Function]}
-                  onFocus={[Function]}
-                  type="checkbox"
-                />
-                <div
-                  checked={false}
-                  className="StyledCheckBox__StyledCheckBoxBox-sc-1dbk5ju-3 fxKnpz StyledBox-sc-13pk1d4-0 jFlQDV"
-                />
-              </div>
-              <span>
-                Pay this invoice to a third-party
-              </span>
-            </label>
-          </div>
-          <div
-            aria-hidden={true}
-            className="Collapsible__AnimatedBox-sc-15kniua-0 cHrNEL StyledBox-sc-13pk1d4-0 IRSNj"
-            open={false}
-          >
-            <div
-              className="StyledBox-sc-13pk1d4-0 Tiesv"
-            >
-              <div
-                className="StyledBox-sc-13pk1d4-0 clLqce"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Remit to company
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_company_name"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Name
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_contact_person_name"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    VAT number
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_vat_number"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Local tax ID
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_local_tax_id"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Tax country
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_tax_country"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 clLqce"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Street
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_street1"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        placeholder="Street name and number"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Street
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_street2"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        placeholder="Apartment, unit, office, etc"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    City
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_city"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        placeholder="City or state"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Country
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_country"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    ZIP code
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_zipcode"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-      />
-      <div
-        className="StyledBox-sc-13pk1d4-0 ffeAql"
-      >
-        <div
-          className="StyledBox-sc-13pk1d4-0 clLqce"
-        >
-          <div
-            className="StyledBox-sc-13pk1d4-0 ffeAql"
-          >
-            <h5
-              className="StyledHeading-sc-1rdh4aw-0 djDvmr"
-              style={
-                Object {
-                  "minWidth": "100px",
-                }
-              }
-            >
-              Credit note
-            </h5>
-            <div
-              className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-            />
-            <label
-              checked={false}
-              className="StyledCheckBox__StyledCheckBoxContainer-sc-1dbk5ju-1 bVmNDQ"
-              onClick={[Function]}
-            >
-              <div
-                checked={false}
-                className="StyledCheckBox-sc-1dbk5ju-6 jXdLin StyledBox-sc-13pk1d4-0 emCRMK"
-              >
-                <input
-                  checked={false}
-                  className="StyledCheckBox__StyledCheckBoxInput-sc-1dbk5ju-2 dmEAHg"
-                  onBlur={[Function]}
-                  onChange={[Function]}
-                  onFocus={[Function]}
-                  type="checkbox"
-                />
-                <div
-                  checked={false}
-                  className="StyledCheckBox__StyledCheckBoxBox-sc-1dbk5ju-3 fxKnpz StyledBox-sc-13pk1d4-0 jFlQDV"
-                />
-              </div>
-              <span>
-                invoice is credit
-              </span>
-            </label>
-          </div>
-          <div
-            aria-hidden={true}
-            className="Collapsible__AnimatedBox-sc-15kniua-0 cHrNEL StyledBox-sc-13pk1d4-0 IRSNj"
-            open={false}
-          >
-            <div
-              className="StyledBox-sc-13pk1d4-0 Tiesv"
-            >
-              <div
-                className="StyledBox-sc-13pk1d4-0 eHctww"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Original invoice number
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="credit_note_invoice_number"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 eHctww"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Original invoice date
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="credit_for_invoice_date"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        type="date"
-                      />
+                      <div
+                        className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      >
+                        <input
+                          autoComplete="off"
+                          className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                          disabled={true}
+                          name="gross_amount"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          onKeyDown={[Function]}
+                          value="NaN"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -2001,7 +1272,35 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                         onChange={[Function]}
                         onFocus={[Function]}
                         onKeyDown={[Function]}
-                        placeholder="City or state"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                />
+                <div
+                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                >
+                  <label
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
+                  >
+                    State
+                  </label>
+                  <div
+                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                  >
+                    <div
+                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                    >
+                      <input
+                        autoComplete="off"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                        name="sender_state"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onFocus={[Function]}
+                        onKeyDown={[Function]}
                       />
                     </div>
                   </div>
@@ -2214,7 +1513,35 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                         onChange={[Function]}
                         onFocus={[Function]}
                         onKeyDown={[Function]}
-                        placeholder="City or state"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                />
+                <div
+                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                >
+                  <label
+                    className="StyledText-sc-1sadyjn-0 bKLvLm"
+                  >
+                    State
+                  </label>
+                  <div
+                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                  >
+                    <div
+                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                    >
+                      <input
+                        autoComplete="off"
+                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                        name="bill_to_state"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onFocus={[Function]}
+                        onKeyDown={[Function]}
                       />
                     </div>
                   </div>
@@ -2302,7 +1629,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                 }
               }
             >
-              Details
+              Invoice Details
             </h5>
           </div>
           <div
@@ -2311,1156 +1638,371 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
             open={true}
           >
             <div
-              className="StyledBox-sc-13pk1d4-0 ffeAql"
+              className="StyledBox-sc-13pk1d4-0 IRSNj"
             >
               <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                className="StyledBox-sc-13pk1d4-0 ffeAql"
               >
                 <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
                 >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Invoice Status
-                  </label>
                   <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                   >
-                    <button
-                      aria-label="Open Drop"
-                      className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS StyledButton-sc-323bzc-0 jfbKsv"
-                      onBlur={[Function]}
-                      onClick={[Function]}
-                      onFocus={[Function]}
-                      onKeyDown={[Function]}
-                      onMouseOut={[Function]}
-                      onMouseOver={[Function]}
-                      type="button"
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
                     >
-                      <div
-                        className="StyledBox-sc-13pk1d4-0 erazuK"
+                      Status
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    >
+                      <button
+                        aria-label="Open Drop"
+                        className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS StyledButton-sc-323bzc-0 jfbKsv"
+                        onBlur={[Function]}
+                        onClick={[Function]}
+                        onFocus={[Function]}
+                        onKeyDown={[Function]}
+                        onMouseOut={[Function]}
+                        onMouseOver={[Function]}
+                        type="button"
                       >
                         <div
-                          className="StyledBox-sc-13pk1d4-0 XINUX"
+                          className="StyledBox-sc-13pk1d4-0 erazuK"
                         >
                           <div
-                            className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                            className="StyledBox-sc-13pk1d4-0 XINUX"
                           >
-                            <input
-                              autoComplete="off"
-                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 duvNfq"
-                              onBlur={[Function]}
-                              onChange={[Function]}
-                              onClick={[Function]}
-                              onFocus={[Function]}
-                              onKeyDown={[Function]}
-                              placeholder="Select"
-                              readOnly={true}
-                              tabIndex="-1"
-                              type="text"
-                            />
+                            <div
+                              className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                            >
+                              <input
+                                autoComplete="off"
+                                className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 duvNfq"
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onClick={[Function]}
+                                onFocus={[Function]}
+                                onKeyDown={[Function]}
+                                placeholder="Select"
+                                readOnly={true}
+                                tabIndex="-1"
+                                type="text"
+                              />
+                            </div>
+                          </div>
+                          <div
+                            className="StyledBox-sc-13pk1d4-0 eLQtUu"
+                            style={
+                              Object {
+                                "minWidth": "auto",
+                              }
+                            }
+                          >
+                            <svg
+                              aria-label="FormDown"
+                              className="StyledIcon-ofa7kd-0 dSllCE"
+                              viewBox="0 0 24 24"
+                            >
+                              <polyline
+                                fill="none"
+                                points="18 9 12 15 6 9"
+                                stroke="#000"
+                                strokeWidth="2"
+                              />
+                            </svg>
                           </div>
                         </div>
-                        <div
-                          className="StyledBox-sc-13pk1d4-0 eLQtUu"
-                          style={
-                            Object {
-                              "minWidth": "auto",
-                            }
-                          }
-                        >
-                          <svg
-                            aria-label="FormDown"
-                            className="StyledIcon-ofa7kd-0 dSllCE"
-                            viewBox="0 0 24 24"
-                          >
-                            <polyline
-                              fill="none"
-                              points="18 9 12 15 6 9"
-                              stroke="#000"
-                              strokeWidth="2"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                    </button>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
-              >
                 <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
                 >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Currency
-                  </label>
                   <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                   >
-                    <button
-                      aria-label="Open Drop"
-                      className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS StyledButton-sc-323bzc-0 jfbKsv"
-                      onBlur={[Function]}
-                      onClick={[Function]}
-                      onFocus={[Function]}
-                      onKeyDown={[Function]}
-                      onMouseOut={[Function]}
-                      onMouseOver={[Function]}
-                      type="button"
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
                     >
-                      <div
-                        className="StyledBox-sc-13pk1d4-0 erazuK"
+                      Currency
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    >
+                      <button
+                        aria-label="Open Drop"
+                        className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS StyledButton-sc-323bzc-0 jfbKsv"
+                        onBlur={[Function]}
+                        onClick={[Function]}
+                        onFocus={[Function]}
+                        onKeyDown={[Function]}
+                        onMouseOut={[Function]}
+                        onMouseOver={[Function]}
+                        type="button"
                       >
                         <div
-                          className="StyledBox-sc-13pk1d4-0 XINUX"
+                          className="StyledBox-sc-13pk1d4-0 erazuK"
                         >
                           <div
-                            className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                            className="StyledBox-sc-13pk1d4-0 XINUX"
                           >
-                            <input
-                              autoComplete="off"
-                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 duvNfq"
-                              onBlur={[Function]}
-                              onChange={[Function]}
-                              onClick={[Function]}
-                              onFocus={[Function]}
-                              onKeyDown={[Function]}
-                              placeholder="Select"
-                              readOnly={true}
-                              tabIndex="-1"
-                              type="text"
-                            />
+                            <div
+                              className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                            >
+                              <input
+                                autoComplete="off"
+                                className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 duvNfq"
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onClick={[Function]}
+                                onFocus={[Function]}
+                                onKeyDown={[Function]}
+                                placeholder="Select"
+                                readOnly={true}
+                                tabIndex="-1"
+                                type="text"
+                              />
+                            </div>
+                          </div>
+                          <div
+                            className="StyledBox-sc-13pk1d4-0 eLQtUu"
+                            style={
+                              Object {
+                                "minWidth": "auto",
+                              }
+                            }
+                          >
+                            <svg
+                              aria-label="FormDown"
+                              className="StyledIcon-ofa7kd-0 dSllCE"
+                              viewBox="0 0 24 24"
+                            >
+                              <polyline
+                                fill="none"
+                                points="18 9 12 15 6 9"
+                                stroke="#000"
+                                strokeWidth="2"
+                              />
+                            </svg>
                           </div>
                         </div>
-                        <div
-                          className="StyledBox-sc-13pk1d4-0 eLQtUu"
-                          style={
-                            Object {
-                              "minWidth": "auto",
-                            }
-                          }
-                        >
-                          <svg
-                            aria-label="FormDown"
-                            className="StyledIcon-ofa7kd-0 dSllCE"
-                            viewBox="0 0 24 24"
-                          >
-                            <polyline
-                              fill="none"
-                              points="18 9 12 15 6 9"
-                              stroke="#000"
-                              strokeWidth="2"
-                            />
-                          </svg>
-                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
+                    >
+                      Date created
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    >
+                      <div
+                        className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      >
+                        <input
+                          autoComplete="off"
+                          className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                          name="date_created"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          onKeyDown={[Function]}
+                          type="date"
+                        />
                       </div>
-                    </button>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                />
+                <div
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                >
+                  <div
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  >
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
+                    >
+                      Date due
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    >
+                      <div
+                        className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      >
+                        <input
+                          autoComplete="off"
+                          className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                          name="date_due"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          onKeyDown={[Function]}
+                          type="date"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
               <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
               />
               <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                className="StyledBox-sc-13pk1d4-0 ffeAql"
               >
                 <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
                 >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Invoice date
-                  </label>
                   <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                   >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
                     >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="date_created"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        type="date"
-                      />
+                      Net amount, undefined
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    >
+                      <div
+                        className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      >
+                        <input
+                          autoComplete="off"
+                          className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                          maxLength={22}
+                          name="net_amount"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          onKeyDown={[Function]}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
-              >
                 <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Due date
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="date_due"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        type="date"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-      />
-      <div
-        className="StyledBox-sc-13pk1d4-0 IRSNj"
-      >
-        <div
-          className="StyledBox-sc-13pk1d4-0 IRSNj"
-        >
-          <div
-            className="StyledBox-sc-13pk1d4-0 ffeAql"
-          >
-            <h5
-              className="StyledHeading-sc-1rdh4aw-0 djDvmr"
-              style={
-                Object {
-                  "minWidth": "100px",
-                }
-              }
-            >
-              Invoice Total
-            </h5>
-          </div>
-          <div
-            aria-hidden={false}
-            className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
-            open={true}
-          >
-            <div
-              className="StyledBox-sc-13pk1d4-0 ffeAql"
-            >
-              <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Net amount, undefined
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        maxLength={22}
-                        name="net_amount"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Tax rate, %
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="tax_rate"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        value={NaN}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Tax amount, undefined
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
-                        disabled={true}
-                        name="tax_amount"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        value="NaN"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 dRJqWv"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Gross amount, undefined
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
-                        disabled={true}
-                        name="gross_amount"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        value="NaN"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-      />
-      <div
-        className="StyledBox-sc-13pk1d4-0 ffeAql"
-      >
-        <div
-          className="StyledBox-sc-13pk1d4-0 clLqce"
-        >
-          <div
-            className="StyledBox-sc-13pk1d4-0 ffeAql"
-          >
-            <h5
-              className="StyledHeading-sc-1rdh4aw-0 djDvmr"
-              style={
-                Object {
-                  "minWidth": "100px",
-                }
-              }
-            >
-              Ship to
-            </h5>
-            <div
-              className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-            />
-            <label
-              checked={false}
-              className="StyledCheckBox__StyledCheckBoxContainer-sc-1dbk5ju-1 bVmNDQ"
-              onClick={[Function]}
-            >
-              <div
-                checked={false}
-                className="StyledCheckBox-sc-1dbk5ju-6 jXdLin StyledBox-sc-13pk1d4-0 emCRMK"
-              >
-                <input
-                  checked={false}
-                  className="StyledCheckBox__StyledCheckBoxInput-sc-1dbk5ju-2 dmEAHg"
-                  onBlur={[Function]}
-                  onChange={[Function]}
-                  onFocus={[Function]}
-                  type="checkbox"
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
                 />
                 <div
-                  checked={false}
-                  className="StyledCheckBox__StyledCheckBoxBox-sc-1dbk5ju-3 fxKnpz StyledBox-sc-13pk1d4-0 jFlQDV"
-                />
-              </div>
-              <span>
-                Shipment was sent to a third-party
-              </span>
-            </label>
-          </div>
-          <div
-            aria-hidden={true}
-            className="Collapsible__AnimatedBox-sc-15kniua-0 cHrNEL StyledBox-sc-13pk1d4-0 IRSNj"
-            open={false}
-          >
-            <div
-              className="StyledBox-sc-13pk1d4-0 ffeAql"
-            >
-              <div
-                className="StyledBox-sc-13pk1d4-0 clLqce"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
                 >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Ship to company
-                  </label>
                   <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                   >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
                     >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="ship_to_company_name"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
+                      Tax rate, %
+                    </label>
+                    <div
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    >
+                      <div
+                        className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      >
+                        <input
+                          autoComplete="off"
+                          className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                          name="tax_rate"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          onKeyDown={[Function]}
+                          value={NaN}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
                 />
                 <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
                 >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Name
-                  </label>
                   <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                   >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
                     >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="ship_to_contact_person_name"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 clLqce"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Street
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
+                      Tax amount, undefined
+                    </label>
                     <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
                     >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="ship_to_street1"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        placeholder="Street name and number"
-                      />
+                      <div
+                        className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      >
+                        <input
+                          autoComplete="off"
+                          className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                          disabled={true}
+                          name="tax_amount"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          onKeyDown={[Function]}
+                          value="NaN"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
                 />
                 <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
                 >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Street
-                  </label>
                   <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
+                    className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                   >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                    <label
+                      className="StyledText-sc-1sadyjn-0 bKLvLm"
                     >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="ship_to_street2"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        placeholder="Apartment, unit, office, etc"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    City
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
+                      Gross amount, undefined
+                    </label>
                     <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      className="StyledBox-sc-13pk1d4-0 gZSidW"
                     >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="ship_to_city"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        placeholder="City or state"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Country
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="ship_to_country"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    ZIP code
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="ship_to_zipcode"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-        />
-        <div
-          className="StyledBox-sc-13pk1d4-0 clLqce"
-        >
-          <div
-            className="StyledBox-sc-13pk1d4-0 ffeAql"
-          >
-            <h5
-              className="StyledHeading-sc-1rdh4aw-0 djDvmr"
-              style={
-                Object {
-                  "minWidth": "100px",
-                }
-              }
-            >
-              Remit to
-            </h5>
-            <div
-              className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-            />
-            <label
-              checked={false}
-              className="StyledCheckBox__StyledCheckBoxContainer-sc-1dbk5ju-1 bVmNDQ"
-              onClick={[Function]}
-            >
-              <div
-                checked={false}
-                className="StyledCheckBox-sc-1dbk5ju-6 jXdLin StyledBox-sc-13pk1d4-0 emCRMK"
-              >
-                <input
-                  checked={false}
-                  className="StyledCheckBox__StyledCheckBoxInput-sc-1dbk5ju-2 dmEAHg"
-                  onBlur={[Function]}
-                  onChange={[Function]}
-                  onFocus={[Function]}
-                  type="checkbox"
-                />
-                <div
-                  checked={false}
-                  className="StyledCheckBox__StyledCheckBoxBox-sc-1dbk5ju-3 fxKnpz StyledBox-sc-13pk1d4-0 jFlQDV"
-                />
-              </div>
-              <span>
-                Pay this invoice to a third-party
-              </span>
-            </label>
-          </div>
-          <div
-            aria-hidden={true}
-            className="Collapsible__AnimatedBox-sc-15kniua-0 cHrNEL StyledBox-sc-13pk1d4-0 IRSNj"
-            open={false}
-          >
-            <div
-              className="StyledBox-sc-13pk1d4-0 Tiesv"
-            >
-              <div
-                className="StyledBox-sc-13pk1d4-0 clLqce"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Remit to company
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_company_name"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Name
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_contact_person_name"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    VAT number
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_vat_number"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Local tax ID
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_local_tax_id"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Tax country
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_tax_country"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 clLqce"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Street
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_street1"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        placeholder="Street name and number"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Street
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_street2"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        placeholder="Apartment, unit, office, etc"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    City
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_city"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        placeholder="City or state"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Country
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_country"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    ZIP code
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="remit_to_zipcode"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-      />
-      <div
-        className="StyledBox-sc-13pk1d4-0 ffeAql"
-      >
-        <div
-          className="StyledBox-sc-13pk1d4-0 clLqce"
-        >
-          <div
-            className="StyledBox-sc-13pk1d4-0 ffeAql"
-          >
-            <h5
-              className="StyledHeading-sc-1rdh4aw-0 djDvmr"
-              style={
-                Object {
-                  "minWidth": "100px",
-                }
-              }
-            >
-              Credit note
-            </h5>
-            <div
-              className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-            />
-            <label
-              checked={false}
-              className="StyledCheckBox__StyledCheckBoxContainer-sc-1dbk5ju-1 bVmNDQ"
-              onClick={[Function]}
-            >
-              <div
-                checked={false}
-                className="StyledCheckBox-sc-1dbk5ju-6 jXdLin StyledBox-sc-13pk1d4-0 emCRMK"
-              >
-                <input
-                  checked={false}
-                  className="StyledCheckBox__StyledCheckBoxInput-sc-1dbk5ju-2 dmEAHg"
-                  onBlur={[Function]}
-                  onChange={[Function]}
-                  onFocus={[Function]}
-                  type="checkbox"
-                />
-                <div
-                  checked={false}
-                  className="StyledCheckBox__StyledCheckBoxBox-sc-1dbk5ju-3 fxKnpz StyledBox-sc-13pk1d4-0 jFlQDV"
-                />
-              </div>
-              <span>
-                invoice is credit
-              </span>
-            </label>
-          </div>
-          <div
-            aria-hidden={true}
-            className="Collapsible__AnimatedBox-sc-15kniua-0 cHrNEL StyledBox-sc-13pk1d4-0 IRSNj"
-            open={false}
-          >
-            <div
-              className="StyledBox-sc-13pk1d4-0 Tiesv"
-            >
-              <div
-                className="StyledBox-sc-13pk1d4-0 eHctww"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Original invoice number
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="credit_note_invoice_number"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-              />
-              <div
-                className="StyledBox-sc-13pk1d4-0 eHctww"
-              >
-                <div
-                  className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-                >
-                  <label
-                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                  >
-                    Original invoice date
-                  </label>
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 gZSidW"
-                  >
-                    <div
-                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                    >
-                      <input
-                        autoComplete="off"
-                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                        name="credit_for_invoice_date"
-                        onBlur={[Function]}
-                        onChange={[Function]}
-                        onFocus={[Function]}
-                        onKeyDown={[Function]}
-                        type="date"
-                      />
+                      <div
+                        className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                      >
+                        <input
+                          autoComplete="off"
+                          className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                          disabled={true}
+                          name="gross_amount"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          onKeyDown={[Function]}
+                          value="NaN"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

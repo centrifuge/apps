@@ -55,7 +55,7 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
             columns={[
               {
                 property: 'number',
-                header: 'Invoice Number',
+                header: 'Invoice number',
               },
 
               {
@@ -64,7 +64,7 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
               },
               {
                 property: 'net_amount',
-                header: 'Net Amount',
+                header: 'Net amount',
                 align: 'end',
                 render: datum => {
                   return formatCurrency(datum.net_amount, datum.currency);
@@ -76,7 +76,7 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
               },
               {
                 property: 'date_created',
-                header: 'Date Created',
+                header: 'Date created',
                 render: datum => {
                   return formatDate(datum.date_created);
                 },
@@ -84,7 +84,7 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
 
               {
                 property: 'date_due',
-                header: 'Date Due',
+                header: 'Date due',
                 render: datum => {
                   return formatDate(datum.date_due);
                 },
@@ -92,11 +92,21 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
 
               {
                 property: 'invoice_status',
-                header: 'Document Status',
+                header: 'Document status',
                 render: datum => {
                   return <Text color={'status-ok'}>Created</Text>;
                 },
               },
+
+              {
+                property: 'fundingAgreement',
+                header: 'Funding status',
+                render: datum => {
+                  if(!datum.fundingAgreement) return '';
+                  return datum.fundingAgreement.signatures ? <Text color={'status-ok'}>Approved</Text> : <Text>Pending</Text>;
+                },
+              },
+
               {
                 property: '_id',
                 header: 'Actions',
@@ -136,6 +146,7 @@ const mapStateToProps = (state) => {
       (state.invoices.get.data.map(response => ({
         ...response.data,
         _id: response._id,
+        fundingAgreement: response.fundingAgreement,
         createdAt: response.createdAt,
 
       })) as InvoiceData[]),

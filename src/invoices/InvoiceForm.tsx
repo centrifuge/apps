@@ -6,11 +6,7 @@ import { LabelValuePair } from '../common/interfaces';
 import { Formik } from 'formik';
 import { ConnectedSenderForm } from './invoice-form-partials/SenderForm';
 import { ConnectedRecipientForm } from './invoice-form-partials/RecipientForm';
-import { ConnectedShipToForm } from './invoice-form-partials/ShipToForm';
-import { ConnectedRemitToForm } from './invoice-form-partials/RemitToForm';
 import { ConnectedDetailsForm } from './invoice-form-partials/DetailsForm';
-import { ConnectedCreditNoteForm } from './invoice-form-partials/CreditNoteForm';
-import { ConnectedInvoiceTotalForm } from './invoice-form-partials/InvoiceTotalForm';
 import * as Yup from 'yup';
 import { Section } from '../components/Section';
 
@@ -26,7 +22,7 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
     onSubmit: (invoice: Invoice) => {
       // do nothing
     },
-    invoice: {currency:"USD"},
+    invoice: { currency: 'USD' },
     contacts: [],
   };
 
@@ -123,21 +119,16 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
                     <ConnectedDetailsForm columnGap={columnGap}/>
                   </Box>
 
-                  {/* Invoice Total section */}
-                  <Box gap={columnGap}>
-                    <ConnectedInvoiceTotalForm columnGap={columnGap}/>
-                  </Box>
-
                   {/*Ship to and Remit to */}
-                  <Box direction="row" gap={columnGap}>
+                  {/*<Box direction="row" gap={columnGap}>
                     <ConnectedShipToForm columnGap={columnGap}/>
                     <ConnectedRemitToForm columnGap={columnGap}/>
-                  </Box>
+                  </Box>*/}
 
                   {/* Credit note section */}
-                  <Box direction="row" gap={columnGap}>
+                  {/* <Box direction="row" gap={columnGap}>
                     <ConnectedCreditNoteForm columnGap={columnGap}/>
-                  </Box>
+                  </Box>*/}
 
                   <Box direction="row" gap={columnGap}>
                     {/* Comments section */}

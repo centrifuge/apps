@@ -64,7 +64,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
               },
               {
                 property: 'funding_id',
-                header: 'Funding Agreement ID',
+                header: 'Funding agreement ID',
                 render: datum => {
                   return <Box width={'small'}>
                     <Text style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>{datum.funding_id}</Text>
@@ -78,7 +78,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
               },
               {
                 property: 'net_amount',
-                header: 'Net Amount',
+                header: 'Net amount',
                 align: 'end',
                 render: datum => {
                   return formatCurrency(datum.amount, datum.currency);
@@ -86,7 +86,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
               },
               {
                 property: 'amount',
-                header: 'Funding Amount',
+                header: 'Funding amount',
                 align: 'end',
                 render: datum => {
                   return formatCurrency(datum.amount, datum.currency);
@@ -98,7 +98,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
               },
               {
                 property: 'repayment_due_date',
-                header: 'Repayment Due Date',
+                header: 'Repayment due date',
                 render: datum => {
                   return formatDate(datum.repayment_due_date);
                 },
@@ -106,7 +106,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
 
               {
                 property: 'invoice_status',
-                header: 'Funding Status',
+                header: 'Funding status',
                 render: datum => {
                   return datum.signatures ? <Text color={'status-ok'}>Accepted</Text> : <Text>Received</Text>;
                 },

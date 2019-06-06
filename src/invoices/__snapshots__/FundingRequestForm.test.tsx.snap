@@ -25,7 +25,7 @@ exports[`RequestFundingForm Should render empty form 1`] = `
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Funder's Name
+                Funder
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -105,7 +105,7 @@ exports[`RequestFundingForm Should render empty form 1`] = `
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                NFT Deposit Address
+                NFT deposit address
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -291,7 +291,7 @@ exports[`RequestFundingForm Should render empty form 1`] = `
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Repayment Due Date
+                Repayment due date
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -366,7 +366,7 @@ exports[`RequestFundingForm Should render empty form 1`] = `
       </div>
     </div>
     <div
-      className="StyledBox-sc-13pk1d4-0 fSSGpo"
+      className="StyledBox-sc-13pk1d4-0 kBooLY"
     >
       <button
         className="StyledButton-sc-323bzc-0 kHrfdt"
@@ -390,7 +390,7 @@ exports[`RequestFundingForm Should render empty form 1`] = `
         onMouseOver={[Function]}
         type="submit"
       >
-        Send
+        Request
       </button>
     </div>
   </form>
@@ -422,7 +422,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Funder's Name
+                Funder
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -502,7 +502,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                NFT Deposit Address
+                NFT deposit address
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -688,7 +688,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Repayment Due Date
+                Repayment due date
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -763,7 +763,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
       </div>
     </div>
     <div
-      className="StyledBox-sc-13pk1d4-0 fSSGpo"
+      className="StyledBox-sc-13pk1d4-0 kBooLY"
     >
       <button
         className="StyledButton-sc-323bzc-0 kHrfdt"
@@ -787,7 +787,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
         onMouseOver={[Function]}
         type="submit"
       >
-        Send
+        Request
       </button>
     </div>
   </form>
@@ -819,7 +819,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Funder's Name
+                Funder
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -899,7 +899,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                NFT Deposit Address
+                NFT deposit address
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -1085,7 +1085,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Repayment Due Date
+                Repayment due date
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -1160,7 +1160,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
       </div>
     </div>
     <div
-      className="StyledBox-sc-13pk1d4-0 fSSGpo"
+      className="StyledBox-sc-13pk1d4-0 kBooLY"
     >
       <button
         className="StyledButton-sc-323bzc-0 kHrfdt"
@@ -1184,7 +1184,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
         onMouseOver={[Function]}
         type="submit"
       >
-        Send
+        Request
       </button>
     </div>
   </form>
@@ -1216,7 +1216,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Funder's Name
+                Funder
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -1296,7 +1296,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                NFT Deposit Address
+                NFT deposit address
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -1482,7 +1482,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Repayment Due Date
+                Repayment due date
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -1557,7 +1557,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
       </div>
     </div>
     <div
-      className="StyledBox-sc-13pk1d4-0 fSSGpo"
+      className="StyledBox-sc-13pk1d4-0 kBooLY"
     >
       <button
         className="StyledButton-sc-323bzc-0 kHrfdt"
@@ -1581,7 +1581,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
         onMouseOver={[Function]}
         type="submit"
       >
-        Send
+        Request
       </button>
     </div>
   </form>

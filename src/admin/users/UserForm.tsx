@@ -86,7 +86,7 @@ export default class UserForm extends React.Component<InviteProps> {
                     />
                   </FormField>
 
-                  <Box margin={{ vertical: 'medium' }}>
+                  <Box margin={{ bottom: 'medium' }}>
                     <FormField
                       label="Permissions"
                       error={errors!.permissions}
