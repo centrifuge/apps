@@ -65,7 +65,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
               },
               {
                 property: 'agreement_id',
-                header: 'Funding Agreement ID',
+                header: 'Funding agreement ID',
                 render: datum => {
                   return <Box width={'small'}>
                     <Text style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>{datum.agreement_id}</Text>
@@ -75,7 +75,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
               },
               {
                 property: 'number',
-                header: 'Invoice Number',
+                header: 'Invoice number',
               },
               {
                 property: 'net_amount',
@@ -93,10 +93,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
                   return formatCurrency(datum.amount, datum.currency);
                 },
               },
-              {
-                property: 'currency',
-                header: 'Currency',
-              },
+
               {
                 property: 'repayment_due_date',
                 header: 'Repayment due date',

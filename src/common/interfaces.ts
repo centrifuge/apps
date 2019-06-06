@@ -23,7 +23,12 @@ export interface InvoiceResponse extends InvInvoiceResponse {
   _id?: string;
   createdAt?: Date,
   updatedAt?: Date
-  fundingAgreement?: FunFundingResponseData | null
+  fundingAgreement?: FundingAgreementResponse| null
+}
+
+
+export interface FundingAgreementResponse extends FunFundingResponseData{
+  nftOwner?:string
 }
 
 

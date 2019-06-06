@@ -73,10 +73,7 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
                   return formatCurrency(datum.net_amount, datum.currency);
                 },
               },
-              {
-                property: 'currency',
-                header: 'Currency',
-              },
+
               {
                 property: 'date_created',
                 header: 'Date created',

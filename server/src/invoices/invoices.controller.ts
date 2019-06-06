@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { Invoice } from '../../../src/common/models/invoice';
 import { ROUTES } from '../../../src/common/constants';
 import { SessionGuard } from '../auth/SessionGuard';
@@ -73,10 +73,29 @@ export class InvoicesController {
    * @return {Promise<Invoice|null>} result
    */
   async getById(@Param() params, @Req() request): Promise<InvoiceResponse | null> {
-    return await this.database.invoices.findOne({
+    const invoice = await this.database.invoices.findOne({
       _id: params.id,
       ownerId: request.user._id,
     });
+    // TODO use header info when ready
+    // We the call because the document is not updated on transfer and the header info is out of sync
+    if (invoice.fundingAgreement) {
+      const tokenId = invoice.fundingAgreement.funding.nft_address;
+      // Search for the registry address
+      const nft = invoice.header.nfts.find(nft => {
+        return nft.token_id === tokenId;
+      });
+      if (nft) {
+        const ownerResponse = await this.centrifugeService.nft.ownerOf(nft.token_id, nft.registry, request.user.account).catch(async error => {
+          throw new HttpException(await error.json(), error.status);
+        });
+        invoice.fundingAgreement.nftOwner = ownerResponse.owner;
+      } else {
+        throw new HttpException('Nft from funding agreement not found on invoice', HttpStatus.CONFLICT);
+      }
+
+    }
+    return invoice;
   }
 
   /**
