@@ -8,6 +8,7 @@ import { invoiceRoutes } from './routes';
 import { Edit, View } from 'grommet-icons';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { formatCurrency, formatDate } from '../common/formaters';
+import { Preloader } from '../components/Preloader';
 
 
 type ViewInvoicesProps = {
@@ -32,8 +33,10 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
   render() {
 
     if (this.props.loading || !this.props.invoices) {
-      return <></>;
+      return <Preloader message="Loading"/>;
     }
+
+
 
     return (
       <Box fill>

@@ -12,6 +12,7 @@ import { Box, Button, Heading } from 'grommet';
 import { invoiceRoutes } from './routes';
 import { LinkPrevious } from 'grommet-icons';
 import { User } from '../common/models/user';
+import { Preloader } from '../components/Preloader';
 
 type ConnectedEditInvoiceProps = {
   updateInvoice: (invoice: Invoice) => void;
@@ -52,11 +53,11 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
     const { loggedInUser, updatingInvoice } = this.props;
 
     if (!this.props.invoice || !this.props.contacts) {
-      return <Box align="center" justify="center" fill={true}>Loading</Box>;
+      return <Preloader message="Loading"/>
     }
 
     if (updatingInvoice) {
-      return <Box align="center" justify="center" fill={true}>Updating invoice</Box>;
+      return <Preloader message="Updating invoice" withSound={true}/>
     }
 
     // Add logged in user to contacts

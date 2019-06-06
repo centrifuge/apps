@@ -12,6 +12,7 @@ import { invoiceRoutes } from './routes';
 import { Box, Button, Heading } from 'grommet';
 import { LinkPrevious } from 'grommet-icons';
 import { User } from '../common/models/user';
+import { Preloader } from '../components/Preloader';
 
 type ConnectedCreateInvoiceProps = {
   createInvoice: (invoice: Invoice) => void;
@@ -49,11 +50,11 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
     const { loggedInUser } = this.props;
 
     if (!this.props.contacts) {
-      return <Box align="center" justify="center" fill={true}>Loading</Box>;
+      return <Preloader message="Loading"/>;
     }
 
     if (this.props.creatingInvoice) {
-      return <Box align="center" justify="center" fill={true}>Saving Invoice</Box>;
+      return <Preloader message="Saving invoice" withSound={true}/>
     }
     // Add logged in user to contacts
     const contacts: LabelValuePair[] = [

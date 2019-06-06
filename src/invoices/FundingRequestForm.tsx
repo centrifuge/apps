@@ -93,7 +93,6 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
               const repaymentDate = new Date(values.repayment_due_date);
               const diff = repaymentDate.getTime() - today.getTime();
               days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-              console.log('days', days);
               repaymentAmount = values.amount * (1 + (values.apr) / 365 * days) + (values.amount * (values.fee));
 
               if (isNaN(repaymentAmount)) repaymentAmount = 0;

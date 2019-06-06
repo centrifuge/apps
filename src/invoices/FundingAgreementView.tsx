@@ -14,6 +14,7 @@ import { Modal } from '@centrifuge/axis-modal';
 import { signFunding } from '../store/actions/funding';
 import { InvoiceDetails } from './InvoiceDetails';
 import { Invoice } from '../common/models/invoice';
+import { Preloader } from '../components/Preloader';
 
 type ConnectedFundingAgreementViewProps = {
   getInvoiceById: typeof getInvoiceById;
@@ -58,12 +59,13 @@ export class FundingAgreementView extends React.Component<ConnectedFundingAgreem
   render() {
     const { invoice, contacts, fundingAgreement, signingFunding,header, id } = this.props;
     if (!invoice || !contacts) {
-      return <Box align="center" justify="center" fill={true}>Loading Funding Agreement</Box>;
+      return <Preloader message="Loading"/>
     }
 
     if (signingFunding && signingFunding.loading) {
-      return <Box align="center" justify="center" fill={true}>Approving Funding Agreement</Box>;
+      return <Preloader message="Approving funding agreement" withSound={true}/>
     }
+
     const canApproveFunding = !(fundingAgreement && fundingAgreement.signatures);
 
     return (

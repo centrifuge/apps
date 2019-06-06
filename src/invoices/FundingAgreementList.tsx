@@ -8,6 +8,7 @@ import { View } from 'grommet-icons';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { formatCurrency, formatDate } from '../common/formaters';
 import { FunFundingData, FunFundingSignature } from '../../clients/centrifuge-node';
+import { Preloader } from '../components/Preloader';
 
 
 type FundingAgreements = FunFundingData & {
@@ -40,7 +41,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
   render() {
 
     if (this.props.loading || !this.props.fundingAgreements) {
-      return <></>;
+      return <Preloader message="Loading"/>;
     }
 
 

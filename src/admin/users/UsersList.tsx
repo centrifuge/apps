@@ -10,6 +10,7 @@ import { PERMISSIONS } from '../../common/constants';
 import { Modal } from '@centrifuge/axis-modal';
 import UserForm from './UserForm';
 import { formatDate } from '../../common/formaters';
+import { Preloader } from '../../components/Preloader';
 
 type UsersListProps = {
   users: User[] | null;
@@ -117,11 +118,11 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
     const { users, invitingUser } = this.props;
 
     if (!this.props.users) {
-      return <></>;
+      return <Preloader message="Loading"/>;
     }
 
     if (invitingUser && invitingUser.loading) {
-      return <Box align="center" justify="center" fill={true}>Creating user</Box>;
+      return <Preloader message="Creating user" withSound={true}/>;
     }
     return (
       <Box fill>

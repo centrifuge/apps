@@ -18,6 +18,7 @@ import { createFunding, resetCreateFunding } from '../store/actions/funding';
 import { InvoiceDetails } from './InvoiceDetails';
 import { RequestState } from '../store/reducers/http-request-reducer';
 import { Invoice } from '../common/models/invoice';
+import { Preloader } from '../components/Preloader';
 
 type ConnectedInvoiceViewProps = {
   getInvoiceById: (id: string) => void;
@@ -77,12 +78,13 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
 
 
     if (!invoice || !contacts) {
-      return <Box align="center" justify="center" fill={true}>Loading invoice</Box>;
+      return <Preloader message="Loading"/>
     }
 
     if (creatingFunding && creatingFunding.loading) {
-      return <Box align="center" justify="center" fill={true}>Requesting Funding Agreement</Box>;
+      return <Preloader message="Requesting funding agreement" withSound={true}/>
     }
+
 
     // TODO make currency and due_date mandatory in invoice
     //@ts-ignore
