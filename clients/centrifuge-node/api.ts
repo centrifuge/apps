@@ -5740,7 +5740,7 @@ export const NFTServiceApiFetchParamCreator = function (configuration?: Configur
             if (authorization === null || authorization === undefined) {
                 throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling mintInvoiceUnpaidNFT.');
             }
-            const localVarPath = `/nfts/{identifier}/invoice/unpaid/mint`
+            const localVarPath = `/invoice/{identifier}/mint/unpaid`
                 .replace(`{${"identifier"}}`, encodeURIComponent(String(identifier)));
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
