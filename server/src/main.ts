@@ -24,13 +24,15 @@ async function bootstrap() {
   app.use(passport.initialize());
   app.use(passport.session());
 
+
   // When the build is production the application serves the assets built by create-react-app
   app.setViewEngine('html')
   app.engine('html', require('hbs').__express);
   app.setBaseViewsDir(path.resolve('./build'));
   app.useStaticAssets(path.resolve('./build'),{index:false});
 
-  await app.listen(3001);
+  const server = await app.listen(3001);
+  server.setTimeout(0);
 }
 
 bootstrap();

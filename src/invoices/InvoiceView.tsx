@@ -115,6 +115,7 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
           onClose={this.closeFundingRequest}
         >
           <FundingRequestForm
+            maxAmount={parseFloat(invoice.gross_amount || '')}
             onSubmit={this.submitFundingRequest}
             onDiscard={this.closeFundingRequest}
             contacts={contacts}

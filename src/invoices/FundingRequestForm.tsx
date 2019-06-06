@@ -7,13 +7,14 @@ import * as Yup from 'yup';
 import { FundingRequest } from '../common/models/funding-request';
 import SearchSelect from '../components/form/SearchSelect';
 import { dateToString, extractDate } from '../common/formaters';
-import { isValidAddress } from 'ethereumjs-util';
+import { Invoice } from '../common/models/invoice';
 
 type FundingRequestFormProps = {
   onSubmit: (fundingRequest: FundingRequest) => void;
   onDiscard: () => void;
   contacts: LabelValuePair[];
   today: Date;
+  maxAmount: number;
   fundingRequest: FundingRequest;
 };
 
@@ -27,6 +28,7 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
       // do nothing by default
     },
     today: new Date(),
+    maxAmount: Infinity,
     fundingRequest: new FundingRequest(),
     contacts: [],
   };
@@ -45,7 +47,7 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
   render() {
 
     const { submitted } = this.state;
-    const { fundingRequest, contacts, today } = this.props;
+    const { fundingRequest, contacts, today, maxAmount } = this.props;
     const columnGap = 'medium';
     const sectionGap = 'large';
 
@@ -54,7 +56,8 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
       funder: Yup.string()
         .required('This field is required'),
       amount: Yup.number()
-        .required('This field is required'),
+        .required('This field is required')
+        .max(maxAmount, 'Should not exceed the invoice amount'),
       apr: Yup.number()
         .required('This field is required'),
       fee: Yup.number()

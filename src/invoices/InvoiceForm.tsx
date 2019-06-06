@@ -53,6 +53,9 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
         .required('This field is required'),
       status: Yup.string()
         .required('This field is required'),
+      net_amount: Yup.number()
+        .moreThan(0,'must be greater than 0')
+        .required('This field is required'),
       date_created: Yup.date()
         .typeError('Wrong date format')
         .required('This field is required'),
