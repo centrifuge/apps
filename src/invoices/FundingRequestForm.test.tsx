@@ -9,7 +9,7 @@ import { Formik } from 'formik';
 
 describe('RequestFundingForm', () => {
 
-
+  const today = new Date('2019-06-05T00:00:00.000Z')
   const contacts = [
     {
       label: 'Alice',
@@ -38,7 +38,7 @@ describe('RequestFundingForm', () => {
 
   it('Should render form with sender default values and correctly calculate the computed values', () => {
 
-    var date = new Date('2019-06-05T09:07:12.264Z');
+    var date = new Date(today);
     date.setDate(date.getDate() + 27);
 
     const fundingRequest = {
@@ -58,7 +58,10 @@ describe('RequestFundingForm', () => {
     };
 
     const fundingForm = renderer.create(
-      <FundingRequestForm fundingRequest={fundingRequest} contacts={contacts} onDiscard={onDiscard}
+      <FundingRequestForm fundingRequest={fundingRequest}
+                          today={today}
+                          contacts={contacts}
+                          onDiscard={onDiscard}
                           onSubmit={onSubmit}/>,
     );
 
@@ -70,7 +73,7 @@ describe('RequestFundingForm', () => {
 
   it('Should render form with sender default values and correctly calculate the computed values for days 31, apr 5% and fee 1%', () => {
 
-    var date = new Date('2019-06-05T09:07:12.264Z');
+    var date = new Date(today);
     date.setDate(date.getDate() + 31);
 
     const fundingRequest = {
@@ -90,7 +93,10 @@ describe('RequestFundingForm', () => {
     };
 
     const fundingForm = renderer.create(
-      <FundingRequestForm fundingRequest={fundingRequest} contacts={contacts} onDiscard={onDiscard}
+      <FundingRequestForm fundingRequest={fundingRequest}
+                          today={today}
+                          contacts={contacts}
+                          onDiscard={onDiscard}
                           onSubmit={onSubmit}/>,
     );
 
@@ -102,7 +108,7 @@ describe('RequestFundingForm', () => {
 
   it('Should render form with sender default values and correctly calculate the computed values for days 31, apr 5% and fee 0%', () => {
 
-    var date = new Date('2019-06-05T09:07:12.264Z');
+    var date = new Date(today);
     date.setDate(date.getDate() + 31);
 
 
@@ -124,7 +130,10 @@ describe('RequestFundingForm', () => {
 
     };
     const fundingForm = renderer.create(
-      <FundingRequestForm fundingRequest={fundingRequest} contacts={contacts} onDiscard={onDiscard}
+      <FundingRequestForm fundingRequest={fundingRequest}
+                          today={today}
+                          contacts={contacts}
+                          onDiscard={onDiscard}
                           onSubmit={onSubmit}/>,
     );
 
@@ -137,7 +146,7 @@ describe('RequestFundingForm', () => {
 
   it('Should call the callback functions', () => {
 
-    var date = new Date('2019-06-05T09:07:12.264Z');
+    var date = new Date(today);
     date.setDate(date.getDate() + 31);
 
     const fundingRequest = {
@@ -156,7 +165,10 @@ describe('RequestFundingForm', () => {
 
     };
     const fundingForm = renderer.create(
-      <FundingRequestForm fundingRequest={fundingRequest} contacts={contacts} onDiscard={onDiscard}
+      <FundingRequestForm fundingRequest={fundingRequest}
+                          today={today}
+                          contacts={contacts}
+                          onDiscard={onDiscard}
                           onSubmit={onSubmit}/>,
     );
 
