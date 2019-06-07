@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "module": "esnext",
-    "declaration": true,
     "noImplicitAny": false,
     "removeComments": true,
     "noLib": false,
@@ -20,11 +19,16 @@
     "resolveJsonModule": true,
     "noEmit": true,
     "jsx": "preserve",
-    "isolatedModules": true
+    "isolatedModules": true,
+    "strictPropertyInitialization": false,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ]
   },
   "include": [
-    "src/**/*",
-    "server/src/**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",

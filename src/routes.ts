@@ -1,10 +1,11 @@
-import invoiceRoutes from './invoices/routes';
-import purchaseOrdersRoutes from './purchaseorders/routes';
+import {invoiceRoutes,fundingRoutes} from './invoices/routes';
 import contactsRoutes from './contacts/routes';
+import userRoutes from './user/routes';
 
 export default {
   invoices: invoiceRoutes,
-  purchaseOrders: purchaseOrdersRoutes,
+  funding: fundingRoutes,
   contacts: contactsRoutes,
-  user: '/user'
+  user: userRoutes,
+  index: '/'
 }

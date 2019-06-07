@@ -1,0 +1,13 @@
+language: node_js
+
+node_js:
+  - '10'
+
+services:
+  - docker
+
+deploy:
+  provider: script
+  script: bash ./scripts/docker_push.sh
+  on:
+    branch: master
