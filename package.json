@@ -39,7 +39,7 @@
     "yup": "^0.27.0"
   },
   "scripts": {
-    "start:prod": "react-scripts build && nodemon",
+    "start:prod": "nodemon",
     "test": "cross-env CI=true react-scripts test && jest --config server/jest.config.js",
     "start": "run-p start:frontend start:backend",
     "start:frontend": "react-scripts start",
