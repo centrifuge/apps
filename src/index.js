@@ -1,70 +1,63 @@
+module.exports = Tinlake;
+
 const fs = require('fs');
-
+const SignerProvider = require('ethjs-provider-signer');
+const sign = require('ethjs-signer').sign;
 const Eth = require('ethjs');
-const eth = new Eth(new Eth.HttpProvider(process.env['ETH_RPC_URL']));
 
-const me = process.env['ETH_FROM'];
+let eth;
+let contracts;
+let abiDir
+let ethFrom;
+let ethConfig;
 
-const abiDir = process.env['CONTRACTS_ABI'];
+/**
+ * Returns the Tinlake instance.
+ *
+ * @method Tinlake
+ * @param {Object} rpcUrl
+ * @param {Object} options the Eth options object
+ * @returns {Object} tinlake Tinlake object instance
+* @throws if the new flag is not used in construction
+*/
+
+function Tinlake(rpcUrl,mainAddress,privateKey, contractAbi, contractAddresses, options) {
+    ethFrom = mainAddress;
+    abiDir = contractAbi;
+
+    let provider = new SignerProvider(rpcUrl, {
+        signTransaction: (rawTx, cb) => cb(null, sign(rawTx, privateKey)),
+        accounts: (cb) => cb(null, [ethFrom]),
+    });
+
+    eth = new Eth(provider,options);
+
+    contracts = {
+        "nft": getContract('test/SimpleNFT.abi', contractAddresses["nft"]),
+        "title": getContract('Title.abi', contractAddresses["title"]),
+        "currency": getContract('test/SimpleToken.abi',contractAddresses["currency"]) ,
+        "admit": getContract('Admit.abi',contractAddresses["admit"]),
+        "reception": getContract('Reception.abi', contractAddresses["reception"]),
+        "desk": getContract('Desk.abi',  contractAddresses["desk"]),
+        "shelf": getContract('Shelf.abi', contractAddresses["shelf"]),
+        "appraiser": getContract('Appraiser.abi', contractAddresses["appraiser"]),
+    };
+
+
+    let gasLimit = 1000000;
+    ethConfig = {from: ethFrom,  gasLimit: "0x"+gasLimit.toString(16)};
+
+}
+Tinlake.prototype.approveNFT = () => console.log('not implemented yet');
+
+Tinlake.prototype.mintNFT = (deposit, tokenID) => contracts.nft.mint(deposit, tokenID, ethConfig);
+
+Tinlake.prototype.admit = (registry, nft, principal, usr) => contracts.admit.admit(registry, nft, principal, usr, ethConfig);
+
+Tinlake.prototype.borrow = () => console.log('not implemented yet');
+
+
 function getContract(file, address) {
     let rawdata = fs.readFileSync(abiDir+file);
     return eth.contract(JSON.parse(rawdata)).at(address);
 }
-
-let registry_addr = process.env['NFT_COLLATERAL'];
-let title_addr = process.env['TITLE'];
-let contracts = {
-    "nft": getContract('test/SimpleNFT.abi', registry_addr),
-    "title": getContract('Title.abi', title_addr),
-    "currency": getContract('test/SimpleToken.abi', process.env['CURRENCY']),
-    "admit": getContract('Admit.abi', process.env['ADMIT']),
-    "reception": getContract('Reception.abi', process.env['RECEPTION']),
-    "desk": getContract('Desk.abi', process.env['DESK']),
-    "shelf": getContract('Shelf.abi', process.env['SHELF']),
-    "appraiser": getContract('Appraiser.abi', process.env['APPRAISER']),
-}
-
-filter_logs = (event) => {
-    if (event.address != title_addr) {
-        console.log(event);
-    }
-}
-
-let nft_value = 150*10**18;
-let principal = 100*10**18;
-
-function admitNft(id_) {
-    console.log(contracts.admit.admit);
-    let p = new Promise((resolve) => {
-        // the following is broken because ethjs does not support on('event', ...). Question to @SilentCicero oustanding
-        contracts.admit.methods.admit(registry_addr, id_, principal, me).send({from: me, gas:10**6*1.7}).on('receipt', (receipt) => {
-            console.log(receipt);
-            resolve(receipt);
-        });
-    });
-    return p;
-}
-
-async function run() {
-    // Mint some money
-    //await contracts.currency.mint(me, 100, {from: me});
-    console.log("ME:", me);
-    // Mint an NFTi
-    let nft_id = Math.floor(Math.random()*(10**15));
-    console.log("NFT ID:", nft_id);
-    let nft_tx = await contracts.nft.mint(me, nft_id, {from: me});
-
-
-    // Approve the NFT
-    admitNft(nft_id);
-    console.log("TX Hash:", res);
-    res = await eth.getTransactionReceipt(res);
-    console.log(contracts.admit.Created());
-    //console.log(contracts.title.Created.processReceipt(res));
-    //console.log("RES", res);
-    res = await contracts.shelf.shelf(0);
-    console.log("Loan", res);
-    let supply = await contracts.currency.totalSupply();
-}
-
-run();
