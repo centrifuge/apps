@@ -16,16 +16,6 @@ let abiDir
 let ethFrom;
 let ethConfig;
 
-/**
- * Returns the Tinlake instance.
- *
- * @method Tinlake
- * @param {Object} rpcUrl
- * @param {Object} options the Eth options object
- * @returns {Object} tinlake Tinlake object instance
-* @throws if the new flag is not used in construction
-*/
-
 function Tinlake(rpcUrl,mainAddress,privateKey, contractAbi, contractAddresses, options) {
     ethFrom = mainAddress;
     abiDir = contractAbi;
