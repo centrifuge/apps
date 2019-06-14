@@ -15,6 +15,9 @@ describe('functional tinlake tests', function() {
         tinlake = new Tinlake(rpcUrl,ethFrom, process.env['ETH_PRIVATE_KEY'],process.env['CONTRACTS_ABI'],addresses, {});
     })
     describe('tinlake borrow', function() {
+
+        let principal = 100;
+        let appraisal = 120;
         it('should mint an NFT & admit', () => {
             tokenID = "0x"+Math.floor(Math.random()*(10**15));
             console.log("Token ID -> "+tokenID);
@@ -22,7 +25,7 @@ describe('functional tinlake tests', function() {
                 console.log("mint result");
                 console.log(result.txHash);
                 console.log(result.events);
-                let principal = 100;
+
                return tinlake.adminAdmit(addresses["NFT_COLLATERAL"],tokenID, principal, ethFrom);
             }).then(result  => {
                 console.log("admit result");
@@ -40,6 +43,12 @@ describe('functional tinlake tests', function() {
                 console.log("approve results");
                 console.log(result.txHash);
                 console.log(result.events);
+                return tinlake.adminAppraise(loanID, appraisal);
+
+            }).then(result => {
+                console.log("appraisal results");
+                console.log(result.txHash);
+                console.log(result.events);
                 return tinlake.borrow(loanID, ethFrom);
 
             }).then(result => {
@@ -53,6 +62,13 @@ describe('functional tinlake tests', function() {
             })
 
         });
+
+        // it('set ward: desk should be allowed to access lender', () => {
+        //
+        //     tinlake.lenderRely(addresses["DESK"]).then(result=>console.log(result));
+        //
+        // });
+
 
     });
 });

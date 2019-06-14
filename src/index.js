@@ -36,6 +36,7 @@ function Tinlake(rpcUrl,mainAddress,privateKey, contractAbi, contractAddresses, 
         "desk": getContract('Desk.abi',  contractAddresses["DESK"]),
         "shelf": getContract('Shelf.abi', contractAddresses["SHELF"]),
         "appraiser": getContract('Appraiser.abi', contractAddresses["APPRAISER"]),
+        "lender": getContract('MakerAdapter.abi', contractAddresses["LENDER"]),
     };
 
 
@@ -73,10 +74,26 @@ Tinlake.prototype.adminAdmit = (registry, nft, principal, usr) => {
     });
 };
 
+
+Tinlake.prototype.adminAppraise = (loanID, appraisal) => {
+    return contracts.appraiser.file(loanID,appraisal, ethConfig).then(txHash => {
+        console.log("[Appraisal.file] txHash: "+txHash);
+        return waitAndReturnEvents(txHash,contracts["nft"].abi);
+    });
+};
+
 Tinlake.prototype.borrow = (loanID, to) => {
     return contracts.reception.borrow(loanID, to, ethConfig).then(txHash => {
         console.log("[Reception.borrow] txHash: "+txHash);
         return waitAndReturnEvents(txHash,contracts["reception"].abi);
+    });
+}
+
+
+Tinlake.prototype.lenderRely = (usr) => {
+    return contracts.lender.rely(usr, ethConfig).then(txHash => {
+        console.log("[Lender.rely] txHash: "+txHash);
+        return waitAndReturnEvents(txHash,contracts["lender"].abi);
     });
 }
 
@@ -86,6 +103,7 @@ let waitAndReturnEvents = (txHash, abi) => {
     return new Promise((resolve, reject)=> {
         waitForTransaction(txHash).then(tx => {
             eth.getTransactionReceipt(tx.hash, (err, receipt) => {
+                console.log(receipt);
                 if (err != null) {
                     reject("failed to get receipt")
                 }
