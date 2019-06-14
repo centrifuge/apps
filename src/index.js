@@ -43,48 +43,61 @@ function Tinlake(rpcUrl,mainAddress,privateKey, contractAbi, contractAddresses, 
     ethConfig = {from: ethFrom,  gasLimit: "0x"+gasLimit.toString(16)};
 
 }
-Tinlake.prototype.approveNFT = () => console.log('not implemented yet');
-
-Tinlake.prototype.mintNFT = (deposit, tokenID) => {
-    return new Promise((resolve, reject)=> {
-        contracts.nft.mint(deposit, tokenID, ethConfig).then(txHash => {
-            console.log("[Mint] txHash: "+txHash);
-            return waitForTransaction(txHash)
-        }).then(tx => {
-            eth.getTransactionReceipt(tx.hash, (err, receipt) => {
-                if (err != null) {
-                    reject("failed to get receipt")
-                }
-                let events = getEvents(receipt, contracts["nft"].abi);
-                resolve({"txHash":tx.hash,"events":events});
-            });
-
-        })
+Tinlake.prototype.approveNFT = (tokenID, to) => {
+    return contracts.nft.approve(to,tokenID, ethConfig).then(txHash => {
+        console.log("[NFT Approve] txHash: "+txHash);
+        return waitAndReturnEvents(txHash,contracts["nft"].abi);
     });
 
 }
 
-Tinlake.prototype.admit = (registry, nft, principal, usr) => {
+Tinlake.prototype.ownerOfNFT = (tokenID) => {
+    return contracts.nft.ownerOf(tokenID);
+}
+
+Tinlake.prototype.balanceOfCurrency = (usr) => {
+    return contracts.currency.balanceOf(usr);
+}
+
+Tinlake.prototype.mintNFT = (deposit, tokenID) => {
+    return contracts.nft.mint(deposit, tokenID, ethConfig).then(txHash => {
+        console.log("[NFT.mint] txHash: "+txHash);
+        return waitAndReturnEvents(txHash,contracts["nft"].abi);
+    });
+}
+
+Tinlake.prototype.adminAdmit = (registry, nft, principal, usr) => {
+    return contracts.admit.admit(registry, nft, principal, usr, ethConfig).then(txHash => {
+        console.log("[Admit.admit] txHash: "+txHash);
+        return waitAndReturnEvents(txHash,contracts["nft"].abi);
+    });
+};
+
+Tinlake.prototype.borrow = (loanID, to) => {
+    return contracts.reception.borrow(loanID, to, ethConfig).then(txHash => {
+        console.log("[Reception.borrow] txHash: "+txHash);
+        return waitAndReturnEvents(txHash,contracts["reception"].abi);
+    });
+}
+
+
+
+let waitAndReturnEvents = (txHash, abi) => {
     return new Promise((resolve, reject)=> {
-        contracts.admit.admit(registry, nft, principal, usr, ethConfig).then(txHash => {
-            console.log("[Admit] txHash: "+txHash);
-            return waitForTransaction(txHash)
-        }).then(tx => {
+        waitForTransaction(txHash).then(tx => {
             eth.getTransactionReceipt(tx.hash, (err, receipt) => {
                 if (err != null) {
                     reject("failed to get receipt")
                 }
-                let events = getEvents(receipt, contracts["nft"].abi);
-                resolve({"txHash":tx.hash,"events":events});
+                let events = getEvents(receipt, abi);
+                resolve({"txHash":tx.hash,"events":events, "status":tx.status});
             });
 
         })
     });
-};
+}
 
-Tinlake.prototype.borrow = () => console.log('not implemented yet');
-
-// todo replace with a better pooling
+// todo replace with a better polling
 let waitForTransaction = (txHash) => {
     return  new Promise(function(resolve, reject) {
             let secMax = 5;
@@ -120,6 +133,9 @@ let findEvent = (abi, funcHash) => {
 
 }
 let getEvents = (receipt, abi) => {
+    if (receipt.logs.length == 0) {
+        return null;
+    }
     let log = receipt.logs[0];
     let events = [];
 
