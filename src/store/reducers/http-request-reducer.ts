@@ -1,10 +1,11 @@
 import {ActionType} from '../actions/action-type-generator';
+import { AxiosError } from 'axios';
 
 export type RequestState<T> = {
   loading: boolean;
   hasError?: boolean;
   data?: T;
-  error?: Error;
+  error?: AxiosError;
 };
 
 const defaultState = {
@@ -27,6 +28,12 @@ export function httpRequestReducer<T>(actionType: ActionType) {
       case actionType.reset: {
         return { ...defaultState };
       }
+      case actionType.clearError: {
+        return {
+          ...state,
+          error:undefined
+        };
+      }
       case actionType.start: {
         return { ...defaultState, loading: true };
       }
@@ -42,7 +49,7 @@ export function httpRequestReducer<T>(actionType: ActionType) {
           ...defaultState,
           loading: false,
           hasError: true,
-          error: payload as Error,
+          error: payload as AxiosError,
         };
       }
       default: {

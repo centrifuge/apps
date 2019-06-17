@@ -11,6 +11,7 @@ import { Modal } from '@centrifuge/axis-modal';
 import UserForm from './UserForm';
 import { formatDate } from '../../common/formaters';
 import { Preloader } from '../../components/Preloader';
+import { NotificationContext } from '../../notifications/NotificationContext';
 
 type UsersListProps = {
   users: User[] | null;
@@ -116,7 +117,6 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
   render() {
 
     const { users, invitingUser } = this.props;
-
     if (!this.props.users) {
       return <Preloader message="Loading"/>;
     }
@@ -124,6 +124,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
     if (invitingUser && invitingUser.loading) {
       return <Preloader message="Creating user" withSound={true}/>;
     }
+
     return (
       <Box fill>
         <Modal
@@ -157,6 +158,8 @@ const mapStateToProps = (state) => {
 export default connect(
   mapStateToProps,
   {
-    getAllUsers, resetGetAllUsers, invite,
+    getAllUsers,
+    resetGetAllUsers,
+    invite,
   },
 )(UsersList);

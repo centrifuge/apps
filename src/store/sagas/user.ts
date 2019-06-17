@@ -1,9 +1,10 @@
 import { call, fork, put, take, takeEvery } from 'redux-saga/effects';
 import { httpClient } from '../../http-client';
-import {getAllUsersAction, userLoginAction, userRegisterAction, userInviteAction } from '../actions/users';
+import { getAllUsersAction, userInviteAction, userLoginAction, userRegisterAction } from '../actions/users';
 import { User } from '../../common/models/user';
 import routes from '../../routes';
 import { push } from 'connected-react-router';
+import { alertError } from '../actions/notifications';
 
 export function* loginUser(user: User) {
   try {
@@ -46,10 +47,15 @@ export function* inviteUser(action) {
     });
     // reload the users
     yield put({
-      type:getAllUsersAction.start
-    })
+      type: getAllUsersAction.start,
+    });
   } catch (e) {
-    yield put({ type: userRegisterAction.fail, payload: e });
+    yield put({ type: userInviteAction.fail, payload: e });
+    yield put(alertError(
+      'Failed to invite user',
+      e.message,
+      { onConfirmAction: { type: userInviteAction.clearError } },
+    ));
   }
 }
 

@@ -19,7 +19,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
   }
   onClose={[Function]}
   opened={true}
-  title="Title"
+  title=""
   width="medium"
 >
   <Component
@@ -31,7 +31,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
     }
     onClose={[Function]}
     opened={true}
-    title="Title"
+    title=""
     width="medium"
   >
     <Layer
@@ -68,13 +68,9 @@ exports[`NotificationContext Should render a default popup 1`] = `
                     class="StyledBox-sc-13pk1d4-0 jKLnMz"
                   >
                     <div
-                      class="StyledBox-sc-13pk1d4-0 lkzpGw"
+                      class="StyledBox-sc-13pk1d4-0 lkbCVP"
                     >
-                      <h3
-                        class="StyledHeading-sc-1rdh4aw-0 iEPYku"
-                      >
-                        Title
-                      </h3>
+                      
                       <button
                         class="StyledButton-sc-323bzc-0 kPUXNH"
                         type="button"
@@ -98,20 +94,11 @@ exports[`NotificationContext Should render a default popup 1`] = `
                     >
                       <p
                         class="StyledParagraph-tbetod-0 dIDtVY"
-                      >
-                        Message
-                      </p>
+                      />
                     </div>
                     <div
                       class="StyledBox-sc-13pk1d4-0 fSSGpo"
-                    >
-                      <button
-                        class="StyledButton-sc-323bzc-0 ibWwqS"
-                        type="button"
-                      >
-                        OK
-                      </button>
-                    </div>
+                    />
                   </div>
                 </div>
               </div>
@@ -206,13 +193,9 @@ exports[`NotificationContext Should render a default popup 1`] = `
                               class="StyledBox-sc-13pk1d4-0 jKLnMz"
                             >
                               <div
-                                class="StyledBox-sc-13pk1d4-0 lkzpGw"
+                                class="StyledBox-sc-13pk1d4-0 lkbCVP"
                               >
-                                <h3
-                                  class="StyledHeading-sc-1rdh4aw-0 iEPYku"
-                                >
-                                  Title
-                                </h3>
+                                
                                 <button
                                   class="StyledButton-sc-323bzc-0 kPUXNH"
                                   type="button"
@@ -236,20 +219,11 @@ exports[`NotificationContext Should render a default popup 1`] = `
                               >
                                 <p
                                   class="StyledParagraph-tbetod-0 dIDtVY"
-                                >
-                                  Message
-                                </p>
+                                />
                               </div>
                               <div
                                 class="StyledBox-sc-13pk1d4-0 fSSGpo"
-                              >
-                                <button
-                                  class="StyledButton-sc-323bzc-0 ibWwqS"
-                                  type="button"
-                                >
-                                  OK
-                                </button>
-                              </div>
+                              />
                             </div>
                           </div>
                         </div>,
@@ -371,13 +345,9 @@ exports[`NotificationContext Should render a default popup 1`] = `
                                   class="StyledBox-sc-13pk1d4-0 jKLnMz"
                                 >
                                   <div
-                                    class="StyledBox-sc-13pk1d4-0 lkzpGw"
+                                    class="StyledBox-sc-13pk1d4-0 lkbCVP"
                                   >
-                                    <h3
-                                      class="StyledHeading-sc-1rdh4aw-0 iEPYku"
-                                    >
-                                      Title
-                                    </h3>
+                                    
                                     <button
                                       class="StyledButton-sc-323bzc-0 kPUXNH"
                                       type="button"
@@ -401,20 +371,11 @@ exports[`NotificationContext Should render a default popup 1`] = `
                                   >
                                     <p
                                       class="StyledParagraph-tbetod-0 dIDtVY"
-                                    >
-                                      Message
-                                    </p>
+                                    />
                                   </div>
                                   <div
                                     class="StyledBox-sc-13pk1d4-0 fSSGpo"
-                                  >
-                                    <button
-                                      class="StyledButton-sc-323bzc-0 ibWwqS"
-                                      type="button"
-                                    >
-                                      OK
-                                    </button>
-                                  </div>
+                                  />
                                 </div>
                               </div>,
                             }
@@ -598,7 +559,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
                                           alignContent="center"
                                           direction="row"
                                           flex={false}
-                                          justify="between"
+                                          justify="end"
                                           margin="none"
                                           pad="none"
                                           responsive={true}
@@ -607,7 +568,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
                                             alignContent="center"
                                             direction="row"
                                             flex={false}
-                                            justify="between"
+                                            justify="end"
                                             margin="none"
                                             pad="none"
                                             responsive={true}
@@ -617,7 +578,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
                                               direction="row"
                                               flex={false}
                                               forwardRef={null}
-                                              justify="between"
+                                              justify="end"
                                               margin="none"
                                               pad="none"
                                               responsive={true}
@@ -626,7 +587,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
                                                 alignContent="center"
                                                 directionProp="row"
                                                 flex={false}
-                                                justify="between"
+                                                justify="end"
                                                 margin="none"
                                                 pad="none"
                                                 responsive={true}
@@ -702,103 +663,14 @@ exports[`NotificationContext Should render a default popup 1`] = `
                                                     }
                                                   }
                                                   forwardedRef={null}
-                                                  justify="between"
+                                                  justify="end"
                                                   margin="none"
                                                   pad="none"
                                                   responsive={true}
                                                 >
                                                   <div
-                                                    className="StyledBox-sc-13pk1d4-0 lkzpGw"
+                                                    className="StyledBox-sc-13pk1d4-0 lkbCVP"
                                                   >
-                                                    <Heading
-                                                      color=""
-                                                      level={3}
-                                                      margin={
-                                                        Object {
-                                                          "bottom": "none",
-                                                          "left": "none",
-                                                          "right": "medium",
-                                                          "top": "none",
-                                                        }
-                                                      }
-                                                      responsive={true}
-                                                    >
-                                                      <StyledHeading
-                                                        as="h3"
-                                                        colorProp=""
-                                                        level={3}
-                                                        margin={
-                                                          Object {
-                                                            "bottom": "none",
-                                                            "left": "none",
-                                                            "right": "medium",
-                                                            "top": "none",
-                                                          }
-                                                        }
-                                                        responsive={true}
-                                                      >
-                                                        <StyledComponent
-                                                          as="h3"
-                                                          colorProp=""
-                                                          forwardedComponent={
-                                                            Object {
-                                                              "$$typeof": Symbol(react.forward_ref),
-                                                              "attrs": Array [],
-                                                              "componentStyle": ComponentStyle {
-                                                                "componentId": "StyledHeading-sc-1rdh4aw-0",
-                                                                "isStatic": false,
-                                                                "lastClassName": "iEPYku",
-                                                                "rules": Array [
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                ],
-                                                              },
-                                                              "defaultProps": Object {},
-                                                              "displayName": "StyledHeading",
-                                                              "foldedComponentIds": Array [],
-                                                              "render": [Function],
-                                                              "styledComponentId": "StyledHeading-sc-1rdh4aw-0",
-                                                              "target": "h1",
-                                                              "toString": [Function],
-                                                              "warnTooManyClasses": [Function],
-                                                              "withComponent": [Function],
-                                                            }
-                                                          }
-                                                          forwardedRef={null}
-                                                          level={3}
-                                                          margin={
-                                                            Object {
-                                                              "bottom": "none",
-                                                              "left": "none",
-                                                              "right": "medium",
-                                                              "top": "none",
-                                                            }
-                                                          }
-                                                          responsive={true}
-                                                        >
-                                                          <h3
-                                                            className="StyledHeading-sc-1rdh4aw-0 iEPYku"
-                                                          >
-                                                            Title
-                                                          </h3>
-                                                        </StyledComponent>
-                                                      </StyledHeading>
-                                                    </Heading>
                                                     <WithTheme(Button)
                                                       focusIndicator={true}
                                                       gap="small"
@@ -895,7 +767,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
                                                                       "componentStyle": ComponentStyle {
                                                                         "componentId": "StyledButton-sc-323bzc-0",
                                                                         "isStatic": false,
-                                                                        "lastClassName": "ibWwqS",
+                                                                        "lastClassName": "kPUXNH",
                                                                         "rules": Array [
                                                                           "display:inline-block;box-sizing:border-box;cursor:pointer;outline:none;font:inherit;text-decoration:none;margin:0;background:transparent;overflow:visible;text-transform:none;",
                                                                           [Function],
@@ -1203,9 +1075,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
                                                         >
                                                           <p
                                                             className="StyledParagraph-tbetod-0 dIDtVY"
-                                                          >
-                                                            Message
-                                                          </p>
+                                                          />
                                                         </StyledComponent>
                                                       </StyledParagraph>
                                                     </Paragraph>
@@ -1323,185 +1193,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
                                                 >
                                                   <div
                                                     className="StyledBox-sc-13pk1d4-0 fSSGpo"
-                                                  >
-                                                    <WithTheme(Button)
-                                                      fill={false}
-                                                      focusIndicator={true}
-                                                      gap="small"
-                                                      label="OK"
-                                                      onClick={[Function]}
-                                                      primary={true}
-                                                      type="button"
-                                                    >
-                                                      <FocusableComponent
-                                                        fill={false}
-                                                        focusIndicator={true}
-                                                        gap="small"
-                                                        label="OK"
-                                                        onClick={[Function]}
-                                                        primary={true}
-                                                        type="button"
-                                                        withFocusRef={null}
-                                                      >
-                                                        <WithTheme(Button)
-                                                          fill={false}
-                                                          focus={false}
-                                                          focusIndicator={true}
-                                                          gap="small"
-                                                          label="OK"
-                                                          onBlur={[Function]}
-                                                          onClick={[Function]}
-                                                          onFocus={[Function]}
-                                                          primary={true}
-                                                          type="button"
-                                                        >
-                                                          <Button
-                                                            fill={false}
-                                                            focus={false}
-                                                            focusIndicator={true}
-                                                            gap="small"
-                                                            label="OK"
-                                                            onBlur={[Function]}
-                                                            onClick={[Function]}
-                                                            onFocus={[Function]}
-                                                            primary={true}
-                                                            type="button"
-                                                          >
-                                                            <Button
-                                                              fill={false}
-                                                              focus={false}
-                                                              focusIndicator={true}
-                                                              forwardRef={
-                                                                Object {
-                                                                  "current": <button
-                                                                    class="StyledButton-sc-323bzc-0 ibWwqS"
-                                                                    type="button"
-                                                                  >
-                                                                    OK
-                                                                  </button>,
-                                                                }
-                                                              }
-                                                              gap="small"
-                                                              label="OK"
-                                                              onBlur={[Function]}
-                                                              onClick={[Function]}
-                                                              onFocus={[Function]}
-                                                              primary={true}
-                                                              type="button"
-                                                            >
-                                                              <StyledButton
-                                                                fillContainer={false}
-                                                                focus={false}
-                                                                focusIndicator={true}
-                                                                gap="small"
-                                                                hasIcon={false}
-                                                                hasLabel={true}
-                                                                onBlur={[Function]}
-                                                                onClick={[Function]}
-                                                                onFocus={[Function]}
-                                                                onMouseOut={[Function]}
-                                                                onMouseOver={[Function]}
-                                                                pad={true}
-                                                                primary={true}
-                                                                type="button"
-                                                              >
-                                                                <StyledComponent
-                                                                  fillContainer={false}
-                                                                  focus={false}
-                                                                  focusIndicator={true}
-                                                                  forwardedComponent={
-                                                                    Object {
-                                                                      "$$typeof": Symbol(react.forward_ref),
-                                                                      "attrs": Array [],
-                                                                      "componentStyle": ComponentStyle {
-                                                                        "componentId": "StyledButton-sc-323bzc-0",
-                                                                        "isStatic": false,
-                                                                        "lastClassName": "ibWwqS",
-                                                                        "rules": Array [
-                                                                          "display:inline-block;box-sizing:border-box;cursor:pointer;outline:none;font:inherit;text-decoration:none;margin:0;background:transparent;overflow:visible;text-transform:none;",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                        ],
-                                                                      },
-                                                                      "defaultProps": Object {},
-                                                                      "displayName": "StyledButton",
-                                                                      "foldedComponentIds": Array [],
-                                                                      "render": [Function],
-                                                                      "styledComponentId": "StyledButton-sc-323bzc-0",
-                                                                      "target": "button",
-                                                                      "toString": [Function],
-                                                                      "warnTooManyClasses": [Function],
-                                                                      "withComponent": [Function],
-                                                                    }
-                                                                  }
-                                                                  forwardedRef={
-                                                                    Object {
-                                                                      "current": <button
-                                                                        class="StyledButton-sc-323bzc-0 ibWwqS"
-                                                                        type="button"
-                                                                      >
-                                                                        OK
-                                                                      </button>,
-                                                                    }
-                                                                  }
-                                                                  gap="small"
-                                                                  hasIcon={false}
-                                                                  hasLabel={true}
-                                                                  onBlur={[Function]}
-                                                                  onClick={[Function]}
-                                                                  onFocus={[Function]}
-                                                                  onMouseOut={[Function]}
-                                                                  onMouseOver={[Function]}
-                                                                  pad={true}
-                                                                  primary={true}
-                                                                  type="button"
-                                                                >
-                                                                  <button
-                                                                    className="StyledButton-sc-323bzc-0 ibWwqS"
-                                                                    onBlur={[Function]}
-                                                                    onClick={[Function]}
-                                                                    onFocus={[Function]}
-                                                                    onMouseOut={[Function]}
-                                                                    onMouseOver={[Function]}
-                                                                    type="button"
-                                                                  >
-                                                                    OK
-                                                                  </button>
-                                                                </StyledComponent>
-                                                              </StyledButton>
-                                                            </Button>
-                                                          </Button>
-                                                        </WithTheme(Button)>
-                                                      </FocusableComponent>
-                                                    </WithTheme(Button)>
-                                                  </div>
+                                                  />
                                                 </StyledComponent>
                                               </StyledBox>
                                             </Box>
@@ -1533,25 +1225,25 @@ exports[`NotificationContext Should render a error popup 1`] = `
 <WithTheme(Component)
   headingProps={
     Object {
-      "color": "status-error",
+      "color": "",
       "level": 3,
     }
   }
   onClose={[Function]}
   opened={true}
-  title="Title"
+  title=""
   width="medium"
 >
   <Component
     headingProps={
       Object {
-        "color": "status-error",
+        "color": "",
         "level": 3,
       }
     }
     onClose={[Function]}
     opened={true}
-    title="Title"
+    title=""
     width="medium"
   >
     <Layer
@@ -1588,13 +1280,9 @@ exports[`NotificationContext Should render a error popup 1`] = `
                     class="StyledBox-sc-13pk1d4-0 jKLnMz"
                   >
                     <div
-                      class="StyledBox-sc-13pk1d4-0 lkzpGw"
+                      class="StyledBox-sc-13pk1d4-0 lkbCVP"
                     >
-                      <h3
-                        class="StyledHeading-sc-1rdh4aw-0 bwUBGa"
-                      >
-                        Title
-                      </h3>
+                      
                       <button
                         class="StyledButton-sc-323bzc-0 kPUXNH"
                         type="button"
@@ -1618,20 +1306,11 @@ exports[`NotificationContext Should render a error popup 1`] = `
                     >
                       <p
                         class="StyledParagraph-tbetod-0 dIDtVY"
-                      >
-                        Message
-                      </p>
+                      />
                     </div>
                     <div
                       class="StyledBox-sc-13pk1d4-0 fSSGpo"
-                    >
-                      <button
-                        class="StyledButton-sc-323bzc-0 ibWwqS"
-                        type="button"
-                      >
-                        OK
-                      </button>
-                    </div>
+                    />
                   </div>
                 </div>
               </div>
@@ -1726,13 +1405,9 @@ exports[`NotificationContext Should render a error popup 1`] = `
                               class="StyledBox-sc-13pk1d4-0 jKLnMz"
                             >
                               <div
-                                class="StyledBox-sc-13pk1d4-0 lkzpGw"
+                                class="StyledBox-sc-13pk1d4-0 lkbCVP"
                               >
-                                <h3
-                                  class="StyledHeading-sc-1rdh4aw-0 bwUBGa"
-                                >
-                                  Title
-                                </h3>
+                                
                                 <button
                                   class="StyledButton-sc-323bzc-0 kPUXNH"
                                   type="button"
@@ -1756,20 +1431,11 @@ exports[`NotificationContext Should render a error popup 1`] = `
                               >
                                 <p
                                   class="StyledParagraph-tbetod-0 dIDtVY"
-                                >
-                                  Message
-                                </p>
+                                />
                               </div>
                               <div
                                 class="StyledBox-sc-13pk1d4-0 fSSGpo"
-                              >
-                                <button
-                                  class="StyledButton-sc-323bzc-0 ibWwqS"
-                                  type="button"
-                                >
-                                  OK
-                                </button>
-                              </div>
+                              />
                             </div>
                           </div>
                         </div>,
@@ -1891,13 +1557,9 @@ exports[`NotificationContext Should render a error popup 1`] = `
                                   class="StyledBox-sc-13pk1d4-0 jKLnMz"
                                 >
                                   <div
-                                    class="StyledBox-sc-13pk1d4-0 lkzpGw"
+                                    class="StyledBox-sc-13pk1d4-0 lkbCVP"
                                   >
-                                    <h3
-                                      class="StyledHeading-sc-1rdh4aw-0 bwUBGa"
-                                    >
-                                      Title
-                                    </h3>
+                                    
                                     <button
                                       class="StyledButton-sc-323bzc-0 kPUXNH"
                                       type="button"
@@ -1921,20 +1583,11 @@ exports[`NotificationContext Should render a error popup 1`] = `
                                   >
                                     <p
                                       class="StyledParagraph-tbetod-0 dIDtVY"
-                                    >
-                                      Message
-                                    </p>
+                                    />
                                   </div>
                                   <div
                                     class="StyledBox-sc-13pk1d4-0 fSSGpo"
-                                  >
-                                    <button
-                                      class="StyledButton-sc-323bzc-0 ibWwqS"
-                                      type="button"
-                                    >
-                                      OK
-                                    </button>
-                                  </div>
+                                  />
                                 </div>
                               </div>,
                             }
@@ -2118,7 +1771,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
                                           alignContent="center"
                                           direction="row"
                                           flex={false}
-                                          justify="between"
+                                          justify="end"
                                           margin="none"
                                           pad="none"
                                           responsive={true}
@@ -2127,7 +1780,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
                                             alignContent="center"
                                             direction="row"
                                             flex={false}
-                                            justify="between"
+                                            justify="end"
                                             margin="none"
                                             pad="none"
                                             responsive={true}
@@ -2137,7 +1790,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
                                               direction="row"
                                               flex={false}
                                               forwardRef={null}
-                                              justify="between"
+                                              justify="end"
                                               margin="none"
                                               pad="none"
                                               responsive={true}
@@ -2146,7 +1799,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
                                                 alignContent="center"
                                                 directionProp="row"
                                                 flex={false}
-                                                justify="between"
+                                                justify="end"
                                                 margin="none"
                                                 pad="none"
                                                 responsive={true}
@@ -2222,103 +1875,14 @@ exports[`NotificationContext Should render a error popup 1`] = `
                                                     }
                                                   }
                                                   forwardedRef={null}
-                                                  justify="between"
+                                                  justify="end"
                                                   margin="none"
                                                   pad="none"
                                                   responsive={true}
                                                 >
                                                   <div
-                                                    className="StyledBox-sc-13pk1d4-0 lkzpGw"
+                                                    className="StyledBox-sc-13pk1d4-0 lkbCVP"
                                                   >
-                                                    <Heading
-                                                      color="status-error"
-                                                      level={3}
-                                                      margin={
-                                                        Object {
-                                                          "bottom": "none",
-                                                          "left": "none",
-                                                          "right": "medium",
-                                                          "top": "none",
-                                                        }
-                                                      }
-                                                      responsive={true}
-                                                    >
-                                                      <StyledHeading
-                                                        as="h3"
-                                                        colorProp="status-error"
-                                                        level={3}
-                                                        margin={
-                                                          Object {
-                                                            "bottom": "none",
-                                                            "left": "none",
-                                                            "right": "medium",
-                                                            "top": "none",
-                                                          }
-                                                        }
-                                                        responsive={true}
-                                                      >
-                                                        <StyledComponent
-                                                          as="h3"
-                                                          colorProp="status-error"
-                                                          forwardedComponent={
-                                                            Object {
-                                                              "$$typeof": Symbol(react.forward_ref),
-                                                              "attrs": Array [],
-                                                              "componentStyle": ComponentStyle {
-                                                                "componentId": "StyledHeading-sc-1rdh4aw-0",
-                                                                "isStatic": false,
-                                                                "lastClassName": "bwUBGa",
-                                                                "rules": Array [
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                ],
-                                                              },
-                                                              "defaultProps": Object {},
-                                                              "displayName": "StyledHeading",
-                                                              "foldedComponentIds": Array [],
-                                                              "render": [Function],
-                                                              "styledComponentId": "StyledHeading-sc-1rdh4aw-0",
-                                                              "target": "h1",
-                                                              "toString": [Function],
-                                                              "warnTooManyClasses": [Function],
-                                                              "withComponent": [Function],
-                                                            }
-                                                          }
-                                                          forwardedRef={null}
-                                                          level={3}
-                                                          margin={
-                                                            Object {
-                                                              "bottom": "none",
-                                                              "left": "none",
-                                                              "right": "medium",
-                                                              "top": "none",
-                                                            }
-                                                          }
-                                                          responsive={true}
-                                                        >
-                                                          <h3
-                                                            className="StyledHeading-sc-1rdh4aw-0 bwUBGa"
-                                                          >
-                                                            Title
-                                                          </h3>
-                                                        </StyledComponent>
-                                                      </StyledHeading>
-                                                    </Heading>
                                                     <WithTheme(Button)
                                                       focusIndicator={true}
                                                       gap="small"
@@ -2415,7 +1979,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
                                                                       "componentStyle": ComponentStyle {
                                                                         "componentId": "StyledButton-sc-323bzc-0",
                                                                         "isStatic": false,
-                                                                        "lastClassName": "ibWwqS",
+                                                                        "lastClassName": "kPUXNH",
                                                                         "rules": Array [
                                                                           "display:inline-block;box-sizing:border-box;cursor:pointer;outline:none;font:inherit;text-decoration:none;margin:0;background:transparent;overflow:visible;text-transform:none;",
                                                                           [Function],
@@ -2723,9 +2287,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
                                                         >
                                                           <p
                                                             className="StyledParagraph-tbetod-0 dIDtVY"
-                                                          >
-                                                            Message
-                                                          </p>
+                                                          />
                                                         </StyledComponent>
                                                       </StyledParagraph>
                                                     </Paragraph>
@@ -2843,185 +2405,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
                                                 >
                                                   <div
                                                     className="StyledBox-sc-13pk1d4-0 fSSGpo"
-                                                  >
-                                                    <WithTheme(Button)
-                                                      fill={false}
-                                                      focusIndicator={true}
-                                                      gap="small"
-                                                      label="OK"
-                                                      onClick={[Function]}
-                                                      primary={true}
-                                                      type="button"
-                                                    >
-                                                      <FocusableComponent
-                                                        fill={false}
-                                                        focusIndicator={true}
-                                                        gap="small"
-                                                        label="OK"
-                                                        onClick={[Function]}
-                                                        primary={true}
-                                                        type="button"
-                                                        withFocusRef={null}
-                                                      >
-                                                        <WithTheme(Button)
-                                                          fill={false}
-                                                          focus={false}
-                                                          focusIndicator={true}
-                                                          gap="small"
-                                                          label="OK"
-                                                          onBlur={[Function]}
-                                                          onClick={[Function]}
-                                                          onFocus={[Function]}
-                                                          primary={true}
-                                                          type="button"
-                                                        >
-                                                          <Button
-                                                            fill={false}
-                                                            focus={false}
-                                                            focusIndicator={true}
-                                                            gap="small"
-                                                            label="OK"
-                                                            onBlur={[Function]}
-                                                            onClick={[Function]}
-                                                            onFocus={[Function]}
-                                                            primary={true}
-                                                            type="button"
-                                                          >
-                                                            <Button
-                                                              fill={false}
-                                                              focus={false}
-                                                              focusIndicator={true}
-                                                              forwardRef={
-                                                                Object {
-                                                                  "current": <button
-                                                                    class="StyledButton-sc-323bzc-0 ibWwqS"
-                                                                    type="button"
-                                                                  >
-                                                                    OK
-                                                                  </button>,
-                                                                }
-                                                              }
-                                                              gap="small"
-                                                              label="OK"
-                                                              onBlur={[Function]}
-                                                              onClick={[Function]}
-                                                              onFocus={[Function]}
-                                                              primary={true}
-                                                              type="button"
-                                                            >
-                                                              <StyledButton
-                                                                fillContainer={false}
-                                                                focus={false}
-                                                                focusIndicator={true}
-                                                                gap="small"
-                                                                hasIcon={false}
-                                                                hasLabel={true}
-                                                                onBlur={[Function]}
-                                                                onClick={[Function]}
-                                                                onFocus={[Function]}
-                                                                onMouseOut={[Function]}
-                                                                onMouseOver={[Function]}
-                                                                pad={true}
-                                                                primary={true}
-                                                                type="button"
-                                                              >
-                                                                <StyledComponent
-                                                                  fillContainer={false}
-                                                                  focus={false}
-                                                                  focusIndicator={true}
-                                                                  forwardedComponent={
-                                                                    Object {
-                                                                      "$$typeof": Symbol(react.forward_ref),
-                                                                      "attrs": Array [],
-                                                                      "componentStyle": ComponentStyle {
-                                                                        "componentId": "StyledButton-sc-323bzc-0",
-                                                                        "isStatic": false,
-                                                                        "lastClassName": "ibWwqS",
-                                                                        "rules": Array [
-                                                                          "display:inline-block;box-sizing:border-box;cursor:pointer;outline:none;font:inherit;text-decoration:none;margin:0;background:transparent;overflow:visible;text-transform:none;",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                        ],
-                                                                      },
-                                                                      "defaultProps": Object {},
-                                                                      "displayName": "StyledButton",
-                                                                      "foldedComponentIds": Array [],
-                                                                      "render": [Function],
-                                                                      "styledComponentId": "StyledButton-sc-323bzc-0",
-                                                                      "target": "button",
-                                                                      "toString": [Function],
-                                                                      "warnTooManyClasses": [Function],
-                                                                      "withComponent": [Function],
-                                                                    }
-                                                                  }
-                                                                  forwardedRef={
-                                                                    Object {
-                                                                      "current": <button
-                                                                        class="StyledButton-sc-323bzc-0 ibWwqS"
-                                                                        type="button"
-                                                                      >
-                                                                        OK
-                                                                      </button>,
-                                                                    }
-                                                                  }
-                                                                  gap="small"
-                                                                  hasIcon={false}
-                                                                  hasLabel={true}
-                                                                  onBlur={[Function]}
-                                                                  onClick={[Function]}
-                                                                  onFocus={[Function]}
-                                                                  onMouseOut={[Function]}
-                                                                  onMouseOver={[Function]}
-                                                                  pad={true}
-                                                                  primary={true}
-                                                                  type="button"
-                                                                >
-                                                                  <button
-                                                                    className="StyledButton-sc-323bzc-0 ibWwqS"
-                                                                    onBlur={[Function]}
-                                                                    onClick={[Function]}
-                                                                    onFocus={[Function]}
-                                                                    onMouseOut={[Function]}
-                                                                    onMouseOver={[Function]}
-                                                                    type="button"
-                                                                  >
-                                                                    OK
-                                                                  </button>
-                                                                </StyledComponent>
-                                                              </StyledButton>
-                                                            </Button>
-                                                          </Button>
-                                                        </WithTheme(Button)>
-                                                      </FocusableComponent>
-                                                    </WithTheme(Button)>
-                                                  </div>
+                                                  />
                                                 </StyledComponent>
                                               </StyledBox>
                                             </Box>
@@ -3053,25 +2437,25 @@ exports[`NotificationContext Should render a success popup 1`] = `
 <WithTheme(Component)
   headingProps={
     Object {
-      "color": "status-ok",
+      "color": "",
       "level": 3,
     }
   }
   onClose={[Function]}
   opened={true}
-  title="Title"
+  title=""
   width="medium"
 >
   <Component
     headingProps={
       Object {
-        "color": "status-ok",
+        "color": "",
         "level": 3,
       }
     }
     onClose={[Function]}
     opened={true}
-    title="Title"
+    title=""
     width="medium"
   >
     <Layer
@@ -3108,13 +2492,9 @@ exports[`NotificationContext Should render a success popup 1`] = `
                     class="StyledBox-sc-13pk1d4-0 jKLnMz"
                   >
                     <div
-                      class="StyledBox-sc-13pk1d4-0 lkzpGw"
+                      class="StyledBox-sc-13pk1d4-0 lkbCVP"
                     >
-                      <h3
-                        class="StyledHeading-sc-1rdh4aw-0 cvWvQz"
-                      >
-                        Title
-                      </h3>
+                      
                       <button
                         class="StyledButton-sc-323bzc-0 kPUXNH"
                         type="button"
@@ -3138,20 +2518,11 @@ exports[`NotificationContext Should render a success popup 1`] = `
                     >
                       <p
                         class="StyledParagraph-tbetod-0 dIDtVY"
-                      >
-                        Message
-                      </p>
+                      />
                     </div>
                     <div
                       class="StyledBox-sc-13pk1d4-0 fSSGpo"
-                    >
-                      <button
-                        class="StyledButton-sc-323bzc-0 ibWwqS"
-                        type="button"
-                      >
-                        OK
-                      </button>
-                    </div>
+                    />
                   </div>
                 </div>
               </div>
@@ -3246,13 +2617,9 @@ exports[`NotificationContext Should render a success popup 1`] = `
                               class="StyledBox-sc-13pk1d4-0 jKLnMz"
                             >
                               <div
-                                class="StyledBox-sc-13pk1d4-0 lkzpGw"
+                                class="StyledBox-sc-13pk1d4-0 lkbCVP"
                               >
-                                <h3
-                                  class="StyledHeading-sc-1rdh4aw-0 cvWvQz"
-                                >
-                                  Title
-                                </h3>
+                                
                                 <button
                                   class="StyledButton-sc-323bzc-0 kPUXNH"
                                   type="button"
@@ -3276,20 +2643,11 @@ exports[`NotificationContext Should render a success popup 1`] = `
                               >
                                 <p
                                   class="StyledParagraph-tbetod-0 dIDtVY"
-                                >
-                                  Message
-                                </p>
+                                />
                               </div>
                               <div
                                 class="StyledBox-sc-13pk1d4-0 fSSGpo"
-                              >
-                                <button
-                                  class="StyledButton-sc-323bzc-0 ibWwqS"
-                                  type="button"
-                                >
-                                  OK
-                                </button>
-                              </div>
+                              />
                             </div>
                           </div>
                         </div>,
@@ -3411,13 +2769,9 @@ exports[`NotificationContext Should render a success popup 1`] = `
                                   class="StyledBox-sc-13pk1d4-0 jKLnMz"
                                 >
                                   <div
-                                    class="StyledBox-sc-13pk1d4-0 lkzpGw"
+                                    class="StyledBox-sc-13pk1d4-0 lkbCVP"
                                   >
-                                    <h3
-                                      class="StyledHeading-sc-1rdh4aw-0 cvWvQz"
-                                    >
-                                      Title
-                                    </h3>
+                                    
                                     <button
                                       class="StyledButton-sc-323bzc-0 kPUXNH"
                                       type="button"
@@ -3441,20 +2795,11 @@ exports[`NotificationContext Should render a success popup 1`] = `
                                   >
                                     <p
                                       class="StyledParagraph-tbetod-0 dIDtVY"
-                                    >
-                                      Message
-                                    </p>
+                                    />
                                   </div>
                                   <div
                                     class="StyledBox-sc-13pk1d4-0 fSSGpo"
-                                  >
-                                    <button
-                                      class="StyledButton-sc-323bzc-0 ibWwqS"
-                                      type="button"
-                                    >
-                                      OK
-                                    </button>
-                                  </div>
+                                  />
                                 </div>
                               </div>,
                             }
@@ -3638,7 +2983,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
                                           alignContent="center"
                                           direction="row"
                                           flex={false}
-                                          justify="between"
+                                          justify="end"
                                           margin="none"
                                           pad="none"
                                           responsive={true}
@@ -3647,7 +2992,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
                                             alignContent="center"
                                             direction="row"
                                             flex={false}
-                                            justify="between"
+                                            justify="end"
                                             margin="none"
                                             pad="none"
                                             responsive={true}
@@ -3657,7 +3002,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
                                               direction="row"
                                               flex={false}
                                               forwardRef={null}
-                                              justify="between"
+                                              justify="end"
                                               margin="none"
                                               pad="none"
                                               responsive={true}
@@ -3666,7 +3011,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
                                                 alignContent="center"
                                                 directionProp="row"
                                                 flex={false}
-                                                justify="between"
+                                                justify="end"
                                                 margin="none"
                                                 pad="none"
                                                 responsive={true}
@@ -3742,103 +3087,14 @@ exports[`NotificationContext Should render a success popup 1`] = `
                                                     }
                                                   }
                                                   forwardedRef={null}
-                                                  justify="between"
+                                                  justify="end"
                                                   margin="none"
                                                   pad="none"
                                                   responsive={true}
                                                 >
                                                   <div
-                                                    className="StyledBox-sc-13pk1d4-0 lkzpGw"
+                                                    className="StyledBox-sc-13pk1d4-0 lkbCVP"
                                                   >
-                                                    <Heading
-                                                      color="status-ok"
-                                                      level={3}
-                                                      margin={
-                                                        Object {
-                                                          "bottom": "none",
-                                                          "left": "none",
-                                                          "right": "medium",
-                                                          "top": "none",
-                                                        }
-                                                      }
-                                                      responsive={true}
-                                                    >
-                                                      <StyledHeading
-                                                        as="h3"
-                                                        colorProp="status-ok"
-                                                        level={3}
-                                                        margin={
-                                                          Object {
-                                                            "bottom": "none",
-                                                            "left": "none",
-                                                            "right": "medium",
-                                                            "top": "none",
-                                                          }
-                                                        }
-                                                        responsive={true}
-                                                      >
-                                                        <StyledComponent
-                                                          as="h3"
-                                                          colorProp="status-ok"
-                                                          forwardedComponent={
-                                                            Object {
-                                                              "$$typeof": Symbol(react.forward_ref),
-                                                              "attrs": Array [],
-                                                              "componentStyle": ComponentStyle {
-                                                                "componentId": "StyledHeading-sc-1rdh4aw-0",
-                                                                "isStatic": false,
-                                                                "lastClassName": "cvWvQz",
-                                                                "rules": Array [
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                ],
-                                                              },
-                                                              "defaultProps": Object {},
-                                                              "displayName": "StyledHeading",
-                                                              "foldedComponentIds": Array [],
-                                                              "render": [Function],
-                                                              "styledComponentId": "StyledHeading-sc-1rdh4aw-0",
-                                                              "target": "h1",
-                                                              "toString": [Function],
-                                                              "warnTooManyClasses": [Function],
-                                                              "withComponent": [Function],
-                                                            }
-                                                          }
-                                                          forwardedRef={null}
-                                                          level={3}
-                                                          margin={
-                                                            Object {
-                                                              "bottom": "none",
-                                                              "left": "none",
-                                                              "right": "medium",
-                                                              "top": "none",
-                                                            }
-                                                          }
-                                                          responsive={true}
-                                                        >
-                                                          <h3
-                                                            className="StyledHeading-sc-1rdh4aw-0 cvWvQz"
-                                                          >
-                                                            Title
-                                                          </h3>
-                                                        </StyledComponent>
-                                                      </StyledHeading>
-                                                    </Heading>
                                                     <WithTheme(Button)
                                                       focusIndicator={true}
                                                       gap="small"
@@ -3935,7 +3191,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
                                                                       "componentStyle": ComponentStyle {
                                                                         "componentId": "StyledButton-sc-323bzc-0",
                                                                         "isStatic": false,
-                                                                        "lastClassName": "ibWwqS",
+                                                                        "lastClassName": "kPUXNH",
                                                                         "rules": Array [
                                                                           "display:inline-block;box-sizing:border-box;cursor:pointer;outline:none;font:inherit;text-decoration:none;margin:0;background:transparent;overflow:visible;text-transform:none;",
                                                                           [Function],
@@ -4243,9 +3499,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
                                                         >
                                                           <p
                                                             className="StyledParagraph-tbetod-0 dIDtVY"
-                                                          >
-                                                            Message
-                                                          </p>
+                                                          />
                                                         </StyledComponent>
                                                       </StyledParagraph>
                                                     </Paragraph>
@@ -4363,185 +3617,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
                                                 >
                                                   <div
                                                     className="StyledBox-sc-13pk1d4-0 fSSGpo"
-                                                  >
-                                                    <WithTheme(Button)
-                                                      fill={false}
-                                                      focusIndicator={true}
-                                                      gap="small"
-                                                      label="OK"
-                                                      onClick={[Function]}
-                                                      primary={true}
-                                                      type="button"
-                                                    >
-                                                      <FocusableComponent
-                                                        fill={false}
-                                                        focusIndicator={true}
-                                                        gap="small"
-                                                        label="OK"
-                                                        onClick={[Function]}
-                                                        primary={true}
-                                                        type="button"
-                                                        withFocusRef={null}
-                                                      >
-                                                        <WithTheme(Button)
-                                                          fill={false}
-                                                          focus={false}
-                                                          focusIndicator={true}
-                                                          gap="small"
-                                                          label="OK"
-                                                          onBlur={[Function]}
-                                                          onClick={[Function]}
-                                                          onFocus={[Function]}
-                                                          primary={true}
-                                                          type="button"
-                                                        >
-                                                          <Button
-                                                            fill={false}
-                                                            focus={false}
-                                                            focusIndicator={true}
-                                                            gap="small"
-                                                            label="OK"
-                                                            onBlur={[Function]}
-                                                            onClick={[Function]}
-                                                            onFocus={[Function]}
-                                                            primary={true}
-                                                            type="button"
-                                                          >
-                                                            <Button
-                                                              fill={false}
-                                                              focus={false}
-                                                              focusIndicator={true}
-                                                              forwardRef={
-                                                                Object {
-                                                                  "current": <button
-                                                                    class="StyledButton-sc-323bzc-0 ibWwqS"
-                                                                    type="button"
-                                                                  >
-                                                                    OK
-                                                                  </button>,
-                                                                }
-                                                              }
-                                                              gap="small"
-                                                              label="OK"
-                                                              onBlur={[Function]}
-                                                              onClick={[Function]}
-                                                              onFocus={[Function]}
-                                                              primary={true}
-                                                              type="button"
-                                                            >
-                                                              <StyledButton
-                                                                fillContainer={false}
-                                                                focus={false}
-                                                                focusIndicator={true}
-                                                                gap="small"
-                                                                hasIcon={false}
-                                                                hasLabel={true}
-                                                                onBlur={[Function]}
-                                                                onClick={[Function]}
-                                                                onFocus={[Function]}
-                                                                onMouseOut={[Function]}
-                                                                onMouseOver={[Function]}
-                                                                pad={true}
-                                                                primary={true}
-                                                                type="button"
-                                                              >
-                                                                <StyledComponent
-                                                                  fillContainer={false}
-                                                                  focus={false}
-                                                                  focusIndicator={true}
-                                                                  forwardedComponent={
-                                                                    Object {
-                                                                      "$$typeof": Symbol(react.forward_ref),
-                                                                      "attrs": Array [],
-                                                                      "componentStyle": ComponentStyle {
-                                                                        "componentId": "StyledButton-sc-323bzc-0",
-                                                                        "isStatic": false,
-                                                                        "lastClassName": "ibWwqS",
-                                                                        "rules": Array [
-                                                                          "display:inline-block;box-sizing:border-box;cursor:pointer;outline:none;font:inherit;text-decoration:none;margin:0;background:transparent;overflow:visible;text-transform:none;",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                        ],
-                                                                      },
-                                                                      "defaultProps": Object {},
-                                                                      "displayName": "StyledButton",
-                                                                      "foldedComponentIds": Array [],
-                                                                      "render": [Function],
-                                                                      "styledComponentId": "StyledButton-sc-323bzc-0",
-                                                                      "target": "button",
-                                                                      "toString": [Function],
-                                                                      "warnTooManyClasses": [Function],
-                                                                      "withComponent": [Function],
-                                                                    }
-                                                                  }
-                                                                  forwardedRef={
-                                                                    Object {
-                                                                      "current": <button
-                                                                        class="StyledButton-sc-323bzc-0 ibWwqS"
-                                                                        type="button"
-                                                                      >
-                                                                        OK
-                                                                      </button>,
-                                                                    }
-                                                                  }
-                                                                  gap="small"
-                                                                  hasIcon={false}
-                                                                  hasLabel={true}
-                                                                  onBlur={[Function]}
-                                                                  onClick={[Function]}
-                                                                  onFocus={[Function]}
-                                                                  onMouseOut={[Function]}
-                                                                  onMouseOver={[Function]}
-                                                                  pad={true}
-                                                                  primary={true}
-                                                                  type="button"
-                                                                >
-                                                                  <button
-                                                                    className="StyledButton-sc-323bzc-0 ibWwqS"
-                                                                    onBlur={[Function]}
-                                                                    onClick={[Function]}
-                                                                    onFocus={[Function]}
-                                                                    onMouseOut={[Function]}
-                                                                    onMouseOver={[Function]}
-                                                                    type="button"
-                                                                  >
-                                                                    OK
-                                                                  </button>
-                                                                </StyledComponent>
-                                                              </StyledButton>
-                                                            </Button>
-                                                          </Button>
-                                                        </WithTheme(Button)>
-                                                      </FocusableComponent>
-                                                    </WithTheme(Button)>
-                                                  </div>
+                                                  />
                                                 </StyledComponent>
                                               </StyledBox>
                                             </Box>
@@ -4573,25 +3649,25 @@ exports[`NotificationContext Should render a warning popup 1`] = `
 <WithTheme(Component)
   headingProps={
     Object {
-      "color": "status-warning",
+      "color": "",
       "level": 3,
     }
   }
   onClose={[Function]}
   opened={true}
-  title="Title"
+  title=""
   width="medium"
 >
   <Component
     headingProps={
       Object {
-        "color": "status-warning",
+        "color": "",
         "level": 3,
       }
     }
     onClose={[Function]}
     opened={true}
-    title="Title"
+    title=""
     width="medium"
   >
     <Layer
@@ -4628,13 +3704,9 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                     class="StyledBox-sc-13pk1d4-0 jKLnMz"
                   >
                     <div
-                      class="StyledBox-sc-13pk1d4-0 lkzpGw"
+                      class="StyledBox-sc-13pk1d4-0 lkbCVP"
                     >
-                      <h3
-                        class="StyledHeading-sc-1rdh4aw-0 ijqQPw"
-                      >
-                        Title
-                      </h3>
+                      
                       <button
                         class="StyledButton-sc-323bzc-0 kPUXNH"
                         type="button"
@@ -4658,20 +3730,11 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                     >
                       <p
                         class="StyledParagraph-tbetod-0 dIDtVY"
-                      >
-                        Message
-                      </p>
+                      />
                     </div>
                     <div
                       class="StyledBox-sc-13pk1d4-0 fSSGpo"
-                    >
-                      <button
-                        class="StyledButton-sc-323bzc-0 ibWwqS"
-                        type="button"
-                      >
-                        OK
-                      </button>
-                    </div>
+                    />
                   </div>
                 </div>
               </div>
@@ -4766,13 +3829,9 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                               class="StyledBox-sc-13pk1d4-0 jKLnMz"
                             >
                               <div
-                                class="StyledBox-sc-13pk1d4-0 lkzpGw"
+                                class="StyledBox-sc-13pk1d4-0 lkbCVP"
                               >
-                                <h3
-                                  class="StyledHeading-sc-1rdh4aw-0 ijqQPw"
-                                >
-                                  Title
-                                </h3>
+                                
                                 <button
                                   class="StyledButton-sc-323bzc-0 kPUXNH"
                                   type="button"
@@ -4796,20 +3855,11 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                               >
                                 <p
                                   class="StyledParagraph-tbetod-0 dIDtVY"
-                                >
-                                  Message
-                                </p>
+                                />
                               </div>
                               <div
                                 class="StyledBox-sc-13pk1d4-0 fSSGpo"
-                              >
-                                <button
-                                  class="StyledButton-sc-323bzc-0 ibWwqS"
-                                  type="button"
-                                >
-                                  OK
-                                </button>
-                              </div>
+                              />
                             </div>
                           </div>
                         </div>,
@@ -4931,13 +3981,9 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                                   class="StyledBox-sc-13pk1d4-0 jKLnMz"
                                 >
                                   <div
-                                    class="StyledBox-sc-13pk1d4-0 lkzpGw"
+                                    class="StyledBox-sc-13pk1d4-0 lkbCVP"
                                   >
-                                    <h3
-                                      class="StyledHeading-sc-1rdh4aw-0 ijqQPw"
-                                    >
-                                      Title
-                                    </h3>
+                                    
                                     <button
                                       class="StyledButton-sc-323bzc-0 kPUXNH"
                                       type="button"
@@ -4961,20 +4007,11 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                                   >
                                     <p
                                       class="StyledParagraph-tbetod-0 dIDtVY"
-                                    >
-                                      Message
-                                    </p>
+                                    />
                                   </div>
                                   <div
                                     class="StyledBox-sc-13pk1d4-0 fSSGpo"
-                                  >
-                                    <button
-                                      class="StyledButton-sc-323bzc-0 ibWwqS"
-                                      type="button"
-                                    >
-                                      OK
-                                    </button>
-                                  </div>
+                                  />
                                 </div>
                               </div>,
                             }
@@ -5158,7 +4195,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                                           alignContent="center"
                                           direction="row"
                                           flex={false}
-                                          justify="between"
+                                          justify="end"
                                           margin="none"
                                           pad="none"
                                           responsive={true}
@@ -5167,7 +4204,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                                             alignContent="center"
                                             direction="row"
                                             flex={false}
-                                            justify="between"
+                                            justify="end"
                                             margin="none"
                                             pad="none"
                                             responsive={true}
@@ -5177,7 +4214,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                                               direction="row"
                                               flex={false}
                                               forwardRef={null}
-                                              justify="between"
+                                              justify="end"
                                               margin="none"
                                               pad="none"
                                               responsive={true}
@@ -5186,7 +4223,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                                                 alignContent="center"
                                                 directionProp="row"
                                                 flex={false}
-                                                justify="between"
+                                                justify="end"
                                                 margin="none"
                                                 pad="none"
                                                 responsive={true}
@@ -5262,103 +4299,14 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                                                     }
                                                   }
                                                   forwardedRef={null}
-                                                  justify="between"
+                                                  justify="end"
                                                   margin="none"
                                                   pad="none"
                                                   responsive={true}
                                                 >
                                                   <div
-                                                    className="StyledBox-sc-13pk1d4-0 lkzpGw"
+                                                    className="StyledBox-sc-13pk1d4-0 lkbCVP"
                                                   >
-                                                    <Heading
-                                                      color="status-warning"
-                                                      level={3}
-                                                      margin={
-                                                        Object {
-                                                          "bottom": "none",
-                                                          "left": "none",
-                                                          "right": "medium",
-                                                          "top": "none",
-                                                        }
-                                                      }
-                                                      responsive={true}
-                                                    >
-                                                      <StyledHeading
-                                                        as="h3"
-                                                        colorProp="status-warning"
-                                                        level={3}
-                                                        margin={
-                                                          Object {
-                                                            "bottom": "none",
-                                                            "left": "none",
-                                                            "right": "medium",
-                                                            "top": "none",
-                                                          }
-                                                        }
-                                                        responsive={true}
-                                                      >
-                                                        <StyledComponent
-                                                          as="h3"
-                                                          colorProp="status-warning"
-                                                          forwardedComponent={
-                                                            Object {
-                                                              "$$typeof": Symbol(react.forward_ref),
-                                                              "attrs": Array [],
-                                                              "componentStyle": ComponentStyle {
-                                                                "componentId": "StyledHeading-sc-1rdh4aw-0",
-                                                                "isStatic": false,
-                                                                "lastClassName": "ijqQPw",
-                                                                "rules": Array [
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                ],
-                                                              },
-                                                              "defaultProps": Object {},
-                                                              "displayName": "StyledHeading",
-                                                              "foldedComponentIds": Array [],
-                                                              "render": [Function],
-                                                              "styledComponentId": "StyledHeading-sc-1rdh4aw-0",
-                                                              "target": "h1",
-                                                              "toString": [Function],
-                                                              "warnTooManyClasses": [Function],
-                                                              "withComponent": [Function],
-                                                            }
-                                                          }
-                                                          forwardedRef={null}
-                                                          level={3}
-                                                          margin={
-                                                            Object {
-                                                              "bottom": "none",
-                                                              "left": "none",
-                                                              "right": "medium",
-                                                              "top": "none",
-                                                            }
-                                                          }
-                                                          responsive={true}
-                                                        >
-                                                          <h3
-                                                            className="StyledHeading-sc-1rdh4aw-0 ijqQPw"
-                                                          >
-                                                            Title
-                                                          </h3>
-                                                        </StyledComponent>
-                                                      </StyledHeading>
-                                                    </Heading>
                                                     <WithTheme(Button)
                                                       focusIndicator={true}
                                                       gap="small"
@@ -5455,7 +4403,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                                                                       "componentStyle": ComponentStyle {
                                                                         "componentId": "StyledButton-sc-323bzc-0",
                                                                         "isStatic": false,
-                                                                        "lastClassName": "ibWwqS",
+                                                                        "lastClassName": "kPUXNH",
                                                                         "rules": Array [
                                                                           "display:inline-block;box-sizing:border-box;cursor:pointer;outline:none;font:inherit;text-decoration:none;margin:0;background:transparent;overflow:visible;text-transform:none;",
                                                                           [Function],
@@ -5763,9 +4711,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                                                         >
                                                           <p
                                                             className="StyledParagraph-tbetod-0 dIDtVY"
-                                                          >
-                                                            Message
-                                                          </p>
+                                                          />
                                                         </StyledComponent>
                                                       </StyledParagraph>
                                                     </Paragraph>
@@ -5883,185 +4829,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                                                 >
                                                   <div
                                                     className="StyledBox-sc-13pk1d4-0 fSSGpo"
-                                                  >
-                                                    <WithTheme(Button)
-                                                      fill={false}
-                                                      focusIndicator={true}
-                                                      gap="small"
-                                                      label="OK"
-                                                      onClick={[Function]}
-                                                      primary={true}
-                                                      type="button"
-                                                    >
-                                                      <FocusableComponent
-                                                        fill={false}
-                                                        focusIndicator={true}
-                                                        gap="small"
-                                                        label="OK"
-                                                        onClick={[Function]}
-                                                        primary={true}
-                                                        type="button"
-                                                        withFocusRef={null}
-                                                      >
-                                                        <WithTheme(Button)
-                                                          fill={false}
-                                                          focus={false}
-                                                          focusIndicator={true}
-                                                          gap="small"
-                                                          label="OK"
-                                                          onBlur={[Function]}
-                                                          onClick={[Function]}
-                                                          onFocus={[Function]}
-                                                          primary={true}
-                                                          type="button"
-                                                        >
-                                                          <Button
-                                                            fill={false}
-                                                            focus={false}
-                                                            focusIndicator={true}
-                                                            gap="small"
-                                                            label="OK"
-                                                            onBlur={[Function]}
-                                                            onClick={[Function]}
-                                                            onFocus={[Function]}
-                                                            primary={true}
-                                                            type="button"
-                                                          >
-                                                            <Button
-                                                              fill={false}
-                                                              focus={false}
-                                                              focusIndicator={true}
-                                                              forwardRef={
-                                                                Object {
-                                                                  "current": <button
-                                                                    class="StyledButton-sc-323bzc-0 ibWwqS"
-                                                                    type="button"
-                                                                  >
-                                                                    OK
-                                                                  </button>,
-                                                                }
-                                                              }
-                                                              gap="small"
-                                                              label="OK"
-                                                              onBlur={[Function]}
-                                                              onClick={[Function]}
-                                                              onFocus={[Function]}
-                                                              primary={true}
-                                                              type="button"
-                                                            >
-                                                              <StyledButton
-                                                                fillContainer={false}
-                                                                focus={false}
-                                                                focusIndicator={true}
-                                                                gap="small"
-                                                                hasIcon={false}
-                                                                hasLabel={true}
-                                                                onBlur={[Function]}
-                                                                onClick={[Function]}
-                                                                onFocus={[Function]}
-                                                                onMouseOut={[Function]}
-                                                                onMouseOver={[Function]}
-                                                                pad={true}
-                                                                primary={true}
-                                                                type="button"
-                                                              >
-                                                                <StyledComponent
-                                                                  fillContainer={false}
-                                                                  focus={false}
-                                                                  focusIndicator={true}
-                                                                  forwardedComponent={
-                                                                    Object {
-                                                                      "$$typeof": Symbol(react.forward_ref),
-                                                                      "attrs": Array [],
-                                                                      "componentStyle": ComponentStyle {
-                                                                        "componentId": "StyledButton-sc-323bzc-0",
-                                                                        "isStatic": false,
-                                                                        "lastClassName": "ibWwqS",
-                                                                        "rules": Array [
-                                                                          "display:inline-block;box-sizing:border-box;cursor:pointer;outline:none;font:inherit;text-decoration:none;margin:0;background:transparent;overflow:visible;text-transform:none;",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                        ],
-                                                                      },
-                                                                      "defaultProps": Object {},
-                                                                      "displayName": "StyledButton",
-                                                                      "foldedComponentIds": Array [],
-                                                                      "render": [Function],
-                                                                      "styledComponentId": "StyledButton-sc-323bzc-0",
-                                                                      "target": "button",
-                                                                      "toString": [Function],
-                                                                      "warnTooManyClasses": [Function],
-                                                                      "withComponent": [Function],
-                                                                    }
-                                                                  }
-                                                                  forwardedRef={
-                                                                    Object {
-                                                                      "current": <button
-                                                                        class="StyledButton-sc-323bzc-0 ibWwqS"
-                                                                        type="button"
-                                                                      >
-                                                                        OK
-                                                                      </button>,
-                                                                    }
-                                                                  }
-                                                                  gap="small"
-                                                                  hasIcon={false}
-                                                                  hasLabel={true}
-                                                                  onBlur={[Function]}
-                                                                  onClick={[Function]}
-                                                                  onFocus={[Function]}
-                                                                  onMouseOut={[Function]}
-                                                                  onMouseOver={[Function]}
-                                                                  pad={true}
-                                                                  primary={true}
-                                                                  type="button"
-                                                                >
-                                                                  <button
-                                                                    className="StyledButton-sc-323bzc-0 ibWwqS"
-                                                                    onBlur={[Function]}
-                                                                    onClick={[Function]}
-                                                                    onFocus={[Function]}
-                                                                    onMouseOut={[Function]}
-                                                                    onMouseOver={[Function]}
-                                                                    type="button"
-                                                                  >
-                                                                    OK
-                                                                  </button>
-                                                                </StyledComponent>
-                                                              </StyledButton>
-                                                            </Button>
-                                                          </Button>
-                                                        </WithTheme(Button)>
-                                                      </FocusableComponent>
-                                                    </WithTheme(Button)>
-                                                  </div>
+                                                  />
                                                 </StyledComponent>
                                               </StyledBox>
                                             </Box>
@@ -6099,7 +4867,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
   }
   onClose={[Function]}
   opened={true}
-  title="Title"
+  title=""
   width="medium"
 >
   <Component
@@ -6111,7 +4879,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
     }
     onClose={[Function]}
     opened={true}
-    title="Title"
+    title=""
     width="medium"
   >
     <Layer
@@ -6148,13 +4916,9 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                     class="StyledBox-sc-13pk1d4-0 jKLnMz"
                   >
                     <div
-                      class="StyledBox-sc-13pk1d4-0 lkzpGw"
+                      class="StyledBox-sc-13pk1d4-0 lkbCVP"
                     >
-                      <h3
-                        class="StyledHeading-sc-1rdh4aw-0 iEPYku"
-                      >
-                        Title
-                      </h3>
+                      
                       <button
                         class="StyledButton-sc-323bzc-0 kPUXNH"
                         type="button"
@@ -6178,20 +4942,11 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                     >
                       <p
                         class="StyledParagraph-tbetod-0 dIDtVY"
-                      >
-                        Message
-                      </p>
+                      />
                     </div>
                     <div
                       class="StyledBox-sc-13pk1d4-0 fSSGpo"
-                    >
-                      <button
-                        class="StyledButton-sc-323bzc-0 ibWwqS"
-                        type="button"
-                      >
-                        Crazy Label
-                      </button>
-                    </div>
+                    />
                   </div>
                 </div>
               </div>
@@ -6286,13 +5041,9 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                               class="StyledBox-sc-13pk1d4-0 jKLnMz"
                             >
                               <div
-                                class="StyledBox-sc-13pk1d4-0 lkzpGw"
+                                class="StyledBox-sc-13pk1d4-0 lkbCVP"
                               >
-                                <h3
-                                  class="StyledHeading-sc-1rdh4aw-0 iEPYku"
-                                >
-                                  Title
-                                </h3>
+                                
                                 <button
                                   class="StyledButton-sc-323bzc-0 kPUXNH"
                                   type="button"
@@ -6316,20 +5067,11 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                               >
                                 <p
                                   class="StyledParagraph-tbetod-0 dIDtVY"
-                                >
-                                  Message
-                                </p>
+                                />
                               </div>
                               <div
                                 class="StyledBox-sc-13pk1d4-0 fSSGpo"
-                              >
-                                <button
-                                  class="StyledButton-sc-323bzc-0 ibWwqS"
-                                  type="button"
-                                >
-                                  Crazy Label
-                                </button>
-                              </div>
+                              />
                             </div>
                           </div>
                         </div>,
@@ -6451,13 +5193,9 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                                   class="StyledBox-sc-13pk1d4-0 jKLnMz"
                                 >
                                   <div
-                                    class="StyledBox-sc-13pk1d4-0 lkzpGw"
+                                    class="StyledBox-sc-13pk1d4-0 lkbCVP"
                                   >
-                                    <h3
-                                      class="StyledHeading-sc-1rdh4aw-0 iEPYku"
-                                    >
-                                      Title
-                                    </h3>
+                                    
                                     <button
                                       class="StyledButton-sc-323bzc-0 kPUXNH"
                                       type="button"
@@ -6481,20 +5219,11 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                                   >
                                     <p
                                       class="StyledParagraph-tbetod-0 dIDtVY"
-                                    >
-                                      Message
-                                    </p>
+                                    />
                                   </div>
                                   <div
                                     class="StyledBox-sc-13pk1d4-0 fSSGpo"
-                                  >
-                                    <button
-                                      class="StyledButton-sc-323bzc-0 ibWwqS"
-                                      type="button"
-                                    >
-                                      Crazy Label
-                                    </button>
-                                  </div>
+                                  />
                                 </div>
                               </div>,
                             }
@@ -6678,7 +5407,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                                           alignContent="center"
                                           direction="row"
                                           flex={false}
-                                          justify="between"
+                                          justify="end"
                                           margin="none"
                                           pad="none"
                                           responsive={true}
@@ -6687,7 +5416,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                                             alignContent="center"
                                             direction="row"
                                             flex={false}
-                                            justify="between"
+                                            justify="end"
                                             margin="none"
                                             pad="none"
                                             responsive={true}
@@ -6697,7 +5426,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                                               direction="row"
                                               flex={false}
                                               forwardRef={null}
-                                              justify="between"
+                                              justify="end"
                                               margin="none"
                                               pad="none"
                                               responsive={true}
@@ -6706,7 +5435,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                                                 alignContent="center"
                                                 directionProp="row"
                                                 flex={false}
-                                                justify="between"
+                                                justify="end"
                                                 margin="none"
                                                 pad="none"
                                                 responsive={true}
@@ -6782,103 +5511,14 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                                                     }
                                                   }
                                                   forwardedRef={null}
-                                                  justify="between"
+                                                  justify="end"
                                                   margin="none"
                                                   pad="none"
                                                   responsive={true}
                                                 >
                                                   <div
-                                                    className="StyledBox-sc-13pk1d4-0 lkzpGw"
+                                                    className="StyledBox-sc-13pk1d4-0 lkbCVP"
                                                   >
-                                                    <Heading
-                                                      color=""
-                                                      level={3}
-                                                      margin={
-                                                        Object {
-                                                          "bottom": "none",
-                                                          "left": "none",
-                                                          "right": "medium",
-                                                          "top": "none",
-                                                        }
-                                                      }
-                                                      responsive={true}
-                                                    >
-                                                      <StyledHeading
-                                                        as="h3"
-                                                        colorProp=""
-                                                        level={3}
-                                                        margin={
-                                                          Object {
-                                                            "bottom": "none",
-                                                            "left": "none",
-                                                            "right": "medium",
-                                                            "top": "none",
-                                                          }
-                                                        }
-                                                        responsive={true}
-                                                      >
-                                                        <StyledComponent
-                                                          as="h3"
-                                                          colorProp=""
-                                                          forwardedComponent={
-                                                            Object {
-                                                              "$$typeof": Symbol(react.forward_ref),
-                                                              "attrs": Array [],
-                                                              "componentStyle": ComponentStyle {
-                                                                "componentId": "StyledHeading-sc-1rdh4aw-0",
-                                                                "isStatic": false,
-                                                                "lastClassName": "iEPYku",
-                                                                "rules": Array [
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                  " ",
-                                                                  [Function],
-                                                                ],
-                                                              },
-                                                              "defaultProps": Object {},
-                                                              "displayName": "StyledHeading",
-                                                              "foldedComponentIds": Array [],
-                                                              "render": [Function],
-                                                              "styledComponentId": "StyledHeading-sc-1rdh4aw-0",
-                                                              "target": "h1",
-                                                              "toString": [Function],
-                                                              "warnTooManyClasses": [Function],
-                                                              "withComponent": [Function],
-                                                            }
-                                                          }
-                                                          forwardedRef={null}
-                                                          level={3}
-                                                          margin={
-                                                            Object {
-                                                              "bottom": "none",
-                                                              "left": "none",
-                                                              "right": "medium",
-                                                              "top": "none",
-                                                            }
-                                                          }
-                                                          responsive={true}
-                                                        >
-                                                          <h3
-                                                            className="StyledHeading-sc-1rdh4aw-0 iEPYku"
-                                                          >
-                                                            Title
-                                                          </h3>
-                                                        </StyledComponent>
-                                                      </StyledHeading>
-                                                    </Heading>
                                                     <WithTheme(Button)
                                                       focusIndicator={true}
                                                       gap="small"
@@ -6975,7 +5615,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                                                                       "componentStyle": ComponentStyle {
                                                                         "componentId": "StyledButton-sc-323bzc-0",
                                                                         "isStatic": false,
-                                                                        "lastClassName": "ibWwqS",
+                                                                        "lastClassName": "kPUXNH",
                                                                         "rules": Array [
                                                                           "display:inline-block;box-sizing:border-box;cursor:pointer;outline:none;font:inherit;text-decoration:none;margin:0;background:transparent;overflow:visible;text-transform:none;",
                                                                           [Function],
@@ -7283,9 +5923,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                                                         >
                                                           <p
                                                             className="StyledParagraph-tbetod-0 dIDtVY"
-                                                          >
-                                                            Message
-                                                          </p>
+                                                          />
                                                         </StyledComponent>
                                                       </StyledParagraph>
                                                     </Paragraph>
@@ -7403,185 +6041,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                                                 >
                                                   <div
                                                     className="StyledBox-sc-13pk1d4-0 fSSGpo"
-                                                  >
-                                                    <WithTheme(Button)
-                                                      fill={false}
-                                                      focusIndicator={true}
-                                                      gap="small"
-                                                      label="Crazy Label"
-                                                      onClick={[Function]}
-                                                      primary={true}
-                                                      type="button"
-                                                    >
-                                                      <FocusableComponent
-                                                        fill={false}
-                                                        focusIndicator={true}
-                                                        gap="small"
-                                                        label="Crazy Label"
-                                                        onClick={[Function]}
-                                                        primary={true}
-                                                        type="button"
-                                                        withFocusRef={null}
-                                                      >
-                                                        <WithTheme(Button)
-                                                          fill={false}
-                                                          focus={false}
-                                                          focusIndicator={true}
-                                                          gap="small"
-                                                          label="Crazy Label"
-                                                          onBlur={[Function]}
-                                                          onClick={[Function]}
-                                                          onFocus={[Function]}
-                                                          primary={true}
-                                                          type="button"
-                                                        >
-                                                          <Button
-                                                            fill={false}
-                                                            focus={false}
-                                                            focusIndicator={true}
-                                                            gap="small"
-                                                            label="Crazy Label"
-                                                            onBlur={[Function]}
-                                                            onClick={[Function]}
-                                                            onFocus={[Function]}
-                                                            primary={true}
-                                                            type="button"
-                                                          >
-                                                            <Button
-                                                              fill={false}
-                                                              focus={false}
-                                                              focusIndicator={true}
-                                                              forwardRef={
-                                                                Object {
-                                                                  "current": <button
-                                                                    class="StyledButton-sc-323bzc-0 ibWwqS"
-                                                                    type="button"
-                                                                  >
-                                                                    Crazy Label
-                                                                  </button>,
-                                                                }
-                                                              }
-                                                              gap="small"
-                                                              label="Crazy Label"
-                                                              onBlur={[Function]}
-                                                              onClick={[Function]}
-                                                              onFocus={[Function]}
-                                                              primary={true}
-                                                              type="button"
-                                                            >
-                                                              <StyledButton
-                                                                fillContainer={false}
-                                                                focus={false}
-                                                                focusIndicator={true}
-                                                                gap="small"
-                                                                hasIcon={false}
-                                                                hasLabel={true}
-                                                                onBlur={[Function]}
-                                                                onClick={[Function]}
-                                                                onFocus={[Function]}
-                                                                onMouseOut={[Function]}
-                                                                onMouseOver={[Function]}
-                                                                pad={true}
-                                                                primary={true}
-                                                                type="button"
-                                                              >
-                                                                <StyledComponent
-                                                                  fillContainer={false}
-                                                                  focus={false}
-                                                                  focusIndicator={true}
-                                                                  forwardedComponent={
-                                                                    Object {
-                                                                      "$$typeof": Symbol(react.forward_ref),
-                                                                      "attrs": Array [],
-                                                                      "componentStyle": ComponentStyle {
-                                                                        "componentId": "StyledButton-sc-323bzc-0",
-                                                                        "isStatic": false,
-                                                                        "lastClassName": "ibWwqS",
-                                                                        "rules": Array [
-                                                                          "display:inline-block;box-sizing:border-box;cursor:pointer;outline:none;font:inherit;text-decoration:none;margin:0;background:transparent;overflow:visible;text-transform:none;",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                          " ",
-                                                                          [Function],
-                                                                        ],
-                                                                      },
-                                                                      "defaultProps": Object {},
-                                                                      "displayName": "StyledButton",
-                                                                      "foldedComponentIds": Array [],
-                                                                      "render": [Function],
-                                                                      "styledComponentId": "StyledButton-sc-323bzc-0",
-                                                                      "target": "button",
-                                                                      "toString": [Function],
-                                                                      "warnTooManyClasses": [Function],
-                                                                      "withComponent": [Function],
-                                                                    }
-                                                                  }
-                                                                  forwardedRef={
-                                                                    Object {
-                                                                      "current": <button
-                                                                        class="StyledButton-sc-323bzc-0 ibWwqS"
-                                                                        type="button"
-                                                                      >
-                                                                        Crazy Label
-                                                                      </button>,
-                                                                    }
-                                                                  }
-                                                                  gap="small"
-                                                                  hasIcon={false}
-                                                                  hasLabel={true}
-                                                                  onBlur={[Function]}
-                                                                  onClick={[Function]}
-                                                                  onFocus={[Function]}
-                                                                  onMouseOut={[Function]}
-                                                                  onMouseOver={[Function]}
-                                                                  pad={true}
-                                                                  primary={true}
-                                                                  type="button"
-                                                                >
-                                                                  <button
-                                                                    className="StyledButton-sc-323bzc-0 ibWwqS"
-                                                                    onBlur={[Function]}
-                                                                    onClick={[Function]}
-                                                                    onFocus={[Function]}
-                                                                    onMouseOut={[Function]}
-                                                                    onMouseOver={[Function]}
-                                                                    type="button"
-                                                                  >
-                                                                    Crazy Label
-                                                                  </button>
-                                                                </StyledComponent>
-                                                              </StyledButton>
-                                                            </Button>
-                                                          </Button>
-                                                        </WithTheme(Button)>
-                                                      </FocusableComponent>
-                                                    </WithTheme(Button)>
-                                                  </div>
+                                                  />
                                                 </StyledComponent>
                                               </StyledBox>
                                             </Box>

@@ -27,28 +27,27 @@ export class InvoicesController {
    */
   async create(@Req() request, @Body() invoice: Invoice): Promise<InvInvoiceResponse> {
     const collaborators = [invoice!.sender, invoice!.recipient].filter(item => item);
-    try {
-      const createResult = await this.centrifugeService.invoices.create(
-        {
-          data: {
-            ...invoice,
-          },
-          write_access: {
-            collaborators,
-          },
+
+    delete invoice.currency;
+    const createResult = await this.centrifugeService.invoices.create(
+      {
+        data: {
+          ...invoice,
         },
-        request.user.account,
-      );
+        write_access: {
+          collaborators,
+        },
+      },
+      request.user.account,
+    );
 
-      await this.centrifugeService.pullForJobComplete(createResult.header.job_id, request.user.account);
+    await this.centrifugeService.pullForJobComplete(createResult.header.job_id, request.user.account);
 
-      return await this.database.invoices.insert({
-        ...createResult,
-        ownerId: request.user._id,
-      });
-    } catch (error) {
-      throw new HttpException(await error.json(), error.status);
-    }
+    return await this.database.invoices.insert({
+      ...createResult,
+      ownerId: request.user._id,
+    });
+
   }
 
   @Get()
@@ -73,6 +72,7 @@ export class InvoicesController {
    * @return {Promise<Invoice|null>} result
    */
   async getById(@Param() params, @Req() request): Promise<InvoiceResponse | null> {
+
     const invoice = await this.database.invoices.findOne({
       _id: params.id,
       ownerId: request.user._id,
@@ -82,13 +82,11 @@ export class InvoicesController {
     if (invoice.fundingAgreement) {
       const tokenId = invoice.fundingAgreement.funding.nft_address;
       // Search for the registry address
-      const nft = invoice.header.nfts.find(nft => {
-        return nft.token_id === tokenId;
+      const nft = invoice.header.nfts.find(item => {
+        return item.token_id === tokenId;
       });
       if (nft) {
-        const ownerResponse = await this.centrifugeService.nft.ownerOf(nft.token_id, nft.registry, request.user.account).catch(async error => {
-          throw new HttpException(await error.json(), error.status);
-        });
+        const ownerResponse = await this.centrifugeService.nft.ownerOf(nft.token_id, nft.registry, request.user.account);
         invoice.fundingAgreement.nftOwner = ownerResponse.owner;
       } else {
         throw new HttpException('Nft from funding agreement not found on invoice', HttpStatus.CONFLICT);
@@ -112,6 +110,7 @@ export class InvoicesController {
     @Req() request,
     @Body() updateInvoiceRequest: Invoice,
   ) {
+
     const invoice: InvInvoiceResponse = await this.database.invoices.findOne(
       { _id: params.id, ownerId: request.user._id },
     );

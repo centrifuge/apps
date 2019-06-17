@@ -7,12 +7,14 @@ import { getInvoiceById, resetGetInvoiceById, resetUpdateInvoice, updateInvoice 
 import { Invoice } from '../common/models/invoice';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
-import { LabelValuePair } from '../common/interfaces';
+import { InvoiceData, LabelValuePair } from '../common/interfaces';
 import { Box, Button, Heading } from 'grommet';
 import { invoiceRoutes } from './routes';
 import { LinkPrevious } from 'grommet-icons';
 import { User } from '../common/models/user';
 import { Preloader } from '../components/Preloader';
+import { NotificationContext } from '../notifications/NotificationContext';
+import { RequestState } from '../store/reducers/http-request-reducer';
 
 type ConnectedEditInvoiceProps = {
   updateInvoice: (invoice: Invoice) => void;
@@ -24,7 +26,7 @@ type ConnectedEditInvoiceProps = {
   invoice?: Invoice;
   contacts?: LabelValuePair[];
   loggedInUser: User;
-  updatingInvoice: boolean;
+  updatingInvoice: RequestState<InvoiceData>;
 } & RouteComponentProps<{ id?: string }>;
 
 class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
@@ -53,11 +55,11 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
     const { loggedInUser, updatingInvoice } = this.props;
 
     if (!this.props.invoice || !this.props.contacts) {
-      return <Preloader message="Loading"/>
+      return <Preloader message="Loading"/>;
     }
 
-    if (updatingInvoice) {
-      return <Preloader message="Updating invoice" withSound={true}/>
+    if (updatingInvoice.loading) {
+      return <Preloader message="Updating invoice" withSound={true}/>;
     }
 
     // Add logged in user to contacts
@@ -99,7 +101,6 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
   }
 }
 
-
 const mapStateToProps = (state) => {
   return {
     loggedInUser: state.user.auth.loggedInUser,
@@ -107,7 +108,7 @@ const mapStateToProps = (state) => {
       _id: state.invoices.getById.data._id,
       ...state.invoices.getById.data.data,
     },
-    updatingInvoice: state.invoices.update.loading,
+    updatingInvoice: state.invoices.update,
     contacts: state.contacts.get.data
       ? (state.contacts.get.data.map(contact => ({
         label: contact.name,

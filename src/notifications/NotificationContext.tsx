@@ -10,8 +10,13 @@ export enum NOTIFICATION {
 }
 
 
-const CONTEXT_API = {
-  notify: (title: string, message: string, options: NotificationOptions = {}) => {
+type NotificationApi = {
+  notify: (options: NotificationOptions) => void;
+  close: () => void;
+}
+
+let CONTEXT_API: NotificationApi = {
+  notify: (options: NotificationOptions) => {
   },
   close: () => {
   },
@@ -21,16 +26,16 @@ const CONTEXT_API = {
 export const NotificationContext = React.createContext(CONTEXT_API);
 export const NotificationConsumer = NotificationContext.Consumer;
 
-interface NotificationState {
+export interface NotificationState {
   opened: boolean,
-  title: string,
-  message: string,
   options: NotificationOptions
 }
 
-interface NotificationOptions {
+export interface NotificationOptions {
+  title?: string,
+  message?: string,
   cancelable?: boolean, // modal can self close(x icon and click outside)
-  type?: NOTIFICATION, // DEFAULT, SUCCESS, ERROR, WARNING
+  type: NOTIFICATION, // DEFAULT, SUCCESS, ERROR, WARNING
   confirmLabel?: string, // Label for the modal button
   onClose?: () => void, // callback for when the modal is closed.
   onConfirm?: () => void, // callback for when the modal is closed.
@@ -39,9 +44,9 @@ interface NotificationOptions {
 
 const DEFAULT_STATE: NotificationState = {
   opened: false,
-  title: '',
-  message: '',
   options: {
+    title: '',
+    message: '',
     cancelable: true,
     type: NOTIFICATION.DEFAULT,
     confirmLabel: 'OK',
@@ -53,13 +58,20 @@ export class NotificationProvider extends Component<{}, NotificationState> {
 
   constructor(props) {
     super(props);
+    this.state = {
+      ...DEFAULT_STATE,
+    };
+
+    CONTEXT_API = {
+      notify: this.notify,
+      close: this.close,
+    };
+
   }
 
-  notify = (title: string, message: string, options: NotificationOptions = {}) => {
+  notify = (options: NotificationOptions) => {
     this.setState({
       opened: true,
-      title,
-      message,
       options: {
         ...this.state.options,
         ...options,
@@ -79,7 +91,7 @@ export class NotificationProvider extends Component<{}, NotificationState> {
 
   render() {
     const { children } = this.props;
-    const { opened, title, message, options } = this.state;
+    const { opened, options } = this.state;
     // TODO this can be exposed as provider values
     let modalProps: any = {
       headingProps: {
@@ -91,6 +103,16 @@ export class NotificationProvider extends Component<{}, NotificationState> {
     if (options.cancelable) {
       modalProps.onClose = this.close;
     }
+
+    // default notification content.
+    let modalContent = <Paragraph>
+      {options.message}
+    </Paragraph>;
+    // default notification actions
+    let actions =  [
+      <Button primary label={options.confirmLabel} fill={false} onClick={this.confirm}/>
+    ]
+
     // Compute the color of the modal title
     switch (options.type) {
       case NOTIFICATION.SUCCESS:
@@ -102,31 +124,29 @@ export class NotificationProvider extends Component<{}, NotificationState> {
       case NOTIFICATION.WARNING:
         modalProps.headingProps.color = 'status-warning';
         break;
+
+      default:
+        actions = [];
+        break
     }
+
 
     return (
       <NotificationContext.Provider
-        value={
-          {
-            notify: this.notify,
-            close: this.close,
-          }
-        }
+        value={CONTEXT_API}
       >
         <Modal
           opened={opened}
           width={'medium'}
-          title={title}
+          title={options.title}
           {...modalProps}
         >
           <Box width={'medium'}>
-            <Paragraph>
-              {message}
-            </Paragraph>
+            {modalContent}
           </Box>
 
           <Box direction="row" gap="medium" justify={'end'}>
-            <Button primary label={options.confirmLabel || 'OK'} fill={false} onClick={this.confirm}/>
+            {actions}
           </Box>
         </Modal>
         {children}

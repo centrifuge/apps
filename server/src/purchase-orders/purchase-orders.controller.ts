@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Inject,
-  Param,
-  Post,
-  Put,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { SessionGuard } from '../auth/SessionGuard';
 import { ROUTES } from '../../../src/common/constants';
 import { DatabaseService } from '../database/database.service';
@@ -23,7 +13,8 @@ export class PurchaseOrdersController {
   constructor(
     private readonly databaseService: DatabaseService,
     readonly centrifugeService: CentrifugeService,
-  ) {}
+  ) {
+  }
 
   @Post()
   /**
@@ -34,6 +25,7 @@ export class PurchaseOrdersController {
    * @return {Promise<PurchaseOrder>} result
    */
   async create(@Req() request, @Body() purchaseOrder: PurchaseOrder) {
+
     const collaborators = purchaseOrder.collaborators
       ? [...purchaseOrder.collaborators]
       : [];
@@ -53,6 +45,7 @@ export class PurchaseOrdersController {
       ...createResult,
       ownerId: request.user._id,
     });
+
   }
 
   /**
@@ -69,29 +62,29 @@ export class PurchaseOrdersController {
     @Req() request,
     @Body() purchaseOrder: PurchaseOrder,
   ) {
-    try {
-      const id = params.id;
-      const dbPurchaseOrder: PoPurchaseOrderResponse = await this.databaseService.purchaseOrders.findOne(
-        { _id: id, ownerId: request.user._id },
-      );
-      const updateResult = await this.centrifugeService.purchaseOrders.update(
-        dbPurchaseOrder.header.document_id,
-        {
-          data: {
-            ...purchaseOrder,
-          },
-          write_access: {
-            collaborators: purchaseOrder.collaborators,
-          },
-        },
-        config.admin.account,
-      );
 
-      return await this.databaseService.purchaseOrders.updateById(id, {
-        ...updateResult,
-        ownerId: request.user._id,
-      });
-    } catch (err) {}
+    const id = params.id;
+    const dbPurchaseOrder: PoPurchaseOrderResponse = await this.databaseService.purchaseOrders.findOne(
+      { _id: id, ownerId: request.user._id },
+    );
+    const updateResult = await this.centrifugeService.purchaseOrders.update(
+      dbPurchaseOrder.header.document_id,
+      {
+        data: {
+          ...purchaseOrder,
+        },
+        write_access: {
+          collaborators: purchaseOrder.collaborators,
+        },
+      },
+      config.admin.account,
+    );
+
+    return await this.databaseService.purchaseOrders.updateById(id, {
+      ...updateResult,
+      ownerId: request.user._id,
+    });
+
   }
 
   @Get()

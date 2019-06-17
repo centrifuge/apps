@@ -18,6 +18,7 @@ import Contacts from './contacts/View';
 import { NotificationProvider } from './notifications/NotificationContext';
 import FundingAgreementList from './invoices/FundingAgreementList';
 import { ConnectedInvoiceView } from './invoices/InvoiceView';
+import { ConnectedNotifications } from './notifications/Notifications';
 
 interface AppPros {
   selectedRoute: string;
@@ -107,6 +108,7 @@ class App extends Component<AppPros> {
         <AxisTheme full={true}>
           <NotificationProvider>
             <Box fill align="center">
+              <ConnectedNotifications/>
               <Header
                 user={loggedInUser}
                 selectedRoute={selectedRoute}

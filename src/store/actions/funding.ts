@@ -16,9 +16,13 @@ export const createFunding = (payload: FundingRequest) =>
   action(createFundingAction.start, { payload });
 export const resetCreateFunding = () =>
   action(createFundingAction.reset);
+export const clearCreateFundingError = () =>
+  action(createFundingAction.clearError);
 
 
 export const signFunding = (payload: FunRequest & { invoice_id: string }) =>
   action(signFundingAction.start, { payload });
 export const resetSignFunding = () =>
   action(signFundingAction.reset);
+export const clearSignFundingError = () =>
+  action(signFundingAction.clearError);

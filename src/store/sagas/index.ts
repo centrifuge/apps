@@ -3,8 +3,9 @@ import invoices from './invoices';
 import users from './user';
 import contacts from './contacts';
 import funding from './funding';
+import notifications from './notifications';
 
-export default function*() {
+export default function* () {
   yield all([
     fork(invoices.watchGetInvoicesPage),
     fork(invoices.watchGetInvoiceById),
@@ -19,5 +20,6 @@ export default function*() {
     fork(contacts.watchUpdateContact),
     fork(funding.watchCreateFunding),
     fork(funding.watchSignFunding),
+    fork(notifications.watchCloseAlert),
   ]);
 }

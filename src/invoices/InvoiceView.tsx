@@ -19,6 +19,7 @@ import { InvoiceDetails } from './InvoiceDetails';
 import { RequestState } from '../store/reducers/http-request-reducer';
 import { Invoice } from '../common/models/invoice';
 import { Preloader } from '../components/Preloader';
+import { NotificationContext } from '../notifications/NotificationContext';
 
 type ConnectedInvoiceViewProps = {
   getInvoiceById: (id: string) => void;
@@ -72,19 +73,16 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
   render() {
     const { id, header, invoice, contacts, fundingAgreement, creatingFunding } = this.props;
     const { requestFunding } = this.state;
-    const columnGap = 'medium';
-    const sectionGap = 'medium';
     const fundingRequest: FundingRequest = new FundingRequest();
 
 
     if (!invoice || !contacts) {
-      return <Preloader message="Loading"/>
+      return <Preloader message="Loading"/>;
     }
 
     if (creatingFunding && creatingFunding.loading) {
-      return <Preloader message="Requesting funding agreement" withSound={true}/>
+      return <Preloader message="Requesting funding agreement" withSound={true}/>;
     }
-
 
     // TODO make currency and due_date mandatory in invoice
     //@ts-ignore
@@ -159,6 +157,7 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
 
   }
 }
+
 
 const mapStateToProps = (state) => {
   return {

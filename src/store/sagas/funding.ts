@@ -2,6 +2,7 @@ import { call, put, takeEvery } from 'redux-saga/effects';
 import { httpClient } from '../../http-client';
 import { createFundingAction, signFundingAction } from '../actions/funding';
 import { getInvoiceById } from '../actions/invoices';
+import { alertError } from '../actions/notifications';
 
 
 export function* createFunding(action) {
@@ -17,6 +18,11 @@ export function* createFunding(action) {
 
   } catch (e) {
     yield put({ type: createFundingAction.fail, payload: e });
+    yield put(alertError(
+      'Failed to request funding',
+      e.message,
+      { onConfirmAction: { type: createFundingAction.clearError } },
+    ));
   }
 }
 
@@ -32,7 +38,13 @@ export function* signFunding(action) {
     });
 
   } catch (e) {
-    yield put({ type: createFundingAction.fail, payload: e });
+    yield put({ type: signFundingAction.fail, payload: e });
+    yield put(alertError(
+      'Failed to approve funding agreement',
+      e.message,
+      { onConfirmAction: { type: signFundingAction.clearError } },
+    ));
+
   }
 }
 
