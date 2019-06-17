@@ -14,11 +14,13 @@ describe('functional tinlake tests', function() {
     before(() => {
         tinlake = new Tinlake(rpcUrl,ethFrom, process.env['ETH_PRIVATE_KEY'],process.env['CONTRACTS_ABI'],addresses, {});
     })
-    describe('tinlake borrow', function() {
+    describe('tinlake borrow and repay', function(done) {
 
         let principal = 100;
-        let appraisal = 120;
-        it('should mint an NFT & admit', () => {
+        let appraisal = 300;
+        console.log("appraisal: "+appraisal);
+        console.log("principal: "+principal);
+        it('borrow and repay successful', () => {
             tokenID = "0x"+Math.floor(Math.random()*(10**15));
             console.log("Token ID -> "+tokenID);
             tinlake.mintNFT(ethFrom,tokenID).then((result) => {
@@ -57,18 +59,24 @@ describe('functional tinlake tests', function() {
                 console.log(result.events);
                 return tinlake.balanceOfCurrency(ethFrom);
             }).then(balance => {
-                console.log("DAI Balance");
-                console.log(balance["0"].toString());
-            })
+                console.log("DAI Balance after borrow");
+                console.log(balance["0"].toString() + " DAI");
+                console.log("repay");
+                return tinlake.approveCurrency(addresses["PILE"],principal);
+            }).then(result => {
+                console.log(result);
+                return tinlake.repay(loanID, principal,ethFrom, ethFrom);
+
+            }).then(result => {
+                console.log(result);
+                return tinlake.balanceOfCurrency(ethFrom);
+
+            }).then(balance => {
+                console.log("DAI Balance after Repay");
+                console.log(balance["0"].toString() +" DAI");
+                done();
+            });
 
         });
-
-        // it('set ward: desk should be allowed to access lender', () => {
-        //
-        //     tinlake.lenderRely(addresses["DESK"]).then(result=>console.log(result));
-        //
-        // });
-
-
     });
 });

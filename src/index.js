@@ -89,6 +89,20 @@ Tinlake.prototype.borrow = (loanID, to) => {
     });
 }
 
+Tinlake.prototype.repay = (loan, wad, usrT, usr) => {
+    return contracts.reception.repay(loan, wad,usrT,usr, ethConfig).then(txHash => {
+        console.log("[Reception.repay] txHash: "+txHash);
+        return waitAndReturnEvents(txHash,contracts["reception"].abi);
+    });
+}
+
+Tinlake.prototype.approveCurrency = (usr, wad) => {
+    return contracts.currency.approve(usr, wad, ethConfig).then(txHash => {
+        console.log("[Currency.approve] txHash: "+txHash);
+      return waitAndReturnEvents(txHash,contracts["currency"].abi);
+    });
+}
+
 
 Tinlake.prototype.lenderRely = (usr) => {
     return contracts.lender.rely(usr, ethConfig).then(txHash => {
@@ -103,12 +117,11 @@ let waitAndReturnEvents = (txHash, abi) => {
     return new Promise((resolve, reject)=> {
         waitForTransaction(txHash).then(tx => {
             eth.getTransactionReceipt(tx.hash, (err, receipt) => {
-                console.log(receipt);
                 if (err != null) {
                     reject("failed to get receipt")
                 }
                 let events = getEvents(receipt, abi);
-                resolve({"txHash":tx.hash,"events":events, "status":tx.status});
+                resolve({"txHash":tx.hash,"events":events, "status":receipt.status});
             });
 
         })
@@ -154,13 +167,14 @@ let getEvents = (receipt, abi) => {
     if (receipt.logs.length == 0) {
         return null;
     }
+
     let log = receipt.logs[0];
     let events = [];
 
     let matches = findEvent(abi, log.topics[0]);
     if (matches.length === 1) {
         let event = matches[0];
-        let inputs = event.inputs.map((input)=>input.type);
+        let inputs = event.inputs.filter(input=>input.indexed).map(input=>input.type);
 
         // remove 0x prefix from topics
         let topics = log.topics.map((t) => t.replace("0x",""));
