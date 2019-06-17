@@ -14,7 +14,8 @@ describe('functional tinlake tests', function() {
     before(() => {
         tinlake = new Tinlake(rpcUrl,ethFrom, process.env['ETH_PRIVATE_KEY'],process.env['CONTRACTS_ABI'],addresses, {});
     })
-    describe('tinlake borrow and repay', function(done) {
+    describe('tinlake borrow and repay', function() {
+        this.timeout(50000);
 
         let principal = 100;
         let appraisal = 300;
@@ -23,7 +24,7 @@ describe('functional tinlake tests', function() {
         it('borrow and repay successful', () => {
             tokenID = "0x"+Math.floor(Math.random()*(10**15));
             console.log("Token ID -> "+tokenID);
-            tinlake.mintNFT(ethFrom,tokenID).then((result) => {
+            return tinlake.mintNFT(ethFrom,tokenID).then((result) => {
                 console.log("mint result");
                 console.log(result.txHash);
                 console.log(result.events);
@@ -74,7 +75,7 @@ describe('functional tinlake tests', function() {
             }).then(balance => {
                 console.log("DAI Balance after Repay");
                 console.log(balance["0"].toString() +" DAI");
-                done();
+                return Promise.resolve("success");
             });
 
         });
