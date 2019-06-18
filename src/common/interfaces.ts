@@ -4,7 +4,7 @@ import {
   InvInvoiceResponse,
   PoPurchaseOrderResponse,
 } from '../../clients/centrifuge-node';
-import { Contact } from './models/contact';
+import { Invoice } from './models/invoice';
 
 //TODO break all interfaces up and move to models
 //TODO Refactor this. The name is bad. Is it very interface specic ? Do we need an interface for this?
@@ -13,22 +13,19 @@ export interface LabelValuePair {
   value: string;
 }
 
-export interface InvoiceData extends InvInvoiceData {
-  supplier?: Contact;
-}
 
 export interface InvoiceResponse extends InvInvoiceResponse {
-  data?: InvoiceData;
+  data?: Invoice | InvInvoiceData;
   ownerId?: string;
   _id?: string;
   createdAt?: Date,
   updatedAt?: Date
-  fundingAgreement?: FundingAgreementResponse| null
+  fundingAgreement?: FundingAgreementResponse | null
 }
 
 
-export interface FundingAgreementResponse extends FunFundingResponseData{
-  nftOwner?:string
+export interface FundingAgreementResponse extends FunFundingResponseData {
+  nftOwner?: string
 }
 
 

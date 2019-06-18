@@ -111,6 +111,8 @@ export class InvoicesController {
     @Body() updateInvoiceRequest: Invoice,
   ) {
 
+    const collaborators = [updateInvoiceRequest!.sender, updateInvoiceRequest!.recipient].filter(item => item);
+
     const invoice: InvInvoiceResponse = await this.database.invoices.findOne(
       { _id: params.id, ownerId: request.user._id },
     );
@@ -120,7 +122,7 @@ export class InvoicesController {
       {
         data: { ...updateInvoiceRequest },
         write_access: {
-          collaborators: updateInvoiceRequest.collaborators,
+          collaborators,
         },
       },
       config.admin.account,

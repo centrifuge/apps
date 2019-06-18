@@ -58,6 +58,7 @@ export class WebhooksController {
           // We need to delete the attributes prop because nedb does not allow for . in field names
           delete invoice.data.attributes;
         }
+
         await this.databaseService.invoices.update(
           { 'header.document_id': notification.document_id, 'ownerId': user._id },
           invoice,
@@ -70,6 +71,7 @@ export class WebhooksController {
           user.account,
         );
         await this.databaseService.purchaseOrders.insert(result);
+        // TODO this should be similar to invoices. We do not care for now.
       }
     }
 

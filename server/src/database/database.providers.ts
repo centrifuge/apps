@@ -6,7 +6,6 @@ import { Contact } from '../../../src/common/models/contact';
 import config from '../../../src/common/config';
 import { InvoiceResponse, PurchaseOrderResponse } from '../../../src/common/interfaces';
 import { DatabaseService } from './database.service';
-import { dateToString } from '../../../src/common/formaters';
 
 // TODO refactor this in mutiple providers,services
 
@@ -14,18 +13,17 @@ import { dateToString } from '../../../src/common/formaters';
 /**
  * Initialize the database and the separate collections.
  */
-const initializeDatabase = async () => {
+const initializeDatabase = async (inMemoryOnly:boolean) => {
   const invoicesRepository = new DatabaseRepository<InvoiceResponse>(
-    `${config.dbPath}/invoicesDb`,
+    { filename: `${config.dbPath}/invoicesDb`, inMemoryOnly },
   );
   const usersRepository = new DatabaseRepository<User>(
-    `${config.dbPath}/usersDb`,
+    { filename: `${config.dbPath}/usersDb`, inMemoryOnly },
   );
   const admin: User = {
     name: config.admin.name,
     password: await promisify(bcrypt.hash)(config.admin.password, 10),
     email: config.admin.email,
-    date_added: dateToString(new Date()),
     enabled: true,
     invited: false,
     account: config.admin.account,
@@ -41,11 +39,11 @@ const initializeDatabase = async () => {
   }
 
   const contactsRepository = new DatabaseRepository<Contact>(
-    `${config.dbPath}/contactsDb`,
+    { filename: `${config.dbPath}/contactsDb`, inMemoryOnly },
   );
 
   const purchaseOrdersRepository = new DatabaseRepository<PurchaseOrderResponse>(
-    `${config.dbPath}/purchaseOrdersDb`,
+    { filename: `${config.dbPath}/purchaseOrdersDb`, inMemoryOnly },
   );
 
   return {
@@ -65,8 +63,11 @@ let initializeDatabasePromise;
 export const databaseServiceProvider = {
   provide: DatabaseService,
   useFactory: async (): Promise<DatabaseService> => {
-    if (!initializeDatabasePromise) {
-      initializeDatabasePromise = initializeDatabase();
+
+    const testingMode = process.env.NODE_ENV === 'test';
+
+    if (!initializeDatabasePromise || testingMode) {
+      initializeDatabasePromise = initializeDatabase(testingMode);
     }
 
     return initializeDatabasePromise;

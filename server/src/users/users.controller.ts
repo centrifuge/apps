@@ -104,7 +104,6 @@ export class UsersController {
       name: user.name,
       email: user.email,
       account: '',
-      date_added: dateToString(new Date()),
       password: undefined,
       enabled: false,
       invited: true,
@@ -128,7 +127,6 @@ export class UsersController {
       user.password = await promisify(bcrypt.hash)(user.password, 10);
     }
     const result: User = await this.databaseService.users.updateById(id, user, true);
-    // TODO return "public" User here not just the id
-    return result._id;
+    return result;
   }
 }

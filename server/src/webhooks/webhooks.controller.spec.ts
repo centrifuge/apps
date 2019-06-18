@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { documentTypes, eventTypes, WebhooksController } from './webhooks.controller';
 import { databaseServiceProvider } from '../database/database.providers';
 import { InvInvoiceResponse, PoPurchaseOrderResponse } from '../../../clients/centrifuge-node';
-import config from '../../../src/common/config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { DatabaseService } from '../database/database.service';
 import { User } from '../../../src/common/models/user';
@@ -13,28 +12,15 @@ describe('WebhooksController', () => {
   user._id = 'id01';
   user.account = '0x1111';
   const documentId = '112233';
-  const databaseServiceMock = {
-    invoices: {
-      insert: jest.fn(data => data),
-      update: jest.fn((id, value) => value),
-      get: jest.fn(data => data),
-    },
-    users: {
-      findOne: jest.fn((query) => {
-        if (query.account === user.account) return user;
-        return null;
-      }),
-    },
-    purchaseOrders: {
-      insert: jest.fn(data => data),
-    },
-  };
+  const invoiceSpies: any = {};
+  const poSpies: any = {};
+
   const getResponse = {
     data: {},
     header: {
       document_id: documentId,
     },
-    ownerId: user._id
+    ownerId: user._id,
   };
 
   const centrifugeClient = {
@@ -52,14 +38,21 @@ describe('WebhooksController', () => {
       controllers: [WebhooksController],
       providers: [databaseServiceProvider, CentrifugeService],
     })
-      .overrideProvider(DatabaseService)
-      .useValue(databaseServiceMock)
+
       .overrideProvider(CentrifugeService)
       .useValue(centrifugeClient)
       .compile();
 
-    databaseServiceMock.invoices.update.mockClear();
-    databaseServiceMock.invoices.insert.mockClear();
+
+    const databaseService = webhooksModule.get<DatabaseService>(DatabaseService);
+
+    // insert a user
+    databaseService.users.insert(user);
+
+    invoiceSpies.spyInsert = jest.spyOn(databaseService.invoices, 'insert');
+    invoiceSpies.spyUpdate = jest.spyOn(databaseService.invoices, 'update');
+    poSpies.spyInsert = jest.spyOn(databaseService.purchaseOrders, 'insert');
+    poSpies.spyUpdate = jest.spyOn(databaseService.purchaseOrders, 'update');
     centrifugeClient.invoices.get.mockClear();
   });
 
@@ -81,13 +74,14 @@ describe('WebhooksController', () => {
         documentId,
         user.account,
       );
-      expect(databaseServiceMock.invoices.update).toHaveBeenCalledWith(
+
+      expect(invoiceSpies.spyUpdate).toHaveBeenCalledWith(
         {
           'header.document_id': getResponse.header.document_id,
           'ownerId': user._id,
         },
         getResponse,
-        {upsert:true},
+        { upsert: true },
       );
     });
   });
@@ -126,7 +120,7 @@ describe('WebhooksController', () => {
         documentId,
         user.account,
       );
-      expect(databaseServiceMock.purchaseOrders.insert).toHaveBeenCalledWith(
+      expect(poSpies.spyInsert).toHaveBeenCalledWith(
         getResponse,
       );
     });
@@ -141,7 +135,7 @@ describe('WebhooksController', () => {
       const result = await webhooksController.receiveMessage({});
       expect(result).toBe('OK');
       expect(centrifugeClient.invoices.get).not.toHaveBeenCalled();
-      expect(databaseServiceMock.invoices.insert).not.toHaveBeenCalled();
+      expect(poSpies.spyInsert).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,6 +1,6 @@
 import * as DataStore from 'nedb-promises';
 import * as Nedb from 'nedb';
-import { Cursor } from 'nedb';
+import { DataStoreOptions } from 'nedb';
 
 /**
  * A repository class for accessing database data. Class methods promisify the equivalent Nedb methods
@@ -11,8 +11,16 @@ export class DatabaseRepository<T> {
   private repository: DataStore;
 
   constructor(
-    private readonly path: string) {
-    this.repository = DataStore.create({ filename: path, timestampData:true });
+    private readonly options: DataStoreOptions) {
+
+    const defaultOptions: DataStoreOptions = {
+      timestampData: true,
+    };
+
+    this.repository = DataStore.create({
+      ...defaultOptions,
+      ...options,
+    });
   }
 
   /**
@@ -29,11 +37,11 @@ export class DatabaseRepository<T> {
    * @param {any} query - Nedb query object
    * @returns {Promise<T[]>} promise
    */
-  find(query: any): Promise<T[]>  {
+  find(query: any): Promise<T[]> {
     return this.repository.find(query).exec();
   }
 
-  getCursor(query: any): any  {
+  getCursor(query: any): any {
     return this.repository.find(query);
   }
 

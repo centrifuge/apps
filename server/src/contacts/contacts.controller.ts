@@ -54,9 +54,9 @@ export class ContactsController {
    * @return {Promise<Contact[]>} result
    */
   async get(@Req() request) {
-    return await this.databaseService.contacts.find({
+    return this.databaseService.contacts.getCursor({
       ownerId: request.user._id,
-    });
+    }).sort({ updatedAt: -1 }).exec();
   }
 
   @Put(':id')

@@ -1,13 +1,24 @@
 import { FundingController } from './funding.controller';
 import { databaseServiceProvider } from '../database/database.providers';
-import { User } from '../../../src/common/models/user';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SessionGuard } from '../auth/SessionGuard';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { DatabaseService } from '../database/database.service';
+import { Invoice } from '../../../src/common/models/invoice';
 
 
 describe('Funding controller', () => {
+
+
+  const invoice: Invoice = {
+    sender: '0x111',
+    recipient: '0x112',
+    currency: 'USD',
+    number: '999',
+    sender_company_name: 'cinderella',
+    bill_to_company_name: 'step mother',
+  };
+  let insertedInvoice: any = {};
 
   class CentrifugeClientMock {
     invoices = {
@@ -17,7 +28,7 @@ describe('Funding controller', () => {
             nfts: [
               {
                 token_id: 'token_id',
-                owner: 'owner'
+                owner: 'owner',
               },
             ],
           },
@@ -49,16 +60,17 @@ describe('Funding controller', () => {
               nfts: [
                 {
                   token_id: payload.nft_address,
-                  owner: account
-                }
-              ]
+                  owner: account,
+                },
+              ],
             },
             data: {
               funding: {
                 ...payload,
               },
               signatures: ['signature_data_1'],
-            }}
+            },
+          };
           resolve(result);
         });
       }),
@@ -78,10 +90,10 @@ describe('Funding controller', () => {
       tokenTransfer: () => {
         return new Promise((resolve, reject) => {
           resolve({
-                header: {
-                  job_id: 'some_job_id',
-                },
+              header: {
+                job_id: 'some_job_id',
               },
+            },
           );
         });
       },
@@ -97,15 +109,9 @@ describe('Funding controller', () => {
   // for storage and we will not need a DatabaseServiceMock
   // https://app.zenhub.com/workspaces/centrifuge-5ba350114b5806bc2be90978/issues/centrifuge/centrifuge-starter-kit/98
   let fundingModule: TestingModule;
-  class DatabaseServiceMock {
-    invoices = {
-      update: jest.fn((id, value) => value),
-    };
-  }
 
-  const databaseServiceMock = new DatabaseServiceMock();
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     fundingModule = await Test.createTestingModule({
       controllers: [FundingController],
       providers: [
@@ -114,11 +120,19 @@ describe('Funding controller', () => {
         databaseServiceProvider,
       ],
     })
-      .overrideProvider(DatabaseService)
-      .useValue(databaseServiceMock)
       .overrideProvider(CentrifugeService)
       .useValue(centrifugeClientMock)
       .compile();
+
+
+    const databaseService = fundingModule.get<DatabaseService>(DatabaseService);
+    insertedInvoice = await databaseService.invoices.insert({
+      header: {
+        document_id: '0x39393939',
+      },
+      data: { ...invoice },
+      ownerId: 'user_id',
+    });
 
   });
 
@@ -128,7 +142,7 @@ describe('Funding controller', () => {
 
       const fundingRequest = {
         invoice_id: 'some_id',
-        document_id: 'document_id',
+        document_id: '0x39393939',
         funder: 'funder',
         agreement_id: 'agreement_id',
         amount: 0,
@@ -173,10 +187,10 @@ describe('Funding controller', () => {
     it('should return the signed funding agreement', async () => {
 
       const fundingRequest = {
-        identifier:"0x4444",
+        identifier: '0x39393939',
         agreement_id: 'agreement_id',
         nft_address: 'token_id',
-        borrower_id: 'owner'
+        borrower_id: 'owner',
       };
 
       const fundingController = fundingModule.get<FundingController>(
@@ -200,8 +214,8 @@ describe('Funding controller', () => {
           funding: {
             ...fundingRequest,
           },
-          signatures:['signature_data_1'],
-        }
+          signatures: ['signature_data_1'],
+        },
       });
     });
   });

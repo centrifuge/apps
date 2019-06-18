@@ -4,7 +4,6 @@ export interface IUser {
   name: string;
   password?: string;
   email: string;
-  date_added: string;
   _id?: string;
   account: string;
   permissions: PERMISSIONS[];
@@ -16,7 +15,6 @@ export class User implements IUser{
   name: string;
   password?: string = "";
   email: string;
-  date_added: string;
   _id?: string;
   account: string = "";
   permissions: PERMISSIONS[] = [];
