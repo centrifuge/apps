@@ -7,8 +7,8 @@ const Eth = require('ethjs');
 
 const Abi = require("web3-eth-abi");
 const abiCoder = new Abi.AbiCoder();
-const Web3 = require('web3'); // todo replace with sha3 lib
-const web3 = new Web3(); // todo replace with sha3 lib
+const utils = require('web3-utils');
+
 
 let eth;
 let contracts;
@@ -154,12 +154,13 @@ let waitForTransaction = (txHash) => {
     })
 }
 
-let findEvent = (abi, funcHash) => {
+
+let findEvent = (abi, funcSignature) => {
     return abi.filter((item) => {
         if (item.type !== "event") return false;
         let signature = item.name + "(" + item.inputs.map((input) => input.type).join(",") + ")";
-        let hash = web3.utils.sha3(signature);
-        if (hash === funcHash) return true;
+        let hash = utils.sha3(signature);
+        if (hash === funcSignature) return true;
     });
 
 }
@@ -167,28 +168,27 @@ let getEvents = (receipt, abi) => {
     if (receipt.logs.length == 0) {
         return null;
     }
-
-    let log = receipt.logs[0];
     let events = [];
+    receipt.logs.forEach(log => {
+        let funcSignature = log.topics[0];
+        let matches = findEvent(abi,funcSignature);
+        if (matches.length === 1) {
+            let event = matches[0];
+            let inputs = event.inputs.filter(input=>input.indexed).map(input=>input.type);
 
-    let matches = findEvent(abi, log.topics[0]);
-    if (matches.length === 1) {
-        let event = matches[0];
-        let inputs = event.inputs.filter(input=>input.indexed).map(input=>input.type);
+            // remove 0x prefix from topics
+            let topics = log.topics.map((t) => t.replace("0x",""));
 
-        // remove 0x prefix from topics
-        let topics = log.topics.map((t) => t.replace("0x",""));
+            // concat topics without first topic (func signature)
+            let bytes = "0x"+topics.slice(1).join("");
 
-        // concat topics without first topic (function signature)
-        let bytes = "0x"+topics.slice(1).join("");
+            let data = abiCoder.decodeParameters(inputs, bytes);
 
-        let data = abiCoder.decodeParameters(inputs, bytes);
+            events.push({"event":event,"data":data})
 
-        events.push({"event":event,"data":data})
-
-    }
+        }
+    });
     return events;
-
 }
 
 let getContract = (file, address)  => {
