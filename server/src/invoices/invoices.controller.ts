@@ -27,8 +27,6 @@ export class InvoicesController {
    */
   async create(@Req() request, @Body() invoice: Invoice): Promise<InvInvoiceResponse> {
     const collaborators = [invoice!.sender, invoice!.recipient].filter(item => item);
-
-    delete invoice.currency;
     const createResult = await this.centrifugeService.invoices.create(
       {
         data: {

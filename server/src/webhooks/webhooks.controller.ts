@@ -2,7 +2,6 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { ROUTES } from '../../../src/common/constants';
 import { FunFundingListResponse, NotificationNotificationMessage } from '../../../clients/centrifuge-node';
 import { DatabaseService } from '../database/database.service';
-import config from '../../../src/common/config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { InvoiceResponse } from '../../../src/common/interfaces';
 
@@ -34,7 +33,6 @@ export class WebhooksController {
    */
   @Post()
   async receiveMessage(@Body() notification: NotificationNotificationMessage) {
-
     if (notification.event_type === eventTypes.DOCUMENT) {
       // Search for the user in the database
       const user = await this.databaseService.users.findOne({ account: notification.to_id });
