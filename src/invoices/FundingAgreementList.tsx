@@ -80,7 +80,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
                 header: 'Net amount',
                 align: 'end',
                 render: datum => {
-                  return formatCurrency(datum.amount, datum.currency);
+                  return formatCurrency(datum.net_amount, datum.currency);
                 },
               },
               {

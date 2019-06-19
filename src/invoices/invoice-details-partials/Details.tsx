@@ -41,7 +41,7 @@ export class Details extends React.Component<DetailsProps> {
 
             <Box basis={'1/4'}>
               <DisplayField
-                label="Date created"
+                label="Invoice date"
                 value={formatDate(invoice!.date_created)}
               />
             </Box>

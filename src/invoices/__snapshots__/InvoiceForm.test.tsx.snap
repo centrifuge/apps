@@ -776,7 +776,7 @@ exports[`InvoiceForm Should render empty form 1`] = `
                     <label
                       className="StyledText-sc-1sadyjn-0 bKLvLm"
                     >
-                      Date created
+                      Invoice date
                     </label>
                     <div
                       className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -1808,7 +1808,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                     <label
                       className="StyledText-sc-1sadyjn-0 bKLvLm"
                     >
-                      Date created
+                      Invoice date
                     </label>
                     <div
                       className="StyledBox-sc-13pk1d4-0 gZSidW"
