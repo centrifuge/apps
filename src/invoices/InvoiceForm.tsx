@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Box, FormField, TextArea, TextInput } from 'grommet';
 import { Invoice } from '../common/models/invoice';
 import { LabelValuePair } from '../common/interfaces';

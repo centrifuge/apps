@@ -20,13 +20,13 @@ export class FundingController {
 
   @Post(ROUTES.FUNDING.sign)
   async sign(@Body() payload: FunRequest, @Request() req): Promise<FunFundingResponse | null> {
-    const signatureResponse = await this.centrifugeService.funding.sign(payload.identifier, payload.agreement_id, payload, req.user.account);
+    const signatureResponse = await this.centrifugeService.funding.sign(payload.document_id, payload.agreement_id, payload, req.user.account);
     await this.centrifugeService.pullForJobComplete(signatureResponse.header.job_id, req.user.account);
-    const updatedInvoice = await this.centrifugeService.invoices.get(payload.identifier, req.user.account);
-    delete updatedInvoice.data.attributes;
+    const updatedInvoice = await this.centrifugeService.invoices.get(payload.document_id, req.user.account);
+    delete updatedInvoice.attributes;
     // Find all the invoices for the document ID
     const invoiceWithNft = await this.databaseService.invoices.update(
-      { 'header.document_id': payload.identifier, 'ownerId': req.user._id },
+      { 'header.document_id': payload.document_id, 'ownerId': req.user._id },
       {
         ...updatedInvoice,
         ownerId: req.user._id,
@@ -58,12 +58,13 @@ export class FundingController {
       const newOwner = invoiceWithNft.fundingAgreement.funding.funder_id;
 
       if (nft.owner.toLowerCase() === invoiceWithNft.fundingAgreement.funding.borrower_id.toLowerCase()) {
-        const transferResponse = await this.centrifugeService.nft.tokenTransfer(tokenId, {
-            token_id: tokenId,
-            registry_address: registry,
-            to: newOwner,
-          },
-          nft.owner);
+        const transferResponse = await this.centrifugeService.nft.transferNft(
+          nft.owner,
+          registry,
+          tokenId,
+          {to:newOwner},
+          nft.owner,
+        );
 
         await this.centrifugeService.pullForJobComplete(transferResponse.header.job_id, nft.owner);
       } else {
@@ -77,13 +78,13 @@ export class FundingController {
   @Post(ROUTES.FUNDING.base)
   async create(@Body() fundingRequest: FundingRequest, @Request() req): Promise<FunFundingResponse | null> {
     const nftPayload: NftNFTMintInvoiceUnpaidRequest = {
-      identifier: fundingRequest.document_id,
+      document_id: fundingRequest.document_id,
       deposit_address: req.user.account,
     };
 
     // Mint an UnpaidInvoiceNFT.
     // This will fail if the document already has a nft minted
-    const nftResult = await this.centrifugeService.nft.mintInvoiceUnpaidNFT(fundingRequest.document_id, nftPayload, req.user.account);
+    const nftResult = await this.centrifugeService.invoiceUnpaid.mintInvoiceUnpaidNFT(fundingRequest.document_id, nftPayload, req.user.account);
 
     // Pull to see when minting is complete. We need the token ID for the funding API
     await this.centrifugeService.pullForJobComplete(nftResult.header.job_id, req.user.account);
@@ -114,7 +115,7 @@ export class FundingController {
     const invoiceWithFunding = await this.centrifugeService.invoices.get(fundingRequest.document_id, req.user.account);
     // We need to delete the attributes prop because NEDB does not allow for . in field names
     // Ex: funding[0].amount
-    delete invoiceWithFunding.data.attributes;
+    delete invoiceWithFunding.attributes;
     // Update the document in the database
     await this.databaseService.invoices.update(
       { 'header.document_id': fundingRequest.document_id, 'ownerId': req.user._id },

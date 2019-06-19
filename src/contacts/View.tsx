@@ -13,7 +13,6 @@ import {
 import { RequestState } from '../store/reducers/http-request-reducer';
 import { Contact } from '../common/models/contact';
 import ContactList from './ContactList';
-import { Box } from 'grommet';
 import { Preloader } from '../components/Preloader';
 
 const mapStateToProps = (state: {
@@ -49,7 +48,7 @@ class ViewContacts extends React.Component<ViewContactsProps> {
 
   render() {
     if (this.props.loading) {
-      return <Preloader message="Loading"/>
+      return <Preloader message="Loading"/>;
     }
 
     return (

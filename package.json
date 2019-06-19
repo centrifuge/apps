@@ -1,5 +1,5 @@
 {
-  "name": "centrifuge-ui-kit",
+  "name": "centrifuge-gateway",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -40,14 +40,13 @@
   },
   "scripts": {
     "start:prod": "nodemon",
-    "test": "cross-env CI=true react-scripts test && jest --config server/jest.config.js",
+    "test": "cross-env CI=true react-scripts test && jest --config server/jest.config.js && npm run build:frontend",
     "start": "run-p start:frontend start:backend",
     "start:frontend": "react-scripts start",
     "build:frontend": "react-scripts build",
     "test:frontend": "react-scripts test --coverage",
     "start:backend": "nodemon",
-    "test:backend": "jest --config server/jest.config.js",
-    "eject": "react-scripts eject"
+    "test:backend": "jest --config server/jest.config.js"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
 import { getAllUsers, invite, resetGetAllUsers } from '../../store/actions/users';
 import { RequestState } from '../../store/reducers/http-request-reducer';
 import { Box, Button, DataTable, Heading, Text } from 'grommet';
@@ -11,7 +10,6 @@ import { Modal } from '@centrifuge/axis-modal';
 import UserForm from './UserForm';
 import { formatDate } from '../../common/formaters';
 import { Preloader } from '../../components/Preloader';
-import { NotificationContext } from '../../notifications/NotificationContext';
 
 type UsersListProps = {
   users: User[] | null;

@@ -2,20 +2,18 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { getInvoices, resetGetInvoices } from '../store/actions/invoices';
-import { InvoiceData } from '../common/interfaces';
 import { Anchor, Box, Button, DataTable, Heading, Text } from 'grommet';
 import { invoiceRoutes } from './routes';
-import { Edit, View } from 'grommet-icons';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { formatCurrency, formatDate } from '../common/formaters';
 import { Preloader } from '../components/Preloader';
-import { NotificationContext } from '../notifications/NotificationContext';
+import { InvInvoiceData } from '../../clients/centrifuge-node';
 
 
 type ViewInvoicesProps = {
   getInvoices: () => void;
   resetGetInvoices: () => void;
-  invoices?: InvoiceData[];
+  invoices?: InvInvoiceData[];
   loading: boolean;
   error: any;
 };
@@ -23,12 +21,6 @@ type ViewInvoicesProps = {
 class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProps> {
 
   displayName = 'InvoiceList';
-
-
-  constructor(props) {
-    super(props);
-    console.log('Constructor', props);
-  }
 
   componentWillMount() {
     this.props.getInvoices();
@@ -158,7 +150,7 @@ const mapStateToProps = (state) => {
         fundingAgreement: response.fundingAgreement,
         createdAt: response.createdAt,
 
-      })) as InvoiceData[]),
+      })) as InvInvoiceData[]),
     loading: state.invoices.get.loading,
     error: state.invoices.get.error,
   };

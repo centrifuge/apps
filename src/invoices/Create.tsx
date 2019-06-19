@@ -7,21 +7,21 @@ import { createInvoice, resetCreateInvoice } from '../store/actions/invoices';
 import { Invoice } from '../common/models/invoice';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
-import { InvoiceData, LabelValuePair } from '../common/interfaces';
+import { LabelValuePair } from '../common/interfaces';
 import { invoiceRoutes } from './routes';
 import { Box, Button, Heading } from 'grommet';
 import { LinkPrevious } from 'grommet-icons';
 import { User } from '../common/models/user';
 import { Preloader } from '../components/Preloader';
-import { NotificationContext } from '../notifications/NotificationContext';
 import { RequestState } from '../store/reducers/http-request-reducer';
+import { InvInvoiceData } from '../../clients/centrifuge-node';
 
 type ConnectedCreateInvoiceProps = {
   createInvoice: (invoice: Invoice) => void;
   resetCreateInvoice: () => void;
   getContacts: () => void;
   resetGetContacts: () => void;
-  creatingInvoice: RequestState<InvoiceData>;
+  creatingInvoice: RequestState<InvInvoiceData>;
   contacts?: LabelValuePair[];
   loggedInUser: User;
 } & RouteComponentProps;

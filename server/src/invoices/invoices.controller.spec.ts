@@ -105,9 +105,7 @@ describe('InvoicesController', () => {
         data: {
           ...invoice,
         },
-        write_access: {
-          collaborators: [invoice.sender, invoice.recipient],
-        },
+        write_access: [invoice.sender, invoice.recipient],
         header: {
           job_id: 'some_job_id',
         },
@@ -161,20 +159,16 @@ describe('InvoicesController', () => {
         '0x39393939',
         {
           data: { ...updatedInvoice },
-          write_access: {
-            collaborators: [updatedInvoice.sender, updatedInvoice.recipient],
-          }
+          write_access: [updatedInvoice.sender, updatedInvoice.recipient],
         },
         config.admin.account,
       );
 
       expect(updateResult).toMatchObject({
         data: {
-          ...updatedInvoice
+          ...updatedInvoice,
         },
-        write_access: {
-          collaborators: [updatedInvoice.sender, updatedInvoice.recipient],
-        },
+        write_access: [updatedInvoice.sender, updatedInvoice.recipient],
       });
     });
   });

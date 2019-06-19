@@ -13,9 +13,6 @@ import {
   Text,
   TextInput,
 } from 'grommet';
-import { Add, Edit } from 'grommet-icons';
-import { Link } from 'react-router-dom';
-
 import { Contact } from '../common/models/contact';
 import { Formik } from 'formik';
 
@@ -27,7 +24,7 @@ interface ContactsProps {
 }
 
 interface ContactsState {
-  submitted:boolean
+  submitted: boolean
   newContact?: Contact;
   contacts: (Contact & { isEditing?: boolean })[];
 }
@@ -60,7 +57,7 @@ export default class ContactList extends React.Component<ContactsProps,
             </Box>
             <Box fill direction="row" gap="small">
               <Anchor
-                label={"Edit"}
+                label={'Edit'}
                 onClick={() => {
                   // @ts-ignore
                   contact.isEditing = true;

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Box } from 'grommet';
 import { DisplayField } from '../../components/DisplayField';
 import { Section } from '../../components/Section';

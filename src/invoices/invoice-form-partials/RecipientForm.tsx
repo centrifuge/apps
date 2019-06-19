@@ -1,10 +1,8 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Box, FormField, TextInput } from 'grommet';
 
 import { connect, FormikContext } from 'formik';
 import { LabelValuePair } from '../../common/interfaces';
-import SearchSelect from '../../components/form/SearchSelect';
 import { Invoice } from '../../common/models/invoice';
 import { Section } from '../../components/Section';
 
@@ -24,12 +22,10 @@ export class RecipientForm extends React.Component<ConnectedRecipientFormProps> 
     const {
       errors,
       values,
-      setFieldValue,
       handleChange,
     } = this.props.formik;
 
     const {
-      contacts,
       columnGap,
     } = this.props;
 

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Box } from 'grommet';
 import { LabelValuePair } from '../../common/interfaces';
 import { Invoice } from '../../common/models/invoice';
@@ -20,13 +19,9 @@ export class Recipient extends React.Component<RecipientProps> {
 
     const {
       invoice,
-      contacts,
       columnGap,
     } = this.props;
 
-    const recipientName = contacts.filter(contact =>
-      contact.value === invoice!.recipient,
-    ).map(contact => contact.label).shift();
 
     return (
       <Section headingLevel="5" title="Recipient" basis={'1/2'}>

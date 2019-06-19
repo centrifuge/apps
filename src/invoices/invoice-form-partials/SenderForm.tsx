@@ -1,7 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Box, FormField, TextInput } from 'grommet';
-
 import { connect, FormikContext } from 'formik';
 import { LabelValuePair } from '../../common/interfaces';
 import SearchSelect from '../../components/form/SearchSelect';

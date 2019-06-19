@@ -7,14 +7,14 @@ import { getInvoiceById, resetGetInvoiceById, resetUpdateInvoice, updateInvoice 
 import { Invoice } from '../common/models/invoice';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
-import { InvoiceData, LabelValuePair } from '../common/interfaces';
+import { LabelValuePair } from '../common/interfaces';
 import { Box, Button, Heading } from 'grommet';
 import { invoiceRoutes } from './routes';
 import { LinkPrevious } from 'grommet-icons';
 import { User } from '../common/models/user';
 import { Preloader } from '../components/Preloader';
-import { NotificationContext } from '../notifications/NotificationContext';
 import { RequestState } from '../store/reducers/http-request-reducer';
+import { InvInvoiceData } from '../../clients/centrifuge-node';
 
 type ConnectedEditInvoiceProps = {
   updateInvoice: (invoice: Invoice) => void;
@@ -26,7 +26,7 @@ type ConnectedEditInvoiceProps = {
   invoice?: Invoice;
   contacts?: LabelValuePair[];
   loggedInUser: User;
-  updatingInvoice: RequestState<InvoiceData>;
+  updatingInvoice: RequestState<InvInvoiceData>;
 } & RouteComponentProps<{ id?: string }>;
 
 class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {

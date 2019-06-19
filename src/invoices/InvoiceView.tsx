@@ -19,7 +19,6 @@ import { InvoiceDetails } from './InvoiceDetails';
 import { RequestState } from '../store/reducers/http-request-reducer';
 import { Invoice } from '../common/models/invoice';
 import { Preloader } from '../components/Preloader';
-import { NotificationContext } from '../notifications/NotificationContext';
 
 type ConnectedInvoiceViewProps = {
   getInvoiceById: (id: string) => void;

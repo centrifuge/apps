@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Box } from 'grommet';
 import { LabelValuePair } from '../../common/interfaces';
 import { Invoice } from '../../common/models/invoice';

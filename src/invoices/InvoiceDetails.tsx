@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Box } from 'grommet';
 import { LabelValuePair } from '../common/interfaces';
 import { FunFundingResponseData } from '../../clients/centrifuge-node';
@@ -8,7 +7,6 @@ import { Sender } from './invoice-details-partials/Sender';
 import { Recipient } from './invoice-details-partials/Recipient';
 import { Details } from './invoice-details-partials/Details';
 import { Section } from '../components/Section';
-import { Modal } from '@centrifuge/axis-modal';
 import { FundingAgreement } from './invoice-details-partials/FundingAgreement';
 import { Invoice } from '../common/models/invoice';
 

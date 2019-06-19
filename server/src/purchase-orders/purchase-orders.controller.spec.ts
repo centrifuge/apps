@@ -7,8 +7,6 @@ import config from '../../../src/common/config';
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 
-
-
 describe('PurchaseOrdersController', () => {
   let centrifugeId;
 
@@ -85,9 +83,7 @@ describe('PurchaseOrdersController', () => {
 
   describe('create', () => {
     it('should return the created purchase order', async () => {
-      const purchaseOrdersController = purchaseOrdersModule.get<
-        PurchaseOrdersController
-      >(PurchaseOrdersController);
+      const purchaseOrdersController = purchaseOrdersModule.get<PurchaseOrdersController>(PurchaseOrdersController);
 
       const result = await purchaseOrdersController.create(
         { user: { _id: 'user_id' } },
@@ -95,9 +91,7 @@ describe('PurchaseOrdersController', () => {
       );
 
       expect(result).toEqual({
-        write_access: {
-          collaborators: [...purchaseOrder.collaborators],
-        },
+        write_access: [...purchaseOrder.collaborators],
         data: purchaseOrder,
         ownerId: 'user_id',
       });
@@ -110,9 +104,7 @@ describe('PurchaseOrdersController', () => {
 
   describe('get', () => {
     it('should return a list of contacts', async () => {
-      const purchaseOrdersController = purchaseOrdersModule.get<
-        PurchaseOrdersController
-      >(PurchaseOrdersController);
+      const purchaseOrdersController = purchaseOrdersModule.get<PurchaseOrdersController>(PurchaseOrdersController);
 
       const result = await purchaseOrdersController.get({
         user: { _id: 'some_user_id' },
@@ -124,9 +116,7 @@ describe('PurchaseOrdersController', () => {
 
   describe('update', function() {
     it('should update the specified purchase order', async function() {
-      const purchaseOrdersController = purchaseOrdersModule.get<
-        PurchaseOrdersController
-      >(PurchaseOrdersController);
+      const purchaseOrdersController = purchaseOrdersModule.get<PurchaseOrdersController>(PurchaseOrdersController);
 
       const updatedOrder = { ...purchaseOrder, number: 'updated_number' };
 
@@ -146,9 +136,7 @@ describe('PurchaseOrdersController', () => {
           data: {
             ...updatedOrder,
           },
-          write_access: {
-            collaborators: ['new_collaborator']
-          },
+          write_access: ['new_collaborator'],
         },
         config.admin.account,
       );
@@ -163,9 +151,7 @@ describe('PurchaseOrdersController', () => {
 
   describe('get by id', function() {
     it('should return the purchase order by id', async function() {
-      const purchaseOrdersController = purchaseOrdersModule.get<
-        PurchaseOrdersController
-      >(PurchaseOrdersController);
+      const purchaseOrdersController = purchaseOrdersModule.get<PurchaseOrdersController>(PurchaseOrdersController);
 
       const result = await purchaseOrdersController.getById(
         { id: 'some_id' },

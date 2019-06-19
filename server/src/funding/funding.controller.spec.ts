@@ -22,9 +22,10 @@ describe('Funding controller', () => {
 
   class CentrifugeClientMock {
     invoices = {
-      get: jest.fn(data => {
+      get: jest.fn(document_id => {
         return {
           header: {
+            document_id,
             nfts: [
               {
                 token_id: 'token_id',
@@ -33,9 +34,11 @@ describe('Funding controller', () => {
             ],
           },
           data: {
-            attributes: {
-              'funding[0].test': true,
-            },
+            currency: 'USD',
+          },
+
+          attributes: {
+            'funding[0].test': true,
           },
         };
       }),
@@ -75,7 +78,7 @@ describe('Funding controller', () => {
         });
       }),
     };
-    nft = {
+    invoiceUnpaid = {
       mintInvoiceUnpaidNFT: () => {
         return new Promise((resolve, reject) => {
           resolve({
@@ -86,8 +89,9 @@ describe('Funding controller', () => {
           );
         });
       },
-
-      tokenTransfer: () => {
+    };
+    nft = {
+      transferNft: () => {
         return new Promise((resolve, reject) => {
           resolve({
               header: {
@@ -187,7 +191,7 @@ describe('Funding controller', () => {
     it('should return the signed funding agreement', async () => {
 
       const fundingRequest = {
-        identifier: '0x39393939',
+        document_id: '0x39393939',
         agreement_id: 'agreement_id',
         nft_address: 'token_id',
         borrower_id: 'owner',

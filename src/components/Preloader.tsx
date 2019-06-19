@@ -11,7 +11,7 @@ type PreloaderProps = {
 export class Preloader extends Component<PreloaderProps> {
 
   render() {
-    const { message, withSound, ...rest } = this.props;
+    const { message, withSound } = this.props;
     return <Box align="center" justify="center" fill={true} gap={'medium'}>
       <Box>
         <svg id='L7' xmlns='http://www.w3.org/2000/svg' width="56px" viewBox='0 0 100 100'>

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Box, Button, FormField, RadioButtonGroup, TextInput } from 'grommet';
 import { User } from '../../common/models/user';
 import * as Yup from 'yup';

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Box, Paragraph } from 'grommet';
 import { Invoice,  invoiceHasRemitTo } from '../../common/models/invoice';
 import { DisplayField } from '../../components/DisplayField';

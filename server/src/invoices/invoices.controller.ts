@@ -27,14 +27,13 @@ export class InvoicesController {
    */
   async create(@Req() request, @Body() invoice: Invoice): Promise<InvInvoiceResponse> {
     const collaborators = [invoice!.sender, invoice!.recipient].filter(item => item);
+
     const createResult = await this.centrifugeService.invoices.create(
       {
         data: {
           ...invoice,
         },
-        write_access: {
-          collaborators,
-        },
+        write_access: collaborators,
       },
       request.user.account,
     );
@@ -84,7 +83,7 @@ export class InvoicesController {
         return item.token_id === tokenId;
       });
       if (nft) {
-        const ownerResponse = await this.centrifugeService.nft.ownerOf(nft.token_id, nft.registry, request.user.account);
+        const ownerResponse = await this.centrifugeService.nft.ownerOfNft(request.user.account, nft.token_id, nft.registry, request.user.account);
         invoice.fundingAgreement.nftOwner = ownerResponse.owner;
       } else {
         throw new HttpException('Nft from funding agreement not found on invoice', HttpStatus.CONFLICT);
@@ -119,9 +118,7 @@ export class InvoicesController {
       invoice.header.document_id,
       {
         data: { ...updateInvoiceRequest },
-        write_access: {
-          collaborators,
-        },
+        write_access: collaborators,
       },
       config.admin.account,
     );

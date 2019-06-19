@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Box, Button, FormField, TextInput } from 'grommet';
 import { LabelValuePair } from '../common/interfaces';
 import { Formik } from 'formik';
@@ -7,7 +6,6 @@ import * as Yup from 'yup';
 import { FundingRequest } from '../common/models/funding-request';
 import SearchSelect from '../components/form/SearchSelect';
 import { dateToString, extractDate } from '../common/formaters';
-import { Invoice } from '../common/models/invoice';
 
 type FundingRequestFormProps = {
   onSubmit: (fundingRequest: FundingRequest) => void;

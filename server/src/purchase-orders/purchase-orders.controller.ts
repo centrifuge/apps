@@ -34,9 +34,8 @@ export class PurchaseOrdersController {
         data: {
           ...purchaseOrder,
         },
-        write_access: {
-          collaborators,
-        },
+        write_access: collaborators,
+
       },
       config.admin.account,
     );
@@ -73,9 +72,7 @@ export class PurchaseOrdersController {
         data: {
           ...purchaseOrder,
         },
-        write_access: {
-          collaborators: purchaseOrder.collaborators,
-        },
+        write_access: purchaseOrder.collaborators,
       },
       config.admin.account,
     );
