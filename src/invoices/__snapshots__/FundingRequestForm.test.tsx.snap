@@ -2,7 +2,7 @@
 
 exports[`RequestFundingForm Should render empty form 1`] = `
 <div
-  className="StyledBox-sc-13pk1d4-0 fQeAyH"
+  className="StyledBox-sc-13pk1d4-0 gUwRxV"
 >
   <form
     onSubmit={[Function]}
@@ -93,6 +93,79 @@ exports[`RequestFundingForm Should render empty form 1`] = `
               </div>
             </div>
           </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
+          <div
+            className="StyledBox-sc-13pk1d4-0 Tiesv"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 clLqce"
+            >
+              <div
+                className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+              >
+                <label
+                  className="StyledText-sc-1sadyjn-0 bKLvLm"
+                >
+                  Invoice amount
+                </label>
+                <div
+                  className="StyledBox-sc-13pk1d4-0 gZSidW"
+                >
+                  <div
+                    className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                  >
+                    <input
+                      autoComplete="off"
+                      className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                      disabled={true}
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      value={0}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+            />
+            <div
+              className="StyledBox-sc-13pk1d4-0 clLqce"
+            >
+              <div
+                className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+              >
+                <label
+                  className="StyledText-sc-1sadyjn-0 bKLvLm"
+                >
+                  Currency
+                </label>
+                <div
+                  className="StyledBox-sc-13pk1d4-0 gZSidW"
+                >
+                  <div
+                    className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                  >
+                    <input
+                      autoComplete="off"
+                      className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                      disabled={true}
+                      name="currency"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      value=""
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div
@@ -113,42 +186,7 @@ exports[`RequestFundingForm Should render empty form 1`] = `
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Currency
-              </label>
-              <div
-                className="StyledBox-sc-13pk1d4-0 gZSidW"
-              >
-                <div
-                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                >
-                  <input
-                    autoComplete="off"
-                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
-                    disabled={true}
-                    name="currency"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    value=""
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-          />
-          <div
-            className="StyledBox-sc-13pk1d4-0 dRJqWv"
-          >
-            <div
-              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-            >
-              <label
-                className="StyledText-sc-1sadyjn-0 bKLvLm"
-              >
-                Finance amount, 
+                Repayment amount, 
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -159,7 +197,7 @@ exports[`RequestFundingForm Should render empty form 1`] = `
                   <input
                     autoComplete="off"
                     className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                    name="amount"
+                    name="repayment_amount"
                     onBlur={[Function]}
                     onChange={[Function]}
                     onFocus={[Function]}
@@ -217,7 +255,7 @@ exports[`RequestFundingForm Should render empty form 1`] = `
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Fee, %
+                Finance fee, 
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -229,12 +267,46 @@ exports[`RequestFundingForm Should render empty form 1`] = `
                     autoComplete="off"
                     className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
                     disabled={true}
-                    name="fee"
                     onBlur={[Function]}
                     onChange={[Function]}
                     onFocus={[Function]}
                     onKeyDown={[Function]}
-                    value={0}
+                    value="NaN"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
+          <div
+            className="StyledBox-sc-13pk1d4-0 dRJqWv"
+          >
+            <div
+              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+            >
+              <label
+                className="StyledText-sc-1sadyjn-0 bKLvLm"
+              >
+                Early payment amount, 
+              </label>
+              <div
+                className="StyledBox-sc-13pk1d4-0 gZSidW"
+              >
+                <div
+                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                >
+                  <input
+                    autoComplete="off"
+                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                    disabled={true}
+                    name="amount"
+                    onBlur={[Function]}
+                    onChange={[Function]}
+                    onFocus={[Function]}
+                    onKeyDown={[Function]}
+                    value="0.00"
                   />
                 </div>
               </div>
@@ -247,6 +319,41 @@ exports[`RequestFundingForm Should render empty form 1`] = `
         <div
           className="StyledBox-sc-13pk1d4-0 ffeAql"
         >
+          <div
+            className="StyledBox-sc-13pk1d4-0 dRJqWv"
+          >
+            <div
+              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+            >
+              <label
+                className="StyledText-sc-1sadyjn-0 bKLvLm"
+              >
+                Early payment date
+              </label>
+              <div
+                className="StyledBox-sc-13pk1d4-0 gZSidW"
+              >
+                <div
+                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                >
+                  <input
+                    autoComplete="off"
+                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                    disabled={true}
+                    onBlur={[Function]}
+                    onChange={[Function]}
+                    onFocus={[Function]}
+                    onKeyDown={[Function]}
+                    type="date"
+                    value="2019-06-20"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
           <div
             className="StyledBox-sc-13pk1d4-0 dRJqWv"
           >
@@ -275,41 +382,6 @@ exports[`RequestFundingForm Should render empty form 1`] = `
                     onKeyDown={[Function]}
                     type="date"
                     value=""
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-          />
-          <div
-            className="StyledBox-sc-13pk1d4-0 dRJqWv"
-          >
-            <div
-              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-            >
-              <label
-                className="StyledText-sc-1sadyjn-0 bKLvLm"
-              >
-                Repayment amount, 
-              </label>
-              <div
-                className="StyledBox-sc-13pk1d4-0 gZSidW"
-              >
-                <div
-                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                >
-                  <input
-                    autoComplete="off"
-                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
-                    disabled={true}
-                    name="repayment_amount"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    value="0.00"
                   />
                 </div>
               </div>
@@ -364,7 +436,7 @@ exports[`RequestFundingForm Should render empty form 1`] = `
 
 exports[`RequestFundingForm Should render form with sender default values and correctly calculate the computed values 1`] = `
 <div
-  className="StyledBox-sc-13pk1d4-0 fQeAyH"
+  className="StyledBox-sc-13pk1d4-0 gUwRxV"
 >
   <form
     onSubmit={[Function]}
@@ -455,6 +527,78 @@ exports[`RequestFundingForm Should render form with sender default values and co
               </div>
             </div>
           </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
+          <div
+            className="StyledBox-sc-13pk1d4-0 Tiesv"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 clLqce"
+            >
+              <div
+                className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+              >
+                <label
+                  className="StyledText-sc-1sadyjn-0 bKLvLm"
+                >
+                  Invoice amount
+                </label>
+                <div
+                  className="StyledBox-sc-13pk1d4-0 gZSidW"
+                >
+                  <div
+                    className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                  >
+                    <input
+                      autoComplete="off"
+                      className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                      disabled={true}
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+            />
+            <div
+              className="StyledBox-sc-13pk1d4-0 clLqce"
+            >
+              <div
+                className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+              >
+                <label
+                  className="StyledText-sc-1sadyjn-0 bKLvLm"
+                >
+                  Currency
+                </label>
+                <div
+                  className="StyledBox-sc-13pk1d4-0 gZSidW"
+                >
+                  <div
+                    className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                  >
+                    <input
+                      autoComplete="off"
+                      className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                      disabled={true}
+                      name="currency"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      value="USD"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div
@@ -475,42 +619,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Currency
-              </label>
-              <div
-                className="StyledBox-sc-13pk1d4-0 gZSidW"
-              >
-                <div
-                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                >
-                  <input
-                    autoComplete="off"
-                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
-                    disabled={true}
-                    name="currency"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    value="USD"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-          />
-          <div
-            className="StyledBox-sc-13pk1d4-0 dRJqWv"
-          >
-            <div
-              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-            >
-              <label
-                className="StyledText-sc-1sadyjn-0 bKLvLm"
-              >
-                Finance amount, USD
+                Repayment amount, USD
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -521,12 +630,12 @@ exports[`RequestFundingForm Should render form with sender default values and co
                   <input
                     autoComplete="off"
                     className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                    name="amount"
+                    name="repayment_amount"
                     onBlur={[Function]}
                     onChange={[Function]}
                     onFocus={[Function]}
                     onKeyDown={[Function]}
-                    value={1000}
+                    value={1005}
                   />
                 </div>
               </div>
@@ -579,7 +688,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Fee, %
+                Finance fee, USD
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -591,12 +700,46 @@ exports[`RequestFundingForm Should render form with sender default values and co
                     autoComplete="off"
                     className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
                     disabled={true}
-                    name="fee"
                     onBlur={[Function]}
                     onChange={[Function]}
                     onFocus={[Function]}
                     onKeyDown={[Function]}
-                    value={1}
+                    value="13.82"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
+          <div
+            className="StyledBox-sc-13pk1d4-0 dRJqWv"
+          >
+            <div
+              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+            >
+              <label
+                className="StyledText-sc-1sadyjn-0 bKLvLm"
+              >
+                Early payment amount, USD
+              </label>
+              <div
+                className="StyledBox-sc-13pk1d4-0 gZSidW"
+              >
+                <div
+                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                >
+                  <input
+                    autoComplete="off"
+                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                    disabled={true}
+                    name="amount"
+                    onBlur={[Function]}
+                    onChange={[Function]}
+                    onFocus={[Function]}
+                    onKeyDown={[Function]}
+                    value="991.18"
                   />
                 </div>
               </div>
@@ -609,6 +752,41 @@ exports[`RequestFundingForm Should render form with sender default values and co
         <div
           className="StyledBox-sc-13pk1d4-0 ffeAql"
         >
+          <div
+            className="StyledBox-sc-13pk1d4-0 dRJqWv"
+          >
+            <div
+              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+            >
+              <label
+                className="StyledText-sc-1sadyjn-0 bKLvLm"
+              >
+                Early payment date
+              </label>
+              <div
+                className="StyledBox-sc-13pk1d4-0 gZSidW"
+              >
+                <div
+                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                >
+                  <input
+                    autoComplete="off"
+                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                    disabled={true}
+                    onBlur={[Function]}
+                    onChange={[Function]}
+                    onFocus={[Function]}
+                    onKeyDown={[Function]}
+                    type="date"
+                    value="2019-06-05"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
           <div
             className="StyledBox-sc-13pk1d4-0 dRJqWv"
           >
@@ -637,41 +815,6 @@ exports[`RequestFundingForm Should render form with sender default values and co
                     onKeyDown={[Function]}
                     type="date"
                     value="2019-07-02"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-          />
-          <div
-            className="StyledBox-sc-13pk1d4-0 dRJqWv"
-          >
-            <div
-              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-            >
-              <label
-                className="StyledText-sc-1sadyjn-0 bKLvLm"
-              >
-                Repayment amount, USD
-              </label>
-              <div
-                className="StyledBox-sc-13pk1d4-0 gZSidW"
-              >
-                <div
-                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                >
-                  <input
-                    autoComplete="off"
-                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
-                    disabled={true}
-                    name="repayment_amount"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    value="1013.70"
                   />
                 </div>
               </div>
@@ -726,7 +869,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
 
 exports[`RequestFundingForm Should render form with sender default values and correctly calculate the computed values for days 31, apr 5% and fee 0% 1`] = `
 <div
-  className="StyledBox-sc-13pk1d4-0 fQeAyH"
+  className="StyledBox-sc-13pk1d4-0 gUwRxV"
 >
   <form
     onSubmit={[Function]}
@@ -817,6 +960,78 @@ exports[`RequestFundingForm Should render form with sender default values and co
               </div>
             </div>
           </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
+          <div
+            className="StyledBox-sc-13pk1d4-0 Tiesv"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 clLqce"
+            >
+              <div
+                className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+              >
+                <label
+                  className="StyledText-sc-1sadyjn-0 bKLvLm"
+                >
+                  Invoice amount
+                </label>
+                <div
+                  className="StyledBox-sc-13pk1d4-0 gZSidW"
+                >
+                  <div
+                    className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                  >
+                    <input
+                      autoComplete="off"
+                      className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                      disabled={true}
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+            />
+            <div
+              className="StyledBox-sc-13pk1d4-0 clLqce"
+            >
+              <div
+                className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+              >
+                <label
+                  className="StyledText-sc-1sadyjn-0 bKLvLm"
+                >
+                  Currency
+                </label>
+                <div
+                  className="StyledBox-sc-13pk1d4-0 gZSidW"
+                >
+                  <div
+                    className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                  >
+                    <input
+                      autoComplete="off"
+                      className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                      disabled={true}
+                      name="currency"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      value="USD"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div
@@ -837,42 +1052,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Currency
-              </label>
-              <div
-                className="StyledBox-sc-13pk1d4-0 gZSidW"
-              >
-                <div
-                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                >
-                  <input
-                    autoComplete="off"
-                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
-                    disabled={true}
-                    name="currency"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    value="USD"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-          />
-          <div
-            className="StyledBox-sc-13pk1d4-0 dRJqWv"
-          >
-            <div
-              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-            >
-              <label
-                className="StyledText-sc-1sadyjn-0 bKLvLm"
-              >
-                Finance amount, USD
+                Repayment amount, USD
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -883,7 +1063,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
                   <input
                     autoComplete="off"
                     className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                    name="amount"
+                    name="repayment_amount"
                     onBlur={[Function]}
                     onChange={[Function]}
                     onFocus={[Function]}
@@ -941,7 +1121,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Fee, %
+                Finance fee, USD
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -953,12 +1133,46 @@ exports[`RequestFundingForm Should render form with sender default values and co
                     autoComplete="off"
                     className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
                     disabled={true}
-                    name="fee"
                     onBlur={[Function]}
                     onChange={[Function]}
                     onFocus={[Function]}
                     onKeyDown={[Function]}
-                    value={0}
+                    value="4.17"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
+          <div
+            className="StyledBox-sc-13pk1d4-0 dRJqWv"
+          >
+            <div
+              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+            >
+              <label
+                className="StyledText-sc-1sadyjn-0 bKLvLm"
+              >
+                Early payment amount, USD
+              </label>
+              <div
+                className="StyledBox-sc-13pk1d4-0 gZSidW"
+              >
+                <div
+                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                >
+                  <input
+                    autoComplete="off"
+                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                    disabled={true}
+                    name="amount"
+                    onBlur={[Function]}
+                    onChange={[Function]}
+                    onFocus={[Function]}
+                    onKeyDown={[Function]}
+                    value="995.83"
                   />
                 </div>
               </div>
@@ -971,6 +1185,41 @@ exports[`RequestFundingForm Should render form with sender default values and co
         <div
           className="StyledBox-sc-13pk1d4-0 ffeAql"
         >
+          <div
+            className="StyledBox-sc-13pk1d4-0 dRJqWv"
+          >
+            <div
+              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+            >
+              <label
+                className="StyledText-sc-1sadyjn-0 bKLvLm"
+              >
+                Early payment date
+              </label>
+              <div
+                className="StyledBox-sc-13pk1d4-0 gZSidW"
+              >
+                <div
+                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                >
+                  <input
+                    autoComplete="off"
+                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                    disabled={true}
+                    onBlur={[Function]}
+                    onChange={[Function]}
+                    onFocus={[Function]}
+                    onKeyDown={[Function]}
+                    type="date"
+                    value="2019-06-05"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
           <div
             className="StyledBox-sc-13pk1d4-0 dRJqWv"
           >
@@ -998,42 +1247,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
                     onFocus={[Function]}
                     onKeyDown={[Function]}
                     type="date"
-                    value="2019-07-06"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-          />
-          <div
-            className="StyledBox-sc-13pk1d4-0 dRJqWv"
-          >
-            <div
-              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-            >
-              <label
-                className="StyledText-sc-1sadyjn-0 bKLvLm"
-              >
-                Repayment amount, USD
-              </label>
-              <div
-                className="StyledBox-sc-13pk1d4-0 gZSidW"
-              >
-                <div
-                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                >
-                  <input
-                    autoComplete="off"
-                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
-                    disabled={true}
-                    name="repayment_amount"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    value="1004.25"
+                    value="2019-07-05"
                   />
                 </div>
               </div>
@@ -1088,7 +1302,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
 
 exports[`RequestFundingForm Should render form with sender default values and correctly calculate the computed values for days 31, apr 5% and fee 1% 1`] = `
 <div
-  className="StyledBox-sc-13pk1d4-0 fQeAyH"
+  className="StyledBox-sc-13pk1d4-0 gUwRxV"
 >
   <form
     onSubmit={[Function]}
@@ -1179,6 +1393,78 @@ exports[`RequestFundingForm Should render form with sender default values and co
               </div>
             </div>
           </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
+          <div
+            className="StyledBox-sc-13pk1d4-0 Tiesv"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 clLqce"
+            >
+              <div
+                className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+              >
+                <label
+                  className="StyledText-sc-1sadyjn-0 bKLvLm"
+                >
+                  Invoice amount
+                </label>
+                <div
+                  className="StyledBox-sc-13pk1d4-0 gZSidW"
+                >
+                  <div
+                    className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                  >
+                    <input
+                      autoComplete="off"
+                      className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                      disabled={true}
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+            />
+            <div
+              className="StyledBox-sc-13pk1d4-0 clLqce"
+            >
+              <div
+                className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+              >
+                <label
+                  className="StyledText-sc-1sadyjn-0 bKLvLm"
+                >
+                  Currency
+                </label>
+                <div
+                  className="StyledBox-sc-13pk1d4-0 gZSidW"
+                >
+                  <div
+                    className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                  >
+                    <input
+                      autoComplete="off"
+                      className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                      disabled={true}
+                      name="currency"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      value="USD"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div
@@ -1199,42 +1485,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Currency
-              </label>
-              <div
-                className="StyledBox-sc-13pk1d4-0 gZSidW"
-              >
-                <div
-                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                >
-                  <input
-                    autoComplete="off"
-                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
-                    disabled={true}
-                    name="currency"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    value="USD"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-          />
-          <div
-            className="StyledBox-sc-13pk1d4-0 dRJqWv"
-          >
-            <div
-              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-            >
-              <label
-                className="StyledText-sc-1sadyjn-0 bKLvLm"
-              >
-                Finance amount, USD
+                Repayment amount, USD
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -1245,7 +1496,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
                   <input
                     autoComplete="off"
                     className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                    name="amount"
+                    name="repayment_amount"
                     onBlur={[Function]}
                     onChange={[Function]}
                     onFocus={[Function]}
@@ -1303,7 +1554,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
               <label
                 className="StyledText-sc-1sadyjn-0 bKLvLm"
               >
-                Fee, %
+                Finance fee, USD
               </label>
               <div
                 className="StyledBox-sc-13pk1d4-0 gZSidW"
@@ -1315,12 +1566,46 @@ exports[`RequestFundingForm Should render form with sender default values and co
                     autoComplete="off"
                     className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
                     disabled={true}
-                    name="fee"
                     onBlur={[Function]}
                     onChange={[Function]}
                     onFocus={[Function]}
                     onKeyDown={[Function]}
-                    value={1}
+                    value="14.17"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
+          <div
+            className="StyledBox-sc-13pk1d4-0 dRJqWv"
+          >
+            <div
+              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+            >
+              <label
+                className="StyledText-sc-1sadyjn-0 bKLvLm"
+              >
+                Early payment amount, USD
+              </label>
+              <div
+                className="StyledBox-sc-13pk1d4-0 gZSidW"
+              >
+                <div
+                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                >
+                  <input
+                    autoComplete="off"
+                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                    disabled={true}
+                    name="amount"
+                    onBlur={[Function]}
+                    onChange={[Function]}
+                    onFocus={[Function]}
+                    onKeyDown={[Function]}
+                    value="985.83"
                   />
                 </div>
               </div>
@@ -1333,6 +1618,41 @@ exports[`RequestFundingForm Should render form with sender default values and co
         <div
           className="StyledBox-sc-13pk1d4-0 ffeAql"
         >
+          <div
+            className="StyledBox-sc-13pk1d4-0 dRJqWv"
+          >
+            <div
+              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+            >
+              <label
+                className="StyledText-sc-1sadyjn-0 bKLvLm"
+              >
+                Early payment date
+              </label>
+              <div
+                className="StyledBox-sc-13pk1d4-0 gZSidW"
+              >
+                <div
+                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
+                >
+                  <input
+                    autoComplete="off"
+                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                    disabled={true}
+                    onBlur={[Function]}
+                    onChange={[Function]}
+                    onFocus={[Function]}
+                    onKeyDown={[Function]}
+                    type="date"
+                    value="2019-06-05"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          />
           <div
             className="StyledBox-sc-13pk1d4-0 dRJqWv"
           >
@@ -1360,42 +1680,7 @@ exports[`RequestFundingForm Should render form with sender default values and co
                     onFocus={[Function]}
                     onKeyDown={[Function]}
                     type="date"
-                    value="2019-07-06"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-          />
-          <div
-            className="StyledBox-sc-13pk1d4-0 dRJqWv"
-          >
-            <div
-              className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
-            >
-              <label
-                className="StyledText-sc-1sadyjn-0 bKLvLm"
-              >
-                Repayment amount, USD
-              </label>
-              <div
-                className="StyledBox-sc-13pk1d4-0 gZSidW"
-              >
-                <div
-                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 yIdXy"
-                >
-                  <input
-                    autoComplete="off"
-                    className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
-                    disabled={true}
-                    name="repayment_amount"
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onFocus={[Function]}
-                    onKeyDown={[Function]}
-                    value="1014.25"
+                    value="2019-07-05"
                   />
                 </div>
               </div>

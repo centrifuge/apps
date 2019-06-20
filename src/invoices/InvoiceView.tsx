@@ -90,6 +90,7 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
     fundingRequest.currency = invoice.currency;
     //@ts-ignore
     fundingRequest.document_id = header.document_id;
+    fundingRequest.invoice_amount = parseFloat(invoice.gross_amount || '');
     //@ts-ignore
     fundingRequest.repayment_due_date = invoice.date_due || dateToString(new Date());
 
@@ -112,7 +113,6 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
           onClose={this.closeFundingRequest}
         >
           <FundingRequestForm
-            maxAmount={parseFloat(invoice.gross_amount || '')}
             onSubmit={this.submitFundingRequest}
             onDiscard={this.closeFundingRequest}
             contacts={contacts}

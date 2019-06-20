@@ -46,12 +46,12 @@ describe('RequestFundingForm', () => {
       document_id: 'document',
       funder: contacts[0].value,
       agreement_id: 'SOMEID',
-      amount: 1000,
+      amount: 0,
       days: 0,
       apr: 0.05,
       fee: 0.01,
       repayment_due_date: dateToString(date),
-      repayment_amount: 0,
+      repayment_amount: 1005,
       currency: 'USD',
 
     };
@@ -64,8 +64,8 @@ describe('RequestFundingForm', () => {
                           onSubmit={onSubmit}/>,
     );
 
-    const repaymentDateInput = fundingForm.root.findByProps({ name: 'repayment_amount' });
-    expect(repaymentDateInput.props.value).toEqual('1013.70');
+    const repaymentDateInput = fundingForm.root.findByProps({ name: 'amount' });
+    expect(repaymentDateInput.props.value).toEqual('991.18');
     expect(fundingForm.toJSON()).toMatchSnapshot();
 
   });
@@ -73,19 +73,19 @@ describe('RequestFundingForm', () => {
   it('Should render form with sender default values and correctly calculate the computed values for days 31, apr 5% and fee 1%', () => {
 
     var date = new Date(today);
-    date.setDate(date.getDate() + 31);
+    date.setDate(date.getDate() + 30);
 
     const fundingRequest = {
       invoice_id: 'id',
       document_id: 'document',
       funder: contacts[0].value,
       agreement_id: 'SOMEID',
-      amount: 1000,
+      amount: 0,
       days: 0,
       apr: 0.05,
       fee: 0.01,
       repayment_due_date: dateToString(date),
-      repayment_amount: 0,
+      repayment_amount: 1000,
       currency: 'USD',
 
     };
@@ -98,8 +98,8 @@ describe('RequestFundingForm', () => {
                           onSubmit={onSubmit}/>,
     );
 
-    const repaymentDateInput = fundingForm.root.findByProps({ name: 'repayment_amount' });
-    expect(repaymentDateInput.props.value).toEqual('1014.25');
+    const repaymentDateInput = fundingForm.root.findByProps({ name: 'amount' });
+    expect(repaymentDateInput.props.value).toEqual('985.83');
     expect(fundingForm.toJSON()).toMatchSnapshot();
 
   });
@@ -107,7 +107,7 @@ describe('RequestFundingForm', () => {
   it('Should render form with sender default values and correctly calculate the computed values for days 31, apr 5% and fee 0%', () => {
 
     var date = new Date(today);
-    date.setDate(date.getDate() + 31);
+    date.setDate(date.getDate() + 30);
 
 
 
@@ -117,12 +117,12 @@ describe('RequestFundingForm', () => {
       document_id: 'document',
       funder: contacts[0].value,
       agreement_id: 'SOMEID',
-      amount: 1000,
+      amount: 0,
       days: 0,
       apr: 0.05,
       fee: 0,
       repayment_due_date: dateToString(date),
-      repayment_amount: 0,
+      repayment_amount: 1000,
       currency: 'USD',
 
     };
@@ -134,8 +134,8 @@ describe('RequestFundingForm', () => {
                           onSubmit={onSubmit}/>,
     );
 
-    const repaymentDateInput = fundingForm.root.findByProps({ name: 'repayment_amount' });
-    expect(repaymentDateInput.props.value).toEqual('1004.25');
+    const repaymentDateInput = fundingForm.root.findByProps({ name: 'amount' });
+    expect(repaymentDateInput.props.value).toEqual('995.83');
     expect(fundingForm.toJSON()).toMatchSnapshot();
 
   });
@@ -144,19 +144,19 @@ describe('RequestFundingForm', () => {
   it('Should call the callback functions', () => {
 
     var date = new Date(today);
-    date.setDate(date.getDate() + 31);
+    date.setDate(date.getDate() + 30);
 
     const fundingRequest = {
       invoice_id: 'id',
       document_id: 'document',
       funder: contacts[0].value,
       agreement_id: 'SOMEID',
-      amount: 1000,
+      amount: 0,
       days: 0,
       apr: 0.05,
       fee: 0.01,
       repayment_due_date: dateToString(date),
-      repayment_amount: 0,
+      repayment_amount: 1000,
       currency: 'USD',
 
     };

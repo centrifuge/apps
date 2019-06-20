@@ -150,6 +150,7 @@ describe('Funding controller', () => {
         funder: 'funder',
         agreement_id: 'agreement_id',
         amount: 0,
+        invoice_amount:0,
         days: 0,
         apr: 5,
         fee: 0,

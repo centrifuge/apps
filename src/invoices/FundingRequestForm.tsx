@@ -12,7 +12,6 @@ type FundingRequestFormProps = {
   onDiscard: () => void;
   contacts: LabelValuePair[];
   today: Date;
-  maxAmount: number;
   fundingRequest: FundingRequest;
 };
 
@@ -26,7 +25,6 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
       // do nothing by default
     },
     today: new Date(),
-    maxAmount: Infinity,
     fundingRequest: new FundingRequest(),
     contacts: [],
   };
@@ -45,7 +43,7 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
   render() {
 
     const { submitted } = this.state;
-    const { fundingRequest, contacts, today, maxAmount } = this.props;
+    const { fundingRequest, contacts, today } = this.props;
     const columnGap = 'medium';
     const sectionGap = 'large';
 
@@ -53,9 +51,9 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
     const fundingRequestValidation = Yup.object().shape({
       funder: Yup.string()
         .required('This field is required'),
-      amount: Yup.number()
+      repayment_amount: Yup.number()
         .required('This field is required')
-        .max(maxAmount, 'Should not exceed the invoice amount'),
+        .max(fundingRequest.invoice_amount, 'Should not exceed the invoice amount'),
       apr: Yup.number()
         .required('This field is required'),
       fee: Yup.number()
@@ -67,7 +65,7 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
     });
 
     return (
-      <Box width={'large'} pad={{ top: 'large', bottom: 'large' }}>
+      <Box width={'800px'} pad={{ top: 'large', bottom: 'large' }}>
         <Formik
           validationSchema={fundingRequestValidation}
           initialValues={fundingRequest}
@@ -89,18 +87,19 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
              }) => {
 
               // Calculate days and repayment_amount
-              let days;
-              let repaymentAmount;
+              let days, amount, financeRate, feeAmount, financeFee;
               const repaymentDate = new Date(values.repayment_due_date);
               const diff = repaymentDate.getTime() - today.getTime();
               days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-              repaymentAmount = values.amount * (1 + (values.apr) / 365 * days) + (values.amount * (values.fee));
+              financeRate = values.apr / 360 * days;
+              feeAmount = values.fee * values.repayment_amount;
+              financeFee = values.repayment_amount * financeRate + feeAmount;
+              amount = values.repayment_amount - financeFee;
 
-              if (isNaN(repaymentAmount)) repaymentAmount = 0;
+              if (isNaN(amount)) amount = 0;
               if (isNaN(days)) days = 0;
-
               values.days = days;
-              values.repayment_amount = repaymentAmount.toFixed(2);
+              values.amount = amount.toFixed(2);
 
               return (
                 <form
@@ -132,7 +131,34 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                               }
                             />
                           </FormField>
+                        </Box>
 
+                        <Box basis={'1/2'} gap={columnGap} direction="row">
+                          <Box basis={'1/2'}>
+                            <FormField
+                              label="Invoice amount"
+                            >
+
+                              <TextInput
+                                disabled={true}
+                                value={values.invoice_amount}
+                              />
+                            </FormField>
+                          </Box>
+                          <Box basis={'1/2'}>
+                            <FormField
+                              label="Currency"
+                              error={errors!.currency}
+                            >
+
+                              <TextInput
+                                disabled={true}
+                                name="currency"
+                                value={values!.currency}
+                                onChange={handleChange}
+                              />
+                            </FormField>
+                          </Box>
                         </Box>
                       </Box>
 
@@ -141,30 +167,15 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                       <Box direction="row" gap={columnGap}>
                         <Box basis={'1/4'} gap={columnGap}>
                           <FormField
-                            label="Currency"
-                            error={errors!.currency}
+                            label={`Repayment amount, ${values!.currency}`}
+                            error={errors!.repayment_amount}
                           >
-
                             <TextInput
-                              disabled={true}
-                              name="currency"
-                              value={values!.currency}
+                              name="repayment_amount"
+                              value={values!.repayment_amount}
                               onChange={handleChange}
                             />
                           </FormField>
-                        </Box>
-                        <Box basis={'1/4'} gap={columnGap}>
-                          <FormField
-                            label={`Finance amount, ${values!.currency}`}
-                            error={errors!.amount}
-                          >
-                            <TextInput
-                              name="amount"
-                              value={values!.amount}
-                              onChange={handleChange}
-                            />
-                          </FormField>
-
                         </Box>
                         <Box basis={'1/4'} gap={columnGap}>
                           <FormField
@@ -181,21 +192,44 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                         </Box>
                         <Box basis={'1/4'} gap={columnGap}>
                           <FormField
-                            label="Fee, %"
+                            label={`Finance fee, ${values!.currency}`}
                             error={errors!.fee}
                           >
                             <TextInput
-                              name="fee"
                               disabled={true}
-                              value={values!.fee * 100}
-                              onChange={(ev) => {
-                                handleChange(ev);
-                              }}
+                              value={financeFee.toFixed(2)}
                             />
                           </FormField>
                         </Box>
+                        <Box basis={'1/4'} gap={columnGap}>
+                          <FormField
+                            label={`Early payment amount, ${values!.currency}`}
+                            error={errors!.amount}
+                          >
+                            <TextInput
+                              disabled={true}
+                              name="amount"
+                              value={values!.amount}
+                              onChange={handleChange}
+                            />
+                          </FormField>
+
+                        </Box>
                       </Box>
                       <Box direction="row" gap={columnGap}>
+                        <Box basis={'1/4'} gap={columnGap}>
+                          <FormField
+                            label="Early payment date"
+                            error={errors!.repayment_due_date}
+                          >
+                            <TextInput
+                              disabled={true}
+                              type="date"
+                              value={extractDate(today)}
+
+                            />
+                          </FormField>
+                        </Box>
                         <Box basis={'1/4'} gap={columnGap}>
                           <FormField
                             label="Repayment due date"
@@ -211,19 +245,7 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                               }}
                             />
                           </FormField>
-                        </Box>
-                        <Box basis={'1/4'} gap={columnGap}>
-                          <FormField
-                            label={`Repayment amount, ${values!.currency}`}
-                            error={errors!.repayment_amount}
-                          >
-                            <TextInput
-                              disabled={true}
-                              name="repayment_amount"
-                              value={values!.repayment_amount}
-                              onChange={handleChange}
-                            />
-                          </FormField>
+
                         </Box>
                         <Box basis={'1/4'} gap={columnGap}>
 
