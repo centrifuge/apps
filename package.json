@@ -21,6 +21,8 @@
     "@types/web3-eth-abi": "^1.0.0",
     "nodemon": "^1.19.1",
     "ts-mocha": "^6.0.0",
+    "tslint": "^5.18.0",
+    "tslint-config-airbnb": "^5.11.1",
     "typescript": "^3.5.2"
   },
   "scripts": {
