@@ -1,15 +1,16 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import renderer from 'react-test-renderer';
 import { BrowserRouter } from 'react-router-dom';
 import FundingRequestForm from './FundingRequestForm';
 import { FundingRequest } from '../common/models/funding-request';
 import { dateToString } from '../common/formaters';
 import { Formik } from 'formik';
+import { serializeSnapshot } from '../testing/serialize';
+
 
 describe('RequestFundingForm', () => {
 
-  const today = new Date('2019-06-05T00:00:00.000Z')
+  const today = new Date('2019-06-05T00:00:00.000Z');
   const contacts = [
     {
       label: 'Alice',
@@ -27,13 +28,24 @@ describe('RequestFundingForm', () => {
   const onDiscard = jest.fn(() => {
   });
 
-  it('Should render empty form', () => {
+
+  beforeAll(() => {
+    onDiscard.mockClear();
+    onSubmit.mockClear();
+  });
+
+  it('Should render the form', () => {
     const fundingRequest = new FundingRequest();
-    const bodyShallow = renderer.create(
-      <FundingRequestForm fundingRequest={fundingRequest} contacts={contacts} onDiscard={onDiscard}
+    fundingRequest.currency = 'USD';
+    fundingRequest.invoice_id = '2222';
+    fundingRequest.document_id = '0xsss';
+    fundingRequest.invoice_amount = 1000;
+    fundingRequest.repayment_due_date = dateToString(new Date(today));
+    const fundingForm = mount(
+      <FundingRequestForm fundingRequest={fundingRequest} today={today} contacts={contacts} onDiscard={onDiscard}
                           onSubmit={onSubmit}/>,
-    ).toJSON();
-    expect(bodyShallow).toMatchSnapshot();
+    );
+    expect(serializeSnapshot(fundingForm)).toMatchSnapshot();
   });
 
   it('Should render form with sender default values and correctly calculate the computed values', () => {
@@ -56,7 +68,7 @@ describe('RequestFundingForm', () => {
 
     };
 
-    const fundingForm = renderer.create(
+    const fundingForm = mount(
       <FundingRequestForm fundingRequest={fundingRequest}
                           today={today}
                           contacts={contacts}
@@ -64,9 +76,8 @@ describe('RequestFundingForm', () => {
                           onSubmit={onSubmit}/>,
     );
 
-    const repaymentDateInput = fundingForm.root.findByProps({ name: 'amount' });
-    expect(repaymentDateInput.props.value).toEqual('991.18');
-    expect(fundingForm.toJSON()).toMatchSnapshot();
+    const amountInput = fundingForm.find(`input[name="amount"]`);
+    expect(amountInput.props().value).toEqual('$991.18');
 
   });
 
@@ -86,11 +97,11 @@ describe('RequestFundingForm', () => {
       fee: 0.01,
       repayment_due_date: dateToString(date),
       repayment_amount: 1000,
-      currency: 'USD',
+      currency: 'EUR',
 
     };
 
-    const fundingForm = renderer.create(
+    const fundingForm = mount(
       <FundingRequestForm fundingRequest={fundingRequest}
                           today={today}
                           contacts={contacts}
@@ -98,9 +109,8 @@ describe('RequestFundingForm', () => {
                           onSubmit={onSubmit}/>,
     );
 
-    const repaymentDateInput = fundingForm.root.findByProps({ name: 'amount' });
-    expect(repaymentDateInput.props.value).toEqual('985.83');
-    expect(fundingForm.toJSON()).toMatchSnapshot();
+    const amountInput = fundingForm.find(`input[name="amount"]`);
+    expect(amountInput.props().value).toEqual('€985.83');
 
   });
 
@@ -108,8 +118,6 @@ describe('RequestFundingForm', () => {
 
     var date = new Date(today);
     date.setDate(date.getDate() + 30);
-
-
 
 
     const fundingRequest = {
@@ -126,7 +134,7 @@ describe('RequestFundingForm', () => {
       currency: 'USD',
 
     };
-    const fundingForm = renderer.create(
+    const fundingForm = mount(
       <FundingRequestForm fundingRequest={fundingRequest}
                           today={today}
                           contacts={contacts}
@@ -134,9 +142,8 @@ describe('RequestFundingForm', () => {
                           onSubmit={onSubmit}/>,
     );
 
-    const repaymentDateInput = fundingForm.root.findByProps({ name: 'amount' });
-    expect(repaymentDateInput.props.value).toEqual('995.83');
-    expect(fundingForm.toJSON()).toMatchSnapshot();
+    const amountInput = fundingForm.find(`input[name="amount"]`);
+    expect(amountInput.props().value).toEqual('$995.83');
 
   });
 
@@ -145,7 +152,6 @@ describe('RequestFundingForm', () => {
 
     var date = new Date(today);
     date.setDate(date.getDate() + 30);
-
     const fundingRequest = {
       invoice_id: 'id',
       document_id: 'document',
@@ -160,7 +166,7 @@ describe('RequestFundingForm', () => {
       currency: 'USD',
 
     };
-    const fundingForm = renderer.create(
+    const fundingForm = mount(
       <FundingRequestForm fundingRequest={fundingRequest}
                           today={today}
                           contacts={contacts}
@@ -168,20 +174,18 @@ describe('RequestFundingForm', () => {
                           onSubmit={onSubmit}/>,
     );
 
-    const form = fundingForm.root.findByType(Formik);
-    const discardButton = fundingForm.root.findByProps({ label: 'Discard' });
+    const form = fundingForm.find(Formik);
+    const discardButton = fundingForm.find(`[label="Discard"]`).first();
+    discardButton.simulate('click');
 
-    form.props.onSubmit(fundingRequest, {
+    form.props().onSubmit(fundingRequest, {
       setSubmitting: () => {
       },
     });
-    discardButton.props.onClick();
 
     expect(onDiscard.mock.calls.length).toEqual(1);
     expect(onSubmit.mock.calls.length).toEqual(1);
 
-
   });
-
 
 });

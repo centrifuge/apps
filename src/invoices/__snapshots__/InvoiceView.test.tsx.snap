@@ -644,7 +644,7 @@ exports[`FundingAgreementView Should not render an empty form 1`] = `
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
-                          USDNaN
+                          $NaN
                         </p>
                       </div>
                     </div>
@@ -698,7 +698,7 @@ exports[`FundingAgreementView Should not render an empty form 1`] = `
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
-                          USDNaN
+                          $NaN
                         </p>
                       </div>
                     </div>
@@ -725,7 +725,7 @@ exports[`FundingAgreementView Should not render an empty form 1`] = `
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
-                          USDNaN
+                          $NaN
                         </p>
                       </div>
                     </div>
@@ -1431,7 +1431,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
-                          USDNaN
+                          $NaN
                         </p>
                       </div>
                     </div>
@@ -1485,7 +1485,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
-                          USDNaN
+                          $NaN
                         </p>
                       </div>
                     </div>
@@ -1512,7 +1512,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
-                          USDNaN
+                          $NaN
                         </p>
                       </div>
                     </div>

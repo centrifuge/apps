@@ -4,22 +4,8 @@ import {AxisTheme} from '@centrifuge/axis-theme';
 import { NotificationConsumer, NotificationProvider, NOTIFICATION } from './NotificationContext';
 import { shallow, mount } from 'enzyme';
 import {Modal} from '@centrifuge/axis-modal'
-import toJson from 'enzyme-to-json';
+import {serializeSnapshot} from '../testing/serialize';
 
-
-const serializeSnapshot = (component) => {
-  // We are not interested in the theme prop and we remove it in order to reduce file size
-  return toJson(
-    component,
-    {
-      noKey:false,
-      map: (node => {
-        delete node.props.theme;
-        return node;
-      }),
-    },
-  );
-};
 
 const setProviders = (component) => {
   return  <AxisTheme>
@@ -53,8 +39,10 @@ describe('NotificationContext', () => {
           {({ notify }) => {
             return <button onClick={()=> {
               notify(
-                'Title',
-                'Message',
+                {
+                  title: 'Title',
+                  message:'Messsge',
+                }
               );
             }}></button>;
           }}
@@ -72,9 +60,9 @@ describe('NotificationContext', () => {
             {({ notify }) => {
               return <button onClick={()=> {
                 notify(
-                  'Title',
-                  'Message',
                   {
+                    title: 'Title',
+                    message:'Messsge',
                     type: NOTIFICATION.WARNING,
                   },
                 );
@@ -95,9 +83,9 @@ describe('NotificationContext', () => {
           {({ notify }) => {
             return <button onClick={()=> {
               notify(
-                'Title',
-                'Message',
                 {
+                  title: 'Title',
+                  message:'Messsge',
                   type: NOTIFICATION.SUCCESS,
                 },
               );
@@ -117,9 +105,9 @@ describe('NotificationContext', () => {
           {({ notify }) => {
             return <button onClick={()=> {
               notify(
-                'Title',
-                'Message',
                 {
+                  title: 'Title',
+                  message:'Messsge',
                   type: NOTIFICATION.ERROR,
                 },
               );
@@ -141,9 +129,9 @@ describe('NotificationContext', () => {
 
               return <button onClick={()=> {
                 notify(
-                  'Title',
-                  'Message',
                   {
+                    title: 'Title',
+                    message:'Messsge',
                     confirmLabel: "Crazy Label",
                   },
                 );

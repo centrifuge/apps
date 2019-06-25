@@ -35,7 +35,7 @@ export interface NotificationOptions {
   title?: string,
   message?: string,
   cancelable?: boolean, // modal can self close(x icon and click outside)
-  type: NOTIFICATION, // DEFAULT, SUCCESS, ERROR, WARNING
+  type?: NOTIFICATION, // DEFAULT, SUCCESS, ERROR, WARNING
   confirmLabel?: string, // Label for the modal button
   onClose?: () => void, // callback for when the modal is closed.
   onConfirm?: () => void, // callback for when the modal is closed.
