@@ -15,7 +15,13 @@
     "web3-utils": "^1.0.0-beta.55"
   },
   "devDependencies": {
-    "nodemon": "^1.19.1"
+    "@types/assert": "^1.4.2",
+    "@types/ethjs-signer": "^0.1.0",
+    "@types/mocha": "^5.2.7",
+    "@types/web3-eth-abi": "^1.0.0",
+    "nodemon": "^1.19.1",
+    "ts-mocha": "^6.0.0",
+    "typescript": "^3.5.2"
   },
   "scripts": {
     "test": "mocha",
