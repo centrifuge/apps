@@ -7,6 +7,16 @@ var Eth = require('ethjs');
 var Abi = require('web3-eth-abi');
 var abiCoder = new Abi.AbiCoder();
 var utils = require('web3-utils');
+// tslint:disable:import-name
+var SimpleNFT_abi_1 = require("./abi/test/SimpleNFT.abi");
+var Title_abi_1 = require("./abi/Title.abi");
+var SimpleToken_abi_1 = require("./abi/test/SimpleToken.abi");
+var Admit_abi_1 = require("./abi/Admit.abi");
+var Reception_abi_1 = require("./abi/Reception.abi");
+var Desk_abi_1 = require("./abi/Desk.abi");
+var Shelf_abi_1 = require("./abi/Shelf.abi");
+var Appraiser_abi_1 = require("./abi/Appraiser.abi");
+var MakerAdapter_abi_1 = require("./abi/MakerAdapter.abi");
 var Tinlake = /** @class */ (function () {
     function Tinlake(provider, _a) {
         var _this = this;
@@ -68,22 +78,22 @@ var Tinlake = /** @class */ (function () {
                 return waitAndReturnEvents(_this.eth, txHash, _this.contracts['lender'].abi);
             });
         };
-        this.contractAbiPath = contractAbiPath || './abi';
+        this.contractAbiPath = contractAbiPath || __dirname + "/abi";
         this.contractAddresses = contractAddresses || defaultContractAddresses_1.default;
         this.provider = provider;
         this.ethOptions = ethOptions || {};
-        this.ethConfig = ethConfig;
+        this.ethConfig = ethConfig || {};
         this.eth = new Eth(this.provider, this.ethOptions);
         this.contracts = {
-            nft: getContract(this.eth, this.contractAbiPath, 'test/SimpleNFT.abi', this.contractAddresses['NFT_COLLATERAL']),
-            title: getContract(this.eth, this.contractAbiPath, 'Title.abi', this.contractAddresses['TITLE']),
-            currency: getContract(this.eth, this.contractAbiPath, 'test/SimpleToken.abi', this.contractAddresses['CURRENCY']),
-            admit: getContract(this.eth, this.contractAbiPath, 'Admit.abi', this.contractAddresses['ADMIT']),
-            reception: getContract(this.eth, this.contractAbiPath, 'Reception.abi', this.contractAddresses['RECEPTION']),
-            desk: getContract(this.eth, this.contractAbiPath, 'Desk.abi', this.contractAddresses['DESK']),
-            shelf: getContract(this.eth, this.contractAbiPath, 'Shelf.abi', this.contractAddresses['SHELF']),
-            appraiser: getContract(this.eth, this.contractAbiPath, 'Appraiser.abi', this.contractAddresses['APPRAISER']),
-            lender: getContract(this.eth, this.contractAbiPath, 'MakerAdapter.abi', this.contractAddresses['LENDER']),
+            nft: this.eth.contract(SimpleNFT_abi_1.default).at(this.contractAddresses['NFT_COLLATERAL']),
+            title: this.eth.contract(Title_abi_1.default).at(this.contractAddresses['TITLE']),
+            currency: this.eth.contract(SimpleToken_abi_1.default).at(this.contractAddresses['CURRENCY']),
+            admit: this.eth.contract(Admit_abi_1.default).at(this.contractAddresses['ADMIT']),
+            reception: this.eth.contract(Reception_abi_1.default).at(this.contractAddresses['RECEPTION']),
+            desk: this.eth.contract(Desk_abi_1.default).at(this.contractAddresses['DESK']),
+            shelf: this.eth.contract(Shelf_abi_1.default).at(this.contractAddresses['SHELF']),
+            appraiser: this.eth.contract(Appraiser_abi_1.default).at(this.contractAddresses['APPRAISER']),
+            lender: this.eth.contract(MakerAdapter_abi_1.default).at(this.contractAddresses['LENDER']),
         };
     }
     return Tinlake;
@@ -157,11 +167,6 @@ var getEvents = function (receipt, abi) {
         }
     });
     return events;
-};
-var getContract = function (eth, path, file, address) {
-    var json = require(path + "/" + file + ".ts");
-    // console.log(file, json)
-    return eth.contract(json.default).at(address);
 };
 exports.default = Tinlake;
 //# sourceMappingURL=Tinlake.js.map

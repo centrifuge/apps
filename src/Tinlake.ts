@@ -6,6 +6,18 @@ const Abi = require('web3-eth-abi');
 const abiCoder = new Abi.AbiCoder();
 const utils = require('web3-utils');
 
+// tslint:disable:import-name
+import contractAbiNft from './abi/test/SimpleNFT.abi';
+import contractAbiTitle from './abi/Title.abi';
+import contractAbiCurrency from './abi/test/SimpleToken.abi';
+import contractAbiAdmit from './abi/Admit.abi';
+import contractAbiReception from './abi/Reception.abi';
+import contractAbiDesk from './abi/Desk.abi';
+import contractAbiShelf from './abi/Shelf.abi';
+import contractAbiAppraiser from './abi/Appraiser.abi';
+import contractAbiLender from './abi/MakerAdapter.abi';
+// tslint:enable:import-name
+
 interface ContractAddresses {
   'APPRAISER': string;
   'TITLE': string;
@@ -72,32 +84,23 @@ class Tinlake {
 
   constructor(
     provider: any, { contractAbiPath, contractAddresses, ethOptions, ethConfig }: Options = {}) {
-    this.contractAbiPath = contractAbiPath || './abi';
+    this.contractAbiPath = contractAbiPath || `${__dirname}/abi`;
     this.contractAddresses = contractAddresses || defaultContractAddresses;
     this.provider = provider;
     this.ethOptions = ethOptions || {};
-    this.ethConfig = ethConfig;
+    this.ethConfig = ethConfig || {};
     this.eth = new Eth(this.provider, this.ethOptions) as ethI;
 
     this.contracts = {
-      nft: getContract(this.eth, this.contractAbiPath,
-                       'test/SimpleNFT.abi', this.contractAddresses['NFT_COLLATERAL']),
-      title: getContract(this.eth, this.contractAbiPath,
-                         'Title.abi', this.contractAddresses['TITLE']),
-      currency: getContract(this.eth, this.contractAbiPath,
-                            'test/SimpleToken.abi', this.contractAddresses['CURRENCY']),
-      admit: getContract(this.eth, this.contractAbiPath,
-                         'Admit.abi', this.contractAddresses['ADMIT']),
-      reception: getContract(this.eth, this.contractAbiPath,
-                             'Reception.abi', this.contractAddresses['RECEPTION']),
-      desk: getContract(this.eth, this.contractAbiPath,
-                        'Desk.abi', this.contractAddresses['DESK']),
-      shelf: getContract(this.eth, this.contractAbiPath,
-                         'Shelf.abi', this.contractAddresses['SHELF']),
-      appraiser: getContract(this.eth, this.contractAbiPath,
-                             'Appraiser.abi', this.contractAddresses['APPRAISER']),
-      lender: getContract(this.eth, this.contractAbiPath,
-                          'MakerAdapter.abi', this.contractAddresses['LENDER']),
+      nft: this.eth.contract(contractAbiNft).at(this.contractAddresses['NFT_COLLATERAL']),
+      title: this.eth.contract(contractAbiTitle).at(this.contractAddresses['TITLE']),
+      currency: this.eth.contract(contractAbiCurrency).at(this.contractAddresses['CURRENCY']),
+      admit: this.eth.contract(contractAbiAdmit).at(this.contractAddresses['ADMIT']),
+      reception: this.eth.contract(contractAbiReception).at(this.contractAddresses['RECEPTION']),
+      desk: this.eth.contract(contractAbiDesk).at(this.contractAddresses['DESK']),
+      shelf: this.eth.contract(contractAbiShelf).at(this.contractAddresses['SHELF']),
+      appraiser: this.eth.contract(contractAbiAppraiser).at(this.contractAddresses['APPRAISER']),
+      lender: this.eth.contract(contractAbiLender).at(this.contractAddresses['LENDER']),
     };
   }
 
@@ -251,14 +254,6 @@ const getEvents = (receipt: { logs:
     }
   });
   return events;
-};
-
-const getContract = (eth: ethI, path: string, file: string, address: string) => {
-  const json = require(`${path}/${file}.ts`);
-
-  // console.log(file, json)
-
-  return eth.contract(json.default).at(address);
 };
 
 export default Tinlake;

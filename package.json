@@ -2,8 +2,9 @@
   "name": "tinlake",
   "version": "0.0.1",
   "description": "Centrifuge Tinlake Contracts Client",
-  "main": "src/Tinlake.ts",
-  "module": "src/Tinlake.ts",
+  "main": "build/Tinlake.js",
+  "types": "build/Tinlake.d.ts",
+  "module": "build/Tinlake.js",
   "dependencies": {
     "bignumber.js": "^9.0.0",
     "ethjs": "^0.4.0",
