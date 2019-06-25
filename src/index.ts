@@ -72,9 +72,9 @@ class Tinlake {
         this.contractAbiPath = contractAbiPath || './abi'
         this.contractAddresses = contractAddresses || defaultContractAddresses
         this.provider = provider
-        this.ethOptions = ethOptions
+        this.ethOptions = ethOptions || {}
         this.ethConfig = ethConfig
-        this.eth = new Eth(this.provider, ethOptions) as ethI
+        this.eth = new Eth(this.provider, this.ethOptions) as ethI
 
         this.contracts = {
             "nft": getContract(this.eth, this.contractAbiPath, 'test/SimpleNFT.abi', this.contractAddresses["NFT_COLLATERAL"]),
@@ -232,11 +232,11 @@ let getEvents = (receipt: { logs: { length: number; forEach: (arg0: (log: any) =
 }
 
 let getContract = (eth: ethI, path: string, file: string, address: string) => {
-    let json = require(path + '/' + file);
+    let json = require(path + '/' + file + '.ts');
 
-    console.log(file, json)
+    // console.log(file, json)
 
-    return eth.contract(json).at(address);
+    return eth.contract(json.default).at(address);
 }
 
 export default Tinlake

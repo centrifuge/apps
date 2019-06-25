@@ -15,6 +15,8 @@ let tokenID: string;
 let loanID: string;
 let addresses = JSON.parse(fs.readFileSync(process.env['ADDRESSES_TINLAKE']).toString());
 
+const gasLimit = 1000000
+
 describe('functional tinlake tests', function () {
     before(() => {
         tinlake = new Tinlake(
@@ -22,7 +24,10 @@ describe('functional tinlake tests', function () {
                 signTransaction: (rawTx: any, cb: (arg0: null, arg1: any) => void) => cb(null, sign(rawTx, process.env.ETH_PRIVATE_KEY)),
                 accounts: (cb: (arg0: null, arg1: string[]) => void) => cb(null, [ethFrom]),
             }),
-            { contractAbiPath: path.resolve(__dirname, '..', 'src', 'abi') },
+            {
+                contractAbiPath: path.resolve(__dirname, '..', 'src', 'abi'),
+                ethConfig: { from: ethFrom,  gasLimit: "0x"+gasLimit.toString(16) }
+            },
         );
     })
     describe('tinlake borrow and repay', function () {
