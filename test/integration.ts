@@ -6,6 +6,8 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const rpcUrl = process.env['ETH_RPC_URL'];
+// tslint:disable-next-line:import-name
+import BN from 'bn.js';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -31,6 +33,25 @@ describe('functional tinlake tests', () => {
       },
     );
   });
+
+  describe('tinlake call functionality', function () {
+    this.timeout(50000);
+
+    it('count number of loans', async () => {
+      const count = await tinlake.loanCount();
+      console.log(`Found ${count} loans`);
+      assert(count.gte(new BN(0)));
+    });
+
+    it('get a loan', async () => {
+      const res = await tinlake.getLoan(20);
+      assert(res.price instanceof BN);
+      assert(res.principal instanceof BN);
+      assert(typeof res.registry === 'string');
+      assert(res.tokenId instanceof BN);
+    });
+  });
+
   describe('tinlake borrow and repay', function () {
     this.timeout(50000);
     const principal = 100;

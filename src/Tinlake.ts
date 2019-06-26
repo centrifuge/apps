@@ -5,6 +5,8 @@ const Eth = require('ethjs');
 const Abi = require('web3-eth-abi');
 const abiCoder = new Abi.AbiCoder();
 const utils = require('web3-utils');
+// tslint:disable-next-line:import-name
+import BN from 'bn.js';
 
 // tslint:disable:import-name
 import contractAbiNft from './abi/test/SimpleNFT.abi';
@@ -73,6 +75,15 @@ interface Balance {
   [x: string]: { toString: () => string; };
 }
 
+export type Address = string;
+
+export interface Loan {
+  registry: Address;
+  tokenId: BN;
+  price: BN;
+  principal: BN;
+}
+
 class Tinlake {
   private contractAbiPath: string;
   private contractAddresses: ContractAddresses;
@@ -102,6 +113,16 @@ class Tinlake {
       appraiser: this.eth.contract(contractAbiAppraiser).at(this.contractAddresses['APPRAISER']),
       lender: this.eth.contract(contractAbiLender).at(this.contractAddresses['LENDER']),
     };
+  }
+
+  loanCount = async (): Promise<BN> => {
+    const res = await this.contracts.title.count();
+    return res[0];
+  }
+
+  getLoan = async (loanId: number): Promise<Loan> => {
+    const loan = await this.contracts.shelf.shelf(loanId);
+    return loan;
   }
 
   approveNFT = (tokenID: string, to: string): Promise<Events> => {

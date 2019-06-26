@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 interface ContractAddresses {
     'APPRAISER': string;
     'TITLE': string;
@@ -37,6 +38,13 @@ interface Balance {
         toString: () => string;
     };
 }
+export declare type Address = string;
+export interface Loan {
+    registry: Address;
+    tokenId: BN;
+    price: BN;
+    principal: BN;
+}
 declare class Tinlake {
     private contractAbiPath;
     private contractAddresses;
@@ -46,6 +54,8 @@ declare class Tinlake {
     private eth;
     private contracts;
     constructor(provider: any, { contractAbiPath, contractAddresses, ethOptions, ethConfig }?: Options);
+    loanCount: () => Promise<BN>;
+    getLoan: (loanId: number) => Promise<Loan>;
     approveNFT: (tokenID: string, to: string) => Promise<Events>;
     ownerOfNFT: (tokenID: string) => Promise<Events>;
     balanceOfCurrency: (usr: string) => Promise<Balance>;
