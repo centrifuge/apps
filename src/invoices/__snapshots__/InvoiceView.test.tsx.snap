@@ -45,7 +45,7 @@ exports[`FundingAgreementView Should not render an empty form 1`] = `
         className="StyledBox-sc-13pk1d4-0 ffeAql"
       >
         <button
-          className="StyledButton-sc-323bzc-0 ibWwqS"
+          className="StyledButton-sc-323bzc-0 fjZdgk"
           disabled={false}
           onBlur={[Function]}
           onClick={[Function]}
@@ -830,7 +830,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
         className="StyledBox-sc-13pk1d4-0 ffeAql"
       >
         <button
-          className="StyledButton-sc-323bzc-0 ibWwqS"
+          className="StyledButton-sc-323bzc-0 fjZdgk"
           disabled={false}
           onBlur={[Function]}
           onClick={[Function]}

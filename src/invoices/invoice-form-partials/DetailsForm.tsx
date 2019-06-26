@@ -2,9 +2,10 @@ import React from 'react';
 import { connect, FormikContext } from 'formik';
 import { Invoice } from '../../common/models/invoice';
 import { Section } from '../../components/Section';
-import { Box, FormField, Select, TextInput } from 'grommet';
+import { Box, FormField, Select } from 'grommet';
 import { dateToString, extractDate, getCurrencyFormat, getPercentFormat } from '../../common/formaters';
 import { NumberInput } from '@centrifuge/axis-number-input';
+import { DateInput } from '@centrifuge/axis-date-input';
 
 interface DetailsFormProps {
   columnGap: string;
@@ -72,12 +73,11 @@ export class DetailsForm extends React.Component<ConnectedDetailsFormProps> {
                 label="Invoice date"
                 error={errors!.date_created}
               >
-                <TextInput
+                <DateInput
                   name="date_created"
-                  type="date"
                   value={extractDate(values!.date_created)}
-                  onChange={ev => {
-                    setFieldValue('date_created', dateToString(ev.target.value));
+                  onChange={date => {
+                    setFieldValue('date_created', dateToString(date));
                   }}
                 />
               </FormField>
@@ -88,12 +88,11 @@ export class DetailsForm extends React.Component<ConnectedDetailsFormProps> {
                 label="Date due"
                 error={errors!.date_due}
               >
-                <TextInput
+                <DateInput
                   name="date_due"
-                  type="date"
                   value={extractDate(values!.date_due)}
-                  onChange={ev => {
-                    setFieldValue('date_due', dateToString(ev.target.value));
+                  onChange={date => {
+                    setFieldValue('date_due', dateToString(date));
                   }}
                 />
               </FormField>

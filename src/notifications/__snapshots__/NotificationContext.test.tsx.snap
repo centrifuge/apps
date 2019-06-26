@@ -449,7 +449,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
                   class="StyledBox-sc-13pk1d4-0 fSSGpo"
                 >
                   <button
-                    class="StyledButton-sc-323bzc-0 ibWwqS"
+                    class="StyledButton-sc-323bzc-0 fjZdgk"
                     type="button"
                   >
                     OK
@@ -778,7 +778,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
                                       type="button"
                                     >
                                       <button
-                                        className="StyledButton-sc-323bzc-0 ibWwqS"
+                                        className="StyledButton-sc-323bzc-0 fjZdgk"
                                         onBlur={[Function]}
                                         onClick={[Function]}
                                         onFocus={[Function]}
@@ -885,7 +885,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
                   class="StyledBox-sc-13pk1d4-0 fSSGpo"
                 >
                   <button
-                    class="StyledButton-sc-323bzc-0 ibWwqS"
+                    class="StyledButton-sc-323bzc-0 fjZdgk"
                     type="button"
                   >
                     OK
@@ -1214,7 +1214,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
                                       type="button"
                                     >
                                       <button
-                                        className="StyledButton-sc-323bzc-0 ibWwqS"
+                                        className="StyledButton-sc-323bzc-0 fjZdgk"
                                         onBlur={[Function]}
                                         onClick={[Function]}
                                         onFocus={[Function]}
@@ -1321,7 +1321,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                   class="StyledBox-sc-13pk1d4-0 fSSGpo"
                 >
                   <button
-                    class="StyledButton-sc-323bzc-0 ibWwqS"
+                    class="StyledButton-sc-323bzc-0 fjZdgk"
                     type="button"
                   >
                     OK
@@ -1650,7 +1650,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                                       type="button"
                                     >
                                       <button
-                                        className="StyledButton-sc-323bzc-0 ibWwqS"
+                                        className="StyledButton-sc-323bzc-0 fjZdgk"
                                         onBlur={[Function]}
                                         onClick={[Function]}
                                         onFocus={[Function]}

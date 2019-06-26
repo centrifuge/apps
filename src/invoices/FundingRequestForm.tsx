@@ -7,7 +7,7 @@ import { FundingRequest } from '../common/models/funding-request';
 import SearchSelect from '../components/form/SearchSelect';
 import { dateToString, extractDate, getCurrencyFormat, getPercentFormat } from '../common/formaters';
 import { NumberInput } from '@centrifuge/axis-number-input';
-
+import { DateInput } from '@centrifuge/axis-date-input';
 
 type FundingRequestFormProps = {
   onSubmit: (fundingRequest: FundingRequest) => void;
@@ -233,9 +233,8 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                             label="Early payment date"
                             error={errors!.repayment_due_date}
                           >
-                            <TextInput
+                            <DateInput
                               disabled={true}
-                              type="date"
                               value={extractDate(today)}
 
                             />
@@ -246,15 +245,16 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                             label="Repayment due date"
                             error={errors!.repayment_due_date}
                           >
-                            <TextInput
+                            <DateInput
                               disabled={true}
                               name="repayment_due_date"
                               type="date"
                               value={extractDate(values!.repayment_due_date)}
-                              onChange={ev => {
-                                setFieldValue('repayment_due_date', dateToString(ev.target.value));
+                              onChange={date => {
+                                setFieldValue('repayment_due_date', dateToString(date));
                               }}
                             />
+
                           </FormField>
 
                         </Box>
