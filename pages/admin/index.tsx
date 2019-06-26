@@ -1,12 +1,18 @@
 import * as React from 'react';
 // tslint:disable-next-line:import-name
 import Tinlake, { Loan } from 'tinlake';
+// tslint:disable-next-line:import-name
+import Link from 'next/link';
 
 declare var web3: any;
 
+interface InternalLoan extends Loan {
+  id: number;
+}
+
 interface State {
   count: number;
-  loans: Loan[];
+  loans: InternalLoan[];
 }
 
 class Admin extends React.Component {
@@ -40,8 +46,9 @@ class Admin extends React.Component {
       loanPromises.push(this.tinlake.getLoan(i));
     }
 
-    const loans = (await Promise.all(loanPromises)).map((loan) => {
+    const loans = (await Promise.all(loanPromises)).map((loan, i) => {
       return ({
+        id: i,
         principal: loan.principal,
         price: loan.price,
         registry: loan.registry,
@@ -61,19 +68,27 @@ class Admin extends React.Component {
       <table>
         <thead>
           <tr>
-            <th>Registry</th>
-            <th>TokenID</th>
-            <th>Price</th>
+            <th>NFT ID</th>
+            <th>NFT Owner</th>
+            <th>NFT Status</th>
             <th>Principal</th>
+            <th>Interest rate</th>
+            <th>Debt</th>
+            <th>Maturity Date</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
         {this.state.loans.map(loan =>
           <tr key={loan.tokenId.toString()}>
-            <td>{loan.registry}</td>
             <td>{loan.tokenId.toString()}</td>
-            <td>{loan.price.toString()}</td>
+            <td>{loan.registry}</td>
+            <td>TODO</td>
             <td>{loan.principal.toString()}</td>
+            <td>{loan.price.toString()}</td>
+            <td>TODO</td>
+            <td>TODO</td>
+            <td><Link href={`/admin/loan/${loan.id}`}><a>View</a></Link></td>
           </tr>,
           )}
           </tbody>
