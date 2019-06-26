@@ -36,7 +36,7 @@ class Admin extends React.Component {
       ethConfig: { from: account },
     });
 
-    const count = await this.tinlake.amountOfLoans();
+    const count = await this.tinlake.loanCount();
 
     this.setState({ count: count.toNumber() });
 
