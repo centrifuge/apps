@@ -5,7 +5,7 @@ import Tinlake from 'tinlake';
 
 declare var web3: any;
 
-class Admin extends React.Component {
+class WhitelistNFT extends React.Component {
   tinlake: Tinlake | undefined;
 
   componentDidMount() {
@@ -51,4 +51,4 @@ class Admin extends React.Component {
   }
 }
 
-export default Admin;
+export default WhitelistNFT;

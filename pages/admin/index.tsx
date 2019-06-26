@@ -1,13 +1,17 @@
 import * as React from 'react';
 // tslint:disable-next-line:import-name
-import Tinlake, { Loan } from 'tinlake';
+import Tinlake, { Loan, BalanceDebt } from 'tinlake';
 // tslint:disable-next-line:import-name
 import Link from 'next/link';
+// tslint:disable-next-line:import-name
+import BN from 'bn.js';
 
 declare var web3: any;
 
 interface InternalLoan extends Loan {
   id: number;
+  balance: BN;
+  debt: BN;
 }
 
 interface State {
@@ -41,22 +45,29 @@ class Admin extends React.Component {
     this.setState({ count: count.toNumber() });
 
     const loanPromises: Promise<Loan>[] = [];
+    const balanceDebtPromises: Promise<BalanceDebt>[] = [];
 
     for (let i = 0; i < count.toNumber(); i += 1) {
       loanPromises.push(this.tinlake.getLoan(i));
+      balanceDebtPromises.push(this.tinlake.getBalanceDebt(i));
     }
 
-    const loans = (await Promise.all(loanPromises)).map((loan, i) => {
+    const loans = await Promise.all(loanPromises);
+    const balanceDebtData = await Promise.all(balanceDebtPromises);
+
+    const extendedLoansData = loans.map((loan, i) => {
       return ({
         id: i,
         principal: loan.principal,
         price: loan.price,
         registry: loan.registry,
         tokenId: loan.tokenId,
+        balance: balanceDebtData[i].balance,
+        debt: balanceDebtData[i].debt,
       });
     });
 
-    this.setState({ loans });
+    this.setState({ loans: extendedLoansData });
   }
 
   render() {
@@ -83,12 +94,13 @@ class Admin extends React.Component {
           <tr key={loan.tokenId.toString()}>
             <td>{loan.tokenId.toString()}</td>
             <td>{loan.registry}</td>
-            <td>TODO</td>
+            <td>{getLoanStatus(loan.balance, loan.debt)}</td>
             <td>{loan.principal.toString()}</td>
             <td>{loan.price.toString()}</td>
-            <td>TODO</td>
-            <td>TODO</td>
-            <td><Link href={`/admin/loan/${loan.id}`}><a>View</a></Link></td>
+            <td>{loan.debt.toString()}</td>
+            <td>-</td>
+            <td><Link href={`/admin/loan?loanId=${loan.id}`} as={`/admin/loan/${loan.id}`}>
+              <a>View</a></Link></td>
           </tr>,
           )}
           </tbody>
@@ -98,3 +110,12 @@ class Admin extends React.Component {
 }
 
 export default Admin;
+
+type LoanStatus = 'Submitted' | 'Whitelisted' | 'Collateralized' | 'Repaid' | 'Rejected';
+
+function getLoanStatus(balance: BN, debt: BN): LoanStatus {
+  if (!balance.isZero()) { return 'Whitelisted'; }
+  if (balance.isZero() && !debt.isZero()) { return 'Collateralized'; }
+  if (balance.isZero() && debt.isZero()) { return 'Repaid'; }
+  return 'Submitted';
+}
