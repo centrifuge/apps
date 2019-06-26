@@ -1,7 +1,7 @@
 import * as React from 'react';
 // tslint:disable-next-line:import-name
 import Tinlake from 'tinlake';
-import config from '../config';
+import config from '../../config';
 
 declare var web3: any;
 
