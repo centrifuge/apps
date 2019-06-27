@@ -94,13 +94,13 @@ export interface BalanceDebt {
 }
 
 class Tinlake {
+  public provider: any;
+  public eth: ethI;
+  public ethOptions: any;
+  public ethConfig: any;
+  public contractAddresses: ContractAddresses;
+  public contracts: Contracts;
   private contractAbiPath: string;
-  private contractAddresses: ContractAddresses;
-  private provider: any;
-  private ethOptions: any;
-  private ethConfig: any;
-  private eth: ethI;
-  private contracts: Contracts;
 
   constructor(
     provider: any, { contractAbiPath, contractAddresses, ethOptions, ethConfig }: Options = {}) {
@@ -160,7 +160,7 @@ class Tinlake {
     });
   }
 
-  adminAdmit = (registry: string, nft: string, principal: number, usr: string): Promise<Events> => {
+  adminAdmit = (registry: string, nft: string, principal: string, usr: string): Promise<Events> => {
     return this.contracts.admit.admit(registry, nft, principal, usr, this.ethConfig)
       .then((txHash: string) => {
         console.log(`[Admit.admit] txHash: ${txHash}`);
@@ -168,7 +168,7 @@ class Tinlake {
       });
   }
 
-  adminAppraise = (loanID: string, appraisal: number): Promise<Events> => {
+  adminAppraise = (loanID: string, appraisal: string): Promise<Events> => {
     return this.contracts.appraiser.file(loanID, appraisal, this.ethConfig)
       .then((txHash: string) => {
         console.log(`[Appraisal.file] txHash: ${txHash}`);
@@ -183,7 +183,7 @@ class Tinlake {
     });
   }
 
-  repay = (loan: string, wad: number, usrT: string, usr: string): Promise<Events> => {
+  repay = (loan: string, wad: string, usrT: string, usr: string): Promise<Events> => {
     return this.contracts.reception.repay(loan, wad, usrT, usr, this.ethConfig)
       .then((txHash: string) => {
         console.log(`[Reception.repay] txHash: ${txHash}`);
@@ -191,7 +191,7 @@ class Tinlake {
       });
   }
 
-  approveCurrency = (usr: string, wad: number): Promise<Events> => {
+  approveCurrency = (usr: string, wad: string): Promise<Events> => {
     return this.contracts.currency.approve(usr, wad, this.ethConfig).then((txHash: string) => {
       console.log(`[Currency.approve] txHash: ${txHash}`);
       return waitAndReturnEvents(this.eth, txHash, this.contracts['currency'].abi);

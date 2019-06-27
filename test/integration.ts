@@ -60,8 +60,8 @@ describe('functional tinlake tests', () => {
 
   describe('tinlake borrow and repay', function () {
     this.timeout(50000);
-    const principal = 100;
-    const appraisal = 300;
+    const principal = '100';
+    const appraisal = '300';
     it('borrow and repay successful', () => {
       console.log(`appraisal: ${appraisal}`);
       console.log(`principal: ${principal}`);
