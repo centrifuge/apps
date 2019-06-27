@@ -11,7 +11,8 @@
     "esModuleInterop": true,
     "lib": [
       "es2015"
-    ]
+    ],
+    "resolveJsonModule": true
   },
   "include": [
     "src/**/*"

@@ -34,32 +34,29 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var defaultContractAddresses_1 = __importDefault(require("./defaultContractAddresses"));
 // tslint:disable-next-line:variable-name
 var Eth = require('ethjs');
 // tslint:disable-next-line:variable-name
 var Abi = require('web3-eth-abi');
 var abiCoder = new Abi.AbiCoder();
 var utils = require('web3-utils');
+var defaultContractAddresses = require('./addresses_tinlake.json');
 // tslint:disable:import-name
-var SimpleNFT_abi_1 = __importDefault(require("./abi/test/SimpleNFT.abi"));
-var Title_abi_1 = __importDefault(require("./abi/Title.abi"));
-var SimpleToken_abi_1 = __importDefault(require("./abi/test/SimpleToken.abi"));
-var Admit_abi_1 = __importDefault(require("./abi/Admit.abi"));
-var Reception_abi_1 = __importDefault(require("./abi/Reception.abi"));
-var Desk_abi_1 = __importDefault(require("./abi/Desk.abi"));
-var Shelf_abi_1 = __importDefault(require("./abi/Shelf.abi"));
-var Appraiser_abi_1 = __importDefault(require("./abi/Appraiser.abi"));
-var MakerAdapter_abi_1 = __importDefault(require("./abi/MakerAdapter.abi"));
-var Pile_abi_1 = __importDefault(require("./abi/Pile.abi"));
+var contractAbiNft = require('./abi/test/SimpleNFT.abi');
+var contractAbiTitle = require('./abi/Title.abi');
+var contractAbiCurrency = require('./abi/test/SimpleToken.abi');
+var contractAbiAdmit = require('./abi/Admit.abi');
+var contractAbiReception = require('./abi/Reception.abi');
+var contractAbiDesk = require('./abi/Desk.abi');
+var contractAbiShelf = require('./abi/Shelf.abi');
+var contractAbiAppraiser = require('./abi/Appraiser.abi');
+var contractAbiLender = require('./abi/MakerAdapter.abi');
+var contractAbiPile = require('./abi/Pile.abi');
 var Tinlake = /** @class */ (function () {
     function Tinlake(provider, _a) {
         var _this = this;
-        var _b = _a === void 0 ? {} : _a, contractAbiPath = _b.contractAbiPath, contractAddresses = _b.contractAddresses, ethOptions = _b.ethOptions, ethConfig = _b.ethConfig;
+        var _b = _a === void 0 ? {} : _a, contractAbis = _b.contractAbis, contractAddresses = _b.contractAddresses, ethOptions = _b.ethOptions, ethConfig = _b.ethConfig;
         this.loanCount = function () { return __awaiter(_this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
@@ -144,23 +141,44 @@ var Tinlake = /** @class */ (function () {
                 return waitAndReturnEvents(_this.eth, txHash, _this.contracts['lender'].abi);
             });
         };
-        this.contractAbiPath = contractAbiPath || __dirname + "/abi";
-        this.contractAddresses = contractAddresses || defaultContractAddresses_1.default;
+        this.contractAbis = contractAbis || {
+            nft: contractAbiNft,
+            title: contractAbiTitle,
+            currency: contractAbiCurrency,
+            admit: contractAbiAdmit,
+            reception: contractAbiReception,
+            desk: contractAbiDesk,
+            shelf: contractAbiShelf,
+            appraiser: contractAbiAppraiser,
+            lender: contractAbiLender,
+            pile: contractAbiPile,
+        };
+        this.contractAddresses = contractAddresses || defaultContractAddresses;
         this.provider = provider;
         this.ethOptions = ethOptions || {};
         this.ethConfig = ethConfig || {};
         this.eth = new Eth(this.provider, this.ethOptions);
         this.contracts = {
-            nft: this.eth.contract(SimpleNFT_abi_1.default).at(this.contractAddresses['NFT_COLLATERAL']),
-            title: this.eth.contract(Title_abi_1.default).at(this.contractAddresses['TITLE']),
-            currency: this.eth.contract(SimpleToken_abi_1.default).at(this.contractAddresses['CURRENCY']),
-            admit: this.eth.contract(Admit_abi_1.default).at(this.contractAddresses['ADMIT']),
-            reception: this.eth.contract(Reception_abi_1.default).at(this.contractAddresses['RECEPTION']),
-            desk: this.eth.contract(Desk_abi_1.default).at(this.contractAddresses['DESK']),
-            shelf: this.eth.contract(Shelf_abi_1.default).at(this.contractAddresses['SHELF']),
-            appraiser: this.eth.contract(Appraiser_abi_1.default).at(this.contractAddresses['APPRAISER']),
-            lender: this.eth.contract(MakerAdapter_abi_1.default).at(this.contractAddresses['LENDER']),
-            pile: this.eth.contract(Pile_abi_1.default).at(this.contractAddresses['PILE']),
+            nft: this.eth.contract(this.contractAbis.nft)
+                .at(this.contractAddresses['NFT_COLLATERAL']),
+            title: this.eth.contract(this.contractAbis.title)
+                .at(this.contractAddresses['TITLE']),
+            currency: this.eth.contract(this.contractAbis.currency)
+                .at(this.contractAddresses['CURRENCY']),
+            admit: this.eth.contract(this.contractAbis.admit)
+                .at(this.contractAddresses['ADMIT']),
+            reception: this.eth.contract(this.contractAbis.reception)
+                .at(this.contractAddresses['RECEPTION']),
+            desk: this.eth.contract(this.contractAbis.desk)
+                .at(this.contractAddresses['DESK']),
+            shelf: this.eth.contract(this.contractAbis.shelf)
+                .at(this.contractAddresses['SHELF']),
+            appraiser: this.eth.contract(this.contractAbis.appraiser)
+                .at(this.contractAddresses['APPRAISER']),
+            lender: this.eth.contract(this.contractAbis.lender)
+                .at(this.contractAddresses['LENDER']),
+            pile: this.eth.contract(this.contractAbis.pile)
+                .at(this.contractAddresses['PILE']),
         };
     }
     return Tinlake;

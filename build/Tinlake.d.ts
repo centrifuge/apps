@@ -1,4 +1,16 @@
 import BN from 'bn.js';
+interface ContractAbis {
+    'nft': string;
+    'title': string;
+    'currency': string;
+    'admit': string;
+    'reception': string;
+    'desk': string;
+    'shelf': string;
+    'appraiser': string;
+    'lender': string;
+    'pile': string;
+}
 interface ContractAddresses {
     'APPRAISER': string;
     'TITLE': string;
@@ -18,7 +30,7 @@ interface ContractAddresses {
     'CURRENCY': string;
 }
 interface Options {
-    contractAbiPath?: string;
+    contractAbis?: ContractAbis;
     contractAddresses?: ContractAddresses;
     ethOptions?: any;
     ethConfig?: any;
@@ -77,8 +89,8 @@ declare class Tinlake {
     ethConfig: any;
     contractAddresses: ContractAddresses;
     contracts: Contracts;
-    private contractAbiPath;
-    constructor(provider: any, { contractAbiPath, contractAddresses, ethOptions, ethConfig }?: Options);
+    contractAbis: ContractAbis;
+    constructor(provider: any, { contractAbis, contractAddresses, ethOptions, ethConfig }?: Options);
     loanCount: () => Promise<BN>;
     getLoan: (loanId: number) => Promise<Loan>;
     getBalanceDebt: (loanId: number) => Promise<BalanceDebt>;

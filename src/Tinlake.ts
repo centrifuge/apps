@@ -13,6 +13,7 @@ const defaultContractAddresses = require('./addresses_tinlake.json');
 const contractAbiNft = require('./abi/test/SimpleNFT.abi');
 const contractAbiTitle = require('./abi/Title.abi');
 const contractAbiCurrency = require('./abi/test/SimpleToken.abi');
+const contractAbiAdmitJson = require('./abi/Admit.abi.json');
 const contractAbiAdmit = require('./abi/Admit.abi');
 const contractAbiReception = require('./abi/Reception.abi');
 const contractAbiDesk = require('./abi/Desk.abi');
@@ -21,6 +22,8 @@ const contractAbiAppraiser = require('./abi/Appraiser.abi');
 const contractAbiLender = require('./abi/MakerAdapter.abi');
 const contractAbiPile = require('./abi/Pile.abi');
 // tslint:enable:import-name
+
+console.log({ contractAbiAdmitJson });
 
 interface ContractAbis {
   'nft': string;
