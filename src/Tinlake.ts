@@ -18,6 +18,7 @@ import contractAbiDesk from './abi/Desk.abi';
 import contractAbiShelf from './abi/Shelf.abi';
 import contractAbiAppraiser from './abi/Appraiser.abi';
 import contractAbiLender from './abi/MakerAdapter.abi';
+import contractAbiPile from './abi/Pile.abi';
 // tslint:enable:import-name
 
 interface ContractAddresses {
@@ -56,6 +57,7 @@ interface Contracts {
   shelf: any;
   appraiser: any;
   lender: any;
+  pile: any;
 }
 
 // tslint:disable-next-line:class-name
@@ -82,6 +84,13 @@ export interface Loan {
   tokenId: BN;
   price: BN;
   principal: BN;
+}
+
+export interface BalanceDebt {
+  debt: BN;
+  balance: BN;
+  fee: BN;
+  chi: BN;
 }
 
 class Tinlake {
@@ -112,6 +121,7 @@ class Tinlake {
       shelf: this.eth.contract(contractAbiShelf).at(this.contractAddresses['SHELF']),
       appraiser: this.eth.contract(contractAbiAppraiser).at(this.contractAddresses['APPRAISER']),
       lender: this.eth.contract(contractAbiLender).at(this.contractAddresses['LENDER']),
+      pile: this.eth.contract(contractAbiPile).at(this.contractAddresses['PILE']),
     };
   }
 
@@ -121,8 +131,11 @@ class Tinlake {
   }
 
   getLoan = async (loanId: number): Promise<Loan> => {
-    const loan = await this.contracts.shelf.shelf(loanId);
-    return loan;
+    return await this.contracts.shelf.shelf(loanId);
+  }
+
+  getBalanceDebt = async (loanId: number): Promise<BalanceDebt> => {
+    return await this.contracts.pile.loans(loanId);
   }
 
   approveNFT = (tokenID: string, to: string): Promise<Events> => {

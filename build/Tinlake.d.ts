@@ -45,6 +45,12 @@ export interface Loan {
     price: BN;
     principal: BN;
 }
+export interface BalanceDebt {
+    debt: BN;
+    balance: BN;
+    fee: BN;
+    chi: BN;
+}
 declare class Tinlake {
     private contractAbiPath;
     private contractAddresses;
@@ -56,6 +62,7 @@ declare class Tinlake {
     constructor(provider: any, { contractAbiPath, contractAddresses, ethOptions, ethConfig }?: Options);
     loanCount: () => Promise<BN>;
     getLoan: (loanId: number) => Promise<Loan>;
+    getBalanceDebt: (loanId: number) => Promise<BalanceDebt>;
     approveNFT: (tokenID: string, to: string) => Promise<Events>;
     ownerOfNFT: (tokenID: string) => Promise<Events>;
     balanceOfCurrency: (usr: string) => Promise<Balance>;

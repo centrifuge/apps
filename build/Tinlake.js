@@ -55,6 +55,7 @@ var Desk_abi_1 = __importDefault(require("./abi/Desk.abi"));
 var Shelf_abi_1 = __importDefault(require("./abi/Shelf.abi"));
 var Appraiser_abi_1 = __importDefault(require("./abi/Appraiser.abi"));
 var MakerAdapter_abi_1 = __importDefault(require("./abi/MakerAdapter.abi"));
+var Pile_abi_1 = __importDefault(require("./abi/Pile.abi"));
 var Tinlake = /** @class */ (function () {
     function Tinlake(provider, _a) {
         var _this = this;
@@ -71,13 +72,18 @@ var Tinlake = /** @class */ (function () {
             });
         }); };
         this.getLoan = function (loanId) { return __awaiter(_this, void 0, void 0, function () {
-            var loan;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.contracts.shelf.shelf(loanId)];
-                    case 1:
-                        loan = _a.sent();
-                        return [2 /*return*/, loan];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        }); };
+        this.getBalanceDebt = function (loanId) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.contracts.pile.loans(loanId)];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         }); };
@@ -154,6 +160,7 @@ var Tinlake = /** @class */ (function () {
             shelf: this.eth.contract(Shelf_abi_1.default).at(this.contractAddresses['SHELF']),
             appraiser: this.eth.contract(Appraiser_abi_1.default).at(this.contractAddresses['APPRAISER']),
             lender: this.eth.contract(MakerAdapter_abi_1.default).at(this.contractAddresses['LENDER']),
+            pile: this.eth.contract(Pile_abi_1.default).at(this.contractAddresses['PILE']),
         };
     }
     return Tinlake;

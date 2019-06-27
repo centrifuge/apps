@@ -50,6 +50,12 @@ describe('functional tinlake tests', () => {
       assert(typeof res.registry === 'string');
       assert(res.tokenId instanceof BN);
     });
+
+    it('get balance and debt from pile for a loan', async () => {
+      const res = await tinlake.getBalanceDebt(20);
+      assert(res.balance instanceof BN);
+      assert(res.debt instanceof BN);
+    });
   });
 
   describe('tinlake borrow and repay', function () {
