@@ -2,7 +2,7 @@ import * as React from 'react';
 import LoanList from '../../components/LoanList';
 import WithTinlake from '../../components/WithTinlake';
 
-class AdminPage extends React.Component {
+class LoanListPage extends React.Component {
   render() {
     return <div>
       <h1>NFTs</h1>
@@ -11,4 +11,4 @@ class AdminPage extends React.Component {
   }
 }
 
-export default AdminPage;
+export default LoanListPage;

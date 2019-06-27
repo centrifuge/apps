@@ -1,16 +1,23 @@
 import * as React from 'react';
 // tslint:disable-next-line:import-name
 import Tinlake from 'tinlake';
+import MintNFT from '../MintNFT';
 
 interface Props {
   tinlake: Tinlake;
 }
 
 interface State {
+  tokenId: string;
+  principal: string;
+  interestRate: string;
 }
 
 class WhitelistNFT extends React.Component<Props, State> {
   state: State = {
+    tokenId: '',
+    principal: '',
+    interestRate: '',
   };
 
   mint = async () => {
@@ -33,7 +40,22 @@ class WhitelistNFT extends React.Component<Props, State> {
 
   render() {
     return <div>
-      <button onClick={this.mint}>Mint NFT</button>
+      <MintNFT tinlake={this.props.tinlake} />
+
+      <hr />
+
+      <div>
+        NFT ID <input onChange={e => this.setState({ tokenId: e.currentTarget.value }) }
+          value={this.state.tokenId} />
+      </div>
+      <div>
+        Principal <input onChange={e => this.setState({ principal: e.currentTarget.value }) }
+          value={this.state.principal} />
+      </div>
+      <div>
+        Interest rate <input onChange={e => this.setState({ interestRate: e.currentTarget.value }) }
+          value={this.state.interestRate} />
+      </div>
     </div>;
   }
 }

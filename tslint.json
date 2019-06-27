@@ -10,6 +10,7 @@
         "protected-method-regex": "^[a-z$][\\w\\d]+$",
         "static-method-regex": "^[a-z$][\\w\\d]+$"
       }
-    ]
+    ],
+    "import-name": false
   }
 }

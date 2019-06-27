@@ -1,6 +1,7 @@
 import * as React from 'react';
 import WithTinlake from '../../components/WithTinlake';
 import LoanDetail from '../../components/LoanDetail';
+import Link from 'next/link';
 
 class LoanPage extends React.Component<{ loanId: string }> {
   static async getInitialProps({ query }: any) {
@@ -9,7 +10,7 @@ class LoanPage extends React.Component<{ loanId: string }> {
 
   render() {
     return <div>
-      <h1>View NFT</h1>
+      <h1><Link href="/admin"><a>{'<-'}</a></Link>View NFT</h1>
 
       {this.props.loanId ? (
         <WithTinlake render={tinlake =>
