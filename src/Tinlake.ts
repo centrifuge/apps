@@ -1,4 +1,3 @@
-import defaultContractAddresses from './defaultContractAddresses';
 // tslint:disable-next-line:variable-name
 const Eth = require('ethjs');
 // tslint:disable-next-line:variable-name
@@ -8,18 +7,33 @@ const utils = require('web3-utils');
 // tslint:disable-next-line:import-name
 import BN from 'bn.js';
 
+const defaultContractAddresses = require('./addresses_tinlake.json');
+
 // tslint:disable:import-name
-import contractAbiNft from './abi/test/SimpleNFT.abi';
-import contractAbiTitle from './abi/Title.abi';
-import contractAbiCurrency from './abi/test/SimpleToken.abi';
-import contractAbiAdmit from './abi/Admit.abi';
-import contractAbiReception from './abi/Reception.abi';
-import contractAbiDesk from './abi/Desk.abi';
-import contractAbiShelf from './abi/Shelf.abi';
-import contractAbiAppraiser from './abi/Appraiser.abi';
-import contractAbiLender from './abi/MakerAdapter.abi';
-import contractAbiPile from './abi/Pile.abi';
+const contractAbiNft = require('./abi/test/SimpleNFT.abi');
+const contractAbiTitle = require('./abi/Title.abi');
+const contractAbiCurrency = require('./abi/test/SimpleToken.abi');
+const contractAbiAdmit = require('./abi/Admit.abi');
+const contractAbiReception = require('./abi/Reception.abi');
+const contractAbiDesk = require('./abi/Desk.abi');
+const contractAbiShelf = require('./abi/Shelf.abi');
+const contractAbiAppraiser = require('./abi/Appraiser.abi');
+const contractAbiLender = require('./abi/MakerAdapter.abi');
+const contractAbiPile = require('./abi/Pile.abi');
 // tslint:enable:import-name
+
+interface ContractAbis {
+  'nft': string;
+  'title': string;
+  'currency': string;
+  'admit': string;
+  'reception': string;
+  'desk': string;
+  'shelf': string;
+  'appraiser': string;
+  'lender': string;
+  'pile': string;
+}
 
 interface ContractAddresses {
   'APPRAISER': string;
@@ -41,7 +55,7 @@ interface ContractAddresses {
 }
 
 interface Options {
-  contractAbiPath?: string;
+  contractAbis?: ContractAbis;
   contractAddresses?: ContractAddresses;
   ethOptions?: any;
   ethConfig?: any;
@@ -100,11 +114,22 @@ class Tinlake {
   public ethConfig: any;
   public contractAddresses: ContractAddresses;
   public contracts: Contracts;
-  private contractAbiPath: string;
+  public contractAbis: ContractAbis;
 
   constructor(
-    provider: any, { contractAbiPath, contractAddresses, ethOptions, ethConfig }: Options = {}) {
-    this.contractAbiPath = contractAbiPath || `${__dirname}/abi`;
+    provider: any, { contractAbis, contractAddresses, ethOptions, ethConfig }: Options = {}) {
+    this.contractAbis = contractAbis || {
+      nft: contractAbiNft,
+      title: contractAbiTitle,
+      currency: contractAbiCurrency,
+      admit: contractAbiAdmit,
+      reception: contractAbiReception,
+      desk: contractAbiDesk,
+      shelf: contractAbiShelf,
+      appraiser: contractAbiAppraiser,
+      lender: contractAbiLender,
+      pile: contractAbiPile,
+    };
     this.contractAddresses = contractAddresses || defaultContractAddresses;
     this.provider = provider;
     this.ethOptions = ethOptions || {};
@@ -112,16 +137,26 @@ class Tinlake {
     this.eth = new Eth(this.provider, this.ethOptions) as ethI;
 
     this.contracts = {
-      nft: this.eth.contract(contractAbiNft).at(this.contractAddresses['NFT_COLLATERAL']),
-      title: this.eth.contract(contractAbiTitle).at(this.contractAddresses['TITLE']),
-      currency: this.eth.contract(contractAbiCurrency).at(this.contractAddresses['CURRENCY']),
-      admit: this.eth.contract(contractAbiAdmit).at(this.contractAddresses['ADMIT']),
-      reception: this.eth.contract(contractAbiReception).at(this.contractAddresses['RECEPTION']),
-      desk: this.eth.contract(contractAbiDesk).at(this.contractAddresses['DESK']),
-      shelf: this.eth.contract(contractAbiShelf).at(this.contractAddresses['SHELF']),
-      appraiser: this.eth.contract(contractAbiAppraiser).at(this.contractAddresses['APPRAISER']),
-      lender: this.eth.contract(contractAbiLender).at(this.contractAddresses['LENDER']),
-      pile: this.eth.contract(contractAbiPile).at(this.contractAddresses['PILE']),
+      nft: this.eth.contract(this.contractAbis.nft)
+        .at(this.contractAddresses['NFT_COLLATERAL']),
+      title: this.eth.contract(this.contractAbis.title)
+        .at(this.contractAddresses['TITLE']),
+      currency: this.eth.contract(this.contractAbis.currency)
+        .at(this.contractAddresses['CURRENCY']),
+      admit: this.eth.contract(this.contractAbis.admit)
+        .at(this.contractAddresses['ADMIT']),
+      reception: this.eth.contract(this.contractAbis.reception)
+        .at(this.contractAddresses['RECEPTION']),
+      desk: this.eth.contract(this.contractAbis.desk)
+        .at(this.contractAddresses['DESK']),
+      shelf: this.eth.contract(this.contractAbis.shelf)
+        .at(this.contractAddresses['SHELF']),
+      appraiser: this.eth.contract(this.contractAbis.appraiser)
+        .at(this.contractAddresses['APPRAISER']),
+      lender: this.eth.contract(this.contractAbis.lender)
+        .at(this.contractAddresses['LENDER']),
+      pile: this.eth.contract(this.contractAbis.pile)
+        .at(this.contractAddresses['PILE']),
     };
   }
 

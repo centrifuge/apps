@@ -22,6 +22,7 @@
     "@types/mocha": "^5.2.7",
     "@types/web3-eth-abi": "^1.0.0",
     "declaration-bundler-webpack-plugin": "^1.0.3",
+    "json-loader": "^0.5.7",
     "nodemon": "^1.19.1",
     "ts-loader": "^6.0.4",
     "ts-mocha": "^6.0.0",
@@ -33,6 +34,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "bundle": "webpack",
     "test": "ts-mocha test/**/*",
     "nodemon": "nodemon node inspect src/index.js"
   },
