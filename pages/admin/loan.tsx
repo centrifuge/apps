@@ -2,6 +2,7 @@ import * as React from 'react';
 import WithTinlake from '../../components/WithTinlake';
 import LoanDetail from '../../components/LoanDetail';
 import Link from 'next/link';
+import { AxisTheme } from '@centrifuge/axis-theme';
 
 class LoanPage extends React.Component<{ loanId: string }> {
   static async getInitialProps({ query }: any) {
@@ -9,7 +10,7 @@ class LoanPage extends React.Component<{ loanId: string }> {
   }
 
   render() {
-    return <div>
+    return <AxisTheme full={true}><div>
       <h1><Link href="/admin"><a>{'<-'}</a></Link>View NFT</h1>
 
       {this.props.loanId ? (
@@ -18,7 +19,7 @@ class LoanPage extends React.Component<{ loanId: string }> {
       ) : (
         'Please provide an ID'
       )}
-    </div>;
+    </div></AxisTheme>;
   }
 }
 

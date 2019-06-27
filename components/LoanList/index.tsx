@@ -5,11 +5,13 @@ import Tinlake, { Loan, BalanceDebt } from 'tinlake';
 import Link from 'next/link';
 // tslint:disable-next-line:import-name
 import BN from 'bn.js';
+import { Box, DataTable } from 'grommet';
 
 interface InternalLoan extends Loan {
   id: number;
   balance: BN;
   debt: BN;
+  status: string;
 }
 
 interface Props {
@@ -20,6 +22,21 @@ interface State {
   count: number;
   loans: InternalLoan[];
 }
+
+const columns = [
+  { header: 'NFT ID', property: 'tokenId',
+    render: (l: InternalLoan) => l.tokenId.toString() },
+  { header: 'NFT Owner', property: 'registry' },
+  { header: 'NFT Status', property: 'status' },
+  { header: 'Principal', property: 'principal',
+    render: (l: InternalLoan) => l.principal.toString() },
+  { header: 'Interest rate', property: 'price',
+    render: (l: InternalLoan) => l.price.toString() },
+  { header: 'Debt', property: 'debt', render: (l: InternalLoan) => l.debt.toString() },
+  { header: 'Maturity Date', property: '', render: () => '-' },
+  { header: 'Actions', property: 'id', render: (l: InternalLoan) =>
+    <Link href={`/admin/loan?loanId=${l.id}`}><a>View</a></Link> },
+];
 
 class LoanList extends React.Component<Props, State> {
   state: State = {
@@ -56,6 +73,7 @@ class LoanList extends React.Component<Props, State> {
         tokenId: loan.tokenId,
         balance: balanceDebtData[i].balance,
         debt: balanceDebtData[i].debt,
+        status: getLoanStatus(balanceDebtData[i].balance, balanceDebtData[i].debt),
       });
     });
 
@@ -63,39 +81,11 @@ class LoanList extends React.Component<Props, State> {
   }
 
   render() {
-    return <div>
+    return <Box>
       Found {this.state.count} loans
 
-      <table>
-        <thead>
-          <tr>
-            <th>NFT ID</th>
-            <th>NFT Owner</th>
-            <th>NFT Status</th>
-            <th>Principal</th>
-            <th>Interest rate</th>
-            <th>Debt</th>
-            <th>Maturity Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-        {this.state.loans.map(loan =>
-          <tr key={loan.tokenId.toString()}>
-            <td>{loan.tokenId.toString()}</td>
-            <td>{loan.registry}</td>
-            <td>{getLoanStatus(loan.balance, loan.debt)}</td>
-            <td>{loan.principal.toString()}</td>
-            <td>{loan.price.toString()}</td>
-            <td>{loan.debt.toString()}</td>
-            <td>-</td>
-            <td><Link href={`/admin/loan?loanId=${loan.id}`}>
-              <a>View</a></Link></td>
-          </tr>,
-          )}
-          </tbody>
-      </table>
-    </div>;
+      <DataTable data={this.state.loans} columns={columns} />
+    </Box>;
   }
 }
 

@@ -19,9 +19,14 @@
   },
   "homepage": "https://github.com/centrifuge/tinlake-ui#readme",
   "dependencies": {
+    "@centrifuge/axis-theme": "^0.2.3-develop.2",
+    "chai": "^4.2.0",
+    "grommet": "^2.7.1",
     "next": "^8.1.0",
+    "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "styled-components": "^4.3.2",
     "tinlake": "git+https://github.com/philipstanislaus/tinlake.js.git#web-version"
   },
   "devDependencies": {
