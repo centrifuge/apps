@@ -28,13 +28,14 @@ const columns = [
     render: (l: InternalLoan) => l.tokenId.toString() },
   { header: 'NFT Owner', property: 'registry' },
   { header: 'NFT Status', property: 'status' },
-  { header: 'Principal', property: 'principal',
+  { header: 'Principal', property: 'principal', align: 'end',
     render: (l: InternalLoan) => l.principal.toString() },
-  { header: 'Interest rate', property: 'price',
+  { header: 'Interest rate', property: 'price', align: 'end',
     render: (l: InternalLoan) => l.price.toString() },
-  { header: 'Debt', property: 'debt', render: (l: InternalLoan) => l.debt.toString() },
-  { header: 'Maturity Date', property: '', render: () => '-' },
-  { header: 'Actions', property: 'id', render: (l: InternalLoan) =>
+  { header: 'Debt', property: 'debt', align: 'end',
+    render: (l: InternalLoan) => l.debt.toString() },
+  { header: 'Maturity Date', property: '', align: 'end', render: () => '-' },
+  { header: 'Actions', property: 'id', align: 'end', render: (l: InternalLoan) =>
     <Link href={`/admin/loan?loanId=${l.id}`}><a>View</a></Link> },
 ];
 

@@ -12,9 +12,9 @@ class LoanListPage extends React.Component {
           <Heading level="3">NFTs</Heading>
         </Box>
 
-        <WithTinlake render={tinlake => <LoanList tinlake={tinlake} />} />;
-      </Box>;
-    </AxisTheme > ;
+        <WithTinlake render={tinlake => <LoanList tinlake={tinlake} />} />
+      </Box>
+    </AxisTheme>;
   }
 }
 
