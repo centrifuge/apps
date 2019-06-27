@@ -23,22 +23,6 @@ interface State {
   loans: InternalLoan[];
 }
 
-const columns = [
-  { header: 'NFT ID', property: 'tokenId',
-    render: (l: InternalLoan) => l.tokenId.toString() },
-  { header: 'NFT Owner', property: 'registry' },
-  { header: 'NFT Status', property: 'status' },
-  { header: 'Principal', property: 'principal', align: 'end',
-    render: (l: InternalLoan) => l.principal.toString() },
-  { header: 'Interest rate', property: 'price', align: 'end',
-    render: (l: InternalLoan) => l.price.toString() },
-  { header: 'Debt', property: 'debt', align: 'end',
-    render: (l: InternalLoan) => l.debt.toString() },
-  { header: 'Maturity Date', property: '', align: 'end', render: () => '-' },
-  { header: 'Actions', property: 'id', align: 'end', render: (l: InternalLoan) =>
-    <Link href={`/admin/loan?loanId=${l.id}`}><a>View</a></Link> },
-];
-
 class LoanList extends React.Component<Props, State> {
   state: State = {
     count: 0,
@@ -85,14 +69,29 @@ class LoanList extends React.Component<Props, State> {
     return <Box>
       Found {this.state.count} loans
 
-      <DataTable data={this.state.loans} columns={columns} />
+      <DataTable data={this.state.loans} columns={[
+        { header: 'NFT ID', property: 'tokenId',
+          render: (l: InternalLoan) => l.tokenId.toString() },
+        { header: 'NFT Owner', property: 'registry' },
+        { header: 'NFT Status', property: 'status' },
+        { header: 'Principal', property: 'principal', align: 'end',
+          render: (l: InternalLoan) => l.principal.toString() },
+        { header: 'Interest rate', property: 'price', align: 'end',
+          render: (l: InternalLoan) => l.price.toString() },
+        { header: 'Debt', property: 'debt', align: 'end',
+          render: (l: InternalLoan) => l.debt.toString() },
+        { header: 'Maturity Date', property: '', align: 'end', render: () => '-' },
+        { header: 'Actions', property: 'id', align: 'end', render: (l: InternalLoan) =>
+          <Link href={`/admin/loan?loanId=${l.id}`}><a>View</a></Link> },
+      ]} />
     </Box>;
   }
 }
 
 export default LoanList;
 
-type LoanStatus = 'Submitted' | 'Whitelisted' | 'Collateralized' | 'Repaid' | 'Rejected';
+type LoanStatus = 'Submitted' | 'Whitelisted' | 'Collateralized'
+  | 'Repaid' | 'Rejected';
 
 function getLoanStatus(balance: BN, debt: BN): LoanStatus {
   if (!balance.isZero()) { return 'Whitelisted'; }

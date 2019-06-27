@@ -14,7 +14,7 @@ interface Props {
 interface State {
   tokenId: string;
   principal: string;
-  interestRate: string;
+  appraisal: string;
   is: 'loading' | 'success' | 'error' | null;
   errorMsg: string;
 }
@@ -23,7 +23,7 @@ class WhitelistNFT extends React.Component<Props, State> {
   state: State = {
     tokenId: '',
     principal: '100',
-    interestRate: '300',
+    appraisal: '300',
     is: null,
     errorMsg: '',
   };
@@ -32,7 +32,7 @@ class WhitelistNFT extends React.Component<Props, State> {
     this.setState({ is: 'loading' });
 
     const { tinlake } = this.props;
-    const { tokenId, principal, interestRate } = this.state;
+    const { tokenId, principal, appraisal } = this.state;
     const ethFrom = tinlake.ethConfig.from;
     const addresses = tinlake.contractAddresses;
 
@@ -65,7 +65,7 @@ class WhitelistNFT extends React.Component<Props, State> {
       }
 
       // appraise
-      const res3 = await tinlake.adminAppraise(loanId, interestRate);
+      const res3 = await tinlake.adminAppraise(loanId, appraisal);
 
       console.log('appraisal results');
       console.log(res3.txHash);
@@ -84,7 +84,7 @@ class WhitelistNFT extends React.Component<Props, State> {
   }
 
   render() {
-    const { tokenId, principal, interestRate, is, errorMsg } = this.state;
+    const { tokenId, principal, appraisal, is, errorMsg } = this.state;
 
     return <Box>
       <MintNFT tinlake={this.props.tinlake} />
@@ -99,7 +99,7 @@ class WhitelistNFT extends React.Component<Props, State> {
           </FormField>
         </Box>
         <Box basis={'1/4'} gap="medium">
-          <FormField label="Principal ID">
+          <FormField label="Principal">
             <TextInput
               value={principal}
               onChange={e => this.setState({ principal: e.currentTarget.value }) }
@@ -107,10 +107,10 @@ class WhitelistNFT extends React.Component<Props, State> {
           </FormField>
         </Box>
         <Box basis={'1/4'} gap="medium">
-          <FormField label="Interest rate">
+          <FormField label="Appraisal">
             <TextInput
-              value={interestRate}
-              onChange={e => this.setState({ interestRate: e.currentTarget.value }) }
+              value={appraisal}
+              onChange={e => this.setState({ appraisal: e.currentTarget.value }) }
             />
           </FormField>
         </Box>
