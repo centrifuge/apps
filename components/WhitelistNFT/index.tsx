@@ -2,6 +2,10 @@ import * as React from 'react';
 // tslint:disable-next-line:import-name
 import Tinlake from 'tinlake';
 import MintNFT from '../MintNFT';
+import { Box, FormField, TextInput, Button } from 'grommet';
+import Alert from '../Alert';
+
+const SUCCESS_STATUS = '0x1';
 
 interface Props {
   tinlake: Tinlake;
@@ -11,52 +15,120 @@ interface State {
   tokenId: string;
   principal: string;
   interestRate: string;
+  is: 'loading' | 'success' | 'error' | null;
+  errorMsg: string;
 }
 
 class WhitelistNFT extends React.Component<Props, State> {
   state: State = {
     tokenId: '',
-    principal: '',
-    interestRate: '',
+    principal: '100',
+    interestRate: '300',
+    is: null,
+    errorMsg: '',
   };
 
-  mint = async () => {
-    const principal = 100;
-    const appraisal = 300;
+  whitelist = async () => {
+    this.setState({ is: 'loading' });
 
-    console.log(`appraisal: ${appraisal}`);
-    console.log(`principal: ${principal}`);
+    const { tinlake } = this.props;
+    const { tokenId, principal, interestRate } = this.state;
+    const ethFrom = tinlake.ethConfig.from;
+    const addresses = tinlake.contractAddresses;
 
-    const tokenID = `0x${Math.floor(Math.random() * (10 ** 15))}`;
+    try {
+      // admit
+      const res1 = await tinlake.adminAdmit(addresses['NFT_COLLATERAL'], tokenId, principal,
+                                            ethFrom);
 
-    console.log(`token id: ${tokenID}`);
+      console.log('admit result');
+      console.log(res1.txHash);
 
-    const ethFrom = '0x0a735602a357802f553113f5831fe2fbf2f0e2e0';
+      if (res1.status !== SUCCESS_STATUS || res1.events[0].event.name !== 'Transfer') {
+        console.log(res1);
+        this.setState({ is: 'error', errorMsg: JSON.stringify(res1) });
+        return;
+      }
 
-    const res = await this.props.tinlake.mintNFT(ethFrom, tokenID);
+      // approve
+      const loanId = res1.events[0].data[2].toString();
+      console.log(`Loan id: ${loanId}`);
+      const res2 = await tinlake.approveNFT(tokenId, addresses['SHELF']);
 
-    console.log(res);
+      console.log('approve results');
+      console.log(res2.txHash);
+
+      if (res2.status !== SUCCESS_STATUS || res2.events[0].event.name !== 'Approval') {
+        console.log(res2);
+        this.setState({ is: 'error', errorMsg: JSON.stringify(res2) });
+        return;
+      }
+
+      // appraise
+      const res3 = await tinlake.adminAppraise(loanId, interestRate);
+
+      console.log('appraisal results');
+      console.log(res3.txHash);
+
+      if (res3.status !== SUCCESS_STATUS) {
+        console.log(res3);
+        this.setState({ is: 'error', errorMsg: JSON.stringify(res3) });
+        return;
+      }
+
+      this.setState({ is: 'success' });
+    } catch (e) {
+      console.log(e);
+      this.setState({ is: 'error', errorMsg: e.message });
+    }
   }
 
   render() {
-    return <div>
+    const { tokenId, principal, interestRate, is, errorMsg } = this.state;
+
+    return <Box>
       <MintNFT tinlake={this.props.tinlake} />
 
-      <hr />
+      <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'xlarge' }}>
+        <Box basis={'1/4'} gap="medium">
+          <FormField label="NFT ID">
+            <TextInput
+              value={tokenId}
+              onChange={e => this.setState({ tokenId: e.currentTarget.value }) }
+            />
+          </FormField>
+        </Box>
+        <Box basis={'1/4'} gap="medium">
+          <FormField label="Principal ID">
+            <TextInput
+              value={principal}
+              onChange={e => this.setState({ principal: e.currentTarget.value }) }
+            />
+          </FormField>
+        </Box>
+        <Box basis={'1/4'} gap="medium">
+          <FormField label="Interest rate">
+            <TextInput
+              value={interestRate}
+              onChange={e => this.setState({ interestRate: e.currentTarget.value }) }
+            />
+          </FormField>
+        </Box>
+      </Box>
 
-      <div>
-        NFT ID <input onChange={e => this.setState({ tokenId: e.currentTarget.value }) }
-          value={this.state.tokenId} />
-      </div>
-      <div>
-        Principal <input onChange={e => this.setState({ principal: e.currentTarget.value }) }
-          value={this.state.principal} />
-      </div>
-      <div>
-        Interest rate <input onChange={e => this.setState({ interestRate: e.currentTarget.value }) }
-          value={this.state.interestRate} />
-      </div>
-    </div>;
+      <Box margin={{ bottom: 'medium' }}>
+        <Button onClick={this.whitelist} primary alignSelf="end">Whitelist</Button>
+      </Box>
+
+      {is === 'loading' && 'Whitelisting...'}
+      {is === 'success' && <Alert type="success">
+        Successfully whitelisted NFT for Token ID {tokenId}</Alert>}
+      {is === 'error' && <Alert type="error">
+        <strong>Error whitelisting NFT for Token ID {tokenId}, see console for details</strong>
+        {errorMsg && <div><br />{errorMsg}</div>}
+      </Alert>}
+
+    </Box>;
   }
 }
 

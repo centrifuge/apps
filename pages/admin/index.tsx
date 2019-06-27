@@ -6,15 +6,13 @@ import { Box, Heading } from 'grommet';
 
 class LoanListPage extends React.Component {
   render() {
-    return <AxisTheme full={true}>
-      <Box>
-        <Box justify="between" direction="row" align="center">
-          <Heading level="3">NFTs</Heading>
-        </Box>
-
-        <WithTinlake render={tinlake => <LoanList tinlake={tinlake} />} />
+    return <AxisTheme full={true}><Box pad="large">
+      <Box justify="between" direction="row" align="center">
+        <Heading level="3">NFTs</Heading>
       </Box>
-    </AxisTheme>;
+
+      <WithTinlake render={tinlake => <LoanList tinlake={tinlake} />} />
+    </Box></AxisTheme>;
   }
 }
 
