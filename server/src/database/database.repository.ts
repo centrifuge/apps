@@ -62,7 +62,7 @@ export class DatabaseRepository<T> {
    * @param {object} updateObject - The update object query
    * @returns {Promise<T|null>} promise
    */
-  updateById(id: string, updateObject: T, upsert: boolean = false): Promise<T | null> {
+  updateById(id: string, updateObject: Modifier<T> | T, upsert: boolean = false): Promise<T | null> {
     return this.update({ _id: id }, updateObject, { returnUpdatedDocs: true, upsert });
   }
 
@@ -70,10 +70,16 @@ export class DatabaseRepository<T> {
    * Update object
    * @param {any} query - Nedb query object
    * @param {object} updateObject - The update object query
-   * @param {Nedb.UpdateOptions} options - {multi,usert,returnUpdatedDocs}
+   * @param {Nedb.UpdateOptions} options - {multi,upsert,returnUpdatedDocs}
    * @returns {Promise<T|null>} promise
    */
-  update(query: any, updateObject: T, options?: Nedb.UpdateOptions): Promise<T | null> {
+  update(query: any, updateObject: Modifier<T> | T, options?: Nedb.UpdateOptions): Promise<T  | null> {
     return this.repository.update(query, updateObject, options);
   }
 }
+
+interface Modifier<T> {
+  $set?: Partial<T>;
+  $push?: any;
+  $pop?: Partial<T>
+};

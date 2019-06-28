@@ -125,6 +125,7 @@ export class FundingController {
         fundingAgreement: fundingResponse.data,
       },
     );
+
     return fundingResponse;
   }
 }
