@@ -1,5 +1,5 @@
 import { AnyAction, Action } from 'redux';
-import Tinlake, { Loan, BalanceDebt } from 'tinlake';
+import Tinlake, { Loan, BalanceDebt, Address } from 'tinlake';
 // tslint:disable-next-line:import-name
 import BN from 'bn.js';
 import getLoanStatus from '../utils/getLoanStatus';
@@ -17,6 +17,7 @@ export interface InternalLoan extends Loan {
   balance: BN;
   debt: BN;
   status: string;
+  owner: Address;
 }
 
 export interface LoansState {
@@ -66,9 +67,24 @@ export function getLoans(tinlake: Tinlake):
     const loans = await Promise.all(loanPromises);
     const balanceDebtData = await Promise.all(balanceDebtPromises);
 
+    const ownerPromises: Promise<Address>[] = [];
+    for (let i = 0; i < count.toNumber(); i += 1) {
+      ownerPromises.push(tinlake.ownerOfNFT(loans[i].tokenId.toString()));
+    }
+    const owners: Address[] = [];
+    for (let i = 0; i < count.toNumber(); i += 1) {
+      try {
+        owners[i] = await ownerPromises[i];
+      } catch (e) {
+        console.warn(`Could not get owner for Loan ID ${i}, NFT ID ${loans[i].tokenId.toString()}`);
+        owners[i] = '';
+      }
+    }
+
     const extendedLoansData = loans.map((loan, i) => {
       return ({
         loanId: i,
+        owner: owners[i],
         principal: loan.principal,
         price: loan.price,
         registry: loan.registry,
@@ -99,8 +115,17 @@ export function getLoan(tinlake: Tinlake, loanId: number):
       tinlake.getBalanceDebt(loanId),
     ]);
 
+    let owner: Address;
+    try {
+      owner = await tinlake.ownerOfNFT(loan.tokenId.toString());
+    } catch (e) {
+      console.warn(`Could not get owner for Loan ID ${loanId}, NFT ID ${loan.tokenId.toString()}`);
+      owner = '';
+    }
+
     const extendedLoanData = {
       loanId,
+      owner,
       principal: loan.principal,
       price: loan.price,
       registry: loan.registry,

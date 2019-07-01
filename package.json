@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -35,11 +36,13 @@
     "tinlake": "git+https://github.com/philipstanislaus/tinlake.js.git#web-version"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.15",
     "@types/next": "^8.0.5",
     "@types/react": "^16.8.22",
     "@types/react-redux": "^7.1.1",
     "@types/styled-components": "^4.1.16",
     "@zeit/next-typescript": "^1.1.1",
+    "jest": "^24.8.0",
     "tslint": "^5.18.0",
     "tslint-config-airbnb": "^5.11.1",
     "typescript": "^3.5.2"

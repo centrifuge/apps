@@ -6,11 +6,13 @@ import Link from 'next/link';
 import { Box, DataTable } from 'grommet';
 import { connect } from 'react-redux';
 import { InternalLoan, LoansState, getLoans } from '../../ducks/loans';
+import { formatAddress } from '../../utils/formatAddress';
 
 interface Props {
   tinlake: Tinlake;
   loans?: LoansState;
   getLoans?: (tinlake: Tinlake) => Promise<void>;
+  mode: 'borrower' | 'admin';
 }
 
 class LoanList extends React.Component<Props> {
@@ -19,18 +21,22 @@ class LoanList extends React.Component<Props> {
   }
 
   render() {
-    const { loans } = this.props;
+    const { loans, mode, tinlake: { ethConfig: { from } } } = this.props;
 
     if (loans!.loansState === 'loading') {
       return 'Loading...';
     }
 
+    const filteredLoans = mode === 'borrower' ? loans!.loans.filter(l => l.owner === from) :
+      loans!.loans;
+
     return <Box>
-      <DataTable data={loans!.loans} columns={[
+      <DataTable data={filteredLoans} columns={[
         { header: 'Loan ID', property: 'loanId', align: 'end' },
         { header: 'NFT ID', property: 'tokenId', align: 'end',
-          render: (l: InternalLoan) => l.tokenId.toString() },
-        { header: 'NFT Owner', property: 'registry', align: 'end' },
+          render: (l: InternalLoan) => formatAddress(l.tokenId.toString()) },
+        { header: 'NFT Owner', property: 'owner', align: 'end',
+          render: (l: InternalLoan) => formatAddress(l.owner) },
         { header: 'NFT Status', property: 'status' },
         { header: 'Principal', property: 'principal', align: 'end',
           render: (l: InternalLoan) => l.principal.toString() },

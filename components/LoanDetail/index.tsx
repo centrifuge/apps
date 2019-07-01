@@ -4,8 +4,7 @@ import Tinlake from 'tinlake';
 import { LoansState, getLoan } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
-import { Box, FormField, TextInput, Heading } from 'grommet';
-import styled from 'styled-components';
+import { Box, FormField, TextInput } from 'grommet';
 import LoanNftData from '../LoanNftData.tsx';
 
 interface Props {
@@ -30,7 +29,7 @@ class LoanDetail extends React.Component<Props> {
         Could not find loan {loanId}</Alert>;
     }
 
-    const { status, principal, price, debt, tokenId, registry } = singleLoan!;
+    const { status, principal, price, debt } = singleLoan!;
 
     return <Box>
       <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
