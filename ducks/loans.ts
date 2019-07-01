@@ -5,6 +5,9 @@ import BN from 'bn.js';
 import getLoanStatus from '../utils/getLoanStatus';
 import { ThunkAction } from 'redux-thunk';
 
+// Config
+const startingLoanId = 42;
+
 // Actions
 const LOAD = 'tinlake-ui/loans/LOAD';
 const RECEIVE = 'tinlake-ui/loans/RECEIVE';
@@ -59,7 +62,7 @@ export function getLoans(tinlake: Tinlake):
     const loanPromises: Promise<Loan>[] = [];
     const balanceDebtPromises: Promise<BalanceDebt>[] = [];
 
-    for (let i = 0; i < count.toNumber(); i += 1) {
+    for (let i = startingLoanId; i < count.toNumber(); i += 1) {
       loanPromises.push(tinlake.getLoan(i));
       balanceDebtPromises.push(tinlake.getBalanceDebt(i));
     }
@@ -68,22 +71,23 @@ export function getLoans(tinlake: Tinlake):
     const balanceDebtData = await Promise.all(balanceDebtPromises);
 
     const ownerPromises: Promise<Address>[] = [];
-    for (let i = 0; i < count.toNumber(); i += 1) {
+    for (let i = 0; i < count.toNumber() - startingLoanId; i += 1) {
       ownerPromises.push(tinlake.ownerOfNFT(loans[i].tokenId.toString()));
     }
     const owners: Address[] = [];
-    for (let i = 0; i < count.toNumber(); i += 1) {
+    for (let i = 0; i < count.toNumber() - startingLoanId; i += 1) {
       try {
         owners[i] = await ownerPromises[i];
       } catch (e) {
-        console.warn(`Could not get owner for Loan ID ${i}, NFT ID ${loans[i].tokenId.toString()}`);
+        console.warn(`Could not get owner for Loan ID ${i + startingLoanId}, ` +
+          `NFT ID ${loans[i].tokenId.toString()}`);
         owners[i] = '';
       }
     }
 
     const extendedLoansData = loans.map((loan, i) => {
       return ({
-        loanId: i,
+        loanId: i + startingLoanId,
         owner: owners[i],
         principal: loan.principal,
         price: loan.price,
