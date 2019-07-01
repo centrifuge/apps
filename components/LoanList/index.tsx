@@ -51,14 +51,14 @@ class LoanList extends React.Component<Props, State> {
 
     const extendedLoansData = loans.map((loan, i) => {
       return ({
-        id: i,
+        loanId: i,
         principal: loan.principal,
         price: loan.price,
         registry: loan.registry,
         tokenId: loan.tokenId,
         balance: balanceDebtData[i].balance,
         debt: balanceDebtData[i].debt,
-        status: getLoanStatus(balanceDebtData[i].balance, balanceDebtData[i].debt),
+        status: getLoanStatus(loan.principal, balanceDebtData[i].debt),
       });
     });
 
@@ -70,9 +70,10 @@ class LoanList extends React.Component<Props, State> {
       Found {this.state.count} loans
 
       <DataTable data={this.state.loans} columns={[
-        { header: 'NFT ID', property: 'tokenId',
+        { header: 'Loan ID', property: 'loanId', align: 'end' },
+        { header: 'NFT ID', property: 'tokenId', align: 'end',
           render: (l: InternalLoan) => l.tokenId.toString() },
-        { header: 'NFT Owner', property: 'registry' },
+        { header: 'NFT Owner', property: 'registry', align: 'end' },
         { header: 'NFT Status', property: 'status' },
         { header: 'Principal', property: 'principal', align: 'end',
           render: (l: InternalLoan) => l.principal.toString() },
@@ -90,12 +91,11 @@ class LoanList extends React.Component<Props, State> {
 
 export default LoanList;
 
-type LoanStatus = 'Submitted' | 'Whitelisted' | 'Collateralized'
-  | 'Repaid' | 'Rejected';
+type LoanStatus = 'Whitelisted' | 'Ongoing' | 'Repaid';
 
-function getLoanStatus(balance: BN, debt: BN): LoanStatus {
-  if (!balance.isZero()) { return 'Whitelisted'; }
-  if (balance.isZero() && !debt.isZero()) { return 'Collateralized'; }
-  if (balance.isZero() && debt.isZero()) { return 'Repaid'; }
-  return 'Submitted';
+function getLoanStatus(principal: BN, debt: BN): LoanStatus {
+  if (!principal.isZero()) { return 'Whitelisted'; }
+  if (principal.isZero() && !debt.isZero()) { return 'Ongoing'; }
+  if (principal.isZero() && debt.isZero()) { return 'Repaid'; }
+  throw Error('Unknown loan status');
 }
