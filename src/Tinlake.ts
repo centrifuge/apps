@@ -179,8 +179,9 @@ class Tinlake {
     });
   }
 
-  ownerOfNFT = (tokenID: string): Promise<Events> => {
-    return this.contracts.nft.ownerOf(tokenID);
+  ownerOfNFT = async (tokenID: Address): Promise<Address> => {
+    const res = await this.contracts.nft.ownerOf(tokenID);
+    return res['0'];
   }
 
   balanceOfCurrency = (usr: string): Promise<Balance> => {

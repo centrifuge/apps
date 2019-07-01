@@ -24013,9 +24013,17 @@ var Tinlake = /** @class */ (function () {
                 return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi);
             });
         };
-        this.ownerOfNFT = function (tokenID) {
-            return _this.contracts.nft.ownerOf(tokenID);
-        };
+        this.ownerOfNFT = function (tokenID) { return __awaiter(_this, void 0, void 0, function () {
+            var res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.contracts.nft.ownerOf(tokenID)];
+                    case 1:
+                        res = _a.sent();
+                        return [2 /*return*/, res['0']];
+                }
+            });
+        }); };
         this.balanceOfCurrency = function (usr) {
             return _this.contracts.currency.balanceOf(usr);
         };

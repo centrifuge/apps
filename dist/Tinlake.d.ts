@@ -95,7 +95,7 @@ declare class Tinlake {
     getLoan: (loanId: number) => Promise<Loan>;
     getBalanceDebt: (loanId: number) => Promise<BalanceDebt>;
     approveNFT: (tokenID: string, to: string) => Promise<Events>;
-    ownerOfNFT: (tokenID: string) => Promise<Events>;
+    ownerOfNFT: (tokenID: string) => Promise<string>;
     balanceOfCurrency: (usr: string) => Promise<Balance>;
     mintNFT: (deposit: string, tokenID: string) => Promise<Events>;
     adminAdmit: (registry: string, nft: string, principal: string, usr: string) => Promise<Events>;

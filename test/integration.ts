@@ -33,7 +33,7 @@ describe('functional tinlake tests', () => {
     );
   });
 
-  describe.only('tinlake call functionality', function () {
+  describe('tinlake call functionality', function () {
     this.timeout(50000);
 
     it('count number of loans', async () => {
@@ -54,6 +54,11 @@ describe('functional tinlake tests', () => {
       const res = await tinlake.getBalanceDebt(20);
       assert(BN.isBN(res.balance));
       assert(BN.isBN(res.debt));
+    });
+
+    it('gets the owner of an nft', async () => {
+      const res = await tinlake.ownerOfNFT('582379665328543379');
+      assert.equal(typeof res, 'string');
     });
   });
 
