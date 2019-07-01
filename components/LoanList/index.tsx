@@ -9,21 +9,18 @@ import { InternalLoan, LoansState, getLoans } from '../../ducks/loans';
 
 interface Props {
   tinlake: Tinlake;
-  loans: LoansState;
-  getLoans: (tinlake: Tinlake) => Promise<void>;
+  loans?: LoansState;
+  getLoans?: (tinlake: Tinlake) => Promise<void>;
 }
 
 class LoanList extends React.Component<Props> {
-  componentDidMount() {
-    this.props.getLoans(this.props.tinlake);
+  componentWillMount() {
+    this.props.getLoans!(this.props.tinlake);
   }
 
   render() {
-    console.log(this.props);
     return <Box>
-      Found {this.props.loans.loans.length} loans
-
-      <DataTable data={this.props.loans.loans} columns={[
+      <DataTable data={this.props.loans!.loans} columns={[
         { header: 'Loan ID', property: 'loanId', align: 'end' },
         { header: 'NFT ID', property: 'tokenId', align: 'end',
           render: (l: InternalLoan) => l.tokenId.toString() },

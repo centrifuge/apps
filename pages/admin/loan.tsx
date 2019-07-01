@@ -12,12 +12,14 @@ class LoanPage extends React.Component<{ loanId: string }> {
   }
 
   render() {
-    return <AxisTheme full={true}><Box pad="large">
-      <h1><Link href="/admin"><a>{'<-'}</a></Link>View NFT</h1>
+    const { loanId } = this.props;
 
-      {this.props.loanId ? (
+    return <AxisTheme full={true}><Box pad="large">
+      <h1><Link href="/admin"><a>{'<-'}</a></Link>View Loan {loanId}</h1>
+
+      {loanId ? (
         <WithTinlake render={tinlake =>
-          <LoanDetail tinlake={tinlake} loanId={this.props.loanId} />} />
+          <LoanDetail tinlake={tinlake} loanId={loanId} />} />
       ) : (
         <Alert type="error">Please provide an ID</Alert>
       )}

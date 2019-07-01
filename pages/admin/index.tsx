@@ -8,7 +8,7 @@ class LoanListPage extends React.Component {
   render() {
     return <AxisTheme full={true}><Box pad="large">
       <Box justify="between" direction="row" align="center">
-        <Heading level="3">NFTs</Heading>
+        <Heading level="3">Loans</Heading>
       </Box>
 
       <WithTinlake render={tinlake => <LoanList tinlake={tinlake} />} />
