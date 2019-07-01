@@ -1,10 +1,6 @@
-'use strict';
-
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-var Eth = _interopDefault(require('ethjs'));
-var Abi = _interopDefault(require('web3-eth-abi'));
-var utils = _interopDefault(require('web3-utils'));
+import Eth from 'ethjs';
+import Abi from 'web3-eth-abi';
+import utils from 'web3-utils';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
@@ -3277,4 +3273,4 @@ var getEvents = function (receipt, abi) {
     return events;
 };
 
-module.exports = Tinlake;
+export default Tinlake;

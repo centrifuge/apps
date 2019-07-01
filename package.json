@@ -2,9 +2,12 @@
   "name": "tinlake",
   "version": "0.0.1",
   "description": "Centrifuge Tinlake Contracts Client",
-  "main": "build/Tinlake.js",
-  "types": "build/Tinlake.d.ts",
-  "module": "build/Tinlake.js",
+  "main": "dist/Tinlake.js",
+  "types": "dist/Tinlake.d.ts",
+  "module": "dist/Tinlake.es.js",
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "bignumber.js": "^9.0.0",
     "ethjs": "^0.4.0",
@@ -22,20 +25,19 @@
     "@types/mocha": "^5.2.7",
     "@types/web3-eth-abi": "^1.0.0",
     "declaration-bundler-webpack-plugin": "^1.0.3",
-    "json-loader": "^0.5.7",
     "nodemon": "^1.19.1",
-    "ts-loader": "^6.0.4",
+    "rollup": "^1.16.3",
+    "rollup-plugin-json": "^4.0.0",
+    "rollup-plugin-typescript2": "^0.21.2",
     "ts-mocha": "^6.0.0",
     "tslint": "^5.18.0",
     "tslint-config-airbnb": "^5.11.1",
-    "typescript": "^3.5.2",
-    "webpack": "^4.35.0",
-    "webpack-cli": "^3.3.5"
+    "typescript": "^3.5.2"
   },
   "scripts": {
-    "build": "tsc",
-    "bundle": "webpack",
-    "test": "ts-mocha test/**/*",
+    "bundle": "rollup -c",
+    "watch": "rollup -cw",
+    "test": "npm run bundle && ts-mocha -p test/tsconfig.json test/**/*",
     "nodemon": "nodemon node inspect src/index.js"
   },
   "repository": {

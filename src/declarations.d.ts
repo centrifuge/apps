@@ -3,12 +3,4 @@ declare module '*.abi' {
   export default value
 }
 
-declare module NodeJS {
-  interface Global {
-    XMLHttpRequest: any;
-  }
-}
-
-interface Window {
-  XMLHttpRequest: any;
-}
+declare module 'ethjs'

@@ -7,20 +7,7 @@ const rpcUrl = process.env['ETH_RPC_URL'];
 // tslint:disable-next-line:import-name
 import BN from 'bn.js';
 
-declare global {
-  namespace NodeJS {
-    interface Global {
-      XMLHttpRequest: any;
-    }
-  }
-}
-
-// tslint:disable-next-line:variable-name
-const XMLHttpRequest = require('xhr2');
-global.XMLHttpRequest = XMLHttpRequest;
-
-// tslint:disable-next-line:variable-name
-const Tinlake = require('../dist/Tinlake').default;
+import Tinlake from '../dist/Tinlake';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -51,7 +38,7 @@ describe('functional tinlake tests', () => {
 
     it('count number of loans', async () => {
       const count = await tinlake.loanCount();
-      console.log(`Found ${count} loans`);
+      console.log(`Found ${count} loans `);
       assert(count.gte(new BN(0)));
     });
 

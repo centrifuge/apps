@@ -1,15 +1,15 @@
 import BN from 'bn.js';
 interface ContractAbis {
-    'nft': string;
-    'title': string;
-    'currency': string;
-    'admit': string;
-    'reception': string;
-    'desk': string;
-    'shelf': string;
-    'appraiser': string;
-    'lender': string;
-    'pile': string;
+    'nft': any;
+    'title': any;
+    'currency': any;
+    'admit': any;
+    'reception': any;
+    'desk': any;
+    'shelf': any;
+    'appraiser': any;
+    'lender': any;
+    'pile': any;
 }
 interface ContractAddresses {
     'APPRAISER': string;

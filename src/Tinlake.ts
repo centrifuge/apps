@@ -1,38 +1,39 @@
-// tslint:disable-next-line:variable-name
-const Eth = require('ethjs');
-// tslint:disable-next-line:variable-name
-const Abi = require('web3-eth-abi');
+// tslint:disable-next-line:import-name
+import Eth from 'ethjs';
+// tslint:disable-next-line:import-name
+import Abi from 'web3-eth-abi';
 const abiCoder = new Abi.AbiCoder();
-const utils = require('web3-utils');
+// tslint:disable-next-line:import-name
+import utils from 'web3-utils';
 // tslint:disable-next-line:import-name
 import BN from 'bn.js';
 
-const defaultContractAddresses = require('./addresses_tinlake.json');
+// tslint:disable:import-name no-duplicate-imports
+import defaultContractAddresses from './addresses_tinlake.json';
 
-// tslint:disable:import-name
-const contractAbiNft = require('./abi/test/SimpleNFT.abi');
-const contractAbiTitle = require('./abi/Title.abi');
-const contractAbiCurrency = require('./abi/test/SimpleToken.abi');
-const contractAbiAdmit = require('./abi/Admit.abi');
-const contractAbiReception = require('./abi/Reception.abi');
-const contractAbiDesk = require('./abi/Desk.abi');
-const contractAbiShelf = require('./abi/Shelf.abi');
-const contractAbiAppraiser = require('./abi/Appraiser.abi');
-const contractAbiLender = require('./abi/MakerAdapter.abi');
-const contractAbiPile = require('./abi/Pile.abi');
+import contractAbiNft from './abi/test/SimpleNFT.abi.json';
+import contractAbiTitle from './abi/Title.abi.json';
+import contractAbiCurrency from './abi/test/SimpleToken.abi.json';
+import contractAbiAdmit from './abi/Admit.abi.json';
+import contractAbiReception from './abi/Reception.abi.json';
+import contractAbiDesk from './abi/Desk.abi.json';
+import contractAbiShelf from './abi/Shelf.abi.json';
+import contractAbiAppraiser from './abi/Appraiser.abi.json';
+import contractAbiLender from './abi/MakerAdapter.abi.json';
+import contractAbiPile from './abi/Pile.abi.json';
 // tslint:enable:import-name
 
 interface ContractAbis {
-  'nft': string;
-  'title': string;
-  'currency': string;
-  'admit': string;
-  'reception': string;
-  'desk': string;
-  'shelf': string;
-  'appraiser': string;
-  'lender': string;
-  'pile': string;
+  'nft': any;
+  'title': any;
+  'currency': any;
+  'admit': any;
+  'reception': any;
+  'desk': any;
+  'shelf': any;
+  'appraiser': any;
+  'lender': any;
+  'pile': any;
 }
 
 interface ContractAddresses {
