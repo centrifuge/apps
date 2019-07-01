@@ -4,6 +4,8 @@ import Tinlake from 'tinlake';
 import { LoansState, getLoan } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
+import { Box, FormField, TextInput, Heading } from 'grommet';
+import styled from 'styled-components';
 
 interface Props {
   loanId: string;
@@ -21,7 +23,7 @@ class LoanDetail extends React.Component<Props> {
     const { loans, loanId } = this.props;
     const { singleLoan, singleLoanState } = loans!;
 
-    if (singleLoanState === null || singleLoanState === 'loading') { return 'loading'; }
+    if (singleLoanState === null || singleLoanState === 'loading') { return 'Loading...'; }
     if (singleLoanState === 'not found') {
       return <Alert type="error">
         Could not find loan {loanId}</Alert>;
@@ -29,21 +31,56 @@ class LoanDetail extends React.Component<Props> {
 
     const { status, principal, price, debt, tokenId, registry } = singleLoan!;
 
-    return <div>
-      <div>Loan ID {loanId}</div>
-      <div>Loan Status {status}</div>
-      <div>Appraisal Amount</div>
-      <div>Principal Amount {principal.toString()}</div>
-      <div>Debt {debt.toString()}</div>
-      <div>Interest Rate {price.toString()}</div>
-      <div>NFT ID {tokenId.toString()}</div>
-      <div>NFT Owner {registry.toString()}</div>
-      <div>Mortgage ID TBD</div>
-      <div>Mortgage Amount TBD</div>
-      <div>Currency TBD</div>
-      <div>Maturity Date TBD</div>
-    </div>;
+    return <Box>
+      <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
+        <Box basis={'1/4'} gap="medium"><FormField label="Loan ID">
+          <TextInput value={loanId} disabled /></FormField></Box>
+        <Box basis={'1/4'} gap="medium"><FormField label="Loan Status">
+          <TextInput value={status} disabled /></FormField></Box>
+      </Box>
+
+      <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
+        <Box basis={'1/4'} gap="medium"><FormField label="Appraisal Amount">
+          <TextInput value={'TBD'} disabled /></FormField></Box>
+        <Box basis={'1/4'} gap="medium"><FormField label="Principal Amount">
+          <TextInput value={principal.toString()} disabled /></FormField></Box>
+        <Box basis={'1/4'} gap="medium"><FormField label="Debt">
+          <TextInput value={debt.toString()} disabled /></FormField></Box>
+        <Box basis={'1/4'} gap="medium"><FormField label="Interest Rate">
+          <TextInput value={price.toString()} disabled /></FormField></Box>
+      </Box>
+
+      <NftDataContainer>
+        <Heading level="6" margin="none">NFT Data</Heading>
+        <Box direction="row" gap="medium" margin={{ bottom: 'large', top: 'medium' }}>
+          <Box basis={'1/4'} gap="medium"><FormField label="NFT ID">
+            <TextInput value={tokenId.toString()} disabled /></FormField></Box>
+          <Box basis={'1/4'} gap="medium"><FormField label="NFT Owner">
+            <TextInput value={registry.toString()} disabled /></FormField></Box>
+        </Box>
+
+        <p>The following metadata was read from the NFT:</p>
+        <Box direction="row" gap="medium" margin={{ bottom: 'none', top: 'small' }}>
+          <Box basis={'1/4'} gap="medium"><FormField label="Mortgage ID">
+            <TextInput value={'TBD'} disabled /></FormField></Box>
+          <Box basis={'1/4'} gap="medium"><FormField label="Mortgage Amount">
+            <TextInput value={'TBD'} disabled /></FormField></Box>
+          <Box basis={'1/4'} gap="medium"><FormField label="Currency">
+            <TextInput value={'TBD'} disabled /></FormField></Box>
+          <Box basis={'1/4'} gap="medium"><FormField label="Maturity Date">
+            <TextInput value={'TBD'} disabled /></FormField></Box>
+        </Box>
+      </NftDataContainer>
+    </Box>;
   }
 }
 
 export default connect(state => state, { getLoan })(LoanDetail);
+
+// tslint:disable-next-line:variable-name
+const NftDataContainer = styled(Box)`
+  margin: 56px -20px -20px -20px;
+  padding: 20px;
+  border-radius: 3px;
+  background: #f7f7f7;
+`;

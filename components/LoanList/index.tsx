@@ -19,8 +19,14 @@ class LoanList extends React.Component<Props> {
   }
 
   render() {
+    const { loans } = this.props;
+
+    if (loans!.loansState === 'loading') {
+      return 'Loading...';
+    }
+
     return <Box>
-      <DataTable data={this.props.loans!.loans} columns={[
+      <DataTable data={loans!.loans} columns={[
         { header: 'Loan ID', property: 'loanId', align: 'end' },
         { header: 'NFT ID', property: 'tokenId', align: 'end',
           render: (l: InternalLoan) => l.tokenId.toString() },
