@@ -33,7 +33,7 @@ describe('functional tinlake tests', () => {
     );
   });
 
-  describe('tinlake call functionality', function () {
+  describe.only('tinlake call functionality', function () {
     this.timeout(50000);
 
     it('count number of loans', async () => {

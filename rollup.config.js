@@ -1,5 +1,7 @@
-import typescript from 'rollup-plugin-typescript2'
 import json from 'rollup-plugin-json';
+import resolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
+import typescript from 'rollup-plugin-typescript2'
 
 import pkg from './package.json'
 
@@ -16,14 +18,16 @@ export default {
     },
   ],
   external: [
-    ...Object.keys(pkg.dependencies || {}),
+  //   ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.peerDependencies || {}),
   ],
   plugins: [
+    resolve(),
+    commonjs(),
     json({
       // All JSON files will be parsed by default,
       // but you can also specifically include/exclude files
-      include: ['src/**/*.json', 'src/**/*.abi'],
+      // include: ['src/**/*.json', 'src/**/*.abi'],
       // include: 'node_modules/**',
       // exclude: [ 'node_modules/foo/**', 'node_modules/bar/**' ],
 

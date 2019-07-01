@@ -1,10 +1,8 @@
 // tslint:disable-next-line:import-name
 import Eth from 'ethjs';
-// tslint:disable-next-line:import-name
-import Abi from 'web3-eth-abi';
-const abiCoder = new Abi.AbiCoder();
-// tslint:disable-next-line:import-name
-import utils from 'web3-utils';
+import { AbiCoder } from 'web3-eth-abi';
+const abiCoder = new AbiCoder();
+import { sha3 } from 'web3-utils';
 // tslint:disable-next-line:import-name
 import BN from 'bn.js';
 
@@ -290,7 +288,7 @@ const findEvent = (abi: { filter: (arg0: (item: any) => boolean | undefined) => 
     if (item.type !== 'event') return false;
     const signature =
       `${item.name}(${item.inputs.map((input: { type: any; }) => input.type).join(',')})`;
-    const hash = utils.sha3(signature);
+    const hash = sha3(signature);
     if (hash === funcSignature) return true;
   });
 };
