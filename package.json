@@ -19,8 +19,8 @@
   },
   "homepage": "https://github.com/centrifuge/tinlake-ui#readme",
   "dependencies": {
-    "@centrifuge/axis-number-input": "^0.2.4-develop.2",
-    "@centrifuge/axis-theme": "^0.2.3-develop.2",
+    "@centrifuge/axis-number-input": "^0.3.0",
+    "@centrifuge/axis-theme": "^0.3.0",
     "chai": "^4.2.0",
     "grommet": "^2.7.1",
     "next": "^8.1.0",
