@@ -4,10 +4,12 @@ import { Box } from 'grommet';
 interface Props {
   type: 'error' | 'success';
   children: React.ReactNode;
+  [key: string]: any;
 }
 
-function Alert({ type, children }: Props) {
-  return <AlertContainer type={type}>{children}</AlertContainer>;
+function Alert({ type, children, ...rest }: Props) {
+  console.log({ rest });
+  return <AlertContainer type={type} {...rest}>{children}</AlertContainer>;
 }
 
 const colors = {

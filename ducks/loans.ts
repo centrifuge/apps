@@ -43,7 +43,7 @@ export default function reducer(state: LoansState = initialState,
   switch (action.type) {
     case LOAD: return { ...state, loansState: 'loading' };
     case RECEIVE: return { ...state, loansState: 'found', loans: action.loans };
-    case LOAD_SINGLE: return { ...state, singleLoanState: 'loading' };
+    case LOAD_SINGLE: return { ...state, singleLoanState: 'loading', singleLoan: null };
     case LOAD_SINGLE_NOT_FOUND: return { ...state, singleLoanState: 'not found' };
     case RECEIVE_SINGLE: return { ...state, singleLoanState: 'found', singleLoan: action.loan };
     default: return state;

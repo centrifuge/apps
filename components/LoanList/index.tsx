@@ -33,10 +33,10 @@ class LoanList extends React.Component<Props> {
     return <Box>
       <DataTable data={filteredLoans} columns={[
         { header: 'Loan ID', property: 'loanId', align: 'end' },
-        { header: 'NFT ID', property: 'tokenId', align: 'end',
-          render: (l: InternalLoan) => formatAddress(l.tokenId.toString()) },
-        { header: 'NFT Owner', property: 'owner', align: 'end',
-          render: (l: InternalLoan) => formatAddress(l.owner) },
+        { header: 'NFT ID', property: 'tokenId', align: 'end', render: (l: InternalLoan) =>
+          <span title={l.tokenId.toString()}>{formatAddress(l.tokenId.toString())}</span> },
+        { header: 'NFT Owner', property: 'owner', align: 'end', render: (l: InternalLoan) =>
+          <span title={l.owner}>{formatAddress(l.owner)}</span> },
         { header: 'NFT Status', property: 'status' },
         { header: 'Principal', property: 'principal', align: 'end',
           render: (l: InternalLoan) => l.principal.toString() },
@@ -46,7 +46,7 @@ class LoanList extends React.Component<Props> {
           render: (l: InternalLoan) => l.debt.toString() },
         { header: 'Maturity Date', property: '', align: 'end', render: () => '-' },
         { header: 'Actions', property: 'id', align: 'end', render: (l: InternalLoan) =>
-          <Link href={`/admin/loan?loanId=${l.loanId}`}><a>View</a></Link> },
+          <Link href={`/${mode}/loan?loanId=${l.loanId}`}><a>View</a></Link> },
       ]} />
     </Box>;
   }
