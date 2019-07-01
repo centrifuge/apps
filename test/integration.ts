@@ -44,16 +44,16 @@ describe('functional tinlake tests', () => {
 
     it('get a loan', async () => {
       const res = await tinlake.getLoan(20);
-      assert(res.price instanceof BN);
-      assert(res.principal instanceof BN);
+      assert(BN.isBN(res.price));
+      assert(BN.isBN(res.principal));
       assert(typeof res.registry === 'string');
-      assert(res.tokenId instanceof BN);
+      assert(BN.isBN(res.tokenId));
     });
 
     it('get balance and debt from pile for a loan', async () => {
       const res = await tinlake.getBalanceDebt(20);
-      assert(res.balance instanceof BN);
-      assert(res.debt instanceof BN);
+      assert(BN.isBN(res.balance));
+      assert(BN.isBN(res.debt));
     });
   });
 
