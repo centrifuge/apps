@@ -1,5 +1,5 @@
 const path = require('path');
-var DeclarationBundlerPlugin = require('declaration-bundler-webpack-plugin');
+// var DeclarationBundlerPlugin = require('declaration-bundler-webpack-plugin');
 
 module.exports = {
   mode: 'production',
@@ -24,16 +24,16 @@ module.exports = {
       { test: /\.ts$/, loader: "ts-loader" },
     ]
   },
-//   plugins: [
-//     new DeclarationBundlerPlugin({
-//         moduleName:'some.path.moduleName',
-//         out:'./builds/bundle.d.ts',
-//     }),
+  plugins: [
+    // new DeclarationBundlerPlugin({
+    //     moduleName: 'tinlake',
+    //     out: './dist/Tinlake.d.ts',
+    // }),
 
-// new UglifyJsPlugin({
-//   cache: true,
-//   parallel: true,
-//   sourceMap: true,
-// }),
-//   ]
+    // new UglifyJsPlugin({
+    //   cache: true,
+    //   parallel: true,
+    //   sourceMap: true,
+    // }),
+  ]
 };
