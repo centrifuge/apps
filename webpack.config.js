@@ -11,12 +11,16 @@ module.exports = {
   },
   output: {
     filename: 'Tinlake.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist'),
+    library: 'tinlake',
+    libraryTarget: 'umd',
+    // The following is a workaround, see https://github.com/markdalgleish/static-site-generator-webpack-plugin/issues/130
+    globalObject: 'this',
   },
   module: {
     rules: [
+      { test: /\.(json|abi)$/, loader: 'json-loader', type: 'javascript/auto' },
       // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
-      { test: /\.(json|abi)$/, loader: 'json-loader' },
       { test: /\.ts$/, loader: "ts-loader" },
     ]
   },

@@ -46,6 +46,7 @@ var defaultContractAddresses = require('./addresses_tinlake.json');
 var contractAbiNft = require('./abi/test/SimpleNFT.abi');
 var contractAbiTitle = require('./abi/Title.abi');
 var contractAbiCurrency = require('./abi/test/SimpleToken.abi');
+var contractAbiAdmitJson = require('./abi/Admit.abi.json');
 var contractAbiAdmit = require('./abi/Admit.abi');
 var contractAbiReception = require('./abi/Reception.abi');
 var contractAbiDesk = require('./abi/Desk.abi');
@@ -53,6 +54,9 @@ var contractAbiShelf = require('./abi/Shelf.abi');
 var contractAbiAppraiser = require('./abi/Appraiser.abi');
 var contractAbiLender = require('./abi/MakerAdapter.abi');
 var contractAbiPile = require('./abi/Pile.abi');
+// tslint:enable:import-name
+console.log({ contractAbiAdmit: contractAbiAdmit });
+console.log({ contractAbiAdmitJson: contractAbiAdmitJson });
 var Tinlake = /** @class */ (function () {
     function Tinlake(provider, _a) {
         var _this = this;

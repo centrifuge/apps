@@ -1,13 +1,26 @@
-import Tinlake from '../src/Tinlake';
 // tslint:disable-next-line:variable-name
 const SignerProvider = require('ethjs-provider-signer');
 const { sign } = require('ethjs-signer');
-const assert = require('assert');
+import assert from 'assert';
 const fs = require('fs');
-const path = require('path');
 const rpcUrl = process.env['ETH_RPC_URL'];
 // tslint:disable-next-line:import-name
 import BN from 'bn.js';
+
+declare global {
+  namespace NodeJS {
+    interface Global {
+      XMLHttpRequest: any;
+    }
+  }
+}
+
+// tslint:disable-next-line:variable-name
+const XMLHttpRequest = require('xhr2');
+global.XMLHttpRequest = XMLHttpRequest;
+
+// tslint:disable-next-line:variable-name
+const Tinlake = require('../dist/Tinlake').default;
 
 const SUCCESS_STATUS = '0x1';
 
@@ -28,7 +41,6 @@ describe('functional tinlake tests', () => {
         accounts: (cb: (arg0: null, arg1: string[]) => void) => cb(null, [ethFrom]),
       }),
       {
-        contractAbiPath: path.resolve(__dirname, '..', 'src', 'abi'),
         ethConfig: { from: ethFrom, gasLimit: `0x${gasLimit.toString(16)}` },
       },
     );
