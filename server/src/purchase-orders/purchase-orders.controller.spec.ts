@@ -6,6 +6,7 @@ import { PurchaseOrder } from '../../../src/common/models/purchase-order';
 import config from '../../../src/common/config';
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
+import {MockCentrifugeService} from "../centrifuge-client/centrifuge-client.mock";
 
 describe('PurchaseOrdersController', () => {
   let centrifugeId;
@@ -51,34 +52,27 @@ describe('PurchaseOrdersController', () => {
 
   const databaseServiceMock = new DatabaseServiceMock();
 
-  class CentrifugeClientMock {
-    purchaseOrders = {
-      create: jest.fn(data => data),
-      get: jest.fn((id, data) => data),
-      update: jest.fn((id, data) => data),
-    };
+  const mockCentrifugeService = new MockCentrifugeService()
+  const centrifugeServiceProvider = {
+    provide: CentrifugeService,
+    useValue: mockCentrifugeService
   }
-
-  const centrifugeClientMock = new CentrifugeClientMock();
 
   beforeEach(async () => {
     purchaseOrdersModule = await Test.createTestingModule({
       controllers: [PurchaseOrdersController],
       providers: [
         SessionGuard,
-        CentrifugeService,
+        centrifugeServiceProvider,
         databaseServiceProvider,
       ],
     })
       .overrideProvider(DatabaseService)
       .useValue(databaseServiceMock)
-      .overrideProvider(CentrifugeService)
-      .useValue(centrifugeClientMock)
       .compile();
 
     databaseServiceMock.purchaseOrders.insert.mockClear();
     databaseServiceMock.purchaseOrders.find.mockClear();
-    centrifugeClientMock.purchaseOrders.create.mockClear();
   });
 
   describe('create', () => {
@@ -91,7 +85,7 @@ describe('PurchaseOrdersController', () => {
       );
 
       expect(result).toEqual({
-        write_access: [...purchaseOrder.collaborators],
+        write_access: ['new_collaborator'],
         data: purchaseOrder,
         ownerId: 'user_id',
       });
@@ -130,7 +124,7 @@ describe('PurchaseOrdersController', () => {
         _id: 'id_to_update',
         ownerId: 'user_id',
       });
-      expect(centrifugeClientMock.purchaseOrders.update).toHaveBeenCalledWith(
+      expect(mockCentrifugeService.purchaseOrders.update).toHaveBeenCalledWith(
         'find_one_document_id',
         {
           data: {

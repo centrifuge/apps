@@ -20,6 +20,27 @@ export class MockCentrifugeService {
         },
       };
     }),
+    create: jest.fn(data => {
+      return {
+        header: {
+          job_id: 'some_job_id',
+        },
+        ...data,
+      };
+    }),
+    update: jest.fn((documentId, data) => {
+      return {
+        header: {
+          job_id: 'some_job_id',
+        },
+        ...data,
+      };
+    }),
+  };
+  purchaseOrders = {
+    create: jest.fn(data => data),
+    get: jest.fn((id, data) => data),
+    update: jest.fn((id, data) => data),
   };
   funding = {
     create: jest.fn((document_id, payload, account) => {
@@ -90,6 +111,35 @@ export class MockCentrifugeService {
         resolve(result);
       });
     }),
+  };
+  invoiceUnpaid = {
+    mintInvoiceUnpaidNFT: () => {
+      return new Promise((resolve, reject) => {
+        resolve({
+              header: {
+                job_id: 'some_job_id',
+              },
+            },
+        );
+      });
+    },
+  };
+  nft = {
+    transferNft: () => {
+      return new Promise((resolve, reject) => {
+        resolve({
+              header: {
+                job_id: 'some_job_id',
+              },
+            },
+        );
+      });
+    },
+  };
+  accounts = {
+    generateAccount: jest.fn(() => ({
+      identity_id: 'generated_identity_id',
+    })),
   }
   pullForJobComplete = () => true;
 }

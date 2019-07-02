@@ -7,33 +7,30 @@ import { SessionGuard } from '../auth/SessionGuard';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { DatabaseService } from '../database/database.service';
 import { PERMISSIONS } from '../../../src/common/constants';
+import {MockCentrifugeService} from "../centrifuge-client/centrifuge-client.mock";
 
 describe('Users controller', () => {
   const userAccount = 'generated_identity_id';
-  const centrifugeClientMock = ({
-    accounts: {
-      generateAccount: jest.fn(() => ({
-        identity_id: userAccount,
-      })),
-    },
-  } as any) as CentrifugeService;
 
   let invitedUser: User;
   let enabledUser: User;
   let userModule: TestingModule;
 
+  const mockCentrifugeService = new MockCentrifugeService()
+  const centrifugeServiceProvider = {
+    provide: CentrifugeService,
+    useValue: mockCentrifugeService
+  }
 
   beforeAll(async () => {
     userModule = await Test.createTestingModule({
       controllers: [UsersController],
       providers: [
         SessionGuard,
-        CentrifugeService,
+        centrifugeServiceProvider,
         databaseServiceProvider,
       ],
     })
-      .overrideProvider(CentrifugeService)
-      .useValue(centrifugeClientMock)
       .compile();
 
     const databaseService = userModule.get<DatabaseService>(DatabaseService);
@@ -268,11 +265,6 @@ describe('Users controller', () => {
     });
 
     describe('invite', () => {
-      const usersController = new UsersController(
-        ({} as any) as DatabaseService,
-        centrifugeClientMock,
-      );
-
       it('should throw error', async () => {
         await expect(
           usersController.invite({

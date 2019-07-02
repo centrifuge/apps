@@ -7,6 +7,7 @@ import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import config from '../../../src/common/config';
 import { Invoice } from '../../../src/common/models/invoice';
+import {MockCentrifugeService} from "../centrifuge-client/centrifuge-client.mock";
 
 describe('InvoicesController', () => {
   let centrifugeId;
@@ -31,45 +32,22 @@ describe('InvoicesController', () => {
     bill_to_company_name: 'step mother',
   };
   let insertedInvoice: any = {};
-
-
   const databaseSpies: any = {};
-
-  class CentrifugeClientMock {
-    invoices = {
-      create: jest.fn(data => {
-        return {
-          header: {
-            job_id: 'some_job_id',
-          },
-          ...data,
-        };
-      }),
-      update: jest.fn((documentId, data) => {
-        return {
-          header: {
-            job_id: 'some_job_id',
-          },
-          ...data,
-        };
-      }),
-    };
-
-    pullForJobComplete = () => true;
+  const mockCentrifugeService = new MockCentrifugeService()
+  const centrifugeServiceProvider = {
+    provide: CentrifugeService,
+    useValue: mockCentrifugeService
   }
 
-  const centrifugeClientMock = new CentrifugeClientMock();
   beforeEach(async () => {
     invoicesModule = await Test.createTestingModule({
       controllers: [InvoicesController],
       providers: [
         SessionGuard,
-        CentrifugeService,
+        centrifugeServiceProvider,
         databaseServiceProvider,
       ],
     })
-      .overrideProvider(CentrifugeService)
-      .useValue(centrifugeClientMock)
       .compile();
 
 
@@ -155,7 +133,7 @@ describe('InvoicesController', () => {
         _id: insertedInvoice._id,
         ownerId: 'user_id',
       });
-      expect(centrifugeClientMock.invoices.update).toHaveBeenCalledWith(
+      expect(mockCentrifugeService.invoices.update).toHaveBeenCalledWith(
         '0x39393939',
         {
           data: { ...updatedInvoice },

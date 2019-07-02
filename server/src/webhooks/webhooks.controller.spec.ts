@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { documentTypes, eventTypes, WebhooksController } from './webhooks.controller';
 import { databaseServiceProvider } from '../database/database.providers';
-import { InvInvoiceResponse, PoPurchaseOrderResponse } from '../../../clients/centrifuge-node';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { DatabaseService } from '../database/database.service';
 import { User } from '../../../src/common/models/user';
+import {MockCentrifugeService} from "../centrifuge-client/centrifuge-client.mock";
 
 describe('WebhooksController', () => {
   let webhooksModule: TestingModule;
@@ -23,25 +23,21 @@ describe('WebhooksController', () => {
     ownerId: user._id,
   };
 
-  const centrifugeClient = {
-    invoices: {
-      get: jest.fn((): InvInvoiceResponse => getResponse),
-
-    },
-    purchaseOrders: {
-      get: jest.fn((): PoPurchaseOrderResponse => getResponse),
-    },
-  };
+  const mockCentrifugeService = new MockCentrifugeService()
+  const centrifugeServiceProvider = {
+    provide: CentrifugeService,
+    useValue: mockCentrifugeService
+  }
 
   beforeEach(async () => {
     webhooksModule = await Test.createTestingModule({
       controllers: [WebhooksController],
-      providers: [databaseServiceProvider, CentrifugeService],
+      providers: [
+        databaseServiceProvider,
+        centrifugeServiceProvider,
+      ],
     })
-
-      .overrideProvider(CentrifugeService)
-      .useValue(centrifugeClient)
-      .compile();
+    .compile();
 
 
     const databaseService = webhooksModule.get<DatabaseService>(DatabaseService);
@@ -53,7 +49,7 @@ describe('WebhooksController', () => {
     invoiceSpies.spyUpdate = jest.spyOn(databaseService.invoices, 'update');
     poSpies.spyInsert = jest.spyOn(databaseService.purchaseOrders, 'insert');
     poSpies.spyUpdate = jest.spyOn(databaseService.purchaseOrders, 'update');
-    centrifugeClient.invoices.get.mockClear();
+    // mockCentrifugeService.invoices.get.mockClear();
   });
 
   describe('when it receives success invoice creation', function() {
@@ -70,23 +66,19 @@ describe('WebhooksController', () => {
       });
 
       expect(result).toEqual('OK');
-      expect(centrifugeClient.invoices.get).toHaveBeenCalledWith(
-        documentId,
-        user.account,
+      expect(mockCentrifugeService.invoices.get).toHaveBeenCalledWith(
+         documentId, user.account
       );
 
       expect(invoiceSpies.spyUpdate).toHaveBeenCalledWith(
-        {
-          'header.document_id': getResponse.header.document_id,
-          'ownerId': user._id,
-        },
-        getResponse,
+        {"header.document_id": "112233", "ownerId": "id01"},
+        {"data": {"currency": "USD"}, "header": {"document_id": "112233", "nfts": [{"owner": "owner", "token_id": "token_id"}]}, "ownerId": "id01"},
         { upsert: true },
       );
     });
   });
 
-  describe('when it receives success invoice creation', function() {
+  describe('when it receives successful invoice creation', function() {
     it('should fetch it from the node and persist it in the database', async function() {
       const webhooksController = webhooksModule.get<WebhooksController>(
         WebhooksController,
@@ -116,12 +108,12 @@ describe('WebhooksController', () => {
       });
 
       expect(result).toEqual('OK');
-      expect(centrifugeClient.purchaseOrders.get).toHaveBeenCalledWith(
+      expect(mockCentrifugeService.purchaseOrders.get).toHaveBeenCalledWith(
         documentId,
         user.account,
       );
       expect(poSpies.spyInsert).toHaveBeenCalledWith(
-        getResponse,
+        user.account
       );
     });
   });
@@ -134,7 +126,7 @@ describe('WebhooksController', () => {
 
       const result = await webhooksController.receiveMessage({});
       expect(result).toBe('OK');
-      expect(centrifugeClient.invoices.get).not.toHaveBeenCalled();
+      expect(invoiceSpies.spyInsert).not.toHaveBeenCalled();
       expect(poSpies.spyInsert).not.toHaveBeenCalled();
     });
   });
