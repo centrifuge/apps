@@ -37,12 +37,12 @@ class WhitelistNFT extends React.Component<Props, State> {
 
     try {
       // admit
-      const owner = await tinlake.ownerOfNFT(tokenId);
+      const nftOwner = await tinlake.ownerOfNFT(tokenId);
 
-      console.log(`owner of tokenId ${tokenId} is ${owner}`);
+      console.log(`NFT owner of tokenId ${tokenId} is ${nftOwner}`);
 
       const res2 = await tinlake.adminAdmit(addresses['NFT_COLLATERAL'], tokenId, principal,
-                                            owner);
+                                            nftOwner);
 
       console.log('admit result');
       console.log(res2.txHash);

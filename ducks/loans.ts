@@ -4,6 +4,7 @@ import Tinlake, { Loan, BalanceDebt, Address } from 'tinlake';
 import BN from 'bn.js';
 import getLoanStatus from '../utils/getLoanStatus';
 import { ThunkAction } from 'redux-thunk';
+import { bnToHex } from '../utils/bnToHex';
 
 // Config
 const startingLoanId = 42;
@@ -20,7 +21,8 @@ export interface InternalLoan extends Loan {
   balance: BN;
   debt: BN;
   status: string;
-  owner: Address;
+  nftOwner: Address;
+  loanOwner: Address;
 }
 
 export interface LoansState {
@@ -70,25 +72,36 @@ export function getLoans(tinlake: Tinlake):
     const loans = await Promise.all(loanPromises);
     const balanceDebtData = await Promise.all(balanceDebtPromises);
 
-    const ownerPromises: Promise<Address>[] = [];
+    const nftOwnerPromises: Promise<Address>[] = [];
+    const loanOwnerPromises: Promise<Address>[] = [];
     for (let i = 0; i < count.toNumber() - startingLoanId; i += 1) {
-      ownerPromises.push(tinlake.ownerOfLoan(`${i}`));
+      nftOwnerPromises.push(tinlake.ownerOfNFT(bnToHex(loans[i].tokenId)));
+      loanOwnerPromises.push(tinlake.ownerOfLoan(`${i}`));
     }
-    const owners: Address[] = [];
+    const nftOwners: Address[] = [];
+    const loanOwners: Address[] = [];
     for (let i = 0; i < count.toNumber() - startingLoanId; i += 1) {
       try {
-        owners[i] = await ownerPromises[i];
+        nftOwners[i] = await nftOwnerPromises[i];
       } catch (e) {
-        console.warn(`Could not get owner for Loan ID ${i + startingLoanId}, ` +
-          `NFT ID ${loans[i].tokenId.toString()}`);
-        owners[i] = '';
+        console.warn(`Could not get NFT owner for Loan ID ${i + startingLoanId}, ` +
+          `NFT ID ${bnToHex(loans[i].tokenId)}`);
+        nftOwners[i] = '';
+      }
+      try {
+        loanOwners[i] = await loanOwnerPromises[i];
+      } catch (e) {
+        console.warn(`Could not get loan owner for Loan ID ${i + startingLoanId}, ` +
+          `NFT ID ${bnToHex(loans[i].tokenId)}`);
+        loanOwners[i] = '';
       }
     }
 
-    const extendedLoansData = loans.map((loan, i) => {
+    const extendedLoansData: InternalLoan[] = loans.map((loan, i) => {
       return ({
         loanId: i + startingLoanId,
-        owner: owners[i],
+        loanOwner: loanOwners[i],
+        nftOwner: nftOwners[i],
         principal: loan.principal,
         price: loan.price,
         registry: loan.registry,
@@ -119,17 +132,30 @@ export function getLoan(tinlake: Tinlake, loanId: number):
       tinlake.getBalanceDebt(loanId),
     ]);
 
-    let owner: Address;
+    const nftOwnerPromise = tinlake.ownerOfNFT(bnToHex(loan.tokenId));
+    const loanOwnerPromise = tinlake.ownerOfLoan(`${loanId}`);
+
+    let nftOwner: Address;
+    let loanOwner: Address;
     try {
-      owner = await tinlake.ownerOfLoan(`${loanId}`);
+      nftOwner = await nftOwnerPromise;
     } catch (e) {
-      console.warn(`Could not get owner for Loan ID ${loanId}, NFT ID ${loan.tokenId.toString()}`);
-      owner = '';
+      console.warn(`Could not get NFT owner for Loan ID ${loanId}, ` +
+        `NFT ID ${loan.tokenId.toString()}`);
+      nftOwner = '';
+    }
+    try {
+      loanOwner = await loanOwnerPromise;
+    } catch (e) {
+      console.warn(`Could not get loan owner for Loan ID ${loanId}, ` +
+        `NFT ID ${loan.tokenId.toString()}`);
+      loanOwner = '';
     }
 
-    const extendedLoanData = {
+    const extendedLoanData: InternalLoan = {
       loanId,
-      owner,
+      nftOwner,
+      loanOwner,
       principal: loan.principal,
       price: loan.price,
       registry: loan.registry,

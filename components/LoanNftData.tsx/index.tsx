@@ -10,7 +10,7 @@ interface Props {
 
 class LoanNftData extends React.Component<Props> {
   render() {
-    const { loan: { tokenId, owner } } = this.props;
+    const { loan: { tokenId, nftOwner } } = this.props;
 
     return <NftDataContainer>
       <Heading level="6" margin="none">NFT Data</Heading>
@@ -19,7 +19,7 @@ class LoanNftData extends React.Component<Props> {
           <TextInput value={formatAddress(tokenId.toString())} disabled
             title={tokenId.toString()}/></FormField></Box>
         <Box basis={'1/4'} gap="medium"><FormField label="NFT Owner">
-          <TextInput value={formatAddress(owner)} disabled title={owner} /></FormField></Box>
+          <TextInput value={formatAddress(nftOwner)} disabled title={nftOwner} /></FormField></Box>
       </Box>
 
       <p>The following metadata was read from the NFT:</p>

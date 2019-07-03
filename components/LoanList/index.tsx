@@ -21,13 +21,13 @@ class LoanList extends React.Component<Props> {
   }
 
   render() {
-    const { loans, mode, tinlake: { ethConfig: { from } } } = this.props;
+    const { loans, mode, tinlake: { ethConfig: { from: ethFrom } } } = this.props;
 
     if (loans!.loansState === 'loading') {
       return 'Loading...';
     }
 
-    const filteredLoans = mode === 'borrower' ? loans!.loans.filter(l => l.owner === from) :
+    const filteredLoans = mode === 'borrower' ? loans!.loans.filter(l => l.loanOwner === ethFrom) :
       loans!.loans;
 
     return <Box>
@@ -35,8 +35,8 @@ class LoanList extends React.Component<Props> {
         { header: 'Loan ID', property: 'loanId', align: 'end' },
         { header: 'NFT ID', property: 'tokenId', align: 'end', render: (l: InternalLoan) =>
           <span title={l.tokenId.toString()}>{formatAddress(l.tokenId.toString())}</span> },
-        { header: 'NFT Owner', property: 'owner', align: 'end', render: (l: InternalLoan) =>
-          <span title={l.owner}>{formatAddress(l.owner)}</span> },
+        { header: 'NFT Owner', property: 'nftOwner', align: 'end', render: (l: InternalLoan) =>
+          <span title={l.nftOwner}>{formatAddress(l.nftOwner)}</span> },
         { header: 'NFT Status', property: 'status' },
         { header: 'Principal', property: 'principal', align: 'end',
           render: (l: InternalLoan) => l.principal.toString() },

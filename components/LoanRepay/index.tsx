@@ -94,12 +94,12 @@ class LoanRepay extends React.Component<Props, State> {
         Could not find loan {loanId}</Alert>;
     }
 
-    const { status, price, owner } = singleLoan!;
+    const { status, price, loanOwner } = singleLoan!;
     const { repayAmount, is, errorMsg } = this.state;
     const totalAmount = price.add(new BN(repayAmount));
 
     return <Box>
-      {status === 'Ongoing' && owner === tinlake.ethConfig.from &&
+      {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
         <Button primary onClick={this.repay}>Confirm</Button>}
 
       {is === 'loading' && 'Repaying...'}

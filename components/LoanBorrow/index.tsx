@@ -95,11 +95,11 @@ class LoanBorrow extends React.Component<Props, State> {
         Could not find loan {loanId}</Alert>;
     }
 
-    const { status, principal, price, owner } = singleLoan!;
+    const { status, principal, price, loanOwner } = singleLoan!;
     const { borrowAmount, is, errorMsg } = this.state;
 
     return <Box>
-      {status === 'Whitelisted' && owner === tinlake.ethConfig.from &&
+      {status === 'Whitelisted' && loanOwner === tinlake.ethConfig.from &&
         <Button primary onClick={this.borrow}>Confirm</Button>}
 
       {is === 'loading' && 'Borrowing...'}

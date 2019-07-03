@@ -30,12 +30,12 @@ class LoanDetail extends React.Component<Props> {
         Could not find loan {loanId}</Alert>;
     }
 
-    const { status, principal, price, debt, owner } = singleLoan!;
+    const { status, principal, price, debt, loanOwner } = singleLoan!;
 
     return <Box>
-      {status === 'Whitelisted' && owner === tinlake.ethConfig.from &&
+      {status === 'Whitelisted' && loanOwner === tinlake.ethConfig.from &&
         <Link href={`/borrower/borrow?loanId=${loanId}`}><Button primary>Borrow</Button></Link>}
-      {status === 'Ongoing' && owner === tinlake.ethConfig.from &&
+      {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
         <Link href={`/borrower/repay?loanId=${loanId}`}><Button primary>Repay</Button></Link>}
 
       <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
