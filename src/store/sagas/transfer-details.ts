@@ -8,9 +8,8 @@ import { createTransferDetailsAction, updateTransferDetailsAction } from '../act
 export function* createTransferDetails(action) {
   try {
     const { payload } = action;
-    yield timeout(1000);
     const response = yield call(httpClient.transferDetails.create, payload);
-    //reload the invoice in order to display the created funding agreement
+    //reload the invoice
     yield put(getInvoiceById(payload.invoice_id));
     yield put({
       type: createTransferDetailsAction.success,
@@ -30,10 +29,8 @@ export function* createTransferDetails(action) {
 export function* updateTransferDetails(action) {
   try {
     const { payload } = action;
-
-    yield timeout(1000);
     const response = yield call(httpClient.transferDetails.update, payload);
-    //reload the invoice in order to display the created funding agreement
+    //reload the invoice
     yield put(getInvoiceById(payload.invoice_id));
     yield put({
       type: updateTransferDetailsAction.success,
@@ -56,8 +53,3 @@ export default {
   watchCreateTransferDetails: () => takeEvery(createTransferDetailsAction.start, createTransferDetails),
   watchUpdateTransferDetails: () => takeEvery(updateTransferDetailsAction.start, updateTransferDetails),
 };
-
-
-function timeout(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}

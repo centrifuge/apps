@@ -1,6 +1,6 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
 import { httpClient } from '../../http-client';
-import { createFundingAction, signFundingAction } from '../actions/funding';
+import { createFundingAction, settleFundingAction, signFundingAction } from '../actions/funding';
 import { getInvoiceById } from '../actions/invoices';
 import { alertError } from '../actions/notifications';
 
@@ -49,7 +49,32 @@ export function* signFunding(action) {
 }
 
 
+export function* settleFunding(action) {
+  try {
+    const { payload } = action;
+    yield call(httpClient.transferDetails.update, payload);
+    const response = yield call(httpClient.funding.settle, payload);
+
+    yield put(getInvoiceById(payload.invoice_id));
+    yield put({
+      type: settleFundingAction.success,
+      payload: response.data,
+    });
+
+  } catch (e) {
+    yield put({ type: settleFundingAction.fail, payload: e });
+    yield put(alertError(
+      'Failed to settle funding agreement',
+      e.message,
+      { onConfirmAction: { type: settleFundingAction.clearError } },
+    ));
+
+  }
+}
+
+
 export default {
   watchCreateFunding: () => takeEvery(createFundingAction.start, createFunding),
   watchSignFunding: () => takeEvery(signFundingAction.start, signFunding),
+  watchSettleFunding: () => takeEvery(settleFundingAction.start, settleFunding),
 };

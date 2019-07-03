@@ -4,6 +4,7 @@ import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { FundingRequest } from '../../../src/common/models/funding-request';
 import {
+  CoreapiTransferNFTResponse,
   FunFundingCreatePayload,
   FunFundingResponse,
   FunRequest,
@@ -62,7 +63,7 @@ export class FundingController {
           nft.owner,
           registry,
           tokenId,
-          {to:newOwner},
+          { to: newOwner },
           nft.owner,
         );
 
@@ -73,6 +74,40 @@ export class FundingController {
     }
 
     return signatureResponse;
+  }
+
+  @Post(ROUTES.FUNDING.settle)
+  async settle(@Body() payload: FunRequest, @Request() req): Promise<CoreapiTransferNFTResponse | null> {
+    // We only transfer the nft but we could more stuff here,
+    // for ex we can sign the funding agreement again if necesary
+    const fundingAgreement = await this.centrifugeService.funding.get(payload.document_id, payload.agreement_id, req.user.account);
+    const nfts = fundingAgreement.header.nfts;
+    const nft = nfts.find(item => {
+      return item.token_id === fundingAgreement.data.funding.nft_address;
+    });
+
+    if (nft === undefined) {
+      throw new HttpException(await 'NFT not attached to Invoice, NFT not found', HttpStatus.CONFLICT);
+    }
+
+    const registry = nft.registry;
+    const tokenId = nft.token_id;
+    const newOwner = fundingAgreement.data.funding.borrower_id;
+
+    if (nft.owner.toLowerCase() === fundingAgreement.data.funding.funder_id.toLowerCase()) {
+      const transferResponse = await this.centrifugeService.nft.transferNft(
+        nft.owner,
+        registry,
+        tokenId,
+        { to: newOwner },
+        nft.owner,
+      );
+
+      await this.centrifugeService.pullForJobComplete(transferResponse.header.job_id, nft.owner);
+      return transferResponse;
+    } else {
+      throw new HttpException(await 'token owner does not correspond to the Funder', HttpStatus.FORBIDDEN);
+    }
   }
 
   @Post(ROUTES.FUNDING.base)

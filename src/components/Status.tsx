@@ -1,16 +1,16 @@
 import React from 'react';
 import { Text } from 'grommet';
-import { STATUS } from '../common/status';
+import { FUNDING_STATUS } from '../common/status';
 
 export const Status = (props => {
   const { value } = props;
   let color = '';
   switch (value) {
-    case STATUS.REPAID:
+    case FUNDING_STATUS.REPAID:
       color = 'status-ok';
       break;
-    case STATUS.REPAYING_FUNDING:
-    case STATUS.SENDING_FUNDING:
+    case FUNDING_STATUS.REPAYING_FUNDING:
+    case FUNDING_STATUS.SENDING_FUNDING:
       color = 'status-warning'
   }
 

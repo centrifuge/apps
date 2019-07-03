@@ -21,6 +21,7 @@ export default function* () {
     fork(contacts.watchUpdateContact),
     fork(funding.watchCreateFunding),
     fork(funding.watchSignFunding),
+    fork(funding.watchSettleFunding),
     fork(transferDetails.watchCreateTransferDetails),
     fork(transferDetails.watchUpdateTransferDetails),
     fork(notifications.watchCloseAlert),

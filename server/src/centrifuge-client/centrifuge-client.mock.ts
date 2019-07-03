@@ -54,6 +54,28 @@ export class MockCentrifugeService {
         resolve(result);
       });
     }),
+
+    get: jest.fn((document_id, agreement_id, account) => {
+      return {
+        header: {
+          nfts: [
+            {
+              token_id: '0xNFT',
+              owner: '0x1111',
+              registry: '0xADDRESS',
+            },
+          ],
+        },
+        data: {
+          funding: {
+            nft_address: '0xNFT',
+            funder_id: '0x1111',
+            borrower_id: '0x2222',
+          },
+        },
+      };
+
+    }),
     sign: jest.fn((document_id, agreement_id, payload, account) => {
       return new Promise((resolve, reject) => {
         const result = {
@@ -116,22 +138,25 @@ export class MockCentrifugeService {
     mintInvoiceUnpaidNFT: () => {
       return new Promise((resolve, reject) => {
         resolve({
-              header: {
-                job_id: 'some_job_id',
-              },
+            header: {
+              job_id: 'some_job_id',
             },
+          },
         );
       });
     },
   };
   nft = {
-    transferNft: () => {
+    transferNft: (account, registry_address, token_id, body) => {
       return new Promise((resolve, reject) => {
         resolve({
-              header: {
-                job_id: 'some_job_id',
-              },
+            header: {
+              job_id: 'some_job_id',
             },
+            registry_address,
+            token_id,
+            to: body.to,
+          },
         );
       });
     },
@@ -140,6 +165,6 @@ export class MockCentrifugeService {
     generateAccount: jest.fn(() => ({
       identity_id: 'generated_identity_id',
     })),
-  }
+  };
   pullForJobComplete = () => true;
 }

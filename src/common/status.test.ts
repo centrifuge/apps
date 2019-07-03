@@ -1,18 +1,18 @@
-import { getInvoiceFundingStatus, STATUS } from './status';
+import { getInvoiceFundingStatus, FUNDING_STATUS } from './status';
 
 
 describe('Funding Status', () => {
 
   it('Should return NO_STATUS', function() {
     const invoice = {};
-    expect(getInvoiceFundingStatus(invoice)).toBe(STATUS.NO_STATUS);
+    expect(getInvoiceFundingStatus(invoice)).toBe(FUNDING_STATUS.NO_STATUS);
   });
 
   it('Should return PENDING', function() {
     const invoice = {
       fundingAgreement: {},
     };
-    expect(getInvoiceFundingStatus(invoice)).toBe(STATUS.PENDING);
+    expect(getInvoiceFundingStatus(invoice)).toBe(FUNDING_STATUS.PENDING);
   });
 
   it('Should return ACCEPTED', function() {
@@ -21,7 +21,7 @@ describe('Funding Status', () => {
         signatures: [{}],
       },
     };
-    expect(getInvoiceFundingStatus(invoice)).toBe(STATUS.ACCEPTED);
+    expect(getInvoiceFundingStatus(invoice)).toBe(FUNDING_STATUS.ACCEPTED);
   });
 
   it('Should return SENDING_FUNDING', function() {
@@ -33,7 +33,7 @@ describe('Funding Status', () => {
         { status: 'opened' }
       ],
     };
-    expect(getInvoiceFundingStatus(invoice)).toBe(STATUS.SENDING_FUNDING);
+    expect(getInvoiceFundingStatus(invoice)).toBe(FUNDING_STATUS.SENDING_FUNDING);
   });
 
   it('Should return FUNDED', function() {
@@ -45,7 +45,7 @@ describe('Funding Status', () => {
         { status: 'settled' }
       ],
     };
-    expect(getInvoiceFundingStatus(invoice)).toBe(STATUS.FUNDED);
+    expect(getInvoiceFundingStatus(invoice)).toBe(FUNDING_STATUS.FUNDED);
   });
 
 
@@ -59,7 +59,7 @@ describe('Funding Status', () => {
         { status: 'opened' },
       ],
     };
-    expect(getInvoiceFundingStatus(invoice)).toBe(STATUS.REPAYING_FUNDING);
+    expect(getInvoiceFundingStatus(invoice)).toBe(FUNDING_STATUS.REPAYING_FUNDING);
   });
 
   it('Should return REPAID', function() {
@@ -72,7 +72,7 @@ describe('Funding Status', () => {
         { status: 'settled' },
       ],
     };
-    expect(getInvoiceFundingStatus(invoice)).toBe(STATUS.REPAID);
+    expect(getInvoiceFundingStatus(invoice)).toBe(FUNDING_STATUS.REPAID);
   });
 
   it('Should return UNKNOWN', function() {
@@ -85,7 +85,7 @@ describe('Funding Status', () => {
         { status: 'UNKNOWN' },
       ],
     };
-    expect(getInvoiceFundingStatus(invoice)).toBe(STATUS.UNKNOWN);
+    expect(getInvoiceFundingStatus(invoice)).toBe(FUNDING_STATUS.UNKNOWN);
   });
 
 });

@@ -20,7 +20,7 @@ import { RequestState } from '../store/reducers/http-request-reducer';
 import { Preloader } from '../components/Preloader';
 import { createTransferDetails, updateTransferDetails } from '../store/actions/transfer-details';
 import TransferDetailsForm from './TransferDetailsForm';
-import { getInvoiceFundingStatus, STATUS } from '../common/status';
+import { getInvoiceFundingStatus, FUNDING_STATUS, TRANSFER_DETAILS_STATUS } from '../common/status';
 import { TransferDetailsRequest } from '../common/models/transfer-details';
 import { SecondaryHeader } from '../components/SecondaryHeader';
 
@@ -92,7 +92,7 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
       ...invoice!.transferDetails![0],
       document_id: invoice!.header!.document_id,
       invoice_id: invoice!._id,
-      status: 'settled',
+      status: TRANSFER_DETAILS_STATUS.SETTLED,
       settlement_date: dateToString(new Date()),
     };
 
@@ -151,7 +151,7 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
       recipient_id: invoice!.data!.sender,
       amount: 0,
       transfer_type: 'crypto',
-      status: 'opened',
+      status: TRANSFER_DETAILS_STATUS.OPENED,
     } : {};
 
     //@ts-ignore
@@ -174,8 +174,8 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
       && data.date_due;
 
 
-    const canSettleFunding = fundingStatus === STATUS.SENDING_FUNDING;
-    const canRecordPayment = fundingStatus === STATUS.FUNDED;
+    const canSettleFunding = fundingStatus === FUNDING_STATUS.SENDING_FUNDING;
+    const canRecordPayment = fundingStatus === FUNDING_STATUS.FUNDED;
 
 
     return (

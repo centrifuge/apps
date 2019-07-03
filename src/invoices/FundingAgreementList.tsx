@@ -9,6 +9,7 @@ import { FunFundingData, FunFundingSignature } from '../../clients/centrifuge-no
 import { Preloader } from '../components/Preloader';
 import { getInvoiceFundingStatus } from '../common/status';
 import { SecondaryHeader } from '../components/SecondaryHeader';
+import { Status } from '../components/Status';
 
 
 type FundingAgreements = FunFundingData & {
@@ -51,7 +52,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
         <SecondaryHeader>
           <Heading level="3">Funding Agreements</Heading>
         </SecondaryHeader>
-        <Box pad={{horizontal:'medium'}}>
+        <Box pad={{ horizontal: 'medium' }}>
           <DataTable
             sortable={false}
             data={this.props.fundingAgreements}
@@ -106,7 +107,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
                 property: 'invoice_status',
                 header: 'Funding status',
                 render: datum => {
-                  return getInvoiceFundingStatus(datum);
+                  return <Status value={getInvoiceFundingStatus(datum)}/>;
                 },
               },
               {

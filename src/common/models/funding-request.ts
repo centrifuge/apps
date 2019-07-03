@@ -19,10 +19,11 @@ export class FundingRequest implements IFundingRequest {
   public agreement_id?: string;
   public amount: number = 0;
   public days: number = 0;
-  public invoice_amount:number = 0;
+  public invoice_amount: number = 0;
   public apr: number = 0.05;
   public fee: number = 0;
   public repayment_due_date: string = '';
   public repayment_amount: number = 0;
   public currency: string = '';
 }
+
