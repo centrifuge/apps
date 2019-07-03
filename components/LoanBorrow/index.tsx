@@ -95,7 +95,7 @@ class LoanBorrow extends React.Component<Props, State> {
         Could not find loan {loanId}</Alert>;
     }
 
-    const { status, principal, price, loanOwner } = singleLoan!;
+    const { status, principal, fee, loanOwner } = singleLoan!;
     const { borrowAmount, is, errorMsg } = this.state;
 
     return <Box>
@@ -120,7 +120,7 @@ class LoanBorrow extends React.Component<Props, State> {
         <Box basis={'1/4'} gap="medium"><FormField label="Principal">
           <TextInput value={principal.toString()} disabled /></FormField></Box>
         <Box basis={'1/4'} gap="medium"><FormField label="Interest Rate">
-          <TextInput value={price.toString()} disabled /></FormField></Box>
+          <TextInput value={fee.toString()} disabled /></FormField></Box>
       </Box>
 
       <LoanNftData loan={singleLoan!} />

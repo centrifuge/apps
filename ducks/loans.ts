@@ -20,6 +20,7 @@ export interface InternalLoan extends Loan {
   loanId: number;
   balance: BN;
   debt: BN;
+  fee: BN;
   status: string;
   nftOwner: Address;
   loanOwner: Address;
@@ -104,6 +105,7 @@ export function getLoans(tinlake: Tinlake):
         nftOwner: nftOwners[i],
         principal: loan.principal,
         price: loan.price,
+        fee: balanceDebtData[i].fee,
         registry: loan.registry,
         tokenId: loan.tokenId,
         balance: balanceDebtData[i].balance,
@@ -158,6 +160,7 @@ export function getLoan(tinlake: Tinlake, loanId: number):
       loanOwner,
       principal: loan.principal,
       price: loan.price,
+      fee: balanceDebtData.fee,
       registry: loan.registry,
       tokenId: loan.tokenId,
       balance: balanceDebtData.balance,

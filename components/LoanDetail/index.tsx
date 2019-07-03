@@ -30,7 +30,7 @@ class LoanDetail extends React.Component<Props> {
         Could not find loan {loanId}</Alert>;
     }
 
-    const { status, principal, price, debt, loanOwner } = singleLoan!;
+    const { status, principal, price, fee, debt, loanOwner } = singleLoan!;
 
     return <Box>
       {status === 'Whitelisted' && loanOwner === tinlake.ethConfig.from &&
@@ -47,13 +47,13 @@ class LoanDetail extends React.Component<Props> {
 
       <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
         <Box basis={'1/4'} gap="medium"><FormField label="Appraisal Amount">
-          <TextInput value={'TBD'} disabled /></FormField></Box>
+          <TextInput value={price.toString()} disabled /></FormField></Box>
         <Box basis={'1/4'} gap="medium"><FormField label="Principal Amount">
           <TextInput value={principal.toString()} disabled /></FormField></Box>
         <Box basis={'1/4'} gap="medium"><FormField label="Debt">
           <TextInput value={debt.toString()} disabled /></FormField></Box>
         <Box basis={'1/4'} gap="medium"><FormField label="Interest Rate">
-          <TextInput value={price.toString()} disabled /></FormField></Box>
+          <TextInput value={fee.toString()} disabled /></FormField></Box>
       </Box>
 
       <LoanNftData loan={singleLoan!} />

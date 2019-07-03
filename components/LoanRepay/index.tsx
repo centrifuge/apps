@@ -94,9 +94,9 @@ class LoanRepay extends React.Component<Props, State> {
         Could not find loan {loanId}</Alert>;
     }
 
-    const { status, price, loanOwner } = singleLoan!;
+    const { status, fee, loanOwner } = singleLoan!;
     const { repayAmount, is, errorMsg } = this.state;
-    const totalAmount = price.add(new BN(repayAmount));
+    const totalAmount = fee.add(new BN(repayAmount));
 
     return <Box>
       {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
@@ -117,7 +117,7 @@ class LoanRepay extends React.Component<Props, State> {
             onChange={e => this.setState({ repayAmount: e.currentTarget.value }) }
           /></FormField></Box>
         <Box basis={'1/4'} gap="medium"><FormField label="Interest Amount">
-          <TextInput value={price.toString()} disabled /></FormField></Box>
+          <TextInput value={fee.toString()} disabled /></FormField></Box>
         <Box basis={'1/4'} gap="medium"><FormField label="Total Amount">
           <TextInput value={totalAmount.toString()} disabled /></FormField></Box>
       </Box>
