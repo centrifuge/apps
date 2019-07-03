@@ -4,8 +4,8 @@ import { ContactsController } from './contacts.controller';
 import { Contact } from '../../../src/common/models/contact';
 import { SessionGuard } from '../auth/SessionGuard';
 import { databaseServiceProvider } from '../database/database.providers';
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { DatabaseService } from '../database/database.service';
+import { centrifugeServiceProvider } from "../centrifuge-client/centrifuge.module";
 const delay = require('util').promisify(setTimeout);
 
 describe('ContactsController', () => {
@@ -23,25 +23,15 @@ describe('ContactsController', () => {
   ];
   const databaseSpies: any = {};
 
-  class CentrifugeClientMock {
-    documents = {
-      create: jest.fn(data => data),
-    };
-  }
-
-  const centrifugeClientMock = new CentrifugeClientMock();
-
   beforeEach(async () => {
     contactsModule = await Test.createTestingModule({
       controllers: [ContactsController],
       providers: [
         SessionGuard,
-        CentrifugeService,
+        centrifugeServiceProvider,
         databaseServiceProvider,
       ],
     })
-      .overrideProvider(CentrifugeService)
-      .useValue(centrifugeClientMock)
       .compile();
 
     const databaseService = contactsModule.get<DatabaseService>(DatabaseService);
@@ -51,8 +41,6 @@ describe('ContactsController', () => {
       await delay(0);
       await databaseService.contacts.insert(insertedContacts[i]);
     }
-
-
 
     databaseSpies.spyInsert = jest.spyOn(databaseService.contacts, 'insert');
     databaseSpies.spyUpdate = jest.spyOn(databaseService.contacts, 'update');

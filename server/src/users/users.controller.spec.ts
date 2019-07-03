@@ -4,10 +4,9 @@ import { User } from '../../../src/common/models/user';
 import config from '../../../src/common/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SessionGuard } from '../auth/SessionGuard';
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { DatabaseService } from '../database/database.service';
 import { PERMISSIONS } from '../../../src/common/constants';
-import {MockCentrifugeService} from "../centrifuge-client/centrifuge-client.mock";
+import { centrifugeServiceProvider } from "../centrifuge-client/centrifuge.module";
 
 describe('Users controller', () => {
   const userAccount = 'generated_identity_id';
@@ -15,12 +14,6 @@ describe('Users controller', () => {
   let invitedUser: User;
   let enabledUser: User;
   let userModule: TestingModule;
-
-  const mockCentrifugeService = new MockCentrifugeService()
-  const centrifugeServiceProvider = {
-    provide: CentrifugeService,
-    useValue: mockCentrifugeService
-  }
 
   beforeAll(async () => {
     userModule = await Test.createTestingModule({

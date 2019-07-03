@@ -9,7 +9,6 @@ import { DatabaseService } from './database.service';
 
 // TODO refactor this in mutiple providers,services
 
-
 /**
  * Initialize the database and the separate collections.
  */
@@ -64,8 +63,10 @@ export const databaseServiceProvider = {
   provide: DatabaseService,
   useFactory: async (): Promise<DatabaseService> => {
 
-    const testingMode = process.env.NODE_ENV === 'test';
-
+    let testingMode: boolean
+    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'functional') {
+      testingMode = true
+    }
     if (!initializeDatabasePromise || testingMode) {
       initializeDatabasePromise = initializeDatabase(testingMode);
     }
@@ -73,4 +74,3 @@ export const databaseServiceProvider = {
     return initializeDatabasePromise;
   },
 };
-

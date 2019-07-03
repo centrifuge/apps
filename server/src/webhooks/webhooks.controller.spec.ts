@@ -4,7 +4,7 @@ import { databaseServiceProvider } from '../database/database.providers';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { DatabaseService } from '../database/database.service';
 import { User } from '../../../src/common/models/user';
-import {MockCentrifugeService} from "../centrifuge-client/centrifuge-client.mock";
+import { centrifugeServiceProvider } from "../centrifuge-client/centrifuge.module";
 
 describe('WebhooksController', () => {
   let webhooksModule: TestingModule;
@@ -14,20 +14,7 @@ describe('WebhooksController', () => {
   const documentId = '112233';
   const invoiceSpies: any = {};
   const poSpies: any = {};
-
-  const getResponse = {
-    data: {},
-    header: {
-      document_id: documentId,
-    },
-    ownerId: user._id,
-  };
-
-  const mockCentrifugeService = new MockCentrifugeService()
-  const centrifugeServiceProvider = {
-    provide: CentrifugeService,
-    useValue: mockCentrifugeService
-  }
+  let centrifugeSpies: any = {};
 
   beforeEach(async () => {
     webhooksModule = await Test.createTestingModule({
@@ -41,6 +28,7 @@ describe('WebhooksController', () => {
 
 
     const databaseService = webhooksModule.get<DatabaseService>(DatabaseService);
+    const centrifugeService = webhooksModule.get<CentrifugeService>(CentrifugeService);
 
     // insert a user
     databaseService.users.insert(user);
@@ -49,7 +37,10 @@ describe('WebhooksController', () => {
     invoiceSpies.spyUpdate = jest.spyOn(databaseService.invoices, 'update');
     poSpies.spyInsert = jest.spyOn(databaseService.purchaseOrders, 'insert');
     poSpies.spyUpdate = jest.spyOn(databaseService.purchaseOrders, 'update');
-    // mockCentrifugeService.invoices.get.mockClear();
+
+    centrifugeSpies.spyInvGet = jest.spyOn(centrifugeService.invoices, 'get');
+    centrifugeSpies.spyPOGet = jest.spyOn(centrifugeService.invoices, 'get');
+
   });
 
   describe('when it receives success invoice creation', function() {
@@ -66,7 +57,7 @@ describe('WebhooksController', () => {
       });
 
       expect(result).toEqual('OK');
-      expect(mockCentrifugeService.invoices.get).toHaveBeenCalledWith(
+      expect(centrifugeSpies.spyInvGet).toHaveBeenCalledWith(
          documentId, user.account
       );
 
@@ -108,7 +99,7 @@ describe('WebhooksController', () => {
       });
 
       expect(result).toEqual('OK');
-      expect(mockCentrifugeService.purchaseOrders.get).toHaveBeenCalledWith(
+      expect(centrifugeSpies.spyPOGet).toHaveBeenCalledWith(
         documentId,
         user.account,
       );

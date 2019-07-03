@@ -2,14 +2,12 @@ import { FundingController } from './funding.controller';
 import { databaseServiceProvider } from '../database/database.providers';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SessionGuard } from '../auth/SessionGuard';
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { DatabaseService } from '../database/database.service';
 import { Invoice } from '../../../src/common/models/invoice';
-import {MockCentrifugeService} from "../centrifuge-client/centrifuge-client.mock";
+import { centrifugeServiceProvider } from "../centrifuge-client/centrifuge.module";
 
 
 describe('Funding controller', () => {
-
 
   const invoice: Invoice = {
     sender: '0x111',
@@ -21,18 +19,11 @@ describe('Funding controller', () => {
   };
   let insertedInvoice: any = {};
 
-  const mockCentrifugeService = new MockCentrifugeService()
-  const centrifugeServiceProvider = {
-    provide: CentrifugeService,
-    useValue: mockCentrifugeService
-  }
-
   // TODO Mocking/Reimplementing all nedb moethods is error prone
   // Considering that nedb is local we can run it in the test with a different config
   // for storage and we will not need a DatabaseServiceMock
   // https://app.zenhub.com/workspaces/centrifuge-5ba350114b5806bc2be90978/issues/centrifuge/centrifuge-starter-kit/98
   let fundingModule: TestingModule;
-
 
   beforeEach(async () => {
     fundingModule = await Test.createTestingModule({
@@ -45,7 +36,6 @@ describe('Funding controller', () => {
     })
       .compile();
 
-
     const databaseService = fundingModule.get<DatabaseService>(DatabaseService);
     insertedInvoice = await databaseService.invoices.insert({
       header: {
@@ -56,7 +46,6 @@ describe('Funding controller', () => {
     });
 
   });
-
 
   describe('create', () => {
     it('should return the created funding agreement', async () => {
