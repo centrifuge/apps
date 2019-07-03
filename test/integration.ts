@@ -56,6 +56,11 @@ describe('functional tinlake tests', () => {
       assert(BN.isBN(res.debt));
     });
 
+    it('gets the owner of a loan', async () => {
+      const res = await tinlake.ownerOfLoan('43');
+      assert.equal(typeof res, 'string');
+    });
+
     it('gets the owner of an nft', async () => {
       const res = await tinlake.ownerOfNFT('582379665328543379');
       assert.equal(typeof res, 'string');
@@ -80,6 +85,7 @@ describe('functional tinlake tests', () => {
         console.log('admin whitelist NFT');
         console.log('-------------------------------------');
 
+        // TODO: use tokenId to ask registry who the owner is
         return tinlake.adminAdmit(addresses['NFT_COLLATERAL'], tokenID, principal, ethFrom);
       }).then((result) => {
         console.log('admit result');
@@ -91,6 +97,8 @@ describe('functional tinlake tests', () => {
 
         assert.equal(result.status, SUCCESS_STATUS, 'tx should be successful');
         assert.equal(result.events[0].event.name, 'Transfer', 'tx should be successful');
+
+        // TODO: borrower should do that, move down
         return tinlake.approveNFT(tokenID, addresses['SHELF']);
       },      (err: any) => {
         console.log(err);
@@ -100,6 +108,7 @@ describe('functional tinlake tests', () => {
         console.log(result.txHash);
         assert.equal(result.status, SUCCESS_STATUS, 'tx should be successful');
         assert.equal(result.events[0].event.name, 'Approval', 'tx should be successful');
+        // TODO: move up, before approve NFT
         return tinlake.adminAppraise(loanID, appraisal);
 
       }).then((result: { txHash: any; status: any; }) => {

@@ -94,14 +94,28 @@ declare class Tinlake {
     loanCount: () => Promise<BN>;
     getLoan: (loanId: number) => Promise<Loan>;
     getBalanceDebt: (loanId: number) => Promise<BalanceDebt>;
-    approveNFT: (tokenID: string, to: string) => Promise<Events>;
-    ownerOfNFT: (tokenID: string) => Promise<string>;
+    approveNFT: (tokenId: string, to: string) => Promise<Events>;
+    ownerOfNFT: (tokenId: string) => Promise<string>;
+    ownerOfLoan: (loanId: string) => Promise<string>;
     balanceOfCurrency: (usr: string) => Promise<Balance>;
-    mintNFT: (deposit: string, tokenID: string) => Promise<Events>;
-    adminAdmit: (registry: string, nft: string, principal: string, usr: string) => Promise<Events>;
+    /**
+     * @param owner Owner of the new NFT
+     */
+    mintNFT: (owner: string, tokenId: string) => Promise<Events>;
+    /**
+     * @param owner Owner of the created loan
+     */
+    adminAdmit: (registry: string, nft: string, principal: string, owner: string) => Promise<Events>;
     adminAppraise: (loanID: string, appraisal: string) => Promise<Events>;
-    borrow: (loanID: string, to: string) => Promise<Events>;
-    repay: (loan: string, wad: string, usrT: string, usr: string) => Promise<Events>;
+    /**
+     * @param to Address that should receive the currency (e. g. DAI)
+     */
+    borrow: (loanId: string, to: string) => Promise<Events>;
+    /**
+     * @param from Address that pays back the currency (e. g. DAI)
+     * @param to Address that receives the NFT
+     */
+    repay: (loanId: string, wad: string, from: string, to: string) => Promise<Events>;
     approveCurrency: (usr: string, wad: string) => Promise<Events>;
     lenderRely: (usr: string) => Promise<Events>;
 }

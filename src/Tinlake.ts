@@ -172,15 +172,20 @@ class Tinlake {
     return await this.contracts.pile.loans(loanId);
   }
 
-  approveNFT = (tokenID: string, to: string): Promise<Events> => {
-    return this.contracts.nft.approve(to, tokenID, this.ethConfig).then((txHash: string) => {
+  approveNFT = (tokenId: string, to: string): Promise<Events> => {
+    return this.contracts.nft.approve(to, tokenId, this.ethConfig).then((txHash: string) => {
       console.log(`[NFT Approve] txHash: ${txHash}`);
       return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi);
     });
   }
 
-  ownerOfNFT = async (tokenID: Address): Promise<Address> => {
-    const res = await this.contracts.nft.ownerOf(tokenID);
+  ownerOfNFT = async (tokenId: Address): Promise<Address> => {
+    const res = await this.contracts.nft.ownerOf(tokenId);
+    return res['0'];
+  }
+
+  ownerOfLoan = async (loanId: Address): Promise<Address> => {
+    const res = await this.contracts.title.ownerOf(loanId);
     return res['0'];
   }
 
@@ -188,15 +193,22 @@ class Tinlake {
     return this.contracts.currency.balanceOf(usr);
   }
 
-  mintNFT = (deposit: string, tokenID: string): Promise<Events> => {
-    return this.contracts.nft.mint(deposit, tokenID, this.ethConfig).then((txHash: string) => {
+  /**
+   * @param owner Owner of the new NFT
+   */
+  mintNFT = (owner: string, tokenId: string): Promise<Events> => {
+    return this.contracts.nft.mint(owner, tokenId, this.ethConfig).then((txHash: string) => {
       console.log(`[NFT.mint] txHash: ${txHash}`);
       return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi);
     });
   }
 
-  adminAdmit = (registry: string, nft: string, principal: string, usr: string): Promise<Events> => {
-    return this.contracts.admit.admit(registry, nft, principal, usr, this.ethConfig)
+  /**
+   * @param owner Owner of the created loan
+   */
+  adminAdmit = (registry: string, nft: string, principal: string, owner: string):
+    Promise<Events> => {
+    return this.contracts.admit.admit(registry, nft, principal, owner, this.ethConfig)
       .then((txHash: string) => {
         console.log(`[Admit.admit] txHash: ${txHash}`);
         return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi);
@@ -211,15 +223,22 @@ class Tinlake {
       });
   }
 
-  borrow = (loanID: string, to: string): Promise<Events> => {
-    return this.contracts.reception.borrow(loanID, to, this.ethConfig).then((txHash: string) => {
+  /**
+   * @param to Address that should receive the currency (e. g. DAI)
+   */
+  borrow = (loanId: string, to: string): Promise<Events> => {
+    return this.contracts.reception.borrow(loanId, to, this.ethConfig).then((txHash: string) => {
       console.log(`[Reception.borrow] txHash: ${txHash}`);
       return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi);
     });
   }
 
-  repay = (loan: string, wad: string, usrT: string, usr: string): Promise<Events> => {
-    return this.contracts.reception.repay(loan, wad, usrT, usr, this.ethConfig)
+  /**
+   * @param from Address that pays back the currency (e. g. DAI)
+   * @param to Address that receives the NFT
+   */
+  repay = (loanId: string, wad: string, from: string, to: string): Promise<Events> => {
+    return this.contracts.reception.repay(loanId, wad, from, to, this.ethConfig)
       .then((txHash: string) => {
         console.log(`[Reception.repay] txHash: ${txHash}`);
         return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi);

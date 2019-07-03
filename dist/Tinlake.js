@@ -24011,17 +24011,28 @@ var Tinlake = /** @class */ (function () {
                 }
             });
         }); };
-        this.approveNFT = function (tokenID, to) {
-            return _this.contracts.nft.approve(to, tokenID, _this.ethConfig).then(function (txHash) {
+        this.approveNFT = function (tokenId, to) {
+            return _this.contracts.nft.approve(to, tokenId, _this.ethConfig).then(function (txHash) {
                 console.log("[NFT Approve] txHash: " + txHash);
                 return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi);
             });
         };
-        this.ownerOfNFT = function (tokenID) { return __awaiter(_this, void 0, void 0, function () {
+        this.ownerOfNFT = function (tokenId) { return __awaiter(_this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.contracts.nft.ownerOf(tokenID)];
+                    case 0: return [4 /*yield*/, this.contracts.nft.ownerOf(tokenId)];
+                    case 1:
+                        res = _a.sent();
+                        return [2 /*return*/, res['0']];
+                }
+            });
+        }); };
+        this.ownerOfLoan = function (loanId) { return __awaiter(_this, void 0, void 0, function () {
+            var res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.contracts.title.ownerOf(loanId)];
                     case 1:
                         res = _a.sent();
                         return [2 /*return*/, res['0']];
@@ -24031,14 +24042,20 @@ var Tinlake = /** @class */ (function () {
         this.balanceOfCurrency = function (usr) {
             return _this.contracts.currency.balanceOf(usr);
         };
-        this.mintNFT = function (deposit, tokenID) {
-            return _this.contracts.nft.mint(deposit, tokenID, _this.ethConfig).then(function (txHash) {
+        /**
+         * @param owner Owner of the new NFT
+         */
+        this.mintNFT = function (owner, tokenId) {
+            return _this.contracts.nft.mint(owner, tokenId, _this.ethConfig).then(function (txHash) {
                 console.log("[NFT.mint] txHash: " + txHash);
                 return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi);
             });
         };
-        this.adminAdmit = function (registry, nft, principal, usr) {
-            return _this.contracts.admit.admit(registry, nft, principal, usr, _this.ethConfig)
+        /**
+         * @param owner Owner of the created loan
+         */
+        this.adminAdmit = function (registry, nft, principal, owner) {
+            return _this.contracts.admit.admit(registry, nft, principal, owner, _this.ethConfig)
                 .then(function (txHash) {
                 console.log("[Admit.admit] txHash: " + txHash);
                 return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi);
@@ -24051,14 +24068,21 @@ var Tinlake = /** @class */ (function () {
                 return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi);
             });
         };
-        this.borrow = function (loanID, to) {
-            return _this.contracts.reception.borrow(loanID, to, _this.ethConfig).then(function (txHash) {
+        /**
+         * @param to Address that should receive the currency (e. g. DAI)
+         */
+        this.borrow = function (loanId, to) {
+            return _this.contracts.reception.borrow(loanId, to, _this.ethConfig).then(function (txHash) {
                 console.log("[Reception.borrow] txHash: " + txHash);
                 return waitAndReturnEvents(_this.eth, txHash, _this.contracts['reception'].abi);
             });
         };
-        this.repay = function (loan, wad, usrT, usr) {
-            return _this.contracts.reception.repay(loan, wad, usrT, usr, _this.ethConfig)
+        /**
+         * @param from Address that pays back the currency (e. g. DAI)
+         * @param to Address that receives the NFT
+         */
+        this.repay = function (loanId, wad, from, to) {
+            return _this.contracts.reception.repay(loanId, wad, from, to, _this.ethConfig)
                 .then(function (txHash) {
                 console.log("[Reception.repay] txHash: " + txHash);
                 return waitAndReturnEvents(_this.eth, txHash, _this.contracts['reception'].abi);
