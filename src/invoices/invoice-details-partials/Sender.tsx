@@ -24,7 +24,7 @@ export class Sender extends React.Component<SenderProps> {
     } = this.props;
 
     return (
-      <Section headingLevel="5" title="Sender" basis={'1/2'}>
+      <Section headingLevel="5" title="Sender" basis={'1/2'} pad={{horizontal:'medium',vertical:"medium",right:'none'}}>
         <Box direction="row" gap={columnGap} basis={'1/2'}>
         <Box gap={columnGap} basis={'1/2'}>
 

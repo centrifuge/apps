@@ -10,6 +10,7 @@ import { Preloader } from '../components/Preloader';
 import { InvInvoiceData } from '../../clients/centrifuge-node';
 import { getInvoiceFundingStatus } from '../common/status';
 import { Status } from '../components/Status';
+import { SecondaryHeader } from '../components/SecondaryHeader';
 
 
 type ViewInvoicesProps = {
@@ -41,8 +42,7 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
 
     return (
       <Box fill>
-
-        <Box justify="between" direction="row" align="center">
+        <SecondaryHeader>
           <Heading level="3">Invoices</Heading>
           <Link to={invoiceRoutes.new}>
             <Button
@@ -50,11 +50,11 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
               label="Create Invoice"
             />
           </Link>
-        </Box>
+        </SecondaryHeader>
 
-        <Box>
+        <Box pad={{horizontal:'medium'}}>
           <DataTable
-            sortable={true}
+            sortable={false}
             data={this.props.invoices}
             primaryKey={'_id'}
             columns={[

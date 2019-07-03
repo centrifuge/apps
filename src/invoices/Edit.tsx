@@ -15,6 +15,7 @@ import { User } from '../common/models/user';
 import { Preloader } from '../components/Preloader';
 import { RequestState } from '../store/reducers/http-request-reducer';
 import { InvInvoiceData } from '../../clients/centrifuge-node';
+import { SecondaryHeader } from '../components/SecondaryHeader';
 
 type ConnectedEditInvoiceProps = {
   updateInvoice: (invoice: Invoice) => void;
@@ -74,7 +75,7 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
         contacts={contacts}
         invoice={this.props.invoice}
       >
-        <Box justify="between" direction="row" align="center">
+        <SecondaryHeader>
           <Box direction="row" gap="small" align="center">
             <Link to={invoiceRoutes.index} size="large">
               <LinkPrevious/>
@@ -95,7 +96,7 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
               label="Update"
             />
           </Box>
-        </Box>
+        </SecondaryHeader>
       </InvoiceForm>
     );
   }

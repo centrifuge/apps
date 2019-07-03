@@ -22,6 +22,7 @@ import { createTransferDetails, updateTransferDetails } from '../store/actions/t
 import TransferDetailsForm from './TransferDetailsForm';
 import { getInvoiceFundingStatus, STATUS } from '../common/status';
 import { TransferDetailsRequest } from '../common/models/transfer-details';
+import { SecondaryHeader } from '../components/SecondaryHeader';
 
 
 type ConnectedInvoiceViewProps = {
@@ -206,7 +207,7 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
           />
         </Modal>
         <Box pad={{ bottom: 'large' }}>
-          <Box justify="between" direction="row" align="center">
+          <SecondaryHeader>
             <Box direction="row" gap="small" align="center">
               <Link to={routes.invoices.index} size="large">
                 <LinkPrevious/>
@@ -250,7 +251,7 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
                 />
               }
             </Box>
-          </Box>
+          </SecondaryHeader>
 
           <InvoiceDetails
             invoice={invoice}

@@ -15,6 +15,7 @@ import { User } from '../common/models/user';
 import { Preloader } from '../components/Preloader';
 import { RequestState } from '../store/reducers/http-request-reducer';
 import { InvInvoiceData } from '../../clients/centrifuge-node';
+import { SecondaryHeader } from '../components/SecondaryHeader';
 
 type ConnectedCreateInvoiceProps = {
   createInvoice: (invoice: Invoice) => void;
@@ -97,7 +98,7 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
         onSubmit={this.createInvoice}
         contacts={contacts}
       >
-        <Box justify="between" direction="row" align="center">
+       <SecondaryHeader>
           <Box direction="row" gap="small" align="center">
             <Link to={invoiceRoutes.index} size="large">
               <LinkPrevious/>
@@ -119,7 +120,7 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
               label="Save"
             />
           </Box>
-        </Box>
+        </SecondaryHeader>
       </InvoiceForm>
     );
   }

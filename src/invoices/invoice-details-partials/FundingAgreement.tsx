@@ -23,7 +23,7 @@ export class FundingAgreement extends React.Component<FundingAgreementProps> {
       columnGap,
     } = this.props;
     return (
-      <Section headingLevel="5" title="Funding Agreement">
+      <Section headingLevel="5" title="Funding Agreement"  background={'light-1'}>
         <Box gap={columnGap}>
           <Box direction="row" gap={columnGap} flex="grow">
             <Box basis={'1/4'}>

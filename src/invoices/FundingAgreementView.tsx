@@ -19,6 +19,7 @@ import { createTransferDetails, updateTransferDetails } from '../store/actions/t
 import { dateToString } from '../common/formaters';
 import { getInvoiceFundingStatus, STATUS } from '../common/status';
 import { TransferDetailsRequest } from '../common/models/transfer-details';
+import { SecondaryHeader } from '../components/SecondaryHeader';
 
 type ConnectedFundingAgreementViewProps = {
   getInvoiceById: typeof getInvoiceById;
@@ -158,7 +159,7 @@ export class FundingAgreementView extends React.Component<ConnectedFundingAgreem
           />
         </Modal>
         <Box pad={{ bottom: 'large' }}>
-          <Box justify="between" direction="row" align="center">
+          <SecondaryHeader>
             <Box direction="row" gap="small" align="center">
               <Link to={routes.invoices.index} size="large">
                 <LinkPrevious/>
@@ -194,7 +195,8 @@ export class FundingAgreementView extends React.Component<ConnectedFundingAgreem
                 />
               }
             </Box>
-          </Box>
+          </SecondaryHeader>
+
 
           <InvoiceDetails
             invoice={invoice}

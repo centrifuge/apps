@@ -10,6 +10,7 @@ import { Modal } from '@centrifuge/axis-modal';
 import UserForm from './UserForm';
 import { formatDate } from '../../common/formaters';
 import { Preloader } from '../../components/Preloader';
+import { SecondaryHeader } from '../../components/SecondaryHeader';
 
 type UsersListProps = {
   users: User[] | null;
@@ -63,7 +64,6 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
   renderUsers = (data) => {
 
     return (
-      <Box>
         <DataTable
           data={data}
           sortable={true}
@@ -107,7 +107,6 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
             },
           ]}
         />
-      </Box>
     );
   };
 
@@ -134,13 +133,15 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
         >
           <UserForm user={new User()} onSubmit={this.inviteUser} onDiscard={this.closeUserForm}/>
         </Modal>
-        <Box justify="between" direction="row" align="center">
+        <SecondaryHeader>
           <Heading level="3">User Management</Heading>
           <Box>
             <Button primary label="Create User" onClick={this.openUserForm}/>
           </Box>
-        </Box>
+        </SecondaryHeader>
+        <Box pad={{horizontal:"medium"}}>
         {this.renderUsers(users)}
+        </Box>
       </Box>
     );
   }

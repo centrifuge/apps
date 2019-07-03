@@ -24,7 +24,7 @@ export class Recipient extends React.Component<RecipientProps> {
 
 
     return (
-      <Section headingLevel="5" title="Recipient" basis={'1/2'}>
+      <Section headingLevel="5" title="Recipient" basis={'1/2'} pad={{horizontal:'medium',vertical:"medium",left:'none'}}>
         <Box direction="row" gap={columnGap} basis={'1/2'}>
         <Box gap={columnGap} basis={'1/2'}>
 

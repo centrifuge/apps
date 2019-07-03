@@ -7,8 +7,8 @@ const config = {
   dbPath: env.DB_PATH ? env.DB_PATH.replace('db','db1') : './db',
   admin: {
     name: env.CENTRIFUGE_ADMIN_USER || 'admin',
-    email: env.CENTRIFUGE_ADMIN_EMAIL || 'test@test.org',
-    password: env.CENTRIFUGE_ADMIN_PASSWORD || 'admin',
+    email: env.CENTRIFUGE_ADMIN_EMAIL || 'funder@centrifuge.io',
+    password: env.CENTRIFUGE_ADMIN_PASSWORD || 'anastasia',
     account:  env.CENTRIFUGE_ADMIN_ACCOUNT || '0x5f2bBFcf948a0083bbE77C0aD97A64142D6b1D48',
     permissions:[PERMISSIONS.CAN_MANAGE_USERS,PERMISSIONS.CAN_CREATE_INVOICES],
   },

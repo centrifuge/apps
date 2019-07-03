@@ -8,9 +8,10 @@ export const Section = withTheme(props => {
   const [opened, open] = useState(!collapsed);
 
   return (
-    <Box {...rest}>
+    <Box pad={'medium'} {...rest}>
       <Box direction="row" gap="medium">
-        <Heading style={{ minWidth: '100px' }} level={headingLevel || 2}>{title}</Heading>
+        {title &&
+        <Heading margin={{ top: 'none' }} style={{ minWidth: '100px' }} level={headingLevel || 2}>{title}</Heading>}
         {collapsibleLabel && (
           <CheckBox
             label={collapsibleLabel}

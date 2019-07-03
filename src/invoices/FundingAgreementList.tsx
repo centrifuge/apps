@@ -8,6 +8,7 @@ import { formatCurrency, formatDate } from '../common/formaters';
 import { FunFundingData, FunFundingSignature } from '../../clients/centrifuge-node';
 import { Preloader } from '../components/Preloader';
 import { getInvoiceFundingStatus } from '../common/status';
+import { SecondaryHeader } from '../components/SecondaryHeader';
 
 
 type FundingAgreements = FunFundingData & {
@@ -47,14 +48,12 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
     return (
 
       <Box fill>
-        <Box justify="between" direction="row" align="center">
+        <SecondaryHeader>
           <Heading level="3">Funding Agreements</Heading>
-
-        </Box>
-
-        <Box>
+        </SecondaryHeader>
+        <Box pad={{horizontal:'medium'}}>
           <DataTable
-            sortable={true}
+            sortable={false}
             data={this.props.fundingAgreements}
             primaryKey={'agreement_id'}
             columns={[

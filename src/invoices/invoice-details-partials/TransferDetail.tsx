@@ -24,7 +24,7 @@ export class TransferDetail extends React.Component<TransferDetailProps> {
 
     return (
       <>
-        {transfer && <Section headingLevel="5" title={title}>
+        {transfer && <Section headingLevel="5" title={title}  background={'light-1'}>
           <Box gap={columnGap}>
             <Box direction="row" gap={columnGap} flex="grow">
               <Box basis={'1/2'}>
@@ -49,12 +49,6 @@ export class TransferDetail extends React.Component<TransferDetailProps> {
                 />
               </Box>
 
-              {/*  <Box basis={'1/4'}>
-                <DisplayField
-                  label="Settlement date"
-                  value={formatDate(transfer!.settlement_date)}
-                />
-              </Box>*/}
             </Box>
           </Box>
         </Section>}

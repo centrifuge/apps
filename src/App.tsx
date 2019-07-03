@@ -119,7 +119,6 @@ class App extends Component<AppPros> {
                 justify="center"
                 direction="row"
                 fill
-                overflow={'scroll'}
               >
                 <Box width="xlarge">
                   <div style={{ minHeight: '100%' }}>

@@ -15,6 +15,7 @@ import {
 } from 'grommet';
 import { Contact } from '../common/models/contact';
 import { Formik } from 'formik';
+import { SecondaryHeader } from '../components/SecondaryHeader';
 
 interface ContactsProps {
   contacts?: (Contact & { isEditing?: boolean })[];
@@ -193,7 +194,7 @@ export default class ContactList extends React.Component<ContactsProps,
   render() {
     return (
       <Box fill>
-        <Box justify="between" direction="row" align="center">
+        <SecondaryHeader>
           <Heading level="3">Contacts</Heading>
           <Button
             primary
@@ -201,9 +202,9 @@ export default class ContactList extends React.Component<ContactsProps,
             label="Add Contact"
             disabled={!!this.state.newContact}
           />
-        </Box>
+        </SecondaryHeader>
 
-        <Box>
+        <Box pad={{horizontal:"medium"}}>
           <Table>
             <TableHeader>
               <TableRow>
