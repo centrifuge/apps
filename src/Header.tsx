@@ -28,6 +28,7 @@ const Header: FunctionComponent<HeaderProps> = (props) => {
 
   return <Box
     justify="center"
+    pad={{horizontal:'medium'}}
     align="center"
     height="xsmall"
     fill="horizontal"

@@ -5,782 +5,65 @@ exports[`FundingAgreementView Should not render an empty form 1`] = `
   className="StyledGrommet-sc-19lkkz7-0 eWRwfm"
 >
   <div
-    className="StyledBox-sc-13pk1d4-0 hOJKqu"
+    className="StyledBox-sc-13pk1d4-0 bTrVGp"
   >
-    <div
-      className="StyledBox-sc-13pk1d4-0 erazuK"
-    >
-      <div
-        className="StyledBox-sc-13pk1d4-0 gQLnBt"
-      >
-        <a
-          href="/invoices"
-          onClick={[Function]}
-          size="large"
-        >
-          <svg
-            aria-label="LinkPrevious"
-            className="StyledIcon-ofa7kd-0 cgOtHq"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M2,12 L22,12 M13,3 L22,12 L13,21"
-              fill="none"
-              stroke="#000"
-              strokeWidth="2"
-              transform="matrix(-1 0 0 1 24 0)"
-            />
-          </svg>
-        </a>
-        <div
-          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 iChEkS"
-        />
-        <h3
-          className="StyledHeading-sc-1rdh4aw-0 YlnAZ"
-        >
-          Funding Agreement for Invoice #
-        </h3>
-      </div>
-      <div
-        className="StyledBox-sc-13pk1d4-0 ffeAql"
-      >
-        <button
-          className="StyledButton-sc-323bzc-0 fjZdgk"
-          disabled={false}
-          onBlur={[Function]}
-          onClick={[Function]}
-          onFocus={[Function]}
-          onMouseOut={[Function]}
-          onMouseOver={[Function]}
-          type="button"
-        >
-          Approve
-        </button>
-      </div>
-    </div>
     <div
       className="StyledBox-sc-13pk1d4-0 IRSNj"
     >
-      <div
-        className="StyledBox-sc-13pk1d4-0 IRSNj"
+      <svg
+        id="L7"
+        viewBox="0 0 100 100"
+        width="56px"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        <div
-          className="StyledBox-sc-13pk1d4-0 IRSNj"
+        <path
+          d="M31.6,3.5C5.9,13.6-6.6,42.7,3.5,68.4c10.1,25.7,39.2,38.3,64.9,28.1l-3.1-7.9c-21.3,8.4-45.4-2-53.8-23.3 c-8.4-21.3,2-45.4,23.3-53.8L31.6,3.5z"
+          fill="#000"
         >
-          <div
-            className="StyledBox-sc-13pk1d4-0 IRSNj"
-          >
-            <div
-              className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-            >
-              <label
-                className="StyledText-sc-1sadyjn-0 gtjeKK"
-              >
-                Invoice number
-              </label>
-              <div
-                className="StyledBox-sc-13pk1d4-0 exlMvl"
-              >
-                <p
-                  className="StyledParagraph-tbetod-0 dBXmID"
-                  onBlur={[Function]}
-                  onFocus={[Function]}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-        />
-        <div
-          className="StyledBox-sc-13pk1d4-0 ffeAql"
-        >
-          <div
-            className="StyledBox-sc-13pk1d4-0 clLqce"
-          >
-            <div
-              className="StyledBox-sc-13pk1d4-0 ffeAql"
-            >
-              <h5
-                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
-                style={
-                  Object {
-                    "minWidth": "100px",
-                  }
-                }
-              >
-                Sender
-              </h5>
-            </div>
-            <div
-              aria-hidden={false}
-              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
-              open={true}
-            >
-              <div
-                className="StyledBox-sc-13pk1d4-0 Tiesv"
-              >
-                <div
-                  className="StyledBox-sc-13pk1d4-0 clLqce"
-                >
-                  <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                  >
-                    <label
-                      className="StyledText-sc-1sadyjn-0 gtjeKK"
-                    >
-                      Name
-                    </label>
-                    <div
-                      className="StyledBox-sc-13pk1d4-0 exlMvl"
-                    >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      />
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                  />
-                  <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                  >
-                    <label
-                      className="StyledText-sc-1sadyjn-0 gtjeKK"
-                    >
-                      Centrifuge ID
-                    </label>
-                    <div
-                      className="StyledBox-sc-13pk1d4-0 exlMvl"
-                    >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-                />
-                <div
-                  className="StyledBox-sc-13pk1d4-0 clLqce"
-                >
-                  <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                  >
-                    <label
-                      className="StyledText-sc-1sadyjn-0 gtjeKK"
-                    >
-                      Street 1
-                    </label>
-                    <div
-                      className="StyledBox-sc-13pk1d4-0 exlMvl"
-                    >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      />
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                  />
-                  <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                  >
-                    <label
-                      className="StyledText-sc-1sadyjn-0 gtjeKK"
-                    >
-                      Street 2
-                    </label>
-                    <div
-                      className="StyledBox-sc-13pk1d4-0 exlMvl"
-                    >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      />
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                  />
-                  <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                  >
-                    <label
-                      className="StyledText-sc-1sadyjn-0 gtjeKK"
-                    >
-                      City
-                    </label>
-                    <div
-                      className="StyledBox-sc-13pk1d4-0 exlMvl"
-                    >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      />
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                  />
-                  <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                  >
-                    <label
-                      className="StyledText-sc-1sadyjn-0 gtjeKK"
-                    >
-                      State
-                    </label>
-                    <div
-                      className="StyledBox-sc-13pk1d4-0 exlMvl"
-                    >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      />
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                  />
-                  <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                  >
-                    <label
-                      className="StyledText-sc-1sadyjn-0 gtjeKK"
-                    >
-                      Country
-                    </label>
-                    <div
-                      className="StyledBox-sc-13pk1d4-0 exlMvl"
-                    >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      />
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                  />
-                  <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                  >
-                    <label
-                      className="StyledText-sc-1sadyjn-0 gtjeKK"
-                    >
-                      ZIP code
-                    </label>
-                    <div
-                      className="StyledBox-sc-13pk1d4-0 exlMvl"
-                    >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+          <animateTransform
+            attributeName="transform"
+            attributeType="XML"
+            dur="2s"
+            from="0 50 50"
+            repeatCount="indefinite"
+            to="360 50 50"
+            type="rotate"
           />
-          <div
-            className="StyledBox-sc-13pk1d4-0 clLqce"
-          >
-            <div
-              className="StyledBox-sc-13pk1d4-0 ffeAql"
-            >
-              <h5
-                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
-                style={
-                  Object {
-                    "minWidth": "100px",
-                  }
-                }
-              >
-                Recipient
-              </h5>
-            </div>
-            <div
-              aria-hidden={false}
-              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
-              open={true}
-            >
-              <div
-                className="StyledBox-sc-13pk1d4-0 Tiesv"
-              >
-                <div
-                  className="StyledBox-sc-13pk1d4-0 clLqce"
-                >
-                  <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                  >
-                    <label
-                      className="StyledText-sc-1sadyjn-0 gtjeKK"
-                    >
-                      Name
-                    </label>
-                    <div
-                      className="StyledBox-sc-13pk1d4-0 exlMvl"
-                    >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-                />
-                <div
-                  className="StyledBox-sc-13pk1d4-0 clLqce"
-                >
-                  <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                  >
-                    <label
-                      className="StyledText-sc-1sadyjn-0 gtjeKK"
-                    >
-                      Street 1
-                    </label>
-                    <div
-                      className="StyledBox-sc-13pk1d4-0 exlMvl"
-                    >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      />
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                  />
-                  <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                  >
-                    <label
-                      className="StyledText-sc-1sadyjn-0 gtjeKK"
-                    >
-                      Street 2
-                    </label>
-                    <div
-                      className="StyledBox-sc-13pk1d4-0 exlMvl"
-                    >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      />
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                  />
-                  <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                  >
-                    <label
-                      className="StyledText-sc-1sadyjn-0 gtjeKK"
-                    >
-                      City
-                    </label>
-                    <div
-                      className="StyledBox-sc-13pk1d4-0 exlMvl"
-                    >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      />
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                  />
-                  <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                  >
-                    <label
-                      className="StyledText-sc-1sadyjn-0 gtjeKK"
-                    >
-                      State
-                    </label>
-                    <div
-                      className="StyledBox-sc-13pk1d4-0 exlMvl"
-                    >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      />
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                  />
-                  <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                  >
-                    <label
-                      className="StyledText-sc-1sadyjn-0 gtjeKK"
-                    >
-                      Country
-                    </label>
-                    <div
-                      className="StyledBox-sc-13pk1d4-0 exlMvl"
-                    >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      />
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                  />
-                  <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                  >
-                    <label
-                      className="StyledText-sc-1sadyjn-0 gtjeKK"
-                    >
-                      ZIP code
-                    </label>
-                    <div
-                      className="StyledBox-sc-13pk1d4-0 exlMvl"
-                    >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-        />
-        <div
-          className="StyledBox-sc-13pk1d4-0 IRSNj"
+        </path>
+        <path
+          d="M42.3,39.6c5.7-4.3,13.9-3.1,18.1,2.7c4.3,5.7,3.1,13.9-2.7,18.1l4.1,5.5c8.8-6.5,10.6-19,4.1-27.7 c-6.5-8.8-19-10.6-27.7-4.1L42.3,39.6z"
+          fill="#000"
         >
-          <div
-            className="StyledBox-sc-13pk1d4-0 IRSNj"
-          >
-            <div
-              className="StyledBox-sc-13pk1d4-0 ffeAql"
-            >
-              <h5
-                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
-                style={
-                  Object {
-                    "minWidth": "100px",
-                  }
-                }
-              >
-                Invoice Details
-              </h5>
-            </div>
-            <div
-              aria-hidden={false}
-              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
-              open={true}
-            >
-              <div
-                className="StyledBox-sc-13pk1d4-0 IRSNj"
-              >
-                <div
-                  className="StyledBox-sc-13pk1d4-0 kmJoJj"
-                >
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 dRJqWv"
-                  >
-                    <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                    >
-                      <label
-                        className="StyledText-sc-1sadyjn-0 gtjeKK"
-                      >
-                        Status
-                      </label>
-                      <div
-                        className="StyledBox-sc-13pk1d4-0 exlMvl"
-                      >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
-                          onBlur={[Function]}
-                          onFocus={[Function]}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-                  />
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 dRJqWv"
-                  >
-                    <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                    >
-                      <label
-                        className="StyledText-sc-1sadyjn-0 gtjeKK"
-                      >
-                        Currency
-                      </label>
-                      <div
-                        className="StyledBox-sc-13pk1d4-0 exlMvl"
-                      >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
-                          onBlur={[Function]}
-                          onFocus={[Function]}
-                        >
-                          EUR
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-                  />
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 dRJqWv"
-                  >
-                    <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                    >
-                      <label
-                        className="StyledText-sc-1sadyjn-0 gtjeKK"
-                      >
-                        Invoice date
-                      </label>
-                      <div
-                        className="StyledBox-sc-13pk1d4-0 exlMvl"
-                      >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
-                          onBlur={[Function]}
-                          onFocus={[Function]}
-                        >
-                          
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-                  />
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 dRJqWv"
-                  >
-                    <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                    >
-                      <label
-                        className="StyledText-sc-1sadyjn-0 gtjeKK"
-                      >
-                        Date due
-                      </label>
-                      <div
-                        className="StyledBox-sc-13pk1d4-0 exlMvl"
-                      >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
-                          onBlur={[Function]}
-                          onFocus={[Function]}
-                        >
-                          
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-                />
-                <div
-                  className="StyledBox-sc-13pk1d4-0 ffeAql"
-                >
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 dRJqWv"
-                  >
-                    <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                    >
-                      <label
-                        className="StyledText-sc-1sadyjn-0 gtjeKK"
-                      >
-                        Net amount
-                      </label>
-                      <div
-                        className="StyledBox-sc-13pk1d4-0 exlMvl"
-                      >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
-                          onBlur={[Function]}
-                          onFocus={[Function]}
-                        >
-                          €NaN
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-                  />
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 dRJqWv"
-                  >
-                    <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                    >
-                      <label
-                        className="StyledText-sc-1sadyjn-0 gtjeKK"
-                      >
-                        Tax rate
-                      </label>
-                      <div
-                        className="StyledBox-sc-13pk1d4-0 exlMvl"
-                      >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
-                          onBlur={[Function]}
-                          onFocus={[Function]}
-                        >
-                          NaN%
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-                  />
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 dRJqWv"
-                  >
-                    <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                    >
-                      <label
-                        className="StyledText-sc-1sadyjn-0 gtjeKK"
-                      >
-                        Tax amount
-                      </label>
-                      <div
-                        className="StyledBox-sc-13pk1d4-0 exlMvl"
-                      >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
-                          onBlur={[Function]}
-                          onFocus={[Function]}
-                        >
-                          €NaN
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-                  />
-                  <div
-                    className="StyledBox-sc-13pk1d4-0 dRJqWv"
-                  >
-                    <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-                    >
-                      <label
-                        className="StyledText-sc-1sadyjn-0 gtjeKK"
-                      >
-                        Gross amount
-                      </label>
-                      <div
-                        className="StyledBox-sc-13pk1d4-0 exlMvl"
-                      >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
-                          onBlur={[Function]}
-                          onFocus={[Function]}
-                        >
-                          €NaN
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
-        />
-        <div
-          className="StyledBox-sc-13pk1d4-0 ffeAql"
+          <animateTransform
+            attributeName="transform"
+            attributeType="XML"
+            dur="1s"
+            from="0 50 50"
+            repeatCount="indefinite"
+            to="-360 50 50"
+            type="rotate"
+          />
+        </path>
+        <path
+          d="M82,35.7C74.1,18,53.4,10.1,35.7,18S10.1,46.6,18,64.3l7.6-3.4c-6-13.5,0-29.3,13.5-35.3s29.3,0,35.3,13.5 L82,35.7z"
+          fill="#000"
         >
-          <div
-            className="StyledBox-sc-13pk1d4-0 clLqce"
-          >
-            <div
-              className="StyledBox-sc-13pk1d4-0 ffeAql"
-            >
-              <h5
-                className="StyledHeading-sc-1rdh4aw-0 jwWtQy"
-                style={
-                  Object {
-                    "minWidth": "100px",
-                  }
-                }
-              >
-                Comments
-              </h5>
-            </div>
-            <div
-              aria-hidden={false}
-              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
-              open={true}
-            >
-              <div
-                className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
-              >
-                <div
-                  className="StyledBox-sc-13pk1d4-0 exlMvl"
-                >
-                  <p
-                    className="StyledParagraph-tbetod-0 dBXmID"
-                    onBlur={[Function]}
-                    onFocus={[Function]}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+          <animateTransform
+            attributeName="transform"
+            attributeType="XML"
+            dur="2s"
+            from="0 50 50"
+            repeatCount="indefinite"
+            to="360 50 50"
+            type="rotate"
+          />
+        </path>
+      </svg>
     </div>
+    <div
+      className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
+    />
+    Loading
   </div>
 </div>
 `;
@@ -828,20 +111,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
       </div>
       <div
         className="StyledBox-sc-13pk1d4-0 ffeAql"
-      >
-        <button
-          className="StyledButton-sc-323bzc-0 fjZdgk"
-          disabled={false}
-          onBlur={[Function]}
-          onClick={[Function]}
-          onFocus={[Function]}
-          onMouseOut={[Function]}
-          onMouseOver={[Function]}
-          type="button"
-        >
-          Approve
-        </button>
-      </div>
+      />
     </div>
     <div
       className="StyledBox-sc-13pk1d4-0 IRSNj"
@@ -856,7 +126,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
             className="StyledBox-sc-13pk1d4-0 IRSNj"
           >
             <div
-              className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+              className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
             >
               <label
                 className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -866,11 +136,15 @@ exports[`FundingAgreementView Should render the form with proper values for cont
               <div
                 className="StyledBox-sc-13pk1d4-0 exlMvl"
               >
-                <p
-                  className="StyledParagraph-tbetod-0 dBXmID"
+                <div
+                  className="StyledBox-sc-13pk1d4-0 ffeAql"
                   onBlur={[Function]}
                   onFocus={[Function]}
-                />
+                >
+                  <p
+                    className="StyledParagraph-tbetod-0 dBXmID"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -910,7 +184,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                   className="StyledBox-sc-13pk1d4-0 clLqce"
                 >
                   <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                    className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                   >
                     <label
                       className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -920,18 +194,22 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     <div
                       className="StyledBox-sc-13pk1d4-0 exlMvl"
                     >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
+                      <div
+                        className="StyledBox-sc-13pk1d4-0 ffeAql"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        <p
+                          className="StyledParagraph-tbetod-0 dBXmID"
+                        />
+                      </div>
                     </div>
                   </div>
                   <div
                     className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
                   />
                   <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                    className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                   >
                     <label
                       className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -941,13 +219,17 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     <div
                       className="StyledBox-sc-13pk1d4-0 exlMvl"
                     >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
+                      <div
+                        className="StyledBox-sc-13pk1d4-0 ffeAql"
                         onBlur={[Function]}
                         onFocus={[Function]}
                       >
-                        0x1111
-                      </p>
+                        <p
+                          className="StyledParagraph-tbetod-0 dBXmID"
+                        >
+                          0x1111
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -958,7 +240,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                   className="StyledBox-sc-13pk1d4-0 clLqce"
                 >
                   <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                    className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                   >
                     <label
                       className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -968,18 +250,22 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     <div
                       className="StyledBox-sc-13pk1d4-0 exlMvl"
                     >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
+                      <div
+                        className="StyledBox-sc-13pk1d4-0 ffeAql"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        <p
+                          className="StyledParagraph-tbetod-0 dBXmID"
+                        />
+                      </div>
                     </div>
                   </div>
                   <div
                     className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
                   />
                   <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                    className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                   >
                     <label
                       className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -989,18 +275,22 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     <div
                       className="StyledBox-sc-13pk1d4-0 exlMvl"
                     >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
+                      <div
+                        className="StyledBox-sc-13pk1d4-0 ffeAql"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        <p
+                          className="StyledParagraph-tbetod-0 dBXmID"
+                        />
+                      </div>
                     </div>
                   </div>
                   <div
                     className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
                   />
                   <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                    className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                   >
                     <label
                       className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1010,18 +300,22 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     <div
                       className="StyledBox-sc-13pk1d4-0 exlMvl"
                     >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
+                      <div
+                        className="StyledBox-sc-13pk1d4-0 ffeAql"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        <p
+                          className="StyledParagraph-tbetod-0 dBXmID"
+                        />
+                      </div>
                     </div>
                   </div>
                   <div
                     className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
                   />
                   <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                    className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                   >
                     <label
                       className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1031,18 +325,22 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     <div
                       className="StyledBox-sc-13pk1d4-0 exlMvl"
                     >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
+                      <div
+                        className="StyledBox-sc-13pk1d4-0 ffeAql"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        <p
+                          className="StyledParagraph-tbetod-0 dBXmID"
+                        />
+                      </div>
                     </div>
                   </div>
                   <div
                     className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
                   />
                   <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                    className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                   >
                     <label
                       className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1052,18 +350,22 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     <div
                       className="StyledBox-sc-13pk1d4-0 exlMvl"
                     >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
+                      <div
+                        className="StyledBox-sc-13pk1d4-0 ffeAql"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        <p
+                          className="StyledParagraph-tbetod-0 dBXmID"
+                        />
+                      </div>
                     </div>
                   </div>
                   <div
                     className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
                   />
                   <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                    className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                   >
                     <label
                       className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1073,11 +375,15 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     <div
                       className="StyledBox-sc-13pk1d4-0 exlMvl"
                     >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
+                      <div
+                        className="StyledBox-sc-13pk1d4-0 ffeAql"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        <p
+                          className="StyledParagraph-tbetod-0 dBXmID"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1116,7 +422,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                   className="StyledBox-sc-13pk1d4-0 clLqce"
                 >
                   <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                    className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                   >
                     <label
                       className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1126,11 +432,15 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     <div
                       className="StyledBox-sc-13pk1d4-0 exlMvl"
                     >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
+                      <div
+                        className="StyledBox-sc-13pk1d4-0 ffeAql"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        <p
+                          className="StyledParagraph-tbetod-0 dBXmID"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1141,7 +451,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                   className="StyledBox-sc-13pk1d4-0 clLqce"
                 >
                   <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                    className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                   >
                     <label
                       className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1151,18 +461,22 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     <div
                       className="StyledBox-sc-13pk1d4-0 exlMvl"
                     >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
+                      <div
+                        className="StyledBox-sc-13pk1d4-0 ffeAql"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        <p
+                          className="StyledParagraph-tbetod-0 dBXmID"
+                        />
+                      </div>
                     </div>
                   </div>
                   <div
                     className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
                   />
                   <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                    className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                   >
                     <label
                       className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1172,18 +486,22 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     <div
                       className="StyledBox-sc-13pk1d4-0 exlMvl"
                     >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
+                      <div
+                        className="StyledBox-sc-13pk1d4-0 ffeAql"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        <p
+                          className="StyledParagraph-tbetod-0 dBXmID"
+                        />
+                      </div>
                     </div>
                   </div>
                   <div
                     className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
                   />
                   <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                    className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                   >
                     <label
                       className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1193,18 +511,22 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     <div
                       className="StyledBox-sc-13pk1d4-0 exlMvl"
                     >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
+                      <div
+                        className="StyledBox-sc-13pk1d4-0 ffeAql"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        <p
+                          className="StyledParagraph-tbetod-0 dBXmID"
+                        />
+                      </div>
                     </div>
                   </div>
                   <div
                     className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
                   />
                   <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                    className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                   >
                     <label
                       className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1214,18 +536,22 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     <div
                       className="StyledBox-sc-13pk1d4-0 exlMvl"
                     >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
+                      <div
+                        className="StyledBox-sc-13pk1d4-0 ffeAql"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        <p
+                          className="StyledParagraph-tbetod-0 dBXmID"
+                        />
+                      </div>
                     </div>
                   </div>
                   <div
                     className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
                   />
                   <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                    className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                   >
                     <label
                       className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1235,18 +561,22 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     <div
                       className="StyledBox-sc-13pk1d4-0 exlMvl"
                     >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
+                      <div
+                        className="StyledBox-sc-13pk1d4-0 ffeAql"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        <p
+                          className="StyledParagraph-tbetod-0 dBXmID"
+                        />
+                      </div>
                     </div>
                   </div>
                   <div
                     className="StyledBox__StyledBoxGap-sc-13pk1d4-1 irlfVP"
                   />
                   <div
-                    className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                    className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                   >
                     <label
                       className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1256,11 +586,15 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     <div
                       className="StyledBox-sc-13pk1d4-0 exlMvl"
                     >
-                      <p
-                        className="StyledParagraph-tbetod-0 dBXmID"
+                      <div
+                        className="StyledBox-sc-13pk1d4-0 ffeAql"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                      />
+                      >
+                        <p
+                          className="StyledParagraph-tbetod-0 dBXmID"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1306,7 +640,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     className="StyledBox-sc-13pk1d4-0 dRJqWv"
                   >
                     <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                      className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                     >
                       <label
                         className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1316,11 +650,15 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                       <div
                         className="StyledBox-sc-13pk1d4-0 exlMvl"
                       >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
+                        <div
+                          className="StyledBox-sc-13pk1d4-0 ffeAql"
                           onBlur={[Function]}
                           onFocus={[Function]}
-                        />
+                        >
+                          <p
+                            className="StyledParagraph-tbetod-0 dBXmID"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1331,7 +669,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     className="StyledBox-sc-13pk1d4-0 dRJqWv"
                   >
                     <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                      className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                     >
                       <label
                         className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1341,13 +679,17 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                       <div
                         className="StyledBox-sc-13pk1d4-0 exlMvl"
                       >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
+                        <div
+                          className="StyledBox-sc-13pk1d4-0 ffeAql"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
-                          USD
-                        </p>
+                          <p
+                            className="StyledParagraph-tbetod-0 dBXmID"
+                          >
+                            USD
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1358,7 +700,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     className="StyledBox-sc-13pk1d4-0 dRJqWv"
                   >
                     <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                      className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                     >
                       <label
                         className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1368,13 +710,17 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                       <div
                         className="StyledBox-sc-13pk1d4-0 exlMvl"
                       >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
+                        <div
+                          className="StyledBox-sc-13pk1d4-0 ffeAql"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
-                          
-                        </p>
+                          <p
+                            className="StyledParagraph-tbetod-0 dBXmID"
+                          >
+                            
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1385,7 +731,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     className="StyledBox-sc-13pk1d4-0 dRJqWv"
                   >
                     <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                      className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                     >
                       <label
                         className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1395,13 +741,17 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                       <div
                         className="StyledBox-sc-13pk1d4-0 exlMvl"
                       >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
+                        <div
+                          className="StyledBox-sc-13pk1d4-0 ffeAql"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
-                          
-                        </p>
+                          <p
+                            className="StyledParagraph-tbetod-0 dBXmID"
+                          >
+                            
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1416,7 +766,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     className="StyledBox-sc-13pk1d4-0 dRJqWv"
                   >
                     <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                      className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                     >
                       <label
                         className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1426,13 +776,17 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                       <div
                         className="StyledBox-sc-13pk1d4-0 exlMvl"
                       >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
+                        <div
+                          className="StyledBox-sc-13pk1d4-0 ffeAql"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
-                          $NaN
-                        </p>
+                          <p
+                            className="StyledParagraph-tbetod-0 dBXmID"
+                          >
+                            $NaN
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1443,7 +797,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     className="StyledBox-sc-13pk1d4-0 dRJqWv"
                   >
                     <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                      className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                     >
                       <label
                         className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1453,13 +807,17 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                       <div
                         className="StyledBox-sc-13pk1d4-0 exlMvl"
                       >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
+                        <div
+                          className="StyledBox-sc-13pk1d4-0 ffeAql"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
-                          NaN%
-                        </p>
+                          <p
+                            className="StyledParagraph-tbetod-0 dBXmID"
+                          >
+                            NaN%
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1470,7 +828,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     className="StyledBox-sc-13pk1d4-0 dRJqWv"
                   >
                     <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                      className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                     >
                       <label
                         className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1480,13 +838,17 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                       <div
                         className="StyledBox-sc-13pk1d4-0 exlMvl"
                       >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
+                        <div
+                          className="StyledBox-sc-13pk1d4-0 ffeAql"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
-                          $NaN
-                        </p>
+                          <p
+                            className="StyledParagraph-tbetod-0 dBXmID"
+                          >
+                            $NaN
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1497,7 +859,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                     className="StyledBox-sc-13pk1d4-0 dRJqWv"
                   >
                     <div
-                      className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                      className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
                     >
                       <label
                         className="StyledText-sc-1sadyjn-0 gtjeKK"
@@ -1507,13 +869,17 @@ exports[`FundingAgreementView Should render the form with proper values for cont
                       <div
                         className="StyledBox-sc-13pk1d4-0 exlMvl"
                       >
-                        <p
-                          className="StyledParagraph-tbetod-0 dBXmID"
+                        <div
+                          className="StyledBox-sc-13pk1d4-0 ffeAql"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
-                          $NaN
-                        </p>
+                          <p
+                            className="StyledParagraph-tbetod-0 dBXmID"
+                          >
+                            $NaN
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1551,16 +917,20 @@ exports[`FundingAgreementView Should render the form with proper values for cont
               open={true}
             >
               <div
-                className="sc-bdVaJa cZtluK FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
+                className="sc-bdVaJa hxlonW FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"
               >
                 <div
                   className="StyledBox-sc-13pk1d4-0 exlMvl"
                 >
-                  <p
-                    className="StyledParagraph-tbetod-0 dBXmID"
+                  <div
+                    className="StyledBox-sc-13pk1d4-0 ffeAql"
                     onBlur={[Function]}
                     onFocus={[Function]}
-                  />
+                  >
+                    <p
+                      className="StyledParagraph-tbetod-0 dBXmID"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

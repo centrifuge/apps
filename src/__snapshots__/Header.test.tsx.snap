@@ -2,7 +2,7 @@
 
 exports[`Header Should render an empty header 1`] = `
 <div
-  className="StyledBox-sc-13pk1d4-0 iFsBNS"
+  className="StyledBox-sc-13pk1d4-0 hCuBIL"
 >
   <div
     className="StyledBox-sc-13pk1d4-0 cJCWCR"
@@ -36,7 +36,7 @@ exports[`Header Should render an empty header 1`] = `
 
 exports[`Header Should render the Header 1`] = `
 <div
-  className="StyledBox-sc-13pk1d4-0 iFsBNS"
+  className="StyledBox-sc-13pk1d4-0 hCuBIL"
 >
   <div
     className="StyledBox-sc-13pk1d4-0 cJCWCR"

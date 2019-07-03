@@ -33,7 +33,7 @@ export class TransferDetailsController {
       data: {
         sender_id: transferDetailsRequest.sender_id,
         recipient_id: transferDetailsRequest.recipient_id,
-        amount: transferDetailsRequest.amount,
+        amount: transferDetailsRequest.amount.toString(),
         currency: transferDetailsRequest.currency,
         scheduled_date: transferDetailsRequest.scheduled_date,
         settlement_date: transferDetailsRequest.settlement_date,
@@ -65,7 +65,7 @@ export class TransferDetailsController {
         transfer_id: updateRequest.transfer_id,
         sender_id: updateRequest.sender_id,
         recipient_id: updateRequest.recipient_id,
-        amount: updateRequest.amount,
+        amount: updateRequest.amount.toString(),
         currency: updateRequest.currency,
         scheduled_date: updateRequest.scheduled_date,
         settlement_date: updateRequest.settlement_date,
@@ -87,8 +87,8 @@ export class TransferDetailsController {
 
   async updateDbOnJobCompletion (transferDetailsResponse: UserapiTransferDetailResponse, req) {
     await this.centrifugeService.pullForJobComplete(transferDetailsResponse.header.job_id, req.user.account);
-    const invoiceWithTransferDetails = await this.centrifugeService.invoices.get(req.document_id, req.user.account);
-    const transferList = await this.centrifugeService.transfer.listTransferDetails(req.user.account, req.document_id)
+    const invoiceWithTransferDetails = await this.centrifugeService.invoices.get(transferDetailsResponse.header.document_id, req.user.account);
+    const transferList = await this.centrifugeService.transfer.listTransferDetails(req.user.account, transferDetailsResponse.header.document_id)
     // Update the document in the database
     await this.databaseService.invoices.update(
         { 'header.document_id': transferDetailsResponse.header.document_id, 'ownerId': req.user._id },

@@ -7,6 +7,7 @@ import { RouteComponentProps, withRouter } from 'react-router';
 import { formatCurrency, formatDate } from '../common/formaters';
 import { FunFundingData, FunFundingSignature } from '../../clients/centrifuge-node';
 import { Preloader } from '../components/Preloader';
+import { getInvoiceFundingStatus } from '../common/status';
 
 
 type FundingAgreements = FunFundingData & {
@@ -60,13 +61,14 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
               {
                 property: 'sender_company_name',
                 header: 'Borrower',
+                render: datum => datum.data.sender_company_name,
               },
               {
                 property: 'agreement_id',
                 header: 'Funding agreement ID',
                 render: datum => {
                   return <Box width={'small'}>
-                    <Text style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>{datum.agreement_id}</Text>
+                    <Text style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>{datum.data.agreement_id}</Text>
                   </Box>;
                 },
 
@@ -74,13 +76,14 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
               {
                 property: 'number',
                 header: 'Invoice number',
+                render: datum => datum.data.number,
               },
               {
                 property: 'net_amount',
                 header: 'Net amount',
                 align: 'end',
                 render: datum => {
-                  return formatCurrency(datum.net_amount, datum.currency);
+                  return formatCurrency(datum.data.net_amount, datum.data.currency);
                 },
               },
               {
@@ -88,7 +91,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
                 header: 'Funding amount',
                 align: 'end',
                 render: datum => {
-                  return formatCurrency(datum.amount, datum.currency);
+                  return formatCurrency(datum.fundingAgreement.funding.amount, datum.fundingAgreement.funding.currency);
                 },
               },
 
@@ -96,7 +99,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
                 property: 'repayment_due_date',
                 header: 'Repayment due date',
                 render: datum => {
-                  return formatDate(datum.repayment_due_date);
+                  return formatDate(datum.fundingAgreement.funding.repayment_due_date);
                 },
               },
 
@@ -104,7 +107,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
                 property: 'invoice_status',
                 header: 'Funding status',
                 render: datum => {
-                  return datum.signatures ? <Text color={'status-ok'}>Accepted</Text> : <Text>Received</Text>;
+                  return getInvoiceFundingStatus(datum);
                 },
               },
               {
@@ -133,16 +136,8 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
 
 const mapStateToProps = (state) => {
   return {
-    fundingAgreements:
-      state.invoices.get.data &&
-      (state.invoices.get.data.filter(item => item.fundingAgreement).map(response => ({
-        ...response.fundingAgreement.funding,
-        signatures: response.fundingAgreement.signatures,
-        sender_company_name: response.data.sender_company_name,
-        net_amount: response.data.net_amount,
-        number: response.data.number,
-        _id: response._id,
-      }))),
+    fundingAgreements: state.invoices.get.data &&
+      state.invoices.get.data.filter(item => item.fundingAgreement),
     loading: state.invoices.get.loading,
   };
 };

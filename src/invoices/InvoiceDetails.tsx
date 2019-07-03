@@ -1,18 +1,17 @@
 import React from 'react';
 import { Box } from 'grommet';
-import { LabelValuePair } from '../common/interfaces';
-import { FunFundingResponseData } from '../../clients/centrifuge-node';
+import { InvoiceResponse, LabelValuePair } from '../common/interfaces';
 import { DisplayField } from '../components/DisplayField';
 import { Sender } from './invoice-details-partials/Sender';
 import { Recipient } from './invoice-details-partials/Recipient';
 import { Details } from './invoice-details-partials/Details';
 import { Section } from '../components/Section';
 import { FundingAgreement } from './invoice-details-partials/FundingAgreement';
-import { Invoice } from '../common/models/invoice';
+import { TransferDetail } from './invoice-details-partials/TransferDetail';
 
 type ConnectedInvoiceDetailsProps = {
-  invoice: Invoice;
-  fundingAgreement: FunFundingResponseData | null,
+  invoice: InvoiceResponse;
+  fundingStatus: string,
   contacts: LabelValuePair[];
 }
 
@@ -21,9 +20,21 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
   displayName = 'InvoiceDetails';
 
   render() {
-    const { invoice, contacts, fundingAgreement } = this.props;
+    const {
+      invoice,
+      contacts,
+
+      fundingStatus,
+    } = this.props;
+
     const columnGap = 'medium';
     const sectionGap = 'medium';
+
+    const invoiceData = invoice.data || {currency:'USD'} ;
+    const transferDetails = invoice.transferDetails || [];
+    const fundingAgreement = invoice.fundingAgreement;
+    const fundingTransfer = transferDetails[0];
+    const repaymentTransfer = transferDetails[1];
 
     return (
       <Box>
@@ -33,24 +44,29 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
             <Box>
               <DisplayField
                 label="Invoice number"
-                value={invoice!.number}
+                value={invoiceData!.number}
               />
             </Box>
           </Box>
 
           {/*Funding Agreement*/}
 
-          {fundingAgreement && <FundingAgreement fundingAgreement={fundingAgreement} columnGap={columnGap}/>}
+          {fundingAgreement &&
+          <FundingAgreement fundingStatus={fundingStatus} fundingAgreement={fundingAgreement} columnGap={columnGap}/>}
+          {fundingTransfer &&
+          <TransferDetail transfer={fundingTransfer} title={'Funding transfer'} columnGap={columnGap}/>}
+          {repaymentTransfer &&
+          <TransferDetail transfer={repaymentTransfer} title={'Repayment transfer'} columnGap={columnGap}/>}
 
           {/*Sender and Recipient */}
           <Box direction="row" gap={columnGap}>
             <Sender
-              invoice={invoice}
+              invoice={invoiceData}
               columnGap={columnGap}
               contacts={contacts}
             />
             <Recipient
-              invoice={invoice}
+              invoice={invoiceData}
               columnGap={columnGap}
               contacts={contacts}
             />
@@ -60,7 +76,7 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
           {/* Details section */}
           <Box gap={columnGap}>
             <Details
-              invoice={invoice}
+              invoice={invoiceData}
               columnGap={columnGap}
             />
           </Box>
@@ -90,7 +106,7 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
           <Box direction="row">
             <Section headingLevel="5" title="Comments" basis={'1/2'}>
               <DisplayField
-                value={invoice!.comment}
+                value={invoiceData!.comment}
               />
             </Section>
 

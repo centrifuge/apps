@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Button, Heading } from 'grommet';
-import { LabelValuePair } from '../common/interfaces';
+import { InvoiceResponse, LabelValuePair } from '../common/interfaces';
 import { connect } from 'react-redux';
-import { DocumentResponseHeader, FunFundingResponse, FunFundingResponseData } from '../../clients/centrifuge-node';
+import { FunFundingResponse } from '../../clients/centrifuge-node';
 import { getInvoiceById, resetGetInvoiceById } from '../store/actions/invoices';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
 import { RouteComponentProps, withRouter } from 'react-router';
@@ -17,22 +17,29 @@ import { dateToString } from '../common/formaters';
 import { createFunding, resetCreateFunding } from '../store/actions/funding';
 import { InvoiceDetails } from './InvoiceDetails';
 import { RequestState } from '../store/reducers/http-request-reducer';
-import { Invoice } from '../common/models/invoice';
 import { Preloader } from '../components/Preloader';
+import { createTransferDetails, updateTransferDetails } from '../store/actions/transfer-details';
+import TransferDetailsForm from './TransferDetailsForm';
+import { getInvoiceFundingStatus, STATUS } from '../common/status';
+import { TransferDetailsRequest } from '../common/models/transfer-details';
+
 
 type ConnectedInvoiceViewProps = {
   getInvoiceById: (id: string) => void;
   resetGetInvoiceById: () => void;
   resetCreateFunding: () => void;
   createFunding: (fundingRequest: FundingRequest) => void;
+  createTransferDetails: typeof createTransferDetails;
+  updateTransferDetails: typeof updateTransferDetails;
   getContacts: () => void;
   resetGetContacts: () => void;
-  invoice: Invoice | null;
-  header: DocumentResponseHeader | null,
-  fundingAgreement: FunFundingResponseData | null,
+  invoice: InvoiceResponse | null;
+  transferDetails: any | null,
   id: string | null,
   contacts?: LabelValuePair[];
   creatingFunding: RequestState<FunFundingResponse>;
+  creatingTransferDetails: RequestState<TransferDetailsRequest>;
+  updatingTransferDetails: RequestState<TransferDetailsRequest>;
 } & RouteComponentProps<{ id?: string }>;
 
 export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
@@ -40,6 +47,7 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
   displayName = 'InvoiceView';
   state = {
     requestFunding: false,
+    addTransferDetails: false,
   };
 
   componentDidMount() {
@@ -49,6 +57,9 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
     }
   }
 
+  openTransferDetails = () => {
+    this.setState({ addTransferDetails: true });
+  };
 
   closeFundingRequest = () => {
     this.setState({ requestFunding: false });
@@ -63,6 +74,31 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
     this.props.createFunding(fundingRequest);
   };
 
+  closeTransferDetails = () => {
+    this.setState({ addTransferDetails: false });
+  };
+
+  submitTransferDetails = (transferDetails) => {
+    this.closeTransferDetails();
+    const { createTransferDetails } = this.props;
+    createTransferDetails(transferDetails);
+  };
+
+  confirmFunding = () => {
+    const { updateTransferDetails, invoice } = this.props;
+
+    const fundingTransfer = {
+      ...invoice!.transferDetails![0],
+      document_id: invoice!.header!.document_id,
+      invoice_id: invoice!._id,
+      status: 'settled',
+      settlement_date: dateToString(new Date()),
+    };
+
+
+    updateTransferDetails(fundingTransfer);
+  };
+
   componentWillUnmount() {
     this.props.resetGetContacts();
     this.props.resetGetInvoiceById();
@@ -70,12 +106,17 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
   }
 
   render() {
-    const { id, header, invoice, contacts, fundingAgreement, creatingFunding } = this.props;
-    const { requestFunding } = this.state;
-    const fundingRequest: FundingRequest = new FundingRequest();
+    const {
+      invoice,
+      contacts,
+      creatingFunding,
+      creatingTransferDetails,
+      updatingTransferDetails,
 
+    } = this.props;
+    const { requestFunding, addTransferDetails } = this.state;
 
-    if (!invoice || !contacts) {
+    if (!invoice || !contacts || !invoice.data) {
       return <Preloader message="Loading"/>;
     }
 
@@ -83,33 +124,78 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
       return <Preloader message="Requesting funding agreement" withSound={true}/>;
     }
 
-    // TODO make currency and due_date mandatory in invoice
+    if (updatingTransferDetails && updatingTransferDetails.loading) {
+      return <Preloader message="Confirming funding" withSound={true}/>;
+    }
+
+    if (creatingTransferDetails && creatingTransferDetails.loading) {
+      return <Preloader message="Recording repayment transfer" withSound={true}/>;
+    }
+
+    const {
+      _id,
+      header,
+      data,
+      fundingAgreement,
+    } = invoice;
+
+    const fundingStatus = getInvoiceFundingStatus(invoice);
+    const fundingRequest: FundingRequest = new FundingRequest();
+
+    const repaymentDetails = fundingAgreement ? {
+      invoice_id: invoice!._id,
+      document_id: header!.document_id,
+      currency: 'DAI',
+      sender_id: fundingAgreement!.funding!.funder_id,
+      recipient_id: invoice!.data!.sender,
+      amount: 0,
+      transfer_type: 'crypto',
+      status: 'opened',
+    } : {};
+
     //@ts-ignore
-    fundingRequest.invoice_id = id;
+    fundingRequest.invoice_id = _id;
     //@ts-ignore
-    fundingRequest.currency = invoice.currency;
+    fundingRequest.currency = data.currency;
     //@ts-ignore
     fundingRequest.document_id = header.document_id;
-    fundingRequest.invoice_amount = parseFloat(invoice.gross_amount || '');
+    fundingRequest.invoice_amount = parseFloat(data.gross_amount || '');
     //@ts-ignore
-    fundingRequest.repayment_due_date = invoice.date_due || dateToString(new Date());
+    fundingRequest.repayment_due_date = data.date_due || dateToString(new Date());
 
     // We can fund invoices only that have date due greated then today
     // and have the status unpaid
     const canRequestFunding = !fundingAgreement
       //@ts-ignore
-      && (new Date(invoice.date_due)) > (new Date())
-      && invoice.status === 'unpaid'
-      && invoice.currency
-      && invoice.date_due;
+      && (new Date(data.date_due)) > (new Date())
+      && data.status === 'unpaid'
+      && data.currency
+      && data.date_due;
+
+
+    const canSettleFunding = fundingStatus === STATUS.SENDING_FUNDING;
+    const canRecordPayment = fundingStatus === STATUS.FUNDED;
 
 
     return (
       <>
         <Modal
+          opened={addTransferDetails}
+          headingProps={{ level: 3 }}
+          title={`Record repayment`}
+          onClose={this.closeTransferDetails}
+        >
+          <TransferDetailsForm
+            onSubmit={this.submitTransferDetails}
+            onDiscard={this.closeTransferDetails}
+            contacts={contacts}
+            transferDetails={repaymentDetails}
+          />
+        </Modal>
+        <Modal
           opened={requestFunding}
           headingProps={{ level: 3 }}
-          title={`Request funding for invoice #${invoice.number}`}
+          title={`Request funding for invoice #${data.number}`}
           onClose={this.closeFundingRequest}
         >
           <FundingRequestForm
@@ -127,29 +213,49 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
               </Link>
 
               <Heading level="3">
-                Invoice #{invoice!.number}
+                Invoice #{invoice!.data!.number}
               </Heading>
             </Box>
             <Box direction="row" gap="medium">
-              <Button
-                disabled={!canRequestFunding}
-                onClick={() => {
-                  id && this.props.history.push(
-                    invoiceRoutes.edit.replace(':id', id),
-                  );
-                }}
-                label="Edit"
-              />
-              <Button
-                disabled={!canRequestFunding}
-                primary
-                onClick={this.openFundingRequest}
-                label="Request Funding"
-              />
+              {
+                canRequestFunding && <Button
+                  onClick={() => {
+                    _id && this.props.history.push(
+                      invoiceRoutes.edit.replace(':id', _id),
+                    );
+                  }}
+                  label="Edit"
+                />
+              }
+              {
+                canRequestFunding && <Button
+                  disabled={!canRequestFunding}
+                  primary
+                  onClick={this.openFundingRequest}
+                  label="Request funding"
+                />
+              }
+              {
+                canRecordPayment && <Button
+                  primary
+                  label="Record repayment transfer"
+                  onClick={this.openTransferDetails}
+                />
+              }
+              {
+                canSettleFunding && <Button
+                  primary
+                  label="Confirm as funded"
+                  onClick={this.confirmFunding}
+                />
+              }
             </Box>
           </Box>
 
-          <InvoiceDetails invoice={invoice} fundingAgreement={fundingAgreement} contacts={contacts}/>
+          <InvoiceDetails
+            invoice={invoice}
+            fundingStatus={fundingStatus}
+            contacts={contacts}/>
         </Box>
       </>
     );
@@ -160,18 +266,9 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
 
 const mapStateToProps = (state) => {
   return {
-    ...(!state.invoices.getById.data ? {
-      invoice: null,
-      header: null,
-      fundingAgreement: null,
-      id: null,
-    } : {
-      invoice: state.invoices.getById.data.data,
-      id: state.invoices.getById.data._id,
-      fundingAgreement: state.invoices.getById.data.fundingAgreement,
-      header: state.invoices.getById.data.header,
-    }),
-
+    invoice: state.invoices.getById.data,
+    creatingTransferDetails: state.transferDetails.create,
+    updatingTransferDetails: state.transferDetails.update,
     creatingFunding: state.funding.create,
     contacts: state.contacts.get.data
       ? (state.contacts.get.data.map(contact => ({
@@ -191,6 +288,8 @@ export const ConnectedInvoiceView = connect(
     resetGetInvoiceById,
     createFunding,
     resetCreateFunding,
+    createTransferDetails,
+    updateTransferDetails,
   },
 )(withRouter(InvoiceView));
 

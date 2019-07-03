@@ -24,9 +24,6 @@ describe('FundingAgreementView', () => {
   };
 
   const defaultProps = {
-    header: {
-      document_id: 'document_id',
-    },
     match: {
       params: {
         id: '3333',
@@ -50,7 +47,6 @@ describe('FundingAgreementView', () => {
       },
     ];
     const bodyShallow = renderer.create(
-      // TODO Test fails when using Axis Theme. Investigate!!!
       <AxisTheme>
         <BrowserRouter>
           <DynamicParamFundingAgreementView
@@ -69,10 +65,15 @@ describe('FundingAgreementView', () => {
 
   it('Should render the form with proper values for contact fields', () => {
     const invoice = {
-      sender: '0x1111',
-      recipient: '0x1111',
-      payee: '0x11112',
-      currency: 'USD',
+      header: {
+        document_id: 'document_id',
+      },
+      data: {
+        sender: '0x1111',
+        recipient: '0x1111',
+        payee: '0x11112',
+        currency: 'USD',
+      }
     };
     const contacts = [
       {
@@ -127,6 +128,5 @@ describe('FundingAgreementView', () => {
     ).toJSON();
     expect(bodyShallow).toMatchSnapshot();
   });
-
 
 });

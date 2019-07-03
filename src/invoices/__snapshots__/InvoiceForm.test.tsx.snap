@@ -6,7 +6,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
   margin="none"
   pad={
     Object {
-      "bottom": "large",
+      "bottom": "xlarge",
     }
   }
   responsive={true}
@@ -16,7 +16,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
     margin="none"
     pad={
       Object {
-        "bottom": "large",
+        "bottom": "xlarge",
       }
     }
     responsive={true}
@@ -26,13 +26,13 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
       margin="none"
       pad={
         Object {
-          "bottom": "large",
+          "bottom": "xlarge",
         }
       }
       responsive={true}
     >
       <div
-        className="StyledBox-sc-13pk1d4-0 hOJKqu"
+        className="StyledBox-sc-13pk1d4-0 hMUzWw"
       >
         <form
           onSubmit={[Function]}
@@ -60,317 +60,443 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                 <div
                   className="StyledBox-sc-13pk1d4-0 IRSNj"
                 >
-                  <WithTheme(Box)
-                    direction="row"
-                    margin="none"
-                    pad="none"
-                    responsive={true}
-                  >
-                    <Box
-                      direction="row"
+                  <WithTheme(Component)>
+                    <WithTheme(Box)
+                      direction="column"
                       margin="none"
                       pad="none"
                       responsive={true}
                     >
-                      <StyledBox
-                        directionProp="row"
+                      <Box
+                        direction="column"
                         margin="none"
                         pad="none"
                         responsive={true}
                       >
-                        <div
-                          className="StyledBox-sc-13pk1d4-0 ffeAql"
+                        <StyledBox
+                          directionProp="column"
+                          margin="none"
+                          pad="none"
+                          responsive={true}
                         >
-                          <WithTheme(Box)
-                            basis="1/4"
-                            direction="column"
-                            margin="none"
-                            pad="none"
-                            responsive={true}
+                          <div
+                            className="StyledBox-sc-13pk1d4-0 IRSNj"
                           >
-                            <Box
-                              basis="1/4"
-                              direction="column"
+                            <WithTheme(Box)
+                              direction="row"
+                              gap="medium"
                               margin="none"
                               pad="none"
                               responsive={true}
                             >
-                              <StyledBox
-                                basis="1/4"
-                                directionProp="column"
+                              <Box
+                                direction="row"
+                                gap="medium"
                                 margin="none"
                                 pad="none"
                                 responsive={true}
                               >
-                                <div
-                                  className="StyledBox-sc-13pk1d4-0 dRJqWv"
+                                <StyledBox
+                                  directionProp="row"
+                                  margin="none"
+                                  pad="none"
+                                  responsive={true}
                                 >
-                                  <WithTheme(FormField)
-                                    label="Invoice number"
+                                  <div
+                                    className="StyledBox-sc-13pk1d4-0 ffeAql"
                                   >
-                                    <WithTheme(FormField)
-                                      focus={false}
-                                      label="Invoice number"
-                                      onBlur={[Function]}
-                                      onFocus={[Function]}
+                                    <StyledHeading
+                                      as="h2"
+                                      level={2}
+                                      responsive={true}
+                                      style={
+                                        Object {
+                                          "minWidth": "100px",
+                                        }
+                                      }
                                     >
-                                      <FormField__FormFieldBox
-                                        direction="column"
-                                        margin={
+                                      <h2
+                                        className="StyledHeading-sc-1rdh4aw-0 yhirM"
+                                        style={
                                           Object {
-                                            "bottom": "small",
+                                            "minWidth": "100px",
                                           }
                                         }
-                                        pad="none"
-                                        responsive={true}
+                                      />
+                                    </StyledHeading>
+                                  </div>
+                                </StyledBox>
+                              </Box>
+                            </WithTheme(Box)>
+                            <WithTheme(Collapsible)
+                              open={true}
+                            >
+                              <Collapsible__AnimatedBox
+                                animate={false}
+                                aria-hidden={false}
+                                direction="column"
+                                margin="none"
+                                open={true}
+                                pad="none"
+                                responsive={true}
+                              >
+                                <WithTheme(Box)
+                                  animate={false}
+                                  aria-hidden={false}
+                                  className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW"
+                                  direction="column"
+                                  margin="none"
+                                  open={true}
+                                  pad="none"
+                                  responsive={true}
+                                >
+                                  <Box
+                                    animate={false}
+                                    aria-hidden={false}
+                                    className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW"
+                                    direction="column"
+                                    margin="none"
+                                    open={true}
+                                    pad="none"
+                                    responsive={true}
+                                  >
+                                    <StyledBox
+                                      animate={false}
+                                      aria-hidden={false}
+                                      className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW"
+                                      directionProp="column"
+                                      margin="none"
+                                      open={true}
+                                      pad="none"
+                                      responsive={true}
+                                    >
+                                      <div
+                                        aria-hidden={false}
+                                        className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
+                                        open={true}
                                       >
                                         <WithTheme(Box)
-                                          className="FormField__FormFieldBox-m9hood-0 eshLKp"
-                                          direction="column"
-                                          margin={
-                                            Object {
-                                              "bottom": "small",
-                                            }
-                                          }
+                                          direction="row"
+                                          margin="none"
                                           pad="none"
                                           responsive={true}
                                         >
                                           <Box
-                                            className="FormField__FormFieldBox-m9hood-0 eshLKp"
-                                            direction="column"
-                                            margin={
-                                              Object {
-                                                "bottom": "small",
-                                              }
-                                            }
+                                            direction="row"
+                                            margin="none"
                                             pad="none"
                                             responsive={true}
                                           >
                                             <StyledBox
-                                              className="FormField__FormFieldBox-m9hood-0 eshLKp"
-                                              directionProp="column"
-                                              margin={
-                                                Object {
-                                                  "bottom": "small",
-                                                }
-                                              }
+                                              directionProp="row"
+                                              margin="none"
                                               pad="none"
                                               responsive={true}
                                             >
                                               <div
-                                                className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+                                                className="StyledBox-sc-13pk1d4-0 ffeAql"
                                               >
-                                                <StyledText
-                                                  as="label"
-                                                  level={1}
-                                                  margin={
-                                                    Object {
-                                                      "horizontal": "small",
-                                                      "vertical": "xsmall",
-                                                    }
-                                                  }
-                                                >
-                                                  <label
-                                                    className="StyledText-sc-1sadyjn-0 bKLvLm"
-                                                  >
-                                                    Invoice number
-                                                  </label>
-                                                </StyledText>
                                                 <WithTheme(Box)
-                                                  border={
-                                                    Object {
-                                                      "color": "border",
-                                                      "error": Object {
-                                                        "color": Object {
-                                                          "dark": "white",
-                                                          "light": "status-critical",
-                                                        },
-                                                      },
-                                                      "position": "inner",
-                                                      "side": "bottom",
-                                                    }
-                                                  }
+                                                  basis="1"
                                                   direction="column"
                                                   margin="none"
                                                   pad="none"
                                                   responsive={true}
                                                 >
                                                   <Box
-                                                    border={
-                                                      Object {
-                                                        "color": "border",
-                                                        "error": Object {
-                                                          "color": Object {
-                                                            "dark": "white",
-                                                            "light": "status-critical",
-                                                          },
-                                                        },
-                                                        "position": "inner",
-                                                        "side": "bottom",
-                                                      }
-                                                    }
+                                                    basis="1"
                                                     direction="column"
                                                     margin="none"
                                                     pad="none"
                                                     responsive={true}
                                                   >
                                                     <StyledBox
-                                                      border={
-                                                        Object {
-                                                          "color": "border",
-                                                          "error": Object {
-                                                            "color": Object {
-                                                              "dark": "white",
-                                                              "light": "status-critical",
-                                                            },
-                                                          },
-                                                          "position": "inner",
-                                                          "side": "bottom",
-                                                        }
-                                                      }
+                                                      basis="1"
                                                       directionProp="column"
                                                       margin="none"
                                                       pad="none"
                                                       responsive={true}
                                                     >
                                                       <div
-                                                        className="StyledBox-sc-13pk1d4-0 gZSidW"
+                                                        className="StyledBox-sc-13pk1d4-0 lmLdYD"
                                                       >
-                                                        <WithTheme(TextInput)
-                                                          dropAlign={
-                                                            Object {
-                                                              "left": "left",
-                                                              "top": "bottom",
-                                                            }
-                                                          }
-                                                          focusIndicator={false}
-                                                          key=".0"
-                                                          messages={
-                                                            Object {
-                                                              "enterSelect": "(Press Enter to Select)",
-                                                              "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
-                                                              "suggestionsCount": "suggestions available",
-                                                              "suggestionsExist": "This input has suggestions use arrow keys to navigate",
-                                                            }
-                                                          }
-                                                          name="number"
-                                                          onBlur={[Function]}
-                                                          onChange={[Function]}
-                                                          onFocus={[Function]}
-                                                          plain={true}
+                                                        <WithTheme(FormField)
+                                                          label="Invoice number"
                                                         >
-                                                          <WithTheme(TextInput)
-                                                            dropAlign={
-                                                              Object {
-                                                                "left": "left",
-                                                                "top": "bottom",
-                                                              }
-                                                            }
+                                                          <WithTheme(FormField)
                                                             focus={false}
-                                                            focusIndicator={false}
-                                                            messages={
-                                                              Object {
-                                                                "enterSelect": "(Press Enter to Select)",
-                                                                "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
-                                                                "suggestionsCount": "suggestions available",
-                                                                "suggestionsExist": "This input has suggestions use arrow keys to navigate",
-                                                              }
-                                                            }
-                                                            name="number"
+                                                            label="Invoice number"
                                                             onBlur={[Function]}
-                                                            onChange={[Function]}
                                                             onFocus={[Function]}
-                                                            plain={true}
                                                           >
-                                                            <TextInput
-                                                              dropAlign={
+                                                            <FormField__FormFieldBox
+                                                              direction="column"
+                                                              margin={
                                                                 Object {
-                                                                  "left": "left",
-                                                                  "top": "bottom",
+                                                                  "bottom": "small",
                                                                 }
                                                               }
-                                                              focus={false}
-                                                              focusIndicator={false}
-                                                              messages={
-                                                                Object {
-                                                                  "enterSelect": "(Press Enter to Select)",
-                                                                  "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
-                                                                  "suggestionsCount": "suggestions available",
-                                                                  "suggestionsExist": "This input has suggestions use arrow keys to navigate",
-                                                                }
-                                                              }
-                                                              name="number"
-                                                              onBlur={[Function]}
-                                                              onChange={[Function]}
-                                                              onFocus={[Function]}
-                                                              plain={true}
+                                                              pad="none"
+                                                              responsive={true}
                                                             >
-                                                              <TextInput
-                                                                announce={[Function]}
-                                                                dropAlign={
+                                                              <WithTheme(Box)
+                                                                className="FormField__FormFieldBox-m9hood-0 eshLKp"
+                                                                direction="column"
+                                                                margin={
                                                                   Object {
-                                                                    "left": "left",
-                                                                    "top": "bottom",
+                                                                    "bottom": "small",
                                                                   }
                                                                 }
-                                                                focus={false}
-                                                                focusIndicator={false}
-                                                                messages={
-                                                                  Object {
-                                                                    "enterSelect": "(Press Enter to Select)",
-                                                                    "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
-                                                                    "suggestionsCount": "suggestions available",
-                                                                    "suggestionsExist": "This input has suggestions use arrow keys to navigate",
-                                                                  }
-                                                                }
-                                                                name="number"
-                                                                onBlur={[Function]}
-                                                                onChange={[Function]}
-                                                                onFocus={[Function]}
-                                                                plain={true}
+                                                                pad="none"
+                                                                responsive={true}
                                                               >
-                                                                <StyledTextInput__StyledTextInputContainer
-                                                                  plain={true}
+                                                                <Box
+                                                                  className="FormField__FormFieldBox-m9hood-0 eshLKp"
+                                                                  direction="column"
+                                                                  margin={
+                                                                    Object {
+                                                                      "bottom": "small",
+                                                                    }
+                                                                  }
+                                                                  pad="none"
+                                                                  responsive={true}
                                                                 >
-                                                                  <div
-                                                                    className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 kYQCpm"
-                                                                  >
-                                                                    <StyledTextInput
-                                                                      announce={[Function]}
-                                                                      autoComplete="off"
-                                                                      focus={false}
-                                                                      focusIndicator={false}
-                                                                      messages={
-                                                                        Object {
-                                                                          "enterSelect": "(Press Enter to Select)",
-                                                                          "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
-                                                                          "suggestionsCount": "suggestions available",
-                                                                          "suggestionsExist": "This input has suggestions use arrow keys to navigate",
-                                                                        }
+                                                                  <StyledBox
+                                                                    className="FormField__FormFieldBox-m9hood-0 eshLKp"
+                                                                    directionProp="column"
+                                                                    margin={
+                                                                      Object {
+                                                                        "bottom": "small",
                                                                       }
-                                                                      name="number"
-                                                                      onBlur={[Function]}
-                                                                      onChange={[Function]}
-                                                                      onFocus={[Function]}
-                                                                      onKeyDown={[Function]}
-                                                                      plain={true}
+                                                                    }
+                                                                    pad="none"
+                                                                    responsive={true}
+                                                                  >
+                                                                    <div
+                                                                      className="FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
                                                                     >
-                                                                      <input
-                                                                        autoComplete="off"
-                                                                        className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                                                                        name="number"
-                                                                        onBlur={[Function]}
-                                                                        onChange={[Function]}
-                                                                        onFocus={[Function]}
-                                                                        onKeyDown={[Function]}
-                                                                      />
-                                                                    </StyledTextInput>
-                                                                  </div>
-                                                                </StyledTextInput__StyledTextInputContainer>
-                                                              </TextInput>
-                                                            </TextInput>
-                                                          </WithTheme(TextInput)>
-                                                        </WithTheme(TextInput)>
+                                                                      <StyledText
+                                                                        as="label"
+                                                                        level={1}
+                                                                        margin={
+                                                                          Object {
+                                                                            "horizontal": "small",
+                                                                            "vertical": "xsmall",
+                                                                          }
+                                                                        }
+                                                                      >
+                                                                        <label
+                                                                          className="StyledText-sc-1sadyjn-0 bKLvLm"
+                                                                        >
+                                                                          Invoice number
+                                                                        </label>
+                                                                      </StyledText>
+                                                                      <WithTheme(Box)
+                                                                        border={
+                                                                          Object {
+                                                                            "color": "border",
+                                                                            "error": Object {
+                                                                              "color": Object {
+                                                                                "dark": "white",
+                                                                                "light": "status-critical",
+                                                                              },
+                                                                            },
+                                                                            "position": "inner",
+                                                                            "side": "bottom",
+                                                                          }
+                                                                        }
+                                                                        direction="column"
+                                                                        margin="none"
+                                                                        pad="none"
+                                                                        responsive={true}
+                                                                      >
+                                                                        <Box
+                                                                          border={
+                                                                            Object {
+                                                                              "color": "border",
+                                                                              "error": Object {
+                                                                                "color": Object {
+                                                                                  "dark": "white",
+                                                                                  "light": "status-critical",
+                                                                                },
+                                                                              },
+                                                                              "position": "inner",
+                                                                              "side": "bottom",
+                                                                            }
+                                                                          }
+                                                                          direction="column"
+                                                                          margin="none"
+                                                                          pad="none"
+                                                                          responsive={true}
+                                                                        >
+                                                                          <StyledBox
+                                                                            border={
+                                                                              Object {
+                                                                                "color": "border",
+                                                                                "error": Object {
+                                                                                  "color": Object {
+                                                                                    "dark": "white",
+                                                                                    "light": "status-critical",
+                                                                                  },
+                                                                                },
+                                                                                "position": "inner",
+                                                                                "side": "bottom",
+                                                                              }
+                                                                            }
+                                                                            directionProp="column"
+                                                                            margin="none"
+                                                                            pad="none"
+                                                                            responsive={true}
+                                                                          >
+                                                                            <div
+                                                                              className="StyledBox-sc-13pk1d4-0 gZSidW"
+                                                                            >
+                                                                              <WithTheme(TextInput)
+                                                                                dropAlign={
+                                                                                  Object {
+                                                                                    "left": "left",
+                                                                                    "top": "bottom",
+                                                                                  }
+                                                                                }
+                                                                                focusIndicator={false}
+                                                                                key=".0"
+                                                                                messages={
+                                                                                  Object {
+                                                                                    "enterSelect": "(Press Enter to Select)",
+                                                                                    "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                    "suggestionsCount": "suggestions available",
+                                                                                    "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                  }
+                                                                                }
+                                                                                name="number"
+                                                                                onBlur={[Function]}
+                                                                                onChange={[Function]}
+                                                                                onFocus={[Function]}
+                                                                                plain={true}
+                                                                              >
+                                                                                <WithTheme(TextInput)
+                                                                                  dropAlign={
+                                                                                    Object {
+                                                                                      "left": "left",
+                                                                                      "top": "bottom",
+                                                                                    }
+                                                                                  }
+                                                                                  focus={false}
+                                                                                  focusIndicator={false}
+                                                                                  messages={
+                                                                                    Object {
+                                                                                      "enterSelect": "(Press Enter to Select)",
+                                                                                      "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                      "suggestionsCount": "suggestions available",
+                                                                                      "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                    }
+                                                                                  }
+                                                                                  name="number"
+                                                                                  onBlur={[Function]}
+                                                                                  onChange={[Function]}
+                                                                                  onFocus={[Function]}
+                                                                                  plain={true}
+                                                                                >
+                                                                                  <TextInput
+                                                                                    dropAlign={
+                                                                                      Object {
+                                                                                        "left": "left",
+                                                                                        "top": "bottom",
+                                                                                      }
+                                                                                    }
+                                                                                    focus={false}
+                                                                                    focusIndicator={false}
+                                                                                    messages={
+                                                                                      Object {
+                                                                                        "enterSelect": "(Press Enter to Select)",
+                                                                                        "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                        "suggestionsCount": "suggestions available",
+                                                                                        "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                      }
+                                                                                    }
+                                                                                    name="number"
+                                                                                    onBlur={[Function]}
+                                                                                    onChange={[Function]}
+                                                                                    onFocus={[Function]}
+                                                                                    plain={true}
+                                                                                  >
+                                                                                    <TextInput
+                                                                                      announce={[Function]}
+                                                                                      dropAlign={
+                                                                                        Object {
+                                                                                          "left": "left",
+                                                                                          "top": "bottom",
+                                                                                        }
+                                                                                      }
+                                                                                      focus={false}
+                                                                                      focusIndicator={false}
+                                                                                      messages={
+                                                                                        Object {
+                                                                                          "enterSelect": "(Press Enter to Select)",
+                                                                                          "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                          "suggestionsCount": "suggestions available",
+                                                                                          "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                        }
+                                                                                      }
+                                                                                      name="number"
+                                                                                      onBlur={[Function]}
+                                                                                      onChange={[Function]}
+                                                                                      onFocus={[Function]}
+                                                                                      plain={true}
+                                                                                    >
+                                                                                      <StyledTextInput__StyledTextInputContainer
+                                                                                        plain={true}
+                                                                                      >
+                                                                                        <div
+                                                                                          className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 kYQCpm"
+                                                                                        >
+                                                                                          <StyledTextInput
+                                                                                            announce={[Function]}
+                                                                                            autoComplete="off"
+                                                                                            focus={false}
+                                                                                            focusIndicator={false}
+                                                                                            messages={
+                                                                                              Object {
+                                                                                                "enterSelect": "(Press Enter to Select)",
+                                                                                                "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                                "suggestionsCount": "suggestions available",
+                                                                                                "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                              }
+                                                                                            }
+                                                                                            name="number"
+                                                                                            onBlur={[Function]}
+                                                                                            onChange={[Function]}
+                                                                                            onFocus={[Function]}
+                                                                                            onKeyDown={[Function]}
+                                                                                            plain={true}
+                                                                                          >
+                                                                                            <input
+                                                                                              autoComplete="off"
+                                                                                              className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                                                                                              name="number"
+                                                                                              onBlur={[Function]}
+                                                                                              onChange={[Function]}
+                                                                                              onFocus={[Function]}
+                                                                                              onKeyDown={[Function]}
+                                                                                            />
+                                                                                          </StyledTextInput>
+                                                                                        </div>
+                                                                                      </StyledTextInput__StyledTextInputContainer>
+                                                                                    </TextInput>
+                                                                                  </TextInput>
+                                                                                </WithTheme(TextInput)>
+                                                                              </WithTheme(TextInput)>
+                                                                            </div>
+                                                                          </StyledBox>
+                                                                        </Box>
+                                                                      </WithTheme(Box)>
+                                                                    </div>
+                                                                  </StyledBox>
+                                                                </Box>
+                                                              </WithTheme(Box)>
+                                                            </FormField__FormFieldBox>
+                                                          </WithTheme(FormField)>
+                                                        </WithTheme(FormField)>
                                                       </div>
                                                     </StyledBox>
                                                   </Box>
@@ -379,17 +505,17 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                             </StyledBox>
                                           </Box>
                                         </WithTheme(Box)>
-                                      </FormField__FormFieldBox>
-                                    </WithTheme(FormField)>
-                                  </WithTheme(FormField)>
-                                </div>
-                              </StyledBox>
-                            </Box>
-                          </WithTheme(Box)>
-                        </div>
-                      </StyledBox>
-                    </Box>
-                  </WithTheme(Box)>
+                                      </div>
+                                    </StyledBox>
+                                  </Box>
+                                </WithTheme(Box)>
+                              </Collapsible__AnimatedBox>
+                            </WithTheme(Collapsible)>
+                          </div>
+                        </StyledBox>
+                      </Box>
+                    </WithTheme(Box)>
+                  </WithTheme(Component)>
                   <StyledBox__StyledBoxGap
                     directionProp="column"
                     gap="medium"
