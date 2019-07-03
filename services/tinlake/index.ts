@@ -12,7 +12,7 @@ export async function getTinlake() {
 
   const accounts = await web3.currentProvider.enable();
   const account = accounts[0];
-  // console.log(`Using account ${account}`);
+  console.log(`Using account ${account}`);
 
   tinlake = new Tinlake(web3.currentProvider, contractAddresses, {
     ethConfig: { from: account },

@@ -51,11 +51,9 @@ class LoanRepay extends React.Component<Props, State> {
     const { tinlake, loanId } = this.props;
     const { repayAmount } = this.state;
     const addresses = tinlake.contractAddresses;
+    const ethFrom = tinlake.ethConfig.from;
 
     try {
-      // get loan
-      const loan = await tinlake.getLoan(parseInt(loanId, 10));
-
       // approve currency
       const res0 = await tinlake.approveCurrency(addresses['PILE'], repayAmount);
       console.log(res0.txHash);
@@ -67,8 +65,8 @@ class LoanRepay extends React.Component<Props, State> {
       }
 
       // repay
-      const res1 = await tinlake.repay(loanId, repayAmount, bnToHex(loan.tokenId),
-                                       bnToHex(loan.tokenId));
+      const res1 = await tinlake.repay(loanId, repayAmount, ethFrom,
+                                       ethFrom);
 
       console.log('admit result');
       console.log(res1.txHash);

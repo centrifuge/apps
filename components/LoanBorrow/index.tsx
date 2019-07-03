@@ -48,6 +48,7 @@ class LoanBorrow extends React.Component<Props, State> {
 
     const { tinlake, loanId } = this.props;
     const addresses = tinlake.contractAddresses;
+    const ethFrom = tinlake.ethConfig.from;
 
     try {
       // get loan
@@ -66,7 +67,7 @@ class LoanBorrow extends React.Component<Props, State> {
       }
 
       // borrow
-      const res2 = await tinlake.borrow(loanId, bnToHex(loan.tokenId));
+      const res2 = await tinlake.borrow(loanId, ethFrom);
 
       console.log('admit result');
       console.log(res2.txHash);
@@ -94,7 +95,7 @@ class LoanBorrow extends React.Component<Props, State> {
         Could not find loan {loanId}</Alert>;
     }
 
-    const { status, principal, price, owner, debt } = singleLoan!;
+    const { status, principal, price, owner } = singleLoan!;
     const { borrowAmount, is, errorMsg } = this.state;
 
     return <Box>
@@ -103,7 +104,7 @@ class LoanBorrow extends React.Component<Props, State> {
 
       {is === 'loading' && 'Borrowing...'}
       {is === 'success' && <Alert type="success" margin={{ top: 'large' }}>
-        Successfully borrowed {debt.toString()} for Loan ID {loanId}</Alert>}
+        Successfully borrowed {borrowAmount} for Loan ID {loanId}</Alert>}
       {is === 'error' && <Alert type="error" margin={{ top: 'large' }}>
         <strong>Error borrowing for Loan ID {loanId}, see console for details</strong>
         {errorMsg && <div><br />{errorMsg}</div>}
