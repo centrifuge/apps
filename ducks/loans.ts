@@ -72,7 +72,7 @@ export function getLoans(tinlake: Tinlake):
 
     const ownerPromises: Promise<Address>[] = [];
     for (let i = 0; i < count.toNumber() - startingLoanId; i += 1) {
-      ownerPromises.push(tinlake.ownerOfNFT(loans[i].tokenId.toString()));
+      ownerPromises.push(tinlake.ownerOfLoan(`${i}`));
     }
     const owners: Address[] = [];
     for (let i = 0; i < count.toNumber() - startingLoanId; i += 1) {
@@ -121,7 +121,7 @@ export function getLoan(tinlake: Tinlake, loanId: number):
 
     let owner: Address;
     try {
-      owner = await tinlake.ownerOfNFT(loan.tokenId.toString());
+      owner = await tinlake.ownerOfLoan(`${loanId}`);
     } catch (e) {
       console.warn(`Could not get owner for Loan ID ${loanId}, NFT ID ${loan.tokenId.toString()}`);
       owner = '';

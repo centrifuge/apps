@@ -38,9 +38,9 @@ class LoanRepay extends React.Component<Props, State> {
   componentDidUpdate(nextProps: Props) {
     const loans = nextProps.loans;
     if (!loans || !loans.singleLoan) { return; }
-    const nextPrincipal = loans.singleLoan.principal.toString();
-    if (nextPrincipal !== this.state.repayAmount) {
-      this.setState({ repayAmount: loans.singleLoan.principal.toString() });
+    const nextDebt = loans.singleLoan.debt.toString();
+    if (nextDebt !== this.state.repayAmount) {
+      this.setState({ repayAmount: loans.singleLoan.debt.toString() });
     }
   }
 
@@ -49,11 +49,25 @@ class LoanRepay extends React.Component<Props, State> {
 
     const { tinlake, loanId } = this.props;
     const { repayAmount } = this.state;
-    const ethFrom = tinlake.ethConfig.from;
+    const addresses = tinlake.contractAddresses;
 
     try {
+      // get loan
+      const loan = await tinlake.getLoan(parseInt(loanId, 10));
+
+      // approve currency
+      const res0 = await tinlake.approveCurrency(addresses['PILE'], repayAmount);
+      console.log(res0.txHash);
+
+      if (res0.status !== SUCCESS_STATUS || res0.events[0].event.name !== 'Approval') {
+        console.log(res0);
+        this.setState({ is: 'error', errorMsg: JSON.stringify(res0) });
+        return;
+      }
+
       // repay
-      const res1 = await tinlake.repay(loanId, repayAmount, ethFrom, ethFrom);
+      const res1 = await tinlake.repay(loanId, repayAmount, loan.tokenId.toString(),
+                                       loan.tokenId.toString());
 
       console.log('admit result');
       console.log(res1.txHash);
@@ -86,7 +100,7 @@ class LoanRepay extends React.Component<Props, State> {
     const totalAmount = price.add(new BN(repayAmount));
 
     return <Box>
-      {status === 'Whitelisted' && owner === tinlake.ethConfig.from &&
+      {status === 'Ongoing' && owner === tinlake.ethConfig.from &&
         <Button primary onClick={this.repay}>Confirm</Button>}
 
       {is === 'loading' && 'Repaying...'}

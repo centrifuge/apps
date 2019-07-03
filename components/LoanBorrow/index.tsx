@@ -46,18 +46,33 @@ class LoanBorrow extends React.Component<Props, State> {
     this.setState({ is: 'loading' });
 
     const { tinlake, loanId } = this.props;
-    const ethFrom = tinlake.ethConfig.from;
+    const addresses = tinlake.contractAddresses;
 
     try {
-      // borrow
-      const res1 = await tinlake.borrow(loanId, ethFrom);
+      // get loan
+      const loan = await tinlake.getLoan(parseInt(loanId, 10));
 
-      console.log('admit result');
+      // approve
+      const res1 = await tinlake.approveNFT(loan.tokenId.toString(), addresses['SHELF']);
+
+      console.log('approve results');
       console.log(res1.txHash);
 
-      if (res1.status !== SUCCESS_STATUS) {
+      if (res1.status !== SUCCESS_STATUS || res1.events[0].event.name !== 'Approval') {
         console.log(res1);
         this.setState({ is: 'error', errorMsg: JSON.stringify(res1) });
+        return;
+      }
+
+      // borrow
+      const res2 = await tinlake.borrow(loanId, loan.tokenId.toString());
+
+      console.log('admit result');
+      console.log(res2.txHash);
+
+      if (res2.status !== SUCCESS_STATUS) {
+        console.log(res2);
+        this.setState({ is: 'error', errorMsg: JSON.stringify(res2) });
         return;
       }
 
