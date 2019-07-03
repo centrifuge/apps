@@ -85,7 +85,6 @@ describe('functional tinlake tests', () => {
         console.log('admin whitelist NFT');
         console.log('-------------------------------------');
 
-        // TODO: use tokenId to ask registry who the owner is
         return tinlake.adminAdmit(addresses['NFT_COLLATERAL'], tokenID, principal, ethFrom);
       }).then((result) => {
         console.log('admit result');
@@ -98,7 +97,17 @@ describe('functional tinlake tests', () => {
         assert.equal(result.status, SUCCESS_STATUS, 'tx should be successful');
         assert.equal(result.events[0].event.name, 'Transfer', 'tx should be successful');
 
-        // TODO: borrower should do that, move down
+        return tinlake.adminAppraise(loanID, appraisal);
+
+      }).then((result: { txHash: any; status: any; }) => {
+        console.log('appraisal results');
+        console.log(result.txHash);
+        assert.equal(result.status, SUCCESS_STATUS, 'tx should be successful');
+
+        console.log('-------------------------------------');
+        console.log('borrow');
+        console.log('-------------------------------------');
+
         return tinlake.approveNFT(tokenID, addresses['SHELF']);
       },      (err: any) => {
         console.log(err);
@@ -108,18 +117,8 @@ describe('functional tinlake tests', () => {
         console.log(result.txHash);
         assert.equal(result.status, SUCCESS_STATUS, 'tx should be successful');
         assert.equal(result.events[0].event.name, 'Approval', 'tx should be successful');
-        // TODO: move up, before approve NFT
-        return tinlake.adminAppraise(loanID, appraisal);
 
-      }).then((result: { txHash: any; status: any; }) => {
-        console.log('appraisal results');
-        console.log(result.txHash);
-        assert.equal(result.status, SUCCESS_STATUS, 'tx should be successful');
-        console.log('-------------------------------------');
-        console.log('borrow');
-        console.log('-------------------------------------');
         return tinlake.borrow(loanID, ethFrom);
-
       }).then((result: { txHash: any; status: any; }) => {
         console.log(result.txHash);
         assert.equal(result.status, SUCCESS_STATUS, 'tx should be successful');
