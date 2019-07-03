@@ -7,8 +7,6 @@ import { sha3 } from 'web3-utils';
 import BN from 'bn.js';
 
 // tslint:disable:import-name no-duplicate-imports
-import defaultContractAddresses from './addresses_tinlake.json';
-
 import contractAbiNft from './abi/test/SimpleNFT.abi.json';
 import contractAbiTitle from './abi/Title.abi.json';
 import contractAbiCurrency from './abi/test/SimpleToken.abi.json';
@@ -55,7 +53,6 @@ interface ContractAddresses {
 
 interface Options {
   contractAbis?: ContractAbis;
-  contractAddresses?: ContractAddresses;
   ethOptions?: any;
   ethConfig?: any;
 }
@@ -115,8 +112,8 @@ class Tinlake {
   public contracts: Contracts;
   public contractAbis: ContractAbis;
 
-  constructor(
-    provider: any, { contractAbis, contractAddresses, ethOptions, ethConfig }: Options = {}) {
+  constructor(provider: any, contractAddresses: ContractAddresses,
+              { contractAbis, ethOptions, ethConfig }: Options = {}) {
     this.contractAbis = contractAbis || {
       nft: contractAbiNft,
       title: contractAbiTitle,
@@ -129,7 +126,7 @@ class Tinlake {
       lender: contractAbiLender,
       pile: contractAbiPile,
     };
-    this.contractAddresses = contractAddresses || defaultContractAddresses;
+    this.contractAddresses = contractAddresses;
     this.provider = provider;
     this.ethOptions = ethOptions || {};
     this.ethConfig = ethConfig || {};

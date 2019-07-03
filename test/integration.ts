@@ -6,6 +6,8 @@ const fs = require('fs');
 const rpcUrl = process.env['ETH_RPC_URL'];
 // tslint:disable-next-line:import-name
 import BN from 'bn.js';
+// tslint:disable-next-line:import-name
+import contractAddresses from './addresses_tinlake.json';
 
 import Tinlake from '../dist/Tinlake';
 
@@ -27,6 +29,7 @@ describe('functional tinlake tests', () => {
           cb(null, sign(rawTx, process.env.ETH_PRIVATE_KEY)),
         accounts: (cb: (arg0: null, arg1: string[]) => void) => cb(null, [ethFrom]),
       }),
+      contractAddresses,
       {
         ethConfig: { from: ethFrom, gasLimit: `0x${gasLimit.toString(16)}` },
       },
@@ -43,7 +46,7 @@ describe('functional tinlake tests', () => {
     });
 
     it('get a loan', async () => {
-      const res = await tinlake.getLoan(20);
+      const res = await tinlake.getLoan(43);
       assert(BN.isBN(res.price));
       assert(BN.isBN(res.principal));
       assert(typeof res.registry === 'string');

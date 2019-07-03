@@ -31,7 +31,6 @@ interface ContractAddresses {
 }
 interface Options {
     contractAbis?: ContractAbis;
-    contractAddresses?: ContractAddresses;
     ethOptions?: any;
     ethConfig?: any;
 }
@@ -90,7 +89,7 @@ declare class Tinlake {
     contractAddresses: ContractAddresses;
     contracts: Contracts;
     contractAbis: ContractAbis;
-    constructor(provider: any, { contractAbis, contractAddresses, ethOptions, ethConfig }?: Options);
+    constructor(provider: any, contractAddresses: ContractAddresses, { contractAbis, ethOptions, ethConfig }?: Options);
     loanCount: () => Promise<BN>;
     getLoan: (loanId: number) => Promise<Loan>;
     getBalanceDebt: (loanId: number) => Promise<BalanceDebt>;
