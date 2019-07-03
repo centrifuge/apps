@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import Alert from '../Alert';
 import { Box, FormField, TextInput, Button } from 'grommet';
 import LoanNftData from '../LoanNftData.tsx';
+import { bnToHex } from '../../utils/bnToHex';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -53,7 +54,7 @@ class LoanBorrow extends React.Component<Props, State> {
       const loan = await tinlake.getLoan(parseInt(loanId, 10));
 
       // approve
-      const res1 = await tinlake.approveNFT(loan.tokenId.toString(), addresses['SHELF']);
+      const res1 = await tinlake.approveNFT(bnToHex(loan.tokenId), addresses['SHELF']);
 
       console.log('approve results');
       console.log(res1.txHash);
@@ -65,7 +66,7 @@ class LoanBorrow extends React.Component<Props, State> {
       }
 
       // borrow
-      const res2 = await tinlake.borrow(loanId, loan.tokenId.toString());
+      const res2 = await tinlake.borrow(loanId, bnToHex(loan.tokenId));
 
       console.log('admit result');
       console.log(res2.txHash);

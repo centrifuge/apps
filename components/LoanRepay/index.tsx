@@ -8,6 +8,7 @@ import { Box, FormField, TextInput, Button } from 'grommet';
 import LoanNftData from '../LoanNftData.tsx';
 // tslint:disable-next-line:import-name
 import BN from 'bn.js';
+import { bnToHex } from '../../utils/bnToHex';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -66,8 +67,8 @@ class LoanRepay extends React.Component<Props, State> {
       }
 
       // repay
-      const res1 = await tinlake.repay(loanId, repayAmount, loan.tokenId.toString(),
-                                       loan.tokenId.toString());
+      const res1 = await tinlake.repay(loanId, repayAmount, bnToHex(loan.tokenId),
+                                       bnToHex(loan.tokenId));
 
       console.log('admit result');
       console.log(res1.txHash);
