@@ -2,7 +2,6 @@
 const SignerProvider = require('ethjs-provider-signer');
 const { sign } = require('ethjs-signer');
 import assert from 'assert';
-const fs = require('fs');
 const rpcUrl = process.env['ETH_RPC_URL'];
 // tslint:disable-next-line:import-name
 import BN from 'bn.js';
@@ -19,7 +18,6 @@ const adminEthFrom = `0x${process.env['ETH_FROM']}`;
 const borrowerEthFrom = `0x${process.env['BORROWER_ETH_FROM']}`;
 let tokenID: string;
 let loanID: string;
-const addresses = JSON.parse(fs.readFileSync(process.env['ADDRESSES_TINLAKE']).toString());
 
 const gasLimit = 1000000;
 
@@ -101,7 +99,7 @@ describe('functional tinlake tests', () => {
         console.log('admin whitelist NFT');
         console.log('-------------------------------------');
 
-        return adminTinlake.adminAdmit(addresses['NFT_COLLATERAL'], tokenID, principal,
+        return adminTinlake.adminAdmit(contractAddresses['NFT_COLLATERAL'], tokenID, principal,
                                        borrowerEthFrom);
       }).then((result) => {
         console.log('admit result');
@@ -124,7 +122,7 @@ describe('functional tinlake tests', () => {
         console.log('borrow');
         console.log('-------------------------------------');
 
-        return borrowerTinlake.approveNFT(tokenID, addresses['SHELF']);
+        return borrowerTinlake.approveNFT(tokenID, contractAddresses['SHELF']);
       },      (err: any) => {
         console.log(err);
         throw err;
@@ -145,7 +143,7 @@ describe('functional tinlake tests', () => {
         console.log('-------------------------------------');
         console.log('repay');
         console.log('-------------------------------------');
-        return borrowerTinlake.approveCurrency(addresses['PILE'], principal);
+        return borrowerTinlake.approveCurrency(contractAddresses['PILE'], principal);
       }).then((result) => {
         console.log(result.txHash);
         assert.equal(result.events[0].event.name, 'Approval', 'tx should be successful');
