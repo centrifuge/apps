@@ -5,7 +5,7 @@ exports[`FundingAgreementView Should not render an empty form 1`] = `
   className="StyledGrommet-sc-19lkkz7-0 eWRwfm"
 >
   <div
-    className="StyledBox-sc-13pk1d4-0 bTrVGp"
+    className="StyledBox-sc-13pk1d4-0 kBwxZQ"
   >
     <div
       className="StyledBox-sc-13pk1d4-0 IRSNj"
@@ -956,7 +956,7 @@ exports[`FundingAgreementView Should render the loading state 1`] = `
   className="StyledGrommet-sc-19lkkz7-0 eWRwfm"
 >
   <div
-    className="StyledBox-sc-13pk1d4-0 bTrVGp"
+    className="StyledBox-sc-13pk1d4-0 kBwxZQ"
   >
     <div
       className="StyledBox-sc-13pk1d4-0 IRSNj"

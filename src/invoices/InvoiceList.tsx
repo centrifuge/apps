@@ -41,7 +41,7 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
     }
 
     return (
-      <Box fill>
+      <Box>
         <SecondaryHeader>
           <Heading level="3">Invoices</Heading>
           <Link to={invoiceRoutes.new}>

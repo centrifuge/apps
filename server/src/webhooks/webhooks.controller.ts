@@ -37,6 +37,7 @@ export class WebhooksController {
    */
   @Post()
   async receiveMessage(@Body() notification: NotificationNotificationMessage) {
+    console.log('Receive Webhook',notification)
     try {
       if (notification.event_type === eventTypes.DOCUMENT) {
         // Search for the user in the database

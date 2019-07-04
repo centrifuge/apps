@@ -12,7 +12,7 @@ export class Preloader extends Component<PreloaderProps> {
 
   render() {
     const { message, withSound } = this.props;
-    return <Box align="center" justify="center" fill={true} gap={'medium'}>
+    return <Box align="center" justify="center" width={'100%'} height={'calc(100vh - 90px)'} gap={'medium'}>
       <Box>
         <svg id='L7' xmlns='http://www.w3.org/2000/svg' width="56px" viewBox='0 0 100 100'>
           <path fill='#000'

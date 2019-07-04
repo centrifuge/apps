@@ -107,7 +107,7 @@ class App extends Component<AppPros> {
       <div className="App">
         <AxisTheme full={true}>
           <NotificationProvider>
-            <Box fill align="center">
+            <Box  align="center">
               <ConnectedNotifications/>
               <Header
                 user={loggedInUser}
@@ -118,13 +118,9 @@ class App extends Component<AppPros> {
               <Box
                 justify="center"
                 direction="row"
-                fill
               >
-                <Box width="xlarge">
-                  <div style={{ minHeight: '100%' }}>
+                <Box width="xlarge" >
                     <Routing routes={routeItems}/>
-                  </div>
-
                 </Box>
               </Box>
 

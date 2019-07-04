@@ -5,7 +5,7 @@ exports[`Header Should render an empty header 1`] = `
   className="StyledBox-sc-13pk1d4-0 iEnTcK"
   style={
     Object {
-      "minHeight": "90px",
+      "height": "90px",
       "position": "sticky",
       "top": 0,
       "zIndex": 1,
@@ -47,7 +47,7 @@ exports[`Header Should render the Header 1`] = `
   className="StyledBox-sc-13pk1d4-0 iEnTcK"
   style={
     Object {
-      "minHeight": "90px",
+      "height": "90px",
       "position": "sticky",
       "top": 0,
       "zIndex": 1,

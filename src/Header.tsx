@@ -33,7 +33,7 @@ const Header: FunctionComponent<HeaderProps> = (props) => {
     height="xsmall"
     fill="horizontal"
     // TODO move this to axis theme
-    style={{ position: 'sticky', top: 0, minHeight: '90px',zIndex:1 }}
+    style={{ position: 'sticky', top: 0, height: '90px',zIndex:1 }}
     background='white'
     border={{ side: 'bottom', color: 'light-4' }}
   >
