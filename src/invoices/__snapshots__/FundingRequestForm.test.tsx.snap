@@ -1877,7 +1877,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                   precision={2}
                                                                   suffix="%"
                                                                   thousandSeparator=","
-                                                                  value={0.05}
+                                                                  value={5}
                                                                 >
                                                                   <NumberInput__StyledCurrencyContainer
                                                                     decimalSeparator="."
@@ -1890,7 +1890,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                     precision={2}
                                                                     suffix="%"
                                                                     thousandSeparator=","
-                                                                    value={0.05}
+                                                                    value={5}
                                                                   >
                                                                     <div
                                                                       className="NumberInput__StyledCurrencyContainer-sc-1j29tjj-1 liHHvP"
@@ -1898,7 +1898,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                       name="apr"
                                                                       onBlur={[Function]}
                                                                       onFocus={[Function]}
-                                                                      value={0.05}
+                                                                      value={5}
                                                                     >
                                                                       <NumberInput__StyledCurrencyInput
                                                                         decimalSeparator="."
@@ -1909,7 +1909,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                         precision={2}
                                                                         suffix="%"
                                                                         thousandSeparator=","
-                                                                        value={0.05}
+                                                                        value={5}
                                                                       >
                                                                         <input
                                                                           className="NumberInput__StyledCurrencyInput-sc-1j29tjj-0 hHmpRt"
@@ -1920,7 +1920,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                           onFocus={[Function]}
                                                                           onMouseUp={[Function]}
                                                                           type="text"
-                                                                          value="0.05%"
+                                                                          value="5.00%"
                                                                         />
                                                                       </NumberInput__StyledCurrencyInput>
                                                                     </div>

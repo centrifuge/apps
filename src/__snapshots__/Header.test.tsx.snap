@@ -106,12 +106,37 @@ exports[`Header Should render the Header 1`] = `
     <div
       className="StyledBox-sc-13pk1d4-0 BclQN"
     >
-      <span
-        className="StyledText-sc-1sadyjn-0 fWSbXS"
+      <div
+        className="StyledBox-sc-13pk1d4-0 gQLnBt"
       >
-        My Centrifuge ID: 
-        0x33333
-      </span>
+        <span
+          className="StyledText-sc-1sadyjn-0 fWSbXS"
+        >
+          Centrifuge ID: 
+        </span>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 gufrXq"
+        />
+        <div
+          className="sc-bdVaJa netlj FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+        >
+          <div
+            className="StyledBox-sc-13pk1d4-0 gZSidW"
+          >
+            <div
+              className="StyledBox-sc-13pk1d4-0 ffeAql"
+              onBlur={[Function]}
+              onFocus={[Function]}
+            >
+              <p
+                className="StyledParagraph-tbetod-0 fbHsbZ"
+              >
+                0x33333
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
       <div
         className="StyledBox__StyledBoxGap-sc-13pk1d4-1 iChEkS"
       />

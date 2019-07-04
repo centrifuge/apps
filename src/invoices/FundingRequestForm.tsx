@@ -196,7 +196,7 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                               {...percentParts}
                               disabled={true}
                               name="apr"
-                              value={values!.apr}
+                              value={values!.apr * 100}
                             />
                           </FormField>
                         </Box>

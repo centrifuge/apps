@@ -2,7 +2,7 @@ import React from 'react';
 import { Box } from 'grommet';
 import { DisplayField } from '../../components/DisplayField';
 import { Section } from '../../components/Section';
-import { extractDate, formatCurrency, formatPercent } from '../../common/formaters';
+import { formatCurrency, formatDate, formatPercent } from '../../common/formaters';
 import { FundingAgreementResponse } from '../../common/interfaces';
 import { Status } from '../../components/Status';
 
@@ -23,7 +23,7 @@ export class FundingAgreement extends React.Component<FundingAgreementProps> {
       columnGap,
     } = this.props;
     return (
-      <Section headingLevel="5" title="Funding Agreement"  background={'light-1'}>
+      <Section headingLevel="5" title="Funding Agreement" background={'light-1'}>
         <Box gap={columnGap}>
           <Box direction="row" gap={columnGap} flex="grow">
             <Box basis={'1/4'}>
@@ -58,7 +58,7 @@ export class FundingAgreement extends React.Component<FundingAgreementProps> {
             <Box basis={'1/4'}>
               <DisplayField
                 label="Repayment due date"
-                value={extractDate(funding!.repayment_due_date)}
+                value={formatDate(funding!.repayment_due_date)}
               />
             </Box>
 

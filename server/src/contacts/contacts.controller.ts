@@ -39,7 +39,7 @@ export class ContactsController {
 
     const newContact = new Contact(
       contact.name,
-      contact.address,
+      contact.address.toLowerCase(),
       request.user._id,
     );
     return await this.databaseService.contacts.insert(newContact);

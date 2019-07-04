@@ -96,16 +96,21 @@ export default class InvoiceForm extends React.Component<InvoiceFormProps> {
                 <Box direction="column" gap={sectionGap}>
                   {/* Invoice number section */}
                   <Section>
-                    <FormField
-                      label="Invoice number"
-                      error={errors!.number}
-                    >
-                      <TextInput
-                        name="number"
-                        value={values!.number}
-                        onChange={handleChange}
-                      />
-                    </FormField>
+                    <Box direction="row">
+                      <Box basis={'1/2'}>
+                        <FormField
+                          label="Invoice number"
+                          error={errors!.number}
+                        >
+                          <TextInput
+                            name="number"
+                            value={values!.number}
+                            onChange={handleChange}
+                          />
+                        </FormField>
+                      </Box>
+                    </Box>
+
                   </Section>
 
 

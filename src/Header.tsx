@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Anchor, Box, Button, Image, Text } from 'grommet';
 import logo from './logo.png';
 import { User } from './common/models/user';
+import { DisplayField } from './components/DisplayField';
 
 
 export interface MenuItem {
@@ -66,7 +67,10 @@ const Header: FunctionComponent<HeaderProps> = (props) => {
         )}
       </Box>
       {user && <Box direction="row" gap={itemGap} align="center" justify="end">
-        <Text>My Centrifuge ID: {user.account}</Text>
+        <Box direction="row" align="center" gap={'xsmall'}>
+          <Text>Centrifuge ID: </Text>
+          <DisplayField width={'160px'} noBorder={true} value={user.account}/>
+        </Box>
         <Text> {user.email}</Text>
       </Box>}
       <Box direction="row" gap={itemGap} align="center" justify="end">

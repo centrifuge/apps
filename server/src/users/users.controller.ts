@@ -119,7 +119,7 @@ export class UsersController {
       const account = await this.centrifugeService.accounts.generateAccount(
         config.admin.account,
       );
-      user.account = account.identity_id;
+      user.account = account.identity_id.toLowerCase();
     }
 
     // Hash Password, and invited one should not have a password

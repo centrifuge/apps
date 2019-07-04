@@ -3,13 +3,13 @@ import styled from 'styled-components';
 import { Anchor, Box, FormField, FormFieldProps, Paragraph } from 'grommet';
 import { Share } from 'grommet-icons';
 
-export class FormFieldWrapper extends Component<FormFieldProps & { value: string,linkTo:string }> {
+export class FormFieldWrapper extends Component<FormFieldProps & { value: string, linkTo: string }> {
   render(): React.ReactNode {
     const { value, linkTo, ...rest } = this.props;
     return <FormField {...rest}>
-      <Box direction="row" gap={"small"} >
+      <Box direction="row" gap={'small'}>
         <Paragraph margin="none">
-          { value}
+          {value}
 
         </Paragraph>
         {linkTo && <Anchor href={linkTo} target={'_blank'}><Share size={'small'}/></Anchor>}
@@ -40,5 +40,8 @@ export const DisplayField = styled(FormFieldWrapper)`
       display: inline-block;
     }
     border-color: ${props => props.theme.global.colors['light-4']};
+    ${props => props.noBorder && 'border: none'}
+    ${props => props.width && `max-width: ${props.width}`}
+    
   }
 `;

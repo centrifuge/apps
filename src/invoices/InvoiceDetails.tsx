@@ -30,7 +30,7 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
     const columnGap = 'medium';
     const sectionGap = 'none';
 
-    const invoiceData = invoice.data || {currency:'USD'} ;
+    const invoiceData = invoice.data || { currency: 'USD' };
     const transferDetails = invoice.transferDetails || [];
     const fundingAgreement = invoice.fundingAgreement;
     const fundingTransfer = transferDetails[0];
@@ -41,11 +41,13 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
         <Box direction="column" gap={sectionGap}>
           <Section>
             {/* Invoice number section */}
-            <Box>
-              <DisplayField
-                label="Invoice number"
-                value={invoiceData!.number}
-              />
+            <Box direction={'row'}>
+              <Box basis={'1/2'}>
+                <DisplayField
+                  label="Invoice number"
+                  value={invoiceData!.number}
+                />
+              </Box>
             </Box>
           </Section>
 

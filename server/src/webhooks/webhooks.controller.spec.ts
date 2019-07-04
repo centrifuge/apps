@@ -70,18 +70,19 @@ describe('WebhooksController', () => {
   });
 
   describe('when it receives successful invoice creation', function() {
-    it('should fetch it from the node and persist it in the database', async function() {
+    it('Should fail when it does not find the user', async function() {
       const webhooksController = webhooksModule.get<WebhooksController>(
         WebhooksController,
       );
-
-      const result = await webhooksController.receiveMessage({
-        event_type: eventTypes.DOCUMENT,
-        document_type: documentTypes.invoice,
-        document_id: documentId,
-      });
-
-      expect(result).toEqual('User is not present in database');
+      try {
+        const result = await webhooksController.receiveMessage({
+          event_type: eventTypes.DOCUMENT,
+          document_type: documentTypes.invoice,
+          document_id: documentId,
+        });
+      } catch (e) {
+        expect(e.message).toEqual('Webhook Error');
+      }
     });
   });
 
