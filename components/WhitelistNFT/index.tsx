@@ -1,14 +1,15 @@
 import * as React from 'react';
 // tslint:disable-next-line:import-name
 import Tinlake from 'tinlake';
-import MintNFT from '../MintNFT';
 import { Box, FormField, TextInput, Button } from 'grommet';
 import Alert from '../Alert';
+import Link from 'next/link';
 
 const SUCCESS_STATUS = '0x1';
 
 interface Props {
   tinlake: Tinlake;
+  tokenId: string;
 }
 
 interface State {
@@ -27,6 +28,10 @@ class WhitelistNFT extends React.Component<Props, State> {
     is: null,
     errorMsg: '',
   };
+
+  componentWillMount() {
+    this.setState({ tokenId: this.props.tokenId });
+  }
 
   whitelist = async () => {
     this.setState({ is: 'loading' });
@@ -92,9 +97,7 @@ class WhitelistNFT extends React.Component<Props, State> {
     const { tokenId, principal, appraisal, is, errorMsg } = this.state;
 
     return <Box>
-      <MintNFT tinlake={this.props.tinlake} />
-
-      <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'xlarge' }}>
+      <Box direction="row" gap="medium" margin={{ bottom: 'medium' }}>
         <Box basis={'1/4'} gap="medium">
           <FormField label="NFT ID">
             <TextInput

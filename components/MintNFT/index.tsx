@@ -3,6 +3,7 @@ import * as React from 'react';
 import Tinlake from 'tinlake';
 import { Box, FormField, TextInput, Button } from 'grommet';
 import Alert from '../Alert';
+import Link from 'next/link';
 
 interface Props {
   tinlake: Tinlake;
@@ -46,9 +47,7 @@ class MintNFT extends React.Component<Props, State> {
   render() {
     const { is, tokenId, errorMsg } = this.state;
 
-    return <Box pad="medium" style={{ backgroundColor: '#edf2f7', borderRadius: 18 }}>
-      <h2>Mint an NFT</h2>
-
+    return <Box>
       <Box direction="row" gap="medium" margin={{ bottom: 'medium' }}>
         <Box basis={'1/4'} gap="medium">
           <FormField label="Token ID">
@@ -66,7 +65,10 @@ class MintNFT extends React.Component<Props, State> {
 
       {is === 'loading' && 'Minting...'}
       {is === 'success' && <Alert type="success">
-        Successfully minted NFT for Token ID {tokenId}</Alert>}
+        Successfully minted NFT for Token ID {tokenId}<br />
+        <br />
+        <Link href={`/admin/whitelist-nft?tokenId=${tokenId}`}>
+          <a>Proceed to whitelisting</a></Link></Alert>}
       {is === 'error' && <Alert type="error">
         <strong>Error minting NFT for Token ID {tokenId}, see console for details</strong>
         {errorMsg && <div><br />{errorMsg}</div>}
