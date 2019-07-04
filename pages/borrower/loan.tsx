@@ -15,7 +15,7 @@ class LoanPage extends React.Component<{ loanId: string }> {
     const { loanId } = this.props;
 
     return <AxisTheme full={true}><Box pad="large">
-      <h1><Link href="/admin"><a>{'<-'}</a></Link>View Loan {loanId}</h1>
+      <h1><Link href="/borrower"><a>{'<-'}</a></Link>View Loan {loanId}</h1>
 
       {loanId ? (
         <WithTinlake render={tinlake =>

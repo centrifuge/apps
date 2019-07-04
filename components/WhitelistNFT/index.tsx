@@ -33,36 +33,28 @@ class WhitelistNFT extends React.Component<Props, State> {
 
     const { tinlake } = this.props;
     const { tokenId, principal, appraisal } = this.state;
-    const ethFrom = tinlake.ethConfig.from;
     const addresses = tinlake.contractAddresses;
 
     try {
       // admit
-      const res1 = await tinlake.adminAdmit(addresses['NFT_COLLATERAL'], tokenId, principal,
-                                            ethFrom);
+      const nftOwner = await tinlake.ownerOfNFT(tokenId);
+
+      console.log(`NFT owner of tokenId ${tokenId} is ${nftOwner}`);
+
+      const res2 = await tinlake.adminAdmit(addresses['NFT_COLLATERAL'], tokenId, principal,
+                                            nftOwner);
 
       console.log('admit result');
-      console.log(res1.txHash);
-
-      if (res1.status !== SUCCESS_STATUS || res1.events[0].event.name !== 'Transfer') {
-        console.log(res1);
-        this.setState({ is: 'error', errorMsg: JSON.stringify(res1) });
-        return;
-      }
-
-      // approve
-      const loanId = res1.events[0].data[2].toString();
-      console.log(`Loan id: ${loanId}`);
-      const res2 = await tinlake.approveNFT(tokenId, addresses['SHELF']);
-
-      console.log('approve results');
       console.log(res2.txHash);
 
-      if (res2.status !== SUCCESS_STATUS || res2.events[0].event.name !== 'Approval') {
+      if (res2.status !== SUCCESS_STATUS || res2.events[0].event.name !== 'Transfer') {
         console.log(res2);
         this.setState({ is: 'error', errorMsg: JSON.stringify(res2) });
         return;
       }
+
+      const loanId = res2.events[0].data[2].toString();
+      console.log(`Loan id: ${loanId}`);
 
       // appraise
       const res3 = await tinlake.adminAppraise(loanId, appraisal);

@@ -11,7 +11,7 @@ class LoanListPage extends React.Component {
         <Heading level="3">Loans</Heading>
       </Box>
 
-      <WithTinlake render={tinlake => <LoanList tinlake={tinlake} mode="admin" />} />
+      <WithTinlake render={tinlake => <LoanList tinlake={tinlake} mode="borrower" />} />
     </Box></AxisTheme>;
   }
 }

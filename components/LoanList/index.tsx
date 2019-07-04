@@ -6,38 +6,47 @@ import Link from 'next/link';
 import { Box, DataTable } from 'grommet';
 import { connect } from 'react-redux';
 import { InternalLoan, LoansState, getLoans } from '../../ducks/loans';
+import { formatAddress } from '../../utils/formatAddress';
 
 interface Props {
   tinlake: Tinlake;
-  loans: LoansState;
-  getLoans: (tinlake: Tinlake) => Promise<void>;
+  loans?: LoansState;
+  getLoans?: (tinlake: Tinlake) => Promise<void>;
+  mode: 'borrower' | 'admin';
 }
 
 class LoanList extends React.Component<Props> {
-  componentDidMount() {
-    this.props.getLoans(this.props.tinlake);
+  componentWillMount() {
+    this.props.getLoans!(this.props.tinlake);
   }
 
   render() {
-    console.log(this.props);
-    return <Box>
-      Found {this.props.loans.loans.length} loans
+    const { loans, mode, tinlake: { ethConfig: { from: ethFrom } } } = this.props;
 
-      <DataTable data={this.props.loans.loans} columns={[
+    if (loans!.loansState === 'loading') {
+      return 'Loading...';
+    }
+
+    const filteredLoans = mode === 'borrower' ? loans!.loans.filter(l => l.loanOwner === ethFrom) :
+      loans!.loans;
+
+    return <Box>
+      <DataTable data={filteredLoans} columns={[
         { header: 'Loan ID', property: 'loanId', align: 'end' },
-        { header: 'NFT ID', property: 'tokenId', align: 'end',
-          render: (l: InternalLoan) => l.tokenId.toString() },
-        { header: 'NFT Owner', property: 'registry', align: 'end' },
+        { header: 'NFT ID', property: 'tokenId', align: 'end', render: (l: InternalLoan) =>
+          <span title={l.tokenId.toString()}>{formatAddress(l.tokenId.toString())}</span> },
+        { header: 'NFT Owner', property: 'nftOwner', align: 'end', render: (l: InternalLoan) =>
+          <span title={l.nftOwner}>{formatAddress(l.nftOwner)}</span> },
         { header: 'NFT Status', property: 'status' },
         { header: 'Principal', property: 'principal', align: 'end',
           render: (l: InternalLoan) => l.principal.toString() },
-        { header: 'Interest rate', property: 'price', align: 'end',
-          render: (l: InternalLoan) => l.price.toString() },
+        { header: 'Interest rate', property: 'fee', align: 'end',
+          render: (l: InternalLoan) => l.fee.toString() },
         { header: 'Debt', property: 'debt', align: 'end',
           render: (l: InternalLoan) => l.debt.toString() },
         { header: 'Maturity Date', property: '', align: 'end', render: () => '-' },
         { header: 'Actions', property: 'id', align: 'end', render: (l: InternalLoan) =>
-          <Link href={`/admin/loan?loanId=${l.loanId}`}><a>View</a></Link> },
+          <Link href={`/${mode}/loan?loanId=${l.loanId}`}><a>View</a></Link> },
       ]} />
     </Box>;
   }

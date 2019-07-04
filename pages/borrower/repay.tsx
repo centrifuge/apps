@@ -1,12 +1,12 @@
 import * as React from 'react';
 import WithTinlake from '../../components/WithTinlake';
-import LoanDetail from '../../components/LoanDetail';
 import Link from 'next/link';
 import { AxisTheme } from '@centrifuge/axis-theme';
 import Alert from '../../components/Alert';
 import { Box } from 'grommet';
+import LoanRepay from '../../components/LoanRepay';
 
-class LoanPage extends React.Component<{ loanId: string }> {
+class RepayPage extends React.Component<{ loanId: string }> {
   static async getInitialProps({ query }: any) {
     return { loanId: query.loanId };
   }
@@ -15,11 +15,12 @@ class LoanPage extends React.Component<{ loanId: string }> {
     const { loanId } = this.props;
 
     return <AxisTheme full={true}><Box pad="large">
-      <h1><Link href="/admin"><a>{'<-'}</a></Link>View Loan {loanId}</h1>
+      <h1><Link href={`/borrower/loan?loanId=${loanId}`}><a>{'<-'}</a>
+        </Link>Repay Loan {loanId}</h1>
 
       {loanId ? (
         <WithTinlake render={tinlake =>
-          <LoanDetail tinlake={tinlake} loanId={loanId} />} />
+          <LoanRepay tinlake={tinlake} loanId={loanId} />} />
       ) : (
         <Alert type="error">Please provide an ID</Alert>
       )}
@@ -27,4 +28,4 @@ class LoanPage extends React.Component<{ loanId: string }> {
   }
 }
 
-export default LoanPage;
+export default RepayPage;
