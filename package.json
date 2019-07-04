@@ -14,7 +14,7 @@
     "bcrypt": "3.0.2",
     "connected-react-router": "^5.0.1",
     "cross-env": "^5.2.0",
-    "ethereumjs-util": "^6.0.0",
+    "ethereumjs-util": "^6.1.0",
     "ethjs": "^0.4.0",
     "express-session": "^1.15.6",
     "formik": "^1.5.2",

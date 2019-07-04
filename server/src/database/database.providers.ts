@@ -3,6 +3,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../../../src/common/models/user';
 import { DatabaseRepository } from './database.repository';
 import { Contact } from '../../../src/common/models/contact';
+import { Schema } from '../../../src/common/models/schema';
 import config from '../../../src/common/config';
 import { InvoiceResponse, PurchaseOrderResponse } from '../../../src/common/interfaces';
 import { DatabaseService } from './database.service';
@@ -45,11 +46,16 @@ const initializeDatabase = async (inMemoryOnly:boolean) => {
     { filename: `${config.dbPath}/purchaseOrdersDb`, inMemoryOnly },
   );
 
+  const schemasRepository = new DatabaseRepository<Schema>(
+      { filename: `${config.dbPath}/schemasDb`, inMemoryOnly },
+  );
+
   return {
     invoices: invoicesRepository,
     users: usersRepository,
     contacts: contactsRepository,
     purchaseOrders: purchaseOrdersRepository,
+    schemas: schemasRepository,
   };
 };
 

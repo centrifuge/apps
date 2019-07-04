@@ -5,7 +5,6 @@ import { Contact } from '../../../src/common/models/contact';
 import { SessionGuard } from '../auth/SessionGuard';
 import { databaseServiceProvider } from '../database/database.providers';
 import { DatabaseService } from '../database/database.service';
-import { centrifugeServiceProvider } from "../centrifuge-client/centrifuge.module";
 const delay = require('util').promisify(setTimeout);
 
 describe('ContactsController', () => {
@@ -23,12 +22,12 @@ describe('ContactsController', () => {
   ];
   const databaseSpies: any = {};
 
+
   beforeEach(async () => {
     contactsModule = await Test.createTestingModule({
       controllers: [ContactsController],
       providers: [
         SessionGuard,
-        centrifugeServiceProvider,
         databaseServiceProvider,
       ],
     })
@@ -41,7 +40,6 @@ describe('ContactsController', () => {
       await delay(0);
       await databaseService.contacts.insert(insertedContacts[i]);
     }
-
     databaseSpies.spyInsert = jest.spyOn(databaseService.contacts, 'insert');
     databaseSpies.spyUpdate = jest.spyOn(databaseService.contacts, 'update');
     databaseSpies.spyGetCursor = jest.spyOn(databaseService.contacts, 'getCursor');
