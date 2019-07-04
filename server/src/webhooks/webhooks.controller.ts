@@ -41,7 +41,7 @@ export class WebhooksController {
     try {
       if (notification.event_type === eventTypes.DOCUMENT) {
         // Search for the user in the database
-        const user = await this.databaseService.users.findOne({ account: notification.to_id.toLowerCase() });
+        const user = await this.databaseService.users.findOne({ $or: [{ account: notification.to_id.toLowerCase() }, { account: notification.to_id }] });
         if (!user) {
           throw new Error('User is not present in database');
         }
