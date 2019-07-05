@@ -20958,41 +20958,6 @@ function AbiCoder$1() {
   return new AbiCoder(Utils, new abiCoder_6());
 }
 
-var APPRAISER = "0x791e9c006ad2cfbc19ab4dba1493a7b4fd878ffb";
-var TITLE = "0xcfd31ae903e3f24bdd05d5b8c0647a379027ac3d";
-var LIGHTSWITCH = "0x93dbc477a429b9c79f04de31f078414b41d9c296";
-var PILE = "0xf06c77d26bf7c421d0a51ed224337a2eb248146f";
-var SHELF = "0x2511817b6a7c85ae955536888668a6e71061a9f8";
-var COLLATERAL = "0xf89f248b1dc5868b4a4a18903b85d824e49f097b";
-var DESK = "0xc90cc64c9748cee655fcfc83a37637e52bae96e7";
-var RECEPTION = "0x7ddb8c63b9b9b58023459e2edd451576fada3d8c";
-var LENDER = "0x1ee12a18d06b29e024d4b38690ccc8c3ee770945";
-var CVTJOIN = "0xd50b45a23950c2f2a93684ccc799214cbcfec0c4";
-var CVTPIP = "0xa608167b835d70649ede64b21ec0beaa070e5012";
-var NFT_COLLATERAL = "0x811e4db6112e52f45f979b075ed8749477e401b3";
-var DEPLOYER = "0x46ec091397425a60bad68c15591951751773a28b";
-var ADMIT = "0x1add1ccc313de5dbaf12254d93e2a3e4ef02d080";
-var SPELL = "0x70c46a468f48b79c9a4c8c31711aab4b08ff13e5";
-var CURRENCY = "0xc101b98ad804caa3052b37cb14a76d7ced0be232";
-var defaultContractAddresses = {
-  APPRAISER: APPRAISER,
-  TITLE: TITLE,
-  LIGHTSWITCH: LIGHTSWITCH,
-  PILE: PILE,
-  SHELF: SHELF,
-  COLLATERAL: COLLATERAL,
-  DESK: DESK,
-  RECEPTION: RECEPTION,
-  LENDER: LENDER,
-  CVTJOIN: CVTJOIN,
-  CVTPIP: CVTPIP,
-  NFT_COLLATERAL: NFT_COLLATERAL,
-  DEPLOYER: DEPLOYER,
-  ADMIT: ADMIT,
-  SPELL: SPELL,
-  CURRENCY: CURRENCY
-};
-
 var contractAbiNft = [
   {
     constant: true,
@@ -23977,9 +23942,9 @@ var contractAbiPile = [
 
 var abiCoder$1 = new AbiCoder$1();
 var Tinlake = /** @class */ (function () {
-    function Tinlake(provider, _a) {
+    function Tinlake(provider, contractAddresses, _a) {
         var _this = this;
-        var _b = _a === void 0 ? {} : _a, contractAbis = _b.contractAbis, contractAddresses = _b.contractAddresses, ethOptions = _b.ethOptions, ethConfig = _b.ethConfig;
+        var _b = _a === void 0 ? {} : _a, contractAbis = _b.contractAbis, ethOptions = _b.ethOptions, ethConfig = _b.ethConfig;
         this.loanCount = function () { return __awaiter(_this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
@@ -24108,7 +24073,7 @@ var Tinlake = /** @class */ (function () {
             lender: contractAbiLender,
             pile: contractAbiPile,
         };
-        this.contractAddresses = contractAddresses || defaultContractAddresses;
+        this.contractAddresses = contractAddresses;
         this.provider = provider;
         this.ethOptions = ethOptions || {};
         this.ethConfig = ethConfig || {};

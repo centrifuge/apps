@@ -31,7 +31,6 @@ interface ContractAddresses {
 }
 interface Options {
     contractAbis?: ContractAbis;
-    contractAddresses?: ContractAddresses;
     ethOptions?: any;
     ethConfig?: any;
 }
@@ -90,10 +89,10 @@ declare class Tinlake {
     contractAddresses: ContractAddresses;
     contracts: Contracts;
     contractAbis: ContractAbis;
-    constructor(provider: any, { contractAbis, contractAddresses, ethOptions, ethConfig }?: Options);
+    constructor(provider: any, contractAddresses: ContractAddresses, { contractAbis, ethOptions, ethConfig }?: Options);
     loanCount: () => Promise<BN>;
-    getLoan: (loanId: number) => Promise<Loan>;
-    getBalanceDebt: (loanId: number) => Promise<BalanceDebt>;
+    getLoan: (loanId: string) => Promise<Loan>;
+    getBalanceDebt: (loanId: string) => Promise<BalanceDebt>;
     approveNFT: (tokenId: string, to: string) => Promise<Events>;
     ownerOfNFT: (tokenId: string) => Promise<string>;
     ownerOfLoan: (loanId: string) => Promise<string>;
