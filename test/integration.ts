@@ -16,7 +16,7 @@ let adminTinlake: Tinlake;
 let borrowerTinlake: Tinlake;
 const adminEthFrom = `0x${process.env['ETH_FROM']}`;
 const borrowerEthFrom = `0x${process.env['BORROWER_ETH_FROM']}`;
-let tokenID: string;
+const tokenID = `0x${Math.floor(Math.random() * (10 ** 15))}`;
 let loanID: string;
 
 const gasLimit = 1000000;
@@ -47,40 +47,6 @@ describe('functional tinlake tests', () => {
     );
   });
 
-  describe('tinlake call functionality', function () {
-    this.timeout(50000);
-
-    it('count number of loans', async () => {
-      const count = await adminTinlake.loanCount();
-      console.log(`Found ${count} loans `);
-      assert(count.gte(new BN(0)));
-    });
-
-    it('get a loan', async () => {
-      const res = await adminTinlake.getLoan(43);
-      assert(BN.isBN(res.price));
-      assert(BN.isBN(res.principal));
-      assert(typeof res.registry === 'string');
-      assert(BN.isBN(res.tokenId));
-    });
-
-    it('get balance and debt from pile for a loan', async () => {
-      const res = await adminTinlake.getBalanceDebt(20);
-      assert(BN.isBN(res.balance));
-      assert(BN.isBN(res.debt));
-    });
-
-    it('gets the owner of a loan', async () => {
-      const res = await adminTinlake.ownerOfLoan('43');
-      assert.equal(typeof res, 'string');
-    });
-
-    it('gets the owner of an nft', async () => {
-      const res = await adminTinlake.ownerOfNFT('582379665328543379');
-      assert.equal(typeof res, 'string');
-    });
-  });
-
   describe('tinlake borrow and repay', function () {
     this.timeout(50000);
     const principal = '100';
@@ -88,7 +54,6 @@ describe('functional tinlake tests', () => {
     it('borrow and repay successful', () => {
       console.log(`appraisal: ${appraisal}`);
       console.log(`principal: ${principal}`);
-      tokenID = `0x${Math.floor(Math.random() * (10 ** 15))}`;
       console.log(`token id: ${tokenID}`);
       return borrowerTinlake.mintNFT(borrowerEthFrom, tokenID).then((result) => {
         console.log('mint result');
@@ -161,6 +126,40 @@ describe('functional tinlake tests', () => {
         return Promise.resolve('success');
       });
 
+    });
+  });
+
+  describe('tinlake call functionality', function () {
+    this.timeout(50000);
+
+    it('count number of loans', async () => {
+      const count = await adminTinlake.loanCount();
+      console.log(`Found ${count} loans `);
+      assert(count.gte(new BN(0)));
+    });
+
+    it('get a loan', async () => {
+      const res = await adminTinlake.getLoan(loanID);
+      assert(BN.isBN(res.price));
+      assert(BN.isBN(res.principal));
+      assert(typeof res.registry === 'string');
+      assert(BN.isBN(res.tokenId));
+    });
+
+    it('get balance and debt from pile for a loan', async () => {
+      const res = await adminTinlake.getBalanceDebt(loanID);
+      assert(BN.isBN(res.balance));
+      assert(BN.isBN(res.debt));
+    });
+
+    it('gets the owner of a loan', async () => {
+      const res = await adminTinlake.ownerOfLoan(loanID);
+      assert.equal(typeof res, 'string');
+    });
+
+    it('gets the owner of an nft', async () => {
+      const res = await adminTinlake.ownerOfNFT(tokenID);
+      assert.equal(typeof res, 'string');
     });
   });
 });

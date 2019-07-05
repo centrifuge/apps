@@ -91,8 +91,8 @@ declare class Tinlake {
     contractAbis: ContractAbis;
     constructor(provider: any, contractAddresses: ContractAddresses, { contractAbis, ethOptions, ethConfig }?: Options);
     loanCount: () => Promise<BN>;
-    getLoan: (loanId: number) => Promise<Loan>;
-    getBalanceDebt: (loanId: number) => Promise<BalanceDebt>;
+    getLoan: (loanId: string) => Promise<Loan>;
+    getBalanceDebt: (loanId: string) => Promise<BalanceDebt>;
     approveNFT: (tokenId: string, to: string) => Promise<Events>;
     ownerOfNFT: (tokenId: string) => Promise<string>;
     ownerOfLoan: (loanId: string) => Promise<string>;
