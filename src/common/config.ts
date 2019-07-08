@@ -10,7 +10,7 @@ const config = {
     email: env.CENTRIFUGE_ADMIN_EMAIL || 'test@test.org',
     password: env.CENTRIFUGE_ADMIN_PASSWORD || 'admin',
     account:  env.CENTRIFUGE_ADMIN_ACCOUNT || '0x5f2bBFcf948a0083bbE77C0aD97A64142D6b1D48',
-    permissions:[PERMISSIONS.CAN_MANAGE_USERS,PERMISSIONS.CAN_CREATE_INVOICES],
+    permissions:[PERMISSIONS.CAN_MANAGE_USERS, PERMISSIONS.CAN_MANAGE_SCHEMAS, PERMISSIONS.CAN_CREATE_INVOICES],
   },
   inviteOnly: Boolean(env.INVITE_ONLY || true),
   ethProvider: env.ETH_PROVIDER || 'https://rinkeby.infura.io/v3/55b957b5c6be42c49e6d48cbb102bdd5',

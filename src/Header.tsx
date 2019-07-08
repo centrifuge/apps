@@ -20,7 +20,7 @@ interface HeaderProps {
   push: (route: string) => void
 }
 
-//TODO move this to componentns and make more generic
+//TODO move this to components and make more generic
 const Header: FunctionComponent<HeaderProps> = (props) => {
 
   const { selectedRoute, menuItems, push, user } = props;

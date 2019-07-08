@@ -7,6 +7,7 @@ import { Contact } from '../common/models/contact';
 import { FunRequest, InvInvoiceResponse } from '../../clients/centrifuge-node';
 import { FundingRequest } from '../common/models/funding-request';
 import { TransferDetailsRequest } from '../common/models/transfer-details';
+import { Schema } from "../common/models/schema";
 
 const instance = axios.create();
 
@@ -43,5 +44,11 @@ export const httpClient = {
   transferDetails: {
     create: async (transferDetails: TransferDetailsRequest) => instance.post(ROUTES.TRANSFER_DETAILS, transferDetails),
     update: async (transferDetails: TransferDetailsRequest) => instance.put(`${ROUTES.TRANSFER_DETAILS}`, transferDetails),
+  },
+  schemas : {
+    create: async (schema: Schema) => instance.post(ROUTES.SCHEMAS, schema),
+    read: async () => instance.get(ROUTES.SCHEMAS),
+    readById: async (id): Promise<Schema> => instance.get(`${ROUTES.SCHEMAS}/${id}`),
+    update: async (schema: Schema) => instance.put(`${ROUTES.SCHEMAS}/${schema._id}`, schema),
   }
 };

@@ -1,10 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { HttpException } from '@nestjs/common';
-import { Schema, AttrTypes } from '../../../src/common/models/schema';
-import { SessionGuard } from '../auth/SessionGuard';
-import { databaseServiceProvider } from '../database/database.providers';
-import { DatabaseService } from '../database/database.service';
-import { SchemasController } from "./schemas.controllers";
+import {Test, TestingModule} from '@nestjs/testing';
+import {HttpException} from '@nestjs/common';
+import {AttrTypes, Schema} from '../../../src/common/models/schema';
+import {SessionGuard} from '../auth/SessionGuard';
+import {databaseServiceProvider} from '../database/database.providers';
+import {DatabaseService} from '../database/database.service';
+import {SchemasController} from "./schemas.controllers";
+
 const delay = require('util').promisify(setTimeout);
 
 describe('SchemasController', () => {
@@ -76,6 +77,13 @@ describe('SchemasController', () => {
 
       try {
         await schemasController.create({
+          name: 'bestAnimals',
+          attributes: [
+            {
+              label: 'catlike_qualities',
+              type: AttrTypes.STRING,
+            }
+          ],
           registries: [
             {
               address: '0x111'
@@ -119,7 +127,6 @@ describe('SchemasController', () => {
 
       const updateSchemaObject = {
         _id: result._id,
-        name: 'bestAnimals',
         registries: [
           {
             address:'0x87c574FB2DF0EaA2dAf5fc4a8A16dd3Ce39011B1',
@@ -127,7 +134,7 @@ describe('SchemasController', () => {
         ]
       } as Schema;
 
-      const x = await schemasController.update(
+      await schemasController.update(
           { id: result._id },
           updateSchemaObject,
       );

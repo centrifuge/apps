@@ -1,5 +1,6 @@
 import {invoiceRoutes,fundingRoutes} from './invoices/routes';
 import contactsRoutes from './contacts/routes';
+import { schemasRoutes } from './admin/schemas/routes';
 import userRoutes from './user/routes';
 
 export default {
@@ -7,5 +8,6 @@ export default {
   funding: fundingRoutes,
   contacts: contactsRoutes,
   user: userRoutes,
+  schemas: schemasRoutes,
   index: '/'
 }

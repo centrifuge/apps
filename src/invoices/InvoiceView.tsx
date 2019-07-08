@@ -164,7 +164,7 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
     //@ts-ignore
     fundingRequest.repayment_due_date = data.date_due || dateToString(new Date());
 
-    // We can fund invoices only that have date due greated then today
+    // We can fund invoices only that have date due created later than today
     // and have the status unpaid
     const canRequestFunding = !fundingAgreement
       //@ts-ignore

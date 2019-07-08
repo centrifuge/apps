@@ -6,6 +6,8 @@ import user from './user';
 import contacts from './contacts';
 import funding from './funding';
 import transferDetails from './transfer-details';
+import schemas from './schemas';
+
 import notifications from './notifications';
 
 export default history =>
@@ -16,5 +18,6 @@ export default history =>
     contacts,
     funding,
     transferDetails,
+    schemas,
     notifications,
   });

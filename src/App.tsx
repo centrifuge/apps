@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Box } from 'grommet';
 import { AxisTheme } from '@centrifuge/axis-theme';
-
 import Routing, { RouteItem } from './Routing';
 import Header, { MenuItem } from './Header';
 import { connect } from 'react-redux';
@@ -19,6 +18,7 @@ import { NotificationProvider } from './notifications/NotificationContext';
 import FundingAgreementList from './invoices/FundingAgreementList';
 import { ConnectedInvoiceView } from './invoices/InvoiceView';
 import { ConnectedNotifications } from './notifications/Notifications';
+import SchemasList from "./admin/schemas/SchemasList";
 
 interface AppPros {
   selectedRoute: string;
@@ -40,6 +40,18 @@ class App extends Component<AppPros> {
     let routeItems: RouteItem[] = [];
 
     if (loggedInUser) {
+
+      if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_SCHEMAS)) {
+        menuItems.push(
+            { label: 'Schemas', route: routes.schemas.index },
+        );
+        routeItems.push(
+            {
+              path: routes.schemas.index,
+              component: SchemasList,
+            },
+        );
+      }
 
       if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
         menuItems.push(
