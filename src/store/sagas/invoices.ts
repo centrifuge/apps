@@ -57,7 +57,7 @@ export function* updateInvoice(action) {
       type: updateInvoiceAction.success,
       payload: response.data,
     });
-    yield put(push(routes.index));
+    yield put(push(routes.invoices.index));
   } catch (e) {
     yield put({ type: updateInvoiceAction.fail, payload: e });
     yield put(alertError(

@@ -66,7 +66,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
     return (
         <DataTable
           data={data}
-          sortable={true}
+          primaryKey={'_id'}
           columns={[
             {
               property: 'name',
@@ -90,7 +90,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
               property: 'date_added',
               header: 'Date added',
               render: data =>
-                data.date_added ? <Text>{formatDate(data.date_added)}</Text> : null,
+                data.createdAt ? <Text>{formatDate(data.createdAt)}</Text> : null,
             },
             {
               property: 'enabled',

@@ -121,7 +121,7 @@ describe('InvoicesController', () => {
 
       const updateResult = await invoiceController.updateById(
         { id: insertedInvoice._id },
-        { user: { _id: 'user_id' } },
+        { user: { _id: 'user_id', account: '0x4441122' } },
         { ...updatedInvoice },
       );
 
@@ -135,7 +135,7 @@ describe('InvoicesController', () => {
           data: { ...updatedInvoice },
           write_access: [updatedInvoice.sender, updatedInvoice.recipient],
         },
-        config.admin.account,
+        '0x4441122',
       );
 
       expect(updateResult).toMatchObject({

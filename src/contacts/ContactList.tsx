@@ -16,8 +16,10 @@ import {
 import { Contact } from '../common/models/contact';
 import { Formik } from 'formik';
 import { SecondaryHeader } from '../components/SecondaryHeader';
+import { User } from '../common/models/user';
 
 interface ContactsProps {
+  loggedInUser: User;
   contacts?: (Contact & { isEditing?: boolean })[];
   refresh: () => void;
   createContact: (contact: Contact) => void;
@@ -46,6 +48,7 @@ export default class ContactList extends React.Component<ContactsProps,
   }
 
   renderRow(contact: Contact) {
+    const {loggedInUser} = this.props;
     return (
       <TableRow key={contact.address}>
         <TableCell>
@@ -57,14 +60,14 @@ export default class ContactList extends React.Component<ContactsProps,
               <Text>{contact.address}</Text>
             </Box>
             <Box fill direction="row" gap="small">
-              <Anchor
+              {contact!.address!.toLowerCase() !== loggedInUser.account.toLowerCase() && <Anchor
                 label={'Edit'}
                 onClick={() => {
                   // @ts-ignore
                   contact.isEditing = true;
                   this.setState({ contacts: this.state.contacts });
                 }}
-              />
+              />}
             </Box>
           </Box>
         </TableCell>

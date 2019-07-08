@@ -20,6 +20,7 @@ import { dateToString } from '../common/formaters';
 import { FUNDING_STATUS, getInvoiceFundingStatus, TRANSFER_DETAILS_STATUS } from '../common/status';
 import { TransferDetailsRequest } from '../common/models/transfer-details';
 import { SecondaryHeader } from '../components/SecondaryHeader';
+import { mapContactsToLabelKeyPair } from '../store/derived-data';
 
 type ConnectedFundingAgreementViewProps = {
   getInvoiceById: typeof getInvoiceById;
@@ -33,7 +34,7 @@ type ConnectedFundingAgreementViewProps = {
   contacts?: LabelValuePair[];
   signingFunding: RequestState<FunFundingResponse>;
   creatingTransferDetails: RequestState<TransferDetailsRequest>;
-  settlingFunding : RequestState<CoreapiTransferNFTResponse>;
+  settlingFunding: RequestState<CoreapiTransferNFTResponse>;
 } & RouteComponentProps<{ id?: string }>;
 
 export class FundingAgreementView extends React.Component<ConnectedFundingAgreementViewProps> {
@@ -216,12 +217,7 @@ const mapStateToProps = (state) => {
     signingFunding: state.funding.sign,
     creatingTransferDetails: state.transferDetails.create,
     settlingFunding: state.funding.settle,
-    contacts: state.contacts.get.data
-      ? (state.contacts.get.data.map(contact => ({
-        label: contact.name,
-        value: contact.address,
-      })) as LabelValuePair[])
-      : undefined,
+    contacts: mapContactsToLabelKeyPair(state, true),
   };
 };
 

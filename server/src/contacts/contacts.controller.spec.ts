@@ -5,6 +5,7 @@ import { Contact } from '../../../src/common/models/contact';
 import { SessionGuard } from '../auth/SessionGuard';
 import { databaseServiceProvider } from '../database/database.providers';
 import { DatabaseService } from '../database/database.service';
+
 const delay = require('util').promisify(setTimeout);
 
 describe('ContactsController', () => {
@@ -17,8 +18,8 @@ describe('ContactsController', () => {
 
   const ownerId = 'some_user_id';
   const insertedContacts = [
-    {name: 'alberta', address: '0xc111111111a4e539741ca11b590b9447b26a8057',  ownerId},
-    {name: 'Alice', address: '0xc112221111a4e539741ca11b590b9447b26a8057',  ownerId},
+    { name: 'alberta', address: '0xc111111111a4e539741ca11b590b9447b26a8057', ownerId },
+    { name: 'Alice', address: '0xc112221111a4e539741ca11b590b9447b26a8057', ownerId },
   ];
   const databaseSpies: any = {};
 
@@ -36,7 +37,7 @@ describe('ContactsController', () => {
     const databaseService = contactsModule.get<DatabaseService>(DatabaseService);
 
     // add some default contacts to the database
-    for(let i = 0; i < insertedContacts.length; i++) {
+    for (let i = 0; i < insertedContacts.length; i++) {
       await delay(0);
       await databaseService.contacts.insert(insertedContacts[i]);
     }
@@ -111,13 +112,16 @@ describe('ContactsController', () => {
       );
 
       const result = await contactsController.get({
-        user: { _id: 'some_user_id' },
+        user: { _id: 'some_user_id', name: 'Test User', account: '0x333' },
       });
-      expect(result.length).toEqual(insertedContacts.length);
+      expect(result.length).toEqual(insertedContacts.length );
       // should get the inserted contracts from the beforeEach hook in reverse
-      result.reverse().forEach((contact, index) => {
-        expect(contact).toMatchObject(insertedContacts[index]);
-      });
+
+      expect(result.reverse()).toMatchObject(
+        [
+          ...insertedContacts
+        ],
+      );
 
 
       expect(databaseSpies.spyGetCursor).toHaveBeenCalledTimes(1);

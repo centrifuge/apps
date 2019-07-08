@@ -27,6 +27,7 @@ export interface InvoiceResponse extends InvInvoiceResponse {
 
 export interface FundingAgreementResponse extends FunFundingResponseData {
   nftOwner?: string
+  nftRegistry?: string
 }
 
 export interface PurchaseOrderResponse

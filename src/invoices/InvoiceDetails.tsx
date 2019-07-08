@@ -23,12 +23,12 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
     const {
       invoice,
       contacts,
-
       fundingStatus,
     } = this.props;
 
     const columnGap = 'medium';
     const sectionGap = 'none';
+
 
     const invoiceData = invoice.data || { currency: 'USD' };
     const transferDetails = invoice.transferDetails || [];
@@ -54,7 +54,7 @@ export class InvoiceDetails extends React.Component<ConnectedInvoiceDetailsProps
           {/*Funding Agreement*/}
 
           {fundingAgreement &&
-          <FundingAgreement fundingStatus={fundingStatus} fundingAgreement={fundingAgreement} columnGap={columnGap}/>}
+          <FundingAgreement contacts={contacts} fundingStatus={fundingStatus} fundingAgreement={fundingAgreement} columnGap={columnGap}/>}
           {fundingTransfer &&
           <TransferDetail transfer={fundingTransfer} title={'Funding Transfer'} columnGap={columnGap}/>}
           {repaymentTransfer &&

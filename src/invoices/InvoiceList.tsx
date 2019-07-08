@@ -80,7 +80,7 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
 
               {
                 property: 'date_created',
-                header: 'Date created',
+                header: 'Invoice date',
                 render: datum => {
                   return formatDate(datum.data.date_created);
                 },
@@ -123,14 +123,14 @@ class InvoiceList extends React.Component<ViewInvoicesProps & RouteComponentProp
                         )
                       }
                     />
-                    <Anchor
+                    {!datum.fundingAgreement && <Anchor
                       label={'Edit'}
                       onClick={() =>
                         this.props.history.push(
                           invoiceRoutes.edit.replace(':id', datum._id),
                         )
                       }
-                    />
+                    />}
                   </Box>
                 ),
               },

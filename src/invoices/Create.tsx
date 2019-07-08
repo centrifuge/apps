@@ -16,6 +16,7 @@ import { Preloader } from '../components/Preloader';
 import { RequestState } from '../store/reducers/http-request-reducer';
 import { InvInvoiceData } from '../../clients/centrifuge-node';
 import { SecondaryHeader } from '../components/SecondaryHeader';
+import { mapContactsToLabelKeyPair } from '../store/derived-data';
 
 type ConnectedCreateInvoiceProps = {
   createInvoice: (invoice: Invoice) => void;
@@ -73,7 +74,7 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
 
   render() {
 
-    const { loggedInUser, creatingInvoice } = this.props;
+    const { creatingInvoice, contacts } = this.props;
 
     if (!this.props.contacts) {
       return <Preloader message="Loading"/>;
@@ -83,11 +84,6 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
       return <Preloader message="Saving invoice" withSound={true}/>;
     }
 
-    // Add logged in user to contacts
-    const contacts: LabelValuePair[] = [
-      { label: loggedInUser.name, value: loggedInUser.account },
-      ...this.props.contacts,
-    ];
 
     // Create default data for invoice. The sender should be the logged in user
 
@@ -98,7 +94,7 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
         onSubmit={this.createInvoice}
         contacts={contacts}
       >
-       <SecondaryHeader>
+        <SecondaryHeader>
           <Box direction="row" gap="small" align="center">
             <Link to={invoiceRoutes.index} size="large">
               <LinkPrevious/>
@@ -130,12 +126,7 @@ const mapStateToProps = (state) => {
   return {
     loggedInUser: state.user.auth.loggedInUser,
     creatingInvoice: state.invoices.create,
-    contacts: state.contacts.get.data
-      ? (state.contacts.get.data.map(contact => ({
-        label: contact.name,
-        value: contact.address,
-      })) as LabelValuePair[])
-      : undefined,
+    contacts: mapContactsToLabelKeyPair(state),
   };
 };
 

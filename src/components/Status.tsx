@@ -11,6 +11,7 @@ export const Status = (props => {
       break;
     case FUNDING_STATUS.REPAYING_FUNDING:
     case FUNDING_STATUS.SENDING_FUNDING:
+    case FUNDING_STATUS.PENDING:
       color = 'status-warning'
   }
 

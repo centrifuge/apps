@@ -863,524 +863,147 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                     <div
                                                                                       className="StyledBox-sc-13pk1d4-0 gZSidW"
                                                                                     >
-                                                                                      <WithTheme(Select)
-                                                                                        closeOnChange={true}
+                                                                                      <WithTheme(TextInput)
+                                                                                        disabled={true}
                                                                                         dropAlign={
                                                                                           Object {
                                                                                             "left": "left",
                                                                                             "top": "bottom",
                                                                                           }
                                                                                         }
-                                                                                        labelKey="label"
+                                                                                        focusIndicator={false}
+                                                                                        key=".0"
                                                                                         messages={
                                                                                           Object {
-                                                                                            "multiple": "multiple",
+                                                                                            "enterSelect": "(Press Enter to Select)",
+                                                                                            "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                            "suggestionsCount": "suggestions available",
+                                                                                            "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                           }
                                                                                         }
+                                                                                        name="sender_company_name"
+                                                                                        onBlur={[Function]}
                                                                                         onChange={[Function]}
-                                                                                        onSearch={[Function]}
-                                                                                        options={
-                                                                                          Array [
-                                                                                            Object {
-                                                                                              "label": "Alice",
-                                                                                              "value": "0x1111",
-                                                                                            },
-                                                                                            Object {
-                                                                                              "label": "Bob",
-                                                                                              "value": "0x1112",
-                                                                                            },
-                                                                                          ]
-                                                                                        }
-                                                                                        placeholder="Select"
+                                                                                        onFocus={[Function]}
                                                                                         plain={true}
-                                                                                        size="medium"
-                                                                                        value={
-                                                                                          Object {
-                                                                                            "label": "Alice",
-                                                                                            "value": "0x1111",
-                                                                                          }
-                                                                                        }
-                                                                                        valueKey="value"
                                                                                       >
-                                                                                        <Select
-                                                                                          closeOnChange={true}
+                                                                                        <WithTheme(TextInput)
+                                                                                          disabled={true}
                                                                                           dropAlign={
                                                                                             Object {
                                                                                               "left": "left",
                                                                                               "top": "bottom",
                                                                                             }
                                                                                           }
-                                                                                          labelKey="label"
+                                                                                          focus={false}
+                                                                                          focusIndicator={false}
                                                                                           messages={
                                                                                             Object {
-                                                                                              "multiple": "multiple",
+                                                                                              "enterSelect": "(Press Enter to Select)",
+                                                                                              "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                              "suggestionsCount": "suggestions available",
+                                                                                              "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                             }
                                                                                           }
+                                                                                          name="sender_company_name"
+                                                                                          onBlur={[Function]}
                                                                                           onChange={[Function]}
-                                                                                          onSearch={[Function]}
-                                                                                          options={
-                                                                                            Array [
-                                                                                              Object {
-                                                                                                "label": "Alice",
-                                                                                                "value": "0x1111",
-                                                                                              },
-                                                                                              Object {
-                                                                                                "label": "Bob",
-                                                                                                "value": "0x1112",
-                                                                                              },
-                                                                                            ]
-                                                                                          }
-                                                                                          placeholder="Select"
+                                                                                          onFocus={[Function]}
                                                                                           plain={true}
-                                                                                          size="medium"
-                                                                                          value={
-                                                                                            Object {
-                                                                                              "label": "Alice",
-                                                                                              "value": "0x1111",
-                                                                                            }
-                                                                                          }
-                                                                                          valueKey="value"
                                                                                         >
-                                                                                          <Select__StyledSelectDropButton
+                                                                                          <TextInput
+                                                                                            disabled={true}
                                                                                             dropAlign={
                                                                                               Object {
                                                                                                 "left": "left",
                                                                                                 "top": "bottom",
                                                                                               }
                                                                                             }
-                                                                                            dropContent={null}
-                                                                                            dropProps={Object {}}
-                                                                                            onClose={[Function]}
-                                                                                            onKeyDown={[Function]}
-                                                                                            onOpen={[Function]}
+                                                                                            focus={false}
+                                                                                            focusIndicator={false}
+                                                                                            messages={
+                                                                                              Object {
+                                                                                                "enterSelect": "(Press Enter to Select)",
+                                                                                                "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                                "suggestionsCount": "suggestions available",
+                                                                                                "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                              }
+                                                                                            }
+                                                                                            name="sender_company_name"
+                                                                                            onBlur={[Function]}
+                                                                                            onChange={[Function]}
+                                                                                            onFocus={[Function]}
                                                                                             plain={true}
                                                                                           >
-                                                                                            <DropButton
-                                                                                              a11yTitle="Open Drop"
-                                                                                              className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS"
+                                                                                            <TextInput
+                                                                                              announce={[Function]}
+                                                                                              disabled={true}
                                                                                               dropAlign={
                                                                                                 Object {
                                                                                                   "left": "left",
                                                                                                   "top": "bottom",
                                                                                                 }
                                                                                               }
-                                                                                              dropContent={null}
-                                                                                              dropProps={Object {}}
-                                                                                              onClose={[Function]}
-                                                                                              onKeyDown={[Function]}
-                                                                                              onOpen={[Function]}
+                                                                                              focus={false}
+                                                                                              focusIndicator={false}
+                                                                                              messages={
+                                                                                                Object {
+                                                                                                  "enterSelect": "(Press Enter to Select)",
+                                                                                                  "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                                  "suggestionsCount": "suggestions available",
+                                                                                                  "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                                }
+                                                                                              }
+                                                                                              name="sender_company_name"
+                                                                                              onBlur={[Function]}
+                                                                                              onChange={[Function]}
+                                                                                              onFocus={[Function]}
                                                                                               plain={true}
                                                                                             >
-                                                                                              <WithTheme(Button)
-                                                                                                a11yTitle="Open Drop"
-                                                                                                className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS"
-                                                                                                focusIndicator={true}
-                                                                                                gap="small"
-                                                                                                onClick={[Function]}
-                                                                                                onKeyDown={[Function]}
+                                                                                              <StyledTextInput__StyledTextInputContainer
                                                                                                 plain={true}
-                                                                                                type="button"
                                                                                               >
-                                                                                                <WithTheme(Button)
-                                                                                                  a11yTitle="Open Drop"
-                                                                                                  className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS"
-                                                                                                  focus={false}
-                                                                                                  focusIndicator={true}
-                                                                                                  gap="small"
-                                                                                                  onBlur={[Function]}
-                                                                                                  onClick={[Function]}
-                                                                                                  onFocus={[Function]}
-                                                                                                  onKeyDown={[Function]}
-                                                                                                  plain={true}
-                                                                                                  type="button"
+                                                                                                <div
+                                                                                                  className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 kYQCpm"
                                                                                                 >
-                                                                                                  <Button
-                                                                                                    a11yTitle="Open Drop"
-                                                                                                    className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS"
+                                                                                                  <StyledTextInput
+                                                                                                    announce={[Function]}
+                                                                                                    autoComplete="off"
+                                                                                                    disabled={true}
                                                                                                     focus={false}
-                                                                                                    focusIndicator={true}
-                                                                                                    gap="small"
+                                                                                                    focusIndicator={false}
+                                                                                                    messages={
+                                                                                                      Object {
+                                                                                                        "enterSelect": "(Press Enter to Select)",
+                                                                                                        "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                                        "suggestionsCount": "suggestions available",
+                                                                                                        "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                                      }
+                                                                                                    }
+                                                                                                    name="sender_company_name"
                                                                                                     onBlur={[Function]}
-                                                                                                    onClick={[Function]}
+                                                                                                    onChange={[Function]}
                                                                                                     onFocus={[Function]}
                                                                                                     onKeyDown={[Function]}
                                                                                                     plain={true}
-                                                                                                    type="button"
                                                                                                   >
-                                                                                                    <StyledButton
-                                                                                                      aria-label="Open Drop"
-                                                                                                      className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS"
-                                                                                                      focus={false}
-                                                                                                      focusIndicator={true}
-                                                                                                      gap="small"
-                                                                                                      hasIcon={false}
-                                                                                                      hasLabel={false}
+                                                                                                    <input
+                                                                                                      autoComplete="off"
+                                                                                                      className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                                                                                                      disabled={true}
+                                                                                                      name="sender_company_name"
                                                                                                       onBlur={[Function]}
-                                                                                                      onClick={[Function]}
+                                                                                                      onChange={[Function]}
                                                                                                       onFocus={[Function]}
                                                                                                       onKeyDown={[Function]}
-                                                                                                      onMouseOut={[Function]}
-                                                                                                      onMouseOver={[Function]}
-                                                                                                      pad={false}
-                                                                                                      plain={true}
-                                                                                                      type="button"
-                                                                                                    >
-                                                                                                      <button
-                                                                                                        aria-label="Open Drop"
-                                                                                                        className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS StyledButton-sc-323bzc-0 jfbKsv"
-                                                                                                        onBlur={[Function]}
-                                                                                                        onClick={[Function]}
-                                                                                                        onFocus={[Function]}
-                                                                                                        onKeyDown={[Function]}
-                                                                                                        onMouseOut={[Function]}
-                                                                                                        onMouseOver={[Function]}
-                                                                                                        type="button"
-                                                                                                      >
-                                                                                                        <WithTheme(Box)
-                                                                                                          align="center"
-                                                                                                          direction="row"
-                                                                                                          justify="between"
-                                                                                                          margin="none"
-                                                                                                          pad="none"
-                                                                                                          responsive={true}
-                                                                                                        >
-                                                                                                          <Box
-                                                                                                            align="center"
-                                                                                                            direction="row"
-                                                                                                            justify="between"
-                                                                                                            margin="none"
-                                                                                                            pad="none"
-                                                                                                            responsive={true}
-                                                                                                          >
-                                                                                                            <StyledBox
-                                                                                                              align="center"
-                                                                                                              directionProp="row"
-                                                                                                              justify="between"
-                                                                                                              margin="none"
-                                                                                                              pad="none"
-                                                                                                              responsive={true}
-                                                                                                            >
-                                                                                                              <div
-                                                                                                                className="StyledBox-sc-13pk1d4-0 erazuK"
-                                                                                                              >
-                                                                                                                <WithTheme(Box)
-                                                                                                                  basis="auto"
-                                                                                                                  direction="row"
-                                                                                                                  flex={true}
-                                                                                                                  margin="none"
-                                                                                                                  pad="none"
-                                                                                                                  responsive={true}
-                                                                                                                >
-                                                                                                                  <Box
-                                                                                                                    basis="auto"
-                                                                                                                    direction="row"
-                                                                                                                    flex={true}
-                                                                                                                    margin="none"
-                                                                                                                    pad="none"
-                                                                                                                    responsive={true}
-                                                                                                                  >
-                                                                                                                    <StyledBox
-                                                                                                                      basis="auto"
-                                                                                                                      directionProp="row"
-                                                                                                                      flex={true}
-                                                                                                                      margin="none"
-                                                                                                                      pad="none"
-                                                                                                                      responsive={true}
-                                                                                                                    >
-                                                                                                                      <div
-                                                                                                                        className="StyledBox-sc-13pk1d4-0 XINUX"
-                                                                                                                      >
-                                                                                                                        <Select__SelectTextInput
-                                                                                                                          dropAlign={
-                                                                                                                            Object {
-                                                                                                                              "left": "left",
-                                                                                                                              "top": "bottom",
-                                                                                                                            }
-                                                                                                                          }
-                                                                                                                          messages={
-                                                                                                                            Object {
-                                                                                                                              "enterSelect": "(Press Enter to Select)",
-                                                                                                                              "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
-                                                                                                                              "suggestionsCount": "suggestions available",
-                                                                                                                              "suggestionsExist": "This input has suggestions use arrow keys to navigate",
-                                                                                                                            }
-                                                                                                                          }
-                                                                                                                          onClick={[Function]}
-                                                                                                                          placeholder="Select"
-                                                                                                                          plain={true}
-                                                                                                                          readOnly={true}
-                                                                                                                          size="medium"
-                                                                                                                          tabIndex="-1"
-                                                                                                                          type="text"
-                                                                                                                          value="Alice"
-                                                                                                                          valueKey="value"
-                                                                                                                        >
-                                                                                                                          <WithTheme(TextInput)
-                                                                                                                            className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy"
-                                                                                                                            dropAlign={
-                                                                                                                              Object {
-                                                                                                                                "left": "left",
-                                                                                                                                "top": "bottom",
-                                                                                                                              }
-                                                                                                                            }
-                                                                                                                            messages={
-                                                                                                                              Object {
-                                                                                                                                "enterSelect": "(Press Enter to Select)",
-                                                                                                                                "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
-                                                                                                                                "suggestionsCount": "suggestions available",
-                                                                                                                                "suggestionsExist": "This input has suggestions use arrow keys to navigate",
-                                                                                                                              }
-                                                                                                                            }
-                                                                                                                            onClick={[Function]}
-                                                                                                                            placeholder="Select"
-                                                                                                                            plain={true}
-                                                                                                                            readOnly={true}
-                                                                                                                            size="medium"
-                                                                                                                            tabIndex="-1"
-                                                                                                                            type="text"
-                                                                                                                            value="Alice"
-                                                                                                                            valueKey="value"
-                                                                                                                          >
-                                                                                                                            <WithTheme(TextInput)
-                                                                                                                              className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy"
-                                                                                                                              dropAlign={
-                                                                                                                                Object {
-                                                                                                                                  "left": "left",
-                                                                                                                                  "top": "bottom",
-                                                                                                                                }
-                                                                                                                              }
-                                                                                                                              focus={false}
-                                                                                                                              messages={
-                                                                                                                                Object {
-                                                                                                                                  "enterSelect": "(Press Enter to Select)",
-                                                                                                                                  "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
-                                                                                                                                  "suggestionsCount": "suggestions available",
-                                                                                                                                  "suggestionsExist": "This input has suggestions use arrow keys to navigate",
-                                                                                                                                }
-                                                                                                                              }
-                                                                                                                              onBlur={[Function]}
-                                                                                                                              onClick={[Function]}
-                                                                                                                              onFocus={[Function]}
-                                                                                                                              placeholder="Select"
-                                                                                                                              plain={true}
-                                                                                                                              readOnly={true}
-                                                                                                                              size="medium"
-                                                                                                                              tabIndex="-1"
-                                                                                                                              type="text"
-                                                                                                                              value="Alice"
-                                                                                                                              valueKey="value"
-                                                                                                                            >
-                                                                                                                              <TextInput
-                                                                                                                                className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy"
-                                                                                                                                dropAlign={
-                                                                                                                                  Object {
-                                                                                                                                    "left": "left",
-                                                                                                                                    "top": "bottom",
-                                                                                                                                  }
-                                                                                                                                }
-                                                                                                                                focus={false}
-                                                                                                                                messages={
-                                                                                                                                  Object {
-                                                                                                                                    "enterSelect": "(Press Enter to Select)",
-                                                                                                                                    "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
-                                                                                                                                    "suggestionsCount": "suggestions available",
-                                                                                                                                    "suggestionsExist": "This input has suggestions use arrow keys to navigate",
-                                                                                                                                  }
-                                                                                                                                }
-                                                                                                                                onBlur={[Function]}
-                                                                                                                                onClick={[Function]}
-                                                                                                                                onFocus={[Function]}
-                                                                                                                                placeholder="Select"
-                                                                                                                                plain={true}
-                                                                                                                                readOnly={true}
-                                                                                                                                size="medium"
-                                                                                                                                tabIndex="-1"
-                                                                                                                                type="text"
-                                                                                                                                value="Alice"
-                                                                                                                                valueKey="value"
-                                                                                                                              >
-                                                                                                                                <TextInput
-                                                                                                                                  announce={[Function]}
-                                                                                                                                  className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy"
-                                                                                                                                  dropAlign={
-                                                                                                                                    Object {
-                                                                                                                                      "left": "left",
-                                                                                                                                      "top": "bottom",
-                                                                                                                                    }
-                                                                                                                                  }
-                                                                                                                                  focus={false}
-                                                                                                                                  messages={
-                                                                                                                                    Object {
-                                                                                                                                      "enterSelect": "(Press Enter to Select)",
-                                                                                                                                      "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
-                                                                                                                                      "suggestionsCount": "suggestions available",
-                                                                                                                                      "suggestionsExist": "This input has suggestions use arrow keys to navigate",
-                                                                                                                                    }
-                                                                                                                                  }
-                                                                                                                                  onBlur={[Function]}
-                                                                                                                                  onClick={[Function]}
-                                                                                                                                  onFocus={[Function]}
-                                                                                                                                  placeholder="Select"
-                                                                                                                                  plain={true}
-                                                                                                                                  readOnly={true}
-                                                                                                                                  size="medium"
-                                                                                                                                  tabIndex="-1"
-                                                                                                                                  type="text"
-                                                                                                                                  value="Alice"
-                                                                                                                                  valueKey="value"
-                                                                                                                                >
-                                                                                                                                  <StyledTextInput__StyledTextInputContainer
-                                                                                                                                    plain={true}
-                                                                                                                                  >
-                                                                                                                                    <div
-                                                                                                                                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 kYQCpm"
-                                                                                                                                    >
-                                                                                                                                      <StyledTextInput
-                                                                                                                                        announce={[Function]}
-                                                                                                                                        autoComplete="off"
-                                                                                                                                        className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy"
-                                                                                                                                        focus={false}
-                                                                                                                                        messages={
-                                                                                                                                          Object {
-                                                                                                                                            "enterSelect": "(Press Enter to Select)",
-                                                                                                                                            "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
-                                                                                                                                            "suggestionsCount": "suggestions available",
-                                                                                                                                            "suggestionsExist": "This input has suggestions use arrow keys to navigate",
-                                                                                                                                          }
-                                                                                                                                        }
-                                                                                                                                        onBlur={[Function]}
-                                                                                                                                        onChange={[Function]}
-                                                                                                                                        onClick={[Function]}
-                                                                                                                                        onFocus={[Function]}
-                                                                                                                                        onKeyDown={[Function]}
-                                                                                                                                        placeholder="Select"
-                                                                                                                                        plain={true}
-                                                                                                                                        readOnly={true}
-                                                                                                                                        size="medium"
-                                                                                                                                        tabIndex="-1"
-                                                                                                                                        type="text"
-                                                                                                                                        value="Alice"
-                                                                                                                                        valueKey="value"
-                                                                                                                                      >
-                                                                                                                                        <input
-                                                                                                                                          autoComplete="off"
-                                                                                                                                          className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy StyledTextInput-sc-1x30a0s-0 jfnKzs"
-                                                                                                                                          onBlur={[Function]}
-                                                                                                                                          onChange={[Function]}
-                                                                                                                                          onClick={[Function]}
-                                                                                                                                          onFocus={[Function]}
-                                                                                                                                          onKeyDown={[Function]}
-                                                                                                                                          placeholder="Select"
-                                                                                                                                          readOnly={true}
-                                                                                                                                          size="medium"
-                                                                                                                                          tabIndex="-1"
-                                                                                                                                          type="text"
-                                                                                                                                          value="Alice"
-                                                                                                                                        />
-                                                                                                                                      </StyledTextInput>
-                                                                                                                                    </div>
-                                                                                                                                  </StyledTextInput__StyledTextInputContainer>
-                                                                                                                                </TextInput>
-                                                                                                                              </TextInput>
-                                                                                                                            </WithTheme(TextInput)>
-                                                                                                                          </WithTheme(TextInput)>
-                                                                                                                        </Select__SelectTextInput>
-                                                                                                                      </div>
-                                                                                                                    </StyledBox>
-                                                                                                                  </Box>
-                                                                                                                </WithTheme(Box)>
-                                                                                                                <WithTheme(Box)
-                                                                                                                  direction="column"
-                                                                                                                  flex={false}
-                                                                                                                  margin={
-                                                                                                                    Object {
-                                                                                                                      "horizontal": "small",
-                                                                                                                    }
-                                                                                                                  }
-                                                                                                                  pad="none"
-                                                                                                                  responsive={true}
-                                                                                                                  style={
-                                                                                                                    Object {
-                                                                                                                      "minWidth": "auto",
-                                                                                                                    }
-                                                                                                                  }
-                                                                                                                >
-                                                                                                                  <Box
-                                                                                                                    direction="column"
-                                                                                                                    flex={false}
-                                                                                                                    margin={
-                                                                                                                      Object {
-                                                                                                                        "horizontal": "small",
-                                                                                                                      }
-                                                                                                                    }
-                                                                                                                    pad="none"
-                                                                                                                    responsive={true}
-                                                                                                                    style={
-                                                                                                                      Object {
-                                                                                                                        "minWidth": "auto",
-                                                                                                                      }
-                                                                                                                    }
-                                                                                                                  >
-                                                                                                                    <StyledBox
-                                                                                                                      directionProp="column"
-                                                                                                                      flex={false}
-                                                                                                                      margin={
-                                                                                                                        Object {
-                                                                                                                          "horizontal": "small",
-                                                                                                                        }
-                                                                                                                      }
-                                                                                                                      pad="none"
-                                                                                                                      responsive={true}
-                                                                                                                      style={
-                                                                                                                        Object {
-                                                                                                                          "minWidth": "auto",
-                                                                                                                        }
-                                                                                                                      }
-                                                                                                                    >
-                                                                                                                      <div
-                                                                                                                        className="StyledBox-sc-13pk1d4-0 eLQtUu"
-                                                                                                                        style={
-                                                                                                                          Object {
-                                                                                                                            "minWidth": "auto",
-                                                                                                                          }
-                                                                                                                        }
-                                                                                                                      >
-                                                                                                                        <StyledIcon
-                                                                                                                          a11yTitle="FormDown"
-                                                                                                                          color="#7D4CDB"
-                                                                                                                          size="medium"
-                                                                                                                          viewBox="0 0 24 24"
-                                                                                                                        >
-                                                                                                                          <svg
-                                                                                                                            aria-label="FormDown"
-                                                                                                                            className="StyledIcon-ofa7kd-0 dSllCE"
-                                                                                                                            viewBox="0 0 24 24"
-                                                                                                                          >
-                                                                                                                            <polyline
-                                                                                                                              fill="none"
-                                                                                                                              points="18 9 12 15 6 9"
-                                                                                                                              stroke="#000"
-                                                                                                                              strokeWidth="2"
-                                                                                                                            />
-                                                                                                                          </svg>
-                                                                                                                        </StyledIcon>
-                                                                                                                      </div>
-                                                                                                                    </StyledBox>
-                                                                                                                  </Box>
-                                                                                                                </WithTheme(Box)>
-                                                                                                              </div>
-                                                                                                            </StyledBox>
-                                                                                                          </Box>
-                                                                                                        </WithTheme(Box)>
-                                                                                                      </button>
-                                                                                                    </StyledButton>
-                                                                                                  </Button>
-                                                                                                </WithTheme(Button)>
-                                                                                              </WithTheme(Button)>
-                                                                                            </DropButton>
-                                                                                          </Select__StyledSelectDropButton>
-                                                                                        </Select>
-                                                                                      </WithTheme(Select)>
+                                                                                                    />
+                                                                                                  </StyledTextInput>
+                                                                                                </div>
+                                                                                              </StyledTextInput__StyledTextInputContainer>
+                                                                                            </TextInput>
+                                                                                          </TextInput>
+                                                                                        </WithTheme(TextInput)>
+                                                                                      </WithTheme(TextInput)>
                                                                                     </div>
                                                                                   </StyledBox>
                                                                                 </Box>
@@ -1433,11 +1056,11 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                 className="StyledBox-sc-13pk1d4-0 clLqce"
                                                               >
                                                                 <WithTheme(FormField)
-                                                                  label="Street"
+                                                                  label="Street 1"
                                                                 >
                                                                   <WithTheme(FormField)
                                                                     focus={false}
-                                                                    label="Street"
+                                                                    label="Street 1"
                                                                     onBlur={[Function]}
                                                                     onFocus={[Function]}
                                                                   >
@@ -1500,7 +1123,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                 <label
                                                                                   className="StyledText-sc-1sadyjn-0 bKLvLm"
                                                                                 >
-                                                                                  Street
+                                                                                  Street 1
                                                                                 </label>
                                                                               </StyledText>
                                                                               <WithTheme(Box)
@@ -1726,11 +1349,11 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                   />
                                                                 </StyledBox__StyledBoxGap>
                                                                 <WithTheme(FormField)
-                                                                  label="Street"
+                                                                  label="Street 2"
                                                                 >
                                                                   <WithTheme(FormField)
                                                                     focus={false}
-                                                                    label="Street"
+                                                                    label="Street 2"
                                                                     onBlur={[Function]}
                                                                     onFocus={[Function]}
                                                                   >
@@ -1793,7 +1416,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                 <label
                                                                                   className="StyledText-sc-1sadyjn-0 bKLvLm"
                                                                                 >
-                                                                                  Street
+                                                                                  Street 2
                                                                                 </label>
                                                                               </StyledText>
                                                                               <WithTheme(Box)

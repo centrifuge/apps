@@ -89,7 +89,7 @@ export class RemitToForm extends React.Component<ConnectedRemitToProps> {
           </Box>
           <Box gap={columnGap} basis={'1/2'}>
             <FormField
-              label="Street"
+              label="Street 1"
               error={errors!.remit_to_street1}
             >
               <TextInput
@@ -100,7 +100,7 @@ export class RemitToForm extends React.Component<ConnectedRemitToProps> {
               />
             </FormField>
             <FormField
-              label="Street"
+              label="Street 2"
               error={errors!.remit_to_street2}
             >
               <TextInput

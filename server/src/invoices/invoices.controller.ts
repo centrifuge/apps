@@ -2,10 +2,13 @@ import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, Req
 import { Invoice } from '../../../src/common/models/invoice';
 import { ROUTES } from '../../../src/common/constants';
 import { SessionGuard } from '../auth/SessionGuard';
-import { InvInvoiceResponse } from '../../../clients/centrifuge-node';
+import {
+  FunFundingListResponse,
+  InvInvoiceResponse,
+  UserapiTransferDetailListResponse,
+} from '../../../clients/centrifuge-node';
 import { DatabaseService } from '../database/database.service';
 import { InvoiceResponse } from '../../../src/common/interfaces';
-import config from '../../../src/common/config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 
 @Controller(ROUTES.INVOICES)
@@ -85,6 +88,7 @@ export class InvoicesController {
       if (nft) {
         const ownerResponse = await this.centrifugeService.nft.ownerOfNft(request.user.account, nft.token_id, nft.registry, request.user.account);
         invoice.fundingAgreement.nftOwner = ownerResponse.owner;
+        invoice.fundingAgreement.nftRegistry = nft.registry;
       } else {
         throw new HttpException('Nft from funding agreement not found on invoice', HttpStatus.CONFLICT);
       }
@@ -114,16 +118,36 @@ export class InvoicesController {
       { _id: params.id, ownerId: request.user._id },
     );
 
-    const updateResult = await this.centrifugeService.invoices.update(
+    const updateResult: InvoiceResponse = await this.centrifugeService.invoices.update(
       invoice.header.document_id,
       {
         data: { ...updateInvoiceRequest },
         write_access: collaborators,
       },
-      config.admin.account,
+      request.user.account,
     );
 
     await this.centrifugeService.pullForJobComplete(updateResult.header.job_id, request.user.account);
+    
+    if (updateResult.attributes) {
+      if (updateResult.attributes.funding_agreement) {
+        const fundingList: FunFundingListResponse = await this.centrifugeService.funding.getList(
+          updateResult.header.document_id,
+          request.user.account,
+        );
+        updateResult.fundingAgreement = (fundingList.data ? fundingList.data.shift() : undefined);
+      }
+      if (updateResult.attributes.transfer_details) {
+        const transferList: UserapiTransferDetailListResponse = await this.centrifugeService.transfer.listTransferDetails(
+          request.user.account,
+          updateResult.header.document_id,
+        );
+        updateResult.transferDetails = (transferList ? transferList.data : undefined);
+      }
+
+      // We need to delete the attributes prop because nedb does not allow for . in field names
+      delete updateResult.attributes;
+    }
 
     return await this.database.invoices.updateById(params.id, {
       ...updateResult,

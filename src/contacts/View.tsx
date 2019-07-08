@@ -10,15 +10,14 @@ import {
   resetUpdateContact,
   updateContact,
 } from '../store/actions/contacts';
-import { RequestState } from '../store/reducers/http-request-reducer';
 import { Contact } from '../common/models/contact';
 import ContactList from './ContactList';
 import { Preloader } from '../components/Preloader';
+import { User } from '../common/models/user';
 
-const mapStateToProps = (state: {
-  contacts: { get: RequestState<Contact[]> };
-}) => {
+const mapStateToProps = (state) => {
   return {
+    loggedInUser: state.user.auth.loggedInUser,
     contacts: state.contacts.get.data,
     loading: state.contacts.get.loading,
   };
@@ -32,6 +31,7 @@ type ViewContactsProps = {
   updateContact: (contact: Contact) => void;
   resetUpdateContact: () => void;
   contacts?: Contact[];
+  loggedInUser: User;
   loading: boolean;
 };
 
@@ -47,13 +47,17 @@ class ViewContacts extends React.Component<ViewContactsProps> {
   }
 
   render() {
-    if (this.props.loading) {
+
+    const { loading, loggedInUser, contacts } = this.props;
+
+    if (loading) {
       return <Preloader message="Loading"/>;
     }
 
     return (
       <ContactList
-        contacts={this.props.contacts as Contact[]}
+        loggedInUser={loggedInUser}
+        contacts={contacts as Contact[]}
         refresh={this.props.getContacts}
         createContact={this.props.createContact}
         updateContact={this.props.updateContact}

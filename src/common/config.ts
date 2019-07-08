@@ -13,6 +13,7 @@ const config = {
     permissions:[PERMISSIONS.CAN_MANAGE_USERS, PERMISSIONS.CAN_MANAGE_SCHEMAS, PERMISSIONS.CAN_CREATE_INVOICES],
   },
   inviteOnly: Boolean(env.INVITE_ONLY || true),
+  ethNetwork:  env.ETH_NETWORK || 'rinkeby',
   ethProvider: env.ETH_PROVIDER || 'https://rinkeby.infura.io/v3/55b957b5c6be42c49e6d48cbb102bdd5',
 };
 
