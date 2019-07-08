@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Box, Paragraph } from 'grommet';
 import { formatDate } from '../../common/formaters';
 import { Invoice, invoiceHasCreditNote } from '../../common/models/invoice';

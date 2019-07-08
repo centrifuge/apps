@@ -1,14 +1,15 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
 import { getInvoices, resetGetInvoices } from '../store/actions/invoices';
 import { Anchor, Box, DataTable, Heading, Text } from 'grommet';
 import { fundingRoutes } from './routes';
-import { View } from 'grommet-icons';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { formatCurrency, formatDate } from '../common/formaters';
 import { FunFundingData, FunFundingSignature } from '../../clients/centrifuge-node';
 import { Preloader } from '../components/Preloader';
+import { getInvoiceFundingStatus } from '../common/status';
+import { SecondaryHeader } from '../components/SecondaryHeader';
+import { Status } from '../components/Status';
 
 
 type FundingAgreements = FunFundingData & {
@@ -48,27 +49,26 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
     return (
 
       <Box fill>
-        <Box justify="between" direction="row" align="center">
+        <SecondaryHeader>
           <Heading level="3">Funding Agreements</Heading>
-
-        </Box>
-
-        <Box>
+        </SecondaryHeader>
+        <Box pad={{ horizontal: 'medium' }}>
           <DataTable
-            sortable={true}
+            sortable={false}
             data={this.props.fundingAgreements}
             primaryKey={'agreement_id'}
             columns={[
               {
                 property: 'sender_company_name',
                 header: 'Borrower',
+                render: datum => datum.data.sender_company_name,
               },
               {
                 property: 'agreement_id',
                 header: 'Funding agreement ID',
                 render: datum => {
                   return <Box width={'small'}>
-                    <Text style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>{datum.agreement_id}</Text>
+                    <Text style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>{datum.fundingAgreement.funding.agreement_id}</Text>
                   </Box>;
                 },
 
@@ -76,21 +76,22 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
               {
                 property: 'number',
                 header: 'Invoice number',
+                render: datum => datum.data.number,
               },
               {
                 property: 'net_amount',
                 header: 'Net amount',
                 align: 'end',
                 render: datum => {
-                  return formatCurrency(datum.amount, datum.currency);
+                  return formatCurrency(datum.data.net_amount, datum.data.currency);
                 },
               },
               {
                 property: 'amount',
-                header: 'Funding amount',
+                header: 'Early payment amount',
                 align: 'end',
                 render: datum => {
-                  return formatCurrency(datum.amount, datum.currency);
+                  return formatCurrency(datum.fundingAgreement.funding.amount, datum.fundingAgreement.funding.currency);
                 },
               },
 
@@ -98,7 +99,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
                 property: 'repayment_due_date',
                 header: 'Repayment due date',
                 render: datum => {
-                  return formatDate(datum.repayment_due_date);
+                  return formatDate(datum.fundingAgreement.funding.repayment_due_date);
                 },
               },
 
@@ -106,7 +107,7 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
                 property: 'invoice_status',
                 header: 'Funding status',
                 render: datum => {
-                  return datum.signatures ? <Text color={'status-ok'}>Accepted</Text> : <Text>Received</Text>;
+                  return <Status value={getInvoiceFundingStatus(datum)}/>;
                 },
               },
               {
@@ -135,16 +136,8 @@ class FundingAgreementList extends React.Component<ViewInvoicesProps & RouteComp
 
 const mapStateToProps = (state) => {
   return {
-    fundingAgreements:
-      state.invoices.get.data &&
-      (state.invoices.get.data.filter(item => item.fundingAgreement).map(response => ({
-        ...response.fundingAgreement.funding,
-        signatures: response.fundingAgreement.signatures,
-        sender_company_name: response.data.sender_company_name,
-        net_amount: response.data.net_amount,
-        number: response.data.number,
-        _id: response._id,
-      }))),
+    fundingAgreements: state.invoices.get.data &&
+      state.invoices.get.data.filter(item => item.fundingAgreement),
     loading: state.invoices.get.loading,
   };
 };

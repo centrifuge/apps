@@ -1,11 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { connect, FormikContext } from 'formik';
 import { Invoice } from '../../common/models/invoice';
 import { Section } from '../../components/Section';
-import { Box, FormField, Select, TextInput } from 'grommet';
-import { dateToString, extractDate } from '../../common/formaters';
-
+import { Box, FormField, Select } from 'grommet';
+import { dateToString, extractDate, getCurrencyFormat, getPercentFormat } from '../../common/formaters';
+import { NumberInput } from '@centrifuge/axis-number-input';
+import { DateInput } from '@centrifuge/axis-date-input';
 
 interface DetailsFormProps {
   columnGap: string;
@@ -23,7 +23,6 @@ export class DetailsForm extends React.Component<ConnectedDetailsFormProps> {
       errors,
       values,
       setFieldValue,
-      handleChange,
     } = this.props.formik;
 
     const {
@@ -31,102 +30,54 @@ export class DetailsForm extends React.Component<ConnectedDetailsFormProps> {
     } = this.props;
 
 
-    values.tax_amount = (parseFloat(values.net_amount || '') * parseFloat(values.tax_rate || '')).toFixed(2);
+    values.tax_amount = (parseFloat(values.net_amount || '') * (parseFloat(values.tax_rate || ''))/100).toFixed(2);
     values.gross_amount = (parseFloat(values.net_amount || '') + parseFloat(values.tax_amount || '')).toFixed(2);
+    const currencyParts = getCurrencyFormat(values.currency);
+    const percentParts = getPercentFormat();
 
     return (
       <Section headingLevel="5" title="Invoice Details">
         <Box gap={columnGap}>
           <Box direction="row" gap={columnGap}>
-          <Box basis={'1/4'}>
-            <FormField
-              label="Status"
-              error={errors!.status}
-            >
-              <Select
-                placeholder="Select"
-                value={values!.status}
-                options={['unpaid', 'paid']}
-                onChange={({ option }) => setFieldValue('status', option)}
-              />
-            </FormField>
-          </Box>
-
-          <Box basis={'1/4'}>
-            <FormField
-              label="Currency"
-              error={errors!.currency}
-            >
-              <Select
-                placeholder="Select"
-                value={values!.currency}
-                options={['USD', 'EUR']}
-                onChange={({ option }) => setFieldValue('currency', option)}
-              />
-
-            </FormField>
-          </Box>
-
-          <Box basis={'1/4'}>
-            <FormField
-              label="Date created"
-              error={errors!.date_created}
-            >
-              <TextInput
-                name="date_created"
-                type="date"
-                value={extractDate(values!.date_created)}
-                onChange={ev => {
-                  setFieldValue('date_created', dateToString(ev.target.value));
-                }}
-              />
-            </FormField>
-          </Box>
-
-          <Box basis={'1/4'}>
-            <FormField
-              label="Date due"
-              error={errors!.date_due}
-            >
-              <TextInput
-                name="date_due"
-                type="date"
-                value={extractDate(values!.date_due)}
-                onChange={ev => {
-                  setFieldValue('date_due', dateToString(ev.target.value));
-                }}
-              />
-            </FormField>
-          </Box>
-        </Box>
-          <Box direction="row" gap={columnGap}>
-
             <Box basis={'1/4'}>
               <FormField
-                label={`Net amount, ${values.currency}`}
-                error={errors!.net_amount}
+                label="Status"
+                error={errors!.status}
               >
-                <TextInput
-                  name="net_amount"
-                  maxLength={22}
-                  value={values.net_amount}
-                  onChange={handleChange}
+                <Select
+                  placeholder="Select"
+                  value={values!.status}
+                  options={['unpaid', 'paid']}
+                  onChange={({ option }) => setFieldValue('status', option)}
                 />
               </FormField>
             </Box>
 
             <Box basis={'1/4'}>
               <FormField
-                label="Tax rate, %"
-                maxLength={4}
-                error={errors!.tax_rate}
+                label="Currency"
+                error={errors!.currency}
               >
-                <TextInput
-                  name="tax_rate"
-                  value={(parseFloat(values.tax_rate || '') * 100)}
-                  onChange={(ev) => {
-                    const no = parseFloat(ev.target.value);
-                    setFieldValue('tax_rate', ((isNaN(no) ? 0 : no) / 100).toString());
+                <Select
+                  placeholder="Select"
+                  value={values!.currency}
+                  options={['USD', 'EUR']}
+                  onChange={({ option }) => setFieldValue('currency', option)}
+                />
+
+              </FormField>
+            </Box>
+
+            <Box basis={'1/4'}>
+              <FormField
+                label="Invoice date"
+                error={errors!.date_created}
+              >
+                <DateInput
+                  name="date_created"
+                  value={extractDate(values!.date_created)}
+                  onChange={date => {
+                    setFieldValue('date_created', dateToString(date));
                   }}
                 />
               </FormField>
@@ -134,28 +85,79 @@ export class DetailsForm extends React.Component<ConnectedDetailsFormProps> {
 
             <Box basis={'1/4'}>
               <FormField
-                label={`Tax amount, ${values.currency}`}
-                error={errors!.tax_amount}
+                label="Date due"
+                error={errors!.date_due}
               >
-                <TextInput
-                  disabled={true}
-                  name="tax_amount"
-                  value={values!.tax_amount}
-                  onChange={handleChange}
+                <DateInput
+                  name="date_due"
+                  value={extractDate(values!.date_due)}
+                  onChange={date => {
+                    setFieldValue('date_due', dateToString(date));
+                  }}
+                />
+              </FormField>
+            </Box>
+          </Box>
+          <Box direction="row" gap={columnGap}>
+
+            <Box basis={'1/4'}>
+              <FormField
+                label={`Net amount, ${values.currency}`}
+                error={errors!.net_amount}
+              >
+
+                <NumberInput
+                  {...currencyParts}
+                  name="net_amount"
+                  value={values.net_amount}
+                  onChange={(masked, value) => {
+                    setFieldValue('net_amount', value+'');
+                  }}
+                />
+
+              </FormField>
+            </Box>
+
+            <Box basis={'1/4'}>
+              <FormField
+                label="Tax rate"
+                error={errors!.tax_rate}
+              >
+                <NumberInput
+                  {...percentParts}
+                  name="tax_rate"
+                  value={values.tax_rate}
+                  onChange={(masked, value) => {
+                    setFieldValue('tax_rate', value+'');
+                  }}
                 />
               </FormField>
             </Box>
 
             <Box basis={'1/4'}>
               <FormField
-                label={`Gross amount, ${values.currency}`}
+                label={`Tax amount`}
+                error={errors!.tax_amount}
+              >
+                <NumberInput
+                  {...currencyParts}
+                  disabled={true}
+                  name="tax_amount"
+                  value={values.tax_amount}
+                />
+              </FormField>
+            </Box>
+
+            <Box basis={'1/4'}>
+              <FormField
+                label={`Gross amount`}
                 error={errors!.gross_amount}
               >
-                <TextInput
+                <NumberInput
+                  {...currencyParts}
                   disabled={true}
                   name="gross_amount"
-                  value={values!.gross_amount}
-                  onChange={handleChange}
+                  value={values.gross_amount}
                 />
               </FormField>
             </Box>

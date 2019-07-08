@@ -4,7 +4,6 @@ import {
   Get,
   HttpException,
   HttpStatus,
-  Inject,
   Param,
   Post,
   Put,
@@ -40,7 +39,7 @@ export class ContactsController {
 
     const newContact = new Contact(
       contact.name,
-      contact.address,
+      contact.address.toLowerCase(),
       request.user._id,
     );
     return await this.databaseService.contacts.insert(newContact);
@@ -54,9 +53,9 @@ export class ContactsController {
    * @return {Promise<Contact[]>} result
    */
   async get(@Req() request) {
-    return await this.databaseService.contacts.find({
+    return this.databaseService.contacts.getCursor({
       ownerId: request.user._id,
-    });
+    }).sort({ updatedAt: -1 }).exec();
   }
 
   @Put(':id')

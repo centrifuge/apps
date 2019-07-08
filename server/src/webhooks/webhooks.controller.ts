@@ -1,8 +1,11 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ROUTES } from '../../../src/common/constants';
-import { FunFundingListResponse, NotificationNotificationMessage } from '../../../clients/centrifuge-node';
+import {
+  FunFundingListResponse,
+  NotificationNotificationMessage,
+  UserapiTransferDetailListResponse,
+} from '../../../clients/centrifuge-node';
 import { DatabaseService } from '../database/database.service';
-import config from '../../../src/common/config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { InvoiceResponse } from '../../../src/common/interfaces';
 
@@ -34,45 +37,57 @@ export class WebhooksController {
    */
   @Post()
   async receiveMessage(@Body() notification: NotificationNotificationMessage) {
-
-    if (notification.event_type === eventTypes.DOCUMENT) {
-      // Search for the user in the database
-      const user = await this.databaseService.users.findOne({ account: notification.to_id });
-      if (!user) {
-        return 'User is not present in database';
-      }
-      if (notification.document_type === documentTypes.invoice) {
-        const result = await this.centrifugeService.invoices.get(
-          notification.document_id,
-          user.account,
-        );
-
-        const invoice: InvoiceResponse = {
-          ...result,
-          ownerId: user._id,
-        };
-
-        if (invoice.data.attributes && invoice.data.attributes.funding_agreement) {
-          const fundingList: FunFundingListResponse = await this.centrifugeService.funding.getList(invoice.header.document_id, user.account);
-          invoice.fundingAgreement = (fundingList.data ? fundingList.data.shift() : undefined);
-          // We need to delete the attributes prop because nedb does not allow for . in field names
-          delete invoice.data.attributes;
+    console.log('Receive Webhook', notification);
+    try {
+      if (notification.event_type === eventTypes.DOCUMENT) {
+        // Search for the user in the database
+        const user = await this.databaseService.users.findOne({ $or: [{ account: notification.to_id.toLowerCase() }, { account: notification.to_id }] });
+        if (!user) {
+          throw new Error('User is not present in database');
         }
-        await this.databaseService.invoices.update(
-          { 'header.document_id': notification.document_id, 'ownerId': user._id },
-          invoice,
-          { upsert: true },
-        );
+        if (notification.document_type === documentTypes.invoice) {
+          const result = await this.centrifugeService.invoices.get(
+            notification.document_id,
+            user.account,
+          );
 
-      } else if (notification.document_type === documentTypes.purchaseOrder) {
-        const result = await this.centrifugeService.purchaseOrders.get(
-          notification.document_id,
-          user.account,
-        );
-        await this.databaseService.purchaseOrders.insert(result);
+          const invoice: InvoiceResponse = {
+            ...result,
+            ownerId: user._id,
+          };
+          if (invoice.attributes) {
+            if (invoice.attributes.funding_agreement) {
+              const fundingList: FunFundingListResponse = await this.centrifugeService.funding.getList(invoice.header.document_id, user.account);
+              invoice.fundingAgreement = (fundingList.data ? fundingList.data.shift() : undefined);
+            }
+            if (invoice.attributes.transfer_details) {
+              const transferList: UserapiTransferDetailListResponse = await this.centrifugeService.transfer.listTransferDetails(user.account, invoice.header.document_id);
+              invoice.transferDetails = (transferList ? transferList.data : undefined);
+            }
+
+            // We need to delete the attributes prop because nedb does not allow for . in field names
+            delete invoice.attributes;
+          }
+
+          await this.databaseService.invoices.update(
+            { 'header.document_id': notification.document_id, 'ownerId': user._id },
+            invoice,
+            { upsert: true },
+          );
+
+        } else if (notification.document_type === documentTypes.purchaseOrder) {
+          const result = await this.centrifugeService.purchaseOrders.get(
+            notification.document_id,
+            user.account,
+          );
+          await this.databaseService.purchaseOrders.insert(result);
+          // TODO this should be similar to invoices. We do not care for now.
+        }
       }
+    } catch (e) {
+      console.log(e);
+      throw new Error('Webhook Error');
     }
-
     return 'OK';
   }
 }

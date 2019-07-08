@@ -1,20 +1,19 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Box, Button, FormField, TextInput } from 'grommet';
 import { LabelValuePair } from '../common/interfaces';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { FundingRequest } from '../common/models/funding-request';
 import SearchSelect from '../components/form/SearchSelect';
-import { dateToString, extractDate } from '../common/formaters';
-import { Invoice } from '../common/models/invoice';
+import { dateToString, extractDate, getCurrencyFormat, getPercentFormat } from '../common/formaters';
+import { NumberInput } from '@centrifuge/axis-number-input';
+import { DateInput } from '@centrifuge/axis-date-input';
 
 type FundingRequestFormProps = {
   onSubmit: (fundingRequest: FundingRequest) => void;
   onDiscard: () => void;
   contacts: LabelValuePair[];
   today: Date;
-  maxAmount: number;
   fundingRequest: FundingRequest;
 };
 
@@ -28,7 +27,6 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
       // do nothing by default
     },
     today: new Date(),
-    maxAmount: Infinity,
     fundingRequest: new FundingRequest(),
     contacts: [],
   };
@@ -47,17 +45,20 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
   render() {
 
     const { submitted } = this.state;
-    const { fundingRequest, contacts, today, maxAmount } = this.props;
+    const { fundingRequest, contacts, today } = this.props;
     const columnGap = 'medium';
     const sectionGap = 'large';
+
+    const currencyParts = getCurrencyFormat(fundingRequest.currency);
+    const percentParts = getPercentFormat();
 
 
     const fundingRequestValidation = Yup.object().shape({
       funder: Yup.string()
         .required('This field is required'),
-      amount: Yup.number()
+      repayment_amount: Yup.number()
         .required('This field is required')
-        .max(maxAmount, 'Should not exceed the invoice amount'),
+        .max(fundingRequest.invoice_amount, 'Should not exceed the invoice amount'),
       apr: Yup.number()
         .required('This field is required'),
       fee: Yup.number()
@@ -91,18 +92,19 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
              }) => {
 
               // Calculate days and repayment_amount
-              let days;
-              let repaymentAmount;
+              let days, amount, financeRate, feeAmount, financeFee;
               const repaymentDate = new Date(values.repayment_due_date);
               const diff = repaymentDate.getTime() - today.getTime();
               days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-              repaymentAmount = values.amount * (1 + (values.apr) / 365 * days) + (values.amount * (values.fee));
+              financeRate = values.apr / 360 * days;
+              feeAmount = values.fee * values.repayment_amount;
+              financeFee = values.repayment_amount * financeRate + feeAmount;
+              amount = values.repayment_amount - financeFee;
 
-              if (isNaN(repaymentAmount)) repaymentAmount = 0;
+              if (isNaN(amount)) amount = 0;
               if (isNaN(days)) days = 0;
-
               values.days = days;
-              values.repayment_amount = repaymentAmount.toFixed(2);
+              values.amount = amount.toFixed(2);
 
               return (
                 <form
@@ -134,7 +136,35 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                               }
                             />
                           </FormField>
+                        </Box>
 
+                        <Box basis={'1/2'} gap={columnGap} direction="row">
+                          <Box basis={'1/2'}>
+                            <FormField
+                              label="Invoice amount"
+                            >
+                              <NumberInput
+                                {...currencyParts}
+                                disabled={true}
+                                name="invoice_amount"
+                                value={values.invoice_amount}
+                              />
+                            </FormField>
+                          </Box>
+                          <Box basis={'1/2'}>
+                            <FormField
+                              label="Currency"
+                              error={errors!.currency}
+                            >
+
+                              <TextInput
+                                disabled={true}
+                                name="currency"
+                                value={values!.currency}
+                                onChange={handleChange}
+                              />
+                            </FormField>
+                          </Box>
                         </Box>
                       </Box>
 
@@ -143,89 +173,90 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                       <Box direction="row" gap={columnGap}>
                         <Box basis={'1/4'} gap={columnGap}>
                           <FormField
-                            label="Currency"
-                            error={errors!.currency}
+                            label={`Repayment amount`}
+                            error={errors!.repayment_amount}
                           >
-
-                            <TextInput
-                              disabled={true}
-                              name="currency"
-                              value={values!.currency}
-                              onChange={handleChange}
+                            <NumberInput
+                              {...currencyParts}
+                              name="repayment_amount"
+                              value={values!.repayment_amount}
+                              onChange={(masked, value) => {
+                                setFieldValue('repayment_amount', value);
+                              }}
                             />
+
                           </FormField>
                         </Box>
                         <Box basis={'1/4'} gap={columnGap}>
                           <FormField
-                            label={`Finance amount, ${values!.currency}`}
-                            error={errors!.amount}
-                          >
-                            <TextInput
-                              name="amount"
-                              value={values!.amount}
-                              onChange={handleChange}
-                            />
-                          </FormField>
-
-                        </Box>
-                        <Box basis={'1/4'} gap={columnGap}>
-                          <FormField
-                            label="APR, %"
+                            label="APR"
                             error={errors!.apr}
                           >
-                            <TextInput
+                            <NumberInput
+                              {...percentParts}
                               disabled={true}
                               name="apr"
                               value={values!.apr * 100}
-                              onChange={handleChange}
                             />
                           </FormField>
                         </Box>
                         <Box basis={'1/4'} gap={columnGap}>
                           <FormField
-                            label="Fee, %"
+                            label={`Finance fee`}
                             error={errors!.fee}
                           >
-                            <TextInput
-                              name="fee"
+                            <NumberInput
+                              {...currencyParts}
                               disabled={true}
-                              value={values!.fee * 100}
-                              onChange={(ev) => {
-                                handleChange(ev);
-                              }}
+                              value={financeFee}
                             />
                           </FormField>
+                        </Box>
+                        <Box basis={'1/4'} gap={columnGap}>
+                          <FormField
+                            label={`Early payment amount`}
+                            error={errors!.amount}
+                          >
+                            <NumberInput
+                              {...currencyParts}
+                              name="amount"
+                              disabled={true}
+                              value={values!.amount}
+                            />
+                          </FormField>
+
                         </Box>
                       </Box>
                       <Box direction="row" gap={columnGap}>
                         <Box basis={'1/4'} gap={columnGap}>
                           <FormField
-                            label="Repayment due date"
+                            label="Early payment date"
                             error={errors!.repayment_due_date}
                           >
-                            <TextInput
+                            <DateInput
                               disabled={true}
-                              name="repayment_due_date"
-                              type="date"
-                              value={extractDate(values!.repayment_due_date)}
-                              onChange={ev => {
-                                setFieldValue('repayment_due_date', dateToString(ev.target.value));
-                              }}
+                              value={extractDate(today)}
+
                             />
                           </FormField>
                         </Box>
                         <Box basis={'1/4'} gap={columnGap}>
                           <FormField
-                            label={`Repayment amount, ${values!.currency}`}
-                            error={errors!.repayment_amount}
+                            label="Repayment due date"
+                            error={errors!.repayment_due_date}
                           >
-                            <TextInput
+                            <DateInput
                               disabled={true}
-                              name="repayment_amount"
-                              value={values!.repayment_amount}
-                              onChange={handleChange}
+                              name="repayment_due_date"
+                              type="date"
+                              value={extractDate(values!.repayment_due_date)}
+                              onChange={date => {
+                                setFieldValue('repayment_due_date', dateToString(date));
+                              }}
                             />
+
                           </FormField>
+
                         </Box>
                         <Box basis={'1/4'} gap={columnGap}>
 

@@ -21,6 +21,8 @@ export const login = (user: User) =>
 export const invite = (user: User) =>
   action(userInviteAction.start, {user});
 
+export const clearInviteError = () => action(userInviteAction.clearError);
+
 export const register = (user: User) =>
   action(userRegisterAction.start, { user });
 

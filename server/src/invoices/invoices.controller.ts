@@ -2,10 +2,13 @@ import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, Req
 import { Invoice } from '../../../src/common/models/invoice';
 import { ROUTES } from '../../../src/common/constants';
 import { SessionGuard } from '../auth/SessionGuard';
-import { InvInvoiceResponse } from '../../../clients/centrifuge-node';
+import {
+  FunFundingListResponse,
+  InvInvoiceResponse,
+  UserapiTransferDetailListResponse,
+} from '../../../clients/centrifuge-node';
 import { DatabaseService } from '../database/database.service';
 import { InvoiceResponse } from '../../../src/common/interfaces';
-import config from '../../../src/common/config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 
 @Controller(ROUTES.INVOICES)
@@ -27,28 +30,24 @@ export class InvoicesController {
    */
   async create(@Req() request, @Body() invoice: Invoice): Promise<InvInvoiceResponse> {
     const collaborators = [invoice!.sender, invoice!.recipient].filter(item => item);
-    try {
-      const createResult = await this.centrifugeService.invoices.create(
-        {
-          data: {
-            ...invoice,
-          },
-          write_access: {
-            collaborators,
-          },
+
+    const createResult = await this.centrifugeService.invoices.create(
+      {
+        data: {
+          ...invoice,
         },
-        request.user.account,
-      );
+        write_access: collaborators,
+      },
+      request.user.account,
+    );
 
-      await this.centrifugeService.pullForJobComplete(createResult.header.job_id, request.user.account);
+    await this.centrifugeService.pullForJobComplete(createResult.header.job_id, request.user.account);
 
-      return await this.database.invoices.insert({
-        ...createResult,
-        ownerId: request.user._id,
-      });
-    } catch (error) {
-      throw new HttpException(await error.json(), error.status);
-    }
+    return await this.database.invoices.insert({
+      ...createResult,
+      ownerId: request.user._id,
+    });
+
   }
 
   @Get()
@@ -73,6 +72,7 @@ export class InvoicesController {
    * @return {Promise<Invoice|null>} result
    */
   async getById(@Param() params, @Req() request): Promise<InvoiceResponse | null> {
+
     const invoice = await this.database.invoices.findOne({
       _id: params.id,
       ownerId: request.user._id,
@@ -82,14 +82,13 @@ export class InvoicesController {
     if (invoice.fundingAgreement) {
       const tokenId = invoice.fundingAgreement.funding.nft_address;
       // Search for the registry address
-      const nft = invoice.header.nfts.find(nft => {
-        return nft.token_id === tokenId;
+      const nft = invoice.header.nfts.find(item => {
+        return item.token_id === tokenId;
       });
       if (nft) {
-        const ownerResponse = await this.centrifugeService.nft.ownerOf(nft.token_id, nft.registry, request.user.account).catch(async error => {
-          throw new HttpException(await error.json(), error.status);
-        });
+        const ownerResponse = await this.centrifugeService.nft.ownerOfNft(request.user.account, nft.token_id, nft.registry, request.user.account);
         invoice.fundingAgreement.nftOwner = ownerResponse.owner;
+        invoice.fundingAgreement.nftRegistry = nft.registry;
       } else {
         throw new HttpException('Nft from funding agreement not found on invoice', HttpStatus.CONFLICT);
       }
@@ -112,22 +111,43 @@ export class InvoicesController {
     @Req() request,
     @Body() updateInvoiceRequest: Invoice,
   ) {
+
+    const collaborators = [updateInvoiceRequest!.sender, updateInvoiceRequest!.recipient].filter(item => item);
+
     const invoice: InvInvoiceResponse = await this.database.invoices.findOne(
       { _id: params.id, ownerId: request.user._id },
     );
 
-    const updateResult = await this.centrifugeService.invoices.update(
+    const updateResult: InvoiceResponse = await this.centrifugeService.invoices.update(
       invoice.header.document_id,
       {
         data: { ...updateInvoiceRequest },
-        write_access: {
-          collaborators: updateInvoiceRequest.collaborators,
-        },
+        write_access: collaborators,
       },
-      config.admin.account,
+      request.user.account,
     );
 
     await this.centrifugeService.pullForJobComplete(updateResult.header.job_id, request.user.account);
+    
+    if (updateResult.attributes) {
+      if (updateResult.attributes.funding_agreement) {
+        const fundingList: FunFundingListResponse = await this.centrifugeService.funding.getList(
+          updateResult.header.document_id,
+          request.user.account,
+        );
+        updateResult.fundingAgreement = (fundingList.data ? fundingList.data.shift() : undefined);
+      }
+      if (updateResult.attributes.transfer_details) {
+        const transferList: UserapiTransferDetailListResponse = await this.centrifugeService.transfer.listTransferDetails(
+          request.user.account,
+          updateResult.header.document_id,
+        );
+        updateResult.transferDetails = (transferList ? transferList.data : undefined);
+      }
+
+      // We need to delete the attributes prop because nedb does not allow for . in field names
+      delete updateResult.attributes;
+    }
 
     return await this.database.invoices.updateById(params.id, {
       ...updateResult,

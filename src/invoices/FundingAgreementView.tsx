@@ -1,20 +1,26 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Button, Heading } from 'grommet';
-import { InvoiceData, LabelValuePair } from '../common/interfaces';
+import { InvoiceResponse, LabelValuePair } from '../common/interfaces';
 import { connect } from 'react-redux';
 import { RequestState } from '../store/reducers/http-request-reducer';
-import { DocumentResponseHeader, FunFundingResponse, FunFundingResponseData } from '../../clients/centrifuge-node';
+import { CoreapiTransferNFTResponse, FunFundingResponse } from '../../clients/centrifuge-node';
 import { getInvoiceById, resetGetInvoiceById } from '../store/actions/invoices';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { LinkPrevious } from 'grommet-icons';
 import routes from '../routes';
-import { Modal } from '@centrifuge/axis-modal';
-import { signFunding } from '../store/actions/funding';
+import { settleFunding, signFunding } from '../store/actions/funding';
 import { InvoiceDetails } from './InvoiceDetails';
-import { Invoice } from '../common/models/invoice';
 import { Preloader } from '../components/Preloader';
+import { Modal } from '@centrifuge/axis-modal';
+import TransferDetailsForm from './TransferDetailsForm';
+import { createTransferDetails, updateTransferDetails } from '../store/actions/transfer-details';
+import { dateToString } from '../common/formaters';
+import { FUNDING_STATUS, getInvoiceFundingStatus, TRANSFER_DETAILS_STATUS } from '../common/status';
+import { TransferDetailsRequest } from '../common/models/transfer-details';
+import { SecondaryHeader } from '../components/SecondaryHeader';
+import { mapContactsToLabelKeyPair } from '../store/derived-data';
 
 type ConnectedFundingAgreementViewProps = {
   getInvoiceById: typeof getInvoiceById;
@@ -22,17 +28,22 @@ type ConnectedFundingAgreementViewProps = {
   getContacts: typeof getContacts;
   signFunding: typeof signFunding;
   resetGetContacts: typeof resetGetInvoiceById;
-  invoice: Invoice | null;
-  header: DocumentResponseHeader | null,
-  fundingAgreement: FunFundingResponseData | null,
-  id: string | null,
+  createTransferDetails: typeof createTransferDetails;
+  settleFunding: typeof settleFunding;
+  invoice: InvoiceResponse | null;
   contacts?: LabelValuePair[];
   signingFunding: RequestState<FunFundingResponse>;
+  creatingTransferDetails: RequestState<TransferDetailsRequest>;
+  settlingFunding: RequestState<CoreapiTransferNFTResponse>;
 } & RouteComponentProps<{ id?: string }>;
 
 export class FundingAgreementView extends React.Component<ConnectedFundingAgreementViewProps> {
 
   displayName = 'FundingAgreementView';
+
+  state = {
+    addTransferDetails: false,
+  };
 
   componentDidMount() {
     if (this.props.match.params.id) {
@@ -41,13 +52,39 @@ export class FundingAgreementView extends React.Component<ConnectedFundingAgreem
     }
   }
 
+  openTransferDetails = () => {
+    this.setState({ addTransferDetails: true });
+  };
+
+  closeTransferDetails = () => {
+    this.setState({ addTransferDetails: false });
+  };
+
+  submitTransferDetails = (transferDetails) => {
+    this.closeTransferDetails();
+    const { createTransferDetails } = this.props;
+    createTransferDetails(transferDetails);
+  };
+
+  settleFundingAgreement = () => {
+    const { invoice, settleFunding } = this.props;
+    const repaymentTransfer = {
+      ...invoice!.transferDetails![1],
+      invoice_id: invoice!._id,
+      agreement_id: invoice!.fundingAgreement!.funding!.agreement_id,
+      document_id: invoice!.header!.document_id,
+      status: TRANSFER_DETAILS_STATUS.SETTLED,
+      settlement_date: dateToString(new Date()),
+    };
+    settleFunding(repaymentTransfer);
+  };
 
   signFundingAgreement = () => {
-    const { id, fundingAgreement, header, signFunding } = this.props;
+    const { invoice, signFunding } = this.props;
     signFunding({
-      identifier: header!.document_id,
-      agreement_id: fundingAgreement!.funding!.agreement_id,
-      invoice_id: id!,
+      document_id: invoice!.header!.document_id,
+      agreement_id: invoice!.fundingAgreement!.funding!.agreement_id,
+      invoice_id: invoice!._id!,
     });
   };
 
@@ -57,42 +94,115 @@ export class FundingAgreementView extends React.Component<ConnectedFundingAgreem
   }
 
   render() {
-    const { invoice, contacts, fundingAgreement, signingFunding,header, id } = this.props;
-    if (!invoice || !contacts) {
-      return <Preloader message="Loading"/>
+    const {
+      invoice,
+      contacts,
+      signingFunding,
+      creatingTransferDetails,
+      settlingFunding,
+    } = this.props;
+
+    const { addTransferDetails } = this.state;
+
+
+    if (!invoice || !invoice.data || !contacts) {
+      return <Preloader message="Loading"/>;
     }
 
     if (signingFunding && signingFunding.loading) {
-      return <Preloader message="Approving funding agreement" withSound={true}/>
+      return <Preloader message="Approving funding agreement" withSound={true}/>;
     }
 
-    const canApproveFunding = !(fundingAgreement && fundingAgreement.signatures);
+    if (creatingTransferDetails && creatingTransferDetails.loading) {
+      return <Preloader message="Recording funding transfer" withSound={true}/>;
+    }
+
+    if (settlingFunding && settlingFunding.loading) {
+      return <Preloader message="Confirming repayment" withSound={true}/>;
+    }
+
+    const {
+      header,
+      fundingAgreement,
+    } = invoice;
+
+    const fundingStatus = getInvoiceFundingStatus(invoice);
+
+    const fundingDetails = fundingAgreement ? {
+      invoice_id: invoice!._id,
+      document_id: header && header!.document_id,
+      currency: 'DAI',
+      sender_id: fundingAgreement!.funding!.funder_id || '',
+      recipient_id: invoice!.data!.sender,
+      amount: 0,
+      transfer_type: 'crypto',
+      status: TRANSFER_DETAILS_STATUS.OPENED,
+    } : {};
+
+
+    const canApproveFunding = fundingStatus === FUNDING_STATUS.PENDING;
+    const canRecordFunding = fundingStatus === FUNDING_STATUS.ACCEPTED;
+    const canSettleRepayment = fundingStatus === FUNDING_STATUS.REPAYING_FUNDING;
 
     return (
       <>
-
+        <Modal
+          opened={addTransferDetails}
+          headingProps={{ level: 3 }}
+          title={`Record funding`}
+          onClose={this.closeTransferDetails}
+        >
+          <TransferDetailsForm
+            onSubmit={this.submitTransferDetails}
+            onDiscard={this.closeTransferDetails}
+            contacts={contacts}
+            transferDetails={fundingDetails}
+          />
+        </Modal>
         <Box pad={{ bottom: 'large' }}>
-          <Box justify="between" direction="row" align="center">
+          <SecondaryHeader>
             <Box direction="row" gap="small" align="center">
               <Link to={routes.invoices.index} size="large">
                 <LinkPrevious/>
               </Link>
 
               <Heading level="3">
-                Funding Agreement for Invoice #{invoice!.number}
+                Funding Agreement for Invoice #{invoice!.data!.number}
               </Heading>
             </Box>
             <Box direction="row" gap="medium">
-              <Button
-                disabled={!canApproveFunding}
-                onClick={this.signFundingAgreement}
-                primary
-                label="Approve"
-              />
-            </Box>
-          </Box>
+              {
+                canApproveFunding && <Button
+                  onClick={this.signFundingAgreement}
+                  primary
+                  label="Approve"
+                />
+              }
 
-          <InvoiceDetails invoice={invoice} fundingAgreement={fundingAgreement} contacts={contacts}/>
+
+              {
+                canRecordFunding && <Button
+                  primary
+                  label="Record funding transfer"
+                  onClick={this.openTransferDetails}
+                />
+              }
+
+              {
+                canSettleRepayment && <Button
+                  primary
+                  label="Confirm as repaid"
+                  onClick={this.settleFundingAgreement}
+                />
+              }
+            </Box>
+          </SecondaryHeader>
+
+
+          <InvoiceDetails
+            invoice={invoice}
+            fundingStatus={fundingStatus}
+            contacts={contacts}/>
         </Box>
       </>
     );
@@ -103,24 +213,11 @@ export class FundingAgreementView extends React.Component<ConnectedFundingAgreem
 
 const mapStateToProps = (state) => {
   return {
-    ...(!state.invoices.getById.data ? {
-      invoice: null,
-      header: null,
-      fundingAgreement: null,
-      id: null,
-    } : {
-      invoice: state.invoices.getById.data.data,
-      id: state.invoices.getById.data._id,
-      fundingAgreement: state.invoices.getById.data.fundingAgreement,
-      header: state.invoices.getById.data.header,
-      signingFunding: state.funding.sign,
-    }),
-    contacts: state.contacts.get.data
-      ? (state.contacts.get.data.map(contact => ({
-        label: contact.name,
-        value: contact.address,
-      })) as LabelValuePair[])
-      : undefined,
+    invoice: state.invoices.getById.data,
+    signingFunding: state.funding.sign,
+    creatingTransferDetails: state.transferDetails.create,
+    settlingFunding: state.funding.settle,
+    contacts: mapContactsToLabelKeyPair(state, true),
   };
 };
 
@@ -132,6 +229,9 @@ export const ConnectedFundingAgreementView = connect(
     getInvoiceById,
     resetGetInvoiceById,
     signFunding,
+    createTransferDetails,
+    updateTransferDetails,
+    settleFunding,
   },
 )(withRouter(FundingAgreementView));
 

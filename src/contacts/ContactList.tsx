@@ -13,13 +13,13 @@ import {
   Text,
   TextInput,
 } from 'grommet';
-import { Add, Edit } from 'grommet-icons';
-import { Link } from 'react-router-dom';
-
 import { Contact } from '../common/models/contact';
 import { Formik } from 'formik';
+import { SecondaryHeader } from '../components/SecondaryHeader';
+import { User } from '../common/models/user';
 
 interface ContactsProps {
+  loggedInUser: User;
   contacts?: (Contact & { isEditing?: boolean })[];
   refresh: () => void;
   createContact: (contact: Contact) => void;
@@ -27,7 +27,7 @@ interface ContactsProps {
 }
 
 interface ContactsState {
-  submitted:boolean
+  submitted: boolean
   newContact?: Contact;
   contacts: (Contact & { isEditing?: boolean })[];
 }
@@ -48,6 +48,7 @@ export default class ContactList extends React.Component<ContactsProps,
   }
 
   renderRow(contact: Contact) {
+    const {loggedInUser} = this.props;
     return (
       <TableRow key={contact.address}>
         <TableCell>
@@ -59,14 +60,14 @@ export default class ContactList extends React.Component<ContactsProps,
               <Text>{contact.address}</Text>
             </Box>
             <Box fill direction="row" gap="small">
-              <Anchor
-                label={"Edit"}
+              {contact!.address!.toLowerCase() !== loggedInUser.account.toLowerCase() && <Anchor
+                label={'Edit'}
                 onClick={() => {
                   // @ts-ignore
                   contact.isEditing = true;
                   this.setState({ contacts: this.state.contacts });
                 }}
-              />
+              />}
             </Box>
           </Box>
         </TableCell>
@@ -196,7 +197,7 @@ export default class ContactList extends React.Component<ContactsProps,
   render() {
     return (
       <Box fill>
-        <Box justify="between" direction="row" align="center">
+        <SecondaryHeader>
           <Heading level="3">Contacts</Heading>
           <Button
             primary
@@ -204,9 +205,9 @@ export default class ContactList extends React.Component<ContactsProps,
             label="Add Contact"
             disabled={!!this.state.newContact}
           />
-        </Box>
+        </SecondaryHeader>
 
-        <Box>
+        <Box pad={{horizontal:"medium"}}>
           <Table>
             <TableHeader>
               <TableRow>

@@ -3,6 +3,7 @@ import { mount } from 'enzyme';
 import renderer from 'react-test-renderer';
 import InvoiceForm from './InvoiceForm';
 import { BrowserRouter } from 'react-router-dom';
+import { serializeSnapshot } from '../testing/serialize';
 
 describe('InvoiceForm', () => {
 
@@ -25,22 +26,24 @@ describe('InvoiceForm', () => {
   });
 
   it('Should render empty form', () => {
-    const invoice = {};
-    const bodyShallow = renderer.create(
+    const invoice = {
+      currency:'USD',
+    };
+    const form = mount(
         <InvoiceForm invoice={invoice} contacts={contacts} onCancel={onCancel} onSubmit={onSubmit}/>
-    ).toJSON();
-    expect(bodyShallow).toMatchSnapshot();
+    )
   });
 
   it('Should render form with sender and recipient selected', () => {
     const invoice = {
       sender: contacts[0].value,
       recipient: contacts[1].value,
+      currency:'USD',
     };
-    const bodyShallow = renderer.create(
+    const form = mount(
         <InvoiceForm invoice={invoice} contacts={contacts} onCancel={onCancel} onSubmit={onSubmit}/>
-    ).toJSON();
-    expect(bodyShallow).toMatchSnapshot();
+    );
+    expect(serializeSnapshot(form)).toMatchSnapshot();
   });
 
 

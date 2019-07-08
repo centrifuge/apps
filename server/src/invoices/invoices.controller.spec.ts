@@ -1,17 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { InvoicesController } from './invoices.controller';
-import { Invoice } from '../../../src/common/models/invoice';
 import { SessionGuard } from '../auth/SessionGuard';
 import { databaseServiceProvider } from '../database/database.providers';
-import { Contact } from '../../../src/common/models/contact';
-import { InvInvoiceData } from '../../../clients/centrifuge-node';
-
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import config from '../../../src/common/config';
+import { Invoice } from '../../../src/common/models/invoice';
+import { centrifugeServiceProvider } from "../centrifuge-client/centrifuge.module";
 
 describe('InvoicesController', () => {
   let centrifugeId;
+  let invoiceSpies: any = {};
 
   beforeAll(() => {
     centrifugeId = config.admin.account;
@@ -25,102 +24,45 @@ describe('InvoicesController', () => {
   let invoicesModule: TestingModule;
 
   const invoice: Invoice = {
-    _id: 'invoice_id',
+    sender: '0x111',
+    recipient: '0x112',
     currency: 'USD',
     number: '999',
     sender_company_name: 'cinderella',
     bill_to_company_name: 'step mother',
-    collaborators: [],
   };
-
-  let fetchedInvoices: Invoice[];
-
-  class DatabaseServiceMock {
-    invoices = {
-      insert: jest.fn(val => val),
-      find: jest.fn(() =>
-        fetchedInvoices.map(
-          (data: Invoice): InvInvoiceData => ({
-            ...data,
-          }),
-        ),
-      ),
-      getCursor: jest.fn(() => {
-        return {
-          sort: jest.fn(() => {
-            return {
-              exec: jest.fn(() => {
-                return fetchedInvoices.map(
-                  (data: Invoice): InvInvoiceData => ({
-                    ...data,
-                  }),
-                )
-              },
-              ),
-            };
-          }),
-        };
-      }),
-      findOne: jest.fn((query) => {
-        const found = fetchedInvoices.find(i => i._id === query._id);
-        return found ? {
-          data: found,
-          header: {
-            document_id: `document_${query._id}`,
-          },
-        } : null;
-      }),
-      updateById: jest.fn((id, value) => value),
-    };
-  }
-
-  const databaseServiceMock = new DatabaseServiceMock();
-
-  class CentrifugeClientMock {
-    invoices = {
-      create: jest.fn(data => {
-       return {
-         header: {
-           job_id: 'some_job_id',
-         },
-         ...data,
-       }
-      }),
-      update: jest.fn(data => {
-        return {
-          header: {
-            job_id: 'some_job_id',
-          },
-          ...data,
-        }
-      }),
-    };
-
-    pullForJobComplete = () => true;
-  }
-
-  const centrifugeClientMock = new CentrifugeClientMock();
+  let insertedInvoice: any = {};
+  const databaseSpies: any = {};
 
   beforeEach(async () => {
-    fetchedInvoices = [invoice];
-
     invoicesModule = await Test.createTestingModule({
       controllers: [InvoicesController],
       providers: [
         SessionGuard,
-        CentrifugeService,
+        centrifugeServiceProvider,
         databaseServiceProvider,
       ],
     })
-      .overrideProvider(DatabaseService)
-      .useValue(databaseServiceMock)
-      .overrideProvider(CentrifugeService)
-      .useValue(centrifugeClientMock)
       .compile();
 
-    databaseServiceMock.invoices.insert.mockClear();
-    databaseServiceMock.invoices.find.mockClear();
-    databaseServiceMock.invoices.getCursor.mockClear();
+    const databaseService = invoicesModule.get<DatabaseService>(DatabaseService);
+    insertedInvoice = await databaseService.invoices.insert({
+      header: {
+        document_id: '0x39393939',
+      },
+      data: { ...invoice },
+      ownerId: 'user_id',
+    });
+    const centrifugeService = invoicesModule.get<CentrifugeService>(CentrifugeService);
+
+    databaseSpies.spyInsert = jest.spyOn(databaseService.invoices, 'insert');
+    databaseSpies.spyUpdate = jest.spyOn(databaseService.invoices, 'update');
+    databaseSpies.spyFind = jest.spyOn(databaseService.invoices, 'find');
+    databaseSpies.spyFindOne = jest.spyOn(databaseService.invoices, 'findOne');
+    databaseSpies.spyGetCursor = jest.spyOn(databaseService.invoices, 'getCursor');
+    databaseSpies.spyUpdateById = jest.spyOn(databaseService.invoices, 'updateById');
+
+    invoiceSpies.spyUpdate = jest.spyOn(centrifugeService.invoices, 'update');
   });
 
   describe('create', () => {
@@ -133,36 +75,34 @@ describe('InvoicesController', () => {
         { user: { _id: 'user_id' } },
         invoice,
       );
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         data: {
           ...invoice,
         },
-        write_access: {
-          collaborators: [...invoice.collaborators],
-        },
+        write_access: [invoice.sender, invoice.recipient],
         header: {
           job_id: 'some_job_id',
         },
         ownerId: 'user_id',
       });
 
-      expect(databaseServiceMock.invoices.insert).toHaveBeenCalledTimes(1);
+      expect(databaseSpies.spyInsert).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('get invoices', () => {
 
-      it('should get the list of invoices from the database', async () => {
-        const invoicesController = invoicesModule.get<InvoicesController>(
-          InvoicesController,
-        );
+    it('should get the list of invoices from the database', async () => {
+      const invoicesController = invoicesModule.get<InvoicesController>(
+        InvoicesController,
+      );
 
-        const result = await invoicesController.get({
-          user: { _id: 'user_id' },
-        });
-
-        expect(databaseServiceMock.invoices.getCursor).toHaveBeenCalledTimes(1);
+      const result = await invoicesController.get({
+        user: { _id: 'user_id' },
       });
+
+      expect(databaseSpies.spyGetCursor).toHaveBeenCalledTimes(1);
+    });
 
   });
 
@@ -175,37 +115,35 @@ describe('InvoicesController', () => {
       const updatedInvoice: Invoice = {
         ...invoice,
         number: 'updated_number',
-        collaborators: ['new_collaborator'],
+        sender: '0x444',
+        recipient: '0x9999',
       };
 
       const updateResult = await invoiceController.updateById(
-        { id: invoice._id },
-        { user: { _id: 'user_id' } },
+        { id: insertedInvoice._id },
+        { user: { _id: 'user_id', account: '0x4441122' } },
         { ...updatedInvoice },
       );
 
-      expect(databaseServiceMock.invoices.findOne).toHaveBeenCalledWith({
-        _id: invoice._id,
+      expect(databaseSpies.spyFindOne).toHaveBeenCalledWith({
+        _id: insertedInvoice._id,
         ownerId: 'user_id',
       });
-      expect(centrifugeClientMock.invoices.update).toHaveBeenCalledWith(
-        'document_invoice_id',
+      expect(invoiceSpies.spyUpdate).toHaveBeenCalledWith(
+        '0x39393939',
         {
           data: { ...updatedInvoice },
-          write_access: {
-            collaborators: ['new_collaborator'],
-          },
-
+          write_access: [updatedInvoice.sender, updatedInvoice.recipient],
         },
-        config.admin.account,
+        '0x4441122',
       );
 
-      expect(databaseServiceMock.invoices.updateById).toHaveBeenCalledWith(
-        'invoice_id',
-        {
-          ...updateResult,
+      expect(updateResult).toMatchObject({
+        data: {
+          ...updatedInvoice,
         },
-      );
+        write_access: [updatedInvoice.sender, updatedInvoice.recipient],
+      });
     });
   });
 
@@ -216,18 +154,18 @@ describe('InvoicesController', () => {
       );
 
       const result = await invoiceController.getById(
-        { id: invoice._id },
+        { id: insertedInvoice._id },
         { user: { _id: 'user_id' } },
       );
-      expect(databaseServiceMock.invoices.findOne).toHaveBeenCalledWith({
-        _id: invoice._id,
+      expect(databaseSpies.spyFindOne).toHaveBeenCalledWith({
+        _id: insertedInvoice._id,
         ownerId: 'user_id',
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         data: invoice,
         header: {
-          document_id: `document_${invoice._id}`,
+          document_id: '0x39393939',
         },
       });
     });

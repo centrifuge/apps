@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Anchor, Box, Button, Image, Text } from 'grommet';
 import logo from './logo.png';
 import { User } from './common/models/user';
+import { DisplayField } from './components/DisplayField';
 
 
 export interface MenuItem {
@@ -19,6 +20,7 @@ interface HeaderProps {
   push: (route: string) => void
 }
 
+//TODO move this to components and make more generic
 const Header: FunctionComponent<HeaderProps> = (props) => {
 
   const { selectedRoute, menuItems, push, user } = props;
@@ -31,13 +33,17 @@ const Header: FunctionComponent<HeaderProps> = (props) => {
     align="center"
     height="xsmall"
     fill="horizontal"
-    border={{side:'bottom',color:'light-4'}}
+    // TODO move this to axis theme
+    style={{ position: 'sticky', top: 0, height: '90px',zIndex:1 }}
+    background='white'
+    border={{ side: 'bottom', color: 'light-4' }}
   >
     <Box
       direction="row"
       fill="vertical"
       align="center"
       justify="between"
+      pad={{ horizontal: 'medium' }}
       gap={sectionGap}
       width='xlarge'
     >
@@ -61,7 +67,10 @@ const Header: FunctionComponent<HeaderProps> = (props) => {
         )}
       </Box>
       {user && <Box direction="row" gap={itemGap} align="center" justify="end">
-        <Text>My Centrifuge ID: {user.account}</Text>
+        <Box direction="row" align="center" gap={'xsmall'}>
+          <Text>Centrifuge ID: </Text>
+          <DisplayField width={'160px'} noBorder={true} value={user.account}/>
+        </Box>
         <Text> {user.email}</Text>
       </Box>}
       <Box direction="row" gap={itemGap} align="center" justify="end">

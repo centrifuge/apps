@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Box } from 'grommet';
 import { AxisTheme } from '@centrifuge/axis-theme';
-
 import Routing, { RouteItem } from './Routing';
 import Header, { MenuItem } from './Header';
 import { connect } from 'react-redux';
@@ -18,6 +17,8 @@ import Contacts from './contacts/View';
 import { NotificationProvider } from './notifications/NotificationContext';
 import FundingAgreementList from './invoices/FundingAgreementList';
 import { ConnectedInvoiceView } from './invoices/InvoiceView';
+import { ConnectedNotifications } from './notifications/Notifications';
+import SchemasList from "./admin/schemas/SchemasList";
 
 interface AppPros {
   selectedRoute: string;
@@ -39,6 +40,18 @@ class App extends Component<AppPros> {
     let routeItems: RouteItem[] = [];
 
     if (loggedInUser) {
+
+      if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_SCHEMAS)) {
+        menuItems.push(
+            { label: 'Schemas', route: routes.schemas.index },
+        );
+        routeItems.push(
+            {
+              path: routes.schemas.index,
+              component: SchemasList,
+            },
+        );
+      }
 
       if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
         menuItems.push(
@@ -106,7 +119,8 @@ class App extends Component<AppPros> {
       <div className="App">
         <AxisTheme full={true}>
           <NotificationProvider>
-            <Box fill align="center">
+            <Box  align="center">
+              <ConnectedNotifications/>
               <Header
                 user={loggedInUser}
                 selectedRoute={selectedRoute}
@@ -116,14 +130,9 @@ class App extends Component<AppPros> {
               <Box
                 justify="center"
                 direction="row"
-                fill
-                overflow={'scroll'}
               >
-                <Box width="xlarge">
-                  <div style={{ minHeight: '100%' }}>
+                <Box width="xlarge" >
                     <Routing routes={routeItems}/>
-                  </div>
-
                 </Box>
               </Box>
 

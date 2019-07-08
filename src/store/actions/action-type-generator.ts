@@ -3,6 +3,7 @@ export type ActionType = {
   success: string;
   fail: string;
   reset: string;
+  clearError: string;
 };
 
 /**
@@ -14,4 +15,5 @@ export const getActions = (actionType: string): ActionType => ({
   success: `${actionType}_SUCCESS`,
   fail: `${actionType}_ERROR`,
   reset: `${actionType}_RESET`,
+  clearError: `${actionType}_CLEAR_ERROR`,
 });

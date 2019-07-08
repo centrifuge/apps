@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Box } from 'grommet';
 import { formatCurrency, formatDate, formatPercent } from '../../common/formaters';
 import { Invoice } from '../../common/models/invoice';
@@ -42,7 +41,7 @@ export class Details extends React.Component<DetailsProps> {
 
             <Box basis={'1/4'}>
               <DisplayField
-                label="Date created"
+                label="Invoice date"
                 value={formatDate(invoice!.date_created)}
               />
             </Box>

@@ -4,8 +4,9 @@ import { ContactsController } from './contacts.controller';
 import { Contact } from '../../../src/common/models/contact';
 import { SessionGuard } from '../auth/SessionGuard';
 import { databaseServiceProvider } from '../database/database.providers';
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { DatabaseService } from '../database/database.service';
+
+const delay = require('util').promisify(setTimeout);
 
 describe('ContactsController', () => {
   let contactsModule: TestingModule;
@@ -14,46 +15,35 @@ describe('ContactsController', () => {
     'sarah',
     '0xc128924276e4e539111ca11b590b9447b26a8057',
   );
-  const fetchedContacts = [
-    new Contact('alberta', '0xc111111111a4e539741ca11b590b9447b26a8057'),
+
+  const ownerId = 'some_user_id';
+  const insertedContacts = [
+    { name: 'alberta', address: '0xc111111111a4e539741ca11b590b9447b26a8057', ownerId },
+    { name: 'Alice', address: '0xc112221111a4e539741ca11b590b9447b26a8057', ownerId },
   ];
+  const databaseSpies: any = {};
 
-  class DatabaseServiceMock {
-    contacts = {
-      insert: jest.fn(val => val),
-      update: jest.fn(val => val),
-      find: jest.fn(() => fetchedContacts),
-      updateByQuery: jest.fn(data => data),
-    };
-  }
-
-  const databaseServiceMock = new DatabaseServiceMock();
-
-  class CentrifugeClientMock {
-    documents = {
-      create: jest.fn(data => data),
-    };
-  }
-
-  const centrifugeClientMock = new CentrifugeClientMock();
 
   beforeEach(async () => {
     contactsModule = await Test.createTestingModule({
       controllers: [ContactsController],
       providers: [
         SessionGuard,
-        CentrifugeService,
         databaseServiceProvider,
       ],
     })
-      .overrideProvider(DatabaseService)
-      .useValue(databaseServiceMock)
-      .overrideProvider(CentrifugeService)
-      .useValue(centrifugeClientMock)
       .compile();
 
-    databaseServiceMock.contacts.insert.mockClear();
-    databaseServiceMock.contacts.find.mockClear();
+    const databaseService = contactsModule.get<DatabaseService>(DatabaseService);
+
+    // add some default contacts to the database
+    for (let i = 0; i < insertedContacts.length; i++) {
+      await delay(0);
+      await databaseService.contacts.insert(insertedContacts[i]);
+    }
+    databaseSpies.spyInsert = jest.spyOn(databaseService.contacts, 'insert');
+    databaseSpies.spyUpdate = jest.spyOn(databaseService.contacts, 'update');
+    databaseSpies.spyGetCursor = jest.spyOn(databaseService.contacts, 'getCursor');
   });
 
   describe('create', () => {
@@ -62,20 +52,19 @@ describe('ContactsController', () => {
         ContactsController,
       );
 
-      const userId = 'owner_id';
 
       const result = await contactsController.create(
-        { user: { _id: userId } },
+        { user: { _id: ownerId } },
         contactToCreate,
       );
 
-      expect(result).toEqual({
-        ownerId: userId,
+      expect(result).toMatchObject({
+        ownerId: ownerId,
         name: contactToCreate.name,
         address: contactToCreate.address,
       });
 
-      expect(databaseServiceMock.contacts.insert).toHaveBeenCalledTimes(1);
+      expect(databaseSpies.spyInsert).toHaveBeenCalledTimes(1);
     });
 
     it('should throw error when no name specified', async function() {
@@ -84,10 +73,9 @@ describe('ContactsController', () => {
         ContactsController,
       );
 
-      const userId = 'owner_id';
 
       try {
-        await contactsController.create({ user: { _id: userId } }, {
+        await contactsController.create({ user: { _id: ownerId } }, {
           address: '0xc111111111a4e539741ca11b590b9447b26a8057',
         } as Contact);
       } catch (err) {
@@ -124,10 +112,19 @@ describe('ContactsController', () => {
       );
 
       const result = await contactsController.get({
-        user: { _id: 'some_user_id' },
+        user: { _id: 'some_user_id', name: 'Test User', account: '0x333' },
       });
-      expect(result).toBe(fetchedContacts);
-      expect(databaseServiceMock.contacts.find).toHaveBeenCalledTimes(1);
+      expect(result.length).toEqual(insertedContacts.length );
+      // should get the inserted contracts from the beforeEach hook in reverse
+
+      expect(result.reverse()).toMatchObject(
+        [
+          ...insertedContacts
+        ],
+      );
+
+
+      expect(databaseSpies.spyGetCursor).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -143,25 +140,23 @@ describe('ContactsController', () => {
         _id: 'snow_white_7',
       };
 
-      const userId = 'some_user_id';
-
       await contactsController.updateById(
         { id: updateContactObject._id },
         updateContactObject,
         {
-          user: { _id: userId },
+          user: { _id: ownerId },
         },
       );
 
-      expect(databaseServiceMock.contacts.update).toHaveBeenCalledTimes(
+      expect(databaseSpies.spyUpdate).toHaveBeenCalledTimes(
         1,
       );
-      expect(databaseServiceMock.contacts.update).toHaveBeenCalledWith(
+      expect(databaseSpies.spyUpdate).toHaveBeenCalledWith(
         {
           _id: updateContactObject._id,
-          ownerId: userId,
+          ownerId: ownerId,
         },
-        { ...updateContactObject, ownerId: userId },
+        { ...updateContactObject, ownerId: ownerId },
       );
     });
   });

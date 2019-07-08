@@ -4,7 +4,6 @@ import { AuthService } from './auth.service';
 import { User } from '../../../src/common/models/user';
 import { databaseServiceProvider } from '../database/database.providers';
 import { DatabaseService } from '../database/database.service';
-import { dateToString } from '../../../src/common/formaters';
 
 describe('LocalStrategy', () => {
   const unhashedPassword = 'my_password';
@@ -13,8 +12,7 @@ describe('LocalStrategy', () => {
     name: 'my_username',
     _id: 'user_id',
     email: 'test@test.test',
-    date_added: dateToString(new Date()),
-    account:"0x3333",
+    account: '0x3333',
     enabled: true,
     invited: false,
     permissions: [],
@@ -23,34 +21,26 @@ describe('LocalStrategy', () => {
   let authService: AuthService;
 
   beforeEach(async () => {
-    class DatabaseServiceMock {
-      users = {
-        findOne: jest.fn(() => ({
-            ...mockUser,
-            password: hashedPassword,
-          }),
-        ),
-      };
-    }
 
-    const databaseServiceMock = new DatabaseServiceMock();
 
     const module = await Test.createTestingModule({
       providers: [AuthService, databaseServiceProvider],
-    })
-      .overrideProvider(DatabaseService)
-      .useValue(databaseServiceMock)
-      .compile();
+    }).compile();
+    const databaseService = module.get<DatabaseService>(DatabaseService);
+    databaseService.users.insert({
+      ...mockUser,
+      password: hashedPassword,
+    });
 
     authService = module.get<AuthService>(AuthService);
   });
 
   it('should return user if credentials are valid', async () => {
     const result = await authService.validateUser(
-      mockUser.name,
+      mockUser.email,
       unhashedPassword,
     );
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       ...mockUser,
       password: hashedPassword,
     });

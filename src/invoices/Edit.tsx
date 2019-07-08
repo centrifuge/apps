@@ -7,12 +7,16 @@ import { getInvoiceById, resetGetInvoiceById, resetUpdateInvoice, updateInvoice 
 import { Invoice } from '../common/models/invoice';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
-import { LabelValuePair } from '../common/interfaces';
+import { InvoiceResponse, LabelValuePair } from '../common/interfaces';
 import { Box, Button, Heading } from 'grommet';
 import { invoiceRoutes } from './routes';
 import { LinkPrevious } from 'grommet-icons';
 import { User } from '../common/models/user';
 import { Preloader } from '../components/Preloader';
+import { RequestState } from '../store/reducers/http-request-reducer';
+import { InvInvoiceData } from '../../clients/centrifuge-node';
+import { SecondaryHeader } from '../components/SecondaryHeader';
+import { mapContactsToLabelKeyPair } from '../store/derived-data';
 
 type ConnectedEditInvoiceProps = {
   updateInvoice: (invoice: Invoice) => void;
@@ -21,10 +25,10 @@ type ConnectedEditInvoiceProps = {
   resetGetInvoiceById: () => void;
   getContacts: () => void;
   resetGetContacts: () => void;
-  invoice?: Invoice;
+  invoice?: InvoiceResponse;
   contacts?: LabelValuePair[];
   loggedInUser: User;
-  updatingInvoice: boolean;
+  updatingInvoice: RequestState<InvInvoiceData>;
 } & RouteComponentProps<{ id?: string }>;
 
 class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
@@ -50,29 +54,24 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
   };
 
   render() {
-    const { loggedInUser, updatingInvoice } = this.props;
+    const { updatingInvoice, contacts, invoice } = this.props;
 
     if (!this.props.invoice || !this.props.contacts) {
-      return <Preloader message="Loading"/>
+      return <Preloader message="Loading"/>;
     }
 
-    if (updatingInvoice) {
-      return <Preloader message="Updating invoice" withSound={true}/>
+    if (updatingInvoice.loading) {
+      return <Preloader message="Updating invoice" withSound={true}/>;
     }
 
-    // Add logged in user to contacts
-    const contacts: LabelValuePair[] = [
-      { label: loggedInUser.name, value: loggedInUser.account },
-      ...this.props.contacts,
-    ];
 
     return (
       <InvoiceForm
         onSubmit={this.updateInvoice}
         contacts={contacts}
-        invoice={this.props.invoice}
+        invoice={invoice!.data}
       >
-        <Box justify="between" direction="row" align="center">
+        <SecondaryHeader>
           <Box direction="row" gap="small" align="center">
             <Link to={invoiceRoutes.index} size="large">
               <LinkPrevious/>
@@ -87,33 +86,24 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
               onClick={this.onCancel}
               label="Discard"
             />
-            <Button
+            {!invoice!.fundingAgreement && <Button
               type="submit"
               primary
               label="Update"
-            />
+            />}
           </Box>
-        </Box>
+        </SecondaryHeader>
       </InvoiceForm>
     );
   }
 }
 
-
 const mapStateToProps = (state) => {
   return {
     loggedInUser: state.user.auth.loggedInUser,
-    invoice: state.invoices.getById.data && {
-      _id: state.invoices.getById.data._id,
-      ...state.invoices.getById.data.data,
-    },
-    updatingInvoice: state.invoices.update.loading,
-    contacts: state.contacts.get.data
-      ? (state.contacts.get.data.map(contact => ({
-        label: contact.name,
-        value: contact.address,
-      })) as LabelValuePair[])
-      : undefined,
+    invoice: state.invoices.getById.data,
+    updatingInvoice: state.invoices.update,
+    contacts: mapContactsToLabelKeyPair(state)
   };
 };
 

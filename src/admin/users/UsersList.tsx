@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
 import { getAllUsers, invite, resetGetAllUsers } from '../../store/actions/users';
 import { RequestState } from '../../store/reducers/http-request-reducer';
 import { Box, Button, DataTable, Heading, Text } from 'grommet';
@@ -11,6 +10,7 @@ import { Modal } from '@centrifuge/axis-modal';
 import UserForm from './UserForm';
 import { formatDate } from '../../common/formaters';
 import { Preloader } from '../../components/Preloader';
+import { SecondaryHeader } from '../../components/SecondaryHeader';
 
 type UsersListProps = {
   users: User[] | null;
@@ -64,10 +64,9 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
   renderUsers = (data) => {
 
     return (
-      <Box>
         <DataTable
           data={data}
-          sortable={true}
+          primaryKey={'_id'}
           columns={[
             {
               property: 'name',
@@ -91,7 +90,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
               property: 'date_added',
               header: 'Date added',
               render: data =>
-                data.date_added ? <Text>{formatDate(data.date_added)}</Text> : null,
+                data.createdAt ? <Text>{formatDate(data.createdAt)}</Text> : null,
             },
             {
               property: 'enabled',
@@ -108,7 +107,6 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
             },
           ]}
         />
-      </Box>
     );
   };
 
@@ -116,7 +114,6 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
   render() {
 
     const { users, invitingUser } = this.props;
-
     if (!this.props.users) {
       return <Preloader message="Loading"/>;
     }
@@ -124,6 +121,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
     if (invitingUser && invitingUser.loading) {
       return <Preloader message="Creating user" withSound={true}/>;
     }
+
     return (
       <Box fill>
         <Modal
@@ -135,13 +133,15 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
         >
           <UserForm user={new User()} onSubmit={this.inviteUser} onDiscard={this.closeUserForm}/>
         </Modal>
-        <Box justify="between" direction="row" align="center">
+        <SecondaryHeader>
           <Heading level="3">User Management</Heading>
           <Box>
             <Button primary label="Create User" onClick={this.openUserForm}/>
           </Box>
-        </Box>
+        </SecondaryHeader>
+        <Box pad={{horizontal:"medium"}}>
         {this.renderUsers(users)}
+        </Box>
       </Box>
     );
   }
@@ -157,6 +157,8 @@ const mapStateToProps = (state) => {
 export default connect(
   mapStateToProps,
   {
-    getAllUsers, resetGetAllUsers, invite,
+    getAllUsers,
+    resetGetAllUsers,
+    invite,
   },
 )(UsersList);

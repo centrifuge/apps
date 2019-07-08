@@ -17,10 +17,14 @@ function action(type, payload = {}) {
 
 export const createInvoice = (invoice: Invoice) =>
   action(createInvoiceAction.start, { invoice });
+export const clearCreateInvoiceError = () => action(createInvoiceAction.clearError);
 export const resetCreateInvoice = () => action(createInvoiceAction.reset);
+
 export const updateInvoice = (invoice: Invoice) =>
   action(updateInvoiceAction.start, { invoice });
+export const clearUpdateInvoiceError = () => action(updateInvoiceAction.clearError);
 export const resetUpdateInvoice = () => action(updateInvoiceAction.reset);
+
 export const getInvoices = () => action(getInvoiceAction.start);
 export const resetGetInvoices = () => action(getInvoiceAction.reset);
 export const getInvoiceById = id => action(getInvoiceByIdAction.start, { id });

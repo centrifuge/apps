@@ -1,13 +1,9 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import { httpClient } from '../../http-client';
-import {
-  createInvoiceAction,
-  getInvoiceAction,
-  getInvoiceByIdAction,
-  updateInvoiceAction,
-} from '../actions/invoices';
+import { createInvoiceAction, getInvoiceAction, getInvoiceByIdAction, updateInvoiceAction } from '../actions/invoices';
 import routes from '../../routes';
+import { alertError } from '../actions/notifications';
 
 export function* getInvoices() {
   try {
@@ -45,6 +41,11 @@ export function* createInvoice(action) {
     yield put(push(routes.invoices.index));
   } catch (e) {
     yield put({ type: createInvoiceAction.fail, payload: e });
+    yield put(alertError(
+      'Failed to create invoice',
+      e.message,
+      { onConfirmAction: { type: createInvoiceAction.clearError } },
+    ));
   }
 }
 
@@ -56,9 +57,15 @@ export function* updateInvoice(action) {
       type: updateInvoiceAction.success,
       payload: response.data,
     });
-    yield put(push(routes.index));
+    yield put(push(routes.invoices.index));
   } catch (e) {
     yield put({ type: updateInvoiceAction.fail, payload: e });
+    yield put(alertError(
+      'Failed to update invoice',
+      e.message,
+      { onConfirmAction: { type: updateInvoiceAction.clearError } },
+    ));
+
   }
 }
 

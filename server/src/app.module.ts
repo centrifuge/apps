@@ -8,8 +8,10 @@ import { PurchaseOrdersModule } from './purchase-orders/purchase-orders.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { APP_FILTER } from '@nestjs/core';
-import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { FundingModule } from './funding/funding.module';
+import { AllExceptionFilter } from './filters/all-exception.filter';
+import { TransferModule } from "./transfers/transfer-details.module";
+import { SchemasModule } from "./schemas/schemas.module";
 
 @Module({
   controllers: [AppController],
@@ -17,7 +19,7 @@ import { FundingModule } from './funding/funding.module';
     AppService,
     {
       provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
+      useClass: AllExceptionFilter,
     },
   ],
   imports: [
@@ -28,6 +30,8 @@ import { FundingModule } from './funding/funding.module';
     PurchaseOrdersModule,
     UsersModule,
     WebhooksModule,
+    TransferModule,
+    SchemasModule
   ],
 })
 export class AppModule {

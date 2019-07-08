@@ -14,6 +14,7 @@ const userRoutes = {
 const fundingRoutes = {
   base: baseFundingRoute,
   sign: `${baseFundingRoute}/sign`,
+  settle: `${baseFundingRoute}/settle`,
 };
 
 
@@ -25,6 +26,8 @@ export const ROUTES = Object.freeze({
   CONTACTS: `${API_BASE}/contacts`,
   WEBHOOKS: `${API_BASE}/webhooks`,
   PURCHASE_ORDERS: `${API_BASE}/purchase_orders`,
+  TRANSFER_DETAILS: `${API_BASE}/transfer_details`,
+  SCHEMAS: `${API_BASE}/schemas`
 });
 
 export enum PERMISSIONS {
@@ -32,4 +35,5 @@ export enum PERMISSIONS {
   CAN_CREATE_INVOICES = 'can_create_invoices',
   CAN_MANAGE_USERS = 'can_manage_users',
   CAN_MANAGE_ACCOUNTS = 'can_manage_accounts',
+  CAN_MANAGE_SCHEMAS = 'can_manage_schemas'
 }
