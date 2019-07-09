@@ -128,7 +128,7 @@ export class InvoicesController {
     );
 
     await this.centrifugeService.pullForJobComplete(updateResult.header.job_id, request.user.account);
-    
+
     if (updateResult.attributes) {
       if (updateResult.attributes.funding_agreement) {
         const fundingList: FunFundingListResponse = await this.centrifugeService.funding.getList(

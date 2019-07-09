@@ -45,8 +45,11 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
     this.props.resetUpdateInvoice();
   }
 
-  updateInvoice = (invoice: Invoice) => {
-    this.props.updateInvoice(invoice);
+  updateInvoice = (data: Invoice) => {
+    this.props.updateInvoice({
+      _id: this.props.invoice!._id,
+      ...data
+    });
   };
 
   onCancel = () => {
