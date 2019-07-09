@@ -33,7 +33,7 @@ export class Preloader extends Component<PreloaderProps> {
         </svg>
       </Box>
       {message}
-      {withSound && <audio src="/sound.mp3" autoPlay={false} loop={true}></audio>}
+      {withSound && <audio src="/sound.mp3" autoPlay={true} loop={true}></audio>}
     </Box>;
   }
 }
