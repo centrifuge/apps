@@ -1,6 +1,5 @@
 import * as React from 'react';
 import WithTinlake from '../../components/WithTinlake';
-import { AxisTheme } from '@centrifuge/axis-theme';
 import { Box } from 'grommet';
 import MintNFT from '../../components/MintNFT';
 import Header, { MenuItem } from '../../components/Header';
@@ -11,7 +10,7 @@ const menuItems: MenuItem[] = [
 
 class MintNFTPage extends React.Component {
   render() {
-    return <AxisTheme full={true}><Box align="center">
+    return <Box align="center">
       <Header
         selectedRoute={'/temp/mint-nft'}
         menuItems={menuItems.reverse()}
@@ -25,7 +24,7 @@ class MintNFTPage extends React.Component {
           <WithTinlake render={tinlake => <MintNFT tinlake={tinlake} />} />
         </Box>
       </Box>
-    </Box></AxisTheme>;
+    </Box>;
   }
 }
 

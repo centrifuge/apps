@@ -18,28 +18,26 @@ class BorrowerLoanPage extends React.Component<{ loanId: string }> {
   render() {
     const { loanId } = this.props;
 
-    return <AxisTheme full={true}>
-      <Box align="center">
-        <Header
-          selectedRoute={`/borrower/loan?loanId=${loanId}`}
-          menuItems={menuItems.reverse()}
-          section="BORROWER"
-        />
-        <Box
-          justify="center"
-          direction="row"
-        >
-          <Box width="xlarge" >
-            {loanId ? (
-              <WithTinlake render={tinlake =>
-                <LoanDetail tinlake={tinlake} loanId={loanId} mode="borrower" />} />
-            ) : (
-                <Alert type="error">Please provide an ID</Alert>
-              )}
-          </Box>
+    return <Box align="center">
+      <Header
+        selectedRoute={`/borrower/loan?loanId=${loanId}`}
+        menuItems={menuItems.reverse()}
+        section="BORROWER"
+      />
+      <Box
+        justify="center"
+        direction="row"
+      >
+        <Box width="xlarge" >
+          {loanId ? (
+            <WithTinlake render={tinlake =>
+              <LoanDetail tinlake={tinlake} loanId={loanId} mode="borrower" />} />
+          ) : (
+              <Alert type="error">Please provide an ID</Alert>
+            )}
         </Box>
       </Box>
-    </AxisTheme>;
+    </Box>;
   }
 }
 

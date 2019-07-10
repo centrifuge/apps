@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import App, { Container } from 'next/app';
 import withRedux from 'next-redux-wrapper';
 import makeStore from '../utils/makeStore';
+import { AxisTheme } from '@centrifuge/axis-theme';
 
 class MyApp extends App<{ store: any }> {
   static async getInitialProps({ Component, ctx }: { Component: any, ctx: any }) {
@@ -16,13 +17,15 @@ class MyApp extends App<{ store: any }> {
   render() {
     const { Component, pageProps, store } = this.props;
     return (
-      <div className="App">
-        <Container>
-          <Provider store={store}>
-            <Component {...pageProps} />
-          </Provider>
-        </Container>
-      </div>
+      <AxisTheme full={true}>
+        <div className="App">
+          <Container>
+            <Provider store={store}>
+              <Component {...pageProps} />
+            </Provider>
+          </Container>
+        </div>
+      </AxisTheme>
     );
   }
 }

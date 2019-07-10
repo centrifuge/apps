@@ -1,7 +1,6 @@
 import * as React from 'react';
 import WithTinlake from '../../components/WithTinlake';
 import WhitelistNFT from '../../components/WhitelistNFT';
-import { AxisTheme } from '@centrifuge/axis-theme';
 import { Box } from 'grommet';
 import Header, { MenuItem } from '../../components/Header';
 
@@ -17,7 +16,7 @@ class WhitelistNFTPage extends React.Component<{ tokenId: string }> {
   render() {
     const { tokenId } = this.props;
 
-    return <AxisTheme full={true}><Box align="center">
+    return <Box align="center">
       <Header
         selectedRoute={'/admin/whitelist-nft'}
         menuItems={menuItems.reverse()}
@@ -31,7 +30,7 @@ class WhitelistNFTPage extends React.Component<{ tokenId: string }> {
           <WithTinlake render={tinlake => <WhitelistNFT tinlake={tinlake} tokenId={tokenId} />} />
         </Box>
       </Box>
-    </Box></AxisTheme>;
+    </Box>;
   }
 }
 

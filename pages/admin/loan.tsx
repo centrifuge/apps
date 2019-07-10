@@ -1,7 +1,6 @@
 import * as React from 'react';
 import WithTinlake from '../../components/WithTinlake';
 import LoanDetail from '../../components/LoanDetail';
-import { AxisTheme } from '@centrifuge/axis-theme';
 import Alert from '../../components/Alert';
 import { Box } from 'grommet';
 import Header, { MenuItem } from '../../components/Header';
@@ -18,28 +17,26 @@ class AdminLoanPage extends React.Component<{ loanId: string }> {
   render() {
     const { loanId } = this.props;
 
-    return <AxisTheme full={true}>
-      <Box align="center">
-        <Header
-          selectedRoute={`/admin/loan?loanId=${loanId}`}
-          menuItems={menuItems.reverse()}
-          section="ADMIN"
-        />
-        <Box
-          justify="center"
-          direction="row"
-        >
-          <Box width="xlarge" >
-            {loanId ? (
-              <WithTinlake render={tinlake =>
-                <LoanDetail tinlake={tinlake} loanId={loanId} mode="admin" />} />
-            ) : (
+    return <Box align="center">
+      <Header
+        selectedRoute={`/admin/loan?loanId=${loanId}`}
+        menuItems={menuItems.reverse()}
+        section="ADMIN"
+      />
+      <Box
+        justify="center"
+        direction="row"
+      >
+        <Box width="xlarge" >
+          {loanId ? (
+            <WithTinlake render={tinlake =>
+              <LoanDetail tinlake={tinlake} loanId={loanId} mode="admin" />} />
+          ) : (
               <Alert type="error">Please provide an ID</Alert>
             )}
-          </Box>
         </Box>
       </Box>
-    </AxisTheme>;
+    </Box>;
   }
 }
 
