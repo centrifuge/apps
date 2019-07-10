@@ -3,7 +3,7 @@ import Tinlake from 'tinlake';
 import { LoansState, getLoan } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
-import { Box, FormField, Button, Heading } from 'grommet';
+import { Box, FormField, Button, Heading, Text } from 'grommet';
 import LoanNftData from '../LoanNftData.tsx';
 import { bnToHex } from '../../utils/bnToHex';
 import SecondaryHeader from '../SecondaryHeader';
@@ -121,7 +121,7 @@ class LoanBorrow extends React.Component<Props, State> {
           Successfully borrowed <Number value={borrowAmount} suffix=" DAI" precision={2} />
           for Loan ID {loanId}</Alert>}
         {is === 'error' && <Alert type="error" margin={{ top: 'large' }}>
-          <strong>Error borrowing for Loan ID {loanId}, see console for details</strong>
+          <Text weight="bold">Error borrowing for Loan ID {loanId}, see console for details</Text>
           {errorMsg && <div><br />{errorMsg}</div>}
         </Alert>}
 

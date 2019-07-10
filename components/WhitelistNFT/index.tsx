@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Tinlake from 'tinlake';
-import { Box, FormField, TextInput, Button, Heading } from 'grommet';
+import { Box, FormField, TextInput, Button, Heading, Text } from 'grommet';
 import Alert from '../Alert';
 import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
@@ -103,7 +103,8 @@ class WhitelistNFT extends React.Component<Props, State> {
         {is === 'success' && <Alert type="success">
           Successfully whitelisted NFT for Token ID {tokenId}</Alert>}
         {is === 'error' && <Alert type="error">
-          <strong>Error whitelisting NFT for Token ID {tokenId}, see console for details</strong>
+          <Text weight="bold">
+            Error whitelisting NFT for Token ID {tokenId}, see console for details</Text>
           {errorMsg && <div><br />{errorMsg}</div>}
         </Alert>}
 

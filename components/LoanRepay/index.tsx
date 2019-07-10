@@ -3,7 +3,7 @@ import Tinlake from 'tinlake';
 import { LoansState, getLoan } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
-import { Box, FormField, Button, Heading } from 'grommet';
+import { Box, FormField, Button, Heading, Text } from 'grommet';
 import LoanNftData from '../LoanNftData.tsx';
 import BN from 'bn.js';
 import SecondaryHeader from '../SecondaryHeader';
@@ -120,7 +120,7 @@ class LoanRepay extends React.Component<Props, State> {
           Successfully repayed <Number value={repayAmount.toString()} suffix=" DAI" precision={2} />
           for Loan ID {loanId}</Alert>}
         {is === 'error' && <Alert type="error" margin={{ top: 'large' }}>
-          <strong>Error repaying Loan ID {loanId}, see console for details</strong>
+          <Text weight="bold">Error repaying Loan ID {loanId}, see console for details</Text>
           {errorMsg && <div><br />{errorMsg}</div>}
         </Alert>}
 

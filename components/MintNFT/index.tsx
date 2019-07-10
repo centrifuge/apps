@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Tinlake from 'tinlake';
-import { Box, FormField, TextInput, Button, Heading, Anchor } from 'grommet';
+import { Box, FormField, TextInput, Button, Heading, Anchor, Text } from 'grommet';
 import Alert from '../Alert';
 import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
@@ -66,7 +66,8 @@ class MintNFT extends React.Component<Props, State> {
           <Link href={`/admin/whitelist-nft?tokenId=${tokenId}`}>
             <Anchor>Proceed to whitelisting</Anchor></Link></Alert>}
         {is === 'error' && <Alert type="error">
-          <strong>Error minting NFT for Token ID {tokenId}, see console for details</strong>
+          <Text weight="bold">
+            Error minting NFT for Token ID {tokenId}, see console for details</Text>
           {errorMsg && <div><br />{errorMsg}</div>}
         </Alert>}
 
