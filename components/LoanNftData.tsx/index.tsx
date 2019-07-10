@@ -20,6 +20,8 @@ class LoanNftData extends React.Component<Props> {
             title={tokenId.toString()}/></FormField></Box>
         <Box basis={'1/4'} gap="medium"><FormField label="NFT Owner">
           <TextInput value={formatAddress(nftOwner)} disabled title={nftOwner} /></FormField></Box>
+        <Box basis={'1/4'} gap="medium" />
+        <Box basis={'1/4'} gap="medium" />
       </Box>
 
       <Paragraph>The following metadata was read from the NFT:</Paragraph>

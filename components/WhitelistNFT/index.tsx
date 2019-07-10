@@ -132,6 +132,7 @@ class WhitelistNFT extends React.Component<Props, State> {
               />
             </FormField>
           </Box>
+          <Box basis={'1/4'} gap="medium" />
         </Box>
       </Box>
     </Box>;

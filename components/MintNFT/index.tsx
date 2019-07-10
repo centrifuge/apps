@@ -83,6 +83,9 @@ class MintNFT extends React.Component<Props, State> {
               />
             </FormField>
           </Box>
+          <Box basis={'1/4'} gap="medium" />
+          <Box basis={'1/4'} gap="medium" />
+          <Box basis={'1/4'} gap="medium" />
         </Box>
       </Box>
     </Box>;

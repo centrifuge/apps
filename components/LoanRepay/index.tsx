@@ -138,6 +138,7 @@ class LoanRepay extends React.Component<Props, State> {
           <Box basis={'1/4'} gap="medium"><FormField label="Total Amount">
             <NumberInput value={totalAmount.toString()} disabled suffix=" DAI" precision={2} />
           </FormField></Box>
+          <Box basis={'1/4'} gap="medium" />
         </Box>
 
         <LoanNftData loan={singleLoan!} />

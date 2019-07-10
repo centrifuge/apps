@@ -58,6 +58,8 @@ class LoanDetail extends React.Component<Props> {
             <TextInput value={loanId} disabled /></FormField></Box>
           <Box basis={'1/4'} gap="medium"><FormField label="Loan Status">
             <TextInput value={status} disabled /></FormField></Box>
+          <Box basis={'1/4'} gap="medium" />
+          <Box basis={'1/4'} gap="medium" />
         </Box>
 
         <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
