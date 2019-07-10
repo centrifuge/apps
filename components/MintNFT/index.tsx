@@ -49,7 +49,7 @@ class MintNFT extends React.Component<Props, State> {
     return <Box>
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">
-          <Link href="/admin">
+          <Link href="/borrower">
             <LinkPrevious />
           </Link>
           <Heading level="3">Mint NFT</Heading>
