@@ -106,6 +106,7 @@ declare class Tinlake {
      */
     adminAdmit: (registry: string, nft: string, principal: string, owner: string) => Promise<Events>;
     adminAppraise: (loanID: string, appraisal: string) => Promise<Events>;
+    getAppraisal: (loanID: string) => Promise<BN>;
     /**
      * @param to Address that should receive the currency (e. g. DAI)
      */
