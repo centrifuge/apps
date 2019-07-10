@@ -280,6 +280,10 @@ const waitForTransaction = (eth: ethI, txHash: any) => {
     const wait = (txHash: string) => {
       setTimeout(() => {
         eth.getTransactionByHash(txHash, (err: any, tx: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
           if (tx.blockHash != null) {
             resolve(tx);
             return;
