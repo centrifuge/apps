@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders errors correctly 1`] = `
+<div
+  className="sc-bdVaJa gLzRZh StyledBox-sc-13pk1d4-0 IRSNj"
+  type="error"
+>
+  My error
+</div>
+`;
+
+exports[`renders infos correctly 1`] = `
+<div
+  className="sc-bdVaJa jXuNwu StyledBox-sc-13pk1d4-0 IRSNj"
+  type="info"
+>
+  My info
+</div>
+`;
+
+exports[`renders success correctly 1`] = `
+<div
+  className="sc-bdVaJa dTbgYV StyledBox-sc-13pk1d4-0 IRSNj"
+  type="success"
+>
+  My success
+</div>
+`;

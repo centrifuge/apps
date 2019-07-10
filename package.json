@@ -34,7 +34,7 @@
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
     "styled-components": "^4.3.2",
-    "tinlake": "git+https://github.com/philipstanislaus/tinlake.js.git#web-version",
+    "tinlake": "git+https://github.com/centrifuge/tinlake.js.git#master",
     "web3connect": "^1.0.0-beta.13"
   },
   "devDependencies": {
@@ -42,9 +42,11 @@
     "@types/next": "^8.0.5",
     "@types/react": "^16.8.23",
     "@types/react-redux": "^7.1.1",
+    "@types/react-test-renderer": "^16.8.2",
     "@types/styled-components": "^4.1.16",
     "@zeit/next-typescript": "^1.1.1",
     "jest": "^24.8.0",
+    "react-test-renderer": "^16.8.6",
     "tslint": "^5.18.0",
     "tslint-config-airbnb": "^5.11.1",
     "typescript": "^3.5.2"
