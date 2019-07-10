@@ -24124,6 +24124,10 @@ var waitForTransaction = function (eth, txHash) {
         var wait = function (txHash) {
             setTimeout(function () {
                 eth.getTransactionByHash(txHash, function (err, tx) {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
                     if (tx.blockHash != null) {
                         resolve(tx);
                         return;
