@@ -2,7 +2,7 @@ import { AnyAction, Action } from 'redux';
 import Tinlake, { Loan, BalanceDebt, Address } from 'tinlake';
 // tslint:disable-next-line:import-name
 import BN from 'bn.js';
-import getLoanStatus from '../utils/getLoanStatus';
+import getLoanStatus, { LoanStatus } from '../utils/getLoanStatus';
 import { ThunkAction } from 'redux-thunk';
 import { bnToHex } from '../utils/bnToHex';
 
@@ -21,7 +21,7 @@ export interface InternalLoan extends Loan {
   balance: BN;
   debt: BN;
   fee: BN;
-  status: string;
+  status: LoanStatus;
   nftOwner: Address;
   loanOwner: Address;
 }

@@ -4,11 +4,15 @@ import Tinlake from 'tinlake';
 import { LoansState, getLoan } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
-import { Box, FormField, TextInput, Button } from 'grommet';
+import { Box, FormField, Button, Heading } from 'grommet';
 import LoanNftData from '../LoanNftData.tsx';
 // tslint:disable-next-line:import-name
 import BN from 'bn.js';
-import { bnToHex } from '../../utils/bnToHex';
+import SecondaryHeader from '../SecondaryHeader';
+import Link from 'next/link';
+import { LinkPrevious } from 'grommet-icons';
+import { NumberInput } from '@centrifuge/axis-number-input';
+import Number from '../Number';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -99,30 +103,47 @@ class LoanRepay extends React.Component<Props, State> {
     const totalAmount = fee.add(new BN(repayAmount));
 
     return <Box>
-      {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
-        <Button primary onClick={this.repay}>Confirm</Button>}
+      <SecondaryHeader>
+        <Box direction="row" gap="small" align="center">
+          <Link href={`/borrower/loan?loanId=${loanId}`}>
+            <LinkPrevious />
+          </Link>
+          <Heading level="3">Repay Loan {loanId}</Heading>
+        </Box>
 
-      {is === 'loading' && 'Repaying...'}
-      {is === 'success' && <Alert type="success" margin={{ top: 'large' }}>
-        Successfully repayed {repayAmount.toString()} for Loan ID {loanId}</Alert>}
-      {is === 'error' && <Alert type="error" margin={{ top: 'large' }}>
-        <strong>Error repaying Loan ID {loanId}, see console for details</strong>
-        {errorMsg && <div><br />{errorMsg}</div>}
-      </Alert>}
+        {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
+          <Button primary onClick={this.repay} label="Confirm" />}
+      </SecondaryHeader>
 
-      <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
-        <Box basis={'1/4'} gap="medium"><FormField label="Repay Amount">
-          <TextInput
-            value={repayAmount} disabled
-            onChange={e => this.setState({ repayAmount: e.currentTarget.value }) }
-          /></FormField></Box>
-        <Box basis={'1/4'} gap="medium"><FormField label="Interest Amount">
-          <TextInput value={fee.toString()} disabled /></FormField></Box>
-        <Box basis={'1/4'} gap="medium"><FormField label="Total Amount">
-          <TextInput value={totalAmount.toString()} disabled /></FormField></Box>
+      <Box pad={{ horizontal: 'medium' }}>
+
+        {is === 'loading' && 'Repaying...'}
+        {is === 'success' && <Alert type="success" margin={{ top: 'large' }}>
+          Successfully repayed <Number value={repayAmount.toString()} suffix=" DAI" precision={2} />
+          for Loan ID {loanId}</Alert>}
+        {is === 'error' && <Alert type="error" margin={{ top: 'large' }}>
+          <strong>Error repaying Loan ID {loanId}, see console for details</strong>
+          {errorMsg && <div><br />{errorMsg}</div>}
+        </Alert>}
+
+        <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
+          <Box basis={'1/4'} gap="medium"><FormField label="Repay Amount">
+            <NumberInput
+              value={repayAmount} disabled suffix=" DAI" precision={2}
+              onChange={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                this.setState({ repayAmount: e.currentTarget.value })}
+            />
+          </FormField></Box>
+          <Box basis={'1/4'} gap="medium"><FormField label="Interest Amount">
+            <NumberInput value={fee.toString()} disabled suffix=" DAI" precision={2} />
+          </FormField></Box>
+          <Box basis={'1/4'} gap="medium"><FormField label="Total Amount">
+            <NumberInput value={totalAmount.toString()} disabled suffix=" DAI" precision={2} />
+          </FormField></Box>
+        </Box>
+
+        <LoanNftData loan={singleLoan!} />
       </Box>
-
-      <LoanNftData loan={singleLoan!} />
     </Box>;
   }
 }

@@ -41,7 +41,7 @@ export default LoanNftData;
 
 // tslint:disable-next-line:variable-name
 const NftDataContainer = styled(Box)`
-  margin: 56px -20px -20px -20px;
+  margin: 56px 0;
   padding: 20px;
   border-radius: 3px;
   background: #f7f7f7;

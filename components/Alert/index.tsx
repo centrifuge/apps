@@ -2,13 +2,12 @@ import styled from 'styled-components';
 import { Box } from 'grommet';
 
 interface Props {
-  type: 'error' | 'success';
+  type: 'error' | 'info' | 'success';
   children: React.ReactNode;
   [key: string]: any;
 }
 
 function Alert({ type, children, ...rest }: Props) {
-  console.log({ rest });
   return <AlertContainer type={type} {...rest}>{children}</AlertContainer>;
 }
 
@@ -16,6 +15,10 @@ const colors = {
   error: {
     backgroundColor: '#fed7d7',
     color: '#9b2c2c',
+  },
+  info: {
+    backgroundColor: '#bee3f8',
+    color: '#2c5282',
   },
   success: {
     backgroundColor: '#c6f6d5',

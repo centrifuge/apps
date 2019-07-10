@@ -16,11 +16,13 @@ class MyApp extends App<{ store: any }> {
   render() {
     const { Component, pageProps, store } = this.props;
     return (
-      <Container>
-        <Provider store={store}>
-          <Component {...pageProps} />
-        </Provider>
-      </Container>
+      <div className="App">
+        <Container>
+          <Provider store={store}>
+            <Component {...pageProps} />
+          </Provider>
+        </Container>
+      </div>
     );
   }
 }

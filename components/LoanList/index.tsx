@@ -3,10 +3,12 @@ import * as React from 'react';
 import Tinlake from 'tinlake';
 // tslint:disable-next-line:import-name
 import Link from 'next/link';
-import { Box, DataTable } from 'grommet';
+import { Box, DataTable, Heading } from 'grommet';
 import { connect } from 'react-redux';
 import { InternalLoan, LoansState, getLoans } from '../../ducks/loans';
-import { formatAddress } from '../../utils/formatAddress';
+import SecondaryHeader from '../SecondaryHeader';
+import Address from '../Address';
+import Number from '../Number';
 
 interface Props {
   tinlake: Tinlake;
@@ -31,23 +33,47 @@ class LoanList extends React.Component<Props> {
       loans!.loans;
 
     return <Box>
-      <DataTable data={filteredLoans} columns={[
-        { header: 'Loan ID', property: 'loanId', align: 'end' },
-        { header: 'NFT ID', property: 'tokenId', align: 'end', render: (l: InternalLoan) =>
-          <span title={l.tokenId.toString()}>{formatAddress(l.tokenId.toString())}</span> },
-        { header: 'NFT Owner', property: 'nftOwner', align: 'end', render: (l: InternalLoan) =>
-          <span title={l.nftOwner}>{formatAddress(l.nftOwner)}</span> },
-        { header: 'NFT Status', property: 'status' },
-        { header: 'Principal', property: 'principal', align: 'end',
-          render: (l: InternalLoan) => l.principal.toString() },
-        { header: 'Interest rate', property: 'fee', align: 'end',
-          render: (l: InternalLoan) => l.fee.toString() },
-        { header: 'Debt', property: 'debt', align: 'end',
-          render: (l: InternalLoan) => l.debt.toString() },
-        { header: 'Maturity Date', property: '', align: 'end', render: () => '-' },
-        { header: 'Actions', property: 'id', align: 'end', render: (l: InternalLoan) =>
-          <Link href={`/${mode}/loan?loanId=${l.loanId}`}><a>View</a></Link> },
-      ]} />
+      <SecondaryHeader>
+        <Heading level="3">Loans</Heading>
+      </SecondaryHeader>
+
+      <Box pad={{ horizontal: 'medium' }}>
+        <DataTable data={filteredLoans} sortable columns={[
+          { header: 'Loan ID', property: 'loanId', align: 'end' },
+          {
+            header: 'NFT ID', property: 'tokenId', align: 'end',
+            render: (l: InternalLoan) => <Address address={l.tokenId.toString()} />,
+          },
+          {
+            header: 'NFT Owner', property: 'nftOwner', align: 'end',
+            render: (l: InternalLoan) => <Address address={l.nftOwner} />,
+          },
+          { header: 'NFT Status', property: 'status' },
+          {
+            header: 'Principal', property: 'principal', align: 'end',
+            render: (l: InternalLoan) => l.status === 'Whitelisted' ?
+              <Number suffix=" DAI" precision={2} value={l.principal.toString()} /> : '-',
+          },
+          {
+            header: 'Interest rate', property: 'fee', align: 'end',
+            render: (l: InternalLoan) => l.status === 'Repaid' ? '-' :
+              <Number suffix="%" value={l.fee.toString()} />,
+          },
+          {
+            header: 'Debt', property: 'debt', align: 'end',
+            render: (l: InternalLoan) => l.status === 'Whitelisted' ? '-' :
+              <Number suffix=" DAI" precision={2} value={l.debt.toString()} />,
+          },
+          {
+            header: 'Maturity Date', property: '', align: 'end',
+            render: (l: InternalLoan) => l.status === 'Repaid' ? '-' : 'TBD',
+          },
+          {
+            header: 'Actions', property: 'id', align: 'end', render: (l: InternalLoan) =>
+              <Link href={`/${mode}/loan?loanId=${l.loanId}`}><a>View</a></Link>,
+          },
+        ]} />
+      </Box>
     </Box>;
   }
 }

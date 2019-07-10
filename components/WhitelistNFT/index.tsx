@@ -1,9 +1,11 @@
 import * as React from 'react';
 // tslint:disable-next-line:import-name
 import Tinlake from 'tinlake';
-import { Box, FormField, TextInput, Button } from 'grommet';
+import { Box, FormField, TextInput, Button, Heading } from 'grommet';
 import Alert from '../Alert';
 import Link from 'next/link';
+import SecondaryHeader from '../SecondaryHeader';
+import { LinkPrevious } from 'grommet-icons';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -30,7 +32,7 @@ class WhitelistNFT extends React.Component<Props, State> {
   };
 
   componentWillMount() {
-    this.setState({ tokenId: this.props.tokenId });
+    this.setState({ tokenId: this.props.tokenId || '' });
   }
 
   whitelist = async () => {
@@ -96,46 +98,56 @@ class WhitelistNFT extends React.Component<Props, State> {
   render() {
     const { tokenId, principal, appraisal, is, errorMsg } = this.state;
 
+    console.log('tokenId', tokenId);
+
     return <Box>
-      <Box direction="row" gap="medium" margin={{ bottom: 'medium' }}>
-        <Box basis={'1/4'} gap="medium">
-          <FormField label="NFT ID">
-            <TextInput
-              value={tokenId}
-              onChange={e => this.setState({ tokenId: e.currentTarget.value }) }
-            />
-          </FormField>
+      <SecondaryHeader>
+        <Box direction="row" gap="small" align="center">
+          <Link href="/admin">
+            <LinkPrevious />
+          </Link>
+          <Heading level="3">Whitelist NFT</Heading>
         </Box>
-        <Box basis={'1/4'} gap="medium">
-          <FormField label="Principal">
-            <TextInput
-              value={principal}
-              onChange={e => this.setState({ principal: e.currentTarget.value }) }
-            />
-          </FormField>
-        </Box>
-        <Box basis={'1/4'} gap="medium">
-          <FormField label="Appraisal">
-            <TextInput
-              value={appraisal}
-              onChange={e => this.setState({ appraisal: e.currentTarget.value }) }
-            />
-          </FormField>
+
+        <Button onClick={this.whitelist} primary label="Whitelist" />
+      </SecondaryHeader>
+
+      <Box pad={{ horizontal: 'medium' }}>
+        {is === 'loading' && 'Whitelisting...'}
+        {is === 'success' && <Alert type="success">
+          Successfully whitelisted NFT for Token ID {tokenId}</Alert>}
+        {is === 'error' && <Alert type="error">
+          <strong>Error whitelisting NFT for Token ID {tokenId}, see console for details</strong>
+          {errorMsg && <div><br />{errorMsg}</div>}
+        </Alert>}
+
+        <Box direction="row" gap="medium" margin={{ vertical: 'large' }}>
+          <Box basis={'1/4'} gap="medium">
+            <FormField label="NFT ID">
+              <TextInput
+                value={tokenId}
+                onChange={e => this.setState({ tokenId: e.currentTarget.value })}
+              />
+            </FormField>
+          </Box>
+          <Box basis={'1/4'} gap="medium">
+            <FormField label="Appraisal">
+              <TextInput
+                value={appraisal}
+                onChange={e => this.setState({ appraisal: e.currentTarget.value })}
+              />
+            </FormField>
+          </Box>
+          <Box basis={'1/4'} gap="medium">
+            <FormField label="Principal">
+              <TextInput
+                value={principal}
+                onChange={e => this.setState({ principal: e.currentTarget.value })}
+              />
+            </FormField>
+          </Box>
         </Box>
       </Box>
-
-      <Box margin={{ bottom: 'medium' }}>
-        <Button onClick={this.whitelist} primary alignSelf="end">Whitelist</Button>
-      </Box>
-
-      {is === 'loading' && 'Whitelisting...'}
-      {is === 'success' && <Alert type="success">
-        Successfully whitelisted NFT for Token ID {tokenId}</Alert>}
-      {is === 'error' && <Alert type="error">
-        <strong>Error whitelisting NFT for Token ID {tokenId}, see console for details</strong>
-        {errorMsg && <div><br />{errorMsg}</div>}
-      </Alert>}
-
     </Box>;
   }
 }
