@@ -1,6 +1,4 @@
-// tslint:disable-next-line:import-name
 import Tinlake from 'tinlake';
-// tslint:disable-next-line:import-name
 import contractAddresses from './addresses_tinlake.json';
 
 declare var web3: any;
@@ -10,7 +8,6 @@ let tinlake: Tinlake | null = null;
 export async function getTinlake() {
   if (tinlake) { return tinlake; }
 
-  // const provider = web3.currentProvider;
   const provider = await web3Connect();
 
   const accounts = await provider.enable();
@@ -27,7 +24,6 @@ export async function getTinlake() {
 async function web3Connect(): Promise<any> {
   return new Promise((resolve, reject) => {
     // require here since we only want it to be loaded in browser, not on server side rendering
-    // tslint:disable-next-line:variable-name
     const Web3Connect = require('web3connect').default;
 
     console.log({ Web3Connect });
@@ -48,7 +44,6 @@ async function web3Connect(): Promise<any> {
     // subscibe to connect
     web3Connect.on('connect', (provider: any) => {
       resolve(provider);
-      // const web3 = new Web3(provider); // add provider to web3
     });
 
     // subscibe to close

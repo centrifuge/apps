@@ -1,9 +1,10 @@
 import * as React from 'react';
-// tslint:disable-next-line:import-name
 import Tinlake from 'tinlake';
-import { Box, FormField, TextInput, Button } from 'grommet';
+import { Box, FormField, TextInput, Button, Heading, Text } from 'grommet';
 import Alert from '../Alert';
 import Link from 'next/link';
+import SecondaryHeader from '../SecondaryHeader';
+import { LinkPrevious } from 'grommet-icons';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -30,7 +31,7 @@ class WhitelistNFT extends React.Component<Props, State> {
   };
 
   componentWillMount() {
-    this.setState({ tokenId: this.props.tokenId });
+    this.setState({ tokenId: this.props.tokenId || '' });
   }
 
   whitelist = async () => {
@@ -46,8 +47,6 @@ class WhitelistNFT extends React.Component<Props, State> {
 
       console.log(`NFT owner of tokenId ${tokenId} is ${nftOwner}`);
 
-      // console.log(`Calling tinlake.adminAdmit(${addresses['NFT_COLLATERAL']}, ` +
-      //   `${tokenId}, ${principal}, ${nftOwner})`);
       const res2 = await tinlake.adminAdmit(addresses['NFT_COLLATERAL'], tokenId, principal,
                                             nftOwner);
 
@@ -63,13 +62,7 @@ class WhitelistNFT extends React.Component<Props, State> {
       const loanId = res2.events[0].data[2].toString();
       console.log(`Loan id: ${loanId}`);
 
-      // const nftOwner2 = await tinlake.ownerOfNFT(tokenId);
-      // console.log(`NFT owner: ${nftOwner2}`);
-      // const loanOwner2 = await tinlake.ownerOfLoan(loanId);
-      // console.log(`loan owner: ${loanOwner2}`);
-
       // appraise
-      // console.log(`Calling tinlake.adminAppraise(${loanId}, ${appraisal})`);
       const res3 = await tinlake.adminAppraise(loanId, appraisal);
 
       console.log('appraisal results');
@@ -81,11 +74,6 @@ class WhitelistNFT extends React.Component<Props, State> {
         return;
       }
 
-      // const nftOwner3 = await tinlake.ownerOfNFT(tokenId);
-      // console.log(`NFT owner: ${nftOwner3}`);
-      // const loanOwner3 = await tinlake.ownerOfLoan(loanId);
-      // console.log(`loan owner: ${loanOwner3}`);
-
       this.setState({ is: 'success' });
     } catch (e) {
       console.log(e);
@@ -96,46 +84,58 @@ class WhitelistNFT extends React.Component<Props, State> {
   render() {
     const { tokenId, principal, appraisal, is, errorMsg } = this.state;
 
+    console.log('tokenId', tokenId);
+
     return <Box>
-      <Box direction="row" gap="medium" margin={{ bottom: 'medium' }}>
-        <Box basis={'1/4'} gap="medium">
-          <FormField label="NFT ID">
-            <TextInput
-              value={tokenId}
-              onChange={e => this.setState({ tokenId: e.currentTarget.value }) }
-            />
-          </FormField>
+      <SecondaryHeader>
+        <Box direction="row" gap="small" align="center">
+          <Link href="/admin">
+            <LinkPrevious />
+          </Link>
+          <Heading level="3">Whitelist NFT</Heading>
         </Box>
-        <Box basis={'1/4'} gap="medium">
-          <FormField label="Principal">
-            <TextInput
-              value={principal}
-              onChange={e => this.setState({ principal: e.currentTarget.value }) }
-            />
-          </FormField>
-        </Box>
-        <Box basis={'1/4'} gap="medium">
-          <FormField label="Appraisal">
-            <TextInput
-              value={appraisal}
-              onChange={e => this.setState({ appraisal: e.currentTarget.value }) }
-            />
-          </FormField>
+
+        <Button onClick={this.whitelist} primary label="Whitelist" />
+      </SecondaryHeader>
+
+      <Box pad={{ horizontal: 'medium' }}>
+        {is === 'loading' && 'Whitelisting...'}
+        {is === 'success' && <Alert type="success">
+          Successfully whitelisted NFT for Token ID {tokenId}</Alert>}
+        {is === 'error' && <Alert type="error">
+          <Text weight="bold">
+            Error whitelisting NFT for Token ID {tokenId}, see console for details</Text>
+          {errorMsg && <div><br />{errorMsg}</div>}
+        </Alert>}
+
+        <Box direction="row" gap="medium" margin={{ vertical: 'large' }}>
+          <Box basis={'1/4'} gap="medium">
+            <FormField label="NFT ID">
+              <TextInput
+                value={tokenId}
+                onChange={e => this.setState({ tokenId: e.currentTarget.value })}
+              />
+            </FormField>
+          </Box>
+          <Box basis={'1/4'} gap="medium">
+            <FormField label="Appraisal">
+              <TextInput
+                value={appraisal}
+                onChange={e => this.setState({ appraisal: e.currentTarget.value })}
+              />
+            </FormField>
+          </Box>
+          <Box basis={'1/4'} gap="medium">
+            <FormField label="Principal">
+              <TextInput
+                value={principal}
+                onChange={e => this.setState({ principal: e.currentTarget.value })}
+              />
+            </FormField>
+          </Box>
+          <Box basis={'1/4'} gap="medium" />
         </Box>
       </Box>
-
-      <Box margin={{ bottom: 'medium' }}>
-        <Button onClick={this.whitelist} primary alignSelf="end">Whitelist</Button>
-      </Box>
-
-      {is === 'loading' && 'Whitelisting...'}
-      {is === 'success' && <Alert type="success">
-        Successfully whitelisted NFT for Token ID {tokenId}</Alert>}
-      {is === 'error' && <Alert type="error">
-        <strong>Error whitelisting NFT for Token ID {tokenId}, see console for details</strong>
-        {errorMsg && <div><br />{errorMsg}</div>}
-      </Alert>}
-
     </Box>;
   }
 }

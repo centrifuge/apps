@@ -1,12 +1,16 @@
 import * as React from 'react';
-// tslint:disable-next-line:import-name
 import Tinlake from 'tinlake';
 import { LoansState, getLoan } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
-import { Box, FormField, TextInput, Button } from 'grommet';
+import { Box, FormField, Button, Heading, Text } from 'grommet';
 import LoanNftData from '../LoanNftData.tsx';
 import { bnToHex } from '../../utils/bnToHex';
+import SecondaryHeader from '../SecondaryHeader';
+import Link from 'next/link';
+import { LinkPrevious } from 'grommet-icons';
+import { NumberInput } from '@centrifuge/axis-number-input';
+import Number from '../Number';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -99,31 +103,45 @@ class LoanBorrow extends React.Component<Props, State> {
     const { borrowAmount, is, errorMsg } = this.state;
 
     return <Box>
-      {status === 'Whitelisted' && loanOwner === tinlake.ethConfig.from &&
-        <Button primary onClick={this.borrow}>Confirm</Button>}
+      <SecondaryHeader>
+        <Box direction="row" gap="small" align="center">
+          <Link href={`/borrower/loan?loanId=${loanId}`}>
+            <LinkPrevious />
+          </Link>
+          <Heading level="3">Borrow Loan {loanId}</Heading>
+        </Box>
 
-      {is === 'loading' && 'Borrowing...'}
-      {is === 'success' && <Alert type="success" margin={{ top: 'large' }}>
-        Successfully borrowed {borrowAmount} for Loan ID {loanId}</Alert>}
-      {is === 'error' && <Alert type="error" margin={{ top: 'large' }}>
-        <strong>Error borrowing for Loan ID {loanId}, see console for details</strong>
-        {errorMsg && <div><br />{errorMsg}</div>}
-      </Alert>}
+        {status === 'Whitelisted' && loanOwner === tinlake.ethConfig.from &&
+          <Button primary onClick={this.borrow} label="Confirm" />}
+      </SecondaryHeader>
 
-      <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
-        <Box basis={'1/4'} gap="medium"><FormField label="Borrow Amount">
-          <TextInput
-            value={borrowAmount} disabled
-            onChange={e => this.setState({ borrowAmount: e.currentTarget.value }) }
-          /></FormField></Box>
-        <Box basis={'1/4'} gap="medium" />
-        <Box basis={'1/4'} gap="medium"><FormField label="Principal">
-          <TextInput value={principal.toString()} disabled /></FormField></Box>
-        <Box basis={'1/4'} gap="medium"><FormField label="Interest Rate">
-          <TextInput value={fee.toString()} disabled /></FormField></Box>
+      <Box pad={{ horizontal: 'medium' }}>
+        {is === 'loading' && 'Borrowing...'}
+        {is === 'success' && <Alert type="success" margin={{ top: 'large' }}>
+          Successfully borrowed <Number value={borrowAmount} suffix=" DAI" precision={2} />
+          for Loan ID {loanId}</Alert>}
+        {is === 'error' && <Alert type="error" margin={{ top: 'large' }}>
+          <Text weight="bold">Error borrowing for Loan ID {loanId}, see console for details</Text>
+          {errorMsg && <div><br />{errorMsg}</div>}
+        </Alert>}
+
+        <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
+          <Box basis={'1/4'} gap="medium"><FormField label="Borrow Amount">
+            <NumberInput
+              value={borrowAmount} disabled suffix=" DAI" precision={2}
+              onChange={e => this.setState({ borrowAmount: e.currentTarget.value })}
+            /></FormField></Box>
+          <Box basis={'1/4'} gap="medium" />
+          <Box basis={'1/4'} gap="medium"><FormField label="Principal">
+            <NumberInput value={principal.toString()} disabled suffix=" DAI" precision={2} />
+          </FormField></Box>
+          <Box basis={'1/4'} gap="medium"><FormField label="Interest Rate">
+            <NumberInput value={fee.toString()} disabled suffix="%" />
+          </FormField></Box>
+        </Box>
+
+        <LoanNftData loan={singleLoan!} />
       </Box>
-
-      <LoanNftData loan={singleLoan!} />
     </Box>;
   }
 }

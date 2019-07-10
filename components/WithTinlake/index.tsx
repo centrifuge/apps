@@ -1,5 +1,4 @@
 import * as React from 'react';
-// tslint:disable-next-line:import-name
 import Tinlake from 'tinlake';
 import { getTinlake } from '../../services/tinlake';
 

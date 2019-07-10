@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { InternalLoan } from '../../ducks/loans';
-import { Box, FormField, TextInput, Heading } from 'grommet';
+import { Box, FormField, TextInput, Heading, Paragraph } from 'grommet';
 import styled from 'styled-components';
 import { formatAddress } from '../../utils/formatAddress';
 
@@ -20,9 +20,11 @@ class LoanNftData extends React.Component<Props> {
             title={tokenId.toString()}/></FormField></Box>
         <Box basis={'1/4'} gap="medium"><FormField label="NFT Owner">
           <TextInput value={formatAddress(nftOwner)} disabled title={nftOwner} /></FormField></Box>
+        <Box basis={'1/4'} gap="medium" />
+        <Box basis={'1/4'} gap="medium" />
       </Box>
 
-      <p>The following metadata was read from the NFT:</p>
+      <Paragraph>The following metadata was read from the NFT:</Paragraph>
       <Box direction="row" gap="medium" margin={{ bottom: 'none', top: 'small' }}>
         <Box basis={'1/4'} gap="medium"><FormField label="Mortgage ID">
           <TextInput value={'TBD'} disabled /></FormField></Box>
@@ -39,9 +41,8 @@ class LoanNftData extends React.Component<Props> {
 
 export default LoanNftData;
 
-// tslint:disable-next-line:variable-name
 const NftDataContainer = styled(Box)`
-  margin: 56px -20px -20px -20px;
+  margin: 56px 0;
   padding: 20px;
   border-radius: 3px;
   background: #f7f7f7;

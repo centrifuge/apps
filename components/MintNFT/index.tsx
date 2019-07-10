@@ -1,9 +1,10 @@
 import * as React from 'react';
-// tslint:disable-next-line:import-name
 import Tinlake from 'tinlake';
-import { Box, FormField, TextInput, Button } from 'grommet';
+import { Box, FormField, TextInput, Button, Heading, Anchor, Text } from 'grommet';
 import Alert from '../Alert';
 import Link from 'next/link';
+import SecondaryHeader from '../SecondaryHeader';
+import { LinkPrevious } from 'grommet-icons';
 
 interface Props {
   tinlake: Tinlake;
@@ -28,10 +29,8 @@ class MintNFT extends React.Component<Props, State> {
     this.setState({ is: 'loading' });
 
     try {
-      // console.log(`Calling tinlake.mintNFT(${this.props.tinlake.ethConfig.from}, ` +
-      //   `${this.state.tokenId})`);
       const res = await this.props.tinlake.mintNFT(
-          this.props.tinlake.ethConfig.from, this.state.tokenId);
+        this.props.tinlake.ethConfig.from, this.state.tokenId);
       if (res.status === SUCCESS_STATUS && res.events[0].event.name === 'Transfer') {
         this.setState({ is: 'success' });
       } else {
@@ -48,31 +47,48 @@ class MintNFT extends React.Component<Props, State> {
     const { is, tokenId, errorMsg } = this.state;
 
     return <Box>
-      <Box direction="row" gap="medium" margin={{ bottom: 'medium' }}>
-        <Box basis={'1/4'} gap="medium">
-          <FormField label="Token ID">
-            <TextInput
-              value={this.state.tokenId}
-              onChange={e => this.setState({ tokenId: e.currentTarget.value }) }
-            />
-          </FormField>
+      <SecondaryHeader>
+        <Box direction="row" gap="small" align="center">
+          <Link href="/borrower">
+            <LinkPrevious />
+          </Link>
+          <Heading level="3">Mint NFT</Heading>
+        </Box>
+
+        <Button primary onClick={this.mint} label="Mint NFT" />
+      </SecondaryHeader>
+
+      <Box pad={{ horizontal: 'medium' }}>
+        {is === 'loading' && 'Minting...'}
+        {is === 'success' && <Alert type="success">
+          Successfully minted NFT for Token ID {tokenId}<br />
+          <br />
+          <Link href={`/admin/whitelist-nft?tokenId=${tokenId}`}>
+            <Anchor>Proceed to whitelisting</Anchor></Link></Alert>}
+        {is === 'error' && <Alert type="error">
+          <Text weight="bold">
+            Error minting NFT for Token ID {tokenId}, see console for details</Text>
+          {errorMsg && <div><br />{errorMsg}</div>}
+        </Alert>}
+
+        <Alert type="info">
+          This is a temporary page that will be removed once integrated with Centrifuge Gateway.
+        </Alert>
+
+        <Box direction="row" gap="medium" margin={{ vertical: 'large' }}>
+          <Box basis={'1/4'} gap="medium">
+            <FormField label="Token ID">
+              <TextInput
+                value={this.state.tokenId}
+                onChange={e => this.setState({ tokenId: e.currentTarget.value })}
+              />
+            </FormField>
+          </Box>
+          <Box basis={'1/4'} gap="medium" />
+          <Box basis={'1/4'} gap="medium" />
+          <Box basis={'1/4'} gap="medium" />
         </Box>
       </Box>
-
-      <Box margin={{ bottom: 'medium' }}>
-        <Button primary onClick={this.mint} alignSelf="end">Mint NFT</Button>
-      </Box>
-
-      {is === 'loading' && 'Minting...'}
-      {is === 'success' && <Alert type="success">
-        Successfully minted NFT for Token ID {tokenId}<br />
-        <br />
-        <Link href={`/admin/whitelist-nft?tokenId=${tokenId}`}>
-          <a>Proceed to whitelisting</a></Link></Alert>}
-      {is === 'error' && <Alert type="error">
-        <strong>Error minting NFT for Token ID {tokenId}, see console for details</strong>
-        {errorMsg && <div><br />{errorMsg}</div>}
-      </Alert>}
     </Box>;
   }
 }

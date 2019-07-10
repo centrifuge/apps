@@ -1,9 +1,12 @@
 import * as React from 'react';
 import WithTinlake from '../../components/WithTinlake';
 import WhitelistNFT from '../../components/WhitelistNFT';
-import Link from 'next/link';
-import { AxisTheme } from '@centrifuge/axis-theme';
 import { Box } from 'grommet';
+import Header, { MenuItem } from '../../components/Header';
+
+const menuItems: MenuItem[] = [
+  { label: 'NFTs', route: '/admin' },
+];
 
 class WhitelistNFTPage extends React.Component<{ tokenId: string }> {
   static async getInitialProps({ query }: any) {
@@ -13,11 +16,21 @@ class WhitelistNFTPage extends React.Component<{ tokenId: string }> {
   render() {
     const { tokenId } = this.props;
 
-    return <AxisTheme full={true}><Box pad="large">
-      <h1><Link href="/admin"><a>{'<-'}</a></Link>Whitelist NFT</h1>
-
-      <WithTinlake render={tinlake => <WhitelistNFT tinlake={tinlake} tokenId={tokenId} />} />
-    </Box></AxisTheme>;
+    return <Box align="center">
+      <Header
+        selectedRoute={'/admin/whitelist-nft'}
+        menuItems={menuItems.reverse()}
+        section="ADMIN"
+      />
+      <Box
+        justify="center"
+        direction="row"
+      >
+        <Box width="xlarge" >
+          <WithTinlake render={tinlake => <WhitelistNFT tinlake={tinlake} tokenId={tokenId} />} />
+        </Box>
+      </Box>
+    </Box>;
   }
 }
 
