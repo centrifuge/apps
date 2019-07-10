@@ -2,10 +2,8 @@ import React from 'react';
 import { Anchor, Box, Button, DataTable, Heading, Text } from 'grommet';
 import { Modal } from '@centrifuge/axis-modal';
 import { Schema } from "../../common/models/schema";
-import SchemasCreationForm from "./SchemasCreationForm";
 import { SecondaryHeader } from "../../components/SecondaryHeader";
 import { formatDate } from "../../common/formaters";
-// import { schemasRoutes } from "./routes";
 import { connect } from "react-redux";
 import {
   createSchema,
@@ -19,9 +17,13 @@ import {
 } from "../../store/actions/schemas";
 import { RequestState } from "../../store/reducers/http-request-reducer";
 import { Preloader } from "../../components/Preloader";
+import { RouteComponentProps, withRouter } from "react-router";
+import SchemasForm from "./SchemasForm";
 
 const mapStateToProps = (state: {
-  schemas: { getList: RequestState<Schema[]> };
+  schemas: {
+    getList: RequestState<Schema[]>
+  };
 }) => {
   return {
     schemas: state.schemas.getList.data,
@@ -31,28 +33,32 @@ const mapStateToProps = (state: {
 
 type SchemasProps = {
   schemas?: Schema[];
-  getSchemasList: () => void;
-  resetGetSchemasList: () => void;
-  resetCreateSchema: () => void;
-  createSchema: (schema: Schema) => void;
-  getSchema: () => void;
-  resetGetSchema: () => void;
-  updateSchema: (schema: Schema) => void;
-  resetUpdateSchema: () => void;
+  getSchemasList: typeof getSchemasList;
+  resetGetSchemasList: typeof resetGetSchemasList;
+  resetCreateSchema: typeof resetCreateSchema;
+  createSchema: typeof createSchema;
+  getSchema: typeof getSchema;
+  resetGetSchema: typeof resetGetSchema;
+  updateSchema: typeof updateSchema;
+  resetUpdateSchema: typeof resetUpdateSchema;
   loading: boolean;
 };
 
 const emptySchemaInput = {
-  json: {
     name: "",
     attributes: [],
     registries:[],
-  }
-}
+};
 
-class SchemasList extends React.Component<SchemasProps> {
+const createTitle = "Create New Schema";
+const updateTitle = "View/Edit Existing Schema";
+
+class SchemasList extends React.Component<RouteComponentProps & SchemasProps> {
   state = {
+    selectedSchema: null,
     createSchema: false,
+    viewSchema: false,
+    isEditing: false,
   };
 
   componentDidMount() {
@@ -61,30 +67,60 @@ class SchemasList extends React.Component<SchemasProps> {
 
   componentWillUnmount() {
     this.props.resetCreateSchema();
-    // this.props.resetGetSchema();
-    // this.props.resetUpdateSchema();
+    this.props.resetUpdateSchema();
+    this.props.resetGetSchema();
+    this.props.resetGetSchemasList();
   }
 
-  createSchema = (input) => {
-    const schemaInput = input.json
-    const schemaString = schemaInput.replace(/\r?\n|\r|\t/g, '')
-    const schemaJSON = JSON.parse(schemaString)
-    let schema = new Schema(
-        schemaJSON.name,
-        schemaJSON.attributes,
-        schemaJSON.registries
-    )
-    this.props.createSchema(schema);
-    this.closeCreateSchema();
+  handleSubmit = (input) => {
+    const schemaString = input.replace(/\r?\n|\r|\t/g, '');
+    let schema: Schema
+    const schemaJSON = JSON.parse(schemaString);
+    if (this.state.isEditing) {
+      schema = new Schema(
+          schemaJSON.name,
+          schemaJSON.attributes,
+          schemaJSON.registries,
+          schemaJSON._id
+      );
+      this.props.updateSchema(schema);
+      this.closeViewSchema();
+    } else {
+      schema = new Schema(
+          schemaJSON.name,
+          schemaJSON.attributes,
+          schemaJSON.registries,
+      );
+      this.props.createSchema(schema);
+      this.closeCreateSchema();
+    }
   };
 
   closeCreateSchema = () => {
     this.setState({ createSchema: false });
   };
 
+  closeViewSchema = () => {
+    this.setState({ viewSchema: false });
+  };
+
   onAddNewClick = () => {
     this.setState({
       createSchema: true,
+      isEditing: false,
+    });
+  };
+
+  onViewSchemaClick = (data) => {
+    this.props.getSchema(data._id);
+    const value = JSON.stringify(data, null, 4);
+    const test = {
+      json: value
+    };
+    this.setState({
+      selectedSchema: test,
+      viewSchema: true,
+      isEditing: true,
     });
   };
 
@@ -119,22 +155,8 @@ class SchemasList extends React.Component<SchemasProps> {
                 render: data => (
                     <Box direction="row" gap="small">
                       <Anchor
-                          label={'View'}
-                          onClick={() =>
-                              console.log('view')
-                              // this.props.history.push(
-                              //     schemaRoutes.view.replace(':id', data._id),
-                              // )
-                          }
-                      />
-                      <Anchor
-                          label={'Update'}
-                          onClick={() =>
-                              console.log('edit')
-                              // this.props.history.push(
-                              //     schemaRoutes.edit.replace(':id', data._id),
-                              // )
-                          }
+                          label={'View/Update'}
+                          onClick={ async () => { await this.onViewSchemaClick(data)} }
                       />
                     </Box>
                 ),
@@ -142,7 +164,7 @@ class SchemasList extends React.Component<SchemasProps> {
             ]}
         />
     );
-  }
+  };
 
   render() {
 
@@ -150,7 +172,7 @@ class SchemasList extends React.Component<SchemasProps> {
       return <Preloader message="Loading"/>;
     }
 
-    const { createSchema } = this.state;
+    const { createSchema, viewSchema, selectedSchema, isEditing } = this.state;
     const { schemas } = this.props;
 
     return (
@@ -164,15 +186,16 @@ class SchemasList extends React.Component<SchemasProps> {
             />
           </SecondaryHeader>
           <Modal
-            opened={createSchema}
-            headingProps={{ level: 3 }}
-            title={`Create new schema`}
-            onClose={this.closeCreateSchema}
+              opened={ isEditing ? viewSchema :  createSchema }
+              headingProps={{ level: 3 }}
+              title={ isEditing ? updateTitle : createTitle }
+              onClose={ isEditing ?  this.closeViewSchema : this.closeCreateSchema }
           >
-            <SchemasCreationForm
-              schema={emptySchemaInput}
-              onSubmit={this.createSchema}
-              onDiscard={this.closeCreateSchema}
+            <SchemasForm
+                isEditing={isEditing}
+                selectedSchema={ isEditing ? selectedSchema : emptySchemaInput }
+                onSubmit={this.handleSubmit}
+                onDiscard={ isEditing ? this.closeViewSchema : this.closeCreateSchema }
             />
           </Modal>
          <Box pad={{horizontal:"medium"}}>
@@ -195,4 +218,4 @@ export default connect(
       updateSchema,
       resetUpdateSchema,
     },
-)(SchemasList);
+)(withRouter(SchemasList));

@@ -129,7 +129,9 @@ describe('SchemasController', () => {
         _id: result._id,
         registries: [
           {
+            label: 'animal_registry',
             address:'0x87c574FB2DF0EaA2dAf5fc4a8A16dd3Ce39011B1',
+            proofs:['attributes.wingspan']
           }
         ]
       } as Schema;
@@ -144,7 +146,16 @@ describe('SchemasController', () => {
           {
             _id: result._id,
           },
-          { ...updateSchemaObject },
+          {
+            '_id': result._id,
+            'attributes': [{"label": "wingspans", "type": "string"}],
+            "name": "bestAnimals",
+            "registries": [{
+              "address": "0x87c574FB2DF0EaA2dAf5fc4a8A16dd3Ce39011B1",
+              "label": "animal_registry",
+              "proofs": ["attributes.wingspan"]
+            }]
+          },
           {
             returnUpdatedDocs: true,
             upsert: false,
@@ -157,6 +168,8 @@ describe('SchemasController', () => {
       const updateSchemaObject2 = {
         _id: result._id,
         name: 'wrongupdate',
+        attributes: result.attributes,
+        registries: result.registries,
       } as Schema;
 
       try {

@@ -80,16 +80,12 @@ export class SchemasController {
     const oldSchema = await this.databaseService.schemas.findOne({_id: params.id})
     let updateSchemaObj: Schema;
 
-    if (update.name && oldSchema.name != update.name || update.attributes && oldSchema.attributes != update.attributes) {
-      throw new HttpException('Updating a schema name or attributes is not allowed', HttpStatus.BAD_REQUEST);
-    }
-
     try {
       updateSchemaObj = new Schema(
-          update.name,
-          update.attributes,
+          oldSchema.name,
+          oldSchema.attributes,
           update.registries,
-          oldSchema._id
+          oldSchema._id,
       );
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);

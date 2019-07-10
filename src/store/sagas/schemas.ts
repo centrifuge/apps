@@ -7,8 +7,9 @@ import {
   updateSchemaAction
 } from "../actions/schemas";
 
-export function* getSchema(id) {
+export function* getSchema(action) {
   try {
+    const { id } = action;
     const response = yield call(httpClient.schemas.readById, id);
     yield put({
       type: getSchemaAction.success,

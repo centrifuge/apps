@@ -10,7 +10,7 @@ import { Schema } from "../../../common/models/schema";
 
 const create = httpRequestReducer<Schema>(createSchemaAction);
 const getList = httpRequestReducer<Schema[]>(getSchemasListAction);
-const get = httpRequestReducer<Schema[]>(getSchemaAction);
+const get = httpRequestReducer<Schema>(getSchemaAction);
 const update = httpRequestReducer<Schema>(updateSchemaAction);
 
 export default combineReducers({ create, get, getList, update });

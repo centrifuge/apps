@@ -18,10 +18,9 @@ function action(type, payload = {}) {
 export const createSchema = (schema: Schema) =>
     action(createSchemaAction.start, { schema});
 export const resetCreateSchema = () => action(createSchemaAction.reset);
-export const getSchema = () => action(getSchemaAction.start);
+export const getSchema = id => action(getSchemaAction.start, { id });
 export const resetGetSchema = () => action(getSchemaAction.reset);
 export const getSchemasList = () => action(getSchemasListAction.start);
 export const resetGetSchemasList = () => action(getSchemasListAction.reset);
-export const updateSchema = (schema: Schema) =>
-    action(updateSchemaAction.start, { schema: schema});
+export const updateSchema = (schema: Schema) => action(updateSchemaAction.start, { schema: schema});
 export const resetUpdateSchema = () => action(updateSchemaAction.reset);

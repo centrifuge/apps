@@ -85,7 +85,6 @@ export class WebhooksController {
         }
       }
     } catch (e) {
-      console.log(e);
       throw new Error('Webhook Error');
     }
     return 'OK';
