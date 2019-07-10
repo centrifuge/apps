@@ -26,7 +26,6 @@ const colors = {
   },
 };
 
-// tslint:disable-next-line:variable-name
 const AlertContainer = styled(Box)<{ type: 'error' | 'success' }>`
   padding: 24px;
   background-color: ${p => colors[p.type].backgroundColor};

@@ -1,12 +1,10 @@
 import * as React from 'react';
-// tslint:disable-next-line:import-name
 import Tinlake from 'tinlake';
 import { LoansState, getLoan } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
 import { Box, FormField, Button, Heading } from 'grommet';
 import LoanNftData from '../LoanNftData.tsx';
-// tslint:disable-next-line:import-name
 import BN from 'bn.js';
 import SecondaryHeader from '../SecondaryHeader';
 import Link from 'next/link';

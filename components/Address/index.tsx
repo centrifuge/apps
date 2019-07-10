@@ -16,7 +16,6 @@ function Address({ address, ...rest }: Props) {
   </AddressContainer>;
 }
 
-// tslint:disable-next-line:variable-name
 const AddressContainer = styled.a`
   cursor: copy;
 `;

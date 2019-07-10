@@ -2,14 +2,12 @@ import React from 'react';
 import { Box } from 'grommet';
 import styled, { withTheme } from 'styled-components';
 
-// tslint:disable-next-line:variable-name
 const StyledSecondaryHeader = styled(Box)`
   position: sticky;
   top: 90px ;
   z-index: 2;
 `;
 
-// tslint:disable-next-line:variable-name
 const SecondaryHeader = withTheme((props) => {
   const { children, ...rest } = props;
 

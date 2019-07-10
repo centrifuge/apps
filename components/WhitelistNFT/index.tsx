@@ -1,5 +1,4 @@
 import * as React from 'react';
-// tslint:disable-next-line:import-name
 import Tinlake from 'tinlake';
 import { Box, FormField, TextInput, Button, Heading } from 'grommet';
 import Alert from '../Alert';
@@ -48,8 +47,6 @@ class WhitelistNFT extends React.Component<Props, State> {
 
       console.log(`NFT owner of tokenId ${tokenId} is ${nftOwner}`);
 
-      // console.log(`Calling tinlake.adminAdmit(${addresses['NFT_COLLATERAL']}, ` +
-      //   `${tokenId}, ${principal}, ${nftOwner})`);
       const res2 = await tinlake.adminAdmit(addresses['NFT_COLLATERAL'], tokenId, principal,
                                             nftOwner);
 
@@ -65,13 +62,7 @@ class WhitelistNFT extends React.Component<Props, State> {
       const loanId = res2.events[0].data[2].toString();
       console.log(`Loan id: ${loanId}`);
 
-      // const nftOwner2 = await tinlake.ownerOfNFT(tokenId);
-      // console.log(`NFT owner: ${nftOwner2}`);
-      // const loanOwner2 = await tinlake.ownerOfLoan(loanId);
-      // console.log(`loan owner: ${loanOwner2}`);
-
       // appraise
-      // console.log(`Calling tinlake.adminAppraise(${loanId}, ${appraisal})`);
       const res3 = await tinlake.adminAppraise(loanId, appraisal);
 
       console.log('appraisal results');
@@ -82,11 +73,6 @@ class WhitelistNFT extends React.Component<Props, State> {
         this.setState({ is: 'error', errorMsg: JSON.stringify(res3) });
         return;
       }
-
-      // const nftOwner3 = await tinlake.ownerOfNFT(tokenId);
-      // console.log(`NFT owner: ${nftOwner3}`);
-      // const loanOwner3 = await tinlake.ownerOfLoan(loanId);
-      // console.log(`loan owner: ${loanOwner3}`);
 
       this.setState({ is: 'success' });
     } catch (e) {

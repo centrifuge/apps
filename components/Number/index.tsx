@@ -11,7 +11,6 @@ interface Props {
   suffix?: string;
 }
 
-// tslint:disable-next-line:variable-name
 const Number: FunctionComponent<Props> = ({ value, precision, decimalSeparator,
   thousandSeparator, allowNegative, prefix, suffix }: Props) => {
   return <span>{mask(value, precision, decimalSeparator, thousandSeparator,

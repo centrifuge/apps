@@ -1,5 +1,4 @@
 import { bnToHex } from './bnToHex';
-// tslint:disable-next-line:import-name
 import BN from 'bn.js';
 
 test('formats correctly', () => {

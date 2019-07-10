@@ -1,4 +1,3 @@
-// tslint:disable-next-line:import-name
 import BN from 'bn.js';
 
 export type LoanStatus = 'Whitelisted' | 'Ongoing' | 'Repaid';

@@ -1,6 +1,5 @@
 import { AnyAction, Action } from 'redux';
 import Tinlake, { Loan, BalanceDebt, Address } from 'tinlake';
-// tslint:disable-next-line:import-name
 import BN from 'bn.js';
 import getLoanStatus, { LoanStatus } from '../utils/getLoanStatus';
 import { ThunkAction } from 'redux-thunk';
@@ -84,8 +83,6 @@ export function getLoans(tinlake: Tinlake):
     for (let i = 0; i < count.toNumber() - startingLoanId; i += 1) {
       try {
         nftOwners[i] = await nftOwnerPromises[i];
-        // console.log(`loan id: ${i + startingLoanId}, nftOwner: ${nftOwners[i]}, ` +
-        //   `tokenId: ${bnToHex(loans[i].tokenId)}`);
       } catch (e) {
         console.warn(`Could not get NFT owner for Loan ID ${i + startingLoanId}, ` +
         `NFT ID ${bnToHex(loans[i].tokenId)}`);
@@ -93,8 +90,6 @@ export function getLoans(tinlake: Tinlake):
       }
       try {
         loanOwners[i] = await loanOwnerPromises[i];
-        // console.log(`loan id: ${i + startingLoanId}, loanOwner: ${loanOwners[i]}, ` +
-        //   `tokenId: ${bnToHex(loans[i].tokenId)}`);
       } catch (e) {
         console.warn(`Could not get loan owner for Loan ID ${i + startingLoanId}, ` +
           `NFT ID ${bnToHex(loans[i].tokenId)}`);

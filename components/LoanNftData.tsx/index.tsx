@@ -39,7 +39,6 @@ class LoanNftData extends React.Component<Props> {
 
 export default LoanNftData;
 
-// tslint:disable-next-line:variable-name
 const NftDataContainer = styled(Box)`
   margin: 56px 0;
   padding: 20px;

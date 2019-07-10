@@ -1,5 +1,4 @@
 import * as React from 'react';
-// tslint:disable-next-line:import-name
 import Tinlake from 'tinlake';
 import { Box, FormField, TextInput, Button, Heading, Anchor } from 'grommet';
 import Alert from '../Alert';
@@ -30,8 +29,6 @@ class MintNFT extends React.Component<Props, State> {
     this.setState({ is: 'loading' });
 
     try {
-      // console.log(`Calling tinlake.mintNFT(${this.props.tinlake.ethConfig.from}, ` +
-      //   `${this.state.tokenId})`);
       const res = await this.props.tinlake.mintNFT(
         this.props.tinlake.ethConfig.from, this.state.tokenId);
       if (res.status === SUCCESS_STATUS && res.events[0].event.name === 'Transfer') {

@@ -1,7 +1,5 @@
 import * as React from 'react';
-// tslint:disable-next-line:import-name
 import Tinlake from 'tinlake';
-// tslint:disable-next-line:import-name
 import Link from 'next/link';
 import { Box, DataTable, Heading, Anchor } from 'grommet';
 import { connect } from 'react-redux';
