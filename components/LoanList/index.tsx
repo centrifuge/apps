@@ -3,7 +3,7 @@ import * as React from 'react';
 import Tinlake from 'tinlake';
 // tslint:disable-next-line:import-name
 import Link from 'next/link';
-import { Box, DataTable, Heading } from 'grommet';
+import { Box, DataTable, Heading, Anchor } from 'grommet';
 import { connect } from 'react-redux';
 import { InternalLoan, LoansState, getLoans } from '../../ducks/loans';
 import SecondaryHeader from '../SecondaryHeader';
@@ -70,7 +70,7 @@ class LoanList extends React.Component<Props> {
           },
           {
             header: 'Actions', property: 'id', align: 'end', render: (l: InternalLoan) =>
-              <Link href={`/${mode}/loan?loanId=${l.loanId}`}><a>View</a></Link>,
+              <Link href={`/${mode}/loan?loanId=${l.loanId}`}><Anchor>View</Anchor></Link>,
           },
         ]} />
       </Box>
