@@ -77,20 +77,24 @@ export function getLoans(tinlake: Tinlake):
     const loanOwnerPromises: Promise<Address>[] = [];
     for (let i = 0; i < count.toNumber() - startingLoanId; i += 1) {
       nftOwnerPromises.push(tinlake.ownerOfNFT(bnToHex(loans[i].tokenId)));
-      loanOwnerPromises.push(tinlake.ownerOfLoan(`${i}`));
+      loanOwnerPromises.push(tinlake.ownerOfLoan(`${i + startingLoanId}`));
     }
     const nftOwners: Address[] = [];
     const loanOwners: Address[] = [];
     for (let i = 0; i < count.toNumber() - startingLoanId; i += 1) {
       try {
         nftOwners[i] = await nftOwnerPromises[i];
+        // console.log(`loan id: ${i + startingLoanId}, nftOwner: ${nftOwners[i]}, ` +
+        //   `tokenId: ${bnToHex(loans[i].tokenId)}`);
       } catch (e) {
         console.warn(`Could not get NFT owner for Loan ID ${i + startingLoanId}, ` +
-          `NFT ID ${bnToHex(loans[i].tokenId)}`);
+        `NFT ID ${bnToHex(loans[i].tokenId)}`);
         nftOwners[i] = '';
       }
       try {
         loanOwners[i] = await loanOwnerPromises[i];
+        // console.log(`loan id: ${i + startingLoanId}, loanOwner: ${loanOwners[i]}, ` +
+        //   `tokenId: ${bnToHex(loans[i].tokenId)}`);
       } catch (e) {
         console.warn(`Could not get loan owner for Loan ID ${i + startingLoanId}, ` +
           `NFT ID ${bnToHex(loans[i].tokenId)}`);
