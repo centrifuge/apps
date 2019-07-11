@@ -13,7 +13,7 @@ import { DatabaseService } from './database.service';
 /**
  * Initialize the database and the separate collections.
  */
-const initializeDatabase = async (inMemoryOnly:boolean) => {
+const initializeDatabase = async (inMemoryOnly: boolean) => {
   const invoicesRepository = new DatabaseRepository<InvoiceResponse>(
     { filename: `${config.dbPath}/invoicesDb`, inMemoryOnly },
   );
@@ -26,6 +26,7 @@ const initializeDatabase = async (inMemoryOnly:boolean) => {
     email: config.admin.email,
     enabled: true,
     invited: false,
+    schemas: [],
     account: config.admin.account,
     permissions: config.admin.permissions,
   };
@@ -47,7 +48,7 @@ const initializeDatabase = async (inMemoryOnly:boolean) => {
   );
 
   const schemasRepository = new DatabaseRepository<Schema>(
-      { filename: `${config.dbPath}/schemasDb`, inMemoryOnly },
+    { filename: `${config.dbPath}/schemasDb`, inMemoryOnly },
   );
 
   return {
@@ -69,9 +70,9 @@ export const databaseServiceProvider = {
   provide: DatabaseService,
   useFactory: async (): Promise<DatabaseService> => {
 
-    let testingMode: boolean
+    let testingMode: boolean;
     if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'functional') {
-      testingMode = true
+      testingMode = true;
     }
     if (!initializeDatabasePromise || testingMode) {
       initializeDatabasePromise = initializeDatabase(testingMode);

@@ -300,12 +300,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                   placeholder="Select"
                                                                   plain={true}
                                                                   size="medium"
-                                                                  value={
-                                                                    Object {
-                                                                      "label": "",
-                                                                      "value": "",
-                                                                    }
-                                                                  }
                                                                   valueKey="value"
                                                                 >
                                                                   <Select
@@ -339,12 +333,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                     placeholder="Select"
                                                                     plain={true}
                                                                     size="medium"
-                                                                    value={
-                                                                      Object {
-                                                                        "label": "",
-                                                                        "value": "",
-                                                                      }
-                                                                    }
                                                                     valueKey="value"
                                                                   >
                                                                     <Select__StyledSelectDropButton
@@ -518,7 +506,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                     size="medium"
                                                                                                     tabIndex="-1"
                                                                                                     type="text"
-                                                                                                    value=""
                                                                                                     valueKey="value"
                                                                                                   >
                                                                                                     <WithTheme(TextInput)
@@ -544,7 +531,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                       size="medium"
                                                                                                       tabIndex="-1"
                                                                                                       type="text"
-                                                                                                      value=""
                                                                                                       valueKey="value"
                                                                                                     >
                                                                                                       <WithTheme(TextInput)
@@ -573,7 +559,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                         size="medium"
                                                                                                         tabIndex="-1"
                                                                                                         type="text"
-                                                                                                        value=""
                                                                                                         valueKey="value"
                                                                                                       >
                                                                                                         <TextInput
@@ -602,7 +587,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                           size="medium"
                                                                                                           tabIndex="-1"
                                                                                                           type="text"
-                                                                                                          value=""
                                                                                                           valueKey="value"
                                                                                                         >
                                                                                                           <TextInput
@@ -632,7 +616,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                             size="medium"
                                                                                                             tabIndex="-1"
                                                                                                             type="text"
-                                                                                                            value=""
                                                                                                             valueKey="value"
                                                                                                           >
                                                                                                             <StyledTextInput__StyledTextInputContainer
@@ -665,7 +648,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                                   size="medium"
                                                                                                                   tabIndex="-1"
                                                                                                                   type="text"
-                                                                                                                  value=""
                                                                                                                   valueKey="value"
                                                                                                                 >
                                                                                                                   <input
@@ -681,7 +663,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                                     size="medium"
                                                                                                                     tabIndex="-1"
                                                                                                                     type="text"
-                                                                                                                    value=""
                                                                                                                   />
                                                                                                                 </StyledTextInput>
                                                                                                               </div>

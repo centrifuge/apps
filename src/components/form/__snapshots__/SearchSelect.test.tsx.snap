@@ -919,12 +919,6 @@ exports[`Search Select when single item select should match snapshot 1`] = `
       },
     }
   }
-  value={
-    Object {
-      "label": "",
-      "value": "",
-    }
-  }
   valueKey="value"
 />
 `;

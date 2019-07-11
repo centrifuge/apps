@@ -25,8 +25,9 @@ export const httpClient = {
   user: {
     login: async (user: User) => instance.post(ROUTES.USERS.login, user),
     logout: async () => instance.get(ROUTES.USERS.logout),
-    register: async (user: User) => instance.post(ROUTES.USERS.register, user),
+    register: async (user: User) => instance.post(ROUTES.USERS.base, user),
     invite: async (user: User) => instance.post(ROUTES.USERS.invite, user),
+    update: async (user: User) => instance.put(ROUTES.USERS.base, user),
     list: async () => instance.get(ROUTES.USERS.base),
 
   },

@@ -7,6 +7,7 @@ export interface IUser {
   _id?: string;
   account: string;
   permissions: PERMISSIONS[];
+  schemas?: string[];
   enabled: boolean;
   invited: boolean;
 }
@@ -18,6 +19,7 @@ export class User implements IUser{
   _id?: string;
   account: string = "";
   permissions: PERMISSIONS[] = [];
+  schemas: string[] = [];
   enabled: boolean;
   invited: boolean;
 }

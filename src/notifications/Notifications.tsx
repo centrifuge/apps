@@ -14,19 +14,21 @@ export class Notifications extends React.Component<NotificationsProps> {
 
     const { alert, closeAlert } = this.props;
     const { notify } = this.context;
+    setTimeout(()=> {
+      if (alert) {
+        const { title, type, message, options } = alert;
+        notify({
+          type,
+          title,
+          message,
+          confirmLabel: 'Ok',
+          onConfirm: () => {
+            closeAlert(options!.onConfirmAction);
+          },
+        });
+      }
+    },0)
 
-    if (alert) {
-      const { title, type, message, options } = alert;
-      notify({
-        type,
-        title,
-        message,
-        confirmLabel: 'Ok',
-        onConfirm: () => {
-          closeAlert(options!.onConfirmAction);
-        },
-      });
-    }
 
     return (
       <></>

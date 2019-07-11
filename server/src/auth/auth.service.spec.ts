@@ -9,6 +9,7 @@ describe('LocalStrategy', () => {
   const unhashedPassword = 'my_password';
   const hashedPassword = '$2b$12$qI.Lyik/2lJvLwfK74xFee7mOVWyKm0K20YPv4zlfis2dNOh2LJdO';
   const mockUser: User = {
+    ...(new User()),
     name: 'my_username',
     _id: 'user_id',
     email: 'test@test.test',
@@ -21,8 +22,6 @@ describe('LocalStrategy', () => {
   let authService: AuthService;
 
   beforeEach(async () => {
-
-
     const module = await Test.createTestingModule({
       providers: [AuthService, databaseServiceProvider],
     }).compile();

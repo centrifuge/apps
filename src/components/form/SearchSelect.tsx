@@ -9,7 +9,7 @@ export interface SearchSelectItem {
 
 interface SearchSelectState {
   options: SearchSelectItem[];
-  selected: SearchSelectItem | SearchSelectItem[];
+  selected: SearchSelectItem;
 }
 
 interface SearchSelectProps extends Omit<SelectProps,"selected">{
@@ -17,7 +17,8 @@ interface SearchSelectProps extends Omit<SelectProps,"selected">{
   selected?: SearchSelectItem | SearchSelectItem[];
 }
 
-
+//TODO refactor this to support also array of string and not only SearchSelectItems
+// @see MutipleSelect
 export default class SearchSelect<SearchSelectItem> extends Component<
   SearchSelectProps,
   SearchSelectState> {
@@ -26,22 +27,23 @@ export default class SearchSelect<SearchSelectItem> extends Component<
     this.state = {
       options: props.options,
       selected:
-        props.selected || (props.multiple ? [] : { label: '', value: '' }),
+        props.selected,
     };
   }
 
   onChange = event => {
-    this.setState({ selected: event.value }, () => {
+    this.setState({ selected: event.value,options: this.props.options }, () => {
       this.props.onChange && this.props.onChange(
         this.state.selected
       );
     });
+
+
   };
 
   onSearch = text => {
     const exp = new RegExp(text, 'i');
     this.setState({
-      /// @ts-ignore - https://github.com/final-form/react-final-form/issues/398
       options: this.props.options.filter(o => exp.test(o.label)),
     });
   };

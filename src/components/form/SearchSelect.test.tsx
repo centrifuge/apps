@@ -49,7 +49,7 @@ describe('Search Select', () => {
     it('should initialize the state', function() {
       const state = searchSelectShallow.state();
       expect(state.options).toBe(items);
-      expect(state.selected).toEqual({ label: '', value: '' });
+      expect(state.selected).toEqual(undefined);
     });
 
     describe('onChange', () => {

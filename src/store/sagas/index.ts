@@ -16,6 +16,7 @@ export default function* () {
     fork(users.watchLoginPage),
     fork(users.watchUserRegister),
     fork(users.watchUserInvite),
+    fork(users.watchUserUpdate),
     fork(users.watchGetAllUsers),
     fork(contacts.watchGetContactsPage),
     fork(contacts.watchCreateContact),
