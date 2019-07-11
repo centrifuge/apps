@@ -11,6 +11,9 @@ type PreloaderProps = {
 export class Preloader extends Component<PreloaderProps> {
 
   render() {
+
+    const autoplay = process.env.NODE_ENV !== 'development';
+
     const { message, withSound } = this.props;
     return <Box align="center" justify="center" width={'100%'} height={'calc(100vh - 90px)'} gap={'medium'}>
       <Box>
@@ -33,7 +36,7 @@ export class Preloader extends Component<PreloaderProps> {
         </svg>
       </Box>
       {message}
-      {withSound && <audio src="/sound.mp3" autoPlay={true} loop={true}></audio>}
+      {withSound && <audio src="/sound.mp3" autoPlay={autoplay} loop={true}></audio>}
     </Box>;
   }
 }
