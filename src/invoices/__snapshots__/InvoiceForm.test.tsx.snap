@@ -6795,7 +6795,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                 >
                                                                                                   <DropButton
                                                                                                     a11yTitle="Open Drop"
-                                                                                                    className="DateInput__StyledDateInputDropButton-sc-592rhp-1 tjMTL"
+                                                                                                    className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 ldQWmt"
                                                                                                     dropAlign={
                                                                                                       Object {
                                                                                                         "left": "left",
@@ -6810,7 +6810,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                   >
                                                                                                     <WithTheme(Button)
                                                                                                       a11yTitle="Open Drop"
-                                                                                                      className="DateInput__StyledDateInputDropButton-sc-592rhp-1 tjMTL"
+                                                                                                      className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 ldQWmt"
                                                                                                       focusIndicator={true}
                                                                                                       gap="small"
                                                                                                       onClick={[Function]}
@@ -6820,7 +6820,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                     >
                                                                                                       <WithTheme(Button)
                                                                                                         a11yTitle="Open Drop"
-                                                                                                        className="DateInput__StyledDateInputDropButton-sc-592rhp-1 tjMTL"
+                                                                                                        className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 ldQWmt"
                                                                                                         focus={false}
                                                                                                         focusIndicator={true}
                                                                                                         gap="small"
@@ -6833,7 +6833,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                       >
                                                                                                         <Button
                                                                                                           a11yTitle="Open Drop"
-                                                                                                          className="DateInput__StyledDateInputDropButton-sc-592rhp-1 tjMTL"
+                                                                                                          className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 ldQWmt"
                                                                                                           focus={false}
                                                                                                           focusIndicator={true}
                                                                                                           gap="small"
@@ -6846,7 +6846,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                         >
                                                                                                           <StyledButton
                                                                                                             aria-label="Open Drop"
-                                                                                                            className="DateInput__StyledDateInputDropButton-sc-592rhp-1 tjMTL"
+                                                                                                            className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 ldQWmt"
                                                                                                             focus={false}
                                                                                                             focusIndicator={true}
                                                                                                             gap="small"
@@ -6864,7 +6864,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                           >
                                                                                                             <button
                                                                                                               aria-label="Open Drop"
-                                                                                                              className="DateInput__StyledDateInputDropButton-sc-592rhp-1 tjMTL StyledButton-sc-323bzc-0 jfbKsv"
+                                                                                                              className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 ldQWmt StyledButton-sc-323bzc-0 jfbKsv"
                                                                                                               onBlur={[Function]}
                                                                                                               onClick={[Function]}
                                                                                                               onFocus={[Function]}
@@ -6918,7 +6918,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                         value=""
                                                                                                                       >
                                                                                                                         <WithTheme(TextInput)
-                                                                                                                          className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                                          className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                                           dropAlign={
                                                                                                                             Object {
                                                                                                                               "left": "left",
@@ -6939,7 +6939,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                           value=""
                                                                                                                         >
                                                                                                                           <WithTheme(TextInput)
-                                                                                                                            className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                                            className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                                             dropAlign={
                                                                                                                               Object {
                                                                                                                                 "left": "left",
@@ -6963,7 +6963,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                             value=""
                                                                                                                           >
                                                                                                                             <TextInput
-                                                                                                                              className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                                              className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                                               dropAlign={
                                                                                                                                 Object {
                                                                                                                                   "left": "left",
@@ -6988,7 +6988,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                             >
                                                                                                                               <TextInput
                                                                                                                                 announce={[Function]}
-                                                                                                                                className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                                                className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                                                 dropAlign={
                                                                                                                                   Object {
                                                                                                                                     "left": "left",
@@ -7020,7 +7020,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                                     <StyledTextInput
                                                                                                                                       announce={[Function]}
                                                                                                                                       autoComplete="off"
-                                                                                                                                      className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                                                      className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                                                       focus={false}
                                                                                                                                       messages={
                                                                                                                                         Object {
@@ -7041,7 +7041,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                                     >
                                                                                                                                       <input
                                                                                                                                         autoComplete="off"
-                                                                                                                                        className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy StyledTextInput-sc-1x30a0s-0 duvNfq"
+                                                                                                                                        className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM StyledTextInput-sc-1x30a0s-0 duvNfq"
                                                                                                                                         onBlur={[Function]}
                                                                                                                                         onChange={[Function]}
                                                                                                                                         onFocus={[Function]}
@@ -7301,7 +7301,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                 >
                                                                                                   <DropButton
                                                                                                     a11yTitle="Open Drop"
-                                                                                                    className="DateInput__StyledDateInputDropButton-sc-592rhp-1 tjMTL"
+                                                                                                    className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 ldQWmt"
                                                                                                     dropAlign={
                                                                                                       Object {
                                                                                                         "left": "left",
@@ -7316,7 +7316,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                   >
                                                                                                     <WithTheme(Button)
                                                                                                       a11yTitle="Open Drop"
-                                                                                                      className="DateInput__StyledDateInputDropButton-sc-592rhp-1 tjMTL"
+                                                                                                      className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 ldQWmt"
                                                                                                       focusIndicator={true}
                                                                                                       gap="small"
                                                                                                       onClick={[Function]}
@@ -7326,7 +7326,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                     >
                                                                                                       <WithTheme(Button)
                                                                                                         a11yTitle="Open Drop"
-                                                                                                        className="DateInput__StyledDateInputDropButton-sc-592rhp-1 tjMTL"
+                                                                                                        className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 ldQWmt"
                                                                                                         focus={false}
                                                                                                         focusIndicator={true}
                                                                                                         gap="small"
@@ -7339,7 +7339,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                       >
                                                                                                         <Button
                                                                                                           a11yTitle="Open Drop"
-                                                                                                          className="DateInput__StyledDateInputDropButton-sc-592rhp-1 tjMTL"
+                                                                                                          className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 ldQWmt"
                                                                                                           focus={false}
                                                                                                           focusIndicator={true}
                                                                                                           gap="small"
@@ -7352,7 +7352,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                         >
                                                                                                           <StyledButton
                                                                                                             aria-label="Open Drop"
-                                                                                                            className="DateInput__StyledDateInputDropButton-sc-592rhp-1 tjMTL"
+                                                                                                            className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 ldQWmt"
                                                                                                             focus={false}
                                                                                                             focusIndicator={true}
                                                                                                             gap="small"
@@ -7370,7 +7370,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                           >
                                                                                                             <button
                                                                                                               aria-label="Open Drop"
-                                                                                                              className="DateInput__StyledDateInputDropButton-sc-592rhp-1 tjMTL StyledButton-sc-323bzc-0 jfbKsv"
+                                                                                                              className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 ldQWmt StyledButton-sc-323bzc-0 jfbKsv"
                                                                                                               onBlur={[Function]}
                                                                                                               onClick={[Function]}
                                                                                                               onFocus={[Function]}
@@ -7424,7 +7424,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                         value=""
                                                                                                                       >
                                                                                                                         <WithTheme(TextInput)
-                                                                                                                          className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                                          className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                                           dropAlign={
                                                                                                                             Object {
                                                                                                                               "left": "left",
@@ -7445,7 +7445,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                           value=""
                                                                                                                         >
                                                                                                                           <WithTheme(TextInput)
-                                                                                                                            className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                                            className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                                             dropAlign={
                                                                                                                               Object {
                                                                                                                                 "left": "left",
@@ -7469,7 +7469,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                             value=""
                                                                                                                           >
                                                                                                                             <TextInput
-                                                                                                                              className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                                              className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                                               dropAlign={
                                                                                                                                 Object {
                                                                                                                                   "left": "left",
@@ -7494,7 +7494,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                             >
                                                                                                                               <TextInput
                                                                                                                                 announce={[Function]}
-                                                                                                                                className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                                                className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                                                 dropAlign={
                                                                                                                                   Object {
                                                                                                                                     "left": "left",
@@ -7526,7 +7526,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                                     <StyledTextInput
                                                                                                                                       announce={[Function]}
                                                                                                                                       autoComplete="off"
-                                                                                                                                      className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                                                      className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                                                       focus={false}
                                                                                                                                       messages={
                                                                                                                                         Object {
@@ -7547,7 +7547,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                                     >
                                                                                                                                       <input
                                                                                                                                         autoComplete="off"
-                                                                                                                                        className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy StyledTextInput-sc-1x30a0s-0 duvNfq"
+                                                                                                                                        className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM StyledTextInput-sc-1x30a0s-0 duvNfq"
                                                                                                                                         onBlur={[Function]}
                                                                                                                                         onChange={[Function]}
                                                                                                                                         onFocus={[Function]}
@@ -7835,7 +7835,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                   thousandSeparator=","
                                                                                                 >
                                                                                                   <div
-                                                                                                    className="NumberInput__StyledCurrencyContainer-sc-1j29tjj-1 liHHvP"
+                                                                                                    className="NumberInput__StyledCurrencyContainer-sc-1mk0e8s-1 fvlnYL"
                                                                                                     name="net_amount"
                                                                                                     onBlur={[Function]}
                                                                                                     onChange={[Function]}
@@ -7853,7 +7853,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                       thousandSeparator=","
                                                                                                     >
                                                                                                       <input
-                                                                                                        className="NumberInput__StyledCurrencyInput-sc-1j29tjj-0 cNEpXP"
+                                                                                                        className="NumberInput__StyledCurrencyInput-sc-1mk0e8s-0 eQOnKh"
                                                                                                         name="net_amount"
                                                                                                         onBlur={[Function]}
                                                                                                         onChange={[Function]}
@@ -8072,7 +8072,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                   thousandSeparator=","
                                                                                                 >
                                                                                                   <div
-                                                                                                    className="NumberInput__StyledCurrencyContainer-sc-1j29tjj-1 liHHvP"
+                                                                                                    className="NumberInput__StyledCurrencyContainer-sc-1mk0e8s-1 fvlnYL"
                                                                                                     name="tax_rate"
                                                                                                     onBlur={[Function]}
                                                                                                     onChange={[Function]}
@@ -8089,7 +8089,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                       thousandSeparator=","
                                                                                                     >
                                                                                                       <input
-                                                                                                        className="NumberInput__StyledCurrencyInput-sc-1j29tjj-0 cNEpXP"
+                                                                                                        className="NumberInput__StyledCurrencyInput-sc-1mk0e8s-0 eQOnKh"
                                                                                                         name="tax_rate"
                                                                                                         onBlur={[Function]}
                                                                                                         onChange={[Function]}
@@ -8310,7 +8310,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                   value="NaN"
                                                                                                 >
                                                                                                   <div
-                                                                                                    className="NumberInput__StyledCurrencyContainer-sc-1j29tjj-1 liHHvP"
+                                                                                                    className="NumberInput__StyledCurrencyContainer-sc-1mk0e8s-1 fvlnYL"
                                                                                                     disabled={true}
                                                                                                     name="tax_amount"
                                                                                                     onBlur={[Function]}
@@ -8330,7 +8330,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                       value="NaN"
                                                                                                     >
                                                                                                       <input
-                                                                                                        className="NumberInput__StyledCurrencyInput-sc-1j29tjj-0 hHmpRt"
+                                                                                                        className="NumberInput__StyledCurrencyInput-sc-1mk0e8s-0 jqervJ"
                                                                                                         disabled={true}
                                                                                                         name="tax_amount"
                                                                                                         onBlur={[Function]}
@@ -8552,7 +8552,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                   value="NaN"
                                                                                                 >
                                                                                                   <div
-                                                                                                    className="NumberInput__StyledCurrencyContainer-sc-1j29tjj-1 liHHvP"
+                                                                                                    className="NumberInput__StyledCurrencyContainer-sc-1mk0e8s-1 fvlnYL"
                                                                                                     disabled={true}
                                                                                                     name="gross_amount"
                                                                                                     onBlur={[Function]}
@@ -8572,7 +8572,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                       value="NaN"
                                                                                                     >
                                                                                                       <input
-                                                                                                        className="NumberInput__StyledCurrencyInput-sc-1j29tjj-0 hHmpRt"
+                                                                                                        className="NumberInput__StyledCurrencyInput-sc-1mk0e8s-0 jqervJ"
                                                                                                         disabled={true}
                                                                                                         name="gross_amount"
                                                                                                         onBlur={[Function]}

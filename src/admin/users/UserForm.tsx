@@ -90,7 +90,7 @@ export default class UserForm extends React.Component<InviteProps> {
                   handleSubmit(event);
                 }}
               >
-                <Box gap="small">
+                <Box gap="medium">
                   <FormField
                     label="Name"
                     error={errors.name}

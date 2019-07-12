@@ -44,7 +44,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
                 tabindex="-1"
               />
               <div
-                class="StyledBox-sc-13pk1d4-0 jKLnMz"
+                class="StyledBox-sc-13pk1d4-0 jZQdx"
               >
                 <div
                   class="StyledBox-sc-13pk1d4-0 lkzpGw"
@@ -136,35 +136,32 @@ exports[`NotificationContext Should render a default popup 1`] = `
               <WithTheme(Box)
                 background="white"
                 direction="column"
-                elevation="medium"
-                fill="vertical"
                 margin="none"
                 pad="medium"
                 responsive={true}
                 round="small"
+                width="medium"
               >
                 <Box
                   background="white"
                   direction="column"
-                  elevation="medium"
-                  fill="vertical"
                   margin="none"
                   pad="medium"
                   responsive={true}
                   round="small"
+                  width="medium"
                 >
                   <StyledBox
                     background="white"
                     directionProp="column"
-                    elevationProp="medium"
-                    fillProp="vertical"
                     margin="none"
                     pad="medium"
                     responsive={true}
                     round="small"
+                    widthProp="medium"
                   >
                     <div
-                      className="StyledBox-sc-13pk1d4-0 jKLnMz"
+                      className="StyledBox-sc-13pk1d4-0 jZQdx"
                     >
                       <WithTheme(Box)
                         alignContent="center"
@@ -408,7 +405,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
                 tabindex="-1"
               />
               <div
-                class="StyledBox-sc-13pk1d4-0 jKLnMz"
+                class="StyledBox-sc-13pk1d4-0 jZQdx"
               >
                 <div
                   class="StyledBox-sc-13pk1d4-0 lkzpGw"
@@ -507,35 +504,32 @@ exports[`NotificationContext Should render a error popup 1`] = `
               <WithTheme(Box)
                 background="white"
                 direction="column"
-                elevation="medium"
-                fill="vertical"
                 margin="none"
                 pad="medium"
                 responsive={true}
                 round="small"
+                width="medium"
               >
                 <Box
                   background="white"
                   direction="column"
-                  elevation="medium"
-                  fill="vertical"
                   margin="none"
                   pad="medium"
                   responsive={true}
                   round="small"
+                  width="medium"
                 >
                   <StyledBox
                     background="white"
                     directionProp="column"
-                    elevationProp="medium"
-                    fillProp="vertical"
                     margin="none"
                     pad="medium"
                     responsive={true}
                     round="small"
+                    widthProp="medium"
                   >
                     <div
-                      className="StyledBox-sc-13pk1d4-0 jKLnMz"
+                      className="StyledBox-sc-13pk1d4-0 jZQdx"
                     >
                       <WithTheme(Box)
                         alignContent="center"
@@ -844,7 +838,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
                 tabindex="-1"
               />
               <div
-                class="StyledBox-sc-13pk1d4-0 jKLnMz"
+                class="StyledBox-sc-13pk1d4-0 jZQdx"
               >
                 <div
                   class="StyledBox-sc-13pk1d4-0 lkzpGw"
@@ -943,35 +937,32 @@ exports[`NotificationContext Should render a success popup 1`] = `
               <WithTheme(Box)
                 background="white"
                 direction="column"
-                elevation="medium"
-                fill="vertical"
                 margin="none"
                 pad="medium"
                 responsive={true}
                 round="small"
+                width="medium"
               >
                 <Box
                   background="white"
                   direction="column"
-                  elevation="medium"
-                  fill="vertical"
                   margin="none"
                   pad="medium"
                   responsive={true}
                   round="small"
+                  width="medium"
                 >
                   <StyledBox
                     background="white"
                     directionProp="column"
-                    elevationProp="medium"
-                    fillProp="vertical"
                     margin="none"
                     pad="medium"
                     responsive={true}
                     round="small"
+                    widthProp="medium"
                   >
                     <div
-                      className="StyledBox-sc-13pk1d4-0 jKLnMz"
+                      className="StyledBox-sc-13pk1d4-0 jZQdx"
                     >
                       <WithTheme(Box)
                         alignContent="center"
@@ -1280,7 +1271,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                 tabindex="-1"
               />
               <div
-                class="StyledBox-sc-13pk1d4-0 jKLnMz"
+                class="StyledBox-sc-13pk1d4-0 jZQdx"
               >
                 <div
                   class="StyledBox-sc-13pk1d4-0 lkzpGw"
@@ -1379,35 +1370,32 @@ exports[`NotificationContext Should render a warning popup 1`] = `
               <WithTheme(Box)
                 background="white"
                 direction="column"
-                elevation="medium"
-                fill="vertical"
                 margin="none"
                 pad="medium"
                 responsive={true}
                 round="small"
+                width="medium"
               >
                 <Box
                   background="white"
                   direction="column"
-                  elevation="medium"
-                  fill="vertical"
                   margin="none"
                   pad="medium"
                   responsive={true}
                   round="small"
+                  width="medium"
                 >
                   <StyledBox
                     background="white"
                     directionProp="column"
-                    elevationProp="medium"
-                    fillProp="vertical"
                     margin="none"
                     pad="medium"
                     responsive={true}
                     round="small"
+                    widthProp="medium"
                   >
                     <div
-                      className="StyledBox-sc-13pk1d4-0 jKLnMz"
+                      className="StyledBox-sc-13pk1d4-0 jZQdx"
                     >
                       <WithTheme(Box)
                         alignContent="center"
@@ -1716,7 +1704,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                 tabindex="-1"
               />
               <div
-                class="StyledBox-sc-13pk1d4-0 jKLnMz"
+                class="StyledBox-sc-13pk1d4-0 jZQdx"
               >
                 <div
                   class="StyledBox-sc-13pk1d4-0 lkzpGw"
@@ -1808,35 +1796,32 @@ exports[`NotificationContext Should set the proper label for the confirm button 
               <WithTheme(Box)
                 background="white"
                 direction="column"
-                elevation="medium"
-                fill="vertical"
                 margin="none"
                 pad="medium"
                 responsive={true}
                 round="small"
+                width="medium"
               >
                 <Box
                   background="white"
                   direction="column"
-                  elevation="medium"
-                  fill="vertical"
                   margin="none"
                   pad="medium"
                   responsive={true}
                   round="small"
+                  width="medium"
                 >
                   <StyledBox
                     background="white"
                     directionProp="column"
-                    elevationProp="medium"
-                    fillProp="vertical"
                     margin="none"
                     pad="medium"
                     responsive={true}
                     round="small"
+                    widthProp="medium"
                   >
                     <div
-                      className="StyledBox-sc-13pk1d4-0 jKLnMz"
+                      className="StyledBox-sc-13pk1d4-0 jZQdx"
                     >
                       <WithTheme(Box)
                         alignContent="center"

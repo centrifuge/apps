@@ -162,7 +162,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
         <Modal
           opened={this.state.userFormOpened}
           headingProps={{ level: 3 }}
-          width={'medium'}
+          width={'large'}
           title={user._id ? 'Edit user' : 'Create user'}
           onClose={this.closeUserForm}
         >
