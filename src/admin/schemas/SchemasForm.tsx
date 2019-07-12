@@ -51,6 +51,9 @@ export default class SchemasForm extends React.Component<SchemasProps, SchemasSt
               if (!test.attributes) {
                 return this.createError({ path: this.path, message: 'At least one attribute for this schema  is required'})
               }
+              if (!test.attributes.find(i => i.name === 'reference_id')) {
+                return this.createError({ path: this.path, message: 'reference_id field is required in the attributes definition'})
+              }
               return true
             })
           })

@@ -77,12 +77,12 @@ class SchemasList extends React.Component<RouteComponentProps & SchemasProps> {
     let schema: Schema
     const schemaJSON = JSON.parse(schemaString);
     if (this.state.isEditing) {
-      schema = new Schema(
-          schemaJSON.name,
-          schemaJSON.attributes,
-          schemaJSON.registries,
-          schemaJSON._id
-      );
+        schema = new Schema(
+            schemaJSON.name,
+            schemaJSON.attributes,
+            schemaJSON.registries,
+            schemaJSON._id
+        );
       this.props.updateSchema(schema);
       this.closeViewSchema();
     } else {
@@ -94,6 +94,7 @@ class SchemasList extends React.Component<RouteComponentProps & SchemasProps> {
       this.props.createSchema(schema);
       this.closeCreateSchema();
     }
+
   };
 
   closeCreateSchema = () => {

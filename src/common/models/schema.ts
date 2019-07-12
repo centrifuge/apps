@@ -8,6 +8,7 @@ export class Schema {
    readonly _id?: string,
  ){
    Schema.validateRegistryAddress(this)
+   Schema.validateAttributes(this)
  }
 
   public static validateRegistryAddress(schema: Schema) {
@@ -18,11 +19,27 @@ export class Schema {
      }
    })
   }
+
+  public static validateAttributes(schema: Schema) {
+   if (!Array.isArray(schema.attributes)) {
+     throw new Error(`Attribute set is not an array`);
+   }
+   if (!schema.attributes || !schema.registries || !schema.name) {
+     throw new Error(`Schema must define attributes, registries, and schema name`);
+   }
+   if (schema.attributes && schema.attributes.length > 0) {
+     const refID = schema.attributes.filter(attr => attr.name === 'reference_id');
+     if (refID.length === 0) {
+       throw new Error(`Attributes do not contain a reference ID`);
+     }
+   }
+  }
 }
 
 export interface Attribute {
+  name: string,
   label: string,
-  type: AttrTypes.STRING | AttrTypes.DATE | AttrTypes.NUMBER,
+  type: AttrTypes.STRING | AttrTypes.TIMESTAMP | AttrTypes.INTEGER | AttrTypes.BYTES | AttrTypes.DECIMAL
 }
 
 export interface Registry {
@@ -32,7 +49,9 @@ export interface Registry {
 }
 
 export enum AttrTypes {
-  NUMBER = 'number',
+  INTEGER = 'integer',
+  DECIMAL = 'decimal',
+  BYTES = 'bytes',
   STRING = 'string',
-  DATE = 'Date',
+  TIMESTAMP = 'timestamp',
 }

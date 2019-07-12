@@ -14,7 +14,18 @@ describe('SchemasController', () => {
       'bestAnimals',
       [
         {
+          name: 'reference_id',
+          label: 'ReferenceId',
+          type: AttrTypes.STRING,
+        },
+        {
+          name: 'animal.wingspan',
           label: 'wingspans',
+          type: AttrTypes.STRING,
+        },
+        {
+          name: 'animal.reference_id',
+          label: 'reference_id',
           type: AttrTypes.STRING,
         }
       ]
@@ -24,7 +35,7 @@ describe('SchemasController', () => {
           label: 'BEST_ANIMALS_NFT',
           address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
           proofs: [
-            'attributes.wingspans',
+            'attributes.animals.wingspans',
             'header.document_id'
           ]
         }
@@ -80,6 +91,7 @@ describe('SchemasController', () => {
           name: 'bestAnimals',
           attributes: [
             {
+              name: 'document.qualities',
               label: 'catlike_qualities',
               type: AttrTypes.STRING,
             }
@@ -91,6 +103,34 @@ describe('SchemasController', () => {
           ]} as Schema);
       } catch (err) {
         expect(err.message).toEqual('0x111 is not a valid registry address');
+        expect(err.status).toEqual(400);
+        expect(err instanceof HttpException).toEqual(true);
+      }
+    });
+
+    it('should throw error when there is no reference id attribute', async function() {
+      expect.assertions(3);
+      const schemasController = schemaModule.get<SchemasController>(
+          SchemasController,
+      );
+
+      try {
+        await schemasController.create({
+          name: 'bestAnimals',
+          attributes: [
+            {
+              name: 'document.qualities',
+              label: 'catlike_qualities',
+              type: AttrTypes.STRING,
+            }
+          ],
+          registries: [
+            {
+              address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
+            }
+          ]} as Schema);
+      } catch (err) {
+        expect(err.message).toEqual('Attributes do not contain a reference ID');
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }
@@ -148,7 +188,7 @@ describe('SchemasController', () => {
           },
           {
             '_id': result._id,
-            'attributes': [{"label": "wingspans", "type": "string"}],
+            'attributes': [{"label": "ReferenceId", "name": "reference_id", "type": "string"}, {"label": "wingspans", "type": "string", "name": "animal.wingspan"}, {"name": "animal.reference_id", "label": "reference_id", "type":"string"}],
             "name": "bestAnimals",
             "registries": [{
               "address": "0x87c574FB2DF0EaA2dAf5fc4a8A16dd3Ce39011B1",
