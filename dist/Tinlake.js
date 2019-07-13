@@ -24134,7 +24134,7 @@ var waitAndReturnEvents = function (eth, txHash, abi) {
 // todo replace with a better polling
 var waitForTransaction = function (eth, txHash) {
     return new Promise(function (resolve, reject) {
-        var secMax = 5;
+        var secMax = 30;
         var sec = 0;
         var wait = function (txHash) {
             setTimeout(function () {
@@ -24149,8 +24149,11 @@ var waitForTransaction = function (eth, txHash) {
                     }
                     console.log("waiting for tx :" + txHash);
                     sec = sec + 1;
-                    if (sec !== secMax) {
+                    if (sec < secMax) {
                         wait(txHash);
+                    }
+                    else {
+                        reject("waiting for transaction tx " + tx + " timed out after " + secMax + " seconds");
                     }
                 });
             }, 1000);
