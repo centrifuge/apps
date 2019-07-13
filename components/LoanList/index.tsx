@@ -66,10 +66,6 @@ class LoanList extends React.Component<Props> {
               <NumberDisplay suffix=" DAI" precision={18} value={baseToDisplay(l.debt, 18)} />,
           },
           {
-            header: 'Maturity Date', property: '', align: 'end',
-            render: (l: InternalLoan) => l.status === 'Repaid' ? '-' : 'TBD',
-          },
-          {
             header: 'Actions', property: 'id', align: 'end', sortable: false,
             render: (l: InternalLoan) =>
               <Link href={`/${mode}/loan?loanId=${l.loanId}`}><Anchor>View</Anchor></Link>,
