@@ -6,7 +6,7 @@ interface Props {
   decimalSeparator?: '.' | ',';
   thousandSeparator?: ',' | '.';
   precision?: number;
-  allowNegative?: false;
+  allowNegative?: boolean;
   prefix?: string;
   suffix?: string;
 }
@@ -15,7 +15,7 @@ const NumberDisplay: FunctionComponent<Props> = ({ value, precision, decimalSepa
   thousandSeparator, allowNegative, prefix, suffix }: Props) => {
   const formatted = Number(Number.parseFloat(value))
     .toLocaleString(undefined, { style: 'decimal',
-      minimumFractionDigits: 18, maximumFractionDigits: 18 });
+      minimumFractionDigits: precision, maximumFractionDigits: precision });
 
   return <span>{mask(formatted, precision, decimalSeparator, thousandSeparator,
                      allowNegative, prefix, suffix).maskedValue}</span>;
@@ -26,7 +26,7 @@ NumberDisplay.defaultProps = {
   decimalSeparator: '.',
   thousandSeparator: ',',
   precision: 2,
-  allowNegative: false,
+  allowNegative: true,
   prefix: '',
   suffix: '',
 };
