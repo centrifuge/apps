@@ -37,10 +37,10 @@
     "typescript": "^3.5.2"
   },
   "scripts": {
-    "bundle": "rollup -c",
+    "build": "rollup -c",
     "watch": "rollup -cw",
-    "test": "npm run bundle && ts-mocha -p test/tsconfig.json test/**/*",
-    "nodemon": "nodemon node inspect src/index.js"
+    "test": "npm run build && ts-mocha -p test/tsconfig.json test/**/*",
+    "nodemon": "nodemon node inspect dist/Tinlake.js"
   },
   "repository": {
     "type": "git",
