@@ -1,4 +1,5 @@
 import { Decimal } from 'decimal.js-light';
+import BN from 'bn.js';
 
 Decimal.set({
   precision: 30,
@@ -19,7 +20,10 @@ const lookup: { [fee: string]: string } = {};
  * functions here by hand.
  * @param fee Fee
  */
-export const feeToInterestRate = (fee: string): string => {
+export const feeToInterestRate = (fee: string|BN): string => {
+  // tslint:disable-next-line:no-parameter-reassignment
+  if (typeof fee !== 'string' && typeof fee !== 'number') { fee = fee.toString(); }
+
   if (lookup[fee]) { return lookup[fee]; }
 
   const i = new Decimal(fee).div('1e27').pow(n);

@@ -24,6 +24,7 @@
     "@centrifuge/axis-number-input": "^0.3.0",
     "@centrifuge/axis-theme": "^0.3.0",
     "chai": "^4.2.0",
+    "decimal.js-light": "^2.5.0",
     "grommet": "^2.7.3",
     "next": "^8.1.0",
     "next-redux-wrapper": "^3.0.0-alpha.3",
