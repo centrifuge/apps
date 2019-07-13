@@ -5,6 +5,9 @@ import Alert from '../Alert';
 import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
+import { NumberInput } from '@centrifuge/axis-number-input';
+import { baseToDisplay } from '../../utils/baseToDisplay';
+import { displayToBase } from '../../utils/displayToBase';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -119,17 +122,19 @@ class WhitelistNFT extends React.Component<Props, State> {
           </Box>
           <Box basis={'1/4'} gap="medium">
             <FormField label="Appraisal">
-              <TextInput
-                value={appraisal}
-                onChange={e => this.setState({ appraisal: e.currentTarget.value })}
+              <NumberInput
+                value={baseToDisplay(appraisal, 18)} suffix=" DAI" precision={18}
+                onChange={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                  this.setState({ appraisal: displayToBase(e.currentTarget.value, 18) })}
               />
             </FormField>
           </Box>
           <Box basis={'1/4'} gap="medium">
             <FormField label="Principal">
-              <TextInput
-                value={principal}
-                onChange={e => this.setState({ principal: e.currentTarget.value })}
+              <NumberInput
+                value={baseToDisplay(principal, 18)} suffix=" DAI" precision={18}
+                onChange={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                  this.setState({ principal: displayToBase(e.currentTarget.value, 18) })}
               />
             </FormField>
           </Box>

@@ -16,7 +16,7 @@ const LOAD_SINGLE_NOT_FOUND = 'tinlake-ui/loans/LOAD_SINGLE_NOT_FOUND';
 const RECEIVE_SINGLE = 'tinlake-ui/loans/RECEIVE_SINGLE';
 
 export interface InternalLoan extends Loan {
-  loanId: number;
+  loanId: string;
   balance: BN;
   debt: BN;
   fee: BN;
@@ -65,8 +65,8 @@ export function getLoans(tinlake: Tinlake):
     const balanceDebtPromises: Promise<BalanceDebt>[] = [];
 
     for (let i = startingLoanId; i < count.toNumber(); i += 1) {
-      loanPromises.push(tinlake.getLoan(i));
-      balanceDebtPromises.push(tinlake.getBalanceDebt(i));
+      loanPromises.push(tinlake.getLoan(`${i}`));
+      balanceDebtPromises.push(tinlake.getBalanceDebt(`${i}`));
     }
 
     const loans = await Promise.all(loanPromises);
@@ -99,7 +99,7 @@ export function getLoans(tinlake: Tinlake):
 
     const extendedLoansData: InternalLoan[] = loans.map((loan, i) => {
       return ({
-        loanId: i + startingLoanId,
+        loanId: `${i + startingLoanId}`,
         loanOwner: loanOwners[i],
         nftOwner: nftOwners[i],
         principal: loan.principal,
@@ -117,14 +117,14 @@ export function getLoans(tinlake: Tinlake):
   };
 }
 
-export function getLoan(tinlake: Tinlake, loanId: number):
+export function getLoan(tinlake: Tinlake, loanId: string):
   ThunkAction<Promise<void>, LoansState, undefined, Action> {
   return async (dispatch) => {
     dispatch({ type: LOAD_SINGLE });
 
     const count = await tinlake.loanCount();
 
-    if (count.toNumber() <= loanId) {
+    if (count.toNumber() <= Number(loanId)) {
       dispatch({ type: LOAD_SINGLE_NOT_FOUND });
     }
 
@@ -134,7 +134,7 @@ export function getLoan(tinlake: Tinlake, loanId: number):
     ]);
 
     const nftOwnerPromise = tinlake.ownerOfNFT(bnToHex(loan.tokenId));
-    const loanOwnerPromise = tinlake.ownerOfLoan(`${loanId}`);
+    const loanOwnerPromise = tinlake.ownerOfLoan(loanId);
 
     let nftOwner: Address;
     let loanOwner: Address;

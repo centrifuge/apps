@@ -6,7 +6,9 @@ import { connect } from 'react-redux';
 import { InternalLoan, LoansState, getLoans } from '../../ducks/loans';
 import SecondaryHeader from '../SecondaryHeader';
 import Address from '../Address';
-import Number from '../Number';
+import NumberDisplay from '../NumberDisplay';
+import { baseToDisplay } from '../../utils/baseToDisplay';
+import { feeToInterestRate } from '../../utils/feeToInterestRate';
 
 interface Props {
   tinlake: Tinlake;
@@ -50,17 +52,18 @@ class LoanList extends React.Component<Props> {
           {
             header: 'Principal', property: 'principal', align: 'end',
             render: (l: InternalLoan) => l.status === 'Whitelisted' ?
-              <Number suffix=" DAI" precision={2} value={l.principal.toString()} /> : '-',
+              <NumberDisplay suffix=" DAI" precision={18} value={baseToDisplay(l.principal, 18)} />
+              : '-',
           },
           {
             header: 'Interest rate', property: 'fee', align: 'end',
             render: (l: InternalLoan) => l.status === 'Repaid' ? '-' :
-              <Number suffix="%" value={l.fee.toString()} />,
+              <NumberDisplay suffix="%" value={feeToInterestRate(l.fee)} />,
           },
           {
             header: 'Debt', property: 'debt', align: 'end',
             render: (l: InternalLoan) => l.status === 'Whitelisted' ? '-' :
-              <Number suffix=" DAI" precision={2} value={l.debt.toString()} />,
+              <NumberDisplay suffix=" DAI" precision={18} value={baseToDisplay(l.debt, 18)} />,
           },
           {
             header: 'Maturity Date', property: '', align: 'end',

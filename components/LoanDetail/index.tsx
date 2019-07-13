@@ -9,20 +9,22 @@ import LoanNftData from '../LoanNftData.tsx';
 import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
+import { baseToDisplay } from '../../utils/baseToDisplay';
+import { feeToInterestRate } from '../../utils/feeToInterestRate';
 
 interface Props {
   loanId: string;
   mode: 'borrower' | 'admin';
   tinlake: Tinlake;
   loans?: LoansState;
-  getLoan?: (tinlake: Tinlake, loanId: number) => Promise<void>;
+  getLoan?: (tinlake: Tinlake, loanId: string) => Promise<void>;
 }
 
 const none = <TextInput value="-" disabled />;
 
 class LoanDetail extends React.Component<Props> {
   componentWillMount() {
-    this.props.getLoan!(this.props.tinlake, parseInt(this.props.loanId, 10));
+    this.props.getLoan!(this.props.tinlake, this.props.loanId);
   }
 
   render() {
@@ -64,20 +66,21 @@ class LoanDetail extends React.Component<Props> {
 
         <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
           <Box basis={'1/4'} gap="medium"><FormField label="Appraisal Amount">
-            <NumberInput value={price.toString()} suffix=" DAI" disabled precision={2} />
+            <NumberInput value={baseToDisplay(price, 18)} suffix=" DAI" disabled precision={18} />
           </FormField></Box>
           <Box basis={'1/4'} gap="medium"><FormField label="Principal Amount">
             {status === 'Whitelisted' ?
-              <NumberInput value={principal.toString()} suffix=" DAI" disabled precision={2} /> :
+              <NumberInput value={baseToDisplay(principal, 18)} suffix=" DAI"
+                disabled precision={18} /> :
                 none}
           </FormField></Box>
           <Box basis={'1/4'} gap="medium"><FormField label="Debt">
             {status === 'Whitelisted' ? none :
-              <NumberInput value={debt.toString()} suffix=" DAI" precision={2} disabled />}
+              <NumberInput value={baseToDisplay(debt, 18)} suffix=" DAI" precision={18} disabled />}
           </FormField></Box>
           <Box basis={'1/4'} gap="medium"><FormField label="Interest Rate">
             {status === 'Repaid' ? none :
-              <NumberInput value={fee.toString()} suffix="%" disabled />}
+              <NumberInput value={feeToInterestRate(fee)} suffix="%" disabled />}
           </FormField></Box>
         </Box>
 

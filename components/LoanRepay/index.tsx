@@ -10,7 +10,9 @@ import SecondaryHeader from '../SecondaryHeader';
 import Link from 'next/link';
 import { LinkPrevious } from 'grommet-icons';
 import { NumberInput } from '@centrifuge/axis-number-input';
-import Number from '../Number';
+import NumberDisplay from '../NumberDisplay';
+import { baseToDisplay } from '../../utils/baseToDisplay';
+import { displayToBase } from '../../utils/displayToBase';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -18,7 +20,7 @@ interface Props {
   loanId: string;
   tinlake: Tinlake;
   loans?: LoansState;
-  getLoan?: (tinlake: Tinlake, loanId: number) => Promise<void>;
+  getLoan?: (tinlake: Tinlake, loanId: string) => Promise<void>;
 }
 
 interface State {
@@ -35,7 +37,7 @@ class LoanRepay extends React.Component<Props, State> {
   };
 
   componentWillMount() {
-    this.props.getLoan!(this.props.tinlake, parseInt(this.props.loanId, 10));
+    this.props.getLoan!(this.props.tinlake, this.props.loanId);
   }
 
   componentDidUpdate(nextProps: Props) {
@@ -117,7 +119,8 @@ class LoanRepay extends React.Component<Props, State> {
 
         {is === 'loading' && 'Repaying...'}
         {is === 'success' && <Alert type="success" margin={{ top: 'large' }}>
-          Successfully repayed <Number value={repayAmount.toString()} suffix=" DAI" precision={2} />
+          Successfully repayed
+          <NumberDisplay value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />
           for Loan ID {loanId}</Alert>}
         {is === 'error' && <Alert type="error" margin={{ top: 'large' }}>
           <Text weight="bold">Error repaying Loan ID {loanId}, see console for details</Text>
@@ -127,16 +130,17 @@ class LoanRepay extends React.Component<Props, State> {
         <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
           <Box basis={'1/4'} gap="medium"><FormField label="Repay Amount">
             <NumberInput
-              value={repayAmount} disabled suffix=" DAI" precision={2}
+              value={baseToDisplay(repayAmount, 18)} disabled suffix=" DAI" precision={18}
               onChange={(e: React.KeyboardEvent<HTMLInputElement>) =>
-                this.setState({ repayAmount: e.currentTarget.value })}
+                this.setState({ repayAmount: displayToBase(e.currentTarget.value, 18) })}
             />
           </FormField></Box>
           <Box basis={'1/4'} gap="medium"><FormField label="Interest Amount">
-            <NumberInput value={fee.toString()} disabled suffix=" DAI" precision={2} />
+            <NumberInput value={baseToDisplay(fee, 18)} disabled suffix=" DAI" precision={18} />
           </FormField></Box>
           <Box basis={'1/4'} gap="medium"><FormField label="Total Amount">
-            <NumberInput value={totalAmount.toString()} disabled suffix=" DAI" precision={2} />
+            <NumberInput value={baseToDisplay(totalAmount, 18)} disabled
+              suffix=" DAI" precision={18} />
           </FormField></Box>
           <Box basis={'1/4'} gap="medium" />
         </Box>

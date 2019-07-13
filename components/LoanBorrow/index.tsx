@@ -10,7 +10,10 @@ import SecondaryHeader from '../SecondaryHeader';
 import Link from 'next/link';
 import { LinkPrevious } from 'grommet-icons';
 import { NumberInput } from '@centrifuge/axis-number-input';
-import Number from '../Number';
+import NumberDisplay from '../NumberDisplay';
+import { baseToDisplay } from '../../utils/baseToDisplay';
+import { displayToBase } from '../../utils/displayToBase';
+import { feeToInterestRate } from '../../utils/feeToInterestRate';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -18,7 +21,7 @@ interface Props {
   loanId: string;
   tinlake: Tinlake;
   loans?: LoansState;
-  getLoan?: (tinlake: Tinlake, loanId: number) => Promise<void>;
+  getLoan?: (tinlake: Tinlake, loanId: string) => Promise<void>;
 }
 
 interface State {
@@ -35,7 +38,7 @@ class LoanBorrow extends React.Component<Props, State> {
   };
 
   componentWillMount() {
-    this.props.getLoan!(this.props.tinlake, parseInt(this.props.loanId, 10));
+    this.props.getLoan!(this.props.tinlake, this.props.loanId);
   }
 
   componentDidUpdate(nextProps: Props) {
@@ -56,7 +59,7 @@ class LoanBorrow extends React.Component<Props, State> {
 
     try {
       // get loan
-      const loan = await tinlake.getLoan(parseInt(loanId, 10));
+      const loan = await tinlake.getLoan(loanId);
 
       // approve
       const res1 = await tinlake.approveNFT(bnToHex(loan.tokenId), addresses['SHELF']);
@@ -118,7 +121,8 @@ class LoanBorrow extends React.Component<Props, State> {
       <Box pad={{ horizontal: 'medium' }}>
         {is === 'loading' && 'Borrowing...'}
         {is === 'success' && <Alert type="success" margin={{ top: 'large' }}>
-          Successfully borrowed <Number value={borrowAmount} suffix=" DAI" precision={2} />
+          Successfully borrowed
+          <NumberDisplay value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18} />
           for Loan ID {loanId}</Alert>}
         {is === 'error' && <Alert type="error" margin={{ top: 'large' }}>
           <Text weight="bold">Error borrowing for Loan ID {loanId}, see console for details</Text>
@@ -128,15 +132,17 @@ class LoanBorrow extends React.Component<Props, State> {
         <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
           <Box basis={'1/4'} gap="medium"><FormField label="Borrow Amount">
             <NumberInput
-              value={borrowAmount} disabled suffix=" DAI" precision={2}
-              onChange={e => this.setState({ borrowAmount: e.currentTarget.value })}
+              value={baseToDisplay(borrowAmount, 18)} disabled suffix=" DAI" precision={18}
+              onChange={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                this.setState({ borrowAmount: displayToBase(e.currentTarget.value, 18) })}
             /></FormField></Box>
           <Box basis={'1/4'} gap="medium" />
           <Box basis={'1/4'} gap="medium"><FormField label="Principal">
-            <NumberInput value={principal.toString()} disabled suffix=" DAI" precision={2} />
+            <NumberInput value={baseToDisplay(principal, 18)} disabled
+              suffix=" DAI" precision={18} />
           </FormField></Box>
           <Box basis={'1/4'} gap="medium"><FormField label="Interest Rate">
-            <NumberInput value={fee.toString()} disabled suffix="%" />
+            <NumberInput value={feeToInterestRate(fee)} disabled suffix="%" />
           </FormField></Box>
         </Box>
 

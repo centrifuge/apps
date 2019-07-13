@@ -11,13 +11,17 @@ interface Props {
   suffix?: string;
 }
 
-const Number: FunctionComponent<Props> = ({ value, precision, decimalSeparator,
+const NumberDisplay: FunctionComponent<Props> = ({ value, precision, decimalSeparator,
   thousandSeparator, allowNegative, prefix, suffix }: Props) => {
-  return <span>{mask(value, precision, decimalSeparator, thousandSeparator,
+  const formatted = Number(Number.parseFloat(value))
+    .toLocaleString(undefined, { style: 'decimal',
+      minimumFractionDigits: 18, maximumFractionDigits: 18 });
+
+  return <span>{mask(formatted, precision, decimalSeparator, thousandSeparator,
                      allowNegative, prefix, suffix).maskedValue}</span>;
 };
 
-Number.defaultProps = {
+NumberDisplay.defaultProps = {
   value: '0',
   decimalSeparator: '.',
   thousandSeparator: ',',
@@ -27,4 +31,4 @@ Number.defaultProps = {
   suffix: '',
 };
 
-export default Number;
+export default NumberDisplay;
