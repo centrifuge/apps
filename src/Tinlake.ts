@@ -280,7 +280,7 @@ const waitAndReturnEvents = (eth: ethI, txHash: string, abi: any) => {
 // todo replace with a better polling
 const waitForTransaction = (eth: ethI, txHash: any) => {
   return new Promise((resolve, reject) => {
-    const secMax = 30;
+    const secMax = 60;
     let sec = 0;
     const wait = (txHash: string) => {
       setTimeout(() => {
