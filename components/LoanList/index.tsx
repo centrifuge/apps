@@ -46,7 +46,9 @@ class LoanList extends React.Component<Props> {
           },
           {
             header: 'NFT Owner', property: 'nftOwner', align: 'end',
-            render: (l: InternalLoan) => <Address address={l.nftOwner} />,
+            render: (l: InternalLoan) => <>
+              <Address address={l.nftOwner} /> {l.nftOwner === ethFrom && 'ME'}
+            </>,
           },
           { header: 'NFT Status', property: 'status' },
           {

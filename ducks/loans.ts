@@ -59,7 +59,11 @@ export function getLoans(tinlake: Tinlake):
   return async (dispatch) => {
     dispatch({ type: LOAD });
 
+    console.log('start counting loans');
+
     const count = await tinlake.loanCount();
+
+    console.log('found', count, 'loans');
 
     const loanPromises: Promise<Loan>[] = [];
     const balanceDebtPromises: Promise<BalanceDebt>[] = [];

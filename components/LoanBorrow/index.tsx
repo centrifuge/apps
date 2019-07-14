@@ -4,7 +4,7 @@ import { LoansState, getLoan } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
 import { Box, FormField, Button, Heading, Text } from 'grommet';
-import LoanNftData from '../LoanNftData.tsx';
+import LoanNftData from '../LoanNftData';
 import { bnToHex } from '../../utils/bnToHex';
 import SecondaryHeader from '../SecondaryHeader';
 import Link from 'next/link';
@@ -13,7 +13,7 @@ import { NumberInput } from '@centrifuge/axis-number-input';
 import NumberDisplay from '../NumberDisplay';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 import { displayToBase } from '../../utils/displayToBase';
-import { feeToInterestRate } from '../../utils/feeToInterestRate';
+import LoanData from '../LoanData';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -36,6 +36,7 @@ class LoanBorrow extends React.Component<Props, State> {
     is: null,
     errorMsg: '',
   };
+  lastPrincipal = '';
 
   componentWillMount() {
     this.props.getLoan!(this.props.tinlake, this.props.loanId);
@@ -45,7 +46,8 @@ class LoanBorrow extends React.Component<Props, State> {
     const loans = nextProps.loans;
     if (!loans || !loans.singleLoan) { return; }
     const nextPrincipal = loans.singleLoan.principal.toString();
-    if (nextPrincipal !== this.state.borrowAmount) {
+    if (nextPrincipal !== this.lastPrincipal) {
+      this.lastPrincipal = nextPrincipal;
       this.setState({ borrowAmount: loans.singleLoan.principal.toString() });
     }
   }
@@ -102,7 +104,7 @@ class LoanBorrow extends React.Component<Props, State> {
         Could not find loan {loanId}</Alert>;
     }
 
-    const { status, principal, fee, loanOwner } = singleLoan!;
+    const { status, loanOwner } = singleLoan!;
     const { borrowAmount, is, errorMsg } = this.state;
 
     return <Box>
@@ -119,34 +121,39 @@ class LoanBorrow extends React.Component<Props, State> {
       </SecondaryHeader>
 
       <Box pad={{ horizontal: 'medium' }}>
+        <Box direction="row" justify="end" margin={{ bottom: 'medium' }}>
+          <Text>
+            Your Borrow Amount will be <Text weight="bold">{<NumberDisplay
+              value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18} />}</Text>
+          </Text>
+        </Box>
+
         {is === 'loading' && 'Borrowing...'}
-        {is === 'success' && <Alert type="success" margin={{ top: 'large' }}>
+        {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
           Successfully borrowed
           <NumberDisplay value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18} />
           for Loan ID {loanId}</Alert>}
-        {is === 'error' && <Alert type="error" margin={{ top: 'large' }}>
+        {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
           <Text weight="bold">Error borrowing for Loan ID {loanId}, see console for details</Text>
           {errorMsg && <div><br />{errorMsg}</div>}
         </Alert>}
 
-        <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
+        <Box direction="row" gap="medium" margin={{ vertical: 'medium' }}>
           <Box basis={'1/4'} gap="medium"><FormField label="Borrow Amount">
             <NumberInput
-              value={baseToDisplay(borrowAmount, 18)} disabled suffix=" DAI" precision={18}
-              onChange={(e: React.KeyboardEvent<HTMLInputElement>) =>
-                this.setState({ borrowAmount: displayToBase(e.currentTarget.value, 18) })}
+              value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18}
+              onChange={(masked: string, float: number) => float !== undefined &&
+                this.setState({ borrowAmount: displayToBase(masked, 18) })}
+              autoFocus disabled
             /></FormField></Box>
           <Box basis={'1/4'} gap="medium" />
-          <Box basis={'1/4'} gap="medium"><FormField label="Principal">
-            <NumberInput value={baseToDisplay(principal, 18)} disabled
-              suffix=" DAI" precision={18} />
-          </FormField></Box>
-          <Box basis={'1/4'} gap="medium"><FormField label="Interest Rate">
-            <NumberInput value={feeToInterestRate(fee)} disabled suffix="%" />
-          </FormField></Box>
+          <Box basis={'1/4'} gap="medium" />
+          <Box basis={'1/4'} gap="medium" />
         </Box>
 
-        <LoanNftData loan={singleLoan!} />
+        <LoanData loan={singleLoan!} />
+
+        <LoanNftData loan={singleLoan!} authedAddr={tinlake.ethConfig.from} />
       </Box>
     </Box>;
   }

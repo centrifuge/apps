@@ -27,8 +27,8 @@ interface State {
 class WhitelistNFT extends React.Component<Props, State> {
   state: State = {
     tokenId: '',
-    principal: '100',
-    appraisal: '300',
+    principal: '100000000000000000000',
+    appraisal: '300000000000000000000',
     is: null,
     errorMsg: '',
   };
@@ -87,8 +87,6 @@ class WhitelistNFT extends React.Component<Props, State> {
   render() {
     const { tokenId, principal, appraisal, is, errorMsg } = this.state;
 
-    console.log('tokenId', tokenId);
-
     return <Box>
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">
@@ -123,9 +121,9 @@ class WhitelistNFT extends React.Component<Props, State> {
           <Box basis={'1/4'} gap="medium">
             <FormField label="Appraisal">
               <NumberInput
-                value={baseToDisplay(appraisal, 18)} suffix=" DAI" precision={18}
-                onChange={(e: React.KeyboardEvent<HTMLInputElement>) =>
-                  this.setState({ appraisal: displayToBase(e.currentTarget.value, 18) })}
+                value={baseToDisplay(appraisal, 18)} suffix=" DAI" precision={18} autoFocus
+                onChange={(masked: string, float: number) => float !== undefined &&
+                  this.setState({ appraisal: displayToBase(masked, 18) })}
               />
             </FormField>
           </Box>
@@ -133,8 +131,8 @@ class WhitelistNFT extends React.Component<Props, State> {
             <FormField label="Principal">
               <NumberInput
                 value={baseToDisplay(principal, 18)} suffix=" DAI" precision={18}
-                onChange={(e: React.KeyboardEvent<HTMLInputElement>) =>
-                  this.setState({ principal: displayToBase(e.currentTarget.value, 18) })}
+                onChange={(masked: string, float: number) => float !== undefined &&
+                  this.setState({ principal: displayToBase(masked, 18) })}
               />
             </FormField>
           </Box>

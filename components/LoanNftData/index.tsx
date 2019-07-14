@@ -6,11 +6,12 @@ import { formatAddress } from '../../utils/formatAddress';
 
 interface Props {
   loan: InternalLoan;
+  authedAddr: string;
 }
 
 class LoanNftData extends React.Component<Props> {
   render() {
-    const { loan: { tokenId, nftOwner } } = this.props;
+    const { loan: { tokenId, nftOwner }, authedAddr } = this.props;
 
     return <NftDataContainer>
       <Heading level="6" margin="none">NFT Data</Heading>
@@ -19,7 +20,9 @@ class LoanNftData extends React.Component<Props> {
           <TextInput value={formatAddress(tokenId.toString())} disabled
             title={tokenId.toString()}/></FormField></Box>
         <Box basis={'1/4'} gap="medium"><FormField label="NFT Owner">
-          <TextInput value={formatAddress(nftOwner)} disabled title={nftOwner} /></FormField></Box>
+          <TextInput value={formatAddress(nftOwner)} disabled title={nftOwner} /></FormField>
+          {authedAddr === nftOwner && 'ME'}
+        </Box>
         <Box basis={'1/4'} gap="medium" />
         <Box basis={'1/4'} gap="medium" />
       </Box>

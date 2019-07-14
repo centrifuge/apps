@@ -4,7 +4,7 @@ import { LoansState, getLoan } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
 import { Box, FormField, Button, Heading, Text } from 'grommet';
-import LoanNftData from '../LoanNftData.tsx';
+import LoanNftData from '../LoanNftData';
 import BN from 'bn.js';
 import SecondaryHeader from '../SecondaryHeader';
 import Link from 'next/link';
@@ -13,6 +13,7 @@ import { NumberInput } from '@centrifuge/axis-number-input';
 import NumberDisplay from '../NumberDisplay';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 import { displayToBase } from '../../utils/displayToBase';
+import LoanData from '../LoanData';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -35,6 +36,7 @@ class LoanRepay extends React.Component<Props, State> {
     is: null,
     errorMsg: '',
   };
+  lastDebt = '';
 
   componentWillMount() {
     this.props.getLoan!(this.props.tinlake, this.props.loanId);
@@ -44,7 +46,8 @@ class LoanRepay extends React.Component<Props, State> {
     const loans = nextProps.loans;
     if (!loans || !loans.singleLoan) { return; }
     const nextDebt = loans.singleLoan.debt.toString();
-    if (nextDebt !== this.state.repayAmount) {
+    if (nextDebt !== this.lastDebt) {
+      this.lastDebt = nextDebt;
       this.setState({ repayAmount: loans.singleLoan.debt.toString() });
     }
   }
@@ -100,7 +103,6 @@ class LoanRepay extends React.Component<Props, State> {
 
     const { status, fee, loanOwner } = singleLoan!;
     const { repayAmount, is, errorMsg } = this.state;
-    const totalAmount = fee.add(new BN(repayAmount));
 
     return <Box>
       <SecondaryHeader>
@@ -116,36 +118,40 @@ class LoanRepay extends React.Component<Props, State> {
       </SecondaryHeader>
 
       <Box pad={{ horizontal: 'medium' }}>
+        <Box direction="row" justify="end" margin={{ bottom: 'medium' }}>
+          <Text>
+            Your total Repayment Amount is <Text weight="bold">{<NumberDisplay
+              value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />}</Text>
+          </Text>
+        </Box>
 
         {is === 'loading' && 'Repaying...'}
-        {is === 'success' && <Alert type="success" margin={{ top: 'large' }}>
+        {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
           Successfully repayed
           <NumberDisplay value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />
           for Loan ID {loanId}</Alert>}
-        {is === 'error' && <Alert type="error" margin={{ top: 'large' }}>
+        {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
           <Text weight="bold">Error repaying Loan ID {loanId}, see console for details</Text>
           {errorMsg && <div><br />{errorMsg}</div>}
         </Alert>}
 
-        <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
+        <Box direction="row" gap="medium" margin={{ vertical: 'medium' }}>
           <Box basis={'1/4'} gap="medium"><FormField label="Repay Amount">
             <NumberInput
-              value={baseToDisplay(repayAmount, 18)} disabled suffix=" DAI" precision={18}
-              onChange={(e: React.KeyboardEvent<HTMLInputElement>) =>
-                this.setState({ repayAmount: displayToBase(e.currentTarget.value, 18) })}
+              value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18}
+              onChange={(masked: string, float: number) => float !== undefined &&
+                this.setState({ repayAmount: displayToBase(masked, 18) })}
+              autoFocus disabled
             />
           </FormField></Box>
-          <Box basis={'1/4'} gap="medium"><FormField label="Interest Amount">
-            <NumberInput value={baseToDisplay(fee, 18)} disabled suffix=" DAI" precision={18} />
-          </FormField></Box>
-          <Box basis={'1/4'} gap="medium"><FormField label="Total Amount">
-            <NumberInput value={baseToDisplay(totalAmount, 18)} disabled
-              suffix=" DAI" precision={18} />
-          </FormField></Box>
+          <Box basis={'1/4'} gap="medium" />
+          <Box basis={'1/4'} gap="medium" />
           <Box basis={'1/4'} gap="medium" />
         </Box>
 
-        <LoanNftData loan={singleLoan!} />
+        <LoanData loan={singleLoan!} />
+
+        <LoanNftData loan={singleLoan!} authedAddr={tinlake.ethConfig.from} />
       </Box>
     </Box>;
   }

@@ -1,32 +1,23 @@
-import mask from '../../utils/mask';
 import { FunctionComponent } from 'react';
 
 interface Props {
   value: string;
-  decimalSeparator?: '.' | ',';
-  thousandSeparator?: ',' | '.';
   precision?: number;
-  allowNegative?: boolean;
   prefix?: string;
   suffix?: string;
 }
 
-const NumberDisplay: FunctionComponent<Props> = ({ value, precision, decimalSeparator,
-  thousandSeparator, allowNegative, prefix, suffix }: Props) => {
-  const formatted = Number(Number.parseFloat(value))
-    .toLocaleString(undefined, { style: 'decimal',
+const NumberDisplay: FunctionComponent<Props> = ({ value, precision, prefix, suffix }: Props) => {
+  const formatted = Number(parseFloat(value))
+    .toLocaleString('en-GB', { style: 'decimal',
       minimumFractionDigits: precision, maximumFractionDigits: precision });
 
-  return <span>{mask(formatted, precision, decimalSeparator, thousandSeparator,
-                     allowNegative, prefix, suffix).maskedValue}</span>;
+  return <span>{prefix}{formatted}{suffix}</span>;
 };
 
 NumberDisplay.defaultProps = {
   value: '0',
-  decimalSeparator: '.',
-  thousandSeparator: ',',
   precision: 2,
-  allowNegative: true,
   prefix: '',
   suffix: '',
 };
