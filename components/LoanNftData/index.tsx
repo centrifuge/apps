@@ -3,6 +3,7 @@ import { InternalLoan } from '../../ducks/loans';
 import { Box, FormField, TextInput, Heading, Paragraph } from 'grommet';
 import styled from 'styled-components';
 import { formatAddress } from '../../utils/formatAddress';
+import MeBadge from '../MeBadge';
 
 interface Props {
   loan: InternalLoan;
@@ -19,9 +20,12 @@ class LoanNftData extends React.Component<Props> {
         <Box basis={'1/4'} gap="medium"><FormField label="NFT ID">
           <TextInput value={formatAddress(tokenId.toString())} disabled
             title={tokenId.toString()}/></FormField></Box>
-        <Box basis={'1/4'} gap="medium"><FormField label="NFT Owner">
-          <TextInput value={formatAddress(nftOwner)} disabled title={nftOwner} /></FormField>
-          {authedAddr === nftOwner && 'ME'}
+        <Box basis={'1/4'} gap="medium">
+          <FormField label="NFT Owner" style={{ position: 'relative' }}>
+            <TextInput value={formatAddress(nftOwner)} disabled title={nftOwner} />
+            {authedAddr === nftOwner &&
+              <MeBadge style={{ position: 'absolute', left: 100, top: 32 }} />}
+          </FormField>
         </Box>
         <Box basis={'1/4'} gap="medium" />
         <Box basis={'1/4'} gap="medium" />

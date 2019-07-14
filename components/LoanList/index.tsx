@@ -9,6 +9,7 @@ import Address from '../Address';
 import NumberDisplay from '../NumberDisplay';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 import { feeToInterestRate } from '../../utils/feeToInterestRate';
+import MeBadge from '../MeBadge';
 
 interface Props {
   tinlake: Tinlake;
@@ -46,9 +47,10 @@ class LoanList extends React.Component<Props> {
           },
           {
             header: 'NFT Owner', property: 'nftOwner', align: 'end',
-            render: (l: InternalLoan) => <>
-              <Address address={l.nftOwner} /> {l.nftOwner === ethFrom && 'ME'}
-            </>,
+            render: (l: InternalLoan) => <Box direction="row">
+              <Address address={l.nftOwner} />
+              {l.nftOwner === ethFrom && <MeBadge style={{ marginLeft: 5 }} />}
+            </Box>,
           },
           { header: 'NFT Status', property: 'status' },
           {
