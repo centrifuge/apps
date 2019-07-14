@@ -121,10 +121,12 @@ export function getLoans(tinlake: Tinlake):
   };
 }
 
-export function getLoan(tinlake: Tinlake, loanId: string):
+export function getLoan(tinlake: Tinlake, loanId: string, refresh = false):
   ThunkAction<Promise<void>, LoansState, undefined, Action> {
   return async (dispatch) => {
-    dispatch({ type: LOAD_SINGLE });
+    if (!refresh) {
+      dispatch({ type: LOAD_SINGLE });
+    }
 
     const count = await tinlake.loanCount();
 

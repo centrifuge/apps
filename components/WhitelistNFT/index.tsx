@@ -96,7 +96,8 @@ class WhitelistNFT extends React.Component<Props, State> {
           <Heading level="3">Whitelist NFT</Heading>
         </Box>
 
-        <Button onClick={this.whitelist} primary label="Whitelist" />
+        <Button onClick={this.whitelist} primary label="Whitelist"
+          disabled={is === 'loading' || is === 'success'} />
       </SecondaryHeader>
 
       <Box pad={{ horizontal: 'medium' }}>
@@ -115,6 +116,7 @@ class WhitelistNFT extends React.Component<Props, State> {
               <TextInput
                 value={tokenId}
                 onChange={e => this.setState({ tokenId: e.currentTarget.value })}
+                disabled={is === 'loading' || is === 'success'}
               />
             </FormField>
           </Box>
@@ -124,6 +126,7 @@ class WhitelistNFT extends React.Component<Props, State> {
                 value={baseToDisplay(appraisal, 18)} suffix=" DAI" precision={18} autoFocus
                 onChange={(masked: string, float: number) => float !== undefined &&
                   this.setState({ appraisal: displayToBase(masked, 18) })}
+                disabled={is === 'loading' || is === 'success'}
               />
             </FormField>
           </Box>
@@ -133,6 +136,7 @@ class WhitelistNFT extends React.Component<Props, State> {
                 value={baseToDisplay(principal, 18)} suffix=" DAI" precision={18}
                 onChange={(masked: string, float: number) => float !== undefined &&
                   this.setState({ principal: displayToBase(masked, 18) })}
+                disabled={is === 'loading' || is === 'success'}
               />
             </FormField>
           </Box>

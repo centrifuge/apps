@@ -15,7 +15,7 @@ interface Props {
   mode: 'borrower' | 'admin';
   tinlake: Tinlake;
   loans?: LoansState;
-  getLoan?: (tinlake: Tinlake, loanId: string) => Promise<void>;
+  getLoan?: (tinlake: Tinlake, loanId: string, refresh?: boolean) => Promise<void>;
 }
 
 class LoanDetail extends React.Component<Props> {

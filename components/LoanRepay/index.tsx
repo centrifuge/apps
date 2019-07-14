@@ -5,7 +5,6 @@ import { connect } from 'react-redux';
 import Alert from '../Alert';
 import { Box, FormField, Button, Heading, Text } from 'grommet';
 import LoanNftData from '../LoanNftData';
-import BN from 'bn.js';
 import SecondaryHeader from '../SecondaryHeader';
 import Link from 'next/link';
 import { LinkPrevious } from 'grommet-icons';
@@ -21,7 +20,7 @@ interface Props {
   loanId: string;
   tinlake: Tinlake;
   loans?: LoansState;
-  getLoan?: (tinlake: Tinlake, loanId: string) => Promise<void>;
+  getLoan?: (tinlake: Tinlake, loanId: string, refresh?: boolean) => Promise<void>;
 }
 
 interface State {
@@ -55,7 +54,7 @@ class LoanRepay extends React.Component<Props, State> {
   repay = async () => {
     this.setState({ is: 'loading' });
 
-    const { tinlake, loanId } = this.props;
+    const { getLoan, tinlake, loanId } = this.props;
     const { repayAmount } = this.state;
     const addresses = tinlake.contractAddresses;
     const ethFrom = tinlake.ethConfig.from;
@@ -84,6 +83,8 @@ class LoanRepay extends React.Component<Props, State> {
         return;
       }
 
+      getLoan!(tinlake, loanId, true);
+
       this.setState({ is: 'success' });
     } catch (e) {
       console.log(e);
@@ -101,7 +102,7 @@ class LoanRepay extends React.Component<Props, State> {
         Could not find loan {loanId}</Alert>;
     }
 
-    const { status, fee, loanOwner } = singleLoan!;
+    const { status, loanOwner } = singleLoan!;
     const { repayAmount, is, errorMsg } = this.state;
 
     return <Box>
@@ -114,16 +115,19 @@ class LoanRepay extends React.Component<Props, State> {
         </Box>
 
         {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
-          <Button primary onClick={this.repay} label="Confirm" />}
+          <Button primary onClick={this.repay} label="Confirm"
+            disabled={is === 'loading' || is === 'success'} />}
       </SecondaryHeader>
 
       <Box pad={{ horizontal: 'medium' }}>
-        <Box direction="row" justify="end" margin={{ bottom: 'medium' }}>
-          <Text>
-            Your total Repayment Amount is <Text weight="bold">{<NumberDisplay
-              value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />}</Text>
-          </Text>
-        </Box>
+        {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
+          <Box direction="row" justify="end" margin={{ bottom: 'medium' }}>
+            <Text>
+              Your total Repayment Amount is <Text weight="bold">{<NumberDisplay
+                value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />}</Text>
+            </Text>
+          </Box>
+        }
 
         {is === 'loading' && 'Repaying...'}
         {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
@@ -141,7 +145,7 @@ class LoanRepay extends React.Component<Props, State> {
               value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18}
               onChange={(masked: string, float: number) => float !== undefined &&
                 this.setState({ repayAmount: displayToBase(masked, 18) })}
-              autoFocus disabled
+              autoFocus disabled={true || is === 'loading' || is === 'success'}
             />
           </FormField></Box>
           <Box basis={'1/4'} gap="medium" />

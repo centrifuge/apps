@@ -21,7 +21,7 @@ interface Props {
   loanId: string;
   tinlake: Tinlake;
   loans?: LoansState;
-  getLoan?: (tinlake: Tinlake, loanId: string) => Promise<void>;
+  getLoan?: (tinlake: Tinlake, loanId: string, refresh?: boolean) => Promise<void>;
 }
 
 interface State {
@@ -55,7 +55,7 @@ class LoanBorrow extends React.Component<Props, State> {
   borrow = async () => {
     this.setState({ is: 'loading' });
 
-    const { tinlake, loanId } = this.props;
+    const { getLoan, tinlake, loanId } = this.props;
     const addresses = tinlake.contractAddresses;
     const ethFrom = tinlake.ethConfig.from;
 
@@ -87,6 +87,8 @@ class LoanBorrow extends React.Component<Props, State> {
         return;
       }
 
+      getLoan!(tinlake, loanId, true);
+
       this.setState({ is: 'success' });
     } catch (e) {
       console.log(e);
@@ -117,16 +119,19 @@ class LoanBorrow extends React.Component<Props, State> {
         </Box>
 
         {status === 'Whitelisted' && loanOwner === tinlake.ethConfig.from &&
-          <Button primary onClick={this.borrow} label="Confirm" />}
+          <Button primary onClick={this.borrow} label="Confirm"
+            disabled={is === 'loading' || is === 'success'} />}
       </SecondaryHeader>
 
       <Box pad={{ horizontal: 'medium' }}>
-        <Box direction="row" justify="end" margin={{ bottom: 'medium' }}>
-          <Text>
-            Your Borrow Amount will be <Text weight="bold">{<NumberDisplay
-              value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18} />}</Text>
-          </Text>
-        </Box>
+        {status === 'Whitelisted' && loanOwner === tinlake.ethConfig.from &&
+          <Box direction="row" justify="end" margin={{ bottom: 'medium' }}>
+            <Text>
+              Your Borrow Amount will be <Text weight="bold">{<NumberDisplay
+                value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18} />}</Text>
+            </Text>
+          </Box>
+        }
 
         {is === 'loading' && 'Borrowing...'}
         {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
@@ -144,7 +149,7 @@ class LoanBorrow extends React.Component<Props, State> {
               value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18}
               onChange={(masked: string, float: number) => float !== undefined &&
                 this.setState({ borrowAmount: displayToBase(masked, 18) })}
-              autoFocus disabled
+              autoFocus disabled={true || is === 'loading' || is === 'success'}
             /></FormField></Box>
           <Box basis={'1/4'} gap="medium" />
           <Box basis={'1/4'} gap="medium" />
