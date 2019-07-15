@@ -92,17 +92,14 @@ export class WebhooksController {
               notification.document_id,
               user.account,
           );
-          const document: DocResponse = {
-            ...result,
-            ownerId: user._id,
-          };
-          const unflattenedAttributes = unflatten(document.attributes)
+          const unflattenedAttributes = unflatten(result.attributes)
 
           await this.databaseService.documents.update(
               { 'header.document_id': notification.document_id, 'ownerId': user._id },
               {$set: {
-                header: document.header,
-                data: document.data,
+                ownerId: user._id,
+                header: result.header,
+                data: result.data,
                 attributes: unflattenedAttributes,
                 schema: unflattenedAttributes.schema,
               }},
