@@ -9,5 +9,4 @@ import { AuthModule } from '../auth/auth.module';
   providers: [],
   imports: [DatabaseModule, AuthModule, CentrifugeModule],
 })
-export class FundingModule  {
-}
+export class FundingModule {}

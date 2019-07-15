@@ -27,7 +27,8 @@ export const ROUTES = Object.freeze({
   WEBHOOKS: `${API_BASE}/webhooks`,
   PURCHASE_ORDERS: `${API_BASE}/purchase_orders`,
   TRANSFER_DETAILS: `${API_BASE}/transfer_details`,
-  SCHEMAS: `${API_BASE}/schemas`
+  SCHEMAS: `${API_BASE}/schemas`,
+  DOCUMENTS:  `${API_BASE}/documents`
 });
 
 export enum PERMISSIONS {

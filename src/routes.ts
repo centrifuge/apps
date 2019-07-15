@@ -1,4 +1,4 @@
-import {invoiceRoutes,fundingRoutes} from './invoices/routes';
+import { invoiceRoutes,fundingRoutes } from './invoices/routes';
 import contactsRoutes from './contacts/routes';
 import { schemasRoutes } from './admin/schemas/routes';
 import userRoutes from './user/routes';

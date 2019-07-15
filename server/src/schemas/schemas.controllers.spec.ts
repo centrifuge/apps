@@ -1,10 +1,10 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {HttpException} from '@nestjs/common';
-import {AttrTypes, Schema} from '../../../src/common/models/schema';
-import {SessionGuard} from '../auth/SessionGuard';
-import {databaseServiceProvider} from '../database/database.providers';
-import {DatabaseService} from '../database/database.service';
-import {SchemasController} from "./schemas.controllers";
+import { Test, TestingModule } from '@nestjs/testing';
+import { HttpException } from '@nestjs/common';
+import { AttrTypes, Schema } from '../../../src/common/models/schema';
+import { SessionGuard } from '../auth/SessionGuard';
+import { databaseServiceProvider } from '../database/database.providers';
+import { DatabaseService } from '../database/database.service';
+import { SchemasController } from "./schemas.controllers";
 
 const delay = require('util').promisify(setTimeout);
 
@@ -51,8 +51,7 @@ describe('SchemasController', () => {
         SessionGuard,
         databaseServiceProvider,
       ],
-    })
-      .compile();
+    }).compile();
 
     const databaseService = schemaModule.get<DatabaseService>(DatabaseService);
 

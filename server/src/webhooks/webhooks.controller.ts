@@ -8,12 +8,16 @@ import {
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { InvoiceResponse } from '../../../src/common/interfaces';
+import { DocResponse } from "../../../src/common/models/document";
+import { unflatten } from "../../../src/common/custom-attributes";
 
 export const documentTypes = {
   invoice:
     'http://github.com/centrifuge/centrifuge-protobufs/invoice/#invoice.InvoiceData',
   purchaseOrder:
     'http://github.com/centrifuge/centrifuge-protobufs/purchaseorder/#purchaseorder.PurchaseOrderData',
+  genericDocument:
+    'http://github.com/centrifuge/centrifuge-protobufs/generic/#generic.Generic',
 };
 
 export const eventTypes = {
@@ -36,6 +40,7 @@ export class WebhooksController {
    * @param notification NotificationNotificationMessage - received notification
    */
   @Post()
+  // TODO: refactor/rethink to remove code duplication in functionality
   async receiveMessage(@Body() notification: NotificationNotificationMessage) {
     console.log('Receive Webhook', notification);
     try {
@@ -74,14 +79,35 @@ export class WebhooksController {
             invoice,
             { upsert: true },
           );
-
+          // TODO this should be similar to invoices. We do not care for now.
         } else if (notification.document_type === documentTypes.purchaseOrder) {
           const result = await this.centrifugeService.purchaseOrders.get(
             notification.document_id,
             user.account,
           );
           await this.databaseService.purchaseOrders.insert(result);
-          // TODO this should be similar to invoices. We do not care for now.
+          // FlexDocs
+        } else if (notification.document_type === documentTypes.genericDocument) {
+          const result = await this.centrifugeService.documents.getDocument(
+              notification.document_id,
+              user.account,
+          );
+          const document: DocResponse = {
+            ...result,
+            ownerId: user._id,
+          };
+          const unflattenedAttributes = unflatten(document.attributes)
+
+          await this.databaseService.documents.update(
+              { 'header.document_id': notification.document_id, 'ownerId': user._id },
+              {$set: {
+                header: document.header,
+                data: document.data,
+                attributes: unflattenedAttributes,
+                schema: unflattenedAttributes.schema,
+              }},
+              { upsert: true },
+          );
         }
       }
     } catch (e) {

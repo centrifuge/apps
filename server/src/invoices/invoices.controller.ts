@@ -102,8 +102,8 @@ export class InvoicesController {
    * @async
    * @param {Param} params - the query params
    * @param {Param} request - the http request
-   * @param {PurchaseOrder} updateInvoiceRequest - the updated invoice
-   * @return {Promise<PurchaseOrder>} result
+   * @param {Invoice} updateInvoiceRequest - the updated invoice
+   * @return {Promise<Invoice>} result
    */
   @Put(':id')
   async updateById(
