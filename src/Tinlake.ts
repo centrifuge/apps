@@ -260,6 +260,15 @@ class Tinlake {
       return waitAndReturnEvents(this.eth, txHash, this.contracts['lender'].abi);
     });
   }
+
+  unwhitelist = (loanId: string, registry: string, nft: string, principal: string):
+    Promise<Events> => {
+    return this.contracts.shelf.file(loanId, registry, nft, principal, this.ethConfig)
+      .then((txHash: string) => {
+        console.log(`[Shelf.file] txHash: ${txHash}`);
+        return waitAndReturnEvents(this.eth, txHash, this.contracts['shelf'].abi);
+      });
+  }
 }
 
 const waitAndReturnEvents = (eth: ethI, txHash: string, abi: any) => {

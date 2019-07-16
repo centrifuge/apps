@@ -129,8 +129,62 @@ describe('functional tinlake tests', () => {
     });
   });
 
+  describe.only('tinlake whitelist and unwhitelist', function () {
+    this.timeout(50000);
+    it('whitelist and unwhitelist successful', () => {
+      const tokenID = `0x${Math.floor(Math.random() * (10 ** 15))}`;
+      let loanID: string = '';
+      console.log(`token id: ${tokenID}`);
+      return borrowerTinlake.mintNFT(borrowerEthFrom, tokenID).then((result) => {
+        console.log('mint result');
+        console.log(result.txHash);
+        assert.equal(result.status, SUCCESS_STATUS, 'tx should be successful');
+        assert.equal(result.events[0].event.name, 'Transfer', 'tx should be successful');
+        console.log('-------------------------------------');
+        console.log('admin whitelist NFT');
+        console.log('-------------------------------------');
+
+        return adminTinlake.adminAdmit(contractAddresses['NFT_COLLATERAL'], tokenID, principal,
+                                       borrowerEthFrom);
+      }).then((result) => {
+        console.log('admit result');
+        console.log(result.txHash);
+
+        // parse loanID from event
+        loanID = result.events[0].data[2].toString();
+        console.log(`Loan id: ${loanID}`);
+
+        assert.equal(result.status, SUCCESS_STATUS, 'tx should be successful');
+        assert.equal(result.events[0].event.name, 'Transfer', 'tx should be successful');
+
+        return adminTinlake.adminAppraise(loanID, appraisal);
+      }).then((result: { txHash: any; status: any; }) => {
+        console.log('appraisal results');
+        console.log(result.txHash);
+        assert.equal(result.status, SUCCESS_STATUS, 'tx should be successful');
+
+        console.log('-------------------------------------');
+        console.log('admin unwhitelist NFT');
+        console.log('-------------------------------------');
+
+        return adminTinlake.unwhitelist(loanID, contractAddresses['SHELF'], tokenID, principal);
+      },      (err: any) => {
+        console.log(err);
+        throw err;
+      }).then((result) => {
+        console.log('unwhitelist results');
+        console.log(result.txHash);
+        assert.equal(result.status, SUCCESS_STATUS, 'tx should be successful');
+        assert.equal(result.events[0].event.name, 'Approval', 'tx should be successful');
+      });
+    });
+  });
+
   describe('tinlake call functionality', function () {
     this.timeout(50000);
+
+    // const loanID = '4';
+    // const tokenID = '0x784079192908932';
 
     it('count number of loans', async () => {
       const count = await adminTinlake.loanCount();
@@ -164,6 +218,8 @@ describe('functional tinlake tests', () => {
 
     it('gets the appraisal of a loan', async () => {
       const res = await adminTinlake.getAppraisal(loanID);
+
+      console.log('got appraisal', res.toString());
       assert.equal(res.toString(), appraisal);
     });
   });

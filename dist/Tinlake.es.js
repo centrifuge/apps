@@ -24072,6 +24072,13 @@ var Tinlake = /** @class */ (function () {
                 return waitAndReturnEvents(_this.eth, txHash, _this.contracts['lender'].abi);
             });
         };
+        this.unwhitelist = function (loanId, registry, nft, principal) {
+            return _this.contracts.shelf.file(loanId, registry, nft, principal, _this.ethConfig)
+                .then(function (txHash) {
+                console.log("[Shelf.file] txHash: " + txHash);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['shelf'].abi);
+            });
+        };
         this.contractAbis = contractAbis || {
             nft: contractAbiNft,
             title: contractAbiTitle,

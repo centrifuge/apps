@@ -118,5 +118,6 @@ declare class Tinlake {
     repay: (loanId: string, wad: string, from: string, to: string) => Promise<Events>;
     approveCurrency: (usr: string, wad: string) => Promise<Events>;
     lenderRely: (usr: string) => Promise<Events>;
+    unwhitelist: (loanId: string, registry: string, nft: string, principal: string) => Promise<Events>;
 }
 export default Tinlake;
