@@ -3,7 +3,7 @@ import Tinlake from 'tinlake';
 import Link from 'next/link';
 import { Box, DataTable, Heading, Anchor } from 'grommet';
 import { connect } from 'react-redux';
-import { InternalLoan, LoansState, getLoans } from '../../ducks/loans';
+import { InternalListLoan, LoansState, getLoans } from '../../ducks/loans';
 import SecondaryHeader from '../SecondaryHeader';
 import Address from '../Address';
 import NumberDisplay from '../NumberDisplay';
@@ -43,11 +43,11 @@ class LoanList extends React.Component<Props> {
           { header: 'Loan ID', property: 'loanId', align: 'end' },
           {
             header: 'NFT ID', property: 'tokenId', align: 'end',
-            render: (l: InternalLoan) => <Address address={l.tokenId.toString()} />,
+            render: (l: InternalListLoan) => <Address address={l.tokenId.toString()} />,
           },
           {
             header: 'NFT Owner', property: 'nftOwner', align: 'end',
-            render: (l: InternalLoan) => <div>
+            render: (l: InternalListLoan) => <div>
               <Address address={l.nftOwner} />
               {l.nftOwner === ethFrom && <MeBadge style={{ marginLeft: 5 }} />}
             </div>,
@@ -55,23 +55,23 @@ class LoanList extends React.Component<Props> {
           { header: 'NFT Status', property: 'status' },
           {
             header: 'Principal', property: 'principal', align: 'end',
-            render: (l: InternalLoan) => l.status === 'Whitelisted' ?
+            render: (l: InternalListLoan) => l.status === 'Whitelisted' ?
               <NumberDisplay suffix=" DAI" precision={18} value={baseToDisplay(l.principal, 18)} />
               : '-',
           },
           {
             header: 'Interest rate', property: 'fee', align: 'end',
-            render: (l: InternalLoan) => l.status === 'Repaid' ? '-' :
+            render: (l: InternalListLoan) => l.status === 'Repaid' ? '-' :
               <NumberDisplay suffix="%" value={feeToInterestRate(l.fee)} />,
           },
           {
             header: 'Debt', property: 'debt', align: 'end',
-            render: (l: InternalLoan) => l.status === 'Whitelisted' ? '-' :
+            render: (l: InternalListLoan) => l.status === 'Whitelisted' ? '-' :
               <NumberDisplay suffix=" DAI" precision={18} value={baseToDisplay(l.debt, 18)} />,
           },
           {
             header: 'Actions', property: 'id', align: 'end', sortable: false,
-            render: (l: InternalLoan) =>
+            render: (l: InternalListLoan) =>
               <Link href={`/${mode}/loan?loanId=${l.loanId}`}><Anchor>View</Anchor></Link>,
           },
         ]} />

@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { InternalLoan } from '../../ducks/loans';
+import { InternalListLoan } from '../../ducks/loans';
 import { Box, FormField, TextInput, Heading, Paragraph } from 'grommet';
 import styled from 'styled-components';
 import { formatAddress } from '../../utils/formatAddress';
 import MeBadge from '../MeBadge';
 
 interface Props {
-  loan: InternalLoan;
+  loan: InternalListLoan;
   authedAddr: string;
 }
 

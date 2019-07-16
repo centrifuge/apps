@@ -1,19 +1,19 @@
 import * as React from 'react';
-import { InternalLoan } from '../../ducks/loans';
+import { InternalSingleLoan } from '../../ducks/loans';
 import { Box, FormField, TextInput } from 'grommet';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 import { feeToInterestRate } from '../../utils/feeToInterestRate';
 import { NumberInput } from '@centrifuge/axis-number-input';
 
 interface Props {
-  loan: InternalLoan;
+  loan: InternalSingleLoan;
 }
 
 const none = <TextInput value="-" disabled />;
 
 class LoanData extends React.Component<Props> {
   render() {
-    const { loan: { debt, fee, principal, price } } = this.props;
+    const { loan: { status, debt, fee, principal, appraisal } } = this.props;
 
     return <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
       <Box basis={'1/4'} gap="medium"><FormField label="Debt">
@@ -31,7 +31,7 @@ class LoanData extends React.Component<Props> {
             none}
       </FormField></Box>
       <Box basis={'1/4'} gap="medium"><FormField label="Appraisal Amount">
-        <NumberInput value={baseToDisplay(price, 18)} suffix=" DAI" disabled precision={18} />
+        <NumberInput value={baseToDisplay(appraisal, 18)} suffix=" DAI" disabled precision={18} />
       </FormField></Box>
   </Box>;
   }
