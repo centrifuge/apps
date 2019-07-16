@@ -280,7 +280,7 @@ const waitAndReturnEvents = (eth: ethI, txHash: string, abi: any) => {
 // todo replace with a better polling
 const waitForTransaction = (eth: ethI, txHash: any) => {
   return new Promise((resolve, reject) => {
-    const secMax = 5;
+    const secMax = 60;
     let sec = 0;
     const wait = (txHash: string) => {
       setTimeout(() => {
@@ -295,10 +295,11 @@ const waitForTransaction = (eth: ethI, txHash: any) => {
           }
           console.log(`waiting for tx :${txHash}`);
           sec = sec + 1;
-          if (sec !== secMax) {
+          if (sec < secMax) {
             wait(txHash);
+          } else {
+            reject(`waiting for transaction tx ${tx} timed out after ${secMax} seconds`);
           }
-
         });
       },         1000);
 
