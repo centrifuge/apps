@@ -6,7 +6,7 @@ import { ThunkAction } from 'redux-thunk';
 import { bnToHex } from '../utils/bnToHex';
 
 // Config
-const startingLoanId = 42;
+const startingLoanId = 0;
 
 // Actions
 const LOAD = 'tinlake-ui/loans/LOAD';
