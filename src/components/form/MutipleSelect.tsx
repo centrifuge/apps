@@ -105,6 +105,7 @@ export default class MutipleSelect extends Component<MutipleSelectProps,
                 <Box onClick={
                   (ev) => {
                     ev.stopPropagation();
+                    if(this.props.disabled) return;
                     this.onChange(
                       this.state.selected.filter((selected: any) => {
                           return this.getItemValue(selected) !== this.getItemValue(item);
@@ -113,8 +114,7 @@ export default class MutipleSelect extends Component<MutipleSelectProps,
                     );
 
                   }}>
-                  <Close size={'small'}
-                  />
+                  { !this.props.disabled && <Close size={'small'}/>}
                 </Box>
               </Box>
             ),

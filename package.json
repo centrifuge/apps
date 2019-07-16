@@ -22,6 +22,7 @@
     "grommet": "^2.7.1",
     "grommet-icons": "^4.2.0",
     "hbs": "^4.0.4",
+    "lodash": "^4.17.14",
     "nedb": "1.8.0",
     "nedb-promises": "3.0.3",
     "normalize.css": "^8.0.1",

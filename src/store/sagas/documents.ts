@@ -14,6 +14,9 @@ const documents = {
   'first_id': {
     _id: 'first_id',
     createdAt: '2019-07-09T10:54:59.900Z',
+    header: {
+      read_access: ['0x7c907d059737c821067a5e0beba19ee9242a45cb'],
+    },
     attributes: {
 
       '_schema': {

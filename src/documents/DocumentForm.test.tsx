@@ -43,31 +43,52 @@ describe('DocumentForm', () => {
     {
       _id: 'second_id',
       createdAt: '2019-07-09T10:54:59.900Z',
+      header: {
+        read_access: [
+          '0x111',
+          '0xNotInContacts'
+        ]
+      },
       attributes: {
+
+        ['_schema']: {
+          key:
+            '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
+          type: 'string',
+          value: 'first_schema',
+        },
 
         ['reference_id']: {
           key:
             '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
           type: 'string',
-          value: 'reference nr2',
+          value: 'reference nr1',
         },
 
         ['customer']: {
           key:
             '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
           type: 'string',
-          value: 'some customer2',
+          value: 'some customer',
         },
 
         ['amount']: {
           key:
             '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
-          type: 'integer',
-          value: '101',
+          type: 'decimal',
+          value: '100',
         },
       },
     },
   ];
+
+
+  const contacts = [
+    {
+      name:"My Contact",
+      address:"0x111"
+    }
+  ]
 
 
   const schemas = [
@@ -143,6 +164,14 @@ describe('DocumentForm', () => {
   it('Should render the form with default data', () => {
     const documentForm = mount(
       <DocumentForm document={documents[0]} schemas={schemas} onCancel={onCancel} onSubmit={onSubmit}/>,
+    );
+    expect(documentForm.html()).toMatchSnapshot();
+  });
+
+
+  it('Should render the form with default data also for read access', () => {
+    const documentForm = mount(
+      <DocumentForm document={documents[1]} schemas={schemas} contacts={contacts} onCancel={onCancel} onSubmit={onSubmit}/>,
     );
     expect(documentForm.html()).toMatchSnapshot();
   });

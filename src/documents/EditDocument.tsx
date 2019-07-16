@@ -5,7 +5,6 @@ import { connect } from 'react-redux';
 import DocumentForm from './DocumentForm';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
-import { LabelValuePair } from '../common/interfaces';
 import { Box, Button, Heading } from 'grommet';
 import { documentRoutes } from './routes';
 import { LinkPrevious } from 'grommet-icons';
@@ -14,10 +13,10 @@ import { Preloader } from '../components/Preloader';
 import { RequestState } from '../store/reducers/http-request-reducer';
 import { CoreapiDocumentResponse } from '../../clients/centrifuge-node';
 import { SecondaryHeader } from '../components/SecondaryHeader';
-import { mapContactsToLabelKeyPair } from '../store/derived-data';
 import { getDocumentById, resetGetDocumentById, resetUpdateDocument, updateDocument } from '../store/actions/documents';
 import { getSchemasList, resetGetSchemasList } from '../store/actions/schemas';
 import { Schema } from '../common/models/schema';
+import { Contact } from '../common/models/contact';
 
 type Props = {
   updateDocument: typeof updateDocument;
@@ -30,7 +29,7 @@ type Props = {
   resetGetContacts: typeof getContacts;
   document?: CoreapiDocumentResponse;
   schemas: Schema[];
-  contacts?: LabelValuePair[];
+  contacts?: Contact[];
   loggedInUser: User;
   updatingDocument: RequestState<CoreapiDocumentResponse>;
 } & RouteComponentProps<{ id?: string }>;
@@ -110,7 +109,7 @@ const mapStateToProps = (state) => {
     loggedInUser: state.user.auth.loggedInUser,
     document: state.documents.getById.data,
     updatingDocument: state.documents.update,
-    contacts: mapContactsToLabelKeyPair(state),
+    contacts: state.contacts.get.data,
     schemas: state.schemas.getList.data,
   };
 };

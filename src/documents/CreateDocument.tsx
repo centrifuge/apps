@@ -4,18 +4,18 @@ import { connect } from 'react-redux';
 import DocumentForm from './DocumentForm';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
-import { LabelValuePair } from '../common/interfaces';
 import { Box, Button, Heading } from 'grommet';
 import { LinkPrevious } from 'grommet-icons';
 import { Preloader } from '../components/Preloader';
 import { RequestState } from '../store/reducers/http-request-reducer';
-import { CoreapiDocumentResponse, InvInvoiceData } from '../../clients/centrifuge-node';
+import { CoreapiDocumentResponse } from '../../clients/centrifuge-node';
 import { SecondaryHeader } from '../components/SecondaryHeader';
-import { getUserSchemas, mapContactsToLabelKeyPair } from '../store/derived-data';
+import { getUserSchemas } from '../store/derived-data';
 import { documentRoutes } from './routes';
 import { Schema } from '../common/models/schema';
 import { getSchemasList, resetGetSchemasList } from '../store/actions/schemas';
 import { createDocument, resetCreateDocument } from '../store/actions/documents';
+import { Contact } from '../common/models/contact';
 
 type Props = {
   createDocument: typeof createDocument;
@@ -24,8 +24,8 @@ type Props = {
   resetGetContacts: typeof resetGetContacts;
   getSchemasList: typeof getSchemasList;
   resetGetSchemasList: typeof resetGetSchemasList;
-  creatingDocument: RequestState<InvInvoiceData>;
-  contacts?: LabelValuePair[];
+  creatingDocument: RequestState<CoreapiDocumentResponse>;
+  contacts: Contact[];
   schemas?: Schema[];
 } & RouteComponentProps;
 
@@ -39,7 +39,9 @@ export class CreateDocument extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = {
-      defaultDocument: {},
+      defaultDocument: {
+        attributes: {}
+      },
     };
   }
 
@@ -71,7 +73,7 @@ export class CreateDocument extends React.Component<Props, State> {
     const { creatingDocument, contacts, schemas } = this.props;
     const { defaultDocument } = this.state;
 
-    if (!this.props.contacts || !schemas!.length) {
+    if (!contacts || !schemas!.length) {
       return <Preloader message="Loading"/>;
     }
 
@@ -117,7 +119,7 @@ export class CreateDocument extends React.Component<Props, State> {
 const mapStateToProps = (state) => {
   return {
     creatingDocument: state.documents.create,
-    contacts: mapContactsToLabelKeyPair(state),
+    contacts: state.contacts.get.data,
     schemas: getUserSchemas(state),
   };
 };
