@@ -319,8 +319,10 @@ const waitForTransaction = (eth: ethI, txHash: any) => {
 
 const findEvent = (abi: { filter: (arg0: (item: any) => boolean | undefined) => any[]; },
                    funcSignature: any) => {
-  return abi.filter((item: { type: string; name: string;
-    inputs: { map: (arg0: (input: any) => any) => { join: (arg0: string) => string; }; }; }) => {
+  return abi.filter((item: {
+    type: string; name: string;
+    inputs: { map: (arg0: (input: any) => any) => { join: (arg0: string) => string; }; };
+  }) => {
     if (item.type !== 'event') return false;
     const signature =
       `${item.name}(${item.inputs.map((input: { type: any; }) => input.type).join(',')})`;
@@ -329,8 +331,10 @@ const findEvent = (abi: { filter: (arg0: (item: any) => boolean | undefined) => 
   });
 };
 
-const getEvents = (receipt: { logs:
-                    { length: number; forEach: (arg0: (log: any) => void) => void; }; },
+const getEvents = (receipt: {
+  logs:
+  { length: number; forEach: (arg0: (log: any) => void) => void; };
+},
                    abi: any) => {
   if (receipt.logs.length === 0) {
     return null;
@@ -344,11 +348,11 @@ const getEvents = (receipt: { logs:
       const inputs = event.inputs.filter((input: { indexed: any; }) => input.indexed)
         .map((input: { type: any; }) => input.type);
 
-        // remove 0x prefix from topics
+      // remove 0x prefix from topics
       const topics = log.topics.map((t: { replace: (arg0: string, arg1: string) => void; }) =>
         t.replace('0x', ''));
 
-        // concat topics without first topic (func signature)
+      // concat topics without first topic (func signature)
       const bytes = `0x${topics.slice(1).join('')}`;
 
       const data = abiCoder.decodeParameters(inputs, bytes);

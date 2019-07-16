@@ -129,7 +129,7 @@ describe('functional tinlake tests', () => {
     });
   });
 
-  describe.only('tinlake whitelist and unwhitelist', function () {
+  describe('tinlake whitelist and unwhitelist', function () {
     this.timeout(50000);
     it('whitelist and unwhitelist successful', () => {
       const tokenID = `0x${Math.floor(Math.random() * (10 ** 15))}`;
@@ -175,7 +175,6 @@ describe('functional tinlake tests', () => {
         console.log('unwhitelist results');
         console.log(result.txHash);
         assert.equal(result.status, SUCCESS_STATUS, 'tx should be successful');
-        assert.equal(result.events[0].event.name, 'Approval', 'tx should be successful');
       });
     });
   });

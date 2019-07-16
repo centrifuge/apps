@@ -22658,33 +22658,6 @@ var contractAbiShelf = [
     type: "function"
   },
   {
-    constant: false,
-    inputs: [
-      {
-        name: "loan",
-        type: "uint256"
-      },
-      {
-        name: "registry_",
-        type: "address"
-      },
-      {
-        name: "nft_",
-        type: "uint256"
-      },
-      {
-        name: "principal_",
-        type: "uint256"
-      }
-    ],
-    name: "file",
-    outputs: [
-    ],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
     constant: true,
     inputs: [
     ],
@@ -22837,6 +22810,33 @@ var contractAbiShelf = [
       },
       {
         name: "nft_",
+        type: "uint256"
+      }
+    ],
+    name: "file",
+    outputs: [
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "loan",
+        type: "uint256"
+      },
+      {
+        name: "registry_",
+        type: "address"
+      },
+      {
+        name: "nft_",
+        type: "uint256"
+      },
+      {
+        name: "principal_",
         type: "uint256"
       }
     ],
@@ -23612,12 +23612,58 @@ var contractAbiPile = [
   {
     constant: true,
     inputs: [
+      {
+        name: "fee",
+        type: "uint256"
+      }
+    ],
+    name: "compounding",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      },
+      {
+        name: "",
+        type: "uint256"
+      },
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
     ],
     name: "want",
     outputs: [
       {
         name: "",
         type: "int256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "loan",
+        type: "uint256"
+      }
+    ],
+    name: "burden",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
       }
     ],
     payable: false,
