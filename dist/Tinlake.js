@@ -24033,6 +24033,17 @@ var Tinlake = /** @class */ (function () {
                 return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi);
             });
         };
+        this.getAppraisal = function (loanID) { return __awaiter(_this, void 0, void 0, function () {
+            var res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.contracts.appraiser.value(loanID)];
+                    case 1:
+                        res = _a.sent();
+                        return [2 /*return*/, res['0']];
+                }
+            });
+        }); };
         /**
          * @param to Address that should receive the currency (e. g. DAI)
          */

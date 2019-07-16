@@ -20,6 +20,8 @@ const tokenID = `0x${Math.floor(Math.random() * (10 ** 15))}`;
 let loanID: string;
 
 const gasLimit = 1000000;
+const principal = '100';
+const appraisal = '300';
 
 describe('functional tinlake tests', () => {
   before(() => {
@@ -49,8 +51,6 @@ describe('functional tinlake tests', () => {
 
   describe('tinlake borrow and repay', function () {
     this.timeout(50000);
-    const principal = '100';
-    const appraisal = '300';
     it('borrow and repay successful', () => {
       console.log(`appraisal: ${appraisal}`);
       console.log(`principal: ${principal}`);
@@ -160,6 +160,11 @@ describe('functional tinlake tests', () => {
     it('gets the owner of an nft', async () => {
       const res = await adminTinlake.ownerOfNFT(tokenID);
       assert.equal(typeof res, 'string');
+    });
+
+    it('gets the appraisal of a loan', async () => {
+      const res = await adminTinlake.getAppraisal(loanID);
+      assert.equal(res.toString(), appraisal);
     });
   });
 });

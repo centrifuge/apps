@@ -220,6 +220,11 @@ class Tinlake {
       });
   }
 
+  getAppraisal = async (loanID: string): Promise<BN> => {
+    const res = await this.contracts.appraiser.value(loanID);
+    return res['0'];
+  }
+
   /**
    * @param to Address that should receive the currency (e. g. DAI)
    */
