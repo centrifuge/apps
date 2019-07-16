@@ -6,6 +6,7 @@ import funding from './funding';
 import transferDetails from './transfer-details';
 import notifications from './notifications';
 import schemas from "./schemas";
+import documents from "./documents";
 
 export default function* () {
   yield all([
@@ -30,6 +31,10 @@ export default function* () {
     fork(schemas.watchGetSchema),
     fork(schemas.watchGetSchemasList),
     fork(schemas.watchUpdateSchema),
+    fork(documents.watchCreateDocument),
+    fork(documents.watchGetDocumentById),
+    fork(documents.watchGetDocuments),
+    fork(documents.watchUpdateDocument),
     fork(notifications.watchCloseAlert),
   ]);
 }

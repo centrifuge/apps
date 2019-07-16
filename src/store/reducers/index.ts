@@ -7,6 +7,7 @@ import contacts from './contacts';
 import funding from './funding';
 import transferDetails from './transfer-details';
 import schemas from './schemas';
+import documents from './documents';
 
 import notifications from './notifications';
 
@@ -19,5 +20,6 @@ export default history =>
     funding,
     transferDetails,
     schemas,
+    documents,
     notifications,
   });

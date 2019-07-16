@@ -11,7 +11,7 @@ export const Section = withTheme(props => {
     <Box pad={'medium'} {...rest}>
       <Box direction="row" gap="medium">
         {title &&
-        <Heading margin={{ top: 'none' }} style={{ minWidth: '100px' }} level={headingLevel || 2}>{title}</Heading>}
+        <Heading margin={{ top: 'none' }} style={{ minWidth: '100px' }} level={headingLevel || 5}>{title}</Heading>}
         {collapsibleLabel && (
           <CheckBox
             label={collapsibleLabel}

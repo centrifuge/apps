@@ -18,7 +18,11 @@ import { NotificationProvider } from './notifications/NotificationContext';
 import FundingAgreementList from './invoices/FundingAgreementList';
 import { ConnectedInvoiceView } from './invoices/InvoiceView';
 import { ConnectedNotifications } from './notifications/Notifications';
-import SchemasList from "./admin/schemas/SchemasList";
+import SchemasList from './admin/schemas/SchemasList';
+import ListDocuments from './documents/ListDocuments';
+import CreateDocument from './documents/CreateDocument';
+import ViewDocument from './documents/ViewDocument';
+import EditDocument from './documents/EditDocument';
 
 interface AppPros {
   selectedRoute: string;
@@ -39,17 +43,19 @@ class App extends Component<AppPros> {
     let menuItems: MenuItem[] = [];
     let routeItems: RouteItem[] = [];
 
+
+    //TODO move this a function that generates menuItems and routes items based a user
     if (loggedInUser) {
 
       if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_SCHEMAS)) {
         menuItems.push(
-            { label: 'Schemas', route: routes.schemas.index },
+          { label: 'Schemas', route: routes.schemas.index },
         );
         routeItems.push(
-            {
-              path: routes.schemas.index,
-              component: SchemasList,
-            },
+          {
+            path: routes.schemas.index,
+            component: SchemasList,
+          },
         );
       }
 
@@ -111,6 +117,28 @@ class App extends Component<AppPros> {
         );
       }
 
+      if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS) && loggedInUser.schemas.length) {
+        menuItems.push({ label: 'Documents', route: routes.documents.index });
+        routeItems.push(
+          {
+            path: routes.documents.index,
+            component: ListDocuments,
+          },
+          {
+            path: routes.documents.new,
+            component: CreateDocument,
+          },
+          {
+            path: routes.documents.view,
+            component: ViewDocument,
+          },
+          {
+            path: routes.documents.edit,
+            component: EditDocument,
+          },
+        );
+      }
+
       menuItems.push({ label: 'Log out', route: routes.user.logout, external: true, secondary: true });
 
     }
@@ -119,7 +147,7 @@ class App extends Component<AppPros> {
       <div className="App">
         <AxisTheme full={true}>
           <NotificationProvider>
-            <Box  align="center">
+            <Box align="center">
               <ConnectedNotifications/>
               <Header
                 user={loggedInUser}
@@ -131,8 +159,8 @@ class App extends Component<AppPros> {
                 justify="center"
                 direction="row"
               >
-                <Box width="xlarge" >
-                    <Routing routes={routeItems}/>
+                <Box width="xlarge">
+                  <Routing routes={routeItems}/>
                 </Box>
               </Box>
 

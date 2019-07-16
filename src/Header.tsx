@@ -55,7 +55,7 @@ const Header: FunctionComponent<HeaderProps> = (props) => {
         {menuItems.filter(item => !item.secondary).map((item) => {
             const anchorProps = {
               ...(item.external ? { href: item.route } : { onClick: () => push(item.route) }),
-              ...(selectedRoute === item.route ? { className: 'selected' } : {}),
+              ...(selectedRoute === item.route ? { color: 'selected' } : {}),
             };
             return <Button
               plain

@@ -277,13 +277,16 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                       "top": "bottom",
                                                                     }
                                                                   }
+                                                                  focusIndicator={false}
                                                                   labelKey="label"
                                                                   messages={
                                                                     Object {
                                                                       "multiple": "multiple",
                                                                     }
                                                                   }
+                                                                  onBlur={[Function]}
                                                                   onChange={[Function]}
+                                                                  onFocus={[Function]}
                                                                   onSearch={[Function]}
                                                                   options={
                                                                     Array [
@@ -310,13 +313,16 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                         "top": "bottom",
                                                                       }
                                                                     }
+                                                                    focusIndicator={false}
                                                                     labelKey="label"
                                                                     messages={
                                                                       Object {
                                                                         "multiple": "multiple",
                                                                       }
                                                                     }
+                                                                    onBlur={[Function]}
                                                                     onChange={[Function]}
+                                                                    onFocus={[Function]}
                                                                     onSearch={[Function]}
                                                                     options={
                                                                       Array [
@@ -491,6 +497,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                         "top": "bottom",
                                                                                                       }
                                                                                                     }
+                                                                                                    focusIndicator={false}
                                                                                                     messages={
                                                                                                       Object {
                                                                                                         "enterSelect": "(Press Enter to Select)",
@@ -499,7 +506,9 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                         "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                                       }
                                                                                                     }
+                                                                                                    onBlur={[Function]}
                                                                                                     onClick={[Function]}
+                                                                                                    onFocus={[Function]}
                                                                                                     placeholder="Select"
                                                                                                     plain={true}
                                                                                                     readOnly={true}
@@ -516,6 +525,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                           "top": "bottom",
                                                                                                         }
                                                                                                       }
+                                                                                                      focusIndicator={false}
                                                                                                       messages={
                                                                                                         Object {
                                                                                                           "enterSelect": "(Press Enter to Select)",
@@ -524,7 +534,9 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                           "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                                         }
                                                                                                       }
+                                                                                                      onBlur={[Function]}
                                                                                                       onClick={[Function]}
+                                                                                                      onFocus={[Function]}
                                                                                                       placeholder="Select"
                                                                                                       plain={true}
                                                                                                       readOnly={true}
@@ -542,6 +554,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                           }
                                                                                                         }
                                                                                                         focus={false}
+                                                                                                        focusIndicator={false}
                                                                                                         messages={
                                                                                                           Object {
                                                                                                             "enterSelect": "(Press Enter to Select)",
@@ -570,6 +583,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                             }
                                                                                                           }
                                                                                                           focus={false}
+                                                                                                          focusIndicator={false}
                                                                                                           messages={
                                                                                                             Object {
                                                                                                               "enterSelect": "(Press Enter to Select)",
@@ -599,6 +613,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                               }
                                                                                                             }
                                                                                                             focus={false}
+                                                                                                            focusIndicator={false}
                                                                                                             messages={
                                                                                                               Object {
                                                                                                                 "enterSelect": "(Press Enter to Select)",
@@ -629,6 +644,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                                   autoComplete="off"
                                                                                                                   className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy"
                                                                                                                   focus={false}
+                                                                                                                  focusIndicator={false}
                                                                                                                   messages={
                                                                                                                     Object {
                                                                                                                       "enterSelect": "(Press Enter to Select)",

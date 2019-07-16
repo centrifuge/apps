@@ -27,10 +27,15 @@ export default class MutipleSelect extends Component<MutipleSelectProps,
     };
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({ options: nextProps.options });
+  }
+
   onChange = selected => {
     this.setState(
       {
         selected: selected,
+        options: this.props.options,
 
       },
       () => {
@@ -51,18 +56,18 @@ export default class MutipleSelect extends Component<MutipleSelectProps,
 
 
   getItemValue = (value) => {
-    return this.getItemPropByKey(value,'valueKey');
+    return this.getItemPropByKey(value, 'valueKey');
   };
 
   getItemLabel = (value) => {
-    return this.getItemPropByKey(value,'labelKey');
+    return this.getItemPropByKey(value, 'labelKey');
   };
 
 
   getItemPropByKey = (value, key) => {
-    const prop  = this.props[key];
+    const prop = this.props[key];
     if (!prop) {
-        return value
+      return value;
     } else {
       if (typeof prop === 'function') {
         return prop(value);
