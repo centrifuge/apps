@@ -9,7 +9,10 @@ interface ContractAbis {
     'shelf': any;
     'appraiser': any;
     'lender': any;
+    'collateral': any;
     'pile': any;
+    'pileForAdd': any;
+    'pileForInit': any;
 }
 interface ContractAddresses {
     'APPRAISER': string;
@@ -44,7 +47,10 @@ interface Contracts {
     shelf: any;
     appraiser: any;
     lender: any;
+    collateral: any;
     pile: any;
+    pileForAdd: any;
+    pileForInit: any;
 }
 interface ethI {
     getTransactionReceipt: (arg0: any, arg1: (err: any, receipt: any) => void) => void;
@@ -118,5 +124,13 @@ declare class Tinlake {
     repay: (loanId: string, wad: string, from: string, to: string) => Promise<Events>;
     approveCurrency: (usr: string, wad: string) => Promise<Events>;
     lenderRely: (usr: string) => Promise<Events>;
+    initFee: (fee: string) => Promise<Events>;
+    existsFee: (fee: string) => Promise<boolean>;
+    addFee: (loanId: string, fee: string, balance: string) => Promise<Events>;
+    getCurrentDebt: (loanId: string) => Promise<BN>;
+    unwhitelist: (loanId: string, registry: string, nft: string) => Promise<Events>;
+    getTotalDebt: () => Promise<BN>;
+    getTotalBalance: () => Promise<BN>;
+    getTotalValueOfNFTs: () => Promise<BN>;
 }
 export default Tinlake;
