@@ -8,6 +8,7 @@ import { LinkPrevious } from 'grommet-icons';
 import { NumberInput } from '@centrifuge/axis-number-input';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 import { displayToBase } from '../../utils/displayToBase';
+import { interestRateToFee } from '../../utils/interestRateToFee';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -20,6 +21,7 @@ interface State {
   tokenId: string;
   principal: string;
   appraisal: string;
+  interestRate: string;
   is: 'loading' | 'success' | 'error' | null;
   errorMsg: string;
 }
@@ -29,6 +31,7 @@ class WhitelistNFT extends React.Component<Props, State> {
     tokenId: '',
     principal: '100000000000000000000',
     appraisal: '300000000000000000000',
+    interestRate: '5',
     is: null,
     errorMsg: '',
   };
@@ -41,7 +44,7 @@ class WhitelistNFT extends React.Component<Props, State> {
     this.setState({ is: 'loading' });
 
     const { tinlake } = this.props;
-    const { tokenId, principal, appraisal } = this.state;
+    const { tokenId, principal, appraisal, interestRate } = this.state;
     const addresses = tinlake.contractAddresses;
 
     try {
@@ -70,12 +73,36 @@ class WhitelistNFT extends React.Component<Props, State> {
 
       console.log('appraisal results');
       console.log(res3.txHash);
-
       if (res3.status !== SUCCESS_STATUS) {
         console.log(res3);
         this.setState({ is: 'error', errorMsg: JSON.stringify(res3) });
         return;
       }
+
+      // init fee
+      const fee = interestRateToFee(interestRate);
+      const feeExists = await tinlake.existsFee(fee);
+      if (!feeExists) {
+        console.log(`Fee ${fee} does not yet exist, create it`);
+        const res4 = await tinlake.initFee(fee);
+        if (res4.status !== SUCCESS_STATUS) {
+          console.log(res4);
+          this.setState({ is: 'error', errorMsg: JSON.stringify(res4) });
+          return;
+        }
+        console.log('Fee created');
+      } else {
+        console.log(`Fee ${fee} already exists`);
+      }
+
+      // add fee
+      const res5 = await tinlake.addFee(loanId, fee, '0');
+      if (res5.status !== SUCCESS_STATUS) {
+        console.log(res5);
+        this.setState({ is: 'error', errorMsg: JSON.stringify(res5) });
+        return;
+      }
+      console.log('Fee added');
 
       this.setState({ is: 'success' });
     } catch (e) {
@@ -85,7 +112,9 @@ class WhitelistNFT extends React.Component<Props, State> {
   }
 
   render() {
-    const { tokenId, principal, appraisal, is, errorMsg } = this.state;
+    const { tokenId, principal, appraisal, interestRate, is, errorMsg } = this.state;
+
+    console.log({ interestRate });
 
     return <Box>
       <SecondaryHeader>
@@ -140,7 +169,20 @@ class WhitelistNFT extends React.Component<Props, State> {
               />
             </FormField>
           </Box>
-          <Box basis={'1/4'} gap="medium" />
+          <Box basis={'1/4'} gap="medium">
+            <FormField label="Interest Rate (Yearly)">
+              <NumberInput
+                value={interestRate} suffix=" %" precision={2}
+                onChange={(masked: string, float: number) => {
+                  if (float !== undefined) {
+                    console.log({ masked, float });
+                    this.setState({ interestRate: `${float}` });
+                  }
+                }}
+                disabled={is === 'loading' || is === 'success'}
+              />
+            </FormField>
+          </Box>
         </Box>
       </Box>
     </Box>;
