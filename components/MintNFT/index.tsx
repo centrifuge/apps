@@ -72,7 +72,7 @@ class MintNFT extends React.Component<Props, State> {
           {errorMsg && <div><br />{errorMsg}</div>}
         </Alert>}
 
-        <Alert type="info">
+        <Alert type="info" margin={{ vertical: 'medium' }}>
           This is a temporary page that will be removed once integrated with Centrifuge Gateway.
         </Alert>
 
