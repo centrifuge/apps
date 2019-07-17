@@ -83,7 +83,7 @@ class LoanRepay extends React.Component<Props, State> {
         return;
       }
 
-      getLoan!(tinlake, loanId, true);
+      await getLoan!(tinlake, loanId, true);
 
       this.setState({ is: 'success' });
     } catch (e) {
