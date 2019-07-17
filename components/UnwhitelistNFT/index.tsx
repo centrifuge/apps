@@ -3,7 +3,7 @@ import Tinlake from 'tinlake';
 import { LoansState, getLoan } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
-import { Box, Button, Heading, Text } from 'grommet';
+import { Box, Button, Heading, Text, FormField, TextInput } from 'grommet';
 import LoanNftData from '../LoanNftData';
 import { bnToHex } from '../../utils/bnToHex';
 import SecondaryHeader from '../SecondaryHeader';
@@ -95,7 +95,7 @@ class UnwhitelistNFT extends React.Component<Props, State> {
       </SecondaryHeader>
 
       <Box pad={{ horizontal: 'medium' }}>
-        {is === 'loading' && 'Borrowing...'}
+        {is === 'loading' && 'Unwhitelisting...'}
         {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
           Successfully unwhitelisted NFT for Loan ID {loanId}</Alert>}
         {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
@@ -103,6 +103,15 @@ class UnwhitelistNFT extends React.Component<Props, State> {
             Error unwhitelisting NFT for Loan ID {loanId}, see console for details</Text>
           {errorMsg && <div><br />{errorMsg}</div>}
         </Alert>}
+
+        <Box direction="row" gap="medium" margin={{ vertical: 'medium', top: 'large' }}>
+          <Box basis={'1/4'} gap="medium"><FormField label="Loan ID">
+            <TextInput value={loanId} disabled /></FormField></Box>
+          <Box basis={'1/4'} gap="medium"><FormField label="Loan Status">
+            <TextInput value={status} disabled /></FormField></Box>
+          <Box basis={'1/4'} gap="medium" />
+          <Box basis={'1/4'} gap="medium" />
+        </Box>
 
         <LoanData loan={singleLoan!} />
 
