@@ -17,6 +17,12 @@ import contractAbiShelf from './abi/Shelf.abi.json';
 import contractAbiAppraiser from './abi/Appraiser.abi.json';
 import contractAbiLender from './abi/MakerAdapter.abi.json';
 import contractAbiPile from './abi/Pile.abi.json';
+// the following are just different orders of the methods in the ABI file. Reason is that ethjs
+// does not expose overloaded methods under different keys,
+// but instead just uses the last method, e. g. `file`. The following ABIs put the needed `file`
+// method last.
+import contractAbiPileForAdd from './abi/PileForAdd.json';
+import contractAbiPileForInit from './abi/PileForInit.abi.json';
 // tslint:enable:import-name
 
 interface ContractAbis {
@@ -30,6 +36,8 @@ interface ContractAbis {
   'appraiser': any;
   'lender': any;
   'pile': any;
+  'pileForAdd': any;
+  'pileForInit': any;
 }
 
 interface ContractAddresses {
@@ -68,6 +76,8 @@ interface Contracts {
   appraiser: any;
   lender: any;
   pile: any;
+  pileForAdd: any;
+  pileForInit: any;
 }
 
 // tslint:disable-next-line:class-name
@@ -125,6 +135,8 @@ class Tinlake {
       appraiser: contractAbiAppraiser,
       lender: contractAbiLender,
       pile: contractAbiPile,
+      pileForAdd: contractAbiPileForAdd,
+      pileForInit: contractAbiPileForInit,
     };
     this.contractAddresses = contractAddresses;
     this.provider = provider;
@@ -152,6 +164,10 @@ class Tinlake {
       lender: this.eth.contract(this.contractAbis.lender)
         .at(this.contractAddresses['LENDER']),
       pile: this.eth.contract(this.contractAbis.pile)
+        .at(this.contractAddresses['PILE']),
+      pileForAdd: this.eth.contract(this.contractAbis.pileForAdd)
+        .at(this.contractAddresses['PILE']),
+      pileForInit: this.eth.contract(this.contractAbis.pileForInit)
         .at(this.contractAddresses['PILE']),
     };
   }
@@ -259,6 +275,32 @@ class Tinlake {
       console.log(`[Lender.rely] txHash: ${txHash}`);
       return waitAndReturnEvents(this.eth, txHash, this.contracts['lender'].abi);
     });
+  }
+
+  initFee = (fee: string): Promise<Events> => {
+    return this.contracts.pileForInit.file(fee, fee, this.ethConfig)
+      .then((txHash: string) => {
+        console.log(`[Pile.file] txHash: ${txHash}`);
+        return waitAndReturnEvents(this.eth, txHash, this.contracts.pileForInit.abi);
+      });
+  }
+
+  existsFee = async (fee: string): Promise<boolean> => {
+    const res: { speed: BN } = await this.contracts.pile.fees(fee);
+    return !res.speed.isZero();
+  }
+
+  addFee = (loanId: string, fee: string, balance: string): Promise<Events> => {
+    return this.contracts.pileForAdd.file(loanId, fee, balance, this.ethConfig)
+      .then((txHash: string) => {
+        console.log(`[Pile.file] txHash: ${txHash}`);
+        return waitAndReturnEvents(this.eth, txHash, this.contracts.pileForAdd.abi);
+      });
+  }
+
+  getCurrentDebt = async (loanId: string): Promise<BN> => {
+    const res = await this.contracts.pile.burden(loanId);
+    return res['0'];
   }
 
   unwhitelist = (loanId: string, registry: string, nft: string, principal: string):
