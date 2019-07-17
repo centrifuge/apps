@@ -22,25 +22,31 @@ class ConnectedLoginPage extends React.Component<ConnectedLoginPageProps> {
 
   render() {
 
-    const {auth} = this.props;
+    const { auth } = this.props;
 
     if (!!auth.loggedInUser) {
-      switch (auth.loggedInUser.permissions[0]) {
-        case PERMISSIONS.CAN_CREATE_INVOICES: {
-          return <Redirect to={routes.invoices.index}/>;
-        }
-        case PERMISSIONS.CAN_FUND_INVOICES: {
-          return <Redirect to={routes.funding.index}/>;
-        }
-        case PERMISSIONS.CAN_MANAGE_USERS: {
-          return <Redirect to={routes.user.index}/>;
-        }
+
+      if (auth.loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
+        return <Redirect to={routes.user.index}/>;
       }
-    } else {
-      return (
-        <LoginForm error={auth.error} onSubmit={this.login}/>
-      );
+
+      if (auth.loggedInUser.permissions.includes(PERMISSIONS.CAN_VIEW_DOCUMENTS) ||
+        auth.loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)) {
+        return <Redirect to={routes.documents.index}/>;
+      }
+
+      if (auth.loggedInUser.permissions.includes(PERMISSIONS.CAN_CREATE_INVOICES)) {
+        return <Redirect to={routes.invoices.index}/>;
+      }
+
+      if (auth.loggedInUser.permissions.includes(PERMISSIONS.CAN_FUND_INVOICES)) {
+        return <Redirect to={routes.funding.index}/>;
+      }
     }
+
+    return (
+      <LoginForm error={auth.error} onSubmit={this.login}/>
+    );
   }
 }
 

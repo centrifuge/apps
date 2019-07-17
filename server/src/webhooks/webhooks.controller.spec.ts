@@ -4,7 +4,7 @@ import { databaseServiceProvider } from '../database/database.providers';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { DatabaseService } from '../database/database.service';
 import { User } from '../../../src/common/models/user';
-import { centrifugeServiceProvider } from "../centrifuge-client/centrifuge.module";
+import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.module';
 
 describe('WebhooksController', () => {
   let webhooksModule: TestingModule;
@@ -24,7 +24,7 @@ describe('WebhooksController', () => {
         centrifugeServiceProvider,
       ],
     })
-    .compile();
+      .compile();
 
 
     const databaseService = webhooksModule.get<DatabaseService>(DatabaseService);
@@ -58,12 +58,16 @@ describe('WebhooksController', () => {
 
       expect(result).toEqual('OK');
       expect(centrifugeSpies.spyInvGet).toHaveBeenCalledWith(
-         documentId, user.account
+        documentId, user.account,
       );
 
       expect(invoiceSpies.spyUpdate).toHaveBeenCalledWith(
-        {"header.document_id": "112233", "ownerId": "id01"},
-        {"data": {"currency": "USD"}, "header": {"document_id": "112233", "nfts": [{"owner": "owner", "token_id": "token_id"}]}, "ownerId": "id01"},
+        { 'header.document_id': '112233', 'ownerId': 'id01' },
+        {
+          'data': { 'currency': 'USD' },
+          'header': { 'document_id': '112233', 'nfts': [{ 'owner': 'owner', 'token_id': 'token_id' }] },
+          'ownerId': 'id01',
+        },
         { upsert: true },
       );
     });
@@ -79,9 +83,10 @@ describe('WebhooksController', () => {
           event_type: eventTypes.DOCUMENT,
           document_type: documentTypes.invoice,
           document_id: documentId,
+          to_id: '0x4444',
         });
       } catch (e) {
-        expect(e.message).toEqual('Webhook Error');
+        expect(e.message).toEqual('Webhook Error: User is not present in database');
       }
     });
   });
@@ -105,7 +110,7 @@ describe('WebhooksController', () => {
         user.account,
       );
       expect(poSpies.spyInsert).toHaveBeenCalledWith(
-        user.account
+        user.account,
       );
     });
   });

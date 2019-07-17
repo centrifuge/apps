@@ -89,11 +89,11 @@ export class WebhooksController {
           // FlexDocs
         } else if (notification.document_type === documentTypes.genericDocument) {
           const result = await this.centrifugeService.documents.getDocument(
-              notification.document_id,
               user.account,
+              notification.document_id,
           );
-          const unflattenedAttributes = unflatten(result.attributes)
 
+          const unflattenedAttributes = unflatten(result.attributes)
           await this.databaseService.documents.update(
               { 'header.document_id': notification.document_id, 'ownerId': user._id },
               {$set: {
@@ -101,14 +101,14 @@ export class WebhooksController {
                 header: result.header,
                 data: result.data,
                 attributes: unflattenedAttributes,
-                schema: unflattenedAttributes.schema,
+                scheme: result.scheme,
               }},
               { upsert: true },
           );
         }
       }
     } catch (e) {
-      throw new Error('Webhook Error');
+      throw new Error(`Webhook Error: ${e.message}`);
     }
     return 'OK';
   }

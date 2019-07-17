@@ -36,15 +36,15 @@ export default class UserForm extends React.Component<InviteProps> {
         .required('This field is required'),
       schemas: Yup.array()
         .test({
-          name:'test_schemas',
-          test:(function(this ,value) {
-            if(this.parent.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)) {
-              return (value && value.length)
+          name: 'test_schemas',
+          test: (function(this, value) {
+            if (this.parent.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)) {
+              return (value && value.length);
             }
             return true;
           }),
-          message:'This field is required'
-        })
+          message: 'This field is required',
+        }),
     });
 
     const { user, schemas } = this.props;
@@ -57,13 +57,14 @@ export default class UserForm extends React.Component<InviteProps> {
       PERMISSIONS.CAN_MANAGE_USERS,
       PERMISSIONS.CAN_MANAGE_SCHEMAS,
       PERMISSIONS.CAN_MANAGE_DOCUMENTS,
+      PERMISSIONS.CAN_VIEW_DOCUMENTS,
     ];
 
 
     const schemaOptions = schemas.map(i => i.name);
 
     return (
-      <Box  margin={{ vertical: 'medium' }}>
+      <Box margin={{ vertical: 'medium' }}>
         <Formik
           initialValues={user}
           validateOnBlur={submitted}
@@ -122,7 +123,7 @@ export default class UserForm extends React.Component<InviteProps> {
                         options={permissionOptions}
                         onChange={(selection) => {
                           setFieldValue('permissions', selection);
-                          if(!selection.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)) {
+                          if (!selection.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)) {
                             setFieldValue('schemas', []);
                           }
                         }}

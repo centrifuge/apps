@@ -44,7 +44,7 @@ class App extends Component<AppPros> {
     let routeItems: RouteItem[] = [];
 
 
-    //TODO move this a function that generates menuItems and routes items based a user
+    //TODO move this a function that generates menuItems and routes items based on a user
     if (loggedInUser) {
 
       if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_SCHEMAS)) {
@@ -117,27 +117,41 @@ class App extends Component<AppPros> {
         );
       }
 
-      if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS) && loggedInUser.schemas.length) {
+
+      if (loggedInUser.permissions.includes(PERMISSIONS.CAN_VIEW_DOCUMENTS) || loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)) {
         menuItems.push({ label: 'Documents', route: routes.documents.index });
+
+        // The order is important and the path are similar and routes will match first route it finds
+        // documents/new can match documents/{id} if the routes is declared after
+        if (loggedInUser.schemas.length) {
+          routeItems.push(
+            {
+              path: routes.documents.new,
+              component: CreateDocument,
+            },
+            {
+              path: routes.documents.edit,
+              component: EditDocument,
+            },
+          );
+
+        }
+
         routeItems.push(
           {
             path: routes.documents.index,
             component: ListDocuments,
           },
           {
-            path: routes.documents.new,
-            component: CreateDocument,
-          },
-          {
             path: routes.documents.view,
             component: ViewDocument,
           },
-          {
-            path: routes.documents.edit,
-            component: EditDocument,
-          },
         );
+
+
       }
+
+
 
       menuItems.push({ label: 'Log out', route: routes.user.logout, external: true, secondary: true });
 

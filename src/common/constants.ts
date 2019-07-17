@@ -28,7 +28,7 @@ export const ROUTES = Object.freeze({
   PURCHASE_ORDERS: `${API_BASE}/purchase_orders`,
   TRANSFER_DETAILS: `${API_BASE}/transfer_details`,
   SCHEMAS: `${API_BASE}/schemas`,
-  DOCUMENTS:  `${API_BASE}/documents`
+  DOCUMENTS: `${API_BASE}/documents`,
 });
 
 export enum PERMISSIONS {
@@ -37,5 +37,6 @@ export enum PERMISSIONS {
   CAN_MANAGE_USERS = 'can_manage_users',
   CAN_MANAGE_ACCOUNTS = 'can_manage_accounts',
   CAN_MANAGE_SCHEMAS = 'can_manage_schemas',
-  CAN_MANAGE_DOCUMENTS = 'can_manage_documents'
+  CAN_MANAGE_DOCUMENTS = 'can_manage_documents',
+  CAN_VIEW_DOCUMENTS = 'can_view_documents'
 }
