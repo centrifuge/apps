@@ -8,7 +8,7 @@ import {
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { InvoiceResponse } from '../../../src/common/interfaces';
-import { DocResponse } from "../../../src/common/models/document";
+import { Document } from "../../../src/common/models/document";
 import { unflatten } from "../../../src/common/custom-attributes";
 
 export const documentTypes = {

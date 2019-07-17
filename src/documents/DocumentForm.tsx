@@ -3,7 +3,7 @@ import { Box, FormField, TextInput } from 'grommet';
 import { Formik } from 'formik';
 
 import * as Yup from 'yup';
-import { CoreapiDocumentResponse } from '../../clients/centrifuge-node';
+import { Document } from '../common/models/document';
 import { Attribute, Schema } from '../common/models/schema';
 import SearchSelect from '../components/form/SearchSelect';
 import { NumberInput } from '@centrifuge/axis-number-input';
@@ -14,12 +14,12 @@ import { Contact } from '../common/models/contact';
 import MutipleSelect from '../components/form/MutipleSelect';
 
 type Props = {
-  onSubmit?: (document: CoreapiDocumentResponse) => void;
+  onSubmit?: (document: Document) => void;
   contacts: Contact[];
   schemas: Schema[],
   mode?: 'edit' | 'view' | 'create',
   editMode?: boolean,
-  document: CoreapiDocumentResponse;
+  document: Document;
 };
 
 type State = {
@@ -151,7 +151,7 @@ export class DocumentForm extends React.Component<Props, State> {
 
     // Handle cent ids that are not in contacts
     document.header.read_access.forEach(centId => {
-      if(!contacts.find(c => c.address === centId)) {
+      if(!contacts.find(c => c.address!.toLowerCase() === centId.toLowerCase())) {
         contacts.push({
           name:centId,
           address:centId,
@@ -222,7 +222,7 @@ export class DocumentForm extends React.Component<Props, State> {
                             options={contacts}
                             selected={
                               get(values, 'header.read_access').map(v => {
-                                return contacts.find(c => c.address === v);
+                                return contacts.find(c => c.address!.toLowerCase() === v.toLowerCase());
                               })
                             }
                             onChange={(selection) => {
@@ -292,7 +292,9 @@ export class DocumentForm extends React.Component<Props, State> {
                 name={`${key}`}
                 precision={2}
                 onChange={(masked, value) => {
-                  setFieldValue(`${key}`, value);
+                  //TODO there is a problem with onChange for NumberInput
+                  // It fires 2 times. First with the event so value is undefined
+                  setFieldValue(`${key}`, value && value.toString());
                 }}
               />;
 

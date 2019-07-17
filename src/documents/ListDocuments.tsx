@@ -5,17 +5,17 @@ import { Anchor, Box, Button, DataTable, Heading } from 'grommet';
 import { documentRoutes } from './routes';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { formatDate } from '../common/formaters';
-import { Preloader } from '../components/Preloader';
-import { CoreapiDocumentResponse } from '../../clients/centrifuge-node';
+import { Document } from '../common/models/document';
 import { SecondaryHeader } from '../components/SecondaryHeader';
 import { getDocuments, resetGetDocuments } from '../store/actions/documents';
 import { User } from '../common/models/user';
+import { Preloader } from '../components/Preloader';
 
 
 type Props = {
   getDocuments: typeof getDocuments;
   resetGetDocuments: typeof resetGetDocuments;
-  documents: CoreapiDocumentResponse[];
+  documents: Document[];
   loading: boolean;
   loggedInUser: User;
   error: any;

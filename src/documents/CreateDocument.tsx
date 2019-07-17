@@ -8,7 +8,6 @@ import { Box, Button, Heading } from 'grommet';
 import { LinkPrevious } from 'grommet-icons';
 import { Preloader } from '../components/Preloader';
 import { RequestState } from '../store/reducers/http-request-reducer';
-import { CoreapiDocumentResponse } from '../../clients/centrifuge-node';
 import { SecondaryHeader } from '../components/SecondaryHeader';
 import { getUserSchemas } from '../store/derived-data';
 import { documentRoutes } from './routes';
@@ -16,6 +15,7 @@ import { Schema } from '../common/models/schema';
 import { getSchemasList, resetGetSchemasList } from '../store/actions/schemas';
 import { createDocument, resetCreateDocument } from '../store/actions/documents';
 import { Contact } from '../common/models/contact';
+import { Document } from '../common/models/document';
 
 type Props = {
   createDocument: typeof createDocument;
@@ -24,14 +24,14 @@ type Props = {
   resetGetContacts: typeof resetGetContacts;
   getSchemasList: typeof getSchemasList;
   resetGetSchemasList: typeof resetGetSchemasList;
-  creatingDocument: RequestState<CoreapiDocumentResponse>;
+  creatingDocument: RequestState<Document>;
   contacts: Contact[];
   schemas?: Schema[];
 } & RouteComponentProps;
 
 
 type State = {
-  defaultDocument: CoreapiDocumentResponse
+  defaultDocument: Document
 }
 
 export class CreateDocument extends React.Component<Props, State> {
@@ -40,7 +40,7 @@ export class CreateDocument extends React.Component<Props, State> {
     super(props);
     this.state = {
       defaultDocument: {
-        attributes: {}
+        attributes: {},
       },
     };
   }
@@ -57,7 +57,7 @@ export class CreateDocument extends React.Component<Props, State> {
     this.props.resetGetContacts();
   }
 
-  createDocument = (document: CoreapiDocumentResponse) => {
+  createDocument = (document: Document) => {
     this.props.createDocument(document);
     this.setState({
       defaultDocument: document,

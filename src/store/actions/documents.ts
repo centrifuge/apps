@@ -1,5 +1,5 @@
 import { getActions } from './action-type-generator';
-import { CoreapiDocumentResponse } from '../../../clients/centrifuge-node';
+import { Document } from '../../common/models/document';
 
 const CREATE_DOCUMENT_BASE_TYPE = 'CREATE_DOCUMENT_ACTION';
 const UPDATE_DOCUMENT_BASE_TYPE = 'UPDATE_DOCUMENT_ACTION';
@@ -15,12 +15,12 @@ function action(type, payload = {}) {
   return { type, ...payload };
 }
 
-export const createDocument = (document: CoreapiDocumentResponse) =>
+export const createDocument = (document: Document) =>
   action(createDocumentAction.start, { document });
 export const clearCreateDocumentError = () => action(createDocumentAction.clearError);
 export const resetCreateDocument = () => action(createDocumentAction.reset);
 
-export const updateDocument = (document: CoreapiDocumentResponse) =>
+export const updateDocument = (document: Document) =>
   action(updateDocumentAction.start, { document });
 export const clearUpdateDocumentError = () => action(updateDocumentAction.clearError);
 export const resetUpdateDocument = () => action(updateDocumentAction.reset);

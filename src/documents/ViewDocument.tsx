@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Button, Heading } from 'grommet';
 import { connect } from 'react-redux';
-import { CoreapiDocumentResponse } from '../../clients/centrifuge-node';
+import { Document } from '../common/models/document';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { LinkPrevious } from 'grommet-icons';
@@ -24,7 +24,7 @@ type Props = {
   resetGetContacts: typeof resetGetContacts;
   getSchemasList: typeof getSchemasList
   resetGetSchemasList: typeof resetGetSchemasList
-  document: CoreapiDocumentResponse & { _id: string };
+  document: Document & { _id: string };
   contacts: Contact[];
   schemas: Schema[];
 

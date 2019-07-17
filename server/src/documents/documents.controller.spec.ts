@@ -1,17 +1,19 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { Document } from "../../../src/common/models/document";
-import { SessionGuard } from "../auth/SessionGuard";
-import { databaseServiceProvider } from "../database/database.providers";
-import { DatabaseService } from "../database/database.service";
-import { DocumentsController } from "./documents.controller";
-import { centrifugeServiceProvider } from "../centrifuge-client/centrifuge.module";
-import { CoreapiCreateDocumentRequest } from "../../../clients/centrifuge-node";
+import { Test, TestingModule } from '@nestjs/testing';
+import { Document } from '../../../src/common/models/document';
+import { SessionGuard } from '../auth/SessionGuard';
+import { databaseServiceProvider } from '../database/database.providers';
+import { DatabaseService } from '../database/database.service';
+import { DocumentsController } from './documents.controller';
+import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.module';
+import { CoreapiCreateDocumentRequest } from '../../../clients/centrifuge-node';
 
 describe('DocumentsController', () => {
   let documentsModule: TestingModule;
   const documentToCreate: Document = {
-    read_access: ['0x111'],
-    write_access: ['0x222'],
+    header: {
+      read_access: ['0x111'],
+      write_access: ['0x222'],
+    },
     'attributes': {
       'animal_type': {
         'type': 'string',
@@ -23,27 +25,29 @@ describe('DocumentsController', () => {
       },
       'schema': {
         'type': 'string',
-        'value': 'zoology'
-      }
-    }
+        'value': 'zoology',
+      },
+    },
   };
 
   const documentToInsert: Document = {
-    read_access: ['0x111'],
-    write_access: ['0x222'],
+    header: {
+      read_access: ['0x111'],
+      write_access: ['0x222'],
+    },
     'attributes': {
-    'animal_type': {
-      'type': 'string',
-      'value': 'iguana',
-    },
-     'diet': {
-      'type': 'string',
-      'value': 'insects',
-    },
+      'animal_type': {
+        'type': 'string',
+        'value': 'iguana',
+      },
+      'diet': {
+        'type': 'string',
+        'value': 'insects',
+      },
       'schema': {
-      'type': 'string',
-      'value': 'zoology'
-      }
+        'type': 'string',
+        'value': 'zoology',
+      },
     },
   };
 
@@ -72,25 +76,25 @@ describe('DocumentsController', () => {
     databaseSpies.spyFindOne = jest.spyOn(databaseService.documents, 'findOne');
     databaseSpies.spyInsert = jest.spyOn(databaseService.documents, 'insert');
     databaseSpies.spyUpdate = jest.spyOn(databaseService.documents, 'update');
-    databaseSpies.spyGetAll = jest.spyOn(databaseService.documents , 'getCursor');
+    databaseSpies.spyGetAll = jest.spyOn(databaseService.documents, 'getCursor');
   });
 
   describe('create', () => {
     it('should return the created document', async () => {
       const documentsController = documentsModule.get<DocumentsController>(
-          DocumentsController,
+        DocumentsController,
       );
 
       const payload: CoreapiCreateDocumentRequest = {
         ...documentToCreate,
       };
       const result = await documentsController.create(
-          {user: {_id: 'user_id'}},
-          payload
+        { user: { _id: 'user_id' } },
+        payload,
       );
 
       expect(result).toMatchObject({
-          ...documentToCreate,
+        ...documentToCreate,
         header: {
           job_id: 'some_job_id',
         },
@@ -99,13 +103,13 @@ describe('DocumentsController', () => {
 
       expect(databaseSpies.spyInsert).toHaveBeenCalledTimes(1);
     });
-  })
+  });
 
   describe('get documents list', () => {
 
     it('should get the list of documents from the database', async () => {
       const documentsController = documentsModule.get<DocumentsController>(
-          DocumentsController,
+        DocumentsController,
       );
 
       const payload: CoreapiCreateDocumentRequest = {
@@ -113,17 +117,15 @@ describe('DocumentsController', () => {
       };
 
       await documentsController.create(
-          {user: {_id: 'user_id'}},
-          payload
+        { user: { _id: 'user_id' } },
+        payload,
       );
 
-      payload.attributes = {
-
-      };
+      payload.attributes = {};
 
       await documentsController.create(
-          {user: {_id: 'user_id'}},
-          payload,
+        { user: { _id: 'user_id' } },
+        payload,
       );
 
 
@@ -138,7 +140,7 @@ describe('DocumentsController', () => {
   describe('update', function() {
     it('should update the specified document', async function() {
       const documentsController = documentsModule.get<DocumentsController>(
-          DocumentsController,
+        DocumentsController,
       );
 
       const updatedDocument: Document = {
@@ -146,53 +148,73 @@ describe('DocumentsController', () => {
       };
 
       const updateResult = await documentsController.updateById(
-          { id: insertedDocument._id },
-          { user: { _id: 'user_id', account: '0x4441122' } },
-          { ...updatedDocument },
+        { id: insertedDocument._id },
+        { user: { _id: 'user_id', account: '0x4441122' } },
+        { ...updatedDocument },
       );
 
       expect(databaseSpies.spyFindOne).toHaveBeenCalledWith({
         _id: insertedDocument._id,
-        ownerId: 'user_id',
       });
       expect(databaseSpies.spyUpdate).toHaveBeenCalledWith(
-          {_id: insertedDocument._id},
-          {"$set":
-                {"attributes":
-                      {"animal_type":
-                            {"type": "string", "value": "iguana"},
-                        "diet": {"type": "string", "value": "insects"},
-                        "schema": {"type": "string", "value": "zoology"}
-                        },
-                  "data": undefined,
-                  "header": {"job_id": "some_job_id"},
-                  "schema": {"type": "string", "value": "zoology"}
-                }
-          },
-          {"returnUpdatedDocs": true, "upsert": false}
+        { _id: insertedDocument._id },
+        {
+          '$set':
+            {
+              'attributes':
+                {
+                  'animal_type':
+                    { 'type': 'string', 'value': 'iguana' },
+                  'diet': { 'type': 'string', 'value': 'insects' },
+                  'schema': { 'type': 'string', 'value': 'zoology' },
+                },
+
+              'header': { 'job_id': 'some_job_id' },
+            },
+        },
+        { 'returnUpdatedDocs': true, 'upsert': false },
       );
       expect(updateResult!.attributes).toMatchObject({
         ...updatedDocument.attributes,
       });
+    });
+
+    it('should throw and error because the document does not exist', async function() {
+      const documentsController = documentsModule.get<DocumentsController>(
+        DocumentsController,
+      );
+
+      const updatedDocument: Document = {
+        ...documentToCreate,
+      };
+      await expect(
+        documentsController.updateById(
+          { id: "someID" },
+          { user: { _id: 'user_id', account: '0x4441122' } },
+          { ...updatedDocument },
+        ),
+      ).rejects.toThrow(
+        `Can not find document #someID in the database`
+      );
     });
   });
 
   describe('get by id', function() {
     it('should return the invoice by id', async function() {
       const documentsController = documentsModule.get<DocumentsController>(
-          DocumentsController,
+        DocumentsController,
       );
 
       const result = await documentsController.getById(
-          { id: insertedDocument._id },
-          { user: { _id: 'user_id' } },
+        { id: insertedDocument._id },
+        { user: { _id: 'user_id' } },
       );
       expect(databaseSpies.spyFindOne).toHaveBeenCalledWith({
         _id: insertedDocument._id,
         ownerId: 'user_id',
       });
 
-      expect(result!.attributes).toMatchObject(insertedDocument.attributes)
+      expect(result!.attributes).toMatchObject(insertedDocument.attributes);
     });
   });
 });

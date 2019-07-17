@@ -11,7 +11,7 @@ import { LinkPrevious } from 'grommet-icons';
 import { User } from '../common/models/user';
 import { Preloader } from '../components/Preloader';
 import { RequestState } from '../store/reducers/http-request-reducer';
-import { CoreapiDocumentResponse } from '../../clients/centrifuge-node';
+import { Document } from '../common/models/document';
 import { SecondaryHeader } from '../components/SecondaryHeader';
 import { getDocumentById, resetGetDocumentById, resetUpdateDocument, updateDocument } from '../store/actions/documents';
 import { getSchemasList, resetGetSchemasList } from '../store/actions/schemas';
@@ -27,11 +27,11 @@ type Props = {
   resetGetSchemasList: typeof resetGetSchemasList
   getContacts: typeof getContacts;
   resetGetContacts: typeof getContacts;
-  document?: CoreapiDocumentResponse;
+  document?: Document;
   schemas: Schema[];
   contacts?: Contact[];
   loggedInUser: User;
-  updatingDocument: RequestState<CoreapiDocumentResponse>;
+  updatingDocument: RequestState<Document>;
 } & RouteComponentProps<{ id?: string }>;
 
 export class EditDocument extends React.Component<Props> {
@@ -50,7 +50,7 @@ export class EditDocument extends React.Component<Props> {
     this.props.resetUpdateDocument();
   }
 
-  updateDocument = (document: CoreapiDocumentResponse) => {
+  updateDocument = (document: Document) => {
     this.props.updateDocument(document);
   };
 
