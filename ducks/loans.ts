@@ -209,6 +209,8 @@ export function getDebt(tinlake: Tinlake, loanId: string):
 export function subscribeDebt(tinlake: Tinlake, loanId: string):
   ThunkAction<() => void, LoansState, undefined, Action> {
   return (dispatch) => {
+    dispatch(getDebt(tinlake, loanId));
+
     const interval = setInterval(
       () => dispatch(getDebt(tinlake, loanId)),
       1000,
