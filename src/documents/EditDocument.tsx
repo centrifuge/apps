@@ -5,10 +5,10 @@ import { connect } from 'react-redux';
 import DocumentForm from './DocumentForm';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { getContacts, resetGetContacts } from '../store/actions/contacts';
-import { Box, Button, Heading } from 'grommet';
+import { Box, Button, Heading, Paragraph } from 'grommet';
 import { documentRoutes } from './routes';
 import { LinkPrevious } from 'grommet-icons';
-import { User } from '../common/models/user';
+import { canWriteToDoc, User } from '../common/models/user';
 import { Preloader } from '../components/Preloader';
 import { RequestState } from '../store/reducers/http-request-reducer';
 import { Document } from '../common/models/document';
@@ -59,7 +59,13 @@ export class EditDocument extends React.Component<Props> {
   };
 
   render() {
-    const { updatingDocument, contacts, document, schemas } = this.props;
+    const {
+      updatingDocument,
+      contacts,
+      document,
+      schemas,
+      loggedInUser,
+    } = this.props;
 
     if (!document || !contacts || !schemas) {
       return <Preloader message="Loading"/>;
@@ -67,6 +73,10 @@ export class EditDocument extends React.Component<Props> {
 
     if (updatingDocument.loading) {
       return <Preloader message="Updating document" withSound={true}/>;
+    }
+    // TODO add route resolvers and remove this logic
+    if(!canWriteToDoc(loggedInUser,document)) {
+      return <Paragraph color="status-error"> Access Denied! </Paragraph>;
     }
 
     return (

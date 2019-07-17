@@ -8,7 +8,7 @@ import { formatDate } from '../common/formaters';
 import { Document } from '../common/models/document';
 import { SecondaryHeader } from '../components/SecondaryHeader';
 import { getDocuments, resetGetDocuments } from '../store/actions/documents';
-import { User } from '../common/models/user';
+import { canCreateDocuments, canWriteToDoc, User } from '../common/models/user';
 import { Preloader } from '../components/Preloader';
 
 
@@ -31,9 +31,10 @@ export class ListDocuments extends React.Component<Props & RouteComponentProps> 
     this.props.resetGetDocuments();
   }
 
+
   render() {
 
-    const {loading, documents,loggedInUser, history} = this.props;
+    const { loading, documents, history, loggedInUser } = this.props;
 
     if (loading) {
       return <Preloader message="Loading"/>;
@@ -44,7 +45,7 @@ export class ListDocuments extends React.Component<Props & RouteComponentProps> 
         <SecondaryHeader>
           <Heading level="3">Documents</Heading>
           <Link to={documentRoutes.new}>
-            {loggedInUser.schemas.length > 0 && <Button
+            {canCreateDocuments(loggedInUser) && <Button
               primary
               label="Create Document"
             />}
@@ -89,14 +90,14 @@ export class ListDocuments extends React.Component<Props & RouteComponentProps> 
                         )
                       }
                     />
-                    <Anchor
+                    {canWriteToDoc(loggedInUser, datum) && <Anchor
                       label={'Edit'}
                       onClick={() =>
                         history.push(
                           documentRoutes.edit.replace(':id', datum._id),
                         )
                       }
-                    />
+                    />}
                   </Box>
                 ),
               },

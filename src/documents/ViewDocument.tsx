@@ -15,6 +15,7 @@ import { getDocumentById, resetGetDocumentById } from '../store/actions/document
 import { getSchemasList, resetGetSchemasList } from '../store/actions/schemas';
 import { Schema } from '../common/models/schema';
 import { Contact } from '../common/models/contact';
+import { canWriteToDoc, User } from '../common/models/user';
 
 
 type Props = {
@@ -24,11 +25,12 @@ type Props = {
   resetGetContacts: typeof resetGetContacts;
   getSchemasList: typeof getSchemasList
   resetGetSchemasList: typeof resetGetSchemasList
-  document: Document & { _id: string };
+  document: Document;
+  loggedInUser: User;
   contacts: Contact[];
   schemas: Schema[];
 
-} & RouteComponentProps<{ id?: string }>;
+} & RouteComponentProps<{ id: string }>;
 
 export class ViewDocument extends React.Component<Props> {
 
@@ -48,8 +50,14 @@ export class ViewDocument extends React.Component<Props> {
 
   render() {
     const {
+      match: {
+        params: {
+          id,
+        },
+      },
       document,
       contacts,
+      loggedInUser,
       schemas,
     } = this.props;
 
@@ -71,14 +79,14 @@ export class ViewDocument extends React.Component<Props> {
               </Heading>
             </Box>
             <Box direction="row" gap="medium">
-              <Button
+              {canWriteToDoc(loggedInUser, document) && <Button
                 onClick={() => {
                   this.props.history.push(
-                    documentRoutes.edit.replace(':id', document!._id),
+                    documentRoutes.edit.replace(':id', id),
                   );
                 }}
                 label="Edit"
-              />
+              />}
             </Box>
           </SecondaryHeader>
 
@@ -97,6 +105,7 @@ export class ViewDocument extends React.Component<Props> {
 
 const mapStateToProps = (state) => {
   return {
+    loggedInUser: state.user.auth.loggedInUser,
     document: state.documents.getById.data,
     contacts: state.contacts.get.data,
     schemas: state.schemas.getList.data,

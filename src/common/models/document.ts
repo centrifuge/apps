@@ -13,3 +13,9 @@ export interface Document extends CoreapiDocumentResponse {
   createdAt?: Date,
   updatedAt?: Date
 }
+
+export enum DOCUMENT_ACCESS  {
+  READ = 'read_access',
+  WRITE = 'write_access',
+}
+
