@@ -4,7 +4,7 @@ import { LoansState, getLoan, subscribeDebt } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
 import { Box, Button, Heading, Text, FormField, TextInput } from 'grommet';
-import LoanNftData from '../LoanNftData';
+import NftData from '../NftData';
 import { bnToHex } from '../../utils/bnToHex';
 import SecondaryHeader from '../SecondaryHeader';
 import Link from 'next/link';
@@ -122,7 +122,7 @@ class UnwhitelistNFT extends React.Component<Props, State> {
 
         <LoanData loan={singleLoan!} />
 
-        <LoanNftData loan={singleLoan!} authedAddr={tinlake.ethConfig.from} />
+        <NftData data={singleLoan!} authedAddr={tinlake.ethConfig.from} />
       </Box>
     </Box>;
   }

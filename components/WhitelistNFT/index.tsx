@@ -9,12 +9,17 @@ import { NumberInput } from '@centrifuge/axis-number-input';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 import { displayToBase } from '../../utils/displayToBase';
 import { interestRateToFee } from '../../utils/interestRateToFee';
+import { connect } from 'react-redux';
+import { NFTState, getNFT } from '../../ducks/nft';
+import NftData from '../NftData';
 
 const SUCCESS_STATUS = '0x1';
 
 interface Props {
   tinlake: Tinlake;
   tokenId: string;
+  nft?: NFTState;
+  getNFT?: (tinlake: Tinlake, tonkenId: string) => Promise<void>;
 }
 
 interface State {
@@ -37,7 +42,9 @@ class WhitelistNFT extends React.Component<Props, State> {
   };
 
   componentWillMount() {
-    this.setState({ tokenId: this.props.tokenId || '' });
+    this.setState({ tokenId: this.props.tokenId || '' }, () => {
+      if (this.props.tokenId) { this.getNFT(); }
+    });
   }
 
   whitelist = async () => {
@@ -111,10 +118,15 @@ class WhitelistNFT extends React.Component<Props, State> {
     }
   }
 
-  render() {
-    const { tokenId, principal, appraisal, interestRate, is, errorMsg } = this.state;
+  getNFT = async () => {
+    const { tinlake, getNFT } = this.props;
 
-    console.log({ interestRate });
+    await getNFT!(tinlake, this.state.tokenId);
+  }
+
+  render() {
+    const { tinlake, nft } = this.props;
+    const { tokenId, principal, appraisal, interestRate, is, errorMsg } = this.state;
 
     return <Box>
       <SecondaryHeader>
@@ -144,7 +156,7 @@ class WhitelistNFT extends React.Component<Props, State> {
             <FormField label="NFT ID">
               <TextInput
                 value={tokenId}
-                onChange={e => this.setState({ tokenId: e.currentTarget.value })}
+                onChange={e => this.setState({ tokenId: e.currentTarget.value }, this.getNFT)}
                 disabled={is === 'loading' || is === 'success'}
               />
             </FormField>
@@ -184,9 +196,15 @@ class WhitelistNFT extends React.Component<Props, State> {
             </FormField>
           </Box>
         </Box>
+
+        {nft!.state === 'loading' && 'Loading NFT data...'}
+        {nft!.state === 'not found' && <Alert type="error" margin={{ vertical: 'large' }}>
+          NFT for token ID {tokenId} not found.</Alert>}
+        {nft!.state === 'found' && nft!.nft &&
+          <NftData data={nft!.nft} authedAddr={tinlake.ethConfig.from} />}
       </Box>
     </Box>;
   }
 }
 
-export default WhitelistNFT;
+export default connect(state => state, { getNFT })(WhitelistNFT);

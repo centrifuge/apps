@@ -4,7 +4,7 @@ import { LoansState, getLoan, subscribeDebt } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
 import { Box, FormField, TextInput, Button, Heading } from 'grommet';
-import LoanNftData from '../LoanNftData';
+import NftData from '../NftData';
 import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
@@ -75,7 +75,7 @@ class LoanDetail extends React.Component<Props> {
 
         <LoanData loan={singleLoan!} />
 
-        <LoanNftData loan={singleLoan!} authedAddr={tinlake.ethConfig.from} />
+        <NftData data={singleLoan!} authedAddr={tinlake.ethConfig.from} />
       </Box>
     </Box>;
   }
