@@ -54,7 +54,7 @@ class LoanDetail extends React.Component<Props> {
         </Box>
 
         {status === 'Whitelisted' &&
-          <AdminSwitch tinlake={tinlake} render={isAdmin => isAdmin ?
+          <AdminSwitch allowUnauth tinlake={tinlake} render={isAdmin => isAdmin ?
             <Link href={`/admin/unwhitelist-nft?loanId=${loanId}`}>
               <Button primary label="Unwhitelist" /></Link> : null} />}
         {status === 'Whitelisted' && loanOwner === tinlake.ethConfig.from &&

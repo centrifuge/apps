@@ -1,32 +1,45 @@
 import Tinlake from 'tinlake';
 import contractAddresses from './addresses_tinlake.json';
+import Eth from 'ethjs';
 
 declare var web3: any;
 
 let tinlake: Tinlake | null = null;
+let authed = false;
 
 export async function getTinlake() {
   if (tinlake) { return tinlake; }
 
+  const provider = new Eth.HttpProvider(
+    'https://kovan.infura.io/v3/092108ec6aea46ab97b2175b45130455');
+
+  tinlake = new Tinlake(provider, contractAddresses, {});
+
+  return tinlake;
+}
+
+export async function authTinlake() {
+  if (!tinlake) { await getTinlake(); }
+  if (authed) { return; }
+
   const provider = await web3Connect();
+
+  await new Promise(resolve => setTimeout(resolve, 1000));
 
   const accounts = await provider.enable();
   const account = accounts[0];
   console.log(`Using account ${account}`);
 
-  tinlake = new Tinlake(provider, contractAddresses, {
-    ethConfig: { from: account },
-  });
+  tinlake!.provider = provider;
+  tinlake!.ethConfig = { from: account };
 
-  return tinlake;
+  authed = true;
 }
 
 async function web3Connect(): Promise<any> {
   return new Promise((resolve, reject) => {
     // require here since we only want it to be loaded in browser, not on server side rendering
     const Web3Connect = require('web3connect').default;
-
-    console.log({ Web3Connect });
 
     const web3Connect = new Web3Connect.Core({
       providerOptions: {
@@ -51,6 +64,7 @@ async function web3Connect(): Promise<any> {
       reject('Web3Connect Modal Closed');
     });
 
-    web3Connect.toggleModal(); // open modal on button click
+    // open modal
+    web3Connect.toggleModal();
   });
 }

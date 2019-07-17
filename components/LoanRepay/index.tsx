@@ -14,6 +14,7 @@ import { baseToDisplay } from '../../utils/baseToDisplay';
 import { displayToBase } from '../../utils/displayToBase';
 import LoanData from '../LoanData';
 import { calcRepayAmount } from '../../utils/calcRepayAmount';
+import { authTinlake } from '../../services/tinlake';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -72,6 +73,8 @@ class LoanRepay extends React.Component<Props, State> {
 
   repay = async () => {
     this.setState({ is: 'loading' });
+
+    await authTinlake();
 
     const { getLoan, tinlake, loanId } = this.props;
     const { repayAmount } = this.state;

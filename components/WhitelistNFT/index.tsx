@@ -12,6 +12,7 @@ import { interestRateToFee } from '../../utils/interestRateToFee';
 import { connect } from 'react-redux';
 import { NFTState, getNFT } from '../../ducks/nft';
 import NftData from '../NftData';
+import { authTinlake } from '../../services/tinlake';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -49,6 +50,8 @@ class WhitelistNFT extends React.Component<Props, State> {
 
   whitelist = async () => {
     this.setState({ is: 'loading' });
+
+    await authTinlake();
 
     const { tinlake } = this.props;
     const { tokenId, principal, appraisal, interestRate } = this.state;

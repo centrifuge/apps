@@ -14,6 +14,7 @@ import NumberDisplay from '../NumberDisplay';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 import { displayToBase } from '../../utils/displayToBase';
 import LoanData from '../LoanData';
+import { authTinlake } from '../../services/tinlake';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -55,8 +56,11 @@ class LoanBorrow extends React.Component<Props, State> {
   borrow = async () => {
     this.setState({ is: 'loading' });
 
+    await authTinlake();
+
     const { getLoan, tinlake, loanId } = this.props;
     const addresses = tinlake.contractAddresses;
+
     const ethFrom = tinlake.ethConfig.from;
 
     try {

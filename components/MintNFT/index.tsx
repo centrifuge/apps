@@ -5,6 +5,7 @@ import Alert from '../Alert';
 import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
+import { authTinlake } from '../../services/tinlake';
 
 interface Props {
   tinlake: Tinlake;
@@ -27,6 +28,8 @@ class MintNFT extends React.Component<Props, State> {
 
   mint = async () => {
     this.setState({ is: 'loading' });
+
+    await authTinlake();
 
     try {
       const res = await this.props.tinlake.mintNFT(

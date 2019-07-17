@@ -10,6 +10,7 @@ import SecondaryHeader from '../SecondaryHeader';
 import Link from 'next/link';
 import { LinkPrevious } from 'grommet-icons';
 import LoanData from '../LoanData';
+import { authTinlake } from '../../services/tinlake';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -44,6 +45,8 @@ class UnwhitelistNFT extends React.Component<Props, State> {
 
   unwhitelist = async () => {
     this.setState({ is: 'loading' });
+
+    await authTinlake();
 
     const { getLoan, tinlake, loanId } = this.props;
     const addresses = tinlake.contractAddresses;
