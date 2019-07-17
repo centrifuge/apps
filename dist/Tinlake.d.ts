@@ -128,7 +128,7 @@ declare class Tinlake {
     existsFee: (fee: string) => Promise<boolean>;
     addFee: (loanId: string, fee: string, balance: string) => Promise<Events>;
     getCurrentDebt: (loanId: string) => Promise<BN>;
-    unwhitelist: (loanId: string, registry: string, nft: string, principal: string) => Promise<Events>;
+    unwhitelist: (loanId: string, registry: string, nft: string) => Promise<Events>;
     getTotalDebt: () => Promise<BN>;
     getTotalBalance: () => Promise<BN>;
     getTotalValueOfNFTs: () => Promise<BN>;

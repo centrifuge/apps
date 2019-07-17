@@ -309,9 +309,9 @@ class Tinlake {
     return res['0'];
   }
 
-  unwhitelist = (loanId: string, registry: string, nft: string, principal: string):
+  unwhitelist = (loanId: string, registry: string, nft: string):
     Promise<Events> => {
-    return this.contracts.shelf.file(loanId, registry, nft, principal, this.ethConfig)
+    return this.contracts.shelf.file(loanId, registry, nft, '0', this.ethConfig)
       .then((txHash: string) => {
         console.log(`[Shelf.file] txHash: ${txHash}`);
         return waitAndReturnEvents(this.eth, txHash, this.contracts['shelf'].abi);

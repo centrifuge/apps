@@ -204,7 +204,7 @@ describe('functional tinlake tests', () => {
       console.log('-------------------------------------');
 
       const unwhiteListResult = await adminTinlake.unwhitelist(loanID, contractAddresses['SHELF'],
-                                                               tokenID, principal);
+                                                               tokenID);
       console.log('unwhitelist result');
       console.log(unwhiteListResult.txHash);
       assert.equal(unwhiteListResult.status, SUCCESS_STATUS, 'tx should be successful');

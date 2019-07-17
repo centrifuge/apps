@@ -25608,8 +25608,8 @@ var Tinlake = /** @class */ (function () {
                 }
             });
         }); };
-        this.unwhitelist = function (loanId, registry, nft, principal) {
-            return _this.contracts.shelf.file(loanId, registry, nft, principal, _this.ethConfig)
+        this.unwhitelist = function (loanId, registry, nft) {
+            return _this.contracts.shelf.file(loanId, registry, nft, '0', _this.ethConfig)
                 .then(function (txHash) {
                 console.log("[Shelf.file] txHash: " + txHash);
                 return waitAndReturnEvents(_this.eth, txHash, _this.contracts['shelf'].abi);
