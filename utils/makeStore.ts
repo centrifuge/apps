@@ -1,6 +1,7 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
 import loansReducer from '../ducks/loans';
 import dashboardReducer from '../ducks/dashboard';
+import authReducer from '../ducks/auth';
 import thunk from 'redux-thunk';
 
 declare global {
@@ -16,6 +17,7 @@ const makeStore = (initialState: any) => {
       {
         loans: loansReducer,
         dashboard: dashboardReducer,
+        auth: authReducer,
       },
     ),
     initialState,

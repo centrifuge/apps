@@ -9,6 +9,7 @@ import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
 import LoanData from '../LoanData';
+import AdminSwitch from '../AdminSwitch';
 
 interface Props {
   loanId: string;
@@ -53,8 +54,9 @@ class LoanDetail extends React.Component<Props> {
         </Box>
 
         {status === 'Whitelisted' &&
-          <Link href={`/admin/unwhitelist-nft?loanId=${loanId}`}>
-            <Button primary label="Unwhitelist" /></Link>}
+          <AdminSwitch tinlake={tinlake} render={isAdmin => isAdmin ?
+            <Link href={`/admin/unwhitelist-nft?loanId=${loanId}`}>
+              <Button primary label="Unwhitelist" /></Link> : null} />}
         {status === 'Whitelisted' && loanOwner === tinlake.ethConfig.from &&
           <Link href={`/borrower/borrow?loanId=${loanId}`}><Button primary label="Borrow" /></Link>}
         {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&

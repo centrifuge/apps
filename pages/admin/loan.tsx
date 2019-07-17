@@ -4,6 +4,7 @@ import LoanDetail from '../../components/LoanDetail';
 import Alert from '../../components/Alert';
 import { Box } from 'grommet';
 import Header, { MenuItem } from '../../components/Header';
+import AdminSwitch from '../../components/AdminSwitch';
 
 const menuItems: MenuItem[] = [
   { label: 'Loans', route: '/admin' },
@@ -30,7 +31,12 @@ class AdminLoanPage extends React.Component<{ loanId: string }> {
         <Box width="xlarge" >
           {loanId ? (
             <WithTinlake render={tinlake =>
-              <LoanDetail tinlake={tinlake} loanId={loanId} mode="admin" />} />
+              <AdminSwitch tinlake={tinlake} render={isAdmin => isAdmin ?
+                <LoanDetail tinlake={tinlake} loanId={loanId} mode="admin" />
+                :
+                <Alert type="error">Please use an admin account to access this page</Alert>
+              } />
+            } />
           ) : (
               <Alert type="error">Please provide an ID</Alert>
             )}
