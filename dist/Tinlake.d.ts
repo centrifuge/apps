@@ -9,6 +9,7 @@ interface ContractAbis {
     'shelf': any;
     'appraiser': any;
     'lender': any;
+    'collateral': any;
     'pile': any;
     'pileForAdd': any;
     'pileForInit': any;
@@ -46,6 +47,7 @@ interface Contracts {
     shelf: any;
     appraiser: any;
     lender: any;
+    collateral: any;
     pile: any;
     pileForAdd: any;
     pileForInit: any;
@@ -127,5 +129,8 @@ declare class Tinlake {
     addFee: (loanId: string, fee: string, balance: string) => Promise<Events>;
     getCurrentDebt: (loanId: string) => Promise<BN>;
     unwhitelist: (loanId: string, registry: string, nft: string, principal: string) => Promise<Events>;
+    getTotalDebt: () => Promise<BN>;
+    getTotalBalance: () => Promise<BN>;
+    getTotalValueOfNFTs: () => Promise<BN>;
 }
 export default Tinlake;

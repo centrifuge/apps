@@ -16,6 +16,7 @@ import contractAbiDesk from './abi/Desk.abi.json';
 import contractAbiShelf from './abi/Shelf.abi.json';
 import contractAbiAppraiser from './abi/Appraiser.abi.json';
 import contractAbiLender from './abi/MakerAdapter.abi.json';
+import contractAbiCollateral from './abi/Collateral.abi.json';
 import contractAbiPile from './abi/Pile.abi.json';
 // the following are just different orders of the methods in the ABI file. Reason is that ethjs
 // does not expose overloaded methods under different keys,
@@ -35,6 +36,7 @@ interface ContractAbis {
   'shelf': any;
   'appraiser': any;
   'lender': any;
+  'collateral': any;
   'pile': any;
   'pileForAdd': any;
   'pileForInit': any;
@@ -75,6 +77,7 @@ interface Contracts {
   shelf: any;
   appraiser: any;
   lender: any;
+  collateral: any;
   pile: any;
   pileForAdd: any;
   pileForInit: any;
@@ -134,6 +137,7 @@ class Tinlake {
       shelf: contractAbiShelf,
       appraiser: contractAbiAppraiser,
       lender: contractAbiLender,
+      collateral: contractAbiCollateral,
       pile: contractAbiPile,
       pileForAdd: contractAbiPileForAdd,
       pileForInit: contractAbiPileForInit,
@@ -163,6 +167,8 @@ class Tinlake {
         .at(this.contractAddresses['APPRAISER']),
       lender: this.eth.contract(this.contractAbis.lender)
         .at(this.contractAddresses['LENDER']),
+      collateral: this.eth.contract(this.contractAbis.collateral)
+        .at(this.contractAddresses['COLLATERAL']),
       pile: this.eth.contract(this.contractAbis.pile)
         .at(this.contractAddresses['PILE']),
       pileForAdd: this.eth.contract(this.contractAbis.pileForAdd)
@@ -310,6 +316,21 @@ class Tinlake {
         console.log(`[Shelf.file] txHash: ${txHash}`);
         return waitAndReturnEvents(this.eth, txHash, this.contracts['shelf'].abi);
       });
+  }
+
+  getTotalDebt = async (): Promise<BN> => {
+    const res: { 0: BN } = await this.contracts.pile.Debt();
+    return res['0'];
+  }
+
+  getTotalBalance = async (): Promise<BN> => {
+    const res: { 0: BN } = await this.contracts.pile.Balance();
+    return res['0'];
+  }
+
+  getTotalValueOfNFTs = async (): Promise<BN> => {
+    const res: { 0: BN } = await this.contracts.collateral.totalSupply();
+    return res['0'];
   }
 }
 

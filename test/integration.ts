@@ -162,96 +162,112 @@ describe('functional tinlake tests', () => {
       console.log(`DAI Balance after Repay: ${balanceAfter['0'].toString()} DAI`);
     });
   });
-});
 
-describe('tinlake whitelist and unwhitelist', function () {
-  this.timeout(50000);
-  it('whitelist and unwhitelist successful', async () => {
-    const tokenID = `0x${Math.floor(Math.random() * (10 ** 15))}`;
-    let loanID: string = '';
-    console.log(`token id: ${tokenID}`);
+  describe('tinlake whitelist and unwhitelist', function () {
+    this.timeout(50000);
+    it('whitelist and unwhitelist successful', async () => {
+      const tokenID = `0x${Math.floor(Math.random() * (10 ** 15))}`;
+      let loanID: string = '';
+      console.log(`token id: ${tokenID}`);
 
-    const mintResult = await borrowerTinlake.mintNFT(borrowerEthFrom, tokenID);
-    console.log('mint result');
-    console.log(mintResult.txHash);
-    assert.equal(mintResult.status, SUCCESS_STATUS, 'tx should be successful');
-    assert.equal(mintResult.events[0].event.name, 'Transfer', 'tx should be successful');
+      const mintResult = await borrowerTinlake.mintNFT(borrowerEthFrom, tokenID);
+      console.log('mint result');
+      console.log(mintResult.txHash);
+      assert.equal(mintResult.status, SUCCESS_STATUS, 'tx should be successful');
+      assert.equal(mintResult.events[0].event.name, 'Transfer', 'tx should be successful');
 
-    console.log('');
-    console.log('-------------------------------------');
-    console.log('Admin: Whitelist NFT');
-    console.log('-------------------------------------');
+      console.log('');
+      console.log('-------------------------------------');
+      console.log('Admin: Whitelist NFT');
+      console.log('-------------------------------------');
 
-    const admitResult = await adminTinlake.adminAdmit(contractAddresses['NFT_COLLATERAL'],
-                                                      tokenID, principal, borrowerEthFrom);
-    console.log('admit result');
-    console.log(admitResult.txHash);
+      const admitResult = await adminTinlake.adminAdmit(contractAddresses['NFT_COLLATERAL'],
+                                                        tokenID, principal, borrowerEthFrom);
+      console.log('admit result');
+      console.log(admitResult.txHash);
 
       // parse loanID from event
-    loanID = admitResult.events[0].data[2].toString();
-    console.log(`Loan id: ${loanID}`);
+      loanID = admitResult.events[0].data[2].toString();
+      console.log(`Loan id: ${loanID}`);
 
-    assert.equal(admitResult.status, SUCCESS_STATUS, 'tx should be successful');
-    assert.equal(admitResult.events[0].event.name, 'Transfer', 'tx should be successful');
+      assert.equal(admitResult.status, SUCCESS_STATUS, 'tx should be successful');
+      assert.equal(admitResult.events[0].event.name, 'Transfer', 'tx should be successful');
 
-    const appraiseResult = await adminTinlake.adminAppraise(loanID, appraisal);
-    console.log('appraise result');
-    console.log(appraiseResult.txHash);
-    assert.equal(appraiseResult.status, SUCCESS_STATUS, 'tx should be successful');
+      const appraiseResult = await adminTinlake.adminAppraise(loanID, appraisal);
+      console.log('appraise result');
+      console.log(appraiseResult.txHash);
+      assert.equal(appraiseResult.status, SUCCESS_STATUS, 'tx should be successful');
 
-    console.log('');
-    console.log('-------------------------------------');
-    console.log('Admin: Unwhitelist NFT');
-    console.log('-------------------------------------');
+      console.log('');
+      console.log('-------------------------------------');
+      console.log('Admin: Unwhitelist NFT');
+      console.log('-------------------------------------');
 
-    const unwhiteListResult = await adminTinlake.unwhitelist(loanID, contractAddresses['SHELF'],
-                                                             tokenID, principal);
-    console.log('unwhitelist result');
-    console.log(unwhiteListResult.txHash);
-    assert.equal(unwhiteListResult.status, SUCCESS_STATUS, 'tx should be successful');
-  });
-});
-
-describe('tinlake call functionality', function () {
-  this.timeout(50000);
-
-  // const loanID = '4';
-  // const tokenID = '0x784079192908932';
-
-  it('count number of loans', async () => {
-    const count = await adminTinlake.loanCount();
-    console.log(`Found ${count} loans `);
-    assert(count.gte(new BN(0)));
+      const unwhiteListResult = await adminTinlake.unwhitelist(loanID, contractAddresses['SHELF'],
+                                                               tokenID, principal);
+      console.log('unwhitelist result');
+      console.log(unwhiteListResult.txHash);
+      assert.equal(unwhiteListResult.status, SUCCESS_STATUS, 'tx should be successful');
+    });
   });
 
-  it('get a loan', async () => {
-    const res = await adminTinlake.getLoan(loanID);
-    assert(BN.isBN(res.price));
-    assert(BN.isBN(res.principal));
-    assert(typeof res.registry === 'string');
-    assert(BN.isBN(res.tokenId));
-  });
+  describe('tinlake call functionality', function () {
+    this.timeout(50000);
 
-  it('get balance and debt from pile for a loan', async () => {
-    const res = await adminTinlake.getBalanceDebt(loanID);
-    assert(BN.isBN(res.balance));
-    assert(BN.isBN(res.debt));
-  });
+    const loanID = '4';
+    const tokenID = '0x784079192908932';
 
-  it('gets the owner of a loan', async () => {
-    const res = await adminTinlake.ownerOfLoan(loanID);
-    assert.equal(typeof res, 'string');
-  });
+    it('count number of loans', async () => {
+      const count = await adminTinlake.loanCount();
+      console.log(`Found ${count} loans `);
+      assert(count.gte(new BN(0)));
+    });
 
-  it('gets the owner of an nft', async () => {
-    const res = await adminTinlake.ownerOfNFT(tokenID);
-    assert.equal(typeof res, 'string');
-  });
+    it('get a loan', async () => {
+      const res = await adminTinlake.getLoan(loanID);
+      assert(BN.isBN(res.price));
+      assert(BN.isBN(res.principal));
+      assert(typeof res.registry === 'string');
+      assert(BN.isBN(res.tokenId));
+    });
 
-  it('gets the appraisal of a loan', async () => {
-    const res = await adminTinlake.getAppraisal(loanID);
+    it('get balance and debt from pile for a loan', async () => {
+      const res = await adminTinlake.getBalanceDebt(loanID);
+      assert(BN.isBN(res.balance));
+      assert(BN.isBN(res.debt));
+    });
 
-    console.log('got appraisal', res.toString());
-    assert.equal(res.toString(), appraisal);
+    it('gets the owner of a loan', async () => {
+      const res = await adminTinlake.ownerOfLoan(loanID);
+      assert.equal(typeof res, 'string');
+    });
+
+    it('gets the owner of an nft', async () => {
+      const res = await adminTinlake.ownerOfNFT(tokenID);
+      assert.equal(typeof res, 'string');
+    });
+
+    it('gets the appraisal of a loan', async () => {
+      const res = await adminTinlake.getAppraisal(loanID);
+      assert.equal(res.toString(), appraisal);
+    });
+
+    it('gets total debt', async () => {
+      const res = await adminTinlake.getTotalDebt();
+      console.log(`Total debt: ${res.toString()}`);
+      assert(BN.isBN(res));
+    });
+
+    it('gets total balance', async () => {
+      const res = await adminTinlake.getTotalBalance();
+      console.log(`Total balance: ${res.toString()}`);
+      assert(BN.isBN(res));
+    });
+
+    it('gets total value of NFTs (equals total supply of CVT tokens)', async () => {
+      const res = await adminTinlake.getTotalValueOfNFTs();
+      console.log(`Total value of NFTs: ${res.toString()}`);
+      assert(BN.isBN(res));
+    });
   });
 });
