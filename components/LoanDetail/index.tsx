@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Tinlake from 'tinlake';
-import { LoansState, getLoan } from '../../ducks/loans';
+import { LoansState, getLoan, subscribeDebt } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
 import { Box, FormField, TextInput, Button, Heading } from 'grommet';
@@ -16,11 +16,19 @@ interface Props {
   tinlake: Tinlake;
   loans?: LoansState;
   getLoan?: (tinlake: Tinlake, loanId: string, refresh?: boolean) => Promise<void>;
+  subscribeDebt?: (tinlake: Tinlake, loanId: string) => () => void;
 }
 
 class LoanDetail extends React.Component<Props> {
+  discardDebtSubscription = () => { };
+
   componentWillMount() {
     this.props.getLoan!(this.props.tinlake, this.props.loanId);
+    this.discardDebtSubscription = this.props.subscribeDebt!(this.props.tinlake, this.props.loanId);
+  }
+
+  componentWillUnmount() {
+    this.discardDebtSubscription();
   }
 
   render() {
@@ -71,4 +79,4 @@ class LoanDetail extends React.Component<Props> {
   }
 }
 
-export default connect(state => state, { getLoan })(LoanDetail);
+export default connect(state => state, { getLoan, subscribeDebt })(LoanDetail);

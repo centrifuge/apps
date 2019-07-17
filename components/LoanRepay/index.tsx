@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Tinlake from 'tinlake';
-import { LoansState, getLoan } from '../../ducks/loans';
+import { LoansState, getLoan, subscribeDebt } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
 import { Box, FormField, Button, Heading, Text } from 'grommet';
@@ -13,6 +13,7 @@ import NumberDisplay from '../NumberDisplay';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 import { displayToBase } from '../../utils/displayToBase';
 import LoanData from '../LoanData';
+import { calcRepayAmount } from '../../utils/calcRepayAmount';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -21,12 +22,14 @@ interface Props {
   tinlake: Tinlake;
   loans?: LoansState;
   getLoan?: (tinlake: Tinlake, loanId: string, refresh?: boolean) => Promise<void>;
+  subscribeDebt?: (tinlake: Tinlake, loanId: string) => () => void;
 }
 
 interface State {
   repayAmount: string;
   is: 'loading' | 'success' | 'error' | null;
   errorMsg: string;
+  touchedRepaymentAmount: boolean;
 }
 
 class LoanRepay extends React.Component<Props, State> {
@@ -34,21 +37,37 @@ class LoanRepay extends React.Component<Props, State> {
     repayAmount: '',
     is: null,
     errorMsg: '',
+    touchedRepaymentAmount: false,
   };
+  discardDebtSubscription = () => { };
   lastDebt = '';
+  lastPrincipal = '';
+  lastFee = '';
 
   componentWillMount() {
     this.props.getLoan!(this.props.tinlake, this.props.loanId);
+    this.discardDebtSubscription = this.props.subscribeDebt!(this.props.tinlake, this.props.loanId);
+  }
+
+  componentWillUnmount() {
+    this.discardDebtSubscription();
   }
 
   componentDidUpdate(nextProps: Props) {
     const loans = nextProps.loans;
     if (!loans || !loans.singleLoan) { return; }
-    const nextDebt = loans.singleLoan.debt.toString();
-    if (nextDebt !== this.lastDebt) {
-      this.lastDebt = nextDebt;
-      this.setState({ repayAmount: loans.singleLoan.debt.toString() });
-    }
+    if (this.state.touchedRepaymentAmount) { return; }
+
+    const { debt, principal, fee } = loans.singleLoan;
+
+    if (debt.toString() === this.lastDebt && principal.toString() === this.lastPrincipal &&
+      fee.toString() === this.lastFee) { return; }
+
+    this.lastDebt = debt.toString();
+    this.lastPrincipal = principal.toString();
+    this.lastFee = fee.toString();
+
+    this.setState({ repayAmount: calcRepayAmount(debt, principal, fee).toString() });
   }
 
   repay = async () => {
@@ -144,7 +163,8 @@ class LoanRepay extends React.Component<Props, State> {
             <NumberInput
               value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18}
               onChange={(masked: string, float: number) => float !== undefined &&
-                this.setState({ repayAmount: displayToBase(masked, 18) })}
+                this.setState({
+                  repayAmount: displayToBase(masked, 18), touchedRepaymentAmount: true })}
               autoFocus disabled={true || is === 'loading' || is === 'success'}
             />
           </FormField></Box>
@@ -161,4 +181,4 @@ class LoanRepay extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { getLoan })(LoanRepay);
+export default connect(state => state, { getLoan, subscribeDebt })(LoanRepay);
