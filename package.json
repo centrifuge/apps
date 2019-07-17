@@ -1,6 +1,6 @@
 {
   "name": "tinlake",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Centrifuge Tinlake Contracts Client",
   "main": "dist/Tinlake.js",
   "types": "dist/Tinlake.d.ts",
