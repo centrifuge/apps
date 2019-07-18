@@ -10,6 +10,7 @@ import SecondaryHeader from '../SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
 import LoanData from '../LoanData';
 import AdminSwitch from '../AdminSwitch';
+import Auth from '../Auth';
 
 interface Props {
   loanId: string;
@@ -62,6 +63,11 @@ class LoanDetail extends React.Component<Props> {
         {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
           <Link href={`/borrower/repay?loanId=${loanId}`}><Button primary label="Repay" /></Link>}
       </SecondaryHeader>
+
+      <Auth tinlake={tinlake} requireAuthentication render={auth =>
+        mode === 'borrower' && auth.state === 'loaded' && auth.user === null &&
+          <Alert margin="medium" type="error">Please authenticate to view your loan.</Alert>
+      } />
 
       <Box pad={{ horizontal: 'medium' }}>
         <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>

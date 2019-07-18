@@ -20,6 +20,7 @@ const fortmaticConfig = {
 };
 
 let tinlake: Tinlake | null = null;
+let authing = false;
 let authed = false;
 
 export async function getTinlake() {
@@ -35,7 +36,9 @@ export async function getTinlake() {
 
 export async function authTinlake() {
   if (!tinlake) { await getTinlake(); }
-  if (authed) { return; }
+  if (authing || authed) { return; }
+
+  authing = true;
 
   const provider = await web3ConnectToLast();
 
@@ -47,6 +50,7 @@ export async function authTinlake() {
   tinlake!.setEthConfig({ from: account });
 
   authed = true;
+  authing = false;
 }
 
 async function web3Connect(): Promise<any> {

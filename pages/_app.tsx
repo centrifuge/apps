@@ -24,9 +24,9 @@ class MyApp extends App<{ store: any }> {
           <Container>
             <Provider store={store}>
               <WithTinlake render={tinlake =>
-                <Auth tinlake={tinlake}>
+                <Auth tinlake={tinlake} render={() =>
                   <Component {...pageProps} />
-                </Auth>
+                } />
               } />
             </Provider>
           </Container>

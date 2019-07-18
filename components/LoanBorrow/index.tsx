@@ -16,6 +16,7 @@ import { displayToBase } from '../../utils/displayToBase';
 import LoanData from '../LoanData';
 import { authTinlake } from '../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
+import Auth from '../Auth';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -127,6 +128,11 @@ class LoanBorrow extends React.Component<Props, State> {
           <Button primary onClick={this.borrow} label="Confirm"
             disabled={is === 'loading' || is === 'success'} />}
       </SecondaryHeader>
+
+      <Auth tinlake={tinlake} requireAuthentication render={auth =>
+        auth.state === 'loaded' && auth.user === null &&
+          <Alert margin="medium" type="error">Please authenticate to view your loan.</Alert>
+      } />
 
       {is === 'loading' ?
         <Spinner height={'calc(100vh - 89px - 84px)'} message={'Borrowing...'} />

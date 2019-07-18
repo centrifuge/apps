@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Tinlake, { Address } from 'tinlake';
-import { AuthState, authUser } from '../../ducks/auth';
+import { AuthState, loadUser } from '../../ducks/auth';
 import { connect } from 'react-redux';
 import { authTinlake } from '../../services/tinlake';
 
@@ -8,7 +8,7 @@ interface Props {
   tinlake: Tinlake;
   render: (isAdmin: boolean) => React.ReactElement | null;
   auth?: AuthState;
-  authUser?: (tinlake: Tinlake, address: Address) => Promise<void>;
+  loadUser?: (tinlake: Tinlake, address: Address) => Promise<void>;
   allowUnauth?: boolean;
 }
 
@@ -18,7 +18,7 @@ class AdminSwitch extends React.Component<Props> {
   }
 
   init = async () => {
-    const { tinlake, auth, authUser, allowUnauth } = this.props;
+    const { tinlake, auth, loadUser, allowUnauth } = this.props;
 
     if (!allowUnauth) {
       await authTinlake();
@@ -26,7 +26,7 @@ class AdminSwitch extends React.Component<Props> {
 
     if (auth!.state === 'loading' || auth!.state === 'loaded') { return; }
 
-    await authUser!(tinlake, tinlake.ethConfig.from);
+    await loadUser!(tinlake, tinlake.ethConfig.from);
   }
 
   render() {
@@ -38,4 +38,4 @@ class AdminSwitch extends React.Component<Props> {
   }
 }
 
-export default connect(state => state, { authUser })(AdminSwitch);
+export default connect(state => state, { loadUser })(AdminSwitch);

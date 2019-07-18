@@ -11,6 +11,8 @@ import { baseToDisplay } from '../../utils/baseToDisplay';
 import { feeToInterestRate } from '../../utils/feeToInterestRate';
 import MeBadge from '../MeBadge';
 import { Spinner } from '@centrifuge/axis-spinner';
+import Auth from '../Auth';
+import Alert from '../Alert';
 
 interface Props {
   tinlake: Tinlake;
@@ -25,7 +27,7 @@ class LoanList extends React.Component<Props> {
   }
 
   render() {
-    const { loans, mode, tinlake: { ethConfig: { from: ethFrom } } } = this.props;
+    const { loans, mode, tinlake, tinlake: { ethConfig: { from: ethFrom } } } = this.props;
 
     const filteredLoans = mode === 'borrower' ? loans!.loans.filter(l => l.loanOwner === ethFrom) :
       loans!.loans;
@@ -34,6 +36,11 @@ class LoanList extends React.Component<Props> {
       <SecondaryHeader>
         <Heading level="3">Loans</Heading>
       </SecondaryHeader>
+
+      <Auth tinlake={tinlake} requireAuthentication render={auth =>
+        mode === 'borrower' && auth.state === 'loaded' && auth.user === null &&
+          <Alert margin="medium" type="error">Please authenticate to view your loans.</Alert>
+      } />
 
       {loans!.loansState === 'loading' ?
         <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />

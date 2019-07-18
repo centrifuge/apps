@@ -16,6 +16,7 @@ import LoanData from '../LoanData';
 import { calcRepayAmount } from '../../utils/calcRepayAmount';
 import { authTinlake } from '../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
+import Auth from '../Auth';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -141,6 +142,11 @@ class LoanRepay extends React.Component<Props, State> {
           <Button primary onClick={this.repay} label="Confirm"
             disabled={is === 'loading' || is === 'success'} />}
       </SecondaryHeader>
+
+      <Auth tinlake={tinlake} requireAuthentication render={auth =>
+        auth.state === 'loaded' && auth.user === null &&
+          <Alert margin="medium" type="error">Please authenticate to view your loan.</Alert>
+      } />
 
       {is === 'loading' ?
         <Spinner height={'calc(100vh - 89px - 84px)'} message={'Repaying...'} />

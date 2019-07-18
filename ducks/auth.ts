@@ -33,7 +33,7 @@ export default function reducer(state: AuthState = initialState,
   switch (action.type) {
     case LOAD: return { ...state, state: 'loading' };
     case RECEIVE: return { ...state, state: 'loaded', user: action.user };
-    case CLEAR: return { ...state, state: null, user: null };
+    case CLEAR: return { ...state, state: 'loaded', user: null };
     case OBSERVING_AUTH_CHANGES: return { ...state, observingAuthChanges: true };
     default: return state;
   }
@@ -41,15 +41,23 @@ export default function reducer(state: AuthState = initialState,
 
 // side effects, only as applicable
 // e.g. thunks, epics, etc
-export function authUser(tinlake: Tinlake, address: Address):
+export function loadUser(tinlake: Tinlake, address: Address):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
+    const { auth } = getState();
+
+    // don't load again if already loading
+    if (auth.state === 'loading') {
+      return;
+    }
+
+    // clear user if no address given
     if (!address) {
       dispatch({ type: CLEAR });
       return;
     }
 
-    const { auth } = getState();
+    // if user is already loaded, don't load again
     if (auth.user && auth.user.address === address) {
       return;
     }
@@ -75,6 +83,12 @@ export function observeAuthChanges(tinlake: Tinlake):
   return async (dispatch, getState) => {
     console.log('Observe auth changes');
 
+    const state = getState();
+    if (state.auth.observingAuthChanges) {
+      console.log('Already observing auth changes');
+      return;
+    }
+
     // if HTTPProvider is present, regularly check fox provider changes
     if (tinlake.provider.host) {
       if (!providerChecks) {
@@ -87,20 +101,14 @@ export function observeAuthChanges(tinlake: Tinlake):
     if (providerChecks) {
       console.log('Provider changed, clear checking');
       clearInterval(providerChecks);
-      dispatch(authUser(tinlake, tinlake.ethConfig.from));
-    }
-
-    const state = getState();
-    if (state.auth.observingAuthChanges) {
-      console.log('Already observing auth changes');
-      return;
+      dispatch(loadUser(tinlake, tinlake.ethConfig.from));
     }
 
     dispatch({ type: OBSERVING_AUTH_CHANGES });
     tinlake.provider.on('accountsChanged', (accounts: Address[]) => {
       console.log('Active account changed, will update tinlake and authedUser');
       tinlake.ethConfig = { from: accounts[0] };
-      dispatch(authUser(tinlake, accounts[0]));
+      dispatch(loadUser(tinlake, accounts[0]));
     });
   };
 }
