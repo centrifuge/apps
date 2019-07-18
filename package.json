@@ -35,7 +35,7 @@
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
     "styled-components": "^4.3.2",
-    "tinlake": "git+https://github.com/philipstanislaus/tinlake.js.git#unwhitelist-setting-fees-and-dashboard-queries",
+    "tinlake": "git+https://github.com/philipstanislaus/tinlake.js.git#check-admin",
     "web3connect": "^1.0.0-beta.13"
   },
   "devDependencies": {
