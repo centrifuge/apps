@@ -96,6 +96,7 @@ declare class Tinlake {
     contracts: Contracts;
     contractAbis: ContractAbis;
     constructor(provider: any, contractAddresses: ContractAddresses, { contractAbis, ethOptions, ethConfig }?: Options);
+    isAdmin: (address: string) => Promise<boolean>;
     loanCount: () => Promise<BN>;
     getLoan: (loanId: string) => Promise<Loan>;
     getBalanceDebt: (loanId: string) => Promise<BalanceDebt>;

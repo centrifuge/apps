@@ -269,5 +269,15 @@ describe('functional tinlake tests', () => {
       console.log(`Total value of NFTs: ${res.toString()}`);
       assert(BN.isBN(res));
     });
+
+    it('gets admin status correctly for admins', async () => {
+      const isAdmin = await adminTinlake.isAdmin(adminEthFrom);
+      assert(isAdmin === true);
+    });
+
+    it('gets admin status correctly for non admins', async () => {
+      const isAdmin = await borrowerTinlake.isAdmin(borrowerEthFrom);
+      assert(isAdmin === false);
+    });
   });
 });

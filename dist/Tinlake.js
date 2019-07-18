@@ -25449,6 +25449,17 @@ var Tinlake = /** @class */ (function () {
     function Tinlake(provider, contractAddresses, _a) {
         var _this = this;
         var _b = _a === void 0 ? {} : _a, contractAbis = _b.contractAbis, ethOptions = _b.ethOptions, ethConfig = _b.ethConfig;
+        this.isAdmin = function (address) { return __awaiter(_this, void 0, void 0, function () {
+            var res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.contracts.admit.wards(address)];
+                    case 1:
+                        res = _a.sent();
+                        return [2 /*return*/, !res[0].isZero()];
+                }
+            });
+        }); };
         this.loanCount = function () { return __awaiter(_this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {

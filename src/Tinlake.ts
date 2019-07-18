@@ -178,6 +178,11 @@ class Tinlake {
     };
   }
 
+  isAdmin = async (address: Address): Promise<boolean> => {
+    const res = await this.contracts.admit.wards(address);
+    return !(res[0] as BN).isZero();
+  }
+
   loanCount = async (): Promise<BN> => {
     const res = await this.contracts.title.count();
     return res[0];
