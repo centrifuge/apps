@@ -46,8 +46,20 @@ describe('DocumentForm', () => {
       header: {
         read_access: [
           '0x111',
-          '0xNotInContacts'
-        ]
+          '0xNotInContacts',
+        ],
+        nfts: [
+          {
+            owner: '0xD77C534AED04D7Ce34Cd425073a033dB4FBe6a9d',
+            registry: '0xD77C534AED04D7Ce34Cd425073a033dB4FBe6a9d',
+            token_id: '0xD77C534AED04D7Ce34Cd425073a033dB4FBe6a9d',
+          },
+          {
+            owner: '0xB3C8F41b2Ed5f46f0374Ff98F86e6ecD8B8Cd00F',
+            registry: '0xB3C8F41b2Ed5f46f0374Ff98F86e6ecD8B8Cd00F',
+            token_id: '0xB3C8F41b2Ed5f46f0374Ff98F86e6ecD8B8Cd00F',
+          },
+        ],
       },
       attributes: {
 
@@ -85,16 +97,16 @@ describe('DocumentForm', () => {
 
   const contacts = [
     {
-      name:"My Contact",
-      address:"0x111"
-    }
-  ]
+      name: 'My Contact',
+      address: '0x111',
+    },
+  ];
 
 
   const schemas = [
     {
       name: 'first_schema',
-      registries:[],
+      registries: [],
       attributes: [
         {
           name: 'reference_id',
@@ -125,7 +137,7 @@ describe('DocumentForm', () => {
     },
     {
       name: 'second_schema',
-      registries:[],
+      registries: [],
       attributes: [
         {
           name: 'reference_id',
@@ -163,15 +175,16 @@ describe('DocumentForm', () => {
 
   it('Should render the form with default data', () => {
     const documentForm = mount(
-      <DocumentForm document={documents[0]} schemas={schemas} onCancel={onCancel} onSubmit={onSubmit}/>,
+      <DocumentForm document={documents[0]} selectedSchema={schemas[0]} schemas={schemas} onCancel={onCancel} onSubmit={onSubmit}/>,
     );
     expect(documentForm.html()).toMatchSnapshot();
   });
 
 
-  it('Should render the form with default data also for read access', () => {
+  it('Should render the form with default data  for read access and nfts', () => {
     const documentForm = mount(
-      <DocumentForm document={documents[1]} schemas={schemas} contacts={contacts} onCancel={onCancel} onSubmit={onSubmit}/>,
+      <DocumentForm document={documents[1]} selectedSchema={schemas[0]} schemas={schemas} contacts={contacts} onCancel={onCancel}
+                    onSubmit={onSubmit}/>,
     );
     expect(documentForm.html()).toMatchSnapshot();
   });
@@ -179,14 +192,14 @@ describe('DocumentForm', () => {
 
   it('Should render the form in view mode', () => {
     const documentForm = mount(
-      <DocumentForm document={documents[0]} mode={'view'} schemas={schemas} onCancel={onCancel} onSubmit={onSubmit}/>,
+      <DocumentForm document={documents[0]} selectedSchema={schemas[0]} mode={'view'} schemas={schemas} onCancel={onCancel} onSubmit={onSubmit}/>,
     );
     expect(documentForm.html()).toMatchSnapshot();
   });
 
   it('Should render the form in edit mode', () => {
     const documentForm = mount(
-      <DocumentForm document={documents[0]} mode={'view'} schemas={schemas} onCancel={onCancel} onSubmit={onSubmit}/>,
+      <DocumentForm document={documents[0]} selectedSchema={schemas[0]} mode={'view'} schemas={schemas} onCancel={onCancel} onSubmit={onSubmit}/>,
     );
     expect(documentForm.html()).toMatchSnapshot();
   });

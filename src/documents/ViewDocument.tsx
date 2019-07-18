@@ -65,6 +65,16 @@ export class ViewDocument extends React.Component<Props> {
       return <Preloader message="Loading"/>;
     }
 
+    const selectedSchema: Schema | undefined = schemas.find(s => {
+      return (
+        document.attributes &&
+        document.attributes._schema &&
+        s.name === document.attributes._schema.value
+      );
+    });
+
+    if(!selectedSchema) return <p>Unsupported schema</p>
+
     return (
       <>
         <Box pad={{ bottom: 'large' }}>
@@ -91,6 +101,7 @@ export class ViewDocument extends React.Component<Props> {
           </SecondaryHeader>
 
           <DocumentForm
+            selectedSchema={selectedSchema}
             document={document}
             mode={'view'}
             schemas={schemas}

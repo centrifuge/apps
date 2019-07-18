@@ -127,9 +127,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
             className="StyledBox-sc-13pk1d4-0 ffeAql"
           />
           <div
-            aria-hidden={false}
-            className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
-            open={true}
+            className="StyledBox-sc-13pk1d4-0 IRSNj"
           >
             <div
               className="StyledBox-sc-13pk1d4-0 ffeAql"
@@ -187,9 +185,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
               </h5>
             </div>
             <div
-              aria-hidden={false}
-              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
-              open={true}
+              className="StyledBox-sc-13pk1d4-0 IRSNj"
             >
               <div
                 className="StyledBox-sc-13pk1d4-0 Tiesv"
@@ -425,9 +421,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
               </h5>
             </div>
             <div
-              aria-hidden={false}
-              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
-              open={true}
+              className="StyledBox-sc-13pk1d4-0 IRSNj"
             >
               <div
                 className="StyledBox-sc-13pk1d4-0 Tiesv"
@@ -640,9 +634,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
               </h5>
             </div>
             <div
-              aria-hidden={false}
-              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
-              open={true}
+              className="StyledBox-sc-13pk1d4-0 IRSNj"
             >
               <div
                 className="StyledBox-sc-13pk1d4-0 IRSNj"
@@ -926,9 +918,7 @@ exports[`FundingAgreementView Should render the form with proper values for cont
               </h5>
             </div>
             <div
-              aria-hidden={false}
-              className="Collapsible__AnimatedBox-sc-15kniua-0 dMYckW StyledBox-sc-13pk1d4-0 IRSNj"
-              open={true}
+              className="StyledBox-sc-13pk1d4-0 IRSNj"
             >
               <div
                 className="sc-bdVaJa jHJpEe FormField__FormFieldBox-m9hood-0 gmAPiv StyledBox-sc-13pk1d4-0 hehMJe"

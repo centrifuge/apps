@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, FormField, TextInput } from 'grommet';
+import { Box, DataTable, FormField, TextInput } from 'grommet';
 import { Formik } from 'formik';
 
 import * as Yup from 'yup';
@@ -12,6 +12,7 @@ import { dateToString, extractDate } from '../common/formaters';
 import { get } from 'lodash';
 import { Contact } from '../common/models/contact';
 import MutipleSelect from '../components/form/MutipleSelect';
+import { Section } from '../components/Section';
 
 type Props = {
   onSubmit?: (document: Document) => void;
@@ -19,11 +20,15 @@ type Props = {
   schemas: Schema[],
   mode?: 'edit' | 'view' | 'create',
   editMode?: boolean,
-  document: Document;
+  document: Document
+  selectedSchema?: Schema;
+  mintActions?: JSX.Element[];
 };
 
 type State = {
   submitted: boolean,
+  columnGap: string,
+  sectionGap: string,
   selectedSchema: Schema
 }
 
@@ -47,18 +52,14 @@ export class DocumentForm extends React.Component<Props, State> {
 
   constructor(props) {
     super(props);
-    const { document, schemas } = props;
+    const { selectedSchema } = props;
     // Search if the document has a schema set
-    const selectedSchema = schemas.find(s => {
-      return (
-        document.attributes &&
-        document.attributes._schema &&
-        s.name === document.attributes._schema.value
-      );
-    });
+
 
     this.state = {
       submitted: false,
+      columnGap: 'medium',
+      sectionGap: 'none',
       selectedSchema,
     };
 
@@ -72,9 +73,9 @@ export class DocumentForm extends React.Component<Props, State> {
         ...values.attributes,
         // add schema as tech field
         '_schema': {
-            type: 'string',
-            value: selectedSchema.name,
-          },
+          type: 'string',
+          value: selectedSchema.name,
+        },
       },
     };
 
@@ -128,36 +129,48 @@ export class DocumentForm extends React.Component<Props, State> {
 
   render() {
 
-    const { submitted, selectedSchema } = this.state;
-    const { document, mode, schemas, contacts } = this.props;
+    const { submitted, selectedSchema, sectionGap } = this.state;
+    const { document, mode, contacts } = this.props;
     const isViewMode = mode === 'view';
     const isEditMode = mode === 'edit';
-    const columnGap = 'medium';
-    const sectionGap = 'none';
     const validationSchema = selectedSchema ? this.generateValidationSchema(selectedSchema.attributes) : {};
 
 
     // Make sure document has the right form in order not to break the form
     // This should never be the case
-    if(!document.attributes) {
+    if (!document.attributes) {
       document.attributes = {};
     }
-    if(!document.header) {
+    if (!document.header) {
       document.header = {};
     }
-    if(!document.header.read_access || !Array.isArray(document.header.read_access)) {
+
+    document.header.nfts = [
+      {
+        owner: '0xD77C534AED04D7Ce34Cd425073a033dB4FBe6a9d',
+        registry: '0xD77C534AED04D7Ce34Cd425073a033dB4FBe6a9d',
+        token_id: '0xD77C534AED04D7Ce34Cd425073a033dB4FBe6a9d',
+      },
+      {
+        owner: '0xB3C8F41b2Ed5f46f0374Ff98F86e6ecD8B8Cd00F',
+        registry: '0xB3C8F41b2Ed5f46f0374Ff98F86e6ecD8B8Cd00F',
+        token_id: '0xB3C8F41b2Ed5f46f0374Ff98F86e6ecD8B8Cd00F',
+      },
+    ];
+
+    if (!document.header.read_access || !Array.isArray(document.header.read_access)) {
       document.header.read_access = [];
     }
 
     // Handle cent ids that are not in contacts
     document.header.read_access.forEach(centId => {
-      if(!contacts.find(c => c.address!.toLowerCase() === centId.toLowerCase())) {
+      if (!contacts.find(c => c.address!.toLowerCase() === centId.toLowerCase())) {
         contacts.push({
-          name:centId,
-          address:centId,
-        })
+          name: centId,
+          address: centId,
+        });
       }
-    })
+    });
 
 
     return (
@@ -191,51 +204,26 @@ export class DocumentForm extends React.Component<Props, State> {
 
                   {this.props.children}
 
+                  {this.renderDetailsSection(
+                    values,
+                    errors,
+                    handleChange,
+                    setFieldValue,
+                    isViewMode,
+                    isEditMode,
+                  )}
 
-                  <Box gap={columnGap} pad={'medium'}>
-                    {(!isEditMode && !isViewMode) && <Box gap={columnGap}>
-                      <FormField
-                        label="Document Schema"
-                      >
-                        <SearchSelect
-                          labelKey={'name'}
-                          options={schemas}
-                          value={selectedSchema}
-                          onChange={(selected) => {
-                            this.setState({ selectedSchema: selected });
-                          }}
-                        />
-                      </FormField>
+                  {(isEditMode || isViewMode) && this.renderNftSection()}
 
+                  {selectedSchema && this.renderAttributesSection(
+                    values,
+                    errors,
+                    handleChange,
+                    setFieldValue,
+                    isViewMode,
+                    isEditMode,
+                  )}
 
-                    </Box>
-                    }
-                    {
-                      selectedSchema && <Box gap={columnGap}>
-                        <FormField
-                          label="Read Access"
-                        >
-                          <MutipleSelect
-                            disabled={isViewMode}
-                            labelKey={'name'}
-                            valueKey={'address'}
-                            options={contacts}
-                            selected={
-                              get(values, 'header.read_access').map(v => {
-                                return contacts.find(c => c.address!.toLowerCase() === v.toLowerCase());
-                              })
-                            }
-                            onChange={(selection) => {
-                              setFieldValue('header.read_access', selection.map(i => i.address));
-                            }}
-                          />
-                        </FormField>
-                        {
-                          this.generateFormField(values, errors, handleChange, setFieldValue, isViewMode)
-                        }
-                      </Box>
-                    }
-                  </Box>
                 </Box>
               </form>
             )
@@ -245,10 +233,89 @@ export class DocumentForm extends React.Component<Props, State> {
     );
   }
 
-  generateFormField = (values, errors, handleChange, setFieldValue, disabled) => {
 
-    const { selectedSchema } = this.state;
+  renderDetailsSection = (values, errors, handleChange, setFieldValue, isViewMode, isEditMode) => {
+    const { selectedSchema, columnGap } = this.state;
+    const { contacts, schemas } = this.props;
 
+    return <Section title="Details">
+      <Box gap={columnGap}>
+        <FormField
+          label="Document Schema"
+        >
+          <SearchSelect
+            disabled={isViewMode || isEditMode}
+            labelKey={'name'}
+            options={schemas}
+            value={selectedSchema}
+            onChange={(selected) => {
+              this.setState({ selectedSchema: selected });
+            }}
+          />
+        </FormField>
+
+        {
+          selectedSchema && <FormField
+            label="Read Access"
+          >
+            <MutipleSelect
+              disabled={isViewMode}
+              labelKey={'name'}
+              valueKey={'address'}
+              options={contacts}
+              selected={
+                get(values, 'header.read_access').map(v => {
+                  return contacts.find(c => c.address!.toLowerCase() === v.toLowerCase());
+                })
+              }
+              onChange={(selection) => {
+                setFieldValue('header.read_access', selection.map(i => i.address));
+              }}
+            />
+          </FormField>
+        }
+      </Box>
+    </Section>;
+  };
+
+  renderNftSection = () => {
+
+    const { mintActions, document } = this.props;
+
+    return (<Section
+      title="NFTs"
+      actions={mintActions}
+    >
+
+      <DataTable
+        sortable={false}
+        data={document!.header!.nfts}
+        primaryKey={'token_id'}
+        columns={[
+          {
+            property: 'token_id',
+            header: 'Token id',
+          },
+
+          {
+            property: 'registry',
+            header: 'Registry',
+          },
+
+          {
+            property: 'owner',
+            header: 'Owner',
+
+          },
+        ]}
+      />
+
+    </Section>);
+  };
+
+  renderAttributesSection = (values, errors, handleChange, setFieldValue, isViewMode, isEditMode) => {
+
+    const { selectedSchema, columnGap } = this.state;
 
     const fields = [selectedSchema.attributes.map(attr => {
       const key = `attributes.${attr.name}.value`;
@@ -263,21 +330,21 @@ export class DocumentForm extends React.Component<Props, State> {
           switch (attr.type) {
             case 'string':
               return <TextInput
-                disabled={disabled}
+                disabled={isViewMode}
                 value={get(values, key)}
                 name={`${key}`}
                 onChange={handleChange}
               />;
             case 'bytes':
               return <TextInput
-                disabled={disabled}
+                disabled={isViewMode}
                 value={get(values, key)}
                 name={`${key}`}
                 onChange={handleChange}
               />;
             case 'integer':
               return <NumberInput
-                disabled={disabled}
+                disabled={isViewMode}
                 value={get(values, key)}
                 name={`${key}`}
                 precision={0}
@@ -287,7 +354,7 @@ export class DocumentForm extends React.Component<Props, State> {
               />;
             case 'decimal':
               return <NumberInput
-                disabled={disabled}
+                disabled={isViewMode}
                 value={get(values, key)}
                 name={`${key}`}
                 precision={2}
@@ -300,7 +367,7 @@ export class DocumentForm extends React.Component<Props, State> {
 
             case 'timestamp':
               return <DateInput
-                disabled={disabled}
+                disabled={isViewMode}
                 value={extractDate(get(values, key))}
                 name={`${key}`}
                 onChange={date => {
@@ -312,7 +379,13 @@ export class DocumentForm extends React.Component<Props, State> {
       </FormField>;
     })];
 
-    return fields;
+    return <Section title={'Attributes'}>
+      <Box gap={columnGap}>
+        {fields}
+      </Box>
+    </Section>;
+
+
   };
 }
 
