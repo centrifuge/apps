@@ -4,22 +4,29 @@ import { AuthState, loadUser, observeAuthChanges } from '../../ducks/auth';
 import { connect } from 'react-redux';
 import { authTinlake } from '../../services/tinlake';
 
+interface ExtendedAuthState extends AuthState {
+  isAdmin: boolean;
+  isAuthenticated: boolean;
+  isAuthorized: boolean;
+}
+
 interface Props {
   tinlake: Tinlake;
-  requireAuthentication?: boolean;
-  render: (auth: AuthState) => React.ReactElement | null | false;
+  waitForAuthentication?: boolean;
+  waitForAuthorization?: boolean;
+  render: (auth: ExtendedAuthState) => React.ReactElement | null | false;
   auth?: AuthState;
   loadUser?: (tinlake: Tinlake, address: Address) => Promise<void>;
   observeAuthChanges?: (tinlake: Tinlake) => Promise<void>;
 }
 
 interface State {
-  authedTinlake: boolean;
+  isAuthenticating: boolean;
 }
 
 class Auth extends React.Component<Props, State> {
   state = {
-    authedTinlake: false,
+    isAuthenticating: true,
   };
 
   componentWillMount() {
@@ -27,14 +34,14 @@ class Auth extends React.Component<Props, State> {
   }
 
   init = async () => {
-    const { tinlake, requireAuthentication, auth, loadUser, observeAuthChanges } = this.props;
+    const { tinlake, waitForAuthentication, auth, loadUser, observeAuthChanges } = this.props;
 
-    if (requireAuthentication) {
+    if (waitForAuthentication) {
       try {
         await authTinlake();
       } catch (e) {}
 
-      this.setState({ authedTinlake: true });
+      this.setState({ isAuthenticating: false });
     }
 
     if (auth!.state === null) {
@@ -45,12 +52,22 @@ class Auth extends React.Component<Props, State> {
   }
 
   render() {
-    const { auth, requireAuthentication } = this.props;
-    const { authedTinlake } = this.state;
+    const { auth, waitForAuthentication, waitForAuthorization } = this.props;
+    const { isAuthenticating } = this.state;
 
-    if (requireAuthentication && !authedTinlake) { return null; }
+    const isAuthorizing = auth!.state !== 'loaded';
 
-    return this.props.render(auth!);
+    if (waitForAuthentication && isAuthenticating) { return null; }
+    if (waitForAuthorization && isAuthorizing) { return null; }
+
+    const extendedAuthState: ExtendedAuthState = {
+      ...auth!,
+      isAuthenticated: !isAuthenticating,
+      isAuthorized: !isAuthorizing,
+      isAdmin: !!auth!.user && auth!.user.isAdmin,
+    };
+
+    return this.props.render(extendedAuthState);
   }
 }
 

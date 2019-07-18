@@ -37,8 +37,8 @@ class LoanList extends React.Component<Props> {
         <Heading level="3">Loans</Heading>
       </SecondaryHeader>
 
-      <Auth tinlake={tinlake} requireAuthentication render={auth =>
-        mode === 'borrower' && auth.state === 'loaded' && auth.user === null &&
+      <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization render={auth =>
+        mode === 'borrower' && auth.user === null &&
           <Alert margin="medium" type="error">Please authenticate to view your loans.</Alert>
       } />
 

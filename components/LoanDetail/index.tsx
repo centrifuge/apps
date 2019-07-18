@@ -9,7 +9,6 @@ import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
 import LoanData from '../LoanData';
-import AdminSwitch from '../AdminSwitch';
 import Auth from '../Auth';
 
 interface Props {
@@ -55,7 +54,8 @@ class LoanDetail extends React.Component<Props> {
         </Box>
 
         {status === 'Whitelisted' &&
-          <AdminSwitch allowUnauth tinlake={tinlake} render={isAdmin => isAdmin ?
+          <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization
+            render={auth => auth.isAdmin ?
             <Link href={`/admin/unwhitelist-nft?loanId=${loanId}`}>
               <Button primary label="Unwhitelist" /></Link> : null} />}
         {status === 'Whitelisted' && loanOwner === tinlake.ethConfig.from &&
@@ -64,8 +64,8 @@ class LoanDetail extends React.Component<Props> {
           <Link href={`/borrower/repay?loanId=${loanId}`}><Button primary label="Repay" /></Link>}
       </SecondaryHeader>
 
-      <Auth tinlake={tinlake} requireAuthentication render={auth =>
-        mode === 'borrower' && auth.state === 'loaded' && auth.user === null &&
+      <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization render={auth =>
+        mode === 'borrower' && auth.user === null &&
           <Alert margin="medium" type="error">Please authenticate to view your loan.</Alert>
       } />
 

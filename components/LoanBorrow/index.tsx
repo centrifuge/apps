@@ -129,8 +129,8 @@ class LoanBorrow extends React.Component<Props, State> {
             disabled={is === 'loading' || is === 'success'} />}
       </SecondaryHeader>
 
-      <Auth tinlake={tinlake} requireAuthentication render={auth =>
-        auth.state === 'loaded' && auth.user === null &&
+      <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization render={auth =>
+        auth.user === null &&
           <Alert margin="medium" type="error">Please authenticate to view your loan.</Alert>
       } />
 
