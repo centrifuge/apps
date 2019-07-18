@@ -143,9 +143,15 @@ class Tinlake {
       pileForInit: contractAbiPileForInit,
     };
     this.contractAddresses = contractAddresses;
+
+    this.setProvider(provider, ethOptions);
+    this.setEthConfig(ethConfig || {});
+  }
+
+  setProvider = (provider: any, ethOptions?: any) => {
     this.provider = provider;
     this.ethOptions = ethOptions || {};
-    this.ethConfig = ethConfig || {};
+
     this.eth = new Eth(this.provider, this.ethOptions) as ethI;
 
     this.contracts = {
@@ -176,6 +182,10 @@ class Tinlake {
       pileForInit: this.eth.contract(this.contractAbis.pileForInit)
         .at(this.contractAddresses['PILE']),
     };
+  }
+
+  setEthConfig = (ethConfig: { [key: string]: any }) => {
+    this.ethConfig = ethConfig;
   }
 
   isAdmin = async (address: Address): Promise<boolean> => {

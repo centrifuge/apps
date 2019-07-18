@@ -25445,6 +25445,42 @@ var Tinlake = /** @class */ (function () {
     function Tinlake(provider, contractAddresses, _a) {
         var _this = this;
         var _b = _a === void 0 ? {} : _a, contractAbis = _b.contractAbis, ethOptions = _b.ethOptions, ethConfig = _b.ethConfig;
+        this.setProvider = function (provider, ethOptions) {
+            _this.provider = provider;
+            _this.ethOptions = ethOptions || {};
+            _this.eth = new lib$a(_this.provider, _this.ethOptions);
+            _this.contracts = {
+                nft: _this.eth.contract(_this.contractAbis.nft)
+                    .at(_this.contractAddresses['NFT_COLLATERAL']),
+                title: _this.eth.contract(_this.contractAbis.title)
+                    .at(_this.contractAddresses['TITLE']),
+                currency: _this.eth.contract(_this.contractAbis.currency)
+                    .at(_this.contractAddresses['CURRENCY']),
+                admit: _this.eth.contract(_this.contractAbis.admit)
+                    .at(_this.contractAddresses['ADMIT']),
+                reception: _this.eth.contract(_this.contractAbis.reception)
+                    .at(_this.contractAddresses['RECEPTION']),
+                desk: _this.eth.contract(_this.contractAbis.desk)
+                    .at(_this.contractAddresses['DESK']),
+                shelf: _this.eth.contract(_this.contractAbis.shelf)
+                    .at(_this.contractAddresses['SHELF']),
+                appraiser: _this.eth.contract(_this.contractAbis.appraiser)
+                    .at(_this.contractAddresses['APPRAISER']),
+                lender: _this.eth.contract(_this.contractAbis.lender)
+                    .at(_this.contractAddresses['LENDER']),
+                collateral: _this.eth.contract(_this.contractAbis.collateral)
+                    .at(_this.contractAddresses['COLLATERAL']),
+                pile: _this.eth.contract(_this.contractAbis.pile)
+                    .at(_this.contractAddresses['PILE']),
+                pileForAdd: _this.eth.contract(_this.contractAbis.pileForAdd)
+                    .at(_this.contractAddresses['PILE']),
+                pileForInit: _this.eth.contract(_this.contractAbis.pileForInit)
+                    .at(_this.contractAddresses['PILE']),
+            };
+        };
+        this.setEthConfig = function (ethConfig) {
+            _this.ethConfig = ethConfig;
+        };
         this.isAdmin = function (address) { return __awaiter(_this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
@@ -25675,38 +25711,8 @@ var Tinlake = /** @class */ (function () {
             pileForInit: contractAbiPileForInit,
         };
         this.contractAddresses = contractAddresses;
-        this.provider = provider;
-        this.ethOptions = ethOptions || {};
-        this.ethConfig = ethConfig || {};
-        this.eth = new lib$a(this.provider, this.ethOptions);
-        this.contracts = {
-            nft: this.eth.contract(this.contractAbis.nft)
-                .at(this.contractAddresses['NFT_COLLATERAL']),
-            title: this.eth.contract(this.contractAbis.title)
-                .at(this.contractAddresses['TITLE']),
-            currency: this.eth.contract(this.contractAbis.currency)
-                .at(this.contractAddresses['CURRENCY']),
-            admit: this.eth.contract(this.contractAbis.admit)
-                .at(this.contractAddresses['ADMIT']),
-            reception: this.eth.contract(this.contractAbis.reception)
-                .at(this.contractAddresses['RECEPTION']),
-            desk: this.eth.contract(this.contractAbis.desk)
-                .at(this.contractAddresses['DESK']),
-            shelf: this.eth.contract(this.contractAbis.shelf)
-                .at(this.contractAddresses['SHELF']),
-            appraiser: this.eth.contract(this.contractAbis.appraiser)
-                .at(this.contractAddresses['APPRAISER']),
-            lender: this.eth.contract(this.contractAbis.lender)
-                .at(this.contractAddresses['LENDER']),
-            collateral: this.eth.contract(this.contractAbis.collateral)
-                .at(this.contractAddresses['COLLATERAL']),
-            pile: this.eth.contract(this.contractAbis.pile)
-                .at(this.contractAddresses['PILE']),
-            pileForAdd: this.eth.contract(this.contractAbis.pileForAdd)
-                .at(this.contractAddresses['PILE']),
-            pileForInit: this.eth.contract(this.contractAbis.pileForInit)
-                .at(this.contractAddresses['PILE']),
-        };
+        this.setProvider(provider, ethOptions);
+        this.setEthConfig(ethConfig || {});
     }
     return Tinlake;
 }());
