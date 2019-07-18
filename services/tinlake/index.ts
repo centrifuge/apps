@@ -43,8 +43,8 @@ export async function authTinlake() {
   const account = accounts[0];
   console.log(`Using account ${account}`);
 
-  tinlake!.provider = provider;
-  tinlake!.ethConfig = { from: account };
+  tinlake!.setProvider(provider);
+  tinlake!.setEthConfig({ from: account });
 
   authed = true;
 }
