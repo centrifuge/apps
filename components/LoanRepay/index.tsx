@@ -76,14 +76,14 @@ class LoanRepay extends React.Component<Props, State> {
   repay = async () => {
     this.setState({ is: 'loading' });
 
-    await authTinlake();
-
-    const { getLoan, tinlake, loanId } = this.props;
-    const { repayAmount } = this.state;
-    const addresses = tinlake.contractAddresses;
-    const ethFrom = tinlake.ethConfig.from;
-
     try {
+      await authTinlake();
+
+      const { getLoan, tinlake, loanId } = this.props;
+      const { repayAmount } = this.state;
+      const addresses = tinlake.contractAddresses;
+      const ethFrom = tinlake.ethConfig.from;
+
       // approve currency
       const res0 = await tinlake.approveCurrency(addresses['PILE'], repayAmount);
       console.log(res0.txHash);

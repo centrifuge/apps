@@ -58,14 +58,14 @@ class LoanBorrow extends React.Component<Props, State> {
   borrow = async () => {
     this.setState({ is: 'loading' });
 
-    await authTinlake();
-
-    const { getLoan, tinlake, loanId } = this.props;
-    const addresses = tinlake.contractAddresses;
-
-    const ethFrom = tinlake.ethConfig.from;
-
     try {
+      await authTinlake();
+
+      const { getLoan, tinlake, loanId } = this.props;
+      const addresses = tinlake.contractAddresses;
+
+      const ethFrom = tinlake.ethConfig.from;
+
       // get loan
       const loan = await tinlake.getLoan(loanId);
 

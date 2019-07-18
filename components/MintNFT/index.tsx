@@ -30,9 +30,9 @@ class MintNFT extends React.Component<Props, State> {
   mint = async () => {
     this.setState({ is: 'loading' });
 
-    await authTinlake();
-
     try {
+      await authTinlake();
+
       const res = await this.props.tinlake.mintNFT(
         this.props.tinlake.ethConfig.from, this.state.tokenId);
       if (res.status === SUCCESS_STATUS && res.events[0].event.name === 'Transfer') {

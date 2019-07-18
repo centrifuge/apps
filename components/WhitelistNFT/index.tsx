@@ -52,13 +52,13 @@ class WhitelistNFT extends React.Component<Props, State> {
   whitelist = async () => {
     this.setState({ is: 'loading' });
 
-    await authTinlake();
-
-    const { tinlake } = this.props;
-    const { tokenId, principal, appraisal, interestRate } = this.state;
-    const addresses = tinlake.contractAddresses;
-
     try {
+      await authTinlake();
+
+      const { tinlake } = this.props;
+      const { tokenId, principal, appraisal, interestRate } = this.state;
+      const addresses = tinlake.contractAddresses;
+
       // admit
       const nftOwner = await tinlake.ownerOfNFT(tokenId);
 

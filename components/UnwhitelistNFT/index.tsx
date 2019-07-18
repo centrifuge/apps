@@ -47,12 +47,12 @@ class UnwhitelistNFT extends React.Component<Props, State> {
   unwhitelist = async () => {
     this.setState({ is: 'loading' });
 
-    await authTinlake();
-
-    const { getLoan, tinlake, loanId } = this.props;
-    const addresses = tinlake.contractAddresses;
-
     try {
+      await authTinlake();
+
+      const { getLoan, tinlake, loanId } = this.props;
+      const addresses = tinlake.contractAddresses;
+
       // get loan
       const loan = await tinlake.getLoan(loanId);
 
