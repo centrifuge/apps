@@ -9,15 +9,26 @@ interface Props {
 class WithTinlake extends React.Component<Props> {
   state = { loading: true };
   tinlake: Tinlake|null = null;
+  isMounted = false;
+
+  componentWillMount() {
+    this.init();
+  }
 
   componentDidMount() {
-    this.init();
+    this.isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this.isMounted = false;
   }
 
   init = async () => {
     this.tinlake = await getTinlake();
 
-    this.setState({ loading: false });
+    if (this.isMounted) {
+      this.setState({ loading: false });
+    }
   }
 
   render() {

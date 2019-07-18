@@ -28,9 +28,18 @@ class Auth extends React.Component<Props, State> {
   state = {
     isAuthenticating: true,
   };
+  isMounted = false;
 
   componentWillMount() {
     this.init();
+  }
+
+  componentDidMount() {
+    this.isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this.isMounted = false;
   }
 
   init = async () => {
@@ -41,7 +50,9 @@ class Auth extends React.Component<Props, State> {
         await authTinlake();
       } catch (e) {}
 
-      this.setState({ isAuthenticating: false });
+      if (this.isMounted) {
+        this.setState({ isAuthenticating: false });
+      }
     }
 
     if (auth!.state === null) {
