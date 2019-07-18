@@ -13,6 +13,7 @@ import { connect } from 'react-redux';
 import { NFTState, getNFT } from '../../ducks/nft';
 import NftData from '../NftData';
 import { authTinlake } from '../../services/tinlake';
+import { Spinner } from '@centrifuge/axis-spinner';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -144,68 +145,70 @@ class WhitelistNFT extends React.Component<Props, State> {
           disabled={is === 'loading' || is === 'success'} />
       </SecondaryHeader>
 
-      <Box pad={{ horizontal: 'medium' }}>
-        {is === 'loading' && 'Whitelisting...'}
-        {is === 'success' && <Alert type="success">
-          Successfully whitelisted NFT for Token ID {tokenId}</Alert>}
-        {is === 'error' && <Alert type="error">
-          <Text weight="bold">
-            Error whitelisting NFT for Token ID {tokenId}, see console for details</Text>
-          {errorMsg && <div><br />{errorMsg}</div>}
-        </Alert>}
+      {is === 'loading' ?
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Whitelisting...'} />
+      :
+        <Box pad={{ horizontal: 'medium' }}>
+          {is === 'success' && <Alert type="success">
+            Successfully whitelisted NFT for Token ID {tokenId}</Alert>}
+          {is === 'error' && <Alert type="error">
+            <Text weight="bold">
+              Error whitelisting NFT for Token ID {tokenId}, see console for details</Text>
+            {errorMsg && <div><br />{errorMsg}</div>}
+          </Alert>}
 
-        <Box direction="row" gap="medium" margin={{ vertical: 'large' }}>
-          <Box basis={'1/4'} gap="medium">
-            <FormField label="NFT ID">
-              <TextInput
-                value={tokenId}
-                onChange={e => this.setState({ tokenId: e.currentTarget.value }, this.getNFT)}
-                disabled={is === 'loading' || is === 'success'}
-              />
-            </FormField>
+          <Box direction="row" gap="medium" margin={{ vertical: 'large' }}>
+            <Box basis={'1/4'} gap="medium">
+              <FormField label="NFT ID">
+                <TextInput
+                  value={tokenId}
+                  onChange={e => this.setState({ tokenId: e.currentTarget.value }, this.getNFT)}
+                  disabled={is === 'success'}
+                />
+              </FormField>
+            </Box>
+            <Box basis={'1/4'} gap="medium">
+              <FormField label="Appraisal">
+                <NumberInput
+                  value={baseToDisplay(appraisal, 18)} suffix=" DAI" precision={18} autoFocus
+                  onChange={(masked: string, float: number) => float !== undefined &&
+                    this.setState({ appraisal: displayToBase(masked, 18) })}
+                  disabled={is === 'success'}
+                />
+              </FormField>
+            </Box>
+            <Box basis={'1/4'} gap="medium">
+              <FormField label="Principal">
+                <NumberInput
+                  value={baseToDisplay(principal, 18)} suffix=" DAI" precision={18}
+                  onChange={(masked: string, float: number) => float !== undefined &&
+                    this.setState({ principal: displayToBase(masked, 18) })}
+                  disabled={is === 'success'}
+                />
+              </FormField>
+            </Box>
+            <Box basis={'1/4'} gap="medium">
+              <FormField label="Interest Rate (Yearly)">
+                <NumberInput
+                  value={interestRate} suffix=" %" precision={2}
+                  onChange={(masked: string, float: number) => {
+                    if (float !== undefined) {
+                      console.log({ masked, float });
+                      this.setState({ interestRate: `${float}` });
+                    }
+                  }}
+                  disabled={is === 'success'}
+                />
+              </FormField>
+            </Box>
           </Box>
-          <Box basis={'1/4'} gap="medium">
-            <FormField label="Appraisal">
-              <NumberInput
-                value={baseToDisplay(appraisal, 18)} suffix=" DAI" precision={18} autoFocus
-                onChange={(masked: string, float: number) => float !== undefined &&
-                  this.setState({ appraisal: displayToBase(masked, 18) })}
-                disabled={is === 'loading' || is === 'success'}
-              />
-            </FormField>
-          </Box>
-          <Box basis={'1/4'} gap="medium">
-            <FormField label="Principal">
-              <NumberInput
-                value={baseToDisplay(principal, 18)} suffix=" DAI" precision={18}
-                onChange={(masked: string, float: number) => float !== undefined &&
-                  this.setState({ principal: displayToBase(masked, 18) })}
-                disabled={is === 'loading' || is === 'success'}
-              />
-            </FormField>
-          </Box>
-          <Box basis={'1/4'} gap="medium">
-            <FormField label="Interest Rate (Yearly)">
-              <NumberInput
-                value={interestRate} suffix=" %" precision={2}
-                onChange={(masked: string, float: number) => {
-                  if (float !== undefined) {
-                    console.log({ masked, float });
-                    this.setState({ interestRate: `${float}` });
-                  }
-                }}
-                disabled={is === 'loading' || is === 'success'}
-              />
-            </FormField>
-          </Box>
+
+          {nft!.state === 'not found' && <Alert type="error" margin={{ vertical: 'large' }}>
+            NFT for token ID {tokenId} not found.</Alert>}
+          {nft!.state === 'found' && nft!.nft &&
+            <NftData data={nft!.nft} authedAddr={tinlake.ethConfig.from} />}
         </Box>
-
-        {nft!.state === 'loading' && 'Loading NFT data...'}
-        {nft!.state === 'not found' && <Alert type="error" margin={{ vertical: 'large' }}>
-          NFT for token ID {tokenId} not found.</Alert>}
-        {nft!.state === 'found' && nft!.nft &&
-          <NftData data={nft!.nft} authedAddr={tinlake.ethConfig.from} />}
-      </Box>
+      }
     </Box>;
   }
 }

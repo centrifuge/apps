@@ -15,6 +15,7 @@ import { displayToBase } from '../../utils/displayToBase';
 import LoanData from '../LoanData';
 import { calcRepayAmount } from '../../utils/calcRepayAmount';
 import { authTinlake } from '../../services/tinlake';
+import { Spinner } from '@centrifuge/axis-spinner';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -118,7 +119,7 @@ class LoanRepay extends React.Component<Props, State> {
     const { loans, loanId, tinlake } = this.props;
     const { singleLoan, singleLoanState } = loans!;
 
-    if (singleLoanState === null || singleLoanState === 'loading') { return 'Loading...'; }
+    if (singleLoanState === null || singleLoanState === 'loading') { return null; }
     if (singleLoanState === 'not found') {
       return <Alert type="error">
         Could not find loan {loanId}</Alert>;
@@ -141,45 +142,48 @@ class LoanRepay extends React.Component<Props, State> {
             disabled={is === 'loading' || is === 'success'} />}
       </SecondaryHeader>
 
-      <Box pad={{ horizontal: 'medium' }}>
-        {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
-          <Box direction="row" justify="end" margin={{ bottom: 'medium' }}>
-            <Text>
-              Your total Repayment Amount is <Text weight="bold">{<NumberDisplay
-                value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />}</Text>
-            </Text>
+      {is === 'loading' ?
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Repaying...'} />
+      :
+        <Box pad={{ horizontal: 'medium' }}>
+          {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
+            <Box direction="row" justify="end" margin={{ bottom: 'medium' }}>
+              <Text>
+                Your total Repayment Amount is <Text weight="bold">{<NumberDisplay
+                  value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />}</Text>
+              </Text>
+            </Box>
+          }
+
+          {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
+            Successfully repayed
+            <NumberDisplay value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />
+            for Loan ID {loanId}</Alert>}
+          {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
+            <Text weight="bold">Error repaying Loan ID {loanId}, see console for details</Text>
+            {errorMsg && <div><br />{errorMsg}</div>}
+          </Alert>}
+
+          <Box direction="row" gap="medium" margin={{ vertical: 'medium' }}>
+            <Box basis={'1/4'} gap="medium"><FormField label="Repay Amount">
+              <NumberInput
+                value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18}
+                onChange={(masked: string, float: number) => float !== undefined &&
+                  this.setState({
+                    repayAmount: displayToBase(masked, 18), touchedRepaymentAmount: true })}
+                autoFocus disabled={true || is === 'loading' || is === 'success'}
+              />
+            </FormField></Box>
+            <Box basis={'1/4'} gap="medium" />
+            <Box basis={'1/4'} gap="medium" />
+            <Box basis={'1/4'} gap="medium" />
           </Box>
-        }
 
-        {is === 'loading' && 'Repaying...'}
-        {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
-          Successfully repayed
-          <NumberDisplay value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />
-          for Loan ID {loanId}</Alert>}
-        {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
-          <Text weight="bold">Error repaying Loan ID {loanId}, see console for details</Text>
-          {errorMsg && <div><br />{errorMsg}</div>}
-        </Alert>}
+          <LoanData loan={singleLoan!} />
 
-        <Box direction="row" gap="medium" margin={{ vertical: 'medium' }}>
-          <Box basis={'1/4'} gap="medium"><FormField label="Repay Amount">
-            <NumberInput
-              value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18}
-              onChange={(masked: string, float: number) => float !== undefined &&
-                this.setState({
-                  repayAmount: displayToBase(masked, 18), touchedRepaymentAmount: true })}
-              autoFocus disabled={true || is === 'loading' || is === 'success'}
-            />
-          </FormField></Box>
-          <Box basis={'1/4'} gap="medium" />
-          <Box basis={'1/4'} gap="medium" />
-          <Box basis={'1/4'} gap="medium" />
+          <NftData data={singleLoan!} authedAddr={tinlake.ethConfig.from} />
         </Box>
-
-        <LoanData loan={singleLoan!} />
-
-        <NftData data={singleLoan!} authedAddr={tinlake.ethConfig.from} />
-      </Box>
+      }
     </Box>;
   }
 }

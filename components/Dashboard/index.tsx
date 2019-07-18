@@ -30,7 +30,7 @@ class Dashboard extends React.Component<Props> {
     const { dashboard } = this.props;
     const { state, data } = dashboard!;
 
-    if (data === null || state === 'loading') { return 'Loading...'; }
+    if (data === null || state === 'loading') { return null; }
 
     const { loanCount, totalDebt, totalValueOfNFTs } = data!;
 

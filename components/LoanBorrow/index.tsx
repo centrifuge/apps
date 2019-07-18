@@ -15,6 +15,7 @@ import { baseToDisplay } from '../../utils/baseToDisplay';
 import { displayToBase } from '../../utils/displayToBase';
 import LoanData from '../LoanData';
 import { authTinlake } from '../../services/tinlake';
+import { Spinner } from '@centrifuge/axis-spinner';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -104,7 +105,7 @@ class LoanBorrow extends React.Component<Props, State> {
     const { loans, loanId, tinlake } = this.props;
     const { singleLoan, singleLoanState } = loans!;
 
-    if (singleLoanState === null || singleLoanState === 'loading') { return 'Loading...'; }
+    if (singleLoanState === null || singleLoanState === 'loading') { return null; }
     if (singleLoanState === 'not found') {
       return <Alert type="error">
         Could not find loan {loanId}</Alert>;
@@ -127,43 +128,46 @@ class LoanBorrow extends React.Component<Props, State> {
             disabled={is === 'loading' || is === 'success'} />}
       </SecondaryHeader>
 
-      <Box pad={{ horizontal: 'medium' }}>
-        {status === 'Whitelisted' && loanOwner === tinlake.ethConfig.from &&
-          <Box direction="row" justify="end" margin={{ bottom: 'medium' }}>
-            <Text>
-              Your Borrow Amount will be <Text weight="bold">{<NumberDisplay
-                value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18} />}</Text>
-            </Text>
+      {is === 'loading' ?
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Borrowing...'} />
+      :
+        <Box pad={{ horizontal: 'medium' }}>
+          {status === 'Whitelisted' && loanOwner === tinlake.ethConfig.from &&
+            <Box direction="row" justify="end" margin={{ bottom: 'medium' }}>
+              <Text>
+                Your Borrow Amount will be <Text weight="bold">{<NumberDisplay
+                  value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18} />}</Text>
+              </Text>
+            </Box>
+          }
+
+          {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
+            Successfully borrowed
+            <NumberDisplay value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18} />
+            for Loan ID {loanId}</Alert>}
+          {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
+            <Text weight="bold">Error borrowing for Loan ID {loanId}, see console for details</Text>
+            {errorMsg && <div><br />{errorMsg}</div>}
+          </Alert>}
+
+          <Box direction="row" gap="medium" margin={{ vertical: 'medium' }}>
+            <Box basis={'1/4'} gap="medium"><FormField label="Borrow Amount">
+              <NumberInput
+                value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18}
+                onChange={(masked: string, float: number) => float !== undefined &&
+                  this.setState({ borrowAmount: displayToBase(masked, 18) })}
+                autoFocus disabled={true || is === 'loading' || is === 'success'}
+              /></FormField></Box>
+            <Box basis={'1/4'} gap="medium" />
+            <Box basis={'1/4'} gap="medium" />
+            <Box basis={'1/4'} gap="medium" />
           </Box>
-        }
 
-        {is === 'loading' && 'Borrowing...'}
-        {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
-          Successfully borrowed
-          <NumberDisplay value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18} />
-          for Loan ID {loanId}</Alert>}
-        {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
-          <Text weight="bold">Error borrowing for Loan ID {loanId}, see console for details</Text>
-          {errorMsg && <div><br />{errorMsg}</div>}
-        </Alert>}
+          <LoanData loan={singleLoan!} />
 
-        <Box direction="row" gap="medium" margin={{ vertical: 'medium' }}>
-          <Box basis={'1/4'} gap="medium"><FormField label="Borrow Amount">
-            <NumberInput
-              value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18}
-              onChange={(masked: string, float: number) => float !== undefined &&
-                this.setState({ borrowAmount: displayToBase(masked, 18) })}
-              autoFocus disabled={true || is === 'loading' || is === 'success'}
-            /></FormField></Box>
-          <Box basis={'1/4'} gap="medium" />
-          <Box basis={'1/4'} gap="medium" />
-          <Box basis={'1/4'} gap="medium" />
+          <NftData data={singleLoan!} authedAddr={tinlake.ethConfig.from} />
         </Box>
-
-        <LoanData loan={singleLoan!} />
-
-        <NftData data={singleLoan!} authedAddr={tinlake.ethConfig.from} />
-      </Box>
+      }
     </Box>;
   }
 }

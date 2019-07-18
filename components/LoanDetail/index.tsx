@@ -36,7 +36,7 @@ class LoanDetail extends React.Component<Props> {
     const { loans, loanId, tinlake, mode } = this.props;
     const { singleLoan, singleLoanState } = loans!;
 
-    if (singleLoanState === null || singleLoanState === 'loading') { return 'Loading...'; }
+    if (singleLoanState === null || singleLoanState === 'loading') { return null; }
     if (singleLoanState === 'not found') {
       return <Alert type="error">
         Could not find loan {loanId}</Alert>;

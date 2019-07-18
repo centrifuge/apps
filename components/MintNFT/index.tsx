@@ -6,6 +6,7 @@ import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
 import { authTinlake } from '../../services/tinlake';
+import { Spinner } from '@centrifuge/axis-spinner';
 
 interface Props {
   tinlake: Tinlake;
@@ -62,38 +63,41 @@ class MintNFT extends React.Component<Props, State> {
           disabled={is === 'loading' || is === 'success'} />
       </SecondaryHeader>
 
-      <Box pad={{ horizontal: 'medium' }}>
-        {is === 'loading' && 'Minting...'}
-        {is === 'success' && <Alert type="success">
-          Successfully minted NFT for Token ID {tokenId}<br />
-          <br />
-          <Link href={`/admin/whitelist-nft?tokenId=${tokenId}`}>
-            <Anchor>Proceed to whitelisting</Anchor></Link></Alert>}
-        {is === 'error' && <Alert type="error">
-          <Text weight="bold">
-            Error minting NFT for Token ID {tokenId}, see console for details</Text>
-          {errorMsg && <div><br />{errorMsg}</div>}
-        </Alert>}
+      {is === 'loading' ?
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Minting...'} />
+      :
+        <Box pad={{ horizontal: 'medium' }}>
+          {is === 'success' && <Alert type="success">
+            Successfully minted NFT for Token ID {tokenId}<br />
+            <br />
+            <Link href={`/admin/whitelist-nft?tokenId=${tokenId}`}>
+              <Anchor>Proceed to whitelisting</Anchor></Link></Alert>}
+          {is === 'error' && <Alert type="error">
+            <Text weight="bold">
+              Error minting NFT for Token ID {tokenId}, see console for details</Text>
+            {errorMsg && <div><br />{errorMsg}</div>}
+          </Alert>}
 
-        <Alert type="info" margin={{ vertical: 'medium' }}>
-          This is a temporary page that will be removed once integrated with Centrifuge Gateway.
-        </Alert>
+          <Alert type="info" margin={{ vertical: 'medium' }}>
+            This is a temporary page that will be removed once integrated with Centrifuge Gateway.
+          </Alert>
 
-        <Box direction="row" gap="medium" margin={{ vertical: 'large' }}>
-          <Box basis={'1/4'} gap="medium">
-            <FormField label="Token ID">
-              <TextInput
-                value={this.state.tokenId}
-                onChange={e => this.setState({ tokenId: e.currentTarget.value })}
-                disabled={is === 'loading' || is === 'success'}
-              />
-            </FormField>
+          <Box direction="row" gap="medium" margin={{ vertical: 'large' }}>
+            <Box basis={'1/4'} gap="medium">
+              <FormField label="Token ID">
+                <TextInput
+                  value={this.state.tokenId}
+                  onChange={e => this.setState({ tokenId: e.currentTarget.value })}
+                  disabled={is === 'success'}
+                />
+              </FormField>
+            </Box>
+            <Box basis={'1/4'} gap="medium" />
+            <Box basis={'1/4'} gap="medium" />
+            <Box basis={'1/4'} gap="medium" />
           </Box>
-          <Box basis={'1/4'} gap="medium" />
-          <Box basis={'1/4'} gap="medium" />
-          <Box basis={'1/4'} gap="medium" />
         </Box>
-      </Box>
+      }
     </Box>;
   }
 }

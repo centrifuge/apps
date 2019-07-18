@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { LinkPrevious } from 'grommet-icons';
 import LoanData from '../LoanData';
 import { authTinlake } from '../../services/tinlake';
+import { Spinner } from '@centrifuge/axis-spinner';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -81,7 +82,7 @@ class UnwhitelistNFT extends React.Component<Props, State> {
     const { loans, loanId, tinlake } = this.props;
     const { singleLoan, singleLoanState } = loans!;
 
-    if (singleLoanState === null || singleLoanState === 'loading') { return 'Loading...'; }
+    if (singleLoanState === null || singleLoanState === 'loading') { return null; }
     if (singleLoanState === 'not found') {
       return <Alert type="error">
         Could not find loan {loanId}</Alert>;
@@ -104,29 +105,32 @@ class UnwhitelistNFT extends React.Component<Props, State> {
             disabled={is === 'loading' || is === 'success'} />}
       </SecondaryHeader>
 
-      <Box pad={{ horizontal: 'medium' }}>
-        {is === 'loading' && 'Unwhitelisting...'}
-        {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
-          Successfully unwhitelisted NFT for Loan ID {loanId}</Alert>}
-        {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
-          <Text weight="bold">
-            Error unwhitelisting NFT for Loan ID {loanId}, see console for details</Text>
-          {errorMsg && <div><br />{errorMsg}</div>}
-        </Alert>}
+      {is === 'loading' ?
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Unwhitelisting...'} />
+      :
+        <Box pad={{ horizontal: 'medium' }}>
+          {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
+            Successfully unwhitelisted NFT for Loan ID {loanId}</Alert>}
+          {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
+            <Text weight="bold">
+              Error unwhitelisting NFT for Loan ID {loanId}, see console for details</Text>
+            {errorMsg && <div><br />{errorMsg}</div>}
+          </Alert>}
 
-        <Box direction="row" gap="medium" margin={{ vertical: 'medium', top: 'large' }}>
-          <Box basis={'1/4'} gap="medium"><FormField label="Loan ID">
-            <TextInput value={loanId} disabled /></FormField></Box>
-          <Box basis={'1/4'} gap="medium"><FormField label="Loan Status">
-            <TextInput value={status} disabled /></FormField></Box>
-          <Box basis={'1/4'} gap="medium" />
-          <Box basis={'1/4'} gap="medium" />
+          <Box direction="row" gap="medium" margin={{ vertical: 'medium', top: 'large' }}>
+            <Box basis={'1/4'} gap="medium"><FormField label="Loan ID">
+              <TextInput value={loanId} disabled /></FormField></Box>
+            <Box basis={'1/4'} gap="medium"><FormField label="Loan Status">
+              <TextInput value={status} disabled /></FormField></Box>
+            <Box basis={'1/4'} gap="medium" />
+            <Box basis={'1/4'} gap="medium" />
+          </Box>
+
+          <LoanData loan={singleLoan!} />
+
+          <NftData data={singleLoan!} authedAddr={tinlake.ethConfig.from} />
         </Box>
-
-        <LoanData loan={singleLoan!} />
-
-        <NftData data={singleLoan!} authedAddr={tinlake.ethConfig.from} />
-      </Box>
+      }
     </Box>;
   }
 }
