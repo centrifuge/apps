@@ -34,11 +34,12 @@ class UnwhitelistPage extends React.Component<{ loanId: string }> {
               <AdminSwitch tinlake={tinlake} render={isAdmin => isAdmin ?
                 <UnwhitelistNFT tinlake={tinlake} loanId={loanId} />
                 :
-                <Alert type="error">Please use an admin account to access this page</Alert>
+                <Alert margin="medium" type="error">
+                  Please use an admin account to access this page</Alert>
               } />
             } />
           ) : (
-              <Alert type="error">Please provide an ID</Alert>
+              <Alert margin="medium" type="error">Please provide an ID</Alert>
             )}
         </Box>
       </Box>

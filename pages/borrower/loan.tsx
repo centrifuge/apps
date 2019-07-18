@@ -36,7 +36,7 @@ class BorrowerLoanPage extends React.Component<{ loanId: string }> {
               } />
             } />
           ) : (
-              <Alert type="error">Please provide an ID</Alert>
+              <Alert margin="medium" type="error">Please provide an ID</Alert>
             )}
         </Box>
       </Box>

@@ -39,7 +39,7 @@ class LoanDetail extends React.Component<Props> {
 
     if (singleLoanState === null || singleLoanState === 'loading') { return null; }
     if (singleLoanState === 'not found') {
-      return <Alert type="error">
+      return <Alert margin="medium" type="error">
         Could not find loan {loanId}</Alert>;
     }
 

@@ -33,7 +33,8 @@ class WhitelistNFTPage extends React.Component<{ tokenId: string }> {
             <AdminSwitch tinlake={tinlake} render={isAdmin => isAdmin ?
               <WhitelistNFT tinlake={tinlake} tokenId={tokenId} />
               :
-              <Alert type="error">Please use an admin account to access this page</Alert>
+              <Alert margin="medium" type="error">
+                Please use an admin account to access this page</Alert>
             } />
           } />
         </Box>

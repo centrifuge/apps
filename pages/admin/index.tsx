@@ -27,7 +27,8 @@ class AdminLoanListPage extends React.Component {
             <AdminSwitch tinlake={tinlake} render={isAdmin => isAdmin ?
               <LoanList tinlake={tinlake} mode="admin" />
               :
-              <Alert type="error">Please use an admin account to access this page</Alert>
+              <Alert margin="medium" type="error">
+                Please use an admin account to access this page</Alert>
             } />
           } />
         </Box>

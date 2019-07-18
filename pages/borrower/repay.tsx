@@ -32,7 +32,7 @@ class RepayPage extends React.Component<{ loanId: string }> {
             <WithTinlake render={tinlake =>
               <LoanRepay tinlake={tinlake} loanId={loanId} />} />
           ) : (
-              <Alert type="error">Please provide an ID</Alert>
+              <Alert margin="medium" type="error">Please provide an ID</Alert>
             )}
         </Box>
       </Box>

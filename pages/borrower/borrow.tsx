@@ -32,7 +32,7 @@ class BorrowPage extends React.Component<{ loanId: string }> {
             <WithTinlake render={tinlake =>
               <LoanBorrow tinlake={tinlake} loanId={loanId} />} />
           ) : (
-              <Alert type="error">Please provide an ID</Alert>
+              <Alert margin="medium" type="error">Please provide an ID</Alert>
             )}
         </Box>
       </Box>

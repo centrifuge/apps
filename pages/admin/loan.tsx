@@ -34,11 +34,12 @@ class AdminLoanPage extends React.Component<{ loanId: string }> {
               <AdminSwitch tinlake={tinlake} render={isAdmin => isAdmin ?
                 <LoanDetail tinlake={tinlake} loanId={loanId} mode="admin" />
                 :
-                <Alert type="error">Please use an admin account to access this page</Alert>
+                <Alert margin="medium" type="error">
+                  Please use an admin account to access this page</Alert>
               } />
             } />
           ) : (
-              <Alert type="error">Please provide an ID</Alert>
+              <Alert margin="medium" type="error">Please provide an ID</Alert>
             )}
         </Box>
       </Box>
