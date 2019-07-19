@@ -7,10 +7,17 @@ import SearchSelect from '../components/form/SearchSelect';
 import { isValidAddress } from 'ethereumjs-util';
 
 type Props = {
-  onSubmit: (transferDetails: any) => void;
+  onSubmit: (data: MintNftFormData) => void;
   onDiscard: () => void;
   registries: Registry[];
 };
+
+
+export interface MintNftFormData {
+  registry: Registry | undefined,
+  deposit_address: string
+  transfer: boolean
+}
 
 export default class MintNftForm extends React.Component<Props> {
   static defaultProps: Props = {
@@ -43,7 +50,7 @@ export default class MintNftForm extends React.Component<Props> {
     const formValidation = Yup.object().shape({
       registry: Yup.string()
         .required('This field is required'),
-      owner: Yup.string()
+      deposit_address: Yup.string()
         .test({
           name: 'test_schemas',
           test: (function(this, value) {
@@ -63,9 +70,9 @@ export default class MintNftForm extends React.Component<Props> {
 
     });
 
-    const initialValues = {
+    const initialValues: MintNftFormData = {
       registry: undefined,
-      owner: '',
+      deposit_address: '',
       transfer: false,
     };
 
@@ -124,12 +131,12 @@ export default class MintNftForm extends React.Component<Props> {
 
                       {
                         values.transfer && <FormField
-                          label="Owner"
-                          error={errors.owner}
+                          label="Deposit adress"
+                          error={errors.deposit_address}
                         >
                           <TextInput
-                            name="owner"
-                            value={values!.owner}
+                            name="deposit_address"
+                            value={values!.deposit_address}
                             onChange={handleChange}
                           />
                         </FormField>

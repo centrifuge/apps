@@ -13,12 +13,18 @@ import { Preloader } from '../components/Preloader';
 import { RequestState } from '../store/reducers/http-request-reducer';
 import { Document } from '../common/models/document';
 import { SecondaryHeader } from '../components/SecondaryHeader';
-import { getDocumentById, resetGetDocumentById, resetUpdateDocument, updateDocument } from '../store/actions/documents';
+import {
+  getDocumentById,
+  mintNFTForDocument,
+  resetGetDocumentById,
+  resetUpdateDocument,
+  updateDocument,
+} from '../store/actions/documents';
 import { getSchemasList, resetGetSchemasList } from '../store/actions/schemas';
 import { Schema } from '../common/models/schema';
 import { Contact } from '../common/models/contact';
 import { Modal } from '@centrifuge/axis-modal';
-import MintNftForm from './MintNftForm';
+import MintNftForm, { MintNftFormData } from './MintNftForm';
 
 type Props = {
   updateDocument: typeof updateDocument;
@@ -29,11 +35,13 @@ type Props = {
   resetGetSchemasList: typeof resetGetSchemasList
   getContacts: typeof getContacts;
   resetGetContacts: typeof getContacts;
+  mintNFTForDocument: typeof mintNFTForDocument;
   document?: Document;
   schemas: Schema[];
   contacts?: Contact[];
   loggedInUser: User;
   updatingDocument: RequestState<Document>;
+  mintingNFT: RequestState<Document>;
 } & RouteComponentProps<{ id?: string }>;
 
 export class EditDocument extends React.Component<Props> {
@@ -61,6 +69,17 @@ export class EditDocument extends React.Component<Props> {
     this.props.updateDocument(document);
   };
 
+  mintNFT = (data: MintNftFormData) => {
+    this.closeMintModal();
+    const { document, mintNFTForDocument, loggedInUser } = this.props;
+
+    mintNFTForDocument(document!._id || '', {
+      deposit_address: data.transfer ? data.deposit_address : loggedInUser.account,
+      proof_fields: data.registry!.proofs,
+      registry_address: data.registry!.address
+    });
+  };
+
 
   openMintModal = () => {
     this.setState({ mintNft: true });
@@ -77,6 +96,7 @@ export class EditDocument extends React.Component<Props> {
   render() {
     const {
       updatingDocument,
+      mintingNFT,
       contacts,
       document,
       schemas,
@@ -92,6 +112,12 @@ export class EditDocument extends React.Component<Props> {
     if (updatingDocument.loading) {
       return <Preloader message="Updating document" withSound={true}/>;
     }
+
+
+    if (mintingNFT.loading) {
+      return <Preloader message="Minting NFT" withSound={true}/>;
+    }
+
     // TODO add route resolvers and remove this logic
     if (!canWriteToDoc(loggedInUser, document)) {
       return <Paragraph color="status-error"> Access Denied! </Paragraph>;
@@ -108,8 +134,8 @@ export class EditDocument extends React.Component<Props> {
     if (!selectedSchema) return <p>Unsupported schema</p>;
 
     const mintActions = [
-      <Button key="mint_nft" onClick={this.openMintModal} icon={<Money/>} plain label={'Mint NFT'}/>,
-    ]
+        <Button key="mint_nft" onClick={this.openMintModal} icon={<Money/>} plain label={'Mint NFT'}/>,
+      ]
     ;
     return (
       <>
@@ -121,7 +147,7 @@ export class EditDocument extends React.Component<Props> {
           onClose={this.closeMintModal}
         >
           <MintNftForm
-            onSubmit={this.closeMintModal}
+            onSubmit={this.mintNFT}
             onDiscard={this.closeMintModal}
             registries={selectedSchema.registries}
           />
@@ -168,6 +194,7 @@ export class EditDocument extends React.Component<Props> {
 const mapStateToProps = (state) => {
   return {
     loggedInUser: state.user.auth.loggedInUser,
+    mintingNFT: state.documents.mintNFT,
     document: state.documents.getById.data,
     updatingDocument: state.documents.update,
     contacts: state.contacts.get.data,
@@ -186,5 +213,6 @@ export default connect(
     resetGetDocumentById,
     getSchemasList,
     resetGetSchemasList,
+    mintNFTForDocument,
   },
 )(withRouter(EditDocument));

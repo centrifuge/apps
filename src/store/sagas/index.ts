@@ -35,6 +35,7 @@ export default function* () {
     fork(documents.watchGetDocumentById),
     fork(documents.watchGetDocuments),
     fork(documents.watchUpdateDocument),
+    fork(documents.watchMintNftForDocument),
     fork(notifications.watchCloseAlert),
   ]);
 }

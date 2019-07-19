@@ -1,5 +1,7 @@
 import React from 'react';
-import { Box, DataTable, FormField, TextInput } from 'grommet';
+import { Box, DataTable, FormField, Paragraph, TextInput } from 'grommet';
+import { StyledSelect} from 'grommet/components/Select/StyledSelect';
+import { StyledTextInput} from 'grommet/components/TextInput/StyledTextInput';
 import { Formik } from 'formik';
 
 import * as Yup from 'yup';
@@ -13,6 +15,25 @@ import { get } from 'lodash';
 import { Contact } from '../common/models/contact';
 import MutipleSelect from '../components/form/MutipleSelect';
 import { Section } from '../components/Section';
+import styled from 'styled-components';
+import { DisplayField } from '../components/DisplayField';
+
+
+// improve visibility of inputs in view mode
+const StyledFormContainer = styled(Box)`
+  ${StyledTextInput}, input[type="text"], ${StyledSelect} button {
+       ${props => {
+          if (props.mode === 'view')
+            return `
+              svg {
+              opacity: 0;
+              }
+              cursor:default;
+              opacity: 1;`
+          }
+        }
+  }  
+ `;
 
 type Props = {
   onSubmit?: (document: Document) => void;
@@ -145,18 +166,7 @@ export class DocumentForm extends React.Component<Props, State> {
       document.header = {};
     }
 
-    document.header.nfts = [
-      {
-        owner: '0xD77C534AED04D7Ce34Cd425073a033dB4FBe6a9d',
-        registry: '0xD77C534AED04D7Ce34Cd425073a033dB4FBe6a9d',
-        token_id: '0xD77C534AED04D7Ce34Cd425073a033dB4FBe6a9d',
-      },
-      {
-        owner: '0xB3C8F41b2Ed5f46f0374Ff98F86e6ecD8B8Cd00F',
-        registry: '0xB3C8F41b2Ed5f46f0374Ff98F86e6ecD8B8Cd00F',
-        token_id: '0xB3C8F41b2Ed5f46f0374Ff98F86e6ecD8B8Cd00F',
-      },
-    ];
+
 
     if (!document.header.read_access || !Array.isArray(document.header.read_access)) {
       document.header.read_access = [];
@@ -174,7 +184,7 @@ export class DocumentForm extends React.Component<Props, State> {
 
 
     return (
-      <Box pad={{ bottom: 'xlarge' }}>
+      <StyledFormContainer mode={mode} pad={{ bottom: 'xlarge' }}>
         <Formik
           validationSchema={validationSchema}
           initialValues={document}
@@ -229,7 +239,7 @@ export class DocumentForm extends React.Component<Props, State> {
             )
           }
         </Formik>
-      </Box>
+      </StyledFormContainer>
     );
   }
 
@@ -257,6 +267,7 @@ export class DocumentForm extends React.Component<Props, State> {
         {
           selectedSchema && <FormField
             label="Read Access"
+
           >
             <MutipleSelect
               disabled={isViewMode}
@@ -288,27 +299,33 @@ export class DocumentForm extends React.Component<Props, State> {
     >
 
       <DataTable
+        size={'100%'}
         sortable={false}
-        data={document!.header!.nfts}
+        data={document!.header!.nfts || []}
         primaryKey={'token_id'}
         columns={[
           {
             property: 'token_id',
             header: 'Token id',
+            render: datum => <DisplayField value={datum.token_id}  noBorder/>
           },
 
           {
             property: 'registry',
             header: 'Registry',
+            render: datum => <DisplayField value={datum.registry}  noBorder/>
           },
 
           {
             property: 'owner',
             header: 'Owner',
+            render: datum => <DisplayField value={datum.owner} noBorder />
 
           },
         ]}
       />
+
+      {!document!.header!.nfts && <Paragraph color={'dark-2'}>There are no NFTs minted on this document yet.</Paragraph>}
 
     </Section>);
   };
@@ -349,7 +366,9 @@ export class DocumentForm extends React.Component<Props, State> {
                 name={`${key}`}
                 precision={0}
                 onChange={(masked, value) => {
-                  setFieldValue(`${key}`, value);
+                  //TODO there is a problem with onChange for NumberInput
+                  // It fires 2 times. First with the event so value is undefined
+                  setFieldValue(`${key}`, value && value.toString());
                 }}
               />;
             case 'decimal':

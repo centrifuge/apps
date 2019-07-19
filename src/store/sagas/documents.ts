@@ -6,6 +6,7 @@ import {
   createDocumentAction,
   getDocumentByIdAction,
   getDocumentsAction,
+  mintNftForDocumentAction,
   updateDocumentAction,
 } from '../actions/documents';
 import { httpClient } from '../../http-client';
@@ -77,10 +78,34 @@ export function* updateDocument(action) {
   }
 }
 
+
+export function* mintNft(action) {
+  try {
+    const { id, payload } = action;
+    const response = yield call(httpClient.documents.mint, id, payload);
+
+    yield put({
+      type: mintNftForDocumentAction.success,
+      payload: response.data,
+    });
+    yield put(push(routes.documents.index));
+  } catch (e) {
+    yield put({ type: mintNftForDocumentAction.fail, payload: e });
+    yield put(alertError(
+      'Failed to mint nft',
+      e.message,
+      { onConfirmAction: { type: updateDocumentAction.clearError } },
+    ));
+
+  }
+}
+
+
 export default {
   watchGetDocuments: () => takeEvery(getDocumentsAction.start, getDocuments),
   watchGetDocumentById: () =>
     takeEvery(getDocumentByIdAction.start, getDocumentById),
   watchCreateDocument: () => takeEvery(createDocumentAction.start, createDocument),
   watchUpdateDocument: () => takeEvery(updateDocumentAction.start, updateDocument),
+  watchMintNftForDocument: () => takeEvery(mintNftForDocumentAction.start, mintNft),
 };

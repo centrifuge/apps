@@ -188,6 +188,7 @@ class SchemasList extends React.Component<RouteComponentProps & SchemasProps> {
           </SecondaryHeader>
           <Modal
               opened={ isEditing ? viewSchema :  createSchema }
+              width={'large'}
               headingProps={{ level: 3 }}
               title={ isEditing ? updateTitle : createTitle }
               onClose={ isEditing ?  this.closeViewSchema : this.closeCreateSchema }
