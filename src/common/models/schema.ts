@@ -1,5 +1,26 @@
 import { isValidAddress } from 'ethereumjs-util';
 
+export interface Attribute {
+  name: string,
+  label: string,
+  type: AttrTypes.STRING | AttrTypes.TIMESTAMP | AttrTypes.INTEGER | AttrTypes.BYTES | AttrTypes.DECIMAL
+}
+
+export interface Registry {
+  label: string,
+  address: string,
+  proofs: Array<string>
+}
+
+export enum AttrTypes {
+  INTEGER = 'integer',
+  DECIMAL = 'decimal',
+  BYTES = 'bytes',
+  STRING = 'string',
+  TIMESTAMP = 'timestamp',
+}
+
+
 export class Schema {
   constructor(
     readonly name: string,
@@ -49,8 +70,9 @@ export class Schema {
           throw new Error(`Type ${attr.type} is not valid. 
           The supported types are ${supportedTypes.join(', ')}. 
           Please also check for white spaces!`);
-
-        const nestedAttrsMatches = attr.name.match(/\.?([^.\[\]]+)|\[(\d+)\]/g);
+        // eslint-disable-next-line
+        const regex = /\.?([^.\[\]]+)|\[(\d+)\]/g;
+        const nestedAttrsMatches = attr.name.match(regex);
         if (!nestedAttrsMatches || nestedAttrsMatches.length > 1)
           throw new Error(`Nested attributes are not supported! Rename ${attr.name} and to not use . or [ ]`);
 
@@ -66,22 +88,3 @@ export class Schema {
   }
 }
 
-export interface Attribute {
-  name: string,
-  label: string,
-  type: AttrTypes.STRING | AttrTypes.TIMESTAMP | AttrTypes.INTEGER | AttrTypes.BYTES | AttrTypes.DECIMAL
-}
-
-export interface Registry {
-  label: string,
-  address: string,
-  proofs: Array<string>
-}
-
-export enum AttrTypes {
-  INTEGER = 'integer',
-  DECIMAL = 'decimal',
-  BYTES = 'bytes',
-  STRING = 'string',
-  TIMESTAMP = 'timestamp',
-}
