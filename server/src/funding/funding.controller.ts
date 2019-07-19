@@ -23,7 +23,7 @@ export class FundingController {
   async sign(@Body() payload: FunRequest, @Request() req): Promise<FunFundingResponse | null> {
     const signatureResponse = await this.centrifugeService.funding.sign(payload.document_id, payload.agreement_id, payload, req.user.account);
     await this.centrifugeService.pullForJobComplete(signatureResponse.header.job_id, req.user.account);
-    const updatedInvoice = await this.centrifugeService.invoices.get(payload.document_id, req.user.account);
+    const updatedInvoice = await this.centrifugeService.invoices.getInvoice(req.user.account, payload.document_id);
     delete updatedInvoice.attributes;
     // Find all the invoices for the document ID
     const invoiceWithNft = await this.databaseService.invoices.update(
@@ -118,13 +118,14 @@ export class FundingController {
     };
 
     // Mint an UnpaidInvoiceNFT.
+    // TODO use the new invoice unpaid methods
     // This will fail if the document already has a nft minted
-    const nftResult = await this.centrifugeService.invoiceUnpaid.mintInvoiceUnpaidNFT(fundingRequest.document_id, nftPayload, req.user.account);
+     const nftResult = await this.centrifugeService.invoices.invoiceUnpaidNft(req.user.account, nftPayload);
 
     // Pull to see when minting is complete. We need the token ID for the funding API
-    await this.centrifugeService.pullForJobComplete(nftResult.header.job_id, req.user.account);
+     await this.centrifugeService.pullForJobComplete(nftResult.header.job_id, req.user.account);
     // Get the new invoice data in order to get the NFT ID
-    const invoiceWithNft = await this.centrifugeService.invoices.get(fundingRequest.document_id, req.user.account);
+    const invoiceWithNft = await this.centrifugeService.invoices.getInvoice(req.user.account, fundingRequest.document_id);
     const tokenId = invoiceWithNft.header.nfts[0].token_id;
     // Create funding payload
     const payload: FunFundingCreatePayload = {
@@ -147,7 +148,7 @@ export class FundingController {
     // THis will not be necessary when we implement JOb context and keep Job Status for documents
     await this.centrifugeService.pullForJobComplete(fundingResponse.header.job_id, req.user.account);
 
-    const invoiceWithFunding = await this.centrifugeService.invoices.get(fundingRequest.document_id, req.user.account);
+    const invoiceWithFunding = await this.centrifugeService.invoices.getInvoice(req.user.account, fundingRequest.document_id);
     // We need to delete the attributes prop because NEDB does not allow for . in field names
     // Ex: funding[0].amount
     delete invoiceWithFunding.attributes;

@@ -1,4 +1,4 @@
-import { DocumentAttribute } from '../../clients/centrifuge-node';
+import { CoreapiAttributeResponse } from '../../clients/centrifuge-node';
 
 // Reverse function for unflatten and unflattenRaw
 export const flatten = (data): any => {
@@ -66,7 +66,7 @@ export const isArrayLikeDocumentAttribute = (obj) => {
 // Converts and array like Document Attribute to an array making it iterable
 // ignores not isArrayLikeDocumentAttribute objects
 // it is recursive on all the items in the array
-export const toIterableDocumentAttribute = (documentAttribute: DocumentAttribute) => {
+export const toIterableDocumentAttribute = (documentAttribute: CoreapiAttributeResponse) => {
   if (!isArrayLikeDocumentAttribute(documentAttribute) ) return documentAttribute;
   const keys = Object.keys(documentAttribute);
   keys.sort();
@@ -85,7 +85,7 @@ export const toIterableDocumentAttribute = (documentAttribute: DocumentAttribute
 };
 
 // Converts an Iterable Document Attribute to an array like object.
-export const toUniterableDocumentAttribute = (documentAttribute: DocumentAttribute) => {
+export const toUniterableDocumentAttribute = (documentAttribute: CoreapiAttributeResponse) => {
   if (!Array.isArray(documentAttribute)) return documentAttribute;
   let notIterable = {};
   for (let key in documentAttribute) {

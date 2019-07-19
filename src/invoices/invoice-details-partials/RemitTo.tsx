@@ -52,12 +52,12 @@ export class RemitTo extends React.Component<RemitToProps> {
             <Box gap={columnGap} basis={'1/2'}>
               <DisplayField
                 label="Street"
-                value={invoice!.remit_to_street1}
+                value={invoice!.remit_to_street_1}
               />
 
               <DisplayField
                 label="Street"
-                value={invoice!.remit_to_street2}
+                value={invoice!.remit_to_street_2}
               />
 
               <DisplayField

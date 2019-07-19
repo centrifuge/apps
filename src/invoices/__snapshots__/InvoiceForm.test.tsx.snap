@@ -1149,7 +1149,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                         "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                       }
                                                                                     }
-                                                                                    name="sender_street1"
+                                                                                    name="sender_street_1"
                                                                                     onBlur={[Function]}
                                                                                     onChange={[Function]}
                                                                                     onFocus={[Function]}
@@ -1173,7 +1173,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                           "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                         }
                                                                                       }
-                                                                                      name="sender_street1"
+                                                                                      name="sender_street_1"
                                                                                       onBlur={[Function]}
                                                                                       onChange={[Function]}
                                                                                       onFocus={[Function]}
@@ -1197,7 +1197,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                             "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                           }
                                                                                         }
-                                                                                        name="sender_street1"
+                                                                                        name="sender_street_1"
                                                                                         onBlur={[Function]}
                                                                                         onChange={[Function]}
                                                                                         onFocus={[Function]}
@@ -1222,7 +1222,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                               "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                             }
                                                                                           }
-                                                                                          name="sender_street1"
+                                                                                          name="sender_street_1"
                                                                                           onBlur={[Function]}
                                                                                           onChange={[Function]}
                                                                                           onFocus={[Function]}
@@ -1248,7 +1248,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                     "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                                   }
                                                                                                 }
-                                                                                                name="sender_street1"
+                                                                                                name="sender_street_1"
                                                                                                 onBlur={[Function]}
                                                                                                 onChange={[Function]}
                                                                                                 onFocus={[Function]}
@@ -1259,7 +1259,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                 <input
                                                                                                   autoComplete="off"
                                                                                                   className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                                                                                                  name="sender_street1"
+                                                                                                  name="sender_street_1"
                                                                                                   onBlur={[Function]}
                                                                                                   onChange={[Function]}
                                                                                                   onFocus={[Function]}
@@ -1442,7 +1442,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                         "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                       }
                                                                                     }
-                                                                                    name="sender_street2"
+                                                                                    name="sender_street_2"
                                                                                     onBlur={[Function]}
                                                                                     onChange={[Function]}
                                                                                     onFocus={[Function]}
@@ -1466,7 +1466,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                           "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                         }
                                                                                       }
-                                                                                      name="sender_street2"
+                                                                                      name="sender_street_2"
                                                                                       onBlur={[Function]}
                                                                                       onChange={[Function]}
                                                                                       onFocus={[Function]}
@@ -1490,7 +1490,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                             "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                           }
                                                                                         }
-                                                                                        name="sender_street2"
+                                                                                        name="sender_street_2"
                                                                                         onBlur={[Function]}
                                                                                         onChange={[Function]}
                                                                                         onFocus={[Function]}
@@ -1515,7 +1515,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                               "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                             }
                                                                                           }
-                                                                                          name="sender_street2"
+                                                                                          name="sender_street_2"
                                                                                           onBlur={[Function]}
                                                                                           onChange={[Function]}
                                                                                           onFocus={[Function]}
@@ -1541,7 +1541,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                     "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                                   }
                                                                                                 }
-                                                                                                name="sender_street2"
+                                                                                                name="sender_street_2"
                                                                                                 onBlur={[Function]}
                                                                                                 onChange={[Function]}
                                                                                                 onFocus={[Function]}
@@ -1552,7 +1552,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                 <input
                                                                                                   autoComplete="off"
                                                                                                   className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                                                                                                  name="sender_street2"
+                                                                                                  name="sender_street_2"
                                                                                                   onBlur={[Function]}
                                                                                                   onChange={[Function]}
                                                                                                   onFocus={[Function]}
@@ -3397,7 +3397,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                         "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                       }
                                                                                     }
-                                                                                    name="bill_to_street1"
+                                                                                    name="bill_to_street_1"
                                                                                     onBlur={[Function]}
                                                                                     onChange={[Function]}
                                                                                     onFocus={[Function]}
@@ -3421,7 +3421,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                           "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                         }
                                                                                       }
-                                                                                      name="bill_to_street1"
+                                                                                      name="bill_to_street_1"
                                                                                       onBlur={[Function]}
                                                                                       onChange={[Function]}
                                                                                       onFocus={[Function]}
@@ -3445,7 +3445,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                             "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                           }
                                                                                         }
-                                                                                        name="bill_to_street1"
+                                                                                        name="bill_to_street_1"
                                                                                         onBlur={[Function]}
                                                                                         onChange={[Function]}
                                                                                         onFocus={[Function]}
@@ -3470,7 +3470,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                               "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                             }
                                                                                           }
-                                                                                          name="bill_to_street1"
+                                                                                          name="bill_to_street_1"
                                                                                           onBlur={[Function]}
                                                                                           onChange={[Function]}
                                                                                           onFocus={[Function]}
@@ -3496,7 +3496,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                     "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                                   }
                                                                                                 }
-                                                                                                name="bill_to_street1"
+                                                                                                name="bill_to_street_1"
                                                                                                 onBlur={[Function]}
                                                                                                 onChange={[Function]}
                                                                                                 onFocus={[Function]}
@@ -3507,7 +3507,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                 <input
                                                                                                   autoComplete="off"
                                                                                                   className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                                                                                                  name="bill_to_street1"
+                                                                                                  name="bill_to_street_1"
                                                                                                   onBlur={[Function]}
                                                                                                   onChange={[Function]}
                                                                                                   onFocus={[Function]}
@@ -3690,7 +3690,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                         "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                       }
                                                                                     }
-                                                                                    name="bill_to_street2"
+                                                                                    name="bill_to_street_2"
                                                                                     onBlur={[Function]}
                                                                                     onChange={[Function]}
                                                                                     onFocus={[Function]}
@@ -3714,7 +3714,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                           "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                         }
                                                                                       }
-                                                                                      name="bill_to_street2"
+                                                                                      name="bill_to_street_2"
                                                                                       onBlur={[Function]}
                                                                                       onChange={[Function]}
                                                                                       onFocus={[Function]}
@@ -3738,7 +3738,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                             "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                           }
                                                                                         }
-                                                                                        name="bill_to_street2"
+                                                                                        name="bill_to_street_2"
                                                                                         onBlur={[Function]}
                                                                                         onChange={[Function]}
                                                                                         onFocus={[Function]}
@@ -3763,7 +3763,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                               "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                             }
                                                                                           }
-                                                                                          name="bill_to_street2"
+                                                                                          name="bill_to_street_2"
                                                                                           onBlur={[Function]}
                                                                                           onChange={[Function]}
                                                                                           onFocus={[Function]}
@@ -3789,7 +3789,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                     "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                                   }
                                                                                                 }
-                                                                                                name="bill_to_street2"
+                                                                                                name="bill_to_street_2"
                                                                                                 onBlur={[Function]}
                                                                                                 onChange={[Function]}
                                                                                                 onFocus={[Function]}
@@ -3800,7 +3800,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                 <input
                                                                                                   autoComplete="off"
                                                                                                   className="StyledTextInput-sc-1x30a0s-0 duvNfq"
-                                                                                                  name="bill_to_street2"
+                                                                                                  name="bill_to_street_2"
                                                                                                   onBlur={[Function]}
                                                                                                   onChange={[Function]}
                                                                                                   onFocus={[Function]}

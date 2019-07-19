@@ -40,11 +40,11 @@ export class Sender extends React.Component<SenderProps> {
         <Box gap={columnGap} basis={'1/2'}>
           <DisplayField
             label="Street 1"
-            value={invoice!.sender_street1}
+            value={invoice!.sender_street_1}
           />
           <DisplayField
             label="Street 2"
-            value={invoice!.sender_street2}
+            value={invoice!.sender_street_2}
           />
           <DisplayField
             label="City"

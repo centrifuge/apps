@@ -51,23 +51,23 @@ export class SenderForm extends React.Component<ConnectedSenderFormProps> {
           <Box gap={columnGap} basis={'1/2'}>
             <FormField
               label="Street 1"
-              error={errors!.sender_street1}
+              error={errors!.sender_street_1}
             >
               <TextInput
-                name="sender_street1"
+                name="sender_street_1"
                 placeholder="Street name and number"
-                value={values!.sender_street1}
+                value={values!.sender_street_1}
                 onChange={handleChange}
               />
             </FormField>
             <FormField
               label="Street 2"
-              error={errors!.sender_street2}
+              error={errors!.sender_street_2}
             >
               <TextInput
-                name="sender_street2"
+                name="sender_street_2"
                 placeholder="Apartment, unit, office, etc"
-                value={values!.sender_street2}
+                value={values!.sender_street_2}
                 onChange={handleChange}
               />
             </FormField>

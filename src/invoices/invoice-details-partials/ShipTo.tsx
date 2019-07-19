@@ -38,11 +38,11 @@ export class ShipTo extends React.Component<ShipToProps> {
         <Box gap={columnGap} basis={'1/2'}>
           <DisplayField
             label="Street"
-            value={invoice!.ship_to_street1}
+            value={invoice!.ship_to_street_1}
           />
           <DisplayField
             label="Street"
-            value={invoice!.ship_to_street2}
+            value={invoice!.ship_to_street_2}
           />
           <DisplayField
             label="City"

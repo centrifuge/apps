@@ -52,7 +52,7 @@ describe('PurchaseOrdersController', () => {
     });
 
     const centrifugeService = purchaseOrdersModule.get<CentrifugeService>(CentrifugeService);
-    poSpies.spyUpdate = jest.spyOn(centrifugeService.purchaseOrders, 'update');
+    poSpies.spyUpdate = jest.spyOn(centrifugeService.purchaseOrders, 'updatePurchaseOrder');
 
     databaseSpies.spyInsert = jest.spyOn(databaseService.purchaseOrders, 'insert');
     databaseSpies.spyUpdate = jest.spyOn(databaseService.purchaseOrders, 'update');
@@ -112,13 +112,13 @@ describe('PurchaseOrdersController', () => {
         ownerId: 'user_id',
       });
       expect(poSpies.spyUpdate).toHaveBeenCalledWith(
+        config.admin.account,
         '0x39393939',
         {
           data: {
             ...updatedOrder,
           },
         },
-        config.admin.account,
       );
       expect(updateResult).toMatchObject({
         data: {

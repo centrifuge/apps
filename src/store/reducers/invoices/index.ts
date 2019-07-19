@@ -7,11 +7,11 @@ import {
 } from '../../actions/invoices';
 import { httpRequestReducer } from '../http-request-reducer';
 import { Invoice } from '../../../common/models/invoice';
-import { InvInvoiceData } from '../../../../clients/centrifuge-node';
+import { InvoiceData } from '../../../../clients/centrifuge-node';
 
-const get = httpRequestReducer<InvInvoiceData>(getInvoiceAction);
+const get = httpRequestReducer<InvoiceData>(getInvoiceAction);
 const create = httpRequestReducer<Invoice>(createInvoiceAction);
-const getById = httpRequestReducer<InvInvoiceData>(getInvoiceByIdAction);
-const update = httpRequestReducer<InvInvoiceData>(updateInvoiceAction);
+const getById = httpRequestReducer<InvoiceData>(getInvoiceByIdAction);
+const update = httpRequestReducer<InvoiceData>(updateInvoiceAction);
 
 export default combineReducers({ create, get, getById, update });

@@ -51,9 +51,9 @@ export class WebhooksController {
           throw new Error('User is not present in database');
         }
         if (notification.document_type === documentTypes.invoice) {
-          const result = await this.centrifugeService.invoices.get(
-            notification.document_id,
+          const result = await this.centrifugeService.invoices.getInvoice(
             user.account,
+            notification.document_id,
           );
 
           const invoice: InvoiceResponse = {
@@ -81,9 +81,9 @@ export class WebhooksController {
           );
           // TODO this should be similar to invoices. We do not care for now.
         } else if (notification.document_type === documentTypes.purchaseOrder) {
-          const result = await this.centrifugeService.purchaseOrders.get(
-            notification.document_id,
+          const result = await this.centrifugeService.purchaseOrders.getPurchaseOrder(
             user.account,
+            notification.document_id,
           );
           await this.databaseService.purchaseOrders.insert(result);
           // FlexDocs
@@ -93,7 +93,7 @@ export class WebhooksController {
               notification.document_id,
           );
 
-          const unflattenedAttributes = unflatten(result.attributes)
+          const unflattenedAttributes = unflatten(result.attributes);
           await this.databaseService.documents.update(
               { 'header.document_id': notification.document_id, 'ownerId': user._id },
               {$set: {

@@ -81,130 +81,6 @@ export class RequiredError extends Error {
 /**
  * 
  * @export
- * @interface AccountAccountData
- */
-export interface AccountAccountData {
-    /**
-     * 
-     * @type {AccountEthereumAccount}
-     * @memberof AccountAccountData
-     */
-    eth_account?: AccountEthereumAccount;
-    /**
-     * 
-     * @type {string}
-     * @memberof AccountAccountData
-     */
-    eth_default_account_name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AccountAccountData
-     */
-    receive_event_notification_endpoint?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AccountAccountData
-     */
-    identity_id?: string;
-    /**
-     * 
-     * @type {AccountKeyPair}
-     * @memberof AccountAccountData
-     */
-    signing_key_pair?: AccountKeyPair;
-    /**
-     * 
-     * @type {AccountKeyPair}
-     * @memberof AccountAccountData
-     */
-    p2p_key_pair?: AccountKeyPair;
-}
-
-/**
- * 
- * @export
- * @interface AccountEthereumAccount
- */
-export interface AccountEthereumAccount {
-    /**
-     * 
-     * @type {string}
-     * @memberof AccountEthereumAccount
-     */
-    address?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AccountEthereumAccount
-     */
-    key?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AccountEthereumAccount
-     */
-    password?: string;
-}
-
-/**
- * 
- * @export
- * @interface AccountGetAllAccountResponse
- */
-export interface AccountGetAllAccountResponse {
-    /**
-     * 
-     * @type {Array<AccountAccountData>}
-     * @memberof AccountGetAllAccountResponse
-     */
-    data?: Array<AccountAccountData>;
-}
-
-/**
- * 
- * @export
- * @interface AccountKeyPair
- */
-export interface AccountKeyPair {
-    /**
-     * 
-     * @type {string}
-     * @memberof AccountKeyPair
-     */
-    pub?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AccountKeyPair
-     */
-    pvt?: string;
-}
-
-/**
- * 
- * @export
- * @interface AccountUpdateAccountRequest
- */
-export interface AccountUpdateAccountRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof AccountUpdateAccountRequest
-     */
-    account_id?: string;
-    /**
-     * 
-     * @type {AccountAccountData}
-     * @memberof AccountUpdateAccountRequest
-     */
-    data?: AccountAccountData;
-}
-
-/**
- * 
- * @export
  * @interface ByteutilsHexBytes
  */
 export interface ByteutilsHexBytes extends Array<any> {
@@ -213,28 +89,106 @@ export interface ByteutilsHexBytes extends Array<any> {
 /**
  * 
  * @export
- * @interface CoreapiAttribute
+ * @interface CoreapiAccount
  */
-export interface CoreapiAttribute {
+export interface CoreapiAccount {
     /**
      * 
-     * @type {string}
-     * @memberof CoreapiAttribute
+     * @type {CoreapiEthAccount}
+     * @memberof CoreapiAccount
      */
-    type?: CoreapiAttribute.TypeEnum;
+    eth_account?: CoreapiEthAccount;
     /**
      * 
      * @type {string}
-     * @memberof CoreapiAttribute
+     * @memberof CoreapiAccount
+     */
+    eth_default_account_name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CoreapiAccount
+     */
+    identity_id?: string;
+    /**
+     * 
+     * @type {CoreapiKeyPair}
+     * @memberof CoreapiAccount
+     */
+    p2p_key_pair?: CoreapiKeyPair;
+    /**
+     * 
+     * @type {string}
+     * @memberof CoreapiAccount
+     */
+    receive_event_notification_endpoint?: string;
+    /**
+     * 
+     * @type {CoreapiKeyPair}
+     * @memberof CoreapiAccount
+     */
+    signing_key_pair?: CoreapiKeyPair;
+}
+
+/**
+ * 
+ * @export
+ * @interface CoreapiAccounts
+ */
+export interface CoreapiAccounts {
+    /**
+     * 
+     * @type {Array<CoreapiAccount>}
+     * @memberof CoreapiAccounts
+     */
+    data?: Array<CoreapiAccount>;
+}
+
+/**
+ * 
+ * @export
+ * @interface CoreapiAttributeMapRequest
+ */
+export interface CoreapiAttributeMapRequest {
+    [key: string]: any;
+
+}
+
+/**
+ * 
+ * @export
+ * @interface CoreapiAttributeMapResponse
+ */
+export interface CoreapiAttributeMapResponse {
+    [key: string]: any;
+
+}
+
+/**
+ * 
+ * @export
+ * @interface CoreapiAttributeRequest
+ */
+export interface CoreapiAttributeRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof CoreapiAttributeRequest
+     */
+    type?: CoreapiAttributeRequest.TypeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof CoreapiAttributeRequest
      */
     value?: string;
 }
 
 /**
  * @export
- * @namespace CoreapiAttribute
+ * @namespace CoreapiAttributeRequest
  */
-export namespace CoreapiAttribute {
+export namespace CoreapiAttributeRequest {
     /**
      * @export
      * @enum {string}
@@ -251,11 +205,45 @@ export namespace CoreapiAttribute {
 /**
  * 
  * @export
- * @interface CoreapiAttributeMap
+ * @interface CoreapiAttributeResponse
  */
-export interface CoreapiAttributeMap {
-    [key: string]: any;
+export interface CoreapiAttributeResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof CoreapiAttributeResponse
+     */
+    key?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CoreapiAttributeResponse
+     */
+    type?: CoreapiAttributeResponse.TypeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof CoreapiAttributeResponse
+     */
+    value?: string;
+}
 
+/**
+ * @export
+ * @namespace CoreapiAttributeResponse
+ */
+export namespace CoreapiAttributeResponse {
+    /**
+     * @export
+     * @enum {string}
+     */
+    export enum TypeEnum {
+        Integer = <any> 'integer',
+        Decimal = <any> 'decimal',
+        String = <any> 'string',
+        Bytes = <any> 'bytes',
+        Timestamp = <any> 'timestamp'
+    }
 }
 
 /**
@@ -266,10 +254,10 @@ export interface CoreapiAttributeMap {
 export interface CoreapiCreateDocumentRequest {
     /**
      * 
-     * @type {CoreapiAttributeMap}
+     * @type {CoreapiAttributeMapRequest}
      * @memberof CoreapiCreateDocumentRequest
      */
-    attributes?: CoreapiAttributeMap;
+    attributes?: CoreapiAttributeMapRequest;
     /**
      * 
      * @type {any}
@@ -321,10 +309,10 @@ export namespace CoreapiCreateDocumentRequest {
 export interface CoreapiDocumentResponse {
     /**
      * 
-     * @type {CoreapiAttributeMap}
+     * @type {CoreapiAttributeMapResponse}
      * @memberof CoreapiDocumentResponse
      */
-    attributes?: CoreapiAttributeMap;
+    attributes?: CoreapiAttributeMapResponse;
     /**
      * 
      * @type {any}
@@ -360,6 +348,52 @@ export namespace CoreapiDocumentResponse {
         PurchaseOrder = <any> 'purchase_order',
         Entity = <any> 'entity'
     }
+}
+
+/**
+ * 
+ * @export
+ * @interface CoreapiEthAccount
+ */
+export interface CoreapiEthAccount {
+    /**
+     * 
+     * @type {string}
+     * @memberof CoreapiEthAccount
+     */
+    address?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CoreapiEthAccount
+     */
+    key?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CoreapiEthAccount
+     */
+    password?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface CoreapiKeyPair
+ */
+export interface CoreapiKeyPair {
+    /**
+     * 
+     * @type {string}
+     * @memberof CoreapiKeyPair
+     */
+    pub?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CoreapiKeyPair
+     */
+    pvt?: string;
 }
 
 /**
@@ -765,70 +799,6 @@ export interface CoreapiTransferNFTResponse {
 /**
  * 
  * @export
- * @interface DocumentAttribute
- */
-export interface DocumentAttribute {
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentAttribute
-     */
-    key?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentAttribute
-     */
-    type?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentAttribute
-     */
-    value?: string;
-}
-
-/**
- * 
- * @export
- * @interface DocumentBinaryAttachment
- */
-export interface DocumentBinaryAttachment {
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentBinaryAttachment
-     */
-    name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentBinaryAttachment
-     */
-    file_type?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentBinaryAttachment
-     */
-    size?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentBinaryAttachment
-     */
-    data?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentBinaryAttachment
-     */
-    checksum?: string;
-}
-
-/**
- * 
- * @export
  * @interface DocumentNFT
  */
 export interface DocumentNFT {
@@ -856,122 +826,6 @@ export interface DocumentNFT {
      * @memberof DocumentNFT
      */
     token_index?: string;
-}
-
-/**
- * 
- * @export
- * @interface DocumentPaymentDetails
- */
-export interface DocumentPaymentDetails {
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    id?: string;
-    /**
-     * 
-     * @type {Date}
-     * @memberof DocumentPaymentDetails
-     */
-    date_executed?: Date;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    payee?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    payer?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    amount?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    currency?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    reference?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    bank_name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    bank_address?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    bank_country?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    bank_account_number?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    bank_account_currency?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    bank_account_holder_name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    bank_key?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    crypto_chain_uri?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    crypto_transaction_id?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    crypto_from?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentPaymentDetails
-     */
-    crypto_to?: string;
 }
 
 /**
@@ -1033,15 +887,199 @@ export interface DocumentResponseHeader {
 /**
  * 
  * @export
+ * @interface DocumentsBinaryAttachment
+ */
+export interface DocumentsBinaryAttachment {
+    /**
+     * the md5 checksum of the original file for easier verification
+     * @type {string}
+     * @memberof DocumentsBinaryAttachment
+     */
+    checksum?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentsBinaryAttachment
+     */
+    data?: string;
+    /**
+     * mime type of attached file
+     * @type {string}
+     * @memberof DocumentsBinaryAttachment
+     */
+    file_type?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentsBinaryAttachment
+     */
+    name?: string;
+    /**
+     * in bytes
+     * @type {number}
+     * @memberof DocumentsBinaryAttachment
+     */
+    size?: number;
+}
+
+/**
+ * 
+ * @export
+ * @interface DocumentsPaymentDetails
+ */
+export interface DocumentsPaymentDetails {
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    amount?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    bank_account_currency?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    bank_account_holder_name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    bank_account_number?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    bank_address?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    bank_country?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    bank_key?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    bank_name?: string;
+    /**
+     * the ID of the chain to use in URI format. e.g. \"ethereum://42/<tokenaddress>\"
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    crypto_chain_uri?: string;
+    /**
+     * from address
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    crypto_from?: string;
+    /**
+     * to address
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    crypto_to?: string;
+    /**
+     * the transaction in which the payment happened
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    crypto_transaction_id?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    currency?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    date_executed?: string;
+    /**
+     * identifying this payment. could be a sequential number, could be a transaction hash of the crypto payment
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    id?: string;
+    /**
+     * centrifuge id of payee
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    payee?: string;
+    /**
+     * centrifuge id of payer
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    payer?: string;
+    /**
+     * payment reference (e.g. reference field on bank transfer)
+     * @type {string}
+     * @memberof DocumentsPaymentDetails
+     */
+    reference?: string;
+}
+
+/**
+ * 
+ * @export
  * @interface EntityAddress
  */
 export interface EntityAddress {
+    /**
+     * 
+     * @type {string}
+     * @memberof EntityAddress
+     */
+    address_line_1?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EntityAddress
+     */
+    address_line_2?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EntityAddress
+     */
+    contact_person?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EntityAddress
+     */
+    country?: string;
     /**
      * 
      * @type {boolean}
      * @memberof EntityAddress
      */
     is_main?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof EntityAddress
+     */
+    is_pay_to?: boolean;
     /**
      * 
      * @type {boolean}
@@ -1056,22 +1094,10 @@ export interface EntityAddress {
     is_ship_to?: boolean;
     /**
      * 
-     * @type {boolean}
-     * @memberof EntityAddress
-     */
-    is_pay_to?: boolean;
-    /**
-     * 
      * @type {string}
      * @memberof EntityAddress
      */
     label?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityAddress
-     */
-    zip?: string;
     /**
      * 
      * @type {string}
@@ -1083,25 +1109,7 @@ export interface EntityAddress {
      * @type {string}
      * @memberof EntityAddress
      */
-    country?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityAddress
-     */
-    address_line1?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityAddress
-     */
-    address_line2?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityAddress
-     */
-    contact_person?: string;
+    zip?: string;
 }
 
 /**
@@ -1110,12 +1118,6 @@ export interface EntityAddress {
  * @interface EntityBankPaymentMethod
  */
 export interface EntityBankPaymentMethod {
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityBankPaymentMethod
-     */
-    identifier?: string;
     /**
      * 
      * @type {EntityAddress}
@@ -1127,7 +1129,7 @@ export interface EntityBankPaymentMethod {
      * @type {string}
      * @memberof EntityBankPaymentMethod
      */
-    holder_name?: string;
+    bank_account_number?: string;
     /**
      * 
      * @type {string}
@@ -1139,7 +1141,13 @@ export interface EntityBankPaymentMethod {
      * @type {string}
      * @memberof EntityBankPaymentMethod
      */
-    bank_account_number?: string;
+    holder_name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EntityBankPaymentMethod
+     */
+    identifier?: string;
     /**
      * 
      * @type {string}
@@ -1159,19 +1167,19 @@ export interface EntityContact {
      * @type {string}
      * @memberof EntityContact
      */
-    name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityContact
-     */
-    title?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityContact
-     */
     email?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EntityContact
+     */
+    fax?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EntityContact
+     */
+    name?: string;
     /**
      * 
      * @type {string}
@@ -1183,7 +1191,7 @@ export interface EntityContact {
      * @type {string}
      * @memberof EntityContact
      */
-    fax?: string;
+    title?: string;
 }
 
 /**
@@ -1197,211 +1205,95 @@ export interface EntityCryptoPaymentMethod {
      * @type {string}
      * @memberof EntityCryptoPaymentMethod
      */
-    identifier?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityCryptoPaymentMethod
-     */
-    to?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityCryptoPaymentMethod
-     */
     chain_uri?: string;
     /**
      * 
      * @type {string}
      * @memberof EntityCryptoPaymentMethod
      */
-    supported_currency?: string;
-}
-
-/**
- * 
- * @export
- * @interface EntityEntityCreatePayload
- */
-export interface EntityEntityCreatePayload {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof EntityEntityCreatePayload
-     */
-    read_access?: Array<string>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof EntityEntityCreatePayload
-     */
-    write_access?: Array<string>;
-    /**
-     * 
-     * @type {EntityEntityData}
-     * @memberof EntityEntityCreatePayload
-     */
-    data?: EntityEntityData;
-    /**
-     * 
-     * @type {{ [key: string]: DocumentAttribute; }}
-     * @memberof EntityEntityCreatePayload
-     */
-    attributes?: { [key: string]: DocumentAttribute; };
-}
-
-/**
- * 
- * @export
- * @interface EntityEntityData
- */
-export interface EntityEntityData {
+    identifier?: string;
     /**
      * 
      * @type {string}
-     * @memberof EntityEntityData
+     * @memberof EntityCryptoPaymentMethod
+     */
+    supported_currency?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EntityCryptoPaymentMethod
+     */
+    to?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface EntityData
+ */
+export interface EntityData {
+    /**
+     * 
+     * @type {Array<EntityAddress>}
+     * @memberof EntityData
+     */
+    addresses?: Array<EntityAddress>;
+    /**
+     * 
+     * @type {Array<EntityContact>}
+     * @memberof EntityData
+     */
+    contacts?: Array<EntityContact>;
+    /**
+     * 
+     * @type {string}
+     * @memberof EntityData
      */
     identity?: string;
     /**
      * 
      * @type {string}
-     * @memberof EntityEntityData
+     * @memberof EntityData
      */
     legal_name?: string;
     /**
      * 
-     * @type {Array<EntityAddress>}
-     * @memberof EntityEntityData
-     */
-    addresses?: Array<EntityAddress>;
-    /**
-     * 
      * @type {Array<EntityPaymentDetail>}
-     * @memberof EntityEntityData
+     * @memberof EntityData
      */
     payment_details?: Array<EntityPaymentDetail>;
-    /**
-     * 
-     * @type {Array<EntityContact>}
-     * @memberof EntityEntityData
-     */
-    contacts?: Array<EntityContact>;
 }
 
 /**
  * 
  * @export
- * @interface EntityEntityDataResponse
+ * @interface EntityOtherPaymentMethod
  */
-export interface EntityEntityDataResponse {
-    /**
-     * 
-     * @type {EntityEntityData}
-     * @memberof EntityEntityDataResponse
-     */
-    entity?: EntityEntityData;
-    /**
-     * 
-     * @type {Array<EntityRelationship>}
-     * @memberof EntityEntityDataResponse
-     */
-    relationships?: Array<EntityRelationship>;
-}
-
-/**
- * 
- * @export
- * @interface EntityEntityResponse
- */
-export interface EntityEntityResponse {
-    /**
-     * 
-     * @type {DocumentResponseHeader}
-     * @memberof EntityEntityResponse
-     */
-    header?: DocumentResponseHeader;
-    /**
-     * 
-     * @type {EntityEntityDataResponse}
-     * @memberof EntityEntityResponse
-     */
-    data?: EntityEntityDataResponse;
-    /**
-     * 
-     * @type {{ [key: string]: DocumentAttribute; }}
-     * @memberof EntityEntityResponse
-     */
-    attributes?: { [key: string]: DocumentAttribute; };
-}
-
-/**
- * 
- * @export
- * @interface EntityEntityUpdatePayload
- */
-export interface EntityEntityUpdatePayload {
+export interface EntityOtherPaymentMethod {
     /**
      * 
      * @type {string}
-     * @memberof EntityEntityUpdatePayload
-     */
-    document_id?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof EntityEntityUpdatePayload
-     */
-    read_access?: Array<string>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof EntityEntityUpdatePayload
-     */
-    write_access?: Array<string>;
-    /**
-     * 
-     * @type {EntityEntityData}
-     * @memberof EntityEntityUpdatePayload
-     */
-    data?: EntityEntityData;
-    /**
-     * 
-     * @type {{ [key: string]: DocumentAttribute; }}
-     * @memberof EntityEntityUpdatePayload
-     */
-    attributes?: { [key: string]: DocumentAttribute; };
-}
-
-/**
- * 
- * @export
- * @interface EntityOtherPayment
- */
-export interface EntityOtherPayment {
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityOtherPayment
+     * @memberof EntityOtherPaymentMethod
      */
     identifier?: string;
     /**
      * 
      * @type {string}
-     * @memberof EntityOtherPayment
-     */
-    type?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityOtherPayment
+     * @memberof EntityOtherPaymentMethod
      */
     pay_to?: string;
     /**
      * 
      * @type {string}
-     * @memberof EntityOtherPayment
+     * @memberof EntityOtherPaymentMethod
      */
     supported_currency?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EntityOtherPaymentMethod
+     */
+    type?: string;
 }
 
 /**
@@ -1410,12 +1302,6 @@ export interface EntityOtherPayment {
  * @interface EntityPaymentDetail
  */
 export interface EntityPaymentDetail {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof EntityPaymentDetail
-     */
-    predefined?: boolean;
     /**
      * 
      * @type {EntityBankPaymentMethod}
@@ -1430,96 +1316,16 @@ export interface EntityPaymentDetail {
     crypto_payment_method?: EntityCryptoPaymentMethod;
     /**
      * 
-     * @type {EntityOtherPayment}
+     * @type {EntityOtherPaymentMethod}
      * @memberof EntityPaymentDetail
      */
-    other_method?: EntityOtherPayment;
-}
-
-/**
- * 
- * @export
- * @interface EntityRelationship
- */
-export interface EntityRelationship {
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityRelationship
-     */
-    identity?: string;
+    other_payment_method?: EntityOtherPaymentMethod;
     /**
      * 
      * @type {boolean}
-     * @memberof EntityRelationship
+     * @memberof EntityPaymentDetail
      */
-    active?: boolean;
-}
-
-/**
- * 
- * @export
- * @interface EntityRelationshipData
- */
-export interface EntityRelationshipData {
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityRelationshipData
-     */
-    owner_identity?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityRelationshipData
-     */
-    target_identity?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityRelationshipData
-     */
-    entity_identifier?: string;
-}
-
-/**
- * 
- * @export
- * @interface EntityRelationshipPayload
- */
-export interface EntityRelationshipPayload {
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityRelationshipPayload
-     */
-    document_id?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof EntityRelationshipPayload
-     */
-    target_identity?: string;
-}
-
-/**
- * 
- * @export
- * @interface EntityRelationshipResponse
- */
-export interface EntityRelationshipResponse {
-    /**
-     * 
-     * @type {DocumentResponseHeader}
-     * @memberof EntityRelationshipResponse
-     */
-    header?: DocumentResponseHeader;
-    /**
-     * 
-     * @type {Array<EntityRelationshipData>}
-     * @memberof EntityRelationshipResponse
-     */
-    relationship?: Array<EntityRelationshipData>;
+    predefined?: boolean;
 }
 
 /**
@@ -1803,637 +1609,549 @@ export interface HttputilsHTTPError {
 /**
  * 
  * @export
- * @interface InvInvoiceCreatePayload
+ * @interface IdentityDID
  */
-export interface InvInvoiceCreatePayload {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof InvInvoiceCreatePayload
-     */
-    read_access?: Array<string>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof InvInvoiceCreatePayload
-     */
-    write_access?: Array<string>;
-    /**
-     * 
-     * @type {InvInvoiceData}
-     * @memberof InvInvoiceCreatePayload
-     */
-    data?: InvInvoiceData;
-    /**
-     * 
-     * @type {{ [key: string]: DocumentAttribute; }}
-     * @memberof InvInvoiceCreatePayload
-     */
-    attributes?: { [key: string]: DocumentAttribute; };
+export interface IdentityDID extends Array<any> {
 }
 
 /**
  * 
  * @export
- * @interface InvInvoiceData
+ * @interface InvoiceData
  */
-export interface InvInvoiceData {
+export interface InvoiceData {
     /**
      * 
-     * @type {string}
-     * @memberof InvInvoiceData
+     * @type {Array<DocumentsBinaryAttachment>}
+     * @memberof InvoiceData
      */
-    number?: string;
+    attachments?: Array<DocumentsBinaryAttachment>;
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
-     */
-    status?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    sender_invoice_id?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    recipient_invoice_id?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    sender_company_name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    sender_contact_person_name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    sender_street1?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    sender_street2?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    sender_city?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    sender_zipcode?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    sender_state?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    sender_country?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    bill_to_company_name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    bill_to_contact_person_name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    bill_to_street1?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    bill_to_street2?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
     bill_to_city?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
-    bill_to_zipcode?: string;
+    bill_to_company_name?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
-    bill_to_state?: string;
+    bill_to_contact_person_name?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
     bill_to_country?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
-     */
-    bill_to_vat_number?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
     bill_to_local_tax_id?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
-    remit_to_company_name?: string;
+    bill_to_state?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
-    remit_to_contact_person_name?: string;
+    bill_to_street_1?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
-    remit_to_street1?: string;
+    bill_to_street_2?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
-    remit_to_street2?: string;
+    bill_to_vat_number?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
-    remit_to_city?: string;
+    bill_to_zipcode?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
-     */
-    remit_to_zipcode?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    remit_to_state?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    remit_to_country?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    remit_to_vat_number?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    remit_to_local_tax_id?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    remit_to_tax_country?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    ship_to_company_name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    ship_to_contact_person_name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    ship_to_street1?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    ship_to_street2?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    ship_to_city?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    ship_to_zipcode?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    ship_to_state?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    ship_to_country?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    currency?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    gross_amount?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    net_amount?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    tax_amount?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    tax_rate?: string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof InvInvoiceData
-     */
-    tax_on_line_level?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    recipient?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    sender?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
-     */
-    payee?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
     comment?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
-    shipping_terms?: string;
+    credit_for_invoice_date?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
+     */
+    credit_note_invoice_number?: string;
+    /**
+     * ISO currency code
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    currency?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    date_created?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    date_due?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    date_paid?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    date_updated?: string;
+    /**
+     * number of the delivery note
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    delivery_number?: string;
+    /**
+     * invoice amount including tax
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    gross_amount?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof InvoiceData
+     */
+    is_credit_note?: boolean;
+    /**
+     * 
+     * @type {Array<InvoiceLineItem>}
+     * @memberof InvoiceData
+     */
+    line_items?: Array<InvoiceLineItem>;
+    /**
+     * invoice amount excluding tax
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    net_amount?: string;
+    /**
+     * invoice number or reference number
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    number?: string;
+    /**
+     * centrifuge ID of the payee
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    payee?: string;
+    /**
+     * 
+     * @type {Array<DocumentsPaymentDetails>}
+     * @memberof InvoiceData
+     */
+    payment_details?: Array<DocumentsPaymentDetails>;
+    /**
+     * centrifuge ID of the recipient
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    recipient?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    recipient_invoice_id?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    remit_to_city?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    remit_to_company_name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    remit_to_contact_person_name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    remit_to_country?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    remit_to_local_tax_id?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    remit_to_state?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    remit_to_street_1?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    remit_to_street_2?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    remit_to_tax_country?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    remit_to_vat_number?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    remit_to_zipcode?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
      */
     requester_email?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
     requester_name?: string;
     /**
+     * centrifuge ID of the sender
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    sender?: string;
+    /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
-    delivery_number?: string;
+    sender_city?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    sender_company_name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    sender_contact_person_name?: string;
+    /**
+     * country ISO code of the sender of this invoice
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    sender_country?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    sender_invoice_id?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    sender_state?: string;
+    /**
+     * street and address details of the sender company
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    sender_street_1?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    sender_street_2?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    sender_zipcode?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    ship_to_city?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    ship_to_company_name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    ship_to_contact_person_name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    ship_to_country?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    ship_to_state?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    ship_to_street_1?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    ship_to_street_2?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    ship_to_zipcode?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    shipping_terms?: string;
+    /**
+     * invoice status
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    status?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceData
+     */
+    tax_amount?: string;
+    /**
+     * 
+     * @type {Array<InvoiceTaxItem>}
+     * @memberof InvoiceData
+     */
+    tax_items?: Array<InvoiceTaxItem>;
     /**
      * 
      * @type {boolean}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
-    is_credit_note?: boolean;
+    tax_on_line_level?: boolean;
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceData
+     * @memberof InvoiceData
      */
-    credit_note_invoice_number?: string;
-    /**
-     * 
-     * @type {Date}
-     * @memberof InvInvoiceData
-     */
-    credit_for_invoice_date?: Date;
-    /**
-     * 
-     * @type {Date}
-     * @memberof InvInvoiceData
-     */
-    date_due?: Date;
-    /**
-     * 
-     * @type {Date}
-     * @memberof InvInvoiceData
-     */
-    date_paid?: Date;
-    /**
-     * 
-     * @type {Date}
-     * @memberof InvInvoiceData
-     */
-    date_updated?: Date;
-    /**
-     * 
-     * @type {Date}
-     * @memberof InvInvoiceData
-     */
-    date_created?: Date;
-    /**
-     * 
-     * @type {Array<DocumentBinaryAttachment>}
-     * @memberof InvInvoiceData
-     */
-    attachments?: Array<DocumentBinaryAttachment>;
-    /**
-     * 
-     * @type {Array<InvLineItem>}
-     * @memberof InvInvoiceData
-     */
-    line_items?: Array<InvLineItem>;
-    /**
-     * 
-     * @type {Array<DocumentPaymentDetails>}
-     * @memberof InvInvoiceData
-     */
-    payment_details?: Array<DocumentPaymentDetails>;
-    /**
-     * 
-     * @type {Array<InvTaxItem>}
-     * @memberof InvInvoiceData
-     */
-    tax_items?: Array<InvTaxItem>;
+    tax_rate?: string;
 }
 
 /**
  * 
  * @export
- * @interface InvInvoiceResponse
+ * @interface InvoiceLineItem
  */
-export interface InvInvoiceResponse {
-    /**
-     * 
-     * @type {DocumentResponseHeader}
-     * @memberof InvInvoiceResponse
-     */
-    header?: DocumentResponseHeader;
-    /**
-     * 
-     * @type {InvInvoiceData}
-     * @memberof InvInvoiceResponse
-     */
-    data?: InvInvoiceData;
-    /**
-     * 
-     * @type {{ [key: string]: DocumentAttribute; }}
-     * @memberof InvInvoiceResponse
-     */
-    attributes?: { [key: string]: DocumentAttribute; };
-}
-
-/**
- * 
- * @export
- * @interface InvInvoiceUpdatePayload
- */
-export interface InvInvoiceUpdatePayload {
+export interface InvoiceLineItem {
     /**
      * 
      * @type {string}
-     * @memberof InvInvoiceUpdatePayload
+     * @memberof InvoiceLineItem
      */
-    document_id?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof InvInvoiceUpdatePayload
-     */
-    read_access?: Array<string>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof InvInvoiceUpdatePayload
-     */
-    write_access?: Array<string>;
-    /**
-     * 
-     * @type {InvInvoiceData}
-     * @memberof InvInvoiceUpdatePayload
-     */
-    data?: InvInvoiceData;
-    /**
-     * 
-     * @type {{ [key: string]: DocumentAttribute; }}
-     * @memberof InvInvoiceUpdatePayload
-     */
-    attributes?: { [key: string]: DocumentAttribute; };
-}
-
-/**
- * 
- * @export
- * @interface InvLineItem
- */
-export interface InvLineItem {
+    delivery_note_number?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvLineItem
-     */
-    item_number?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvLineItem
+     * @memberof InvoiceLineItem
      */
     description?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvLineItem
-     */
-    sender_part_no?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvLineItem
-     */
-    price_per_unit?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvLineItem
-     */
-    quantity?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvLineItem
-     */
-    unit_of_measure?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvLineItem
-     */
-    net_weight?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvLineItem
-     */
-    tax_amount?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvLineItem
-     */
-    tax_rate?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvLineItem
-     */
-    tax_code?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvLineItem
-     */
-    total_amount?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvLineItem
-     */
-    purchase_order_number?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvLineItem
-     */
-    purchase_order_item_number?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvLineItem
-     */
-    delivery_note_number?: string;
-}
-
-/**
- * 
- * @export
- * @interface InvTaxItem
- */
-export interface InvTaxItem {
-    /**
-     * 
-     * @type {string}
-     * @memberof InvTaxItem
+     * @memberof InvoiceLineItem
      */
     item_number?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvTaxItem
+     * @memberof InvoiceLineItem
      */
-    invoice_item_number?: string;
+    net_weight?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvTaxItem
+     * @memberof InvoiceLineItem
+     */
+    price_per_unit?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceLineItem
+     */
+    purchase_order_item_number?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceLineItem
+     */
+    purchase_order_number?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceLineItem
+     */
+    quantity?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceLineItem
+     */
+    sender_part_no?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceLineItem
      */
     tax_amount?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvTaxItem
-     */
-    tax_rate?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvTaxItem
+     * @memberof InvoiceLineItem
      */
     tax_code?: string;
     /**
      * 
      * @type {string}
-     * @memberof InvTaxItem
+     * @memberof InvoiceLineItem
+     */
+    tax_rate?: string;
+    /**
+     * the total amount of the line item
+     * @type {string}
+     * @memberof InvoiceLineItem
+     */
+    total_amount?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceLineItem
+     */
+    unit_of_measure?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface InvoiceTaxItem
+ */
+export interface InvoiceTaxItem {
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceTaxItem
+     */
+    invoice_item_number?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceTaxItem
+     */
+    item_number?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceTaxItem
+     */
+    tax_amount?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceTaxItem
      */
     tax_base_amount?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceTaxItem
+     */
+    tax_code?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InvoiceTaxItem
+     */
+    tax_rate?: string;
 }
 
 /**
@@ -2581,477 +2299,381 @@ export interface NotificationNotificationMessage {
 /**
  * 
  * @export
- * @interface PoLineItem
+ * @interface PurchaseorderData
  */
-export interface PoLineItem {
+export interface PurchaseorderData {
+    /**
+     * 
+     * @type {Array<DocumentsBinaryAttachment>}
+     * @memberof PurchaseorderData
+     */
+    attachments?: Array<DocumentsBinaryAttachment>;
     /**
      * 
      * @type {string}
-     * @memberof PoLineItem
+     * @memberof PurchaseorderData
      */
-    status?: string;
+    comment?: string;
     /**
      * 
      * @type {string}
-     * @memberof PoLineItem
-     */
-    item_number?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoLineItem
-     */
-    description?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoLineItem
-     */
-    amount_invoiced?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoLineItem
-     */
-    amount_total?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoLineItem
-     */
-    requisition_number?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoLineItem
-     */
-    requisition_item?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoLineItem
-     */
-    part_no?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoLineItem
-     */
-    price_per_unit?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoLineItem
-     */
-    unit_of_measure?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoLineItem
-     */
-    quantity?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoLineItem
-     */
-    received_quantity?: string;
-    /**
-     * 
-     * @type {Date}
-     * @memberof PoLineItem
-     */
-    date_updated?: Date;
-    /**
-     * 
-     * @type {Date}
-     * @memberof PoLineItem
-     */
-    date_created?: Date;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoLineItem
-     */
-    revision_number?: string;
-    /**
-     * 
-     * @type {Array<PoLineItemActivity>}
-     * @memberof PoLineItem
-     */
-    activities?: Array<PoLineItemActivity>;
-    /**
-     * 
-     * @type {Array<PoTaxItem>}
-     * @memberof PoLineItem
-     */
-    tax_items?: Array<PoTaxItem>;
-}
-
-/**
- * 
- * @export
- * @interface PoLineItemActivity
- */
-export interface PoLineItemActivity {
-    /**
-     * 
-     * @type {string}
-     * @memberof PoLineItemActivity
-     */
-    item_number?: string;
-    /**
-     * delivered, returned, credited, invoiced, paid, ...
-     * @type {string}
-     * @memberof PoLineItemActivity
-     */
-    status?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoLineItemActivity
-     */
-    quantity?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoLineItemActivity
-     */
-    amount?: string;
-    /**
-     * depending on status delivery note, invoice, ...
-     * @type {string}
-     * @memberof PoLineItemActivity
-     */
-    reference_document_id?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoLineItemActivity
-     */
-    reference_document_item?: string;
-    /**
-     * 
-     * @type {Date}
-     * @memberof PoLineItemActivity
-     */
-    date?: Date;
-}
-
-/**
- * 
- * @export
- * @interface PoPurchaseOrderCreatePayload
- */
-export interface PoPurchaseOrderCreatePayload {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof PoPurchaseOrderCreatePayload
-     */
-    read_access?: Array<string>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof PoPurchaseOrderCreatePayload
-     */
-    write_access?: Array<string>;
-    /**
-     * 
-     * @type {PoPurchaseOrderData}
-     * @memberof PoPurchaseOrderCreatePayload
-     */
-    data?: PoPurchaseOrderData;
-    /**
-     * 
-     * @type {{ [key: string]: DocumentAttribute; }}
-     * @memberof PoPurchaseOrderCreatePayload
-     */
-    attributes?: { [key: string]: DocumentAttribute; };
-}
-
-/**
- * 
- * @export
- * @interface PoPurchaseOrderData
- */
-export interface PoPurchaseOrderData {
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    status?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    number?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    sender_order_id?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    recipient_order_id?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    requisition_id?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    requester_name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    requester_email?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    ship_to_company_name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    ship_to_contact_person_name?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    ship_to_street1?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    ship_to_street2?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    ship_to_city?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    ship_to_zipcode?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    ship_to_state?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    ship_to_country?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
-     */
-    payment_terms?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PoPurchaseOrderData
+     * @memberof PurchaseorderData
      */
     currency?: string;
     /**
      * 
      * @type {string}
-     * @memberof PoPurchaseOrderData
+     * @memberof PurchaseorderData
      */
-    total_amount?: string;
+    date_confirmed?: string;
     /**
      * 
      * @type {string}
-     * @memberof PoPurchaseOrderData
+     * @memberof PurchaseorderData
+     */
+    date_created?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderData
+     */
+    date_sent?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderData
+     */
+    date_updated?: string;
+    /**
+     * 
+     * @type {Array<PurchaseorderLineItem>}
+     * @memberof PurchaseorderData
+     */
+    line_items?: Array<PurchaseorderLineItem>;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderData
+     */
+    number?: string;
+    /**
+     * 
+     * @type {Array<DocumentsPaymentDetails>}
+     * @memberof PurchaseorderData
+     */
+    payment_details?: Array<DocumentsPaymentDetails>;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderData
+     */
+    payment_terms?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderData
      */
     recipient?: string;
     /**
      * 
      * @type {string}
-     * @memberof PoPurchaseOrderData
+     * @memberof PurchaseorderData
+     */
+    recipient_order_id?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderData
+     */
+    requester_email?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderData
+     */
+    requester_name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderData
+     */
+    requisition_id?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderData
      */
     sender?: string;
     /**
      * 
      * @type {string}
-     * @memberof PoPurchaseOrderData
+     * @memberof PurchaseorderData
      */
-    comment?: string;
-    /**
-     * 
-     * @type {Date}
-     * @memberof PoPurchaseOrderData
-     */
-    date_sent?: Date;
-    /**
-     * 
-     * @type {Date}
-     * @memberof PoPurchaseOrderData
-     */
-    date_confirmed?: Date;
-    /**
-     * 
-     * @type {Date}
-     * @memberof PoPurchaseOrderData
-     */
-    date_updated?: Date;
-    /**
-     * 
-     * @type {Date}
-     * @memberof PoPurchaseOrderData
-     */
-    date_created?: Date;
-    /**
-     * 
-     * @type {Array<DocumentBinaryAttachment>}
-     * @memberof PoPurchaseOrderData
-     */
-    attachments?: Array<DocumentBinaryAttachment>;
-    /**
-     * 
-     * @type {Array<PoLineItem>}
-     * @memberof PoPurchaseOrderData
-     */
-    line_items?: Array<PoLineItem>;
-    /**
-     * 
-     * @type {Array<DocumentPaymentDetails>}
-     * @memberof PoPurchaseOrderData
-     */
-    payment_details?: Array<DocumentPaymentDetails>;
-}
-
-/**
- * 
- * @export
- * @interface PoPurchaseOrderResponse
- */
-export interface PoPurchaseOrderResponse {
-    /**
-     * 
-     * @type {DocumentResponseHeader}
-     * @memberof PoPurchaseOrderResponse
-     */
-    header?: DocumentResponseHeader;
-    /**
-     * 
-     * @type {PoPurchaseOrderData}
-     * @memberof PoPurchaseOrderResponse
-     */
-    data?: PoPurchaseOrderData;
-    /**
-     * 
-     * @type {{ [key: string]: DocumentAttribute; }}
-     * @memberof PoPurchaseOrderResponse
-     */
-    attributes?: { [key: string]: DocumentAttribute; };
-}
-
-/**
- * 
- * @export
- * @interface PoPurchaseOrderUpdatePayload
- */
-export interface PoPurchaseOrderUpdatePayload {
+    sender_order_id?: string;
     /**
      * 
      * @type {string}
-     * @memberof PoPurchaseOrderUpdatePayload
+     * @memberof PurchaseorderData
      */
-    document_id?: string;
+    ship_to_city?: string;
     /**
      * 
-     * @type {Array<string>}
-     * @memberof PoPurchaseOrderUpdatePayload
+     * @type {string}
+     * @memberof PurchaseorderData
      */
-    read_access?: Array<string>;
+    ship_to_company_name?: string;
     /**
      * 
-     * @type {Array<string>}
-     * @memberof PoPurchaseOrderUpdatePayload
+     * @type {string}
+     * @memberof PurchaseorderData
      */
-    write_access?: Array<string>;
+    ship_to_contact_person_name?: string;
     /**
      * 
-     * @type {PoPurchaseOrderData}
-     * @memberof PoPurchaseOrderUpdatePayload
+     * @type {string}
+     * @memberof PurchaseorderData
      */
-    data?: PoPurchaseOrderData;
+    ship_to_country?: string;
     /**
      * 
-     * @type {{ [key: string]: DocumentAttribute; }}
-     * @memberof PoPurchaseOrderUpdatePayload
+     * @type {string}
+     * @memberof PurchaseorderData
      */
-    attributes?: { [key: string]: DocumentAttribute; };
+    ship_to_state?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderData
+     */
+    ship_to_street_1?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderData
+     */
+    ship_to_street_2?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderData
+     */
+    ship_to_zipcode?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderData
+     */
+    status?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderData
+     */
+    total_amount?: string;
 }
 
 /**
  * 
  * @export
- * @interface PoTaxItem
+ * @interface PurchaseorderLineItem
  */
-export interface PoTaxItem {
+export interface PurchaseorderLineItem {
+    /**
+     * 
+     * @type {Array<PurchaseorderLineItemActivity>}
+     * @memberof PurchaseorderLineItem
+     */
+    activities?: Array<PurchaseorderLineItemActivity>;
     /**
      * 
      * @type {string}
-     * @memberof PoTaxItem
+     * @memberof PurchaseorderLineItem
+     */
+    amount_invoiced?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItem
+     */
+    amount_total?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItem
+     */
+    date_created?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItem
+     */
+    date_updated?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItem
+     */
+    description?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItem
      */
     item_number?: string;
     /**
      * 
      * @type {string}
-     * @memberof PoTaxItem
+     * @memberof PurchaseorderLineItem
+     */
+    part_number?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItem
+     */
+    price_per_unit?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItem
+     */
+    quantity?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItem
+     */
+    received_quantity?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItem
+     */
+    requisition_item?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItem
+     */
+    requisition_number?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PurchaseorderLineItem
+     */
+    revision_number?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItem
+     */
+    status?: string;
+    /**
+     * 
+     * @type {Array<PurchaseorderTaxItem>}
+     * @memberof PurchaseorderLineItem
+     */
+    tax_items?: Array<PurchaseorderTaxItem>;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItem
+     */
+    unit_of_measure?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface PurchaseorderLineItemActivity
+ */
+export interface PurchaseorderLineItemActivity {
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItemActivity
+     */
+    amount?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItemActivity
+     */
+    date?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItemActivity
+     */
+    item_number?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItemActivity
+     */
+    quantity?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItemActivity
+     */
+    reference_document_id?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItemActivity
+     */
+    reference_document_item?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderLineItemActivity
+     */
+    status?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface PurchaseorderTaxItem
+ */
+export interface PurchaseorderTaxItem {
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderTaxItem
+     */
+    item_number?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PurchaseorderTaxItem
      */
     purchase_order_item_number?: string;
     /**
      * 
      * @type {string}
-     * @memberof PoTaxItem
+     * @memberof PurchaseorderTaxItem
      */
     tax_amount?: string;
     /**
      * 
      * @type {string}
-     * @memberof PoTaxItem
+     * @memberof PurchaseorderTaxItem
      */
-    tax_rate?: string;
+    tax_base_amount?: string;
     /**
      * 
      * @type {string}
-     * @memberof PoTaxItem
+     * @memberof PurchaseorderTaxItem
      */
     tax_code?: string;
     /**
      * 
      * @type {string}
-     * @memberof PoTaxItem
+     * @memberof PurchaseorderTaxItem
      */
-    tax_base_amount?: string;
+    tax_rate?: string;
 }
 
 /**
@@ -3131,6 +2753,102 @@ export interface TransferdetailsData {
 /**
  * 
  * @export
+ * @interface UserapiCreateEntityRequest
+ */
+export interface UserapiCreateEntityRequest {
+    /**
+     * 
+     * @type {CoreapiAttributeMapRequest}
+     * @memberof UserapiCreateEntityRequest
+     */
+    attributes?: CoreapiAttributeMapRequest;
+    /**
+     * 
+     * @type {EntityData}
+     * @memberof UserapiCreateEntityRequest
+     */
+    data?: EntityData;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserapiCreateEntityRequest
+     */
+    read_access?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserapiCreateEntityRequest
+     */
+    write_access?: Array<string>;
+}
+
+/**
+ * 
+ * @export
+ * @interface UserapiCreateInvoiceRequest
+ */
+export interface UserapiCreateInvoiceRequest {
+    /**
+     * 
+     * @type {CoreapiAttributeMapRequest}
+     * @memberof UserapiCreateInvoiceRequest
+     */
+    attributes?: CoreapiAttributeMapRequest;
+    /**
+     * 
+     * @type {InvoiceData}
+     * @memberof UserapiCreateInvoiceRequest
+     */
+    data?: InvoiceData;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserapiCreateInvoiceRequest
+     */
+    read_access?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserapiCreateInvoiceRequest
+     */
+    write_access?: Array<string>;
+}
+
+/**
+ * 
+ * @export
+ * @interface UserapiCreatePurchaseOrderRequest
+ */
+export interface UserapiCreatePurchaseOrderRequest {
+    /**
+     * 
+     * @type {CoreapiAttributeMapRequest}
+     * @memberof UserapiCreatePurchaseOrderRequest
+     */
+    attributes?: CoreapiAttributeMapRequest;
+    /**
+     * 
+     * @type {PurchaseorderData}
+     * @memberof UserapiCreatePurchaseOrderRequest
+     */
+    data?: PurchaseorderData;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserapiCreatePurchaseOrderRequest
+     */
+    read_access?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserapiCreatePurchaseOrderRequest
+     */
+    write_access?: Array<string>;
+}
+
+/**
+ * 
+ * @export
  * @interface UserapiCreateTransferDetailRequest
  */
 export interface UserapiCreateTransferDetailRequest {
@@ -3146,6 +2864,244 @@ export interface UserapiCreateTransferDetailRequest {
      * @memberof UserapiCreateTransferDetailRequest
      */
     document_id?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface UserapiEntityDataResponse
+ */
+export interface UserapiEntityDataResponse {
+    /**
+     * 
+     * @type {EntityData}
+     * @memberof UserapiEntityDataResponse
+     */
+    entity?: EntityData;
+    /**
+     * 
+     * @type {Array<UserapiRelationship>}
+     * @memberof UserapiEntityDataResponse
+     */
+    relationships?: Array<UserapiRelationship>;
+}
+
+/**
+ * 
+ * @export
+ * @interface UserapiEntityResponse
+ */
+export interface UserapiEntityResponse {
+    /**
+     * 
+     * @type {CoreapiAttributeMapResponse}
+     * @memberof UserapiEntityResponse
+     */
+    attributes?: CoreapiAttributeMapResponse;
+    /**
+     * 
+     * @type {UserapiEntityDataResponse}
+     * @memberof UserapiEntityResponse
+     */
+    data?: UserapiEntityDataResponse;
+    /**
+     * 
+     * @type {CoreapiResponseHeader}
+     * @memberof UserapiEntityResponse
+     */
+    header?: CoreapiResponseHeader;
+}
+
+/**
+ * 
+ * @export
+ * @interface UserapiInvoiceResponse
+ */
+export interface UserapiInvoiceResponse {
+    /**
+     * 
+     * @type {CoreapiAttributeMapResponse}
+     * @memberof UserapiInvoiceResponse
+     */
+    attributes?: CoreapiAttributeMapResponse;
+    /**
+     * 
+     * @type {InvoiceData}
+     * @memberof UserapiInvoiceResponse
+     */
+    data?: InvoiceData;
+    /**
+     * 
+     * @type {CoreapiResponseHeader}
+     * @memberof UserapiInvoiceResponse
+     */
+    header?: CoreapiResponseHeader;
+}
+
+/**
+ * 
+ * @export
+ * @interface UserapiMintNFTRequest
+ */
+export interface UserapiMintNFTRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof UserapiMintNFTRequest
+     */
+    deposit_address?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserapiMintNFTRequest
+     */
+    document_id?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserapiMintNFTRequest
+     */
+    proof_fields?: Array<string>;
+}
+
+/**
+ * 
+ * @export
+ * @interface UserapiNFTMintInvoiceUnpaidRequest
+ */
+export interface UserapiNFTMintInvoiceUnpaidRequest {
+    /**
+     * Deposit address for NFT Token created
+     * @type {string}
+     * @memberof UserapiNFTMintInvoiceUnpaidRequest
+     */
+    deposit_address?: string;
+    /**
+     * Invoice Document identifier
+     * @type {string}
+     * @memberof UserapiNFTMintInvoiceUnpaidRequest
+     */
+    document_id?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface UserapiNFTMintResponse
+ */
+export interface UserapiNFTMintResponse {
+    /**
+     * 
+     * @type {UserapiResponseHeader}
+     * @memberof UserapiNFTMintResponse
+     */
+    header?: UserapiResponseHeader;
+}
+
+/**
+ * 
+ * @export
+ * @interface UserapiPurchaseOrderResponse
+ */
+export interface UserapiPurchaseOrderResponse {
+    /**
+     * 
+     * @type {CoreapiAttributeMapResponse}
+     * @memberof UserapiPurchaseOrderResponse
+     */
+    attributes?: CoreapiAttributeMapResponse;
+    /**
+     * 
+     * @type {PurchaseorderData}
+     * @memberof UserapiPurchaseOrderResponse
+     */
+    data?: PurchaseorderData;
+    /**
+     * 
+     * @type {CoreapiResponseHeader}
+     * @memberof UserapiPurchaseOrderResponse
+     */
+    header?: CoreapiResponseHeader;
+}
+
+/**
+ * 
+ * @export
+ * @interface UserapiRelationship
+ */
+export interface UserapiRelationship {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UserapiRelationship
+     */
+    active?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserapiRelationship
+     */
+    entity_identifier?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserapiRelationship
+     */
+    owner_identity?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserapiRelationship
+     */
+    target_identity?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface UserapiResponseHeader
+ */
+export interface UserapiResponseHeader {
+    /**
+     * 
+     * @type {string}
+     * @memberof UserapiResponseHeader
+     */
+    job_id?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface UserapiShareEntityRequest
+ */
+export interface UserapiShareEntityRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof UserapiShareEntityRequest
+     */
+    target_identity?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface UserapiShareEntityResponse
+ */
+export interface UserapiShareEntityResponse {
+    /**
+     * 
+     * @type {CoreapiResponseHeader}
+     * @memberof UserapiShareEntityResponse
+     */
+    header?: CoreapiResponseHeader;
+    /**
+     * 
+     * @type {UserapiRelationship}
+     * @memberof UserapiShareEntityResponse
+     */
+    relationship?: UserapiRelationship;
 }
 
 /**
@@ -3216,429 +3172,6 @@ export interface UserapiUpdateTransferDetailRequest {
 
 
 /**
- * AccountServiceApi - fetch parameter creator
- * @export
- */
-export const AccountServiceApiFetchParamCreator = function (configuration?: Configuration) {
-    return {
-        /**
-         * Creates an Account
-         * @param {AccountAccountData} body 
-         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createAccount(body: AccountAccountData, authorization: string, options: any = {}): FetchArgs {
-            // verify required parameter 'body' is not null or undefined
-            if (body === null || body === undefined) {
-                throw new RequiredError('body','Required parameter body was null or undefined when calling createAccount.');
-            }
-            // verify required parameter 'authorization' is not null or undefined
-            if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling createAccount.');
-            }
-            const localVarPath = `/v1/accounts`;
-            const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            if (authorization !== undefined && authorization !== null) {
-                localVarHeaderParameter['authorization'] = String(authorization);
-            }
-
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
-            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-            delete localVarUrlObj.search;
-            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-            const needsSerialization = (<any>"AccountAccountData" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
-            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
-
-            return {
-                url: url.format(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Generates an Account taking defaults based on the main account
-         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        generateAccount(authorization: string, options: any = {}): FetchArgs {
-            // verify required parameter 'authorization' is not null or undefined
-            if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling generateAccount.');
-            }
-            const localVarPath = `/v1/accounts/generate`;
-            const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            if (authorization !== undefined && authorization !== null) {
-                localVarHeaderParameter['authorization'] = String(authorization);
-            }
-
-            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
-            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-            delete localVarUrlObj.search;
-            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-
-            return {
-                url: url.format(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Get Account
-         * @param {string} account_id 
-         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getAccount(account_id: string, authorization: string, options: any = {}): FetchArgs {
-            // verify required parameter 'account_id' is not null or undefined
-            if (account_id === null || account_id === undefined) {
-                throw new RequiredError('account_id','Required parameter account_id was null or undefined when calling getAccount.');
-            }
-            // verify required parameter 'authorization' is not null or undefined
-            if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling getAccount.');
-            }
-            const localVarPath = `/v1/accounts/{account_id}`
-                .replace(`{${"account_id"}}`, encodeURIComponent(String(account_id)));
-            const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            if (authorization !== undefined && authorization !== null) {
-                localVarHeaderParameter['authorization'] = String(authorization);
-            }
-
-            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
-            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-            delete localVarUrlObj.search;
-            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-
-            return {
-                url: url.format(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Get All Accounts
-         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getAllAccounts(authorization: string, options: any = {}): FetchArgs {
-            // verify required parameter 'authorization' is not null or undefined
-            if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling getAllAccounts.');
-            }
-            const localVarPath = `/v1/accounts`;
-            const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            if (authorization !== undefined && authorization !== null) {
-                localVarHeaderParameter['authorization'] = String(authorization);
-            }
-
-            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
-            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-            delete localVarUrlObj.search;
-            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-
-            return {
-                url: url.format(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Updates an Account
-         * @param {string} account_id 
-         * @param {AccountUpdateAccountRequest} body 
-         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        updateAccount(account_id: string, body: AccountUpdateAccountRequest, authorization: string, options: any = {}): FetchArgs {
-            // verify required parameter 'account_id' is not null or undefined
-            if (account_id === null || account_id === undefined) {
-                throw new RequiredError('account_id','Required parameter account_id was null or undefined when calling updateAccount.');
-            }
-            // verify required parameter 'body' is not null or undefined
-            if (body === null || body === undefined) {
-                throw new RequiredError('body','Required parameter body was null or undefined when calling updateAccount.');
-            }
-            // verify required parameter 'authorization' is not null or undefined
-            if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling updateAccount.');
-            }
-            const localVarPath = `/v1/accounts/{account_id}`
-                .replace(`{${"account_id"}}`, encodeURIComponent(String(account_id)));
-            const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'PUT' }, options);
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            if (authorization !== undefined && authorization !== null) {
-                localVarHeaderParameter['authorization'] = String(authorization);
-            }
-
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
-            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-            delete localVarUrlObj.search;
-            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-            const needsSerialization = (<any>"AccountUpdateAccountRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
-            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
-
-            return {
-                url: url.format(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-    }
-};
-
-/**
- * AccountServiceApi - functional programming interface
- * @export
- */
-export const AccountServiceApiFp = function(configuration?: Configuration) {
-    return {
-        /**
-         * Creates an Account
-         * @param {AccountAccountData} body 
-         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createAccount(body: AccountAccountData, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<AccountAccountData> {
-            const localVarFetchArgs = AccountServiceApiFetchParamCreator(configuration).createAccount(body, authorization, options);
-            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
-                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    } else {
-                        throw response;
-                    }
-                });
-            };
-        },
-        /**
-         * Generates an Account taking defaults based on the main account
-         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        generateAccount(authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<AccountAccountData> {
-            const localVarFetchArgs = AccountServiceApiFetchParamCreator(configuration).generateAccount(authorization, options);
-            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
-                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    } else {
-                        throw response;
-                    }
-                });
-            };
-        },
-        /**
-         * Get Account
-         * @param {string} account_id 
-         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getAccount(account_id: string, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<AccountAccountData> {
-            const localVarFetchArgs = AccountServiceApiFetchParamCreator(configuration).getAccount(account_id, authorization, options);
-            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
-                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    } else {
-                        throw response;
-                    }
-                });
-            };
-        },
-        /**
-         * Get All Accounts
-         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getAllAccounts(authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<AccountGetAllAccountResponse> {
-            const localVarFetchArgs = AccountServiceApiFetchParamCreator(configuration).getAllAccounts(authorization, options);
-            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
-                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    } else {
-                        throw response;
-                    }
-                });
-            };
-        },
-        /**
-         * Updates an Account
-         * @param {string} account_id 
-         * @param {AccountUpdateAccountRequest} body 
-         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        updateAccount(account_id: string, body: AccountUpdateAccountRequest, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<AccountAccountData> {
-            const localVarFetchArgs = AccountServiceApiFetchParamCreator(configuration).updateAccount(account_id, body, authorization, options);
-            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
-                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    } else {
-                        throw response;
-                    }
-                });
-            };
-        },
-    }
-};
-
-/**
- * AccountServiceApi - factory interface
- * @export
- */
-export const AccountServiceApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
-    return {
-        /**
-         * Creates an Account
-         * @param {AccountAccountData} body 
-         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createAccount(body: AccountAccountData, authorization: string, options?: any) {
-            return AccountServiceApiFp(configuration).createAccount(body, authorization, options)(fetch, basePath);
-        },
-        /**
-         * Generates an Account taking defaults based on the main account
-         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        generateAccount(authorization: string, options?: any) {
-            return AccountServiceApiFp(configuration).generateAccount(authorization, options)(fetch, basePath);
-        },
-        /**
-         * Get Account
-         * @param {string} account_id 
-         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getAccount(account_id: string, authorization: string, options?: any) {
-            return AccountServiceApiFp(configuration).getAccount(account_id, authorization, options)(fetch, basePath);
-        },
-        /**
-         * Get All Accounts
-         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getAllAccounts(authorization: string, options?: any) {
-            return AccountServiceApiFp(configuration).getAllAccounts(authorization, options)(fetch, basePath);
-        },
-        /**
-         * Updates an Account
-         * @param {string} account_id 
-         * @param {AccountUpdateAccountRequest} body 
-         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        updateAccount(account_id: string, body: AccountUpdateAccountRequest, authorization: string, options?: any) {
-            return AccountServiceApiFp(configuration).updateAccount(account_id, body, authorization, options)(fetch, basePath);
-        },
-    };
-};
-
-/**
- * AccountServiceApi - object-oriented interface
- * @export
- * @class AccountServiceApi
- * @extends {BaseAPI}
- */
-export class AccountServiceApi extends BaseAPI {
-    /**
-     * Creates an Account
-     * @param {AccountAccountData} body 
-     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AccountServiceApi
-     */
-    public createAccount(body: AccountAccountData, authorization: string, options?: any) {
-        return AccountServiceApiFp(this.configuration).createAccount(body, authorization, options)(this.fetch, this.basePath);
-    }
-
-    /**
-     * Generates an Account taking defaults based on the main account
-     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AccountServiceApi
-     */
-    public generateAccount(authorization: string, options?: any) {
-        return AccountServiceApiFp(this.configuration).generateAccount(authorization, options)(this.fetch, this.basePath);
-    }
-
-    /**
-     * Get Account
-     * @param {string} account_id 
-     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AccountServiceApi
-     */
-    public getAccount(account_id: string, authorization: string, options?: any) {
-        return AccountServiceApiFp(this.configuration).getAccount(account_id, authorization, options)(this.fetch, this.basePath);
-    }
-
-    /**
-     * Get All Accounts
-     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AccountServiceApi
-     */
-    public getAllAccounts(authorization: string, options?: any) {
-        return AccountServiceApiFp(this.configuration).getAllAccounts(authorization, options)(this.fetch, this.basePath);
-    }
-
-    /**
-     * Updates an Account
-     * @param {string} account_id 
-     * @param {AccountUpdateAccountRequest} body 
-     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AccountServiceApi
-     */
-    public updateAccount(account_id: string, body: AccountUpdateAccountRequest, authorization: string, options?: any) {
-        return AccountServiceApiFp(this.configuration).updateAccount(account_id, body, authorization, options)(this.fetch, this.basePath);
-    }
-
-}
-
-/**
  * AccountsApi - fetch parameter creator
  * @export
  */
@@ -3691,6 +3224,196 @@ export const AccountsApiFetchParamCreator = function (configuration?: Configurat
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Creates a new account without any default configurations.
+         * @summary Creates a new account without any default configurations.
+         * @param {CoreapiAccount} body Account Create request
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createAccount(body: CoreapiAccount, authorization: string, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling createAccount.');
+            }
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling createAccount.');
+            }
+            const localVarPath = `/v1/accounts`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"CoreapiAccount" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Generates a new account with defaults.
+         * @summary Generates a new account with defaults.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        generateAccount(authorization: string, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling generateAccount.');
+            }
+            const localVarPath = `/v1/accounts/generate`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Returns the account associated with accountID.
+         * @summary Returns the account associated with accountID.
+         * @param {string} account_id Account ID
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAccount(account_id: string, authorization: string, options: any = {}): FetchArgs {
+            // verify required parameter 'account_id' is not null or undefined
+            if (account_id === null || account_id === undefined) {
+                throw new RequiredError('account_id','Required parameter account_id was null or undefined when calling getAccount.');
+            }
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling getAccount.');
+            }
+            const localVarPath = `/v1/accounts/{account_id}`
+                .replace(`{${"account_id"}}`, encodeURIComponent(String(account_id)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Returns all the accounts in the node.
+         * @summary Returns all the accounts in the node.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAccounts(authorization: string, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling getAccounts.');
+            }
+            const localVarPath = `/v1/accounts`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Updates an existing account.
+         * @summary Updates an existing account.
+         * @param {string} account_id Account ID
+         * @param {CoreapiAccount} body Account Update request
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateAccount(account_id: string, body: CoreapiAccount, authorization: string, options: any = {}): FetchArgs {
+            // verify required parameter 'account_id' is not null or undefined
+            if (account_id === null || account_id === undefined) {
+                throw new RequiredError('account_id','Required parameter account_id was null or undefined when calling updateAccount.');
+            }
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling updateAccount.');
+            }
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling updateAccount.');
+            }
+            const localVarPath = `/v1/accounts/{account_id}`
+                .replace(`{${"account_id"}}`, encodeURIComponent(String(account_id)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'PUT' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"CoreapiAccount" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -3711,6 +3434,105 @@ export const AccountsApiFp = function(configuration?: Configuration) {
          */
         accountSign(account_id: string, body: CoreapiSignRequest, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiSignResponse> {
             const localVarFetchArgs = AccountsApiFetchParamCreator(configuration).accountSign(account_id, body, authorization, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Creates a new account without any default configurations.
+         * @summary Creates a new account without any default configurations.
+         * @param {CoreapiAccount} body Account Create request
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createAccount(body: CoreapiAccount, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiAccount> {
+            const localVarFetchArgs = AccountsApiFetchParamCreator(configuration).createAccount(body, authorization, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Generates a new account with defaults.
+         * @summary Generates a new account with defaults.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        generateAccount(authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiAccount> {
+            const localVarFetchArgs = AccountsApiFetchParamCreator(configuration).generateAccount(authorization, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Returns the account associated with accountID.
+         * @summary Returns the account associated with accountID.
+         * @param {string} account_id Account ID
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAccount(account_id: string, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiAccount> {
+            const localVarFetchArgs = AccountsApiFetchParamCreator(configuration).getAccount(account_id, authorization, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Returns all the accounts in the node.
+         * @summary Returns all the accounts in the node.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAccounts(authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiAccounts> {
+            const localVarFetchArgs = AccountsApiFetchParamCreator(configuration).getAccounts(authorization, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Updates an existing account.
+         * @summary Updates an existing account.
+         * @param {string} account_id Account ID
+         * @param {CoreapiAccount} body Account Update request
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateAccount(account_id: string, body: CoreapiAccount, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiAccount> {
+            const localVarFetchArgs = AccountsApiFetchParamCreator(configuration).updateAccount(account_id, body, authorization, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -3742,6 +3564,60 @@ export const AccountsApiFactory = function (configuration?: Configuration, fetch
         accountSign(account_id: string, body: CoreapiSignRequest, authorization: string, options?: any) {
             return AccountsApiFp(configuration).accountSign(account_id, body, authorization, options)(fetch, basePath);
         },
+        /**
+         * Creates a new account without any default configurations.
+         * @summary Creates a new account without any default configurations.
+         * @param {CoreapiAccount} body Account Create request
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createAccount(body: CoreapiAccount, authorization: string, options?: any) {
+            return AccountsApiFp(configuration).createAccount(body, authorization, options)(fetch, basePath);
+        },
+        /**
+         * Generates a new account with defaults.
+         * @summary Generates a new account with defaults.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        generateAccount(authorization: string, options?: any) {
+            return AccountsApiFp(configuration).generateAccount(authorization, options)(fetch, basePath);
+        },
+        /**
+         * Returns the account associated with accountID.
+         * @summary Returns the account associated with accountID.
+         * @param {string} account_id Account ID
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAccount(account_id: string, authorization: string, options?: any) {
+            return AccountsApiFp(configuration).getAccount(account_id, authorization, options)(fetch, basePath);
+        },
+        /**
+         * Returns all the accounts in the node.
+         * @summary Returns all the accounts in the node.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAccounts(authorization: string, options?: any) {
+            return AccountsApiFp(configuration).getAccounts(authorization, options)(fetch, basePath);
+        },
+        /**
+         * Updates an existing account.
+         * @summary Updates an existing account.
+         * @param {string} account_id Account ID
+         * @param {CoreapiAccount} body Account Update request
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateAccount(account_id: string, body: CoreapiAccount, authorization: string, options?: any) {
+            return AccountsApiFp(configuration).updateAccount(account_id, body, authorization, options)(fetch, basePath);
+        },
     };
 };
 
@@ -3764,6 +3640,70 @@ export class AccountsApi extends BaseAPI {
      */
     public accountSign(account_id: string, body: CoreapiSignRequest, authorization: string, options?: any) {
         return AccountsApiFp(this.configuration).accountSign(account_id, body, authorization, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * Creates a new account without any default configurations.
+     * @summary Creates a new account without any default configurations.
+     * @param {CoreapiAccount} body Account Create request
+     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AccountsApi
+     */
+    public createAccount(body: CoreapiAccount, authorization: string, options?: any) {
+        return AccountsApiFp(this.configuration).createAccount(body, authorization, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * Generates a new account with defaults.
+     * @summary Generates a new account with defaults.
+     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AccountsApi
+     */
+    public generateAccount(authorization: string, options?: any) {
+        return AccountsApiFp(this.configuration).generateAccount(authorization, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * Returns the account associated with accountID.
+     * @summary Returns the account associated with accountID.
+     * @param {string} account_id Account ID
+     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AccountsApi
+     */
+    public getAccount(account_id: string, authorization: string, options?: any) {
+        return AccountsApiFp(this.configuration).getAccount(account_id, authorization, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * Returns all the accounts in the node.
+     * @summary Returns all the accounts in the node.
+     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AccountsApi
+     */
+    public getAccounts(authorization: string, options?: any) {
+        return AccountsApiFp(this.configuration).getAccounts(authorization, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * Updates an existing account.
+     * @summary Updates an existing account.
+     * @param {string} account_id Account ID
+     * @param {CoreapiAccount} body Account Update request
+     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AccountsApi
+     */
+    public updateAccount(account_id: string, body: CoreapiAccount, authorization: string, options?: any) {
+        return AccountsApiFp(this.configuration).updateAccount(account_id, body, authorization, options)(this.fetch, this.basePath);
     }
 
 }
@@ -4354,26 +4294,27 @@ export class DocumentsApi extends BaseAPI {
 }
 
 /**
- * EntityServiceApi - fetch parameter creator
+ * EntitiesApi - fetch parameter creator
  * @export
  */
-export const EntityServiceApiFetchParamCreator = function (configuration?: Configuration) {
+export const EntitiesApiFetchParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Creates an entity
-         * @param {EntityEntityCreatePayload} body 
+         * Creates a new Entity and anchors it.
+         * @summary Creates a new Entity and anchors it.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {UserapiCreateEntityRequest} body Entity Create request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        create(body: EntityEntityCreatePayload, authorization: string, options: any = {}): FetchArgs {
-            // verify required parameter 'body' is not null or undefined
-            if (body === null || body === undefined) {
-                throw new RequiredError('body','Required parameter body was null or undefined when calling create.');
-            }
+        createEntity(authorization: string, body: UserapiCreateEntityRequest, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling create.');
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling createEntity.');
+            }
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling createEntity.');
             }
             const localVarPath = `/v1/entities`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -4391,7 +4332,7 @@ export const EntityServiceApiFetchParamCreator = function (configuration?: Confi
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-            const needsSerialization = (<any>"EntityEntityCreatePayload" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            const needsSerialization = (<any>"UserapiCreateEntityRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
             localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
 
             return {
@@ -4400,20 +4341,21 @@ export const EntityServiceApiFetchParamCreator = function (configuration?: Confi
             };
         },
         /**
-         * Get the current entity
-         * @param {string} document_id 
+         * Returns the latest version of the Entity.
+         * @summary Returns the latest version of the Entity.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        get(document_id: string, authorization: string, options: any = {}): FetchArgs {
-            // verify required parameter 'document_id' is not null or undefined
-            if (document_id === null || document_id === undefined) {
-                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling get.');
-            }
+        getEntity(authorization: string, document_id: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling get.');
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling getEntity.');
+            }
+            // verify required parameter 'document_id' is not null or undefined
+            if (document_id === null || document_id === undefined) {
+                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling getEntity.');
             }
             const localVarPath = `/v1/entities/{document_id}`
                 .replace(`{${"document_id"}}`, encodeURIComponent(String(document_id)));
@@ -4437,24 +4379,24 @@ export const EntityServiceApiFetchParamCreator = function (configuration?: Confi
             };
         },
         /**
-         * Get entity from business partner
-         * @summary Entity Relation Get
-         * @param {string} relationship_id 
+         * Returns the latest version of the Entity through relationship ID.
+         * @summary Returns the latest version of the Entity through relationship ID.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Entity Relationship Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getEntityByRelationship(relationship_id: string, authorization: string, options: any = {}): FetchArgs {
-            // verify required parameter 'relationship_id' is not null or undefined
-            if (relationship_id === null || relationship_id === undefined) {
-                throw new RequiredError('relationship_id','Required parameter relationship_id was null or undefined when calling getEntityByRelationship.');
-            }
+        getEntityThroughRelationshipId(authorization: string, document_id: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling getEntityByRelationship.');
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling getEntityThroughRelationshipId.');
             }
-            const localVarPath = `/v1/relationships/{relationship_id}/entity`
-                .replace(`{${"relationship_id"}}`, encodeURIComponent(String(relationship_id)));
+            // verify required parameter 'document_id' is not null or undefined
+            if (document_id === null || document_id === undefined) {
+                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling getEntityThroughRelationshipId.');
+            }
+            const localVarPath = `/v1/relationships/{document_id}/entity`
+                .replace(`{${"document_id"}}`, encodeURIComponent(String(document_id)));
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
             const localVarHeaderParameter = {} as any;
@@ -4475,26 +4417,26 @@ export const EntityServiceApiFetchParamCreator = function (configuration?: Confi
             };
         },
         /**
-         * revoke an entity document share
-         * @summary Entity Relation Revoke
-         * @param {string} document_id entity identifier
-         * @param {EntityRelationshipPayload} body 
+         * Revoke revokes target id's access to entity.
+         * @summary Revoke revokes target id's access to entity.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {UserapiShareEntityRequest} body Entity Revoke request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        revoke(document_id: string, body: EntityRelationshipPayload, authorization: string, options: any = {}): FetchArgs {
+        revokeEntity(authorization: string, document_id: string, body: UserapiShareEntityRequest, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling revokeEntity.');
+            }
             // verify required parameter 'document_id' is not null or undefined
             if (document_id === null || document_id === undefined) {
-                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling revoke.');
+                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling revokeEntity.');
             }
             // verify required parameter 'body' is not null or undefined
             if (body === null || body === undefined) {
-                throw new RequiredError('body','Required parameter body was null or undefined when calling revoke.');
-            }
-            // verify required parameter 'authorization' is not null or undefined
-            if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling revoke.');
+                throw new RequiredError('body','Required parameter body was null or undefined when calling revokeEntity.');
             }
             const localVarPath = `/v1/entities/{document_id}/revoke`
                 .replace(`{${"document_id"}}`, encodeURIComponent(String(document_id)));
@@ -4513,7 +4455,7 @@ export const EntityServiceApiFetchParamCreator = function (configuration?: Confi
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-            const needsSerialization = (<any>"EntityRelationshipPayload" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            const needsSerialization = (<any>"UserapiShareEntityRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
             localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
 
             return {
@@ -4522,26 +4464,26 @@ export const EntityServiceApiFetchParamCreator = function (configuration?: Confi
             };
         },
         /**
-         * Share the entity document with others
-         * @summary Entity Relation Share
-         * @param {string} document_id entity identifier
-         * @param {EntityRelationshipPayload} body 
+         * Share gives entity access to target identity.
+         * @summary Share gives entity access to target identity.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {UserapiShareEntityRequest} body Entity Share request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        share(document_id: string, body: EntityRelationshipPayload, authorization: string, options: any = {}): FetchArgs {
+        shareEntity(authorization: string, document_id: string, body: UserapiShareEntityRequest, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling shareEntity.');
+            }
             // verify required parameter 'document_id' is not null or undefined
             if (document_id === null || document_id === undefined) {
-                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling share.');
+                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling shareEntity.');
             }
             // verify required parameter 'body' is not null or undefined
             if (body === null || body === undefined) {
-                throw new RequiredError('body','Required parameter body was null or undefined when calling share.');
-            }
-            // verify required parameter 'authorization' is not null or undefined
-            if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling share.');
+                throw new RequiredError('body','Required parameter body was null or undefined when calling shareEntity.');
             }
             const localVarPath = `/v1/entities/{document_id}/share`
                 .replace(`{${"document_id"}}`, encodeURIComponent(String(document_id)));
@@ -4560,7 +4502,7 @@ export const EntityServiceApiFetchParamCreator = function (configuration?: Confi
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-            const needsSerialization = (<any>"EntityRelationshipPayload" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            const needsSerialization = (<any>"UserapiShareEntityRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
             localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
 
             return {
@@ -4569,25 +4511,26 @@ export const EntityServiceApiFetchParamCreator = function (configuration?: Confi
             };
         },
         /**
-         * Updates an entity
-         * @param {string} document_id 
-         * @param {EntityEntityUpdatePayload} body 
+         * Updates an existing Entity and anchors it.
+         * @summary Updates an existing Entity and anchors it.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {UserapiCreateEntityRequest} body Entity Create request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        update(document_id: string, body: EntityEntityUpdatePayload, authorization: string, options: any = {}): FetchArgs {
+        updateEntity(authorization: string, document_id: string, body: UserapiCreateEntityRequest, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling updateEntity.');
+            }
             // verify required parameter 'document_id' is not null or undefined
             if (document_id === null || document_id === undefined) {
-                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling update.');
+                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling updateEntity.');
             }
             // verify required parameter 'body' is not null or undefined
             if (body === null || body === undefined) {
-                throw new RequiredError('body','Required parameter body was null or undefined when calling update.');
-            }
-            // verify required parameter 'authorization' is not null or undefined
-            if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling update.');
+                throw new RequiredError('body','Required parameter body was null or undefined when calling updateEntity.');
             }
             const localVarPath = `/v1/entities/{document_id}`
                 .replace(`{${"document_id"}}`, encodeURIComponent(String(document_id)));
@@ -4606,7 +4549,7 @@ export const EntityServiceApiFetchParamCreator = function (configuration?: Confi
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-            const needsSerialization = (<any>"EntityEntityUpdatePayload" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            const needsSerialization = (<any>"UserapiCreateEntityRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
             localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
 
             return {
@@ -4618,20 +4561,21 @@ export const EntityServiceApiFetchParamCreator = function (configuration?: Confi
 };
 
 /**
- * EntityServiceApi - functional programming interface
+ * EntitiesApi - functional programming interface
  * @export
  */
-export const EntityServiceApiFp = function(configuration?: Configuration) {
+export const EntitiesApiFp = function(configuration?: Configuration) {
     return {
         /**
-         * Creates an entity
-         * @param {EntityEntityCreatePayload} body 
+         * Creates a new Entity and anchors it.
+         * @summary Creates a new Entity and anchors it.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {UserapiCreateEntityRequest} body Entity Create request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        create(body: EntityEntityCreatePayload, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<EntityEntityResponse> {
-            const localVarFetchArgs = EntityServiceApiFetchParamCreator(configuration).create(body, authorization, options);
+        createEntity(authorization: string, body: UserapiCreateEntityRequest, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiEntityResponse> {
+            const localVarFetchArgs = EntitiesApiFetchParamCreator(configuration).createEntity(authorization, body, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -4643,14 +4587,15 @@ export const EntityServiceApiFp = function(configuration?: Configuration) {
             };
         },
         /**
-         * Get the current entity
-         * @param {string} document_id 
+         * Returns the latest version of the Entity.
+         * @summary Returns the latest version of the Entity.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        get(document_id: string, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<EntityEntityResponse> {
-            const localVarFetchArgs = EntityServiceApiFetchParamCreator(configuration).get(document_id, authorization, options);
+        getEntity(authorization: string, document_id: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiEntityResponse> {
+            const localVarFetchArgs = EntitiesApiFetchParamCreator(configuration).getEntity(authorization, document_id, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -4662,15 +4607,15 @@ export const EntityServiceApiFp = function(configuration?: Configuration) {
             };
         },
         /**
-         * Get entity from business partner
-         * @summary Entity Relation Get
-         * @param {string} relationship_id 
+         * Returns the latest version of the Entity through relationship ID.
+         * @summary Returns the latest version of the Entity through relationship ID.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Entity Relationship Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getEntityByRelationship(relationship_id: string, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<EntityEntityResponse> {
-            const localVarFetchArgs = EntityServiceApiFetchParamCreator(configuration).getEntityByRelationship(relationship_id, authorization, options);
+        getEntityThroughRelationshipId(authorization: string, document_id: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiEntityResponse> {
+            const localVarFetchArgs = EntitiesApiFetchParamCreator(configuration).getEntityThroughRelationshipId(authorization, document_id, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -4682,16 +4627,16 @@ export const EntityServiceApiFp = function(configuration?: Configuration) {
             };
         },
         /**
-         * revoke an entity document share
-         * @summary Entity Relation Revoke
-         * @param {string} document_id entity identifier
-         * @param {EntityRelationshipPayload} body 
+         * Revoke revokes target id's access to entity.
+         * @summary Revoke revokes target id's access to entity.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {UserapiShareEntityRequest} body Entity Revoke request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        revoke(document_id: string, body: EntityRelationshipPayload, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<EntityRelationshipResponse> {
-            const localVarFetchArgs = EntityServiceApiFetchParamCreator(configuration).revoke(document_id, body, authorization, options);
+        revokeEntity(authorization: string, document_id: string, body: UserapiShareEntityRequest, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiShareEntityResponse> {
+            const localVarFetchArgs = EntitiesApiFetchParamCreator(configuration).revokeEntity(authorization, document_id, body, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -4703,16 +4648,16 @@ export const EntityServiceApiFp = function(configuration?: Configuration) {
             };
         },
         /**
-         * Share the entity document with others
-         * @summary Entity Relation Share
-         * @param {string} document_id entity identifier
-         * @param {EntityRelationshipPayload} body 
+         * Share gives entity access to target identity.
+         * @summary Share gives entity access to target identity.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {UserapiShareEntityRequest} body Entity Share request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        share(document_id: string, body: EntityRelationshipPayload, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<EntityRelationshipResponse> {
-            const localVarFetchArgs = EntityServiceApiFetchParamCreator(configuration).share(document_id, body, authorization, options);
+        shareEntity(authorization: string, document_id: string, body: UserapiShareEntityRequest, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiShareEntityResponse> {
+            const localVarFetchArgs = EntitiesApiFetchParamCreator(configuration).shareEntity(authorization, document_id, body, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -4724,15 +4669,16 @@ export const EntityServiceApiFp = function(configuration?: Configuration) {
             };
         },
         /**
-         * Updates an entity
-         * @param {string} document_id 
-         * @param {EntityEntityUpdatePayload} body 
+         * Updates an existing Entity and anchors it.
+         * @summary Updates an existing Entity and anchors it.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {UserapiCreateEntityRequest} body Entity Create request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        update(document_id: string, body: EntityEntityUpdatePayload, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<EntityEntityResponse> {
-            const localVarFetchArgs = EntityServiceApiFetchParamCreator(configuration).update(document_id, body, authorization, options);
+        updateEntity(authorization: string, document_id: string, body: UserapiCreateEntityRequest, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiEntityResponse> {
+            const localVarFetchArgs = EntitiesApiFetchParamCreator(configuration).updateEntity(authorization, document_id, body, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -4747,163 +4693,169 @@ export const EntityServiceApiFp = function(configuration?: Configuration) {
 };
 
 /**
- * EntityServiceApi - factory interface
+ * EntitiesApi - factory interface
  * @export
  */
-export const EntityServiceApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+export const EntitiesApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
     return {
         /**
-         * Creates an entity
-         * @param {EntityEntityCreatePayload} body 
+         * Creates a new Entity and anchors it.
+         * @summary Creates a new Entity and anchors it.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {UserapiCreateEntityRequest} body Entity Create request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        create(body: EntityEntityCreatePayload, authorization: string, options?: any) {
-            return EntityServiceApiFp(configuration).create(body, authorization, options)(fetch, basePath);
+        createEntity(authorization: string, body: UserapiCreateEntityRequest, options?: any) {
+            return EntitiesApiFp(configuration).createEntity(authorization, body, options)(fetch, basePath);
         },
         /**
-         * Get the current entity
-         * @param {string} document_id 
+         * Returns the latest version of the Entity.
+         * @summary Returns the latest version of the Entity.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        get(document_id: string, authorization: string, options?: any) {
-            return EntityServiceApiFp(configuration).get(document_id, authorization, options)(fetch, basePath);
+        getEntity(authorization: string, document_id: string, options?: any) {
+            return EntitiesApiFp(configuration).getEntity(authorization, document_id, options)(fetch, basePath);
         },
         /**
-         * Get entity from business partner
-         * @summary Entity Relation Get
-         * @param {string} relationship_id 
+         * Returns the latest version of the Entity through relationship ID.
+         * @summary Returns the latest version of the Entity through relationship ID.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Entity Relationship Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getEntityByRelationship(relationship_id: string, authorization: string, options?: any) {
-            return EntityServiceApiFp(configuration).getEntityByRelationship(relationship_id, authorization, options)(fetch, basePath);
+        getEntityThroughRelationshipId(authorization: string, document_id: string, options?: any) {
+            return EntitiesApiFp(configuration).getEntityThroughRelationshipId(authorization, document_id, options)(fetch, basePath);
         },
         /**
-         * revoke an entity document share
-         * @summary Entity Relation Revoke
-         * @param {string} document_id entity identifier
-         * @param {EntityRelationshipPayload} body 
+         * Revoke revokes target id's access to entity.
+         * @summary Revoke revokes target id's access to entity.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {UserapiShareEntityRequest} body Entity Revoke request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        revoke(document_id: string, body: EntityRelationshipPayload, authorization: string, options?: any) {
-            return EntityServiceApiFp(configuration).revoke(document_id, body, authorization, options)(fetch, basePath);
+        revokeEntity(authorization: string, document_id: string, body: UserapiShareEntityRequest, options?: any) {
+            return EntitiesApiFp(configuration).revokeEntity(authorization, document_id, body, options)(fetch, basePath);
         },
         /**
-         * Share the entity document with others
-         * @summary Entity Relation Share
-         * @param {string} document_id entity identifier
-         * @param {EntityRelationshipPayload} body 
+         * Share gives entity access to target identity.
+         * @summary Share gives entity access to target identity.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {UserapiShareEntityRequest} body Entity Share request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        share(document_id: string, body: EntityRelationshipPayload, authorization: string, options?: any) {
-            return EntityServiceApiFp(configuration).share(document_id, body, authorization, options)(fetch, basePath);
+        shareEntity(authorization: string, document_id: string, body: UserapiShareEntityRequest, options?: any) {
+            return EntitiesApiFp(configuration).shareEntity(authorization, document_id, body, options)(fetch, basePath);
         },
         /**
-         * Updates an entity
-         * @param {string} document_id 
-         * @param {EntityEntityUpdatePayload} body 
+         * Updates an existing Entity and anchors it.
+         * @summary Updates an existing Entity and anchors it.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {UserapiCreateEntityRequest} body Entity Create request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        update(document_id: string, body: EntityEntityUpdatePayload, authorization: string, options?: any) {
-            return EntityServiceApiFp(configuration).update(document_id, body, authorization, options)(fetch, basePath);
+        updateEntity(authorization: string, document_id: string, body: UserapiCreateEntityRequest, options?: any) {
+            return EntitiesApiFp(configuration).updateEntity(authorization, document_id, body, options)(fetch, basePath);
         },
     };
 };
 
 /**
- * EntityServiceApi - object-oriented interface
+ * EntitiesApi - object-oriented interface
  * @export
- * @class EntityServiceApi
+ * @class EntitiesApi
  * @extends {BaseAPI}
  */
-export class EntityServiceApi extends BaseAPI {
+export class EntitiesApi extends BaseAPI {
     /**
-     * Creates an entity
-     * @param {EntityEntityCreatePayload} body 
+     * Creates a new Entity and anchors it.
+     * @summary Creates a new Entity and anchors it.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {UserapiCreateEntityRequest} body Entity Create request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof EntityServiceApi
+     * @memberof EntitiesApi
      */
-    public create(body: EntityEntityCreatePayload, authorization: string, options?: any) {
-        return EntityServiceApiFp(this.configuration).create(body, authorization, options)(this.fetch, this.basePath);
+    public createEntity(authorization: string, body: UserapiCreateEntityRequest, options?: any) {
+        return EntitiesApiFp(this.configuration).createEntity(authorization, body, options)(this.fetch, this.basePath);
     }
 
     /**
-     * Get the current entity
-     * @param {string} document_id 
+     * Returns the latest version of the Entity.
+     * @summary Returns the latest version of the Entity.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} document_id Document Identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof EntityServiceApi
+     * @memberof EntitiesApi
      */
-    public get(document_id: string, authorization: string, options?: any) {
-        return EntityServiceApiFp(this.configuration).get(document_id, authorization, options)(this.fetch, this.basePath);
+    public getEntity(authorization: string, document_id: string, options?: any) {
+        return EntitiesApiFp(this.configuration).getEntity(authorization, document_id, options)(this.fetch, this.basePath);
     }
 
     /**
-     * Get entity from business partner
-     * @summary Entity Relation Get
-     * @param {string} relationship_id 
+     * Returns the latest version of the Entity through relationship ID.
+     * @summary Returns the latest version of the Entity through relationship ID.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} document_id Entity Relationship Document Identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof EntityServiceApi
+     * @memberof EntitiesApi
      */
-    public getEntityByRelationship(relationship_id: string, authorization: string, options?: any) {
-        return EntityServiceApiFp(this.configuration).getEntityByRelationship(relationship_id, authorization, options)(this.fetch, this.basePath);
+    public getEntityThroughRelationshipId(authorization: string, document_id: string, options?: any) {
+        return EntitiesApiFp(this.configuration).getEntityThroughRelationshipId(authorization, document_id, options)(this.fetch, this.basePath);
     }
 
     /**
-     * revoke an entity document share
-     * @summary Entity Relation Revoke
-     * @param {string} document_id entity identifier
-     * @param {EntityRelationshipPayload} body 
+     * Revoke revokes target id's access to entity.
+     * @summary Revoke revokes target id's access to entity.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} document_id Document Identifier
+     * @param {UserapiShareEntityRequest} body Entity Revoke request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof EntityServiceApi
+     * @memberof EntitiesApi
      */
-    public revoke(document_id: string, body: EntityRelationshipPayload, authorization: string, options?: any) {
-        return EntityServiceApiFp(this.configuration).revoke(document_id, body, authorization, options)(this.fetch, this.basePath);
+    public revokeEntity(authorization: string, document_id: string, body: UserapiShareEntityRequest, options?: any) {
+        return EntitiesApiFp(this.configuration).revokeEntity(authorization, document_id, body, options)(this.fetch, this.basePath);
     }
 
     /**
-     * Share the entity document with others
-     * @summary Entity Relation Share
-     * @param {string} document_id entity identifier
-     * @param {EntityRelationshipPayload} body 
+     * Share gives entity access to target identity.
+     * @summary Share gives entity access to target identity.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} document_id Document Identifier
+     * @param {UserapiShareEntityRequest} body Entity Share request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof EntityServiceApi
+     * @memberof EntitiesApi
      */
-    public share(document_id: string, body: EntityRelationshipPayload, authorization: string, options?: any) {
-        return EntityServiceApiFp(this.configuration).share(document_id, body, authorization, options)(this.fetch, this.basePath);
+    public shareEntity(authorization: string, document_id: string, body: UserapiShareEntityRequest, options?: any) {
+        return EntitiesApiFp(this.configuration).shareEntity(authorization, document_id, body, options)(this.fetch, this.basePath);
     }
 
     /**
-     * Updates an entity
-     * @param {string} document_id 
-     * @param {EntityEntityUpdatePayload} body 
+     * Updates an existing Entity and anchors it.
+     * @summary Updates an existing Entity and anchors it.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} document_id Document Identifier
+     * @param {UserapiCreateEntityRequest} body Entity Create request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof EntityServiceApi
+     * @memberof EntitiesApi
      */
-    public update(document_id: string, body: EntityEntityUpdatePayload, authorization: string, options?: any) {
-        return EntityServiceApiFp(this.configuration).update(document_id, body, authorization, options)(this.fetch, this.basePath);
+    public updateEntity(authorization: string, document_id: string, body: UserapiCreateEntityRequest, options?: any) {
+        return EntitiesApiFp(this.configuration).updateEntity(authorization, document_id, body, options)(this.fetch, this.basePath);
     }
 
 }
@@ -5678,26 +5630,27 @@ export class HealthApi extends BaseAPI {
 }
 
 /**
- * InvoiceServiceApi - fetch parameter creator
+ * InvoicesApi - fetch parameter creator
  * @export
  */
-export const InvoiceServiceApiFetchParamCreator = function (configuration?: Configuration) {
+export const InvoicesApiFetchParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Creates an invoice
-         * @param {InvInvoiceCreatePayload} body 
+         * Creates a new invoice document and anchors it.
+         * @summary Creates a new invoice document and anchors it.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {UserapiCreateInvoiceRequest} body Invoice Create Request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        create(body: InvInvoiceCreatePayload, authorization: string, options: any = {}): FetchArgs {
-            // verify required parameter 'body' is not null or undefined
-            if (body === null || body === undefined) {
-                throw new RequiredError('body','Required parameter body was null or undefined when calling create.');
-            }
+        createInvoice(authorization: string, body: UserapiCreateInvoiceRequest, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling create.');
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling createInvoice.');
+            }
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling createInvoice.');
             }
             const localVarPath = `/v1/invoices`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -5715,7 +5668,7 @@ export const InvoiceServiceApiFetchParamCreator = function (configuration?: Conf
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-            const needsSerialization = (<any>"InvInvoiceCreatePayload" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            const needsSerialization = (<any>"UserapiCreateInvoiceRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
             localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
 
             return {
@@ -5724,20 +5677,21 @@ export const InvoiceServiceApiFetchParamCreator = function (configuration?: Conf
             };
         },
         /**
-         * Get the current invoice
-         * @param {string} document_id 
+         * Returns the latest version of the Invoice.
+         * @summary Returns the latest version of the Invoice.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        get(document_id: string, authorization: string, options: any = {}): FetchArgs {
-            // verify required parameter 'document_id' is not null or undefined
-            if (document_id === null || document_id === undefined) {
-                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling get.');
-            }
+        getInvoice(authorization: string, document_id: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling get.');
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling getInvoice.');
+            }
+            // verify required parameter 'document_id' is not null or undefined
+            if (document_id === null || document_id === undefined) {
+                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling getInvoice.');
             }
             const localVarPath = `/v1/invoices/{document_id}`
                 .replace(`{${"document_id"}}`, encodeURIComponent(String(document_id)));
@@ -5761,25 +5715,26 @@ export const InvoiceServiceApiFetchParamCreator = function (configuration?: Conf
             };
         },
         /**
-         * Get a specific version of an invoice
-         * @param {string} document_id 
-         * @param {string} version_id 
+         * Returns the specific version of an Invoice.
+         * @summary Returns the specific version of an Invoice.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {string} version_id Document Version Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getVersion(document_id: string, version_id: string, authorization: string, options: any = {}): FetchArgs {
+        getInvoiceVersion(authorization: string, document_id: string, version_id: string, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling getInvoiceVersion.');
+            }
             // verify required parameter 'document_id' is not null or undefined
             if (document_id === null || document_id === undefined) {
-                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling getVersion.');
+                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling getInvoiceVersion.');
             }
             // verify required parameter 'version_id' is not null or undefined
             if (version_id === null || version_id === undefined) {
-                throw new RequiredError('version_id','Required parameter version_id was null or undefined when calling getVersion.');
-            }
-            // verify required parameter 'authorization' is not null or undefined
-            if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling getVersion.');
+                throw new RequiredError('version_id','Required parameter version_id was null or undefined when calling getInvoiceVersion.');
             }
             const localVarPath = `/v1/invoices/{document_id}/versions/{version_id}`
                 .replace(`{${"document_id"}}`, encodeURIComponent(String(document_id)))
@@ -5804,25 +5759,67 @@ export const InvoiceServiceApiFetchParamCreator = function (configuration?: Conf
             };
         },
         /**
-         * Updates an invoice
-         * @param {string} document_id 
-         * @param {InvInvoiceUpdatePayload} body 
+         * Mints an NFT for an unpaid invoice document.
+         * @summary Mints an NFT for an unpaid invoice document.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {UserapiNFTMintInvoiceUnpaidRequest} body Invoice Unpaid NFT Mint Request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        update(document_id: string, body: InvInvoiceUpdatePayload, authorization: string, options: any = {}): FetchArgs {
-            // verify required parameter 'document_id' is not null or undefined
-            if (document_id === null || document_id === undefined) {
-                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling update.');
+        invoiceUnpaidNft(authorization: string, body: UserapiNFTMintInvoiceUnpaidRequest, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling invoiceUnpaidNft.');
             }
             // verify required parameter 'body' is not null or undefined
             if (body === null || body === undefined) {
-                throw new RequiredError('body','Required parameter body was null or undefined when calling update.');
+                throw new RequiredError('body','Required parameter body was null or undefined when calling invoiceUnpaidNft.');
             }
+            const localVarPath = `/v1/invoices/{document_id}/mint/unpaid`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"UserapiNFTMintInvoiceUnpaidRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Updates an existing invoice and anchors it.
+         * @summary Updates an existing Invoice and anchors it.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {UserapiCreateInvoiceRequest} body Invoice Update request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateInvoice(authorization: string, document_id: string, body: UserapiCreateInvoiceRequest, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling update.');
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling updateInvoice.');
+            }
+            // verify required parameter 'document_id' is not null or undefined
+            if (document_id === null || document_id === undefined) {
+                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling updateInvoice.');
+            }
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling updateInvoice.');
             }
             const localVarPath = `/v1/invoices/{document_id}`
                 .replace(`{${"document_id"}}`, encodeURIComponent(String(document_id)));
@@ -5841,7 +5838,7 @@ export const InvoiceServiceApiFetchParamCreator = function (configuration?: Conf
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-            const needsSerialization = (<any>"InvInvoiceUpdatePayload" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            const needsSerialization = (<any>"UserapiCreateInvoiceRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
             localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
 
             return {
@@ -5853,20 +5850,21 @@ export const InvoiceServiceApiFetchParamCreator = function (configuration?: Conf
 };
 
 /**
- * InvoiceServiceApi - functional programming interface
+ * InvoicesApi - functional programming interface
  * @export
  */
-export const InvoiceServiceApiFp = function(configuration?: Configuration) {
+export const InvoicesApiFp = function(configuration?: Configuration) {
     return {
         /**
-         * Creates an invoice
-         * @param {InvInvoiceCreatePayload} body 
+         * Creates a new invoice document and anchors it.
+         * @summary Creates a new invoice document and anchors it.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {UserapiCreateInvoiceRequest} body Invoice Create Request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        create(body: InvInvoiceCreatePayload, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<InvInvoiceResponse> {
-            const localVarFetchArgs = InvoiceServiceApiFetchParamCreator(configuration).create(body, authorization, options);
+        createInvoice(authorization: string, body: UserapiCreateInvoiceRequest, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiInvoiceResponse> {
+            const localVarFetchArgs = InvoicesApiFetchParamCreator(configuration).createInvoice(authorization, body, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -5878,14 +5876,15 @@ export const InvoiceServiceApiFp = function(configuration?: Configuration) {
             };
         },
         /**
-         * Get the current invoice
-         * @param {string} document_id 
+         * Returns the latest version of the Invoice.
+         * @summary Returns the latest version of the Invoice.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        get(document_id: string, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<InvInvoiceResponse> {
-            const localVarFetchArgs = InvoiceServiceApiFetchParamCreator(configuration).get(document_id, authorization, options);
+        getInvoice(authorization: string, document_id: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiInvoiceResponse> {
+            const localVarFetchArgs = InvoicesApiFetchParamCreator(configuration).getInvoice(authorization, document_id, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -5897,15 +5896,16 @@ export const InvoiceServiceApiFp = function(configuration?: Configuration) {
             };
         },
         /**
-         * Get a specific version of an invoice
-         * @param {string} document_id 
-         * @param {string} version_id 
+         * Returns the specific version of an Invoice.
+         * @summary Returns the specific version of an Invoice.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {string} version_id Document Version Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getVersion(document_id: string, version_id: string, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<InvInvoiceResponse> {
-            const localVarFetchArgs = InvoiceServiceApiFetchParamCreator(configuration).getVersion(document_id, version_id, authorization, options);
+        getInvoiceVersion(authorization: string, document_id: string, version_id: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiInvoiceResponse> {
+            const localVarFetchArgs = InvoicesApiFetchParamCreator(configuration).getInvoiceVersion(authorization, document_id, version_id, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -5917,15 +5917,36 @@ export const InvoiceServiceApiFp = function(configuration?: Configuration) {
             };
         },
         /**
-         * Updates an invoice
-         * @param {string} document_id 
-         * @param {InvInvoiceUpdatePayload} body 
+         * Mints an NFT for an unpaid invoice document.
+         * @summary Mints an NFT for an unpaid invoice document.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {UserapiNFTMintInvoiceUnpaidRequest} body Invoice Unpaid NFT Mint Request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        update(document_id: string, body: InvInvoiceUpdatePayload, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<InvInvoiceResponse> {
-            const localVarFetchArgs = InvoiceServiceApiFetchParamCreator(configuration).update(document_id, body, authorization, options);
+        invoiceUnpaidNft(authorization: string, body: UserapiNFTMintInvoiceUnpaidRequest, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiNFTMintResponse> {
+            const localVarFetchArgs = InvoicesApiFetchParamCreator(configuration).invoiceUnpaidNft(authorization, body, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Updates an existing invoice and anchors it.
+         * @summary Updates an existing Invoice and anchors it.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {UserapiCreateInvoiceRequest} body Invoice Update request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateInvoice(authorization: string, document_id: string, body: UserapiCreateInvoiceRequest, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiInvoiceResponse> {
+            const localVarFetchArgs = InvoicesApiFetchParamCreator(configuration).updateInvoice(authorization, document_id, body, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -5940,111 +5961,143 @@ export const InvoiceServiceApiFp = function(configuration?: Configuration) {
 };
 
 /**
- * InvoiceServiceApi - factory interface
+ * InvoicesApi - factory interface
  * @export
  */
-export const InvoiceServiceApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+export const InvoicesApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
     return {
         /**
-         * Creates an invoice
-         * @param {InvInvoiceCreatePayload} body 
+         * Creates a new invoice document and anchors it.
+         * @summary Creates a new invoice document and anchors it.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {UserapiCreateInvoiceRequest} body Invoice Create Request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        create(body: InvInvoiceCreatePayload, authorization: string, options?: any) {
-            return InvoiceServiceApiFp(configuration).create(body, authorization, options)(fetch, basePath);
+        createInvoice(authorization: string, body: UserapiCreateInvoiceRequest, options?: any) {
+            return InvoicesApiFp(configuration).createInvoice(authorization, body, options)(fetch, basePath);
         },
         /**
-         * Get the current invoice
-         * @param {string} document_id 
+         * Returns the latest version of the Invoice.
+         * @summary Returns the latest version of the Invoice.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        get(document_id: string, authorization: string, options?: any) {
-            return InvoiceServiceApiFp(configuration).get(document_id, authorization, options)(fetch, basePath);
+        getInvoice(authorization: string, document_id: string, options?: any) {
+            return InvoicesApiFp(configuration).getInvoice(authorization, document_id, options)(fetch, basePath);
         },
         /**
-         * Get a specific version of an invoice
-         * @param {string} document_id 
-         * @param {string} version_id 
+         * Returns the specific version of an Invoice.
+         * @summary Returns the specific version of an Invoice.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {string} version_id Document Version Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getVersion(document_id: string, version_id: string, authorization: string, options?: any) {
-            return InvoiceServiceApiFp(configuration).getVersion(document_id, version_id, authorization, options)(fetch, basePath);
+        getInvoiceVersion(authorization: string, document_id: string, version_id: string, options?: any) {
+            return InvoicesApiFp(configuration).getInvoiceVersion(authorization, document_id, version_id, options)(fetch, basePath);
         },
         /**
-         * Updates an invoice
-         * @param {string} document_id 
-         * @param {InvInvoiceUpdatePayload} body 
+         * Mints an NFT for an unpaid invoice document.
+         * @summary Mints an NFT for an unpaid invoice document.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {UserapiNFTMintInvoiceUnpaidRequest} body Invoice Unpaid NFT Mint Request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        update(document_id: string, body: InvInvoiceUpdatePayload, authorization: string, options?: any) {
-            return InvoiceServiceApiFp(configuration).update(document_id, body, authorization, options)(fetch, basePath);
+        invoiceUnpaidNft(authorization: string, body: UserapiNFTMintInvoiceUnpaidRequest, options?: any) {
+            return InvoicesApiFp(configuration).invoiceUnpaidNft(authorization, body, options)(fetch, basePath);
+        },
+        /**
+         * Updates an existing invoice and anchors it.
+         * @summary Updates an existing Invoice and anchors it.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {UserapiCreateInvoiceRequest} body Invoice Update request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateInvoice(authorization: string, document_id: string, body: UserapiCreateInvoiceRequest, options?: any) {
+            return InvoicesApiFp(configuration).updateInvoice(authorization, document_id, body, options)(fetch, basePath);
         },
     };
 };
 
 /**
- * InvoiceServiceApi - object-oriented interface
+ * InvoicesApi - object-oriented interface
  * @export
- * @class InvoiceServiceApi
+ * @class InvoicesApi
  * @extends {BaseAPI}
  */
-export class InvoiceServiceApi extends BaseAPI {
+export class InvoicesApi extends BaseAPI {
     /**
-     * Creates an invoice
-     * @param {InvInvoiceCreatePayload} body 
+     * Creates a new invoice document and anchors it.
+     * @summary Creates a new invoice document and anchors it.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {UserapiCreateInvoiceRequest} body Invoice Create Request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof InvoiceServiceApi
+     * @memberof InvoicesApi
      */
-    public create(body: InvInvoiceCreatePayload, authorization: string, options?: any) {
-        return InvoiceServiceApiFp(this.configuration).create(body, authorization, options)(this.fetch, this.basePath);
+    public createInvoice(authorization: string, body: UserapiCreateInvoiceRequest, options?: any) {
+        return InvoicesApiFp(this.configuration).createInvoice(authorization, body, options)(this.fetch, this.basePath);
     }
 
     /**
-     * Get the current invoice
-     * @param {string} document_id 
+     * Returns the latest version of the Invoice.
+     * @summary Returns the latest version of the Invoice.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} document_id Document Identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof InvoiceServiceApi
+     * @memberof InvoicesApi
      */
-    public get(document_id: string, authorization: string, options?: any) {
-        return InvoiceServiceApiFp(this.configuration).get(document_id, authorization, options)(this.fetch, this.basePath);
+    public getInvoice(authorization: string, document_id: string, options?: any) {
+        return InvoicesApiFp(this.configuration).getInvoice(authorization, document_id, options)(this.fetch, this.basePath);
     }
 
     /**
-     * Get a specific version of an invoice
-     * @param {string} document_id 
-     * @param {string} version_id 
+     * Returns the specific version of an Invoice.
+     * @summary Returns the specific version of an Invoice.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} document_id Document Identifier
+     * @param {string} version_id Document Version Identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof InvoiceServiceApi
+     * @memberof InvoicesApi
      */
-    public getVersion(document_id: string, version_id: string, authorization: string, options?: any) {
-        return InvoiceServiceApiFp(this.configuration).getVersion(document_id, version_id, authorization, options)(this.fetch, this.basePath);
+    public getInvoiceVersion(authorization: string, document_id: string, version_id: string, options?: any) {
+        return InvoicesApiFp(this.configuration).getInvoiceVersion(authorization, document_id, version_id, options)(this.fetch, this.basePath);
     }
 
     /**
-     * Updates an invoice
-     * @param {string} document_id 
-     * @param {InvInvoiceUpdatePayload} body 
+     * Mints an NFT for an unpaid invoice document.
+     * @summary Mints an NFT for an unpaid invoice document.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {UserapiNFTMintInvoiceUnpaidRequest} body Invoice Unpaid NFT Mint Request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof InvoiceServiceApi
+     * @memberof InvoicesApi
      */
-    public update(document_id: string, body: InvInvoiceUpdatePayload, authorization: string, options?: any) {
-        return InvoiceServiceApiFp(this.configuration).update(document_id, body, authorization, options)(this.fetch, this.basePath);
+    public invoiceUnpaidNft(authorization: string, body: UserapiNFTMintInvoiceUnpaidRequest, options?: any) {
+        return InvoicesApiFp(this.configuration).invoiceUnpaidNft(authorization, body, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * Updates an existing invoice and anchors it.
+     * @summary Updates an existing Invoice and anchors it.
+     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} document_id Document Identifier
+     * @param {UserapiCreateInvoiceRequest} body Invoice Update request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof InvoicesApi
+     */
+    public updateInvoice(authorization: string, document_id: string, body: UserapiCreateInvoiceRequest, options?: any) {
+        return InvoicesApiFp(this.configuration).updateInvoice(authorization, document_id, body, options)(this.fetch, this.basePath);
     }
 
 }
@@ -6168,10 +6221,10 @@ export class JobsApi extends BaseAPI {
 }
 
 /**
- * NFTApi - fetch parameter creator
+ * NFTsApi - fetch parameter creator
  * @export
  */
-export const NFTApiFetchParamCreator = function (configuration?: Configuration) {
+export const NFTsApiFetchParamCreator = function (configuration?: Configuration) {
     return {
         /**
          * Mints an NFT against a document.
@@ -6242,6 +6295,50 @@ export const NFTApiFetchParamCreator = function (configuration?: Configuration) 
             if (registry_address === null || registry_address === undefined) {
                 throw new RequiredError('registry_address','Required parameter registry_address was null or undefined when calling ownerOfNft.');
             }
+            const localVarPath = `/beta/nfts/registries/{registry_address}/tokens/{token_id}/owner`
+                .replace(`{${"token_id"}}`, encodeURIComponent(String(token_id)))
+                .replace(`{${"registry_address"}}`, encodeURIComponent(String(registry_address)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Returns the Owner of the given NFT.
+         * @summary Returns the Owner of the given NFT.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} token_id NFT token ID in hex
+         * @param {string} registry_address Registry address in hex
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        ownerOfNft_1(authorization: string, token_id: string, registry_address: string, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling ownerOfNft_1.');
+            }
+            // verify required parameter 'token_id' is not null or undefined
+            if (token_id === null || token_id === undefined) {
+                throw new RequiredError('token_id','Required parameter token_id was null or undefined when calling ownerOfNft_1.');
+            }
+            // verify required parameter 'registry_address' is not null or undefined
+            if (registry_address === null || registry_address === undefined) {
+                throw new RequiredError('registry_address','Required parameter registry_address was null or undefined when calling ownerOfNft_1.');
+            }
             const localVarPath = `/v1/nfts/registries/{registry_address}/tokens/{token_id}/owner`
                 .replace(`{${"token_id"}}`, encodeURIComponent(String(token_id)))
                 .replace(`{${"registry_address"}}`, encodeURIComponent(String(registry_address)));
@@ -6291,6 +6388,59 @@ export const NFTApiFetchParamCreator = function (configuration?: Configuration) 
             if (body === null || body === undefined) {
                 throw new RequiredError('body','Required parameter body was null or undefined when calling transferNft.');
             }
+            const localVarPath = `/beta/nfts/registries/{registry_address}/tokens/{token_id}/transfer`
+                .replace(`{${"registry_address"}}`, encodeURIComponent(String(registry_address)))
+                .replace(`{${"token_id"}}`, encodeURIComponent(String(token_id)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"CoreapiTransferNFTRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Transfers given NFT to provide address.
+         * @summary Transfers given NFT to provide address.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} registry_address NFT registry address in hex
+         * @param {string} token_id NFT token ID in hex
+         * @param {CoreapiTransferNFTRequest} body Mint NFT request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        transferNft_2(authorization: string, registry_address: string, token_id: string, body: CoreapiTransferNFTRequest, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling transferNft_2.');
+            }
+            // verify required parameter 'registry_address' is not null or undefined
+            if (registry_address === null || registry_address === undefined) {
+                throw new RequiredError('registry_address','Required parameter registry_address was null or undefined when calling transferNft_2.');
+            }
+            // verify required parameter 'token_id' is not null or undefined
+            if (token_id === null || token_id === undefined) {
+                throw new RequiredError('token_id','Required parameter token_id was null or undefined when calling transferNft_2.');
+            }
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling transferNft_2.');
+            }
             const localVarPath = `/v1/nfts/registries/{registry_address}/tokens/{token_id}/transfer`
                 .replace(`{${"registry_address"}}`, encodeURIComponent(String(registry_address)))
                 .replace(`{${"token_id"}}`, encodeURIComponent(String(token_id)));
@@ -6321,10 +6471,10 @@ export const NFTApiFetchParamCreator = function (configuration?: Configuration) 
 };
 
 /**
- * NFTApi - functional programming interface
+ * NFTsApi - functional programming interface
  * @export
  */
-export const NFTApiFp = function(configuration?: Configuration) {
+export const NFTsApiFp = function(configuration?: Configuration) {
     return {
         /**
          * Mints an NFT against a document.
@@ -6336,7 +6486,7 @@ export const NFTApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         mintNft(authorization: string, registry_address: string, body: CoreapiMintNFTRequest, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiMintNFTResponse> {
-            const localVarFetchArgs = NFTApiFetchParamCreator(configuration).mintNft(authorization, registry_address, body, options);
+            const localVarFetchArgs = NFTsApiFetchParamCreator(configuration).mintNft(authorization, registry_address, body, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -6357,7 +6507,28 @@ export const NFTApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         ownerOfNft(authorization: string, token_id: string, registry_address: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiNFTOwnerResponse> {
-            const localVarFetchArgs = NFTApiFetchParamCreator(configuration).ownerOfNft(authorization, token_id, registry_address, options);
+            const localVarFetchArgs = NFTsApiFetchParamCreator(configuration).ownerOfNft(authorization, token_id, registry_address, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Returns the Owner of the given NFT.
+         * @summary Returns the Owner of the given NFT.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} token_id NFT token ID in hex
+         * @param {string} registry_address Registry address in hex
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        ownerOfNft_1(authorization: string, token_id: string, registry_address: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiNFTOwnerResponse> {
+            const localVarFetchArgs = NFTsApiFetchParamCreator(configuration).ownerOfNft_1(authorization, token_id, registry_address, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -6379,7 +6550,29 @@ export const NFTApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         transferNft(authorization: string, registry_address: string, token_id: string, body: CoreapiTransferNFTRequest, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiTransferNFTResponse> {
-            const localVarFetchArgs = NFTApiFetchParamCreator(configuration).transferNft(authorization, registry_address, token_id, body, options);
+            const localVarFetchArgs = NFTsApiFetchParamCreator(configuration).transferNft(authorization, registry_address, token_id, body, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Transfers given NFT to provide address.
+         * @summary Transfers given NFT to provide address.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} registry_address NFT registry address in hex
+         * @param {string} token_id NFT token ID in hex
+         * @param {CoreapiTransferNFTRequest} body Mint NFT request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        transferNft_2(authorization: string, registry_address: string, token_id: string, body: CoreapiTransferNFTRequest, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiTransferNFTResponse> {
+            const localVarFetchArgs = NFTsApiFetchParamCreator(configuration).transferNft_2(authorization, registry_address, token_id, body, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -6394,10 +6587,10 @@ export const NFTApiFp = function(configuration?: Configuration) {
 };
 
 /**
- * NFTApi - factory interface
+ * NFTsApi - factory interface
  * @export
  */
-export const NFTApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+export const NFTsApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
     return {
         /**
          * Mints an NFT against a document.
@@ -6409,7 +6602,7 @@ export const NFTApiFactory = function (configuration?: Configuration, fetch?: Fe
          * @throws {RequiredError}
          */
         mintNft(authorization: string, registry_address: string, body: CoreapiMintNFTRequest, options?: any) {
-            return NFTApiFp(configuration).mintNft(authorization, registry_address, body, options)(fetch, basePath);
+            return NFTsApiFp(configuration).mintNft(authorization, registry_address, body, options)(fetch, basePath);
         },
         /**
          * Returns the Owner of the given NFT.
@@ -6421,7 +6614,19 @@ export const NFTApiFactory = function (configuration?: Configuration, fetch?: Fe
          * @throws {RequiredError}
          */
         ownerOfNft(authorization: string, token_id: string, registry_address: string, options?: any) {
-            return NFTApiFp(configuration).ownerOfNft(authorization, token_id, registry_address, options)(fetch, basePath);
+            return NFTsApiFp(configuration).ownerOfNft(authorization, token_id, registry_address, options)(fetch, basePath);
+        },
+        /**
+         * Returns the Owner of the given NFT.
+         * @summary Returns the Owner of the given NFT.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} token_id NFT token ID in hex
+         * @param {string} registry_address Registry address in hex
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        ownerOfNft_1(authorization: string, token_id: string, registry_address: string, options?: any) {
+            return NFTsApiFp(configuration).ownerOfNft_1(authorization, token_id, registry_address, options)(fetch, basePath);
         },
         /**
          * Transfers given NFT to provide address.
@@ -6434,18 +6639,31 @@ export const NFTApiFactory = function (configuration?: Configuration, fetch?: Fe
          * @throws {RequiredError}
          */
         transferNft(authorization: string, registry_address: string, token_id: string, body: CoreapiTransferNFTRequest, options?: any) {
-            return NFTApiFp(configuration).transferNft(authorization, registry_address, token_id, body, options)(fetch, basePath);
+            return NFTsApiFp(configuration).transferNft(authorization, registry_address, token_id, body, options)(fetch, basePath);
+        },
+        /**
+         * Transfers given NFT to provide address.
+         * @summary Transfers given NFT to provide address.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} registry_address NFT registry address in hex
+         * @param {string} token_id NFT token ID in hex
+         * @param {CoreapiTransferNFTRequest} body Mint NFT request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        transferNft_2(authorization: string, registry_address: string, token_id: string, body: CoreapiTransferNFTRequest, options?: any) {
+            return NFTsApiFp(configuration).transferNft_2(authorization, registry_address, token_id, body, options)(fetch, basePath);
         },
     };
 };
 
 /**
- * NFTApi - object-oriented interface
+ * NFTsApi - object-oriented interface
  * @export
- * @class NFTApi
+ * @class NFTsApi
  * @extends {BaseAPI}
  */
-export class NFTApi extends BaseAPI {
+export class NFTsApi extends BaseAPI {
     /**
      * Mints an NFT against a document.
      * @summary Mints an NFT against a document.
@@ -6454,10 +6672,10 @@ export class NFTApi extends BaseAPI {
      * @param {CoreapiMintNFTRequest} body Mint NFT request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof NFTApi
+     * @memberof NFTsApi
      */
     public mintNft(authorization: string, registry_address: string, body: CoreapiMintNFTRequest, options?: any) {
-        return NFTApiFp(this.configuration).mintNft(authorization, registry_address, body, options)(this.fetch, this.basePath);
+        return NFTsApiFp(this.configuration).mintNft(authorization, registry_address, body, options)(this.fetch, this.basePath);
     }
 
     /**
@@ -6468,10 +6686,24 @@ export class NFTApi extends BaseAPI {
      * @param {string} registry_address Registry address in hex
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof NFTApi
+     * @memberof NFTsApi
      */
     public ownerOfNft(authorization: string, token_id: string, registry_address: string, options?: any) {
-        return NFTApiFp(this.configuration).ownerOfNft(authorization, token_id, registry_address, options)(this.fetch, this.basePath);
+        return NFTsApiFp(this.configuration).ownerOfNft(authorization, token_id, registry_address, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * Returns the Owner of the given NFT.
+     * @summary Returns the Owner of the given NFT.
+     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} token_id NFT token ID in hex
+     * @param {string} registry_address Registry address in hex
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof NFTsApi
+     */
+    public ownerOfNft_1(authorization: string, token_id: string, registry_address: string, options?: any) {
+        return NFTsApiFp(this.configuration).ownerOfNft_1(authorization, token_id, registry_address, options)(this.fetch, this.basePath);
     }
 
     /**
@@ -6483,43 +6715,59 @@ export class NFTApi extends BaseAPI {
      * @param {CoreapiTransferNFTRequest} body Mint NFT request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof NFTApi
+     * @memberof NFTsApi
      */
     public transferNft(authorization: string, registry_address: string, token_id: string, body: CoreapiTransferNFTRequest, options?: any) {
-        return NFTApiFp(this.configuration).transferNft(authorization, registry_address, token_id, body, options)(this.fetch, this.basePath);
+        return NFTsApiFp(this.configuration).transferNft(authorization, registry_address, token_id, body, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * Transfers given NFT to provide address.
+     * @summary Transfers given NFT to provide address.
+     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} registry_address NFT registry address in hex
+     * @param {string} token_id NFT token ID in hex
+     * @param {CoreapiTransferNFTRequest} body Mint NFT request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof NFTsApi
+     */
+    public transferNft_2(authorization: string, registry_address: string, token_id: string, body: CoreapiTransferNFTRequest, options?: any) {
+        return NFTsApiFp(this.configuration).transferNft_2(authorization, registry_address, token_id, body, options)(this.fetch, this.basePath);
     }
 
 }
 
 /**
- * NFTServiceApi - fetch parameter creator
+ * NFTsBetaApi - fetch parameter creator
  * @export
  */
-export const NFTServiceApiFetchParamCreator = function (configuration?: Configuration) {
+export const NFTsBetaApiFetchParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Mints an NFT out of an Unpaid Centrifuge Invoice
-         * @param {string} document_id Invoice Document identifier
-         * @param {NftNFTMintInvoiceUnpaidRequest} body 
+         * Mints an NFT against a document.
+         * @summary Mints an NFT against a document.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} registry_address NFT registry address in hex
+         * @param {UserapiMintNFTRequest} body Mint NFT request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        mintInvoiceUnpaidNFT(document_id: string, body: NftNFTMintInvoiceUnpaidRequest, authorization: string, options: any = {}): FetchArgs {
-            // verify required parameter 'document_id' is not null or undefined
-            if (document_id === null || document_id === undefined) {
-                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling mintInvoiceUnpaidNFT.');
+        mintNft(authorization: string, registry_address: string, body: UserapiMintNFTRequest, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling mintNft.');
+            }
+            // verify required parameter 'registry_address' is not null or undefined
+            if (registry_address === null || registry_address === undefined) {
+                throw new RequiredError('registry_address','Required parameter registry_address was null or undefined when calling mintNft.');
             }
             // verify required parameter 'body' is not null or undefined
             if (body === null || body === undefined) {
-                throw new RequiredError('body','Required parameter body was null or undefined when calling mintInvoiceUnpaidNFT.');
+                throw new RequiredError('body','Required parameter body was null or undefined when calling mintNft.');
             }
-            // verify required parameter 'authorization' is not null or undefined
-            if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling mintInvoiceUnpaidNFT.');
-            }
-            const localVarPath = `/v1/invoices/{document_id}/mint/unpaid`
-                .replace(`{${"document_id"}}`, encodeURIComponent(String(document_id)));
+            const localVarPath = `/beta/nfts/registries/{registry_address}/mint`
+                .replace(`{${"registry_address"}}`, encodeURIComponent(String(registry_address)));
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
             const localVarHeaderParameter = {} as any;
@@ -6535,7 +6783,7 @@ export const NFTServiceApiFetchParamCreator = function (configuration?: Configur
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-            const needsSerialization = (<any>"NftNFTMintInvoiceUnpaidRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            const needsSerialization = (<any>"UserapiMintNFTRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
             localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
 
             return {
@@ -6547,21 +6795,22 @@ export const NFTServiceApiFetchParamCreator = function (configuration?: Configur
 };
 
 /**
- * NFTServiceApi - functional programming interface
+ * NFTsBetaApi - functional programming interface
  * @export
  */
-export const NFTServiceApiFp = function(configuration?: Configuration) {
+export const NFTsBetaApiFp = function(configuration?: Configuration) {
     return {
         /**
-         * Mints an NFT out of an Unpaid Centrifuge Invoice
-         * @param {string} document_id Invoice Document identifier
-         * @param {NftNFTMintInvoiceUnpaidRequest} body 
+         * Mints an NFT against a document.
+         * @summary Mints an NFT against a document.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} registry_address NFT registry address in hex
+         * @param {UserapiMintNFTRequest} body Mint NFT request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        mintInvoiceUnpaidNFT(document_id: string, body: NftNFTMintInvoiceUnpaidRequest, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<NftNFTMintResponse> {
-            const localVarFetchArgs = NFTServiceApiFetchParamCreator(configuration).mintInvoiceUnpaidNFT(document_id, body, authorization, options);
+        mintNft(authorization: string, registry_address: string, body: UserapiMintNFTRequest, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiMintNFTResponse> {
+            const localVarFetchArgs = NFTsBetaApiFetchParamCreator(configuration).mintNft(authorization, registry_address, body, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -6576,43 +6825,45 @@ export const NFTServiceApiFp = function(configuration?: Configuration) {
 };
 
 /**
- * NFTServiceApi - factory interface
+ * NFTsBetaApi - factory interface
  * @export
  */
-export const NFTServiceApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+export const NFTsBetaApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
     return {
         /**
-         * Mints an NFT out of an Unpaid Centrifuge Invoice
-         * @param {string} document_id Invoice Document identifier
-         * @param {NftNFTMintInvoiceUnpaidRequest} body 
+         * Mints an NFT against a document.
+         * @summary Mints an NFT against a document.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} registry_address NFT registry address in hex
+         * @param {UserapiMintNFTRequest} body Mint NFT request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        mintInvoiceUnpaidNFT(document_id: string, body: NftNFTMintInvoiceUnpaidRequest, authorization: string, options?: any) {
-            return NFTServiceApiFp(configuration).mintInvoiceUnpaidNFT(document_id, body, authorization, options)(fetch, basePath);
+        mintNft(authorization: string, registry_address: string, body: UserapiMintNFTRequest, options?: any) {
+            return NFTsBetaApiFp(configuration).mintNft(authorization, registry_address, body, options)(fetch, basePath);
         },
     };
 };
 
 /**
- * NFTServiceApi - object-oriented interface
+ * NFTsBetaApi - object-oriented interface
  * @export
- * @class NFTServiceApi
+ * @class NFTsBetaApi
  * @extends {BaseAPI}
  */
-export class NFTServiceApi extends BaseAPI {
+export class NFTsBetaApi extends BaseAPI {
     /**
-     * Mints an NFT out of an Unpaid Centrifuge Invoice
-     * @param {string} document_id Invoice Document identifier
-     * @param {NftNFTMintInvoiceUnpaidRequest} body 
+     * Mints an NFT against a document.
+     * @summary Mints an NFT against a document.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} registry_address NFT registry address in hex
+     * @param {UserapiMintNFTRequest} body Mint NFT request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof NFTServiceApi
+     * @memberof NFTsBetaApi
      */
-    public mintInvoiceUnpaidNFT(document_id: string, body: NftNFTMintInvoiceUnpaidRequest, authorization: string, options?: any) {
-        return NFTServiceApiFp(this.configuration).mintInvoiceUnpaidNFT(document_id, body, authorization, options)(this.fetch, this.basePath);
+    public mintNft(authorization: string, registry_address: string, body: UserapiMintNFTRequest, options?: any) {
+        return NFTsBetaApiFp(this.configuration).mintNft(authorization, registry_address, body, options)(this.fetch, this.basePath);
     }
 
 }
@@ -6723,26 +6974,27 @@ export class NotificationDummyServiceApi extends BaseAPI {
 }
 
 /**
- * PurchaseOrderServiceApi - fetch parameter creator
+ * PurchaseOrdersApi - fetch parameter creator
  * @export
  */
-export const PurchaseOrderServiceApiFetchParamCreator = function (configuration?: Configuration) {
+export const PurchaseOrdersApiFetchParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Creates a purchase order
-         * @param {PoPurchaseOrderCreatePayload} body 
+         * Creates a new purchase order and anchors it.
+         * @summary Creates a new purchase order and anchors it.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {UserapiCreatePurchaseOrderRequest} body Purchase Order Create request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        create(body: PoPurchaseOrderCreatePayload, authorization: string, options: any = {}): FetchArgs {
-            // verify required parameter 'body' is not null or undefined
-            if (body === null || body === undefined) {
-                throw new RequiredError('body','Required parameter body was null or undefined when calling create.');
-            }
+        createPurchaseOrder(authorization: string, body: UserapiCreatePurchaseOrderRequest, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling create.');
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling createPurchaseOrder.');
+            }
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling createPurchaseOrder.');
             }
             const localVarPath = `/v1/purchase_orders`;
             const localVarUrlObj = url.parse(localVarPath, true);
@@ -6760,7 +7012,7 @@ export const PurchaseOrderServiceApiFetchParamCreator = function (configuration?
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-            const needsSerialization = (<any>"PoPurchaseOrderCreatePayload" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            const needsSerialization = (<any>"UserapiCreatePurchaseOrderRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
             localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
 
             return {
@@ -6769,20 +7021,21 @@ export const PurchaseOrderServiceApiFetchParamCreator = function (configuration?
             };
         },
         /**
-         * Get the current version of a purchase order
-         * @param {string} document_id 
+         * Returns the latest version of the PurchaseOrder.
+         * @summary Returns the latest version of the PurchaseOrder.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        get(document_id: string, authorization: string, options: any = {}): FetchArgs {
-            // verify required parameter 'document_id' is not null or undefined
-            if (document_id === null || document_id === undefined) {
-                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling get.');
-            }
+        getPurchaseOrder(authorization: string, document_id: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling get.');
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling getPurchaseOrder.');
+            }
+            // verify required parameter 'document_id' is not null or undefined
+            if (document_id === null || document_id === undefined) {
+                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling getPurchaseOrder.');
             }
             const localVarPath = `/v1/purchase_orders/{document_id}`
                 .replace(`{${"document_id"}}`, encodeURIComponent(String(document_id)));
@@ -6806,25 +7059,26 @@ export const PurchaseOrderServiceApiFetchParamCreator = function (configuration?
             };
         },
         /**
-         * Get a specific version of a purchase order
-         * @param {string} document_id 
-         * @param {string} version_id 
+         * Returns the specific version of a PurchaseOrder.
+         * @summary Returns the specific version of a PurchaseOrder.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {string} version_id Document Version Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getVersion(document_id: string, version_id: string, authorization: string, options: any = {}): FetchArgs {
+        getPurchaseOrderVersion(authorization: string, document_id: string, version_id: string, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling getPurchaseOrderVersion.');
+            }
             // verify required parameter 'document_id' is not null or undefined
             if (document_id === null || document_id === undefined) {
-                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling getVersion.');
+                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling getPurchaseOrderVersion.');
             }
             // verify required parameter 'version_id' is not null or undefined
             if (version_id === null || version_id === undefined) {
-                throw new RequiredError('version_id','Required parameter version_id was null or undefined when calling getVersion.');
-            }
-            // verify required parameter 'authorization' is not null or undefined
-            if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling getVersion.');
+                throw new RequiredError('version_id','Required parameter version_id was null or undefined when calling getPurchaseOrderVersion.');
             }
             const localVarPath = `/v1/purchase_orders/{document_id}/versions/{version_id}`
                 .replace(`{${"document_id"}}`, encodeURIComponent(String(document_id)))
@@ -6849,25 +7103,26 @@ export const PurchaseOrderServiceApiFetchParamCreator = function (configuration?
             };
         },
         /**
-         * Updates a purchase order
-         * @param {string} document_id 
-         * @param {PoPurchaseOrderUpdatePayload} body 
+         * Updates an existing PurchaseOrder and anchors it.
+         * @summary Updates an existing PurchaseOrder and anchors it.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {UserapiCreatePurchaseOrderRequest} body PurchaseOrder Update request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        update(document_id: string, body: PoPurchaseOrderUpdatePayload, authorization: string, options: any = {}): FetchArgs {
+        updatePurchaseOrder(authorization: string, document_id: string, body: UserapiCreatePurchaseOrderRequest, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling updatePurchaseOrder.');
+            }
             // verify required parameter 'document_id' is not null or undefined
             if (document_id === null || document_id === undefined) {
-                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling update.');
+                throw new RequiredError('document_id','Required parameter document_id was null or undefined when calling updatePurchaseOrder.');
             }
             // verify required parameter 'body' is not null or undefined
             if (body === null || body === undefined) {
-                throw new RequiredError('body','Required parameter body was null or undefined when calling update.');
-            }
-            // verify required parameter 'authorization' is not null or undefined
-            if (authorization === null || authorization === undefined) {
-                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling update.');
+                throw new RequiredError('body','Required parameter body was null or undefined when calling updatePurchaseOrder.');
             }
             const localVarPath = `/v1/purchase_orders/{document_id}`
                 .replace(`{${"document_id"}}`, encodeURIComponent(String(document_id)));
@@ -6886,7 +7141,7 @@ export const PurchaseOrderServiceApiFetchParamCreator = function (configuration?
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-            const needsSerialization = (<any>"PoPurchaseOrderUpdatePayload" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            const needsSerialization = (<any>"UserapiCreatePurchaseOrderRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
             localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
 
             return {
@@ -6898,20 +7153,21 @@ export const PurchaseOrderServiceApiFetchParamCreator = function (configuration?
 };
 
 /**
- * PurchaseOrderServiceApi - functional programming interface
+ * PurchaseOrdersApi - functional programming interface
  * @export
  */
-export const PurchaseOrderServiceApiFp = function(configuration?: Configuration) {
+export const PurchaseOrdersApiFp = function(configuration?: Configuration) {
     return {
         /**
-         * Creates a purchase order
-         * @param {PoPurchaseOrderCreatePayload} body 
+         * Creates a new purchase order and anchors it.
+         * @summary Creates a new purchase order and anchors it.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {UserapiCreatePurchaseOrderRequest} body Purchase Order Create request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        create(body: PoPurchaseOrderCreatePayload, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<PoPurchaseOrderResponse> {
-            const localVarFetchArgs = PurchaseOrderServiceApiFetchParamCreator(configuration).create(body, authorization, options);
+        createPurchaseOrder(authorization: string, body: UserapiCreatePurchaseOrderRequest, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiPurchaseOrderResponse> {
+            const localVarFetchArgs = PurchaseOrdersApiFetchParamCreator(configuration).createPurchaseOrder(authorization, body, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -6923,14 +7179,15 @@ export const PurchaseOrderServiceApiFp = function(configuration?: Configuration)
             };
         },
         /**
-         * Get the current version of a purchase order
-         * @param {string} document_id 
+         * Returns the latest version of the PurchaseOrder.
+         * @summary Returns the latest version of the PurchaseOrder.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        get(document_id: string, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<PoPurchaseOrderResponse> {
-            const localVarFetchArgs = PurchaseOrderServiceApiFetchParamCreator(configuration).get(document_id, authorization, options);
+        getPurchaseOrder(authorization: string, document_id: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiPurchaseOrderResponse> {
+            const localVarFetchArgs = PurchaseOrdersApiFetchParamCreator(configuration).getPurchaseOrder(authorization, document_id, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -6942,15 +7199,16 @@ export const PurchaseOrderServiceApiFp = function(configuration?: Configuration)
             };
         },
         /**
-         * Get a specific version of a purchase order
-         * @param {string} document_id 
-         * @param {string} version_id 
+         * Returns the specific version of a PurchaseOrder.
+         * @summary Returns the specific version of a PurchaseOrder.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {string} version_id Document Version Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getVersion(document_id: string, version_id: string, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<PoPurchaseOrderResponse> {
-            const localVarFetchArgs = PurchaseOrderServiceApiFetchParamCreator(configuration).getVersion(document_id, version_id, authorization, options);
+        getPurchaseOrderVersion(authorization: string, document_id: string, version_id: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiPurchaseOrderResponse> {
+            const localVarFetchArgs = PurchaseOrdersApiFetchParamCreator(configuration).getPurchaseOrderVersion(authorization, document_id, version_id, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -6962,15 +7220,16 @@ export const PurchaseOrderServiceApiFp = function(configuration?: Configuration)
             };
         },
         /**
-         * Updates a purchase order
-         * @param {string} document_id 
-         * @param {PoPurchaseOrderUpdatePayload} body 
+         * Updates an existing PurchaseOrder and anchors it.
+         * @summary Updates an existing PurchaseOrder and anchors it.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {UserapiCreatePurchaseOrderRequest} body PurchaseOrder Update request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        update(document_id: string, body: PoPurchaseOrderUpdatePayload, authorization: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<PoPurchaseOrderResponse> {
-            const localVarFetchArgs = PurchaseOrderServiceApiFetchParamCreator(configuration).update(document_id, body, authorization, options);
+        updatePurchaseOrder(authorization: string, document_id: string, body: UserapiCreatePurchaseOrderRequest, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiPurchaseOrderResponse> {
+            const localVarFetchArgs = PurchaseOrdersApiFetchParamCreator(configuration).updatePurchaseOrder(authorization, document_id, body, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -6985,120 +7244,128 @@ export const PurchaseOrderServiceApiFp = function(configuration?: Configuration)
 };
 
 /**
- * PurchaseOrderServiceApi - factory interface
+ * PurchaseOrdersApi - factory interface
  * @export
  */
-export const PurchaseOrderServiceApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+export const PurchaseOrdersApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
     return {
         /**
-         * Creates a purchase order
-         * @param {PoPurchaseOrderCreatePayload} body 
+         * Creates a new purchase order and anchors it.
+         * @summary Creates a new purchase order and anchors it.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {UserapiCreatePurchaseOrderRequest} body Purchase Order Create request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        create(body: PoPurchaseOrderCreatePayload, authorization: string, options?: any) {
-            return PurchaseOrderServiceApiFp(configuration).create(body, authorization, options)(fetch, basePath);
+        createPurchaseOrder(authorization: string, body: UserapiCreatePurchaseOrderRequest, options?: any) {
+            return PurchaseOrdersApiFp(configuration).createPurchaseOrder(authorization, body, options)(fetch, basePath);
         },
         /**
-         * Get the current version of a purchase order
-         * @param {string} document_id 
+         * Returns the latest version of the PurchaseOrder.
+         * @summary Returns the latest version of the PurchaseOrder.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        get(document_id: string, authorization: string, options?: any) {
-            return PurchaseOrderServiceApiFp(configuration).get(document_id, authorization, options)(fetch, basePath);
+        getPurchaseOrder(authorization: string, document_id: string, options?: any) {
+            return PurchaseOrdersApiFp(configuration).getPurchaseOrder(authorization, document_id, options)(fetch, basePath);
         },
         /**
-         * Get a specific version of a purchase order
-         * @param {string} document_id 
-         * @param {string} version_id 
+         * Returns the specific version of a PurchaseOrder.
+         * @summary Returns the specific version of a PurchaseOrder.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {string} version_id Document Version Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getVersion(document_id: string, version_id: string, authorization: string, options?: any) {
-            return PurchaseOrderServiceApiFp(configuration).getVersion(document_id, version_id, authorization, options)(fetch, basePath);
+        getPurchaseOrderVersion(authorization: string, document_id: string, version_id: string, options?: any) {
+            return PurchaseOrdersApiFp(configuration).getPurchaseOrderVersion(authorization, document_id, version_id, options)(fetch, basePath);
         },
         /**
-         * Updates a purchase order
-         * @param {string} document_id 
-         * @param {PoPurchaseOrderUpdatePayload} body 
+         * Updates an existing PurchaseOrder and anchors it.
+         * @summary Updates an existing PurchaseOrder and anchors it.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} document_id Document Identifier
+         * @param {UserapiCreatePurchaseOrderRequest} body PurchaseOrder Update request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        update(document_id: string, body: PoPurchaseOrderUpdatePayload, authorization: string, options?: any) {
-            return PurchaseOrderServiceApiFp(configuration).update(document_id, body, authorization, options)(fetch, basePath);
+        updatePurchaseOrder(authorization: string, document_id: string, body: UserapiCreatePurchaseOrderRequest, options?: any) {
+            return PurchaseOrdersApiFp(configuration).updatePurchaseOrder(authorization, document_id, body, options)(fetch, basePath);
         },
     };
 };
 
 /**
- * PurchaseOrderServiceApi - object-oriented interface
+ * PurchaseOrdersApi - object-oriented interface
  * @export
- * @class PurchaseOrderServiceApi
+ * @class PurchaseOrdersApi
  * @extends {BaseAPI}
  */
-export class PurchaseOrderServiceApi extends BaseAPI {
+export class PurchaseOrdersApi extends BaseAPI {
     /**
-     * Creates a purchase order
-     * @param {PoPurchaseOrderCreatePayload} body 
+     * Creates a new purchase order and anchors it.
+     * @summary Creates a new purchase order and anchors it.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {UserapiCreatePurchaseOrderRequest} body Purchase Order Create request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof PurchaseOrderServiceApi
+     * @memberof PurchaseOrdersApi
      */
-    public create(body: PoPurchaseOrderCreatePayload, authorization: string, options?: any) {
-        return PurchaseOrderServiceApiFp(this.configuration).create(body, authorization, options)(this.fetch, this.basePath);
+    public createPurchaseOrder(authorization: string, body: UserapiCreatePurchaseOrderRequest, options?: any) {
+        return PurchaseOrdersApiFp(this.configuration).createPurchaseOrder(authorization, body, options)(this.fetch, this.basePath);
     }
 
     /**
-     * Get the current version of a purchase order
-     * @param {string} document_id 
+     * Returns the latest version of the PurchaseOrder.
+     * @summary Returns the latest version of the PurchaseOrder.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} document_id Document Identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof PurchaseOrderServiceApi
+     * @memberof PurchaseOrdersApi
      */
-    public get(document_id: string, authorization: string, options?: any) {
-        return PurchaseOrderServiceApiFp(this.configuration).get(document_id, authorization, options)(this.fetch, this.basePath);
+    public getPurchaseOrder(authorization: string, document_id: string, options?: any) {
+        return PurchaseOrdersApiFp(this.configuration).getPurchaseOrder(authorization, document_id, options)(this.fetch, this.basePath);
     }
 
     /**
-     * Get a specific version of a purchase order
-     * @param {string} document_id 
-     * @param {string} version_id 
+     * Returns the specific version of a PurchaseOrder.
+     * @summary Returns the specific version of a PurchaseOrder.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} document_id Document Identifier
+     * @param {string} version_id Document Version Identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof PurchaseOrderServiceApi
+     * @memberof PurchaseOrdersApi
      */
-    public getVersion(document_id: string, version_id: string, authorization: string, options?: any) {
-        return PurchaseOrderServiceApiFp(this.configuration).getVersion(document_id, version_id, authorization, options)(this.fetch, this.basePath);
+    public getPurchaseOrderVersion(authorization: string, document_id: string, version_id: string, options?: any) {
+        return PurchaseOrdersApiFp(this.configuration).getPurchaseOrderVersion(authorization, document_id, version_id, options)(this.fetch, this.basePath);
     }
 
     /**
-     * Updates a purchase order
-     * @param {string} document_id 
-     * @param {PoPurchaseOrderUpdatePayload} body 
+     * Updates an existing PurchaseOrder and anchors it.
+     * @summary Updates an existing PurchaseOrder and anchors it.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} document_id Document Identifier
+     * @param {UserapiCreatePurchaseOrderRequest} body PurchaseOrder Update request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof PurchaseOrderServiceApi
+     * @memberof PurchaseOrdersApi
      */
-    public update(document_id: string, body: PoPurchaseOrderUpdatePayload, authorization: string, options?: any) {
-        return PurchaseOrderServiceApiFp(this.configuration).update(document_id, body, authorization, options)(this.fetch, this.basePath);
+    public updatePurchaseOrder(authorization: string, document_id: string, body: UserapiCreatePurchaseOrderRequest, options?: any) {
+        return PurchaseOrdersApiFp(this.configuration).updatePurchaseOrder(authorization, document_id, body, options)(this.fetch, this.basePath);
     }
 
 }
 
 /**
- * TransferDetailApi - fetch parameter creator
+ * TransferDetailsApi - fetch parameter creator
  * @export
  */
-export const TransferDetailApiFetchParamCreator = function (configuration?: Configuration) {
+export const TransferDetailsApiFetchParamCreator = function (configuration?: Configuration) {
     return {
         /**
          * Creates a new transfer detail extension on a document and anchors it.
@@ -7286,10 +7553,10 @@ export const TransferDetailApiFetchParamCreator = function (configuration?: Conf
 };
 
 /**
- * TransferDetailApi - functional programming interface
+ * TransferDetailsApi - functional programming interface
  * @export
  */
-export const TransferDetailApiFp = function(configuration?: Configuration) {
+export const TransferDetailsApiFp = function(configuration?: Configuration) {
     return {
         /**
          * Creates a new transfer detail extension on a document and anchors it.
@@ -7301,7 +7568,7 @@ export const TransferDetailApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         createTransferDetail(authorization: string, body: UserapiCreateTransferDetailRequest, document_id: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiTransferDetailResponse> {
-            const localVarFetchArgs = TransferDetailApiFetchParamCreator(configuration).createTransferDetail(authorization, body, document_id, options);
+            const localVarFetchArgs = TransferDetailsApiFetchParamCreator(configuration).createTransferDetail(authorization, body, document_id, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -7322,7 +7589,7 @@ export const TransferDetailApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         getTransferDetail(authorization: string, document_id: string, transfer_id: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiTransferDetailResponse> {
-            const localVarFetchArgs = TransferDetailApiFetchParamCreator(configuration).getTransferDetail(authorization, document_id, transfer_id, options);
+            const localVarFetchArgs = TransferDetailsApiFetchParamCreator(configuration).getTransferDetail(authorization, document_id, transfer_id, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -7342,7 +7609,7 @@ export const TransferDetailApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         listTransferDetails(authorization: string, document_id: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiTransferDetailListResponse> {
-            const localVarFetchArgs = TransferDetailApiFetchParamCreator(configuration).listTransferDetails(authorization, document_id, options);
+            const localVarFetchArgs = TransferDetailsApiFetchParamCreator(configuration).listTransferDetails(authorization, document_id, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -7364,7 +7631,7 @@ export const TransferDetailApiFp = function(configuration?: Configuration) {
          * @throws {RequiredError}
          */
         updateTransferDetail(authorization: string, body: UserapiUpdateTransferDetailRequest, document_id: string, transfer_id: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<UserapiTransferDetailResponse> {
-            const localVarFetchArgs = TransferDetailApiFetchParamCreator(configuration).updateTransferDetail(authorization, body, document_id, transfer_id, options);
+            const localVarFetchArgs = TransferDetailsApiFetchParamCreator(configuration).updateTransferDetail(authorization, body, document_id, transfer_id, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -7379,10 +7646,10 @@ export const TransferDetailApiFp = function(configuration?: Configuration) {
 };
 
 /**
- * TransferDetailApi - factory interface
+ * TransferDetailsApi - factory interface
  * @export
  */
-export const TransferDetailApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+export const TransferDetailsApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
     return {
         /**
          * Creates a new transfer detail extension on a document and anchors it.
@@ -7394,7 +7661,7 @@ export const TransferDetailApiFactory = function (configuration?: Configuration,
          * @throws {RequiredError}
          */
         createTransferDetail(authorization: string, body: UserapiCreateTransferDetailRequest, document_id: string, options?: any) {
-            return TransferDetailApiFp(configuration).createTransferDetail(authorization, body, document_id, options)(fetch, basePath);
+            return TransferDetailsApiFp(configuration).createTransferDetail(authorization, body, document_id, options)(fetch, basePath);
         },
         /**
          * Returns the latest version of the transfer detail.
@@ -7406,7 +7673,7 @@ export const TransferDetailApiFactory = function (configuration?: Configuration,
          * @throws {RequiredError}
          */
         getTransferDetail(authorization: string, document_id: string, transfer_id: string, options?: any) {
-            return TransferDetailApiFp(configuration).getTransferDetail(authorization, document_id, transfer_id, options)(fetch, basePath);
+            return TransferDetailsApiFp(configuration).getTransferDetail(authorization, document_id, transfer_id, options)(fetch, basePath);
         },
         /**
          * Returns a list of the latest versions of all transfer details on the document.
@@ -7417,7 +7684,7 @@ export const TransferDetailApiFactory = function (configuration?: Configuration,
          * @throws {RequiredError}
          */
         listTransferDetails(authorization: string, document_id: string, options?: any) {
-            return TransferDetailApiFp(configuration).listTransferDetails(authorization, document_id, options)(fetch, basePath);
+            return TransferDetailsApiFp(configuration).listTransferDetails(authorization, document_id, options)(fetch, basePath);
         },
         /**
          * Updates a new transfer detail extension on a document and anchors it.
@@ -7430,18 +7697,18 @@ export const TransferDetailApiFactory = function (configuration?: Configuration,
          * @throws {RequiredError}
          */
         updateTransferDetail(authorization: string, body: UserapiUpdateTransferDetailRequest, document_id: string, transfer_id: string, options?: any) {
-            return TransferDetailApiFp(configuration).updateTransferDetail(authorization, body, document_id, transfer_id, options)(fetch, basePath);
+            return TransferDetailsApiFp(configuration).updateTransferDetail(authorization, body, document_id, transfer_id, options)(fetch, basePath);
         },
     };
 };
 
 /**
- * TransferDetailApi - object-oriented interface
+ * TransferDetailsApi - object-oriented interface
  * @export
- * @class TransferDetailApi
+ * @class TransferDetailsApi
  * @extends {BaseAPI}
  */
-export class TransferDetailApi extends BaseAPI {
+export class TransferDetailsApi extends BaseAPI {
     /**
      * Creates a new transfer detail extension on a document and anchors it.
      * @summary Creates a new transfer detail extension on a document and anchors it.
@@ -7450,10 +7717,10 @@ export class TransferDetailApi extends BaseAPI {
      * @param {string} document_id Document Identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof TransferDetailApi
+     * @memberof TransferDetailsApi
      */
     public createTransferDetail(authorization: string, body: UserapiCreateTransferDetailRequest, document_id: string, options?: any) {
-        return TransferDetailApiFp(this.configuration).createTransferDetail(authorization, body, document_id, options)(this.fetch, this.basePath);
+        return TransferDetailsApiFp(this.configuration).createTransferDetail(authorization, body, document_id, options)(this.fetch, this.basePath);
     }
 
     /**
@@ -7464,10 +7731,10 @@ export class TransferDetailApi extends BaseAPI {
      * @param {string} transfer_id Transfer Detail Identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof TransferDetailApi
+     * @memberof TransferDetailsApi
      */
     public getTransferDetail(authorization: string, document_id: string, transfer_id: string, options?: any) {
-        return TransferDetailApiFp(this.configuration).getTransferDetail(authorization, document_id, transfer_id, options)(this.fetch, this.basePath);
+        return TransferDetailsApiFp(this.configuration).getTransferDetail(authorization, document_id, transfer_id, options)(this.fetch, this.basePath);
     }
 
     /**
@@ -7477,10 +7744,10 @@ export class TransferDetailApi extends BaseAPI {
      * @param {string} document_id Document Identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof TransferDetailApi
+     * @memberof TransferDetailsApi
      */
     public listTransferDetails(authorization: string, document_id: string, options?: any) {
-        return TransferDetailApiFp(this.configuration).listTransferDetails(authorization, document_id, options)(this.fetch, this.basePath);
+        return TransferDetailsApiFp(this.configuration).listTransferDetails(authorization, document_id, options)(this.fetch, this.basePath);
     }
 
     /**
@@ -7492,10 +7759,10 @@ export class TransferDetailApi extends BaseAPI {
      * @param {string} transfer_id Transfer Detail Identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof TransferDetailApi
+     * @memberof TransferDetailsApi
      */
     public updateTransferDetail(authorization: string, body: UserapiUpdateTransferDetailRequest, document_id: string, transfer_id: string, options?: any) {
-        return TransferDetailApiFp(this.configuration).updateTransferDetail(authorization, body, document_id, transfer_id, options)(this.fetch, this.basePath);
+        return TransferDetailsApiFp(this.configuration).updateTransferDetail(authorization, body, document_id, transfer_id, options)(this.fetch, this.basePath);
     }
 
 }

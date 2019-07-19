@@ -1,8 +1,8 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
-import { CoreapiCreateDocumentRequest } from '../../../clients/centrifuge-node';
-import { Document, DocumentRequest } from '../../../src/common/models/document';
+import { CoreapiCreateDocumentRequest, UserapiMintNFTRequest } from '../../../clients/centrifuge-node';
+import { Document, DocumentRequest, MintNftRequest } from '../../../src/common/models/document';
 import { ROUTES } from '../../../src/common/constants';
 import { SessionGuard } from '../auth/SessionGuard';
 import { unflatten } from '../../../src/common/custom-attributes';
@@ -91,10 +91,10 @@ export class DocumentsController {
   ) {
 
     const documentFromDb: Document = await this.databaseService.documents.findOne(
-      {_id: params.id},
+      { _id: params.id },
     );
 
-    if(!documentFromDb)  throw new HttpException(`Can not find document #${params.id} in the database`, HttpStatus.FORBIDDEN);
+    if (!documentFromDb) throw new HttpException(`Can not find document #${params.id} in the database`, HttpStatus.CONFLICT);
 
     const updateResult: Document = await this.centrifugeService.documents.updateDocument(
       request.user.account,
@@ -114,6 +114,51 @@ export class DocumentsController {
         header: updateResult.header,
         data: updateResult.data,
         attributes: unflattenAttr,
+      },
+    });
+  }
+
+  /**
+   * Mints an NFT for a doc and saves and updates local database
+   * @async
+   * @param {Param} params - the query params
+   * @param {Param} request - the http request
+   * @param {MintNftRequest} body - minting information
+   * @return {Promise<DocumentRequest>} result
+   */
+  @Post(':id/mint')
+  async mintNFT(
+    @Param() params,
+    @Req() request,
+    @Body() body: MintNftRequest,
+  ) {
+
+    const documentFromDb: Document = await this.databaseService.documents.findOne(
+      { _id: params.id },
+    );
+
+    if (!documentFromDb) throw new HttpException(`Can not find document #${params.id} in the database`, HttpStatus.CONFLICT);
+
+    const payload: UserapiMintNFTRequest = {
+      document_id: documentFromDb.header.document_id,
+      proof_fields: body.proof_fields,
+      deposit_address: body.deposit_address,
+    };
+
+    const mintingResult: Document = await this.centrifugeService.nftBeta.mintNft(
+      request.user.account,
+      body.registry_address,
+      payload,
+    );
+
+    await this.centrifugeService.pullForJobComplete(mintingResult.header.job_id, request.user.account);
+    // TODO Investigate if we can remove this update and and handle this the webhooks
+    const updateResult = await this.centrifugeService.documents.getDocument(request.user.account, documentFromDb.header.document_id);
+    const unflattenAttr = unflatten(updateResult.attributes);
+
+    return await this.databaseService.documents.updateById(params.id, {
+      $set: {
+        header: updateResult.header
       },
     });
   }

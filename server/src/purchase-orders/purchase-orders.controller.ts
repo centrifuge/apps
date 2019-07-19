@@ -3,7 +3,7 @@ import { SessionGuard } from '../auth/SessionGuard';
 import { ROUTES } from '../../../src/common/constants';
 import { DatabaseService } from '../database/database.service';
 import { PurchaseOrder } from '../../../src/common/models/purchase-order';
-import { PoPurchaseOrderResponse } from '../../../clients/centrifuge-node';
+import { UserapiPurchaseOrderResponse } from '../../../clients/centrifuge-node';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import config from '../../../src/common/config';
 
@@ -29,7 +29,8 @@ export class PurchaseOrdersController {
     const collaborators = purchaseOrder.collaborators
       ? [...purchaseOrder.collaborators]
       : [];
-    const createResult: PoPurchaseOrderResponse = await this.centrifugeService.purchaseOrders.create(
+    const createResult: UserapiPurchaseOrderResponse = await this.centrifugeService.purchaseOrders.createPurchaseOrder(
+      config.admin.account,
       {
         data: {
           ...purchaseOrder,
@@ -37,7 +38,6 @@ export class PurchaseOrdersController {
         write_access: collaborators,
 
       },
-      config.admin.account,
     );
 
     return await this.databaseService.purchaseOrders.insert({
@@ -63,10 +63,11 @@ export class PurchaseOrdersController {
   ) {
 
     const id = params.id;
-    const dbPurchaseOrder: PoPurchaseOrderResponse = await this.databaseService.purchaseOrders.findOne(
+    const dbPurchaseOrder: UserapiPurchaseOrderResponse = await this.databaseService.purchaseOrders.findOne(
       { _id: id, ownerId: request.user._id },
     );
-    const updateResult = await this.centrifugeService.purchaseOrders.update(
+    const updateResult = await this.centrifugeService.purchaseOrders.updatePurchaseOrder(
+      config.admin.account,
       dbPurchaseOrder.header.document_id,
       {
         data: {
@@ -74,7 +75,6 @@ export class PurchaseOrdersController {
         },
         write_access: purchaseOrder.collaborators,
       },
-      config.admin.account,
     );
 
     return await this.databaseService.purchaseOrders.updateById(id, {

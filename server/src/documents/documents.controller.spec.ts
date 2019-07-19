@@ -6,6 +6,7 @@ import { DatabaseService } from '../database/database.service';
 import { DocumentsController } from './documents.controller';
 import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.module';
 import { CoreapiCreateDocumentRequest } from '../../../clients/centrifuge-node';
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 
 describe('DocumentsController', () => {
   let documentsModule: TestingModule;
@@ -52,6 +53,7 @@ describe('DocumentsController', () => {
   };
 
   const databaseSpies: any = {};
+  const centApiSpies: any = {};
   let insertedDocument: any = {};
 
   beforeEach(async () => {
@@ -77,6 +79,10 @@ describe('DocumentsController', () => {
     databaseSpies.spyInsert = jest.spyOn(databaseService.documents, 'insert');
     databaseSpies.spyUpdate = jest.spyOn(databaseService.documents, 'update');
     databaseSpies.spyGetAll = jest.spyOn(databaseService.documents, 'getCursor');
+    databaseSpies.spyUpdateById = jest.spyOn(databaseService.documents, 'updateById');
+
+    const centrifugeService = documentsModule.get<CentrifugeService>(CentrifugeService);
+    centApiSpies.spyMintNft = jest.spyOn(centrifugeService.nftBeta, 'mintNft');
   });
 
   describe('create', () => {
@@ -156,6 +162,8 @@ describe('DocumentsController', () => {
       expect(databaseSpies.spyFindOne).toHaveBeenCalledWith({
         _id: insertedDocument._id,
       });
+
+      expect(databaseSpies.spyUpdateById).toHaveBeenCalled();
       expect(databaseSpies.spyUpdate).toHaveBeenCalledWith(
         { _id: insertedDocument._id },
         {
@@ -189,12 +197,12 @@ describe('DocumentsController', () => {
       };
       await expect(
         documentsController.updateById(
-          { id: "someID" },
+          { id: 'someID' },
           { user: { _id: 'user_id', account: '0x4441122' } },
           { ...updatedDocument },
         ),
       ).rejects.toThrow(
-        `Can not find document #someID in the database`
+        `Can not find document #someID in the database`,
       );
     });
   });
@@ -215,6 +223,44 @@ describe('DocumentsController', () => {
       });
 
       expect(result!.attributes).toMatchObject(insertedDocument.attributes);
+    });
+  });
+
+
+  describe('mint', function() {
+    it('Should mint an nft for a document', async function() {
+      const documentsController = documentsModule.get<DocumentsController>(
+        DocumentsController,
+      );
+
+      const payload = {
+        deposit_address: '0x333',
+        registry_address: '0x111',
+        proof_fields: ['some_field'],
+      };
+
+      const result = await documentsController.mintNFT(
+        { id: insertedDocument._id },
+        { user: { _id: 'user_id', account: '0xUserAccount' } },
+        payload,
+      );
+      expect(databaseSpies.spyFindOne).toHaveBeenCalledWith({
+        _id: insertedDocument._id,
+      });
+
+
+      expect(centApiSpies.spyMintNft).toHaveBeenCalledWith(
+        '0xUserAccount',
+        payload.registry_address,
+        {
+          document_id: insertedDocument.header.document_id,
+          proof_fields: payload.proof_fields,
+          deposit_address: payload.deposit_address,
+        });
+
+
+      expect(databaseSpies.spyUpdateById).toHaveBeenCalled();
+
     });
   });
 });

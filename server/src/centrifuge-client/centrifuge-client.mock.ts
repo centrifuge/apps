@@ -1,6 +1,6 @@
 export class MockCentrifugeService {
   invoices = {
-    get: jest.fn(document_id => {
+    getInvoice: jest.fn((auth, document_id) => {
       return {
         header: {
           document_id,
@@ -20,7 +20,7 @@ export class MockCentrifugeService {
         },
       };
     }),
-    create: jest.fn(data => {
+    createInvoice: jest.fn((auth, data) => {
       return {
         header: {
           job_id: 'some_job_id',
@@ -28,19 +28,46 @@ export class MockCentrifugeService {
         ...data,
       };
     }),
-    update: jest.fn((documentId, data) => {
+    updateInvoice: jest.fn((auth, documentId, data) => {
       return {
         header: {
           job_id: 'some_job_id',
         },
         ...data,
       };
+    }),
+
+    invoiceUnpaidNft: jest.fn((auth, payload) => {
+      return new Promise((resolve, reject) => {
+        resolve({
+            header: {
+              job_id: 'some_job_id',
+            },
+          },
+        );
+      });
     }),
   };
   purchaseOrders = {
-    create: jest.fn(data => data),
-    get: jest.fn((id, data) => data),
-    update: jest.fn((id, data) => data),
+    createPurchaseOrder: jest.fn((auth, data) => data),
+    getPurchaseOrder: jest.fn((auth, document_id) => {
+        return {
+          header: {
+            document_id,
+            nfts: [
+              {
+                token_id: 'token_id',
+                owner: 'owner',
+              },
+            ],
+          },
+          data: {
+            currency: 'USD',
+          },
+        };
+      },
+    ),
+    updatePurchaseOrder: jest.fn((auth, id, data) => data),
   };
   funding = {
     create: jest.fn((document_id, payload, account) => {
@@ -134,20 +161,21 @@ export class MockCentrifugeService {
       });
     }),
   };
-  invoiceUnpaid = {
-    mintInvoiceUnpaidNFT: () => {
-      return new Promise((resolve, reject) => {
-        resolve({
-            header: {
-              job_id: 'some_job_id',
-            },
-          },
-        );
-      });
-    },
-  };
+
   nft = {
-    transferNft: (account, registry_address, token_id, body) => {
+
+    mintNft: jest.fn((auth, registry, payload) => {
+      return new Promise((resolve, reject) => {
+        const result = {
+          header: {
+            job_id: 'some_job_id',
+          },
+          ...payload,
+        };
+        resolve(result);
+      });
+    }),
+    transferNft: jest.fn((account, registry_address, token_id, body) => {
       return new Promise((resolve, reject) => {
         resolve({
             header: {
@@ -159,30 +187,34 @@ export class MockCentrifugeService {
           },
         );
       });
-    },
+    }),
   };
+
+  nftBeta = this.nft;
+
   accounts = {
     generateAccount: jest.fn(() => ({
       identity_id: 'generated_identity_id',
     })),
   };
   documents = {
-    get: jest.fn(document_id => {
+    getDocument: jest.fn(document_id => {
       return {
         header: { document_id: '0x39393939' },
-        read_access: [ '0x111' ],
-        write_access: [ '0x222' ],
+        read_access: ['0x111'],
+        write_access: ['0x222'],
         attributes:
-          { animal_type: 'iguana',
+          {
+            animal_type: 'iguana',
             number_of_legs: 4,
             diet: 'insects',
-            'this is a random field': 'random'
+            'this is a random field': 'random',
           },
         schema_id: 'iUSDF2ax31e',
         ownerId: 'user_id',
       };
     }),
-    createDocument: jest.fn( (authid, data) => {
+    createDocument: jest.fn((authid, data) => {
       return {
         header: {
           job_id: 'some_job_id',

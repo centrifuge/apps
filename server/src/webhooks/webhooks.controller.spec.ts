@@ -38,8 +38,8 @@ describe('WebhooksController', () => {
     poSpies.spyInsert = jest.spyOn(databaseService.purchaseOrders, 'insert');
     poSpies.spyUpdate = jest.spyOn(databaseService.purchaseOrders, 'update');
 
-    centrifugeSpies.spyInvGet = jest.spyOn(centrifugeService.invoices, 'get');
-    centrifugeSpies.spyPOGet = jest.spyOn(centrifugeService.invoices, 'get');
+    centrifugeSpies.spyInvGet = jest.spyOn(centrifugeService.invoices, 'getInvoice');
+    centrifugeSpies.spyPOGet = jest.spyOn(centrifugeService.purchaseOrders, 'getPurchaseOrder');
 
   });
 
@@ -58,7 +58,8 @@ describe('WebhooksController', () => {
 
       expect(result).toEqual('OK');
       expect(centrifugeSpies.spyInvGet).toHaveBeenCalledWith(
-        documentId, user.account,
+        user.account,
+        documentId,
       );
 
       expect(invoiceSpies.spyUpdate).toHaveBeenCalledWith(
@@ -106,12 +107,10 @@ describe('WebhooksController', () => {
 
       expect(result).toEqual('OK');
       expect(centrifugeSpies.spyPOGet).toHaveBeenCalledWith(
+        user.account,
         documentId,
-        user.account,
       );
-      expect(poSpies.spyInsert).toHaveBeenCalledWith(
-        user.account,
-      );
+      expect(poSpies.spyInsert).toHaveBeenCalled();
     });
   });
 

@@ -62,7 +62,7 @@ describe('InvoicesController', () => {
     databaseSpies.spyGetCursor = jest.spyOn(databaseService.invoices, 'getCursor');
     databaseSpies.spyUpdateById = jest.spyOn(databaseService.invoices, 'updateById');
 
-    invoiceSpies.spyUpdate = jest.spyOn(centrifugeService.invoices, 'update');
+    invoiceSpies.spyUpdate = jest.spyOn(centrifugeService.invoices, 'updateInvoice');
   });
 
   describe('create', () => {
@@ -130,12 +130,12 @@ describe('InvoicesController', () => {
         ownerId: 'user_id',
       });
       expect(invoiceSpies.spyUpdate).toHaveBeenCalledWith(
+        '0x4441122',
         '0x39393939',
         {
           data: { ...updatedInvoice },
           write_access: [updatedInvoice.sender, updatedInvoice.recipient],
         },
-        '0x4441122',
       );
 
       expect(updateResult).toMatchObject({

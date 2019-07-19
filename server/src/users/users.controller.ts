@@ -137,10 +137,7 @@ export class UsersController {
     );
   }
 
-
   private async upsertUser(user: User, id: string = '') {
-
-
     // Create centrifuge identity in case user does not have one
     if (!user.account) {
       const account = await this.centrifugeService.accounts.generateAccount(

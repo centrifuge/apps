@@ -14,7 +14,7 @@ import { LinkPrevious } from 'grommet-icons';
 import { User } from '../common/models/user';
 import { Preloader } from '../components/Preloader';
 import { RequestState } from '../store/reducers/http-request-reducer';
-import { InvInvoiceData } from '../../clients/centrifuge-node';
+import { InvoiceData } from '../../clients/centrifuge-node';
 import { SecondaryHeader } from '../components/SecondaryHeader';
 import { mapContactsToLabelKeyPair } from '../store/derived-data';
 
@@ -23,7 +23,7 @@ type ConnectedCreateInvoiceProps = {
   resetCreateInvoice: () => void;
   getContacts: () => void;
   resetGetContacts: () => void;
-  creatingInvoice: RequestState<InvInvoiceData>;
+  creatingInvoice: RequestState<InvoiceData>;
   contacts?: LabelValuePair[];
   loggedInUser: User;
 } & RouteComponentProps;

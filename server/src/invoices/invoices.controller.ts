@@ -4,7 +4,7 @@ import { ROUTES } from '../../../src/common/constants';
 import { SessionGuard } from '../auth/SessionGuard';
 import {
   FunFundingListResponse,
-  InvInvoiceResponse,
+  UserapiInvoiceResponse,
   UserapiTransferDetailListResponse,
 } from '../../../clients/centrifuge-node';
 import { DatabaseService } from '../database/database.service';
@@ -26,19 +26,19 @@ export class InvoicesController {
    * @async
    * @param request - the http request
    * @param {Invoice} invoice - the body of the request
-   * @return {Promise<InvInvoiceResponse>} result
+   * @return {Promise<UserapiInvoiceResponse>} result
    */
-  async create(@Req() request, @Body() invoice: Invoice): Promise<InvInvoiceResponse> {
+  async create(@Req() request, @Body() invoice: Invoice): Promise<UserapiInvoiceResponse> {
     const collaborators = [invoice!.sender, invoice!.recipient].filter(item => item);
 
-    const createResult = await this.centrifugeService.invoices.create(
+    const createResult = await this.centrifugeService.invoices.createInvoice(
+      request.user.account,
       {
         data: {
           ...invoice,
         },
         write_access: collaborators,
       },
-      request.user.account,
     );
 
     await this.centrifugeService.pullForJobComplete(createResult.header.job_id, request.user.account);
@@ -114,17 +114,17 @@ export class InvoicesController {
 
     const collaborators = [updateInvoiceRequest!.sender, updateInvoiceRequest!.recipient].filter(item => item);
 
-    const invoice: InvInvoiceResponse = await this.database.invoices.findOne(
+    const invoice: UserapiInvoiceResponse = await this.database.invoices.findOne(
       { _id: params.id, ownerId: request.user._id },
     );
 
-    const updateResult: InvoiceResponse = await this.centrifugeService.invoices.update(
+    const updateResult: InvoiceResponse = await this.centrifugeService.invoices.updateInvoice(
+      request.user.account,
       invoice.header.document_id,
       {
         data: { ...updateInvoiceRequest },
         write_access: collaborators,
       },
-      request.user.account,
     );
 
     await this.centrifugeService.pullForJobComplete(updateResult.header.job_id, request.user.account);

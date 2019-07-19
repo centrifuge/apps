@@ -1,14 +1,13 @@
 import {
-  AccountServiceApi,
+  AccountsApi,
   DocumentsApi,
   FundingServiceApi,
-  InvoiceServiceApi,
+  InvoicesApi,
   JobsApi,
-  JobsStatusResponse,
-  NFTApi,
-  NFTServiceApi,
-  PurchaseOrderServiceApi,
-  TransferDetailApi,
+  JobsStatusResponse, NFTsApi,
+  NFTsBetaApi,
+  PurchaseOrdersApi,
+  TransferDetailsApi,
 } from '../../../clients/centrifuge-node';
 import config from '../../../src/common/config';
 import { promisify } from 'util';
@@ -17,26 +16,26 @@ const delay = promisify(setTimeout);
 
 export class CentrifugeService {
   public documents: DocumentsApi;
-  public accounts: AccountServiceApi;
-  public invoices: InvoiceServiceApi;
-  public purchaseOrders: PurchaseOrderServiceApi;
+  public accounts: AccountsApi;
+  public invoices: InvoicesApi;
+  public purchaseOrders: PurchaseOrdersApi;
   public funding: FundingServiceApi;
-  public nft: NFTApi;
-  public invoiceUnpaid: NFTServiceApi;
+  public nftBeta: NFTsBetaApi;
+  public nft: NFTsApi;
   public job: JobsApi;
-  public transfer: TransferDetailApi;
+  public transfer: TransferDetailsApi;
 
   constructor() {
 
     this.documents = new DocumentsApi({}, config.centrifugeUrl);
-    this.accounts = new AccountServiceApi({}, config.centrifugeUrl);
-    this.invoices = new InvoiceServiceApi({}, config.centrifugeUrl);
-    this.purchaseOrders = new PurchaseOrderServiceApi({}, config.centrifugeUrl);
+    this.accounts = new AccountsApi({}, config.centrifugeUrl);
+    this.invoices = new InvoicesApi({}, config.centrifugeUrl);
+    this.purchaseOrders = new PurchaseOrdersApi({}, config.centrifugeUrl);
     this.funding = new FundingServiceApi({}, config.centrifugeUrl);
-    this.nft = new NFTApi({}, config.centrifugeUrl);
-    this.invoiceUnpaid = new NFTServiceApi({}, config.centrifugeUrl);
+    this.nft = new NFTsApi({}, config.centrifugeUrl);
+    this.nftBeta = new NFTsBetaApi({}, config.centrifugeUrl);
     this.job = new JobsApi({}, config.centrifugeUrl);
-    this.transfer = new TransferDetailApi({}, config.centrifugeUrl);
+    this.transfer = new TransferDetailsApi({}, config.centrifugeUrl);
   }
 
   pullForJobComplete(jobId: string, authorization: string): Promise<JobsStatusResponse> {

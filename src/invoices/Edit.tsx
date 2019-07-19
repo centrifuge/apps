@@ -14,7 +14,7 @@ import { LinkPrevious } from 'grommet-icons';
 import { User } from '../common/models/user';
 import { Preloader } from '../components/Preloader';
 import { RequestState } from '../store/reducers/http-request-reducer';
-import { InvInvoiceData } from '../../clients/centrifuge-node';
+import { InvoiceData } from '../../clients/centrifuge-node';
 import { SecondaryHeader } from '../components/SecondaryHeader';
 import { mapContactsToLabelKeyPair } from '../store/derived-data';
 
@@ -28,7 +28,7 @@ type ConnectedEditInvoiceProps = {
   invoice?: InvoiceResponse;
   contacts?: LabelValuePair[];
   loggedInUser: User;
-  updatingInvoice: RequestState<InvInvoiceData>;
+  updatingInvoice: RequestState<InvoiceData>;
 } & RouteComponentProps<{ id?: string }>;
 
 class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
