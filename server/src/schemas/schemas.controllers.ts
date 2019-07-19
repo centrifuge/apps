@@ -1,26 +1,16 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpException,
-  HttpStatus,
-  Param,
-  Post,
-  Put,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { SessionGuard } from '../auth/SessionGuard';
 import { ROUTES } from '../../../src/common/constants';
 import { DatabaseService } from '../database/database.service';
-import { Schema } from "../../../src/common/models/schema";
+import { Schema } from '../../../src/common/models/schema';
 
 @Controller(ROUTES.SCHEMAS)
 @UseGuards(SessionGuard)
 export class SchemasController {
   constructor(
-      private readonly databaseService: DatabaseService,
-  ) {}
+    private readonly databaseService: DatabaseService,
+  ) {
+  }
 
   @Post()
   /**
@@ -33,13 +23,22 @@ export class SchemasController {
     let newSchema: Schema;
     try {
       newSchema = new Schema(
-          schema.name,
-          schema.attributes,
-          schema.registries,
+        schema.name,
+        schema.attributes,
+        schema.registries,
       );
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
     }
+
+    const schemaFromDB = await this.databaseService.schemas.findOne(
+      { name: newSchema.name },
+    );
+    if (schemaFromDB)
+      throw new HttpException(
+        `Schema with name ${newSchema.name} exists in the database`,
+        HttpStatus.CONFLICT,
+      );
 
     return await this.databaseService.schemas.insert(newSchema);
   }
@@ -51,7 +50,7 @@ export class SchemasController {
    * @return {Promise<Schema[]>} result
    */
   async get() {
-    return await this.databaseService.schemas.find({})
+    return await this.databaseService.schemas.find({});
   }
 
   @Get(':id')
@@ -63,8 +62,8 @@ export class SchemasController {
    */
   async getById(@Param() params) {
     return await this.databaseService.schemas.findOne({
-      _id: params.id
-    })
+      _id: params.id,
+    });
   }
 
   @Put(':id')
@@ -77,23 +76,23 @@ export class SchemasController {
    */
   async update(@Param() params, @Body() update: Schema) {
 
-    const oldSchema = await this.databaseService.schemas.findOne({_id: params.id})
+    const oldSchema = await this.databaseService.schemas.findOne({ _id: params.id });
     let updateSchemaObj: Schema;
 
     try {
       updateSchemaObj = new Schema(
-          oldSchema.name,
-          oldSchema.attributes,
-          update.registries,
-          oldSchema._id,
+        oldSchema.name,
+        oldSchema.attributes,
+        update.registries,
+        oldSchema._id,
       );
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-  }
+    }
 
     return await this.databaseService.schemas.updateById(
-        params.id,
-        updateSchemaObj,
+      params.id,
+      updateSchemaObj,
     );
   }
 }

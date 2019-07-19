@@ -85,7 +85,7 @@ export class UsersController {
 
   @Post(ROUTES.USERS.invite)
   @UseGuards(UserAuthGuard)
-  async invite(@Body() user: { name: string; email: string, permissions: PERMISSIONS[] }) {
+  async invite(@Body() user: Partial<User>) {
     if (!config.inviteOnly) {
       throw new HttpException('Invite functionality not enabled!', HttpStatus.FORBIDDEN);
     }
@@ -105,7 +105,7 @@ export class UsersController {
       password: undefined,
       enabled: false,
       invited: true,
-      schemas: [],
+      schemas: user.schemas,
       permissions: user.permissions,
     });
   }

@@ -1,11 +1,7 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
 import { httpClient } from '../../http-client';
-import {
-  createSchemaAction,
-  getSchemaAction,
-  getSchemasListAction,
-  updateSchemaAction
-} from "../actions/schemas";
+import { createSchemaAction, getSchemaAction, getSchemasListAction, updateSchemaAction } from '../actions/schemas';
+import { alertError } from '../actions/notifications';
 
 export function* getSchema(action) {
   try {
@@ -44,6 +40,11 @@ export function* createSchema(action) {
     });
   } catch (e) {
     yield put({ type: createSchemaAction.fail, payload: e });
+    yield put(alertError(
+      'Failed to create schema',
+      e.message,
+      { onConfirmAction: { type: updateSchemaAction.clearError } },
+    ));
   }
 }
 
@@ -55,10 +56,15 @@ export function* updateSchema(action) {
       payload: response.data,
     });
     yield put({
-      type:getSchemasListAction.start,
+      type: getSchemasListAction.start,
     });
   } catch (e) {
     yield put({ type: updateSchemaAction.fail, payload: e });
+    yield put(alertError(
+      'Failed to update schema',
+      e.message,
+      { onConfirmAction: { type: updateSchemaAction.clearError } },
+    ));
   }
 }
 
@@ -67,4 +73,5 @@ export default {
   watchGetSchema: () => takeEvery(getSchemaAction.start, getSchema),
   watchCreateSchema: () => takeEvery(createSchemaAction.start, createSchema),
   watchUpdateSchema: () => takeEvery(updateSchemaAction.start, updateSchema),
-}
+};
+

@@ -3,7 +3,7 @@ import { push } from 'connected-react-router';
 import routes from '../../routes';
 import { alertError } from '../actions/notifications';
 import {
-  createDocumentAction,
+  createDocumentAction, getDocumentById,
   getDocumentByIdAction,
   getDocumentsAction,
   mintNftForDocumentAction,
@@ -25,7 +25,7 @@ export function* getDocuments() {
   }
 }
 
-export function* getDocumentById(action) {
+export function* fetchDocumentById(action) {
   try {
     const { id } = action;
     const response = yield call(httpClient.documents.readById, id);
@@ -66,7 +66,7 @@ export function* updateDocument(action) {
       type: updateDocumentAction.success,
       payload: response.data,
     });
-    yield put(push(routes.documents.index));
+    yield put(getDocumentById(document._id));
   } catch (e) {
     yield put({ type: updateDocumentAction.fail, payload: e });
     yield put(alertError(
@@ -88,7 +88,7 @@ export function* mintNft(action) {
       type: mintNftForDocumentAction.success,
       payload: response.data,
     });
-    yield put(push(routes.documents.index));
+    yield put(getDocumentById(id));
   } catch (e) {
     yield put({ type: mintNftForDocumentAction.fail, payload: e });
     yield put(alertError(
@@ -104,7 +104,7 @@ export function* mintNft(action) {
 export default {
   watchGetDocuments: () => takeEvery(getDocumentsAction.start, getDocuments),
   watchGetDocumentById: () =>
-    takeEvery(getDocumentByIdAction.start, getDocumentById),
+    takeEvery(getDocumentByIdAction.start, fetchDocumentById),
   watchCreateDocument: () => takeEvery(createDocumentAction.start, createDocument),
   watchUpdateDocument: () => takeEvery(updateDocumentAction.start, updateDocument),
   watchMintNftForDocument: () => takeEvery(mintNftForDocumentAction.start, mintNft),

@@ -71,8 +71,9 @@ export class DocumentsController {
       _id: params.id,
       ownerId: request.user._id,
     });
+    const docFromNode = await this.centrifugeService.documents.getDocument(request.user.account, document.header.document_id);
+    return docFromNode;
 
-    return document;
   }
 
   /**

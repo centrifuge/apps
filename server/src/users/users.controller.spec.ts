@@ -36,7 +36,8 @@ describe('Users controller', () => {
       password: 'password',
       enabled: false,
       invited: true,
-      permissions: [],
+      schemas: ['some_schema'],
+      permissions: [PERMISSIONS.CAN_MANAGE_DOCUMENTS],
     });
 
 
@@ -48,7 +49,8 @@ describe('Users controller', () => {
       password: 'password',
       enabled: true,
       invited: false,
-      permissions: [],
+      schemas: ['some_schema'],
+      permissions: [PERMISSIONS.CAN_MANAGE_DOCUMENTS],
     });
 
 

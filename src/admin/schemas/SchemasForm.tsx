@@ -2,6 +2,7 @@ import React from 'react';
 import { Formik } from 'formik';
 import { Box, TextArea, Button, FormField } from 'grommet';
 import * as Yup from 'yup';
+import { Schema } from '../../common/models/schema';
 
 interface SchemasProps {
   selectedSchema: any;
@@ -42,18 +43,18 @@ export default class SchemasForm extends React.Component<SchemasProps, SchemasSt
               } catch (e) {
                 return this.createError({path: this.path, message: 'Schema is not a valid JSON object'})
               }
-              if (!test.registries) {
-                return this.createError({ path: this.path, message: 'At least one registry for this schema  is required'})
+
+              try {
+                new Schema(
+                  test.name,
+                  test.attributes,
+                  test.registries,
+                  test._id
+                );
+              } catch (e) {
+                return this.createError({ path: this.path, message: e.message})
               }
-              if (!test.name) {
-                return this.createError({ path: this.path, message: 'Schema name is required'})
-              }
-              if (!test.attributes) {
-                return this.createError({ path: this.path, message: 'At least one attribute for this schema  is required'})
-              }
-              if (!test.attributes.find(i => i.name === 'reference_id')) {
-                return this.createError({ path: this.path, message: 'reference_id field is required in the attributes definition'})
-              }
+
               return true
             })
           })

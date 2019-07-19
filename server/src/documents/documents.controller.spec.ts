@@ -83,6 +83,7 @@ describe('DocumentsController', () => {
 
     const centrifugeService = documentsModule.get<CentrifugeService>(CentrifugeService);
     centApiSpies.spyMintNft = jest.spyOn(centrifugeService.nftBeta, 'mintNft');
+    centApiSpies.spyGetDocument = jest.spyOn(centrifugeService.documents, 'getDocument');
   });
 
   describe('create', () => {
@@ -208,21 +209,25 @@ describe('DocumentsController', () => {
   });
 
   describe('get by id', function() {
-    it('should return the invoice by id', async function() {
+    it('should return the document by id', async function() {
       const documentsController = documentsModule.get<DocumentsController>(
         DocumentsController,
       );
 
       const result = await documentsController.getById(
         { id: insertedDocument._id },
-        { user: { _id: 'user_id' } },
+        { user: { _id: 'user_id', account: '0x4441' } },
       );
       expect(databaseSpies.spyFindOne).toHaveBeenCalledWith({
         _id: insertedDocument._id,
         ownerId: 'user_id',
       });
 
-      expect(result!.attributes).toMatchObject(insertedDocument.attributes);
+      expect(centApiSpies.spyGetDocument).toHaveBeenCalledWith(
+        '0x4441',
+        insertedDocument.header.document_id,
+      );
+
     });
   });
 

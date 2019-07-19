@@ -47,6 +47,15 @@ class App extends Component<AppPros> {
     //TODO move this a function that generates menuItems and routes items based on a user
     if (loggedInUser) {
 
+      // There are no special permission for contacts
+      menuItems.push({ label: 'Contacts', route: routes.contacts.index });
+      routeItems.push(
+        {
+          path: routes.contacts.index,
+          component: Contacts,
+        }
+      );
+
       if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_SCHEMAS)) {
         menuItems.push(
           { label: 'Schemas', route: routes.schemas.index },
@@ -73,15 +82,10 @@ class App extends Component<AppPros> {
 
       if (loggedInUser.permissions.includes(PERMISSIONS.CAN_CREATE_INVOICES)) {
         menuItems.push(...[
-          { label: 'Contacts', route: routes.contacts.index },
           { label: 'Invoices', route: routes.invoices.index },
         ]);
 
         routeItems.push(
-          {
-            path: routes.contacts.index,
-            component: Contacts,
-          },
           {
             path: routes.invoices.index,
             component: InvoiceList,
