@@ -376,7 +376,7 @@ const waitForTransaction = (eth: ethI, txHash: any) => {
             reject(err);
             return;
           }
-          if (tx.blockHash != null) {
+          if (tx && tx.blockHash != null) {
             resolve(tx);
             return;
           }
