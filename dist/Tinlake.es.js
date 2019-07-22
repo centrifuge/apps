@@ -25735,7 +25735,7 @@ var waitForTransaction = function (eth, txHash) {
                         reject(err);
                         return;
                     }
-                    if (tx.blockHash != null) {
+                    if (tx && tx.blockHash != null) {
                         resolve(tx);
                         return;
                     }
