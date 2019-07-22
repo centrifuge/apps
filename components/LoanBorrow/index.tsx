@@ -31,6 +31,7 @@ interface State {
   borrowAmount: string;
   is: 'loading' | 'success' | 'error' | null;
   errorMsg: string;
+  touchedBorrowAmount: boolean;
 }
 
 class LoanBorrow extends React.Component<Props, State> {
@@ -38,8 +39,8 @@ class LoanBorrow extends React.Component<Props, State> {
     borrowAmount: '',
     is: null,
     errorMsg: '',
+    touchedBorrowAmount: false,
   };
-  lastPrincipal = '';
 
   componentWillMount() {
     this.props.getLoan!(this.props.tinlake, this.props.loanId);
@@ -48,15 +49,17 @@ class LoanBorrow extends React.Component<Props, State> {
   componentDidUpdate(nextProps: Props) {
     const loans = nextProps.loans;
     if (!loans || !loans.singleLoan) { return; }
-    const nextPrincipal = loans.singleLoan.principal.toString();
-    if (nextPrincipal !== this.lastPrincipal) {
-      this.lastPrincipal = nextPrincipal;
-      this.setState({ borrowAmount: loans.singleLoan.principal.toString() });
-    }
+    if (this.state.touchedBorrowAmount) { return; }
+
+    const { principal } = loans.singleLoan;
+
+    if (principal.toString() === this.state.borrowAmount) { return; }
+
+    this.setState({ borrowAmount: principal.toString() });
   }
 
   borrow = async () => {
-    this.setState({ is: 'loading' });
+    this.setState({ is: 'loading', touchedBorrowAmount: true });
 
     try {
       await authTinlake();
@@ -147,10 +150,11 @@ class LoanBorrow extends React.Component<Props, State> {
             </Box>
           }
 
-          {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
-            Successfully borrowed
+          {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}><Text>
+            Successfully borrowed{' '}
             <NumberDisplay value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18} />
-            for Loan ID {loanId}</Alert>}
+            {' '}for Loan ID {loanId}
+          </Text></Alert>}
           {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
             <Text weight="bold">Error borrowing for Loan ID {loanId}, see console for details</Text>
             {errorMsg && <div><br />{errorMsg}</div>}
@@ -161,7 +165,10 @@ class LoanBorrow extends React.Component<Props, State> {
               <NumberInput
                 value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18}
                 onChange={(masked: string, float: number) => float !== undefined &&
-                  this.setState({ borrowAmount: displayToBase(masked, 18) })}
+                  this.setState({
+                    borrowAmount: displayToBase(masked, 18),
+                    touchedBorrowAmount: true,
+                  })}
                 autoFocus disabled={true || is === 'loading' || is === 'success'}
               /></FormField></Box>
             <Box basis={'1/4'} gap="medium" />

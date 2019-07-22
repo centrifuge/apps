@@ -43,9 +43,6 @@ class LoanRepay extends React.Component<Props, State> {
     touchedRepaymentAmount: false,
   };
   discardDebtSubscription = () => { };
-  lastDebt = '';
-  lastPrincipal = '';
-  lastFee = '';
 
   componentWillMount() {
     this.props.getLoan!(this.props.tinlake, this.props.loanId);
@@ -61,20 +58,17 @@ class LoanRepay extends React.Component<Props, State> {
     if (!loans || !loans.singleLoan) { return; }
     if (this.state.touchedRepaymentAmount) { return; }
 
-    const { debt, principal, fee } = loans.singleLoan;
+    const { debt, fee } = loans.singleLoan;
 
-    if (debt.toString() === this.lastDebt && principal.toString() === this.lastPrincipal &&
-      fee.toString() === this.lastFee) { return; }
+    const repayAmount = calcRepayAmount(debt, fee).toString();
 
-    this.lastDebt = debt.toString();
-    this.lastPrincipal = principal.toString();
-    this.lastFee = fee.toString();
+    if (repayAmount === this.state.repayAmount) { return; }
 
-    this.setState({ repayAmount: calcRepayAmount(debt, fee).toString() });
+    this.setState({ repayAmount });
   }
 
   repay = async () => {
-    this.setState({ is: 'loading' });
+    this.setState({ is: 'loading', touchedRepaymentAmount: true });
 
     try {
       await authTinlake();
@@ -161,10 +155,11 @@ class LoanRepay extends React.Component<Props, State> {
             </Box>
           }
 
-          {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
-            Successfully repayed
+          {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}><Text>
+            Successfully repayed{' '}
             <NumberDisplay value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />
-            for Loan ID {loanId}</Alert>}
+            {' '}for Loan ID {loanId}
+          </Text></Alert>}
           {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
             <Text weight="bold">Error repaying Loan ID {loanId}, see console for details</Text>
             {errorMsg && <div><br />{errorMsg}</div>}
