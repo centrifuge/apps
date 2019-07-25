@@ -8,8 +8,7 @@ import BN from 'bn.js';
 // tslint:disable-next-line:import-name
 import contractAddresses from './addresses_tinlake.json';
 // import { sleep } from './utils/sleep';
-
-import Tinlake from '../dist/Tinlake';
+import Tinlake, { LOAN_ID_IDX } from '../dist/Tinlake';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -99,7 +98,7 @@ describe('functional tinlake tests', () => {
       console.log(admitResult.txHash);
 
       // parse loanID from event
-      loanID = admitResult.events[0].data[2].toString();
+      loanID = admitResult.events[0].data[LOAN_ID_IDX].toString();
       console.log(`Loan id: ${loanID}`);
 
       assert.equal(admitResult.status, SUCCESS_STATUS, 'tx should be successful');
@@ -193,7 +192,7 @@ describe('functional tinlake tests', () => {
       console.log(admitResult.txHash);
 
       // parse loanID from event
-      loanID = admitResult.events[0].data[2].toString();
+      loanID = admitResult.events[0].data[LOAN_ID_IDX].toString();
       console.log(`Loan id: ${loanID}`);
 
       assert.equal(admitResult.status, SUCCESS_STATUS, 'tx should be successful');
@@ -249,7 +248,7 @@ describe('functional tinlake tests', () => {
       console.log(whitelistResult.txHash);
 
       // parse loanID from event
-      loanID = whitelistResult.events[0].data[2].toString();
+      loanID = whitelistResult.events[0].data[LOAN_ID_IDX].toString();
       console.log(`Loan id: ${loanID}`);
 
       assert.equal(whitelistResult.status, SUCCESS_STATUS, 'tx should be successful');

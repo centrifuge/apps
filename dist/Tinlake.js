@@ -1,5 +1,7 @@
 'use strict';
 
+Object.defineProperty(exports, '__esModule', { value: true });
+
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var http = _interopDefault(require('http'));
@@ -25640,6 +25642,7 @@ var contractAbiPileForInit = [
 ];
 
 var abiCoder$1 = new AbiCoder$1();
+var LOAN_ID_IDX = 2;
 var Tinlake = /** @class */ (function () {
     function Tinlake(provider, contractAddresses, _a) {
         var _this = this;
@@ -26010,4 +26013,5 @@ var getEvents = function (receipt, abi) {
     return events;
 };
 
-module.exports = Tinlake;
+exports.LOAN_ID_IDX = LOAN_ID_IDX;
+exports.default = Tinlake;

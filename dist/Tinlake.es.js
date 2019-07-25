@@ -25636,6 +25636,7 @@ var contractAbiPileForInit = [
 ];
 
 var abiCoder$1 = new AbiCoder$1();
+var LOAN_ID_IDX = 2;
 var Tinlake = /** @class */ (function () {
     function Tinlake(provider, contractAddresses, _a) {
         var _this = this;
@@ -26007,3 +26008,4 @@ var getEvents = function (receipt, abi) {
 };
 
 export default Tinlake;
+export { LOAN_ID_IDX };

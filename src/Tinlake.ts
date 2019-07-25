@@ -120,6 +120,8 @@ export interface BalanceDebt {
   chi: BN;
 }
 
+export const LOAN_ID_IDX = 2;
+
 class Tinlake {
   public provider: any;
   public eth: ethI;

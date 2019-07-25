@@ -90,6 +90,7 @@ export interface BalanceDebt {
     fee: BN;
     chi: BN;
 }
+export declare const LOAN_ID_IDX = 2;
 declare class Tinlake {
     provider: any;
     eth: ethI;
