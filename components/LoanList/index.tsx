@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Tinlake from 'tinlake';
 import Link from 'next/link';
-import { Box, DataTable, Heading, Anchor } from 'grommet';
+import { Box, DataTable, Heading, Anchor, Button } from 'grommet';
 import { connect } from 'react-redux';
 import { InternalListLoan, LoansState, getLoans } from '../../ducks/loans';
 import SecondaryHeader from '../SecondaryHeader';
@@ -35,6 +35,11 @@ class LoanList extends React.Component<Props> {
     return <Box>
       <SecondaryHeader>
         <Heading level="3">Loans</Heading>
+
+        <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization
+          render={auth => auth.isAdmin ?
+            <Link href={'/admin/whitelist-nft'}>
+              <Button primary label="Whitelist NFT" /></Link> : null} />
       </SecondaryHeader>
 
       <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization render={auth =>
