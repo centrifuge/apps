@@ -2,18 +2,15 @@ import * as React from 'react';
 import LoanList from '../../components/LoanList';
 import WithTinlake from '../../components/WithTinlake';
 import { Box } from 'grommet';
-import Header, { MenuItem } from '../../components/Header';
-
-const menuItems: MenuItem[] = [
-  { label: 'Loans', route: '/borrower' },
-];
+import Header from '../../components/Header';
+import { menuItems } from '../../menuItems';
 
 class BorrowerLoanListPage extends React.Component {
   render() {
     return <Box align="center">
       <Header
         selectedRoute={'/borrower'}
-        menuItems={menuItems.reverse()}
+        menuItems={menuItems}
         section="BORROWER"
       />
       <Box

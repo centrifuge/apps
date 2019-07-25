@@ -2,13 +2,10 @@ import * as React from 'react';
 import WithTinlake from '../../components/WithTinlake';
 import WhitelistNFT from '../../components/WhitelistNFT';
 import { Box } from 'grommet';
-import Header, { MenuItem } from '../../components/Header';
+import Header from '../../components/Header';
 import Alert from '../../components/Alert';
 import Auth from '../../components/Auth';
-
-const menuItems: MenuItem[] = [
-  { label: 'NFTs', route: '/admin' },
-];
+import { menuItems } from '../../menuItems';
 
 class WhitelistNFTPage extends React.Component<{ tokenId: string }> {
   static async getInitialProps({ query }: any) {
@@ -21,7 +18,7 @@ class WhitelistNFTPage extends React.Component<{ tokenId: string }> {
     return <Box align="center">
       <Header
         selectedRoute={'/admin/whitelist-nft'}
-        menuItems={menuItems.reverse()}
+        menuItems={menuItems}
         section="ADMIN"
       />
       <Box
