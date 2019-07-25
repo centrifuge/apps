@@ -70,6 +70,9 @@ describe('functional tinlake tests', () => {
 
   describe('tinlake borrow and repay', function () {
     this.timeout(50000);
+
+    before(async () => await ensureFeeExists(adminTinlake, fee));
+
     it('borrow and repay successful', async () => {
       console.log('');
       console.log('-------------------------------------');
@@ -165,6 +168,9 @@ describe('functional tinlake tests', () => {
 
   describe('tinlake whitelist and unwhitelist', function () {
     this.timeout(50000);
+
+    before(async () => await ensureFeeExists(adminTinlake, fee));
+
     it('whitelist and unwhitelist successful', async () => {
       const tokenID = `0x${Math.floor(Math.random() * (10 ** 15))}`;
       let loanID: string = '';
@@ -213,6 +219,9 @@ describe('functional tinlake tests', () => {
 
   describe('tinlake borrow and repay with admin whitelist contract', function () {
     this.timeout(50000);
+
+    before(async () => await ensureFeeExists(adminTinlake, fee));
+
     it('borrow and repay successful', async () => {
       console.log('');
       console.log('-------------------------------------');
@@ -362,3 +371,17 @@ describe('functional tinlake tests', () => {
     });
   });
 });
+
+const ensureFeeExists = async (tinlake: Tinlake, fee: string) => {
+  const feeExists = await tinlake.existsFee(fee);
+  if (!feeExists) {
+    console.log(`Fee ${fee} does not yet exist, create it`);
+    const res = await tinlake.initFee(fee);
+    if (res.status !== SUCCESS_STATUS) {
+      throw new Error(`Cannot initialize fee: ${JSON.stringify(res)}`);
+    }
+    console.log('Fee created');
+  } else {
+    console.log(`Fee ${fee} already exists`);
+  }
+};
