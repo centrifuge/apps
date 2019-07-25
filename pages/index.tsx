@@ -13,7 +13,7 @@ function Home() {
   <Header
     selectedRoute={''}
     menuItems={menuItems.reverse()}
-    section="DASHBOARD"
+    section=""
   />
   <Box
     justify="center"
