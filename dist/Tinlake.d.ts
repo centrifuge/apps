@@ -13,6 +13,7 @@ interface ContractAbis {
     'pile': any;
     'pileForAdd': any;
     'pileForInit': any;
+    'admin': any;
 }
 interface ContractAddresses {
     'APPRAISER': string;
@@ -31,6 +32,7 @@ interface ContractAddresses {
     'ADMIT': string;
     'SPELL': string;
     'CURRENCY': string;
+    'ADMIN': string;
 }
 interface Options {
     contractAbis?: ContractAbis;
@@ -51,6 +53,7 @@ interface Contracts {
     pile: any;
     pileForAdd: any;
     pileForInit: any;
+    admin: any;
 }
 interface ethI {
     getTransactionReceipt: (arg0: any, arg1: (err: any, receipt: any) => void) => void;
@@ -133,6 +136,14 @@ declare class Tinlake {
     existsFee: (fee: string) => Promise<boolean>;
     addFee: (loanId: string, fee: string, balance: string) => Promise<Events>;
     getCurrentDebt: (loanId: string) => Promise<BN>;
+    /**
+     * whitelist is a shortcut contract that calls adminAdmit (admit.admit),
+     * adminAppraise (appraiser.file) and addFee (pile.file) to prevent additional
+     * transactions. It is required though that the fee is already initialized
+     * using initFee
+     * @param owner Owner of the created loan
+     */
+    whitelist: (registry: string, nft: string, principal: string, appraisal: string, fee: string, owner: string) => any;
     unwhitelist: (loanId: string, registry: string, nft: string) => Promise<Events>;
     getTotalDebt: () => Promise<BN>;
     getTotalBalance: () => Promise<BN>;

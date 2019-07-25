@@ -24486,6 +24486,201 @@ var contractAbiPile = [
   }
 ];
 
+var contractAbiAdmin = [
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "loan",
+        type: "uint256"
+      }
+    ],
+    name: "blacklist",
+    outputs: [
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "loan",
+        type: "uint256"
+      },
+      {
+        name: "registry",
+        type: "address"
+      },
+      {
+        name: "nft",
+        type: "uint256"
+      },
+      {
+        name: "principal",
+        type: "uint256"
+      },
+      {
+        name: "appraisal",
+        type: "uint256"
+      },
+      {
+        name: "fee",
+        type: "uint256"
+      }
+    ],
+    name: "update",
+    outputs: [
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "usr",
+        type: "address"
+      }
+    ],
+    name: "rely",
+    outputs: [
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "loan",
+        type: "uint256"
+      },
+      {
+        name: "principal",
+        type: "uint256"
+      },
+      {
+        name: "appraisal",
+        type: "uint256"
+      }
+    ],
+    name: "update",
+    outputs: [
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "registry",
+        type: "address"
+      },
+      {
+        name: "nft",
+        type: "uint256"
+      },
+      {
+        name: "principal",
+        type: "uint256"
+      },
+      {
+        name: "appraisal",
+        type: "uint256"
+      },
+      {
+        name: "fee",
+        type: "uint256"
+      },
+      {
+        name: "usr",
+        type: "address"
+      }
+    ],
+    name: "whitelist",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "usr",
+        type: "address"
+      }
+    ],
+    name: "deny",
+    outputs: [
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "",
+        type: "address"
+      }
+    ],
+    name: "wards",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    inputs: [
+      {
+        name: "admit_",
+        type: "address"
+      },
+      {
+        name: "appraiser_",
+        type: "address"
+      },
+      {
+        name: "pile_",
+        type: "address"
+      }
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "constructor"
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        name: "loan",
+        type: "uint256"
+      }
+    ],
+    name: "Whitelisted",
+    type: "event"
+  }
+];
+
 var contractAbiPileForAdd = [
   {
     constant: true,
@@ -25476,6 +25671,8 @@ var Tinlake = /** @class */ (function () {
                     .at(_this.contractAddresses['PILE']),
                 pileForInit: _this.eth.contract(_this.contractAbis.pileForInit)
                     .at(_this.contractAddresses['PILE']),
+                admin: _this.eth.contract(_this.contractAbis.admin)
+                    .at(_this.contractAddresses['ADMIN']),
             };
         };
         this.setEthConfig = function (ethConfig) {
@@ -25655,6 +25852,20 @@ var Tinlake = /** @class */ (function () {
                 }
             });
         }); };
+        /**
+         * whitelist is a shortcut contract that calls adminAdmit (admit.admit),
+         * adminAppraise (appraiser.file) and addFee (pile.file) to prevent additional
+         * transactions. It is required though that the fee is already initialized
+         * using initFee
+         * @param owner Owner of the created loan
+         */
+        this.whitelist = function (registry, nft, principal, appraisal, fee, owner) {
+            return _this.contracts.admin.whitelist(registry, nft, principal, appraisal, fee, owner, _this.ethConfig)
+                .then(function (txHash) {
+                console.log("[Admin.whitelist] txHash: " + txHash);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi);
+            });
+        };
         this.unwhitelist = function (loanId, registry, nft) {
             return _this.contracts.shelf.file(loanId, registry, nft, '0', _this.ethConfig)
                 .then(function (txHash) {
@@ -25709,6 +25920,7 @@ var Tinlake = /** @class */ (function () {
             pile: contractAbiPile,
             pileForAdd: contractAbiPileForAdd,
             pileForInit: contractAbiPileForInit,
+            admin: contractAbiAdmin,
         };
         this.contractAddresses = contractAddresses;
         this.setProvider(provider, ethOptions);

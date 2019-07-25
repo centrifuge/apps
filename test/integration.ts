@@ -211,6 +211,87 @@ describe('functional tinlake tests', () => {
     });
   });
 
+  describe('tinlake borrow and repay with admin whitelist contract', function () {
+    this.timeout(50000);
+    it('borrow and repay successful', async () => {
+      console.log('');
+      console.log('-------------------------------------');
+      console.log('Borrower: Mint NFT');
+      console.log('-------------------------------------');
+
+      console.log(`appraisal: ${appraisal}`);
+      console.log(`principal: ${principal}`);
+      console.log(`token id: ${tokenID}`);
+      const mintResult = await borrowerTinlake.mintNFT(borrowerEthFrom, tokenID);
+      console.log('mint result');
+      console.log(mintResult.txHash);
+      assert.equal(mintResult.status, SUCCESS_STATUS, 'tx should be successful');
+      assert.equal(mintResult.events[0].event.name, 'Transfer', 'tx should be successful');
+
+      console.log('');
+      console.log('-------------------------------------');
+      console.log('Admin: Whitelist NFT');
+      console.log('-------------------------------------');
+
+      const whitelistResult = await adminTinlake.whitelist(contractAddresses['NFT_COLLATERAL'],
+                                                           tokenID, principal, appraisal, fee,
+                                                           borrowerEthFrom);
+      console.log('whitelist result');
+      console.log(whitelistResult.txHash);
+
+      // parse loanID from event
+      loanID = whitelistResult.events[0].data[2].toString();
+      console.log(`Loan id: ${loanID}`);
+
+      assert.equal(whitelistResult.status, SUCCESS_STATUS, 'tx should be successful');
+      assert.equal(whitelistResult.events[0].event.name, 'Transfer', 'tx should be successful');
+
+      console.log('');
+      console.log('-------------------------------------');
+      console.log('Borrower: Borrow');
+      console.log('-------------------------------------');
+
+      const approveResult = await borrowerTinlake.approveNFT(tokenID, contractAddresses['SHELF']);
+      console.log('approve result');
+      console.log(approveResult.txHash);
+      assert.equal(approveResult.status, SUCCESS_STATUS, 'tx should be successful');
+      assert.equal(approveResult.events[0].event.name, 'Approval', 'tx should be successful');
+
+      const borrowResult = await borrowerTinlake.borrow(loanID, borrowerEthFrom);
+      console.log('borrow result');
+      console.log(borrowResult.txHash);
+      assert.equal(borrowResult.status, SUCCESS_STATUS, 'tx should be successful');
+
+      const balanceBefore = await borrowerTinlake.balanceOfCurrency(borrowerEthFrom);
+      console.log(`DAI Balance after borrow: ${balanceBefore['0'].toString()} DAI`);
+
+      // wait for 1 second to accrue debt
+      await sleep(1050);
+      const currentDebt = await borrowerTinlake.getCurrentDebt(loanID);
+      console.log(currentDebt);
+      console.log(`Got current debt of ${currentDebt.toString()}`);
+
+      console.log('');
+      console.log('-------------------------------------');
+      console.log('Borrower: Repay');
+      console.log('-------------------------------------');
+      const approveCurResult = await borrowerTinlake.approveCurrency(contractAddresses['PILE'],
+                                                                     principal);
+      console.log(approveCurResult.txHash);
+      assert.equal(approveCurResult.events[0].event.name, 'Approval', 'tx should be successful');
+      assert.equal(approveCurResult.status, SUCCESS_STATUS, 'tx should be successful');
+
+      const repayResult = await borrowerTinlake.repay(loanID, principal,
+                                                      borrowerEthFrom, borrowerEthFrom);
+
+      console.log(repayResult.txHash);
+      assert.equal(repayResult.status, SUCCESS_STATUS, 'tx should be successful');
+
+      const balanceAfter = await borrowerTinlake.balanceOfCurrency(borrowerEthFrom);
+      console.log(`DAI Balance after Repay: ${balanceAfter['0'].toString()} DAI`);
+    });
+  });
+
   describe('tinlake call functionality', function () {
     this.timeout(50000);
 
