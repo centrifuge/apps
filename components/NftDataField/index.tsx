@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FormField, TextInput } from 'grommet';
-import { NumberInput } from '@centrifuge/axis-number-input';
+import NumberInput from '../NumberInput';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 
 interface FieldDefinitionBase {

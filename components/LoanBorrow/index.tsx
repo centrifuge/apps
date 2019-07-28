@@ -9,7 +9,7 @@ import { bnToHex } from '../../utils/bnToHex';
 import SecondaryHeader from '../SecondaryHeader';
 import Link from 'next/link';
 import { LinkPrevious } from 'grommet-icons';
-import { NumberInput } from '@centrifuge/axis-number-input';
+import NumberInput from '../NumberInput';
 import NumberDisplay from '../NumberDisplay';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 import { displayToBase } from '../../utils/displayToBase';
@@ -164,11 +164,8 @@ class LoanBorrow extends React.Component<Props, State> {
             <Box basis={'1/4'} gap="medium"><FormField label="Borrow Amount">
               <NumberInput
                 value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18}
-                onChange={(masked: string, float: number) => float !== undefined &&
-                  this.setState({
-                    borrowAmount: displayToBase(masked, 18),
-                    touchedBorrowAmount: true,
-                  })}
+                onValueChange={({ value }) => this.setState({
+                  borrowAmount: displayToBase(value, 18), touchedBorrowAmount: true })}
                 autoFocus disabled={true || is === 'loading' || is === 'success'}
               /></FormField></Box>
             <Box basis={'1/4'} gap="medium" />

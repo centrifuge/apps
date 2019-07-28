@@ -8,7 +8,7 @@ import NftData from '../NftData';
 import SecondaryHeader from '../SecondaryHeader';
 import Link from 'next/link';
 import { LinkPrevious } from 'grommet-icons';
-import { NumberInput } from '@centrifuge/axis-number-input';
+import NumberInput from '../NumberInput';
 import NumberDisplay from '../NumberDisplay';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 import { displayToBase } from '../../utils/displayToBase';
@@ -169,9 +169,8 @@ class LoanRepay extends React.Component<Props, State> {
             <Box basis={'1/4'} gap="medium"><FormField label="Repay Amount">
               <NumberInput
                 value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18}
-                onChange={(masked: string, float: number) => float !== undefined &&
-                  this.setState({
-                    repayAmount: displayToBase(masked, 18), touchedRepaymentAmount: true })}
+                onValueChange={({ value }) => this.setState({
+                  repayAmount: displayToBase(value, 18), touchedRepaymentAmount: true })}
                 autoFocus disabled={true || is === 'loading' || is === 'success'}
               />
             </FormField></Box>
