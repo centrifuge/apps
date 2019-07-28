@@ -12,6 +12,7 @@ const CLEAR = 'tinlake-ui/nft/CLEAR';
 export interface NFT {
   tokenId: BN;
   nftOwner: Address;
+  nftData: any;
 }
 
 export interface NFTState {
@@ -48,30 +49,45 @@ export function getNFT(tinlake: Tinlake, tokenId: string):
     dispatch({ type: LOAD });
 
     const nftOwnerPromise = tinlake.ownerOfNFT(tokenId);
+    const nftDataPromise = tinlake.getNFTData(tokenId);
+
+    let nftOwner: Address;
+    let nftData: any;
 
     try {
-      const nftOwner = await nftOwnerPromise;
-
-      if (sequence !== mySequence) { return; }
-
-      const replacedTokenId = tokenId.replace(/^0x/, '');
-      const bnTokenId = new BN(replacedTokenId);
-
-      console.log('tokenId', tokenId, 'replaced', replacedTokenId,
-                  'bnTokenId', bnTokenId.toString(16));
-
-      const nft: NFT = {
-        nftOwner,
-        tokenId: bnTokenId,
-      };
-
-      dispatch({ nft, type: RECEIVE });
+      nftOwner = await nftOwnerPromise;
     } catch (e) {
       if (sequence !== mySequence) { return; }
 
       console.error(`Could not get NFT owner for NFT ID ${tokenId}`, e);
       dispatch({ type: NOT_FOUND });
+      return;
     }
+
+    try {
+      nftData = await nftDataPromise;
+    } catch (e) {
+      if (sequence !== mySequence) { return; }
+
+      console.error(`Could not get NFT data for NFT ID ${tokenId}`, e);
+      nftData = null;
+    }
+
+    if (sequence !== mySequence) { return; }
+
+    const replacedTokenId = tokenId.replace(/^0x/, '');
+    const bnTokenId = new BN(replacedTokenId);
+
+    console.log('tokenId', tokenId, 'replaced', replacedTokenId,
+                'bnTokenId', bnTokenId.toString(16));
+
+    const nft: NFT = {
+      nftOwner,
+      nftData,
+      tokenId: bnTokenId,
+    };
+
+    dispatch({ nft, type: RECEIVE });
   };
 }
 
