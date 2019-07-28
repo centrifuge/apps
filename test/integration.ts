@@ -8,8 +8,7 @@ import BN from 'bn.js';
 // tslint:disable-next-line:import-name
 import contractAddresses from './addresses_tinlake.json';
 // import { sleep } from './utils/sleep';
-
-import Tinlake from '../dist/Tinlake';
+import Tinlake, { LOAN_ID_IDX } from '../dist/Tinlake';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -70,6 +69,9 @@ describe('functional tinlake tests', () => {
 
   describe('tinlake borrow and repay', function () {
     this.timeout(50000);
+
+    before(async () => await ensureFeeExists(adminTinlake, fee));
+
     it('borrow and repay successful', async () => {
       console.log('');
       console.log('-------------------------------------');
@@ -96,7 +98,7 @@ describe('functional tinlake tests', () => {
       console.log(admitResult.txHash);
 
       // parse loanID from event
-      loanID = admitResult.events[0].data[2].toString();
+      loanID = admitResult.events[0].data[LOAN_ID_IDX].toString();
       console.log(`Loan id: ${loanID}`);
 
       assert.equal(admitResult.status, SUCCESS_STATUS, 'tx should be successful');
@@ -165,6 +167,9 @@ describe('functional tinlake tests', () => {
 
   describe('tinlake whitelist and unwhitelist', function () {
     this.timeout(50000);
+
+    before(async () => await ensureFeeExists(adminTinlake, fee));
+
     it('whitelist and unwhitelist successful', async () => {
       const tokenID = `0x${Math.floor(Math.random() * (10 ** 15))}`;
       let loanID: string = '';
@@ -187,7 +192,7 @@ describe('functional tinlake tests', () => {
       console.log(admitResult.txHash);
 
       // parse loanID from event
-      loanID = admitResult.events[0].data[2].toString();
+      loanID = admitResult.events[0].data[LOAN_ID_IDX].toString();
       console.log(`Loan id: ${loanID}`);
 
       assert.equal(admitResult.status, SUCCESS_STATUS, 'tx should be successful');
@@ -208,6 +213,90 @@ describe('functional tinlake tests', () => {
       console.log('unwhitelist result');
       console.log(unwhiteListResult.txHash);
       assert.equal(unwhiteListResult.status, SUCCESS_STATUS, 'tx should be successful');
+    });
+  });
+
+  describe('tinlake borrow and repay with admin whitelist contract', function () {
+    this.timeout(50000);
+
+    before(async () => await ensureFeeExists(adminTinlake, fee));
+
+    it('borrow and repay successful', async () => {
+      console.log('');
+      console.log('-------------------------------------');
+      console.log('Borrower: Mint NFT');
+      console.log('-------------------------------------');
+
+      console.log(`appraisal: ${appraisal}`);
+      console.log(`principal: ${principal}`);
+      console.log(`token id: ${tokenID}`);
+      const mintResult = await borrowerTinlake.mintNFT(borrowerEthFrom, tokenID);
+      console.log('mint result');
+      console.log(mintResult.txHash);
+      assert.equal(mintResult.status, SUCCESS_STATUS, 'tx should be successful');
+      assert.equal(mintResult.events[0].event.name, 'Transfer', 'tx should be successful');
+
+      console.log('');
+      console.log('-------------------------------------');
+      console.log('Admin: Whitelist NFT');
+      console.log('-------------------------------------');
+
+      const whitelistResult = await adminTinlake.whitelist(contractAddresses['NFT_COLLATERAL'],
+                                                           tokenID, principal, appraisal, fee,
+                                                           borrowerEthFrom);
+      console.log('whitelist result');
+      console.log(whitelistResult.txHash);
+
+      // parse loanID from event
+      loanID = whitelistResult.events[0].data[LOAN_ID_IDX].toString();
+      console.log(`Loan id: ${loanID}`);
+
+      assert.equal(whitelistResult.status, SUCCESS_STATUS, 'tx should be successful');
+      assert.equal(whitelistResult.events[0].event.name, 'Transfer', 'tx should be successful');
+
+      console.log('');
+      console.log('-------------------------------------');
+      console.log('Borrower: Borrow');
+      console.log('-------------------------------------');
+
+      const approveResult = await borrowerTinlake.approveNFT(tokenID, contractAddresses['SHELF']);
+      console.log('approve result');
+      console.log(approveResult.txHash);
+      assert.equal(approveResult.status, SUCCESS_STATUS, 'tx should be successful');
+      assert.equal(approveResult.events[0].event.name, 'Approval', 'tx should be successful');
+
+      const borrowResult = await borrowerTinlake.borrow(loanID, borrowerEthFrom);
+      console.log('borrow result');
+      console.log(borrowResult.txHash);
+      assert.equal(borrowResult.status, SUCCESS_STATUS, 'tx should be successful');
+
+      const balanceBefore = await borrowerTinlake.balanceOfCurrency(borrowerEthFrom);
+      console.log(`DAI Balance after borrow: ${balanceBefore['0'].toString()} DAI`);
+
+      // wait for 1 second to accrue debt
+      await sleep(1050);
+      const currentDebt = await borrowerTinlake.getCurrentDebt(loanID);
+      console.log(currentDebt);
+      console.log(`Got current debt of ${currentDebt.toString()}`);
+
+      console.log('');
+      console.log('-------------------------------------');
+      console.log('Borrower: Repay');
+      console.log('-------------------------------------');
+      const approveCurResult = await borrowerTinlake.approveCurrency(contractAddresses['PILE'],
+                                                                     principal);
+      console.log(approveCurResult.txHash);
+      assert.equal(approveCurResult.events[0].event.name, 'Approval', 'tx should be successful');
+      assert.equal(approveCurResult.status, SUCCESS_STATUS, 'tx should be successful');
+
+      const repayResult = await borrowerTinlake.repay(loanID, principal,
+                                                      borrowerEthFrom, borrowerEthFrom);
+
+      console.log(repayResult.txHash);
+      assert.equal(repayResult.status, SUCCESS_STATUS, 'tx should be successful');
+
+      const balanceAfter = await borrowerTinlake.balanceOfCurrency(borrowerEthFrom);
+      console.log(`DAI Balance after Repay: ${balanceAfter['0'].toString()} DAI`);
     });
   });
 
@@ -281,3 +370,17 @@ describe('functional tinlake tests', () => {
     });
   });
 });
+
+const ensureFeeExists = async (tinlake: Tinlake, fee: string) => {
+  const feeExists = await tinlake.existsFee(fee);
+  if (!feeExists) {
+    console.log(`Fee ${fee} does not yet exist, create it`);
+    const res = await tinlake.initFee(fee);
+    if (res.status !== SUCCESS_STATUS) {
+      throw new Error(`Cannot initialize fee: ${JSON.stringify(res)}`);
+    }
+    console.log('Fee created');
+  } else {
+    console.log(`Fee ${fee} already exists`);
+  }
+};

@@ -18,6 +18,7 @@ import contractAbiAppraiser from './abi/Appraiser.abi.json';
 import contractAbiLender from './abi/MakerAdapter.abi.json';
 import contractAbiCollateral from './abi/Collateral.abi.json';
 import contractAbiPile from './abi/Pile.abi.json';
+import contractAbiAdmin from './abi/Admin.abi.json';
 // the following are just different orders of the methods in the ABI file. Reason is that ethjs
 // does not expose overloaded methods under different keys,
 // but instead just uses the last method, e. g. `file`. The following ABIs put the needed `file`
@@ -40,6 +41,7 @@ interface ContractAbis {
   'pile': any;
   'pileForAdd': any;
   'pileForInit': any;
+  'admin': any;
 }
 
 interface ContractAddresses {
@@ -59,6 +61,7 @@ interface ContractAddresses {
   'ADMIT': string;
   'SPELL': string;
   'CURRENCY': string;
+  'ADMIN': string;
 }
 
 interface Options {
@@ -81,6 +84,7 @@ interface Contracts {
   pile: any;
   pileForAdd: any;
   pileForInit: any;
+  admin: any;
 }
 
 // tslint:disable-next-line:class-name
@@ -116,6 +120,8 @@ export interface BalanceDebt {
   chi: BN;
 }
 
+export const LOAN_ID_IDX = 2;
+
 class Tinlake {
   public provider: any;
   public eth: ethI;
@@ -141,6 +147,7 @@ class Tinlake {
       pile: contractAbiPile,
       pileForAdd: contractAbiPileForAdd,
       pileForInit: contractAbiPileForInit,
+      admin: contractAbiAdmin,
     };
     this.contractAddresses = contractAddresses;
 
@@ -181,6 +188,8 @@ class Tinlake {
         .at(this.contractAddresses['PILE']),
       pileForInit: this.eth.contract(this.contractAbis.pileForInit)
         .at(this.contractAddresses['PILE']),
+      admin: this.eth.contract(this.contractAbis.admin)
+        .at(this.contractAddresses['ADMIN']),
     };
   }
 
@@ -322,6 +331,23 @@ class Tinlake {
   getCurrentDebt = async (loanId: string): Promise<BN> => {
     const res = await this.contracts.pile.burden(loanId);
     return res['0'];
+  }
+
+  /**
+   * whitelist is a shortcut contract that calls adminAdmit (admit.admit),
+   * adminAppraise (appraiser.file) and addFee (pile.file) to prevent additional
+   * transactions. It is required though that the fee is already initialized
+   * using initFee
+   * @param owner Owner of the created loan
+   */
+  whitelist = (registry: Address, nft: string, principal: string, appraisal: string,
+               fee: string, owner: string) => {
+    return this.contracts.admin.whitelist(registry, nft, principal, appraisal, fee, owner,
+                                          this.ethConfig)
+      .then((txHash: string) => {
+        console.log(`[Admin.whitelist] txHash: ${txHash}`);
+        return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi);
+      });
   }
 
   unwhitelist = (loanId: string, registry: string, nft: string):
