@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Tinlake from 'tinlake';
+import Tinlake, { baseToDisplay, displayToBase } from 'tinlake';
 import { LoansState, getLoan, subscribeDebt } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
@@ -10,8 +10,6 @@ import Link from 'next/link';
 import { LinkPrevious } from 'grommet-icons';
 import NumberInput from '../NumberInput';
 import NumberDisplay from '../NumberDisplay';
-import { baseToDisplay } from '../../utils/baseToDisplay';
-import { displayToBase } from '../../utils/displayToBase';
 import LoanData from '../LoanData';
 import { calcRepayAmount } from '../../utils/calcRepayAmount';
 import { authTinlake } from '../../services/tinlake';

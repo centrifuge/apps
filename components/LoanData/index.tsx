@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { InternalSingleLoan } from '../../ducks/loans';
 import { Box, FormField, TextInput } from 'grommet';
-import { baseToDisplay } from '../../utils/baseToDisplay';
-import { feeToInterestRate } from '../../utils/feeToInterestRate';
+import { baseToDisplay, feeToInterestRate } from 'tinlake';
 import NumberInput from '../NumberInput';
 
 interface Props {

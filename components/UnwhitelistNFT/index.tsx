@@ -1,11 +1,10 @@
 import * as React from 'react';
-import Tinlake from 'tinlake';
+import Tinlake, { bnToHex } from 'tinlake';
 import { LoansState, getLoan, subscribeDebt } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
 import { Box, Button, Heading, Text, FormField, TextInput } from 'grommet';
 import NftData from '../NftData';
-import { bnToHex } from '../../utils/bnToHex';
 import SecondaryHeader from '../SecondaryHeader';
 import Link from 'next/link';
 import { LinkPrevious } from 'grommet-icons';
