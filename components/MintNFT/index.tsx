@@ -55,7 +55,8 @@ class MintNFT extends React.Component<Props, State> {
           <Heading level="3">Mint NFT</Heading>
         </Box>
 
-        <Button primary onClick={this.mint} label="Mint NFT" />
+        <Button primary onClick={this.mint} label="Mint NFT"
+          disabled={is === 'loading' || is === 'success'} />
       </SecondaryHeader>
 
       <Box pad={{ horizontal: 'medium' }}>
@@ -81,6 +82,7 @@ class MintNFT extends React.Component<Props, State> {
               <TextInput
                 value={this.state.tokenId}
                 onChange={e => this.setState({ tokenId: e.currentTarget.value })}
+                disabled={is === 'loading' || is === 'success'}
               />
             </FormField>
           </Box>

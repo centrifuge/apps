@@ -4,13 +4,15 @@ import { LoansState, getLoan } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
 import { Box, FormField, Button, Heading, Text } from 'grommet';
-import LoanNftData from '../LoanNftData.tsx';
-import BN from 'bn.js';
+import LoanNftData from '../LoanNftData';
 import SecondaryHeader from '../SecondaryHeader';
 import Link from 'next/link';
 import { LinkPrevious } from 'grommet-icons';
 import { NumberInput } from '@centrifuge/axis-number-input';
-import Number from '../Number';
+import NumberDisplay from '../NumberDisplay';
+import { baseToDisplay } from '../../utils/baseToDisplay';
+import { displayToBase } from '../../utils/displayToBase';
+import LoanData from '../LoanData';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -18,7 +20,7 @@ interface Props {
   loanId: string;
   tinlake: Tinlake;
   loans?: LoansState;
-  getLoan?: (tinlake: Tinlake, loanId: number) => Promise<void>;
+  getLoan?: (tinlake: Tinlake, loanId: string, refresh?: boolean) => Promise<void>;
 }
 
 interface State {
@@ -33,16 +35,18 @@ class LoanRepay extends React.Component<Props, State> {
     is: null,
     errorMsg: '',
   };
+  lastDebt = '';
 
   componentWillMount() {
-    this.props.getLoan!(this.props.tinlake, parseInt(this.props.loanId, 10));
+    this.props.getLoan!(this.props.tinlake, this.props.loanId);
   }
 
   componentDidUpdate(nextProps: Props) {
     const loans = nextProps.loans;
     if (!loans || !loans.singleLoan) { return; }
     const nextDebt = loans.singleLoan.debt.toString();
-    if (nextDebt !== this.state.repayAmount) {
+    if (nextDebt !== this.lastDebt) {
+      this.lastDebt = nextDebt;
       this.setState({ repayAmount: loans.singleLoan.debt.toString() });
     }
   }
@@ -50,7 +54,7 @@ class LoanRepay extends React.Component<Props, State> {
   repay = async () => {
     this.setState({ is: 'loading' });
 
-    const { tinlake, loanId } = this.props;
+    const { getLoan, tinlake, loanId } = this.props;
     const { repayAmount } = this.state;
     const addresses = tinlake.contractAddresses;
     const ethFrom = tinlake.ethConfig.from;
@@ -79,6 +83,8 @@ class LoanRepay extends React.Component<Props, State> {
         return;
       }
 
+      getLoan!(tinlake, loanId, true);
+
       this.setState({ is: 'success' });
     } catch (e) {
       console.log(e);
@@ -96,9 +102,8 @@ class LoanRepay extends React.Component<Props, State> {
         Could not find loan {loanId}</Alert>;
     }
 
-    const { status, fee, loanOwner } = singleLoan!;
+    const { status, loanOwner } = singleLoan!;
     const { repayAmount, is, errorMsg } = this.state;
-    const totalAmount = fee.add(new BN(repayAmount));
 
     return <Box>
       <SecondaryHeader>
@@ -110,38 +115,47 @@ class LoanRepay extends React.Component<Props, State> {
         </Box>
 
         {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
-          <Button primary onClick={this.repay} label="Confirm" />}
+          <Button primary onClick={this.repay} label="Confirm"
+            disabled={is === 'loading' || is === 'success'} />}
       </SecondaryHeader>
 
       <Box pad={{ horizontal: 'medium' }}>
+        {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
+          <Box direction="row" justify="end" margin={{ bottom: 'medium' }}>
+            <Text>
+              Your total Repayment Amount is <Text weight="bold">{<NumberDisplay
+                value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />}</Text>
+            </Text>
+          </Box>
+        }
 
         {is === 'loading' && 'Repaying...'}
-        {is === 'success' && <Alert type="success" margin={{ top: 'large' }}>
-          Successfully repayed <Number value={repayAmount.toString()} suffix=" DAI" precision={2} />
+        {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
+          Successfully repayed
+          <NumberDisplay value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />
           for Loan ID {loanId}</Alert>}
-        {is === 'error' && <Alert type="error" margin={{ top: 'large' }}>
+        {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
           <Text weight="bold">Error repaying Loan ID {loanId}, see console for details</Text>
           {errorMsg && <div><br />{errorMsg}</div>}
         </Alert>}
 
-        <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
+        <Box direction="row" gap="medium" margin={{ vertical: 'medium' }}>
           <Box basis={'1/4'} gap="medium"><FormField label="Repay Amount">
             <NumberInput
-              value={repayAmount} disabled suffix=" DAI" precision={2}
-              onChange={(e: React.KeyboardEvent<HTMLInputElement>) =>
-                this.setState({ repayAmount: e.currentTarget.value })}
+              value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18}
+              onChange={(masked: string, float: number) => float !== undefined &&
+                this.setState({ repayAmount: displayToBase(masked, 18) })}
+              autoFocus disabled={true || is === 'loading' || is === 'success'}
             />
           </FormField></Box>
-          <Box basis={'1/4'} gap="medium"><FormField label="Interest Amount">
-            <NumberInput value={fee.toString()} disabled suffix=" DAI" precision={2} />
-          </FormField></Box>
-          <Box basis={'1/4'} gap="medium"><FormField label="Total Amount">
-            <NumberInput value={totalAmount.toString()} disabled suffix=" DAI" precision={2} />
-          </FormField></Box>
+          <Box basis={'1/4'} gap="medium" />
+          <Box basis={'1/4'} gap="medium" />
           <Box basis={'1/4'} gap="medium" />
         </Box>
 
-        <LoanNftData loan={singleLoan!} />
+        <LoanData loan={singleLoan!} />
+
+        <LoanNftData loan={singleLoan!} authedAddr={tinlake.ethConfig.from} />
       </Box>
     </Box>;
   }

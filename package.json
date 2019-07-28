@@ -24,6 +24,7 @@
     "@centrifuge/axis-number-input": "^0.3.0",
     "@centrifuge/axis-theme": "^0.3.0",
     "chai": "^4.2.0",
+    "decimal.js-light": "^2.5.0",
     "grommet": "^2.7.3",
     "next": "^8.1.0",
     "next-redux-wrapper": "^3.0.0-alpha.3",
@@ -34,7 +35,7 @@
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
     "styled-components": "^4.3.2",
-    "tinlake": "git+https://github.com/centrifuge/tinlake.js.git#master",
+    "tinlake": "git+https://github.com/philipstanislaus/tinlake.js.git#timeout-fix",
     "web3connect": "^1.0.0-beta.13"
   },
   "devDependencies": {

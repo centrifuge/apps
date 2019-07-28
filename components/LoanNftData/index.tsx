@@ -1,16 +1,18 @@
 import * as React from 'react';
-import { InternalLoan } from '../../ducks/loans';
+import { InternalListLoan } from '../../ducks/loans';
 import { Box, FormField, TextInput, Heading, Paragraph } from 'grommet';
 import styled from 'styled-components';
 import { formatAddress } from '../../utils/formatAddress';
+import MeBadge from '../MeBadge';
 
 interface Props {
-  loan: InternalLoan;
+  loan: InternalListLoan;
+  authedAddr: string;
 }
 
 class LoanNftData extends React.Component<Props> {
   render() {
-    const { loan: { tokenId, nftOwner } } = this.props;
+    const { loan: { tokenId, nftOwner }, authedAddr } = this.props;
 
     return <NftDataContainer>
       <Heading level="6" margin="none">NFT Data</Heading>
@@ -18,8 +20,13 @@ class LoanNftData extends React.Component<Props> {
         <Box basis={'1/4'} gap="medium"><FormField label="NFT ID">
           <TextInput value={formatAddress(tokenId.toString())} disabled
             title={tokenId.toString()}/></FormField></Box>
-        <Box basis={'1/4'} gap="medium"><FormField label="NFT Owner">
-          <TextInput value={formatAddress(nftOwner)} disabled title={nftOwner} /></FormField></Box>
+        <Box basis={'1/4'} gap="medium">
+          <FormField label="NFT Owner" style={{ position: 'relative' }}>
+            <TextInput value={formatAddress(nftOwner)} disabled title={nftOwner} />
+            {authedAddr === nftOwner &&
+              <MeBadge style={{ position: 'absolute', left: 100, top: 32 }} />}
+          </FormField>
+        </Box>
         <Box basis={'1/4'} gap="medium" />
         <Box basis={'1/4'} gap="medium" />
       </Box>

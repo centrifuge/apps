@@ -5,6 +5,9 @@ import Alert from '../Alert';
 import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
+import { NumberInput } from '@centrifuge/axis-number-input';
+import { baseToDisplay } from '../../utils/baseToDisplay';
+import { displayToBase } from '../../utils/displayToBase';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -24,8 +27,8 @@ interface State {
 class WhitelistNFT extends React.Component<Props, State> {
   state: State = {
     tokenId: '',
-    principal: '100',
-    appraisal: '300',
+    principal: '100000000000000000000',
+    appraisal: '300000000000000000000',
     is: null,
     errorMsg: '',
   };
@@ -84,8 +87,6 @@ class WhitelistNFT extends React.Component<Props, State> {
   render() {
     const { tokenId, principal, appraisal, is, errorMsg } = this.state;
 
-    console.log('tokenId', tokenId);
-
     return <Box>
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">
@@ -95,7 +96,8 @@ class WhitelistNFT extends React.Component<Props, State> {
           <Heading level="3">Whitelist NFT</Heading>
         </Box>
 
-        <Button onClick={this.whitelist} primary label="Whitelist" />
+        <Button onClick={this.whitelist} primary label="Whitelist"
+          disabled={is === 'loading' || is === 'success'} />
       </SecondaryHeader>
 
       <Box pad={{ horizontal: 'medium' }}>
@@ -114,22 +116,27 @@ class WhitelistNFT extends React.Component<Props, State> {
               <TextInput
                 value={tokenId}
                 onChange={e => this.setState({ tokenId: e.currentTarget.value })}
+                disabled={is === 'loading' || is === 'success'}
               />
             </FormField>
           </Box>
           <Box basis={'1/4'} gap="medium">
             <FormField label="Appraisal">
-              <TextInput
-                value={appraisal}
-                onChange={e => this.setState({ appraisal: e.currentTarget.value })}
+              <NumberInput
+                value={baseToDisplay(appraisal, 18)} suffix=" DAI" precision={18} autoFocus
+                onChange={(masked: string, float: number) => float !== undefined &&
+                  this.setState({ appraisal: displayToBase(masked, 18) })}
+                disabled={is === 'loading' || is === 'success'}
               />
             </FormField>
           </Box>
           <Box basis={'1/4'} gap="medium">
             <FormField label="Principal">
-              <TextInput
-                value={principal}
-                onChange={e => this.setState({ principal: e.currentTarget.value })}
+              <NumberInput
+                value={baseToDisplay(principal, 18)} suffix=" DAI" precision={18}
+                onChange={(masked: string, float: number) => float !== undefined &&
+                  this.setState({ principal: displayToBase(masked, 18) })}
+                disabled={is === 'loading' || is === 'success'}
               />
             </FormField>
           </Box>

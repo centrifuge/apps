@@ -4,25 +4,23 @@ import { LoansState, getLoan } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
 import { Box, FormField, TextInput, Button, Heading } from 'grommet';
-import { NumberInput } from '@centrifuge/axis-number-input';
-import LoanNftData from '../LoanNftData.tsx';
+import LoanNftData from '../LoanNftData';
 import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
+import LoanData from '../LoanData';
 
 interface Props {
   loanId: string;
   mode: 'borrower' | 'admin';
   tinlake: Tinlake;
   loans?: LoansState;
-  getLoan?: (tinlake: Tinlake, loanId: number) => Promise<void>;
+  getLoan?: (tinlake: Tinlake, loanId: string, refresh?: boolean) => Promise<void>;
 }
-
-const none = <TextInput value="-" disabled />;
 
 class LoanDetail extends React.Component<Props> {
   componentWillMount() {
-    this.props.getLoan!(this.props.tinlake, parseInt(this.props.loanId, 10));
+    this.props.getLoan!(this.props.tinlake, this.props.loanId);
   }
 
   render() {
@@ -35,7 +33,7 @@ class LoanDetail extends React.Component<Props> {
         Could not find loan {loanId}</Alert>;
     }
 
-    const { status, principal, price, fee, debt, loanOwner } = singleLoan!;
+    const { status, loanOwner } = singleLoan!;
 
     return <Box>
       <SecondaryHeader>
@@ -62,26 +60,9 @@ class LoanDetail extends React.Component<Props> {
           <Box basis={'1/4'} gap="medium" />
         </Box>
 
-        <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
-          <Box basis={'1/4'} gap="medium"><FormField label="Appraisal Amount">
-            <NumberInput value={price.toString()} suffix=" DAI" disabled precision={2} />
-          </FormField></Box>
-          <Box basis={'1/4'} gap="medium"><FormField label="Principal Amount">
-            {status === 'Whitelisted' ?
-              <NumberInput value={principal.toString()} suffix=" DAI" disabled precision={2} /> :
-                none}
-          </FormField></Box>
-          <Box basis={'1/4'} gap="medium"><FormField label="Debt">
-            {status === 'Whitelisted' ? none :
-              <NumberInput value={debt.toString()} suffix=" DAI" precision={2} disabled />}
-          </FormField></Box>
-          <Box basis={'1/4'} gap="medium"><FormField label="Interest Rate">
-            {status === 'Repaid' ? none :
-              <NumberInput value={fee.toString()} suffix="%" disabled />}
-          </FormField></Box>
-        </Box>
+        <LoanData loan={singleLoan!} />
 
-        <LoanNftData loan={singleLoan!} />
+        <LoanNftData loan={singleLoan!} authedAddr={tinlake.ethConfig.from} />
       </Box>
     </Box>;
   }
