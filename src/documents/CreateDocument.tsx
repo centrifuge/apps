@@ -78,7 +78,7 @@ export class CreateDocument extends React.Component<Props, State> {
     }
 
     if (creatingDocument.loading) {
-      return <Preloader message="Saving document" withSound={true}/>;
+      return <Preloader message="Saving document" />;
     }
 
     return (

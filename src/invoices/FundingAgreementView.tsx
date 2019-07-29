@@ -110,15 +110,15 @@ export class FundingAgreementView extends React.Component<ConnectedFundingAgreem
     }
 
     if (signingFunding && signingFunding.loading) {
-      return <Preloader message="Approving funding agreement" withSound={true}/>;
+      return <Preloader message="Approving funding agreement" />;
     }
 
     if (creatingTransferDetails && creatingTransferDetails.loading) {
-      return <Preloader message="Recording funding transfer" withSound={true}/>;
+      return <Preloader message="Recording funding transfer" />;
     }
 
     if (settlingFunding && settlingFunding.loading) {
-      return <Preloader message="Confirming repayment" withSound={true}/>;
+      return <Preloader message="Confirming repayment" />;
     }
 
     const {

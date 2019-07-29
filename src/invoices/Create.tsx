@@ -81,7 +81,7 @@ class ConnectedCreateInvoice extends React.Component<ConnectedCreateInvoiceProps
     }
 
     if (creatingInvoice.loading) {
-      return <Preloader message="Saving invoice" withSound={true}/>;
+      return <Preloader message="Saving invoice" />;
     }
 
 

@@ -110,12 +110,12 @@ export class EditDocument extends React.Component<Props> {
     }
 
     if (updatingDocument.loading) {
-      return <Preloader message="Updating document" withSound={true}/>;
+      return <Preloader message="Updating document" />;
     }
 
 
     if (mintingNFT.loading) {
-      return <Preloader message="Minting NFT" withSound={true}/>;
+      return <Preloader message="Minting NFT" />;
     }
 
     // TODO add route resolvers and remove this logic

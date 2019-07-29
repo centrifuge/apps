@@ -148,11 +148,11 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
     }
 
     if (invitingUser && invitingUser.loading) {
-      return <Preloader message="Creating user" withSound={true}/>;
+      return <Preloader message="Creating user" />;
     }
 
     if (updatingUser && updatingUser.loading) {
-      return <Preloader message="Updating user" withSound={true}/>;
+      return <Preloader message="Updating user" />;
     }
 
     const user = this.state.selectedUser;

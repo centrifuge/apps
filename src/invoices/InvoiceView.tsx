@@ -123,15 +123,15 @@ export class InvoiceView extends React.Component<ConnectedInvoiceViewProps> {
     }
 
     if (creatingFunding && creatingFunding.loading) {
-      return <Preloader message="Requesting funding agreement" withSound={true}/>;
+      return <Preloader message="Requesting funding agreement" />;
     }
 
     if (updatingTransferDetails && updatingTransferDetails.loading) {
-      return <Preloader message="Confirming funding" withSound={true}/>;
+      return <Preloader message="Confirming funding" />;
     }
 
     if (creatingTransferDetails && creatingTransferDetails.loading) {
-      return <Preloader message="Recording repayment transfer" withSound={true}/>;
+      return <Preloader message="Recording repayment transfer" />;
     }
 
     const {

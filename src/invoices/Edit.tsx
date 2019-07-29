@@ -64,7 +64,7 @@ class ConnectedEditInvoice extends React.Component<ConnectedEditInvoiceProps> {
     }
 
     if (updatingInvoice.loading) {
-      return <Preloader message="Updating invoice" withSound={true}/>;
+      return <Preloader message="Updating invoice" />;
     }
 
 
