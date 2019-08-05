@@ -1,13 +1,14 @@
 import * as React from 'react';
 import Tinlake from 'tinlake';
 import { connect } from 'react-redux';
-import { Box, Heading, Text } from 'grommet';
+import { Box, Heading } from 'grommet';
 import SecondaryHeader from '../SecondaryHeader';
 import { DashboardState, subscribeDashboardData } from '../../ducks/dashboard';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 import { calcRatioPercent } from '../../utils/calcRatioPercent';
 import DashboardMetric from '../DashboardMetric';
 import NumberDisplay from '../NumberDisplay';
+import LoanList from '../LoanList';
 
 interface Props {
   tinlake: Tinlake;
@@ -27,7 +28,7 @@ class Dashboard extends React.Component<Props> {
   }
 
   render() {
-    const { dashboard } = this.props;
+    const { dashboard, tinlake } = this.props;
     const { state, data } = dashboard!;
 
     if (data === null || state === 'loading') { return null; }
@@ -65,6 +66,12 @@ class Dashboard extends React.Component<Props> {
           </Box>
         </Box>
       </Box>
+
+      <Box pad={{ horizontal: 'medium', top: 'medium' }}>
+        <Heading level="4">Recent Loans</Heading>
+      </Box>
+
+      <LoanList tinlake={tinlake} mode="admin" />
     </Box>;
   }
 }

@@ -2,18 +2,15 @@ import * as React from 'react';
 import WithTinlake from '../../components/WithTinlake';
 import { Box } from 'grommet';
 import MintNFT from '../../components/MintNFT';
-import Header, { MenuItem } from '../../components/Header';
-
-const menuItems: MenuItem[] = [
-  { label: 'NFTs', route: '/admin' },
-];
+import Header from '../../components/Header';
+import { menuItems } from '../../menuItems';
 
 class MintNFTPage extends React.Component {
   render() {
     return <Box align="center">
       <Header
         selectedRoute={'/temp/mint-nft'}
-        menuItems={menuItems.reverse()}
+        menuItems={menuItems}
         section="BORROWER"
       />
       <Box

@@ -45,7 +45,8 @@ const Header: FunctionComponent<HeaderProps> = (props) => {
 
         {menuItems.filter(item => !item.secondary).map((item) => {
           const anchorProps = {
-            ...(selectedRoute === item.route ? { className: 'selected' } : {}),
+            ...(item.route === selectedRoute ?
+              { className: 'selected', color: '#0828BE' } : {}),
           };
           return <Link href={item.route} key={item.label}><Button
             plain

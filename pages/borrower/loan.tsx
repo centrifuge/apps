@@ -3,11 +3,8 @@ import WithTinlake from '../../components/WithTinlake';
 import LoanDetail from '../../components/LoanDetail';
 import Alert from '../../components/Alert';
 import { Box } from 'grommet';
-import Header, { MenuItem } from '../../components/Header';
-
-const menuItems: MenuItem[] = [
-  { label: 'Loans', route: '/borrower' },
-];
+import Header from '../../components/Header';
+import { menuItems } from '../../menuItems';
 
 class BorrowerLoanPage extends React.Component<{ loanId: string }> {
   static async getInitialProps({ query }: any) {
@@ -20,7 +17,7 @@ class BorrowerLoanPage extends React.Component<{ loanId: string }> {
     return <Box align="center">
       <Header
         selectedRoute={`/borrower/loan?loanId=${loanId}`}
-        menuItems={menuItems.reverse()}
+        menuItems={menuItems}
         section="BORROWER"
       />
       <Box
