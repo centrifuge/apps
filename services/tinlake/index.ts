@@ -72,8 +72,6 @@ async function web3Connect(): Promise<any> {
     web3Connect.on('connect', (provider: any) => {
       const info = Web3Connect.getProviderInfo(provider);
 
-      // console.log({ info });
-
       sessionStorage.setItem('chosenProvider', info.type === 'injected' ? 'injected' : info.name);
 
       resolve(provider);
