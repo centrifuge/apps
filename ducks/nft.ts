@@ -78,9 +78,6 @@ export function getNFT(tinlake: Tinlake, tokenId: string):
     const replacedTokenId = tokenId.replace(/^0x/, '');
     const bnTokenId = new BN(replacedTokenId);
 
-    console.log('tokenId', tokenId, 'replaced', replacedTokenId,
-                'bnTokenId', bnTokenId.toString(16));
-
     const nft: NFT = {
       nftOwner,
       nftData,
