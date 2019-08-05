@@ -198,7 +198,7 @@ class Tinlake {
   }
 
   isAdmin = async (address: Address): Promise<boolean> => {
-    const res = await this.contracts.admit.wards(address);
+    const res = await this.contracts.admin.wards(address);
     return !(res[0] as BN).isZero();
   }
 
