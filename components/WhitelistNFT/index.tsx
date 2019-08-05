@@ -59,15 +59,31 @@ class WhitelistNFT extends React.Component<Props, State> {
       const { tokenId, principal, appraisal, interestRate } = this.state;
       const addresses = tinlake.contractAddresses;
 
+      // init fee
+      const fee = interestRateToFee(interestRate);
+      const feeExists = await tinlake.existsFee(fee);
+      if (!feeExists) {
+        console.log(`Fee ${fee} does not yet exist, create it`);
+        const res = await tinlake.initFee(fee);
+        if (res.status !== SUCCESS_STATUS) {
+          console.log(res);
+          this.setState({ is: 'error', errorMsg: JSON.stringify(res) });
+          return;
+        }
+        console.log('Fee created');
+      } else {
+        console.log(`Fee ${fee} already exists`);
+      }
+
       // admit
       const nftOwner = await tinlake.ownerOfNFT(tokenId);
 
       console.log(`NFT owner of tokenId ${tokenId} is ${nftOwner}`);
 
-      const res2 = await tinlake.adminAdmit(addresses['NFT_COLLATERAL'], tokenId, principal,
-                                            nftOwner);
+      const res2 = await tinlake.whitelist(addresses['NFT_COLLATERAL'], tokenId, principal,
+                                           appraisal, fee, nftOwner);
 
-      console.log('admit result');
+      console.log('whitelist result');
       console.log(res2.txHash);
 
       if (res2.status !== SUCCESS_STATUS || res2.events[0].event.name !== 'Transfer') {
@@ -78,42 +94,6 @@ class WhitelistNFT extends React.Component<Props, State> {
 
       const loanId = res2.events[0].data[2].toString();
       console.log(`Loan id: ${loanId}`);
-
-      // appraise
-      const res3 = await tinlake.adminAppraise(loanId, appraisal);
-
-      console.log('appraisal results');
-      console.log(res3.txHash);
-      if (res3.status !== SUCCESS_STATUS) {
-        console.log(res3);
-        this.setState({ is: 'error', errorMsg: JSON.stringify(res3) });
-        return;
-      }
-
-      // init fee
-      const fee = interestRateToFee(interestRate);
-      const feeExists = await tinlake.existsFee(fee);
-      if (!feeExists) {
-        console.log(`Fee ${fee} does not yet exist, create it`);
-        const res4 = await tinlake.initFee(fee);
-        if (res4.status !== SUCCESS_STATUS) {
-          console.log(res4);
-          this.setState({ is: 'error', errorMsg: JSON.stringify(res4) });
-          return;
-        }
-        console.log('Fee created');
-      } else {
-        console.log(`Fee ${fee} already exists`);
-      }
-
-      // add fee
-      const res5 = await tinlake.addFee(loanId, fee, '0');
-      if (res5.status !== SUCCESS_STATUS) {
-        console.log(res5);
-        this.setState({ is: 'error', errorMsg: JSON.stringify(res5) });
-        return;
-      }
-      console.log('Fee added');
 
       this.setState({ is: 'success' });
     } catch (e) {
