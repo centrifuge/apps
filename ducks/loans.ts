@@ -14,6 +14,7 @@ const RECEIVE = 'tinlake-ui/loans/RECEIVE';
 const LOAD_SINGLE = 'tinlake-ui/loans/LOAD_SINGLE';
 const LOAD_SINGLE_NOT_FOUND = 'tinlake-ui/loans/LOAD_SINGLE_NOT_FOUND';
 const RECEIVE_SINGLE = 'tinlake-ui/loans/RECEIVE_SINGLE';
+const RECEIVE_DEBT = 'tinlake-ui/loans/RECEIVE_DEBT';
 
 export interface InternalListLoan extends Loan {
   loanId: string;
@@ -52,6 +53,10 @@ export default function reducer(state: LoansState = initialState,
     case LOAD_SINGLE: return { ...state, singleLoanState: 'loading', singleLoan: null };
     case LOAD_SINGLE_NOT_FOUND: return { ...state, singleLoanState: 'not found' };
     case RECEIVE_SINGLE: return { ...state, singleLoanState: 'found', singleLoan: action.loan };
+    case RECEIVE_DEBT: {
+      if (state.singleLoan === null) { return state; }
+      return { ...state, singleLoan: { ...state.singleLoan, debt: action.debt } };
+    }
     default: return state;
   }
 }
@@ -169,7 +174,7 @@ export function getLoan(tinlake: Tinlake, loanId: string, refresh = false):
     } catch (e) {
       console.error(`Could not get appraisal for Loan ID ${loanId}, ` +
         `NFT ID ${loan.tokenId.toString()}`);
-      appraisal = new BN();
+      appraisal = new BN(0);
     }
 
     const extendedLoanData: InternalSingleLoan = {
@@ -190,5 +195,27 @@ export function getLoan(tinlake: Tinlake, loanId: string, refresh = false):
     console.log({ loanId, appraisal: appraisal.toString() });
 
     dispatch({ type: RECEIVE_SINGLE, loan: extendedLoanData });
+  };
+}
+
+export function getDebt(tinlake: Tinlake, loanId: string):
+  ThunkAction<Promise<void>, LoansState, undefined, Action> {
+  return async (dispatch) => {
+    const debt = await tinlake.getCurrentDebt(loanId);
+    dispatch({ loanId, debt, type: RECEIVE_DEBT });
+  };
+}
+
+export function subscribeDebt(tinlake: Tinlake, loanId: string):
+  ThunkAction<() => void, LoansState, undefined, Action> {
+  return (dispatch) => {
+    dispatch(getDebt(tinlake, loanId));
+
+    const interval = setInterval(
+      () => dispatch(getDebt(tinlake, loanId)),
+      1000,
+    );
+    const discard = () => clearInterval(interval);
+    return discard as any;
   };
 }

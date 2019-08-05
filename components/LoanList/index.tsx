@@ -10,6 +10,9 @@ import NumberDisplay from '../NumberDisplay';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 import { feeToInterestRate } from '../../utils/feeToInterestRate';
 import MeBadge from '../MeBadge';
+import { Spinner } from '@centrifuge/axis-spinner';
+import Auth from '../Auth';
+import Alert from '../Alert';
 
 interface Props {
   tinlake: Tinlake;
@@ -24,11 +27,7 @@ class LoanList extends React.Component<Props> {
   }
 
   render() {
-    const { loans, mode, tinlake: { ethConfig: { from: ethFrom } } } = this.props;
-
-    if (loans!.loansState === 'loading') {
-      return 'Loading...';
-    }
+    const { loans, mode, tinlake, tinlake: { ethConfig: { from: ethFrom } } } = this.props;
 
     const filteredLoans = mode === 'borrower' ? loans!.loans.filter(l => l.loanOwner === ethFrom) :
       loans!.loans;
@@ -38,44 +37,55 @@ class LoanList extends React.Component<Props> {
         <Heading level="3">Loans</Heading>
       </SecondaryHeader>
 
-      <Box pad={{ horizontal: 'medium' }}>
-        <DataTable data={filteredLoans} sortable columns={[
-          { header: 'Loan ID', property: 'loanId', align: 'end' },
-          {
-            header: 'NFT ID', property: 'tokenId', align: 'end',
-            render: (l: InternalListLoan) => <Address address={l.tokenId.toString()} />,
-          },
-          {
-            header: 'NFT Owner', property: 'nftOwner', align: 'end',
-            render: (l: InternalListLoan) => <div>
-              <Address address={l.nftOwner} />
-              {l.nftOwner === ethFrom && <MeBadge style={{ marginLeft: 5 }} />}
-            </div>,
-          },
-          { header: 'NFT Status', property: 'status' },
-          {
-            header: 'Principal', property: 'principal', align: 'end',
-            render: (l: InternalListLoan) => l.status === 'Whitelisted' ?
-              <NumberDisplay suffix=" DAI" precision={18} value={baseToDisplay(l.principal, 18)} />
-              : '-',
-          },
-          {
-            header: 'Interest rate', property: 'fee', align: 'end',
-            render: (l: InternalListLoan) => l.status === 'Repaid' ? '-' :
-              <NumberDisplay suffix="%" value={feeToInterestRate(l.fee)} />,
-          },
-          {
-            header: 'Debt', property: 'debt', align: 'end',
-            render: (l: InternalListLoan) => l.status === 'Whitelisted' ? '-' :
-              <NumberDisplay suffix=" DAI" precision={18} value={baseToDisplay(l.debt, 18)} />,
-          },
-          {
-            header: 'Actions', property: 'id', align: 'end', sortable: false,
-            render: (l: InternalListLoan) =>
-              <Link href={`/${mode}/loan?loanId=${l.loanId}`}><Anchor>View</Anchor></Link>,
-          },
-        ]} />
-      </Box>
+      <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization render={auth =>
+        mode === 'borrower' && auth.user === null &&
+          <Alert margin="medium" type="error">Please authenticate to view your loans.</Alert>
+      } />
+
+      {loans!.loansState === 'loading' ?
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />
+      :
+        <Box pad={{ horizontal: 'medium' }}>
+          <DataTable data={filteredLoans} sortable columns={[
+            { header: 'Loan ID', property: 'loanId', align: 'end' },
+            {
+              header: 'NFT ID', property: 'tokenId', align: 'end',
+              render: (l: InternalListLoan) => <Address address={l.tokenId.toString()} />,
+            },
+            {
+              header: 'NFT Owner', property: 'nftOwner', align: 'end',
+              render: (l: InternalListLoan) => <div>
+                <Address address={l.nftOwner} />
+                {l.nftOwner === ethFrom && <MeBadge style={{ marginLeft: 5 }} />}
+              </div>,
+            },
+            { header: 'NFT Status', property: 'status' },
+            {
+              header: 'Principal', property: 'principal', align: 'end',
+              render: (l: InternalListLoan) => l.status === 'Whitelisted' ?
+                <NumberDisplay suffix=" DAI" precision={18}
+                  value={baseToDisplay(l.principal, 18)} />
+                : '-',
+            },
+            {
+              header: 'Interest rate', property: 'fee', align: 'end',
+              render: (l: InternalListLoan) => l.status === 'Repaid' ? '-' :
+                <NumberDisplay suffix="%" value={feeToInterestRate(l.fee)} />,
+            },
+            {
+              header: 'Debt', property: 'debt', align: 'end',
+              render: (l: InternalListLoan) => l.status === 'Whitelisted' ? '-' :
+                <NumberDisplay suffix=" DAI" precision={18} value={baseToDisplay(l.debt, 18)} />,
+            },
+            {
+              header: 'Actions', property: 'id', align: 'end', sortable: false,
+              render: (l: InternalListLoan) =>
+                <Link href={`/${mode}/loan?loanId=${l.loanId}`}><Anchor>View</Anchor></Link>,
+            },
+          ]} />
+        </Box>
+      }
+
     </Box>;
   }
 }

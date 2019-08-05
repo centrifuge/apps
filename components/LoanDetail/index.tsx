@@ -1,14 +1,15 @@
 import * as React from 'react';
 import Tinlake from 'tinlake';
-import { LoansState, getLoan } from '../../ducks/loans';
+import { LoansState, getLoan, subscribeDebt } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
 import { Box, FormField, TextInput, Button, Heading } from 'grommet';
-import LoanNftData from '../LoanNftData';
+import NftData from '../NftData';
 import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
 import LoanData from '../LoanData';
+import Auth from '../Auth';
 
 interface Props {
   loanId: string;
@@ -16,20 +17,28 @@ interface Props {
   tinlake: Tinlake;
   loans?: LoansState;
   getLoan?: (tinlake: Tinlake, loanId: string, refresh?: boolean) => Promise<void>;
+  subscribeDebt?: (tinlake: Tinlake, loanId: string) => () => void;
 }
 
 class LoanDetail extends React.Component<Props> {
+  discardDebtSubscription = () => { };
+
   componentWillMount() {
     this.props.getLoan!(this.props.tinlake, this.props.loanId);
+    this.discardDebtSubscription = this.props.subscribeDebt!(this.props.tinlake, this.props.loanId);
+  }
+
+  componentWillUnmount() {
+    this.discardDebtSubscription();
   }
 
   render() {
     const { loans, loanId, tinlake, mode } = this.props;
     const { singleLoan, singleLoanState } = loans!;
 
-    if (singleLoanState === null || singleLoanState === 'loading') { return 'Loading...'; }
+    if (singleLoanState === null || singleLoanState === 'loading') { return null; }
     if (singleLoanState === 'not found') {
-      return <Alert type="error">
+      return <Alert margin="medium" type="error">
         Could not find loan {loanId}</Alert>;
     }
 
@@ -44,11 +53,21 @@ class LoanDetail extends React.Component<Props> {
           <Heading level="3">View Loan {loanId}</Heading>
         </Box>
 
+        {status === 'Whitelisted' &&
+          <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization
+            render={auth => auth.isAdmin ?
+            <Link href={`/admin/unwhitelist-nft?loanId=${loanId}`}>
+              <Button primary label="Unwhitelist" /></Link> : null} />}
         {status === 'Whitelisted' && loanOwner === tinlake.ethConfig.from &&
           <Link href={`/borrower/borrow?loanId=${loanId}`}><Button primary label="Borrow" /></Link>}
         {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
           <Link href={`/borrower/repay?loanId=${loanId}`}><Button primary label="Repay" /></Link>}
       </SecondaryHeader>
+
+      <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization render={auth =>
+        mode === 'borrower' && auth.user === null &&
+          <Alert margin="medium" type="error">Please authenticate to view your loan.</Alert>
+      } />
 
       <Box pad={{ horizontal: 'medium' }}>
         <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
@@ -62,10 +81,10 @@ class LoanDetail extends React.Component<Props> {
 
         <LoanData loan={singleLoan!} />
 
-        <LoanNftData loan={singleLoan!} authedAddr={tinlake.ethConfig.from} />
+        <NftData data={singleLoan!} authedAddr={tinlake.ethConfig.from} />
       </Box>
     </Box>;
   }
 }
 
-export default connect(state => state, { getLoan })(LoanDetail);
+export default connect(state => state, { getLoan, subscribeDebt })(LoanDetail);

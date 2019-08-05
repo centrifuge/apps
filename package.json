@@ -22,6 +22,7 @@
   "homepage": "https://github.com/centrifuge/tinlake-ui#readme",
   "dependencies": {
     "@centrifuge/axis-number-input": "^0.3.0",
+    "@centrifuge/axis-spinner": "^0.3.1",
     "@centrifuge/axis-theme": "^0.3.0",
     "chai": "^4.2.0",
     "decimal.js-light": "^2.5.0",
@@ -35,10 +36,11 @@
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
     "styled-components": "^4.3.2",
-    "tinlake": "git+https://github.com/philipstanislaus/tinlake.js.git#timeout-fix",
+    "tinlake": "github:philipstanislaus/tinlake.js#set-provider",
     "web3connect": "^1.0.0-beta.13"
   },
   "devDependencies": {
+    "@types/bn.js": "^4.11.5",
     "@types/jest": "^24.0.15",
     "@types/next": "^8.0.5",
     "@types/react": "^16.8.23",

@@ -8,18 +8,27 @@ import { LinkPrevious } from 'grommet-icons';
 import { NumberInput } from '@centrifuge/axis-number-input';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 import { displayToBase } from '../../utils/displayToBase';
+import { interestRateToFee } from '../../utils/interestRateToFee';
+import { connect } from 'react-redux';
+import { NFTState, getNFT } from '../../ducks/nft';
+import NftData from '../NftData';
+import { authTinlake } from '../../services/tinlake';
+import { Spinner } from '@centrifuge/axis-spinner';
 
 const SUCCESS_STATUS = '0x1';
 
 interface Props {
   tinlake: Tinlake;
   tokenId: string;
+  nft?: NFTState;
+  getNFT?: (tinlake: Tinlake, tonkenId: string) => Promise<void>;
 }
 
 interface State {
   tokenId: string;
   principal: string;
   appraisal: string;
+  interestRate: string;
   is: 'loading' | 'success' | 'error' | null;
   errorMsg: string;
 }
@@ -29,22 +38,27 @@ class WhitelistNFT extends React.Component<Props, State> {
     tokenId: '',
     principal: '100000000000000000000',
     appraisal: '300000000000000000000',
+    interestRate: '5',
     is: null,
     errorMsg: '',
   };
 
   componentWillMount() {
-    this.setState({ tokenId: this.props.tokenId || '' });
+    this.setState({ tokenId: this.props.tokenId || '' }, () => {
+      if (this.props.tokenId) { this.getNFT(); }
+    });
   }
 
   whitelist = async () => {
     this.setState({ is: 'loading' });
 
-    const { tinlake } = this.props;
-    const { tokenId, principal, appraisal } = this.state;
-    const addresses = tinlake.contractAddresses;
-
     try {
+      await authTinlake();
+
+      const { tinlake } = this.props;
+      const { tokenId, principal, appraisal, interestRate } = this.state;
+      const addresses = tinlake.contractAddresses;
+
       // admit
       const nftOwner = await tinlake.ownerOfNFT(tokenId);
 
@@ -70,12 +84,36 @@ class WhitelistNFT extends React.Component<Props, State> {
 
       console.log('appraisal results');
       console.log(res3.txHash);
-
       if (res3.status !== SUCCESS_STATUS) {
         console.log(res3);
         this.setState({ is: 'error', errorMsg: JSON.stringify(res3) });
         return;
       }
+
+      // init fee
+      const fee = interestRateToFee(interestRate);
+      const feeExists = await tinlake.existsFee(fee);
+      if (!feeExists) {
+        console.log(`Fee ${fee} does not yet exist, create it`);
+        const res4 = await tinlake.initFee(fee);
+        if (res4.status !== SUCCESS_STATUS) {
+          console.log(res4);
+          this.setState({ is: 'error', errorMsg: JSON.stringify(res4) });
+          return;
+        }
+        console.log('Fee created');
+      } else {
+        console.log(`Fee ${fee} already exists`);
+      }
+
+      // add fee
+      const res5 = await tinlake.addFee(loanId, fee, '0');
+      if (res5.status !== SUCCESS_STATUS) {
+        console.log(res5);
+        this.setState({ is: 'error', errorMsg: JSON.stringify(res5) });
+        return;
+      }
+      console.log('Fee added');
 
       this.setState({ is: 'success' });
     } catch (e) {
@@ -84,8 +122,15 @@ class WhitelistNFT extends React.Component<Props, State> {
     }
   }
 
+  getNFT = async () => {
+    const { tinlake, getNFT } = this.props;
+
+    await getNFT!(tinlake, this.state.tokenId);
+  }
+
   render() {
-    const { tokenId, principal, appraisal, is, errorMsg } = this.state;
+    const { tinlake, nft } = this.props;
+    const { tokenId, principal, appraisal, interestRate, is, errorMsg } = this.state;
 
     return <Box>
       <SecondaryHeader>
@@ -100,51 +145,72 @@ class WhitelistNFT extends React.Component<Props, State> {
           disabled={is === 'loading' || is === 'success'} />
       </SecondaryHeader>
 
-      <Box pad={{ horizontal: 'medium' }}>
-        {is === 'loading' && 'Whitelisting...'}
-        {is === 'success' && <Alert type="success">
-          Successfully whitelisted NFT for Token ID {tokenId}</Alert>}
-        {is === 'error' && <Alert type="error">
-          <Text weight="bold">
-            Error whitelisting NFT for Token ID {tokenId}, see console for details</Text>
-          {errorMsg && <div><br />{errorMsg}</div>}
-        </Alert>}
+      {is === 'loading' ?
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Whitelisting...'} />
+      :
+        <Box pad={{ horizontal: 'medium' }}>
+          {is === 'success' && <Alert type="success">
+            Successfully whitelisted NFT for Token ID {tokenId}</Alert>}
+          {is === 'error' && <Alert type="error">
+            <Text weight="bold">
+              Error whitelisting NFT for Token ID {tokenId}, see console for details</Text>
+            {errorMsg && <div><br />{errorMsg}</div>}
+          </Alert>}
 
-        <Box direction="row" gap="medium" margin={{ vertical: 'large' }}>
-          <Box basis={'1/4'} gap="medium">
-            <FormField label="NFT ID">
-              <TextInput
-                value={tokenId}
-                onChange={e => this.setState({ tokenId: e.currentTarget.value })}
-                disabled={is === 'loading' || is === 'success'}
-              />
-            </FormField>
+          <Box direction="row" gap="medium" margin={{ vertical: 'large' }}>
+            <Box basis={'1/4'} gap="medium">
+              <FormField label="NFT ID">
+                <TextInput
+                  value={tokenId}
+                  onChange={e => this.setState({ tokenId: e.currentTarget.value }, this.getNFT)}
+                  disabled={is === 'success'}
+                />
+              </FormField>
+            </Box>
+            <Box basis={'1/4'} gap="medium">
+              <FormField label="Appraisal">
+                <NumberInput
+                  value={baseToDisplay(appraisal, 18)} suffix=" DAI" precision={18} autoFocus
+                  onChange={(masked: string, float: number) => float !== undefined &&
+                    this.setState({ appraisal: displayToBase(masked, 18) })}
+                  disabled={is === 'success'}
+                />
+              </FormField>
+            </Box>
+            <Box basis={'1/4'} gap="medium">
+              <FormField label="Principal">
+                <NumberInput
+                  value={baseToDisplay(principal, 18)} suffix=" DAI" precision={18}
+                  onChange={(masked: string, float: number) => float !== undefined &&
+                    this.setState({ principal: displayToBase(masked, 18) })}
+                  disabled={is === 'success'}
+                />
+              </FormField>
+            </Box>
+            <Box basis={'1/4'} gap="medium">
+              <FormField label="Interest Rate (Yearly)">
+                <NumberInput
+                  value={interestRate} suffix=" %" precision={2}
+                  onChange={(masked: string, float: number) => {
+                    if (float !== undefined) {
+                      console.log({ masked, float });
+                      this.setState({ interestRate: `${float}` });
+                    }
+                  }}
+                  disabled={is === 'success'}
+                />
+              </FormField>
+            </Box>
           </Box>
-          <Box basis={'1/4'} gap="medium">
-            <FormField label="Appraisal">
-              <NumberInput
-                value={baseToDisplay(appraisal, 18)} suffix=" DAI" precision={18} autoFocus
-                onChange={(masked: string, float: number) => float !== undefined &&
-                  this.setState({ appraisal: displayToBase(masked, 18) })}
-                disabled={is === 'loading' || is === 'success'}
-              />
-            </FormField>
-          </Box>
-          <Box basis={'1/4'} gap="medium">
-            <FormField label="Principal">
-              <NumberInput
-                value={baseToDisplay(principal, 18)} suffix=" DAI" precision={18}
-                onChange={(masked: string, float: number) => float !== undefined &&
-                  this.setState({ principal: displayToBase(masked, 18) })}
-                disabled={is === 'loading' || is === 'success'}
-              />
-            </FormField>
-          </Box>
-          <Box basis={'1/4'} gap="medium" />
+
+          {nft!.state === 'not found' && <Alert type="error" margin={{ vertical: 'large' }}>
+            NFT for token ID {tokenId} not found.</Alert>}
+          {nft!.state === 'found' && nft!.nft &&
+            <NftData data={nft!.nft} authedAddr={tinlake.ethConfig.from} />}
         </Box>
-      </Box>
+      }
     </Box>;
   }
 }
 
-export default WhitelistNFT;
+export default connect(state => state, { getNFT })(WhitelistNFT);

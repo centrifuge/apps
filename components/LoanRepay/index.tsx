@@ -1,10 +1,10 @@
 import * as React from 'react';
 import Tinlake from 'tinlake';
-import { LoansState, getLoan } from '../../ducks/loans';
+import { LoansState, getLoan, subscribeDebt } from '../../ducks/loans';
 import { connect } from 'react-redux';
 import Alert from '../Alert';
 import { Box, FormField, Button, Heading, Text } from 'grommet';
-import LoanNftData from '../LoanNftData';
+import NftData from '../NftData';
 import SecondaryHeader from '../SecondaryHeader';
 import Link from 'next/link';
 import { LinkPrevious } from 'grommet-icons';
@@ -13,6 +13,10 @@ import NumberDisplay from '../NumberDisplay';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 import { displayToBase } from '../../utils/displayToBase';
 import LoanData from '../LoanData';
+import { calcRepayAmount } from '../../utils/calcRepayAmount';
+import { authTinlake } from '../../services/tinlake';
+import { Spinner } from '@centrifuge/axis-spinner';
+import Auth from '../Auth';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -21,12 +25,14 @@ interface Props {
   tinlake: Tinlake;
   loans?: LoansState;
   getLoan?: (tinlake: Tinlake, loanId: string, refresh?: boolean) => Promise<void>;
+  subscribeDebt?: (tinlake: Tinlake, loanId: string) => () => void;
 }
 
 interface State {
   repayAmount: string;
   is: 'loading' | 'success' | 'error' | null;
   errorMsg: string;
+  touchedRepaymentAmount: boolean;
 }
 
 class LoanRepay extends React.Component<Props, State> {
@@ -34,32 +40,44 @@ class LoanRepay extends React.Component<Props, State> {
     repayAmount: '',
     is: null,
     errorMsg: '',
+    touchedRepaymentAmount: false,
   };
-  lastDebt = '';
+  discardDebtSubscription = () => { };
 
   componentWillMount() {
     this.props.getLoan!(this.props.tinlake, this.props.loanId);
+    this.discardDebtSubscription = this.props.subscribeDebt!(this.props.tinlake, this.props.loanId);
+  }
+
+  componentWillUnmount() {
+    this.discardDebtSubscription();
   }
 
   componentDidUpdate(nextProps: Props) {
     const loans = nextProps.loans;
     if (!loans || !loans.singleLoan) { return; }
-    const nextDebt = loans.singleLoan.debt.toString();
-    if (nextDebt !== this.lastDebt) {
-      this.lastDebt = nextDebt;
-      this.setState({ repayAmount: loans.singleLoan.debt.toString() });
-    }
+    if (this.state.touchedRepaymentAmount) { return; }
+
+    const { debt, fee } = loans.singleLoan;
+
+    const repayAmount = calcRepayAmount(debt, fee).toString();
+
+    if (repayAmount === this.state.repayAmount) { return; }
+
+    this.setState({ repayAmount });
   }
 
   repay = async () => {
-    this.setState({ is: 'loading' });
-
-    const { getLoan, tinlake, loanId } = this.props;
-    const { repayAmount } = this.state;
-    const addresses = tinlake.contractAddresses;
-    const ethFrom = tinlake.ethConfig.from;
+    this.setState({ is: 'loading', touchedRepaymentAmount: true });
 
     try {
+      await authTinlake();
+
+      const { getLoan, tinlake, loanId } = this.props;
+      const { repayAmount } = this.state;
+      const addresses = tinlake.contractAddresses;
+      const ethFrom = tinlake.ethConfig.from;
+
       // approve currency
       const res0 = await tinlake.approveCurrency(addresses['PILE'], repayAmount);
       console.log(res0.txHash);
@@ -83,7 +101,7 @@ class LoanRepay extends React.Component<Props, State> {
         return;
       }
 
-      getLoan!(tinlake, loanId, true);
+      await getLoan!(tinlake, loanId, true);
 
       this.setState({ is: 'success' });
     } catch (e) {
@@ -96,9 +114,9 @@ class LoanRepay extends React.Component<Props, State> {
     const { loans, loanId, tinlake } = this.props;
     const { singleLoan, singleLoanState } = loans!;
 
-    if (singleLoanState === null || singleLoanState === 'loading') { return 'Loading...'; }
+    if (singleLoanState === null || singleLoanState === 'loading') { return null; }
     if (singleLoanState === 'not found') {
-      return <Alert type="error">
+      return <Alert margin="medium" type="error">
         Could not find loan {loanId}</Alert>;
     }
 
@@ -119,46 +137,56 @@ class LoanRepay extends React.Component<Props, State> {
             disabled={is === 'loading' || is === 'success'} />}
       </SecondaryHeader>
 
-      <Box pad={{ horizontal: 'medium' }}>
-        {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
-          <Box direction="row" justify="end" margin={{ bottom: 'medium' }}>
-            <Text>
-              Your total Repayment Amount is <Text weight="bold">{<NumberDisplay
-                value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />}</Text>
-            </Text>
+      <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization render={auth =>
+        auth.user === null &&
+          <Alert margin="medium" type="error">Please authenticate to view your loan.</Alert>
+      } />
+
+      {is === 'loading' ?
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Repaying...'} />
+      :
+        <Box pad={{ horizontal: 'medium' }}>
+          {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
+            <Box direction="row" justify="end" margin={{ bottom: 'medium' }}>
+              <Text>
+                Your total Repayment Amount is <Text weight="bold">{<NumberDisplay
+                  value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />}</Text>
+              </Text>
+            </Box>
+          }
+
+          {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}><Text>
+            Successfully repayed{' '}
+            <NumberDisplay value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />
+            {' '}for Loan ID {loanId}
+          </Text></Alert>}
+          {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
+            <Text weight="bold">Error repaying Loan ID {loanId}, see console for details</Text>
+            {errorMsg && <div><br />{errorMsg}</div>}
+          </Alert>}
+
+          <Box direction="row" gap="medium" margin={{ vertical: 'medium' }}>
+            <Box basis={'1/4'} gap="medium"><FormField label="Repay Amount">
+              <NumberInput
+                value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18}
+                onChange={(masked: string, float: number) => float !== undefined &&
+                  this.setState({
+                    repayAmount: displayToBase(masked, 18), touchedRepaymentAmount: true })}
+                autoFocus disabled={true || is === 'loading' || is === 'success'}
+              />
+            </FormField></Box>
+            <Box basis={'1/4'} gap="medium" />
+            <Box basis={'1/4'} gap="medium" />
+            <Box basis={'1/4'} gap="medium" />
           </Box>
-        }
 
-        {is === 'loading' && 'Repaying...'}
-        {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
-          Successfully repayed
-          <NumberDisplay value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />
-          for Loan ID {loanId}</Alert>}
-        {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
-          <Text weight="bold">Error repaying Loan ID {loanId}, see console for details</Text>
-          {errorMsg && <div><br />{errorMsg}</div>}
-        </Alert>}
+          <LoanData loan={singleLoan!} />
 
-        <Box direction="row" gap="medium" margin={{ vertical: 'medium' }}>
-          <Box basis={'1/4'} gap="medium"><FormField label="Repay Amount">
-            <NumberInput
-              value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18}
-              onChange={(masked: string, float: number) => float !== undefined &&
-                this.setState({ repayAmount: displayToBase(masked, 18) })}
-              autoFocus disabled={true || is === 'loading' || is === 'success'}
-            />
-          </FormField></Box>
-          <Box basis={'1/4'} gap="medium" />
-          <Box basis={'1/4'} gap="medium" />
-          <Box basis={'1/4'} gap="medium" />
+          <NftData data={singleLoan!} authedAddr={tinlake.ethConfig.from} />
         </Box>
-
-        <LoanData loan={singleLoan!} />
-
-        <LoanNftData loan={singleLoan!} authedAddr={tinlake.ethConfig.from} />
-      </Box>
+      }
     </Box>;
   }
 }
 
-export default connect(state => state, { getLoan })(LoanRepay);
+export default connect(state => state, { getLoan, subscribeDebt })(LoanRepay);

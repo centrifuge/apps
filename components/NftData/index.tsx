@@ -4,15 +4,16 @@ import { Box, FormField, TextInput, Heading, Paragraph } from 'grommet';
 import styled from 'styled-components';
 import { formatAddress } from '../../utils/formatAddress';
 import MeBadge from '../MeBadge';
+import { NFT } from '../../ducks/nft';
 
 interface Props {
-  loan: InternalListLoan;
+  data: InternalListLoan | NFT;
   authedAddr: string;
 }
 
-class LoanNftData extends React.Component<Props> {
+class NftData extends React.Component<Props> {
   render() {
-    const { loan: { tokenId, nftOwner }, authedAddr } = this.props;
+    const { data: { tokenId, nftOwner }, authedAddr } = this.props;
 
     return <NftDataContainer>
       <Heading level="6" margin="none">NFT Data</Heading>
@@ -46,7 +47,7 @@ class LoanNftData extends React.Component<Props> {
   }
 }
 
-export default LoanNftData;
+export default NftData;
 
 const NftDataContainer = styled(Box)`
   margin: 56px 0;
