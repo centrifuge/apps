@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/centrifuge/tinlake-ui#readme",
   "dependencies": {
-    "@centrifuge/axis-number-input": "^0.3.0",
     "@centrifuge/axis-spinner": "^0.3.1",
     "@centrifuge/axis-theme": "^0.3.0",
     "chai": "^4.2.0",
@@ -32,6 +31,7 @@
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "react-number-format": "^4.0.8",
     "react-redux": "^7.1.0",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",

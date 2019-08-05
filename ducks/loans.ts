@@ -28,6 +28,7 @@ export interface InternalListLoan extends Loan {
 
 export interface InternalSingleLoan extends InternalListLoan {
   appraisal: BN;
+  nftData: any;
 }
 
 export interface LoansState {
@@ -151,10 +152,12 @@ export function getLoan(tinlake: Tinlake, loanId: string, refresh = false):
     const nftOwnerPromise = tinlake.ownerOfNFT(bnToHex(loan.tokenId));
     const loanOwnerPromise = tinlake.ownerOfLoan(loanId);
     const appraisalPromise = tinlake.getAppraisal(loanId);
+    const nftDataPromise = tinlake.getNFTData(bnToHex(loan.tokenId));
 
     let nftOwner: Address;
     let loanOwner: Address;
     let appraisal: BN;
+    let nftData: any;
     try {
       nftOwner = await nftOwnerPromise;
     } catch (e) {
@@ -176,12 +179,20 @@ export function getLoan(tinlake: Tinlake, loanId: string, refresh = false):
         `NFT ID ${loan.tokenId.toString()}`);
       appraisal = new BN(0);
     }
+    try {
+      nftData = await nftDataPromise;
+    } catch (e) {
+      console.error(`Could not get NFT data for Loan ID ${loanId}, ` +
+        `NFT ID ${loan.tokenId.toString()}`);
+      nftData = null;
+    }
 
     const extendedLoanData: InternalSingleLoan = {
       loanId,
       nftOwner,
       loanOwner,
       appraisal,
+      nftData,
       principal: loan.principal,
       price: loan.price,
       fee: balanceDebtData.fee,
@@ -191,8 +202,6 @@ export function getLoan(tinlake: Tinlake, loanId: string, refresh = false):
       debt: balanceDebtData.debt,
       status: getLoanStatus(loan.principal, balanceDebtData.debt),
     };
-
-    console.log({ loanId, appraisal: appraisal.toString() });
 
     dispatch({ type: RECEIVE_SINGLE, loan: extendedLoanData });
   };

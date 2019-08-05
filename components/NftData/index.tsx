@@ -1,19 +1,32 @@
 import * as React from 'react';
-import { InternalListLoan } from '../../ducks/loans';
+import { InternalSingleLoan } from '../../ducks/loans';
 import { Box, FormField, TextInput, Heading, Paragraph } from 'grommet';
 import styled from 'styled-components';
 import { formatAddress } from '../../utils/formatAddress';
 import MeBadge from '../MeBadge';
 import { NFT } from '../../ducks/nft';
+import NftDataField, { FieldDefinition } from '../NftDataField';
+import nftDataFieldDefinitions from '../../nft_data_field_definitions.json';
 
 interface Props {
-  data: InternalListLoan | NFT;
+  data: InternalSingleLoan | NFT;
   authedAddr: string;
+}
+
+interface NftData {
+  document_version: string;
+  amount: string;
+  asis_value: string;
+  rehab_value: string;
+  borrower: string;
 }
 
 class NftData extends React.Component<Props> {
   render() {
-    const { data: { tokenId, nftOwner }, authedAddr } = this.props;
+    const { data: { tokenId, nftOwner, nftData }, authedAddr } = this.props;
+
+    // create empty boxes for layout purposes if nft data has != 4 entries
+    const nftDataFillers = [...Array(nftDataFillersNeeded(nftDataFieldDefinitions.length)).keys()];
 
     return <NftDataContainer>
       <Heading level="6" margin="none">NFT Data</Heading>
@@ -34,14 +47,12 @@ class NftData extends React.Component<Props> {
 
       <Paragraph>The following metadata was read from the NFT:</Paragraph>
       <Box direction="row" gap="medium" margin={{ bottom: 'none', top: 'small' }}>
-        <Box basis={'1/4'} gap="medium"><FormField label="Mortgage ID">
-          <TextInput value={'TBD'} disabled /></FormField></Box>
-        <Box basis={'1/4'} gap="medium"><FormField label="Mortgage Amount">
-          <TextInput value={'TBD'} disabled /></FormField></Box>
-        <Box basis={'1/4'} gap="medium"><FormField label="Currency">
-          <TextInput value={'TBD'} disabled /></FormField></Box>
-        <Box basis={'1/4'} gap="medium"><FormField label="Maturity Date">
-          <TextInput value={'TBD'} disabled /></FormField></Box>
+        {nftDataFieldDefinitions.map((fieldDef: FieldDefinition) =>
+          <Box basis={'1/4'} gap="medium" key={fieldDef.key}>
+            <NftDataField fieldDefinition={fieldDef} value={nftData[fieldDef.key]} />
+          </Box>,
+        )}
+        {nftDataFillers.map(i => <Box key={i} basis={'1/4'} gap="medium" />)}
       </Box>
     </NftDataContainer>;
   }
@@ -55,3 +66,9 @@ const NftDataContainer = styled(Box)`
   border-radius: 3px;
   background: #f7f7f7;
 `;
+
+const nftDataFillersNeeded = (noOfFields: number) => {
+  const remainder = noOfFields % 4;
+  if (remainder === 0) { return 0; }
+  return 4 - remainder;
+};

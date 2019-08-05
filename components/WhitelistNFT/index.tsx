@@ -5,7 +5,6 @@ import Alert from '../Alert';
 import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
-import { NumberInput } from '@centrifuge/axis-number-input';
 import { baseToDisplay } from '../../utils/baseToDisplay';
 import { displayToBase } from '../../utils/displayToBase';
 import { interestRateToFee } from '../../utils/interestRateToFee';
@@ -14,6 +13,7 @@ import { NFTState, getNFT } from '../../ducks/nft';
 import NftData from '../NftData';
 import { authTinlake } from '../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
+import NumberInput from '../NumberInput';
 
 const SUCCESS_STATUS = '0x1';
 
@@ -151,8 +151,8 @@ class WhitelistNFT extends React.Component<Props, State> {
               <FormField label="Appraisal">
                 <NumberInput
                   value={baseToDisplay(appraisal, 18)} suffix=" DAI" precision={18} autoFocus
-                  onChange={(masked: string, float: number) => float !== undefined &&
-                    this.setState({ appraisal: displayToBase(masked, 18) })}
+                  onValueChange={({ value }) =>
+                    this.setState({ appraisal: displayToBase(value, 18) })}
                   disabled={is === 'success'}
                 />
               </FormField>
@@ -161,8 +161,8 @@ class WhitelistNFT extends React.Component<Props, State> {
               <FormField label="Principal">
                 <NumberInput
                   value={baseToDisplay(principal, 18)} suffix=" DAI" precision={18}
-                  onChange={(masked: string, float: number) => float !== undefined &&
-                    this.setState({ principal: displayToBase(masked, 18) })}
+                  onValueChange={({ value }) =>
+                    this.setState({ principal: displayToBase(value, 18) })}
                   disabled={is === 'success'}
                 />
               </FormField>
@@ -171,12 +171,8 @@ class WhitelistNFT extends React.Component<Props, State> {
               <FormField label="Interest Rate (Yearly)">
                 <NumberInput
                   value={interestRate} suffix=" %" precision={2}
-                  onChange={(masked: string, float: number) => {
-                    if (float !== undefined) {
-                      console.log({ masked, float });
-                      this.setState({ interestRate: `${float}` });
-                    }
-                  }}
+                  onValueChange={({ value }) =>
+                    this.setState({ interestRate: value })}
                   disabled={is === 'success'}
                 />
               </FormField>
