@@ -1,12 +1,9 @@
-// tslint:disable-next-line:import-name
 import Eth from 'ethjs';
 import { AbiCoder } from 'web3-eth-abi';
 const abiCoder = new AbiCoder();
-import { sha3 } from 'web3-utils';
-// tslint:disable-next-line:import-name
 import BN from 'bn.js';
+import { sha3 } from 'web3-utils';
 
-// tslint:disable:import-name no-duplicate-imports
 import contractAbiNft from './abi/test/SimpleNFT.abi.json';
 import contractAbiTitle from './abi/Title.abi.json';
 import contractAbiCurrency from './abi/test/SimpleToken.abi.json';
@@ -25,7 +22,6 @@ import contractAbiAdmin from './abi/Admin.abi.json';
 // method last.
 import contractAbiPileForAdd from './abi/PileForAdd.json';
 import contractAbiPileForInit from './abi/PileForInit.abi.json';
-// tslint:enable:import-name
 
 interface ContractAbis {
   'nft': any;
@@ -42,6 +38,7 @@ interface ContractAbis {
   'pileForAdd': any;
   'pileForInit': any;
   'admin': any;
+  'nftData': any;
 }
 
 interface ContractAddresses {
@@ -85,10 +82,11 @@ interface Contracts {
   pileForAdd: any;
   pileForInit: any;
   admin: any;
+  nftData: any;
 }
 
-// tslint:disable-next-line:class-name
 interface ethI {
+  web3_sha3: (signature: string) => string;
   getTransactionReceipt: (arg0: any, arg1: (err: any, receipt: any) => void) => void;
   getTransactionByHash: (arg0: any, arg1: (err: any, tx: any) => void) => void;
   contract: (arg0: any) => { at: (arg0: any) => void };
@@ -120,6 +118,11 @@ export interface BalanceDebt {
   chi: BN;
 }
 
+export interface AbiOutput {
+  name: string;
+  type: 'uint265' | 'address';
+}
+
 export const LOAN_ID_IDX = 2;
 
 class Tinlake {
@@ -131,7 +134,7 @@ class Tinlake {
   public contracts: Contracts;
   public contractAbis: ContractAbis;
 
-  constructor(provider: any, contractAddresses: ContractAddresses,
+  constructor(provider: any, contractAddresses: ContractAddresses, nftDataOutputs: AbiOutput[],
               { contractAbis, ethOptions, ethConfig }: Options = {}) {
     this.contractAbis = contractAbis || {
       nft: contractAbiNft,
@@ -148,6 +151,20 @@ class Tinlake {
       pileForAdd: contractAbiPileForAdd,
       pileForInit: contractAbiPileForInit,
       admin: contractAbiAdmin,
+      nftData: [{
+        constant: true,
+        inputs: [
+          {
+            name: '',
+            type: 'uint256',
+          },
+        ],
+        name: 'data',
+        outputs: nftDataOutputs,
+        payable: false,
+        stateMutability: 'view',
+        type: 'function',
+      }],
     };
     this.contractAddresses = contractAddresses;
 
@@ -190,6 +207,8 @@ class Tinlake {
         .at(this.contractAddresses['PILE']),
       admin: this.eth.contract(this.contractAbis.admin)
         .at(this.contractAddresses['ADMIN']),
+      nftData: this.eth.contract(this.contractAbis.nftData)
+        .at(this.contractAddresses['NFT_COLLATERAL']),
     };
   }
 
@@ -373,6 +392,11 @@ class Tinlake {
     const res: { 0: BN } = await this.contracts.collateral.totalSupply();
     return res['0'];
   }
+
+  getNFTData: <T>(tokenId: string) => Promise<T> = async (tokenId) => {
+    const res = await this.contracts.nftData.data(tokenId);
+    return res;
+  }
 }
 
 const waitAndReturnEvents = (eth: ethI, txHash: string, abi: any) => {
@@ -469,3 +493,10 @@ const getEvents = (receipt: {
 };
 
 export default Tinlake;
+
+export * from './utils/baseToDisplay';
+export * from './utils/bnToHex';
+export * from './utils/displayToBase';
+export * from './utils/feeToInterestRate';
+export * from './utils/getLoanStatus';
+export * from './utils/interestRateToFee';

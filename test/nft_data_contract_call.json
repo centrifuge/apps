@@ -1,0 +1,24 @@
+{
+  "outputs": [
+    {
+      "name": "document_version",
+      "type": "uint256"
+    },
+    {
+      "name": "amount",
+      "type": "uint256"
+    },
+    {
+      "name": "asis_value",
+      "type": "uint256"
+    },
+    {
+      "name": "rehab_value",
+      "type": "uint256"
+    },
+    {
+      "name": "borrower",
+      "type": "address"
+    }
+  ]
+}

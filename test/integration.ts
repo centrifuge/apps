@@ -1,13 +1,10 @@
-// tslint:disable-next-line:variable-name
 const SignerProvider = require('ethjs-provider-signer');
 const { sign } = require('ethjs-signer');
 import assert from 'assert';
 const rpcUrl = process.env['ETH_RPC_URL'];
-// tslint:disable-next-line:import-name
 import BN from 'bn.js';
-// tslint:disable-next-line:import-name
 import contractAddresses from './addresses_tinlake.json';
-// import { sleep } from './utils/sleep';
+import nftDataContractCall from './nft_data_contract_call.json';
 import Tinlake, { LOAN_ID_IDX } from '../dist/Tinlake';
 
 const SUCCESS_STATUS = '0x1';
@@ -20,8 +17,8 @@ const tokenID = `0x${Math.floor(Math.random() * (10 ** 15))}`;
 let loanID: string;
 
 const gasLimit = 1000000;
-const principal = '100';
-const appraisal = '300';
+const principal = '100000000000000000000';
+const appraisal = '300000000000000000000';
 const fee = '1000000564701133626865910626'; // 5 % per day
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -35,6 +32,7 @@ describe('functional tinlake tests', () => {
         accounts: (cb: (arg0: null, arg1: string[]) => void) => cb(null, [adminEthFrom]),
       }),
       contractAddresses,
+      nftDataContractCall.outputs,
       {
         ethConfig: { from: adminEthFrom, gasLimit: `0x${gasLimit.toString(16)}` },
       },
@@ -46,6 +44,7 @@ describe('functional tinlake tests', () => {
         accounts: (cb: (arg0: null, arg1: string[]) => void) => cb(null, [borrowerEthFrom]),
       }),
       contractAddresses,
+      nftDataContractCall.outputs,
       {
         ethConfig: { from: borrowerEthFrom, gasLimit: `0x${gasLimit.toString(16)}` },
       },
@@ -300,7 +299,7 @@ describe('functional tinlake tests', () => {
     });
   });
 
-  describe.only('tinlake call functionality', function () {
+  describe('tinlake call functionality', function () {
     this.timeout(50000);
 
     const loanID = '4';
@@ -367,6 +366,11 @@ describe('functional tinlake tests', () => {
     it('gets admin status correctly for non admins', async () => {
       const isAdmin = await borrowerTinlake.isAdmin(borrowerEthFrom);
       assert(isAdmin === false);
+    });
+
+    it('gets additional NFT data', async () => {
+      const data = await borrowerTinlake.getNFTData(
+        '88113924690647335018863500983244386663858523359731661673246712804208111741806');
     });
   });
 });
