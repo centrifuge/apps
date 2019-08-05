@@ -1,9 +1,7 @@
 import { AnyAction, Action } from 'redux';
-import Tinlake, { Loan, BalanceDebt, Address } from 'tinlake';
+import Tinlake, { Loan, BalanceDebt, Address, getLoanStatus, LoanStatus, bnToHex } from 'tinlake';
 import BN from 'bn.js';
-import getLoanStatus, { LoanStatus } from '../utils/getLoanStatus';
 import { ThunkAction } from 'redux-thunk';
-import { bnToHex } from '../utils/bnToHex';
 
 // Config
 const startingLoanId = 0;

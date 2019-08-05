@@ -1,10 +1,9 @@
 import * as React from 'react';
-import Tinlake from 'tinlake';
+import Tinlake, { baseToDisplay } from 'tinlake';
 import { connect } from 'react-redux';
 import { Box, Heading } from 'grommet';
 import SecondaryHeader from '../SecondaryHeader';
 import { DashboardState, subscribeDashboardData } from '../../ducks/dashboard';
-import { baseToDisplay } from '../../utils/baseToDisplay';
 import { calcRatioPercent } from '../../utils/calcRatioPercent';
 import DashboardMetric from '../DashboardMetric';
 import NumberDisplay from '../NumberDisplay';

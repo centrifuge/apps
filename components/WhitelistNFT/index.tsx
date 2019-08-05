@@ -1,13 +1,10 @@
 import * as React from 'react';
-import Tinlake from 'tinlake';
+import Tinlake, { baseToDisplay, displayToBase, interestRateToFee } from 'tinlake';
 import { Box, FormField, TextInput, Button, Heading, Text } from 'grommet';
 import Alert from '../Alert';
 import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
-import { baseToDisplay } from '../../utils/baseToDisplay';
-import { displayToBase } from '../../utils/displayToBase';
-import { interestRateToFee } from '../../utils/interestRateToFee';
 import { connect } from 'react-redux';
 import { NFTState, getNFT } from '../../ducks/nft';
 import NftData from '../NftData';

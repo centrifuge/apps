@@ -1,13 +1,11 @@
 import * as React from 'react';
-import Tinlake from 'tinlake';
+import Tinlake, { baseToDisplay, feeToInterestRate } from 'tinlake';
 import Link from 'next/link';
 import { Box, DataTable, Anchor } from 'grommet';
 import { connect } from 'react-redux';
 import { InternalListLoan, LoansState, getLoans } from '../../ducks/loans';
 import Address from '../Address';
 import NumberDisplay from '../NumberDisplay';
-import { baseToDisplay } from '../../utils/baseToDisplay';
-import { feeToInterestRate } from '../../utils/feeToInterestRate';
 import MeBadge from '../MeBadge';
 import { Spinner } from '@centrifuge/axis-spinner';
 
