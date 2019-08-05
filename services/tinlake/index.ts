@@ -1,6 +1,7 @@
 import Tinlake from 'tinlake';
 import contractAddresses from './addresses_tinlake.json';
 import Eth from 'ethjs';
+import nftDataDefinition from '../../nft_data_definition.json';
 
 declare var web3: any;
 
@@ -29,7 +30,7 @@ export async function getTinlake() {
   const provider = new Eth.HttpProvider(
     'https://kovan.infura.io/v3/092108ec6aea46ab97b2175b45130455');
 
-  tinlake = new Tinlake(provider, contractAddresses, {});
+  tinlake = new Tinlake(provider, contractAddresses, nftDataDefinition.contractCall.outputs, {});
 
   return tinlake;
 }
