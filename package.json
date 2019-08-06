@@ -34,6 +34,7 @@
     "ts-mocha": "^6.0.0",
     "tslint": "^5.18.0",
     "tslint-config-airbnb": "^5.11.1",
+    "typedoc": "^0.15.0",
     "typescript": "^3.5.2"
   },
   "scripts": {
@@ -42,7 +43,8 @@
     "test": "npm run test-unit && npm run test-integration",
     "test-unit": "ts-mocha -p test/tsconfig.json src/**/*.spec.ts",
     "test-integration": "npm run build && ts-mocha -p test/tsconfig.json test/**/*",
-    "nodemon": "nodemon node inspect dist/Tinlake.js"
+    "nodemon": "nodemon node inspect dist/Tinlake.js",
+    "generate-docs": "typedoc --out docs --exclude \"./node_modules/**\" --excludeExternals --excludeNotExported ./src"
   },
   "repository": {
     "type": "git",

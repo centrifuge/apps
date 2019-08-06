@@ -34913,9 +34913,9 @@ var getEvents = function (receipt, abi) {
 };
 
 exports.LOAN_ID_IDX = LOAN_ID_IDX;
+exports.Tinlake = Tinlake;
 exports.baseToDisplay = baseToDisplay;
 exports.bnToHex = bnToHex;
-exports.default = Tinlake;
 exports.displayToBase = displayToBase;
 exports.feeToInterestRate = feeToInterestRate;
 exports.getLoanStatus = getLoanStatus;

@@ -125,7 +125,7 @@ export interface AbiOutput {
 
 export const LOAN_ID_IDX = 2;
 
-class Tinlake {
+export class Tinlake {
   public provider: any;
   public eth: ethI;
   public ethOptions: any;
@@ -491,8 +491,6 @@ const getEvents = (receipt: {
   });
   return events;
 };
-
-export default Tinlake;
 
 export * from './utils/baseToDisplay';
 export * from './utils/bnToHex';
