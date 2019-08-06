@@ -2,7 +2,7 @@
 
 ## Usage
 
-Documentation can be found in `./docs/` or at https://centrifuge.github.io/tinlake.js/docs/.
+Documentation can be found in `./docs/` or at https://centrifuge.github.io/tinlake.js/.
 
 ## Development
 
