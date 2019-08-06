@@ -158,6 +158,7 @@ export declare class Tinlake {
     getTotalValueOfNFTs: () => Promise<BN>;
     getNFTData: <T>(tokenId: string) => Promise<T>;
 }
+export default Tinlake;
 export * from './utils/baseToDisplay';
 export * from './utils/bnToHex';
 export * from './utils/displayToBase';

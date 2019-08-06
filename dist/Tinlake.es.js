@@ -34906,4 +34906,5 @@ var getEvents = function (receipt, abi) {
     return events;
 };
 
+export default Tinlake;
 export { LOAN_ID_IDX, Tinlake, baseToDisplay, bnToHex, displayToBase, feeToInterestRate, getLoanStatus, interestRateToFee };
