@@ -492,6 +492,8 @@ const getEvents = (receipt: {
   return events;
 };
 
+export default Tinlake;
+
 export * from './utils/baseToDisplay';
 export * from './utils/bnToHex';
 export * from './utils/displayToBase';
