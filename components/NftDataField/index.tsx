@@ -1,37 +1,44 @@
 import * as React from 'react';
 import { FormField, TextInput } from 'grommet';
 import NumberInput from '../NumberInput';
-import { baseToDisplay } from 'tinlake';
+import { baseToDisplay, AbiOutput } from 'tinlake';
 
-interface FieldDefinitionBase {
+export interface NftDataDefinition {
+  contractCall: {
+    outputs: AbiOutput[],
+  };
+  displayedFields: DisplayedField[];
+}
+
+interface DisplayedFieldBase {
   key: string;
   label: string;
 }
 
-interface FieldDefinitionUint extends FieldDefinitionBase {
+interface DisplayedFieldUint extends DisplayedFieldBase {
   type: 'uint';
   decimals?: number;
   precision?: number;
   suffix?: string;
 }
 
-interface FieldDefinitionAddress extends FieldDefinitionBase {
+interface DisplayedFieldAddress extends DisplayedFieldBase {
   type: 'address';
 }
 
-export type FieldDefinition = FieldDefinitionUint | FieldDefinitionAddress;
+export type DisplayedField = DisplayedFieldUint | DisplayedFieldAddress;
 
 interface Props {
-  fieldDefinition: FieldDefinition;
+  displayedField: DisplayedField;
   value: any;
 }
 
 class NftDataField extends React.Component<Props> {
   render() {
-    const { fieldDefinition: fieldDef, value } = this.props;
+    const { displayedField: field, value } = this.props;
 
-    if (fieldDef.type === 'uint') {
-      const { label, decimals, precision, suffix } = fieldDef;
+    if (field.type === 'uint') {
+      const { label, decimals, precision, suffix } = field;
 
       return <FormField label={label}>
         <NumberInput value={baseToDisplay(value, decimals || 18)} suffix={suffix}
@@ -39,16 +46,15 @@ class NftDataField extends React.Component<Props> {
       </FormField>;
     }
 
-    if (fieldDef.type === 'address') {
-
-      const { label } = fieldDef;
+    if (field.type === 'address') {
+      const { label } = field;
 
       return <FormField label={label}>
         <TextInput value={value} disabled />
       </FormField>;
     }
 
-    throw new Error(`Unsupported type "${(fieldDef as any).type}" given to NftDataField`);
+    throw new Error(`Unsupported type "${(field as any).type}" given to NftDataField`);
   }
 }
 

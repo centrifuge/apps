@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import { formatAddress } from '../../utils/formatAddress';
 import MeBadge from '../MeBadge';
 import { NFT } from '../../ducks/nft';
-import NftDataField, { FieldDefinition } from '../NftDataField';
-import nftDataFieldDefinitions from '../../nft_data_field_definitions.json';
+import NftDataField, { DisplayedField } from '../NftDataField';
+import nftDataDefinition from '../../nft_data_definition.json';
 
 interface Props {
   data: InternalSingleLoan | NFT;
@@ -26,7 +26,8 @@ class NftData extends React.Component<Props> {
     const { data: { tokenId, nftOwner, nftData }, authedAddr } = this.props;
 
     // create empty boxes for layout purposes if nft data has != 4 entries
-    const nftDataFillers = [...Array(nftDataFillersNeeded(nftDataFieldDefinitions.length)).keys()];
+    const nftDataFillers = [
+      ...Array(nftDataFillersNeeded(nftDataDefinition.displayedFields.length)).keys()];
 
     return <NftDataContainer>
       <Heading level="6" margin="none">NFT Data</Heading>
@@ -47,9 +48,9 @@ class NftData extends React.Component<Props> {
 
       <Paragraph>The following metadata was read from the NFT:</Paragraph>
       <Box direction="row" gap="medium" margin={{ bottom: 'none', top: 'small' }}>
-        {nftDataFieldDefinitions.map((fieldDef: FieldDefinition) =>
-          <Box basis={'1/4'} gap="medium" key={fieldDef.key}>
-            <NftDataField fieldDefinition={fieldDef} value={nftData[fieldDef.key]} />
+        {nftDataDefinition.displayedFields.map((field: DisplayedField) =>
+          <Box basis={'1/4'} gap="medium" key={field.key}>
+            <NftDataField displayedField={field} value={nftData[field.key]} />
           </Box>,
         )}
         {nftDataFillers.map(i => <Box key={i} basis={'1/4'} gap="medium" />)}
