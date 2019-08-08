@@ -22,6 +22,7 @@ const appraisal = '300000000000000000000';
 const fee = '1000000564701133626865910626'; // 5 % per day
 
 const buffer = 10000000000; // buffer amount for repay
+const timeout = 60000;
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -54,7 +55,7 @@ describe('functional tinlake tests', () => {
   });
 
   describe('init fee', function () {
-    this.timeout(60000);
+    this.timeout(timeout);
     it('init fee successfully', async () => {
       const res = await adminTinlake.initFee(fee);
       console.log('init fee result');
@@ -69,7 +70,7 @@ describe('functional tinlake tests', () => {
   });
 
   describe('tinlake borrow and repay', function () {
-    this.timeout(60000);
+    this.timeout(timeout);
 
     before(async () => await ensureFeeExists(adminTinlake, fee));
 
@@ -167,7 +168,7 @@ describe('functional tinlake tests', () => {
   });
 
   describe('tinlake whitelist and unwhitelist', function () {
-    this.timeout(60000);
+    this.timeout(timeout);
 
     before(async () => await ensureFeeExists(adminTinlake, fee));
 
@@ -218,7 +219,7 @@ describe('functional tinlake tests', () => {
   });
 
   describe('tinlake borrow and repay with admin whitelist contract', function () {
-    this.timeout(60000);
+    this.timeout(timeout);
 
     before(async () => await ensureFeeExists(adminTinlake, fee));
 
@@ -306,8 +307,13 @@ describe('functional tinlake tests', () => {
   });
 
   describe('tinlake call functionality', function () {
-    this.timeout(60000);
+    this.timeout(timeout);
 
+    let loanID;
+    before(async () =>  {
+      const count = await adminTinlake.loanCount();
+      loanID = count-1;
+    });
 
     it('count number of loans', async () => {
       const count = await adminTinlake.loanCount();
@@ -316,8 +322,6 @@ describe('functional tinlake tests', () => {
     });
 
     it('get a loan', async () => {
-      const count = await adminTinlake.loanCount();
-      const loanID = count-1;
       const res = await adminTinlake.getLoan(loanID);
       assert(BN.isBN(res.price));
       assert(BN.isBN(res.principal));
@@ -326,16 +330,12 @@ describe('functional tinlake tests', () => {
     });
 
     it('get balance and debt from pile for a loan', async () => {
-      const count = await adminTinlake.loanCount();
-      const loanID = count-1;
       const res = await adminTinlake.getBalanceDebt(loanID);
       assert(BN.isBN(res.balance));
       assert(BN.isBN(res.debt));
     });
 
     it('gets the owner of a loan', async () => {
-      const count = await adminTinlake.loanCount();
-      const loanID = count-1;
       const res = await adminTinlake.ownerOfLoan(loanID);
       assert.equal(typeof res, 'string');
     });
@@ -347,8 +347,6 @@ describe('functional tinlake tests', () => {
     });
 
     it('gets the appraisal of a loan', async () => {
-      const count = await adminTinlake.loanCount();
-      const loanID = count-1;
       const res = await adminTinlake.getAppraisal(loanID);
       assert.equal(res.toString(), appraisal);
     });
