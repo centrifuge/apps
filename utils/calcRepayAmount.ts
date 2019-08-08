@@ -7,7 +7,7 @@ Decimal.set({
   toExpPos: 29,
 });
 
-const bufferInSeconds = 60 * 5;
+const bufferInSeconds = 60 * 60;
 
 /**
  * Adds a fee buffer of 5 minutes to the debt. This function can be used to calculate
