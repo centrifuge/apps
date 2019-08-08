@@ -301,13 +301,25 @@ export class Tinlake {
   }
 
   /**
-   * @param from Address that pays back the currency (e. g. DAI)
-   * @param to Address that receives the NFT
+   * @param wad Amount which should be repaid
+   * @param usr Address that receives the NFT
    */
-  repay = (loanId: string, wad: string, from: string, to: string): Promise<Events> => {
-    return this.contracts.reception.repay(loanId, wad, from, to, this.ethConfig)
+  repay = (loanId: string, wad: string, usr: string): Promise<Events> => {
+    return this.contracts.reception.repay(loanId, wad, usr,  this.ethConfig)
       .then((txHash: string) => {
         console.log(`[Reception.repay] txHash: ${txHash}`);
+        return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi);
+      });
+  }
+
+  /**
+   * @param wad Amount which should be repaid
+   * @param usr Address that receives the NFT
+   */
+  close = (loanId: string, usr: string): Promise<Events> => {
+    return this.contracts.reception.close(loanId, usr,  this.ethConfig)
+      .then((txHash: string) => {
+        console.log(`[Reception.close] txHash: ${txHash}`);
         return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi);
       });
   }

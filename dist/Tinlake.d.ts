@@ -134,10 +134,15 @@ export declare class Tinlake {
      */
     borrow: (loanId: string, to: string) => Promise<Events>;
     /**
-     * @param from Address that pays back the currency (e. g. DAI)
-     * @param to Address that receives the NFT
+     * @param wad Amount which should be repaid
+     * @param usr Address that receives the NFT
      */
-    repay: (loanId: string, wad: string, from: string, to: string) => Promise<Events>;
+    repay: (loanId: string, wad: string, usr: string) => Promise<Events>;
+    /**
+     * @param wad Amount which should be repaid
+     * @param usr Address that receives the NFT
+     */
+    close: (loanId: string, usr: string) => Promise<Events>;
     approveCurrency: (usr: string, wad: string) => Promise<Events>;
     lenderRely: (usr: string) => Promise<Events>;
     initFee: (fee: string) => Promise<Events>;

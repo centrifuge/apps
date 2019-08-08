@@ -157,7 +157,7 @@ describe('functional tinlake tests', () => {
       assert.equal(approveCurResult.status, SUCCESS_STATUS, 'tx should be successful');
 
       const repayResult = await borrowerTinlake.repay(loanID, currentDebt+buffer,
-        borrowerEthFrom, borrowerEthFrom);
+        borrowerEthFrom);
 
       console.log(repayResult.txHash);
       assert.equal(repayResult.status, SUCCESS_STATUS, 'tx should be successful');
@@ -296,7 +296,7 @@ describe('functional tinlake tests', () => {
       assert.equal(approveCurResult.status, SUCCESS_STATUS, 'tx should be successful');
 
       const repayResult = await borrowerTinlake.repay(loanID, currentDebt+buffer,
-        borrowerEthFrom, borrowerEthFrom);
+        borrowerEthFrom);
 
       console.log(repayResult.txHash);
       assert.equal(repayResult.status, SUCCESS_STATUS, 'tx should be successful');
