@@ -26,7 +26,14 @@ interface DisplayedFieldAddress extends DisplayedFieldBase {
   type: 'address';
 }
 
-export type DisplayedField = DisplayedFieldUint | DisplayedFieldAddress;
+interface DisplayedFieldTimestamp extends DisplayedFieldBase {
+  type: 'timestamp';
+  decimals?: number;
+  precision?: number;
+  suffix?: string;
+}
+
+export type DisplayedField = DisplayedFieldUint | DisplayedFieldAddress | DisplayedFieldTimestamp;
 
 interface Props {
   displayedField: DisplayedField;
@@ -51,6 +58,15 @@ class NftDataField extends React.Component<Props> {
 
       return <FormField label={label}>
         <TextInput value={value} disabled />
+      </FormField>;
+    }
+
+    if (field.type === 'timestamp') {
+      const { label } = field;
+      const date = new Date(parseInt(baseToDisplay(value, -10)) * 1000)
+
+      return <FormField label={label}>
+        <TextInput value={date.toDateString()} disabled />
       </FormField>;
     }
 
