@@ -29136,10 +29136,6 @@ var contractAbiReception = [
         type: "uint256"
       },
       {
-        name: "usrT",
-        type: "address"
-      },
-      {
         name: "usr",
         type: "address"
       }
@@ -29168,6 +29164,25 @@ var contractAbiReception = [
     ],
     payable: false,
     stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "loan",
+        type: "uint256"
+      },
+      {
+        name: "usr",
+        type: "address"
+      }
+    ],
+    name: "close",
+    outputs: [
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
     type: "function"
   },
   {
@@ -34669,13 +34684,24 @@ var Tinlake = /** @class */ (function () {
             });
         };
         /**
-         * @param from Address that pays back the currency (e. g. DAI)
-         * @param to Address that receives the NFT
+         * @param wad Amount which should be repaid
+         * @param usr Address that receives the NFT
          */
-        this.repay = function (loanId, wad, from, to) {
-            return _this.contracts.reception.repay(loanId, wad, from, to, _this.ethConfig)
+        this.repay = function (loanId, wad, usr) {
+            return _this.contracts.reception.repay(loanId, wad, usr, _this.ethConfig)
                 .then(function (txHash) {
                 console.log("[Reception.repay] txHash: " + txHash);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['reception'].abi);
+            });
+        };
+        /**
+         * @param wad Amount which should be repaid
+         * @param usr Address that receives the NFT
+         */
+        this.close = function (loanId, usr) {
+            return _this.contracts.reception.close(loanId, usr, _this.ethConfig)
+                .then(function (txHash) {
+                console.log("[Reception.close] txHash: " + txHash);
                 return waitAndReturnEvents(_this.eth, txHash, _this.contracts['reception'].abi);
             });
         };
