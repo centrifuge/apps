@@ -21,6 +21,9 @@ const principal = '100000000000000000000';
 const appraisal = '300000000000000000000';
 const fee = '1000000564701133626865910626'; // 5 % per day
 
+const buffer = 10000000000; // buffer amount for repay
+const timeout = 60000;
+
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 describe('functional tinlake tests', () => {
@@ -52,7 +55,7 @@ describe('functional tinlake tests', () => {
   });
 
   describe('init fee', function () {
-    this.timeout(50000);
+    this.timeout(timeout);
     it('init fee successfully', async () => {
       const res = await adminTinlake.initFee(fee);
       console.log('init fee result');
@@ -67,7 +70,7 @@ describe('functional tinlake tests', () => {
   });
 
   describe('tinlake borrow and repay', function () {
-    this.timeout(50000);
+    this.timeout(timeout);
 
     before(async () => await ensureFeeExists(adminTinlake, fee));
 
@@ -92,7 +95,7 @@ describe('functional tinlake tests', () => {
       console.log('-------------------------------------');
 
       const admitResult = await adminTinlake.adminAdmit(contractAddresses['NFT_COLLATERAL'],
-                                                        tokenID, principal, borrowerEthFrom);
+        tokenID, principal, borrowerEthFrom);
       console.log('admit result');
       console.log(admitResult.txHash);
 
@@ -148,13 +151,13 @@ describe('functional tinlake tests', () => {
       console.log('Borrower: Repay');
       console.log('-------------------------------------');
       const approveCurResult = await borrowerTinlake.approveCurrency(contractAddresses['PILE'],
-                                                                     principal);
+        currentDebt+buffer);
       console.log(approveCurResult.txHash);
       assert.equal(approveCurResult.events[0].event.name, 'Approval', 'tx should be successful');
       assert.equal(approveCurResult.status, SUCCESS_STATUS, 'tx should be successful');
 
-      const repayResult = await borrowerTinlake.repay(loanID, principal,
-                                                      borrowerEthFrom, borrowerEthFrom);
+      const repayResult = await borrowerTinlake.repay(loanID, currentDebt+buffer,
+        borrowerEthFrom, borrowerEthFrom);
 
       console.log(repayResult.txHash);
       assert.equal(repayResult.status, SUCCESS_STATUS, 'tx should be successful');
@@ -165,7 +168,7 @@ describe('functional tinlake tests', () => {
   });
 
   describe('tinlake whitelist and unwhitelist', function () {
-    this.timeout(50000);
+    this.timeout(timeout);
 
     before(async () => await ensureFeeExists(adminTinlake, fee));
 
@@ -186,7 +189,7 @@ describe('functional tinlake tests', () => {
       console.log('-------------------------------------');
 
       const admitResult = await adminTinlake.adminAdmit(contractAddresses['NFT_COLLATERAL'],
-                                                        tokenID, principal, borrowerEthFrom);
+        tokenID, principal, borrowerEthFrom);
       console.log('admit result');
       console.log(admitResult.txHash);
 
@@ -208,7 +211,7 @@ describe('functional tinlake tests', () => {
       console.log('-------------------------------------');
 
       const unwhiteListResult = await adminTinlake.unwhitelist(loanID, contractAddresses['SHELF'],
-                                                               tokenID);
+        tokenID);
       console.log('unwhitelist result');
       console.log(unwhiteListResult.txHash);
       assert.equal(unwhiteListResult.status, SUCCESS_STATUS, 'tx should be successful');
@@ -216,11 +219,14 @@ describe('functional tinlake tests', () => {
   });
 
   describe('tinlake borrow and repay with admin whitelist contract', function () {
-    this.timeout(50000);
+    this.timeout(timeout);
 
     before(async () => await ensureFeeExists(adminTinlake, fee));
 
     it('borrow and repay successful', async () => {
+      // init a new tokenID
+      const tokenID = `0x${Math.floor(Math.random() * (10 ** 15))}`;
+
       console.log('');
       console.log('-------------------------------------');
       console.log('Borrower: Mint NFT');
@@ -241,8 +247,8 @@ describe('functional tinlake tests', () => {
       console.log('-------------------------------------');
 
       const whitelistResult = await adminTinlake.whitelist(contractAddresses['NFT_COLLATERAL'],
-                                                           tokenID, principal, appraisal, fee,
-                                                           borrowerEthFrom);
+        tokenID, principal, appraisal, fee,
+        borrowerEthFrom);
       console.log('whitelist result');
       console.log(whitelistResult.txHash);
 
@@ -276,6 +282,7 @@ describe('functional tinlake tests', () => {
       await sleep(1050);
       const currentDebt = await borrowerTinlake.getCurrentDebt(loanID);
       console.log(currentDebt);
+
       console.log(`Got current debt of ${currentDebt.toString()}`);
 
       console.log('');
@@ -283,13 +290,13 @@ describe('functional tinlake tests', () => {
       console.log('Borrower: Repay');
       console.log('-------------------------------------');
       const approveCurResult = await borrowerTinlake.approveCurrency(contractAddresses['PILE'],
-                                                                     principal);
+        currentDebt+buffer);
       console.log(approveCurResult.txHash);
       assert.equal(approveCurResult.events[0].event.name, 'Approval', 'tx should be successful');
       assert.equal(approveCurResult.status, SUCCESS_STATUS, 'tx should be successful');
 
-      const repayResult = await borrowerTinlake.repay(loanID, principal,
-                                                      borrowerEthFrom, borrowerEthFrom);
+      const repayResult = await borrowerTinlake.repay(loanID, currentDebt+buffer,
+        borrowerEthFrom, borrowerEthFrom);
 
       console.log(repayResult.txHash);
       assert.equal(repayResult.status, SUCCESS_STATUS, 'tx should be successful');
@@ -300,10 +307,13 @@ describe('functional tinlake tests', () => {
   });
 
   describe('tinlake call functionality', function () {
-    this.timeout(50000);
+    this.timeout(timeout);
 
-    const loanID = '4';
-    const tokenID = '0x784079192908932';
+    let loanID;
+    before(async () =>  {
+      const count = await adminTinlake.loanCount();
+      loanID = count-1;
+    });
 
     it('count number of loans', async () => {
       const count = await adminTinlake.loanCount();
@@ -331,6 +341,7 @@ describe('functional tinlake tests', () => {
     });
 
     it('gets the owner of an nft', async () => {
+
       const res = await adminTinlake.ownerOfNFT(tokenID);
       assert.equal(typeof res, 'string');
     });
@@ -368,10 +379,6 @@ describe('functional tinlake tests', () => {
       assert(isAdmin === false);
     });
 
-    it('gets additional NFT data', async () => {
-      const data = await borrowerTinlake.getNFTData(
-        '88113924690647335018863500983244386663858523359731661673246712804208111741806');
-    });
   });
 });
 
