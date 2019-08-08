@@ -6,15 +6,19 @@
         "type": "uint256"
       },
       {
-        "name": "amount",
+        "name": "loan_size",
         "type": "uint256"
       },
       {
-        "name": "asis_value",
+        "name": "advance_rate",
         "type": "uint256"
       },
       {
-        "name": "rehab_value",
+        "name": "risk_rating",
+        "type": "uint256"
+      },
+      {
+        "name": "loan_maturity",
         "type": "uint256"
       },
       {
@@ -25,25 +29,33 @@
   },
   "displayedFields": [
     {
-      "key": "amount",
-      "label": "Mortgage Amount",
+      "key": "loan_size",
+      "label": "Loan Size",
       "type": "uint",
       "decimals": 18,
       "precision": 18,
       "suffix": " DAI"
     },
     {
-      "key": "asis_value",
-      "label": "As Is Value",
+      "key": "advance_rate",
+      "label": "Advance Rate",
       "type": "uint",
       "decimals": 18,
       "precision": 18,
       "suffix": " DAI"
     },
     {
-      "key": "rehab_value",
-      "label": "Rehab Value",
+      "key": "risk_rating",
+      "label": "Risk Rating",
       "type": "uint",
+      "decimals": 18,
+      "precision": 18,
+      "suffix": " DAI"
+    },
+    {
+      "key": "loan_maturity",
+      "label": "Loan Maturity Date",
+      "type": "timestamp",
       "decimals": 18,
       "precision": 18,
       "suffix": " DAI"
