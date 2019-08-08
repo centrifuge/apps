@@ -6,7 +6,7 @@ import { formatAddress } from '../../utils/formatAddress';
 import MeBadge from '../MeBadge';
 import { NFT } from '../../ducks/nft';
 import NftDataField, { DisplayedField } from '../NftDataField';
-import nftDataDefinition from '../../nft_data_definition.json';
+import { config }from '../../config'
 
 interface Props {
   data: InternalSingleLoan | NFT;
@@ -21,6 +21,7 @@ interface NftData {
   borrower: string;
 }
 
+const { nftDataDefinition }  = config;
 class NftData extends React.Component<Props> {
   render() {
     const { data: { tokenId, nftOwner, nftData }, authedAddr } = this.props;
