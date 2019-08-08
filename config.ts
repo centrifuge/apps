@@ -1,5 +1,18 @@
+import getConfig from 'next/config'
+const { publicRuntimeConfig } = getConfig()
+
 const config = {
-  rpcUrl: 'https://kovan.infura.io/v3/092108ec6aea46ab97b2175b45130455',
+  rpcUrl: publicRuntimeConfig.RPC_URL,
+  contractAddresses: publicRuntimeConfig.TINLAKE_ADDRESSES && JSON.parse(publicRuntimeConfig.TINLAKE_ADDRESSES),
+  nftDataDefinition: publicRuntimeConfig.NFT_DATA_DEFINITION && JSON.parse(publicRuntimeConfig.NFT_DATA_DEFINITION)
 };
 
-export default config;
+if (!config.nftDataDefinition) {
+  throw new Error(`Missing env NFT_DATA_DEFINITION`);
+}
+
+if (!config.contractAddresses) {
+  throw new Error(`Missing env TINLAKE_ADDRESSES`);
+}
+
+export default config
