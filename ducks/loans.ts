@@ -209,6 +209,7 @@ export function getDebt(tinlake: Tinlake, loanId: string):
   ThunkAction<Promise<void>, LoansState, undefined, Action> {
   return async (dispatch) => {
     const debt = await tinlake.getCurrentDebt(loanId);
+    console.log("loan and debt", loanId, debt)
     dispatch({ loanId, debt, type: RECEIVE_DEBT });
   };
 }

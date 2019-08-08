@@ -15,7 +15,6 @@ import { calcRepayAmount } from '../../utils/calcRepayAmount';
 import { authTinlake } from '../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import Auth from '../Auth';
-
 const SUCCESS_STATUS = '0x1';
 
 interface Props {
@@ -44,11 +43,11 @@ class LoanRepay extends React.Component<Props, State> {
 
   componentWillMount() {
     this.props.getLoan!(this.props.tinlake, this.props.loanId);
-    this.discardDebtSubscription = this.props.subscribeDebt!(this.props.tinlake, this.props.loanId);
+    // this.discardDebtSubscription = this.props.subscribeDebt!(this.props.tinlake, this.props.loanId);
   }
 
   componentWillUnmount() {
-    this.discardDebtSubscription();
+    // this.discardDebtSubscription();
   }
 
   componentDidUpdate(nextProps: Props) {
@@ -75,25 +74,18 @@ class LoanRepay extends React.Component<Props, State> {
       const { repayAmount } = this.state;
       const addresses = tinlake.contractAddresses;
       const ethFrom = tinlake.ethConfig.from;
-
-      // approve currency
       const res0 = await tinlake.approveCurrency(addresses['PILE'], repayAmount);
-      console.log(res0.txHash);
 
       if (res0.status !== SUCCESS_STATUS || res0.events[0].event.name !== 'Approval') {
-        console.log(res0);
         this.setState({ is: 'error', errorMsg: JSON.stringify(res0) });
         return;
       }
 
       // repay
-      const res1 = await tinlake.repay(loanId, repayAmount, ethFrom);
-
-      console.log('admit result');
-      console.log(res1.txHash);
+      //const res1 = await tinlake.repay(loanId, repayAmount, ethFrom);
+      const res1 = await tinlake.close(loanId, ethFrom);
 
       if (res1.status !== SUCCESS_STATUS) {
-        console.log(res1);
         this.setState({ is: 'error', errorMsg: JSON.stringify(res1) });
         return;
       }
