@@ -1,4 +1,6 @@
 .next
 .vscode
 node_modules
+out
 services/tinlake/addresses_tinlake.json
+nft_data_definition.json
