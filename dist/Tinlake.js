@@ -34870,13 +34870,16 @@ var waitAndReturnEvents = function (eth, txHash, abi) {
                 var events = getEvents(receipt, abi);
                 resolve({ events: events, txHash: tx.hash, status: receipt.status });
             });
+        })
+            .catch(function (error) {
+            reject(error);
         });
     });
 };
 // todo replace with a better polling
 var waitForTransaction = function (eth, txHash) {
     return new Promise(function (resolve, reject) {
-        var secMax = 1;
+        var secMax = 0;
         var sec = 0;
         var wait = function (txHash) {
             setTimeout(function () {

@@ -22,6 +22,7 @@ import contractAbiAdmin from './abi/Admin.abi.json';
 // method last.
 import contractAbiPileForAdd from './abi/PileForAdd.json';
 import contractAbiPileForInit from './abi/PileForInit.abi.json';
+import { rejects } from 'assert';
 
 interface ContractAbis {
   'nft': any;
@@ -420,16 +421,19 @@ const waitAndReturnEvents = (eth: ethI, txHash: string, abi: any) => {
         }
         const events = getEvents(receipt, abi);
         resolve({ events, txHash: tx.hash, status: receipt.status });
-      });
+      })
 
+    })
+    .catch(error => {
+      reject(error)
     });
-  });
+  })
 };
 
 // todo replace with a better polling
 const waitForTransaction = (eth: ethI, txHash: any) => {
   return new Promise((resolve, reject) => {
-    const secMax = 1;
+    const secMax = 0;
     let sec = 0;
     const wait = (txHash: string) => {
       setTimeout(() => {
