@@ -22,7 +22,7 @@ import contractAbiAdmin from './abi/Admin.abi.json';
 // method last.
 import contractAbiPileForAdd from './abi/PileForAdd.json';
 import contractAbiPileForInit from './abi/PileForInit.abi.json';
-import { rejects } from 'assert';
+
 
 interface ContractAbis {
   'nft': any;
@@ -412,9 +412,17 @@ export class Tinlake {
   }
 }
 
-const waitAndReturnEvents = (eth: ethI, txHash: string, abi: any) => {
+const waitAndReturnEvents = async (eth: ethI, txHash: string, abi: any) => {
+
+  let tx: any
+  try {
+    tx = await waitForTransaction(eth, txHash)
+  } catch (err) {
+    console.log("timeout error occured", err)
+    return err
+  }
+  
   return new Promise((resolve, reject) => {
-    waitForTransaction(eth, txHash).then((tx: any) => {
       eth.getTransactionReceipt(tx.hash, (err: null, receipt: any) => {
         if (err != null) {
           reject('failed to get receipt');
@@ -422,11 +430,6 @@ const waitAndReturnEvents = (eth: ethI, txHash: string, abi: any) => {
         const events = getEvents(receipt, abi);
         resolve({ events, txHash: tx.hash, status: receipt.status });
       })
-
-    })
-    .catch(error => {
-      reject(error)
-    });
   })
 };
 
