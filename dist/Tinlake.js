@@ -34528,6 +34528,7 @@ var interestRateToFee = function (interestRate) {
     return feeString;
 };
 
+var _this = undefined;
 var abiCoder$1 = new AbiCoder$1();
 var LOAN_ID_IDX = 2;
 var Tinlake = /** @class */ (function () {
@@ -34704,27 +34705,13 @@ var Tinlake = /** @class */ (function () {
          * @param wad Amount which should be repaid
          * @param usr Address that receives the NFT
          */
-        this.close = function (loanId, usr) { return __awaiter(_this, void 0, void 0, function () {
-            var txHash, err_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.contracts.reception.close(loanId, usr, this.ethConfig)];
-                    case 1:
-                        txHash = _a.sent();
-                        console.log("[Reception.close] txHash: " + txHash);
-                        _a.label = 2;
-                    case 2:
-                        _a.trys.push([2, 4, , 5]);
-                        return [4 /*yield*/, waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi)];
-                    case 3: return [2 /*return*/, (_a.sent())];
-                    case 4:
-                        err_1 = _a.sent();
-                        console.log("timeout error occured");
-                        return [2 /*return*/, err_1];
-                    case 5: return [2 /*return*/];
-                }
+        this.close = function (loanId, usr) {
+            return _this.contracts.reception.close(loanId, usr, _this.ethConfig)
+                .then(function (txHash) {
+                console.log("[Reception.close] txHash: " + txHash);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['reception'].abi);
             });
-        }); };
+        };
         this.approveCurrency = function (usr, wad) {
             return _this.contracts.currency.approve(usr, wad, _this.ethConfig).then(function (txHash) {
                 console.log("[Currency.approve] txHash: " + txHash);
@@ -34874,19 +34861,32 @@ var Tinlake = /** @class */ (function () {
     }
     return Tinlake;
 }());
-var waitAndReturnEvents = function (eth, txHash, abi) {
-    return new Promise(function (resolve, reject) {
-        waitForTransaction(eth, txHash).then(function (tx) {
-            eth.getTransactionReceipt(tx.hash, function (err, receipt) {
-                if (err != null) {
-                    reject('failed to get receipt');
-                }
-                var events = getEvents(receipt, abi);
-                resolve({ events: events, txHash: tx.hash, status: receipt.status });
-            });
-        });
+var waitAndReturnEvents = function (eth, txHash, abi) { return __awaiter(_this, void 0, void 0, function () {
+    var tx, err_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, waitForTransaction(eth, txHash)];
+            case 1:
+                tx = _a.sent();
+                return [3 /*break*/, 3];
+            case 2:
+                err_1 = _a.sent();
+                console.log("timeout error occured", err_1);
+                return [2 /*return*/, err_1];
+            case 3: return [2 /*return*/, new Promise(function (resolve, reject) {
+                    eth.getTransactionReceipt(tx.hash, function (err, receipt) {
+                        if (err != null) {
+                            reject('failed to get receipt');
+                        }
+                        var events = getEvents(receipt, abi);
+                        resolve({ events: events, txHash: tx.hash, status: receipt.status });
+                    });
+                })];
+        }
     });
-};
+}); };
 // todo replace with a better polling
 var waitForTransaction = function (eth, txHash) {
     return new Promise(function (resolve, reject) {
