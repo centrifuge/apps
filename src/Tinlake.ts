@@ -23,7 +23,6 @@ import contractAbiAdmin from './abi/Admin.abi.json';
 import contractAbiPileForAdd from './abi/PileForAdd.json';
 import contractAbiPileForInit from './abi/PileForInit.abi.json';
 
-
 interface ContractAbis {
   'nft': any;
   'title': any;
@@ -136,7 +135,7 @@ export class Tinlake {
   public contracts: Contracts;
   public contractAbis: ContractAbis;
 
-  constructor(provider: any, contractAddresses: ContractAddresses, nftDataOutputs: AbiOutput[], transactionTimeout: number, 
+  constructor(provider: any, contractAddresses: ContractAddresses, nftDataOutputs: AbiOutput[], transactionTimeout: number,
               { contractAbis, ethOptions, ethConfig }: Options = {}) {
     this.contractAbis = contractAbis || {
       nft: contractAbiNft,
@@ -415,22 +414,22 @@ export class Tinlake {
 
 const waitAndReturnEvents = async (eth: ethI, txHash: string, abi: any, transactionTimeout: number) => {
 
-  const tx:any = await waitForTransaction(eth, txHash, transactionTimeout)
+  const tx:any = await waitForTransaction(eth, txHash, transactionTimeout);
   return new Promise((resolve, reject) => {
-      eth.getTransactionReceipt(tx.hash, (err: null, receipt: any) => {
-        if (err != null) {
-          reject('failed to get receipt');
-        }
-        const events = getEvents(receipt, abi);
-        resolve({ events, txHash: tx.hash, status: receipt.status });
-      })
-  })
+    eth.getTransactionReceipt(tx.hash, (err: null, receipt: any) => {
+      if (err != null) {
+        reject('failed to get receipt');
+      }
+      const events = getEvents(receipt, abi);
+      resolve({ events, txHash: tx.hash, status: receipt.status });
+    });
+  });
 };
 
 // todo replace with a better polling
 const waitForTransaction = (eth: ethI, txHash: any, transactionTimeout: number) => {
   return new Promise((resolve, reject) => {
-    const secMax = transactionTimeout
+    const secMax = transactionTimeout;
     let sec = 0;
     const wait = (txHash: string) => {
       setTimeout(() => {
