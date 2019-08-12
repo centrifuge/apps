@@ -90,23 +90,23 @@ export class RemitToForm extends React.Component<ConnectedRemitToProps> {
           <Box gap={columnGap} basis={'1/2'}>
             <FormField
               label="Street 1"
-              error={errors!.remit_to_street1}
+              error={errors!.remit_to_street_1}
             >
               <TextInput
                 placeholder="Street name and number"
-                name="remit_to_street1"
-                value={values!.remit_to_street1}
+                name="remit_to_street_1"
+                value={values!.remit_to_street_1}
                 onChange={handleChange}
               />
             </FormField>
             <FormField
               label="Street 2"
-              error={errors!.remit_to_street2}
+              error={errors!.remit_to_street_2}
             >
               <TextInput
                 placeholder="Apartment, unit, office, etc"
-                name="remit_to_street2"
-                value={values!.remit_to_street2}
+                name="remit_to_street_2"
+                value={values!.remit_to_street_2}
                 onChange={handleChange}
               />
             </FormField>

@@ -15,7 +15,10 @@ exports[`Search Select when single item select should match snapshot 1`] = `
       "multiple": "multiple",
     }
   }
+  name="dropdown"
+  onBlur={[MockFunction]}
   onChange={[Function]}
+  onFocus={[MockFunction]}
   onSearch={[Function]}
   options={
     Array [
@@ -917,12 +920,6 @@ exports[`Search Select when single item select should match snapshot 1`] = `
           "base": "8px",
         },
       },
-    }
-  }
-  value={
-    Object {
-      "label": "",
-      "value": "",
     }
   }
   valueKey="value"

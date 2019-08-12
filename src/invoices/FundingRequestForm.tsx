@@ -127,8 +127,10 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                                 setFieldValue('funder', item.value);
 
                               }}
+                              labelKey="label"
+                              valueKey="value"
                               options={contacts}
-                              selected={
+                              value={
                                 contacts.find(
                                   contact =>
                                     contact.value === values!.funder,

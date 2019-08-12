@@ -7,7 +7,7 @@ import { invoiceRoutes } from './routes';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { formatCurrency, formatDate } from '../common/formaters';
 import { Preloader } from '../components/Preloader';
-import { InvInvoiceData } from '../../clients/centrifuge-node';
+import { InvoiceData } from '../../clients/centrifuge-node';
 import { getInvoiceFundingStatus } from '../common/status';
 import { Status } from '../components/Status';
 import { SecondaryHeader } from '../components/SecondaryHeader';
@@ -16,7 +16,7 @@ import { SecondaryHeader } from '../components/SecondaryHeader';
 type ViewInvoicesProps = {
   getInvoices: () => void;
   resetGetInvoices: () => void;
-  invoices?: InvInvoiceData[];
+  invoices?: InvoiceData[];
   loading: boolean;
   error: any;
 };

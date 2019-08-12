@@ -4,29 +4,31 @@ import { Invoice } from '../common/models/invoice';
 import { ROUTES } from '../common/constants';
 import { User } from '../common/models/user';
 import { Contact } from '../common/models/contact';
-import { FunRequest, InvInvoiceResponse } from '../../clients/centrifuge-node';
+import { FunRequest, UserapiInvoiceResponse } from '../../clients/centrifuge-node';
 import { FundingRequest } from '../common/models/funding-request';
 import { TransferDetailsRequest } from '../common/models/transfer-details';
 import { Schema } from "../common/models/schema";
+import { Document, MintNftRequest } from '../common/models/document';
 
 const instance = axios.create();
 
 export const httpClient = {
   invoices: {
-    create: async (invoice: Invoice): Promise<InvInvoiceResponse> =>
+    create: async (invoice: Invoice): Promise<UserapiInvoiceResponse> =>
       instance.post(ROUTES.INVOICES, invoice),
-    update: async (invoice: Invoice): Promise<InvInvoiceResponse> =>
+    update: async (invoice: Invoice): Promise<UserapiInvoiceResponse> =>
       instance.put(`${ROUTES.INVOICES}/${invoice._id}`, invoice),
-    read: async (): Promise<InvInvoiceResponse> =>
+    read: async (): Promise<UserapiInvoiceResponse> =>
       instance.get(ROUTES.INVOICES),
-    readById: async (id): Promise<InvInvoiceResponse> =>
+    readById: async (id): Promise<UserapiInvoiceResponse> =>
       instance.get(`${ROUTES.INVOICES}/${id}`),
   },
   user: {
     login: async (user: User) => instance.post(ROUTES.USERS.login, user),
     logout: async () => instance.get(ROUTES.USERS.logout),
-    register: async (user: User) => instance.post(ROUTES.USERS.register, user),
+    register: async (user: User) => instance.post(ROUTES.USERS.base, user),
     invite: async (user: User) => instance.post(ROUTES.USERS.invite, user),
+    update: async (user: User) => instance.put(ROUTES.USERS.base, user),
     list: async () => instance.get(ROUTES.USERS.base),
 
   },
@@ -50,5 +52,12 @@ export const httpClient = {
     read: async () => instance.get(ROUTES.SCHEMAS),
     readById: async (id): Promise<Schema> => instance.get(`${ROUTES.SCHEMAS}/${id}`),
     update: async (schema: Schema) => instance.put(`${ROUTES.SCHEMAS}/${schema._id}`, schema),
+  },
+  documents : {
+    create: async (document: Document) => instance.post(ROUTES.DOCUMENTS, document),
+    read: async () => instance.get(ROUTES.DOCUMENTS),
+    readById: async (id): Promise<Document> => instance.get(`${ROUTES.DOCUMENTS}/${id}`),
+    update: async (document: Document) => instance.put(`${ROUTES.DOCUMENTS}/${document._id}`, document),
+    mint: async (id:string,payload: MintNftRequest) => instance.post(`${ROUTES.DOCUMENTS}/${id}/mint`, payload),
   }
 };

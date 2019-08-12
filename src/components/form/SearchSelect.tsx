@@ -1,64 +1,92 @@
 import React, { Component } from 'react';
 import { Select, SelectProps } from 'grommet';
-import { Omit } from 'grommet/utils';
+
 // TODO add this to Axis
-export interface SearchSelectItem {
-  label: string;
-  value: string;
-}
-
 interface SearchSelectState {
-  options: SearchSelectItem[];
-  selected: SearchSelectItem | SearchSelectItem[];
-}
-
-interface SearchSelectProps extends Omit<SelectProps,"selected">{
   options: any[];
-  selected?: SearchSelectItem | SearchSelectItem[];
+}
+
+interface SearchSelectProps extends SelectProps {
+  options: any[];
 }
 
 
-export default class SearchSelect<SearchSelectItem> extends Component<
-  SearchSelectProps,
+export class SearchSelect extends Component<SearchSelectProps,
   SearchSelectState> {
   constructor(props) {
     super(props);
     this.state = {
       options: props.options,
-      selected:
-        props.selected || (props.multiple ? [] : { label: '', value: '' }),
     };
   }
 
-  onChange = event => {
-    this.setState({ selected: event.value }, () => {
-      this.props.onChange && this.props.onChange(
-        this.state.selected
-      );
-    });
+  componentWillReceiveProps(nextProps) {
+      this.setState({ options: nextProps.options });
+  }
+
+  onChange = selected => {
+    this.setState(
+      {
+        options: this.props.options,
+      },
+      () => {
+        this.props.onChange && this.props.onChange(
+          selected.value,
+        );
+      });
   };
+
 
   onSearch = text => {
     const exp = new RegExp(text, 'i');
     this.setState({
-      /// @ts-ignore - https://github.com/final-form/react-final-form/issues/398
-      options: this.props.options.filter(o => exp.test(o.label)),
+      options: this.props.options.filter(o => {
+        return exp.test(this.getItemLabel(o));
+      }),
     });
   };
 
+
+  getItemLabel = (value) => {
+    return this.getItemPropByKey(value, 'labelKey');
+  };
+
+
+  getItemPropByKey = (value, key) => {
+    const prop = this.props[key];
+    if (!prop) {
+      return value;
+    } else {
+      if (typeof prop === 'function') {
+        return prop(value);
+      } else {
+        return value[prop];
+      }
+    }
+  };
+
   render() {
+
+    const props = { ...this.props };
+    props.onSearch = this.onSearch;
+    // delete props that we do not want to pass down
+    delete props.onChange;
+    delete props.multiple;
+    delete props.options;
+
     return (
       <Select
         plain
         size={'medium'}
         placeholder="Select"
         options={this.state.options}
-        value={this.state.selected}
-        labelKey="label"
-        valueKey="value"
         onChange={this.onChange}
         onSearch={this.onSearch}
+        {...props}
       />
     );
   }
 }
+
+
+export default SearchSelect;

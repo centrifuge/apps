@@ -277,13 +277,16 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                       "top": "bottom",
                                                                     }
                                                                   }
+                                                                  focusIndicator={false}
                                                                   labelKey="label"
                                                                   messages={
                                                                     Object {
                                                                       "multiple": "multiple",
                                                                     }
                                                                   }
+                                                                  onBlur={[Function]}
                                                                   onChange={[Function]}
+                                                                  onFocus={[Function]}
                                                                   onSearch={[Function]}
                                                                   options={
                                                                     Array [
@@ -300,12 +303,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                   placeholder="Select"
                                                                   plain={true}
                                                                   size="medium"
-                                                                  value={
-                                                                    Object {
-                                                                      "label": "",
-                                                                      "value": "",
-                                                                    }
-                                                                  }
                                                                   valueKey="value"
                                                                 >
                                                                   <Select
@@ -316,13 +313,16 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                         "top": "bottom",
                                                                       }
                                                                     }
+                                                                    focusIndicator={false}
                                                                     labelKey="label"
                                                                     messages={
                                                                       Object {
                                                                         "multiple": "multiple",
                                                                       }
                                                                     }
+                                                                    onBlur={[Function]}
                                                                     onChange={[Function]}
+                                                                    onFocus={[Function]}
                                                                     onSearch={[Function]}
                                                                     options={
                                                                       Array [
@@ -339,12 +339,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                     placeholder="Select"
                                                                     plain={true}
                                                                     size="medium"
-                                                                    value={
-                                                                      Object {
-                                                                        "label": "",
-                                                                        "value": "",
-                                                                      }
-                                                                    }
                                                                     valueKey="value"
                                                                   >
                                                                     <Select__StyledSelectDropButton
@@ -503,6 +497,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                         "top": "bottom",
                                                                                                       }
                                                                                                     }
+                                                                                                    focusIndicator={false}
                                                                                                     messages={
                                                                                                       Object {
                                                                                                         "enterSelect": "(Press Enter to Select)",
@@ -511,14 +506,15 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                         "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                                       }
                                                                                                     }
+                                                                                                    onBlur={[Function]}
                                                                                                     onClick={[Function]}
+                                                                                                    onFocus={[Function]}
                                                                                                     placeholder="Select"
                                                                                                     plain={true}
                                                                                                     readOnly={true}
                                                                                                     size="medium"
                                                                                                     tabIndex="-1"
                                                                                                     type="text"
-                                                                                                    value=""
                                                                                                     valueKey="value"
                                                                                                   >
                                                                                                     <WithTheme(TextInput)
@@ -529,6 +525,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                           "top": "bottom",
                                                                                                         }
                                                                                                       }
+                                                                                                      focusIndicator={false}
                                                                                                       messages={
                                                                                                         Object {
                                                                                                           "enterSelect": "(Press Enter to Select)",
@@ -537,14 +534,15 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                           "suggestionsExist": "This input has suggestions use arrow keys to navigate",
                                                                                                         }
                                                                                                       }
+                                                                                                      onBlur={[Function]}
                                                                                                       onClick={[Function]}
+                                                                                                      onFocus={[Function]}
                                                                                                       placeholder="Select"
                                                                                                       plain={true}
                                                                                                       readOnly={true}
                                                                                                       size="medium"
                                                                                                       tabIndex="-1"
                                                                                                       type="text"
-                                                                                                      value=""
                                                                                                       valueKey="value"
                                                                                                     >
                                                                                                       <WithTheme(TextInput)
@@ -556,6 +554,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                           }
                                                                                                         }
                                                                                                         focus={false}
+                                                                                                        focusIndicator={false}
                                                                                                         messages={
                                                                                                           Object {
                                                                                                             "enterSelect": "(Press Enter to Select)",
@@ -573,7 +572,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                         size="medium"
                                                                                                         tabIndex="-1"
                                                                                                         type="text"
-                                                                                                        value=""
                                                                                                         valueKey="value"
                                                                                                       >
                                                                                                         <TextInput
@@ -585,6 +583,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                             }
                                                                                                           }
                                                                                                           focus={false}
+                                                                                                          focusIndicator={false}
                                                                                                           messages={
                                                                                                             Object {
                                                                                                               "enterSelect": "(Press Enter to Select)",
@@ -602,7 +601,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                           size="medium"
                                                                                                           tabIndex="-1"
                                                                                                           type="text"
-                                                                                                          value=""
                                                                                                           valueKey="value"
                                                                                                         >
                                                                                                           <TextInput
@@ -615,6 +613,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                               }
                                                                                                             }
                                                                                                             focus={false}
+                                                                                                            focusIndicator={false}
                                                                                                             messages={
                                                                                                               Object {
                                                                                                                 "enterSelect": "(Press Enter to Select)",
@@ -632,7 +631,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                             size="medium"
                                                                                                             tabIndex="-1"
                                                                                                             type="text"
-                                                                                                            value=""
                                                                                                             valueKey="value"
                                                                                                           >
                                                                                                             <StyledTextInput__StyledTextInputContainer
@@ -646,6 +644,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                                   autoComplete="off"
                                                                                                                   className="Select__SelectTextInput-sc-17idtfo-0 lmyIUy"
                                                                                                                   focus={false}
+                                                                                                                  focusIndicator={false}
                                                                                                                   messages={
                                                                                                                     Object {
                                                                                                                       "enterSelect": "(Press Enter to Select)",
@@ -665,7 +664,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                                   size="medium"
                                                                                                                   tabIndex="-1"
                                                                                                                   type="text"
-                                                                                                                  value=""
                                                                                                                   valueKey="value"
                                                                                                                 >
                                                                                                                   <input
@@ -681,7 +679,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                                     size="medium"
                                                                                                                     tabIndex="-1"
                                                                                                                     type="text"
-                                                                                                                    value=""
                                                                                                                   />
                                                                                                                 </StyledTextInput>
                                                                                                               </div>
@@ -1021,7 +1018,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                             value={1000}
                                                                           >
                                                                             <div
-                                                                              className="NumberInput__StyledCurrencyContainer-sc-1j29tjj-1 liHHvP"
+                                                                              className="NumberInput__StyledCurrencyContainer-sc-1mk0e8s-1 fvlnYL"
                                                                               disabled={true}
                                                                               name="invoice_amount"
                                                                               onBlur={[Function]}
@@ -1041,7 +1038,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                 value={1000}
                                                                               >
                                                                                 <input
-                                                                                  className="NumberInput__StyledCurrencyInput-sc-1j29tjj-0 hHmpRt"
+                                                                                  className="NumberInput__StyledCurrencyInput-sc-1mk0e8s-0 jqervJ"
                                                                                   disabled={true}
                                                                                   name="invoice_amount"
                                                                                   onBlur={[Function]}
@@ -1650,7 +1647,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                     value={0}
                                                                   >
                                                                     <div
-                                                                      className="NumberInput__StyledCurrencyContainer-sc-1j29tjj-1 liHHvP"
+                                                                      className="NumberInput__StyledCurrencyContainer-sc-1mk0e8s-1 fvlnYL"
                                                                       name="repayment_amount"
                                                                       onBlur={[Function]}
                                                                       onChange={[Function]}
@@ -1670,7 +1667,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                         value={0}
                                                                       >
                                                                         <input
-                                                                          className="NumberInput__StyledCurrencyInput-sc-1j29tjj-0 cNEpXP"
+                                                                          className="NumberInput__StyledCurrencyInput-sc-1mk0e8s-0 eQOnKh"
                                                                           name="repayment_amount"
                                                                           onBlur={[Function]}
                                                                           onChange={[Function]}
@@ -1893,7 +1890,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                     value={5}
                                                                   >
                                                                     <div
-                                                                      className="NumberInput__StyledCurrencyContainer-sc-1j29tjj-1 liHHvP"
+                                                                      className="NumberInput__StyledCurrencyContainer-sc-1mk0e8s-1 fvlnYL"
                                                                       disabled={true}
                                                                       name="apr"
                                                                       onBlur={[Function]}
@@ -1912,7 +1909,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                         value={5}
                                                                       >
                                                                         <input
-                                                                          className="NumberInput__StyledCurrencyInput-sc-1j29tjj-0 hHmpRt"
+                                                                          className="NumberInput__StyledCurrencyInput-sc-1mk0e8s-0 jqervJ"
                                                                           disabled={true}
                                                                           name="apr"
                                                                           onBlur={[Function]}
@@ -2134,7 +2131,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                     value={0}
                                                                   >
                                                                     <div
-                                                                      className="NumberInput__StyledCurrencyContainer-sc-1j29tjj-1 liHHvP"
+                                                                      className="NumberInput__StyledCurrencyContainer-sc-1mk0e8s-1 fvlnYL"
                                                                       disabled={true}
                                                                       onBlur={[Function]}
                                                                       onFocus={[Function]}
@@ -2152,7 +2149,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                         value={0}
                                                                       >
                                                                         <input
-                                                                          className="NumberInput__StyledCurrencyInput-sc-1j29tjj-0 hHmpRt"
+                                                                          className="NumberInput__StyledCurrencyInput-sc-1mk0e8s-0 jqervJ"
                                                                           disabled={true}
                                                                           onBlur={[Function]}
                                                                           onChange={[Function]}
@@ -2375,7 +2372,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                     value="0.00"
                                                                   >
                                                                     <div
-                                                                      className="NumberInput__StyledCurrencyContainer-sc-1j29tjj-1 liHHvP"
+                                                                      className="NumberInput__StyledCurrencyContainer-sc-1mk0e8s-1 fvlnYL"
                                                                       disabled={true}
                                                                       name="amount"
                                                                       onBlur={[Function]}
@@ -2395,7 +2392,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                         value="0.00"
                                                                       >
                                                                         <input
-                                                                          className="NumberInput__StyledCurrencyInput-sc-1j29tjj-0 hHmpRt"
+                                                                          className="NumberInput__StyledCurrencyInput-sc-1mk0e8s-0 jqervJ"
                                                                           disabled={true}
                                                                           name="amount"
                                                                           onBlur={[Function]}
@@ -2644,7 +2641,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                   >
                                                                     <DropButton
                                                                       a11yTitle="Open Drop"
-                                                                      className="DateInput__StyledDateInputDropButton-sc-592rhp-1 hHhWHB"
+                                                                      className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 hvzYTL"
                                                                       disabled={true}
                                                                       dropAlign={
                                                                         Object {
@@ -2660,7 +2657,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                     >
                                                                       <WithTheme(Button)
                                                                         a11yTitle="Open Drop"
-                                                                        className="DateInput__StyledDateInputDropButton-sc-592rhp-1 hHhWHB"
+                                                                        className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 hvzYTL"
                                                                         disabled={true}
                                                                         focusIndicator={true}
                                                                         gap="small"
@@ -2671,7 +2668,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                       >
                                                                         <WithTheme(Button)
                                                                           a11yTitle="Open Drop"
-                                                                          className="DateInput__StyledDateInputDropButton-sc-592rhp-1 hHhWHB"
+                                                                          className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 hvzYTL"
                                                                           disabled={true}
                                                                           focus={false}
                                                                           focusIndicator={true}
@@ -2685,7 +2682,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                         >
                                                                           <Button
                                                                             a11yTitle="Open Drop"
-                                                                            className="DateInput__StyledDateInputDropButton-sc-592rhp-1 hHhWHB"
+                                                                            className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 hvzYTL"
                                                                             disabled={true}
                                                                             focus={false}
                                                                             focusIndicator={true}
@@ -2699,7 +2696,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                           >
                                                                             <StyledButton
                                                                               aria-label="Open Drop"
-                                                                              className="DateInput__StyledDateInputDropButton-sc-592rhp-1 hHhWHB"
+                                                                              className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 hvzYTL"
                                                                               disabled={true}
                                                                               focus={false}
                                                                               focusIndicator={true}
@@ -2718,7 +2715,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                             >
                                                                               <button
                                                                                 aria-label="Open Drop"
-                                                                                className="DateInput__StyledDateInputDropButton-sc-592rhp-1 hHhWHB StyledButton-sc-323bzc-0 chnll"
+                                                                                className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 hvzYTL StyledButton-sc-323bzc-0 chnll"
                                                                                 disabled={true}
                                                                                 onBlur={[Function]}
                                                                                 onClick={[Function]}
@@ -2773,7 +2770,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                           value="6/5/2019"
                                                                                         >
                                                                                           <WithTheme(TextInput)
-                                                                                            className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                            className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                             dropAlign={
                                                                                               Object {
                                                                                                 "left": "left",
@@ -2794,7 +2791,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                             value="6/5/2019"
                                                                                           >
                                                                                             <WithTheme(TextInput)
-                                                                                              className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                              className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                               dropAlign={
                                                                                                 Object {
                                                                                                   "left": "left",
@@ -2818,7 +2815,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                               value="6/5/2019"
                                                                                             >
                                                                                               <TextInput
-                                                                                                className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                 dropAlign={
                                                                                                   Object {
                                                                                                     "left": "left",
@@ -2843,7 +2840,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                               >
                                                                                                 <TextInput
                                                                                                   announce={[Function]}
-                                                                                                  className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                  className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                   dropAlign={
                                                                                                     Object {
                                                                                                       "left": "left",
@@ -2875,7 +2872,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                       <StyledTextInput
                                                                                                         announce={[Function]}
                                                                                                         autoComplete="off"
-                                                                                                        className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                        className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                         focus={false}
                                                                                                         messages={
                                                                                                           Object {
@@ -2896,7 +2893,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                       >
                                                                                                         <input
                                                                                                           autoComplete="off"
-                                                                                                          className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy StyledTextInput-sc-1x30a0s-0 duvNfq"
+                                                                                                          className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM StyledTextInput-sc-1x30a0s-0 duvNfq"
                                                                                                           onBlur={[Function]}
                                                                                                           onChange={[Function]}
                                                                                                           onFocus={[Function]}
@@ -3162,7 +3159,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                   >
                                                                     <DropButton
                                                                       a11yTitle="Open Drop"
-                                                                      className="DateInput__StyledDateInputDropButton-sc-592rhp-1 hHhWHB"
+                                                                      className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 hvzYTL"
                                                                       disabled={true}
                                                                       dropAlign={
                                                                         Object {
@@ -3178,7 +3175,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                     >
                                                                       <WithTheme(Button)
                                                                         a11yTitle="Open Drop"
-                                                                        className="DateInput__StyledDateInputDropButton-sc-592rhp-1 hHhWHB"
+                                                                        className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 hvzYTL"
                                                                         disabled={true}
                                                                         focusIndicator={true}
                                                                         gap="small"
@@ -3189,7 +3186,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                       >
                                                                         <WithTheme(Button)
                                                                           a11yTitle="Open Drop"
-                                                                          className="DateInput__StyledDateInputDropButton-sc-592rhp-1 hHhWHB"
+                                                                          className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 hvzYTL"
                                                                           disabled={true}
                                                                           focus={false}
                                                                           focusIndicator={true}
@@ -3203,7 +3200,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                         >
                                                                           <Button
                                                                             a11yTitle="Open Drop"
-                                                                            className="DateInput__StyledDateInputDropButton-sc-592rhp-1 hHhWHB"
+                                                                            className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 hvzYTL"
                                                                             disabled={true}
                                                                             focus={false}
                                                                             focusIndicator={true}
@@ -3217,7 +3214,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                           >
                                                                             <StyledButton
                                                                               aria-label="Open Drop"
-                                                                              className="DateInput__StyledDateInputDropButton-sc-592rhp-1 hHhWHB"
+                                                                              className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 hvzYTL"
                                                                               disabled={true}
                                                                               focus={false}
                                                                               focusIndicator={true}
@@ -3236,7 +3233,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                             >
                                                                               <button
                                                                                 aria-label="Open Drop"
-                                                                                className="DateInput__StyledDateInputDropButton-sc-592rhp-1 hHhWHB StyledButton-sc-323bzc-0 chnll"
+                                                                                className="DateInput__StyledDateInputDropButton-sc-1ne1t7m-1 hvzYTL StyledButton-sc-323bzc-0 chnll"
                                                                                 disabled={true}
                                                                                 onBlur={[Function]}
                                                                                 onClick={[Function]}
@@ -3291,7 +3288,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                           value="6/5/2019"
                                                                                         >
                                                                                           <WithTheme(TextInput)
-                                                                                            className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                            className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                             dropAlign={
                                                                                               Object {
                                                                                                 "left": "left",
@@ -3312,7 +3309,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                             value="6/5/2019"
                                                                                           >
                                                                                             <WithTheme(TextInput)
-                                                                                              className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                              className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                               dropAlign={
                                                                                                 Object {
                                                                                                   "left": "left",
@@ -3336,7 +3333,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                               value="6/5/2019"
                                                                                             >
                                                                                               <TextInput
-                                                                                                className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                 dropAlign={
                                                                                                   Object {
                                                                                                     "left": "left",
@@ -3361,7 +3358,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                               >
                                                                                                 <TextInput
                                                                                                   announce={[Function]}
-                                                                                                  className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                  className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                   dropAlign={
                                                                                                     Object {
                                                                                                       "left": "left",
@@ -3393,7 +3390,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                       <StyledTextInput
                                                                                                         announce={[Function]}
                                                                                                         autoComplete="off"
-                                                                                                        className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy"
+                                                                                                        className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM"
                                                                                                         focus={false}
                                                                                                         messages={
                                                                                                           Object {
@@ -3414,7 +3411,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                       >
                                                                                                         <input
                                                                                                           autoComplete="off"
-                                                                                                          className="DateInput__DateTimeTextInput-sc-592rhp-0 kEByNy StyledTextInput-sc-1x30a0s-0 duvNfq"
+                                                                                                          className="DateInput__DateTimeTextInput-sc-1ne1t7m-0 dzhNFM StyledTextInput-sc-1x30a0s-0 duvNfq"
                                                                                                           onBlur={[Function]}
                                                                                                           onChange={[Function]}
                                                                                                           onFocus={[Function]}

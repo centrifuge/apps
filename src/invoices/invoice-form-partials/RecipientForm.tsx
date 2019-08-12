@@ -48,23 +48,23 @@ export class RecipientForm extends React.Component<ConnectedRecipientFormProps> 
           <Box gap={columnGap} basis={'1/2'}>
             <FormField
               label="Street"
-              error={errors!.bill_to_street1}
+              error={errors!.bill_to_street_1}
             >
               <TextInput
-                name="bill_to_street1"
+                name="bill_to_street_1"
                 placeholder="Street name and number"
-                value={values!.bill_to_street1}
+                value={values!.bill_to_street_1}
                 onChange={handleChange}
               />
             </FormField>
             <FormField
               label="Street"
-              error={errors!.bill_to_street2}
+              error={errors!.bill_to_street_2}
             >
               <TextInput
-                name="bill_to_street2"
+                name="bill_to_street_2"
                 placeholder="Apartment, unit, office, etc"
-                value={values!.bill_to_street2}
+                value={values!.bill_to_street_2}
                 onChange={handleChange}
               />
             </FormField>

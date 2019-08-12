@@ -7,13 +7,14 @@ import { Schema } from '../../../src/common/models/schema';
 import config from '../../../src/common/config';
 import { InvoiceResponse, PurchaseOrderResponse } from '../../../src/common/interfaces';
 import { DatabaseService } from './database.service';
+import { DocumentRequest } from "../../../src/common/models/document";
 
 // TODO refactor this in mutiple providers,services
 
 /**
  * Initialize the database and the separate collections.
  */
-const initializeDatabase = async (inMemoryOnly:boolean) => {
+const initializeDatabase = async (inMemoryOnly: boolean) => {
   const invoicesRepository = new DatabaseRepository<InvoiceResponse>(
     { filename: `${config.dbPath}/invoicesDb`, inMemoryOnly },
   );
@@ -26,6 +27,7 @@ const initializeDatabase = async (inMemoryOnly:boolean) => {
     email: config.admin.email,
     enabled: true,
     invited: false,
+    schemas: [],
     account: config.admin.account,
     permissions: config.admin.permissions,
   };
@@ -47,7 +49,11 @@ const initializeDatabase = async (inMemoryOnly:boolean) => {
   );
 
   const schemasRepository = new DatabaseRepository<Schema>(
-      { filename: `${config.dbPath}/schemasDb`, inMemoryOnly },
+    { filename: `${config.dbPath}/schemasDb`, inMemoryOnly },
+  );
+
+  const documentsRepository = new DatabaseRepository<DocumentRequest>(
+      { filename: `${config.dbPath}/documentsDb`, inMemoryOnly },
   );
 
   return {
@@ -56,6 +62,7 @@ const initializeDatabase = async (inMemoryOnly:boolean) => {
     contacts: contactsRepository,
     purchaseOrders: purchaseOrdersRepository,
     schemas: schemasRepository,
+    documents: documentsRepository,
   };
 };
 
@@ -69,9 +76,9 @@ export const databaseServiceProvider = {
   provide: DatabaseService,
   useFactory: async (): Promise<DatabaseService> => {
 
-    let testingMode: boolean
+    let testingMode: boolean;
     if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'functional') {
-      testingMode = true
+      testingMode = true;
     }
     if (!initializeDatabasePromise || testingMode) {
       initializeDatabasePromise = initializeDatabase(testingMode);

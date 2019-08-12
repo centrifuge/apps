@@ -1,9 +1,9 @@
 import {
   FunFundingResponseData,
-  InvInvoiceData,
-  InvInvoiceResponse,
-  PoPurchaseOrderResponse,
-  TransferdetailsData, UserapiTransferDetailResponse,
+  InvoiceData,
+  TransferdetailsData,
+  UserapiInvoiceResponse,
+  UserapiPurchaseOrderResponse,
 } from '../../clients/centrifuge-node';
 import { Invoice } from './models/invoice';
 
@@ -15,8 +15,8 @@ export interface LabelValuePair {
 }
 
 
-export interface InvoiceResponse extends InvInvoiceResponse {
-  data?: Invoice | InvInvoiceData;
+export interface InvoiceResponse extends UserapiInvoiceResponse {
+  data?: Invoice | InvoiceData;
   ownerId?: string;
   _id?: string;
   createdAt?: Date,
@@ -31,7 +31,7 @@ export interface FundingAgreementResponse extends FunFundingResponseData {
 }
 
 export interface PurchaseOrderResponse
-  extends PoPurchaseOrderResponse {
+  extends UserapiPurchaseOrderResponse {
   ownerId?: string;
   _id?: string;
 }

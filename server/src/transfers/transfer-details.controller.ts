@@ -1,23 +1,23 @@
 import { Body, Controller, Post, Put, Request, UseGuards } from '@nestjs/common';
-import { DatabaseService } from "../database/database.service";
-import { CentrifugeService } from "../centrifuge-client/centrifuge.service";
+import { DatabaseService } from '../database/database.service';
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import {
   UserapiCreateTransferDetailRequest,
   UserapiTransferDetailResponse,
-  UserapiUpdateTransferDetailRequest
-} from "../../../clients/centrifuge-node";
-import { SessionGuard } from "../auth/SessionGuard";
-import { TransferDetailsRequest } from "../../../src/common/models/transfer-details";
-import { ROUTES } from "../../../src/common/constants";
+  UserapiUpdateTransferDetailRequest,
+} from '../../../clients/centrifuge-node';
+import { SessionGuard } from '../auth/SessionGuard';
+import { TransferDetailsRequest } from '../../../src/common/models/transfer-details';
+import { ROUTES } from '../../../src/common/constants';
 
 @Controller(ROUTES.TRANSFER_DETAILS)
 @UseGuards(SessionGuard)
 export class TransferDetailsController {
   constructor(
-      private readonly databaseService: DatabaseService,
-      readonly centrifugeService: CentrifugeService,
-      // commented out for now until we enable eth services
-      // readonly ethService: EthService,
+    private readonly databaseService: DatabaseService,
+    readonly centrifugeService: CentrifugeService,
+    // commented out for now until we enable eth services
+    // readonly ethService: EthService,
   ) {
   }
 
@@ -40,16 +40,16 @@ export class TransferDetailsController {
         settlement_reference: transferDetailsRequest.settlement_reference,
         transfer_type: transferDetailsRequest.transfer_type,
         status: transferDetailsRequest.status,
-      }
-    }
+      },
+    };
 
     const transferDetailsResponse: UserapiTransferDetailResponse = await this.centrifugeService.transfer.createTransferDetail(
-        req.user.account,
-        details,
-        transferDetailsRequest.document_id
-    )
+      req.user.account,
+      details,
+      transferDetailsRequest.document_id,
+    );
 
-    return await this.updateDbOnJobCompletion(transferDetailsResponse, req)
+    return await this.updateDbOnJobCompletion(transferDetailsResponse, req);
   }
 
   @Put()
@@ -72,35 +72,33 @@ export class TransferDetailsController {
         settlement_reference: updateRequest.settlement_reference,
         transfer_type: updateRequest.transfer_type,
         status: updateRequest.status,
-      }
-    }
+      },
+    };
 
     const transferDetailsResponse: UserapiTransferDetailResponse = await this.centrifugeService.transfer.updateTransferDetail(
-        req.user.account,
-        details,
-        updateRequest.document_id,
-        updateRequest.transfer_id,
-    )
+      req.user.account,
+      details,
+      updateRequest.document_id,
+      updateRequest.transfer_id,
+    );
 
-    return await this.updateDbOnJobCompletion(transferDetailsResponse, req)
+    return await this.updateDbOnJobCompletion(transferDetailsResponse, req);
   }
 
-  async updateDbOnJobCompletion (transferDetailsResponse: UserapiTransferDetailResponse, req) {
+  async updateDbOnJobCompletion(transferDetailsResponse: UserapiTransferDetailResponse, req) {
     await this.centrifugeService.pullForJobComplete(transferDetailsResponse.header.job_id, req.user.account);
-    const invoiceWithTransferDetails = await this.centrifugeService.invoices.get(transferDetailsResponse.header.document_id, req.user.account);
-    const transferList = await this.centrifugeService.transfer.listTransferDetails(req.user.account, transferDetailsResponse.header.document_id)
+    const invoiceWithTransferDetails = await this.centrifugeService.invoices.getInvoice(req.user.account, transferDetailsResponse.header.document_id);
+    const transferList = await this.centrifugeService.transfer.listTransferDetails(req.user.account, transferDetailsResponse.header.document_id);
     // Update the document in the database
     await this.databaseService.invoices.update(
-        { 'header.document_id': transferDetailsResponse.header.document_id, 'ownerId': req.user._id },
-        {
-          $set: {
-            header: invoiceWithTransferDetails.header,
-            transferDetails: transferList.data,
-          },
+      { 'header.document_id': transferDetailsResponse.header.document_id, 'ownerId': req.user._id },
+      {
+        $set: {
+          header: invoiceWithTransferDetails.header,
+          transferDetails: transferList.data,
         },
+      },
     );
     return transferDetailsResponse;
   }
 }
-
-

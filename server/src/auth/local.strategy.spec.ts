@@ -4,10 +4,10 @@ import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { User } from '../../../src/common/models/user';
 import { Test } from '@nestjs/testing';
-import { dateToString } from '../../../src/common/formaters';
 
 describe('LocalStrategy', () => {
   const mockUser: User = {
+    ...(new User()),
     name: 'my_username',
     password: 'my_password',
     email: 'test@test.com',

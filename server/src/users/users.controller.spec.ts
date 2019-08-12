@@ -6,7 +6,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SessionGuard } from '../auth/SessionGuard';
 import { DatabaseService } from '../database/database.service';
 import { PERMISSIONS } from '../../../src/common/constants';
-import { centrifugeServiceProvider } from "../centrifuge-client/centrifuge.module";
+import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.module';
 
 describe('Users controller', () => {
   const userAccount = 'generated_identity_id';
@@ -29,24 +29,28 @@ describe('Users controller', () => {
     const databaseService = userModule.get<DatabaseService>(DatabaseService);
 
     invitedUser = await databaseService.users.insert({
+      ...(new User()),
       name: 'username',
       email: 'test1',
       account: '0x333',
       password: 'password',
       enabled: false,
       invited: true,
-      permissions: [],
+      schemas: ['some_schema'],
+      permissions: [PERMISSIONS.CAN_MANAGE_DOCUMENTS],
     });
 
 
     enabledUser = await databaseService.users.insert({
+      ...(new User()),
       name: 'username',
       email: 'test2',
       account: '0x333',
       password: 'password',
       enabled: true,
       invited: false,
-      permissions: [],
+      schemas: ['some_schema'],
+      permissions: [PERMISSIONS.CAN_MANAGE_DOCUMENTS],
     });
 
 
@@ -127,6 +131,7 @@ describe('Users controller', () => {
 
       it('should throw if the user has not been invited', async () => {
         const notInvitedUser: User = {
+          ...(new User()),
           _id: 'some_user_id',
           name: 'new_user',
           email: 'test',
@@ -144,9 +149,9 @@ describe('Users controller', () => {
 
       it('should create the user if the user has been invited', async () => {
 
-        const user:any = {
-          ...invitedUser
-        }
+        const user: any = {
+          ...invitedUser,
+        };
 
         const result = await usersController.register(invitedUser);
         // password is tested in auth.service.spec.ts
@@ -159,6 +164,30 @@ describe('Users controller', () => {
         });
       });
     });
+
+    describe('update', () => {
+      it('Should update the user', async () => {
+        const updated = await usersController.update({
+          ...enabledUser,
+          name: 'changed name',
+          permissions: [PERMISSIONS.CAN_CREATE_INVOICES],
+        });
+
+        expect(updated.name).toEqual('changed name');
+      });
+
+      it('Should not update the user because the email is taken', async () => {
+        await expect(
+          usersController.update({
+            ...enabledUser,
+            name: 'changed name 2',
+            email: 'test1',
+            permissions: [PERMISSIONS.CAN_CREATE_INVOICES],
+          }),
+        ).rejects.toThrow('Email taken!');
+      });
+    });
+
   });
 
   describe('when not in invite mode', () => {
@@ -236,7 +265,6 @@ describe('Users controller', () => {
         ).rejects.toThrow(
           'Password is mandatory',
         );
-
 
         await expect(
           usersController.register({

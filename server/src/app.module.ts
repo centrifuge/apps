@@ -12,6 +12,7 @@ import { FundingModule } from './funding/funding.module';
 import { AllExceptionFilter } from './filters/all-exception.filter';
 import { TransferModule } from "./transfers/transfer-details.module";
 import { SchemasModule } from "./schemas/schemas.module";
+import { DocumentsModule } from "./documents/documents.module";
 
 @Module({
   controllers: [AppController],
@@ -31,7 +32,8 @@ import { SchemasModule } from "./schemas/schemas.module";
     UsersModule,
     WebhooksModule,
     TransferModule,
-    SchemasModule
+    SchemasModule,
+    DocumentsModule,
   ],
 })
 export class AppModule {

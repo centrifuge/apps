@@ -1,28 +1,31 @@
 import React from 'react';
-import { Box, Button, FormField, RadioButtonGroup, TextInput } from 'grommet';
+import { Box, Button, FormField, Text, TextInput } from 'grommet';
 import { User } from '../../common/models/user';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { PERMISSIONS } from '../../common/constants';
+import MutipleSelect from '../../components/form/MutipleSelect';
+import { Schema } from '../../common/models/schema';
 
 type InviteProps = {
   user: User,
-  onSubmit: (user) => void;
-  onDiscard: () => void;
+  schemas: Schema[],
+  onSubmit?: (user) => void;
+  onDiscard?: () => void;
 }
 
 export default class UserForm extends React.Component<InviteProps> {
 
   state = { submitted: false };
 
-  onSubmit = async (user: User) => {
-    this.props.onSubmit(user);
+  onSubmit = (user: User) => {
+    this.props.onSubmit && this.props.onSubmit(user);
   };
 
 
   render() {
 
-    const newUserValidation = Yup.object().shape({
+    const userValidation = Yup.object().shape({
       name: Yup.string()
         .max(40, 'Please enter no more than 40 characters')
         .required('This field is required'),
@@ -31,18 +34,42 @@ export default class UserForm extends React.Component<InviteProps> {
         .required('This field is required'),
       permissions: Yup.array()
         .required('This field is required'),
+      schemas: Yup.array()
+        .test({
+          name: 'test_schemas',
+          test: (function(this, value) {
+            if (this.parent.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)) {
+              return (value && value.length);
+            }
+            return true;
+          }),
+          message: 'This field is required',
+        }),
     });
 
-    const { user } = this.props;
+    const { user, schemas } = this.props;
+
     const { submitted } = this.state;
 
+    const permissionOptions = [
+      PERMISSIONS.CAN_FUND_INVOICES,
+      PERMISSIONS.CAN_CREATE_INVOICES,
+      PERMISSIONS.CAN_MANAGE_USERS,
+      PERMISSIONS.CAN_MANAGE_SCHEMAS,
+      PERMISSIONS.CAN_MANAGE_DOCUMENTS,
+      PERMISSIONS.CAN_VIEW_DOCUMENTS,
+    ];
+
+
+    const schemaOptions = schemas.map(i => i.name);
+
     return (
-      <Box width={'medium'} margin={{ vertical: 'medium' }}>
+      <Box margin={{ vertical: 'medium' }}>
         <Formik
           initialValues={user}
           validateOnBlur={submitted}
           validateOnChange={submitted}
-          validationSchema={newUserValidation}
+          validationSchema={userValidation}
           onSubmit={(values, { setSubmitting }) => {
             if (!values) return;
             this.onSubmit(values);
@@ -56,6 +83,7 @@ export default class UserForm extends React.Component<InviteProps> {
                handleChange,
                handleSubmit,
                setFieldValue,
+               dirty,
              }) => (
               <form
                 onSubmit={event => {
@@ -63,7 +91,7 @@ export default class UserForm extends React.Component<InviteProps> {
                   handleSubmit(event);
                 }}
               >
-                <Box gap="small">
+                <Box gap="medium">
                   <FormField
                     label="Name"
                     error={errors.name}
@@ -90,24 +118,43 @@ export default class UserForm extends React.Component<InviteProps> {
                       label="Permissions"
                       error={errors!.permissions}
                     >
-                      <RadioButtonGroup
-                        pad={{ vertical: 'medium' }}
-                        direction="row"
-                        name="radio"
-                        options={[
-                          { label: 'Funder', value: PERMISSIONS.CAN_FUND_INVOICES },
-                          { label: 'Supplier', value: PERMISSIONS.CAN_CREATE_INVOICES },
-                          { label: 'Admin', value: PERMISSIONS.CAN_MANAGE_USERS },
-                        ]}
-                        value={values.permissions[0]}
-                        onChange={(ev) => {
-                          setFieldValue('permissions', [ev.target.value]);
+                      <MutipleSelect
+                        selected={values.permissions}
+                        options={permissionOptions}
+                        onChange={(selection) => {
+                          setFieldValue('permissions', selection);
+                          if (!selection.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)) {
+                            setFieldValue('schemas', []);
+                          }
                         }}
                       />
+
                     </FormField>
-
-
                   </Box>
+
+                  {
+                    values.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS) && <>
+                      {schemaOptions && schemaOptions.length > 0 ?
+                        <Box margin={{ bottom: 'medium' }}>
+                          <FormField
+                            label="Document schemas"
+                            error={errors!.schemas}
+                          >
+                            <MutipleSelect
+                              selected={values.schemas}
+                              options={schemaOptions}
+                              onChange={(selection) => {
+                                setFieldValue('schemas', selection);
+                              }}
+                            />
+
+                          </FormField>
+                        </Box>
+                        :
+                        <Text color={'status-warning'}>No schemas in the database. Please add schemas!</Text>
+                      }
+                    </>
+                  }
 
                   <Box direction="row" justify={'end'} gap={'medium'}>
                     <Button
@@ -115,9 +162,10 @@ export default class UserForm extends React.Component<InviteProps> {
                       onClick={this.props.onDiscard}
                     />
                     <Button
+                      disabled={!dirty}
                       type="submit"
                       primary
-                      label="Create"
+                      label={user._id ? 'Update' : 'Create'}
                     />
                   </Box>
                 </Box>

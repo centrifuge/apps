@@ -60,23 +60,23 @@ export class ShipToForm extends React.Component<ConnectedShipToFormProps> {
           <Box gap={columnGap} basis={'1/2'}>
             <FormField
               label="Street"
-              error={errors!.ship_to_street1}
+              error={errors!.ship_to_street_1}
             >
               <TextInput
                 placeholder="Street name and number"
-                name="ship_to_street1"
-                value={values!.ship_to_street1}
+                name="ship_to_street_1"
+                value={values!.ship_to_street_1}
                 onChange={handleChange}
               />
             </FormField>
             <FormField
               label="Street"
-              error={errors!.ship_to_street2}
+              error={errors!.ship_to_street_2}
             >
               <TextInput
                 placeholder="Apartment, unit, office, etc"
-                name="ship_to_street2"
-                value={values!.ship_to_street2}
+                name="ship_to_street_2"
+                value={values!.ship_to_street_2}
                 onChange={handleChange}
               />
             </FormField>

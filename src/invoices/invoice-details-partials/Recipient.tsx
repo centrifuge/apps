@@ -36,11 +36,11 @@ export class Recipient extends React.Component<RecipientProps> {
         <Box gap={columnGap} basis={'1/2'}>
           <DisplayField
             label="Street 1"
-            value={invoice!.bill_to_street1}
+            value={invoice!.bill_to_street_1}
           />
           <DisplayField
             label="Street 2"
-            value={invoice!.bill_to_street2}
+            value={invoice!.bill_to_street_2}
           />
           <DisplayField
             label="City"

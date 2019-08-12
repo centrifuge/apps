@@ -1,9 +1,11 @@
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import SearchSelect from './SearchSelect';
 
 describe('Search Select', () => {
   const inputProps = {
+    labelKey: 'label',
+    valueKey: 'value',
     name: 'dropdown',
     onBlur: jest.fn(),
     onChange: jest.fn(),
@@ -49,7 +51,7 @@ describe('Search Select', () => {
     it('should initialize the state', function() {
       const state = searchSelectShallow.state();
       expect(state.options).toBe(items);
-      expect(state.selected).toEqual({ label: '', value: '' });
+      expect(state.selected).toEqual(undefined);
     });
 
     describe('onChange', () => {
@@ -64,8 +66,6 @@ describe('Search Select', () => {
           value: orangeJuice,
         });
 
-        const updatedState = searchSelectShallow.state();
-        expect(updatedState.selected).toEqual(orangeJuice);
         expect(inputProps.onChange).toHaveBeenCalledWith(orangeJuice);
       });
     });
