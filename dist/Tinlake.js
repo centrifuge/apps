@@ -34873,7 +34873,6 @@ var waitAndReturnEvents = function (eth, txHash, abi) { return __awaiter(_this, 
                 return [3 /*break*/, 3];
             case 2:
                 err_1 = _a.sent();
-                console.log("timeout error occured", err_1);
                 return [2 /*return*/, err_1];
             case 3: return [2 /*return*/, new Promise(function (resolve, reject) {
                     eth.getTransactionReceipt(tx.hash, function (err, receipt) {
@@ -34890,7 +34889,7 @@ var waitAndReturnEvents = function (eth, txHash, abi) { return __awaiter(_this, 
 // todo replace with a better polling
 var waitForTransaction = function (eth, txHash) {
     return new Promise(function (resolve, reject) {
-        var secMax = 0;
+        var secMax = 60;
         var sec = 0;
         var wait = function (txHash) {
             setTimeout(function () {

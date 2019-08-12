@@ -418,10 +418,9 @@ const waitAndReturnEvents = async (eth: ethI, txHash: string, abi: any) => {
   try {
     tx = await waitForTransaction(eth, txHash)
   } catch (err) {
-    console.log("timeout error occured", err)
     return err
   }
-  
+
   return new Promise((resolve, reject) => {
       eth.getTransactionReceipt(tx.hash, (err: null, receipt: any) => {
         if (err != null) {
@@ -436,7 +435,7 @@ const waitAndReturnEvents = async (eth: ethI, txHash: string, abi: any) => {
 // todo replace with a better polling
 const waitForTransaction = (eth: ethI, txHash: any) => {
   return new Promise((resolve, reject) => {
-    const secMax = 0;
+    const secMax = 60;
     let sec = 0;
     const wait = (txHash: string) => {
       setTimeout(() => {
