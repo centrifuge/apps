@@ -34879,7 +34879,6 @@ var waitAndReturnEvents = function (eth, txHash, abi, transactionTimeout) { retu
 var waitForTransaction = function (eth, txHash, transactionTimeout) {
     return new Promise(function (resolve, reject) {
         var secMax = transactionTimeout;
-        console.log("secMax", secMax);
         var sec = 0;
         var wait = function (txHash) {
             setTimeout(function () {
