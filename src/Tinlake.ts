@@ -132,10 +132,11 @@ export class Tinlake {
   public ethOptions: any;
   public ethConfig: any;
   public contractAddresses: ContractAddresses;
+  public transactionTimeout: number;
   public contracts: Contracts;
   public contractAbis: ContractAbis;
 
-  constructor(provider: any, contractAddresses: ContractAddresses, nftDataOutputs: AbiOutput[],
+  constructor(provider: any, contractAddresses: ContractAddresses, nftDataOutputs: AbiOutput[], transactionTimeout: number, 
               { contractAbis, ethOptions, ethConfig }: Options = {}) {
     this.contractAbis = contractAbis || {
       nft: contractAbiNft,
@@ -168,7 +169,7 @@ export class Tinlake {
       }],
     };
     this.contractAddresses = contractAddresses;
-
+    this.transactionTimeout = transactionTimeout;
     this.setProvider(provider, ethOptions);
     this.setEthConfig(ethConfig || {});
   }
@@ -238,7 +239,7 @@ export class Tinlake {
   approveNFT = (tokenId: string, to: string): Promise<Events> => {
     return this.contracts.nft.approve(to, tokenId, this.ethConfig).then((txHash: string) => {
       console.log(`[NFT Approve] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi);
+      return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
     });
   }
 
@@ -262,7 +263,7 @@ export class Tinlake {
   mintNFT = (owner: string, tokenId: string): Promise<Events> => {
     return this.contracts.nft.mint(owner, tokenId, this.ethConfig).then((txHash: string) => {
       console.log(`[NFT.mint] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi);
+      return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
     });
   }
 
@@ -274,7 +275,7 @@ export class Tinlake {
     return this.contracts.admit.admit(registry, nft, principal, owner, this.ethConfig)
       .then((txHash: string) => {
         console.log(`[Admit.admit] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi);
+        return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
       });
   }
 
@@ -282,7 +283,7 @@ export class Tinlake {
     return this.contracts.appraiser.file(loanID, appraisal, this.ethConfig)
       .then((txHash: string) => {
         console.log(`[Appraisal.file] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi);
+        return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
       });
   }
 
@@ -297,7 +298,7 @@ export class Tinlake {
   borrow = (loanId: string, to: string): Promise<Events> => {
     return this.contracts.reception.borrow(loanId, to, this.ethConfig).then((txHash: string) => {
       console.log(`[Reception.borrow] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi);
+      return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout);
     });
   }
 
@@ -309,7 +310,7 @@ export class Tinlake {
     return this.contracts.reception.repay(loanId, wad, usr,  this.ethConfig)
       .then((txHash: string) => {
         console.log(`[Reception.repay] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi);
+        return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout);
       });
   }
 
@@ -321,21 +322,21 @@ export class Tinlake {
     return this.contracts.reception.close(loanId, usr,  this.ethConfig)
       .then((txHash: string) => {
         console.log(`[Reception.close] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi);
+        return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout);
       });
   }
 
   approveCurrency = (usr: string, wad: string): Promise<Events> => {
     return this.contracts.currency.approve(usr, wad, this.ethConfig).then((txHash: string) => {
       console.log(`[Currency.approve] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['currency'].abi);
+      return waitAndReturnEvents(this.eth, txHash, this.contracts['currency'].abi, this.transactionTimeout);
     });
   }
 
   lenderRely = (usr: string): Promise<Events> => {
     return this.contracts.lender.rely(usr, this.ethConfig).then((txHash: string) => {
       console.log(`[Lender.rely] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['lender'].abi);
+      return waitAndReturnEvents(this.eth, txHash, this.contracts['lender'].abi, this.transactionTimeout);
     });
   }
 
@@ -343,7 +344,7 @@ export class Tinlake {
     return this.contracts.pileForInit.file(fee, fee, this.ethConfig)
       .then((txHash: string) => {
         console.log(`[Pile.file] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts.pileForInit.abi);
+        return waitAndReturnEvents(this.eth, txHash, this.contracts.pileForInit.abi, this.transactionTimeout);
       });
   }
 
@@ -356,7 +357,7 @@ export class Tinlake {
     return this.contracts.pileForAdd.file(loanId, fee, balance, this.ethConfig)
       .then((txHash: string) => {
         console.log(`[Pile.file] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts.pileForAdd.abi);
+        return waitAndReturnEvents(this.eth, txHash, this.contracts.pileForAdd.abi, this.transactionTimeout);
       });
   }
 
@@ -378,7 +379,7 @@ export class Tinlake {
                                           this.ethConfig)
       .then((txHash: string) => {
         console.log(`[Admin.whitelist] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi);
+        return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
       });
   }
 
@@ -387,7 +388,7 @@ export class Tinlake {
     return this.contracts.shelf.file(loanId, registry, nft, '0', this.ethConfig)
       .then((txHash: string) => {
         console.log(`[Shelf.file] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts['shelf'].abi);
+        return waitAndReturnEvents(this.eth, txHash, this.contracts['shelf'].abi, this.transactionTimeout);
       });
   }
 
@@ -412,15 +413,9 @@ export class Tinlake {
   }
 }
 
-const waitAndReturnEvents = async (eth: ethI, txHash: string, abi: any) => {
+const waitAndReturnEvents = async (eth: ethI, txHash: string, abi: any, transactionTimeout: number) => {
 
-  let tx: any
-  try {
-    tx = await waitForTransaction(eth, txHash)
-  } catch (err) {
-    return err
-  }
-
+  const tx:any = await waitForTransaction(eth, txHash, transactionTimeout)
   return new Promise((resolve, reject) => {
       eth.getTransactionReceipt(tx.hash, (err: null, receipt: any) => {
         if (err != null) {
@@ -433,9 +428,9 @@ const waitAndReturnEvents = async (eth: ethI, txHash: string, abi: any) => {
 };
 
 // todo replace with a better polling
-const waitForTransaction = (eth: ethI, txHash: any) => {
+const waitForTransaction = (eth: ethI, txHash: any, transactionTimeout: number) => {
   return new Promise((resolve, reject) => {
-    const secMax = 60;
+    const secMax = transactionTimeout
     let sec = 0;
     const wait = (txHash: string) => {
       setTimeout(() => {
@@ -453,7 +448,7 @@ const waitForTransaction = (eth: ethI, txHash: any) => {
           if (sec < secMax) {
             wait(txHash);
           } else {
-            reject(`waiting for transaction tx ${tx} timed out after ${secMax} seconds`);
+            reject(new Error(`waiting for transaction tx ${txHash} timed out after ${secMax} seconds`));
           }
         });
       },         1000);

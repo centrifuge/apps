@@ -104,9 +104,10 @@ export declare class Tinlake {
     ethOptions: any;
     ethConfig: any;
     contractAddresses: ContractAddresses;
+    transactionTimeout: number;
     contracts: Contracts;
     contractAbis: ContractAbis;
-    constructor(provider: any, contractAddresses: ContractAddresses, nftDataOutputs: AbiOutput[], { contractAbis, ethOptions, ethConfig }?: Options);
+    constructor(provider: any, contractAddresses: ContractAddresses, nftDataOutputs: AbiOutput[], transactionTimeout: number, { contractAbis, ethOptions, ethConfig }?: Options);
     setProvider: (provider: any, ethOptions?: any) => void;
     setEthConfig: (ethConfig: {
         [key: string]: any;

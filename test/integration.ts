@@ -20,7 +20,7 @@ const gasLimit = 1000000;
 const principal = '100000000000000000000';
 const appraisal = '300000000000000000000';
 const fee = '1000000564701133626865910626'; // 5 % per day
-
+const transactionTimeout = 60
 const buffer = 10000000000; // buffer amount for repay
 const timeout = 60000;
 
@@ -36,6 +36,7 @@ describe('functional tinlake tests', () => {
       }),
       contractAddresses,
       nftDataContractCall.outputs,
+      transactionTimeout,
       {
         ethConfig: { from: adminEthFrom, gasLimit: `0x${gasLimit.toString(16)}` },
       },
@@ -48,6 +49,7 @@ describe('functional tinlake tests', () => {
       }),
       contractAddresses,
       nftDataContractCall.outputs,
+      transactionTimeout,
       {
         ethConfig: { from: borrowerEthFrom, gasLimit: `0x${gasLimit.toString(16)}` },
       },
@@ -317,7 +319,6 @@ describe('functional tinlake tests', () => {
 
     it('count number of loans', async () => {
       const count = await adminTinlake.loanCount();
-      console.log(`Found ${count} loans `);
       assert(count.gte(new BN(0)));
     });
 
