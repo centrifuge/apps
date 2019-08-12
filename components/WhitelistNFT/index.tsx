@@ -33,9 +33,9 @@ interface State {
 class WhitelistNFT extends React.Component<Props, State> {
   state: State = {
     tokenId: '',
-    principal: '100000000000000000000',
-    appraisal: '300000000000000000000',
-    interestRate: '5',
+    principal: '0',
+    appraisal: '0',
+    interestRate: '0',
     is: null,
     errorMsg: '',
   };
