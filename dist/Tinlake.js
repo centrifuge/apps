@@ -34876,7 +34876,7 @@ var waitAndReturnEvents = function (eth, txHash, abi) {
 // todo replace with a better polling
 var waitForTransaction = function (eth, txHash) {
     return new Promise(function (resolve, reject) {
-        var secMax = 600;
+        var secMax = 3600;
         var sec = 0;
         var wait = function (txHash) {
             setTimeout(function () {
