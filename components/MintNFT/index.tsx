@@ -38,7 +38,6 @@ class MintNFT extends React.Component<Props, State> {
       if (res.status === SUCCESS_STATUS && res.events[0].event.name === 'Transfer') {
         this.setState({ is: 'success' });
       } else {
-        console.log(res);
         this.setState({ is: 'error' });
       }
     } catch (e) {

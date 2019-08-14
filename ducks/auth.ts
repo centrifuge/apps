@@ -71,7 +71,6 @@ export function loadUser(tinlake: Tinlake, address: Address):
       isAdmin: await isAdminPromise,
     };
 
-    console.log('Will update authed user to:', user);
     dispatch({ user, type: RECEIVE });
   };
 }
@@ -81,32 +80,29 @@ let providerChecks: number;
 export function observeAuthChanges(tinlake: Tinlake):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
-    console.log('Observe auth changes');
 
     const state = getState();
     if (state.auth.observingAuthChanges) {
-      console.log('Already observing auth changes');
       return;
     }
 
     // if HTTPProvider is present, regularly check fox provider changes
     if (tinlake.provider.host) {
       if (!providerChecks) {
-        console.log('Found HTTPProvider - check for provider changes every 200 ms');
+        // console.log('Found HTTPProvider - check for provider changes every 200 ms');
         providerChecks = setInterval(() => dispatch(observeAuthChanges(tinlake)), 2000);
       }
       return;
     }
 
     if (providerChecks) {
-      console.log('Provider changed, clear checking');
+      // console.log('Provider changed, clear checking');
       clearInterval(providerChecks);
       dispatch(loadUser(tinlake, tinlake.ethConfig.from));
     }
 
     dispatch({ type: OBSERVING_AUTH_CHANGES });
     tinlake.provider.on('accountsChanged', (accounts: Address[]) => {
-      console.log('Active account changed, will update tinlake and authedUser');
       tinlake.ethConfig = { from: accounts[0] };
       dispatch(loadUser(tinlake, accounts[0]));
     });

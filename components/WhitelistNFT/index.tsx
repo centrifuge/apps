@@ -60,31 +60,22 @@ class WhitelistNFT extends React.Component<Props, State> {
       const fee = interestRateToFee(interestRate);
       const feeExists = await tinlake.existsFee(fee);
       if (!feeExists) {
-        console.log(`Fee ${fee} does not yet exist, create it`);
         const res = await tinlake.initFee(fee);
         if (res.status !== SUCCESS_STATUS) {
-          console.log(res);
           this.setState({ is: 'error', errorMsg: JSON.stringify(res) });
           return;
         }
-        console.log('Fee created');
       } else {
-        console.log(`Fee ${fee} already exists`);
       }
 
       // admit
       const nftOwner = await tinlake.ownerOfNFT(tokenId);
 
-      console.log(`NFT owner of tokenId ${tokenId} is ${nftOwner}`);
-
       const res2 = await tinlake.whitelist(addresses['NFT_COLLATERAL'], tokenId, principal,
                                            appraisal, fee, nftOwner);
 
-      console.log('whitelist result');
-      console.log(res2.txHash);
 
       if (res2.status !== SUCCESS_STATUS || res2.events[0].event.name !== 'Transfer') {
-        console.log(res2);
         this.setState({ is: 'error', errorMsg: JSON.stringify(res2) });
         return;
       }
