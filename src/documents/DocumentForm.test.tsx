@@ -29,9 +29,16 @@ describe('DocumentForm', () => {
           key:
             '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
           type: 'string',
-          value: 'some customer',
+          value: 'some cust' +
+            'omer',
         },
 
+        ['percent']: {
+          key:
+            '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
+          type: 'decimal',
+          value: '100',
+        },
         ['amount']: {
           key:
             '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
@@ -117,11 +124,17 @@ describe('DocumentForm', () => {
           name: 'amount',
           label: 'Amount',
           type: 'decimal',
+          options: [1, 2, 3],
         },
         {
           name: 'index',
           label: 'Index',
           type: 'integer',
+        },
+        {
+          name: 'percent',
+          label: 'Percent',
+          type: 'decimal',
         },
         {
           name: 'date',
@@ -175,7 +188,8 @@ describe('DocumentForm', () => {
 
   it('Should render the form with default data', () => {
     const documentForm = mount(
-      <DocumentForm document={documents[0]} selectedSchema={schemas[0]} schemas={schemas} onCancel={onCancel} onSubmit={onSubmit}/>,
+      <DocumentForm document={documents[0]} selectedSchema={schemas[0]} schemas={schemas} onCancel={onCancel}
+                    onSubmit={onSubmit}/>,
     );
     expect(documentForm.html()).toMatchSnapshot();
   });
@@ -183,7 +197,8 @@ describe('DocumentForm', () => {
 
   it('Should render the form with default data  for read access and nfts', () => {
     const documentForm = mount(
-      <DocumentForm document={documents[1]} selectedSchema={schemas[0]} schemas={schemas} contacts={contacts} onCancel={onCancel}
+      <DocumentForm document={documents[1]} selectedSchema={schemas[0]} schemas={schemas} contacts={contacts}
+                    onCancel={onCancel}
                     onSubmit={onSubmit}/>,
     );
     expect(documentForm.html()).toMatchSnapshot();
@@ -192,14 +207,16 @@ describe('DocumentForm', () => {
 
   it('Should render the form in view mode', () => {
     const documentForm = mount(
-      <DocumentForm document={documents[0]} selectedSchema={schemas[0]} mode={'view'} schemas={schemas} onCancel={onCancel} onSubmit={onSubmit}/>,
+      <DocumentForm document={documents[0]} selectedSchema={schemas[0]} mode={'view'} schemas={schemas}
+                    onCancel={onCancel} onSubmit={onSubmit}/>,
     );
     expect(documentForm.html()).toMatchSnapshot();
   });
 
   it('Should render the form in edit mode', () => {
     const documentForm = mount(
-      <DocumentForm document={documents[0]} selectedSchema={schemas[0]} mode={'view'} schemas={schemas} onCancel={onCancel} onSubmit={onSubmit}/>,
+      <DocumentForm document={documents[0]} selectedSchema={schemas[0]} mode={'view'} schemas={schemas}
+                    onCancel={onCancel} onSubmit={onSubmit}/>,
     );
     expect(documentForm.html()).toMatchSnapshot();
   });

@@ -357,7 +357,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                     >
                                                                       <DropButton
                                                                         a11yTitle="Open Drop"
-                                                                        className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS"
+                                                                        className="Select__StyledSelectDropButton-sc-17idtfo-1 cvpccN"
                                                                         dropAlign={
                                                                           Object {
                                                                             "left": "left",
@@ -373,7 +373,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                       >
                                                                         <WithTheme(Button)
                                                                           a11yTitle="Open Drop"
-                                                                          className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS"
+                                                                          className="Select__StyledSelectDropButton-sc-17idtfo-1 cvpccN"
                                                                           focusIndicator={true}
                                                                           gap="small"
                                                                           onClick={[Function]}
@@ -383,7 +383,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                         >
                                                                           <WithTheme(Button)
                                                                             a11yTitle="Open Drop"
-                                                                            className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS"
+                                                                            className="Select__StyledSelectDropButton-sc-17idtfo-1 cvpccN"
                                                                             focus={false}
                                                                             focusIndicator={true}
                                                                             gap="small"
@@ -396,7 +396,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                           >
                                                                             <Button
                                                                               a11yTitle="Open Drop"
-                                                                              className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS"
+                                                                              className="Select__StyledSelectDropButton-sc-17idtfo-1 cvpccN"
                                                                               focus={false}
                                                                               focusIndicator={true}
                                                                               gap="small"
@@ -409,7 +409,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                             >
                                                                               <StyledButton
                                                                                 aria-label="Open Drop"
-                                                                                className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS"
+                                                                                className="Select__StyledSelectDropButton-sc-17idtfo-1 cvpccN"
                                                                                 focus={false}
                                                                                 focusIndicator={true}
                                                                                 gap="small"
@@ -427,7 +427,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                               >
                                                                                 <button
                                                                                   aria-label="Open Drop"
-                                                                                  className="Select__StyledSelectDropButton-sc-17idtfo-1 gQjIFS StyledButton-sc-323bzc-0 jfbKsv"
+                                                                                  className="Select__StyledSelectDropButton-sc-17idtfo-1 cvpccN StyledButton-sc-323bzc-0 jfbKsv"
                                                                                   onBlur={[Function]}
                                                                                   onClick={[Function]}
                                                                                   onFocus={[Function]}
@@ -1004,53 +1004,174 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                           thousandSeparator=","
                                                                           value={1000}
                                                                         >
-                                                                          <NumberInput__StyledCurrencyContainer
-                                                                            decimalSeparator="."
+                                                                          <WithTheme(TextInput)
                                                                             disabled={true}
+                                                                            dropAlign={
+                                                                              Object {
+                                                                                "left": "left",
+                                                                                "top": "bottom",
+                                                                              }
+                                                                            }
                                                                             focusIndicator={false}
+                                                                            messages={
+                                                                              Object {
+                                                                                "enterSelect": "(Press Enter to Select)",
+                                                                                "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                "suggestionsCount": "suggestions available",
+                                                                                "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                              }
+                                                                            }
                                                                             name="invoice_amount"
                                                                             onBlur={[Function]}
+                                                                            onChange={[Function]}
                                                                             onFocus={[Function]}
+                                                                            onKeyDown={[Function]}
+                                                                            onMouseUp={[Function]}
+                                                                            placeholder=""
                                                                             plain={true}
-                                                                            precision={2}
-                                                                            prefix="$"
-                                                                            thousandSeparator=","
-                                                                            value={1000}
+                                                                            type="text"
+                                                                            value="$1,000"
                                                                           >
-                                                                            <div
-                                                                              className="NumberInput__StyledCurrencyContainer-sc-1mk0e8s-1 fvlnYL"
+                                                                            <WithTheme(TextInput)
                                                                               disabled={true}
+                                                                              dropAlign={
+                                                                                Object {
+                                                                                  "left": "left",
+                                                                                  "top": "bottom",
+                                                                                }
+                                                                              }
+                                                                              focus={false}
+                                                                              focusIndicator={false}
+                                                                              messages={
+                                                                                Object {
+                                                                                  "enterSelect": "(Press Enter to Select)",
+                                                                                  "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                  "suggestionsCount": "suggestions available",
+                                                                                  "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                }
+                                                                              }
                                                                               name="invoice_amount"
                                                                               onBlur={[Function]}
+                                                                              onChange={[Function]}
                                                                               onFocus={[Function]}
-                                                                              prefix="$"
-                                                                              value={1000}
+                                                                              onKeyDown={[Function]}
+                                                                              onMouseUp={[Function]}
+                                                                              placeholder=""
+                                                                              plain={true}
+                                                                              type="text"
+                                                                              value="$1,000"
                                                                             >
-                                                                              <NumberInput__StyledCurrencyInput
-                                                                                decimalSeparator="."
+                                                                              <TextInput
                                                                                 disabled={true}
+                                                                                dropAlign={
+                                                                                  Object {
+                                                                                    "left": "left",
+                                                                                    "top": "bottom",
+                                                                                  }
+                                                                                }
+                                                                                focus={false}
+                                                                                focusIndicator={false}
+                                                                                messages={
+                                                                                  Object {
+                                                                                    "enterSelect": "(Press Enter to Select)",
+                                                                                    "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                    "suggestionsCount": "suggestions available",
+                                                                                    "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                  }
+                                                                                }
                                                                                 name="invoice_amount"
                                                                                 onBlur={[Function]}
+                                                                                onChange={[Function]}
                                                                                 onFocus={[Function]}
-                                                                                precision={2}
-                                                                                prefix="$"
-                                                                                thousandSeparator=","
-                                                                                value={1000}
+                                                                                onKeyDown={[Function]}
+                                                                                onMouseUp={[Function]}
+                                                                                placeholder=""
+                                                                                plain={true}
+                                                                                type="text"
+                                                                                value="$1,000"
                                                                               >
-                                                                                <input
-                                                                                  className="NumberInput__StyledCurrencyInput-sc-1mk0e8s-0 jqervJ"
+                                                                                <TextInput
+                                                                                  announce={[Function]}
                                                                                   disabled={true}
+                                                                                  dropAlign={
+                                                                                    Object {
+                                                                                      "left": "left",
+                                                                                      "top": "bottom",
+                                                                                    }
+                                                                                  }
+                                                                                  focus={false}
+                                                                                  focusIndicator={false}
+                                                                                  messages={
+                                                                                    Object {
+                                                                                      "enterSelect": "(Press Enter to Select)",
+                                                                                      "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                      "suggestionsCount": "suggestions available",
+                                                                                      "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                    }
+                                                                                  }
                                                                                   name="invoice_amount"
                                                                                   onBlur={[Function]}
                                                                                   onChange={[Function]}
                                                                                   onFocus={[Function]}
+                                                                                  onKeyDown={[Function]}
                                                                                   onMouseUp={[Function]}
+                                                                                  placeholder=""
+                                                                                  plain={true}
                                                                                   type="text"
-                                                                                  value="$1,000.00"
-                                                                                />
-                                                                              </NumberInput__StyledCurrencyInput>
-                                                                            </div>
-                                                                          </NumberInput__StyledCurrencyContainer>
+                                                                                  value="$1,000"
+                                                                                >
+                                                                                  <StyledTextInput__StyledTextInputContainer
+                                                                                    plain={true}
+                                                                                  >
+                                                                                    <div
+                                                                                      className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 kYQCpm"
+                                                                                    >
+                                                                                      <StyledTextInput
+                                                                                        announce={[Function]}
+                                                                                        autoComplete="off"
+                                                                                        disabled={true}
+                                                                                        focus={false}
+                                                                                        focusIndicator={false}
+                                                                                        messages={
+                                                                                          Object {
+                                                                                            "enterSelect": "(Press Enter to Select)",
+                                                                                            "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                            "suggestionsCount": "suggestions available",
+                                                                                            "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                          }
+                                                                                        }
+                                                                                        name="invoice_amount"
+                                                                                        onBlur={[Function]}
+                                                                                        onChange={[Function]}
+                                                                                        onFocus={[Function]}
+                                                                                        onKeyDown={[Function]}
+                                                                                        onMouseUp={[Function]}
+                                                                                        placeholder=""
+                                                                                        plain={true}
+                                                                                        type="text"
+                                                                                        value="$1,000"
+                                                                                      >
+                                                                                        <input
+                                                                                          autoComplete="off"
+                                                                                          className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                                                                                          disabled={true}
+                                                                                          name="invoice_amount"
+                                                                                          onBlur={[Function]}
+                                                                                          onChange={[Function]}
+                                                                                          onFocus={[Function]}
+                                                                                          onKeyDown={[Function]}
+                                                                                          onMouseUp={[Function]}
+                                                                                          placeholder=""
+                                                                                          type="text"
+                                                                                          value="$1,000"
+                                                                                        />
+                                                                                      </StyledTextInput>
+                                                                                    </div>
+                                                                                  </StyledTextInput__StyledTextInputContainer>
+                                                                                </TextInput>
+                                                                              </TextInput>
+                                                                            </WithTheme(TextInput)>
+                                                                          </WithTheme(TextInput)>
                                                                         </WithTheme(Component)>
                                                                       </div>
                                                                     </StyledBox>
@@ -1633,52 +1754,168 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                   thousandSeparator=","
                                                                   value={0}
                                                                 >
-                                                                  <NumberInput__StyledCurrencyContainer
-                                                                    decimalSeparator="."
+                                                                  <WithTheme(TextInput)
+                                                                    dropAlign={
+                                                                      Object {
+                                                                        "left": "left",
+                                                                        "top": "bottom",
+                                                                      }
+                                                                    }
                                                                     focusIndicator={false}
+                                                                    messages={
+                                                                      Object {
+                                                                        "enterSelect": "(Press Enter to Select)",
+                                                                        "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                        "suggestionsCount": "suggestions available",
+                                                                        "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                      }
+                                                                    }
                                                                     name="repayment_amount"
                                                                     onBlur={[Function]}
                                                                     onChange={[Function]}
                                                                     onFocus={[Function]}
+                                                                    onKeyDown={[Function]}
+                                                                    onMouseUp={[Function]}
+                                                                    placeholder=""
                                                                     plain={true}
-                                                                    precision={2}
-                                                                    prefix="$"
-                                                                    thousandSeparator=","
-                                                                    value={0}
+                                                                    type="text"
+                                                                    value="$0"
                                                                   >
-                                                                    <div
-                                                                      className="NumberInput__StyledCurrencyContainer-sc-1mk0e8s-1 fvlnYL"
+                                                                    <WithTheme(TextInput)
+                                                                      dropAlign={
+                                                                        Object {
+                                                                          "left": "left",
+                                                                          "top": "bottom",
+                                                                        }
+                                                                      }
+                                                                      focus={false}
+                                                                      focusIndicator={false}
+                                                                      messages={
+                                                                        Object {
+                                                                          "enterSelect": "(Press Enter to Select)",
+                                                                          "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                          "suggestionsCount": "suggestions available",
+                                                                          "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                        }
+                                                                      }
                                                                       name="repayment_amount"
                                                                       onBlur={[Function]}
                                                                       onChange={[Function]}
                                                                       onFocus={[Function]}
-                                                                      prefix="$"
-                                                                      value={0}
+                                                                      onKeyDown={[Function]}
+                                                                      onMouseUp={[Function]}
+                                                                      placeholder=""
+                                                                      plain={true}
+                                                                      type="text"
+                                                                      value="$0"
                                                                     >
-                                                                      <NumberInput__StyledCurrencyInput
-                                                                        decimalSeparator="."
+                                                                      <TextInput
+                                                                        dropAlign={
+                                                                          Object {
+                                                                            "left": "left",
+                                                                            "top": "bottom",
+                                                                          }
+                                                                        }
+                                                                        focus={false}
+                                                                        focusIndicator={false}
+                                                                        messages={
+                                                                          Object {
+                                                                            "enterSelect": "(Press Enter to Select)",
+                                                                            "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                            "suggestionsCount": "suggestions available",
+                                                                            "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                          }
+                                                                        }
                                                                         name="repayment_amount"
                                                                         onBlur={[Function]}
                                                                         onChange={[Function]}
                                                                         onFocus={[Function]}
-                                                                        precision={2}
-                                                                        prefix="$"
-                                                                        thousandSeparator=","
-                                                                        value={0}
+                                                                        onKeyDown={[Function]}
+                                                                        onMouseUp={[Function]}
+                                                                        placeholder=""
+                                                                        plain={true}
+                                                                        type="text"
+                                                                        value="$0"
                                                                       >
-                                                                        <input
-                                                                          className="NumberInput__StyledCurrencyInput-sc-1mk0e8s-0 eQOnKh"
+                                                                        <TextInput
+                                                                          announce={[Function]}
+                                                                          dropAlign={
+                                                                            Object {
+                                                                              "left": "left",
+                                                                              "top": "bottom",
+                                                                            }
+                                                                          }
+                                                                          focus={false}
+                                                                          focusIndicator={false}
+                                                                          messages={
+                                                                            Object {
+                                                                              "enterSelect": "(Press Enter to Select)",
+                                                                              "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                              "suggestionsCount": "suggestions available",
+                                                                              "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                            }
+                                                                          }
                                                                           name="repayment_amount"
                                                                           onBlur={[Function]}
                                                                           onChange={[Function]}
                                                                           onFocus={[Function]}
+                                                                          onKeyDown={[Function]}
                                                                           onMouseUp={[Function]}
+                                                                          placeholder=""
+                                                                          plain={true}
                                                                           type="text"
-                                                                          value="$0.00"
-                                                                        />
-                                                                      </NumberInput__StyledCurrencyInput>
-                                                                    </div>
-                                                                  </NumberInput__StyledCurrencyContainer>
+                                                                          value="$0"
+                                                                        >
+                                                                          <StyledTextInput__StyledTextInputContainer
+                                                                            plain={true}
+                                                                          >
+                                                                            <div
+                                                                              className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 kYQCpm"
+                                                                            >
+                                                                              <StyledTextInput
+                                                                                announce={[Function]}
+                                                                                autoComplete="off"
+                                                                                focus={false}
+                                                                                focusIndicator={false}
+                                                                                messages={
+                                                                                  Object {
+                                                                                    "enterSelect": "(Press Enter to Select)",
+                                                                                    "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                    "suggestionsCount": "suggestions available",
+                                                                                    "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                  }
+                                                                                }
+                                                                                name="repayment_amount"
+                                                                                onBlur={[Function]}
+                                                                                onChange={[Function]}
+                                                                                onFocus={[Function]}
+                                                                                onKeyDown={[Function]}
+                                                                                onMouseUp={[Function]}
+                                                                                placeholder=""
+                                                                                plain={true}
+                                                                                type="text"
+                                                                                value="$0"
+                                                                              >
+                                                                                <input
+                                                                                  autoComplete="off"
+                                                                                  className="StyledTextInput-sc-1x30a0s-0 duvNfq"
+                                                                                  name="repayment_amount"
+                                                                                  onBlur={[Function]}
+                                                                                  onChange={[Function]}
+                                                                                  onFocus={[Function]}
+                                                                                  onKeyDown={[Function]}
+                                                                                  onMouseUp={[Function]}
+                                                                                  placeholder=""
+                                                                                  type="text"
+                                                                                  value="$0"
+                                                                                />
+                                                                              </StyledTextInput>
+                                                                            </div>
+                                                                          </StyledTextInput__StyledTextInputContainer>
+                                                                        </TextInput>
+                                                                      </TextInput>
+                                                                    </WithTheme(TextInput)>
+                                                                  </WithTheme(TextInput)>
                                                                 </WithTheme(Component)>
                                                               </div>
                                                             </StyledBox>
@@ -1876,52 +2113,174 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                   thousandSeparator=","
                                                                   value={5}
                                                                 >
-                                                                  <NumberInput__StyledCurrencyContainer
-                                                                    decimalSeparator="."
+                                                                  <WithTheme(TextInput)
                                                                     disabled={true}
+                                                                    dropAlign={
+                                                                      Object {
+                                                                        "left": "left",
+                                                                        "top": "bottom",
+                                                                      }
+                                                                    }
                                                                     focusIndicator={false}
+                                                                    messages={
+                                                                      Object {
+                                                                        "enterSelect": "(Press Enter to Select)",
+                                                                        "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                        "suggestionsCount": "suggestions available",
+                                                                        "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                      }
+                                                                    }
                                                                     name="apr"
                                                                     onBlur={[Function]}
+                                                                    onChange={[Function]}
                                                                     onFocus={[Function]}
+                                                                    onKeyDown={[Function]}
+                                                                    onMouseUp={[Function]}
+                                                                    placeholder=""
                                                                     plain={true}
-                                                                    precision={2}
-                                                                    suffix="%"
-                                                                    thousandSeparator=","
-                                                                    value={5}
+                                                                    type="text"
+                                                                    value="5%"
                                                                   >
-                                                                    <div
-                                                                      className="NumberInput__StyledCurrencyContainer-sc-1mk0e8s-1 fvlnYL"
+                                                                    <WithTheme(TextInput)
                                                                       disabled={true}
+                                                                      dropAlign={
+                                                                        Object {
+                                                                          "left": "left",
+                                                                          "top": "bottom",
+                                                                        }
+                                                                      }
+                                                                      focus={false}
+                                                                      focusIndicator={false}
+                                                                      messages={
+                                                                        Object {
+                                                                          "enterSelect": "(Press Enter to Select)",
+                                                                          "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                          "suggestionsCount": "suggestions available",
+                                                                          "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                        }
+                                                                      }
                                                                       name="apr"
                                                                       onBlur={[Function]}
+                                                                      onChange={[Function]}
                                                                       onFocus={[Function]}
-                                                                      value={5}
+                                                                      onKeyDown={[Function]}
+                                                                      onMouseUp={[Function]}
+                                                                      placeholder=""
+                                                                      plain={true}
+                                                                      type="text"
+                                                                      value="5%"
                                                                     >
-                                                                      <NumberInput__StyledCurrencyInput
-                                                                        decimalSeparator="."
+                                                                      <TextInput
                                                                         disabled={true}
+                                                                        dropAlign={
+                                                                          Object {
+                                                                            "left": "left",
+                                                                            "top": "bottom",
+                                                                          }
+                                                                        }
+                                                                        focus={false}
+                                                                        focusIndicator={false}
+                                                                        messages={
+                                                                          Object {
+                                                                            "enterSelect": "(Press Enter to Select)",
+                                                                            "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                            "suggestionsCount": "suggestions available",
+                                                                            "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                          }
+                                                                        }
                                                                         name="apr"
                                                                         onBlur={[Function]}
+                                                                        onChange={[Function]}
                                                                         onFocus={[Function]}
-                                                                        precision={2}
-                                                                        suffix="%"
-                                                                        thousandSeparator=","
-                                                                        value={5}
+                                                                        onKeyDown={[Function]}
+                                                                        onMouseUp={[Function]}
+                                                                        placeholder=""
+                                                                        plain={true}
+                                                                        type="text"
+                                                                        value="5%"
                                                                       >
-                                                                        <input
-                                                                          className="NumberInput__StyledCurrencyInput-sc-1mk0e8s-0 jqervJ"
+                                                                        <TextInput
+                                                                          announce={[Function]}
                                                                           disabled={true}
+                                                                          dropAlign={
+                                                                            Object {
+                                                                              "left": "left",
+                                                                              "top": "bottom",
+                                                                            }
+                                                                          }
+                                                                          focus={false}
+                                                                          focusIndicator={false}
+                                                                          messages={
+                                                                            Object {
+                                                                              "enterSelect": "(Press Enter to Select)",
+                                                                              "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                              "suggestionsCount": "suggestions available",
+                                                                              "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                            }
+                                                                          }
                                                                           name="apr"
                                                                           onBlur={[Function]}
                                                                           onChange={[Function]}
                                                                           onFocus={[Function]}
+                                                                          onKeyDown={[Function]}
                                                                           onMouseUp={[Function]}
+                                                                          placeholder=""
+                                                                          plain={true}
                                                                           type="text"
-                                                                          value="5.00%"
-                                                                        />
-                                                                      </NumberInput__StyledCurrencyInput>
-                                                                    </div>
-                                                                  </NumberInput__StyledCurrencyContainer>
+                                                                          value="5%"
+                                                                        >
+                                                                          <StyledTextInput__StyledTextInputContainer
+                                                                            plain={true}
+                                                                          >
+                                                                            <div
+                                                                              className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 kYQCpm"
+                                                                            >
+                                                                              <StyledTextInput
+                                                                                announce={[Function]}
+                                                                                autoComplete="off"
+                                                                                disabled={true}
+                                                                                focus={false}
+                                                                                focusIndicator={false}
+                                                                                messages={
+                                                                                  Object {
+                                                                                    "enterSelect": "(Press Enter to Select)",
+                                                                                    "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                    "suggestionsCount": "suggestions available",
+                                                                                    "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                  }
+                                                                                }
+                                                                                name="apr"
+                                                                                onBlur={[Function]}
+                                                                                onChange={[Function]}
+                                                                                onFocus={[Function]}
+                                                                                onKeyDown={[Function]}
+                                                                                onMouseUp={[Function]}
+                                                                                placeholder=""
+                                                                                plain={true}
+                                                                                type="text"
+                                                                                value="5%"
+                                                                              >
+                                                                                <input
+                                                                                  autoComplete="off"
+                                                                                  className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                                                                                  disabled={true}
+                                                                                  name="apr"
+                                                                                  onBlur={[Function]}
+                                                                                  onChange={[Function]}
+                                                                                  onFocus={[Function]}
+                                                                                  onKeyDown={[Function]}
+                                                                                  onMouseUp={[Function]}
+                                                                                  placeholder=""
+                                                                                  type="text"
+                                                                                  value="5%"
+                                                                                />
+                                                                              </StyledTextInput>
+                                                                            </div>
+                                                                          </StyledTextInput__StyledTextInputContainer>
+                                                                        </TextInput>
+                                                                      </TextInput>
+                                                                    </WithTheme(TextInput)>
+                                                                  </WithTheme(TextInput)>
                                                                 </WithTheme(Component)>
                                                               </div>
                                                             </StyledBox>
@@ -2118,49 +2477,168 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                   thousandSeparator=","
                                                                   value={0}
                                                                 >
-                                                                  <NumberInput__StyledCurrencyContainer
-                                                                    decimalSeparator="."
+                                                                  <WithTheme(TextInput)
                                                                     disabled={true}
+                                                                    dropAlign={
+                                                                      Object {
+                                                                        "left": "left",
+                                                                        "top": "bottom",
+                                                                      }
+                                                                    }
                                                                     focusIndicator={false}
+                                                                    messages={
+                                                                      Object {
+                                                                        "enterSelect": "(Press Enter to Select)",
+                                                                        "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                        "suggestionsCount": "suggestions available",
+                                                                        "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                      }
+                                                                    }
                                                                     onBlur={[Function]}
+                                                                    onChange={[Function]}
                                                                     onFocus={[Function]}
+                                                                    onKeyDown={[Function]}
+                                                                    onMouseUp={[Function]}
+                                                                    placeholder=""
                                                                     plain={true}
-                                                                    precision={2}
-                                                                    prefix="$"
-                                                                    thousandSeparator=","
-                                                                    value={0}
+                                                                    type="text"
+                                                                    value="$0"
                                                                   >
-                                                                    <div
-                                                                      className="NumberInput__StyledCurrencyContainer-sc-1mk0e8s-1 fvlnYL"
+                                                                    <WithTheme(TextInput)
                                                                       disabled={true}
+                                                                      dropAlign={
+                                                                        Object {
+                                                                          "left": "left",
+                                                                          "top": "bottom",
+                                                                        }
+                                                                      }
+                                                                      focus={false}
+                                                                      focusIndicator={false}
+                                                                      messages={
+                                                                        Object {
+                                                                          "enterSelect": "(Press Enter to Select)",
+                                                                          "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                          "suggestionsCount": "suggestions available",
+                                                                          "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                        }
+                                                                      }
                                                                       onBlur={[Function]}
+                                                                      onChange={[Function]}
                                                                       onFocus={[Function]}
-                                                                      prefix="$"
-                                                                      value={0}
+                                                                      onKeyDown={[Function]}
+                                                                      onMouseUp={[Function]}
+                                                                      placeholder=""
+                                                                      plain={true}
+                                                                      type="text"
+                                                                      value="$0"
                                                                     >
-                                                                      <NumberInput__StyledCurrencyInput
-                                                                        decimalSeparator="."
+                                                                      <TextInput
                                                                         disabled={true}
+                                                                        dropAlign={
+                                                                          Object {
+                                                                            "left": "left",
+                                                                            "top": "bottom",
+                                                                          }
+                                                                        }
+                                                                        focus={false}
+                                                                        focusIndicator={false}
+                                                                        messages={
+                                                                          Object {
+                                                                            "enterSelect": "(Press Enter to Select)",
+                                                                            "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                            "suggestionsCount": "suggestions available",
+                                                                            "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                          }
+                                                                        }
                                                                         onBlur={[Function]}
+                                                                        onChange={[Function]}
                                                                         onFocus={[Function]}
-                                                                        precision={2}
-                                                                        prefix="$"
-                                                                        thousandSeparator=","
-                                                                        value={0}
+                                                                        onKeyDown={[Function]}
+                                                                        onMouseUp={[Function]}
+                                                                        placeholder=""
+                                                                        plain={true}
+                                                                        type="text"
+                                                                        value="$0"
                                                                       >
-                                                                        <input
-                                                                          className="NumberInput__StyledCurrencyInput-sc-1mk0e8s-0 jqervJ"
+                                                                        <TextInput
+                                                                          announce={[Function]}
                                                                           disabled={true}
+                                                                          dropAlign={
+                                                                            Object {
+                                                                              "left": "left",
+                                                                              "top": "bottom",
+                                                                            }
+                                                                          }
+                                                                          focus={false}
+                                                                          focusIndicator={false}
+                                                                          messages={
+                                                                            Object {
+                                                                              "enterSelect": "(Press Enter to Select)",
+                                                                              "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                              "suggestionsCount": "suggestions available",
+                                                                              "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                            }
+                                                                          }
                                                                           onBlur={[Function]}
                                                                           onChange={[Function]}
                                                                           onFocus={[Function]}
+                                                                          onKeyDown={[Function]}
                                                                           onMouseUp={[Function]}
+                                                                          placeholder=""
+                                                                          plain={true}
                                                                           type="text"
-                                                                          value="$0.00"
-                                                                        />
-                                                                      </NumberInput__StyledCurrencyInput>
-                                                                    </div>
-                                                                  </NumberInput__StyledCurrencyContainer>
+                                                                          value="$0"
+                                                                        >
+                                                                          <StyledTextInput__StyledTextInputContainer
+                                                                            plain={true}
+                                                                          >
+                                                                            <div
+                                                                              className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 kYQCpm"
+                                                                            >
+                                                                              <StyledTextInput
+                                                                                announce={[Function]}
+                                                                                autoComplete="off"
+                                                                                disabled={true}
+                                                                                focus={false}
+                                                                                focusIndicator={false}
+                                                                                messages={
+                                                                                  Object {
+                                                                                    "enterSelect": "(Press Enter to Select)",
+                                                                                    "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                    "suggestionsCount": "suggestions available",
+                                                                                    "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                  }
+                                                                                }
+                                                                                onBlur={[Function]}
+                                                                                onChange={[Function]}
+                                                                                onFocus={[Function]}
+                                                                                onKeyDown={[Function]}
+                                                                                onMouseUp={[Function]}
+                                                                                placeholder=""
+                                                                                plain={true}
+                                                                                type="text"
+                                                                                value="$0"
+                                                                              >
+                                                                                <input
+                                                                                  autoComplete="off"
+                                                                                  className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                                                                                  disabled={true}
+                                                                                  onBlur={[Function]}
+                                                                                  onChange={[Function]}
+                                                                                  onFocus={[Function]}
+                                                                                  onKeyDown={[Function]}
+                                                                                  onMouseUp={[Function]}
+                                                                                  placeholder=""
+                                                                                  type="text"
+                                                                                  value="$0"
+                                                                                />
+                                                                              </StyledTextInput>
+                                                                            </div>
+                                                                          </StyledTextInput__StyledTextInputContainer>
+                                                                        </TextInput>
+                                                                      </TextInput>
+                                                                    </WithTheme(TextInput)>
+                                                                  </WithTheme(TextInput)>
                                                                 </WithTheme(Component)>
                                                               </div>
                                                             </StyledBox>
@@ -2358,53 +2836,174 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                   thousandSeparator=","
                                                                   value="0.00"
                                                                 >
-                                                                  <NumberInput__StyledCurrencyContainer
-                                                                    decimalSeparator="."
+                                                                  <WithTheme(TextInput)
                                                                     disabled={true}
+                                                                    dropAlign={
+                                                                      Object {
+                                                                        "left": "left",
+                                                                        "top": "bottom",
+                                                                      }
+                                                                    }
                                                                     focusIndicator={false}
+                                                                    messages={
+                                                                      Object {
+                                                                        "enterSelect": "(Press Enter to Select)",
+                                                                        "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                        "suggestionsCount": "suggestions available",
+                                                                        "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                      }
+                                                                    }
                                                                     name="amount"
                                                                     onBlur={[Function]}
+                                                                    onChange={[Function]}
                                                                     onFocus={[Function]}
+                                                                    onKeyDown={[Function]}
+                                                                    onMouseUp={[Function]}
+                                                                    placeholder=""
                                                                     plain={true}
-                                                                    precision={2}
-                                                                    prefix="$"
-                                                                    thousandSeparator=","
-                                                                    value="0.00"
+                                                                    type="text"
+                                                                    value="$0.00"
                                                                   >
-                                                                    <div
-                                                                      className="NumberInput__StyledCurrencyContainer-sc-1mk0e8s-1 fvlnYL"
+                                                                    <WithTheme(TextInput)
                                                                       disabled={true}
+                                                                      dropAlign={
+                                                                        Object {
+                                                                          "left": "left",
+                                                                          "top": "bottom",
+                                                                        }
+                                                                      }
+                                                                      focus={false}
+                                                                      focusIndicator={false}
+                                                                      messages={
+                                                                        Object {
+                                                                          "enterSelect": "(Press Enter to Select)",
+                                                                          "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                          "suggestionsCount": "suggestions available",
+                                                                          "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                        }
+                                                                      }
                                                                       name="amount"
                                                                       onBlur={[Function]}
+                                                                      onChange={[Function]}
                                                                       onFocus={[Function]}
-                                                                      prefix="$"
-                                                                      value="0.00"
+                                                                      onKeyDown={[Function]}
+                                                                      onMouseUp={[Function]}
+                                                                      placeholder=""
+                                                                      plain={true}
+                                                                      type="text"
+                                                                      value="$0.00"
                                                                     >
-                                                                      <NumberInput__StyledCurrencyInput
-                                                                        decimalSeparator="."
+                                                                      <TextInput
                                                                         disabled={true}
+                                                                        dropAlign={
+                                                                          Object {
+                                                                            "left": "left",
+                                                                            "top": "bottom",
+                                                                          }
+                                                                        }
+                                                                        focus={false}
+                                                                        focusIndicator={false}
+                                                                        messages={
+                                                                          Object {
+                                                                            "enterSelect": "(Press Enter to Select)",
+                                                                            "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                            "suggestionsCount": "suggestions available",
+                                                                            "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                          }
+                                                                        }
                                                                         name="amount"
                                                                         onBlur={[Function]}
+                                                                        onChange={[Function]}
                                                                         onFocus={[Function]}
-                                                                        precision={2}
-                                                                        prefix="$"
-                                                                        thousandSeparator=","
-                                                                        value="0.00"
+                                                                        onKeyDown={[Function]}
+                                                                        onMouseUp={[Function]}
+                                                                        placeholder=""
+                                                                        plain={true}
+                                                                        type="text"
+                                                                        value="$0.00"
                                                                       >
-                                                                        <input
-                                                                          className="NumberInput__StyledCurrencyInput-sc-1mk0e8s-0 jqervJ"
+                                                                        <TextInput
+                                                                          announce={[Function]}
                                                                           disabled={true}
+                                                                          dropAlign={
+                                                                            Object {
+                                                                              "left": "left",
+                                                                              "top": "bottom",
+                                                                            }
+                                                                          }
+                                                                          focus={false}
+                                                                          focusIndicator={false}
+                                                                          messages={
+                                                                            Object {
+                                                                              "enterSelect": "(Press Enter to Select)",
+                                                                              "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                              "suggestionsCount": "suggestions available",
+                                                                              "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                            }
+                                                                          }
                                                                           name="amount"
                                                                           onBlur={[Function]}
                                                                           onChange={[Function]}
                                                                           onFocus={[Function]}
+                                                                          onKeyDown={[Function]}
                                                                           onMouseUp={[Function]}
+                                                                          placeholder=""
+                                                                          plain={true}
                                                                           type="text"
                                                                           value="$0.00"
-                                                                        />
-                                                                      </NumberInput__StyledCurrencyInput>
-                                                                    </div>
-                                                                  </NumberInput__StyledCurrencyContainer>
+                                                                        >
+                                                                          <StyledTextInput__StyledTextInputContainer
+                                                                            plain={true}
+                                                                          >
+                                                                            <div
+                                                                              className="StyledTextInput__StyledTextInputContainer-sc-1x30a0s-1 kYQCpm"
+                                                                            >
+                                                                              <StyledTextInput
+                                                                                announce={[Function]}
+                                                                                autoComplete="off"
+                                                                                disabled={true}
+                                                                                focus={false}
+                                                                                focusIndicator={false}
+                                                                                messages={
+                                                                                  Object {
+                                                                                    "enterSelect": "(Press Enter to Select)",
+                                                                                    "suggestionIsOpen": "Suggestions drop is open, continue to use arrow keys to navigate",
+                                                                                    "suggestionsCount": "suggestions available",
+                                                                                    "suggestionsExist": "This input has suggestions use arrow keys to navigate",
+                                                                                  }
+                                                                                }
+                                                                                name="amount"
+                                                                                onBlur={[Function]}
+                                                                                onChange={[Function]}
+                                                                                onFocus={[Function]}
+                                                                                onKeyDown={[Function]}
+                                                                                onMouseUp={[Function]}
+                                                                                placeholder=""
+                                                                                plain={true}
+                                                                                type="text"
+                                                                                value="$0.00"
+                                                                              >
+                                                                                <input
+                                                                                  autoComplete="off"
+                                                                                  className="StyledTextInput-sc-1x30a0s-0 dlXaQi"
+                                                                                  disabled={true}
+                                                                                  name="amount"
+                                                                                  onBlur={[Function]}
+                                                                                  onChange={[Function]}
+                                                                                  onFocus={[Function]}
+                                                                                  onKeyDown={[Function]}
+                                                                                  onMouseUp={[Function]}
+                                                                                  placeholder=""
+                                                                                  type="text"
+                                                                                  value="$0.00"
+                                                                                />
+                                                                              </StyledTextInput>
+                                                                            </div>
+                                                                          </StyledTextInput__StyledTextInputContainer>
+                                                                        </TextInput>
+                                                                      </TextInput>
+                                                                    </WithTheme(TextInput)>
+                                                                  </WithTheme(TextInput)>
                                                                 </WithTheme(Component)>
                                                               </div>
                                                             </StyledBox>

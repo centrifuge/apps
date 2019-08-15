@@ -44,12 +44,6 @@ type SchemasProps = {
   loading: boolean;
 };
 
-const emptySchemaInput = {
-    name: "",
-    attributes: [],
-    registries:[],
-};
-
 const createTitle = "Create New Schema";
 const updateTitle = "View/Edit Existing Schema";
 
@@ -74,23 +68,12 @@ class SchemasList extends React.Component<RouteComponentProps & SchemasProps> {
 
   handleSubmit = (input) => {
     const schemaString = input.replace(/\r?\n|\r|\t/g, '');
-    let schema: Schema
-    const schemaJSON = JSON.parse(schemaString);
+    let schema: Schema =  JSON.parse(schemaString);
+
     if (this.state.isEditing) {
-        schema = new Schema(
-            schemaJSON.name,
-            schemaJSON.attributes,
-            schemaJSON.registries,
-            schemaJSON._id
-        );
       this.props.updateSchema(schema);
       this.closeViewSchema();
     } else {
-      schema = new Schema(
-          schemaJSON.name,
-          schemaJSON.attributes,
-          schemaJSON.registries,
-      );
       this.props.createSchema(schema);
       this.closeCreateSchema();
     }
@@ -114,12 +97,8 @@ class SchemasList extends React.Component<RouteComponentProps & SchemasProps> {
 
   onViewSchemaClick = (data) => {
     this.props.getSchema(data._id);
-    const value = JSON.stringify(data, null, 4);
-    const test = {
-      json: value
-    };
     this.setState({
-      selectedSchema: test,
+      selectedSchema: data,
       viewSchema: true,
       isEditing: true,
     });
@@ -188,14 +167,14 @@ class SchemasList extends React.Component<RouteComponentProps & SchemasProps> {
           </SecondaryHeader>
           <Modal
               opened={ isEditing ? viewSchema :  createSchema }
-              width={'large'}
+              width={'xlarge'}
               headingProps={{ level: 3 }}
               title={ isEditing ? updateTitle : createTitle }
               onClose={ isEditing ?  this.closeViewSchema : this.closeCreateSchema }
           >
             <SchemasForm
                 isEditing={isEditing}
-                selectedSchema={ isEditing ? selectedSchema : emptySchemaInput }
+                selectedSchema={ isEditing ? selectedSchema : Schema.getDefaultValues() }
                 onSubmit={this.handleSubmit}
                 onDiscard={ isEditing ? this.closeViewSchema : this.closeCreateSchema }
             />

@@ -175,7 +175,7 @@ class App extends Component<AppPros> {
                 justify="center"
                 direction="row"
               >
-                <Box width="xlarge">
+                <Box width="xxlarge">
                   <Routing routes={routeItems}/>
                 </Box>
               </Box>

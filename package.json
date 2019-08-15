@@ -5,7 +5,7 @@
   "dependencies": {
     "@centrifuge/axis-date-input": "^0.3.1",
     "@centrifuge/axis-modal": "^0.3.1",
-    "@centrifuge/axis-number-input": "^0.3.1",
+    "@centrifuge/axis-number-input": "^0.3.2-develop.40",
     "@centrifuge/axis-spinner": "^0.3.1",
     "@centrifuge/axis-theme": "^0.3.1",
     "@nestjs/common": "^5.7.4",
@@ -19,7 +19,7 @@
     "ethjs": "^0.4.0",
     "express-session": "^1.15.6",
     "formik": "^1.5.2",
-    "grommet": "^2.7.1",
+    "grommet": "^2.7.5",
     "grommet-icons": "^4.2.0",
     "hbs": "^4.0.4",
     "lodash": "^4.17.14",

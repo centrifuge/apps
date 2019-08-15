@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException } from '@nestjs/common';
-import { AttrTypes, Schema } from '../../../src/common/models/schema';
+import { AttributesErrors, AttrTypes, RegistriesErrors, Schema } from '../../../src/common/models/schema';
 import { SessionGuard } from '../auth/SessionGuard';
 import { databaseServiceProvider } from '../database/database.providers';
 import { DatabaseService } from '../database/database.service';
@@ -117,7 +117,7 @@ describe('SchemasController', () => {
           ],
         } as Schema);
       } catch (err) {
-        expect(err.message).toEqual('0x111 is not a valid registry address');
+        expect(err.message).toMatch(RegistriesErrors.ADDRESS_FORMAT);
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }
@@ -148,13 +148,13 @@ describe('SchemasController', () => {
           ],
         } as Schema);
       } catch (err) {
-        expect(err.message).toEqual('Attributes do not contain a reference ID');
+        expect(err.message).toEqual(AttributesErrors.REFERENCE_ID_MISSING);
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }
     });
     it('should throw error when there attributes are nested', async function() {
-      expect.assertions(3);
+      expect.assertions(4);
       const schemasController = schemaModule.get<SchemasController>(
         SchemasController,
       );
@@ -178,7 +178,8 @@ describe('SchemasController', () => {
           ],
         } as Schema);
       } catch (err) {
-        expect(err.message).toEqual(`Nested attributes are not supported! Rename document.qualities and to not use . or [ ]`);
+        expect(err.message).toMatch(AttributesErrors.NESTED_ATTRIBUTES_NOT_SUPPORTED);
+        expect(err.message).toMatch('document.qualities');
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }

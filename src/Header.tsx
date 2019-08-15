@@ -45,7 +45,7 @@ const Header: FunctionComponent<HeaderProps> = (props) => {
       justify="between"
       pad={{ horizontal: 'medium' }}
       gap={sectionGap}
-      width='xlarge'
+      width='xxlarge'
     >
       <Link label="Centrifuge" to="/" size="large">
         <Image src={logo}/>

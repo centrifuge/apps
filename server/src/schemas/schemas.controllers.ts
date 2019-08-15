@@ -26,6 +26,7 @@ export class SchemasController {
         schema.name,
         schema.attributes,
         schema.registries,
+        schema.formFeatures,
       );
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
@@ -84,6 +85,7 @@ export class SchemasController {
         oldSchema.name,
         oldSchema.attributes,
         update.registries,
+        update.formFeatures,
         oldSchema._id,
       );
     } catch (err) {

@@ -36,7 +36,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
               class="StyledLayer__StyledOverlay-rmtehz-1 kCkDcC"
             />
             <div
-              class="StyledLayer__StyledContainer-rmtehz-2 iXSNVe"
+              class="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
             >
               <a
                 aria-hidden="true"
@@ -121,7 +121,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
             responsive={true}
           >
             <div
-              className="StyledLayer__StyledContainer-rmtehz-2 iXSNVe"
+              className="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
             >
               <LayerContainer__HiddenAnchor
                 aria-hidden="true"
@@ -397,7 +397,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
               class="StyledLayer__StyledOverlay-rmtehz-1 kCkDcC"
             />
             <div
-              class="StyledLayer__StyledContainer-rmtehz-2 iXSNVe"
+              class="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
             >
               <a
                 aria-hidden="true"
@@ -489,7 +489,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
             responsive={true}
           >
             <div
-              className="StyledLayer__StyledContainer-rmtehz-2 iXSNVe"
+              className="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
             >
               <LayerContainer__HiddenAnchor
                 aria-hidden="true"
@@ -830,7 +830,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
               class="StyledLayer__StyledOverlay-rmtehz-1 kCkDcC"
             />
             <div
-              class="StyledLayer__StyledContainer-rmtehz-2 iXSNVe"
+              class="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
             >
               <a
                 aria-hidden="true"
@@ -922,7 +922,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
             responsive={true}
           >
             <div
-              className="StyledLayer__StyledContainer-rmtehz-2 iXSNVe"
+              className="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
             >
               <LayerContainer__HiddenAnchor
                 aria-hidden="true"
@@ -1263,7 +1263,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
               class="StyledLayer__StyledOverlay-rmtehz-1 kCkDcC"
             />
             <div
-              class="StyledLayer__StyledContainer-rmtehz-2 iXSNVe"
+              class="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
             >
               <a
                 aria-hidden="true"
@@ -1355,7 +1355,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
             responsive={true}
           >
             <div
-              className="StyledLayer__StyledContainer-rmtehz-2 iXSNVe"
+              className="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
             >
               <LayerContainer__HiddenAnchor
                 aria-hidden="true"
@@ -1696,7 +1696,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
               class="StyledLayer__StyledOverlay-rmtehz-1 kCkDcC"
             />
             <div
-              class="StyledLayer__StyledContainer-rmtehz-2 iXSNVe"
+              class="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
             >
               <a
                 aria-hidden="true"
@@ -1781,7 +1781,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
             responsive={true}
           >
             <div
-              className="StyledLayer__StyledContainer-rmtehz-2 iXSNVe"
+              className="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
             >
               <LayerContainer__HiddenAnchor
                 aria-hidden="true"

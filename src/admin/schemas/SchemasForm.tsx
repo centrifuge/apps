@@ -1,6 +1,6 @@
 import React from 'react';
 import { Formik } from 'formik';
-import { Box, TextArea, Button, FormField } from 'grommet';
+import { Box, Button, FormField, Paragraph, TextArea } from 'grommet';
 import * as Yup from 'yup';
 import { Schema } from '../../common/models/schema';
 
@@ -15,14 +15,14 @@ interface SchemasState {
   submitted: boolean;
 }
 
-const editingLabel = "Please note that only edits to the registries will be saved. Any changes to the name or attributes of a schema will be discarded.";
-const creatingLabel = "Please note that the schema must be a valid JSON object.";
-const updateLabel = "Update";
-const createLabel = "Create";
+const editingLabel = 'Please note that only edits to the registries will be saved. Any changes to the name or attributes of a schema will be discarded.';
+const creatingLabel = 'Please note that the schema must be a valid JSON object.';
+const updateLabel = 'Update';
+const createLabel = 'Create';
 
 export default class SchemasForm extends React.Component<SchemasProps, SchemasState> {
   state = {
-    submitted: false
+    submitted: false,
   };
 
   onSubmit = async (input: Object) => {
@@ -33,49 +33,47 @@ export default class SchemasForm extends React.Component<SchemasProps, SchemasSt
 
     const jsonValidation = Yup.object().shape({
       json: Yup.string()
-          .required('Schema is required')
-          .test({
-            name: 'test-json',
-            test: (function (this, value) {
-              let test;
-              try {
-                test = JSON.parse(value)
-              } catch (e) {
-                return this.createError({path: this.path, message: 'Schema is not a valid JSON object'})
-              }
+        .required('Schema is required')
+        .test({
+          name: 'test-json',
+          test: (function(this, value) {
+            let test;
+            try {
+              test = JSON.parse(value);
+            } catch (e) {
+              return this.createError({ path: this.path, message: 'Schema is not a valid JSON object' });
+            }
 
-              try {
-                new Schema(
-                  test.name,
-                  test.attributes,
-                  test.registries,
-                  test._id
-                );
-              } catch (e) {
-                return this.createError({ path: this.path, message: e.message})
-              }
+            try {
+              Schema.validate(test)
+            } catch (e) {
+              return this.createError({ path: this.path, message: e.message });
+            }
 
-              return true
-            })
-          })
+            return true;
+          }),
+        }),
     });
 
     const { submitted } = this.state;
     const { selectedSchema } = this.props;
+    const defaultValues = {
+      json: JSON.stringify(selectedSchema, null, 2),
+    };
 
     return (
-        <Box fill={'vertical'} >
+      <Box pad={{ vertical: 'medium' }}>
         <Formik
-            enableReinitialize={true}
-            initialValues={ selectedSchema }
-            validateOnBlur={submitted}
-            validateOnChange={submitted}
-            validationSchema={jsonValidation}
-            onSubmit={async (values, {setSubmitting}) => {
-              if (!values) return;
-              await this.onSubmit(values.json);
-              setSubmitting(true);
-            }}
+          enableReinitialize={true}
+          initialValues={defaultValues}
+          validateOnBlur={submitted}
+          validateOnChange={submitted}
+          validationSchema={jsonValidation}
+          onSubmit={async (values, { setSubmitting }) => {
+            if (!values) return;
+            await this.onSubmit(values.json);
+            setSubmitting(true);
+          }}
         >
           {
             ({
@@ -85,50 +83,48 @@ export default class SchemasForm extends React.Component<SchemasProps, SchemasSt
                handleChange,
                handleSubmit,
              }) => (
-                <form
-                    onSubmit={event => {
-                      this.setState({submitted: true});
-                      handleSubmit(event);
-                    }}>
-                  <Box fill={'vertical'}>
-                    <Box margin={{vertical: 'medium'}}>
-                      <FormField
-                          component={TextArea}
-                          pad={true}
-                          label={ this.props.isEditing ? editingLabel : creatingLabel }
-                          error={errors!.json}
-                      >
-                        <Box margin={{top: 'medium'}}>
-                        <TextArea
-                            rows={25}
-                            spellCheck={false}
-                            fill={true}
-                            id={"json"}
-                            resize={false}
-                            defaultValue={values.json}
-                            onChange={handleChange}
-                        />
-                        </Box>
-                      </FormField>
+              <form
+                onSubmit={event => {
+                  this.setState({ submitted: true });
+                  handleSubmit(event);
+                }}>
 
-                    </Box>
-                    <Box direction="row" justify={'end'} gap={'medium'}>
-                      <Button
-                          label="Discard"
-                          onClick={this.props.onDiscard}
-                      />
-                      <Button
-                          type="submit"
-                          primary
-                          label={ this.props.isEditing ? updateLabel : createLabel }
-                      />
-                    </Box>
+                <Box gap={'medium'}>
+                  <Paragraph>
+                    {this.props.isEditing ? editingLabel : creatingLabel}
+                  </Paragraph>
+                  <FormField
+                    error={errors!.json}
+                  >
+                       <TextArea
+                         rows={25}
+                         spellCheck={false}
+                         fill={true}
+                         id={'json'}
+                         resize={false}
+                         defaultValue={values.json}
+                         onChange={handleChange}
+                       />
+                  </FormField>
+
+                  <Box direction="row" justify={'end'} gap={'medium'}>
+                    <Button
+                      label="Discard"
+                      onClick={this.props.onDiscard}
+                    />
+                    <Button
+                      type="submit"
+                      primary
+                      label={this.props.isEditing ? updateLabel : createLabel}
+                    />
                   </Box>
-                </form>
+                </Box>
+
+              </form>
             )
           }
         </Formik>
-        </Box>
-    )
+      </Box>
+    );
   }
 }

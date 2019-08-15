@@ -108,6 +108,12 @@ exports[`Search Select when single item select should match snapshot 1`] = `
         },
       },
       "carousel": Object {
+        "animation": Object {
+          "duration": 1000,
+        },
+        "disabled": Object {
+          "icons": Object {},
+        },
         "icons": Object {
           "current": [Function],
           "next": [Function],
@@ -219,6 +225,12 @@ exports[`Search Select when single item select should match snapshot 1`] = `
         "minSpeed": 200,
       },
       "dataTable": Object {
+        "groupEnd": Object {
+          "border": Object {
+            "side": "bottom",
+            "size": "xsmall",
+          },
+        },
         "groupHeader": Object {
           "background": Object {
             "dark": "dark-2",
@@ -773,7 +785,7 @@ exports[`Search Select when single item select should match snapshot 1`] = `
           },
         },
         "options": Object {
-          "box": Object {
+          "container": Object {
             "align": "start",
             "pad": "small",
           },

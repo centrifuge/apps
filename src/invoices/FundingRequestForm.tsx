@@ -182,7 +182,7 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                               {...currencyParts}
                               name="repayment_amount"
                               value={values!.repayment_amount}
-                              onChange={(masked, value) => {
+                              onChange={ ({value}) => {
                                 setFieldValue('repayment_amount', value);
                               }}
                             />

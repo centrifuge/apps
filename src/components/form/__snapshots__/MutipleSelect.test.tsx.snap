@@ -117,6 +117,12 @@ exports[`Mutiple Select when single item select should match snapshot for array 
             },
           },
           "carousel": Object {
+            "animation": Object {
+              "duration": 1000,
+            },
+            "disabled": Object {
+              "icons": Object {},
+            },
             "icons": Object {
               "current": [Function],
               "next": [Function],
@@ -228,6 +234,12 @@ exports[`Mutiple Select when single item select should match snapshot for array 
             "minSpeed": 200,
           },
           "dataTable": Object {
+            "groupEnd": Object {
+              "border": Object {
+                "side": "bottom",
+                "size": "xsmall",
+              },
+            },
             "groupHeader": Object {
               "background": Object {
                 "dark": "dark-2",
@@ -782,7 +794,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
               },
             },
             "options": Object {
-              "box": Object {
+              "container": Object {
                 "align": "start",
                 "pad": "small",
               },
@@ -1051,6 +1063,12 @@ exports[`Mutiple Select when single item select should match snapshot for array 
               },
             },
             "carousel": Object {
+              "animation": Object {
+                "duration": 1000,
+              },
+              "disabled": Object {
+                "icons": Object {},
+              },
               "icons": Object {
                 "current": [Function],
                 "next": [Function],
@@ -1162,6 +1180,12 @@ exports[`Mutiple Select when single item select should match snapshot for array 
               "minSpeed": 200,
             },
             "dataTable": Object {
+              "groupEnd": Object {
+                "border": Object {
+                  "side": "bottom",
+                  "size": "xsmall",
+                },
+              },
               "groupHeader": Object {
                 "background": Object {
                   "dark": "dark-2",
@@ -1716,7 +1740,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
                 },
               },
               "options": Object {
-                "box": Object {
+                "container": Object {
                   "align": "start",
                   "pad": "small",
                 },
@@ -1884,7 +1908,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
     >
       <DropButton
         a11yTitle="Open Drop"
-        className="Select__StyledSelectDropButton-sc-17idtfo-1 dloaWS"
+        className="Select__StyledSelectDropButton-sc-17idtfo-1 fcNjcL"
         dropAlign={
           Object {
             "left": "left",
@@ -1899,7 +1923,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
       >
         <WithTheme(Button)
           a11yTitle="Open Drop"
-          className="Select__StyledSelectDropButton-sc-17idtfo-1 dloaWS"
+          className="Select__StyledSelectDropButton-sc-17idtfo-1 fcNjcL"
           focusIndicator={true}
           gap="small"
           onClick={[Function]}
@@ -1908,7 +1932,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
         >
           <WithTheme(Button)
             a11yTitle="Open Drop"
-            className="Select__StyledSelectDropButton-sc-17idtfo-1 dloaWS"
+            className="Select__StyledSelectDropButton-sc-17idtfo-1 fcNjcL"
             focus={false}
             focusIndicator={true}
             gap="small"
@@ -1920,7 +1944,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
           >
             <Button
               a11yTitle="Open Drop"
-              className="Select__StyledSelectDropButton-sc-17idtfo-1 dloaWS"
+              className="Select__StyledSelectDropButton-sc-17idtfo-1 fcNjcL"
               focus={false}
               focusIndicator={true}
               gap="small"
@@ -1932,7 +1956,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
             >
               <StyledButton
                 aria-label="Open Drop"
-                className="Select__StyledSelectDropButton-sc-17idtfo-1 dloaWS"
+                className="Select__StyledSelectDropButton-sc-17idtfo-1 fcNjcL"
                 focus={false}
                 focusIndicator={true}
                 gap="small"
@@ -1950,7 +1974,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
               >
                 <button
                   aria-label="Open Drop"
-                  className="Select__StyledSelectDropButton-sc-17idtfo-1 dloaWS StyledButton-sc-323bzc-0 jfbKsv"
+                  className="Select__StyledSelectDropButton-sc-17idtfo-1 fcNjcL StyledButton-sc-323bzc-0 jfbKsv"
                   onBlur={[Function]}
                   onClick={[Function]}
                   onFocus={[Function]}
@@ -2261,6 +2285,12 @@ exports[`Mutiple Select when single item select should match snapshot for array 
             },
           },
           "carousel": Object {
+            "animation": Object {
+              "duration": 1000,
+            },
+            "disabled": Object {
+              "icons": Object {},
+            },
             "icons": Object {
               "current": [Function],
               "next": [Function],
@@ -2372,6 +2402,12 @@ exports[`Mutiple Select when single item select should match snapshot for array 
             "minSpeed": 200,
           },
           "dataTable": Object {
+            "groupEnd": Object {
+              "border": Object {
+                "side": "bottom",
+                "size": "xsmall",
+              },
+            },
             "groupHeader": Object {
               "background": Object {
                 "dark": "dark-2",
@@ -2926,7 +2962,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
               },
             },
             "options": Object {
-              "box": Object {
+              "container": Object {
                 "align": "start",
                 "pad": "small",
               },
@@ -3186,6 +3222,12 @@ exports[`Mutiple Select when single item select should match snapshot for array 
               },
             },
             "carousel": Object {
+              "animation": Object {
+                "duration": 1000,
+              },
+              "disabled": Object {
+                "icons": Object {},
+              },
               "icons": Object {
                 "current": [Function],
                 "next": [Function],
@@ -3297,6 +3339,12 @@ exports[`Mutiple Select when single item select should match snapshot for array 
               "minSpeed": 200,
             },
             "dataTable": Object {
+              "groupEnd": Object {
+                "border": Object {
+                  "side": "bottom",
+                  "size": "xsmall",
+                },
+              },
               "groupHeader": Object {
                 "background": Object {
                   "dark": "dark-2",
@@ -3851,7 +3899,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
                 },
               },
               "options": Object {
-                "box": Object {
+                "container": Object {
                   "align": "start",
                   "pad": "small",
                 },
@@ -4019,7 +4067,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
     >
       <DropButton
         a11yTitle="Open Drop"
-        className="Select__StyledSelectDropButton-sc-17idtfo-1 dloaWS"
+        className="Select__StyledSelectDropButton-sc-17idtfo-1 fcNjcL"
         dropAlign={
           Object {
             "left": "left",
@@ -4034,7 +4082,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
       >
         <WithTheme(Button)
           a11yTitle="Open Drop"
-          className="Select__StyledSelectDropButton-sc-17idtfo-1 dloaWS"
+          className="Select__StyledSelectDropButton-sc-17idtfo-1 fcNjcL"
           focusIndicator={true}
           gap="small"
           onClick={[Function]}
@@ -4043,7 +4091,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
         >
           <WithTheme(Button)
             a11yTitle="Open Drop"
-            className="Select__StyledSelectDropButton-sc-17idtfo-1 dloaWS"
+            className="Select__StyledSelectDropButton-sc-17idtfo-1 fcNjcL"
             focus={false}
             focusIndicator={true}
             gap="small"
@@ -4055,7 +4103,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
           >
             <Button
               a11yTitle="Open Drop"
-              className="Select__StyledSelectDropButton-sc-17idtfo-1 dloaWS"
+              className="Select__StyledSelectDropButton-sc-17idtfo-1 fcNjcL"
               focus={false}
               focusIndicator={true}
               gap="small"
@@ -4067,7 +4115,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
             >
               <StyledButton
                 aria-label="Open Drop"
-                className="Select__StyledSelectDropButton-sc-17idtfo-1 dloaWS"
+                className="Select__StyledSelectDropButton-sc-17idtfo-1 fcNjcL"
                 focus={false}
                 focusIndicator={true}
                 gap="small"
@@ -4085,7 +4133,7 @@ exports[`Mutiple Select when single item select should match snapshot for array 
               >
                 <button
                   aria-label="Open Drop"
-                  className="Select__StyledSelectDropButton-sc-17idtfo-1 dloaWS StyledButton-sc-323bzc-0 jfbKsv"
+                  className="Select__StyledSelectDropButton-sc-17idtfo-1 fcNjcL StyledButton-sc-323bzc-0 jfbKsv"
                   onBlur={[Function]}
                   onClick={[Function]}
                   onFocus={[Function]}
