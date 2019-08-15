@@ -70,6 +70,14 @@ class NftDataField extends React.Component<Props> {
       </FormField>;
     }
 
+    if (field.type === 'string') {
+      const { label } = field;
+
+      return <FormField label={label}>
+        <TextInput value={value} disabled />
+      </FormField>;
+    }
+
     throw new Error(`Unsupported type "${(field as any).type}" given to NftDataField`);
   }
 }
