@@ -2,8 +2,8 @@ import * as React from 'react';
 import { FormField, TextInput } from 'grommet';
 import NumberInput from '../NumberInput';
 import { baseToDisplay, AbiOutput, bnToHex } from 'tinlake';
-import { convert as convertToTimestamp } from './../../utils/timestampConverter'
-
+import { convert as convertToTimestamp } from './../../utils/timestampConverter';
+const web3 = require('web3-utils');
 
 export interface NftDataDefinition {
   contractCall: {
@@ -75,9 +75,9 @@ class NftDataField extends React.Component<Props> {
 
     if (field.type === 'string') {
       const { label } = field;
-
+      const msg = bnToHex(value)
       return <FormField label={label}>
-        <TextInput value={value} disabled />
+        <TextInput value={msg} disabled />
       </FormField>;
     }
 
