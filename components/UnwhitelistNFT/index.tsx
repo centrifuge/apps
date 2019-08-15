@@ -59,11 +59,7 @@ class UnwhitelistNFT extends React.Component<Props, State> {
       const res1 = await tinlake.unwhitelist(loanId, addresses['NFT_COLLATERAL'],
                                              bnToHex(loan.tokenId));
 
-      console.log('unwhitelist results');
-      console.log(res1.txHash);
-
       if (res1.status !== SUCCESS_STATUS) {
-        console.log(res1);
         this.setState({ is: 'error', errorMsg: JSON.stringify(res1) });
         return;
       }

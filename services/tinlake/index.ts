@@ -1,10 +1,10 @@
 import Tinlake from 'tinlake';
-import config from '../../config'
+import config from '../../config';
 import Eth from 'ethjs';
 
 declare var web3: any;
 
-const { contractAddresses, nftDataDefinition } = config
+const { contractAddresses, nftDataDefinition, transactionTimeout } = config;
 const portisConfig = {
   id: '2ea2735d-4963-40f5-823f-48cab29f7319', // required
   // network: 'mainnet', // optional
@@ -30,7 +30,7 @@ export async function getTinlake() {
   const provider = new Eth.HttpProvider(
     'https://kovan.infura.io/v3/092108ec6aea46ab97b2175b45130455');
 
-  tinlake = new Tinlake(provider, contractAddresses, nftDataDefinition.contractCall.outputs, {});
+  tinlake = new Tinlake(provider, contractAddresses, nftDataDefinition.contractCall.outputs, transactionTimeout, {});
 
   return tinlake;
 }
@@ -45,7 +45,7 @@ export async function authTinlake() {
 
   const accounts = await provider.enable();
   const account = accounts[0];
-  console.log(`Using account ${account}`);
+  //console.log(`Using account ${account}`);
 
   tinlake!.setProvider(provider);
   tinlake!.setEthConfig({ from: account });

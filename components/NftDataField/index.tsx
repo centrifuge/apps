@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { FormField, TextInput } from 'grommet';
 import NumberInput from '../NumberInput';
-import { baseToDisplay, AbiOutput } from 'tinlake';
+import { baseToDisplay, AbiOutput, bnToHex } from 'tinlake';
+import { convert as convertToTimestamp } from './../../utils/timestampConverter'
+
 
 export interface NftDataDefinition {
   contractCall: {
@@ -46,7 +48,6 @@ class NftDataField extends React.Component<Props> {
 
     if (field.type === 'uint') {
       const { label, decimals, precision, suffix } = field;
-
       return <FormField label={label}>
         <NumberInput value={baseToDisplay(value, decimals || 18)} suffix={suffix}
           precision={precision} disabled />
@@ -63,10 +64,12 @@ class NftDataField extends React.Component<Props> {
 
     if (field.type === 'timestamp') {
       const { label } = field;
-      const date = new Date(parseInt(baseToDisplay(value, -10)) * 1000)
+      const bigIntToHex = bnToHex(value);
+      const paddedHex = bigIntToHex.slice(2).padStart(24, '0');
+      const unixTimestamp = convertToTimestamp(paddedHex);
 
       return <FormField label={label}>
-        <TextInput value={date.toDateString()} disabled />
+        <TextInput value={(new Date(unixTimestamp)).toString()} disabled />
       </FormField>;
     }
 

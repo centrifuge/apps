@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "test": "jest",
-    "export": "npm run build && next export"
+    "export": "npm run build && next export",
+    "lint": "tslint --project ."
   },
   "repository": {
     "type": "git",
@@ -36,7 +37,7 @@
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
     "styled-components": "^4.3.2",
-    "tinlake": "github:centrifuge/tinlake.js",
+    "tinlake": "github:centrifuge/tinlake.js#develop",
     "web3connect": "^1.0.0-beta.13"
   },
   "devDependencies": {
