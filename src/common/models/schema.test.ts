@@ -141,10 +141,18 @@ describe('Schema validations', () => {
   });
 
   describe('Registries Validation', () => {
-    it('should fail when registries is not set or not an array', () => {
+
+    it('should not fail when registries is undefined, null', () => {
       expect(() => {
         Schema.validateRegistries(undefined);
-      }).toThrow(RegistriesErrors.REGISTRIES_FORMAT);
+      }).not.toThrow();
+
+      expect(() => {
+        Schema.validateRegistries(null);
+      }).not.toThrow();
+    });
+
+    it('should fail when registries is not set or not an array', () => {
 
       expect(() => {
         Schema.validateRegistries({});
@@ -219,7 +227,7 @@ describe('Schema validations', () => {
       }).not.toThrow();
     });
 
-    it('should  have columnNo and comments as an optional field', () => {
+    it('should  have columnNo, comments, defaultSection as an optional field', () => {
       expect(() => {
         Schema.validateFormFeatures({ otherProp: 0 });
       }).not.toThrow();
@@ -267,11 +275,48 @@ describe('Schema validations', () => {
 
     });
 
+    it('should  fail if defaultSection in not a string', () => {
+      expect(() => {
+        Schema.validateFormFeatures({
+          columnNo: 4,
+          comments: true,
+          defaultSection: 4,
+        })
+      }).toThrow(FormFeaturesErrors.DEFAULT_SECTION_FORMAT);
+
+      expect(() => {
+        Schema.validateFormFeatures({
+          columnNo: 4,
+          comments: true,
+          defaultSection: undefined,
+        })
+      }).toThrow(FormFeaturesErrors.DEFAULT_SECTION_FORMAT);
+
+
+      expect(() => {
+        Schema.validateFormFeatures({
+          columnNo: 4,
+          comments: true,
+          defaultSection: null,
+        })
+      }).toThrow(FormFeaturesErrors.DEFAULT_SECTION_FORMAT);
+
+      expect(() => {
+        Schema.validateFormFeatures({
+          columnNo: 4,
+          comments: true,
+          defaultSection: {},
+        })
+      }).toThrow(FormFeaturesErrors.DEFAULT_SECTION_FORMAT);
+
+    });
+
     it('should  pass Form Features validation', () => {
       expect(() => {
         Schema.validateFormFeatures({
           columnNo: 4,
           comments: true,
+          defaultSection: 'Default Section Name'
         })
       }).not.toThrow();
 
@@ -279,6 +324,7 @@ describe('Schema validations', () => {
         Schema.validateFormFeatures({
           columnNo: 4,
           comments: false,
+          defaultSection: 'Default Section Name'
         })
       }).not.toThrow();
 

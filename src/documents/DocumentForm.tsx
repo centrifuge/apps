@@ -1,14 +1,14 @@
 import React from 'react';
-import { Box, DataTable, FormField, Grid, Paragraph, ResponsiveContext } from 'grommet';
+import { Box, DataTable, FormField, Grid, Paragraph, ResponsiveContext, TextArea } from 'grommet';
 import { StyledSelect } from 'grommet/components/Select/StyledSelect';
 import { StyledTextInput } from 'grommet/components/TextInput/StyledTextInput';
+import { StyledTextArea } from 'grommet/components/TextArea/StyledTextArea';
 import { Formik } from 'formik';
-
+import { get } from 'lodash';
 import * as Yup from 'yup';
 import { Document } from '../common/models/document';
 import { AttrTypes, Schema } from '../common/models/schema';
 import SearchSelect from '../components/form/SearchSelect';
-import { get } from 'lodash';
 import { Contact } from '../common/models/contact';
 import MutipleSelect from '../components/form/MutipleSelect';
 import { Section } from '../components/Section';
@@ -18,7 +18,7 @@ import AttributeField from './AttributeField';
 
 // improve visibility of inputs in view mode
 const StyledFormContainer = styled(Box)`
-  ${StyledTextInput}, input[type="text"], ${StyledSelect} button {
+  ${StyledTextInput}, ${StyledTextArea}, input[type="text"], textarea, ${StyledSelect} button {
        ${props => {
   if (props.mode === 'view')
     return ` svg {
@@ -140,6 +140,13 @@ export class DocumentForm extends React.Component<Props, State> {
             break;
         }
       }
+      // Add comments field if schema has the option
+      if (schema.formFeatures && schema.formFeatures.comments) {
+        defaultValues['comments'] = {
+          value: '',
+          type: AttrTypes.STRING,
+        };
+      }
     }
 
 
@@ -231,20 +238,28 @@ export class DocumentForm extends React.Component<Props, State> {
                         setFieldValue,
                         isViewMode,
                         isEditMode,
-                        size,
                       )}
 
                       {(isEditMode || isViewMode) && this.renderNftSection()}
 
-                      {selectedSchema && this.renderAttributesSections(
-                        values,
-                        errors,
-                        handleChange,
-                        setFieldValue,
-                        isViewMode,
-                        isEditMode,
-                        size,
-                      )}
+                      {selectedSchema && <>
+                        {this.renderAttributesSections(
+                          values,
+                          errors,
+                          handleChange,
+                          setFieldValue,
+                          isViewMode,
+                          isEditMode,
+                          size,
+                        )}
+                        {this.renderCommentsSection(
+                          values,
+                          errors,
+                          handleChange,
+                          setFieldValue,
+                          isViewMode,
+                        )}
+                      </>}
 
                     </Box>
                   </form>
@@ -278,12 +293,12 @@ export class DocumentForm extends React.Component<Props, State> {
   };
 
 
-  renderDetailsSection = (values, errors, handleChange, setFieldValue, isViewMode, isEditMode, size) => {
+  renderDetailsSection = (values, errors, handleChange, setFieldValue, isViewMode, isEditMode) => {
     const { selectedSchema, columnGap } = this.state;
     const { contacts, schemas } = this.props;
 
     return <Section title="Details">
-      <Grid gap={columnGap} style={{ gridTemplateColumns: `repeat(1, 100%)` }}>
+      <Grid gap={columnGap}>
         <FormField
           label="Document Schema"
         >
@@ -302,6 +317,7 @@ export class DocumentForm extends React.Component<Props, State> {
           label="Read Access"
         >
           <MutipleSelect
+            search={true}
             disabled={isViewMode}
             labelKey={'name'}
             valueKey={'address'}
@@ -320,6 +336,25 @@ export class DocumentForm extends React.Component<Props, State> {
     </Section>;
   };
 
+  renderCommentsSection = (values, errors, handleChange, setFieldValue, isViewMode) => {
+    const { columnGap } = this.state;
+    const key = `attributes.comments.value`;
+    return <Section title="Comments">
+      <Grid gap={columnGap}>
+        <FormField
+          key={key}
+          error={get(errors, key)}
+        >
+          <TextArea
+            disabled={isViewMode}
+            value={get(values, key)}
+            name={`${key}`}
+            onChange={handleChange}
+          />
+        </FormField>
+      </Grid>
+    </Section>;
+  };
 
 
   renderNftSection = () => {
@@ -360,17 +395,17 @@ export class DocumentForm extends React.Component<Props, State> {
 
       {!document!.header!.nfts &&
       <Paragraph color={'dark-2'}>There are no NFTs minted on this document yet.</Paragraph>}
-
     </Section>);
   };
 
   renderAttributesSections = (values, errors, handleChange, setFieldValue, isViewMode, isEditMode, size) => {
 
-    const { selectedSchema } = this.state;
+    const { selectedSchema: { formFeatures, attributes } } = this.state;
+    const defaultSectionName = formFeatures && formFeatures.defaultSection ?  formFeatures.defaultSection : 'Attributes'
     const sections = {};
     // Group in sections
-    selectedSchema.attributes.forEach((attr) => {
-      const sectionName = attr.section || 'Attributes';
+    attributes.forEach((attr) => {
+      const sectionName = attr.section || defaultSectionName;
       if (!sections[sectionName]) sections[sectionName] = [];
       sections[sectionName].push(
         <AttributeField key={attr.name} attr={attr} isViewMode={isViewMode}/>,

@@ -1,4 +1,5 @@
 import { isValidAddress } from 'ethereumjs-util';
+import { isString } from 'lodash';
 
 export interface Attribute {
   name: string,
@@ -27,6 +28,7 @@ export enum AttrTypes {
 export interface FormFeatures {
   columnNo?: number,
   comments?: boolean
+  defaultSection?: string
 }
 
 
@@ -44,8 +46,8 @@ const generateFormFeaturesError = (message) => {
 };
 
 const testForProperty = (obj: object, prop: string) => {
-  return !obj[prop] || !obj[prop].toString().trim()
-}
+  return !obj[prop] || !obj[prop].toString().trim();
+};
 
 
 export enum NameErrors {
@@ -78,6 +80,7 @@ export enum AttributesErrors {
 export enum FormFeaturesErrors {
   COLUMN_NO_FORMAT = 'columnNo property must be an integer greater than 0',
   COMMENTS_FORMAT = 'comments property must be an boolean',
+  DEFAULT_SECTION_FORMAT = 'defaultSection property must be a string',
 }
 
 export class Schema {
@@ -106,31 +109,36 @@ export class Schema {
       formFeatures: {
         columnNo: 4,
         comments: true,
+        defaultSection: 'Attributes',
+
       },
     };
   }
 
   public static validateName(name: string) {
-    if (testForProperty({name},'name')) {
+    if (testForProperty({ name }, 'name')) {
       throw new Error(NameErrors.NAME_FORMAT);
     }
   }
 
-  public static validateRegistries(registries: Registry[]) {
+  public static validateRegistries(registries: Registry[] | undefined) {
+    // Do not throw errors if the prop is undefined, null, false, empty string
+    if (!registries) return;
+
     if (!Array.isArray(registries)) {
       throw new Error(RegistriesErrors.REGISTRIES_FORMAT);
     }
     registries.forEach(registry => {
 
-      if(testForProperty(registry,'address'))
-        throw new Error(RegistriesErrors.ADDRESS_PROP_MISSING)
+      if (testForProperty(registry, 'address'))
+        throw new Error(RegistriesErrors.ADDRESS_PROP_MISSING);
 
       let valid = isValidAddress(registry.address);
       if (!valid) {
         throw generateRegistryError(registry.address, RegistriesErrors.ADDRESS_FORMAT);
       }
 
-      if (testForProperty(registry,'label')) {
+      if (testForProperty(registry, 'label')) {
         throw generateRegistryError(registry.address, RegistriesErrors.LABEL_PROP_MISSING);
       }
 
@@ -144,11 +152,11 @@ export class Schema {
     if (attributes && Array.isArray(attributes) && attributes.length > 0) {
       const refID = attributes.filter(attr => {
 
-        if (testForProperty(attr,'name'))
+        if (testForProperty(attr, 'name'))
           throw generateAttributeError(JSON.stringify(attr), AttributesErrors.NAME_PROP_MISSING);
-        if (testForProperty(attr,'label'))
+        if (testForProperty(attr, 'label'))
           throw generateAttributeError(attr.name, AttributesErrors.LABEL_PROP_MISSING);
-        if (testForProperty(attr,'type'))
+        if (testForProperty(attr, 'type'))
           throw generateAttributeError(attr.name, AttributesErrors.TYPE_PROP_MISSING);
 
         const supportedTypes = Object.values(AttrTypes);
@@ -184,12 +192,16 @@ export class Schema {
   // form features is not required prop for backward compatibility
   // The lack of formFeatures is handled in the document form rendering
   public static validateFormFeatures(formFeatures: FormFeatures | undefined) {
+    // Do not throw errors if the prop is undefined, null, false, empty string
     if (!formFeatures) return;
     if (formFeatures.hasOwnProperty('columnNo') && (!formFeatures.columnNo || !Number.isInteger(formFeatures.columnNo) || formFeatures.columnNo < 1))
       throw generateFormFeaturesError(FormFeaturesErrors.COLUMN_NO_FORMAT);
 
-    if (formFeatures.hasOwnProperty('comments') && typeof formFeatures.comments !== "boolean")
+    if (formFeatures.hasOwnProperty('comments') && typeof formFeatures.comments !== 'boolean')
       throw generateFormFeaturesError(FormFeaturesErrors.COMMENTS_FORMAT);
+
+    if (formFeatures.hasOwnProperty('defaultSection') && !isString(formFeatures.defaultSection))
+      throw generateFormFeaturesError(FormFeaturesErrors.DEFAULT_SECTION_FORMAT);
   }
 
 
