@@ -23,6 +23,7 @@ import contractAbiAdmin from './abi/Admin.abi.json';
 import contractAbiPileForAdd from './abi/PileForAdd.json';
 import contractAbiPileForInit from './abi/PileForInit.abi.json';
 
+const pollingInterval = 1000
 interface ContractAbis {
   'nft': any;
   'title': any;
@@ -450,7 +451,7 @@ const waitForTransaction = (eth: ethI, txHash: any, transactionTimeout: number) 
             reject(new Error(`waiting for transaction tx ${txHash} timed out after ${secMax} seconds`));
           }
         });
-      },         1000);
+      }, pollingInterval);
 
     };
     wait(txHash);
