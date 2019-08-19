@@ -1,6 +1,7 @@
 import {
   AttributesErrors,
   AttrTypes,
+  DiffErrors,
   FormFeaturesErrors,
   generateAttributeError,
   NameErrors,
@@ -127,6 +128,21 @@ describe('Schema validations', () => {
           type: AttrTypes.STRING,
         }]);
       }).toThrow(AttributesErrors.REFERENCE_ID_MISSING);
+    });
+
+
+    it('should fail for duplicated attribute names', () => {
+      expect(() => {
+        Schema.validateAttributes([{
+          name: 'reference_id',
+          label: 'test',
+          type: AttrTypes.STRING,
+        }, {
+          name: 'reference_id',
+          label: 'test',
+          type: AttrTypes.STRING,
+        }]);
+      }).toThrow(AttributesErrors.ATTRIBUTES_UNIQUE_NAMES);
     });
 
     it('should pass the attribute validation', () => {
@@ -281,7 +297,7 @@ describe('Schema validations', () => {
           columnNo: 4,
           comments: true,
           defaultSection: 4,
-        })
+        });
       }).toThrow(FormFeaturesErrors.DEFAULT_SECTION_FORMAT);
 
       expect(() => {
@@ -289,7 +305,7 @@ describe('Schema validations', () => {
           columnNo: 4,
           comments: true,
           defaultSection: undefined,
-        })
+        });
       }).toThrow(FormFeaturesErrors.DEFAULT_SECTION_FORMAT);
 
 
@@ -298,7 +314,7 @@ describe('Schema validations', () => {
           columnNo: 4,
           comments: true,
           defaultSection: null,
-        })
+        });
       }).toThrow(FormFeaturesErrors.DEFAULT_SECTION_FORMAT);
 
       expect(() => {
@@ -306,7 +322,7 @@ describe('Schema validations', () => {
           columnNo: 4,
           comments: true,
           defaultSection: {},
-        })
+        });
       }).toThrow(FormFeaturesErrors.DEFAULT_SECTION_FORMAT);
 
     });
@@ -316,20 +332,89 @@ describe('Schema validations', () => {
         Schema.validateFormFeatures({
           columnNo: 4,
           comments: true,
-          defaultSection: 'Default Section Name'
-        })
+          defaultSection: 'Default Section Name',
+        });
       }).not.toThrow();
 
       expect(() => {
         Schema.validateFormFeatures({
           columnNo: 4,
           comments: false,
-          defaultSection: 'Default Section Name'
-        })
+          defaultSection: 'Default Section Name',
+        });
       }).not.toThrow();
-
     });
 
+  });
+
+  describe('Schema Diff', () => {
+    it('should fail on name changes', () => {
+      expect(() => {
+        Schema.validateDiff({
+          name: 'prev',
+        }, {
+          name:  'next',
+        });
+      }).toThrow(DiffErrors.NAME_CHANGE_FORBIDEN);
+    });
+
+    it('should fail on attribute removal or type and name change', () => {
+      expect(() => {
+        Schema.validateDiff({
+          attributes: [
+            {
+              name: 'reference_id',
+              label: 'test',
+              type: AttrTypes.STRING,
+            }
+          ]
+        }, {
+          attributes:[],
+        });
+      }).toThrow(DiffErrors.ATTRIBUTE_CHANGE_FORBIDEN);
+
+
+      expect(() => {
+        Schema.validateDiff({
+          attributes: [
+            {
+              name: 'reference_id',
+              label: 'test',
+              type: AttrTypes.STRING,
+            }
+          ]
+        }, {
+          attributes: [
+            {
+              name: 'reference_id',
+              label: 'test',
+              type: AttrTypes.TIMESTAMP,
+            }
+          ]
+        });
+      }).toThrow(DiffErrors.ATTRIBUTE_CHANGE_FORBIDEN);
+
+      expect(() => {
+        Schema.validateDiff({
+          attributes: [
+            {
+              name: 'reference_id',
+              label: 'test',
+              type: AttrTypes.STRING,
+            }
+          ]
+        }, {
+          attributes: [
+            {
+              name: 'reference_id_new',
+              label: 'test',
+              type: AttrTypes.STRING,
+            }
+          ]
+        });
+      }).toThrow(DiffErrors.ATTRIBUTE_CHANGE_FORBIDEN);
+
+    });
   });
 
 });

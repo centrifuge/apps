@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException } from '@nestjs/common';
-import { AttributesErrors, AttrTypes, RegistriesErrors, Schema } from '../../../src/common/models/schema';
+import { AttributesErrors, AttrTypes, DiffErrors, RegistriesErrors, Schema } from '../../../src/common/models/schema';
 import { SessionGuard } from '../auth/SessionGuard';
 import { databaseServiceProvider } from '../database/database.providers';
 import { DatabaseService } from '../database/database.service';
@@ -217,7 +217,7 @@ describe('SchemasController', () => {
       );
 
       const updateSchemaObject = {
-        _id: result._id,
+        ...result,
         registries: [
           {
             label: 'animal_registry',
@@ -238,6 +238,8 @@ describe('SchemasController', () => {
           _id: result._id,
         },
         {
+          'archived': false,
+          'formFeatures': undefined,
           '_id': result._id,
           'attributes': [{ 'label': 'ReferenceId', 'name': 'reference_id', 'type': 'string' }, {
             'label': 'wingspans',
@@ -273,7 +275,7 @@ describe('SchemasController', () => {
           updateSchemaObject2,
         );
       } catch (err) {
-        expect(err.message).toEqual('Updating a schema name or attributes is not allowed');
+        expect(err.message).toEqual(DiffErrors.NAME_CHANGE_FORBIDEN);
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }

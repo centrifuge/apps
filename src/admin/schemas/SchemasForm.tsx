@@ -30,6 +30,11 @@ export default class SchemasForm extends React.Component<SchemasProps, SchemasSt
   };
 
   render() {
+    const { submitted } = this.state;
+    const { selectedSchema, isEditing } = this.props;
+    const defaultValues = {
+      json: JSON.stringify(selectedSchema, null, 2),
+    };
 
     const jsonValidation = Yup.object().shape({
       json: Yup.string()
@@ -45,21 +50,24 @@ export default class SchemasForm extends React.Component<SchemasProps, SchemasSt
             }
 
             try {
-              Schema.validate(test)
+              Schema.validate(test);
             } catch (e) {
               return this.createError({ path: this.path, message: e.message });
+            }
+
+            if(isEditing) {
+
+              try {
+                Schema.validateDiff(selectedSchema,test);
+              } catch (e) {
+                return this.createError({ path: this.path, message: e.message });
+              }
             }
 
             return true;
           }),
         }),
     });
-
-    const { submitted } = this.state;
-    const { selectedSchema } = this.props;
-    const defaultValues = {
-      json: JSON.stringify(selectedSchema, null, 2),
-    };
 
     return (
       <Box pad={{ vertical: 'medium' }}>
@@ -91,7 +99,7 @@ export default class SchemasForm extends React.Component<SchemasProps, SchemasSt
 
                 <Box gap={'medium'}>
                   <Paragraph>
-                    {this.props.isEditing ? editingLabel : creatingLabel}
+                    {isEditing ? editingLabel : creatingLabel}
                   </Paragraph>
                   <FormField
                     error={errors!.json}
@@ -115,7 +123,7 @@ export default class SchemasForm extends React.Component<SchemasProps, SchemasSt
                     <Button
                       type="submit"
                       primary
-                      label={this.props.isEditing ? updateLabel : createLabel}
+                      label={isEditing ? updateLabel : createLabel}
                     />
                   </Box>
                 </Box>

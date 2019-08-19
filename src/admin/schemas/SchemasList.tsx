@@ -135,8 +135,8 @@ class SchemasList extends React.Component<RouteComponentProps & SchemasProps> {
                 render: data => (
                     <Box direction="row" gap="small">
                       <Anchor
-                          label={'View/Update'}
-                          onClick={ async () => { await this.onViewSchemaClick(data)} }
+                          label={'Edit'}
+                          onClick={ () => { this.onViewSchemaClick(data)} }
                       />
                     </Box>
                 ),

@@ -1,5 +1,5 @@
 import { isValidAddress } from 'ethereumjs-util';
-import { isString } from 'lodash';
+import { differenceWith, isString, groupBy } from 'lodash';
 
 export interface Attribute {
   name: string,
@@ -33,22 +33,31 @@ export interface FormFeatures {
 
 
 const generateAttributeError = (identifier, message) => {
-  return new Error(`Error on attributes '${identifier}': ${message}`);
+  return new Error(`Error on attributes for '${identifier}': ${message}`);
 };
 
 
 const generateRegistryError = (identifier, message) => {
-  return new Error(`Error on registry '${identifier}': ${message}`);
+  return new Error(`Error on registry for '${identifier}': ${message}`);
 };
 
 const generateFormFeaturesError = (message) => {
   return new Error(`Error on formFeatures: ${message}`);
 };
 
+const generateDiffError = (identifier, message) => {
+  return new Error(`Error on diff for '${identifier}': ${message}`);
+};
+
 const testForProperty = (obj: object, prop: string) => {
   return !obj[prop] || !obj[prop].toString().trim();
 };
 
+
+export enum DiffErrors {
+  NAME_CHANGE_FORBIDEN = 'Changing schema name is not allowed. Create a new one instead',
+  ATTRIBUTE_CHANGE_FORBIDEN = 'It is not allowed to delete attributes or change their name and type properties',
+}
 
 export enum NameErrors {
   NAME_FORMAT = 'Schema must have name set. This is a unique identifier for the schema.',
@@ -64,6 +73,7 @@ export enum RegistriesErrors {
 
 export enum AttributesErrors {
   ATTRIBUTES_FORMAT = 'Schema requires an attributes property containing an array of Attributes. It is mandatory',
+  ATTRIBUTES_UNIQUE_NAMES = 'Schema attributes must have unique names',
   NAME_PROP_MISSING = 'name property is missing or empty',
   LABEL_PROP_MISSING = 'label property is missing or empty',
   TYPE_PROP_MISSING = 'type property is missing or empty',
@@ -84,16 +94,17 @@ export enum FormFeaturesErrors {
 }
 
 export class Schema {
+
+  public archived?: boolean = false;
   constructor(
     readonly name: string,
     readonly attributes: Attribute[],
-    public registries: Registry[],
-    public formFeatures?: FormFeatures,
+    readonly registries: Registry[],
+    readonly formFeatures?: FormFeatures,
     readonly _id?: string,
   ) {
     Schema.validate(this);
   }
-
 
   public static getDefaultValues(): Schema {
     return {
@@ -101,7 +112,7 @@ export class Schema {
       attributes: [
         {
           name: 'reference_id',
-          label: 'Reference_id',
+          label: 'Reference id',
           type: AttrTypes.STRING,
         },
       ],
@@ -113,6 +124,25 @@ export class Schema {
 
       },
     };
+  }
+
+
+  public static validateDiff(prevSchema: Schema, nextSchema: Schema) {
+
+      if (prevSchema.name !== nextSchema.name)
+        throw new Error(DiffErrors.NAME_CHANGE_FORBIDEN);
+
+      // When editing a schema previous attributes should not be removed
+      // and it is not allowed to change values for the name and type props
+      const diffedAttributes = differenceWith(prevSchema.attributes, nextSchema.attributes, (a: Attribute, b: Attribute) => {
+          return a.type === b.type && a.name === b.name;
+      });
+
+      if(diffedAttributes.length > 0) {
+        const identifier = diffedAttributes.map(a => a.name).join(',')
+        throw generateDiffError(identifier, DiffErrors.ATTRIBUTE_CHANGE_FORBIDEN);
+      }
+
   }
 
   public static validateName(name: string) {
@@ -187,7 +217,19 @@ export class Schema {
     } else {
       throw new Error(AttributesErrors.ATTRIBUTES_FORMAT);
     }
+
+    // Group attributes by name
+    const grupupedByName: Attribute[][] = Object.values(groupBy(attributes,(a => a.name)));
+    // check if the matrix has more than one column
+    for (let group of grupupedByName) {
+      if(group.length > 1) {
+        throw generateAttributeError(group[0].name,AttributesErrors.ATTRIBUTES_UNIQUE_NAMES);
+      }
+    }
+
+
   }
+
 
   // form features is not required prop for backward compatibility
   // The lack of formFeatures is handled in the document form rendering

@@ -46,7 +46,7 @@ export class SchemasController {
 
   @Get()
   /**
-   * Get the list of all schemas for the authenticated user
+   * Get the list of all schemas
    * @async
    * @return {Promise<Schema[]>} result
    */
@@ -79,11 +79,11 @@ export class SchemasController {
 
     const oldSchema = await this.databaseService.schemas.findOne({ _id: params.id });
     let updateSchemaObj: Schema;
-
     try {
+      Schema.validateDiff(oldSchema, update);
       updateSchemaObj = new Schema(
-        oldSchema.name,
-        oldSchema.attributes,
+        update.name,
+        update.attributes,
         update.registries,
         update.formFeatures,
         oldSchema._id,
