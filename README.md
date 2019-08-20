@@ -17,7 +17,7 @@ Install dependencies with `npm install`.
 
 `dapp testnet --accounts=2`
 
-##### Addtional Flags
+##### Additional Flags
 `--save=name` after finishing, save snapshot
 `--load=name` start from a previously saved snapshot
 
