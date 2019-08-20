@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { SessionGuard } from '../auth/SessionGuard';
 import { ROUTES } from '../../../src/common/constants';
 import { DatabaseService } from '../database/database.service';
@@ -78,23 +78,42 @@ export class SchemasController {
   async update(@Param() params, @Body() update: Schema) {
 
     const oldSchema = await this.databaseService.schemas.findOne({ _id: params.id });
-    let updateSchemaObj: Schema;
     try {
       Schema.validateDiff(oldSchema, update);
-      updateSchemaObj = new Schema(
-        update.name,
-        update.attributes,
-        update.registries,
-        update.formFeatures,
-        oldSchema._id,
-      );
+      Schema.validate(update);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
     }
-
+    const { name, attributes, registries, formFeatures } = update;
     return await this.databaseService.schemas.updateById(
       params.id,
-      updateSchemaObj,
+      {
+        $set: {
+          name,
+          attributes,
+          registries,
+          formFeatures,
+        },
+      },
+    );
+  }
+
+  @Delete(':id')
+  /**
+   * Archive a schema by id, provided as a query parameter
+   * @async
+   * @param {any} params - the request parameters
+   * @return {Promise<Schema>} result
+   */
+  async archive(@Param() params) {
+    return await this.databaseService.schemas.updateById(
+      params.id,
+      {
+        $set: {
+          archived: true,
+        },
+      }
+      ,
     );
   }
 }

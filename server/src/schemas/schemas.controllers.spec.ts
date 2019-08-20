@@ -206,6 +206,22 @@ describe('SchemasController', () => {
     });
   });
 
+
+  describe('archive', () => {
+    it('should archive a schme', async () => {
+      const schemasController = schemaModule.get<SchemasController>(
+        SchemasController,
+      );
+
+      const newSchema = await schemasController.create({
+        ...schemaToCreate,
+        name: Math.random().toString(),
+      });
+      const result: Schema = await schemasController.archive({ id: newSchema._id });
+      expect(result.archived).toEqual(true);
+    });
+  });
+
   describe('update', function() {
     it('should update the schema in the database', async function() {
       const schemasController = schemaModule.get<SchemasController>(
@@ -238,9 +254,8 @@ describe('SchemasController', () => {
           _id: result._id,
         },
         {
-          'archived': false,
+          "$set" : {
           'formFeatures': undefined,
-          '_id': result._id,
           'attributes': [{ 'label': 'ReferenceId', 'name': 'reference_id', 'type': 'string' }, {
             'label': 'wingspans',
             'type': 'string',
@@ -252,7 +267,7 @@ describe('SchemasController', () => {
             'label': 'animal_registry',
             'proofs': ['attributes.wingspan'],
           }],
-        },
+        }},
         {
           returnUpdatedDocs: true,
           upsert: false,

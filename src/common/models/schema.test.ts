@@ -417,6 +417,36 @@ describe('Schema validations', () => {
     });
   });
 
+
+  describe('To Editable Json', () => {
+    it('should return only the editable props on name changes', () => {
+
+      let schema: Schema = {
+        name:'test',
+        attributes:[],
+        registries:[],
+        formFeatures:{},
+        archived: true,
+      };
+
+      const editableJson = Schema.toEditableJson({
+        ...schema,
+        someRandomProps: 'some Random value',
+        createdAt:new Date()
+      });
+
+      const parsedJson = JSON.parse(editableJson);
+
+      expect(parsedJson).not.toHaveProperty('someRandomProps');
+      expect(parsedJson).not.toHaveProperty('archived');
+      expect(parsedJson).not.toHaveProperty('createdAt');
+      expect(parsedJson).toHaveProperty('name');
+      expect(parsedJson).toHaveProperty('attributes');
+      expect(parsedJson).toHaveProperty('registries');
+      expect(parsedJson).toHaveProperty('formFeatures');
+    });
+  });
+
 });
 
 

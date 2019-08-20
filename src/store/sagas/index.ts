@@ -31,6 +31,7 @@ export default function* () {
     fork(schemas.watchGetSchema),
     fork(schemas.watchGetSchemasList),
     fork(schemas.watchUpdateSchema),
+    fork(schemas.watchArchiveSchema),
     fork(documents.watchCreateDocument),
     fork(documents.watchGetDocumentById),
     fork(documents.watchGetDocuments),

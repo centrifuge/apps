@@ -1,5 +1,5 @@
 import { isValidAddress } from 'ethereumjs-util';
-import { differenceWith, isString, groupBy } from 'lodash';
+import { differenceWith, groupBy, isString } from 'lodash';
 
 export interface Attribute {
   name: string,
@@ -95,12 +95,12 @@ export enum FormFeaturesErrors {
 
 export class Schema {
 
-  public archived?: boolean = false;
   constructor(
     readonly name: string,
     readonly attributes: Attribute[],
     readonly registries: Registry[],
     readonly formFeatures?: FormFeatures,
+    readonly archived?: boolean,
     readonly _id?: string,
   ) {
     Schema.validate(this);
@@ -127,30 +127,59 @@ export class Schema {
   }
 
 
-  public static validateDiff(prevSchema: Schema, nextSchema: Schema) {
+  /**
+   * Exposes only properties that should be editable in a Json editor
+   * @param schema Schema
+   */
+  public static toEditableJson(schema: Schema): string {
+    const { name, attributes, registries, formFeatures } = schema;
+    return JSON.stringify({
+      name,
+      attributes,
+      registries,
+      formFeatures,
 
-      if (prevSchema.name !== nextSchema.name)
-        throw new Error(DiffErrors.NAME_CHANGE_FORBIDEN);
-
-      // When editing a schema previous attributes should not be removed
-      // and it is not allowed to change values for the name and type props
-      const diffedAttributes = differenceWith(prevSchema.attributes, nextSchema.attributes, (a: Attribute, b: Attribute) => {
-          return a.type === b.type && a.name === b.name;
-      });
-
-      if(diffedAttributes.length > 0) {
-        const identifier = diffedAttributes.map(a => a.name).join(',')
-        throw generateDiffError(identifier, DiffErrors.ATTRIBUTE_CHANGE_FORBIDEN);
-      }
-
+    }, null, 2);
   }
 
+  /**
+   * Validates a schema update
+   * When editing a schema previous attributes should not be removed
+   * and it is not allowed to change values for the name and type props
+   * @param prevSchema Schema
+   * @param nextSchema Schema
+   */
+  public static validateDiff(prevSchema: Schema, nextSchema: Schema) {
+
+    if (prevSchema.name !== nextSchema.name)
+      throw new Error(DiffErrors.NAME_CHANGE_FORBIDEN);
+
+
+    const diffedAttributes = differenceWith(prevSchema.attributes, nextSchema.attributes, (a: Attribute, b: Attribute) => {
+      return a.type === b.type && a.name === b.name;
+    });
+
+    if (diffedAttributes.length > 0) {
+      const identifier = diffedAttributes.map(a => a.name).join(',');
+      throw generateDiffError(identifier, DiffErrors.ATTRIBUTE_CHANGE_FORBIDEN);
+    }
+
+  }
+  /**
+   * Validates a schema name has the proper format
+   * @param name string
+   */
   public static validateName(name: string) {
     if (testForProperty({ name }, 'name')) {
       throw new Error(NameErrors.NAME_FORMAT);
     }
   }
 
+  /**
+   * Validates registries array for a schema
+   * Registries can be undefined
+   * @param registries Registry[]
+   */
   public static validateRegistries(registries: Registry[] | undefined) {
     // Do not throw errors if the prop is undefined, null, false, empty string
     if (!registries) return;
@@ -177,7 +206,13 @@ export class Schema {
       }
     });
   }
-
+  /**
+   * Validates attributes array for a schema
+   * attributes must set and have at least one attribute
+   * The method enforces the presence of a reference_id prop which is used
+   * for finding a specific document in a list of documents created based on the schema
+   * @param attributes Attribute[]
+   */
   public static validateAttributes(attributes: Attribute[]) {
     if (attributes && Array.isArray(attributes) && attributes.length > 0) {
       const refID = attributes.filter(attr => {
@@ -219,20 +254,22 @@ export class Schema {
     }
 
     // Group attributes by name
-    const grupupedByName: Attribute[][] = Object.values(groupBy(attributes,(a => a.name)));
+    const grupupedByName: Attribute[][] = Object.values(groupBy(attributes, (a => a.name)));
     // check if the matrix has more than one column
     for (let group of grupupedByName) {
-      if(group.length > 1) {
-        throw generateAttributeError(group[0].name,AttributesErrors.ATTRIBUTES_UNIQUE_NAMES);
+      if (group.length > 1) {
+        throw generateAttributeError(group[0].name, AttributesErrors.ATTRIBUTES_UNIQUE_NAMES);
       }
     }
 
-
   }
 
-
-  // form features is not required prop for backward compatibility
-  // The lack of formFeatures is handled in the document form rendering
+  /**
+   * Validates formFeatures object for a schema
+   * form features is not required prop for backward compatibility
+   * The lack of formFeatures is handled in the document form rendering
+   * @param formFeatures FormFeatures
+   */
   public static validateFormFeatures(formFeatures: FormFeatures | undefined) {
     // Do not throw errors if the prop is undefined, null, false, empty string
     if (!formFeatures) return;
@@ -246,7 +283,10 @@ export class Schema {
       throw generateFormFeaturesError(FormFeaturesErrors.DEFAULT_SECTION_FORMAT);
   }
 
-
+  /**
+   * Validates an entire schema
+   * @param schema Schema
+   */
   public static validate(schema: Schema) {
     Schema.validateName(schema.name);
     Schema.validateRegistries(schema.registries);

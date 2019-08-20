@@ -1,6 +1,12 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
 import { httpClient } from '../../http-client';
-import { createSchemaAction, getSchemaAction, getSchemasListAction, updateSchemaAction } from '../actions/schemas';
+import {
+  archiveSchemaAction,
+  createSchemaAction,
+  getSchemaAction,
+  getSchemasListAction,
+  updateSchemaAction,
+} from '../actions/schemas';
 import { alertError } from '../actions/notifications';
 
 export function* getSchema(action) {
@@ -68,10 +74,31 @@ export function* updateSchema(action) {
   }
 }
 
+export function* archiveSchema(action) {
+  try {
+    const response = yield call(httpClient.schemas.archive, action.id);
+    yield put({
+      type: archiveSchemaAction.success,
+      payload: response.data,
+    });
+    yield put({
+      type: getSchemasListAction.start,
+    });
+  } catch (e) {
+    yield put({ type: archiveSchemaAction.fail, payload: e });
+    yield put(alertError(
+      'Failed to archive schema',
+      e.message,
+      { onConfirmAction: { type: archiveSchemaAction.clearError } },
+    ));
+  }
+}
+
 export default {
   watchGetSchemasList: () => takeEvery(getSchemasListAction.start, getSchemasList),
   watchGetSchema: () => takeEvery(getSchemaAction.start, getSchema),
   watchCreateSchema: () => takeEvery(createSchemaAction.start, createSchema),
   watchUpdateSchema: () => takeEvery(updateSchemaAction.start, updateSchema),
+  watchArchiveSchema: () => takeEvery(archiveSchemaAction.start, archiveSchema),
 };
 

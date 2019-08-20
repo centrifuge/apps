@@ -23,6 +23,6 @@ export const getUserSchemas = (state) => {
   const userSchemas = state.user.auth.loggedInUser.schemas;
   if(!schemas) return [];
 
-  return schemas.filter(schema => userSchemas.includes(schema.name));
+  return schemas.filter(schema => userSchemas.includes(schema.name) && !schema.archived);
 
 }

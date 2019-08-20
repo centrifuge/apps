@@ -4,36 +4,37 @@ import { Box, Button, FormField, Paragraph, TextArea } from 'grommet';
 import * as Yup from 'yup';
 import { Schema } from '../../common/models/schema';
 
-interface SchemasProps {
-  selectedSchema: any;
+interface Props {
+  selectedSchema: Schema;
+  submitLabel: string;
+  infoParagraph: string;
+  readonly: boolean;
   onDiscard: () => void;
   onSubmit: (schema) => void;
-  isEditing: boolean;
 }
 
-interface SchemasState {
+interface State {
   submitted: boolean;
 }
 
-const editingLabel = 'Please note that only edits to the registries will be saved. Any changes to the name or attributes of a schema will be discarded.';
-const creatingLabel = 'Please note that the schema must be a valid JSON object.';
-const updateLabel = 'Update';
-const createLabel = 'Create';
-
-export default class SchemasForm extends React.Component<SchemasProps, SchemasState> {
+export default class SchemasForm extends React.Component<Props, State> {
   state = {
     submitted: false,
   };
 
-  onSubmit = async (input: Object) => {
-    this.props.onSubmit(input);
+  onSubmit = (schemaJsonString: string) => {
+    const { selectedSchema } = this.props;
+    this.props.onSubmit({
+      _id: selectedSchema._id,
+      ...JSON.parse(schemaJsonString),
+    });
   };
 
   render() {
     const { submitted } = this.state;
-    const { selectedSchema, isEditing } = this.props;
+    const { selectedSchema, infoParagraph, submitLabel, readonly } = this.props;
     const defaultValues = {
-      json: JSON.stringify(selectedSchema, null, 2),
+      json: Schema.toEditableJson(selectedSchema),
     };
 
     const jsonValidation = Yup.object().shape({
@@ -54,11 +55,12 @@ export default class SchemasForm extends React.Component<SchemasProps, SchemasSt
             } catch (e) {
               return this.createError({ path: this.path, message: e.message });
             }
-
-            if(isEditing) {
+            // If selected schema has _id set we diff for changes
+            // It can be considered in EditMode
+            if (selectedSchema._id) {
 
               try {
-                Schema.validateDiff(selectedSchema,test);
+                Schema.validateDiff(selectedSchema, test);
               } catch (e) {
                 return this.createError({ path: this.path, message: e.message });
               }
@@ -99,12 +101,13 @@ export default class SchemasForm extends React.Component<SchemasProps, SchemasSt
 
                 <Box gap={'medium'}>
                   <Paragraph>
-                    {isEditing ? editingLabel : creatingLabel}
+                    {infoParagraph}
                   </Paragraph>
                   <FormField
                     error={errors!.json}
                   >
                        <TextArea
+                         readOnly={readonly}
                          rows={25}
                          spellCheck={false}
                          fill={true}
@@ -120,11 +123,11 @@ export default class SchemasForm extends React.Component<SchemasProps, SchemasSt
                       label="Discard"
                       onClick={this.props.onDiscard}
                     />
-                    <Button
+                    {!readonly && <Button
                       type="submit"
                       primary
-                      label={isEditing ? updateLabel : createLabel}
-                    />
+                      label={submitLabel}
+                    />}
                   </Box>
                 </Box>
 
