@@ -49,7 +49,7 @@ message Deploy ERC20 for currency and nft collateral
 
 # Deploy Tinlake
 message Deploy Tinlake with Backer
-#./bin/deploy-all-backer
+./bin/deploy-all-backer
 
 
 ADDRESSES=${ADDRESSES:-$PWD/addresses/addresses-$(seth chain).json}

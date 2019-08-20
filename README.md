@@ -17,6 +17,10 @@ Install dependencies with `npm install`.
 
 `dapp testnet --accounts=2`
 
+##### Addtional Flags
+`--save=name` after finishing, save snapshot
+`--load=name` start from a previously saved snapshot
+
 
 #### Deploy Tinlake Contracts for Tests
 `./bin/deploy-local.sh`
