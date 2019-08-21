@@ -9,8 +9,27 @@ Documentation can be found in `./docs/` or at https://centrifuge.github.io/tinla
 Install dependencies with `npm install`.
 
 ## Running tests
+### Pre Installed
+- DappTools (https://dapp.tools/)
+- jq
 
-Run unit and integration tests at once with `npm test` or separate with `npm run test-unit` and `npm run test-integration`.
+#### Run a local Ethereum Node
+
+`dapp testnet --accounts=2`
+
+##### Additional Flags
+`--save=name` after finishing, save snapshot
+`--load=name` start from a previously saved snapshot
+
+
+#### Deploy Tinlake Contracts for Tests
+`./bin/deploy-local.sh`
+
+#### Set Environment Variables for local deployment
+`source bin/env-local`
+
+#### Run integration tests
+`npm run test`
 
 ## Building for production
 
