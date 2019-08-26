@@ -252,7 +252,7 @@ export class DocumentForm extends React.Component<Props, State> {
                           isEditMode,
                           size,
                         )}
-                        {this.renderCommentsSection(
+                        { (selectedSchema.formFeatures && selectedSchema.formFeatures.comments) && this.renderCommentsSection(
                           values,
                           errors,
                           handleChange,
