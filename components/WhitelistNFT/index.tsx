@@ -152,8 +152,9 @@ class WhitelistNFT extends React.Component<Props, State> {
                   onValueChange={({ value }) => {
                     if (value === baseToDisplay('0', 18)) {
                       this.setState({ is: 'error', errorMsg: 'Principal cannot be 0' });
+                    } else {
+                      this.setState({ principal: displayToBase(value, 18) });
                     }
-                    this.setState({ principal: displayToBase(value, 18) });
                   }}
                   disabled={is === 'success'}
                 />
