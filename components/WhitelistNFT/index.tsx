@@ -33,7 +33,7 @@ interface State {
 class WhitelistNFT extends React.Component<Props, State> {
   state: State = {
     tokenId: '',
-    principal: '0',
+    principal: '1',
     appraisal: '0',
     interestRate: '0',
     is: null,
@@ -149,8 +149,12 @@ class WhitelistNFT extends React.Component<Props, State> {
               <FormField label="Principal">
                 <NumberInput
                   value={baseToDisplay(principal, 18)} suffix=" DAI" precision={18}
-                  onValueChange={({ value }) =>
-                    this.setState({ principal: displayToBase(value, 18) })}
+                  onValueChange={({ value }) => {
+                    if (value === baseToDisplay('0', 18)) {
+                      this.setState({ is: 'error', errorMsg: 'Principal cannot be 0' });
+                    }
+                    this.setState({ principal: displayToBase(value, 18) });
+                  }}
                   disabled={is === 'success'}
                 />
               </FormField>
