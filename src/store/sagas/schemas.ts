@@ -22,9 +22,9 @@ export function* getSchema(action) {
   }
 }
 
-export function* getSchemasList() {
+export function* getSchemasList(action) {
   try {
-    const response = yield call(httpClient.schemas.read);
+    const response = yield call(httpClient.schemas.read, action.query);
     yield put({
       type: getSchemasListAction.success,
       payload: response.data,

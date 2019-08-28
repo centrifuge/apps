@@ -48,7 +48,8 @@ export class CreateDocument extends React.Component<Props, State> {
   componentDidMount() {
     if (!this.props.contacts) {
       this.props.getContacts();
-      this.props.getSchemasList();
+      // Get Only active schemas
+      this.props.getSchemasList({ archived: { $exists: false, $ne: true } });
     }
   }
 
@@ -73,7 +74,7 @@ export class CreateDocument extends React.Component<Props, State> {
     const { creatingDocument, contacts, schemas } = this.props;
     const { defaultDocument } = this.state;
 
-    if (!contacts || !schemas!.length) {
+    if (!contacts || !schemas) {
       return <Preloader message="Loading"/>;
     }
 

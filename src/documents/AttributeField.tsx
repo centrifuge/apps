@@ -61,7 +61,6 @@ const AttributeField = (props: Props) => {
             disabled={isViewMode}
             value={get(values, key)}
             name={`${key}`}
-            placeholder={'0'}
             precision={0}
             onChange={({ value }) => {
               setFieldValue(`${key}`, value);
@@ -71,7 +70,6 @@ const AttributeField = (props: Props) => {
           return <NumberInput
             disabled={isViewMode}
             value={get(values, key)}
-            placeholder={'0'}
             name={`${key}`}
             onChange={({ value }) => {
               setFieldValue(`${key}`, value);
@@ -82,7 +80,6 @@ const AttributeField = (props: Props) => {
           return <NumberInput
             disabled={isViewMode}
             suffix={'%'}
-            placeholder={'0'}
             value={get(values, key)}
             name={`${key}`}
             onChange={({ value }) => {

@@ -22,7 +22,7 @@ export const createSchema = (schema: Schema) =>
 export const resetCreateSchema = () => action(createSchemaAction.reset);
 export const getSchema = id => action(getSchemaAction.start, { id });
 export const resetGetSchema = () => action(getSchemaAction.reset);
-export const getSchemasList = () => action(getSchemasListAction.start);
+export const getSchemasList = (query = {}) => action(getSchemasListAction.start,{query});
 export const resetGetSchemasList = () => action(getSchemasListAction.reset);
 export const updateSchema = (schema: Schema) => action(updateSchemaAction.start, { schema });
 export const archiveSchema = (id: string) => action(archiveSchemaAction.start, { id });

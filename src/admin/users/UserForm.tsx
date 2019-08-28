@@ -6,6 +6,7 @@ import { Formik } from 'formik';
 import { PERMISSIONS } from '../../common/constants';
 import MutipleSelect from '../../components/form/MutipleSelect';
 import { Schema } from '../../common/models/schema';
+import { mapSchemaNames } from '../../common/schema-utils';
 
 type InviteProps = {
   user: User,
@@ -141,10 +142,12 @@ export default class UserForm extends React.Component<InviteProps> {
                             error={errors!.schemas}
                           >
                             <MutipleSelect
-                              selected={values.schemas}
-                              options={schemaOptions}
+                              labelKey={'name'}
+                              valueKey={'name'}
+                              selected={mapSchemaNames(values.schemas,schemas)}
+                              options={schemas}
                               onChange={(selection) => {
-                                setFieldValue('schemas', selection);
+                                setFieldValue('schemas', selection.map(s => s.name));
                               }}
                             />
 

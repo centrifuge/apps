@@ -13,6 +13,9 @@ import { SecondaryHeader } from '../../components/SecondaryHeader';
 import { DisplayField } from '../../components/DisplayField';
 import { getSchemasList, resetGetSchemasList } from '../../store/actions/schemas';
 import { Schema } from '../../common/models/schema';
+import { mapSchemaNames } from '../../common/schema-utils';
+import { PERMISSIONS } from '../../common/constants';
+
 
 type UsersListProps = {
   users: User[] | null;
@@ -37,7 +40,8 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
 
   componentDidMount() {
     this.props.getAllUsers();
-    this.props.getSchemasList();
+    // Get Only active schemas
+    this.props.getSchemasList({ archived: { $exists: false, $ne: true } });
   }
 
   componentWillUnmount() {
@@ -68,7 +72,13 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
   };
 
 
-  renderUsers = (data) => {
+  mapSchemaNames = (userSchemas, schemas) => {
+    if (!schemas || !schemas.data) return [];
+
+  };
+
+
+  renderUsers = (data, schemas) => {
 
     return (
       <DataTable
@@ -115,8 +125,15 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
           {
             property: 'schemas',
             header: 'Document schemas',
-            render: data => {
-              return data.schemas && Array.isArray(data.schemas) ? data.schemas.join(', ') : '';
+            render: data => {// User has not schemas display
+              if(!Array.isArray(data.schemas)) return '';
+              const activeSchemas =  mapSchemaNames(data.schemas, schemas)
+                .map(s => s.name).join(', ');
+              if(data.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS) && activeSchemas.length === 0) {
+                return <Text color="status-error">User should have at least one active schema assigned</Text>
+              }
+
+              return activeSchemas;
             },
           },
           {
@@ -143,16 +160,16 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
   render() {
 
     const { users, invitingUser, updatingUser, schemas } = this.props;
-    if (!this.props.users || !this.props.schemas) {
+    if (!users || !schemas || !schemas.data) {
       return <Preloader message="Loading"/>;
     }
 
     if (invitingUser && invitingUser.loading) {
-      return <Preloader message="Creating user" />;
+      return <Preloader message="Creating user"/>;
     }
 
     if (updatingUser && updatingUser.loading) {
-      return <Preloader message="Updating user" />;
+      return <Preloader message="Updating user"/>;
     }
 
     const user = this.state.selectedUser;
@@ -166,7 +183,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
           title={user._id ? 'Edit user' : 'Create user'}
           onClose={this.closeUserForm}
         >
-          <UserForm schemas={schemas.data || []} user={user} onSubmit={this.onUserFormSubmit}
+          <UserForm schemas={schemas.data} user={user} onSubmit={this.onUserFormSubmit}
                     onDiscard={this.closeUserForm}/>
         </Modal>
         <SecondaryHeader>
@@ -175,13 +192,13 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
             <Button
               primary
               label="Create User"
-              onClick={ () =>
+              onClick={() =>
                 this.openUserForm(new User())
               }/>
           </Box>
         </SecondaryHeader>
         <Box pad={{ horizontal: 'medium' }}>
-          {this.renderUsers(users)}
+          {this.renderUsers(users, schemas.data)}
         </Box>
       </Box>
     );
