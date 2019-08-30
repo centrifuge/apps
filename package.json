@@ -44,7 +44,8 @@
     "test-unit": "ts-mocha -p test/tsconfig.json src/**/*.spec.ts",
     "test-integration": "npm run build && ts-mocha -p test/tsconfig.json test/**/*",
     "nodemon": "nodemon node inspect dist/Tinlake.js",
-    "generate-docs": "typedoc --out docs --exclude \"./node_modules/**\" --excludeExternals --excludeNotExported ./src"
+    "generate-docs": "typedoc --out docs --exclude \"./node_modules/**\" --excludeExternals --excludeNotExported ./src",
+    "lint": "tslint --project ."
   },
   "repository": {
     "type": "git",

@@ -34522,10 +34522,12 @@ var interestRateToFee = function (interestRate) {
     return feeString;
 };
 
+var _this = undefined;
 var abiCoder$1 = new AbiCoder$1();
+var pollingInterval = 1000;
 var LOAN_ID_IDX = 2;
 var Tinlake = /** @class */ (function () {
-    function Tinlake(provider, contractAddresses, nftDataOutputs, _a) {
+    function Tinlake(provider, contractAddresses, nftDataOutputs, transactionTimeout, _a) {
         var _this = this;
         var _b = _a === void 0 ? {} : _a, contractAbis = _b.contractAbis, ethOptions = _b.ethOptions, ethConfig = _b.ethConfig;
         this.setProvider = function (provider, ethOptions) {
@@ -34609,7 +34611,7 @@ var Tinlake = /** @class */ (function () {
         this.approveNFT = function (tokenId, to) {
             return _this.contracts.nft.approve(to, tokenId, _this.ethConfig).then(function (txHash) {
                 console.log("[NFT Approve] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi, _this.transactionTimeout);
             });
         };
         this.ownerOfNFT = function (tokenId) { return __awaiter(_this, void 0, void 0, function () {
@@ -34643,7 +34645,7 @@ var Tinlake = /** @class */ (function () {
         this.mintNFT = function (owner, tokenId) {
             return _this.contracts.nft.mint(owner, tokenId, _this.ethConfig).then(function (txHash) {
                 console.log("[NFT.mint] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi, _this.transactionTimeout);
             });
         };
         /**
@@ -34653,14 +34655,14 @@ var Tinlake = /** @class */ (function () {
             return _this.contracts.admit.admit(registry, nft, principal, owner, _this.ethConfig)
                 .then(function (txHash) {
                 console.log("[Admit.admit] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi, _this.transactionTimeout);
             });
         };
         this.adminAppraise = function (loanID, appraisal) {
             return _this.contracts.appraiser.file(loanID, appraisal, _this.ethConfig)
                 .then(function (txHash) {
                 console.log("[Appraisal.file] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi, _this.transactionTimeout);
             });
         };
         this.getAppraisal = function (loanID) { return __awaiter(_this, void 0, void 0, function () {
@@ -34680,7 +34682,7 @@ var Tinlake = /** @class */ (function () {
         this.borrow = function (loanId, to) {
             return _this.contracts.reception.borrow(loanId, to, _this.ethConfig).then(function (txHash) {
                 console.log("[Reception.borrow] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['reception'].abi);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['reception'].abi, _this.transactionTimeout);
             });
         };
         /**
@@ -34691,7 +34693,7 @@ var Tinlake = /** @class */ (function () {
             return _this.contracts.reception.repay(loanId, wad, usr, _this.ethConfig)
                 .then(function (txHash) {
                 console.log("[Reception.repay] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['reception'].abi);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['reception'].abi, _this.transactionTimeout);
             });
         };
         /**
@@ -34702,26 +34704,26 @@ var Tinlake = /** @class */ (function () {
             return _this.contracts.reception.close(loanId, usr, _this.ethConfig)
                 .then(function (txHash) {
                 console.log("[Reception.close] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['reception'].abi);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['reception'].abi, _this.transactionTimeout);
             });
         };
         this.approveCurrency = function (usr, wad) {
             return _this.contracts.currency.approve(usr, wad, _this.ethConfig).then(function (txHash) {
                 console.log("[Currency.approve] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['currency'].abi);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['currency'].abi, _this.transactionTimeout);
             });
         };
         this.lenderRely = function (usr) {
             return _this.contracts.lender.rely(usr, _this.ethConfig).then(function (txHash) {
                 console.log("[Lender.rely] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['lender'].abi);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['lender'].abi, _this.transactionTimeout);
             });
         };
         this.initFee = function (fee) {
             return _this.contracts.pileForInit.file(fee, fee, _this.ethConfig)
                 .then(function (txHash) {
                 console.log("[Pile.file] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts.pileForInit.abi);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts.pileForInit.abi, _this.transactionTimeout);
             });
         };
         this.existsFee = function (fee) { return __awaiter(_this, void 0, void 0, function () {
@@ -34739,7 +34741,7 @@ var Tinlake = /** @class */ (function () {
             return _this.contracts.pileForAdd.file(loanId, fee, balance, _this.ethConfig)
                 .then(function (txHash) {
                 console.log("[Pile.file] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts.pileForAdd.abi);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts.pileForAdd.abi, _this.transactionTimeout);
             });
         };
         this.getCurrentDebt = function (loanId) { return __awaiter(_this, void 0, void 0, function () {
@@ -34764,14 +34766,14 @@ var Tinlake = /** @class */ (function () {
             return _this.contracts.admin.whitelist(registry, nft, principal, appraisal, fee, owner, _this.ethConfig)
                 .then(function (txHash) {
                 console.log("[Admin.whitelist] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi, _this.transactionTimeout);
             });
         };
         this.unwhitelist = function (loanId, registry, nft) {
             return _this.contracts.shelf.file(loanId, registry, nft, '0', _this.ethConfig)
                 .then(function (txHash) {
                 console.log("[Shelf.file] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['shelf'].abi);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['shelf'].abi, _this.transactionTimeout);
             });
         };
         this.getTotalDebt = function () { return __awaiter(_this, void 0, void 0, function () {
@@ -34849,28 +34851,35 @@ var Tinlake = /** @class */ (function () {
                 }],
         };
         this.contractAddresses = contractAddresses;
+        this.transactionTimeout = transactionTimeout;
         this.setProvider(provider, ethOptions);
         this.setEthConfig(ethConfig || {});
     }
     return Tinlake;
 }());
-var waitAndReturnEvents = function (eth, txHash, abi) {
-    return new Promise(function (resolve, reject) {
-        waitForTransaction(eth, txHash).then(function (tx) {
-            eth.getTransactionReceipt(tx.hash, function (err, receipt) {
-                if (err != null) {
-                    reject('failed to get receipt');
-                }
-                var events = getEvents(receipt, abi);
-                resolve({ events: events, txHash: tx.hash, status: receipt.status });
-            });
-        });
+var waitAndReturnEvents = function (eth, txHash, abi, transactionTimeout) { return __awaiter(_this, void 0, void 0, function () {
+    var tx;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, waitForTransaction(eth, txHash, transactionTimeout)];
+            case 1:
+                tx = _a.sent();
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        eth.getTransactionReceipt(tx.hash, function (err, receipt) {
+                            if (err != null) {
+                                reject('failed to get receipt');
+                            }
+                            var events = getEvents(receipt, abi);
+                            resolve({ events: events, txHash: tx.hash, status: receipt.status });
+                        });
+                    })];
+        }
     });
-};
+}); };
 // todo replace with a better polling
-var waitForTransaction = function (eth, txHash) {
+var waitForTransaction = function (eth, txHash, transactionTimeout) {
     return new Promise(function (resolve, reject) {
-        var secMax = 3600;
+        var secMax = transactionTimeout;
         var sec = 0;
         var wait = function (txHash) {
             setTimeout(function () {
@@ -34889,10 +34898,10 @@ var waitForTransaction = function (eth, txHash) {
                         wait(txHash);
                     }
                     else {
-                        reject("waiting for transaction tx " + tx + " timed out after " + secMax + " seconds");
+                        reject(new Error("waiting for transaction tx " + txHash + " timed out after " + secMax + " seconds"));
                     }
                 });
-            }, 1000);
+            }, pollingInterval);
         };
         wait(txHash);
     });
