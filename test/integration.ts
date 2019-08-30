@@ -11,8 +11,13 @@ const SUCCESS_STATUS = '0x1';
 
 let adminTinlake: Tinlake;
 let borrowerTinlake: Tinlake;
-const adminEthFrom = `0x${process.env['ETH_FROM']}`;
-const borrowerEthFrom = `0x${process.env['BORROWER_ETH_FROM']}`;
+const adminEthFrom = `${process.env['DEFAULT_TEST_ADMIN']}`;
+const borrowerEthFrom = `${process.env['DEFAULT_TEST_BORROWER']}`;
+
+console.log("Admin Addresss");
+console.log(adminEthFrom);
+console.log("Borrower Addresss");
+console.log(borrowerEthFrom);
 const tokenID = `0x${Math.floor(Math.random() * (10 ** 15))}`;
 let loanID: string;
 
@@ -31,7 +36,7 @@ describe('functional tinlake tests', () => {
     adminTinlake = new Tinlake(
       new SignerProvider(rpcUrl, {
         signTransaction: (rawTx: any, cb: (arg0: null, arg1: any) => void) =>
-          cb(null, sign(rawTx, process.env.ETH_PRIVATE_KEY)),
+          cb(null, sign(rawTx, process.env.DEFAULT_TEST_ADMIN_SK)),
         accounts: (cb: (arg0: null, arg1: string[]) => void) => cb(null, [adminEthFrom]),
       }),
       contractAddresses,
@@ -44,7 +49,7 @@ describe('functional tinlake tests', () => {
     borrowerTinlake = new Tinlake(
       new SignerProvider(rpcUrl, {
         signTransaction: (rawTx: any, cb: (arg0: null, arg1: any) => void) =>
-          cb(null, sign(rawTx, process.env.BORROWER_ETH_PRIVATE_KEY)),
+          cb(null, sign(rawTx, process.env.DEFAULT_TEST_BORROWER_SK)),
         accounts: (cb: (arg0: null, arg1: string[]) => void) => cb(null, [borrowerEthFrom]),
       }),
       contractAddresses,

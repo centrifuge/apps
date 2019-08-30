@@ -34530,6 +34530,7 @@ var interestRateToFee = function (interestRate) {
 
 var _this = undefined;
 var abiCoder$1 = new AbiCoder$1();
+var pollingInterval = 1000;
 var LOAN_ID_IDX = 2;
 var Tinlake = /** @class */ (function () {
     function Tinlake(provider, contractAddresses, nftDataOutputs, transactionTimeout, _a) {
@@ -34906,7 +34907,7 @@ var waitForTransaction = function (eth, txHash, transactionTimeout) {
                         reject(new Error("waiting for transaction tx " + txHash + " timed out after " + secMax + " seconds"));
                     }
                 });
-            }, 1000);
+            }, pollingInterval);
         };
         wait(txHash);
     });
