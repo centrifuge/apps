@@ -9,6 +9,7 @@ module.exports = withTypescript({
   publicRuntimeConfig: {
     TINLAKE_ADDRESSES: process.env.TINLAKE_ADDRESSES,
     NFT_DATA_DEFINITION: process.env.NFT_DATA_DEFINITION,
-    RPC_URL: process.env.RPC_URL
+    RPC_URL: process.env.RPC_URL,
+    TINLAKE_DATA_BACKEND_URL: process.env.TINLAKE_DATA_BACKEND_URL
   }
 });

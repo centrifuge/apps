@@ -6,6 +6,7 @@ import { ThunkAction } from 'redux-thunk';
 // Actions
 const LOAD = 'tinlake-ui/dashboard/LOAD';
 const RECEIVE = 'tinlake-ui/dashboard/RECEIVE';
+const RECEIVE_TIMESERIES = 'tinlake-ui/dashboard/RECEIVE_TIME_SERIES';
 
 export interface DashboardState {
   state: null | 'loading' | 'found';
@@ -28,6 +29,7 @@ export default function reducer(state: DashboardState = initialState,
   switch (action.type) {
     case LOAD: return { ...state, state: 'loading' };
     case RECEIVE: return { ...state, state: 'found', data: action.data };
+    case RECEIVE_TIMESERIES: return { ...state, state: 'found', data: action.data };
     default: return state;
   }
 }
@@ -66,3 +68,20 @@ export function subscribeDashboardData(tinlake: Tinlake):
     return discard as any;
   };
 }
+
+
+
+//todo fix appollo client data type
+export function getTimeSeriesData(appolloClient: any) :
+  ThunkAction<void, DashboardState, undefined, Action> {
+  return async (dispatch) => {
+    const timeSeriesData = await appolloClient.testQuery();
+    const data = {
+      outstandingDeptTimeSeries: timeSeriesData,
+      colleteralValueTimeSeries: timeSeriesData
+    };
+    //dispatch({ data, type: RECEIVE_TIMESERIES });
+  };
+}
+
+
