@@ -1,39 +1,40 @@
 import { ApolloClient } from 'apollo-client';
 import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { createHttpLink } from 'apollo-link-http';
-import config from '../../config'
+import config from '../../config';
 import fetch from 'node-fetch';
-import gql from "graphql-tag";
+import gql from 'graphql-tag';
 
-const { tinlakeDataBackendUrl } = config
+const { tinlakeDataBackendUrl } = config;
 const cache = new InMemoryCache();
 const link = new createHttpLink({
-  uri: tinlakeDataBackendUrl, fetch
-})
+  fetch,
+  uri: tinlakeDataBackendUrl,
+});
 
 export interface TinlakeEventEntry {
-  timestamp: string,
-  total_debt: string,
-  total_value_of_nfts: string
+  timestamp: string;
+  total_debt: string;
+  total_value_of_nfts: string;
 }
 
 class Apollo {
-  client: ApolloClient<NormalizedCacheObject>
+  client: ApolloClient<NormalizedCacheObject>;
   constructor() {
     this.client =  new ApolloClient({
       cache,
-      link
-    })
+      link,
+    });
   }
 
   async getColleteralTimeSeriesData(period:string) {
-    let timeSeriesData
+    let timeSeriesData;
     try {
       timeSeriesData = await this.client
       .query({
         query: gql`
         {
-          last${period}(interval:"hour"){
+          last${period}(interval:""){
             timestamp
             total_debt
             total_balance
@@ -44,15 +45,19 @@ class Apollo {
             repaid_loans
           }
         }
-        `
-      })
+        `,
+      });
     } catch (err) {
-      console.log(`error occured while fetching time series data from apollo ${err}`)
-      return []
+      console.log(`error occured while fetching time series data from apollo ${err}`);
+      return [];
     }
-    return (timeSeriesData && timeSeriesData['data'] ? timeSeriesData['data'][`last${period}`] : [])
-  } 
+    return (timeSeriesData && timeSeriesData['data'] ? sortByTime(timeSeriesData['data'][`last${period}`]) : []);
+  }
 }
 
-export interface ApolloClient extends Apollo {};
-export const appolloClient = new Apollo()
+function sortByTime(entries:TinlakeEventEntry[]){
+  const sorted = entries.sort( (a:TinlakeEventEntry, b:TinlakeEventEntry) => (a.timestamp > b.timestamp) ? 1 : -1 )
+  return sorted
+}
+export interface ApolloClient extends Apollo {}
+export const appolloClient = new Apollo();

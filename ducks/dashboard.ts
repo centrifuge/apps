@@ -69,19 +69,15 @@ export function subscribeDashboardData(tinlake: Tinlake):
   };
 }
 
-
-
-//todo fix appollo client data type
+// todo fix appollo client data type
 export function getTimeSeriesData(appolloClient: any) :
   ThunkAction<void, DashboardState, undefined, Action> {
   return async (dispatch) => {
     const timeSeriesData = await appolloClient.testQuery();
     const data = {
       outstandingDeptTimeSeries: timeSeriesData,
-      colleteralValueTimeSeries: timeSeriesData
+      colleteralValueTimeSeries: timeSeriesData,
     };
-    //dispatch({ data, type: RECEIVE_TIMESERIES });
+    // dispatch({ data, type: RECEIVE_TIMESERIES });
   };
 }
-
-

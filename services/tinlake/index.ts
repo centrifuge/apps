@@ -1,14 +1,9 @@
 import Tinlake from 'tinlake';
 import config from '../../config';
 import Eth from 'ethjs';
-
-<<<<<<< HEAD
-const { contractAddresses, nftDataDefinition } = config
-=======
 declare var web3: any;
 
 const { contractAddresses, nftDataDefinition, transactionTimeout } = config;
->>>>>>> develop
 const portisConfig = {
   id: '2ea2735d-4963-40f5-823f-48cab29f7319', // required
   // network: 'mainnet', // optional
@@ -49,10 +44,6 @@ export async function authTinlake() {
 
   const accounts = await provider.enable();
   const account = accounts[0];
-<<<<<<< HEAD
-=======
-  //console.log(`Using account ${account}`);
->>>>>>> develop
 
   tinlake!.setProvider(provider);
   tinlake!.setEthConfig({ from: account });

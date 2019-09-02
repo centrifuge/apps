@@ -2,7 +2,7 @@ import * as React from 'react';
 import { ApolloClient, appolloClient } from '../../services/appollo';
 
 interface Props {
-  render: (appolloClient: ApolloClient ) => React.ReactElement;
+  render: (appolloClient: ApolloClient) => React.ReactElement;
 }
 
 class WithAppollo extends React.Component<Props> {

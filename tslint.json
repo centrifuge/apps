@@ -12,6 +12,8 @@
       }
     ],
     "variable-name": false,
-    "import-name": false
+    "import-name": false,
+    "semicolon": true,
+    "max-line-length": [true, 200]
   }
 }

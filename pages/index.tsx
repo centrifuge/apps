@@ -6,7 +6,6 @@ import WithTinlake from '../components/WithTinlake';
 import WithAppollo from '../components/WithAppollo';
 import { menuItems } from '../menuItems';
 
-
 function Home() {
   return <Box align="center">
   <Header
@@ -19,12 +18,12 @@ function Home() {
     direction="row"
   >
     <Box width="xlarge" >
-      <WithTinlake render={tinlake => 
+      <WithTinlake render={tinlake =>
         <WithAppollo render={appolloClient => <Dashboard tinlake={tinlake} appolloClient={appolloClient} />} />
       }/>
     </Box>
   </Box>
-</Box>
+</Box>;
 }
 
 export default Home;

@@ -2,14 +2,14 @@ import * as React from 'react';
 import { Line } from 'react-chartjs-2';
 
 interface XValueSet {
-      data: Array<string>,
-      backgroundColor: string,
-      label: string 
+  data: string[];
+  backgroundColor: string;
+  label: string;
 }
 
 export interface TimeSeriesData {
-    labels: Array<string>,
-    xValues: Array<XValueSet>
+  labels: string[];
+  xValues: XValueSet[];
 }
 
 const defaultLineData = {
@@ -26,34 +26,34 @@ const defaultLineData = {
   pointHoverBorderWidth: 2,
   pointRadius: 1,
   pointHitRadius: 10,
-}
+};
 
 const defaultLineOptions = {
   scales: {
     yAxes: [
-      { }
+      { },
     ],
     xAxes: [
       {
         gridLines: {
           display: false,
         },
-      }
-    ]
-  }
-}
+      },
+    ],
+  },
+};
 
 interface Props {
-  timeSeriesData: TimeSeriesData
+  timeSeriesData: TimeSeriesData;
 }
 
 export class Graph extends React.Component<Props> {
-  state = { active: undefined }
+  state = { active: undefined };
   componentDidMount() {
   }
 
   render() {
-    const { labels, xValues } = this.props.timeSeriesData
+    const { labels, xValues } = this.props.timeSeriesData;
     const datasets = xValues.map((xValueSet: XValueSet) => {
       return {
         ...xValueSet,
@@ -62,16 +62,16 @@ export class Graph extends React.Component<Props> {
         pointBorderColor: xValueSet.backgroundColor,
         pointHoverBackgroundColor: xValueSet.backgroundColor,
         pointHoverBorderColor: xValueSet.backgroundColor,
-      }
+      };
     });
 
     const graphData = {
       labels,
-      datasets
-    }
+      datasets,
+    };
 
     return (
       <Line height={100} data={graphData} options={defaultLineOptions} />
-    )
+    );
   }
 }

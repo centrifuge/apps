@@ -6,7 +6,7 @@ import { formatAddress } from '../../utils/formatAddress';
 import MeBadge from '../MeBadge';
 import { NFT } from '../../ducks/nft';
 import NftDataField, { DisplayedField } from '../NftDataField';
-import config from '../../config'
+import config from '../../config';
 
 interface Props {
   data: InternalSingleLoan | NFT;

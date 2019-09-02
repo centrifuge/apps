@@ -9,7 +9,8 @@
     "start": "next start",
     "test": "jest",
     "export": "npm run build && next export",
-    "lint": "tslint --project ."
+    "lint": "tslint --project .",
+    "lint-fix": "tslint --fix --project ."
   },
   "repository": {
     "type": "git",
