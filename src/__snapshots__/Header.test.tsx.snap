@@ -44,122 +44,120 @@ exports[`Header Should render an empty header 1`] = `
 
 exports[`Header Should render the Header 1`] = `
 <div
-  className="StyledBox-sc-13pk1d4-0 iEnTcK"
-  style={
-    Object {
-      "height": "90px",
-      "position": "sticky",
-      "top": 0,
-      "zIndex": 1,
-    }
-  }
+  className="StyledGrommet-sc-19lkkz7-0 eWRwfm"
 >
   <div
-    className="StyledBox-sc-13pk1d4-0 fbWwXK"
+    className="StyledBox-sc-13pk1d4-0 gkxoZn"
+    style={
+      Object {
+        "height": "90px",
+        "position": "sticky",
+        "top": 0,
+        "zIndex": 1,
+      }
+    }
   >
-    <a
-      href="/"
-      label="Centrifuge"
-      onClick={[Function]}
-      size="large"
-    >
-      <img
-        className="StyledImage-ey4zx9-0 fmkmCl"
-        src="logo.png"
-      />
-    </a>
     <div
-      className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-    />
-    <div
-      className="StyledBox-sc-13pk1d4-0 ffeAql"
+      className="StyledBox-sc-13pk1d4-0 fbWwXK"
     >
-      <button
-        className="StyledButton-sc-323bzc-0 jfbKsv"
-        onBlur={[Function]}
+      <a
+        href="/"
+        label="Centrifuge"
         onClick={[Function]}
-        onFocus={[Function]}
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
-        type="button"
+        size="large"
       >
-        Invoices
-      </button>
-      <div
-        className="StyledBox__StyledBoxGap-sc-13pk1d4-1 iChEkS"
-      />
-      <button
-        className="StyledButton-sc-323bzc-0 jfbKsv"
-        onBlur={[Function]}
-        onClick={[Function]}
-        onFocus={[Function]}
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
-        type="button"
-      >
-        Contacts
-      </button>
-    </div>
-    <div
-      className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-    />
-    <div
-      className="StyledBox-sc-13pk1d4-0 BclQN"
-    >
-      <div
-        className="StyledBox-sc-13pk1d4-0 gQLnBt"
-      >
-        <span
-          className="StyledText-sc-1sadyjn-0 fWSbXS"
-        >
-          Centrifuge ID: 
-        </span>
-        <div
-          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 gufrXq"
+        <img
+          className="StyledImage-ey4zx9-0 fmkmCl"
+          src="logo.png"
         />
-        <div
-          className="sc-bdVaJa netlj FormField__FormFieldBox-m9hood-0 eshLKp StyledBox-sc-13pk1d4-0 CAsMy"
+      </a>
+      <div
+        className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+      />
+      <div
+        className="StyledBox-sc-13pk1d4-0 ffeAql"
+      >
+        <button
+          className="StyledButton-sc-323bzc-0 kPUXNH"
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+          type="button"
         >
+          Invoices
+        </button>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 iChEkS"
+        />
+        <button
+          className="StyledButton-sc-323bzc-0 kPUXNH"
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+          type="button"
+        >
+          Contacts
+        </button>
+      </div>
+      <div
+        className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
+      />
+      <div
+        className="StyledBox-sc-13pk1d4-0 BclQN"
+      >
+        <div
+          className="StyledBox-sc-13pk1d4-0 gQLnBt"
+        >
+          <span
+            className="StyledText-sc-1sadyjn-0 cTRjlw"
+          >
+            Centrifuge ID: 
+          </span>
           <div
-            className="StyledBox-sc-13pk1d4-0 gZSidW"
+            className="StyledBox__StyledBoxGap-sc-13pk1d4-1 gufrXq"
+          />
+          <div
+            className="StyledBox-sc-13pk1d4-0 cMsezL"
           >
             <div
-              className="StyledBox-sc-13pk1d4-0 ffeAql"
-              onBlur={[Function]}
-              onFocus={[Function]}
+              className="DisplayField__DisplayFieldBox-lfek92-0 bzzYlY StyledBox-sc-13pk1d4-0 IRSNj"
             >
               <p
-                className="StyledParagraph-tbetod-0 fbHsbZ"
+                className="StyledParagraph-tbetod-0 giEJAX"
               >
                 0x33333
               </p>
             </div>
           </div>
         </div>
+        <div
+          className="StyledBox__StyledBoxGap-sc-13pk1d4-1 iChEkS"
+        />
+        <span
+          className="StyledText-sc-1sadyjn-0 cTRjlw"
+        >
+           
+        </span>
       </div>
       <div
-        className="StyledBox__StyledBoxGap-sc-13pk1d4-1 iChEkS"
+        className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
       />
-      <span
-        className="StyledText-sc-1sadyjn-0 fWSbXS"
+      <div
+        className="StyledBox-sc-13pk1d4-0 BclQN"
       >
-         
-      </span>
-    </div>
-    <div
-      className="StyledBox__StyledBoxGap-sc-13pk1d4-1 hyyRSo"
-    />
-    <div
-      className="StyledBox-sc-13pk1d4-0 BclQN"
-    >
-      <a
-        className="StyledAnchor-sc-1rp7lwl-0 jgeOSx"
-        href="/api/users/logout"
-        onBlur={[Function]}
-        onFocus={[Function]}
-      >
-        Logout
-      </a>
+        <a
+          className="StyledAnchor-sc-1rp7lwl-0 cWvlCm"
+          href="/api/users/logout"
+          onBlur={[Function]}
+          onFocus={[Function]}
+        >
+          Logout
+        </a>
+      </div>
     </div>
   </div>
 </div>

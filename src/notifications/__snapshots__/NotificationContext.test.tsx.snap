@@ -10,7 +10,7 @@ exports[`NotificationContext Should not crash 1`] = `
 `;
 
 exports[`NotificationContext Should render a default popup 1`] = `
-<WithTheme(Component)
+<WithTheme(Modal)
   headingProps={
     Object {
       "color": "",
@@ -367,11 +367,11 @@ exports[`NotificationContext Should render a default popup 1`] = `
       </StyledLayer>
     </div>
   </Portal>
-</WithTheme(Component)>
+</WithTheme(Modal)>
 `;
 
 exports[`NotificationContext Should render a error popup 1`] = `
-<WithTheme(Component)
+<WithTheme(Modal)
   headingProps={
     Object {
       "color": "status-error",
@@ -800,11 +800,11 @@ exports[`NotificationContext Should render a error popup 1`] = `
       </StyledLayer>
     </div>
   </Portal>
-</WithTheme(Component)>
+</WithTheme(Modal)>
 `;
 
 exports[`NotificationContext Should render a success popup 1`] = `
-<WithTheme(Component)
+<WithTheme(Modal)
   headingProps={
     Object {
       "color": "status-ok",
@@ -1233,11 +1233,11 @@ exports[`NotificationContext Should render a success popup 1`] = `
       </StyledLayer>
     </div>
   </Portal>
-</WithTheme(Component)>
+</WithTheme(Modal)>
 `;
 
 exports[`NotificationContext Should render a warning popup 1`] = `
-<WithTheme(Component)
+<WithTheme(Modal)
   headingProps={
     Object {
       "color": "status-warning",
@@ -1666,11 +1666,11 @@ exports[`NotificationContext Should render a warning popup 1`] = `
       </StyledLayer>
     </div>
   </Portal>
-</WithTheme(Component)>
+</WithTheme(Modal)>
 `;
 
 exports[`NotificationContext Should set the proper label for the confirm button 1`] = `
-<WithTheme(Component)
+<WithTheme(Modal)
   headingProps={
     Object {
       "color": "",
@@ -2027,5 +2027,5 @@ exports[`NotificationContext Should set the proper label for the confirm button 
       </StyledLayer>
     </div>
   </Portal>
-</WithTheme(Component)>
+</WithTheme(Modal)>
 `;

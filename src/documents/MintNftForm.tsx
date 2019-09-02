@@ -3,7 +3,7 @@ import { Box, Button, CheckBox, FormField, TextInput } from 'grommet';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { Registry } from '../common/models/schema';
-import SearchSelect from '../components/form/SearchSelect';
+import { SearchSelect } from '@centrifuge/axis-search-select';
 import { isValidAddress } from 'ethereumjs-util';
 
 type Props = {

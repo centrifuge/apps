@@ -1,9 +1,10 @@
 import React from 'react';
 import { Box } from 'grommet';
-import { DisplayField } from '../../components/DisplayField';
+import { DisplayField } from '@centrifuge/axis-display-field';
 import { Section } from '../../components/Section';
 import { formatCurrency } from '../../common/formaters';
 import { TransferdetailsData } from '../../../clients/centrifuge-node';
+import {  getTransactionLink } from '../../common/etherscan';
 
 
 interface TransferDetailProps {
@@ -31,7 +32,10 @@ export class TransferDetail extends React.Component<TransferDetailProps> {
                 <DisplayField
                   label="Transaction Id"
                   value={transfer!.settlement_reference}
-                  linkTo={`https://etherscan.io/tx/${transfer!.settlement_reference}`}
+                  link={{
+                    href:getTransactionLink(transfer!.settlement_reference),
+                    target:'_blank'
+                  }}
                 />
               </Box>
 

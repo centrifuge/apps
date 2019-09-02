@@ -302,6 +302,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                   }
                                                                   placeholder="Select"
                                                                   plain={true}
+                                                                  searchPlaceholder="Search"
                                                                   size="medium"
                                                                   valueKey="value"
                                                                 >
@@ -338,6 +339,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                     }
                                                                     placeholder="Select"
                                                                     plain={true}
+                                                                    searchPlaceholder="Search"
                                                                     size="medium"
                                                                     valueKey="value"
                                                                   >
@@ -512,6 +514,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                     placeholder="Select"
                                                                                                     plain={true}
                                                                                                     readOnly={true}
+                                                                                                    searchPlaceholder="Search"
                                                                                                     size="medium"
                                                                                                     tabIndex="-1"
                                                                                                     type="text"
@@ -540,6 +543,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                       placeholder="Select"
                                                                                                       plain={true}
                                                                                                       readOnly={true}
+                                                                                                      searchPlaceholder="Search"
                                                                                                       size="medium"
                                                                                                       tabIndex="-1"
                                                                                                       type="text"
@@ -569,6 +573,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                         placeholder="Select"
                                                                                                         plain={true}
                                                                                                         readOnly={true}
+                                                                                                        searchPlaceholder="Search"
                                                                                                         size="medium"
                                                                                                         tabIndex="-1"
                                                                                                         type="text"
@@ -598,6 +603,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                           placeholder="Select"
                                                                                                           plain={true}
                                                                                                           readOnly={true}
+                                                                                                          searchPlaceholder="Search"
                                                                                                           size="medium"
                                                                                                           tabIndex="-1"
                                                                                                           type="text"
@@ -628,6 +634,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                             placeholder="Select"
                                                                                                             plain={true}
                                                                                                             readOnly={true}
+                                                                                                            searchPlaceholder="Search"
                                                                                                             size="medium"
                                                                                                             tabIndex="-1"
                                                                                                             type="text"
@@ -661,6 +668,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                                   placeholder="Select"
                                                                                                                   plain={true}
                                                                                                                   readOnly={true}
+                                                                                                                  searchPlaceholder="Search"
                                                                                                                   size="medium"
                                                                                                                   tabIndex="-1"
                                                                                                                   type="text"
@@ -3214,7 +3222,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                               <div
                                                                 className="StyledBox-sc-13pk1d4-0 gZSidW"
                                                               >
-                                                                <WithTheme(Component)
+                                                                <WithTheme(DateInput)
                                                                   disabled={true}
                                                                   focusIndicator={false}
                                                                   key=".0"
@@ -3229,14 +3237,18 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                     dropAlign={
                                                                       Object {
                                                                         "left": "left",
-                                                                        "top": "bottom",
+                                                                        "top": "top",
                                                                       }
                                                                     }
                                                                     dropContent={null}
+                                                                    dropProps={
+                                                                      Object {
+                                                                        "stretch": false,
+                                                                      }
+                                                                    }
                                                                     onClose={[Function]}
                                                                     onOpen={[Function]}
                                                                     plain={true}
-                                                                    size="small"
                                                                   >
                                                                     <DropButton
                                                                       a11yTitle="Open Drop"
@@ -3245,14 +3257,18 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                       dropAlign={
                                                                         Object {
                                                                           "left": "left",
-                                                                          "top": "bottom",
+                                                                          "top": "top",
                                                                         }
                                                                       }
                                                                       dropContent={null}
+                                                                      dropProps={
+                                                                        Object {
+                                                                          "stretch": false,
+                                                                        }
+                                                                      }
                                                                       onClose={[Function]}
                                                                       onOpen={[Function]}
                                                                       plain={true}
-                                                                      size="small"
                                                                     >
                                                                       <WithTheme(Button)
                                                                         a11yTitle="Open Drop"
@@ -3262,7 +3278,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                         gap="small"
                                                                         onClick={[Function]}
                                                                         plain={true}
-                                                                        size="small"
                                                                         type="button"
                                                                       >
                                                                         <WithTheme(Button)
@@ -3276,7 +3291,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                           onClick={[Function]}
                                                                           onFocus={[Function]}
                                                                           plain={true}
-                                                                          size="small"
                                                                           type="button"
                                                                         >
                                                                           <Button
@@ -3290,7 +3304,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                             onClick={[Function]}
                                                                             onFocus={[Function]}
                                                                             plain={true}
-                                                                            size="small"
                                                                             type="button"
                                                                           >
                                                                             <StyledButton
@@ -3309,7 +3322,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                               onMouseOver={[Function]}
                                                                               pad={false}
                                                                               plain={true}
-                                                                              size="small"
                                                                               type="button"
                                                                             >
                                                                               <button
@@ -3321,7 +3333,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                 onFocus={[Function]}
                                                                                 onMouseOut={[Function]}
                                                                                 onMouseOver={[Function]}
-                                                                                size="small"
                                                                                 type="button"
                                                                               >
                                                                                 <WithTheme(Box)
@@ -3365,7 +3376,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                           }
                                                                                           plain={true}
                                                                                           readOnly={true}
-                                                                                          tabIndex="-1"
+                                                                                          tabIndex={-1}
                                                                                           value="6/5/2019"
                                                                                         >
                                                                                           <WithTheme(TextInput)
@@ -3386,7 +3397,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                             }
                                                                                             plain={true}
                                                                                             readOnly={true}
-                                                                                            tabIndex="-1"
+                                                                                            tabIndex={-1}
                                                                                             value="6/5/2019"
                                                                                           >
                                                                                             <WithTheme(TextInput)
@@ -3410,7 +3421,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                               onFocus={[Function]}
                                                                                               plain={true}
                                                                                               readOnly={true}
-                                                                                              tabIndex="-1"
+                                                                                              tabIndex={-1}
                                                                                               value="6/5/2019"
                                                                                             >
                                                                                               <TextInput
@@ -3434,7 +3445,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                 onFocus={[Function]}
                                                                                                 plain={true}
                                                                                                 readOnly={true}
-                                                                                                tabIndex="-1"
+                                                                                                tabIndex={-1}
                                                                                                 value="6/5/2019"
                                                                                               >
                                                                                                 <TextInput
@@ -3459,7 +3470,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                   onFocus={[Function]}
                                                                                                   plain={true}
                                                                                                   readOnly={true}
-                                                                                                  tabIndex="-1"
+                                                                                                  tabIndex={-1}
                                                                                                   value="6/5/2019"
                                                                                                 >
                                                                                                   <StyledTextInput__StyledTextInputContainer
@@ -3487,7 +3498,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                         onKeyDown={[Function]}
                                                                                                         plain={true}
                                                                                                         readOnly={true}
-                                                                                                        tabIndex="-1"
+                                                                                                        tabIndex={-1}
                                                                                                         value="6/5/2019"
                                                                                                       >
                                                                                                         <input
@@ -3498,7 +3509,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                           onFocus={[Function]}
                                                                                                           onKeyDown={[Function]}
                                                                                                           readOnly={true}
-                                                                                                          tabIndex="-1"
+                                                                                                          tabIndex={-1}
                                                                                                           value="6/5/2019"
                                                                                                         />
                                                                                                       </StyledTextInput>
@@ -3512,25 +3523,37 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                         <WithTheme(Box)
                                                                                           direction="row"
                                                                                           gap="small"
-                                                                                          margin="none"
+                                                                                          margin={
+                                                                                            Object {
+                                                                                              "horizontal": "small",
+                                                                                            }
+                                                                                          }
                                                                                           pad="none"
                                                                                           responsive={true}
                                                                                         >
                                                                                           <Box
                                                                                             direction="row"
                                                                                             gap="small"
-                                                                                            margin="none"
+                                                                                            margin={
+                                                                                              Object {
+                                                                                                "horizontal": "small",
+                                                                                              }
+                                                                                            }
                                                                                             pad="none"
                                                                                             responsive={true}
                                                                                           >
                                                                                             <StyledBox
                                                                                               directionProp="row"
-                                                                                              margin="none"
+                                                                                              margin={
+                                                                                                Object {
+                                                                                                  "horizontal": "small",
+                                                                                                }
+                                                                                              }
                                                                                               pad="none"
                                                                                               responsive={true}
                                                                                             >
                                                                                               <div
-                                                                                                className="StyledBox-sc-13pk1d4-0 ffeAql"
+                                                                                                className="StyledBox-sc-13pk1d4-0 fVyBBm"
                                                                                               />
                                                                                             </StyledBox>
                                                                                           </Box>
@@ -3546,7 +3569,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                       </WithTheme(Button)>
                                                                     </DropButton>
                                                                   </DateInput__StyledDateInputDropButton>
-                                                                </WithTheme(Component)>
+                                                                </WithTheme(DateInput)>
                                                               </div>
                                                             </StyledBox>
                                                           </Box>
@@ -3729,7 +3752,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                               <div
                                                                 className="StyledBox-sc-13pk1d4-0 gZSidW"
                                                               >
-                                                                <WithTheme(Component)
+                                                                <WithTheme(DateInput)
                                                                   disabled={true}
                                                                   focusIndicator={false}
                                                                   key=".0"
@@ -3747,14 +3770,18 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                     dropAlign={
                                                                       Object {
                                                                         "left": "left",
-                                                                        "top": "bottom",
+                                                                        "top": "top",
                                                                       }
                                                                     }
                                                                     dropContent={null}
+                                                                    dropProps={
+                                                                      Object {
+                                                                        "stretch": false,
+                                                                      }
+                                                                    }
                                                                     onClose={[Function]}
                                                                     onOpen={[Function]}
                                                                     plain={true}
-                                                                    size="small"
                                                                   >
                                                                     <DropButton
                                                                       a11yTitle="Open Drop"
@@ -3763,14 +3790,18 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                       dropAlign={
                                                                         Object {
                                                                           "left": "left",
-                                                                          "top": "bottom",
+                                                                          "top": "top",
                                                                         }
                                                                       }
                                                                       dropContent={null}
+                                                                      dropProps={
+                                                                        Object {
+                                                                          "stretch": false,
+                                                                        }
+                                                                      }
                                                                       onClose={[Function]}
                                                                       onOpen={[Function]}
                                                                       plain={true}
-                                                                      size="small"
                                                                     >
                                                                       <WithTheme(Button)
                                                                         a11yTitle="Open Drop"
@@ -3780,7 +3811,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                         gap="small"
                                                                         onClick={[Function]}
                                                                         plain={true}
-                                                                        size="small"
                                                                         type="button"
                                                                       >
                                                                         <WithTheme(Button)
@@ -3794,7 +3824,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                           onClick={[Function]}
                                                                           onFocus={[Function]}
                                                                           plain={true}
-                                                                          size="small"
                                                                           type="button"
                                                                         >
                                                                           <Button
@@ -3808,7 +3837,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                             onClick={[Function]}
                                                                             onFocus={[Function]}
                                                                             plain={true}
-                                                                            size="small"
                                                                             type="button"
                                                                           >
                                                                             <StyledButton
@@ -3827,7 +3855,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                               onMouseOver={[Function]}
                                                                               pad={false}
                                                                               plain={true}
-                                                                              size="small"
                                                                               type="button"
                                                                             >
                                                                               <button
@@ -3839,7 +3866,6 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                 onFocus={[Function]}
                                                                                 onMouseOut={[Function]}
                                                                                 onMouseOver={[Function]}
-                                                                                size="small"
                                                                                 type="button"
                                                                               >
                                                                                 <WithTheme(Box)
@@ -3883,7 +3909,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                           }
                                                                                           plain={true}
                                                                                           readOnly={true}
-                                                                                          tabIndex="-1"
+                                                                                          tabIndex={-1}
                                                                                           value="6/5/2019"
                                                                                         >
                                                                                           <WithTheme(TextInput)
@@ -3904,7 +3930,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                             }
                                                                                             plain={true}
                                                                                             readOnly={true}
-                                                                                            tabIndex="-1"
+                                                                                            tabIndex={-1}
                                                                                             value="6/5/2019"
                                                                                           >
                                                                                             <WithTheme(TextInput)
@@ -3928,7 +3954,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                               onFocus={[Function]}
                                                                                               plain={true}
                                                                                               readOnly={true}
-                                                                                              tabIndex="-1"
+                                                                                              tabIndex={-1}
                                                                                               value="6/5/2019"
                                                                                             >
                                                                                               <TextInput
@@ -3952,7 +3978,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                 onFocus={[Function]}
                                                                                                 plain={true}
                                                                                                 readOnly={true}
-                                                                                                tabIndex="-1"
+                                                                                                tabIndex={-1}
                                                                                                 value="6/5/2019"
                                                                                               >
                                                                                                 <TextInput
@@ -3977,7 +4003,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                   onFocus={[Function]}
                                                                                                   plain={true}
                                                                                                   readOnly={true}
-                                                                                                  tabIndex="-1"
+                                                                                                  tabIndex={-1}
                                                                                                   value="6/5/2019"
                                                                                                 >
                                                                                                   <StyledTextInput__StyledTextInputContainer
@@ -4005,7 +4031,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                         onKeyDown={[Function]}
                                                                                                         plain={true}
                                                                                                         readOnly={true}
-                                                                                                        tabIndex="-1"
+                                                                                                        tabIndex={-1}
                                                                                                         value="6/5/2019"
                                                                                                       >
                                                                                                         <input
@@ -4016,7 +4042,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                                           onFocus={[Function]}
                                                                                                           onKeyDown={[Function]}
                                                                                                           readOnly={true}
-                                                                                                          tabIndex="-1"
+                                                                                                          tabIndex={-1}
                                                                                                           value="6/5/2019"
                                                                                                         />
                                                                                                       </StyledTextInput>
@@ -4030,25 +4056,37 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                                         <WithTheme(Box)
                                                                                           direction="row"
                                                                                           gap="small"
-                                                                                          margin="none"
+                                                                                          margin={
+                                                                                            Object {
+                                                                                              "horizontal": "small",
+                                                                                            }
+                                                                                          }
                                                                                           pad="none"
                                                                                           responsive={true}
                                                                                         >
                                                                                           <Box
                                                                                             direction="row"
                                                                                             gap="small"
-                                                                                            margin="none"
+                                                                                            margin={
+                                                                                              Object {
+                                                                                                "horizontal": "small",
+                                                                                              }
+                                                                                            }
                                                                                             pad="none"
                                                                                             responsive={true}
                                                                                           >
                                                                                             <StyledBox
                                                                                               directionProp="row"
-                                                                                              margin="none"
+                                                                                              margin={
+                                                                                                Object {
+                                                                                                  "horizontal": "small",
+                                                                                                }
+                                                                                              }
                                                                                               pad="none"
                                                                                               responsive={true}
                                                                                             >
                                                                                               <div
-                                                                                                className="StyledBox-sc-13pk1d4-0 ffeAql"
+                                                                                                className="StyledBox-sc-13pk1d4-0 fVyBBm"
                                                                                               />
                                                                                             </StyledBox>
                                                                                           </Box>
@@ -4064,7 +4102,7 @@ exports[`RequestFundingForm Should render the form 1`] = `
                                                                       </WithTheme(Button)>
                                                                     </DropButton>
                                                                   </DateInput__StyledDateInputDropButton>
-                                                                </WithTheme(Component)>
+                                                                </WithTheme(DateInput)>
                                                               </div>
                                                             </StyledBox>
                                                           </Box>

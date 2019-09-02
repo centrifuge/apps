@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from 'grommet';
 import { InvoiceResponse, LabelValuePair } from '../common/interfaces';
-import { DisplayField } from '../components/DisplayField';
+import { DisplayField } from '@centrifuge/axis-display-field';
 import { Sender } from './invoice-details-partials/Sender';
 import { Recipient } from './invoice-details-partials/Recipient';
 import { Details } from './invoice-details-partials/Details';

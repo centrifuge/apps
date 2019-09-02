@@ -8,12 +8,12 @@ import { get } from 'lodash';
 import * as Yup from 'yup';
 import { Document } from '../common/models/document';
 import { AttrTypes, Schema } from '../common/models/schema';
-import SearchSelect from '../components/form/SearchSelect';
+import { SearchSelect } from '@centrifuge/axis-search-select';
 import { Contact } from '../common/models/contact';
-import MutipleSelect from '../components/form/MutipleSelect';
+import { MultipleSelect } from '@centrifuge/axis-multiple-select';
 import { Section } from '../components/Section';
 import styled from 'styled-components';
-import { DisplayField } from '../components/DisplayField';
+import { DisplayField } from '@centrifuge/axis-display-field';
 import AttributeField from './AttributeField';
 
 // improve visibility of inputs in view mode
@@ -252,7 +252,7 @@ export class DocumentForm extends React.Component<Props, State> {
                           isEditMode,
                           size,
                         )}
-                        { (selectedSchema.formFeatures && selectedSchema.formFeatures.comments) && this.renderCommentsSection(
+                        {(selectedSchema.formFeatures && selectedSchema.formFeatures.comments) && this.renderCommentsSection(
                           values,
                           errors,
                           handleChange,
@@ -316,7 +316,7 @@ export class DocumentForm extends React.Component<Props, State> {
         <FormField
           label="Read Access"
         >
-          <MutipleSelect
+          <MultipleSelect
             search={true}
             disabled={isViewMode}
             labelKey={'name'}
@@ -401,7 +401,7 @@ export class DocumentForm extends React.Component<Props, State> {
   renderAttributesSections = (values, errors, handleChange, setFieldValue, isViewMode, isEditMode, size) => {
 
     const { selectedSchema: { formFeatures, attributes } } = this.state;
-    const defaultSectionName = formFeatures && formFeatures.defaultSection ?  formFeatures.defaultSection : 'Attributes'
+    const defaultSectionName = formFeatures && formFeatures.defaultSection ? formFeatures.defaultSection : 'Attributes';
     const sections = {};
     // Group in sections
     attributes.forEach((attr) => {

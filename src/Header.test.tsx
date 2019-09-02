@@ -7,6 +7,7 @@ import { User } from './common/models/user';
 import renderer from 'react-test-renderer';
 import { BrowserRouter } from 'react-router-dom';
 import routes from './routes';
+import { AxisTheme } from '@centrifuge/axis-theme';
 
 const store = createStore(getRootReducer({}), { router: { location: { pathname: '/' } } });
 
@@ -39,11 +40,14 @@ describe('Header', () => {
     const bodyShallow = renderer.create(
       <Provider store={store}>
         <BrowserRouter>
-          <Header selectedRoute={'/'} user={user} menuItems={items} push={push}/>
+          <AxisTheme>
+            <Header selectedRoute={'/'} user={user} menuItems={items} push={push}/>
+          </AxisTheme>
         </BrowserRouter>
-      </Provider>,
-    ).toJSON();
-    expect(bodyShallow).toMatchSnapshot();
+      </Provider>
+  ,
+  ).toJSON();
+  expect(bodyShallow).toMatchSnapshot();
   });
 
-});
+  });

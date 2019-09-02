@@ -4,7 +4,7 @@ import { LabelValuePair } from '../common/interfaces';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { FundingRequest } from '../common/models/funding-request';
-import SearchSelect from '../components/form/SearchSelect';
+import { SearchSelect } from '@centrifuge/axis-search-select';
 import { dateToString, extractDate, getCurrencyFormat, getPercentFormat } from '../common/formaters';
 import { NumberInput } from '@centrifuge/axis-number-input';
 import { DateInput } from '@centrifuge/axis-date-input';
@@ -182,7 +182,7 @@ export default class FundingRequestForm extends React.Component<FundingRequestFo
                               {...currencyParts}
                               name="repayment_amount"
                               value={values!.repayment_amount}
-                              onChange={ ({value}) => {
+                              onChange={({ value }) => {
                                 setFieldValue('repayment_amount', value);
                               }}
                             />

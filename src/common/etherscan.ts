@@ -5,6 +5,12 @@ const rootLink = `https://[[network]]etherscan.io/`;
 
 const subdomain = config.ethNetwork === 'mainnet' ? '' : `${config.ethNetwork}.`;
 
+
+export const getTransactionLink = (transaction) => {
+  return `${rootLink.replace('[[network]]', subdomain)}/tx/${transaction}`;
+
+};
+
 export const getAddressLink = (address) => {
   return `${rootLink.replace('[[network]]', subdomain)}/address/${address}`;
 };

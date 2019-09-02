@@ -9,12 +9,12 @@ const config = {
     name: env.CENTRIFUGE_ADMIN_USER || 'admin',
     email: env.CENTRIFUGE_ADMIN_EMAIL || 'test@test.org',
     password: env.CENTRIFUGE_ADMIN_PASSWORD || 'admin',
-    account:  env.CENTRIFUGE_ADMIN_ACCOUNT || '0xc910ec8509eBee65D35FA05C5b0C574070D479AD',
+    account:  env.CENTRIFUGE_ADMIN_ACCOUNT || '0xBeaB9D94D23Ff609b92b8C739f4EE13bCe918F8c',
     permissions:[PERMISSIONS.CAN_MANAGE_USERS, PERMISSIONS.CAN_MANAGE_SCHEMAS, PERMISSIONS.CAN_CREATE_INVOICES],
   },
   inviteOnly: Boolean(env.INVITE_ONLY || true),
-  ethNetwork:  env.ETH_NETWORK || 'mainnet',
-  ethProvider: env.ETH_PROVIDER || 'https://mainnet.infura.io/v3/55b957b5c6be42c49e6d48cbb102bdd5',
+  ethNetwork:  env.ETH_NETWORK || 'kovan',
+  ethProvider: env.ETH_PROVIDER || 'https://kovan.infura.io/v3/55b957b5c6be42c49e6d48cbb102bdd5',
 };
 
 export default config;

@@ -2,7 +2,7 @@ import React from 'react';
 import { Box } from 'grommet';
 import { formatCurrency, formatDate, formatPercent } from '../../common/formaters';
 import { Invoice } from '../../common/models/invoice';
-import { DisplayField } from '../../components/DisplayField';
+import { DisplayField } from '@centrifuge/axis-display-field';
 import { Section } from '../../components/Section';
 
 

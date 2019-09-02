@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Paragraph } from 'grommet';
 import { Invoice,  invoiceHasRemitTo } from '../../common/models/invoice';
-import { DisplayField } from '../../components/DisplayField';
+import { DisplayField } from '@centrifuge/axis-display-field';
 import { Section } from '../../components/Section';
 
 interface RemitToProps {

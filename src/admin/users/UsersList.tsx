@@ -10,7 +10,7 @@ import UserForm from './UserForm';
 import { formatDate } from '../../common/formaters';
 import { Preloader } from '../../components/Preloader';
 import { SecondaryHeader } from '../../components/SecondaryHeader';
-import { DisplayField } from '../../components/DisplayField';
+import { DisplayField } from '@centrifuge/axis-display-field';
 import { getSchemasList, resetGetSchemasList } from '../../store/actions/schemas';
 import { Schema } from '../../common/models/schema';
 import { mapSchemaNames } from '../../common/schema-utils';

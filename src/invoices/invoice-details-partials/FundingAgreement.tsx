@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box } from 'grommet';
-import { DisplayField } from '../../components/DisplayField';
+import { DisplayField } from '@centrifuge/axis-display-field';
 import { Section } from '../../components/Section';
 import { formatCurrency, formatDate, formatPercent } from '../../common/formaters';
 import { FundingAgreementResponse, LabelValuePair } from '../../common/interfaces';
@@ -43,7 +43,10 @@ export class FundingAgreement extends React.Component<FundingAgreementProps> {
               <DisplayField
                 label="NFT ID"
                 value={funding!.nft_address}
-                linkTo={getNFTLink(funding!.nft_address, nftRegistry)}
+                link={{
+                  href: getNFTLink(funding!.nft_address, nftRegistry),
+                  target: '_blank',
+                }}
               />
             </Box>
 
@@ -51,7 +54,10 @@ export class FundingAgreement extends React.Component<FundingAgreementProps> {
               <DisplayField
                 label="NFT owner"
                 value={nftOwner}
-                linkTo={getAddressLink(nftOwner)}
+                link={{
+                  href:getAddressLink(nftOwner),
+                  target:'_blank'
+                }}
               />
             </Box>
 

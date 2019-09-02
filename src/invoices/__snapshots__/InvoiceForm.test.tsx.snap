@@ -6660,7 +6660,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                         <div
                                                                                           className="StyledBox-sc-13pk1d4-0 gZSidW"
                                                                                         >
-                                                                                          <WithTheme(Component)
+                                                                                          <WithTheme(DateInput)
                                                                                             focusIndicator={false}
                                                                                             key=".0"
                                                                                             name="date_created"
@@ -6674,14 +6674,18 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                               dropAlign={
                                                                                                 Object {
                                                                                                   "left": "left",
-                                                                                                  "top": "bottom",
+                                                                                                  "top": "top",
                                                                                                 }
                                                                                               }
                                                                                               dropContent={null}
+                                                                                              dropProps={
+                                                                                                Object {
+                                                                                                  "stretch": false,
+                                                                                                }
+                                                                                              }
                                                                                               onClose={[Function]}
                                                                                               onOpen={[Function]}
                                                                                               plain={true}
-                                                                                              size="small"
                                                                                             >
                                                                                               <DropButton
                                                                                                 a11yTitle="Open Drop"
@@ -6689,14 +6693,18 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                 dropAlign={
                                                                                                   Object {
                                                                                                     "left": "left",
-                                                                                                    "top": "bottom",
+                                                                                                    "top": "top",
                                                                                                   }
                                                                                                 }
                                                                                                 dropContent={null}
+                                                                                                dropProps={
+                                                                                                  Object {
+                                                                                                    "stretch": false,
+                                                                                                  }
+                                                                                                }
                                                                                                 onClose={[Function]}
                                                                                                 onOpen={[Function]}
                                                                                                 plain={true}
-                                                                                                size="small"
                                                                                               >
                                                                                                 <WithTheme(Button)
                                                                                                   a11yTitle="Open Drop"
@@ -6705,7 +6713,6 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                   gap="small"
                                                                                                   onClick={[Function]}
                                                                                                   plain={true}
-                                                                                                  size="small"
                                                                                                   type="button"
                                                                                                 >
                                                                                                   <WithTheme(Button)
@@ -6718,7 +6725,6 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                     onClick={[Function]}
                                                                                                     onFocus={[Function]}
                                                                                                     plain={true}
-                                                                                                    size="small"
                                                                                                     type="button"
                                                                                                   >
                                                                                                     <Button
@@ -6731,7 +6737,6 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                       onClick={[Function]}
                                                                                                       onFocus={[Function]}
                                                                                                       plain={true}
-                                                                                                      size="small"
                                                                                                       type="button"
                                                                                                     >
                                                                                                       <StyledButton
@@ -6749,7 +6754,6 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                         onMouseOver={[Function]}
                                                                                                         pad={false}
                                                                                                         plain={true}
-                                                                                                        size="small"
                                                                                                         type="button"
                                                                                                       >
                                                                                                         <button
@@ -6760,7 +6764,6 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                           onFocus={[Function]}
                                                                                                           onMouseOut={[Function]}
                                                                                                           onMouseOver={[Function]}
-                                                                                                          size="small"
                                                                                                           type="button"
                                                                                                         >
                                                                                                           <WithTheme(Box)
@@ -6804,7 +6807,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                     }
                                                                                                                     plain={true}
                                                                                                                     readOnly={true}
-                                                                                                                    tabIndex="-1"
+                                                                                                                    tabIndex={-1}
                                                                                                                     value=""
                                                                                                                   >
                                                                                                                     <WithTheme(TextInput)
@@ -6825,7 +6828,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                       }
                                                                                                                       plain={true}
                                                                                                                       readOnly={true}
-                                                                                                                      tabIndex="-1"
+                                                                                                                      tabIndex={-1}
                                                                                                                       value=""
                                                                                                                     >
                                                                                                                       <WithTheme(TextInput)
@@ -6849,7 +6852,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                         onFocus={[Function]}
                                                                                                                         plain={true}
                                                                                                                         readOnly={true}
-                                                                                                                        tabIndex="-1"
+                                                                                                                        tabIndex={-1}
                                                                                                                         value=""
                                                                                                                       >
                                                                                                                         <TextInput
@@ -6873,7 +6876,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                           onFocus={[Function]}
                                                                                                                           plain={true}
                                                                                                                           readOnly={true}
-                                                                                                                          tabIndex="-1"
+                                                                                                                          tabIndex={-1}
                                                                                                                           value=""
                                                                                                                         >
                                                                                                                           <TextInput
@@ -6898,7 +6901,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                             onFocus={[Function]}
                                                                                                                             plain={true}
                                                                                                                             readOnly={true}
-                                                                                                                            tabIndex="-1"
+                                                                                                                            tabIndex={-1}
                                                                                                                             value=""
                                                                                                                           >
                                                                                                                             <StyledTextInput__StyledTextInputContainer
@@ -6926,7 +6929,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                                   onKeyDown={[Function]}
                                                                                                                                   plain={true}
                                                                                                                                   readOnly={true}
-                                                                                                                                  tabIndex="-1"
+                                                                                                                                  tabIndex={-1}
                                                                                                                                   value=""
                                                                                                                                 >
                                                                                                                                   <input
@@ -6937,7 +6940,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                                     onFocus={[Function]}
                                                                                                                                     onKeyDown={[Function]}
                                                                                                                                     readOnly={true}
-                                                                                                                                    tabIndex="-1"
+                                                                                                                                    tabIndex={-1}
                                                                                                                                     value=""
                                                                                                                                   />
                                                                                                                                 </StyledTextInput>
@@ -6951,25 +6954,37 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                   <WithTheme(Box)
                                                                                                                     direction="row"
                                                                                                                     gap="small"
-                                                                                                                    margin="none"
+                                                                                                                    margin={
+                                                                                                                      Object {
+                                                                                                                        "horizontal": "small",
+                                                                                                                      }
+                                                                                                                    }
                                                                                                                     pad="none"
                                                                                                                     responsive={true}
                                                                                                                   >
                                                                                                                     <Box
                                                                                                                       direction="row"
                                                                                                                       gap="small"
-                                                                                                                      margin="none"
+                                                                                                                      margin={
+                                                                                                                        Object {
+                                                                                                                          "horizontal": "small",
+                                                                                                                        }
+                                                                                                                      }
                                                                                                                       pad="none"
                                                                                                                       responsive={true}
                                                                                                                     >
                                                                                                                       <StyledBox
                                                                                                                         directionProp="row"
-                                                                                                                        margin="none"
+                                                                                                                        margin={
+                                                                                                                          Object {
+                                                                                                                            "horizontal": "small",
+                                                                                                                          }
+                                                                                                                        }
                                                                                                                         pad="none"
                                                                                                                         responsive={true}
                                                                                                                       >
                                                                                                                         <div
-                                                                                                                          className="StyledBox-sc-13pk1d4-0 ffeAql"
+                                                                                                                          className="StyledBox-sc-13pk1d4-0 fVyBBm"
                                                                                                                         />
                                                                                                                       </StyledBox>
                                                                                                                     </Box>
@@ -6985,7 +7000,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                 </WithTheme(Button)>
                                                                                               </DropButton>
                                                                                             </DateInput__StyledDateInputDropButton>
-                                                                                          </WithTheme(Component)>
+                                                                                          </WithTheme(DateInput)>
                                                                                         </div>
                                                                                       </StyledBox>
                                                                                     </Box>
@@ -7166,7 +7181,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                         <div
                                                                                           className="StyledBox-sc-13pk1d4-0 gZSidW"
                                                                                         >
-                                                                                          <WithTheme(Component)
+                                                                                          <WithTheme(DateInput)
                                                                                             focusIndicator={false}
                                                                                             key=".0"
                                                                                             name="date_due"
@@ -7180,14 +7195,18 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                               dropAlign={
                                                                                                 Object {
                                                                                                   "left": "left",
-                                                                                                  "top": "bottom",
+                                                                                                  "top": "top",
                                                                                                 }
                                                                                               }
                                                                                               dropContent={null}
+                                                                                              dropProps={
+                                                                                                Object {
+                                                                                                  "stretch": false,
+                                                                                                }
+                                                                                              }
                                                                                               onClose={[Function]}
                                                                                               onOpen={[Function]}
                                                                                               plain={true}
-                                                                                              size="small"
                                                                                             >
                                                                                               <DropButton
                                                                                                 a11yTitle="Open Drop"
@@ -7195,14 +7214,18 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                 dropAlign={
                                                                                                   Object {
                                                                                                     "left": "left",
-                                                                                                    "top": "bottom",
+                                                                                                    "top": "top",
                                                                                                   }
                                                                                                 }
                                                                                                 dropContent={null}
+                                                                                                dropProps={
+                                                                                                  Object {
+                                                                                                    "stretch": false,
+                                                                                                  }
+                                                                                                }
                                                                                                 onClose={[Function]}
                                                                                                 onOpen={[Function]}
                                                                                                 plain={true}
-                                                                                                size="small"
                                                                                               >
                                                                                                 <WithTheme(Button)
                                                                                                   a11yTitle="Open Drop"
@@ -7211,7 +7234,6 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                   gap="small"
                                                                                                   onClick={[Function]}
                                                                                                   plain={true}
-                                                                                                  size="small"
                                                                                                   type="button"
                                                                                                 >
                                                                                                   <WithTheme(Button)
@@ -7224,7 +7246,6 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                     onClick={[Function]}
                                                                                                     onFocus={[Function]}
                                                                                                     plain={true}
-                                                                                                    size="small"
                                                                                                     type="button"
                                                                                                   >
                                                                                                     <Button
@@ -7237,7 +7258,6 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                       onClick={[Function]}
                                                                                                       onFocus={[Function]}
                                                                                                       plain={true}
-                                                                                                      size="small"
                                                                                                       type="button"
                                                                                                     >
                                                                                                       <StyledButton
@@ -7255,7 +7275,6 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                         onMouseOver={[Function]}
                                                                                                         pad={false}
                                                                                                         plain={true}
-                                                                                                        size="small"
                                                                                                         type="button"
                                                                                                       >
                                                                                                         <button
@@ -7266,7 +7285,6 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                           onFocus={[Function]}
                                                                                                           onMouseOut={[Function]}
                                                                                                           onMouseOver={[Function]}
-                                                                                                          size="small"
                                                                                                           type="button"
                                                                                                         >
                                                                                                           <WithTheme(Box)
@@ -7310,7 +7328,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                     }
                                                                                                                     plain={true}
                                                                                                                     readOnly={true}
-                                                                                                                    tabIndex="-1"
+                                                                                                                    tabIndex={-1}
                                                                                                                     value=""
                                                                                                                   >
                                                                                                                     <WithTheme(TextInput)
@@ -7331,7 +7349,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                       }
                                                                                                                       plain={true}
                                                                                                                       readOnly={true}
-                                                                                                                      tabIndex="-1"
+                                                                                                                      tabIndex={-1}
                                                                                                                       value=""
                                                                                                                     >
                                                                                                                       <WithTheme(TextInput)
@@ -7355,7 +7373,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                         onFocus={[Function]}
                                                                                                                         plain={true}
                                                                                                                         readOnly={true}
-                                                                                                                        tabIndex="-1"
+                                                                                                                        tabIndex={-1}
                                                                                                                         value=""
                                                                                                                       >
                                                                                                                         <TextInput
@@ -7379,7 +7397,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                           onFocus={[Function]}
                                                                                                                           plain={true}
                                                                                                                           readOnly={true}
-                                                                                                                          tabIndex="-1"
+                                                                                                                          tabIndex={-1}
                                                                                                                           value=""
                                                                                                                         >
                                                                                                                           <TextInput
@@ -7404,7 +7422,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                             onFocus={[Function]}
                                                                                                                             plain={true}
                                                                                                                             readOnly={true}
-                                                                                                                            tabIndex="-1"
+                                                                                                                            tabIndex={-1}
                                                                                                                             value=""
                                                                                                                           >
                                                                                                                             <StyledTextInput__StyledTextInputContainer
@@ -7432,7 +7450,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                                   onKeyDown={[Function]}
                                                                                                                                   plain={true}
                                                                                                                                   readOnly={true}
-                                                                                                                                  tabIndex="-1"
+                                                                                                                                  tabIndex={-1}
                                                                                                                                   value=""
                                                                                                                                 >
                                                                                                                                   <input
@@ -7443,7 +7461,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                                     onFocus={[Function]}
                                                                                                                                     onKeyDown={[Function]}
                                                                                                                                     readOnly={true}
-                                                                                                                                    tabIndex="-1"
+                                                                                                                                    tabIndex={-1}
                                                                                                                                     value=""
                                                                                                                                   />
                                                                                                                                 </StyledTextInput>
@@ -7457,25 +7475,37 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                                   <WithTheme(Box)
                                                                                                                     direction="row"
                                                                                                                     gap="small"
-                                                                                                                    margin="none"
+                                                                                                                    margin={
+                                                                                                                      Object {
+                                                                                                                        "horizontal": "small",
+                                                                                                                      }
+                                                                                                                    }
                                                                                                                     pad="none"
                                                                                                                     responsive={true}
                                                                                                                   >
                                                                                                                     <Box
                                                                                                                       direction="row"
                                                                                                                       gap="small"
-                                                                                                                      margin="none"
+                                                                                                                      margin={
+                                                                                                                        Object {
+                                                                                                                          "horizontal": "small",
+                                                                                                                        }
+                                                                                                                      }
                                                                                                                       pad="none"
                                                                                                                       responsive={true}
                                                                                                                     >
                                                                                                                       <StyledBox
                                                                                                                         directionProp="row"
-                                                                                                                        margin="none"
+                                                                                                                        margin={
+                                                                                                                          Object {
+                                                                                                                            "horizontal": "small",
+                                                                                                                          }
+                                                                                                                        }
                                                                                                                         pad="none"
                                                                                                                         responsive={true}
                                                                                                                       >
                                                                                                                         <div
-                                                                                                                          className="StyledBox-sc-13pk1d4-0 ffeAql"
+                                                                                                                          className="StyledBox-sc-13pk1d4-0 fVyBBm"
                                                                                                                         />
                                                                                                                       </StyledBox>
                                                                                                                     </Box>
@@ -7491,7 +7521,7 @@ exports[`InvoiceForm Should render form with sender and recipient selected 1`] =
                                                                                                 </WithTheme(Button)>
                                                                                               </DropButton>
                                                                                             </DateInput__StyledDateInputDropButton>
-                                                                                          </WithTheme(Component)>
+                                                                                          </WithTheme(DateInput)>
                                                                                         </div>
                                                                                       </StyledBox>
                                                                                     </Box>
