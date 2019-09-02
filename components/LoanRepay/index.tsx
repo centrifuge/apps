@@ -81,18 +81,16 @@ class LoanRepay extends React.Component<Props, State> {
         return;
       }
 
-      // repay
       //const res1 = await tinlake.repay(loanId, repayAmount, ethFrom);
       const res1 = await tinlake.close(loanId, ethFrom);
-
       if (res1.status !== SUCCESS_STATUS) {
         this.setState({ is: 'error', errorMsg: JSON.stringify(res1) });
         return;
       }
-
+ 
       await getLoan!(tinlake, loanId, true);
+      this.setState({ is: 'success' }); 
 
-      this.setState({ is: 'success' });
     } catch (e) {
       console.log(e);
       this.setState({ is: 'error', errorMsg: e.message });

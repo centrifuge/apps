@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { InternalSingleLoan } from '../../ducks/loans';
-import { Box, FormField, TextInput, Heading, Paragraph } from 'grommet';
+import { Text, Box, FormField, TextInput, Heading, Paragraph } from 'grommet';
 import styled from 'styled-components';
 import { formatAddress } from '../../utils/formatAddress';
 import MeBadge from '../MeBadge';
@@ -21,10 +21,24 @@ interface NftData {
   borrower: string;
 }
 
-const { nftDataDefinition }  = config;
 class NftData extends React.Component<Props> {
+
+  renderNFTData() {
+    const { data } = this.props;
+    const { nftDataDefinition }  = config;
+    if (!data.nftData) {
+      return <Text> No NFT metadata found on this token!</Text>;
+    }
+    return nftDataDefinition.displayedFields.map((field: DisplayedField) =>
+        <Box basis={'1/4'} gap="medium" key={field.key}>
+          <NftDataField displayedField={field} value={data.nftData[field.key]} />
+        </Box>,
+      );
+  }
+
   render() {
-    const { data: { tokenId, nftOwner, nftData }, authedAddr } = this.props;
+    const { nftDataDefinition } = config;
+    const { data: { tokenId, nftOwner }, authedAddr } = this.props;
 
     // create empty boxes for layout purposes if nft data has != 4 entries
     const nftDataFillers = [
@@ -49,11 +63,7 @@ class NftData extends React.Component<Props> {
 
       <Paragraph>The following metadata was read from the NFT:</Paragraph>
       <Box direction="row" gap="medium" margin={{ bottom: 'none', top: 'small' }}>
-        {nftDataDefinition.displayedFields.map((field: DisplayedField) =>
-          <Box basis={'1/4'} gap="medium" key={field.key}>
-            <NftDataField displayedField={field} value={nftData[field.key]} />
-          </Box>,
-        )}
+        { this.renderNFTData() }
         {nftDataFillers.map(i => <Box key={i} basis={'1/4'} gap="medium" />)}
       </Box>
     </NftDataContainer>;
