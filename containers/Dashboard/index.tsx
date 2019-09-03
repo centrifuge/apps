@@ -87,6 +87,9 @@ class Dashboard extends React.Component<Props, State> {
   render() {
     const { dashboard, tinlake } = this.props;
     const { state, data } = dashboard!;
+    const { showColleteralGraph,
+            colleteralTimeSeriesPeriod, 
+            colleteralValueTimeSeriesData } = this.state
 
     if (data === null || state === 'loading') { return null; }
 
@@ -123,19 +126,19 @@ class Dashboard extends React.Component<Props, State> {
           </Box>
         </Box>
       </Box>
-     { this.state.showColleteralGraph &&
+     { showColleteralGraph &&
         <Box>
           <Box pad={{ horizontal: 'right', top: 'medium' }} align="end">
             <FormField>
               <Select
                 onChange={this.onColleteralTimeSeriesPeriodSelected}
-                value={this.state.colleteralTimeSeriesPeriod}
+                value={colleteralTimeSeriesPeriod}
                 options={periodSelectionOptions}
               />
             </FormField>
           </Box> 
           <Box pad={{ horizontal: 'right', top: 'medium' }}>
-            <Graph timeSeriesData={this.state.colleteralValueTimeSeriesData}></Graph>
+            <Graph timeSeriesData={colleteralValueTimeSeriesData}></Graph>
           </Box>
         </Box>
       }

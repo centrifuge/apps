@@ -56,8 +56,7 @@ class Apollo {
 }
 
 function sortByTime(entries:TinlakeEventEntry[]){
-  const sorted = entries.sort( (a:TinlakeEventEntry, b:TinlakeEventEntry) => (a.timestamp > b.timestamp) ? 1 : -1 )
-  return sorted
+  return entries.sort( (a:TinlakeEventEntry, b:TinlakeEventEntry) => (a.timestamp > b.timestamp) ? 1 : -1 )
 }
 export interface ApolloClient extends Apollo {}
 export const appolloClient = new Apollo();
