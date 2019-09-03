@@ -3,7 +3,7 @@ import Header from '../components/Header';
 import Link from 'next/link';
 import Dashboard from '../containers/Dashboard';
 import WithTinlake from '../components/WithTinlake';
-import WithAppollo from '../components/WithAppollo';
+import WithApollo from '../components/WithApollo';
 import { menuItems } from '../menuItems';
 
 function Home() {
@@ -19,7 +19,7 @@ function Home() {
   >
     <Box width="xlarge" >
       <WithTinlake render={tinlake =>
-        <WithAppollo render={appolloClient => <Dashboard tinlake={tinlake} appolloClient={appolloClient} />} />
+        <WithApollo render={apolloClient => <Dashboard tinlake={tinlake} apolloClient={apolloClient} />} />
       }/>
     </Box>
   </Box>

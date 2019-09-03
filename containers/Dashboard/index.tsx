@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Tinlake, { baseToDisplay } from 'tinlake';
-import { ApolloClient, TinlakeEventEntry } from '../../services/appollo';
+import { ApolloClient, TinlakeEventEntry } from '../../services/apollo';
 import { connect } from 'react-redux';
 import { Box, Heading, Select, FormField } from 'grommet';
 import SecondaryHeader from '../../components/SecondaryHeader';
@@ -17,15 +17,15 @@ const defaultPeriodSelection = '7d';
 
 interface Props {
   tinlake: Tinlake;
-  appolloClient: ApolloClient;
+  apolloClient: ApolloClient;
   dashboard?: DashboardState;
   subscribeDashboardData?: (tinlake: Tinlake) => () => void;
 }
 
 interface State {
-  colleteralTimeSeriesPeriod: string;
-  colleteralValueTimeSeriesData: TimeSeriesData;
-  showColleteralGraph: boolean
+  collateralTimeSeriesPeriod: string;
+  collateralValueTimeSeriesData: TimeSeriesData;
+  showCollateralGraph: boolean
 }
 
 class Dashboard extends React.Component<Props, State> {
@@ -33,51 +33,51 @@ class Dashboard extends React.Component<Props, State> {
   discardSubscription = () => { };
 
   // handlers
-  onColleteralTimeSeriesPeriodSelected = async (event: {value: typeof periodSelectionOptions[number]}) => {
+  onCollateralTimeSeriesPeriodSelected = async (event: {value: typeof periodSelectionOptions[number]}) => {
     const period = event.value;
     this.setState({
-      colleteralTimeSeriesPeriod: period,
+      collateralTimeSeriesPeriod: period,
     });
-    await this.updateColleteralTimeSeriesData(period);
+    await this.updateCollateralTimeSeriesData(period);
   }
 
-  updateColleteralTimeSeriesData = async (period: string) => {
-    const timeSeriesData = await this.props.appolloClient.getColleteralTimeSeriesData(period);
-    const colleteralValueTimeSeriesData = {
+  updateCollateralTimeSeriesData = async (period: string) => {
+    const timeSeriesData = await this.props.apolloClient.getCollateralTimeSeriesData(period);
+    const collateralValueTimeSeriesData = {
       labels: [],
       xValues: [
         { data: [], backgroundColor: 'rgba(51,51,51,1)', label: 'Outstanding Debt' },
-        { data: [], backgroundColor: 'rgba(9,41,190,1)', label: 'Colleteral Value' },
+        { data: [], backgroundColor: 'rgba(9,41,190,1)', label: 'Collateral Value' },
       ],
     };
 
-    const updatedColleteralValueTimeSeriesData = timeSeriesData.reduce((colleteralValueTimeSeriesData: TimeSeriesData, entry: TinlakeEventEntry) => {
+    const updatedCollateralValueTimeSeriesData = timeSeriesData.reduce((collateralValueTimeSeriesData: TimeSeriesData, entry: TinlakeEventEntry) => {
       const dateLabel = (new Date(parseInt(entry.timestamp, 10))).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      colleteralValueTimeSeriesData.labels.push(dateLabel);
-      colleteralValueTimeSeriesData.xValues[0].data.push((parseInt(entry.total_debt, 10) / Math.pow(10, 18)).toFixed(2));
-      colleteralValueTimeSeriesData.xValues[1].data.push((parseInt(entry.total_value_of_nfts, 10) / Math.pow(10, 18)).toFixed(2));
-      return colleteralValueTimeSeriesData;
-    },                                                                 colleteralValueTimeSeriesData);
+      collateralValueTimeSeriesData.labels.push(dateLabel);
+      collateralValueTimeSeriesData.xValues[0].data.push((parseInt(entry.total_debt, 10) / Math.pow(10, 18)).toFixed(2));
+      collateralValueTimeSeriesData.xValues[1].data.push((parseInt(entry.total_value_of_nfts, 10) / Math.pow(10, 18)).toFixed(2));
+      return collateralValueTimeSeriesData;
+    },                                                                 collateralValueTimeSeriesData);
 
     this.setState({
-      colleteralValueTimeSeriesData: updatedColleteralValueTimeSeriesData,
+      collateralValueTimeSeriesData: updatedCollateralValueTimeSeriesData,
     });
   }
 
   componentWillMount() {
     this.discardSubscription = this.props.subscribeDashboardData!(this.props.tinlake);
     this.setState({
-      colleteralTimeSeriesPeriod: defaultPeriodSelection,
-      colleteralValueTimeSeriesData: {
+      collateralTimeSeriesPeriod: defaultPeriodSelection,
+      collateralValueTimeSeriesData: {
         labels: [],
         xValues: [
           { data: [], backgroundColor: 'rgba(51,51,51,1)', label: 'Oustanding Debt' },
-          { data: [], backgroundColor: 'rgba(9,41,190,1)', label: 'Colleteral Value' },
+          { data: [], backgroundColor: 'rgba(9,41,190,1)', label: 'Collateral Value' },
         ],
       },
-      showColleteralGraph: !!config.tinlakeDataBackendUrl
+      showCollateralGraph: !!config.tinlakeDataBackendUrl
     });
-    this.updateColleteralTimeSeriesData(defaultPeriodSelection);
+    this.updateCollateralTimeSeriesData(defaultPeriodSelection);
   }
 
   componentWillUnmount() {
@@ -87,9 +87,9 @@ class Dashboard extends React.Component<Props, State> {
   render() {
     const { dashboard, tinlake } = this.props;
     const { state, data } = dashboard!;
-    const { showColleteralGraph,
-            colleteralTimeSeriesPeriod, 
-            colleteralValueTimeSeriesData } = this.state
+    const { showCollateralGraph,
+            collateralTimeSeriesPeriod, 
+            collateralValueTimeSeriesData } = this.state
 
     if (data === null || state === 'loading') { return null; }
 
@@ -126,19 +126,19 @@ class Dashboard extends React.Component<Props, State> {
           </Box>
         </Box>
       </Box>
-     { showColleteralGraph &&
+     { showCollateralGraph &&
         <Box>
           <Box pad={{ horizontal: 'right', top: 'medium' }} align="end">
             <FormField>
               <Select
-                onChange={this.onColleteralTimeSeriesPeriodSelected}
-                value={colleteralTimeSeriesPeriod}
+                onChange={this.onCollateralTimeSeriesPeriodSelected}
+                value={collateralTimeSeriesPeriod}
                 options={periodSelectionOptions}
               />
             </FormField>
           </Box> 
           <Box pad={{ horizontal: 'right', top: 'medium' }}>
-            <Graph timeSeriesData={colleteralValueTimeSeriesData}></Graph>
+            <Graph timeSeriesData={collateralValueTimeSeriesData}></Graph>
           </Box>
         </Box>
       }

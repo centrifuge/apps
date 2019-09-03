@@ -27,7 +27,7 @@ class Apollo {
     });
   }
 
-  async getColleteralTimeSeriesData(period:string) {
+  async getCollateralTimeSeriesData(period:string) {
     let timeSeriesData;
     try {
       timeSeriesData = await this.client
@@ -59,4 +59,4 @@ function sortByTime(entries:TinlakeEventEntry[]){
   return entries.sort( (a:TinlakeEventEntry, b:TinlakeEventEntry) => (a.timestamp > b.timestamp) ? 1 : -1 )
 }
 export interface ApolloClient extends Apollo {}
-export const appolloClient = new Apollo();
+export const apolloClient = new Apollo();
