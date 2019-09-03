@@ -21,6 +21,7 @@ function bytesToHex(bytes: any[]) {
 
 export function convert(s: string) {
   const bytes = hexToBytes(s);
+  bytes.splice(8, 4);
   const str = `0x${bytesToHex(bytes)}`;
   return Math.trunc(web3.toBigNumber(str).toNumber() * 1000);
 }
