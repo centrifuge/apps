@@ -90,7 +90,7 @@ class WhitelistNFT extends React.Component<Props, State> {
     const { tinlake, getNFT } = this.props;
 
     await getNFT!(tinlake, this.state.tokenId);
-  };
+  }
 
   render() {
     const { tinlake, nft } = this.props;

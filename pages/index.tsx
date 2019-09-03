@@ -1,8 +1,9 @@
-import { Box, Anchor } from 'grommet';
+import { Box, Anchor, Grommet } from 'grommet';
 import Header from '../components/Header';
 import Link from 'next/link';
-import Dashboard from '../components/Dashboard';
+import Dashboard from '../containers/Dashboard';
 import WithTinlake from '../components/WithTinlake';
+import WithApollo from '../components/WithApollo';
 import { menuItems } from '../menuItems';
 
 function Home() {
@@ -17,7 +18,9 @@ function Home() {
     direction="row"
   >
     <Box width="xlarge" >
-      <WithTinlake render={tinlake => <Dashboard tinlake={tinlake} />} />
+      <WithTinlake render={tinlake =>
+        <WithApollo render={apolloClient => <Dashboard tinlake={tinlake} apolloClient={apolloClient} />} />
+      }/>
     </Box>
   </Box>
 </Box>;

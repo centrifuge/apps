@@ -5,7 +5,8 @@ const config = {
   rpcUrl: publicRuntimeConfig.RPC_URL,
   contractAddresses: publicRuntimeConfig.TINLAKE_ADDRESSES && JSON.parse(publicRuntimeConfig.TINLAKE_ADDRESSES),
   nftDataDefinition: publicRuntimeConfig.NFT_DATA_DEFINITION && JSON.parse(publicRuntimeConfig.NFT_DATA_DEFINITION),
-  transactionTimeout: publicRuntimeConfig.TRANSCATION_TIMEOUT
+  transactionTimeout: publicRuntimeConfig.TRANSACTION_TIMEOUT,
+  tinlakeDataBackendUrl: publicRuntimeConfig.TINLAKE_DATA_BACKEND_URL,
 };
 
 if (!config.nftDataDefinition) {

@@ -1,7 +1,6 @@
 import Tinlake from 'tinlake';
 import config from '../../config';
 import Eth from 'ethjs';
-
 declare var web3: any;
 
 const { contractAddresses, nftDataDefinition, transactionTimeout } = config;
@@ -45,7 +44,6 @@ export async function authTinlake() {
 
   const accounts = await provider.enable();
   const account = accounts[0];
-  //console.log(`Using account ${account}`);
 
   tinlake!.setProvider(provider);
   tinlake!.setEthConfig({ from: account });
