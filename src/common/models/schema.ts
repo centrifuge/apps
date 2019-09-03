@@ -118,9 +118,9 @@ export class Schema {
       ],
       registries: [],
       formFeatures: {
-        columnNo: 4,
+        columnNo: 2,
         comments: true,
-        defaultSection: 'Attributes',
+        defaultSection: 'Details',
 
       },
     };

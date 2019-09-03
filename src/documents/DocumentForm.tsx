@@ -322,7 +322,7 @@ export class DocumentForm extends React.Component<Props, State> {
             labelKey={'name'}
             valueKey={'address'}
             options={contacts}
-            selected={
+            value={
               get(values, 'header.read_access').map(v => {
                 return contacts.find(c => c.address!.toLowerCase() === v.toLowerCase());
               })

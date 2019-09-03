@@ -120,7 +120,7 @@ export default class UserForm extends React.Component<InviteProps> {
                       error={errors!.permissions}
                     >
                       <MultipleSelect
-                        selected={values.permissions}
+                        value={values.permissions}
                         options={permissionOptions}
                         onChange={(selection) => {
                           setFieldValue('permissions', selection);
@@ -144,7 +144,7 @@ export default class UserForm extends React.Component<InviteProps> {
                             <MultipleSelect
                               labelKey={'name'}
                               valueKey={'name'}
-                              selected={mapSchemaNames(values.schemas, schemas)}
+                              value={mapSchemaNames(values.schemas, schemas)}
                               options={schemas}
                               onChange={(selection) => {
                                 setFieldValue('schemas', selection.map(s => s.name));

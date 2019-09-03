@@ -198,30 +198,36 @@ class SchemasList extends React.Component<Props, State> {
             property: 'actions',
             sortable: false,
             header: 'Actions',
-            render: data => (
-              <Box direction="row" gap="small">
-                {/*Render actions for unarchived schemas*/}
-                {!data.archived && [<Anchor
-                  label={'Edit'}
+            render: data => {
+
+              let actions = [
+                <Anchor
+                  label={'View'}
                   onClick={() => {
-                    this.editSchema(data);
+                    this.viewSchema(data);
                   }}
-                />,
+                />];
+
+              if (!data.archived) {
+                actions = [
+                  ...actions,
+                  <Anchor
+                    label={'Edit'}
+                    onClick={() => {
+                      this.editSchema(data);
+                    }}
+                  />,
                   <Anchor
                     label={'Archive'}
                     onClick={() => {
                       this.archiveSchema(data);
                     }}
-                  />]}
-                {/*Render actions for archived schemas*/}
-                {data.archived && [<Anchor
-                  label={'View'}
-                  onClick={() => {
-                    this.viewSchema(data);
-                  }}
-                />]}
-              </Box>
-            ),
+                  />];
+              }
+              return <Box direction="row" gap="small">
+                {actions}
+              </Box>;
+            },
           },
         ]}
       />
@@ -274,7 +280,7 @@ class SchemasList extends React.Component<Props, State> {
           {this.renderSchemas(
             schemas.filter(
               schema => showArchive === !!schema.archived,
-            )
+            ),
           )}
         </Box>
       </Box>

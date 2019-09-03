@@ -84,6 +84,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
       <DataTable
         data={data}
         primaryKey={'_id'}
+        sortable={true}
         columns={[
           {
             property: 'name',
@@ -104,6 +105,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
               data.account ? <DisplayField width={'160px'} noBorder value={data.account}/> : null,
           },
           {
+
             property: 'createdAt',
             header: 'Date added',
             render: data =>
@@ -117,6 +119,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
           },
           {
             property: 'permissions',
+            sortable: false,
             header: 'User rights',
             render: data => {
               return data.permissions.join(', ');
@@ -124,6 +127,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
           },
           {
             property: 'schemas',
+            sortable: false,
             header: 'Document schemas',
             render: data => {// User has not schemas display
               if(!Array.isArray(data.schemas)) return '';
@@ -138,6 +142,7 @@ class UsersList extends React.Component<UsersListProps & RouteComponentProps> {
           },
           {
             property: 'actions',
+            sortable: false,
             header: 'Actions',
             render: data => (
               <Box direction="row" gap="small">

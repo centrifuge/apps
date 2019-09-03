@@ -100,15 +100,20 @@ export default class SchemasForm extends React.Component<Props, State> {
                 }}>
 
                 <Box gap={'medium'}>
-                  <Paragraph>
+                  {infoParagraph && <Paragraph>
                     {infoParagraph}
-                  </Paragraph>
-                  <FormField
-                    error={errors!.json}
-                  >
+                  </Paragraph>}
+
+                    <FormField
+                      error={errors!.json}
+                    >
                        <TextArea
+                         style={{
+                           maxHeight:'492px',
+                           height:'calc(100vh - 400px)',
+
+                         }}
                          readOnly={readonly}
-                         rows={25}
                          spellCheck={false}
                          fill={true}
                          id={'json'}
@@ -116,7 +121,7 @@ export default class SchemasForm extends React.Component<Props, State> {
                          defaultValue={values.json}
                          onChange={handleChange}
                        />
-                  </FormField>
+                    </FormField>
 
                   <Box direction="row" justify={'end'} gap={'medium'}>
                     <Button
