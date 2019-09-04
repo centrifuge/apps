@@ -9,6 +9,7 @@ import { SecondaryHeader } from '../components/SecondaryHeader';
 import { getDocuments, resetGetDocuments } from '../store/actions/documents';
 import { canCreateDocuments, canWriteToDoc, User } from '../common/models/user';
 import { Preloader } from '../components/Preloader';
+import { formatDate } from '../common/formaters';
 
 
 type Props = {
@@ -84,6 +85,7 @@ export class ListDocuments extends React.Component<Props & RouteComponentProps> 
                 property: 'createdAt',
                 header: 'Date created',
                 sortable: true,
+                render: datum => formatDate(datum.createdAt)
               },
               {
                 property: '_id',

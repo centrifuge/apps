@@ -120,7 +120,7 @@ export class Schema {
       formFeatures: {
         columnNo: 2,
         comments: true,
-        defaultSection: 'Details',
+        defaultSection: 'Attributes',
 
       },
     };

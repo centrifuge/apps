@@ -297,7 +297,7 @@ export class DocumentForm extends React.Component<Props, State> {
     const { selectedSchema, columnGap } = this.state;
     const { contacts, schemas } = this.props;
 
-    return <Section title="Details">
+    return <Section title="Document Details">
       <Grid gap={columnGap}>
         <FormField
           label="Document Schema"

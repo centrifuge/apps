@@ -1,5 +1,6 @@
 import { Controller, Get, Render, Request, Response } from '@nestjs/common';
 import { AppService } from './app.service';
+import config from '../../src/common/config';
 
 @Controller()
 export class AppController {
@@ -12,6 +13,6 @@ export class AppController {
   @Get('')
   @Render('index')
   root(@Request() req, @Response() res) {
-    return { preloaderState: this.appService.preloadReduxStore(req.user)};
+    return { preloaderState: this.appService.preloadReduxStore(req.user), ethNetwork: config.ethNetwork };
   }
 }
