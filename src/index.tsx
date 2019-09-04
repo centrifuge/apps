@@ -40,6 +40,8 @@ if (process.env.NODE_ENV === 'development') {
   })
     .then(res => res.json())
     .then(response => {
+
+      window['__ETH_NETWORK__'] =  config.ethNetwork;
       runApplication(configureStore({
         user: {
           auth: {

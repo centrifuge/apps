@@ -1,5 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
 import { AppService } from '../app.service';
+import config from '../../../src/common/config';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
@@ -29,7 +30,10 @@ export class AllExceptionFilter implements ExceptionFilter {
         request.headers.accept &&
         request.headers.accept.indexOf('text/html') !== -1
       ) {
-        return response.render('index', { preloaderState: this.appService.preloadReduxStore(request.user) });
+        return response.render('index', {
+          preloaderState: this.appService.preloadReduxStore(request.user),
+          ethNetwork: config.ethNetwork,
+        });
       }
       return response.status(status).json(exception.getResponse());
     } else {

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException } from '@nestjs/common';
-import { AttrTypes, Schema } from '../../../src/common/models/schema';
+import { AttributesErrors, AttrTypes, DiffErrors, RegistriesErrors, Schema } from '../../../src/common/models/schema';
 import { SessionGuard } from '../auth/SessionGuard';
 import { databaseServiceProvider } from '../database/database.providers';
 import { DatabaseService } from '../database/database.service';
@@ -117,7 +117,7 @@ describe('SchemasController', () => {
           ],
         } as Schema);
       } catch (err) {
-        expect(err.message).toEqual('0x111 is not a valid registry address');
+        expect(err.message).toMatch(RegistriesErrors.ADDRESS_FORMAT);
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }
@@ -148,13 +148,13 @@ describe('SchemasController', () => {
           ],
         } as Schema);
       } catch (err) {
-        expect(err.message).toEqual('Attributes do not contain a reference ID');
+        expect(err.message).toEqual(AttributesErrors.REFERENCE_ID_MISSING);
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }
     });
     it('should throw error when there attributes are nested', async function() {
-      expect.assertions(3);
+      expect.assertions(4);
       const schemasController = schemaModule.get<SchemasController>(
         SchemasController,
       );
@@ -178,7 +178,8 @@ describe('SchemasController', () => {
           ],
         } as Schema);
       } catch (err) {
-        expect(err.message).toEqual(`Nested attributes are not supported! Rename document.qualities and to not use . or [ ]`);
+        expect(err.message).toMatch(AttributesErrors.NESTED_ATTRIBUTES_NOT_SUPPORTED);
+        expect(err.message).toMatch('document.qualities');
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }
@@ -203,6 +204,47 @@ describe('SchemasController', () => {
       expect(result.length).toEqual(5);
       expect(databaseSpies.spyGetAll).toHaveBeenCalledTimes(1);
     });
+
+    it('should return a filtered list of schemas', async () => {
+      const schemasController = schemaModule.get<SchemasController>(
+        SchemasController,
+      );
+
+      for (let i = 0; i < 5; i++) {
+        await delay(0);
+        let newSchema = getSchemaData();
+        newSchema.registries[0].label = `increment_${i}`;
+        newSchema.name = `increment_${i}`;
+        await schemasController.create(newSchema);
+      }
+
+      const find1 = await schemasController.get({ 'name': 'increment_0', 'registries.0.label': 'increment_0' });
+      expect(find1.length).toEqual(1);
+
+      const find2 = await schemasController.get({
+        'name': { $in: ['increment_0', 'increment_1'] },
+        'registries.0.label': { $in: ['increment_0', 'increment_1'] },
+      });
+      expect(find2.length).toEqual(2);
+
+      expect(databaseSpies.spyGetAll).toHaveBeenCalledTimes(2);
+    });
+  });
+
+
+  describe('archive', () => {
+    it('should archive a schme', async () => {
+      const schemasController = schemaModule.get<SchemasController>(
+        SchemasController,
+      );
+
+      const newSchema = await schemasController.create({
+        ...schemaToCreate,
+        name: Math.random().toString(),
+      });
+      const result: Schema = await schemasController.archive({ id: newSchema._id });
+      expect(result.archived).toEqual(true);
+    });
   });
 
   describe('update', function() {
@@ -216,7 +258,7 @@ describe('SchemasController', () => {
       );
 
       const updateSchemaObject = {
-        _id: result._id,
+        ...result,
         registries: [
           {
             label: 'animal_registry',
@@ -237,18 +279,20 @@ describe('SchemasController', () => {
           _id: result._id,
         },
         {
-          '_id': result._id,
-          'attributes': [{ 'label': 'ReferenceId', 'name': 'reference_id', 'type': 'string' }, {
-            'label': 'wingspans',
-            'type': 'string',
-            'name': 'animal_wingspan',
-          }, { 'name': 'animal_reference_id', 'label': 'reference_id', 'type': 'string' }],
-          'name': 'bestAnimals',
-          'registries': [{
-            'address': '0x87c574FB2DF0EaA2dAf5fc4a8A16dd3Ce39011B1',
-            'label': 'animal_registry',
-            'proofs': ['attributes.wingspan'],
-          }],
+          '$set': {
+            'formFeatures': undefined,
+            'attributes': [{ 'label': 'ReferenceId', 'name': 'reference_id', 'type': 'string' }, {
+              'label': 'wingspans',
+              'type': 'string',
+              'name': 'animal_wingspan',
+            }, { 'name': 'animal_reference_id', 'label': 'reference_id', 'type': 'string' }],
+            'name': 'bestAnimals',
+            'registries': [{
+              'address': '0x87c574FB2DF0EaA2dAf5fc4a8A16dd3Ce39011B1',
+              'label': 'animal_registry',
+              'proofs': ['attributes.wingspan'],
+            }],
+          },
         },
         {
           returnUpdatedDocs: true,
@@ -272,7 +316,7 @@ describe('SchemasController', () => {
           updateSchemaObject2,
         );
       } catch (err) {
-        expect(err.message).toEqual('Updating a schema name or attributes is not allowed');
+        expect(err.message).toEqual(DiffErrors.NAME_CHANGE_FORBIDEN);
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }

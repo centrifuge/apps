@@ -114,8 +114,8 @@ export default class TransferDetailsForm extends React.Component<TransferDetails
                               {...currencyParts}
                               name="amount"
                               value={values!.amount}
-                              onChange={(masked, value) => {
-                                setFieldValue('amount', value);
+                              onChange={({value}) => {
+                                setFieldValue('amount', value+'');
                               }}
                             />
 

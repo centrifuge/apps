@@ -1,4 +1,16 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { SessionGuard } from '../auth/SessionGuard';
 import { ROUTES } from '../../../src/common/constants';
 import { DatabaseService } from '../database/database.service';
@@ -26,6 +38,7 @@ export class SchemasController {
         schema.name,
         schema.attributes,
         schema.registries,
+        schema.formFeatures,
       );
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
@@ -45,12 +58,21 @@ export class SchemasController {
 
   @Get()
   /**
-   * Get the list of all schemas for the authenticated user
+   * Get the list of all schemas
    * @async
    * @return {Promise<Schema[]>} result
    */
-  async get() {
-    return await this.databaseService.schemas.find({});
+  async get(@Query() params?) {
+    // Support nested queries
+    params && Object.keys(params).forEach((key) => {
+        try {
+          params[key] = JSON.parse(params[key]);
+        } catch (e) {
+          // Don't throw and error as the values is string
+        }
+      },
+    );
+    return await this.databaseService.schemas.find(params);
   }
 
   @Get(':id')
@@ -77,22 +99,42 @@ export class SchemasController {
   async update(@Param() params, @Body() update: Schema) {
 
     const oldSchema = await this.databaseService.schemas.findOne({ _id: params.id });
-    let updateSchemaObj: Schema;
-
     try {
-      updateSchemaObj = new Schema(
-        oldSchema.name,
-        oldSchema.attributes,
-        update.registries,
-        oldSchema._id,
-      );
+      Schema.validateDiff(oldSchema, update);
+      Schema.validate(update);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
     }
-
+    const { name, attributes, registries, formFeatures } = update;
     return await this.databaseService.schemas.updateById(
       params.id,
-      updateSchemaObj,
+      {
+        $set: {
+          name,
+          attributes,
+          registries,
+          formFeatures,
+        },
+      },
+    );
+  }
+
+  @Delete(':id')
+  /**
+   * Archive a schema by id, provided as a query parameter
+   * @async
+   * @param {any} params - the request parameters
+   * @return {Promise<Schema>} result
+   */
+  async archive(@Param() params) {
+    return await this.databaseService.schemas.updateById(
+      params.id,
+      {
+        $set: {
+          archived: true,
+        },
+      }
+      ,
     );
   }
 }

@@ -1,9 +1,16 @@
-import config from './config';
 import { BN } from 'ethereumjs-util';
 
 const rootLink = `https://[[network]]etherscan.io/`;
 
-const subdomain = config.ethNetwork === 'mainnet' ? '' : `${config.ethNetwork}.`;
+const selectedNetwork = window['__ETH_NETWORK__'] || 'mainnet';
+
+const subdomain = selectedNetwork === 'mainnet' ? '' : `${selectedNetwork}.`;
+
+
+export const getTransactionLink = (transaction) => {
+  return `${rootLink.replace('[[network]]', subdomain)}/tx/${transaction}`;
+
+};
 
 export const getAddressLink = (address) => {
   return `${rootLink.replace('[[network]]', subdomain)}/address/${address}`;

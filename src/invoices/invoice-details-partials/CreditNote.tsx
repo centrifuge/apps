@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Paragraph } from 'grommet';
 import { formatDate } from '../../common/formaters';
 import { Invoice, invoiceHasCreditNote } from '../../common/models/invoice';
-import { DisplayField } from '../../components/DisplayField';
+import { DisplayField } from '@centrifuge/axis-display-field';
 import { Section } from '../../components/Section';
 
 interface CreditNoteProps {

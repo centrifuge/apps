@@ -110,7 +110,7 @@ export class DetailsForm extends React.Component<ConnectedDetailsFormProps> {
                   {...currencyParts}
                   name="net_amount"
                   value={values.net_amount}
-                  onChange={(masked, value) => {
+                  onChange={({value}) => {
                     setFieldValue('net_amount', value+'');
                   }}
                 />
@@ -127,7 +127,7 @@ export class DetailsForm extends React.Component<ConnectedDetailsFormProps> {
                   {...percentParts}
                   name="tax_rate"
                   value={values.tax_rate}
-                  onChange={(masked, value) => {
+                  onChange={({value}) => {
                     setFieldValue('tax_rate', value+'');
                   }}
                 />

@@ -4,8 +4,9 @@ import { User } from '../../common/models/user';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { PERMISSIONS } from '../../common/constants';
-import MutipleSelect from '../../components/form/MutipleSelect';
+import { MultipleSelect } from '@centrifuge/axis-multiple-select';
 import { Schema } from '../../common/models/schema';
+import { mapSchemaNames } from '../../common/schema-utils';
 
 type InviteProps = {
   user: User,
@@ -118,8 +119,8 @@ export default class UserForm extends React.Component<InviteProps> {
                       label="Permissions"
                       error={errors!.permissions}
                     >
-                      <MutipleSelect
-                        selected={values.permissions}
+                      <MultipleSelect
+                        value={values.permissions}
                         options={permissionOptions}
                         onChange={(selection) => {
                           setFieldValue('permissions', selection);
@@ -140,11 +141,13 @@ export default class UserForm extends React.Component<InviteProps> {
                             label="Document schemas"
                             error={errors!.schemas}
                           >
-                            <MutipleSelect
-                              selected={values.schemas}
-                              options={schemaOptions}
+                            <MultipleSelect
+                              labelKey={'name'}
+                              valueKey={'name'}
+                              value={mapSchemaNames(values.schemas, schemas)}
+                              options={schemas}
                               onChange={(selection) => {
-                                setFieldValue('schemas', selection);
+                                setFieldValue('schemas', selection.map(s => s.name));
                               }}
                             />
 
