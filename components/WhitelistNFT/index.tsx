@@ -47,46 +47,42 @@ class WhitelistNFT extends React.Component<Props, State> {
   }
 
   whitelist = async () => {
-    this.setState({ is: 'loading' });
+    const { tinlake } = this.props;
+    const { tokenId, principal, appraisal, interestRate } = this.state;
+    const addresses = tinlake.contractAddresses;
+    if (principal === '0') {
+      this.setState({ is: 'error', errorMsg: 'Principal cannot be 0' });
+    } else {
+      this.setState({ is: 'loading' });
 
-    try {
-      await authTinlake();
-
-      const { tinlake } = this.props;
-      const { tokenId, principal, appraisal, interestRate } = this.state;
-      const addresses = tinlake.contractAddresses;
-
-      // init fee
-      const fee = interestRateToFee(interestRate);
-      const feeExists = await tinlake.existsFee(fee);
-      if (!feeExists) {
-        const res = await tinlake.initFee(fee);
-        if (res.status !== SUCCESS_STATUS) {
-          this.setState({ is: 'error', errorMsg: JSON.stringify(res) });
+      try {
+        await authTinlake();
+        // init fee
+        const fee = interestRateToFee(interestRate);
+        const feeExists = await tinlake.existsFee(fee);
+        if (!feeExists) {
+          const res = await tinlake.initFee(fee);
+          if (res.status !== SUCCESS_STATUS) {
+            this.setState({ is: 'error', errorMsg: JSON.stringify(res) });
+            return;
+          }
+        }
+        // admit
+        const nftOwner = await tinlake.ownerOfNFT(tokenId);
+        const res2 = await tinlake.whitelist(addresses['NFT_COLLATERAL'], tokenId, principal, appraisal, fee, nftOwner);
+        if (res2.status !== SUCCESS_STATUS || res2.events[0].event.name !== 'Transfer') {
+          this.setState({ is: 'error', errorMsg: JSON.stringify(res2) });
           return;
         }
-      } else {
+
+        const loanId = res2.events[0].data[2].toString();
+        console.log(`Loan id: ${loanId}`);
+
+        this.setState({ is: 'success' });
+      } catch (e) {
+        console.log(e);
+        this.setState({ is: 'error', errorMsg: e.message });
       }
-
-      // admit
-      const nftOwner = await tinlake.ownerOfNFT(tokenId);
-
-      const res2 = await tinlake.whitelist(addresses['NFT_COLLATERAL'], tokenId, principal,
-                                           appraisal, fee, nftOwner);
-
-
-      if (res2.status !== SUCCESS_STATUS || res2.events[0].event.name !== 'Transfer') {
-        this.setState({ is: 'error', errorMsg: JSON.stringify(res2) });
-        return;
-      }
-
-      const loanId = res2.events[0].data[2].toString();
-      console.log(`Loan id: ${loanId}`);
-
-      this.setState({ is: 'success' });
-    } catch (e) {
-      console.log(e);
-      this.setState({ is: 'error', errorMsg: e.message });
     }
   }
 
@@ -149,8 +145,9 @@ class WhitelistNFT extends React.Component<Props, State> {
               <FormField label="Principal">
                 <NumberInput
                   value={baseToDisplay(principal, 18)} suffix=" DAI" precision={18}
-                  onValueChange={({ value }) =>
-                    this.setState({ principal: displayToBase(value, 18) })}
+                  onValueChange={({ value }) => {
+                    this.setState({ principal: displayToBase(value, 18) });
+                  }}
                   disabled={is === 'success'}
                 />
               </FormField>

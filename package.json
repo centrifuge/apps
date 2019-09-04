@@ -9,7 +9,8 @@
     "start": "next start",
     "test": "jest",
     "export": "npm run build && next export",
-    "lint": "tslint --project ."
+    "lint": "tslint --project .",
+    "lint-fix": "tslint --fix --project ."
   },
   "repository": {
     "type": "git",
@@ -24,13 +25,21 @@
   "dependencies": {
     "@centrifuge/axis-spinner": "^0.3.1",
     "@centrifuge/axis-theme": "^0.3.0",
+    "apollo-cache-inmemory": "^1.6.3",
+    "apollo-client": "^2.6.4",
+    "apollo-link-http": "^1.5.15",
     "chai": "^4.2.0",
+    "chart.js": "^2.8.0",
     "decimal.js-light": "^2.5.0",
+    "graphql": "^14.4.2",
+    "graphql-tag": "^2.10.1",
     "grommet": "^2.7.3",
     "next": "^8.1.0",
     "next-redux-wrapper": "^3.0.0-alpha.3",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
+    "react-apollo": "^3.0.1",
+    "react-chartjs-2": "^2.7.6",
     "react-dom": "^16.8.6",
     "react-number-format": "^4.0.8",
     "react-redux": "^7.1.0",
@@ -38,6 +47,10 @@
     "redux-thunk": "^2.3.0",
     "styled-components": "^4.3.2",
     "tinlake": "github:centrifuge/tinlake.js",
+<<<<<<< HEAD
+=======
+    "web3-utils": "^1.2.1",
+>>>>>>> develop
     "web3connect": "^1.0.0-beta.13"
   },
   "devDependencies": {
