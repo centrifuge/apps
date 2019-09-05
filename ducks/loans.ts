@@ -70,16 +70,18 @@ export function getLoans(tinlake: Tinlake):
     const count = await tinlake.loanCount();
 
     const loanPromises: Promise<Loan>[] = [];
-    const balanceDebtPromises: Promise<BalanceDebt>[] = [];
+    const balancePromises: Promise<BalanceDebt>[] = [];
+    const currentDebtPromises: Promise<BN>[] = [];
 
     for (let i = startingLoanId; i < count.toNumber(); i += 1) {
       loanPromises.push(tinlake.getLoan(`${i}`));
-      balanceDebtPromises.push(tinlake.getBalanceDebt(`${i}`));
+      balancePromises.push(tinlake.getBalanceDebt(`${i}`));
+      currentDebtPromises.push(tinlake.getCurrentDebt(`${i}`));
     }
 
     const loans = await Promise.all(loanPromises);
-    const balanceDebtData = await Promise.all(balanceDebtPromises);
-
+    const balanceDebtData = await Promise.all(balancePromises);
+    const currentDebtData = await Promise.all(currentDebtPromises);
     const nftOwnerPromises: Promise<Address>[] = [];
     const loanOwnerPromises: Promise<Address>[] = [];
     for (let i = 0; i < count.toNumber() - startingLoanId; i += 1) {
@@ -116,8 +118,8 @@ export function getLoans(tinlake: Tinlake):
         registry: loan.registry,
         tokenId: loan.tokenId,
         balance: balanceDebtData[i].balance,
-        debt: balanceDebtData[i].debt,
-        status: getLoanStatus(loan.principal, balanceDebtData[i].debt),
+        debt: currentDebtData[i],
+        status: getLoanStatus(loan.principal, currentDebtData[i]),
       });
     });
 
@@ -137,6 +139,8 @@ export function getLoan(tinlake: Tinlake, loanId: string, refresh = false):
     if (count.toNumber() <= Number(loanId)) {
       dispatch({ type: LOAD_SINGLE_NOT_FOUND });
     }
+
+    const currentDebt = await tinlake.getCurrentDebt(loanId)
 
     const [loan, balanceDebtData] = await Promise.all([
       tinlake.getLoan(loanId),
@@ -193,8 +197,8 @@ export function getLoan(tinlake: Tinlake, loanId: string, refresh = false):
       registry: loan.registry,
       tokenId: loan.tokenId,
       balance: balanceDebtData.balance,
-      debt: balanceDebtData.debt,
-      status: getLoanStatus(loan.principal, balanceDebtData.debt),
+      debt: currentDebt,
+      status: getLoanStatus(loan.principal, currentDebt),
     };
 
     dispatch({ type: RECEIVE_SINGLE, loan: extendedLoanData });
