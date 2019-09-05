@@ -13,10 +13,10 @@ class ApprovePage extends React.Component {
         menuItems={menuItems}
         section="ADMIN"
       />
-      <Box
-        justify="center"
-        direction="row"
-      >
+        <Box
+          justify="center"
+          direction="row"
+        >
         <Box width="xlarge" >
           <WithTinlake render={tinlake => <Approve tinlake={tinlake} />} />
         </Box>

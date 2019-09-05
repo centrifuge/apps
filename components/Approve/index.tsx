@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Tinlake from 'tinlake';
-import { Box, Button, Heading,Text } from 'grommet';
+import { Box, Button, Heading, Text } from 'grommet';
 import Alert from '../Alert';
 import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
@@ -27,7 +27,7 @@ class Approve extends React.Component<Props, State> {
   };
 
   approve = async () => {
-    const { tinlake } = this.props 
+    const { tinlake } = this.props
     const addresses = tinlake.contractAddresses;
 
     this.setState({ is: 'loading' });
@@ -37,20 +37,20 @@ class Approve extends React.Component<Props, State> {
 
       const amount = (new BN(-1)).toString()
       const approveCurrencyResult = await tinlake.approveCurrency(addresses['LENDER'], amount);
-     
+
       if (approveCurrencyResult.status !== SUCCESS_STATUS || approveCurrencyResult.events[0].event.name !== 'Approval') {
         this.setState({ is: 'error', errorMsg: JSON.stringify(approveCurrencyResult) });
         return;
       }
 
       const approveCollateralResult = await tinlake.approveCollateral(addresses['LENDER'], amount);
-      
+
       if (approveCollateralResult.status !== SUCCESS_STATUS || approveCollateralResult.events[0].event.name !== 'Approval') {
         this.setState({ is: 'error', errorMsg: JSON.stringify(approveCollateralResult) });
         return;
       }
 
-      this.setState({ is: 'success'});
+      this.setState({ is: 'success' });
     } catch (e) {
       console.log(e);
       this.setState({ is: 'error', errorMsg: e.message });
@@ -74,25 +74,29 @@ class Approve extends React.Component<Props, State> {
       </SecondaryHeader>
 
       {is === 'loading' ?
-        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Approving...'} />
-      :
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Please open MetaMask and approve both transactions. The approval might take a few seconds...'} />
+        :
         <Box pad={{ horizontal: 'medium' }}>
           {is === 'success' && <Alert type="success">
             Successfully approved<br />
-             </Alert>}
+          </Alert>}
           {is === 'error' && <Alert type="error">
             <Text weight="bold">
               Error approving </Text>
             {errorMsg && <div><br />{errorMsg}</div>}
           </Alert>}
 
-          <Alert type="info" margin={{ vertical: 'medium' }}>
-            This is a temporary page for backers to enable lenders to take currency and collateral.
-          </Alert>
-
-
         </Box>
+
       }
+      <Alert type="info" margin={{ vertical: 'medium' }}>
+        This is a temporary page for backers to enable lenders to take currency and collateral.
+        Backers need to sign two transactions:
+        <br />
+        First transaction: Backer allows lender to take currency
+        <br />
+        Second transaction: Backer allows lender to take collateral
+      </Alert>
     </Box>;
   }
 }
