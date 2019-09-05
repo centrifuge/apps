@@ -124,7 +124,7 @@ class LoanBorrow extends React.Component<Props, State> {
       } />
 
       {is === 'loading' ?
-        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Borrowing...'} />
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Initiating the borrowing process. Please confirm the pending transactions in MetaMask, and do not leave this page until all transactions have been confirmed.'} />
       :
         <Box pad={{ horizontal: 'medium' }}>
           {status === 'Whitelisted' && loanOwner === tinlake.ethConfig.from &&
