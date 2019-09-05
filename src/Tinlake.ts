@@ -236,6 +236,13 @@ export class Tinlake {
     return await this.contracts.pile.loans(loanId);
   }
 
+  approveCollateral = (usr: string, wad: string): Promise<Events> => {
+    return this.contracts.collateral.approve(usr, wad, this.ethConfig).then((txHash: string) => {
+      console.log(`[Collateral Approve] txHash: ${txHash}`);
+      return waitAndReturnEvents(this.eth, txHash, this.contracts['collateral'].abi, this.transactionTimeout);
+    });
+  }
+
   approveNFT = (tokenId: string, to: string): Promise<Events> => {
     return this.contracts.nft.approve(to, tokenId, this.ethConfig).then((txHash: string) => {
       console.log(`[NFT Approve] txHash: ${txHash}`);
