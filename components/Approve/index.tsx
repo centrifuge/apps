@@ -87,7 +87,7 @@ class Approve extends React.Component<Props, State> {
           </Alert>}
 
           <Alert type="info" margin={{ vertical: 'medium' }}>
-            This is a temporary page for backers to enable landers to take currency and collateral.
+            This is a temporary page for backers to enable lenders to take currency and collateral.
           </Alert>
 
 
