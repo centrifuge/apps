@@ -116,6 +116,7 @@ export declare class Tinlake {
     loanCount: () => Promise<BN>;
     getLoan: (loanId: string) => Promise<Loan>;
     getBalanceDebt: (loanId: string) => Promise<BalanceDebt>;
+    approveCollateral: (usr: string, wad: string) => Promise<Events>;
     approveNFT: (tokenId: string, to: string) => Promise<Events>;
     ownerOfNFT: (tokenId: string) => Promise<string>;
     ownerOfLoan: (loanId: string) => Promise<string>;

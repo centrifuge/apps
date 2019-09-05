@@ -34608,6 +34608,12 @@ var Tinlake = /** @class */ (function () {
                 }
             });
         }); };
+        this.approveCollateral = function (usr, wad) {
+            return _this.contracts.collateral.approve(usr, wad, _this.ethConfig).then(function (txHash) {
+                console.log("[Collateral Approve] txHash: " + txHash);
+                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['collateral'].abi, _this.transactionTimeout);
+            });
+        };
         this.approveNFT = function (tokenId, to) {
             return _this.contracts.nft.approve(to, tokenId, _this.ethConfig).then(function (txHash) {
                 console.log("[NFT Approve] txHash: " + txHash);
