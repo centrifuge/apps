@@ -1,6 +1,6 @@
 import * as React from 'react';
 import WithTinlake from '../../components/WithTinlake';
-import WhitelistNFT from '../../components/WhitelistNFT';
+import WhitelistNFT from '../../containers/WhitelistNFT';
 import { Box } from 'grommet';
 import Header from '../../components/Header';
 import Alert from '../../components/Alert';
@@ -13,8 +13,6 @@ class WhitelistNFTPage extends React.Component<{ tokenId: string }> {
   }
 
   render() {
-    const { tokenId } = this.props;
-
     return <Box align="center">
       <Header
         selectedRoute={'/admin/whitelist-nft'}
@@ -29,7 +27,7 @@ class WhitelistNFTPage extends React.Component<{ tokenId: string }> {
           <WithTinlake render={tinlake =>
             <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization
               render={auth => auth.isAdmin ?
-                <WhitelistNFT tinlake={tinlake} tokenId={tokenId} />
+                <WhitelistNFT tinlake={tinlake} />
                 :
                 <Alert margin="medium" type="error">
                   Please use an admin account to access this page</Alert>

@@ -2,7 +2,6 @@ import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
 import loansReducer from '../ducks/loans';
 import dashboardReducer from '../ducks/dashboard';
 import authReducer from '../ducks/auth';
-import nftReducer from '../ducks/nft';
 import thunk from 'redux-thunk';
 
 declare global {
@@ -18,8 +17,7 @@ const makeStore = (initialState: any) => {
       {
         loans: loansReducer,
         dashboard: dashboardReducer,
-        auth: authReducer,
-        nft: nftReducer,
+        auth: authReducer
       },
     ),
     initialState,
