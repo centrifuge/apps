@@ -101,7 +101,7 @@ class UnwhitelistNFT extends React.Component<Props, State> {
       </SecondaryHeader>
 
       {is === 'loading' ?
-        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Unwhitelisting...'} />
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Initiating the unwhitelisting process. Please confirm the pending transactions in MetaMask, and do not leave this page until all transactions have been confirmed'} />
       :
         <Box pad={{ horizontal: 'medium' }}>
           {is === 'success' && <Alert type="success" margin={{ vertical: 'large' }}>
