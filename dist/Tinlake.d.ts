@@ -65,21 +65,6 @@ interface ethI {
         at: (arg0: any) => void;
     };
 }
-interface Events {
-    txHash: string;
-    status: any;
-    events: {
-        event: {
-            name: any;
-        };
-        data: any[];
-    }[];
-}
-interface Balance {
-    [x: string]: {
-        toString: () => string;
-    };
-}
 export declare type Address = string;
 export interface Loan {
     registry: Address;
@@ -116,39 +101,39 @@ export declare class Tinlake {
     loanCount: () => Promise<BN>;
     getLoan: (loanId: string) => Promise<Loan>;
     getBalanceDebt: (loanId: string) => Promise<BalanceDebt>;
-    approveNFT: (tokenId: string, to: string) => Promise<Events>;
-    ownerOfNFT: (tokenId: string) => Promise<string>;
-    ownerOfLoan: (loanId: string) => Promise<string>;
-    balanceOfCurrency: (usr: string) => Promise<Balance>;
+    approveNFT: (tokenId: string, to: string) => Promise<unknown>;
+    ownerOfNFT: (tokenId: string) => Promise<any>;
+    ownerOfLoan: (loanId: string) => Promise<any>;
+    balanceOfCurrency: (usr: string) => Promise<any>;
     /**
      * @param owner Owner of the new NFT
      */
-    mintNFT: (owner: string, tokenId: string) => Promise<Events>;
+    mintNFT: (owner: string, tokenId: string) => Promise<unknown>;
     /**
      * @param owner Owner of the created loan
      */
-    adminAdmit: (registry: string, nft: string, principal: string, owner: string) => Promise<Events>;
-    adminAppraise: (loanID: string, appraisal: string) => Promise<Events>;
-    getAppraisal: (loanID: string) => Promise<BN>;
+    adminAdmit: (registry: string, nft: string, principal: string, owner: string) => Promise<unknown>;
+    adminAppraise: (loanID: string, appraisal: string) => Promise<unknown>;
+    getAppraisal: (loanID: string) => Promise<any>;
     /**
      * @param to Address that should receive the currency (e. g. DAI)
      */
-    borrow: (loanId: string, to: string) => Promise<Events>;
+    borrow: (loanId: string, to: string) => Promise<unknown>;
     /**
      * @param wad Amount which should be repaid
      * @param usr Address that receives the NFT
      */
-    repay: (loanId: string, wad: string, usr: string) => Promise<Events>;
+    repay: (loanId: string, wad: string, usr: string) => Promise<unknown>;
     /**
      * @param wad Amount which should be repaid
      * @param usr Address that receives the NFT
      */
-    close: (loanId: string, usr: string) => Promise<Events>;
-    approveCurrency: (usr: string, wad: string) => Promise<Events>;
-    lenderRely: (usr: string) => Promise<Events>;
-    initFee: (fee: string) => Promise<Events>;
+    close: (loanId: string, usr: string) => Promise<unknown>;
+    approveCurrency: (usr: string, wad: string) => Promise<unknown>;
+    lenderRely: (usr: string) => Promise<unknown>;
+    initFee: (fee: string) => Promise<unknown>;
     existsFee: (fee: string) => Promise<boolean>;
-    addFee: (loanId: string, fee: string, balance: string) => Promise<Events>;
+    addFee: (loanId: string, fee: string, balance: string) => Promise<unknown>;
     getCurrentDebt: (loanId: string) => Promise<BN>;
     /**
      * whitelist is a shortcut contract that calls adminAdmit (admit.admit),
@@ -157,8 +142,8 @@ export declare class Tinlake {
      * using initFee
      * @param owner Owner of the created loan
      */
-    whitelist: (registry: string, nft: string, principal: string, appraisal: string, fee: string, owner: string) => any;
-    unwhitelist: (loanId: string, registry: string, nft: string) => Promise<Events>;
+    whitelist: (registry: string, nft: string, principal: string, appraisal: string, fee: string, owner: string) => Promise<unknown>;
+    unwhitelist: (loanId: string, registry: string, nft: string) => Promise<unknown>;
     getTotalDebt: () => Promise<BN>;
     getTotalBalance: () => Promise<BN>;
     getTotalValueOfNFTs: () => Promise<BN>;

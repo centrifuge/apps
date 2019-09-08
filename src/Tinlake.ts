@@ -219,150 +219,133 @@ export class Tinlake {
   }
 
   isAdmin = async (address: Address): Promise<boolean> => {
-    const res = await this.contracts.admin.wards(address);
+    const res = await executeAndRetry(this.contracts.admin.wards,[address]);
     return !(res[0] as BN).isZero();
   }
 
   loanCount = async (): Promise<BN> => {
-    const res = await this.contracts.title.count();
+    const res = await executeAndRetry(this.contracts.title.count,[]);
     return res[0];
   }
 
   getLoan = async (loanId: string): Promise<Loan> => {
-    return await this.contracts.shelf.shelf(loanId);
+    return await executeAndRetry(this.contracts.shelf.shelf,[loanId]);
   }
 
   getBalanceDebt = async (loanId: string): Promise<BalanceDebt> => {
-    return await this.contracts.pile.loans(loanId);
+    return await executeAndRetry(this.contracts.pile.loans,[loanId]);
   }
 
-  approveNFT = (tokenId: string, to: string): Promise<Events> => {
-    return this.contracts.nft.approve(to, tokenId, this.ethConfig).then((txHash: string) => {
-      console.log(`[NFT Approve] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
-    });
+  approveNFT = async (tokenId: string, to: string) => {
+    const txHash = await executeAndRetry(this.contracts.nft.approve,[to, tokenId, this.ethConfig])
+    console.log(`[NFT Approve] txHash: ${txHash}`);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
   }
 
-  ownerOfNFT = async (tokenId: Address): Promise<Address> => {
-    const res = await this.contracts.nft.ownerOf(tokenId);
+  ownerOfNFT = async (tokenId: Address) => {
+    const res = await executeAndRetry(this.contracts.nft.ownerOf,[tokenId]);
     return res['0'];
   }
 
-  ownerOfLoan = async (loanId: Address): Promise<Address> => {
-    const res = await this.contracts.title.ownerOf(loanId);
+  ownerOfLoan = async (loanId: Address) => {
+    const res = await executeAndRetry(this.contracts.title.ownerOf,[loanId]);
     return res['0'];
   }
 
-  balanceOfCurrency = (usr: string): Promise<Balance> => {
-    return this.contracts.currency.balanceOf(usr);
+  balanceOfCurrency = async (usr: string) => {
+    return executeAndRetry(this.contracts.currency.balanceOf,[usr]);
   }
 
   /**
    * @param owner Owner of the new NFT
    */
-  mintNFT = (owner: string, tokenId: string): Promise<Events> => {
-    return this.contracts.nft.mint(owner, tokenId, this.ethConfig).then((txHash: string) => {
-      console.log(`[NFT.mint] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
-    });
+  mintNFT = async (owner: string, tokenId: string) => {
+    const txHash = await executeAndRetry(this.contracts.nft.mint,[owner, tokenId, this.ethConfig]);
+    console.log(`[NFT.mint] txHash: ${txHash}`);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
   }
 
   /**
    * @param owner Owner of the created loan
    */
-  adminAdmit = (registry: string, nft: string, principal: string, owner: string):
-    Promise<Events> => {
-    return this.contracts.admit.admit(registry, nft, principal, owner, this.ethConfig)
-      .then((txHash: string) => {
-        console.log(`[Admit.admit] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
-      });
+  adminAdmit = async (registry: string, nft: string, principal: string, owner: string) => {
+    const txHash = await executeAndRetry(this.contracts.admit.admit,[registry, nft, principal, owner, this.ethConfig])
+    console.log(`[Admit.admit] txHash: ${txHash}`);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout); 
   }
 
-  adminAppraise = (loanID: string, appraisal: string): Promise<Events> => {
-    return this.contracts.appraiser.file(loanID, appraisal, this.ethConfig)
-      .then((txHash: string) => {
-        console.log(`[Appraisal.file] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
-      });
+  adminAppraise = async (loanID: string, appraisal: string) => {
+    const txHash = await executeAndRetry(this.contracts.appraiser.file,[loanID, appraisal, this.ethConfig]);
+    console.log(`[Appraisal.file] txHash: ${txHash}`);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
+      
   }
 
-  getAppraisal = async (loanID: string): Promise<BN> => {
-    const res = await this.contracts.appraiser.value(loanID);
+  getAppraisal = async (loanID: string) => {
+    const res = await executeAndRetry(this.contracts.appraiser.value,[loanID]);
     return res['0'];
   }
 
   /**
    * @param to Address that should receive the currency (e. g. DAI)
    */
-  borrow = (loanId: string, to: string): Promise<Events> => {
-    return this.contracts.reception.borrow(loanId, to, this.ethConfig).then((txHash: string) => {
-      console.log(`[Reception.borrow] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout);
-    });
+  borrow = async (loanId: string, to: string) => {
+    const txHash = await executeAndRetry(this.contracts.reception.borrow, [loanId, to, this.ethConfig])
+    console.log(`[Reception.borrow] txHash: ${txHash}`);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout);
   }
 
   /**
    * @param wad Amount which should be repaid
    * @param usr Address that receives the NFT
    */
-  repay = (loanId: string, wad: string, usr: string): Promise<Events> => {
-    return this.contracts.reception.repay(loanId, wad, usr,  this.ethConfig)
-      .then((txHash: string) => {
-        console.log(`[Reception.repay] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout);
-      });
+  repay = async (loanId: string, wad: string, usr: string)=> {
+    const txHash = await executeAndRetry(this.contracts.reception.repay,[loanId, wad, usr,  this.ethConfig])  
+    console.log(`[Reception.repay] txHash: ${txHash}`);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout);
   }
 
   /**
    * @param wad Amount which should be repaid
    * @param usr Address that receives the NFT
    */
-  close = (loanId: string, usr: string): Promise<Events> => {
-    return this.contracts.reception.close(loanId, usr,  this.ethConfig)
-      .then((txHash: string) => {
-        console.log(`[Reception.close] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout);
-      });
+  close = async  (loanId: string, usr: string) => {
+    const txHash = await executeAndRetry(this.contracts.reception.close,[loanId, usr,  this.ethConfig])
+    console.log(`[Reception.close] txHash: ${txHash}`);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout);
   }
 
-  approveCurrency = (usr: string, wad: string): Promise<Events> => {
-    return this.contracts.currency.approve(usr, wad, this.ethConfig).then((txHash: string) => {
-      console.log(`[Currency.approve] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['currency'].abi, this.transactionTimeout);
-    });
+  approveCurrency = async (usr: string, wad: string) => {
+    const txHash = await executeAndRetry(this.contracts.currency.approve,[usr, wad, this.ethConfig])
+    console.log(`[Currency.approve] txHash: ${txHash}`);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['currency'].abi, this.transactionTimeout);
   }
 
-  lenderRely = (usr: string): Promise<Events> => {
-    return this.contracts.lender.rely(usr, this.ethConfig).then((txHash: string) => {
-      console.log(`[Lender.rely] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['lender'].abi, this.transactionTimeout);
-    });
+  lenderRely = async (usr: string) => {
+    const txHash = await executeAndRetry(this.contracts.lender.rely, [usr, this.ethConfig]);
+    console.log(`[Lender.rely] txHash: ${txHash}`);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['lender'].abi, this.transactionTimeout);
   }
 
-  initFee = (fee: string): Promise<Events> => {
-    return this.contracts.pileForInit.file(fee, fee, this.ethConfig)
-      .then((txHash: string) => {
-        console.log(`[Pile.file] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts.pileForInit.abi, this.transactionTimeout);
-      });
+  initFee = async (fee: string) => {
+    const txHash = await executeAndRetry(this.contracts.pileForInit.file, [fee, fee, this.ethConfig]);
+    console.log(`[Pile.file] txHash: ${txHash}`);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts.pileForInit.abi, this.transactionTimeout);
   }
 
-  existsFee = async (fee: string): Promise<boolean> => {
-    const res: { speed: BN } = await this.contracts.pile.fees(fee);
+  existsFee = async (fee: string) => {
+    const res: { speed: BN } = await executeAndRetry(this.contracts.pile.fees, [fee]);
     return !res.speed.isZero();
   }
 
-  addFee = (loanId: string, fee: string, balance: string): Promise<Events> => {
-    return this.contracts.pileForAdd.file(loanId, fee, balance, this.ethConfig)
-      .then((txHash: string) => {
-        console.log(`[Pile.file] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts.pileForAdd.abi, this.transactionTimeout);
-      });
+  addFee = async (loanId: string, fee: string, balance: string) => {
+    const txHash = await executeAndRetry(this.contracts.pileForAdd.file, [loanId, fee, balance, this.ethConfig]);
+    console.log(`[Pile.file] txHash: ${txHash}`);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts.pileForAdd.abi, this.transactionTimeout);
   }
 
   getCurrentDebt = async (loanId: string): Promise<BN> => {
-    const res = await this.contracts.pile.burden(loanId);
+    const res = await executeAndRetry(this.contracts.pile.burden, [loanId]);
     return res['0'];
   }
 
@@ -373,48 +356,59 @@ export class Tinlake {
    * using initFee
    * @param owner Owner of the created loan
    */
-  whitelist = (registry: Address, nft: string, principal: string, appraisal: string,
+  whitelist = async (registry: Address, nft: string, principal: string, appraisal: string,
                fee: string, owner: string) => {
-    return this.contracts.admin.whitelist(registry, nft, principal, appraisal, fee, owner,
-                                          this.ethConfig)
-      .then((txHash: string) => {
-        console.log(`[Admin.whitelist] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
-      });
+    const txHash = await executeAndRetry(this.contracts.admin.whitelist,[registry, nft, principal, appraisal, fee, owner, this.ethConfig]);
+    console.log(`[Admin.whitelist] txHash: ${txHash}`);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
   }
 
-  unwhitelist = (loanId: string, registry: string, nft: string):
-    Promise<Events> => {
-    return this.contracts.shelf.file(loanId, registry, nft, '0', this.ethConfig)
-      .then((txHash: string) => {
-        console.log(`[Shelf.file] txHash: ${txHash}`);
-        return waitAndReturnEvents(this.eth, txHash, this.contracts['shelf'].abi, this.transactionTimeout);
-      });
+  unwhitelist = async (loanId: string, registry: string, nft: string) => {
+    const txHash = await executeAndRetry(this.contracts.shelf.file, [loanId, registry, nft, '0', this.ethConfig])
+    console.log(`[Shelf.file] txHash: ${txHash}`);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['shelf'].abi, this.transactionTimeout);
   }
 
   getTotalDebt = async (): Promise<BN> => {
-    const res: { 0: BN } = await this.contracts.pile.Debt();
+    const res: { 0: BN } = await executeAndRetry(this.contracts.pile.Debt, []);
     return res['0'];
   }
 
   getTotalBalance = async (): Promise<BN> => {
-    const res: { 0: BN } = await this.contracts.pile.Balance();
+    const res: { 0: BN } = await executeAndRetry(this.contracts.pile.Balance, []);
     return res['0'];
   }
 
   getTotalValueOfNFTs = async (): Promise<BN> => {
-    const res: { 0: BN } = await this.contracts.collateral.totalSupply();
+    const res: { 0: BN } = await executeAndRetry(this.contracts.collateral.totalSupply, []);
     return res['0'];
   }
 
   getNFTData: <T>(tokenId: string) => Promise<T> = async (tokenId) => {
-    const res = await this.contracts.nftData.data(tokenId);
+    const res = await executeAndRetry(this.contracts.nftData.data, [tokenId]);
     return res;
   }
 }
 
-const waitAndReturnEvents = async (eth: ethI, txHash: string, abi: any, transactionTimeout: number) => {
+async function executeAndRetry (f: Function, args: Array<any> = []) : Promise<any> {
+  try {
+    const result = await f(...args);
+    return result;
+  } catch (e) {
+    // using error message, since error code is not unique enough
+    // todo introduce retry limit
+    if (e && e.message && e.message.indexOf("Cannot read property 'number' of null") !== -1) {
+      console.log("null error detected", e)
+      sleep(1000);
+      return executeAndRetry(f, args);
+    }
+    else {
+      throw(e);
+    }
+  }
+}
 
+const waitAndReturnEvents = async (eth: ethI, txHash: string, abi: any, transactionTimeout: number) => {
   const tx:any = await waitForTransaction(eth, txHash, transactionTimeout);
   return new Promise((resolve, reject) => {
     eth.getTransactionReceipt(tx.hash, (err: null, receipt: any) => {
@@ -452,7 +446,6 @@ const waitForTransaction = (eth: ethI, txHash: any, transactionTimeout: number) 
           }
         });
       }, pollingInterval);
-
     };
     wait(txHash);
   });
@@ -495,15 +488,17 @@ const getEvents = (receipt: {
 
       // concat topics without first topic (func signature)
       const bytes = `0x${topics.slice(1).join('')}`;
-
       const data = abiCoder.decodeParameters(inputs, bytes);
 
       events.push({ event, data });
-
     }
   });
   return events;
 };
+
+function sleep(millis: number) {
+  return new Promise(resolve => setTimeout(resolve, millis));
+}
 
 export default Tinlake;
 
