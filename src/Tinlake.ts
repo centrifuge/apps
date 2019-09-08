@@ -405,7 +405,7 @@ async function executeAndRetry (f: Function, args: Array<any> = []) : Promise<an
     // todo introduce retry limit
     if (e && e.message && e.message.indexOf("Cannot read property 'number' of null") !== -1) {
       console.log("null error detected, retry triggered...", e)
-      sleep(1000);
+      await sleep(1000);
       return executeAndRetry(f, args);
     }
     else {

@@ -34954,25 +34954,22 @@ function executeAndRetry(f, args) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
+                    _a.trys.push([0, 2, , 6]);
                     return [4 /*yield*/, f.apply(void 0, args)];
                 case 1:
                     result = _a.sent();
                     return [2 /*return*/, result];
                 case 2:
                     e_1 = _a.sent();
-                    // using error message, since error code is not unique enough
-                    // todo introduce retry limit
-                    if (e_1 && e_1.message && e_1.message.indexOf("Cannot read property 'number' of null") !== -1) {
-                        console.log("null error detected, retry triggered...", e_1);
-                        sleep(1000);
-                        return [2 /*return*/, executeAndRetry(f, args)];
-                    }
-                    else {
-                        throw (e_1);
-                    }
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+                    if (!(e_1 && e_1.message && e_1.message.indexOf("Cannot read property 'number' of null") !== -1)) return [3 /*break*/, 4];
+                    console.log("null error detected, retry triggered...", e_1);
+                    return [4 /*yield*/, sleep(1000)];
+                case 3:
+                    _a.sent();
+                    return [2 /*return*/, executeAndRetry(f, args)];
+                case 4: throw (e_1);
+                case 5: return [3 /*break*/, 6];
+                case 6: return [2 /*return*/];
             }
         });
     });
