@@ -219,54 +219,54 @@ export class Tinlake {
   }
 
   isAdmin = async (address: Address): Promise<boolean> => {
-    const res = await executeAndRetry(this.contracts.admin.wards,[address]);
+    const res = await executeAndRetry(this.contracts.admin.wards, [address]);
     return !(res[0] as BN).isZero();
   }
 
   loanCount = async (): Promise<BN> => {
-    const res = await executeAndRetry(this.contracts.title.count,[]);
+    const res = await executeAndRetry(this.contracts.title.count, []);
     return res[0];
   }
 
   getLoan = async (loanId: string): Promise<Loan> => {
-    return await executeAndRetry(this.contracts.shelf.shelf,[loanId]);
+    return await executeAndRetry(this.contracts.shelf.shelf, [loanId]);
   }
 
   getBalanceDebt = async (loanId: string): Promise<BalanceDebt> => {
-    return await executeAndRetry(this.contracts.pile.loans,[loanId]);
+    return await executeAndRetry(this.contracts.pile.loans, [loanId]);
   }
 
   approveNFT = async (tokenId: string, to: string) => {
-    const txHash = await executeAndRetry(this.contracts.nft.approve,[to, tokenId, this.ethConfig])
+    const txHash = await executeAndRetry(this.contracts.nft.approve, [to, tokenId, this.ethConfig])
     console.log(`[NFT Approve] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
   }
 
   approveCollateral = async (usr: string, wad: string) => {
-    const txHash = await executeAndRetry(this.contracts.collateral.approve,[usr, wad, this.ethConfig])
+    const txHash = await executeAndRetry(this.contracts.collateral.approve, [usr, wad, this.ethConfig])
     console.log(`[Collateral Approve] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['collateral'].abi, this.transactionTimeout);
   }
 
   ownerOfNFT = async (tokenId: Address) => {
-    const res = await executeAndRetry(this.contracts.nft.ownerOf,[tokenId]);
+    const res = await executeAndRetry(this.contracts.nft.ownerOf, [tokenId]);
     return res['0'];
   }
 
   ownerOfLoan = async (loanId: Address) => {
-    const res = await executeAndRetry(this.contracts.title.ownerOf,[loanId]);
+    const res = await executeAndRetry(this.contracts.title.ownerOf, [loanId]);
     return res['0'];
   }
 
   balanceOfCurrency = async (usr: string) => {
-    return executeAndRetry(this.contracts.currency.balanceOf,[usr]);
+    return executeAndRetry(this.contracts.currency.balanceOf, [usr]);
   }
 
   /**
    * @param owner Owner of the new NFT
    */
   mintNFT = async (owner: string, tokenId: string) => {
-    const txHash = await executeAndRetry(this.contracts.nft.mint,[owner, tokenId, this.ethConfig]);
+    const txHash = await executeAndRetry(this.contracts.nft.mint, [owner, tokenId, this.ethConfig]);
     console.log(`[NFT.mint] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
   }
@@ -275,20 +275,20 @@ export class Tinlake {
    * @param owner Owner of the created loan
    */
   adminAdmit = async (registry: string, nft: string, principal: string, owner: string) => {
-    const txHash = await executeAndRetry(this.contracts.admit.admit,[registry, nft, principal, owner, this.ethConfig])
+    const txHash = await executeAndRetry(this.contracts.admit.admit, [registry, nft, principal, owner, this.ethConfig])
     console.log(`[Admit.admit] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout); 
   }
 
   adminAppraise = async (loanID: string, appraisal: string) => {
-    const txHash = await executeAndRetry(this.contracts.appraiser.file,[loanID, appraisal, this.ethConfig]);
+    const txHash = await executeAndRetry(this.contracts.appraiser.file, [loanID, appraisal, this.ethConfig]);
     console.log(`[Appraisal.file] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
       
   }
 
   getAppraisal = async (loanID: string) => {
-    const res = await executeAndRetry(this.contracts.appraiser.value,[loanID]);
+    const res = await executeAndRetry(this.contracts.appraiser.value, [loanID]);
     return res['0'];
   }
 
@@ -306,7 +306,7 @@ export class Tinlake {
    * @param usr Address that receives the NFT
    */
   repay = async (loanId: string, wad: string, usr: string)=> {
-    const txHash = await executeAndRetry(this.contracts.reception.repay,[loanId, wad, usr,  this.ethConfig])  
+    const txHash = await executeAndRetry(this.contracts.reception.repay, [loanId, wad, usr,  this.ethConfig])  
     console.log(`[Reception.repay] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout);
   }
@@ -316,13 +316,13 @@ export class Tinlake {
    * @param usr Address that receives the NFT
    */
   close = async  (loanId: string, usr: string) => {
-    const txHash = await executeAndRetry(this.contracts.reception.close,[loanId, usr,  this.ethConfig])
+    const txHash = await executeAndRetry(this.contracts.reception.close, [loanId, usr,  this.ethConfig])
     console.log(`[Reception.close] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout);
   }
 
   approveCurrency = async (usr: string, wad: string) => {
-    const txHash = await executeAndRetry(this.contracts.currency.approve,[usr, wad, this.ethConfig])
+    const txHash = await executeAndRetry(this.contracts.currency.approve, [usr, wad, this.ethConfig])
     console.log(`[Currency.approve] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['currency'].abi, this.transactionTimeout);
   }
@@ -364,7 +364,7 @@ export class Tinlake {
    */
   whitelist = async (registry: Address, nft: string, principal: string, appraisal: string,
                fee: string, owner: string) => {
-    const txHash = await executeAndRetry(this.contracts.admin.whitelist,[registry, nft, principal, appraisal, fee, owner, this.ethConfig]);
+    const txHash = await executeAndRetry(this.contracts.admin.whitelist, [registry, nft, principal, appraisal, fee, owner, this.ethConfig]);
     console.log(`[Admin.whitelist] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
   }

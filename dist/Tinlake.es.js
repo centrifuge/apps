@@ -34958,7 +34958,7 @@ function executeAndRetry(f, args) {
                     // using error message, since error code is not unique enough
                     // todo introduce retry limit
                     if (e_1 && e_1.message && e_1.message.indexOf("Cannot read property 'number' of null") !== -1) {
-                        console.log("null error detected", e_1);
+                        console.log("null error detected, retry triggered...", e_1);
                         sleep(1000);
                         return [2 /*return*/, executeAndRetry(f, args)];
                     }
