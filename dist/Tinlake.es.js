@@ -34620,6 +34620,18 @@ var Tinlake = /** @class */ (function () {
                 }
             });
         }); };
+        this.approveCollateral = function (usr, wad) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.collateral.approve, [usr, wad, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[Collateral Approve] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['collateral'].abi, this.transactionTimeout)];
+                }
+            });
+        }); };
         this.ownerOfNFT = function (tokenId) { return __awaiter(_this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {

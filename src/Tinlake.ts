@@ -242,6 +242,12 @@ export class Tinlake {
     return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
   }
 
+  approveCollateral = async (usr: string, wad: string) => {
+    const txHash = await executeAndRetry(this.contracts.collateral.approve,[usr, wad, this.ethConfig])
+    console.log(`[Collateral Approve] txHash: ${txHash}`);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['collateral'].abi, this.transactionTimeout);
+  }
+
   ownerOfNFT = async (tokenId: Address) => {
     const res = await executeAndRetry(this.contracts.nft.ownerOf,[tokenId]);
     return res['0'];
@@ -398,7 +404,7 @@ async function executeAndRetry (f: Function, args: Array<any> = []) : Promise<an
     // using error message, since error code is not unique enough
     // todo introduce retry limit
     if (e && e.message && e.message.indexOf("Cannot read property 'number' of null") !== -1) {
-      console.log("null error detected", e)
+      console.log("null error detected, retry triggered...", e)
       sleep(1000);
       return executeAndRetry(f, args);
     }
