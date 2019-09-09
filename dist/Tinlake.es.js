@@ -34574,7 +34574,7 @@ var Tinlake = /** @class */ (function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.contracts.admin.wards(address)];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.admin.wards, [address])];
                     case 1:
                         res = _a.sent();
                         return [2 /*return*/, !res[0].isZero()];
@@ -34585,7 +34585,7 @@ var Tinlake = /** @class */ (function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.contracts.title.count()];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.title.count, [])];
                     case 1:
                         res = _a.sent();
                         return [2 /*return*/, res[0]];
@@ -34595,7 +34595,7 @@ var Tinlake = /** @class */ (function () {
         this.getLoan = function (loanId) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.contracts.shelf.shelf(loanId)];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.shelf.shelf, [loanId])];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
@@ -34603,28 +34603,40 @@ var Tinlake = /** @class */ (function () {
         this.getBalanceDebt = function (loanId) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.contracts.pile.loans(loanId)];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.pile.loans, [loanId])];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         }); };
-        this.approveCollateral = function (usr, wad) {
-            return _this.contracts.collateral.approve(usr, wad, _this.ethConfig).then(function (txHash) {
-                console.log("[Collateral Approve] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['collateral'].abi, _this.transactionTimeout);
+        this.approveNFT = function (tokenId, to) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.nft.approve, [to, tokenId, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[NFT Approve] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout)];
+                }
             });
-        };
-        this.approveNFT = function (tokenId, to) {
-            return _this.contracts.nft.approve(to, tokenId, _this.ethConfig).then(function (txHash) {
-                console.log("[NFT Approve] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi, _this.transactionTimeout);
+        }); };
+        this.approveCollateral = function (usr, wad) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.collateral.approve, [usr, wad, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[Collateral Approve] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['collateral'].abi, this.transactionTimeout)];
+                }
             });
-        };
+        }); };
         this.ownerOfNFT = function (tokenId) { return __awaiter(_this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.contracts.nft.ownerOf(tokenId)];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.nft.ownerOf, [tokenId])];
                     case 1:
                         res = _a.sent();
                         return [2 /*return*/, res['0']];
@@ -34635,47 +34647,65 @@ var Tinlake = /** @class */ (function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.contracts.title.ownerOf(loanId)];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.title.ownerOf, [loanId])];
                     case 1:
                         res = _a.sent();
                         return [2 /*return*/, res['0']];
                 }
             });
         }); };
-        this.balanceOfCurrency = function (usr) {
-            return _this.contracts.currency.balanceOf(usr);
-        };
+        this.balanceOfCurrency = function (usr) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, executeAndRetry(this.contracts.currency.balanceOf, [usr])];
+            });
+        }); };
         /**
          * @param owner Owner of the new NFT
          */
-        this.mintNFT = function (owner, tokenId) {
-            return _this.contracts.nft.mint(owner, tokenId, _this.ethConfig).then(function (txHash) {
-                console.log("[NFT.mint] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi, _this.transactionTimeout);
+        this.mintNFT = function (owner, tokenId) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.nft.mint, [owner, tokenId, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[NFT.mint] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout)];
+                }
             });
-        };
+        }); };
         /**
          * @param owner Owner of the created loan
          */
-        this.adminAdmit = function (registry, nft, principal, owner) {
-            return _this.contracts.admit.admit(registry, nft, principal, owner, _this.ethConfig)
-                .then(function (txHash) {
-                console.log("[Admit.admit] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi, _this.transactionTimeout);
+        this.adminAdmit = function (registry, nft, principal, owner) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.admit.admit, [registry, nft, principal, owner, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[Admit.admit] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout)];
+                }
             });
-        };
-        this.adminAppraise = function (loanID, appraisal) {
-            return _this.contracts.appraiser.file(loanID, appraisal, _this.ethConfig)
-                .then(function (txHash) {
-                console.log("[Appraisal.file] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi, _this.transactionTimeout);
+        }); };
+        this.adminAppraise = function (loanID, appraisal) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.appraiser.file, [loanID, appraisal, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[Appraisal.file] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout)];
+                }
             });
-        };
+        }); };
         this.getAppraisal = function (loanID) { return __awaiter(_this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.contracts.appraiser.value(loanID)];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.appraiser.value, [loanID])];
                     case 1:
                         res = _a.sent();
                         return [2 /*return*/, res['0']];
@@ -34685,76 +34715,114 @@ var Tinlake = /** @class */ (function () {
         /**
          * @param to Address that should receive the currency (e. g. DAI)
          */
-        this.borrow = function (loanId, to) {
-            return _this.contracts.reception.borrow(loanId, to, _this.ethConfig).then(function (txHash) {
-                console.log("[Reception.borrow] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['reception'].abi, _this.transactionTimeout);
+        this.borrow = function (loanId, to) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.reception.borrow, [loanId, to, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[Reception.borrow] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout)];
+                }
             });
-        };
+        }); };
         /**
          * @param wad Amount which should be repaid
          * @param usr Address that receives the NFT
          */
-        this.repay = function (loanId, wad, usr) {
-            return _this.contracts.reception.repay(loanId, wad, usr, _this.ethConfig)
-                .then(function (txHash) {
-                console.log("[Reception.repay] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['reception'].abi, _this.transactionTimeout);
+        this.repay = function (loanId, wad, usr) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.reception.repay, [loanId, wad, usr, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[Reception.repay] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout)];
+                }
             });
-        };
+        }); };
         /**
          * @param wad Amount which should be repaid
          * @param usr Address that receives the NFT
          */
-        this.close = function (loanId, usr) {
-            return _this.contracts.reception.close(loanId, usr, _this.ethConfig)
-                .then(function (txHash) {
-                console.log("[Reception.close] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['reception'].abi, _this.transactionTimeout);
+        this.close = function (loanId, usr) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.reception.close, [loanId, usr, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[Reception.close] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout)];
+                }
             });
-        };
-        this.approveCurrency = function (usr, wad) {
-            return _this.contracts.currency.approve(usr, wad, _this.ethConfig).then(function (txHash) {
-                console.log("[Currency.approve] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['currency'].abi, _this.transactionTimeout);
+        }); };
+        this.approveCurrency = function (usr, wad) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.currency.approve, [usr, wad, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[Currency.approve] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['currency'].abi, this.transactionTimeout)];
+                }
             });
-        };
-        this.lenderRely = function (usr) {
-            return _this.contracts.lender.rely(usr, _this.ethConfig).then(function (txHash) {
-                console.log("[Lender.rely] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['lender'].abi, _this.transactionTimeout);
+        }); };
+        this.lenderRely = function (usr) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.lender.rely, [usr, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[Lender.rely] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['lender'].abi, this.transactionTimeout)];
+                }
             });
-        };
-        this.initFee = function (fee) {
-            return _this.contracts.pileForInit.file(fee, fee, _this.ethConfig)
-                .then(function (txHash) {
-                console.log("[Pile.file] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts.pileForInit.abi, _this.transactionTimeout);
+        }); };
+        this.initFee = function (fee) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.pileForInit.file, [fee, fee, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[Pile.file] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts.pileForInit.abi, this.transactionTimeout)];
+                }
             });
-        };
+        }); };
         this.existsFee = function (fee) { return __awaiter(_this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.contracts.pile.fees(fee)];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.pile.fees, [fee])];
                     case 1:
                         res = _a.sent();
                         return [2 /*return*/, !res.speed.isZero()];
                 }
             });
         }); };
-        this.addFee = function (loanId, fee, balance) {
-            return _this.contracts.pileForAdd.file(loanId, fee, balance, _this.ethConfig)
-                .then(function (txHash) {
-                console.log("[Pile.file] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts.pileForAdd.abi, _this.transactionTimeout);
+        this.addFee = function (loanId, fee, balance) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.pileForAdd.file, [loanId, fee, balance, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[Pile.file] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts.pileForAdd.abi, this.transactionTimeout)];
+                }
             });
-        };
+        }); };
         this.getCurrentDebt = function (loanId) { return __awaiter(_this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.contracts.pile.burden(loanId)];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.pile.burden, [loanId])];
                     case 1:
                         res = _a.sent();
                         return [2 /*return*/, res['0']];
@@ -34768,25 +34836,35 @@ var Tinlake = /** @class */ (function () {
          * using initFee
          * @param owner Owner of the created loan
          */
-        this.whitelist = function (registry, nft, principal, appraisal, fee, owner) {
-            return _this.contracts.admin.whitelist(registry, nft, principal, appraisal, fee, owner, _this.ethConfig)
-                .then(function (txHash) {
-                console.log("[Admin.whitelist] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi, _this.transactionTimeout);
+        this.whitelist = function (registry, nft, principal, appraisal, fee, owner) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.admin.whitelist, [registry, nft, principal, appraisal, fee, owner, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[Admin.whitelist] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout)];
+                }
             });
-        };
-        this.unwhitelist = function (loanId, registry, nft) {
-            return _this.contracts.shelf.file(loanId, registry, nft, '0', _this.ethConfig)
-                .then(function (txHash) {
-                console.log("[Shelf.file] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['shelf'].abi, _this.transactionTimeout);
+        }); };
+        this.unwhitelist = function (loanId, registry, nft) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.shelf.file, [loanId, registry, nft, '0', this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[Shelf.file] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['shelf'].abi, this.transactionTimeout)];
+                }
             });
-        };
+        }); };
         this.getTotalDebt = function () { return __awaiter(_this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.contracts.pile.Debt()];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.pile.Debt, [])];
                     case 1:
                         res = _a.sent();
                         return [2 /*return*/, res['0']];
@@ -34797,7 +34875,7 @@ var Tinlake = /** @class */ (function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.contracts.pile.Balance()];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.pile.Balance, [])];
                     case 1:
                         res = _a.sent();
                         return [2 /*return*/, res['0']];
@@ -34808,7 +34886,7 @@ var Tinlake = /** @class */ (function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.contracts.collateral.totalSupply()];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.collateral.totalSupply, [])];
                     case 1:
                         res = _a.sent();
                         return [2 /*return*/, res['0']];
@@ -34819,7 +34897,7 @@ var Tinlake = /** @class */ (function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.contracts.nftData.data(tokenId)];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.nftData.data, [tokenId])];
                     case 1:
                         res = _a.sent();
                         return [2 /*return*/, res];
@@ -34863,6 +34941,33 @@ var Tinlake = /** @class */ (function () {
     }
     return Tinlake;
 }());
+function executeAndRetry(f, args) {
+    if (args === void 0) { args = []; }
+    return __awaiter(this, void 0, void 0, function () {
+        var result, e_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 6]);
+                    return [4 /*yield*/, f.apply(void 0, args)];
+                case 1:
+                    result = _a.sent();
+                    return [2 /*return*/, result];
+                case 2:
+                    e_1 = _a.sent();
+                    if (!(e_1 && e_1.message && e_1.message.indexOf("Cannot read property 'number' of null") !== -1)) return [3 /*break*/, 4];
+                    console.log("null error detected, retry triggered...", e_1);
+                    return [4 /*yield*/, sleep(1000)];
+                case 3:
+                    _a.sent();
+                    return [2 /*return*/, executeAndRetry(f, args)];
+                case 4: throw (e_1);
+                case 5: return [3 /*break*/, 6];
+                case 6: return [2 /*return*/];
+            }
+        });
+    });
+}
 var waitAndReturnEvents = function (eth, txHash, abi, transactionTimeout) { return __awaiter(_this, void 0, void 0, function () {
     var tx;
     return __generator(this, function (_a) {
@@ -34946,6 +35051,9 @@ var getEvents = function (receipt, abi) {
     });
     return events;
 };
+function sleep(millis) {
+    return new Promise(function (resolve) { return setTimeout(resolve, millis); });
+}
 
 export default Tinlake;
 export { LOAN_ID_IDX, Tinlake, baseToDisplay, bnToHex, displayToBase, feeToInterestRate, getLoanStatus, interestRateToFee };
