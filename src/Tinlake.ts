@@ -397,7 +397,8 @@ export class Tinlake {
 }
 
 async function executeAndRetry (f: Function, args: Array<any> = []) : Promise<any> {
-  try {
+  return f(...args)
+  /*try {
     const result = await f(...args);
     return result;
   } catch (e) {
@@ -412,7 +413,7 @@ async function executeAndRetry (f: Function, args: Array<any> = []) : Promise<an
     else {
       throw(e);
     }
-  }
+  }*/
 }
 
 const waitAndReturnEvents = async (eth: ethI, txHash: string, abi: any, transactionTimeout: number) => {
