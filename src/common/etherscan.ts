@@ -1,6 +1,6 @@
 import { BN } from 'ethereumjs-util';
 
-const rootLink = `https://[[network]]etherscan.io/`;
+const rootLink = `https://[[network]]etherscan.io`;
 
 const selectedNetwork = window['__ETH_NETWORK__'] || 'mainnet';
 

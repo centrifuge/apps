@@ -15,6 +15,7 @@ import { Section } from '../components/Section';
 import styled from 'styled-components';
 import { DisplayField } from '@centrifuge/axis-display-field';
 import AttributeField from './AttributeField';
+import { getNFTLink, getAddressLink } from '../common/etherscan';
 
 // improve visibility of inputs in view mode
 const StyledFormContainer = styled(Box)`
@@ -375,19 +376,19 @@ export class DocumentForm extends React.Component<Props, State> {
           {
             property: 'token_id',
             header: 'Token id',
-            render: datum => <DisplayField value={datum.token_id} noBorder/>,
+            render: datum => <DisplayField link={getNFTLink(datum.token_id,datum.registry)} value={datum.token_id}/>,
           },
 
           {
             property: 'registry',
             header: 'Registry',
-            render: datum => <DisplayField value={datum.registry} noBorder/>,
+            render: datum => <DisplayField link={getAddressLink(datum.registry)} value={datum.registry}/>,
           },
 
           {
             property: 'owner',
             header: 'Owner',
-            render: datum => <DisplayField value={datum.owner} noBorder/>,
+            render: datum => <DisplayField link={getAddressLink(datum.owner)} value={datum.owner}/>,
 
           },
         ]}

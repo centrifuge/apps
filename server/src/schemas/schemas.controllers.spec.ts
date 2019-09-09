@@ -67,6 +67,7 @@ describe('SchemasController', () => {
 
     databaseSpies.spyInsert = jest.spyOn(databaseService.schemas, 'insert');
     databaseSpies.spyUpdate = jest.spyOn(databaseService.schemas, 'update');
+    databaseSpies.spyGetCursor = jest.spyOn(databaseService.schemas, 'getCursor');
     databaseSpies.spyGetAll = jest.spyOn(databaseService.schemas, 'find');
   });
 
@@ -202,7 +203,7 @@ describe('SchemasController', () => {
 
       const result = await schemasController.get();
       expect(result.length).toEqual(5);
-      expect(databaseSpies.spyGetAll).toHaveBeenCalledTimes(1);
+      expect(databaseSpies.spyGetCursor).toHaveBeenCalledTimes(1);
     });
 
     it('should return a filtered list of schemas', async () => {
@@ -227,7 +228,7 @@ describe('SchemasController', () => {
       });
       expect(find2.length).toEqual(2);
 
-      expect(databaseSpies.spyGetAll).toHaveBeenCalledTimes(2);
+      expect(databaseSpies.spyGetCursor).toHaveBeenCalledTimes(2);
     });
   });
 

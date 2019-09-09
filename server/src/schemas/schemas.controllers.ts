@@ -72,7 +72,8 @@ export class SchemasController {
         }
       },
     );
-    return await this.databaseService.schemas.find(params);
+
+    return await this.databaseService.schemas.getCursor(params).sort({ createdAt: -1 }).exec();
   }
 
   @Get(':id')

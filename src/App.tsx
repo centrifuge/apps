@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Box } from 'grommet';
+import { Anchor, Box, Image, Text } from 'grommet';
 import { AxisTheme } from '@centrifuge/axis-theme';
 import Routing, { RouteItem } from './Routing';
-import Header, { MenuItem } from './Header';
+import { MenuItem, NavBar } from '@centrifuge/axis-nav-bar';
 import { connect } from 'react-redux';
 import { User } from './common/models/user';
 import { push, RouterAction } from 'connected-react-router';
@@ -23,6 +23,9 @@ import ListDocuments from './documents/ListDocuments';
 import CreateDocument from './documents/CreateDocument';
 import ViewDocument from './documents/ViewDocument';
 import EditDocument from './documents/EditDocument';
+import { getAddressLink } from './common/etherscan';
+import { DisplayField } from '@centrifuge/axis-display-field';
+import logo from './logo.png';
 
 interface AppPros {
   selectedRoute: string;
@@ -53,7 +56,7 @@ class App extends Component<AppPros> {
         {
           path: routes.contacts.index,
           component: Contacts,
-        }
+        },
       );
 
       if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_SCHEMAS)) {
@@ -165,12 +168,40 @@ class App extends Component<AppPros> {
           <NotificationProvider>
             <Box align="center">
               <ConnectedNotifications/>
-              <Header
-                user={loggedInUser}
+              <NavBar
+                width={'xxlarge'}
+                logo={
+                  <Anchor href="/">
+                    <Image src={logo}/>
+                  </Anchor>
+                }
                 selectedRoute={selectedRoute}
+                menuLabel={loggedInUser ? loggedInUser.email : ''}
                 menuItems={menuItems.reverse()}
-                push={push}
-              />
+                onRouteClick={(item) => {
+                  if (item.external) {
+                    window.location.replace(item.route);
+                  } else {
+                    push(item.route);
+                  }
+                }}
+              >
+                {loggedInUser && <Box direction="row" gap={'medium'} align={'center'} justify="end">
+                  <Box direction="row" align="center" gap={'xsmall'}>
+                    <Text>Centrifuge ID: </Text>
+                    <Box width={'160px'}>
+                      <DisplayField
+                        link={{
+                          href: getAddressLink(loggedInUser.account),
+                          target: '_blank',
+                        }}
+                        value={loggedInUser.account}
+                      />
+
+                    </Box>
+                  </Box>
+                </Box>}
+              </NavBar>
               <Box
                 justify="center"
                 direction="row"

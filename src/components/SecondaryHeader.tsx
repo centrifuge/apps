@@ -6,7 +6,7 @@ import styled, { withTheme } from 'styled-components';
 
 const StyledSecondaryHeader = styled(Box)`
   position: sticky;
-  top: 90px ;
+  top: 72px ;
   z-index: 2;
 `;
 
