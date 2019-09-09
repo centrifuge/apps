@@ -93,7 +93,7 @@ class LoanRepay extends React.Component<Props, State> {
 
     } catch (e) {
       console.log(e);
-      this.setState({ is: 'error', errorMsg: e.message });
+      this.setState({ is: 'error', errorMsg: 'Something went wrong: Please reload page and try again.' });
     }
   }
 
