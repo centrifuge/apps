@@ -34955,8 +34955,9 @@ function executeAndRetry(f, args) {
                     return [2 /*return*/, result];
                 case 2:
                     e_1 = _a.sent();
-                    if (!(e_1 && e_1.message && e_1.message.indexOf("Cannot read property 'number' of null") !== -1)) return [3 /*break*/, 4];
-                    console.log("null error detected, retry triggered...", e_1);
+                    if (!(e_1 && e_1.message && (e_1.message.indexOf("Cannot read property 'number' of null") !== -1 ||
+                        e_1.message.indexOf('error with payload') !== -1))) return [3 /*break*/, 4];
+                    console.log("internal RPC error detected, retry triggered...", e_1);
                     return [4 /*yield*/, sleep(1000)];
                 case 3:
                     _a.sent();
