@@ -130,7 +130,7 @@ class LoanRepay extends React.Component<Props, State> {
       } />
 
       {is === 'loading' ?
-        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Repaying...'} />
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Initiating the repayment process. Please confirm the pending transactions in MetaMask, and do not leave this page until all transactions have been confirmed.'} />
       :
         <Box pad={{ horizontal: 'medium' }}>
           {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&

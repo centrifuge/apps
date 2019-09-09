@@ -1,27 +1,26 @@
 import * as React from 'react';
 import Tinlake, { baseToDisplay, displayToBase, interestRateToFee } from 'tinlake';
 import { Box, FormField, TextInput, Button, Heading, Text } from 'grommet';
-import Alert from '../Alert';
+import Alert from '../../components/Alert';
 import Link from 'next/link';
-import SecondaryHeader from '../SecondaryHeader';
+import SecondaryHeader from '../../components/SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
 import { connect } from 'react-redux';
-import { NFTState, getNFT } from '../../ducks/nft';
-import NftData from '../NftData';
+import NftData from '../../components/NftData';
 import { authTinlake } from '../../services/tinlake';
+import { getNFT, NFT } from '../../services/nft'
 import { Spinner } from '@centrifuge/axis-spinner';
-import NumberInput from '../NumberInput';
+import NumberInput from '../../components/NumberInput';
 
 const SUCCESS_STATUS = '0x1';
 
 interface Props {
   tinlake: Tinlake;
-  tokenId: string;
-  nft?: NFTState;
-  getNFT?: (tinlake: Tinlake, tonkenId: string) => Promise<void>;
 }
 
 interface State {
+  nft: NFT | null; 
+  nftError: string;
   tokenId: string;
   principal: string;
   appraisal: string;
@@ -32,6 +31,8 @@ interface State {
 
 class WhitelistNFT extends React.Component<Props, State> {
   state: State = {
+    nft: null,
+    nftError: '',
     tokenId: '',
     principal: '0',
     appraisal: '0',
@@ -41,9 +42,17 @@ class WhitelistNFT extends React.Component<Props, State> {
   };
 
   componentWillMount() {
-    this.setState({ tokenId: this.props.tokenId || '' }, () => {
-      if (this.props.tokenId) { this.getNFT(); }
-    });
+  }
+
+  //handlers
+  onTokenIdValueChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const currentTokenId = event.currentTarget.value
+    await this.setState({ 
+      tokenId: currentTokenId, 
+      nft: null, 
+      nftError: ''
+    })
+    await this.getNFT(currentTokenId)
   }
 
   whitelist = async () => {
@@ -52,9 +61,12 @@ class WhitelistNFT extends React.Component<Props, State> {
     const addresses = tinlake.contractAddresses;
     if (principal === '0') {
       this.setState({ is: 'error', errorMsg: 'Principal cannot be 0' });
-    } else {
+      //needs to be implemented on the contract level first
+    } /*else if (principal > appraisal) {
+      this.setState({ is: 'error', errorMsg: 'Principal can not be heigher then appraisal'  });
+    }*/
+    else{
       this.setState({ is: 'loading' });
-
       try {
         await authTinlake();
         // init fee
@@ -77,7 +89,6 @@ class WhitelistNFT extends React.Component<Props, State> {
 
         const loanId = res2.events[0].data[2].toString();
         console.log(`Loan id: ${loanId}`);
-
         this.setState({ is: 'success' });
       } catch (e) {
         console.log(e);
@@ -86,15 +97,25 @@ class WhitelistNFT extends React.Component<Props, State> {
     }
   }
 
-  getNFT = async () => {
-    const { tinlake, getNFT } = this.props;
-
-    await getNFT!(tinlake, this.state.tokenId);
+  getNFT = async (currentTokenId: string) => {
+    const { tinlake} = this.props;
+    if (currentTokenId && currentTokenId.length > 0) {
+      const result = await getNFT(tinlake, currentTokenId);
+      const {tokenId, nft, errorMessage } = result as Partial< {tokenId:string, nft:NFT, errorMessage:string} >
+      if (tokenId !== this.state.tokenId) {
+        return;
+      }
+      if (errorMessage) {
+        this.setState({ nftError: errorMessage });
+        return;
+      }
+      nft && this.setState({ nft })
+    }
   }
 
   render() {
-    const { tinlake, nft } = this.props;
-    const { tokenId, principal, appraisal, interestRate, is, errorMsg } = this.state;
+    const { tinlake } = this.props;
+    const { tokenId, principal, appraisal, interestRate, is, errorMsg, nft, nftError } = this.state;
 
     return <Box>
       <SecondaryHeader>
@@ -106,11 +127,11 @@ class WhitelistNFT extends React.Component<Props, State> {
         </Box>
 
         <Button onClick={this.whitelist} primary label="Whitelist"
-          disabled={is === 'loading' || is === 'success'} />
+          disabled={is === 'loading' || is === 'success' || !nft} />
       </SecondaryHeader>
 
       {is === 'loading' ?
-        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Whitelisting...'} />
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Initiating the whitelisting process. Please confirm the pending transactions in MetaMask, and do not leave this page until all transactions have been confirmed.'} />
       :
         <Box pad={{ horizontal: 'medium' }}>
           {is === 'success' && <Alert type="success">
@@ -126,7 +147,7 @@ class WhitelistNFT extends React.Component<Props, State> {
               <FormField label="NFT ID">
                 <TextInput
                   value={tokenId}
-                  onChange={e => this.setState({ tokenId: e.currentTarget.value }, this.getNFT)}
+                  onChange={this.onTokenIdValueChange}
                   disabled={is === 'success'}
                 />
               </FormField>
@@ -164,14 +185,14 @@ class WhitelistNFT extends React.Component<Props, State> {
             </Box>
           </Box>
 
-          {nft!.state === 'not found' && <Alert type="error" margin={{ vertical: 'large' }}>
-            NFT for token ID {tokenId} not found.</Alert>}
-          {nft!.state === 'found' && nft!.nft &&
-            <NftData data={nft!.nft} authedAddr={tinlake.ethConfig.from} />}
+          {nftError && <Alert type="error" margin={{ vertical: 'large' }}>
+          { nftError } </Alert>}
+          {nft &&
+            <NftData data={nft} authedAddr={tinlake.ethConfig.from} />}
         </Box>
       }
     </Box>;
   }
 }
 
-export default connect(state => state, { getNFT })(WhitelistNFT);
+export default connect(state => state )(WhitelistNFT);

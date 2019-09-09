@@ -5,3 +5,4 @@ out
 services/tinlake/addresses_tinlake.json
 nft_data_definition.json
 .env
+.DS_Store
