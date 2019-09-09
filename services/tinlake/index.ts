@@ -44,7 +44,6 @@ export async function authTinlake() {
 
   const accounts = await provider.enable();
   const account = accounts[0];
-
   tinlake!.setProvider(provider);
   tinlake!.setEthConfig({ from: account });
 
