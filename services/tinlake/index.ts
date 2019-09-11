@@ -3,7 +3,7 @@ import config from '../../config';
 import Eth from 'ethjs';
 declare var web3: any;
 
-const { contractAddresses, nftDataDefinition, transactionTimeout } = config;
+const { contractAddresses, nftDataDefinition, transactionTimeout, rpcUrl } = config;
 const portisConfig = {
   id: '2ea2735d-4963-40f5-823f-48cab29f7319', // required
   // network: 'mainnet', // optional
@@ -26,8 +26,7 @@ let authed = false;
 export async function getTinlake() {
   if (tinlake) { return tinlake; }
 
-  const provider = new Eth.HttpProvider(
-    'https://kovan.infura.io/v3/092108ec6aea46ab97b2175b45130455');
+  const provider = new Eth.HttpProvider(rpcUrl);
 
   tinlake = new Tinlake(provider, contractAddresses, nftDataDefinition.contractCall.outputs, transactionTimeout, {});
 
