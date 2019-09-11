@@ -397,23 +397,23 @@ export class Tinlake {
 }
 
 async function executeAndRetry (f: Function, args: Array<any> = []) : Promise<any> {
-  return f(...args)
-  /*try {
+  try {
     const result = await f(...args);
     return result;
   } catch (e) {
     // using error message, since error code -32603 is not unique enough 
     // todo introduce retry limit
     if (e && e.message && (e.message.indexOf("Cannot read property 'number' of null") !== -1 ||
-         e.message.indexOf('error with payload')  !== -1)) {
-      console.log("internal RPC error detected, retry triggered...", e)
-      await sleep(1000);
-      return executeAndRetry(f, args);
+        e.message.indexOf('error with payload')  !== -1)) {
+        console.log("internal RPC error detected, retry triggered...", e)
+        throw (new Error("Internal RPC Error. Please try again."))
+      // await sleep(1000);
+      // return executeAndRetry(f, args);
     }
     else {
       throw(e);
     }
-  }*/
+  }
 }
 
 const waitAndReturnEvents = async (eth: ethI, txHash: string, abi: any, transactionTimeout: number) => {

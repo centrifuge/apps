@@ -34950,8 +34950,32 @@ var Tinlake = /** @class */ (function () {
 function executeAndRetry(f, args) {
     if (args === void 0) { args = []; }
     return __awaiter(this, void 0, void 0, function () {
+        var result, e_1;
         return __generator(this, function (_a) {
-            return [2 /*return*/, f.apply(void 0, args)];
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, f.apply(void 0, args)];
+                case 1:
+                    result = _a.sent();
+                    return [2 /*return*/, result];
+                case 2:
+                    e_1 = _a.sent();
+                    // using error message, since error code -32603 is not unique enough 
+                    // todo introduce retry limit
+                    if (e_1 && e_1.message && (e_1.message.indexOf("Cannot read property 'number' of null") !== -1 ||
+                        e_1.message.indexOf('error with payload') !== -1)) {
+                        console.log("internal RPC error detected, retry triggered...", e_1);
+                        throw (new Error("Internal RPC Error. Please try again."));
+                        // await sleep(1000);
+                        // return executeAndRetry(f, args);
+                    }
+                    else {
+                        throw (e_1);
+                    }
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
+            }
         });
     });
 }
