@@ -60,7 +60,7 @@ export function subscribeDashboardData(tinlake: Tinlake):
 
     const interval = setInterval(
       () => dispatch(getDashboardData(tinlake)),
-      1000,
+      3600000,
     );
     const discard = () => clearInterval(interval);
     return discard as any;
