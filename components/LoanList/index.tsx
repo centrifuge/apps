@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Tinlake, { baseToDisplay, feeToInterestRate } from 'tinlake';
+import Tinlake, { bnToHex, baseToDisplay, feeToInterestRate } from 'tinlake';
 import Link from 'next/link';
 import { Box, DataTable, Anchor } from 'grommet';
 import { connect } from 'react-redux';
@@ -23,10 +23,8 @@ class LoanList extends React.Component<Props> {
 
   render() {
     const { loans, mode, tinlake: { ethConfig: { from: ethFrom } } } = this.props;
-
     const filteredLoans = mode === 'borrower' ? loans!.loans.filter(l => l.loanOwner === ethFrom) :
       loans!.loans;
-
     if (loans!.loansState === 'loading') {
       return <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />;
     }
@@ -36,7 +34,8 @@ class LoanList extends React.Component<Props> {
         { header: 'Loan ID', property: 'loanId', align: 'end' },
         {
           header: 'NFT ID', property: 'tokenId', align: 'end',
-          render: (l: InternalListLoan) => <Address address={l.tokenId.toString()} />,
+          render: (l: InternalListLoan) => <Address address={bnToHex(l.tokenId
+          ).toString()} />,
         },
         {
           header: 'NFT Owner', property: 'nftOwner', align: 'end',
