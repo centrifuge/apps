@@ -34,7 +34,7 @@ class Apollo {
       .query({
         query: gql`
         {
-          last${period}(interval:""){
+          last${period}(interval:"day"){
             timestamp
             total_debt
             total_balance
