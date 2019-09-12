@@ -16,7 +16,7 @@ const NumberInput: FunctionComponent<Props> = ({
   return <NumberFormat
     thousandSeparator="," decimalScale={precision} fixedDecimalScale
     allowNegative={false} prefix={prefix} suffix={suffix} customInput={TextInput}
-    isNumericString value={value} onValueChange={onValueChange} {...rest}
+    value={value} onValueChange={onValueChange} {...rest}
   />;
 };
 
