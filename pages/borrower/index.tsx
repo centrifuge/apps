@@ -10,9 +10,6 @@ import Alert from '../../components/Alert';
 
 class BorrowerLoanListPage extends React.Component {
 
-  componentWillMount() {
-  }
-
   render() {
     return <Box align="center">
       <Header

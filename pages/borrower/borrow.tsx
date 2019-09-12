@@ -6,7 +6,6 @@ import LoanBorrow from '../../components/LoanBorrow';
 import Header from '../../components/Header';
 import { menuItems } from '../../menuItems';
 
-
 class BorrowPage extends React.Component<{ loanId: string }> {
   static async getInitialProps({ query }: any) {
     return { loanId: query.loanId };
