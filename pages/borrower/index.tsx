@@ -9,6 +9,7 @@ import Auth from '../../components/Auth';
 import Alert from '../../components/Alert';
 
 class BorrowerLoanListPage extends React.Component {
+
   render() {
     return <Box align="center">
       <Header

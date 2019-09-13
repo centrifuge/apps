@@ -7,6 +7,7 @@ import SecondaryHeader from '../../components/SecondaryHeader';
 import { DashboardState, subscribeDashboardData } from '../../ducks/dashboard';
 import { calcRatioPercent } from '../../utils/calcRatioPercent';
 import DashboardMetric from '../../components/DashboardMetric';
+import { Spinner } from '@centrifuge/axis-spinner';
 import NumberDisplay from '../../components/NumberDisplay';
 import LoanList from '../../components/LoanList';
 import { Graph, TimeSeriesData } from '../../components/Graph';
@@ -26,6 +27,7 @@ interface State {
   collateralTimeSeriesPeriod: string;
   collateralValueTimeSeriesData: TimeSeriesData;
   showCollateralGraph: boolean
+  collateralTimeSeriesFetching: boolean
 }
 
 class Dashboard extends React.Component<Props, State> {
@@ -42,7 +44,14 @@ class Dashboard extends React.Component<Props, State> {
   }
 
   updateCollateralTimeSeriesData = async (period: string) => {
+
+    await this.setState({
+      collateralTimeSeriesFetching : true
+    })
     const timeSeriesData = await this.props.apolloClient.getCollateralTimeSeriesData(period);
+    await this.setState({
+      collateralTimeSeriesFetching : false
+    })
     const collateralValueTimeSeriesData = {
       labels: [],
       xValues: [
@@ -89,7 +98,9 @@ class Dashboard extends React.Component<Props, State> {
     const { state, data } = dashboard!;
     const { showCollateralGraph,
             collateralTimeSeriesPeriod, 
-            collateralValueTimeSeriesData } = this.state
+            collateralValueTimeSeriesData,
+            collateralTimeSeriesFetching
+           } = this.state
 
     if (data === null || state === 'loading') { return null; }
 
@@ -138,7 +149,11 @@ class Dashboard extends React.Component<Props, State> {
             </FormField>
           </Box> 
           <Box pad={{ horizontal: 'right', top: 'medium' }}>
+          {collateralTimeSeriesFetching ?
+            <Spinner height={'calc(30vh)'} message={'loading graph data.'} />
+            :
             <Graph timeSeriesData={collateralValueTimeSeriesData}></Graph>
+          }
           </Box>
         </Box>
       }

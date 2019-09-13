@@ -1,5 +1,5 @@
 import { AnyAction, Action } from 'redux';
-import Tinlake, { Loan, BalanceDebt, Address, getLoanStatus, LoanStatus, bnToHex } from 'tinlake';
+import Tinlake, { Loan, BalanceDebt, Address, getLoanStatus, LoanStatus, bnToHex, baseToDisplay } from 'tinlake';
 import BN from 'bn.js';
 import { ThunkAction } from 'redux-thunk';
 
@@ -122,7 +122,6 @@ export function getLoans(tinlake: Tinlake):
         status: getLoanStatus(loan.principal, currentDebtData[i]),
       });
     });
-
     dispatch({ type: RECEIVE, loans: extendedLoansData });
   };
 }
