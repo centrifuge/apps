@@ -3,7 +3,7 @@ import { InternalSingleLoan } from '../../ducks/loans';
 import { Text, Box, FormField, TextInput, Heading, Paragraph } from 'grommet';
 import styled from 'styled-components';
 import { formatAddress } from '../../utils/formatAddress';
-import MeBadge from '../MeBadge';
+import Badge from '../Badge';
 import { NFT } from '../../ducks/nft';
 import NftDataField, { DisplayedField } from '../NftDataField';
 import config from '../../config';
@@ -54,7 +54,7 @@ class NftData extends React.Component<Props> {
           <FormField label="NFT Owner" style={{ position: 'relative' }}>
             <TextInput value={formatAddress(nftOwner)} disabled title={nftOwner} />
             {authedAddr === nftOwner &&
-              <MeBadge style={{ position: 'absolute', left: 100, top: 32 }} />}
+              <Badge text={'Me'} style={{ position: 'absolute', left: 100, top: 32 }} />}
           </FormField>
         </Box>
         <Box basis={'1/4'} gap="medium" />

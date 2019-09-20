@@ -15,7 +15,6 @@ class BorrowerLoanListPage extends React.Component {
       <Header
         selectedRoute={'/borrower'}
         menuItems={menuItems}
-        section="BORROWER"
       />
       <Box
         justify="center"

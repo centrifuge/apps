@@ -26,8 +26,8 @@ interface Props {
 interface State {
   collateralTimeSeriesPeriod: string;
   collateralValueTimeSeriesData: TimeSeriesData;
-  showCollateralGraph: boolean
-  collateralTimeSeriesFetching: boolean
+  showCollateralGraph: boolean;
+  collateralTimeSeriesFetching: boolean;
 }
 
 class Dashboard extends React.Component<Props, State> {
@@ -38,7 +38,7 @@ class Dashboard extends React.Component<Props, State> {
   onCollateralTimeSeriesPeriodSelected = async (event: {value: typeof periodSelectionOptions[number]}) => {
     const period = event.value;
     this.setState({
-      collateralTimeSeriesPeriod: period,
+      collateralTimeSeriesPeriod: period
     });
     await this.updateCollateralTimeSeriesData(period);
   }
@@ -47,11 +47,11 @@ class Dashboard extends React.Component<Props, State> {
 
     await this.setState({
       collateralTimeSeriesFetching : true
-    })
+    });
     const timeSeriesData = await this.props.apolloClient.getCollateralTimeSeriesData(period);
     await this.setState({
       collateralTimeSeriesFetching : false
-    })
+    });
     const collateralValueTimeSeriesData = {
       labels: [],
       xValues: [
@@ -97,10 +97,10 @@ class Dashboard extends React.Component<Props, State> {
     const { dashboard, tinlake } = this.props;
     const { state, data } = dashboard!;
     const { showCollateralGraph,
-            collateralTimeSeriesPeriod, 
+            collateralTimeSeriesPeriod,
             collateralValueTimeSeriesData,
-            collateralTimeSeriesFetching
-           } = this.state
+            collateralTimeSeriesFetching,
+           } = this.state;
 
     if (data === null || state === 'loading') { return null; }
 
@@ -147,7 +147,7 @@ class Dashboard extends React.Component<Props, State> {
                 options={periodSelectionOptions}
               />
             </FormField>
-          </Box> 
+          </Box>
           <Box pad={{ horizontal: 'right', top: 'medium' }}>
           {collateralTimeSeriesFetching ?
             <Spinner height={'calc(30vh)'} message={'loading graph data.'} />

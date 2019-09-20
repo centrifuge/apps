@@ -12,10 +12,10 @@ class WithTinlake extends React.Component<Props> {
   isMounted = false;
 
   componentWillMount() {
-    this.init();
   }
 
   componentDidMount() {
+    this.init();
     this.isMounted = true;
   }
 

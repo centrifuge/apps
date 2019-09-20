@@ -18,7 +18,6 @@ class BorrowerLoanPage extends React.Component<{ loanId: string }> {
       <Header
         selectedRoute={`/borrower/loan?loanId=${loanId}`}
         menuItems={menuItems}
-        section="BORROWER"
       />
       <Box
         justify="center"

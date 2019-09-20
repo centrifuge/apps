@@ -27,7 +27,7 @@ class Approve extends React.Component<Props, State> {
   };
 
   approve = async () => {
-    const { tinlake } = this.props
+    const { tinlake } = this.props;
     const addresses = tinlake.contractAddresses;
 
     this.setState({ is: 'loading' });
@@ -35,7 +35,7 @@ class Approve extends React.Component<Props, State> {
     try {
       await authTinlake();
 
-      const amount = (new BN(-1)).toString()
+      const amount = (new BN(-1)).toString();
       const approveCurrencyResult = await tinlake.approveCurrency(addresses['LENDER'], amount);
 
       if (approveCurrencyResult.status !== SUCCESS_STATUS || approveCurrencyResult.events[0].event.name !== 'Approval') {

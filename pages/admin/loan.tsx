@@ -19,7 +19,6 @@ class AdminLoanPage extends React.Component<{ loanId: string }> {
       <Header
         selectedRoute={`/admin/loan?loanId=${loanId}`}
         menuItems={menuItems}
-        section="ADMIN"
       />
       <Box
         justify="center"

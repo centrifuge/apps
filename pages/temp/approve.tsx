@@ -11,7 +11,6 @@ class ApprovePage extends React.Component {
       <Header
         selectedRoute={'/temp/backer-approve'}
         menuItems={menuItems}
-        section="ADMIN"
       />
         <Box
           justify="center"

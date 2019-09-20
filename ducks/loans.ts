@@ -139,7 +139,7 @@ export function getLoan(tinlake: Tinlake, loanId: string, refresh = false):
       dispatch({ type: LOAD_SINGLE_NOT_FOUND });
     }
 
-    const currentDebt = await tinlake.getCurrentDebt(loanId)
+    const currentDebt = await tinlake.getCurrentDebt(loanId);
 
     const [loan, balanceDebtData] = await Promise.all([
       tinlake.getLoan(loanId),

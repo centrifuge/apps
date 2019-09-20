@@ -19,7 +19,6 @@ class UnwhitelistPage extends React.Component<{ loanId: string }> {
       <Header
         selectedRoute={`/admin/unwhitelist-nft?loanId=${loanId}`}
         menuItems={menuItems}
-        section="ADMIN"
       />
       <Box
         justify="center"

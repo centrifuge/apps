@@ -17,7 +17,6 @@ class WhitelistNFTPage extends React.Component<{ tokenId: string }> {
       <Header
         selectedRoute={'/admin/whitelist-nft'}
         menuItems={menuItems}
-        section="ADMIN"
       />
       <Box
         justify="center"

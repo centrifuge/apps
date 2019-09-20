@@ -11,7 +11,6 @@ class MintNFTPage extends React.Component {
       <Header
         selectedRoute={'/temp/mint-nft'}
         menuItems={menuItems}
-        section="BORROWER"
       />
       <Box
         justify="center"

@@ -3,10 +3,11 @@ import styled from 'styled-components';
 
 interface Props {
   [key: string]: any;
+  text: string;
 }
 
-const MeBadge: FunctionComponent<Props> = (props) => {
-  return <Container {...props}>Me</Container>;
+const Badge: FunctionComponent<Props> = (props) => {
+  return <Container {...props}>{ props.text }</Container>;
 };
 
 const Container = styled.div`
@@ -19,4 +20,4 @@ const Container = styled.div`
   color: #808080;
 `;
 
-export default MeBadge;
+export default Badge;
