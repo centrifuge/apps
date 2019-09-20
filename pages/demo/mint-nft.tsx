@@ -9,7 +9,7 @@ class MintNFTPage extends React.Component {
   render() {
     return <Box align="center">
       <Header
-        selectedRoute={'/temp/mint-nft'}
+        selectedRoute={'/demo/mint-nft'}
         menuItems={menuItems}
       />
       <Box

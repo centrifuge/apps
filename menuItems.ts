@@ -1,7 +1,16 @@
 import { MenuItem } from './components/Header';
+import config from './config'
 
-export const menuItems: MenuItem[] = [
+const { isDemo } = config
+
+const menuItems: MenuItem[] = [
   { label: 'Dashboard', route: '/' },
   { label: 'My Loans', route: '/borrower' },
-  { label: 'Whitelist', route: '/admin' },
+  { label: 'Whitelist NFT', route: '/admin' },
 ];
+
+isDemo &&  menuItems.push({ label: 'Mint NFT', route: '/demo/mint-nft'})
+
+export {
+  menuItems
+}

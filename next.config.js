@@ -11,6 +11,7 @@ module.exports = withTypescript({
     NFT_DATA_DEFINITION: process.env.NFT_DATA_DEFINITION,
     RPC_URL: process.env.RPC_URL,
     TINLAKE_DATA_BACKEND_URL: process.env.TINLAKE_DATA_BACKEND_URL,
-    TRANSACTION_TIMEOUT: process.env.TRANSACTION_TIMEOUT
+    TRANSACTION_TIMEOUT: process.env.TRANSACTION_TIMEOUT,
+    ENV: process.env.ENV
   }
 });
