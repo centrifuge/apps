@@ -95,9 +95,11 @@ describe('Users controller', () => {
 
     describe('invite', () => {
       it('should fail if the user exists', async () => {
-        await expect(usersController.invite(invitedUser)).rejects.toThrow(
-          'User already invited!',
-        );
+        await expect(usersController.invite(invitedUser)).rejects.toMatchObject({
+          message: {
+            message: 'User already invited!',
+          },
+        });
       });
       it('should add user to the database with invite true and enabled false', async () => {
 
@@ -124,9 +126,11 @@ describe('Users controller', () => {
     describe('register', () => {
       it('should throw if the username is taken and there is an enabled user', async () => {
 
-        await expect(usersController.register(enabledUser)).rejects.toThrow(
-          'Email taken!',
-        );
+        await expect(usersController.register(enabledUser)).rejects.toMatchObject({
+          message: {
+            message: 'Email taken!',
+          },
+        });
       });
 
       it('should throw if the user has not been invited', async () => {
@@ -142,9 +146,12 @@ describe('Users controller', () => {
           permissions: [],
         };
 
-        await expect(usersController.register(notInvitedUser)).rejects.toThrow(
-          'Email taken!',
-        );
+        await expect(usersController.register(notInvitedUser)).rejects
+          .toMatchObject({
+            message: {
+              message: 'Email taken!',
+            },
+          });
       });
 
       it('should create the user if the user has been invited', async () => {
@@ -170,7 +177,7 @@ describe('Users controller', () => {
         const updated = await usersController.update({
           ...enabledUser,
           name: 'changed name',
-          permissions: [PERMISSIONS.CAN_CREATE_INVOICES],
+          permissions: [PERMISSIONS.CAN_MANAGE_DOCUMENTS],
         });
 
         expect(updated.name).toEqual('changed name');
@@ -182,9 +189,13 @@ describe('Users controller', () => {
             ...enabledUser,
             name: 'changed name 2',
             email: 'test1',
-            permissions: [PERMISSIONS.CAN_CREATE_INVOICES],
+            permissions: [PERMISSIONS.CAN_MANAGE_DOCUMENTS],
           }),
-        ).rejects.toThrow('Email taken!');
+        ).rejects.toMatchObject({
+          message: {
+            message: 'Email taken!',
+          },
+        });
       });
     });
 
@@ -211,9 +222,11 @@ describe('Users controller', () => {
       });
 
       it('should return error if the email is taken', async () => {
-        await expect(usersController.register(invitedUser)).rejects.toThrow(
-          'Email taken!',
-        );
+        await expect(usersController.register(invitedUser)).rejects.toMatchObject({
+          message: {
+            message: 'Email taken!',
+          },
+        });
       });
 
       it('should create the user if the username is not taken', async () => {
@@ -247,9 +260,11 @@ describe('Users controller', () => {
             invited: false,
             permissions: [],
           }),
-        ).rejects.toThrow(
-          'Password is mandatory',
-        );
+        ).rejects.toMatchObject({
+          message: {
+            message: 'Password is mandatory',
+          },
+        });
 
         await expect(
           usersController.register({
@@ -262,9 +277,11 @@ describe('Users controller', () => {
             invited: false,
             permissions: [],
           }),
-        ).rejects.toThrow(
-          'Password is mandatory',
-        );
+        ).rejects.toMatchObject({
+          message: {
+            message: 'Password is mandatory',
+          },
+        });
 
         await expect(
           usersController.register({
@@ -277,9 +294,11 @@ describe('Users controller', () => {
             invited: false,
             permissions: [],
           }),
-        ).rejects.toThrow(
-          'Password is mandatory',
-        );
+        ).rejects.toMatchObject({
+          message: {
+            message: 'Password is mandatory',
+          },
+        });
 
       });
 
@@ -291,9 +310,13 @@ describe('Users controller', () => {
           usersController.invite({
             name: 'any_username',
             email: 'test',
-            permissions: [PERMISSIONS.CAN_CREATE_INVOICES],
+            permissions: [PERMISSIONS.CAN_MANAGE_DOCUMENTS],
           }),
-        ).rejects.toThrow('Invite functionality not enabled!');
+        ).rejects.toMatchObject({
+          message: {
+            message: 'Invite functionality not enabled!',
+          },
+        });
       });
     });
   });

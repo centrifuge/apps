@@ -1,4 +1,4 @@
-import React  from 'react';
+import React, { FunctionComponent } from 'react';
 import { NumberInput } from '@centrifuge/axis-number-input';
 import { DateInput } from '@centrifuge/axis-date-input';
 import { Attribute, AttrTypes } from '../common/models/schema';
@@ -18,9 +18,19 @@ interface OuterProps {
   isViewMode: boolean;
 }
 
-const AttributeField = (props: Props) => {
+export const AttributeField: FunctionComponent<Props> = (props: Props) => {
 
-  const { attr, isViewMode, formik: { values, errors, handleChange, setFieldValue } } = props;
+  const {
+    attr,
+    isViewMode,
+    formik: {
+      values,
+      errors,
+      handleChange,
+      setFieldValue
+    }
+  } = props;
+
   const key = `attributes.${attr.name}.value`;
 
   return <Box><FormField
@@ -35,7 +45,7 @@ const AttributeField = (props: Props) => {
           disabled={isViewMode}
           options={attr.options}
           value={get(values, key)}
-          onChange={({value}) => {
+          onChange={({ value }) => {
             setFieldValue(`${key}`, value.toString());
           }}
         />;

@@ -3,13 +3,12 @@ import { databaseServiceProvider } from '../database/database.providers';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SessionGuard } from '../auth/SessionGuard';
 import { DatabaseService } from '../database/database.service';
-import { Invoice } from '../../../src/common/models/invoice';
-import { centrifugeServiceProvider } from "../centrifuge-client/centrifuge.module";
+import { centrifugeServiceProvider } from '../centrifuge-client/centrifuge.module';
 
 
 describe('Funding controller', () => {
 
-  const invoice: Invoice = {
+  const invoice: any = {
     sender: '0x111',
     recipient: '0x112',
     currency: 'USD',
@@ -33,7 +32,7 @@ describe('Funding controller', () => {
       .compile();
 
     const databaseService = fundingModule.get<DatabaseService>(DatabaseService);
-    insertedInvoice = await databaseService.invoices.insert({
+    insertedInvoice = await databaseService.documents.insert({
       header: {
         document_id: '0x39393939',
       },
@@ -47,18 +46,18 @@ describe('Funding controller', () => {
     it('should return the created funding agreement', async () => {
 
       const fundingRequest = {
-        invoice_id: 'some_id',
         document_id: '0x39393939',
-        funder: 'funder',
+        funder_id: 'funder',
         agreement_id: 'agreement_id',
-        amount: 0,
-        invoice_amount: 0,
-        days: 0,
-        apr: 5,
-        fee: 0,
+        amount: '0',
+        invoice_amount: '0',
+        days: '0',
+        apr: '5',
+        fee: '0',
         repayment_due_date: 'next week',
-        repayment_amount: 0,
+        repayment_amount: '0',
         currency: 'USD',
+        nft_address: '0xe444',
       };
 
       const fundingController = fundingModule.get<FundingController>(
@@ -67,23 +66,24 @@ describe('Funding controller', () => {
 
       const result = await fundingController.create(
         fundingRequest,
-        { user: { _id: 'user_id' } },
+        { user: { _id: 'user_id', account: '0xCentrifugeId' } },
       );
       expect(result).toEqual({
         header: {
           job_id: 'some_job_id',
+          nfts: [
+            {
+              token_id: 'someToken',
+              owner: '0xCentrifugeId',
+            },
+          ],
         },
         data: {
-          'amount': '0',
-          'apr': '5',
-          'borrower_id': undefined,
-          'funder_id': 'funder',
-          'currency': 'USD',
-          'days': '0',
-          'fee': '0',
-          'nft_address': 'token_id',
-          'repayment_amount': '0',
-          'repayment_due_date': 'next week',
+          funding: {
+            agreement_id: 'e444',
+            document_id: '0x39393939',
+          },
+          signatures: ['signature_data_1'],
         },
 
       });
@@ -96,8 +96,6 @@ describe('Funding controller', () => {
       const fundingRequest = {
         document_id: '0x39393939',
         agreement_id: 'agreement_id',
-        nft_address: 'token_id',
-        borrower_id: 'owner',
       };
 
       const fundingController = fundingModule.get<FundingController>(
@@ -106,14 +104,15 @@ describe('Funding controller', () => {
 
       const result = await fundingController.sign(
         fundingRequest,
-        { user: { _id: 'user_id' } },
+        { user: { _id: 'user_id',account: '0xCentrifugeId'  } },
       );
       expect(result).toEqual({
         header: {
           job_id: 'some_job_id',
           nfts: [
             {
-              token_id: 'token_id',
+              token_id: 'someToken',
+              owner: '0xCentrifugeId',
             },
           ],
         },
@@ -128,32 +127,5 @@ describe('Funding controller', () => {
   });
 
 
-  describe('settle', () => {
-    it('should return nft transfer details', async () => {
-
-      const payload = {
-        document_id: '0x39393939',
-        agreement_id: 'agreement_id',
-      };
-
-      const fundingController = fundingModule.get<FundingController>(
-        FundingController,
-      );
-
-      const result = await fundingController.settle(
-        payload,
-        { user: { _id: 'user_id' } },
-      );
-      expect(result).toEqual({
-        header: {
-          job_id: 'some_job_id',
-
-        },
-        registry_address: '0xADDRESS',
-        to: '0x2222',
-        token_id: '0xNFT',
-      });
-    });
-  });
 });
 

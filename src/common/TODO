@@ -1,2 +1,0 @@
-For code cleanliness this folder should be moved in a separate package, so both the frontend and the backend can 
-use common routes, constants and DTOs.

@@ -1,29 +1,22 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ROUTES } from '../../../src/common/constants';
-import {
-  FunFundingListResponse,
-  NotificationNotificationMessage,
-  UserapiTransferDetailListResponse,
-} from '../../../clients/centrifuge-node';
+import { NotificationNotificationMessage } from '../../../clients/centrifuge-node';
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
-import { InvoiceResponse } from '../../../src/common/interfaces';
-import { Document } from "../../../src/common/models/document";
-import { unflatten } from "../../../src/common/custom-attributes";
+import { unflatten } from '../../../src/common/custom-attributes';
 
-export const documentTypes = {
-  invoice:
-    'http://github.com/centrifuge/centrifuge-protobufs/invoice/#invoice.InvoiceData',
-  purchaseOrder:
-    'http://github.com/centrifuge/centrifuge-protobufs/purchaseorder/#purchaseorder.PurchaseOrderData',
-  genericDocument:
-    'http://github.com/centrifuge/centrifuge-protobufs/generic/#generic.Generic',
+
+// TODO add this in Common package
+export enum DocumentTypes {
+  INVOICE = 'http://github.com/centrifuge/centrifuge-protobufs/invoice/#invoice.InvoiceData',
+  PURCHASE_ORDERS = 'http://github.com/centrifuge/centrifuge-protobufs/purchaseorder/#purchaseorder.PurchaseOrderData',
+  GENERIC_DOCUMENT = 'http://github.com/centrifuge/centrifuge-protobufs/generic/#generic.Generic',
 };
 
-export const eventTypes = {
-  DOCUMENT: 1,
-  JOB: 1,
-  ERROR: 0,
+export enum EventTypes {
+  DOCUMENT = 1,
+  JOB = 1,
+  ERROR = 0,
 };
 
 @Controller(ROUTES.WEBHOOKS)
@@ -44,67 +37,39 @@ export class WebhooksController {
   async receiveMessage(@Body() notification: NotificationNotificationMessage) {
     console.log('Receive Webhook', notification);
     try {
-      if (notification.event_type === eventTypes.DOCUMENT) {
+      if (notification.event_type === EventTypes.DOCUMENT) {
         // Search for the user in the database
-        const user = await this.databaseService.users.findOne({ $or: [{ account: notification.to_id.toLowerCase() }, { account: notification.to_id }] });
+        const user = await this.databaseService.users
+          .findOne({ $or: [{ account: notification.to_id.toLowerCase() }, { account: notification.to_id }] });
         if (!user) {
           throw new Error('User is not present in database');
         }
-        if (notification.document_type === documentTypes.invoice) {
-          const result = await this.centrifugeService.invoices.getInvoice(
-            user.account,
-            notification.document_id,
-          );
 
-          const invoice: InvoiceResponse = {
-            ...result,
-            ownerId: user._id,
-          };
-          if (invoice.attributes) {
-            if (invoice.attributes.funding_agreement) {
-              const fundingList: FunFundingListResponse = await this.centrifugeService.funding.getList(invoice.header.document_id, user.account);
-              invoice.fundingAgreement = (fundingList.data ? fundingList.data.shift() : undefined);
-            }
-            if (invoice.attributes.transfer_details) {
-              const transferList: UserapiTransferDetailListResponse = await this.centrifugeService.transfer.listTransferDetails(user.account, invoice.header.document_id);
-              invoice.transferDetails = (transferList ? transferList.data : undefined);
-            }
-
-            // We need to delete the attributes prop because nedb does not allow for . in field names
-            delete invoice.attributes;
-          }
-
-          await this.databaseService.invoices.update(
-            { 'header.document_id': notification.document_id, 'ownerId': user._id },
-            invoice,
-            { upsert: true },
-          );
-          // TODO this should be similar to invoices. We do not care for now.
-        } else if (notification.document_type === documentTypes.purchaseOrder) {
-          const result = await this.centrifugeService.purchaseOrders.getPurchaseOrder(
-            user.account,
-            notification.document_id,
-          );
-          await this.databaseService.purchaseOrders.insert(result);
-          // FlexDocs
-        } else if (notification.document_type === documentTypes.genericDocument) {
+        // Gateways can receive and store invoices
+        // TODO this code should be removed when the node does not allow to send invoices
+        // anymore
+        if (notification.document_type === DocumentTypes.GENERIC_DOCUMENT) {
           const result = await this.centrifugeService.documents.getDocument(
-              user.account,
-              notification.document_id,
+            user.account,
+            notification.document_id,
           );
 
           const unflattenedAttributes = unflatten(result.attributes);
           await this.databaseService.documents.update(
-              { 'header.document_id': notification.document_id, 'ownerId': user._id },
-              {$set: {
+            { 'header.document_id': notification.document_id, 'ownerId': user._id },
+            {
+              $set: {
                 ownerId: user._id,
                 header: result.header,
                 data: result.data,
                 attributes: unflattenedAttributes,
                 scheme: result.scheme,
-              }},
-              { upsert: true },
+              },
+            },
+            { upsert: true },
           );
+        } else {
+          throw new Error(`Document type ${notification.document_type} not supported`);
         }
       }
     } catch (e) {

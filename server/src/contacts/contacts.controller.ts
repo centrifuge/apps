@@ -1,15 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpException,
-  HttpStatus,
-  Param,
-  Post,
-  Put,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { SessionGuard } from '../auth/SessionGuard';
 import { Contact } from '../../../src/common/models/contact';
 import { ROUTES } from '../../../src/common/constants';
@@ -20,7 +9,8 @@ import { DatabaseService } from '../database/database.service';
 export class ContactsController {
   constructor(
     private readonly databaseService: DatabaseService,
-  ) {}
+  ) {
+  }
 
   @Post()
   /**
@@ -34,7 +24,7 @@ export class ContactsController {
     try {
       Contact.validate(contact);
     } catch (err) {
-      throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+      throw new BadRequestException(err.message);
     }
 
     const newContact = new Contact(

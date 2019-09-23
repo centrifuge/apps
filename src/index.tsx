@@ -2,21 +2,22 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import { Provider } from 'react-redux';
-import { ConnectedRouter } from 'connected-react-router';
-
-import configureStore, { history } from './store';
 
 import 'normalize.css';
 import config from './common/config';
+import { Route, Router } from 'react-router';
+import { createBrowserHistory } from 'history';
 
-const runApplication = (store) => {
+const customHistory = createBrowserHistory();
+
+const runApplication = (preloadedState) => {
+  ;
   ReactDOM.render(
-    <Provider store={store}>
-      <ConnectedRouter history={history}>
-        <App/>
-      </ConnectedRouter>
-    </Provider>,
+    <Router history={customHistory}>
+      <Route render={() => {
+        return <App loggedInUser={preloadedState.user!.auth!.loggedInUser}/>;
+      }}/>
+    </Router>,
     document.getElementById('root'),
   );
 };
@@ -41,20 +42,25 @@ if (process.env.NODE_ENV === 'development') {
     .then(res => res.json())
     .then(response => {
 
-      window['__ETH_NETWORK__'] =  config.ethNetwork;
-      runApplication(configureStore({
+      window['__ETH_NETWORK__'] = config.ethNetwork;
+      window['__PRELOADED_STATE__'] = {
+        user: response,
+      };
+
+      const defaultStore = {
         user: {
           auth: {
             loggedInUser: response,
           },
         },
-      }));
+      };
+      runApplication(defaultStore);
     });
 
 
 } else {
   //@ts-ignore
-  runApplication(configureStore(window.__PRELOADED_STATE__ || {}));
+  runApplication(window.__PRELOADED_STATE__ || {});
 }
 
 

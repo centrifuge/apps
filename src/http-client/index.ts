@@ -1,10 +1,9 @@
 import axios from 'axios';
-// TODO: extract common models and constants in a better place (separate npm module?)
-import { Invoice } from '../common/models/invoice';
+
 import { ROUTES } from '../common/constants';
 import { User } from '../common/models/user';
 import { Contact } from '../common/models/contact';
-import { FunRequest, UserapiInvoiceResponse } from '../../clients/centrifuge-node';
+import { FunRequest } from '../../clients/centrifuge-node';
 import { FundingRequest } from '../common/models/funding-request';
 import { TransferDetailsRequest } from '../common/models/transfer-details';
 import { Schema } from '../common/models/schema';
@@ -13,16 +12,6 @@ import { Document, MintNftRequest } from '../common/models/document';
 const instance = axios.create();
 
 export const httpClient = {
-  invoices: {
-    create: async (invoice: Invoice): Promise<UserapiInvoiceResponse> =>
-      instance.post(ROUTES.INVOICES, invoice),
-    update: async (invoice: Invoice): Promise<UserapiInvoiceResponse> =>
-      instance.put(`${ROUTES.INVOICES}/${invoice._id}`, invoice),
-    read: async (): Promise<UserapiInvoiceResponse> =>
-      instance.get(ROUTES.INVOICES),
-    readById: async (id): Promise<UserapiInvoiceResponse> =>
-      instance.get(`${ROUTES.INVOICES}/${id}`),
-  },
   user: {
     login: async (user: User) => instance.post(ROUTES.USERS.login, user),
     logout: async () => instance.get(ROUTES.USERS.logout),
@@ -34,14 +23,13 @@ export const httpClient = {
   },
   contacts: {
     create: async (contact: Contact) => instance.post(ROUTES.CONTACTS, contact),
-    read: async () => instance.get(ROUTES.CONTACTS),
+    list: async () => instance.get(ROUTES.CONTACTS),
     update: async (contact: Contact) =>
       instance.put(`${ROUTES.CONTACTS}/${contact._id}`, contact),
   },
   funding: {
     create: async (fundingRequest: FundingRequest) => instance.post(ROUTES.FUNDING.base, fundingRequest),
     sign: async (fundingRequest: FunRequest) => instance.post(ROUTES.FUNDING.sign, fundingRequest),
-    settle: async (fundingRequest: FundingRequest) => instance.post(ROUTES.FUNDING.settle, fundingRequest),
   },
   transferDetails: {
     create: async (transferDetails: TransferDetailsRequest) => instance.post(ROUTES.TRANSFER_DETAILS, transferDetails),
@@ -49,16 +37,16 @@ export const httpClient = {
   },
   schemas: {
     create: async (schema: Schema) => instance.post(ROUTES.SCHEMAS, schema),
-    read: async (query = {}) => instance.get(ROUTES.SCHEMAS, { params: { ...query } }),
-    readById: async (id): Promise<Schema> => instance.get(`${ROUTES.SCHEMAS}/${id}`),
+    list: async (query = {}) => instance.get(ROUTES.SCHEMAS, { params: { ...query } }),
+    getById: async (id): Promise<Schema> => instance.get(`${ROUTES.SCHEMAS}/${id}`),
     update: async (schema: Schema) => instance.put(`${ROUTES.SCHEMAS}/${schema._id}`, schema),
     archive: async (id: string) => instance.delete(`${ROUTES.SCHEMAS}/${id}`),
   },
   documents: {
     create: async (document: Document) => instance.post(ROUTES.DOCUMENTS, document),
-    read: async () => instance.get(ROUTES.DOCUMENTS),
-    readById: async (id): Promise<Document> => instance.get(`${ROUTES.DOCUMENTS}/${id}`),
+    list: async () => instance.get(ROUTES.DOCUMENTS),
+    getById: async (id): Promise<Document> => instance.get(`${ROUTES.DOCUMENTS}/${id}`),
     update: async (document: Document) => instance.put(`${ROUTES.DOCUMENTS}/${document._id}`, document),
-    mint: async (id: string, payload: MintNftRequest) => instance.post(`${ROUTES.DOCUMENTS}/${id}/mint`, payload),
+    mint: async (id: string | undefined, payload: MintNftRequest) => instance.post(`${ROUTES.DOCUMENTS}/${id}/mint`, payload),
   },
 };

@@ -202,9 +202,11 @@ describe('DocumentsController', () => {
           { user: { _id: 'user_id', account: '0x4441122' } },
           { ...updatedDocument },
         ),
-      ).rejects.toThrow(
-        `Can not find document #someID in the database`,
-      );
+      ).rejects.toMatchObject({
+        message: {
+          message: `Can not find document #someID in the database`,
+        },
+      });
     });
   });
 

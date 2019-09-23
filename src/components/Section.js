@@ -18,9 +18,9 @@ export const Section = withTheme(props => {
 
   return (
     <Box pad={'medium'} {...rest}>
-      <Box direction="row" gap="medium">
+      <Box direction="row" pad={{'vertical':'medium'}} gap="medium" align={'center'} >
         {title &&
-        <Heading margin={{ top: 'none' }} style={{ minWidth: '100px' }} level={headingLevel || 5}>{title}</Heading>}
+        <Heading margin={'none'}  level={headingLevel || 5}>{title}</Heading>}
         {collapsibleLabel && (
           <CheckBox
             label={collapsibleLabel}
@@ -28,7 +28,7 @@ export const Section = withTheme(props => {
             onChange={ev => onCollapse ? onCollapse(ev.target.checked) : open(ev.target.checked)}
           />
         )}
-        {actions && <Box justify={'end'} gap={'medium'} direction="row" fill>
+        {actions && <Box justify={'end'} gap={'medium'} direction="row" flex={'grow'}>
           {actions}
         </Box>}
       </Box>

@@ -1,29 +1,31 @@
-export interface IFundingRequest {
-  document_id: string,
-  funder: string,
+export interface IFundingAgreement {
+  funder_id: string,
   agreement_id?: string,
-  amount: number,
-  days: number,
-  apr: number,
-  fee: number,
+  amount: string,
+  days: string,
+  apr: string,
+  fee: string,
   repayment_due_date: string,
-  repayment_amount: number,
+  repayment_amount: string,
   currency: string
 }
 
 
-export class FundingRequest implements IFundingRequest {
-  public invoice_id: string;
-  public document_id: string;
-  public funder: string = '';
+export class FundingAgreement implements IFundingAgreement {
+  public funder_id: string = '';
   public agreement_id?: string;
-  public amount: number = 0;
-  public days: number = 0;
-  public invoice_amount: number = 0;
-  public apr: number = 0.05;
-  public fee: number = 0;
+  public amount: string = '0';
+  public days: string = '0';
+  public apr: string = '0.05';
+  public fee: string = '0';
   public repayment_due_date: string = '';
-  public repayment_amount: number = 0;
-  public currency: string = '';
+  public repayment_amount: string = '0';
+  public currency: string = 'USD';
+  public nft_address: string = '';
+}
+
+
+export class FundingRequest extends FundingAgreement {
+  public document_id: string;
 }
 

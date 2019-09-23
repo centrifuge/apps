@@ -1,10 +1,10 @@
 import {
+  BadRequestException,
   Body,
+  ConflictException,
   Controller,
   Delete,
   Get,
-  HttpException,
-  HttpStatus,
   Param,
   Post,
   Put,
@@ -41,16 +41,15 @@ export class SchemasController {
         schema.formFeatures,
       );
     } catch (err) {
-      throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+      throw new BadRequestException(err.message);
     }
 
     const schemaFromDB = await this.databaseService.schemas.findOne(
       { name: newSchema.name },
     );
     if (schemaFromDB)
-      throw new HttpException(
+      throw new ConflictException(
         `Schema with name ${newSchema.name} exists in the database`,
-        HttpStatus.CONFLICT,
       );
 
     return await this.databaseService.schemas.insert(newSchema);
@@ -104,7 +103,7 @@ export class SchemasController {
       Schema.validateDiff(oldSchema, update);
       Schema.validate(update);
     } catch (err) {
-      throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+      throw new BadRequestException(err.message);
     }
     const { name, attributes, registries, formFeatures } = update;
     return await this.databaseService.schemas.updateById(

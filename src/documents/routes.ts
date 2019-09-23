@@ -1,6 +1,6 @@
 const documentsIndex = '/documents';
 
-export const documentRoutes = {
+export default {
   index: documentsIndex,
   new: `${documentsIndex}/new`,
   view: `${documentsIndex}/:id`,

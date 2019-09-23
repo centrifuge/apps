@@ -28,6 +28,7 @@ export enum AttrTypes {
 export interface FormFeatures {
   columnNo?: number,
   comments?: boolean
+  fundingAgreement?:boolean,
   defaultSection?: string
 }
 
@@ -90,6 +91,7 @@ export enum AttributesErrors {
 export enum FormFeaturesErrors {
   COLUMN_NO_FORMAT = 'columnNo property must be an integer greater than 0',
   COMMENTS_FORMAT = 'comments property must be an boolean',
+  FUNDING_AGREEMENT_FORMAT = 'fundingAgreement property property must be an boolean',
   DEFAULT_SECTION_FORMAT = 'defaultSection property must be a string',
 }
 
@@ -118,6 +120,7 @@ export class Schema {
       ],
       registries: [],
       formFeatures: {
+        fundingAgreement:false,
         columnNo: 2,
         comments: true,
         defaultSection: 'Attributes',
@@ -278,6 +281,9 @@ export class Schema {
 
     if (formFeatures.hasOwnProperty('comments') && typeof formFeatures.comments !== 'boolean')
       throw generateFormFeaturesError(FormFeaturesErrors.COMMENTS_FORMAT);
+
+    if (formFeatures.hasOwnProperty('formFeatures') && typeof formFeatures.comments !== 'boolean')
+      throw generateFormFeaturesError(FormFeaturesErrors.FUNDING_AGREEMENT_FORMAT);
 
     if (formFeatures.hasOwnProperty('defaultSection') && !isString(formFeatures.defaultSection))
       throw generateFormFeaturesError(FormFeaturesErrors.DEFAULT_SECTION_FORMAT);

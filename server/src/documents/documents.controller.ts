@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { CoreapiCreateDocumentRequest, UserapiMintNFTRequest } from '../../../clients/centrifuge-node';
@@ -71,10 +71,15 @@ export class DocumentsController {
       _id: params.id,
       ownerId: request.user._id,
     });
+
+    if (!document) throw new NotFoundException('Document not found');
     const docFromNode = await this.centrifugeService.documents.getDocument(request.user.account, document.header.document_id);
     return {
       _id: document._id,
       ...docFromNode,
+      attributes: {
+        ...unflatten(docFromNode.attributes),
+      },
     };
 
   }
@@ -98,7 +103,7 @@ export class DocumentsController {
       { _id: params.id },
     );
 
-    if (!documentFromDb) throw new HttpException(`Can not find document #${params.id} in the database`, HttpStatus.CONFLICT);
+    if (!documentFromDb) throw new NotFoundException(`Can not find document #${params.id} in the database`);
 
     const payload: UserapiMintNFTRequest = {
       document_id: documentFromDb.header.document_id,
@@ -143,7 +148,10 @@ export class DocumentsController {
       { _id: params.id },
     );
 
-    if (!documentFromDb) throw new HttpException(`Can not find document #${params.id} in the database`, HttpStatus.CONFLICT);
+    if (!documentFromDb) throw new NotFoundException(`Can not find document #${params.id} in the database`);
+
+    // Node does not support signed attributes
+    delete document.attributes.funding_agreement;
 
     const updateResult: Document = await this.centrifugeService.documents.updateDocument(
       request.user.account,

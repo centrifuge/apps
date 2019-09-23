@@ -1,173 +1,143 @@
-import React, { Component } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import { Anchor, Box, Image, Text } from 'grommet';
 import { AxisTheme } from '@centrifuge/axis-theme';
 import Routing, { RouteItem } from './Routing';
 import { MenuItem, NavBar } from '@centrifuge/axis-nav-bar';
-import { connect } from 'react-redux';
 import { User } from './common/models/user';
-import { push, RouterAction } from 'connected-react-router';
 import { PERMISSIONS } from './common/constants';
 import routes from './routes';
-import InvoiceList from './invoices/InvoiceList';
-import UsersList from './admin/users/UsersList';
-import CreateInvoice from './invoices/Create';
-import { ConnectedFundingAgreementView } from './invoices/FundingAgreementView';
-import EditInvoice from './invoices/Edit';
-import Contacts from './contacts/View';
-import { NotificationProvider } from './notifications/NotificationContext';
-import FundingAgreementList from './invoices/FundingAgreementList';
-import { ConnectedInvoiceView } from './invoices/InvoiceView';
-import { ConnectedNotifications } from './notifications/Notifications';
-import SchemasList from './admin/schemas/SchemasList';
+
+import UsersList from './users/UsersList';
+
+
+import Contacts from './contacts/ViewContacts';
+import { NotificationProvider } from './components/notifications/NotificationContext';
+import SchemasList from './schemas/SchemasList';
 import ListDocuments from './documents/ListDocuments';
 import CreateDocument from './documents/CreateDocument';
 import ViewDocument from './documents/ViewDocument';
 import EditDocument from './documents/EditDocument';
 import { getAddressLink } from './common/etherscan';
 import { DisplayField } from '@centrifuge/axis-display-field';
-import logo from './logo.png';
+import logo from './assets/logo.png';
+import { RouteComponentProps, withRouter } from 'react-router';
 
-interface AppPros {
-  selectedRoute: string;
+interface AppPros extends RouteComponentProps {
   loggedInUser: User | null;
-  push: (route) => RouterAction
 }
 
 
-class App extends Component<AppPros> {
-  render() {
+const loggedInUser = window['__PRELOADED_STATE__'] ? window['__PRELOADED_STATE__'].user : null;
 
-    const {
-      selectedRoute,
-      loggedInUser,
+export const AppContext = React.createContext <{
+  user: User | null,
+  setUser: (user) => void
+}>({
+  user: loggedInUser,
+  setUser: (user) => {
+  },
+});
+
+
+const App: FunctionComponent<AppPros> = (props: AppPros) => {
+
+  const {
+    loggedInUser,
+    location: {
+      pathname,
+    },
+    history: {
       push,
-    } = this.props;
-
-    let menuItems: MenuItem[] = [];
-    let routeItems: RouteItem[] = [];
+    },
+  } = props;
 
 
-    //TODO move this a function that generates menuItems and routes items based on a user
-    if (loggedInUser) {
+  const [user, setUser] = useState(loggedInUser);
 
-      // There are no special permission for contacts
-      menuItems.push({ label: 'Contacts', route: routes.contacts.index });
+  let menuItems: MenuItem[] = [];
+  let routeItems: RouteItem[] = [];
+
+
+  //TODO move this a function that generates menuItems and routes items based on a user
+  if (user) {
+
+    // There are no special permission for contacts
+    menuItems.push({ label: 'Contacts', route: routes.contacts.index });
+    routeItems.push(
+      {
+        path: routes.contacts.index,
+        component: Contacts,
+      },
+    );
+
+    if (user.permissions.includes(PERMISSIONS.CAN_MANAGE_SCHEMAS)) {
+      menuItems.push(
+        { label: 'Schemas', route: routes.schemas.index },
+      );
       routeItems.push(
         {
-          path: routes.contacts.index,
-          component: Contacts,
+          path: routes.schemas.index,
+          component: SchemasList,
+        },
+      );
+    }
+
+    if (user.permissions.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
+      menuItems.push(
+        { label: 'Users', route: routes.user.index },
+      );
+      routeItems.push(
+        {
+          path: routes.user.index,
+          component: UsersList,
+        },
+      );
+    }
+
+
+    if (user.permissions.includes(PERMISSIONS.CAN_VIEW_DOCUMENTS) || user.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)) {
+      menuItems.push({ label: 'Documents', route: routes.documents.index });
+
+      // The order is important and the path are similar and routes will match first route it finds
+      // documents/new can match documents/{id} if the routes is declared after
+      if (user.schemas.length) {
+        routeItems.push(
+          {
+            path: routes.documents.new,
+            component: CreateDocument,
+          },
+        );
+
+      }
+
+      routeItems.push(
+        {
+          path: routes.documents.index,
+          component: ListDocuments,
+        },
+        {
+          path: routes.documents.view,
+          component: ViewDocument,
+        },
+        {
+          path: routes.documents.edit,
+          component: EditDocument,
         },
       );
 
-      if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_SCHEMAS)) {
-        menuItems.push(
-          { label: 'Schemas', route: routes.schemas.index },
-        );
-        routeItems.push(
-          {
-            path: routes.schemas.index,
-            component: SchemasList,
-          },
-        );
-      }
-
-      if (loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
-        menuItems.push(
-          { label: 'Users', route: routes.user.index },
-        );
-        routeItems.push(
-          {
-            path: routes.user.index,
-            component: UsersList,
-          },
-        );
-      }
-
-      if (loggedInUser.permissions.includes(PERMISSIONS.CAN_CREATE_INVOICES)) {
-        menuItems.push(...[
-          { label: 'Invoices', route: routes.invoices.index },
-        ]);
-
-        routeItems.push(
-          {
-            path: routes.invoices.index,
-            component: InvoiceList,
-          },
-          {
-            path: routes.invoices.new,
-            component: CreateInvoice,
-          },
-          {
-            path: routes.invoices.view,
-            component: ConnectedInvoiceView,
-          },
-          {
-            path: routes.invoices.edit,
-            component: EditInvoice,
-          },
-        );
-      }
-
-      if (loggedInUser.permissions.includes(PERMISSIONS.CAN_FUND_INVOICES)) {
-        menuItems.push(...[
-          { label: 'Funding Agreements', route: routes.funding.index },
-        ]);
-        routeItems.push(
-          {
-            path: routes.funding.index,
-            component: FundingAgreementList,
-          },
-          {
-            path: routes.funding.view,
-            component: ConnectedFundingAgreementView,
-          },
-        );
-      }
-
-
-      if (loggedInUser.permissions.includes(PERMISSIONS.CAN_VIEW_DOCUMENTS) || loggedInUser.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)) {
-        menuItems.push({ label: 'Documents', route: routes.documents.index });
-
-        // The order is important and the path are similar and routes will match first route it finds
-        // documents/new can match documents/{id} if the routes is declared after
-        if (loggedInUser.schemas.length) {
-          routeItems.push(
-            {
-              path: routes.documents.new,
-              component: CreateDocument,
-            },
-          );
-
-        }
-
-        routeItems.push(
-          {
-            path: routes.documents.index,
-            component: ListDocuments,
-          },
-          {
-            path: routes.documents.view,
-            component: ViewDocument,
-          },
-          {
-            path: routes.documents.edit,
-            component: EditDocument,
-          },
-        );
-
-
-      }
-
-      menuItems.push({ label: 'Log out', route: routes.user.logout, external: true, secondary: true });
 
     }
 
-    return (
-      <div className="App">
-        <AxisTheme full={true}>
+    menuItems.push({ label: 'Log out', route: routes.user.logout, external: true, secondary: true });
+
+  }
+
+  return (
+    <div className="App">
+      <AxisTheme full={true}>
+        <AppContext.Provider value={{ user, setUser }}>
           <NotificationProvider>
             <Box align="center">
-              <ConnectedNotifications/>
               <NavBar
                 width={'xxlarge'}
                 logo={
@@ -175,8 +145,8 @@ class App extends Component<AppPros> {
                     <Image src={logo}/>
                   </Anchor>
                 }
-                selectedRoute={selectedRoute}
-                menuLabel={loggedInUser ? loggedInUser.email : ''}
+                selectedRoute={pathname}
+                menuLabel={user ? user.email : ''}
                 menuItems={menuItems.reverse()}
                 onRouteClick={(item) => {
                   if (item.external) {
@@ -186,16 +156,17 @@ class App extends Component<AppPros> {
                   }
                 }}
               >
-                {loggedInUser && <Box direction="row" gap={'medium'} align={'center'} justify="end">
+                {user && <Box direction="row" gap={'medium'} align={'center'} justify="end">
                   <Box direction="row" align="center" gap={'xsmall'}>
                     <Text>Centrifuge ID: </Text>
                     <Box width={'160px'}>
                       <DisplayField
+                        copy={true}
                         link={{
-                          href: getAddressLink(loggedInUser.account),
+                          href: getAddressLink(user.account),
                           target: '_blank',
                         }}
-                        value={loggedInUser.account}
+                        value={user.account}
                       />
 
                     </Box>
@@ -213,20 +184,10 @@ class App extends Component<AppPros> {
 
             </Box>
           </NotificationProvider>
-        </AxisTheme>
-      </div>
-    );
-  }
-}
-
-const mapStateToProps = (state) => {
-  return {
-    selectedRoute: state.router.location.pathname,
-    loggedInUser: state.user.auth.loggedInUser,
-  };
+        </AppContext.Provider>
+      </AxisTheme>
+    </div>
+  );
 };
 
-export default connect(
-  mapStateToProps,
-  { push },
-)(App);
+export default withRouter(App);

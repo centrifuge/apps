@@ -5,7 +5,6 @@ import { DatabaseRepository } from './database.repository';
 import { Contact } from '../../../src/common/models/contact';
 import { Schema } from '../../../src/common/models/schema';
 import config from '../../../src/common/config';
-import { InvoiceResponse, PurchaseOrderResponse } from '../../../src/common/interfaces';
 import { DatabaseService } from './database.service';
 import { DocumentRequest } from "../../../src/common/models/document";
 
@@ -15,9 +14,7 @@ import { DocumentRequest } from "../../../src/common/models/document";
  * Initialize the database and the separate collections.
  */
 const initializeDatabase = async (inMemoryOnly: boolean) => {
-  const invoicesRepository = new DatabaseRepository<InvoiceResponse>(
-    { filename: `${config.dbPath}/invoicesDb`, inMemoryOnly },
-  );
+
   const usersRepository = new DatabaseRepository<User>(
     { filename: `${config.dbPath}/usersDb`, inMemoryOnly },
   );
@@ -44,10 +41,6 @@ const initializeDatabase = async (inMemoryOnly: boolean) => {
     { filename: `${config.dbPath}/contactsDb`, inMemoryOnly },
   );
 
-  const purchaseOrdersRepository = new DatabaseRepository<PurchaseOrderResponse>(
-    { filename: `${config.dbPath}/purchaseOrdersDb`, inMemoryOnly },
-  );
-
   const schemasRepository = new DatabaseRepository<Schema>(
     { filename: `${config.dbPath}/schemasDb`, inMemoryOnly },
   );
@@ -57,10 +50,8 @@ const initializeDatabase = async (inMemoryOnly: boolean) => {
   );
 
   return {
-    invoices: invoicesRepository,
     users: usersRepository,
     contacts: contactsRepository,
-    purchaseOrders: purchaseOrdersRepository,
     schemas: schemasRepository,
     documents: documentsRepository,
   };

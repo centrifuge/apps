@@ -4,13 +4,15 @@ import {
   FundingServiceApi,
   InvoicesApi,
   JobsApi,
-  JobsStatusResponse, NFTsApi,
+  JobsStatusResponse,
+  NFTsApi,
   NFTsBetaApi,
   PurchaseOrdersApi,
   TransferDetailsApi,
 } from '../../../clients/centrifuge-node';
 import config from '../../../src/common/config';
 import { promisify } from 'util';
+import { BadRequestException } from '@nestjs/common';
 
 const delay = promisify(setTimeout);
 
@@ -42,7 +44,10 @@ export class CentrifugeService {
     return this.job.getJobStatus(authorization, jobId).then(result => {
       if (result.status === 'pending') {
         return delay(500).then(() => this.pullForJobComplete(jobId, authorization));
+      } else if(result.status === 'failed') {
+        throw new BadRequestException(result.message);
       } else {
+        console.log('complete', result);
         return result;
       }
     });

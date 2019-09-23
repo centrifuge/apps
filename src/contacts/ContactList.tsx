@@ -18,25 +18,24 @@ import { Formik } from 'formik';
 import { SecondaryHeader } from '../components/SecondaryHeader';
 import { User } from '../common/models/user';
 
-interface ContactsProps {
+type Props =  {
   loggedInUser: User;
   contacts?: (Contact & { isEditing?: boolean })[];
-  refresh: () => void;
   createContact: (contact: Contact) => void;
   updateContact: (contact: Contact) => void;
 }
 
-interface ContactsState {
+type State = {
   submitted: boolean
   newContact?: Contact;
   contacts: (Contact & { isEditing?: boolean })[];
 }
 
 
-//TODO break this down
+//TODO This should contain only the list and the actions/modals should be view contacts
 
-export default class ContactList extends React.Component<ContactsProps,
-  ContactsState> {
+export default class ContactList extends React.Component<Props,
+  State> {
   displayName = 'Contacts';
 
   constructor(props) {
@@ -50,7 +49,7 @@ export default class ContactList extends React.Component<ContactsProps,
   renderRow(contact: Contact) {
     const {loggedInUser} = this.props;
     return (
-      <TableRow key={contact.address}>
+      <TableRow key={contact._id}>
         <TableCell>
           <Box direction="row" fill gap="xsmall">
             <Box fill>

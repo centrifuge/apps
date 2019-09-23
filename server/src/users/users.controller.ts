@@ -1,10 +1,9 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
-  HttpException,
-  HttpStatus,
   Post,
   Put,
   Request,
@@ -14,7 +13,7 @@ import {
 
 import * as bcrypt from 'bcrypt';
 import { promisify } from 'util';
-import { PERMISSIONS, ROUTES } from '../../../src/common/constants';
+import { ROUTES } from '../../../src/common/constants';
 import { User } from '../../../src/common/models/user';
 import { DatabaseService } from '../database/database.service';
 import config from '../../../src/common/config';
@@ -55,7 +54,7 @@ export class UsersController {
     });
 
     if (!user.password || !user.password.trim()) {
-      throw new HttpException('Password is mandatory', HttpStatus.FORBIDDEN);
+      throw new ForbiddenException('Password is mandatory');
     }
 
     if (config.inviteOnly) {
@@ -68,11 +67,11 @@ export class UsersController {
           existingUser._id,
         );
       } else {
-        throw new HttpException('Email taken!', HttpStatus.FORBIDDEN);
+        throw new ForbiddenException('Email taken!');
       }
     } else {
       if (existingUser) {
-        throw new HttpException('Email taken!', HttpStatus.FORBIDDEN);
+        throw new ForbiddenException('Email taken!');
       }
 
       return this.upsertUser({
@@ -87,14 +86,14 @@ export class UsersController {
   @UseGuards(UserAuthGuard)
   async invite(@Body() user: Partial<User>) {
     if (!config.inviteOnly) {
-      throw new HttpException('Invite functionality not enabled!', HttpStatus.FORBIDDEN);
+      throw new ForbiddenException('Invite functionality not enabled!');
     }
     const userExists = await this.databaseService.users.findOne({
       email: user.email,
     });
 
     if (userExists) {
-      throw new HttpException('User already invited!', HttpStatus.FORBIDDEN);
+      throw new ForbiddenException('User already invited!');
     }
 
     return this.upsertUser({
@@ -122,7 +121,7 @@ export class UsersController {
     });
 
     if (otherUserWithEmail) {
-      throw new HttpException('Email taken!', HttpStatus.FORBIDDEN);
+      throw new ForbiddenException('Email taken!');
     }
 
     return await this.databaseService.users.updateById(user._id,

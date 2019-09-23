@@ -76,7 +76,12 @@ export class MockCentrifugeService {
           header: {
             job_id: 'some_job_id',
           },
-          ...payload,
+          data: {
+            funding: {
+              agreement_id: 'e444',
+              ...payload.data,
+            },
+          },
         };
         resolve(result);
       });
@@ -110,7 +115,7 @@ export class MockCentrifugeService {
             job_id: 'some_job_id',
             nfts: [
               {
-                token_id: payload.nft_address,
+                token_id: 'someToken',
                 owner: account,
               },
             ],
@@ -198,19 +203,31 @@ export class MockCentrifugeService {
     })),
   };
   documents = {
-    getDocument: jest.fn(document_id => {
+    getDocument: jest.fn((account_id, document_id) => {
       return {
-        header: { document_id: '0x39393939' },
+        header: {
+          document_id: document_id,
+          nfts: [{ 'owner': 'owner', 'token_id': 'token_id' }],
+        },
         read_access: ['0x111'],
         write_access: ['0x222'],
+        data: { 'currency': 'USD' },
         attributes:
           {
-            animal_type: 'iguana',
-            number_of_legs: 4,
-            diet: 'insects',
-            'this is a random field': 'random',
+            animal_type: {
+              type: 'string',
+              value: 'iguana',
+            },
+            number_of_legs: {
+              type: 'decimal',
+              value: '4',
+            },
+            diet: {
+              type: 'string',
+              value: 'insects',
+            },
           },
-        schema_id: 'iUSDF2ax31e',
+        scheme: 'iUSDF2ax31e',
         ownerId: 'user_id',
       };
     }),
