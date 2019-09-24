@@ -13,14 +13,6 @@ interface Props {
   authedAddr: string;
 }
 
-interface NftData {
-  document_version: string;
-  amount: string;
-  asis_value: string;
-  rehab_value: string;
-  borrower: string;
-}
-
 class NftData extends React.Component<Props> {
 
   renderNFTData() {
