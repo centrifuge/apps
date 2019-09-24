@@ -19,7 +19,7 @@ interface Props {
 }
 
 interface State {
-  nft: NFT | null; 
+  nft: NFT | null;
   nftError: string;
   tokenId: string;
   principal: string;
@@ -38,18 +38,18 @@ class WhitelistNFT extends React.Component<Props, State> {
     appraisal: '0',
     interestRate: '0',
     is: null,
-    errorMsg: '',
+    errorMsg: ''
   };
 
   componentWillMount() {
   }
 
-  //handlers
+  // handlers
   onTokenIdValueChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const currentTokenId = event.currentTarget.value
-    await this.setState({ 
-      tokenId: currentTokenId, 
-      nft: null, 
+    await this.setState({
+      tokenId: currentTokenId,
+      nft: null,
       nftError: ''
     })
     await this.getNFT(currentTokenId)
@@ -61,11 +61,11 @@ class WhitelistNFT extends React.Component<Props, State> {
     const addresses = tinlake.contractAddresses;
     if (principal === '0') {
       this.setState({ is: 'error', errorMsg: 'Principal cannot be 0' });
-      //needs to be implemented on the contract level first
+      // needs to be implemented on the contract level first
     } /*else if (principal > appraisal) {
       this.setState({ is: 'error', errorMsg: 'Principal can not be heigher then appraisal'  });
     }*/
-    else{
+    else {
       this.setState({ is: 'loading' });
       try {
         await authTinlake();
@@ -98,10 +98,10 @@ class WhitelistNFT extends React.Component<Props, State> {
   }
 
   getNFT = async (currentTokenId: string) => {
-    const { tinlake} = this.props;
+    const { tinlake } = this.props;
     if (currentTokenId && currentTokenId.length > 0) {
       const result = await getNFT(tinlake, currentTokenId);
-      const {tokenId, nft, errorMessage } = result as Partial< {tokenId:string, nft:NFT, errorMessage:string} >
+      const { tokenId, nft, errorMessage } = result as Partial< {tokenId:string, nft:NFT, errorMessage:string} >
       if (tokenId !== this.state.tokenId) {
         return;
       }
@@ -195,4 +195,4 @@ class WhitelistNFT extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state )(WhitelistNFT);
+export default connect(state => state)(WhitelistNFT);

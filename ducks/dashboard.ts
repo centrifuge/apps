@@ -19,7 +19,7 @@ export interface DashboardState {
 
 const initialState: DashboardState = {
   state: null,
-  data: null,
+  data: null
 };
 
 // Reducer
@@ -46,7 +46,7 @@ export function getDashboardData(tinlake: Tinlake):
       loanCount: await loanCountPromise,
       totalDebt: await totalDebtPromise,
       totalBalance: await totalBalancePromise,
-      totalValueOfNFTs: await totalValueOfNFTsPromise,
+      totalValueOfNFTs: await totalValueOfNFTsPromise
     };
 
     dispatch({ data, type: RECEIVE });
@@ -60,7 +60,7 @@ export function subscribeDashboardData(tinlake: Tinlake):
 
     const interval = setInterval(
       () => dispatch(getDashboardData(tinlake)),
-      3600000,
+      3600000
     );
     const discard = () => clearInterval(interval);
     return discard as any;

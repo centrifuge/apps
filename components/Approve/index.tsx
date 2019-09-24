@@ -23,7 +23,7 @@ const SUCCESS_STATUS = '0x1';
 class Approve extends React.Component<Props, State> {
   state: State = {
     is: null,
-    errorMsg: '',
+    errorMsg: ''
   };
 
   approve = async () => {

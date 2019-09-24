@@ -37,7 +37,7 @@ class LoanRepay extends React.Component<Props, State> {
     repayAmount: '',
     is: null,
     errorMsg: '',
-    touchedRepaymentAmount: false,
+    touchedRepaymentAmount: false
   };
   discardDebtSubscription = () => { };
 

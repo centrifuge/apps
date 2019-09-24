@@ -36,7 +36,7 @@ class LoanBorrow extends React.Component<Props, State> {
     borrowAmount: '',
     is: null,
     errorMsg: '',
-    touchedBorrowAmount: false,
+    touchedBorrowAmount: false
   };
 
   componentWillMount() {

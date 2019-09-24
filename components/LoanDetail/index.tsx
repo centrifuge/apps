@@ -13,7 +13,7 @@ import Auth from '../Auth';
 
 interface Props {
   loanId: string;
-  mode: 'borrower' | 'admin';
+  mode: 'borrower' | 'admin' | '';
   tinlake: Tinlake;
   loans?: LoansState;
   getLoan?: (tinlake: Tinlake, loanId: string, refresh?: boolean) => Promise<void>;
@@ -54,7 +54,7 @@ class LoanDetail extends React.Component<Props> {
         </Box>
 
         {status === 'Whitelisted' &&
-          <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization
+          <Auth tinlake={tinlake}
             render={auth => auth.isAdmin ?
             <Link href={`/admin/unwhitelist-nft?loanId=${loanId}`}>
               <Button primary label="Unwhitelist" /></Link> : null} />}
@@ -63,11 +63,6 @@ class LoanDetail extends React.Component<Props> {
         {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
           <Link href={`/borrower/repay?loanId=${loanId}`}><Button primary label="Repay" /></Link>}
       </SecondaryHeader>
-
-      <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization render={auth =>
-        mode === 'borrower' && auth.user === null &&
-          <Alert margin="medium" type="error">Please authenticate to view your loan.</Alert>
-      } />
 
       <Box pad={{ horizontal: 'medium' }}>
         <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>

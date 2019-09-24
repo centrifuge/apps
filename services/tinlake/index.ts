@@ -7,7 +7,7 @@ const { contractAddresses, nftDataDefinition, transactionTimeout, rpcUrl } = con
 const portisConfig = {
   id: '2ea2735d-4963-40f5-823f-48cab29f7319', // required
   // network: 'mainnet', // optional
-  network: 'kovan', // optional
+  network: 'kovan' // optional
 };
 
 const walletConnectConfig = {
@@ -44,8 +44,8 @@ export async function getTinlake() {
   else {
     const httpProvider = new Eth.HttpProvider(rpcUrl);
     tinlake = new Tinlake(httpProvider, contractAddresses, nftDataDefinition.contractCall.outputs, transactionTimeout, {});
-  }   
-  
+  }
+
   return tinlake;
 }
 
@@ -71,11 +71,11 @@ async function web3Connect(): Promise<any> {
     const Web3Connect = require('web3connect').default;
     const web3Connect = new Web3Connect.Core({
       providerOptions: {
-        portis: portisConfig,
+        portis: portisConfig
         // fortmatic: {
         //   key: 'FORTMATIC_KEY', // required
         // },
-      },
+      }
     });
     // subscibe to connect
     web3Connect.on('connect', (provider: any) => {

@@ -14,16 +14,16 @@ function Alert({ type, children, ...rest }: Props) {
 const colors = {
   error: {
     backgroundColor: '#fed7d7',
-    color: '#9b2c2c',
+    color: '#9b2c2c'
   },
   info: {
     backgroundColor: '#bee3f8',
-    color: '#2c5282',
+    color: '#2c5282'
   },
   success: {
     backgroundColor: '#c6f6d5',
-    color: '#276749',
-  },
+    color: '#276749'
+  }
 };
 
 const AlertContainer = styled(Box)<{ type: 'error' | 'success' }>`

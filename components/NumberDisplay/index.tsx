@@ -19,7 +19,7 @@ NumberDisplay.defaultProps = {
   value: '0',
   precision: 2,
   prefix: '',
-  suffix: '',
+  suffix: ''
 };
 
 export default NumberDisplay;

@@ -5,11 +5,14 @@ import Link from 'next/link';
 import { AuthState } from '../../ducks/auth';
 import Badge from '../Badge';
 import { formatAddress } from '../../utils/formatAddress';
+import config from '../../config'
 
+const { isDemo } = config
 export interface MenuItem {
   label: string;
   route: string;
   secondary?: boolean;
+  permission?: "admin" | "demo" 
 }
 
 interface HeaderProps {
@@ -52,7 +55,13 @@ class Header extends React.Component<HeaderProps> {
       </Link>
       <Box direction="row" gap={itemGap} margin={{ right: 'auto' }}>
 
-        {menuItems.filter(item => !item.secondary).map((item) => {
+        {menuItems.filter(item => 
+        {
+          return (isAdmin && item.permission === "admin" ||
+            isDemo && item.permission === "demo" || !item.permission) && !item.secondary
+        }
+        )
+        .map((item) => {
           const anchorProps = {
             ...(item.route === selectedRoute ?
               { className: 'selected', color: '#0828BE' } : {}),

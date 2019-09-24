@@ -24,7 +24,7 @@ class MintNFT extends React.Component<Props, State> {
   state: State = {
     tokenId: `0x${Math.floor(Math.random() * (10 ** 15))}`,
     is: null,
-    errorMsg: '',
+    errorMsg: ''
   };
 
   mint = async () => {

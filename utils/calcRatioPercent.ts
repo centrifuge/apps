@@ -4,7 +4,7 @@ import BN from 'bn.js';
 Decimal.set({
   precision: 30,
   toExpNeg: -7,
-  toExpPos: 29,
+  toExpPos: 29
 });
 
 export const calcRatioPercent = (a: BN, b: BN): string => {

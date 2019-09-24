@@ -32,7 +32,7 @@ class NftData extends React.Component<Props> {
     return nftDataDefinition.displayedFields.map((field: DisplayedField) =>
         <Box basis={'1/4'} gap="medium" key={field.key}>
           <NftDataField displayedField={field} value={data.nftData[field.key]} />
-        </Box>,
+        </Box>
       );
   }
 
