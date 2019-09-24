@@ -27760,6 +27760,7 @@ var src$4 = {
     toTwosComplement: utils$2.toTwosComplement
 };
 var src_11 = src$4.sha3;
+var src_29 = src$4.utf8ToHex;
 
 var contractAbiNft = [
   {
@@ -27846,25 +27847,6 @@ var contractAbiNft = [
     constant: false,
     inputs: [
       {
-        name: "to",
-        type: "address"
-      },
-      {
-        name: "tokenId",
-        type: "uint256"
-      }
-    ],
-    name: "mint",
-    outputs: [
-    ],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [
-      {
         name: "from",
         type: "address"
       },
@@ -27920,6 +27902,37 @@ var contractAbiNft = [
     ],
     payable: false,
     stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "usr",
+        type: "address"
+      },
+      {
+        name: "tkn",
+        type: "uint256"
+      },
+      {
+        name: "ref",
+        type: "bytes"
+      },
+      {
+        name: "amount",
+        type: "uint256"
+      },
+      {
+        name: "asset",
+        type: "bytes"
+      }
+    ],
+    name: "mint",
+    outputs: [
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
     type: "function"
   },
   {
@@ -27985,6 +27998,37 @@ var contractAbiNft = [
       {
         name: "",
         type: "bool"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    name: "data",
+    outputs: [
+      {
+        name: "reference_id",
+        type: "uint256"
+      },
+      {
+        name: "amount",
+        type: "uint256"
+      },
+      {
+        name: "asset_type",
+        type: "uint256"
+      },
+      {
+        name: "borrower",
+        type: "address"
       }
     ],
     payable: false,
@@ -34662,11 +34706,31 @@ var Tinlake = /** @class */ (function () {
         /**
          * @param owner Owner of the new NFT
          */
-        this.mintNFT = function (owner, tokenId) { return __awaiter(_this, void 0, void 0, function () {
-            var txHash;
+        this.mintNFT = function (owner, tokenId, ref, amount, asset) { return __awaiter(_this, void 0, void 0, function () {
+            var ref1, asset1, txHash;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.nft.mint, [owner, tokenId, this.ethConfig])];
+                    case 0:
+                        ref1 = src_29(ref);
+                        asset1 = src_29(asset);
+                        console.log('owner', owner, 'tokenId', tokenId, 'ref', ref, 'amount', typeof amount, amount, 'asset', asset);
+                        return [4 /*yield*/, executeAndRetry(this.contracts.nft.mint, [owner, tokenId, ref1, amount, asset1, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[NFT.mint] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout)];
+                }
+            });
+        }); };
+        this.dummyCall = function (param) { return __awaiter(_this, void 0, void 0, function () {
+            var test1, txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        console.log("second dummy calling");
+                        test1 = src_29(param);
+                        console.log(test1);
+                        return [4 /*yield*/, executeAndRetry(this.contracts.nft.secondDummy, [param, this.ethConfig])];
                     case 1:
                         txHash = _a.sent();
                         console.log("[NFT.mint] txHash: " + txHash);
@@ -34840,7 +34904,9 @@ var Tinlake = /** @class */ (function () {
             var txHash;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.admin.whitelist, [registry, nft, principal, appraisal, fee, owner, this.ethConfig])];
+                    case 0:
+                        console.log(principal, appraisal, fee);
+                        return [4 /*yield*/, executeAndRetry(this.contracts.admin.whitelist, [registry, nft, principal, appraisal, fee, owner, this.ethConfig])];
                     case 1:
                         txHash = _a.sent();
                         console.log("[Admin.whitelist] txHash: " + txHash);

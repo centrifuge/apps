@@ -2,7 +2,7 @@ import Eth from 'ethjs';
 import { AbiCoder } from 'web3-eth-abi';
 const abiCoder = new AbiCoder();
 import BN from 'bn.js';
-import { sha3 } from 'web3-utils';
+import { sha3, utf8ToHex, padLeft } from 'web3-utils';
 
 import contractAbiNft from './abi/test/SimpleNFT.abi.json';
 import contractAbiTitle from './abi/Title.abi.json';
@@ -265,8 +265,11 @@ export class Tinlake {
   /**
    * @param owner Owner of the new NFT
    */
-  mintNFT = async (owner: string, tokenId: string) => {
-    const txHash = await executeAndRetry(this.contracts.nft.mint, [owner, tokenId, this.ethConfig]);
+  mintNFT = async (owner: string, tokenId: string, ref: string, amount: string, asset:string) => {
+    const ref1 = utf8ToHex(ref)
+    const asset1 = utf8ToHex(asset)
+    console.log( 'owner', owner, 'tokenId', tokenId, 'ref', ref, 'amount', typeof amount, amount, 'asset', asset)
+    const txHash = await executeAndRetry(this.contracts.nft.mint, [owner, tokenId, ref1, amount, asset1, this.ethConfig]);
     console.log(`[NFT.mint] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
   }
@@ -362,8 +365,8 @@ export class Tinlake {
    * using initFee
    * @param owner Owner of the created loan
    */
-  whitelist = async (registry: Address, nft: string, principal: string, appraisal: string,
-               fee: string, owner: string) => {
+  whitelist = async (registry: Address, nft: string, principal: string, appraisal: string, fee: string, owner: string) => {
+    console.log(principal, appraisal, fee)
     const txHash = await executeAndRetry(this.contracts.admin.whitelist, [registry, nft, principal, appraisal, fee, owner, this.ethConfig]);
     console.log(`[Admin.whitelist] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
