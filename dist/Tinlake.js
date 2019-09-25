@@ -34665,6 +34665,18 @@ var Tinlake = /** @class */ (function () {
                 return [2 /*return*/, executeAndRetry(this.contracts.currency.balanceOf, [usr])];
             });
         }); };
+        this.mintCurrency = function (usr, wad) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.currency.mint, [usr, wad, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[Currency.mint] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['currency'].abi, this.transactionTimeout)];
+                }
+            });
+        }); };
         /**
          * @param owner Owner of the new NFT
          */

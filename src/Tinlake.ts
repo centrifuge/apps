@@ -177,7 +177,6 @@ export class Tinlake {
   setProvider = (provider: any, ethOptions?: any) => {
     this.provider = provider;
     this.ethOptions = ethOptions || {};
-
     this.eth = new Eth(this.provider, this.ethOptions) as ethI;
 
     this.contracts = {
@@ -262,6 +261,11 @@ export class Tinlake {
     return executeAndRetry(this.contracts.currency.balanceOf, [usr]);
   }
 
+  mintCurrency = async (usr: string, wad: string) => {
+    const txHash = await executeAndRetry(this.contracts.currency.mint, [usr, wad, this.ethConfig]);
+    console.log(`[Currency.mint] txHash: ${txHash}`);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['currency'].abi, this.transactionTimeout);
+  }
   /**
    * @param owner Owner of the new NFT
    */
