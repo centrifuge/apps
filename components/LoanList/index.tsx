@@ -40,7 +40,7 @@ class LoanList extends React.Component<Props> {
         {
           header: 'NFT Owner', property: 'nftOwner', align: 'end',
           render: (l: InternalListLoan) => <div>
-            <Address address={l.nftOwner} />
+            <Address address={l.loanOwner} />
             {l.nftOwner === ethFrom && <Badge text={'Me'} style={{ marginLeft: 5 }} />}
           </div>,
         },
@@ -65,8 +65,10 @@ class LoanList extends React.Component<Props> {
         {
           header: 'Actions', property: 'id', align: 'end', sortable: false,
           render: (l: InternalListLoan) =>
-            <Link href={`/${mode}/loan?loanId=${l.loanId}`}><Anchor>View</Anchor></Link>,
-        },
+          { const loanUrlPrefix = (mode !== '') ? `/${mode}/` : ``
+           return  <Link href={`${loanUrlPrefix}loan?loanId=${l.loanId}`}><Anchor>View</Anchor></Link>
+          }
+      },
       ]} />
     </Box>;
   }

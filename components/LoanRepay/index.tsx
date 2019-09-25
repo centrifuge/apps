@@ -15,7 +15,12 @@ import { calcRepayAmount } from '../../utils/calcRepayAmount';
 import { authTinlake } from '../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import Auth from '../Auth';
+import config from '../../config'
+import BN from 'bn.js';
+const { isDemo } = config
 const SUCCESS_STATUS = '0x1';
+
+const playgroundDAIAmount = '1000';
 
 interface Props {
   loanId: string;
@@ -27,7 +32,7 @@ interface Props {
 
 interface State {
   repayAmount: string;
-  is: 'loading' | 'success' | 'error' | null;
+  is: 'loading' | 'success' | 'error' | 'funded' | null;
   errorMsg: string;
   touchedRepaymentAmount: boolean;
 }
@@ -64,6 +69,26 @@ class LoanRepay extends React.Component<Props, State> {
     this.setState({ repayAmount });
   }
 
+  fundWallet = async () => {
+    this.setState({ is: 'loading' });
+    try {
+      await authTinlake();
+      const { tinlake } = this.props;
+      const ethFrom = tinlake.ethConfig.from;
+      const amount = (new BN( displayToBase(playgroundDAIAmount, 18))).toString();
+      const res = await tinlake.mintCurrency(ethFrom, amount);
+      if (res.status !== SUCCESS_STATUS || res.events[0].event.name !== 'Transfer') {
+        this.setState({ is: 'error', errorMsg: JSON.stringify(res) });
+        return;
+      }
+
+      this.setState({ is: 'funded' });
+    } catch(e) {
+      console.log(e);
+      this.setState({ is: 'error', errorMsg: e.message });
+    }
+
+  }
   repay = async () => {
     this.setState({ is: 'loading', touchedRepaymentAmount: true });
 
@@ -119,9 +144,15 @@ class LoanRepay extends React.Component<Props, State> {
           <Heading level="3">Repay Loan {loanId}</Heading>
         </Box>
 
-        {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
-          <Button primary onClick={this.repay} label="Confirm"
-            disabled={is === 'loading' || is === 'success'} />}
+        <Box direction="row" gap="small" align="center">
+          {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from && isDemo &&
+              <Button primary onClick={this.fundWallet} label="Fund Wallet" disabled = {is === 'loading' || is === 'funded'} />
+          }
+
+          {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
+            <Button primary onClick={this.repay} label="Confirm"
+              disabled={is === 'loading' || is === 'success'} />}
+        </Box> 
       </SecondaryHeader>
 
       <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization render={auth =>
@@ -135,10 +166,16 @@ class LoanRepay extends React.Component<Props, State> {
         <Box pad={{ horizontal: 'medium' }}>
           {status === 'Ongoing' && loanOwner === tinlake.ethConfig.from &&
             <Box direction="row" justify="end" margin={{ bottom: 'medium' }}>
-              <Text>
-                Your total Repayment Amount is <Text weight="bold">{<NumberDisplay
-                  value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />}</Text>
-              </Text>
+              <Box>
+                <Text alignSelf="end">
+                    Your total Repayment Amount is <Text weight="bold">{<NumberDisplay
+                    value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />}</Text>
+                </Text>
+                { isDemo &&
+                <Text>
+                  Please make sure your wallet is funded with playground DAI to cover loan fees.
+                </Text>}
+              </Box>
             </Box>
           }
 
@@ -146,6 +183,9 @@ class LoanRepay extends React.Component<Props, State> {
             Successfully repayed{' '}
             <NumberDisplay value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18} />
             {' '}for Loan ID {loanId}
+          </Text></Alert>}
+          {is === 'funded' && <Alert type="success" margin={{ vertical: 'large' }}><Text>
+            Successfully received 1000 playground DAI. Please confirm the repayment now.
           </Text></Alert>}
           {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
             <Text weight="bold">Error repaying Loan ID {loanId}, see console for details</Text>

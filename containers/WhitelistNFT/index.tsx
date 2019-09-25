@@ -88,7 +88,6 @@ class WhitelistNFT extends React.Component<Props, State> {
         }
 
         const loanId = res2.events[0].data[2].toString();
-        console.log(`Loan id: ${loanId}`);
         this.setState({ is: 'success' });
       } catch (e) {
         console.log(e);

@@ -13,7 +13,6 @@ class BorrowerLoanPage extends React.Component<{ loanId: string }> {
 
   render() {
     const { loanId } = this.props;
-
     return <Box align="center">
       <Header
         selectedRoute={`/borrower/loan?loanId=${loanId}`}

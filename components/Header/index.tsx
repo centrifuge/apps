@@ -12,7 +12,7 @@ export interface MenuItem {
   label: string;
   route: string;
   secondary?: boolean;
-  permission?: "admin" | "demo" 
+  permission?: "admin" | "borrower" | "demo" 
 }
 
 interface HeaderProps {
@@ -57,8 +57,12 @@ class Header extends React.Component<HeaderProps> {
 
         {menuItems.filter(item => 
         {
-          return (isAdmin && item.permission === "admin" ||
-            isDemo && item.permission === "demo" || !item.permission) && !item.secondary
+          return (
+            (isDemo || isAdmin) && item.permission === "admin" ||
+            (isDemo || !isAdmin) && item.permission === 'borrower' ||
+            isDemo && item.permission === "demo" ||
+            !item.permission) 
+            && !item.secondary
         }
         )
         .map((item) => {
@@ -73,6 +77,7 @@ class Header extends React.Component<HeaderProps> {
           /></Link>;
         },
         )}
+
       </Box>
       <Box direction="row" gap={itemGap} align="center" justify="end">
        { isAdmin &&  <Badge text={'Admin'} style={{  }} /> }
