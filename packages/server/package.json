@@ -29,8 +29,10 @@
   "bugs": {
     "url": "https://github.com/centrifuge/gateway.git)/issues"
   },
+  "peerDependencies": {
+    "@centrifuge/gateway-lib": "^0.1.0"
+  },
   "dependencies": {
-    "@centrifuge/gateway-lib": "^0.1.0",
     "@nestjs/common": "^5.7.4",
     "@nestjs/core": "^5.7.4",
     "@nestjs/passport": "^5.1.0",

@@ -17,6 +17,9 @@
   "bugs": {
     "url": "https://github.com/rdinicut/gateway/issues"
   },
+  "peerDependencies": {
+    "@centrifuge/gateway-lib": "^0.1.0"
+  },
   "dependencies": {
     "@centrifuge/axis-date-input": "^0.3.2-develop.44",
     "@centrifuge/axis-display-field": "0.3.2-develop.50",
@@ -41,8 +44,7 @@
     "react-scripts": "^3.1.1",
     "styled-components": "4.2.1",
     "typescript": "3.2.2",
-    "yup": "^0.27.0",
-    "@centrifuge/gateway-lib": "^0.1.0"
+    "yup": "^0.27.0"
   },
   "scripts": {
 
