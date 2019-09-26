@@ -64,6 +64,7 @@ interface ethI {
     contract: (arg0: any) => {
         at: (arg0: any) => void;
     };
+    abi: any;
 }
 export declare type Address = string;
 export interface Loan {
@@ -110,7 +111,6 @@ export declare class Tinlake {
      * @param owner Owner of the new NFT
      */
     mintNFT: (owner: string, tokenId: string, ref: string, amount: string, asset: string) => Promise<unknown>;
-    dummyCall: (param: string) => Promise<unknown>;
     /**
      * @param owner Owner of the created loan
      */

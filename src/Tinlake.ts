@@ -2,7 +2,9 @@ import Eth from 'ethjs';
 import { AbiCoder } from 'web3-eth-abi';
 const abiCoder = new AbiCoder();
 import BN from 'bn.js';
-import { sha3, utf8ToHex, padLeft } from 'web3-utils';
+import { sha3, utf8ToHex, toBN } from 'web3-utils';
+
+const Web3 = require('web3-eth');
 
 import contractAbiNft from './abi/test/SimpleNFT.abi.json';
 import contractAbiTitle from './abi/Title.abi.json';
@@ -91,6 +93,7 @@ interface ethI {
   getTransactionReceipt: (arg0: any, arg1: (err: any, receipt: any) => void) => void;
   getTransactionByHash: (arg0: any, arg1: (err: any, tx: any) => void) => void;
   contract: (arg0: any) => { at: (arg0: any) => void };
+  abi: any;
 }
 
 interface Events {
@@ -216,6 +219,8 @@ export class Tinlake {
 
   setEthConfig = (ethConfig: { [key: string]: any }) => {
     this.ethConfig = ethConfig;
+    // console.log('set Eth config', this.eth[Object.keys(this.eth)['abi']]);
+    // this.eth.abi.encodeParams = abiCoder.encodeParameters;
   }
 
   isAdmin = async (address: Address): Promise<boolean> => {
@@ -266,12 +271,30 @@ export class Tinlake {
    * @param owner Owner of the new NFT
    */
   mintNFT = async (owner: string, tokenId: string, ref: string, amount: string, asset:string) => {
+
+    // this is a hack-in solution until we replace ethjs with web3
     const ref1 = utf8ToHex(ref)
     const asset1 = utf8ToHex(asset)
-    console.log( 'owner', owner, 'tokenId', tokenId, 'ref', ref, 'amount', typeof amount, amount, 'asset', asset)
-    const txHash = await executeAndRetry(this.contracts.nft.mint, [owner, tokenId, ref1, amount, asset1, this.ethConfig]);
-    console.log(`[NFT.mint] txHash: ${txHash}`);
-    return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
+
+    const ref2 = abiCoder.encodeParameter('bytes', ref1)
+    const asset2 = abiCoder.encodeParameter('bytes', asset1)
+
+    const web3 = new Web3(this.provider)
+    const nft = new web3.Contract(this.contractAbis.nft, this.contractAddresses['NFT_COLLATERAL'], {});
+
+    return new Promise((resolve, reject) => {
+      nft.methods.mint(owner, tokenId, ref2, amount, asset2).send(this.ethConfig)
+        .on('transactionHash', (txHash:any) => {
+          console.log(`[NFT.mint] txHash: ${txHash}`);
+        })
+        .on('receipt', (receipt: any) => {
+          resolve(receipt);
+        });
+    });
+
+    // const txHash = await executeAndRetry(this.contracts.nft.mint, [owner, tokenId, ref1, amount, asset1, this.ethConfig]);
+    // console.log(`[NFT.mint] txHash: ${txHash}`);
+    // return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
   }
 
   /**

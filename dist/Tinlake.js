@@ -34574,6 +34574,7 @@ var interestRateToFee = function (interestRate) {
 
 var _this = undefined;
 var abiCoder$1 = new AbiCoder$1();
+var Web3 = require('web3-eth');
 var pollingInterval = 1000;
 var LOAN_ID_IDX = 2;
 var Tinlake = /** @class */ (function () {
@@ -34619,6 +34620,8 @@ var Tinlake = /** @class */ (function () {
         };
         this.setEthConfig = function (ethConfig) {
             _this.ethConfig = ethConfig;
+            // console.log('set Eth config', this.eth[Object.keys(this.eth)['abi']]);
+            // this.eth.abi.encodeParams = abiCoder.encodeParameters;
         };
         this.isAdmin = function (address) { return __awaiter(_this, void 0, void 0, function () {
             var res;
@@ -34713,35 +34716,24 @@ var Tinlake = /** @class */ (function () {
          * @param owner Owner of the new NFT
          */
         this.mintNFT = function (owner, tokenId, ref, amount, asset) { return __awaiter(_this, void 0, void 0, function () {
-            var ref1, asset1, txHash;
+            var ref1, asset1, ref2, asset2, web3, nft;
+            var _this = this;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        ref1 = src_29(ref);
-                        asset1 = src_29(asset);
-                        console.log('owner', owner, 'tokenId', tokenId, 'ref', ref, 'amount', typeof amount, amount, 'asset', asset);
-                        return [4 /*yield*/, executeAndRetry(this.contracts.nft.mint, [owner, tokenId, ref1, amount, asset1, this.ethConfig])];
-                    case 1:
-                        txHash = _a.sent();
-                        console.log("[NFT.mint] txHash: " + txHash);
-                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout)];
-                }
-            });
-        }); };
-        this.dummyCall = function (param) { return __awaiter(_this, void 0, void 0, function () {
-            var test1, txHash;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        console.log("second dummy calling");
-                        test1 = src_29(param);
-                        console.log(test1);
-                        return [4 /*yield*/, executeAndRetry(this.contracts.nft.secondDummy, [param, this.ethConfig])];
-                    case 1:
-                        txHash = _a.sent();
-                        console.log("[NFT.mint] txHash: " + txHash);
-                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout)];
-                }
+                ref1 = src_29(ref);
+                asset1 = src_29(asset);
+                ref2 = abiCoder$1.encodeParameter('bytes', ref1);
+                asset2 = abiCoder$1.encodeParameter('bytes', asset1);
+                web3 = new Web3(this.provider);
+                nft = new web3.Contract(this.contractAbis.nft, this.contractAddresses['NFT_COLLATERAL'], {});
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        nft.methods.mint(owner, tokenId, ref2, amount, asset2).send(_this.ethConfig)
+                            .on('transactionHash', function (txHash) {
+                            console.log("[NFT.mint] txHash: " + txHash);
+                        })
+                            .on('receipt', function (receipt) {
+                            resolve(receipt);
+                        });
+                    })];
             });
         }); };
         /**
