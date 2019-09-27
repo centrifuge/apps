@@ -1,5 +1,6 @@
 import { PERMISSIONS } from '../utils/constants';
 import { Document, DOCUMENT_ACCESS } from './document';
+import { FundingAgreement } from './funding-request';
 
 export interface IUser {
   name: string;
@@ -55,17 +56,7 @@ export const canCreateDocuments = (user: User): boolean => {
 };
 
 
-export const canSignFunding = (user:User | null, doc?:Document):boolean => {
-  if(!user) return false;
-  return !!(
-    doc &&
-    doc.attributes &&
-    doc.attributes.funding_agreement &&
-    Array.isArray(doc.attributes.funding_agreement) &&
-    doc.attributes.funding_agreement!.find(
-      funding => {
-        return funding.funder_id && funding.funder_id.value.toLowerCase() === user.account.toLowerCase()
-      },
-    )
-  );
-}
+export const canSignFunding = (user:User | null, funding?:FundingAgreement):boolean => {
+  if(!user || !funding || !funding.funder_id) return false;
+  return String(funding.funder_id).toLowerCase() === user.account.toLowerCase();
+};

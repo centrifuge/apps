@@ -97,7 +97,7 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
     } catch (e) {
       notification.alert({
         type: NOTIFICATION.ERROR,
-        title: ' Failed to save document',
+        title: 'Failed to save document',
         message: (e as AxiosError)!.response!.data.message,
       });
       setState({
@@ -121,21 +121,12 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
 
   const availableSchemas = mapSchemaNames(user!.schemas, schemas);
 
-  const selectedSchema: Schema | undefined = schemas.find(s => {
-    return (
-      defaultDocument.attributes &&
-      defaultDocument.attributes._schema &&
-      s.name === defaultDocument.attributes._schema.value
-    );
-  });
-
-
   return (
     <DocumentForm
-      selectedSchema={selectedSchema}
       document={defaultDocument}
       schemas={availableSchemas}
       onSubmit={createDocument}
+      mode={'create'}
       contacts={contacts}
       renderHeader={() => {
         return <SecondaryHeader>

@@ -2,13 +2,13 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { BrowserRouter } from 'react-router-dom';
 import { SearchSelect } from '@centrifuge/axis-search-select';
-import { Button, DataTable } from 'grommet';
+import { Anchor, Button, DataTable } from 'grommet';
 import { FundingAgreements } from '../FundingAgreements';
 import { defaultContacts, defaultUser } from '../../test-utilities/default-data';
 import { getFundingStatus } from '@centrifuge/gateway-lib/utils/status';
 import { FundingAgreement } from '@centrifuge/gateway-lib/models/funding-request';
 import FundingAgreementForm from '../FundingAgreementForm';
-import { withAllProvidersAndContexts, withAxis } from '../../test-utilities/test-providers';
+import { withAllProvidersAndContexts } from '../../test-utilities/test-providers';
 
 jest.mock('../../http-client');
 const httpClient = require('../../http-client').httpClient;
@@ -54,8 +54,7 @@ describe('Funding Agreements', () => {
         key:
           '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
         type: 'string',
-        value: 'some cust' +
-          'omer',
+        value: 'some customer',
       },
 
       ['percent']: {
@@ -164,7 +163,7 @@ describe('Funding Agreements', () => {
         },
         'funder_id': {
           'type': 'bytes',
-          'value': '0xe68f93649e5c33db110a8263df4eac74cea7b4ed',
+          'value': '0xSomeFunderId',
           'key': '0xd0134f74e2b1a6b10581035fc5289d5566dc51353ccebc3693cf3b5f251fef9e',
         },
         'repayment_amount': {
@@ -209,16 +208,16 @@ describe('Funding Agreements', () => {
 
     const component = mount(
       withAllProvidersAndContexts(
-      <FundingAgreements
-        document={document}
-        onAsyncStart={onAsyncStart}
-        onAsyncComplete={onAsyncComplete}
-        onAsyncError={onAsyncError}
-        user={defaultUser}
-        viewMode={true}
-        contacts={defaultContacts}
+        <FundingAgreements
+          document={document}
+          onAsyncStart={onAsyncStart}
+          onAsyncComplete={onAsyncComplete}
+          onAsyncError={onAsyncError}
+          user={defaultUser}
+          viewMode={true}
+          contacts={defaultContacts}
 
-      />),
+        />),
     );
     const dataTable = component.find(DataTable);
     expect(dataTable.length).toEqual(1);
@@ -280,36 +279,161 @@ describe('Funding Agreements', () => {
 
 
   });
-  /*
-   it('Should mint an fail to mint an nft ', async () => {
 
-     const component = mount(withApplicationContext(
-       <Nfts document={document}
-             onAsyncStart={onAsyncStart}
-             onAsyncComplete={onAsyncComplete}
-             onAsyncError={onAsyncError}
-             viewMode={false}
-             registries={registries}
+  it('Should fail to request  a funding agreement', async () => {
+    //FundingAgrement form has DatePicker and it will not find
+    // the theme definition
+    const component = mount(withAllProvidersAndContexts(
+      <FundingAgreements
+        document={document}
+        onAsyncStart={onAsyncStart}
+        onAsyncComplete={onAsyncComplete}
+        onAsyncError={onAsyncError}
+        user={defaultUser}
+        viewMode={false}
+        contacts={defaultContacts}
 
-       />),
-     );
-     const error = new Error('Some Error');
-     httpClient.documents.mint.mockImplementation(async () => {
-       throw error;
-     });
+      />),
+    );
+    const error = new Error('Some Error');
+    httpClient.funding.create.mockImplementation(async () => {
+      throw error;
+    });
 
-     const mintAction = component.find(Button);
-     mintAction.simulate('click');
-     const mintingForm = component.find(MintNftForm);
-     await mintingForm.prop('onSubmit')(
-       { registry: registries[0] },
-     );
-     expect(onAsyncStart).toHaveBeenCalledTimes(1);
-     expect(onAsyncComplete).toHaveBeenCalledTimes(0);
-     expect(onAsyncError).toHaveBeenCalledWith(error, 'Failed to mint NFT');
+    const fundingAction = component.find(Button).findWhere(node => node.key() === 'create-funding-agreement');
+    fundingAction.simulate('click');
+    const fundingForm = component.find(FundingAgreementForm);
+    await fundingForm.prop('onSubmit')(
+      { data: 'data' },
+    );
+    expect(onAsyncStart).toHaveBeenCalledTimes(1);
+    expect(onAsyncComplete).toHaveBeenCalledTimes(0);
+    expect(onAsyncError).toHaveBeenCalledWith(error, 'Failed to create funding agreement');
 
 
-   });*/
+  });
+
+
+  it('Should render the first agreement with a view action and second should also have sign', () => {
+
+    const component = mount(
+      withAllProvidersAndContexts(
+        <FundingAgreements
+          document={document}
+          onAsyncStart={onAsyncStart}
+          onAsyncComplete={onAsyncComplete}
+          onAsyncError={onAsyncError}
+          viewMode={false}
+          user={{
+            ...defaultUser,
+            account: '0xSomeFunderId',
+          }}
+          contacts={defaultContacts}
+
+        />),
+    );
+    const dataTable = component.find(DataTable);
+    expect(dataTable.length).toEqual(1);
+
+
+    const rows = dataTable.find('tbody tr');
+    expect(rows.length).toEqual(2);
+
+    expect(rows.at(0).find('.actions').find(Anchor).text()).toEqual('View');
+    const anchorsForSecondRow = rows.at(1).find('.actions').find(Anchor);
+    expect(anchorsForSecondRow.at(0).text()).toEqual('View');
+    expect(anchorsForSecondRow.at(1).text()).toEqual('Sign');
+  });
+
+
+  it('Should sign an agreement', async () => {
+
+    const component = mount(
+      withAllProvidersAndContexts(
+        <FundingAgreements
+          document={document}
+          onAsyncStart={onAsyncStart}
+          onAsyncComplete={onAsyncComplete}
+          onAsyncError={onAsyncError}
+          viewMode={false}
+          user={{
+            ...defaultUser,
+            account: '0xSomeFunderId',
+          }}
+          contacts={defaultContacts}
+
+        />),
+    );
+
+
+    httpClient.funding.sign.mockImplementation(async (data) => {
+      return { data: 'Custom Payload' };
+    });
+
+    const signAction = component.find('tbody tr').at(1).find('.actions').find(Anchor).at(1);
+    await signAction.prop('onClick')();
+    expect(onAsyncStart).toHaveBeenCalledTimes(1);
+    expect(onAsyncError).toHaveBeenCalledTimes(0);
+    expect(onAsyncComplete).toHaveBeenCalledWith('Custom Payload');
+  });
+
+
+  it('Should not sign an agreement', async () => {
+
+    const component = mount(
+      withAllProvidersAndContexts(
+        <FundingAgreements
+          document={document}
+          onAsyncStart={onAsyncStart}
+          onAsyncComplete={onAsyncComplete}
+          onAsyncError={onAsyncError}
+          viewMode={false}
+          user={{
+            ...defaultUser,
+            account: '0xSomeFunderId',
+          }}
+          contacts={defaultContacts}
+
+        />),
+    );
+
+    const error = new Error('Some Error');
+    httpClient.funding.sign.mockImplementation(async (data) => {
+      throw error;
+    });
+
+    const signAction = component.find('tbody tr').at(1).find('.actions').find(Anchor).at(1);
+    await signAction.prop('onClick')();
+    expect(onAsyncStart).toHaveBeenCalledTimes(1);
+    expect(onAsyncComplete).toHaveBeenCalledTimes(0);
+    expect(onAsyncError).toHaveBeenCalledWith(error, 'Failed to sign funding agreement');
+  });
+
+
+  it('Should open the funding agreement in ViewMode', () => {
+
+    const component = mount(
+      withAllProvidersAndContexts(
+        <FundingAgreements
+          document={document}
+          onAsyncStart={onAsyncStart}
+          onAsyncComplete={onAsyncComplete}
+          onAsyncError={onAsyncError}
+          viewMode={false}
+          user={{
+            ...defaultUser,
+            account: '0xSomeFunderId',
+          }}
+          contacts={defaultContacts}
+
+        />),
+    );
+
+    const viewAction = component.find('tbody tr').at(1).find('.actions').find(Anchor).at(0);
+    viewAction.simulate('click');
+    const fundingForm = component.find(FundingAgreementForm);
+    expect(fundingForm.prop('isViewMode')).toEqual(true);
+  });
 
 
 });

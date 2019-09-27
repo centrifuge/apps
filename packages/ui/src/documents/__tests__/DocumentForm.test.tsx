@@ -10,6 +10,7 @@ import { ViewModeFormContainer } from '../../components/ViewModeFormContainer';
 import { SelectOption } from 'grommet/components/Select/SelectOption';
 import Comments from '../Comments';
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers';
+import { defaultSchemas } from '../../test-utilities/default-data';
 
 describe('DocumentForm', () => {
 
@@ -118,66 +119,6 @@ describe('DocumentForm', () => {
   ];
 
 
-  const schemas = [
-    {
-      name: 'first_schema',
-      registries: [],
-      attributes: [
-        {
-          name: 'reference_id',
-          label: 'Reference Id',
-          type: AttrTypes.STRING,
-        },
-        {
-          name: 'amount',
-          label: 'Amount',
-          type: AttrTypes.DECIMAL,
-          options: ['1', '2', '3'],
-        },
-        {
-          name: 'index',
-          label: 'Index',
-          type: AttrTypes.INTEGER,
-        },
-        {
-          name: 'percent',
-          label: 'Percent',
-          type: AttrTypes.PERCENT,
-        },
-        {
-          name: 'date',
-          label: 'Some Date',
-          type: AttrTypes.TIMESTAMP,
-        },
-        {
-          name: 'customer',
-          label: 'Customer',
-          type: AttrTypes.STRING,
-        },
-      ],
-    },
-    {
-      name: 'second_schema',
-      registries: [],
-      attributes: [
-        {
-          name: 'reference_id',
-          label: 'Reference Id',
-          type: AttrTypes.STRING,
-        },
-        {
-          name: 'amount',
-          label: 'Amount',
-          type: AttrTypes.DECIMAL,
-        },
-        {
-          name: 'customer',
-          label: 'Customer',
-          type: AttrTypes.STRING,
-        },
-      ],
-    },
-  ];
 
 
   const onSubmit = jest.fn(() => {
@@ -189,7 +130,7 @@ describe('DocumentForm', () => {
     const documentForm = mount(
       withAllProvidersAndContexts(
         <DocumentForm document={{}}
-                      schemas={schemas}
+                      schemas={defaultSchemas}
                       onSubmit={onSubmit}/>,
       ),
     );
@@ -200,8 +141,8 @@ describe('DocumentForm', () => {
     const documentForm = mount(
       withAllProvidersAndContexts(
         <DocumentForm document={documents[0]}
-                      selectedSchema={schemas[0]}
-                      schemas={schemas}
+                      selectedSchema={defaultSchemas[0]}
+                      schemas={defaultSchemas}
                       onSubmit={onSubmit}/>,
       ),
     );
@@ -222,7 +163,7 @@ describe('DocumentForm', () => {
     const documentForm = mount(
       withAllProvidersAndContexts(
         <DocumentForm document={{}}
-                      schemas={schemas}
+                      schemas={defaultSchemas}
                       renderHeader={() => <MyCustomHeader/>}
                       onSubmit={onSubmit}>
           <MyCustomSection/>
@@ -240,9 +181,9 @@ describe('DocumentForm', () => {
     const documentForm = mount(
       withAllProvidersAndContexts(
         <DocumentForm document={documents[0]}
-                      selectedSchema={schemas[0]}
+                      selectedSchema={defaultSchemas[0]}
                       mode={'view'}
-                      schemas={schemas}
+                      schemas={defaultSchemas}
                       onSubmit={onSubmit}/>,
       ),
     );
@@ -256,9 +197,9 @@ describe('DocumentForm', () => {
     const documentForm = mount(
       withAllProvidersAndContexts(
         <DocumentForm document={documents[0]}
-                      selectedSchema={schemas[0]}
+                      selectedSchema={defaultSchemas[0]}
                       mode={'edit'}
-                      schemas={schemas}
+                      schemas={defaultSchemas}
                       onSubmit={onSubmit}/>,
       ),
     );
@@ -271,7 +212,7 @@ describe('DocumentForm', () => {
     const documentForm = mount(
       withAllProvidersAndContexts(
         <DocumentForm document={documents[0]}
-                      schemas={schemas}
+                      schemas={defaultSchemas}
                       onSubmit={onSubmit}/>,
       ),
     );
@@ -288,13 +229,13 @@ describe('DocumentForm', () => {
       withAllProvidersAndContexts(
         <DocumentForm document={documents[0]}
                       selectedSchema={{
-                        ...schemas[0],
+                        ...defaultSchemas[0],
                         formFeatures: {
                           comments: true,
                         },
 
                       }}
-                      schemas={schemas}
+                      schemas={defaultSchemas}
                       onSubmit={onSubmit}/>,
       ),
     );

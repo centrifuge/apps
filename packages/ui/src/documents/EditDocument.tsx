@@ -34,7 +34,7 @@ type State = {
 }
 
 
-const EditDocument: FunctionComponent<Props> = (props: Props) => {
+export const EditDocument: FunctionComponent<Props> = (props: Props) => {
 
   const {
     match: {
@@ -150,6 +150,7 @@ const EditDocument: FunctionComponent<Props> = (props: Props) => {
   const canMint = selectedSchema!.registries && selectedSchema!.registries.length > 0;
   const canFund = canWriteToDoc(user, document);
   const extendedContacts = extendContactsWithUsers(contacts, [user!]);
+
 
   return (
     <>

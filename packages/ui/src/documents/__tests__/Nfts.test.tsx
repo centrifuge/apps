@@ -131,7 +131,7 @@ describe('Nfts', () => {
   });
 
 
-  it('Should mint an nft successfully ', async () => {
+  it('Should mint a nft successfully ', async () => {
 
     const component = mount(
       withAllProvidersAndContexts(
@@ -163,7 +163,7 @@ describe('Nfts', () => {
 
   });
 
-  it('Should mint an fail to mint an nft ', async () => {
+  it('Should fail to mint a nft ', async () => {
 
     const component = mount(
       withAllProvidersAndContexts(

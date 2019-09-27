@@ -197,21 +197,21 @@ export const FundingAgreements: FunctionComponent<Props> = (props) => {
       header: 'Actions',
       sortable: false,
       render: datum => (
-        <Box direction="row" gap="small">
-          {canSignFunding(user, document) && <Anchor
-            label={'Sign'}
-            onClick={() =>
-              singFundingAgreement(datum)
-            }
-          />
-          }
+        <Box className={'actions'} direction="row" gap="small">
+
           <Anchor
             label={'View'}
             onClick={() =>
               openModalInViewMode(datum)
             }
           />
-
+          {canSignFunding(user, datum) && <Anchor
+            label={'Sign'}
+            onClick={() =>
+              singFundingAgreement(datum)
+            }
+          />
+          }
         </Box>
       ),
     },
