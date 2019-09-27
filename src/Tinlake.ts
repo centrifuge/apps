@@ -2,7 +2,7 @@ import Eth from 'ethjs';
 import { AbiCoder } from 'web3-eth-abi';
 const abiCoder = new AbiCoder();
 import BN from 'bn.js';
-import { sha3, utf8ToHex, toBN } from 'web3-utils';
+import { sha3, utf8ToHex, toHex, toBN, keccak256, asciiToHex } from 'web3-utils';
 
 const Web3 = require('web3-eth');
 
@@ -273,22 +273,28 @@ export class Tinlake {
   mintNFT = async (owner: string, tokenId: string, ref: string, amount: string, asset:string) => {
 
     // this is a hack-in solution until we replace ethjs with web3
-    const ref1 = utf8ToHex(ref)
-    const asset1 = utf8ToHex(asset)
 
-    const ref2 = abiCoder.encodeParameter('bytes', ref1)
-    const asset2 = abiCoder.encodeParameter('bytes', asset1)
+    const ref1 = asciiToHex(ref);
+    const amount1 = asciiToHex(amount);
+    const asset1 = asciiToHex(asset);
 
-    const web3 = new Web3(this.provider)
+    const ref2 = abiCoder.encodeParameter('bytes', ref1);
+    const amount2 = abiCoder.encodeParameter('bytes', amount1);
+    const asset2 = abiCoder.encodeParameter('bytes', asset1);
+
+    const web3 = new Web3(this.provider);
     const nft = new web3.Contract(this.contractAbis.nft, this.contractAddresses['NFT_COLLATERAL'], {});
 
     return new Promise((resolve, reject) => {
-      nft.methods.mint(owner, tokenId, ref2, amount, asset2).send(this.ethConfig)
-        .on('transactionHash', (txHash:any) => {
+      nft.methods.mint(owner, tokenId, ref1, amount1, asset1).send(this.ethConfig)
+        .on('transactionHash', (txHash: any) => {
           console.log(`[NFT.mint] txHash: ${txHash}`);
         })
         .on('receipt', (receipt: any) => {
           resolve(receipt);
+        })
+        .on('error', (err: any) => {
+          reject(err);
         });
     });
 
@@ -331,7 +337,7 @@ export class Tinlake {
    * @param wad Amount which should be repaid
    * @param usr Address that receives the NFT
    */
-  repay = async (loanId: string, wad: string, usr: string)=> {
+  repay = async (loanId: string, wad: string, usr: string) => {
     const txHash = await executeAndRetry(this.contracts.reception.repay, [loanId, wad, usr,  this.ethConfig])  
     console.log(`[Reception.repay] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout);
@@ -417,7 +423,28 @@ export class Tinlake {
   }
 
   getNFTData: <T>(tokenId: string) => Promise<T> = async (tokenId) => {
+
+    // const web3 = new Web3(this.provider);
+    // const nft = new web3.Contract(this.contractAbis.nft, this.contractAddresses['NFT_COLLATERAL'], {});
+    // const res = await nft.methods.data(tokenId).call(this.ethConfig);
+    // console.log('resolution', res)
+    // console.log(abiCoder.decodeParameter('uint', res.reference_id))
+    // return new Promise((resolve, reject) => {
+      // nft.methods.data(tokenId).call(this.ethConfig)
+      //   .on('transactionHash', (txHash: any) => {
+      //     console.log(`[NFT.mint] txHash: ${txHash}`);
+      //   })
+      //   .on('receipt', (receipt: any) => {
+      //     console.log('receipt', receipt)
+      //     resolve(receipt);
+      //   })
+      //   .on('error', (err: any) => {
+      //     reject(err);
+      //   });
+    // });
+
     const res = await executeAndRetry(this.contracts.nftData.data, [tokenId]);
+    console.log('res', res)
     return res;
   }
 }

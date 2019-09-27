@@ -27766,7 +27766,8 @@ var src$4 = {
     toTwosComplement: utils$2.toTwosComplement
 };
 var src_11 = src$4.sha3;
-var src_29 = src$4.utf8ToHex;
+var src_17 = src$4.toHex;
+var src_34 = src$4.asciiToHex;
 
 var contractAbiNft = [
   {
@@ -27782,6 +27783,21 @@ var contractAbiNft = [
       {
         name: "",
         type: "bool"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+    ],
+    name: "name",
+    outputs: [
+      {
+        name: "",
+        type: "string"
       }
     ],
     payable: false,
@@ -27911,6 +27927,40 @@ var contractAbiNft = [
     type: "function"
   },
   {
+    constant: true,
+    inputs: [
+    ],
+    name: "symbol",
+    outputs: [
+      {
+        name: "",
+        type: "string"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "to",
+        type: "address"
+      },
+      {
+        name: "approved",
+        type: "bool"
+      }
+    ],
+    name: "setApprovalForAll",
+    outputs: [
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
     constant: false,
     inputs: [
       {
@@ -27927,7 +27977,7 @@ var contractAbiNft = [
       },
       {
         name: "amount",
-        type: "uint256"
+        type: "bytes"
       },
       {
         name: "asset",
@@ -27935,25 +27985,6 @@ var contractAbiNft = [
       }
     ],
     name: "mint",
-    outputs: [
-    ],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: "to",
-        type: "address"
-      },
-      {
-        name: "approved",
-        type: "bool"
-      }
-    ],
-    name: "setApprovalForAll",
     outputs: [
     ],
     payable: false,
@@ -27985,6 +28016,25 @@ var contractAbiNft = [
     ],
     payable: false,
     stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256"
+      }
+    ],
+    name: "tokenURI",
+    outputs: [
+      {
+        name: "",
+        type: "string"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
     type: "function"
   },
   {
@@ -34716,22 +34766,29 @@ var Tinlake = /** @class */ (function () {
          * @param owner Owner of the new NFT
          */
         this.mintNFT = function (owner, tokenId, ref, amount, asset) { return __awaiter(_this, void 0, void 0, function () {
-            var ref1, asset1, ref2, asset2, web3, nft;
+            var ref1, amount1, asset1, ref2, amount2, asset2, web3, nft;
             var _this = this;
             return __generator(this, function (_a) {
-                ref1 = src_29(ref);
-                asset1 = src_29(asset);
+                ref1 = src_34(ref);
+                amount1 = src_34(amount);
+                asset1 = src_34(asset);
+                console.log('TEST FROM DEFI', src_17('unpaid'), src_34('unpaid'));
                 ref2 = abiCoder$1.encodeParameter('bytes', ref1);
+                amount2 = abiCoder$1.encodeParameter('bytes', amount1);
                 asset2 = abiCoder$1.encodeParameter('bytes', asset1);
+                console.log('ref', ref2, 'amount', amount2, 'asset', asset2);
                 web3 = new Web3(this.provider);
                 nft = new web3.Contract(this.contractAbis.nft, this.contractAddresses['NFT_COLLATERAL'], {});
                 return [2 /*return*/, new Promise(function (resolve, reject) {
-                        nft.methods.mint(owner, tokenId, ref2, amount, asset2).send(_this.ethConfig)
+                        nft.methods.mint(owner, tokenId, ref1, amount1, asset1).send(_this.ethConfig)
                             .on('transactionHash', function (txHash) {
                             console.log("[NFT.mint] txHash: " + txHash);
                         })
                             .on('receipt', function (receipt) {
                             resolve(receipt);
+                        })
+                            .on('error', function (err) {
+                            reject(err);
                         });
                     })];
             });
@@ -34964,6 +35021,7 @@ var Tinlake = /** @class */ (function () {
                     case 0: return [4 /*yield*/, executeAndRetry(this.contracts.nftData.data, [tokenId])];
                     case 1:
                         res = _a.sent();
+                        console.log('res', res);
                         return [2 /*return*/, res];
                 }
             });
