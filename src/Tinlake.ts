@@ -261,7 +261,8 @@ export class Tinlake {
    * @param owner Owner of the new NFT
    */
   mintNFT = (owner: string, tokenId: string): Promise<Events> => {
-    return this.contracts.nft.mint(owner, tokenId, this.ethConfig).then((txHash: string) => {
+    const tkn = abiCoder.encodeParameter('uint', tokenId)
+    return this.contracts.nft.mint(owner, tkn, this.ethConfig).then((txHash: string) => {
       console.log(`[NFT.mint] txHash: ${txHash}`);
       return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
     });

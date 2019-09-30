@@ -27784,6 +27784,21 @@ var contractAbiNft = [
   {
     constant: true,
     inputs: [
+    ],
+    name: "name",
+    outputs: [
+      {
+        name: "",
+        type: "string"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
       {
         name: "tokenId",
         type: "uint256"
@@ -27846,11 +27861,11 @@ var contractAbiNft = [
     constant: false,
     inputs: [
       {
-        name: "to",
+        name: "usr",
         type: "address"
       },
       {
-        name: "tokenId",
+        name: "tkn",
         type: "uint256"
       }
     ],
@@ -27923,6 +27938,21 @@ var contractAbiNft = [
     type: "function"
   },
   {
+    constant: true,
+    inputs: [
+    ],
+    name: "symbol",
+    outputs: [
+      {
+        name: "",
+        type: "string"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
     constant: false,
     inputs: [
       {
@@ -27966,6 +27996,25 @@ var contractAbiNft = [
     ],
     payable: false,
     stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256"
+      }
+    ],
+    name: "tokenURI",
+    outputs: [
+      {
+        name: "",
+        type: "string"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
     type: "function"
   },
   {
@@ -34524,6 +34573,7 @@ var interestRateToFee = function (interestRate) {
 
 var _this = undefined;
 var abiCoder$1 = new AbiCoder$1();
+var pollingInterval = 1000;
 var LOAN_ID_IDX = 2;
 var Tinlake = /** @class */ (function () {
     function Tinlake(provider, contractAddresses, nftDataOutputs, transactionTimeout, _a) {
@@ -34642,7 +34692,8 @@ var Tinlake = /** @class */ (function () {
          * @param owner Owner of the new NFT
          */
         this.mintNFT = function (owner, tokenId) {
-            return _this.contracts.nft.mint(owner, tokenId, _this.ethConfig).then(function (txHash) {
+            var tkn = abiCoder$1.encodeParameter('uint', tokenId);
+            return _this.contracts.nft.mint(owner, tkn, _this.ethConfig).then(function (txHash) {
                 console.log("[NFT.mint] txHash: " + txHash);
                 return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi, _this.transactionTimeout);
             });
@@ -34900,7 +34951,7 @@ var waitForTransaction = function (eth, txHash, transactionTimeout) {
                         reject(new Error("waiting for transaction tx " + txHash + " timed out after " + secMax + " seconds"));
                     }
                 });
-            }, 1000);
+            }, pollingInterval);
         };
         wait(txHash);
     });
