@@ -73,11 +73,9 @@ export function loadUser(tinlake: Tinlake, address: Address):
 
     dispatch({ type: LOAD });
 
-    const isAdminPromise = tinlake.isAdmin(address);
-
     const user = {
       address,
-      isAdmin: isDemo || await isAdminPromise
+      isAdmin: isDemo || (await tinlake.isAdmin(address))
     };
     dispatch({ user, type: RECEIVE });
   };

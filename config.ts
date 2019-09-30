@@ -11,7 +11,6 @@ const config = {
   isDemo: publicRuntimeConfig.ENV && (publicRuntimeConfig.ENV === 'demo'),
   network: publicRuntimeConfig.RPC_URL && networkUrlToName(publicRuntimeConfig.RPC_URL)
 };
-
 if (!config.nftDataDefinition) {
   throw new Error('Missing env NFT_DATA_DEFINITION');
 }
