@@ -27766,7 +27766,7 @@ var src$4 = {
     toTwosComplement: utils$2.toTwosComplement
 };
 var src_11 = src$4.sha3;
-var src_17 = src$4.toHex;
+var src_21 = src$4.hexToNumberString;
 var src_34 = src$4.asciiToHex;
 
 var contractAbiNft = [
@@ -27964,37 +27964,6 @@ var contractAbiNft = [
     constant: false,
     inputs: [
       {
-        name: "usr",
-        type: "address"
-      },
-      {
-        name: "tkn",
-        type: "uint256"
-      },
-      {
-        name: "ref",
-        type: "bytes"
-      },
-      {
-        name: "amount",
-        type: "bytes"
-      },
-      {
-        name: "asset",
-        type: "bytes"
-      }
-    ],
-    name: "mint",
-    outputs: [
-    ],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [
-      {
         name: "from",
         type: "address"
       },
@@ -28089,6 +28058,37 @@ var contractAbiNft = [
     ],
     payable: false,
     stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "usr",
+        type: "address"
+      },
+      {
+        name: "tkn",
+        type: "uint256"
+      },
+      {
+        name: "ref",
+        type: "uint256"
+      },
+      {
+        name: "amount",
+        type: "uint256"
+      },
+      {
+        name: "asset",
+        type: "uint256"
+      }
+    ],
+    name: "mint",
+    outputs: [
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
     type: "function"
   },
   {
@@ -34766,31 +34766,21 @@ var Tinlake = /** @class */ (function () {
          * @param owner Owner of the new NFT
          */
         this.mintNFT = function (owner, tokenId, ref, amount, asset) { return __awaiter(_this, void 0, void 0, function () {
-            var ref1, amount1, asset1, ref2, amount2, asset2, web3, nft;
-            var _this = this;
+            var tkn, ref1, amount1, asset1, txHash;
             return __generator(this, function (_a) {
-                ref1 = src_34(ref);
-                amount1 = src_34(amount);
-                asset1 = src_34(asset);
-                console.log('TEST FROM DEFI', src_17('unpaid'), src_34('unpaid'));
-                ref2 = abiCoder$1.encodeParameter('bytes', ref1);
-                amount2 = abiCoder$1.encodeParameter('bytes', amount1);
-                asset2 = abiCoder$1.encodeParameter('bytes', asset1);
-                console.log('ref', ref2, 'amount', amount2, 'asset', asset2);
-                web3 = new Web3(this.provider);
-                nft = new web3.Contract(this.contractAbis.nft, this.contractAddresses['NFT_COLLATERAL'], {});
-                return [2 /*return*/, new Promise(function (resolve, reject) {
-                        nft.methods.mint(owner, tokenId, ref1, amount1, asset1).send(_this.ethConfig)
-                            .on('transactionHash', function (txHash) {
-                            console.log("[NFT.mint] txHash: " + txHash);
-                        })
-                            .on('receipt', function (receipt) {
-                            resolve(receipt);
-                        })
-                            .on('error', function (err) {
-                            reject(err);
-                        });
-                    })];
+                switch (_a.label) {
+                    case 0:
+                        tkn = src_21(tokenId);
+                        ref1 = src_21(src_34(ref));
+                        amount1 = src_21(src_34(amount));
+                        asset1 = src_21(src_34(asset));
+                        console.log('r1', ref1, '&&&&&&&&', 't1', tkn, '%%%%%%', 'am1', amount1, 'asst1', '$$$$$', asset1);
+                        return [4 /*yield*/, executeAndRetry(this.contracts.nft.mint, [owner, tkn, ref1, amount1, asset1, this.ethConfig])];
+                    case 1:
+                        txHash = _a.sent();
+                        console.log("[NFT.mint] txHash: " + txHash);
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout)];
+                }
             });
         }); };
         /**
@@ -35018,7 +35008,9 @@ var Tinlake = /** @class */ (function () {
             var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.nftData.data, [tokenId])];
+                    case 0:
+                        console.log('NFTDATA', tokenId);
+                        return [4 /*yield*/, executeAndRetry(this.contracts.nftData.data, [tokenId])];
                     case 1:
                         res = _a.sent();
                         console.log('res', res);
