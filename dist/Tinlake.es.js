@@ -34767,15 +34767,10 @@ var Tinlake = /** @class */ (function () {
          * @param owner Owner of the new NFT
          */
         this.mintNFT = function (owner, tokenId, ref, amount, asset) { return __awaiter(_this, void 0, void 0, function () {
-            var tkn, ref1, amount1, asset1, txHash;
+            var txHash;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        tkn = tokenId;
-                        ref1 = ref;
-                        amount1 = amount;
-                        asset1 = asset;
-                        return [4 /*yield*/, executeAndRetry(this.contracts.nft.mint, [owner, tkn, ref1, amount1, asset1, this.ethConfig])];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.nft.mint, [owner, tokenId, ref, amount, asset, this.ethConfig])];
                     case 1:
                         txHash = _a.sent();
                         console.log("[NFT.mint] txHash: " + txHash);

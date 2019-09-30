@@ -272,12 +272,7 @@ export class Tinlake {
    * @param owner Owner of the new NFT
    */
   mintNFT = async (owner: string, tokenId: string, ref: string, amount: string, asset:string) => {
-    const tkn = tokenId;
-    const ref1 = ref;
-    const amount1 = amount;
-    const asset1 = asset;
-
-    const txHash = await executeAndRetry(this.contracts.nft.mint, [owner, tkn, ref1, amount1, asset1, this.ethConfig]);
+    const txHash = await executeAndRetry(this.contracts.nft.mint, [owner, tokenId, ref, amount, asset, this.ethConfig]);
     console.log(`[NFT.mint] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
   };
