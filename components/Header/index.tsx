@@ -40,6 +40,7 @@ class Header extends React.Component<HeaderProps> {
 
     const sectionGap = 'medium';
     const itemGap = 'small';
+    const logoUrl = isDemo && "/static/demo_logo.svg" || "/static/logo.svg";
 
     return <Box
     justify="center"
@@ -60,7 +61,7 @@ class Header extends React.Component<HeaderProps> {
       width="xlarge"
     >
       <Link href="/">
-        <a title="Tinlake"><Image src="/static/logo.svg" style={{ width: 130 }} /></a>
+        <a title="Tinlake"><Image src={logoUrl} style={{ width: 130 }} /></a>
       </Link>
       <Box direction="row" gap={itemGap} margin={{ right: 'auto' }}>
 
