@@ -27766,7 +27766,8 @@ var src$4 = {
     toTwosComplement: utils$2.toTwosComplement
 };
 var src_11 = src$4.sha3;
-var src_21 = src$4.hexToNumberString;
+var src_18 = src$4.toBN;
+var src_24 = src$4.numberToHex;
 var src_34 = src$4.asciiToHex;
 
 var contractAbiNft = [
@@ -34770,11 +34771,20 @@ var Tinlake = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        tkn = src_21(tokenId);
-                        ref1 = src_21(src_34(ref));
-                        amount1 = src_21(src_34(amount));
-                        asset1 = src_21(src_34(asset));
-                        console.log('r1', ref1, '&&&&&&&&', 't1', tkn, '%%%%%%', 'am1', amount1, 'asst1', '$$$$$', asset1);
+                        // const tkn = parseInt(tokenId, 16)
+                        // const ref1 = parseInt(ref, 16);
+                        // const amount1 = parseInt(amount, 16);
+                        // const asset1 = parseInt(asset, 16);
+                        console.log(tokenId, ref, amount, asset);
+                        tkn = tokenId;
+                        ref1 = src_18(src_34(ref));
+                        amount1 = src_24(amount);
+                        asset1 = src_18(src_34(asset));
+                        // const tkn = abiCoder.encodeParameter('uint256', tokenId);
+                        // const ref1 = abiCoder.encodeParameter('uint256', asciiToHex(ref));
+                        // const amount1 = abiCoder.encodeParameter('uint256', asciiToHex(amount));
+                        // const asset1 = abiCoder.encodeParameter('uint256', asciiToHex(asset));
+                        console.log(tkn, ref1, amount1, asset1);
                         return [4 /*yield*/, executeAndRetry(this.contracts.nft.mint, [owner, tkn, ref1, amount1, asset1, this.ethConfig])];
                     case 1:
                         txHash = _a.sent();
@@ -35005,12 +35015,13 @@ var Tinlake = /** @class */ (function () {
             });
         }); };
         this.getNFTData = function (tokenId) { return __awaiter(_this, void 0, void 0, function () {
-            var res;
+            var tkn, res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         console.log('NFTDATA', tokenId);
-                        return [4 /*yield*/, executeAndRetry(this.contracts.nftData.data, [tokenId])];
+                        tkn = abiCoder$1.encodeParameter('uint256', tokenId);
+                        return [4 /*yield*/, executeAndRetry(this.contracts.nftData.data, [tkn])];
                     case 1:
                         res = _a.sent();
                         console.log('res', res);
