@@ -39,7 +39,7 @@ class MintNFT extends React.Component<Props, State> {
     for (let i = 0; i < 32; i = i + 1) {
       id += Math.round(Math.random() * 16);
     }
-    return `0x${id}`;
+    return id;
   }
 
   mint = async () => {
