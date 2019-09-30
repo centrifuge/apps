@@ -1,7 +1,6 @@
 import Tinlake from 'tinlake';
 import config from '../../config';
 import Eth from 'ethjs';
-declare var web3: any;
 
 const { contractAddresses, nftDataDefinition, transactionTimeout, rpcUrl } = config;
 const portisConfig = {

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Tinlake from 'tinlake';
+import Tinlake, { displayToBase, baseToDisplay } from 'tinlake';
 import { Box, FormField, TextInput, Button, Heading, Anchor, Text } from 'grommet';
 import Alert from '../Alert';
 import Link from 'next/link';
@@ -7,6 +7,7 @@ import SecondaryHeader from '../SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
 import { authTinlake } from '../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
+import NumberInput from '../NumberInput';
 
 interface Props {
   tinlake: Tinlake;
@@ -14,40 +15,60 @@ interface Props {
 
 interface State {
   tokenId: string;
+  referenceId: string;
+  amount: string;
+  assetType: string;
   is: 'loading' | 'success' | 'error' | null;
   errorMsg: string;
 }
 
-const SUCCESS_STATUS = '0x1';
+const SUCCESS_STATUS = '0x1'
 
 class MintNFT extends React.Component<Props, State> {
   state: State = {
-    tokenId: `0x${Math.floor(Math.random() * (10 ** 15))}`,
+    tokenId: this.generateTokenId(),
+    referenceId: '',
+    amount: '0',
+    assetType: '',
     is: null,
     errorMsg: ''
   };
 
+  generateTokenId() {
+    let id = '';
+    for (let i = 0; i < 32; i = i + 1) {
+      id += Math.round(Math.random() * 16);
+    }
+    return id;
+  }
+
   mint = async () => {
-    this.setState({ is: 'loading' });
+    const { referenceId, amount, assetType } = this.state;
+    if (referenceId === '' || assetType === '') {
+      this.setState({ is: 'error', errorMsg: 'Both Reference ID and Asset Type must be defined.' });
+    } else if (amount === '0') {
+      this.setState({ is: 'error', errorMsg: 'Amount cannot be 0.' });
+    } else {
+      this.setState({ is: 'loading' });
+      try {
+        await authTinlake();
 
-    try {
-      await authTinlake();
-
-      const res = await this.props.tinlake.mintNFT(
-        this.props.tinlake.ethConfig.from, this.state.tokenId);
-      if (res.status === SUCCESS_STATUS && res.events[0].event.name === 'Transfer') {
-        this.setState({ is: 'success' });
-      } else {
-        this.setState({ is: 'error' });
+        const res = await this.props.tinlake.mintNFT(
+          this.props.tinlake.ethConfig.from, this.state.tokenId, referenceId, amount, assetType);
+        if (res.status === SUCCESS_STATUS && res.events[0].event.name === 'Transfer') {
+          this.setState({ is: 'success' });
+        } else {
+          this.setState({ is: 'error' });
+        }
+      } catch (e) {
+        console.log(e);
+        this.setState({ is: 'error', errorMsg: e.message });
       }
-    } catch (e) {
-      console.log(e);
-      this.setState({ is: 'error', errorMsg: e.message });
     }
   }
 
   render() {
-    const { is, tokenId, errorMsg } = this.state;
+    const { is, tokenId, errorMsg, referenceId, amount, assetType } = this.state;
 
     return <Box>
       <SecondaryHeader>
@@ -67,33 +88,48 @@ class MintNFT extends React.Component<Props, State> {
       :
         <Box pad={{ horizontal: 'medium' }}>
           {is === 'success' && <Alert type="success">
-            Successfully minted NFT for Token ID {tokenId}<br />
-            <br />
+            Successfully minted NFT for Token ID {tokenId}. Please make sure to copy your Token ID and
             <Link href={`/admin/whitelist-nft?tokenId=${tokenId}`}>
-              <Anchor>Proceed to whitelisting</Anchor></Link></Alert>}
+              <Anchor>proceed to whitelisting.</Anchor></Link></Alert>}
           {is === 'error' && <Alert type="error">
             <Text weight="bold">
               Error minting NFT for Token ID {tokenId}, see console for details</Text>
             {errorMsg && <div><br />{errorMsg}</div>}
           </Alert>}
-
-          <Alert type="info" margin={{ vertical: 'medium' }}>
-            This is a temporary page that will be removed once integrated with Centrifuge Gateway.
-          </Alert>
-
-          <Box direction="row" gap="medium" margin={{ vertical: 'large' }}>
-            <Box basis={'1/4'} gap="medium">
-              <FormField label="Token ID">
+          <Box direction="row" justify="center" gap="large" margin={{ vertical: 'large' }}>
+            <Box basis="1/3" gap="large">
+             <FormField label="Token ID">
                 <TextInput
                   value={this.state.tokenId}
-                  onChange={e => this.setState({ tokenId: e.currentTarget.value })}
+                  disabled={true}
+                />
+              </FormField>
+              <FormField label="Reference ID">
+                <TextInput
+                  value={referenceId}
+                  onChange={e => this.setState({ referenceId: e.currentTarget.value })}
+                  disabled={is === 'success'}
+                />
+              </FormField>
+              <FormField label="Amount">
+                <NumberInput
+                  precision={18}
+                  suffix=" USD"
+                  value={baseToDisplay(amount, 18)}
+                  onValueChange={({ value }) => {
+                    this.setState({ amount: displayToBase(value, 18) });
+                  }}
+                  disabled={is === 'success'}
+                />
+              </FormField>
+              <FormField label="Asset Type">
+                <TextInput
+                  value={assetType}
+                  onChange={e => this.setState({ assetType: e.currentTarget.value })}
                   disabled={is === 'success'}
                 />
               </FormField>
             </Box>
-            <Box basis={'1/4'} gap="medium" />
-            <Box basis={'1/4'} gap="medium" />
-            <Box basis={'1/4'} gap="medium" />
           </Box>
         </Box>
       }
