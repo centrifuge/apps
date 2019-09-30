@@ -68,6 +68,8 @@ export const getPercentFormat = () => {
   return {
     ...getNumberFormat(),
     suffix,
+    fixedDecimalScale: true,
+    decimalScale: 2,
   };
 };
 

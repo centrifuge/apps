@@ -96,28 +96,39 @@ export default class FundingRequestForm extends React.Component<Props> {
                submitForm,
              }) => {
 
-              let days, amount, financeRate, feeAmount, financeFee;
+              let days, amount, financeFee;
               // convert string to float
-              const repaymentAmount = parseFloat(values.repayment_amount);
+              const additionalFee = 0;
+              const daysPerYear = 360;
               const apr = parseFloat(values.apr);
+
 
               // Calculate days for loan
               const repaymentDate = new Date(values.repayment_due_date);
               const diff = repaymentDate.getTime() - today.getTime();
-              const additionalFee = 0;
+
               days = Math.round(diff / (1000 * 60 * 60 * 24));
 
-              financeRate = apr / 360 * days;
+
+              amount =  parseFloat(values.amount);
+              const periodicInterestRate = apr * (days/daysPerYear);
+              let repaymentAmount =  parseFloat(additionalFee + (amount * (1 + periodicInterestRate)).toFixed(2));
+              financeFee = parseFloat((repaymentAmount - amount).toFixed(2));
+
+              /* Invoice Style
+               let financeRate, feeAmount, financeFee;
+               financeRate = apr / daysPerYear * days;
+               const repaymentAmount = parseFloat(values.repayment_amount);
               feeAmount = additionalFee * repaymentAmount;
               financeFee = parseFloat(((repaymentAmount * financeRate + feeAmount) || 0).toFixed(2));
-              amount = repaymentAmount - financeFee;
+              amount = repaymentAmount - financeFee;*/
 
 
-              if (isNaN(amount)) amount = 0;
+              if (isNaN(repaymentAmount)) repaymentAmount = 0;
               if (isNaN(days)) days = 0;
               values.days = days.toString();
               values.fee = financeFee.toString();
-              values.amount = amount.toFixed(2).toString();
+              values.repayment_amount = repaymentAmount.toString();
 
 
               const currencyFormat = getCurrencyFormat(values.currency);
@@ -133,6 +144,7 @@ export default class FundingRequestForm extends React.Component<Props> {
                             error={errors!.funder_id}
                           >
                             <SearchSelect
+                              name={'funder_id'}
                               disabled={isViewMode}
                               labelKey={'name'}
                               valueKey={'address'}
@@ -166,20 +178,20 @@ export default class FundingRequestForm extends React.Component<Props> {
                       <Box direction="row" gap={columnGap}>
                         <Box basis='1/2'>
                           <FormField
-                            label={`Repayment amount`}
-                            error={errors!.repayment_amount}
+                            label={`Finance amount`}
+                            error={errors!.amount}
                           >
                             <NumberInput
-                              disabled={isViewMode}
                               {...currencyFormat}
-                              name="repayment_amount"
-                              value={values!.repayment_amount}
+                              name="amount"
+                              disabled={isViewMode}
+                              value={values!.amount}
                               onChange={({ value }) => {
-                                setFieldValue('repayment_amount', value);
+                                setFieldValue('amount', value);
                               }}
                             />
-
                           </FormField>
+
                         </Box>
 
                         <Box basis='1/2'>
@@ -188,10 +200,13 @@ export default class FundingRequestForm extends React.Component<Props> {
                             error={errors!.apr}
                           >
                             <NumberInput
+                              name={'apr'}
+                              disabled={isViewMode}
                               {...percentParts}
-                              disabled={true}
-                              name="apr"
-                              value={apr * 100}
+                              value={parseFloat(values.apr) * 100}
+                              onChange={({ value }) => {
+                                setFieldValue('apr', value/100);
+                              }}
                             />
                           </FormField>
                         </Box>
@@ -201,11 +216,12 @@ export default class FundingRequestForm extends React.Component<Props> {
                       <Box direction="row" gap={columnGap}>
                         <Box basis='1/2'>
                           <FormField
-                            label={`Finance fee`}
+                            label={`Interest amount`}
                             error={errors!.fee}
                           >
                             <NumberInput
                               {...currencyFormat}
+                              name={'fee'}
                               disabled={true}
                               value={values.fee}
                             />
@@ -214,15 +230,16 @@ export default class FundingRequestForm extends React.Component<Props> {
 
                         <Box basis='1/2'>
                           <FormField
-                            label={`Finance amount`}
-                            error={errors!.amount}
+                            label={`Repayment amount`}
+                            error={errors!.repayment_amount}
                           >
                             <NumberInput
                               {...currencyFormat}
-                              name="amount"
+                              name="repayment_amount"
+                              value={values!.repayment_amount}
                               disabled={true}
-                              value={values!.amount}
                             />
+
                           </FormField>
                         </Box>
                       </Box>
@@ -234,6 +251,7 @@ export default class FundingRequestForm extends React.Component<Props> {
                             label="Funding date"
                           >
                             <DateInput
+                              name={'funding_date'}
                               disabled={true}
                               value={extractDate(today)}
 

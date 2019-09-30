@@ -3,7 +3,7 @@ import { NumberInput } from '@centrifuge/axis-number-input';
 import { DateInput } from '@centrifuge/axis-date-input';
 import { Attribute, AttrTypes } from '@centrifuge/gateway-lib/models/schema';
 import { Box, FormField, Select, TextInput } from 'grommet';
-import { dateToString, extractDate } from '@centrifuge/gateway-lib/utils/formaters';
+import { dateToString, extractDate, getPercentFormat } from '@centrifuge/gateway-lib/utils/formaters';
 import { get } from 'lodash';
 import { connect, FormikContext } from 'formik';
 import { Document } from '@centrifuge/gateway-lib/models/document';
@@ -87,11 +87,12 @@ export const AttributeField: FunctionComponent<Props> = (props: Props) => {
           />;
 
         case AttrTypes.PERCENT:
+
+          const percentParts = getPercentFormat();
           return <NumberInput
             disabled={isViewMode}
-            suffix={'%'}
             value={get(values, key)}
-            precision={2}
+            {...percentParts}
             name={`${key}`}
             onChange={({ value }) => {
               setFieldValue(`${key}`, value);
