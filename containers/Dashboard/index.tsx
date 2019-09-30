@@ -27,7 +27,7 @@ interface State {
   collateralTimeSeriesPeriod: string;
   collateralValueTimeSeriesData: TimeSeriesData;
   showCollateralGraph: boolean;
-  collateralTimeSeriesFetching: boolean;
+  loadingGraph: boolean;
 }
 
 class Dashboard extends React.Component<Props, State> {
@@ -46,11 +46,11 @@ class Dashboard extends React.Component<Props, State> {
   updateCollateralTimeSeriesData = async (period: string) => {
 
     await this.setState({
-      collateralTimeSeriesFetching : true
+      loadingGraph : true
     });
     const timeSeriesData = await this.props.apolloClient.getCollateralTimeSeriesData(period);
     await this.setState({
-      collateralTimeSeriesFetching : false
+      loadingGraph : false
     });
     const collateralValueTimeSeriesData = {
       labels: [],
@@ -99,7 +99,7 @@ class Dashboard extends React.Component<Props, State> {
     const { showCollateralGraph,
             collateralTimeSeriesPeriod,
             collateralValueTimeSeriesData,
-            collateralTimeSeriesFetching
+            loadingGraph
            } = this.state;
 
     if (data === null || state === 'loading') { return null; }
@@ -149,7 +149,7 @@ class Dashboard extends React.Component<Props, State> {
             </FormField>
           </Box>
           <Box pad={{ horizontal: 'right', top: 'medium' }}>
-          {collateralTimeSeriesFetching ?
+          {loadingGraph ?
             <Spinner height={'calc(30vh)'} message={'loading graph data.'} />
             :
             <Graph timeSeriesData={collateralValueTimeSeriesData}></Graph>
