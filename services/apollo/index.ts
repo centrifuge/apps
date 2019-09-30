@@ -9,7 +9,7 @@ const { tinlakeDataBackendUrl } = config;
 const cache = new InMemoryCache();
 const link = new createHttpLink({
   fetch,
-  uri: tinlakeDataBackendUrl,
+  uri: tinlakeDataBackendUrl
 });
 
 export interface TinlakeEventEntry {
@@ -23,7 +23,7 @@ class Apollo {
   constructor() {
     this.client =  new ApolloClient({
       cache,
-      link,
+      link
     });
   }
 
@@ -45,7 +45,7 @@ class Apollo {
             repaid_loans
           }
         }
-        `,
+        `
       });
     } catch (err) {
       console.log(`error occured while fetching time series data from apollo ${err}`);

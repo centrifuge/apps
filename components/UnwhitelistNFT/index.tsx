@@ -30,7 +30,7 @@ interface State {
 class UnwhitelistNFT extends React.Component<Props, State> {
   state: State = {
     is: null,
-    errorMsg: '',
+    errorMsg: ''
   };
   discardDebtSubscription = () => { };
 

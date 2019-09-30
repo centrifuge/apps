@@ -48,12 +48,12 @@ export async function getNFT(tinlake: Tinlake, tokenId: string) {
   const nft: NFT = {
     nftOwner,
     nftData,
-    tokenId: bnTokenId,
+    tokenId: bnTokenId
   };
 
   return {
     nft,
-    tokenId,
+    tokenId
   };
 }
 
@@ -61,6 +61,6 @@ function loggedError(error: any, message: string, tokenId: string) {
   console.log(`${message} ${tokenId}`, error);
   return {
     errorMessage: `${message} ${tokenId}`,
-    tokenId,
+    tokenId
   };
 }

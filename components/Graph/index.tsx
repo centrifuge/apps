@@ -25,22 +25,22 @@ const defaultLineData = {
   pointHoverRadius: 5,
   pointHoverBorderWidth: 2,
   pointRadius: 1,
-  pointHitRadius: 10,
+  pointHitRadius: 10
 };
 
 const defaultLineOptions = {
   scales: {
     yAxes: [
-      { },
+      { }
     ],
     xAxes: [
       {
         gridLines: {
-          display: false,
-        },
-      },
-    ],
-  },
+          display: false
+        }
+      }
+    ]
+  }
 };
 
 interface Props {
@@ -61,13 +61,13 @@ export class Graph extends React.Component<Props> {
         borderColor: xValueSet.backgroundColor,
         pointBorderColor: xValueSet.backgroundColor,
         pointHoverBackgroundColor: xValueSet.backgroundColor,
-        pointHoverBorderColor: xValueSet.backgroundColor,
+        pointHoverBorderColor: xValueSet.backgroundColor
       };
     });
 
     const graphData = {
       labels,
-      datasets,
+      datasets
     };
 
     return (

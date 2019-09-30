@@ -40,7 +40,7 @@ const initialState: LoansState = {
   loansState: null,
   loans: [],
   singleLoanState: null,
-  singleLoan: null,
+  singleLoan: null
 };
 
 // Reducer
@@ -119,7 +119,7 @@ export function getLoans(tinlake: Tinlake):
         tokenId: loan.tokenId,
         balance: balanceDebtData[i].balance,
         debt: currentDebtData[i],
-        status: getLoanStatus(loan.principal, currentDebtData[i]),
+        status: getLoanStatus(loan.principal, currentDebtData[i])
       });
     });
     dispatch({ type: RECEIVE, loans: extendedLoansData });
@@ -143,7 +143,7 @@ export function getLoan(tinlake: Tinlake, loanId: string, refresh = false):
 
     const [loan, balanceDebtData] = await Promise.all([
       tinlake.getLoan(loanId),
-      tinlake.getBalanceDebt(loanId),
+      tinlake.getBalanceDebt(loanId)
     ]);
 
     const nftOwnerPromise = tinlake.ownerOfNFT(bnToHex(loan.tokenId));
@@ -197,7 +197,7 @@ export function getLoan(tinlake: Tinlake, loanId: string, refresh = false):
       tokenId: loan.tokenId,
       balance: balanceDebtData.balance,
       debt: currentDebt,
-      status: getLoanStatus(loan.principal, currentDebt),
+      status: getLoanStatus(loan.principal, currentDebt)
     };
 
     dispatch({ type: RECEIVE_SINGLE, loan: extendedLoanData });
@@ -219,7 +219,7 @@ export function subscribeDebt(tinlake: Tinlake, loanId: string):
 
     const interval = setInterval(
       () => dispatch(getDebt(tinlake, loanId)),
-      1000,
+      1000
     );
     const discard = () => clearInterval(interval);
     return discard as any;

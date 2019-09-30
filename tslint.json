@@ -14,6 +14,7 @@
     "variable-name": false,
     "import-name": false,
     "semicolon": true,
-    "max-line-length": [true, 200]
+    "max-line-length": [true, 500],
+    "trailing-comma": [true, {"multiline": "never", "singleline": "never"}]
   }
 }

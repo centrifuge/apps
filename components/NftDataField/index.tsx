@@ -7,7 +7,7 @@ const web3 = require('web3-utils');
 
 export interface NftDataDefinition {
   contractCall: {
-    outputs: AbiOutput[],
+    outputs: AbiOutput[]
   };
   displayedFields: DisplayedField[];
 }

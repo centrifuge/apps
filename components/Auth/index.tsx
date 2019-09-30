@@ -27,7 +27,7 @@ interface State {
 
 class Auth extends React.Component<Props, State> {
   state = {
-    isAuthenticating: true,
+    isAuthenticating: true
   };
   isMounted = false;
 
@@ -68,7 +68,7 @@ class Auth extends React.Component<Props, State> {
   }
 
   loadCurrentState() {
-    
+
   }
 
   render() {
@@ -83,7 +83,7 @@ class Auth extends React.Component<Props, State> {
       ...auth!,
       isAuthenticated: !isAuthenticating,
       isAuthorized: !isAuthorizing,
-      isAdmin: !!auth!.user && auth!.user.isAdmin,
+      isAdmin: !!auth!.user && auth!.user.isAdmin
     };
 
     return this.props.render(extendedAuthState);

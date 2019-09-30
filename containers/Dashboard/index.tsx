@@ -56,8 +56,8 @@ class Dashboard extends React.Component<Props, State> {
       labels: [],
       xValues: [
         { data: [], backgroundColor: 'rgba(51,51,51,1)', label: 'Outstanding Debt' },
-        { data: [], backgroundColor: 'rgba(9,41,190,1)', label: 'Collateral Value' },
-      ],
+        { data: [], backgroundColor: 'rgba(9,41,190,1)', label: 'Collateral Value' }
+      ]
     };
 
     const updatedCollateralValueTimeSeriesData = timeSeriesData.reduce((collateralValueTimeSeriesData: TimeSeriesData, entry: TinlakeEventEntry) => {
@@ -69,7 +69,7 @@ class Dashboard extends React.Component<Props, State> {
     },                                                                 collateralValueTimeSeriesData);
 
     this.setState({
-      collateralValueTimeSeriesData: updatedCollateralValueTimeSeriesData,
+      collateralValueTimeSeriesData: updatedCollateralValueTimeSeriesData
     });
   }
 
@@ -81,8 +81,8 @@ class Dashboard extends React.Component<Props, State> {
         labels: [],
         xValues: [
           { data: [], backgroundColor: 'rgba(51,51,51,1)', label: 'Oustanding Debt' },
-          { data: [], backgroundColor: 'rgba(9,41,190,1)', label: 'Collateral Value' },
-        ],
+          { data: [], backgroundColor: 'rgba(9,41,190,1)', label: 'Collateral Value' }
+        ]
       },
       showCollateralGraph: !!config.tinlakeDataBackendUrl
     });
@@ -99,7 +99,7 @@ class Dashboard extends React.Component<Props, State> {
     const { showCollateralGraph,
             collateralTimeSeriesPeriod,
             collateralValueTimeSeriesData,
-            collateralTimeSeriesFetching,
+            collateralTimeSeriesFetching
            } = this.state;
 
     if (data === null || state === 'loading') { return null; }
@@ -162,7 +162,7 @@ class Dashboard extends React.Component<Props, State> {
         <Heading level="4">Recent Loans</Heading>
       </Box>
 
-      <LoanList tinlake={tinlake} mode="admin" />
+      <LoanList tinlake={tinlake} mode="" />
     </Box>;
   }
 }

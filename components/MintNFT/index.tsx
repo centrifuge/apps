@@ -32,7 +32,7 @@ class MintNFT extends React.Component<Props, State> {
     amount: '0',
     assetType: '',
     is: null,
-    errorMsg: '',
+    errorMsg: ''
   };
 
   generateTokenId() {

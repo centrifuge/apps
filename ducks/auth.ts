@@ -30,7 +30,7 @@ const initialState: AuthState = {
   observingAuthChanges: false,
   state: null,
   user: null,
-  network: null,
+  network: null
 };
 
 // Reducer
@@ -75,7 +75,7 @@ export function loadUser(tinlake: Tinlake, address: Address):
 
     const user = {
       address,
-      isAdmin: isDemo || await isAdminPromise,
+      isAdmin: isDemo || await isAdminPromise
     };
     dispatch({ user, type: RECEIVE });
   };

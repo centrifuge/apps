@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Tinlake, { bnToHex, baseToDisplay, feeToInterestRate } from 'tinlake';
 import Link from 'next/link';
-import { Box, DataTable, Anchor } from 'grommet';
+import { Box, DataTable, Anchor, Text } from 'grommet';
 import { connect } from 'react-redux';
 import { InternalListLoan, LoansState, getLoans } from '../../ducks/loans';
 import Address from '../Address';
@@ -13,7 +13,7 @@ interface Props {
   tinlake: Tinlake;
   loans?: LoansState;
   getLoans?: (tinlake: Tinlake) => Promise<void>;
-  mode: 'borrower' | 'admin';
+  mode: 'borrower' | 'admin' | '';
 }
 
 class LoanList extends React.Component<Props> {
@@ -29,9 +29,9 @@ class LoanList extends React.Component<Props> {
       return <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />;
     }
 
-    return <Box pad={{ horizontal: 'medium' }}>
+    return <Box pad={{ horizontal: 'medium', bottom: 'large' }}>
       <DataTable data={filteredLoans} sortable columns={[
-        { header: 'Loan ID', property: 'loanId', align: 'end' },
+        { header: <HeaderCell text={'Loan ID'}></HeaderCell>, property: 'loanId', align: 'end' },
         {
           header: 'NFT ID', property: 'tokenId', align: 'end',
           render: (l: InternalListLoan) => <Address address={bnToHex(l.tokenId
@@ -40,11 +40,11 @@ class LoanList extends React.Component<Props> {
         {
           header: 'NFT Owner', property: 'nftOwner', align: 'end',
           render: (l: InternalListLoan) => <div>
-            <Address address={l.nftOwner} />
+            <Address address={l.loanOwner} />
             {l.nftOwner === ethFrom && <Badge text={'Me'} style={{ marginLeft: 5 }} />}
           </div>,
         },
-        { header: 'NFT Status', property: 'status' },
+        { header: <HeaderCell text={'NFT Status'}></HeaderCell>, align: 'end', property: 'status' },
         {
           header: 'Principal', property: 'principal', align: 'end',
           render: (l: InternalListLoan) => l.status === 'Whitelisted' ?
@@ -53,7 +53,7 @@ class LoanList extends React.Component<Props> {
             : '-',
         },
         {
-          header: 'Interest rate', property: 'fee', align: 'end',
+          header: <HeaderCell text={'Interest Rate'}></HeaderCell>, property: 'fee', align: 'end',
           render: (l: InternalListLoan) => l.status === 'Repaid' ? '-' :
             <NumberDisplay suffix="%" value={feeToInterestRate(l.fee)} />,
         },
@@ -65,11 +65,17 @@ class LoanList extends React.Component<Props> {
         {
           header: 'Actions', property: 'id', align: 'end', sortable: false,
           render: (l: InternalListLoan) =>
-            <Link href={`/${mode}/loan?loanId=${l.loanId}`}><Anchor>View</Anchor></Link>,
-        },
+          { const loanUrlPrefix = (mode !== '') ? `/${mode}/` : ``
+           return  <Link href={`${loanUrlPrefix}loan?loanId=${l.loanId}`}><Anchor>View</Anchor></Link>
+          }
+      },
       ]} />
     </Box>;
   }
 }
+
+const HeaderCell = (props : {text: string}) => (
+  <Box pad={{ left: 'small'}}><Text>{props.text}</Text></Box>
+);
 
 export default connect(state => state, { getLoans })(LoanList);
