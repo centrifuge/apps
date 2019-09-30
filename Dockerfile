@@ -9,7 +9,7 @@ RUN npm config set unsafe-perm true
 
 RUN npm install
 
-RUN npm run build
+RUN npm run build:series
 
 EXPOSE 3001
 

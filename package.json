@@ -14,6 +14,7 @@
     "test": "cross-env CI=true lerna run test --parallel",
     "start": "cross-env  lerna run start --parallel",
     "build": "lerna run build --stream",
+    "build:series": "lerna run build",
     "postbuild": "rm -rf ./build && mv packages/ui/build .",
     "postinstall": "npm run bootstrap"
   },
