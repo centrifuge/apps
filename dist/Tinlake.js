@@ -27766,9 +27766,6 @@ var src$4 = {
     toTwosComplement: utils$2.toTwosComplement
 };
 var src_11 = src$4.sha3;
-var src_18 = src$4.toBN;
-var src_24 = src$4.numberToHex;
-var src_34 = src$4.asciiToHex;
 
 var contractAbiNft = [
   {
@@ -28008,6 +28005,37 @@ var contractAbiNft = [
     type: "function"
   },
   {
+    constant: false,
+    inputs: [
+      {
+        name: "usr",
+        type: "address"
+      },
+      {
+        name: "tkn",
+        type: "uint256"
+      },
+      {
+        name: "ref",
+        type: "string"
+      },
+      {
+        name: "amount",
+        type: "uint256"
+      },
+      {
+        name: "asset",
+        type: "string"
+      }
+    ],
+    name: "mint",
+    outputs: [
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
     constant: true,
     inputs: [
       {
@@ -28042,7 +28070,7 @@ var contractAbiNft = [
     outputs: [
       {
         name: "reference_id",
-        type: "uint256"
+        type: "string"
       },
       {
         name: "amount",
@@ -28050,7 +28078,7 @@ var contractAbiNft = [
       },
       {
         name: "asset_type",
-        type: "uint256"
+        type: "string"
       },
       {
         name: "borrower",
@@ -28059,37 +28087,6 @@ var contractAbiNft = [
     ],
     payable: false,
     stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: "usr",
-        type: "address"
-      },
-      {
-        name: "tkn",
-        type: "uint256"
-      },
-      {
-        name: "ref",
-        type: "uint256"
-      },
-      {
-        name: "amount",
-        type: "uint256"
-      },
-      {
-        name: "asset",
-        type: "uint256"
-      }
-    ],
-    name: "mint",
-    outputs: [
-    ],
-    payable: false,
-    stateMutability: "nonpayable",
     type: "function"
   },
   {
@@ -34625,7 +34622,6 @@ var interestRateToFee = function (interestRate) {
 
 var _this = undefined;
 var abiCoder$1 = new AbiCoder$1();
-var Web3 = require('web3-eth');
 var pollingInterval = 1000;
 var LOAN_ID_IDX = 2;
 var Tinlake = /** @class */ (function () {
@@ -34783,20 +34779,10 @@ var Tinlake = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        // const tkn = parseInt(tokenId, 16)
-                        // const ref1 = parseInt(ref, 16);
-                        // const amount1 = parseInt(amount, 16);
-                        // const asset1 = parseInt(asset, 16);
-                        console.log(tokenId, ref, amount, asset);
                         tkn = tokenId;
-                        ref1 = src_18(src_34(ref));
-                        amount1 = src_24(amount);
-                        asset1 = src_18(src_34(asset));
-                        // const tkn = abiCoder.encodeParameter('uint256', tokenId);
-                        // const ref1 = abiCoder.encodeParameter('uint256', asciiToHex(ref));
-                        // const amount1 = abiCoder.encodeParameter('uint256', asciiToHex(amount));
-                        // const asset1 = abiCoder.encodeParameter('uint256', asciiToHex(asset));
-                        console.log(tkn, ref1, amount1, asset1);
+                        ref1 = ref;
+                        amount1 = amount;
+                        asset1 = asset;
                         return [4 /*yield*/, executeAndRetry(this.contracts.nft.mint, [owner, tkn, ref1, amount1, asset1, this.ethConfig])];
                     case 1:
                         txHash = _a.sent();

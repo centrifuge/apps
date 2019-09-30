@@ -2,9 +2,8 @@ import Eth from 'ethjs';
 import { AbiCoder } from 'web3-eth-abi';
 const abiCoder = new AbiCoder();
 import BN from 'bn.js';
-import { sha3, asciiToHex, hexToNumberString, numberToHex, toBN } from 'web3-utils';
+import { sha3 } from 'web3-utils';
 
-const Web3 = require('web3-eth');
 
 import contractAbiNft from './abi/test/SimpleNFT.abi.json';
 import contractAbiTitle from './abi/Title.abi.json';
@@ -275,26 +274,10 @@ export class Tinlake {
    * @param owner Owner of the new NFT
    */
   mintNFT = async (owner: string, tokenId: string, ref: string, amount: string, asset:string) => {
-
-    // const tkn = parseInt(tokenId, 16)
-    // const ref1 = parseInt(ref, 16);
-    // const amount1 = parseInt(amount, 16);
-    // const asset1 = parseInt(asset, 16);
-
-    console.log(tokenId, ref, amount, asset)
-
-
     const tkn = tokenId;
-    const ref1 = toBN(asciiToHex(ref));
-    const amount1 = numberToHex(amount);
-    const asset1 = toBN(asciiToHex(asset));
-
-    // const tkn = abiCoder.encodeParameter('uint256', tokenId);
-    // const ref1 = abiCoder.encodeParameter('uint256', asciiToHex(ref));
-    // const amount1 = abiCoder.encodeParameter('uint256', asciiToHex(amount));
-    // const asset1 = abiCoder.encodeParameter('uint256', asciiToHex(asset));
-
-    console.log(tkn, ref1, amount1, asset1)
+    const ref1 = ref;
+    const amount1 = amount;
+    const asset1 = asset;
 
     const txHash = await executeAndRetry(this.contracts.nft.mint, [owner, tkn, ref1, amount1, asset1, this.ethConfig]);
     console.log(`[NFT.mint] txHash: ${txHash}`);
