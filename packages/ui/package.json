@@ -17,10 +17,8 @@
   "bugs": {
     "url": "https://github.com/rdinicut/gateway/issues"
   },
-  "peerDependencies": {
-    "@centrifuge/gateway-lib": "^0.1.0"
-  },
   "dependencies": {
+    "@centrifuge/gateway-lib": "^0.1.0",
     "@centrifuge/axis-date-input": "^0.3.2-develop.44",
     "@centrifuge/axis-display-field": "0.3.2-develop.50",
     "@centrifuge/axis-modal": "^0.1.1-develop.28",
