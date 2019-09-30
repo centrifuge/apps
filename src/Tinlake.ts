@@ -369,7 +369,6 @@ export class Tinlake {
    * @param owner Owner of the created loan
    */
   whitelist = async (registry: Address, nft: string, principal: string, appraisal: string, fee: string, owner: string) => {
-    console.log(principal, appraisal, fee)
     const txHash = await executeAndRetry(this.contracts.admin.whitelist, [registry, nft, principal, appraisal, fee, owner, this.ethConfig]);
     console.log(`[Admin.whitelist] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);

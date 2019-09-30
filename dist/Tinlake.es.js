@@ -34944,9 +34944,7 @@ var Tinlake = /** @class */ (function () {
             var txHash;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        console.log(principal, appraisal, fee);
-                        return [4 /*yield*/, executeAndRetry(this.contracts.admin.whitelist, [registry, nft, principal, appraisal, fee, owner, this.ethConfig])];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.admin.whitelist, [registry, nft, principal, appraisal, fee, owner, this.ethConfig])];
                     case 1:
                         txHash = _a.sent();
                         console.log("[Admin.whitelist] txHash: " + txHash);
