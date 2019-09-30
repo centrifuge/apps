@@ -6,6 +6,7 @@ import { AuthState } from '../../ducks/auth';
 import Badge from '../Badge';
 import { formatAddress } from '../../utils/formatAddress';
 import config from '../../config'
+import { authTinlake } from '../../services/tinlake';
 
 const { isDemo } = config
 export interface MenuItem {
@@ -23,10 +24,18 @@ interface HeaderProps {
 
 class Header extends React.Component<HeaderProps> {
 
+  connectAccount = async () => {
+    try {
+      await authTinlake();
+    } catch (e) {
+      console.log(`authentication failed with Error ${e}`)
+    }
+  }
   render() {
     const { selectedRoute, menuItems, auth } = this.props;
-    const address = auth && auth.user && auth.user.address;
-    const isAdmin = auth && auth.user && auth.user.isAdmin;
+    const user = auth && auth.user
+    const address = user && user.address;
+    const isAdmin = user && user.isAdmin;
     const network = auth && auth.network;
 
     const sectionGap = 'medium';
@@ -58,10 +67,11 @@ class Header extends React.Component<HeaderProps> {
         {menuItems.filter(item => 
         {
           return (
-            (isDemo || isAdmin) && item.permission === "admin" ||
-            (isDemo || !isAdmin) && item.permission === 'borrower' ||
-            isDemo && item.permission === "demo" ||
-            !item.permission) 
+            (user && isDemo ) ||
+            (user && isAdmin) && item.permission === "admin" ||
+            (user && !isAdmin) && item.permission === 'borrower' ||
+            !item.permission
+            ) 
             && !item.secondary
         }
         )
@@ -77,19 +87,24 @@ class Header extends React.Component<HeaderProps> {
           /></Link>;
         },
         )}
-
       </Box>
-      <Box direction="row" gap={itemGap} align="center" justify="end">
-       { isAdmin &&  <Badge text={'Admin'} style={{  }} /> }
-       </Box>
-      <Box direction="column">
-        <Box direction="row" gap={itemGap} align="center" justify="start">
-          <Text> { formatAddress(address || '') } </Text>
+      { !user && <Button onClick={this.connectAccount} label="Connect" /> }
+      { user && 
+        <Box direction="row" gap={itemGap} align="center" justify="end">
+        { isAdmin &&  <Badge text={'Admin'} style={{  }} /> }
+        </Box> 
+      }
+      { user && 
+        <Box direction="column">
+          <Box direction="row" gap={itemGap} align="center" justify="start">
+            <Text> { formatAddress(address || '') } </Text>
+          </Box>
+          <Box direction="row" justify="start" >
+            { network && <Text  style={{ color: '#808080' , lineHeight: '12px', fontSize: '12px' }}> Connected to {network} </Text> }
+          </Box>
         </Box>
-        <Box direction="row" justify="start" >
-          { network && <Text  style={{ color: '#808080' , lineHeight: '12px', fontSize: '12px' }}> Connected to {network} </Text> }
-        </Box>
-      </Box>
+      }
+    
     </Box>
   </Box>;
   }

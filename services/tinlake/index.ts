@@ -54,14 +54,18 @@ export async function authTinlake() {
 
   authing = true;
 
-  const provider = await web3ConnectToLast();
-  const accounts = await provider.enable();
-  const account = accounts[0];
-  tinlake!.setProvider(provider);
-  tinlake!.setEthConfig({ from: account });
-
-  authed = true;
-  authing = false;
+  try {
+    const provider = await web3ConnectToLast();
+    const accounts = await provider.enable();
+    const account = accounts[0];
+    tinlake!.setProvider(provider);
+    tinlake!.setEthConfig({ from: account });
+    authed = true;
+    authing = false;
+  } catch (e) {
+    console.log(`Tinlake Auth failed ${e}`)
+    authing = false;
+  }
 }
 
 async function web3Connect(): Promise<any> {
