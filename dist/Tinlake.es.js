@@ -34724,14 +34724,16 @@ var Tinlake = /** @class */ (function () {
          * @param owner Owner of the new NFT
          */
         this.mintNFT = function (owner, tokenId) { return __awaiter(_this, void 0, void 0, function () {
-            var tkn;
-            var _this = this;
+            var tkn, txHash;
             return __generator(this, function (_a) {
-                tkn = abiCoder$1.encodeParameter('uint', tokenId);
-                return [2 /*return*/, this.contracts.nft.mint(owner, tkn, this.ethConfig).then(function (txHash) {
-                        console.log("[NFT.mint] txHash: " + txHash);
-                        return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi, _this.transactionTimeout);
-                    })];
+                switch (_a.label) {
+                    case 0:
+                        tkn = abiCoder$1.encodeParameter('uint', tokenId);
+                        return [4 /*yield*/, this.contracts.nft.mint(owner, tkn, this.ethConfig)];
+                    case 1:
+                        txHash = _a.sent();
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout)];
+                }
             });
         }); };
         /**

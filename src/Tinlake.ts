@@ -271,12 +271,9 @@ export class Tinlake {
    */
   mintNFT = async (owner: string, tokenId: string) => {
     const tkn = abiCoder.encodeParameter('uint', tokenId)
-    return this.contracts.nft.mint(owner, tkn, this.ethConfig).then((txHash: string) => {
-      console.log(`[NFT.mint] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
-    });
+    const txHash = await this.contracts.nft.mint(owner, tkn, this.ethConfig);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
   }
-
   /**
    * @param owner Owner of the created loan
    */
