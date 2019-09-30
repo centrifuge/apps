@@ -35006,12 +35006,10 @@ var Tinlake = /** @class */ (function () {
             });
         }); };
         this.getNFTData = function (tokenId) { return __awaiter(_this, void 0, void 0, function () {
-            var tkn, res;
+            var res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        tkn = abiCoder$1.encodeParameter('uint256', tokenId);
-                        return [4 /*yield*/, executeAndRetry(this.contracts.nftData.data, [tkn])];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.nftData.data, [tokenId])];
                     case 1:
                         res = _a.sent();
                         return [2 /*return*/, res];

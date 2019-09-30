@@ -397,8 +397,7 @@ export class Tinlake {
   }
 
   getNFTData: <T>(tokenId: string) => Promise<T> = async (tokenId) => {
-    const tkn = abiCoder.encodeParameter('uint256', tokenId)
-    const res = await executeAndRetry(this.contracts.nftData.data, [tkn]);
+    const res = await executeAndRetry(this.contracts.nftData.data, [tokenId]);
     return res;
   }
 }
