@@ -269,10 +269,12 @@ export class Tinlake {
   /**
    * @param owner Owner of the new NFT
    */
-  mintNFT = async (owner: string, tokenId: string) => {
-    const txHash = await executeAndRetry(this.contracts.nft.mint, [owner, tokenId, this.ethConfig]);
-    console.log(`[NFT.mint] txHash: ${txHash}`);
-    return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
+  mintNFT = (owner: string, tokenId: string): Promise<Events> => {
+    const tkn = abiCoder.encodeParameter('uint', tokenId)
+    return this.contracts.nft.mint(owner, tkn, this.ethConfig).then((txHash: string) => {
+      console.log(`[NFT.mint] txHash: ${txHash}`);
+      return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
+    });
   }
 
   /**
@@ -281,14 +283,14 @@ export class Tinlake {
   adminAdmit = async (registry: string, nft: string, principal: string, owner: string) => {
     const txHash = await executeAndRetry(this.contracts.admit.admit, [registry, nft, principal, owner, this.ethConfig])
     console.log(`[Admit.admit] txHash: ${txHash}`);
-    return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout); 
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
   }
 
   adminAppraise = async (loanID: string, appraisal: string) => {
     const txHash = await executeAndRetry(this.contracts.appraiser.file, [loanID, appraisal, this.ethConfig]);
     console.log(`[Appraisal.file] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
-      
+
   }
 
   getAppraisal = async (loanID: string) => {
@@ -310,7 +312,7 @@ export class Tinlake {
    * @param usr Address that receives the NFT
    */
   repay = async (loanId: string, wad: string, usr: string)=> {
-    const txHash = await executeAndRetry(this.contracts.reception.repay, [loanId, wad, usr,  this.ethConfig])  
+    const txHash = await executeAndRetry(this.contracts.reception.repay, [loanId, wad, usr,  this.ethConfig])
     console.log(`[Reception.repay] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout);
   }
@@ -405,7 +407,7 @@ async function executeAndRetry (f: Function, args: Array<any> = []) : Promise<an
     const result = await f(...args);
     return result;
   } catch (e) {
-    // using error message, since error code -32603 is not unique enough 
+    // using error message, since error code -32603 is not unique enough
     // todo introduce retry limit
     if (e && e.message && (e.message.indexOf("Cannot read property 'number' of null") !== -1 ||
         e.message.indexOf('error with payload')  !== -1)) {
