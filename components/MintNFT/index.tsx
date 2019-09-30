@@ -8,7 +8,6 @@ import { LinkPrevious } from 'grommet-icons';
 import { authTinlake } from '../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import NumberInput from '../NumberInput';
-import { numberToHex } from 'web3-utils';
 
 interface Props {
   tinlake: Tinlake;
@@ -40,11 +39,11 @@ class MintNFT extends React.Component<Props, State> {
     for (let i = 0; i < 32; i = i + 1) {
       id += Math.round(Math.random() * 16);
     }
-    return numberToHex(id);
+    return `0x${id}`;
   }
 
   mint = async () => {
-    const { referenceId, amount, assetType } = this.state
+    const { referenceId, amount, assetType } = this.state;
     if (referenceId === '' || assetType === '') {
       this.setState({ is: 'error', errorMsg: 'Both Reference ID and Asset Type must be defined.' });
     } else if (amount === '0') {
