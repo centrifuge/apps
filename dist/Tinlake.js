@@ -27867,25 +27867,6 @@ var contractAbiNft = [
     constant: false,
     inputs: [
       {
-        name: "usr",
-        type: "address"
-      },
-      {
-        name: "tkn",
-        type: "uint256"
-      }
-    ],
-    name: "mint",
-    outputs: [
-    ],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [
-      {
         name: "from",
         type: "address"
       },
@@ -28024,6 +28005,37 @@ var contractAbiNft = [
     type: "function"
   },
   {
+    constant: false,
+    inputs: [
+      {
+        name: "usr",
+        type: "address"
+      },
+      {
+        name: "tkn",
+        type: "uint256"
+      },
+      {
+        name: "ref",
+        type: "string"
+      },
+      {
+        name: "amount",
+        type: "uint256"
+      },
+      {
+        name: "asset",
+        type: "string"
+      }
+    ],
+    name: "mint",
+    outputs: [
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
     constant: true,
     inputs: [
       {
@@ -28040,6 +28052,37 @@ var contractAbiNft = [
       {
         name: "",
         type: "bool"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    name: "data",
+    outputs: [
+      {
+        name: "reference_id",
+        type: "string"
+      },
+      {
+        name: "amount",
+        type: "uint256"
+      },
+      {
+        name: "asset_type",
+        type: "string"
+      },
+      {
+        name: "borrower",
+        type: "address"
       }
     ],
     payable: false,
@@ -34729,15 +34772,14 @@ var Tinlake = /** @class */ (function () {
         /**
          * @param owner Owner of the new NFT
          */
-        this.mintNFT = function (owner, tokenId) { return __awaiter(_this, void 0, void 0, function () {
-            var tkn, txHash;
+        this.mintNFT = function (owner, tokenId, ref, amount, asset) { return __awaiter(_this, void 0, void 0, function () {
+            var txHash;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        tkn = abiCoder$1.encodeParameter('uint', tokenId);
-                        return [4 /*yield*/, this.contracts.nft.mint(owner, tkn, this.ethConfig)];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.nft.mint, [owner, tokenId, ref, amount, asset, this.ethConfig])];
                     case 1:
                         txHash = _a.sent();
+                        console.log("[NFT.mint] txHash: " + txHash);
                         return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout)];
                 }
             });
@@ -35023,7 +35065,7 @@ function executeAndRetry(f, args) {
                     return [2 /*return*/, result];
                 case 2:
                     e_1 = _a.sent();
-                    // using error message, since error code -32603 is not unique enough
+                    // using error message, since error code -32603 is not unique enough 
                     // todo introduce retry limit
                     if (e_1 && e_1.message && (e_1.message.indexOf("Cannot read property 'number' of null") !== -1 ||
                         e_1.message.indexOf('error with payload') !== -1)) {

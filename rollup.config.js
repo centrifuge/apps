@@ -19,10 +19,10 @@ export default {
   ],
   external: [
   //   ...Object.keys(pkg.dependencies || {}),
-    ...Object.keys(pkg.peerDependencies || {}),
+    ...Object.keys(pkg.peerDependencies || {})
   ],
   plugins: [
-    resolve(),
+    resolve({preferBuiltins: true}),
     commonjs(),
     json({
       // All JSON files will be parsed by default,

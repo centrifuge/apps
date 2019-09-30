@@ -4,6 +4,7 @@ const abiCoder = new AbiCoder();
 import BN from 'bn.js';
 import { sha3 } from 'web3-utils';
 
+
 import contractAbiNft from './abi/test/SimpleNFT.abi.json';
 import contractAbiTitle from './abi/Title.abi.json';
 import contractAbiCurrency from './abi/test/SimpleToken.abi.json';
@@ -91,6 +92,7 @@ interface ethI {
   getTransactionReceipt: (arg0: any, arg1: (err: any, receipt: any) => void) => void;
   getTransactionByHash: (arg0: any, arg1: (err: any, tx: any) => void) => void;
   contract: (arg0: any) => { at: (arg0: any) => void };
+  abi: any;
 }
 
 interface Events {
@@ -269,25 +271,26 @@ export class Tinlake {
   /**
    * @param owner Owner of the new NFT
    */
-  mintNFT = async (owner: string, tokenId: string) => {
-    const tkn = abiCoder.encodeParameter('uint', tokenId)
-    const txHash = await this.contracts.nft.mint(owner, tkn, this.ethConfig);
+  mintNFT = async (owner: string, tokenId: string, ref: string, amount: string, asset:string) => {
+    const txHash = await executeAndRetry(this.contracts.nft.mint, [owner, tokenId, ref, amount, asset, this.ethConfig]);
+    console.log(`[NFT.mint] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
-  }
+  };
+
   /**
    * @param owner Owner of the created loan
    */
   adminAdmit = async (registry: string, nft: string, principal: string, owner: string) => {
     const txHash = await executeAndRetry(this.contracts.admit.admit, [registry, nft, principal, owner, this.ethConfig])
     console.log(`[Admit.admit] txHash: ${txHash}`);
-    return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout); 
   }
 
   adminAppraise = async (loanID: string, appraisal: string) => {
     const txHash = await executeAndRetry(this.contracts.appraiser.file, [loanID, appraisal, this.ethConfig]);
     console.log(`[Appraisal.file] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
-
+      
   }
 
   getAppraisal = async (loanID: string) => {
@@ -308,8 +311,8 @@ export class Tinlake {
    * @param wad Amount which should be repaid
    * @param usr Address that receives the NFT
    */
-  repay = async (loanId: string, wad: string, usr: string)=> {
-    const txHash = await executeAndRetry(this.contracts.reception.repay, [loanId, wad, usr,  this.ethConfig])
+  repay = async (loanId: string, wad: string, usr: string) => {
+    const txHash = await executeAndRetry(this.contracts.reception.repay, [loanId, wad, usr,  this.ethConfig])  
     console.log(`[Reception.repay] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['reception'].abi, this.transactionTimeout);
   }
@@ -365,8 +368,7 @@ export class Tinlake {
    * using initFee
    * @param owner Owner of the created loan
    */
-  whitelist = async (registry: Address, nft: string, principal: string, appraisal: string,
-               fee: string, owner: string) => {
+  whitelist = async (registry: Address, nft: string, principal: string, appraisal: string, fee: string, owner: string) => {
     const txHash = await executeAndRetry(this.contracts.admin.whitelist, [registry, nft, principal, appraisal, fee, owner, this.ethConfig]);
     console.log(`[Admin.whitelist] txHash: ${txHash}`);
     return waitAndReturnEvents(this.eth, txHash, this.contracts['nft'].abi, this.transactionTimeout);
@@ -404,7 +406,7 @@ async function executeAndRetry (f: Function, args: Array<any> = []) : Promise<an
     const result = await f(...args);
     return result;
   } catch (e) {
-    // using error message, since error code -32603 is not unique enough
+    // using error message, since error code -32603 is not unique enough 
     // todo introduce retry limit
     if (e && e.message && (e.message.indexOf("Cannot read property 'number' of null") !== -1 ||
         e.message.indexOf('error with payload')  !== -1)) {
