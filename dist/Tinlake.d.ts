@@ -110,7 +110,7 @@ export declare class Tinlake {
     /**
      * @param owner Owner of the new NFT
      */
-    mintNFT: (owner: string, tokenId: string) => Promise<unknown>;
+    mintNFT: (owner: string, tokenId: string) => Promise<any>;
     /**
      * @param owner Owner of the created loan
      */

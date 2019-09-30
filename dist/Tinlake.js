@@ -34729,13 +34729,17 @@ var Tinlake = /** @class */ (function () {
         /**
          * @param owner Owner of the new NFT
          */
-        this.mintNFT = function (owner, tokenId) {
-            var tkn = abiCoder$1.encodeParameter('uint', tokenId);
-            return _this.contracts.nft.mint(owner, tkn, _this.ethConfig).then(function (txHash) {
-                console.log("[NFT.mint] txHash: " + txHash);
-                return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi, _this.transactionTimeout);
+        this.mintNFT = function (owner, tokenId) { return __awaiter(_this, void 0, void 0, function () {
+            var tkn;
+            var _this = this;
+            return __generator(this, function (_a) {
+                tkn = abiCoder$1.encodeParameter('uint', tokenId);
+                return [2 /*return*/, this.contracts.nft.mint(owner, tkn, this.ethConfig).then(function (txHash) {
+                        console.log("[NFT.mint] txHash: " + txHash);
+                        return waitAndReturnEvents(_this.eth, txHash, _this.contracts['nft'].abi, _this.transactionTimeout);
+                    })];
             });
-    };
+        }); };
         /**
          * @param owner Owner of the created loan
          */
