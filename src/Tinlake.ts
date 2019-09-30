@@ -217,8 +217,6 @@ export class Tinlake {
 
   setEthConfig = (ethConfig: { [key: string]: any }) => {
     this.ethConfig = ethConfig;
-    // console.log('set Eth config', this.eth[Object.keys(this.eth)['abi']]);
-    // this.eth.abi.encodeParams = abiCoder.encodeParameters;
   }
 
   isAdmin = async (address: Address): Promise<boolean> => {
@@ -404,10 +402,8 @@ export class Tinlake {
   }
 
   getNFTData: <T>(tokenId: string) => Promise<T> = async (tokenId) => {
-    console.log('NFTDATA', tokenId)
     const tkn = abiCoder.encodeParameter('uint256', tokenId)
     const res = await executeAndRetry(this.contracts.nftData.data, [tkn]);
-    console.log('res', res)
     return res;
   }
 }

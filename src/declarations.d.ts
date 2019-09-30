@@ -5,4 +5,3 @@ declare module '*.abi' {
 
 declare module 'ethjs';
 declare module 'web3-utils';
-declare module 'web3-eth';

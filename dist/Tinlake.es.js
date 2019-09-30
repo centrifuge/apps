@@ -34661,8 +34661,6 @@ var Tinlake = /** @class */ (function () {
         };
         this.setEthConfig = function (ethConfig) {
             _this.ethConfig = ethConfig;
-            // console.log('set Eth config', this.eth[Object.keys(this.eth)['abi']]);
-            // this.eth.abi.encodeParams = abiCoder.encodeParameters;
         };
         this.isAdmin = function (address) { return __awaiter(_this, void 0, void 0, function () {
             var res;
@@ -35011,12 +35009,10 @@ var Tinlake = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        console.log('NFTDATA', tokenId);
                         tkn = abiCoder$1.encodeParameter('uint256', tokenId);
                         return [4 /*yield*/, executeAndRetry(this.contracts.nftData.data, [tkn])];
                     case 1:
                         res = _a.sent();
-                        console.log('res', res);
                         return [2 /*return*/, res];
                 }
             });
