@@ -1,10 +1,8 @@
 import { AnyAction, Action } from 'redux';
 import Tinlake, { Address } from 'tinlake';
 import { ThunkAction } from 'redux-thunk';
-import config from '../config'
+import config from '../config';
 import { networkIdToName } from '../utils/networkNameResolver';
-
-declare var web3: any;
 
 // Actions
 const LOAD = 'tinlake-ui/auth/LOAD';

@@ -8,6 +8,7 @@ import { LinkPrevious } from 'grommet-icons';
 import { authTinlake } from '../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import NumberInput from '../NumberInput';
+import { numberToHex } from 'web3-utils';
 
 interface Props {
   tinlake: Tinlake;
@@ -22,17 +23,25 @@ interface State {
   errorMsg: string;
 }
 
-const SUCCESS_STATUS = '0x1';
+const SUCCESS_STATUS = '0x1'
 
 class MintNFT extends React.Component<Props, State> {
   state: State = {
-    tokenId: `0x${Math.floor(Math.random() * (10 ** 15))}`,
+    tokenId: this.generateTokenId(),
     referenceId: '',
     amount: '0',
     assetType: '',
     is: null,
     errorMsg: '',
   };
+
+  generateTokenId() {
+    let id = '';
+    for (let i = 0; i < 32; i = i + 1) {
+      id += Math.round(Math.random() * 16);
+    }
+    return numberToHex(id);
+  }
 
   mint = async () => {
     const { referenceId, amount, assetType } = this.state
@@ -44,10 +53,10 @@ class MintNFT extends React.Component<Props, State> {
       this.setState({ is: 'loading' });
       try {
         await authTinlake();
+
         const res = await this.props.tinlake.mintNFT(
           this.props.tinlake.ethConfig.from, this.state.tokenId, referenceId, amount, assetType);
-        // const res = await this. props.tinlake.dummyCall('10000000000000000000')
-        if ( res.status === SUCCESS_STATUS && res.events[0].event.name === 'Transfer') {
+        if (res.status === SUCCESS_STATUS && res.events[0].event.name === 'Transfer') {
           this.setState({ is: 'success' });
         } else {
           this.setState({ is: 'error' });
@@ -80,10 +89,9 @@ class MintNFT extends React.Component<Props, State> {
       :
         <Box pad={{ horizontal: 'medium' }}>
           {is === 'success' && <Alert type="success">
-            Successfully minted NFT for Token ID {tokenId}<br />
-            <br />
+            Successfully minted NFT for Token ID {tokenId}. Please make sure to copy your Token ID and
             <Link href={`/admin/whitelist-nft?tokenId=${tokenId}`}>
-              <Anchor>Proceed to whitelisting</Anchor></Link></Alert>}
+              <Anchor>proceed to whitelisting.</Anchor></Link></Alert>}
           {is === 'error' && <Alert type="error">
             <Text weight="bold">
               Error minting NFT for Token ID {tokenId}, see console for details</Text>
@@ -94,7 +102,6 @@ class MintNFT extends React.Component<Props, State> {
              <FormField label="Token ID">
                 <TextInput
                   value={this.state.tokenId}
-                  onChange={e => this.setState({ tokenId: e.currentTarget.value })}
                   disabled={true}
                 />
               </FormField>

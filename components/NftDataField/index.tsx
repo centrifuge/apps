@@ -74,6 +74,7 @@ class NftDataField extends React.Component<Props> {
     }
 
     if (field.type === 'string') {
+      console.log('value', value)
       const { label } = field;
       const msg = web3.hexToUtf8(bnToHex(value));
       return <FormField label={label}>
