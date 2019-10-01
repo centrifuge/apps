@@ -86,11 +86,12 @@ class MintNFT extends React.Component<Props, State> {
       {is === 'loading' ?
         <Spinner height={'calc(100vh - 89px - 84px)'} message={'Minting...'} />
       :
-        <Box pad={{ horizontal: 'medium' }}>
+        <Box pad={{ horizontal: 'xsmall' }}>
           {is === 'success' && <Alert type="success">
-            Successfully minted NFT for Token ID {tokenId}. Please make sure to copy your Token ID and
+            Successfully minted NFT for Token ID {tokenId}.
+            <b>Please make sure to copy your Token ID!</b>
             <Link href={`/admin/whitelist-nft?tokenId=${tokenId}`}>
-              <Anchor>proceed to whitelisting.</Anchor></Link></Alert>}
+              <Anchor>Then proceed to whitelisting</Anchor></Link></Alert>}
           {is === 'error' && <Alert type="error">
             <Text weight="bold">
               Error minting NFT for Token ID {tokenId}, see console for details</Text>
@@ -98,16 +99,23 @@ class MintNFT extends React.Component<Props, State> {
           </Alert>}
           <Box direction="row" justify="center" gap="large" margin={{ vertical: 'large' }}>
             <Box basis="1/3" gap="large">
-             <FormField label="Token ID">
+              { is === 'success' && <FormField label="Token ID">
                 <TextInput
                   value={this.state.tokenId}
                   disabled={true}
                 />
-              </FormField>
+              </FormField> }
               <FormField label="Reference ID">
                 <TextInput
                   value={referenceId}
                   onChange={e => this.setState({ referenceId: e.currentTarget.value })}
+                  disabled={is === 'success'}
+                />
+              </FormField>
+              <FormField label="Asset Type">
+                <TextInput
+                  value={assetType}
+                  onChange={e => this.setState({ assetType: e.currentTarget.value })}
                   disabled={is === 'success'}
                 />
               </FormField>
@@ -119,13 +127,6 @@ class MintNFT extends React.Component<Props, State> {
                   onValueChange={({ value }) => {
                     this.setState({ amount: displayToBase(value, 18) });
                   }}
-                  disabled={is === 'success'}
-                />
-              </FormField>
-              <FormField label="Asset Type">
-                <TextInput
-                  value={assetType}
-                  onChange={e => this.setState({ assetType: e.currentTarget.value })}
                   disabled={is === 'success'}
                 />
               </FormField>
