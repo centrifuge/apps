@@ -340,9 +340,9 @@ export class Tinlake {
   }
 
   initFee = async (fee: string) => {
-    const txHash = await executeAndRetry(this.contracts.pileForInit.file, [fee, fee, this.ethConfig]);
+    const txHash = await executeAndRetry(this.contracts.admin.file, [fee, fee, this.ethConfig]);
     console.log(`[Pile.file] txHash: ${txHash}`);
-    return waitAndReturnEvents(this.eth, txHash, this.contracts.pileForInit.abi, this.transactionTimeout);
+    return waitAndReturnEvents(this.eth, txHash, this.contracts.admin.abi, this.transactionTimeout);
   }
 
   existsFee = async (fee: string) => {

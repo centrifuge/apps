@@ -31495,6 +31495,25 @@ var contractAbiAdmin = [
     constant: false,
     inputs: [
       {
+        name: "fee",
+        type: "uint256"
+      },
+      {
+        name: "speed",
+        type: "uint256"
+      }
+    ],
+    name: "file",
+    outputs: [
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
         name: "registry",
         type: "address"
       },
@@ -34897,11 +34916,11 @@ var Tinlake = /** @class */ (function () {
             var txHash;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.pileForInit.file, [fee, fee, this.ethConfig])];
+                    case 0: return [4 /*yield*/, executeAndRetry(this.contracts.admin.file, [fee, fee, this.ethConfig])];
                     case 1:
                         txHash = _a.sent();
                         console.log("[Pile.file] txHash: " + txHash);
-                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts.pileForInit.abi, this.transactionTimeout)];
+                        return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts.admin.abi, this.transactionTimeout)];
                 }
             });
         }); };
