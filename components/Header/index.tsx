@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Image, Text } from 'grommet';
+import { Box, Button, Image, Text, Anchor } from 'grommet';
 import { connect } from 'react-redux';
 import Link from 'next/link';
 import { AuthState } from '../../ducks/auth';
@@ -105,7 +105,9 @@ class Header extends React.Component<HeaderProps> {
           </Box>
         </Box>
       }
-    
+      { isDemo && 
+      <Anchor href="https://centrifuge.hackmd.io/zRnaoPqfS7mTm9XL0dDRtQ?view" primary target="blank" label="Help"  style={{ textDecoration: 'none', fontWeight: 900}} />
+      }
     </Box>
   </Box>;
   }

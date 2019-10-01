@@ -10,7 +10,9 @@ import SecondaryHeader from '../SecondaryHeader';
 import { LinkPrevious } from 'grommet-icons';
 import LoanData from '../LoanData';
 import Auth from '../Auth';
+import config from '../../config'
 
+const { isDemo }  = config
 interface Props {
   loanId: string;
   mode: 'borrower' | 'admin' | '';
@@ -56,7 +58,7 @@ class LoanDetail extends React.Component<Props> {
         <Box direction="row" gap="small" align="center">
           {status === 'Whitelisted' &&
             <Auth tinlake={tinlake}
-              render={auth => auth.isAdmin ?
+              render={auth => ( auth.isAdmin && !isDemo ) ?
               <Link href={`/admin/unwhitelist-nft?loanId=${loanId}`}>
                 <Button primary label="Unwhitelist" />
               </Link> : null} />
