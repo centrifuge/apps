@@ -39,7 +39,7 @@ describe('Nfts', () => {
         {
           owner: 'Owner of first nft',
           registry: '0xFirstRegistry',
-          token_id: '0xFirstTokenId',
+          token_id: '0x8416c0d06fae1a25dd11e6f0991f58816e0c2de1c755aa5a9ceee389f23ded3c',
         },
         {
           owner: 'Owner of second nft',
@@ -127,6 +127,9 @@ describe('Nfts', () => {
     const rows = dataTable.find('tbody tr');
     expect(dataTable.prop('data')).toEqual(document.header.nfts);
     expect(rows.length).toEqual(2);
+    // make sure the token_id gets converted to int
+    expect(rows.at(0).find('th').at(0).text()).toBe('59745497403145064117625740497207663202436576057166382573054801816399596350780')
+    expect(rows.at(1).find('th').at(0).text()).toBe('1105004169260701')
     expect(component.find(Button).length).toEqual(0);
   });
 

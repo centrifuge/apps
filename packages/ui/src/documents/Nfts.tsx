@@ -3,7 +3,7 @@ import { useMergeState } from '../hooks';
 import { httpClient } from '../http-client';
 import { Modal } from '@centrifuge/axis-modal';
 import { Document } from '@centrifuge/gateway-lib/models/document';
-import { getAddressLink, getNFTLink } from '@centrifuge/gateway-lib/utils/etherscan';
+import { getAddressLink, getNFTLink, hexToInt } from '@centrifuge/gateway-lib/utils/etherscan';
 import { Section } from '../components/Section';
 import { Button, DataTable, Paragraph } from 'grommet';
 import { DisplayField } from '@centrifuge/axis-display-field';
@@ -107,7 +107,7 @@ export const Nfts: FunctionComponent<Props> = (props) => {
                 href: getNFTLink(datum.token_id, datum.registry),
                 target: '_blank',
               }}
-              value={datum.token_id}/>,
+              value={hexToInt(datum.token_id)}/>,
           },
 
           {

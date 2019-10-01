@@ -18,6 +18,10 @@ export const getAddressLink = (address) => {
 };
 
 export const getNFTLink = (tokenId, registyAddress) => {
-  const tokenToInt = new BN(tokenId.replace(/^0x/, ''), 16).toString();
+  const tokenToInt = hexToInt(tokenId);
   return `${rootLink.replace('[[network]]', subdomain)}/token/${registyAddress}?a=${tokenToInt}`;
 };
+
+export const hexToInt = (hex:string) => {
+  return  new BN(hex.replace(/^0x/, ''), 16).toString();
+}
