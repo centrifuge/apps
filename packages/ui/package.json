@@ -18,7 +18,6 @@
     "url": "https://github.com/rdinicut/gateway/issues"
   },
   "dependencies": {
-    "@centrifuge/gateway-lib": "^0.1.0",
     "@centrifuge/axis-date-input": "^0.3.2-develop.44",
     "@centrifuge/axis-display-field": "0.3.2-develop.50",
     "@centrifuge/axis-modal": "^0.1.1-develop.28",
@@ -29,10 +28,11 @@
     "@centrifuge/axis-spinner": "^0.3.2-develop.44",
     "@centrifuge/axis-theme": "0.2.1-develop.33",
     "@centrifuge/axis-utils": "0.3.2-develop.49",
+    "@centrifuge/gateway-lib": "^0.1.0",
     "axios": "^0.19.0",
     "ethereumjs-util": "^6.1.0",
     "formik": "^1.5.8",
-    "grommet": "^2.7.5",
+    "grommet": "^2.7.8",
     "grommet-icons": "^4.2.0",
     "lodash": "^4.17.14",
     "react": "^16.9.0",
@@ -45,7 +45,6 @@
     "yup": "^0.27.0"
   },
   "scripts": {
-
     "start": "react-scripts start",
     "build": "react-scripts build",
     "clean": "rm -rf ./build",

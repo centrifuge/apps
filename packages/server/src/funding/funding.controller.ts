@@ -3,7 +3,8 @@ import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { FundingRequest } from '@centrifuge/gateway-lib/models/funding-request';
-import { FunFundingCreatePayload, FunFundingResponse, FunRequest } from '@centrifuge/gateway-lib/centrifuge-node-client';
+import { UserapiFundingRequest, UserapiFundingResponse } from '@centrifuge/gateway-lib/centrifuge-node-client';
+import { FundingSignatureRequest } from '@centrifuge/gateway-lib/models/funding-request';
 
 @Controller()
 export class FundingController {
@@ -14,12 +15,11 @@ export class FundingController {
   }
 
   @Post(ROUTES.FUNDING.sign)
-  async sign(@Body() payload: FunRequest, @Request() req): Promise<FunFundingResponse | null> {
-    const signatureResponse = await this.centrifugeService.funding.sign(
+  async sign(@Body() payload: FundingSignatureRequest, @Request() req): Promise<UserapiFundingResponse | null> {
+    const signatureResponse = await this.centrifugeService.funding.signFundingAgreement(
+      req.user.account,
       payload.document_id,
       payload.agreement_id,
-      payload,
-      req.user.account,
     );
 
     await this.centrifugeService.pullForJobComplete(
@@ -31,9 +31,9 @@ export class FundingController {
   }
 
   @Post(ROUTES.FUNDING.base)
-  async create(@Body() fundingRequest: FundingRequest, @Request() req): Promise<FunFundingResponse | null> {
+  async create(@Body() fundingRequest: FundingRequest, @Request() req): Promise<UserapiFundingResponse | null> {
 
-    const payload: FunFundingCreatePayload = {
+    const payload: UserapiFundingRequest = {
       data: {
         amount: fundingRequest.amount.toString(),
         apr: fundingRequest.apr.toString(),
@@ -49,24 +49,20 @@ export class FundingController {
 
     if (fundingRequest.nft_address) payload.data.nft_address = fundingRequest.nft_address;
 
-    const fundingResponse = await this.centrifugeService.funding.create(
+    const fundingResponse = await this.centrifugeService.funding.createFundingAgreement(
+      req.user.account,
       fundingRequest.document_id,
       payload,
-      req.user.account,
     );
 
     await this.centrifugeService.pullForJobComplete(
       fundingResponse.header.job_id,
       req.user.account,
     );
-
-    const signaturePayload = {
-      document_id: fundingRequest.document_id,
-      agreement_id: fundingResponse.data.funding.agreement_id,
-    };
-    const signatureResponse = await this.centrifugeService.funding.sign(
-      signaturePayload.document_id, signaturePayload.agreement_id,
-      signaturePayload, req.user.account,
+    const signatureResponse = await this.centrifugeService.funding.signFundingAgreement(
+      req.user.account,
+      fundingRequest.document_id,
+      fundingResponse.data.funding.agreement_id,
     );
     await this.centrifugeService.pullForJobComplete(
       signatureResponse.header.job_id,

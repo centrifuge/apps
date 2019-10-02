@@ -10,6 +10,7 @@ import { NumberInput } from '@centrifuge/axis-number-input';
 import { DateInput } from '@centrifuge/axis-date-input';
 import { SearchSelect } from '@centrifuge/axis-search-select';
 import { TextInput } from 'grommet';
+import { withAxis } from '../../test-utilities/test-providers';
 
 jest.mock('../../http-client');
 
@@ -52,19 +53,21 @@ describe('Funding Agreement Form', () => {
     fundingAgreement.amount = '1000';
 
     const component = mount(
-      <FundingRequestForm
-        onSubmit={onSubmit}
-        onDiscard={onDiscard}
-        contacts={defaultContacts}
-        today={today}
-        isViewMode={false}
-        fundingAgreement={fundingAgreement}/>,
+      withAxis(
+        <FundingRequestForm
+          onSubmit={onSubmit}
+          onDiscard={onDiscard}
+          contacts={defaultContacts}
+          today={today}
+          isViewMode={false}
+          fundingAgreement={fundingAgreement}/>,
+      ),
     );
 
-    const amountField = component.find({name:'amount'}).find(NumberInput);
-    const repaymentAmountField = component.find({name:'repayment_amount'}).find(NumberInput);
-    const repaymentDueDateField = component.find({name:'repayment_due_date'}).find(DateInput);
-    const feeField = component.find({name:'fee'}).find(NumberInput);
+    const amountField = component.find({ name: 'amount' }).find(NumberInput);
+    const repaymentAmountField = component.find({ name: 'repayment_amount' }).find(NumberInput);
+    const repaymentDueDateField = component.find({ name: 'repayment_due_date' }).find(DateInput);
+    const feeField = component.find({ name: 'fee' }).find(NumberInput);
     expect(amountField.prop('value')).toBe('1000');
     expect(repaymentAmountField.prop('value')).toBe('1004.31');
     expect(repaymentDueDateField.prop('value')).toBe('2019-07-06');
@@ -79,16 +82,18 @@ describe('Funding Agreement Form', () => {
     fundingAgreement.funder_id = defaultContacts[0].address!;
 
     const component = mount(
-      <FundingRequestForm
-        onSubmit={onSubmit}
-        onDiscard={onDiscard}
-        contacts={defaultContacts}
-        today={today}
-        isViewMode={false}
-        fundingAgreement={fundingAgreement}/>,
+      withAxis(
+        <FundingRequestForm
+          onSubmit={onSubmit}
+          onDiscard={onDiscard}
+          contacts={defaultContacts}
+          today={today}
+          isViewMode={false}
+          fundingAgreement={fundingAgreement}/>,
+      ),
     );
 
-    const submit = component.find({label:'Request'}).find('button');
+    const submit = component.find({ label: 'Request' }).find('button');
     submit.simulate('click');
     // Form validator are async so we need wait a little
     await new Promise(r => setTimeout(r, 0));
@@ -105,16 +110,18 @@ describe('Funding Agreement Form', () => {
     fundingAgreement.funder_id = defaultContacts[0].address!;
 
     const component = mount(
-      <FundingRequestForm
-        onSubmit={onSubmit}
-        onDiscard={onDiscard}
-        contacts={defaultContacts}
-        today={today}
-        isViewMode={false}
-        fundingAgreement={fundingAgreement}/>,
+      withAxis(
+        <FundingRequestForm
+          onSubmit={onSubmit}
+          onDiscard={onDiscard}
+          contacts={defaultContacts}
+          today={today}
+          isViewMode={false}
+          fundingAgreement={fundingAgreement}/>,
+      ),
     );
 
-    const discard = component.find({label:'Discard'}).find('button');
+    const discard = component.find({ label: 'Discard' }).find('button');
     discard.simulate('click');
     expect(onDiscard).toHaveBeenCalledTimes(1);
 
@@ -129,20 +136,22 @@ describe('Funding Agreement Form', () => {
     fundingAgreement.funder_id = defaultContacts[0].address!;
 
     const component = mount(
-      <FundingRequestForm
-        onSubmit={onSubmit}
-        onDiscard={onDiscard}
-        contacts={defaultContacts}
-        today={today}
-        isViewMode={true}
-        fundingAgreement={fundingAgreement}/>,
+      withAxis(
+        <FundingRequestForm
+          onSubmit={onSubmit}
+          onDiscard={onDiscard}
+          contacts={defaultContacts}
+          today={today}
+          isViewMode={true}
+          fundingAgreement={fundingAgreement}/>,
+      ),
     );
 
 
-    expect(component.find({disabled:true}).find(TextInput).length).toBe(9);
-    expect(component.find({disabled:true}).find(DateInput).length).toBe(2);
-    expect(component.find({disabled:true}).find(SearchSelect).length).toBe(1);
-    expect(component.find({disabled:true}).find(NumberInput).length).toBe(4);
+    expect(component.find({ disabled: true }).find(TextInput).length).toBe(9);
+    expect(component.find({ disabled: true }).find(DateInput).length).toBe(2);
+    expect(component.find({ disabled: true }).find(SearchSelect).length).toBe(1);
+    expect(component.find({ disabled: true }).find(NumberInput).length).toBe(4);
 
   });
 

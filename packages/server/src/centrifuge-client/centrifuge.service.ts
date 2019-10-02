@@ -1,13 +1,12 @@
 import {
   AccountsApi,
   DocumentsApi,
-  FundingServiceApi,
+  FundingAgreementsApi,
   InvoicesApi,
   JobsApi,
   JobsStatusResponse,
   NFTsApi,
   NFTsBetaApi,
-  PurchaseOrdersApi,
   TransferDetailsApi,
 } from '@centrifuge/gateway-lib/centrifuge-node-client';
 import config from '../config';
@@ -20,8 +19,7 @@ export class CentrifugeService {
   public documents: DocumentsApi;
   public accounts: AccountsApi;
   public invoices: InvoicesApi;
-  public purchaseOrders: PurchaseOrdersApi;
-  public funding: FundingServiceApi;
+  public funding: FundingAgreementsApi;
   public nftBeta: NFTsBetaApi;
   public nft: NFTsApi;
   public job: JobsApi;
@@ -32,8 +30,7 @@ export class CentrifugeService {
     this.documents = new DocumentsApi({}, config.centrifugeUrl);
     this.accounts = new AccountsApi({}, config.centrifugeUrl);
     this.invoices = new InvoicesApi({}, config.centrifugeUrl);
-    this.purchaseOrders = new PurchaseOrdersApi({}, config.centrifugeUrl);
-    this.funding = new FundingServiceApi({}, config.centrifugeUrl);
+    this.funding = new FundingAgreementsApi({}, config.centrifugeUrl);
     this.nft = new NFTsApi({}, config.centrifugeUrl);
     this.nftBeta = new NFTsBetaApi({}, config.centrifugeUrl);
     this.job = new JobsApi({}, config.centrifugeUrl);

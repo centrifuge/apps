@@ -64,6 +64,9 @@ typings/
 models
 centrifuge-node-client
 utils
+!src/centrifuge-node-client
+!src/models
+!src/utils
 
 # IntelliJ config files
 .idea

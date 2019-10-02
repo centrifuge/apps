@@ -5,7 +5,7 @@ import { SearchSelect } from '@centrifuge/axis-search-select';
 import { Nfts } from '../Nfts';
 import { Button, DataTable } from 'grommet';
 import MintNftForm from '../MintNftForm';
-import { defaultUser } from '../../test-utilities/default-data';
+import { defaultContacts, defaultUser } from '../../test-utilities/default-data';
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers';
 
 jest.mock('../../http-client');
@@ -69,8 +69,7 @@ describe('Nfts', () => {
         key:
           '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
         type: 'string',
-        value: 'some cust' +
-          'omer',
+        value: 'some customer',
       },
 
       ['percent']: {
@@ -113,6 +112,7 @@ describe('Nfts', () => {
     const component = mount(
       withAllProvidersAndContexts(
         <Nfts document={document}
+              contacts={defaultContacts}
               onAsyncStart={onAsyncStart}
               onAsyncComplete={onAsyncComplete}
               onAsyncError={onAsyncError}
@@ -139,6 +139,7 @@ describe('Nfts', () => {
     const component = mount(
       withAllProvidersAndContexts(
         <Nfts document={document}
+              contacts={defaultContacts}
               onAsyncStart={onAsyncStart}
               onAsyncComplete={onAsyncComplete}
               onAsyncError={onAsyncError}
@@ -149,7 +150,7 @@ describe('Nfts', () => {
         />),
     );
 
-    httpClient.documents.mint.mockImplementation(async () => {
+    httpClient.nfts.mint.mockImplementation(async () => {
       return { data: 'Custom Payload' };
     });
 
@@ -171,6 +172,7 @@ describe('Nfts', () => {
     const component = mount(
       withAllProvidersAndContexts(
         <Nfts document={document}
+              contacts={defaultContacts}
               onAsyncStart={onAsyncStart}
               onAsyncComplete={onAsyncComplete}
               onAsyncError={onAsyncError}
@@ -181,7 +183,7 @@ describe('Nfts', () => {
         />),
     );
     const error = new Error('Some Error');
-    httpClient.documents.mint.mockImplementation(async () => {
+    httpClient.nfts.mint.mockImplementation(async () => {
       throw error;
     });
 

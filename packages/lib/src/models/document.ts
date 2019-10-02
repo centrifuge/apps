@@ -16,9 +16,3 @@ export enum DOCUMENT_ACCESS {
   WRITE = 'write_access',
 }
 
-export interface MintNftRequest {
-  proof_fields: string[],
-  deposit_address: string,
-  registry_address: string
-}
-

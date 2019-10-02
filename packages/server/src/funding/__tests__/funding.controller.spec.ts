@@ -5,7 +5,6 @@ import { SessionGuard } from '../../auth/SessionGuard';
 import { DatabaseService } from '../../database/database.service';
 import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module';
 
-
 describe('Funding controller', () => {
 
   const invoice: any = {
@@ -81,7 +80,6 @@ describe('Funding controller', () => {
         data: {
           funding: {
             agreement_id: 'e444',
-            document_id: '0x39393939',
           },
           signatures: ['signature_data_1'],
         },
@@ -104,7 +102,7 @@ describe('Funding controller', () => {
 
       const result = await fundingController.sign(
         fundingRequest,
-        { user: { _id: 'user_id',account: '0xCentrifugeId'  } },
+        { user: { _id: 'user_id', account: '0xCentrifugeId' } },
       );
       expect(result).toEqual({
         header: {
@@ -118,14 +116,11 @@ describe('Funding controller', () => {
         },
         data: {
           funding: {
-            ...fundingRequest,
+            agreement_id: fundingRequest.agreement_id,
           },
           signatures: ['signature_data_1'],
         },
       });
     });
   });
-
-
 });
-

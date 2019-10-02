@@ -125,7 +125,6 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
     });
   };
 
-
   const onCancel = () => {
     props.history.goBack();
   };
@@ -194,6 +193,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
           viewMode={!canMint}
           document={document!}
           user={user!}
+          contacts={contacts}
           registries={selectedSchema!.registries}/>
 
         {(selectedSchema!.formFeatures && selectedSchema!.formFeatures!.fundingAgreement) && <FundingAgreements

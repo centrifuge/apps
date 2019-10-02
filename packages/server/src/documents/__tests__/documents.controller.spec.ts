@@ -82,7 +82,6 @@ describe('DocumentsController', () => {
     databaseSpies.spyUpdateById = jest.spyOn(databaseService.documents, 'updateById');
 
     const centrifugeService = documentsModule.get<CentrifugeService>(CentrifugeService);
-    centApiSpies.spyMintNft = jest.spyOn(centrifugeService.nftBeta, 'mintNft');
     centApiSpies.spyGetDocument = jest.spyOn(centrifugeService.documents, 'getDocument');
   });
 
@@ -229,44 +228,6 @@ describe('DocumentsController', () => {
         '0x4441',
         insertedDocument.header.document_id,
       );
-
-    });
-  });
-
-
-  describe('mint', function() {
-    it('Should mint an nft for a document', async function() {
-      const documentsController = documentsModule.get<DocumentsController>(
-        DocumentsController,
-      );
-
-      const payload = {
-        deposit_address: '0x333',
-        registry_address: '0x111',
-        proof_fields: ['some_field'],
-      };
-
-      const result = await documentsController.mintNFT(
-        { id: insertedDocument._id },
-        { user: { _id: 'user_id', account: '0xUserAccount' } },
-        payload,
-      );
-      expect(databaseSpies.spyFindOne).toHaveBeenCalledWith({
-        _id: insertedDocument._id,
-      });
-
-
-      expect(centApiSpies.spyMintNft).toHaveBeenCalledWith(
-        '0xUserAccount',
-        payload.registry_address,
-        {
-          document_id: insertedDocument.header.document_id,
-          proof_fields: payload.proof_fields,
-          deposit_address: payload.deposit_address,
-        });
-
-
-      expect(databaseSpies.spyUpdateById).toHaveBeenCalled();
 
     });
   });

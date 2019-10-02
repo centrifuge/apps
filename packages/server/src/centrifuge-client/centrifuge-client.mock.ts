@@ -70,7 +70,7 @@ export class MockCentrifugeService {
     updatePurchaseOrder: jest.fn((auth, id, data) => data),
   };
   funding = {
-    create: jest.fn((document_id, payload, account) => {
+    createFundingAgreement: jest.fn((document_id, payload, account) => {
       return new Promise((resolve, reject) => {
         const result = {
           header: {
@@ -87,7 +87,7 @@ export class MockCentrifugeService {
       });
     }),
 
-    get: jest.fn((document_id, agreement_id, account) => {
+    getFundingAgreement: jest.fn((document_id, agreement_id, account) => {
       return {
         header: {
           nfts: [
@@ -108,7 +108,7 @@ export class MockCentrifugeService {
       };
 
     }),
-    sign: jest.fn((document_id, agreement_id, payload, account) => {
+    signFundingAgreement: jest.fn((account,document_id, agreement_id, ) => {
       return new Promise((resolve, reject) => {
         const result = {
           header: {
@@ -122,7 +122,7 @@ export class MockCentrifugeService {
           },
           data: {
             funding: {
-              ...payload,
+              agreement_id,
             },
             signatures: ['signature_data_1'],
           },

@@ -79,13 +79,6 @@ describe('DocumentForm', () => {
       },
       attributes: {
 
-        ['_schema']: {
-          key:
-            '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
-          type: 'string',
-          value: 'first_schema',
-        },
-
         ['reference_id']: {
           key:
             '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
@@ -204,14 +197,28 @@ describe('DocumentForm', () => {
       ),
     );
     expect(documentForm.find(Section).first().find(SearchSelect).prop('disabled')).not.toBeUndefined();
-    ;
+
   });
 
+  it('Should render attributes section if document has a _schema attribute defined', () => {
 
-  it('Should select a schema and render schema attributes', () => {
     const documentForm = mount(
       withAllProvidersAndContexts(
         <DocumentForm document={documents[0]}
+                      schemas={defaultSchemas}
+                      onSubmit={onSubmit}/>,
+      ),
+    );
+    expect(documentForm.find(Attributes).length).toEqual(1);
+
+  });
+
+
+  it('Should select a schema and render schema attributes when selecting a schema', () => {
+
+    const documentForm = mount(
+      withAllProvidersAndContexts(
+        <DocumentForm document={documents[1]}
                       schemas={defaultSchemas}
                       onSubmit={onSubmit}/>,
       ),

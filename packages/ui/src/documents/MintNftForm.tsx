@@ -18,17 +18,9 @@ export interface MintNftFormData {
   deposit_address: string
   transfer: boolean
 }
+
 // TODO use function components here
 export default class MintNftForm extends React.Component<Props> {
-  static defaultProps: Props = {
-    onSubmit: () => {
-      // do nothing by default
-    },
-    onDiscard: () => {
-      // do nothing by default
-    },
-    registries: [] as Registry[],
-  };
 
   state = { submitted: false };
 
@@ -48,8 +40,10 @@ export default class MintNftForm extends React.Component<Props> {
     const sectionGap = 'large';
 
     const formValidation = Yup.object().shape({
-      registry: Yup.string()
-        .required('This field is required'),
+      registry: Yup.object().shape({
+        address: Yup.string()
+          .required('This field is required')
+      }),
       deposit_address: Yup.string()
         .test({
           name: 'test_schemas',
@@ -71,7 +65,7 @@ export default class MintNftForm extends React.Component<Props> {
     });
 
     const initialValues: MintNftFormData = {
-      registry: undefined,
+      registry: { label: '', address: '', proofs: [] },
       deposit_address: '',
       transfer: false,
     };
@@ -104,9 +98,10 @@ export default class MintNftForm extends React.Component<Props> {
                     <Box gap={columnGap}>
                       <FormField
                         label="Registry"
-                        error={errors.registry}
+                        error={errors!.registry ? (errors!.registry as any)!.address : ''}
                       >
                         <SearchSelect
+                          name="registry"
                           labelKey={'label'}
                           valueKey={'address'}
                           options={registries}
@@ -126,7 +121,7 @@ export default class MintNftForm extends React.Component<Props> {
 
                       {
                         values.transfer && <FormField
-                          label="Deposit adress"
+                          label="Deposit address"
                           error={errors.deposit_address}
                         >
                           <TextInput
@@ -146,9 +141,9 @@ export default class MintNftForm extends React.Component<Props> {
                     />
 
                     <Button
-                      onClick={()=>{
-                        this.setState({submitted:true})
-                        submitForm()
+                      onClick={() => {
+                        this.setState({ submitted: true });
+                        submitForm();
                       }}
                       primary
                       label="Mint"

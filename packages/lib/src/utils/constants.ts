@@ -28,6 +28,7 @@ export const ROUTES = Object.freeze({
   TRANSFER_DETAILS: `${API_BASE}/transfer_details`,
   SCHEMAS: `${API_BASE}/schemas`,
   DOCUMENTS: `${API_BASE}/documents`,
+  NFTS: `${API_BASE}/nfts`,
 });
 
 export enum PERMISSIONS {

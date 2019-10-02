@@ -19,6 +19,8 @@ import { Preloader } from '../components/Preloader';
 import { Nfts } from './Nfts';
 import { FundingAgreements } from './FundingAgreements';
 import { extendContactsWithUsers } from '@centrifuge/gateway-lib/utils/contact-utils';
+import { AxiosError } from 'axios';
+import { NOTIFICATION, NotificationContext } from '../components/NotificationContext';
 
 
 type Props = RouteComponentProps<{ id: string }>
@@ -61,6 +63,7 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
 
 
   const { user } = useContext(AppContext);
+  const notification = useContext(NotificationContext);
 
   const displayPageError = useCallback((error) => {
     setState({
@@ -68,6 +71,21 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
       error,
     });
   }, [setState]);
+
+  const startLoading = (loadingMessage: string = 'Loading') => {
+    setState({ loadingMessage });
+  };
+
+  const displayModalError = (e: AxiosError, title: string = 'Error') => {
+    setState({
+      loadingMessage: null,
+    });
+    notification.alert({
+      type: NOTIFICATION.ERROR,
+      title,
+      message: e!.response!.data.message,
+    });
+  };
 
   const loadData = useCallback(async () => {
     setState({
@@ -142,8 +160,12 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
 
         <Nfts
           viewMode={true}
+          onAsyncStart={startLoading}
+          onAsyncComplete={loadData}
+          onAsyncError={displayModalError}
           user={user!}
           document={document!}
+          contacts={contacts}
           registries={selectedSchema!.registries}/>
 
         {(selectedSchema!.formFeatures && selectedSchema!.formFeatures!.fundingAgreement) && <FundingAgreements

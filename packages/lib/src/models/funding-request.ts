@@ -25,6 +25,11 @@ export class FundingAgreement implements IFundingAgreement {
 }
 
 
+export class FundingSignatureRequest {
+  public document_id: string;
+  public agreement_id: string;
+}
+
 export class FundingRequest extends FundingAgreement {
   public document_id: string;
 }

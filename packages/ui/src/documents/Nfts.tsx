@@ -5,12 +5,16 @@ import { Modal } from '@centrifuge/axis-modal';
 import { Document } from '@centrifuge/gateway-lib/models/document';
 import { getAddressLink, getNFTLink, hexToInt } from '@centrifuge/gateway-lib/utils/etherscan';
 import { Section } from '../components/Section';
-import { Button, DataTable, Paragraph } from 'grommet';
+import { Anchor, Box, Button, DataTable, Paragraph } from 'grommet';
 import { DisplayField } from '@centrifuge/axis-display-field';
 import { Money } from 'grommet-icons';
 import { Registry } from '@centrifuge/gateway-lib/models/schema';
 import MintNftForm, { MintNftFormData } from './MintNftForm';
-import { User } from '@centrifuge/gateway-lib/models/user';
+import { canTransferNft, User } from '@centrifuge/gateway-lib/models/user';
+import { TransferNftRequest } from '@centrifuge/gateway-lib/models/nfts';
+import TransferNftForm from './TransferNftForm';
+import { Contact } from '@centrifuge/gateway-lib/src/models/contact';
+import { CoreapiNFT } from '@centrifuge/gateway-lib/centrifuge-node-client';
 
 type Props = {
   onAsyncStart?: (message: string) => void;
@@ -18,20 +22,27 @@ type Props = {
   onAsyncError?: (error, title?: string) => void;
   document: Document,
   user: User,
+  contacts: Contact[],
   registries: Registry[],
   viewMode: boolean,
 }
 
 type State = {
-  modalOpened: boolean
+  mintModalOpened: boolean
+  transferModalOpened: boolean
+  selectedNft: CoreapiNFT | null
 }
 
 export const Nfts: FunctionComponent<Props> = (props) => {
 
   const [{
-    modalOpened,
+    mintModalOpened,
+    transferModalOpened,
+    selectedNft,
   }, setState] = useMergeState<State>({
-    modalOpened: false,
+    mintModalOpened: false,
+    transferModalOpened: false,
+    selectedNft: null,
   });
 
 
@@ -40,6 +51,7 @@ export const Nfts: FunctionComponent<Props> = (props) => {
     onAsyncComplete,
     onAsyncError,
     document,
+    contacts,
     registries,
     user,
     viewMode,
@@ -49,19 +61,20 @@ export const Nfts: FunctionComponent<Props> = (props) => {
     onAsyncComplete: (data) => {
     },
     onAsyncError: (error, title?: string) => {
+      alert('ON ASYNC');
     },
     ...props,
   };
 
 
-  const mintNFT = async (id: string | undefined, data: MintNftFormData) => {
+  const mintNFT = async (id: string, data: MintNftFormData) => {
 
     onAsyncStart('Minting NFT');
 
     try {
-      onAsyncComplete((await httpClient.documents.mint(
-        id,
+      onAsyncComplete((await httpClient.nfts.mint(
         {
+          document_id: id,
           deposit_address: data.transfer ? data.deposit_address : user!.account,
           proof_fields: data.registry!.proofs,
           registry_address: data.registry!.address,
@@ -72,17 +85,40 @@ export const Nfts: FunctionComponent<Props> = (props) => {
     }
   };
 
-  const openModal = () => {
-    setState({ modalOpened: true });
+  const transferNFT = async (data: TransferNftRequest) => {
+
+    onAsyncStart('Transferring NFT');
+
+    try {
+      onAsyncComplete((await httpClient.nfts.tranfer(
+        data,
+      )).data);
+    } catch (e) {
+      onAsyncError(e, 'Failed to transfer NFT');
+    }
+  };
+
+  const openMintModal = () => {
+    setState({ mintModalOpened: true });
+  };
+
+  const openTransferModal = (selectedNft: CoreapiNFT) => {
+    setState({
+      selectedNft,
+      transferModalOpened: true,
+    });
   };
 
   const closeModal = () => {
-    setState({ modalOpened: false });
+    setState({
+      mintModalOpened: false,
+      transferModalOpened: false,
+    });
   };
 
 
   const mintActions = !viewMode ? [
-    <Button key="mint-nft" onClick={openModal} icon={<Money/>} plain label={'Mint NFT'}/>,
+    <Button key="mint-nft" onClick={openMintModal} icon={<Money/>} plain label={'Mint NFT'}/>,
   ] : [];
 
   const renderNftSection = () => {
@@ -122,7 +158,6 @@ export const Nfts: FunctionComponent<Props> = (props) => {
               }}
               value={datum.registry}/>,
           },
-
           {
             property: 'owner',
             header: 'Owner',
@@ -136,6 +171,19 @@ export const Nfts: FunctionComponent<Props> = (props) => {
               value={datum.owner}/>,
 
           },
+          {
+            property: '_id',
+            header: 'Actions',
+            sortable: false,
+            render: datum => {
+              return canTransferNft(user, datum) ? <Box direction="row" gap="small">
+                <Anchor
+                  label={'Transfer'}
+                  onClick={() => openTransferModal(datum)}
+                />
+              </Box> : [];
+            },
+          },
         ]}
       />
 
@@ -147,15 +195,30 @@ export const Nfts: FunctionComponent<Props> = (props) => {
   return <>
     <Modal
       width={'large'}
-      opened={modalOpened}
+      opened={mintModalOpened}
       headingProps={{ level: 3 }}
       title={`Mint NFT`}
       onClose={closeModal}
     >
       <MintNftForm
-        onSubmit={(data) => mintNFT(document!._id!, data)}
+        onSubmit={(data) => mintNFT(document!.header!.document_id!, data)}
         onDiscard={closeModal}
         registries={registries}
+      />
+    </Modal>
+
+    <Modal
+      width={'large'}
+      opened={transferModalOpened}
+      headingProps={{ level: 3 }}
+      title={`Transfer NFT`}
+      onClose={closeModal}
+    >
+      <TransferNftForm
+        nft={selectedNft!}
+        onSubmit={(data) => transferNFT(data)}
+        onDiscard={closeModal}
+        contacts={contacts}
       />
     </Modal>
 

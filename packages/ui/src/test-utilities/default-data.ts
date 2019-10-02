@@ -23,7 +23,7 @@ export const defaultContacts: Contact[] = [
   },
   {
     name: 'Third Contact',
-    address: '0xThirdContact',
+    address: '0x44a0579754D6c94e7bB2c26bFA7394311Cc50Ccb',
   },
 
 ];

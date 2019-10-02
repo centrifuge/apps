@@ -30,7 +30,7 @@ type State = {
   submitted: boolean,
   columnGap: string,
   sectionGap: string,
-  selectedSchema: Schema
+  selectedSchema?: Schema
 }
 
 
@@ -54,12 +54,27 @@ export class DocumentForm extends React.Component<Props, State> {
 
   constructor(props) {
     super(props);
-    const { selectedSchema } = props;
+    const { schemas,document, selectedSchema } = props;
+
+    // If no selectedSchema is provided search if the provided document has a
+    // _schema defined and select it
+    // The selectedSchema prop is used when the selectedSchema is calculated in the parent component
+    // in order not to do the same calculation twice. Ex: in EditDocument.tsx we need schema to pass
+    // down the registries to the Nfts section
+    const found: Schema | undefined = selectedSchema || schemas.find(s => {
+      return (
+        document &&
+        document.attributes &&
+        document.attributes._schema &&
+        s.name === document.attributes._schema.value
+      );
+    });
+
     this.state = {
       submitted: false,
       columnGap: 'medium',
       sectionGap: 'none',
-      selectedSchema,
+      selectedSchema: found,
     };
   }
 
@@ -75,7 +90,7 @@ export class DocumentForm extends React.Component<Props, State> {
         // add schema as tech field
         '_schema': {
           type: 'string',
-          value: selectedSchema.name,
+          value: selectedSchema!.name,
         },
       },
     };
@@ -84,7 +99,7 @@ export class DocumentForm extends React.Component<Props, State> {
   };
 
 
-  generateValidationSchema = (schema: Schema) => {
+  generateValidationSchema = (schema: Schema | undefined) => {
     // Attributes validation
     let attributes = {};
     let defaultValues = {};

@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
-import { NotificationNotificationMessage } from '@centrifuge/gateway-lib/centrifuge-node-client';
+import { NotificationMessage } from '@centrifuge/gateway-lib/centrifuge-node-client';
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes';
@@ -34,7 +34,7 @@ export class WebhooksController {
    */
   @Post()
   // TODO: refactor/rethink to remove code duplication in functionality
-  async receiveMessage(@Body() notification: NotificationNotificationMessage) {
+  async receiveMessage(@Body() notification: NotificationMessage) {
     console.log('Receive Webhook', notification);
     try {
       if (notification.event_type === EventTypes.DOCUMENT) {

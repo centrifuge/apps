@@ -1,6 +1,7 @@
 import { PERMISSIONS } from '../utils/constants';
 import { Document, DOCUMENT_ACCESS } from './document';
 import { FundingAgreement } from './funding-request';
+import { CoreapiNFT } from '../centrifuge-node-client';
 
 export interface IUser {
   name: string;
@@ -27,12 +28,12 @@ export class User implements IUser {
 }
 
 export const canWriteToDoc = (user: User | null, doc?: Document): boolean => {
-  if(!user || !doc) return false;
+  if (!user || !doc) return false;
   return accountHasDocAccess(user.account, DOCUMENT_ACCESS.WRITE, doc);
 };
 
 export const canReadDoc = (user: User | null, doc?: Document): boolean => {
-  if(!user || !doc) return false;
+  if (!user || !doc) return false;
   return accountHasDocAccess(user.account, DOCUMENT_ACCESS.READ, doc);
 };
 
@@ -55,8 +56,17 @@ export const canCreateDocuments = (user: User): boolean => {
     && user.schemas.length > 0);
 };
 
+export const canTransferNft = (user: User, nft: CoreapiNFT): boolean => {
+  try {
+    return user.account.toLowerCase() === nft!.owner!.toLowerCase();
+  } finally {
+    return false;
+  }
 
-export const canSignFunding = (user:User | null, funding?:FundingAgreement):boolean => {
-  if(!user || !funding || !funding.funder_id) return false;
+
+};
+
+export const canSignFunding = (user: User | null, funding?: FundingAgreement): boolean => {
+  if (!user || !funding || !funding.funder_id) return false;
   return String(funding.funder_id).toLowerCase() === user.account.toLowerCase();
 };
