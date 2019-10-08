@@ -30,6 +30,7 @@ export class DocumentsController {
       {
         attributes: document.attributes,
         read_access: document.header.read_access,
+        write_access: document.header.write_access,
         scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
       },
     );
@@ -114,6 +115,7 @@ export class DocumentsController {
       {
         attributes: document.attributes,
         read_access: document.header.read_access,
+        write_access: document.header.write_access,
         scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
       },
     );
