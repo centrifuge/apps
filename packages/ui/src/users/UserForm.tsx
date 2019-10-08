@@ -70,7 +70,6 @@ export default class UserForm extends React.Component<InviteProps> {
           validateOnChange={submitted}
           validationSchema={userValidation}
           onSubmit={(values, { setSubmitting }) => {
-            if (!values) return;
             this.onSubmit(values);
             setSubmitting(true);
           }}

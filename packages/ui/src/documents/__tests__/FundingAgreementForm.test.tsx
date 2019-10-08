@@ -12,8 +12,6 @@ import { SearchSelect } from '@centrifuge/axis-search-select';
 import { TextInput } from 'grommet';
 import { withAxis } from '../../test-utilities/test-providers';
 
-jest.mock('../../http-client');
-
 
 describe('Funding Agreement Form', () => {
 

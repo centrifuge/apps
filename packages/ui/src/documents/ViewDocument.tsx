@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Document } from '@centrifuge/gateway-lib/models/document';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { Schema } from '@centrifuge/gateway-lib/models/schema';
-import { Contact } from '@centrifuge/gateway-lib/models/contact';
+import { Contact, extendContactsWithUsers } from '@centrifuge/gateway-lib/models/contact';
 import { canWriteToDoc } from '@centrifuge/gateway-lib/models/user';
 import { httpClient } from '../http-client';
 import { AppContext } from '../App';
@@ -18,7 +18,6 @@ import DocumentForm from './DocumentForm';
 import { Preloader } from '../components/Preloader';
 import { Nfts } from './Nfts';
 import { FundingAgreements } from './FundingAgreements';
-import { extendContactsWithUsers } from '@centrifuge/gateway-lib/utils/contact-utils';
 import { AxiosError } from 'axios';
 import { NOTIFICATION, NotificationContext } from '../components/NotificationContext';
 
@@ -105,7 +104,7 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
     } catch (e) {
       displayPageError(e);
     }
-  }, [id, setState,displayPageError]);
+  }, [id, setState, displayPageError]);
 
   useEffect(() => {
     loadData();

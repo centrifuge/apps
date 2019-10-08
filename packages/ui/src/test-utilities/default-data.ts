@@ -1,6 +1,8 @@
 import { User } from '@centrifuge/gateway-lib/models/user';
 import { Contact } from '@centrifuge/gateway-lib/models/contact';
 import { AttrTypes } from '@centrifuge/gateway-lib/models/schema';
+import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator';
+import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document';
 
 export const defaultUser: User = {
   name: 'Default User',
@@ -26,6 +28,22 @@ export const defaultContacts: Contact[] = [
     address: '0x44a0579754D6c94e7bB2c26bFA7394311Cc50Ccb',
   },
 
+];
+
+
+export const defaultCollaborators = [
+  {
+    ...defaultContacts[0],
+    access: DOCUMENT_ACCESS.WRITE,
+  },
+  {
+    ...defaultContacts[1],
+    access: DOCUMENT_ACCESS.READ,
+  },
+  {
+    ...defaultContacts[2],
+    access: DOCUMENT_ACCESS.WRITE,
+  },
 ];
 
 

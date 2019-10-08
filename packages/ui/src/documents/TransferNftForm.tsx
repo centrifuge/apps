@@ -60,7 +60,6 @@ export default class TransferNftForm extends React.Component<Props> {
           validateOnBlur={submitted}
           validateOnChange={submitted}
           onSubmit={(values, { setSubmitting }) => {
-            if (!values) return;
             this.onSubmit(values);
             setSubmitting(true);
           }}

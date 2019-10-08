@@ -118,7 +118,7 @@ describe('DocumentForm', () => {
   });
 
 
-  it('Should render just the details section', () => {
+  it('Should render the Document details and the Collaborators', () => {
 
     const documentForm = mount(
       withAllProvidersAndContexts(
@@ -127,7 +127,11 @@ describe('DocumentForm', () => {
                       onSubmit={onSubmit}/>,
       ),
     );
-    expect(documentForm.find(Section).length).toEqual(1);
+
+    const defaultSections = documentForm.find(Section);
+    expect(defaultSections.length).toEqual(2);
+    expect(defaultSections.at(0).prop('title')).toEqual('Document Details');
+    expect(defaultSections.at(1).prop('title')).toEqual('Collaborators');
   });
 
   it('Should render the form with a selected schema and attributes', () => {

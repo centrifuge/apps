@@ -98,7 +98,7 @@ describe('ContactsController', () => {
           name: 'Joe',
         } as Contact);
       } catch (err) {
-        expect(err.message.message).toEqual('Contact address not specified');
+        expect(err.message.message).toEqual('Contact address must have ETH format');
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }

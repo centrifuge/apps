@@ -59,9 +59,12 @@ export const canCreateDocuments = (user: User): boolean => {
 export const canTransferNft = (user: User, nft: CoreapiNFT): boolean => {
   try {
     return user.account.toLowerCase() === nft!.owner!.toLowerCase();
-  } finally {
-    return false;
+  } catch (e) {
+    //Just log the error
+    console.log(e);
   }
+  return false;
+
 
 
 };

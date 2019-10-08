@@ -1,18 +1,16 @@
 import React from 'react';
-import { Box, FormField, Grid, ResponsiveContext } from 'grommet';
+import { Box, FormField, ResponsiveContext } from 'grommet';
 import { Formik } from 'formik';
-import { get } from 'lodash';
 import * as Yup from 'yup';
 import { Document } from '@centrifuge/gateway-lib/models/document';
 import { AttrTypes, Schema } from '@centrifuge/gateway-lib/models/schema';
 import { SearchSelect } from '@centrifuge/axis-search-select';
 import { Contact } from '@centrifuge/gateway-lib/models/contact';
-import { MultipleSelect } from '@centrifuge/axis-multiple-select';
 import { Section } from '../components/Section';
 import Comments from './Comments';
 import Attributes from './Attributes';
 import { ViewModeFormContainer } from '../components/ViewModeFormContainer';
-import { getContactByAddress } from '@centrifuge/gateway-lib/utils/contact-utils';
+import Collaborators from './Collaborators';
 
 
 // TODO use function components here
@@ -54,7 +52,7 @@ export class DocumentForm extends React.Component<Props, State> {
 
   constructor(props) {
     super(props);
-    const { schemas,document, selectedSchema } = props;
+    const { schemas, document, selectedSchema } = props;
 
     // If no selectedSchema is provided search if the provided document has a
     // _schema defined and select it
@@ -164,7 +162,7 @@ export class DocumentForm extends React.Component<Props, State> {
   render() {
 
     const { submitted, selectedSchema, sectionGap, columnGap } = this.state;
-    const { document, mode, children, renderHeader } = this.props;
+    const { document, mode, children, renderHeader, contacts, schemas } = this.props;
     const isViewMode = mode === 'view';
     const isEditMode = mode === 'edit';
     const { validationSchema, defaultValues } = this.generateValidationSchema(selectedSchema);
@@ -184,9 +182,13 @@ export class DocumentForm extends React.Component<Props, State> {
       document.header = {};
     }
 
-
+    // TODO we should move this add them somewhere else?
     if (!document.header.read_access || !Array.isArray(document.header.read_access)) {
       document.header.read_access = [];
+    }
+
+    if (!document.header.write_access || !Array.isArray(document.header.write_access)) {
+      document.header.write_access = [];
     }
 
 
@@ -200,7 +202,6 @@ export class DocumentForm extends React.Component<Props, State> {
               validateOnBlur={submitted}
               validateOnChange={submitted}
               onSubmit={(values, { setSubmitting }) => {
-                if (!values) return;
                 this.onSubmit(values);
                 setSubmitting(true);
               }}
@@ -211,7 +212,6 @@ export class DocumentForm extends React.Component<Props, State> {
                    errors,
                    handleChange,
                    handleSubmit,
-                   setFieldValue,
                  }) => (
                   <form
                     onSubmit={event => {
@@ -222,15 +222,24 @@ export class DocumentForm extends React.Component<Props, State> {
                     <Box gap={sectionGap}>
                       {renderHeader && renderHeader()}
 
-                      {this.renderDetailsSection(
-                        values,
-                        errors,
-                        handleChange,
-                        setFieldValue,
-                        isViewMode,
-                        isEditMode,
-                      )}
-
+                      <Section title="Document Details">
+                        <FormField
+                          label="Document Schema"
+                        >
+                          <SearchSelect
+                            disabled={isViewMode || isEditMode}
+                            labelKey={'name'}
+                            options={schemas}
+                            value={selectedSchema || ''}
+                            onChange={(selected) => {
+                              this.setState({ selectedSchema: selected });
+                            }}
+                          />
+                        </FormField>
+                      </Section>
+                      <Collaborators
+                        contacts={contacts}
+                        viewMode={isViewMode}/>
                       {children}
 
                       {selectedSchema && <>
@@ -250,51 +259,6 @@ export class DocumentForm extends React.Component<Props, State> {
       </ViewModeFormContainer>
     );
   }
-
-  // TODO move this to own component
-  renderDetailsSection = (values, errors, handleChange, setFieldValue, isViewMode, isEditMode) => {
-    const { selectedSchema, columnGap } = this.state;
-    const { contacts, schemas } = this.props;
-
-    return <Section title="Document Details">
-      <Grid gap={columnGap}>
-        <FormField
-          label="Document Schema"
-        >
-          <SearchSelect
-            disabled={isViewMode || isEditMode}
-            labelKey={'name'}
-            options={schemas}
-            value={selectedSchema || ''}
-            onChange={(selected) => {
-              this.setState({ selectedSchema: selected });
-            }}
-          />
-        </FormField>
-
-        <FormField
-          label="Read Access"
-        >
-          <MultipleSelect
-            search={true}
-            disabled={isViewMode}
-            labelKey={'name'}
-            valueKey={'address'}
-            options={contacts}
-            value={
-              get(values, 'header.read_access').map(v => {
-                return getContactByAddress(v, contacts);
-              })
-            }
-            onChange={(selection) => {
-              setFieldValue('header.read_access', selection.map(i => i.address));
-            }}
-          />
-        </FormField>
-      </Grid>
-    </Section>;
-  };
-
 
 };
 

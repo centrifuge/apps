@@ -34,7 +34,7 @@ export class NftsController {
       deposit_address: body.deposit_address,
     };
 
-    const mintingResult: Document = await this.centrifugeService.nft.mintNft(
+    const mintingResult: Document = await this.centrifugeService.nftBeta.mintNft(
       request.user.account,
       body.registry_address,
       payload,

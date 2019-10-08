@@ -61,7 +61,6 @@ export const Nfts: FunctionComponent<Props> = (props) => {
     onAsyncComplete: (data) => {
     },
     onAsyncError: (error, title?: string) => {
-      alert('ON ASYNC');
     },
     ...props,
   };
@@ -115,7 +114,6 @@ export const Nfts: FunctionComponent<Props> = (props) => {
       transferModalOpened: false,
     });
   };
-
 
   const mintActions = !viewMode ? [
     <Button key="mint-nft" onClick={openMintModal} icon={<Money/>} plain label={'Mint NFT'}/>,

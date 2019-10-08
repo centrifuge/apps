@@ -15,7 +15,7 @@ import { canSignFunding, User } from '@centrifuge/gateway-lib/models/user';
 import { FundingStatus } from './FundingStatus';
 import { getFundingStatus } from '@centrifuge/gateway-lib/utils/status';
 import { FundingAgreement, FundingRequest } from '@centrifuge/gateway-lib/models/funding-request';
-import { getContactByAddress } from '@centrifuge/gateway-lib/utils/contact-utils';
+import { getContactByAddress } from '@centrifuge/gateway-lib/models/contact';
 import { formatPercent } from '@centrifuge/gateway-lib/utils/formaters';
 
 type Props = {

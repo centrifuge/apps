@@ -9,7 +9,7 @@ import { withAllProvidersAndContexts } from '../../test-utilities/test-providers
 import DocumentForm from '../DocumentForm';
 import { Modal } from '@centrifuge/axis-modal';
 import { Preloader } from '../../components/Preloader';
-import { extendContactsWithUsers } from '@centrifuge/gateway-lib/utils/contact-utils';
+import { extendContactsWithUsers } from '@centrifuge/gateway-lib/models/contact';
 import { PageError } from '../../components/PageError';
 import { Heading, Paragraph } from 'grommet';
 import { Nfts } from '../Nfts';

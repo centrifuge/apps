@@ -20,7 +20,7 @@ import { NOTIFICATION, NotificationContext } from '../components/NotificationCon
 import { AxiosError } from 'axios';
 import { FundingAgreements } from './FundingAgreements';
 import { Nfts } from './Nfts';
-import { extendContactsWithUsers } from '@centrifuge/gateway-lib/utils/contact-utils';
+import { extendContactsWithUsers } from '@centrifuge/gateway-lib/models/contact';
 
 type Props = RouteComponentProps<{ id: string }>;
 
@@ -132,6 +132,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
 
   if (loadingMessage) return <Preloader message={loadingMessage}/>;
   if (error) return <PageError error={error}/>;
+  // Redirect to view when the user can not edit this document
   if (!canWriteToDoc(user!, document)) return <Redirect to={documentRoutes.view.replace(':id', id)}/>;
 
   const selectedSchema: Schema | undefined = schemas.find(s => {
@@ -142,7 +143,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
       s.name === document.attributes._schema.value
     );
   });
-  // Redirect to view when the user can not edit this document
+
   if (!selectedSchema) return <PageError error={new Error('Can not find schema definition for document')}/>;
 
   // Add mint action if schema has any registries defined

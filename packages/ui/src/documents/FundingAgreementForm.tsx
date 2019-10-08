@@ -9,7 +9,7 @@ import { NumberInput } from '@centrifuge/axis-number-input';
 import { DateInput } from '@centrifuge/axis-date-input';
 import { Contact } from '@centrifuge/gateway-lib/models/contact';
 import { ViewModeFormContainer } from '../components/ViewModeFormContainer';
-import { getContactByAddress } from '@centrifuge/gateway-lib/utils/contact-utils';
+import { getContactByAddress } from '@centrifuge/gateway-lib/models/contact';
 
 type Props = {
   onSubmit: (fundingRequest: FundingAgreement) => void;
@@ -81,7 +81,6 @@ export default class FundingRequestForm extends React.Component<Props> {
           validateOnBlur={submitted}
           validateOnChange={submitted}
           onSubmit={(values, { setSubmitting }) => {
-            if (!values) return;
             this.onSubmit(values);
             setSubmitting(true);
           }}

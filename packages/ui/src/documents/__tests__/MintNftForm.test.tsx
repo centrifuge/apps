@@ -10,9 +10,6 @@ import MintNftForm from '../MintNftForm';
 import { withAxis } from '../../test-utilities/test-providers';
 import { CheckBox, TextInput } from 'grommet';
 
-jest.mock('../../http-client');
-
-
 describe('Mint NFT Form', () => {
 
   const nft = {
@@ -82,7 +79,7 @@ describe('Mint NFT Form', () => {
 
   });
 
-  it('Should not submit the form because of validation', async () => {
+  it('Should  submit the form', async () => {
 
     const component = mount(
       withAxis(
