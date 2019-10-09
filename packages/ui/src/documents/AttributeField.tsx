@@ -27,11 +27,18 @@ export const AttributeField: FunctionComponent<Props> = (props: Props) => {
       values,
       errors,
       handleChange,
-      setFieldValue
-    }
+      setFieldValue,
+    },
   } = props;
 
   const key = `attributes.${attr.name}.value`;
+
+  const commonProps = {
+    name: key,
+    value: get(values, key) || attr.defaultValue,
+    disabled: isViewMode,
+    placeholder: attr.placeholder,
+  };
 
   return <Box><FormField
     key={key}
@@ -44,7 +51,7 @@ export const AttributeField: FunctionComponent<Props> = (props: Props) => {
         return <Select
           disabled={isViewMode}
           options={attr.options}
-          value={get(values, key)}
+          {...commonProps}
           onChange={({ value }) => {
             setFieldValue(`${key}`, value.toString());
           }}
@@ -54,23 +61,17 @@ export const AttributeField: FunctionComponent<Props> = (props: Props) => {
       switch (attr.type) {
         case AttrTypes.STRING:
           return <TextInput
-            disabled={isViewMode}
-            value={get(values, key)}
-            name={`${key}`}
+            {...commonProps}
             onChange={handleChange}
           />;
         case AttrTypes.BYTES:
           return <TextInput
-            disabled={isViewMode}
-            value={get(values, key)}
-            name={`${key}`}
+            {...commonProps}
             onChange={handleChange}
           />;
         case AttrTypes.INTEGER:
           return <NumberInput
-            disabled={isViewMode}
-            value={get(values, key)}
-            name={`${key}`}
+            {...commonProps}
             precision={0}
             onChange={({ value }) => {
               setFieldValue(`${key}`, value);
@@ -78,9 +79,7 @@ export const AttributeField: FunctionComponent<Props> = (props: Props) => {
           />;
         case AttrTypes.DECIMAL:
           return <NumberInput
-            disabled={isViewMode}
-            value={get(values, key)}
-            name={`${key}`}
+            {...commonProps}
             onChange={({ value }) => {
               setFieldValue(`${key}`, value);
             }}
@@ -90,10 +89,8 @@ export const AttributeField: FunctionComponent<Props> = (props: Props) => {
 
           const percentParts = getPercentFormat();
           return <NumberInput
-            disabled={isViewMode}
-            value={get(values, key)}
+            {...commonProps}
             {...percentParts}
-            name={`${key}`}
             onChange={({ value }) => {
               setFieldValue(`${key}`, value);
             }}
@@ -101,9 +98,8 @@ export const AttributeField: FunctionComponent<Props> = (props: Props) => {
 
         case AttrTypes.TIMESTAMP:
           return <DateInput
-            disabled={isViewMode}
+            {...commonProps}
             value={extractDate(get(values, key))}
-            name={`${key}`}
             onChange={date => {
               setFieldValue(`${key}`, dateToString(date));
             }}

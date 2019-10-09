@@ -6,6 +6,8 @@ export interface Attribute {
   label: string,
   section?: string,
   options?: string[],
+  placeholder?: string,
+  defaultValue?: string,
   type: AttrTypes.STRING | AttrTypes.TIMESTAMP | AttrTypes.INTEGER | AttrTypes.BYTES | AttrTypes.DECIMAL | AttrTypes.PERCENT
 }
 
@@ -84,7 +86,9 @@ export enum AttributesErrors {
   OPTIONS_NOT_FOR_TIMESTAMP = 'type timestamp does not support options',
   COMMENTS_RESERVED = 'This attribute is reserved for the comments feature. Set \'comments:true\' in the schema or use another name',
   NESTED_ATTRIBUTES_NOT_SUPPORTED = 'Nested attributes are not supported! Do not use . or [ ] in name',
-  REFERENCE_ID_MISSING = 'Attributes does not contain a reference_id field'
+  REFERENCE_ID_MISSING = 'Attributes does not contain a reference_id field',
+  PLACEHOLDER_FORMAT = 'Placeholder property must be a string',
+  DEFAULT_VALUE_FORMAT = 'defaultValue property must be a string',
 }
 
 
@@ -246,6 +250,15 @@ export class Schema {
         const nestedAttrsMatches = attr.name.match(regex);
         if (!nestedAttrsMatches || nestedAttrsMatches.length > 1)
           throw generateAttributeError(attr.name, AttributesErrors.NESTED_ATTRIBUTES_NOT_SUPPORTED);
+
+        //Make sure defaultValue is a string
+        if (attr.hasOwnProperty('defaultValue') && !isString(attr.defaultValue)) {
+          throw generateAttributeError(attr.name,AttributesErrors.DEFAULT_VALUE_FORMAT)
+        }
+        //Make sure placeholder is a string
+        if (attr.hasOwnProperty('placeholder') && !isString(attr.placeholder)) {
+          throw generateAttributeError(attr.name,AttributesErrors.PLACEHOLDER_FORMAT)
+        }
 
         return attr.name === 'reference_id';
       });

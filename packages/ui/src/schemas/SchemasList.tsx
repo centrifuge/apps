@@ -244,6 +244,7 @@ const SchemasList: FunctionComponent = () => {
 
               let actions = [
                 <Anchor
+                  key={'view'}
                   label={'View'}
                   onClick={() => {
                     viewSchema(data);
@@ -254,12 +255,14 @@ const SchemasList: FunctionComponent = () => {
                 actions = [
                   ...actions,
                   <Anchor
+                    key={'edit'}
                     label={'Edit'}
                     onClick={() => {
                       editSchema(data);
                     }}
                   />,
                   <Anchor
+                    key={'archive'}
                     label={'Archive'}
                     onClick={() => {
                       archiveSchema(data);

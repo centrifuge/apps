@@ -69,6 +69,28 @@ describe('Schema validations', () => {
       }).toThrow(AttributesErrors.TYPE_NOT_SUPPORTED);
     });
 
+    it('should fail when placeholder is not a string', () => {
+      expect(() => {
+        Schema.validateAttributes([{
+          name: 'test',
+          label: 'test',
+          type: AttrTypes.STRING,
+          placeholder: 3,
+        } as any]);
+      }).toThrow(AttributesErrors.PLACEHOLDER_FORMAT);
+    });
+
+    it('should fail when defaultValue is not a string', () => {
+      expect(() => {
+        Schema.validateAttributes([{
+          name: 'test',
+          label: 'test',
+          type: AttrTypes.STRING,
+          defaultValue: 33,
+        } as any]);
+      }).toThrow(AttributesErrors.DEFAULT_VALUE_FORMAT);
+    });
+
     it('should fail when options is not an array', () => {
       expect(() => {
         Schema.validateAttributes([{
