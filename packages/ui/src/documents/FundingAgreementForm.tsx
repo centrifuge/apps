@@ -4,12 +4,16 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { FundingAgreement } from '@centrifuge/gateway-lib/models/funding-request';
 import { SearchSelect } from '@centrifuge/axis-search-select';
-import { dateToString, extractDate, getCurrencyFormat, getPercentFormat } from '@centrifuge/gateway-lib/utils/formaters';
+import {
+  dateToString,
+  extractDate,
+  getCurrencyFormat,
+  getPercentFormat,
+} from '@centrifuge/gateway-lib/utils/formaters';
 import { NumberInput } from '@centrifuge/axis-number-input';
 import { DateInput } from '@centrifuge/axis-date-input';
-import { Contact } from '@centrifuge/gateway-lib/models/contact';
+import { Contact, getContactByAddress } from '@centrifuge/gateway-lib/models/contact';
 import { ViewModeFormContainer } from '../components/ViewModeFormContainer';
-import { getContactByAddress } from '@centrifuge/gateway-lib/models/contact';
 
 type Props = {
   onSubmit: (fundingRequest: FundingAgreement) => void;
@@ -109,9 +113,9 @@ export default class FundingRequestForm extends React.Component<Props> {
               days = Math.round(diff / (1000 * 60 * 60 * 24));
 
 
-              amount =  parseFloat(values.amount);
-              const periodicInterestRate = apr * (days/daysPerYear);
-              let repaymentAmount =  parseFloat(additionalFee + (amount * (1 + periodicInterestRate)).toFixed(2));
+              amount = parseFloat(values.amount);
+              const periodicInterestRate = apr * (days / daysPerYear);
+              let repaymentAmount = parseFloat(additionalFee + (amount * (1 + periodicInterestRate)).toFixed(2));
               financeFee = parseFloat((repaymentAmount - amount).toFixed(2));
 
               /* Invoice Style
@@ -204,41 +208,9 @@ export default class FundingRequestForm extends React.Component<Props> {
                               {...percentParts}
                               value={parseFloat(values.apr) * 100}
                               onChange={({ value }) => {
-                                setFieldValue('apr', value/100);
+                                setFieldValue('apr', value / 100);
                               }}
                             />
-                          </FormField>
-                        </Box>
-                      </Box>
-                    </Box>
-                    <Box gap={columnGap}>
-                      <Box direction="row" gap={columnGap}>
-                        <Box basis='1/2'>
-                          <FormField
-                            label={`Interest amount`}
-                            error={errors!.fee}
-                          >
-                            <NumberInput
-                              {...currencyFormat}
-                              name={'fee'}
-                              disabled={true}
-                              value={values.fee}
-                            />
-                          </FormField>
-                        </Box>
-
-                        <Box basis='1/2'>
-                          <FormField
-                            label={`Repayment amount`}
-                            error={errors!.repayment_amount}
-                          >
-                            <NumberInput
-                              {...currencyFormat}
-                              name="repayment_amount"
-                              value={values!.repayment_amount}
-                              disabled={true}
-                            />
-
                           </FormField>
                         </Box>
                       </Box>
@@ -271,6 +243,38 @@ export default class FundingRequestForm extends React.Component<Props> {
                               onChange={date => {
                                 setFieldValue('repayment_due_date', dateToString(date));
                               }}
+                            />
+
+                          </FormField>
+                        </Box>
+                      </Box>
+                    </Box>
+                    <Box gap={columnGap}>
+                      <Box direction="row" gap={columnGap}>
+                        <Box basis='1/2'>
+                          <FormField
+                            label={`Interest amount`}
+                            error={errors!.fee}
+                          >
+                            <NumberInput
+                              {...currencyFormat}
+                              name={'fee'}
+                              disabled={true}
+                              value={values.fee}
+                            />
+                          </FormField>
+                        </Box>
+
+                        <Box basis='1/2'>
+                          <FormField
+                            label={`Repayment amount`}
+                            error={errors!.repayment_amount}
+                          >
+                            <NumberInput
+                              {...currencyFormat}
+                              name="repayment_amount"
+                              value={values!.repayment_amount}
+                              disabled={true}
                             />
 
                           </FormField>

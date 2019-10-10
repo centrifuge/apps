@@ -151,6 +151,7 @@ export const FundingAgreements: FunctionComponent<Props> = (props) => {
       header: 'Funder',
       render: datum => <DisplayField
         copy={true}
+        valueToCopy={datum.funder_id}
         as={'span'}
         link={{
           href: getAddressLink(datum.funder_id),

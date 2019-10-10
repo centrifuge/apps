@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start:prod": "nodemon",
-    "bootstrap": "lerna bootstrap",
+    "bootstrap": "lerna bootstrap --hoist",
     "pretest": "lerna run build --scope @centrifuge/gateway-lib",
     "test": "cross-env CI=true lerna run test --parallel",
     "start": "cross-env  lerna run start --parallel",

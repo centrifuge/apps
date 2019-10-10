@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@centrifuge/axis-date-input": "^0.3.2-develop.44",
-    "@centrifuge/axis-display-field": "0.3.2-develop.50",
+    "@centrifuge/axis-display-field": "^0.3.2-develop.51",
     "@centrifuge/axis-modal": "^0.1.1-develop.28",
     "@centrifuge/axis-multiple-select": "^0.3.2-develop.46",
     "@centrifuge/axis-nav-bar": "^0.3.2-develop.47",

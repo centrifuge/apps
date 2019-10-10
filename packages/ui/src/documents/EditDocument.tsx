@@ -204,7 +204,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
           viewMode={!canFund}
           document={document!}
           user={user}
-          contacts={extendedContacts}/>}
+          contacts={contacts}/>}
       </DocumentForm>
     </>
   );
