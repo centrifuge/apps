@@ -79,8 +79,8 @@ export default class SchemasForm extends React.Component<Props, State> {
           validateOnBlur={submitted}
           validateOnChange={submitted}
           validationSchema={jsonValidation}
-          onSubmit={async (values, { setSubmitting }) => {
-            await this.onSubmit(values.json);
+          onSubmit={ (values, { setSubmitting }) => {
+            this.onSubmit(values.json);
             setSubmitting(true);
           }}
         >

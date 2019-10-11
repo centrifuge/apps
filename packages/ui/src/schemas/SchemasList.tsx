@@ -182,6 +182,28 @@ const SchemasList: FunctionComponent = () => {
     }
   };
 
+  const restoreSchema = async (schema: Schema) => {
+    if (!schema._id) throw new Error('Can not restore a schema that does not have _id set');
+    setState({
+      loadingMessage: 'Restoring schema',
+      selectedSchema: null,
+    });
+    try {
+      await httpClient.schemas.restore(schema._id);
+      loadData();
+    } catch (e) {
+      setState({
+        loadingMessage: null,
+      });
+
+      notification.alert({
+        type: NOTIFICATION.ERROR,
+        title: 'Failed to restore schema',
+        message: (e as AxiosError)!.response!.data.message,
+      });
+    }
+  };
+
   const closeSchemaModal = () => {
     setState({ selectedSchema: null, openedSchemaForm: false });
   };
@@ -266,6 +288,16 @@ const SchemasList: FunctionComponent = () => {
                     label={'Archive'}
                     onClick={() => {
                       archiveSchema(data);
+                    }}
+                  />];
+              } else {
+                actions = [
+                  ...actions,
+                  <Anchor
+                    key={'restore'}
+                    label={'Restore'}
+                    onClick={() => {
+                      restoreSchema(data);
                     }}
                   />];
               }

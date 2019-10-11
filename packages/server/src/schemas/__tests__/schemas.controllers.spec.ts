@@ -236,7 +236,7 @@ describe('SchemasController', () => {
 
 
   describe('archive', () => {
-    it('should archive a schme', async () => {
+    it('should archive a schema', async () => {
       const schemasController = schemaModule.get<SchemasController>(
         SchemasController,
       );
@@ -247,6 +247,20 @@ describe('SchemasController', () => {
       });
       const result: Schema = await schemasController.archive({ id: newSchema._id });
       expect(result.archived).toEqual(true);
+    });
+
+    it('should restore a schema', async () => {
+      const schemasController = schemaModule.get<SchemasController>(
+        SchemasController,
+      );
+
+      const newSchema = await schemasController.create({
+        ...schemaToCreate,
+        archived: true,
+        name: Math.random().toString(),
+      });
+      const result: Schema = await schemasController.restore({ id: newSchema._id });
+      expect(result.archived).toEqual(false);
     });
   });
 

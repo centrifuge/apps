@@ -119,7 +119,7 @@ export class SchemasController {
     );
   }
 
-  @Delete(':id')
+  @Put(':id/archive')
   /**
    * Archive a schema by id, provided as a query parameter
    * @async
@@ -127,6 +127,7 @@ export class SchemasController {
    * @return {Promise<Schema>} result
    */
   async archive(@Param() params) {
+
     return await this.databaseService.schemas.updateById(
       params.id,
       {
@@ -137,4 +138,25 @@ export class SchemasController {
       ,
     );
   }
+
+  @Put(':id/restore')
+  /**
+   * Restore a schema by id, provided as a query parameter
+   * @async
+   * @param {any} params - the request parameters
+   * @return {Promise<Schema>} result
+   */
+  async restore(@Param() params) {
+
+    return await this.databaseService.schemas.updateById(
+      params.id,
+      {
+        $set: {
+          archived: false,
+        },
+      }
+      ,
+    );
+  }
+
 }

@@ -15,13 +15,6 @@ import { withAxis } from '../../test-utilities/test-providers';
 
 describe('Funding Agreement Form', () => {
 
-  let location = '';
-
-  const push = (path) => {
-    location = path;
-  };
-
-
   const onSubmit = jest.fn(() => {
   });
 
