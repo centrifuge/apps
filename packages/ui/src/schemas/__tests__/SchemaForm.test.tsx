@@ -7,7 +7,7 @@ import { DateInput } from '@centrifuge/axis-date-input';
 import { SearchSelect } from '@centrifuge/axis-search-select';
 import { Paragraph, TextArea } from 'grommet';
 import { withAxis } from '../../test-utilities/test-providers';
-import SchemasForm from '../SchemasForm';
+import SchemaForm from '../SchemaForm';
 import { Schema } from '@centrifuge/gateway-lib/models/schema';
 
 
@@ -33,7 +33,7 @@ describe('Schema Form', () => {
 
     const component = mount(
       withAxis(
-        <SchemasForm
+        <SchemaForm
           selectedSchema={schema}
           submitLabel={submitLabel}
           infoParagraph={info}
@@ -54,7 +54,7 @@ describe('Schema Form', () => {
     const schema = Schema.getDefaultValues();
     const component = mount(
       withAxis(
-        <SchemasForm
+        <SchemaForm
           selectedSchema={schema}
           submitLabel={submitLabel}
           infoParagraph={info}
@@ -76,7 +76,7 @@ describe('Schema Form', () => {
 
     const component = mount(
       withAxis(
-        <SchemasForm
+        <SchemaForm
           selectedSchema={schema}
           submitLabel={submitLabel}
           infoParagraph={info}
@@ -100,7 +100,7 @@ describe('Schema Form', () => {
     const schema = Schema.getDefaultValues();
     const component = mount(
       withAxis(
-        <SchemasForm
+        <SchemaForm
           selectedSchema={schema}
           submitLabel={submitLabel}
           infoParagraph={info}
@@ -121,7 +121,7 @@ describe('Schema Form', () => {
 
     const component = mount(
       withAxis(
-        <SchemasForm
+        <SchemaForm
           selectedSchema={schema}
           submitLabel={submitLabel}
           infoParagraph={info}

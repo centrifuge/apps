@@ -5,7 +5,7 @@ import { Schema } from '@centrifuge/gateway-lib/models/schema';
 import { SecondaryHeader } from '../components/SecondaryHeader';
 import { formatDate } from '@centrifuge/gateway-lib/utils/formaters';
 import { Preloader } from '../components/Preloader';
-import SchemasForm from './SchemasForm';
+import SchemaForm from './SchemaForm';
 import { httpClient } from '../http-client';
 import { useMergeState } from '../hooks';
 import { NOTIFICATION, NotificationContext } from '../components/NotificationContext';
@@ -69,7 +69,7 @@ const formModePropMapping = {
 };
 
 
-const SchemasList: FunctionComponent = () => {
+const SchemaList: FunctionComponent = () => {
 
   const [
     {
@@ -346,7 +346,7 @@ const SchemasList: FunctionComponent = () => {
         {...formModePropMapping[formMode].modal}
         onClose={closeSchemaModal}
       >
-        <SchemasForm
+        <SchemaForm
           {...formModePropMapping[formMode].schemaForm}
           selectedSchema={selectedSchema || Schema.getDefaultValues()}
           onSubmit={handleSubmit}
@@ -365,4 +365,4 @@ const SchemasList: FunctionComponent = () => {
 
 };
 
-export default SchemasList;
+export default SchemaList;

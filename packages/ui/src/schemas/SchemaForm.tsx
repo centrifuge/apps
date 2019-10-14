@@ -17,7 +17,7 @@ type State = {
   submitted: boolean;
 }
 
-export default class SchemasForm extends React.Component<Props, State> {
+export default class SchemaForm extends React.Component<Props, State> {
   state = {
     submitted: false,
   };
