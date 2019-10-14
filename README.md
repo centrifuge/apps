@@ -1,22 +1,29 @@
 # Gateway [![Build Status](https://travis-ci.com/centrifuge/gateway.svg?token=LpuoLEpkXWjp999VGisL&branch=develop)](https://travis-ci.com/centrifuge/gateway)
-`Gateway` is a user interface that showcases the API of  [go-centrifuge](https://github.com/centrifuge/go-centrifuge/) node and other Centrifuge users. It's main purpose is to act as a testing tool and rapid prototyping tool for simple integrations with Centrifuge.
+
+## Intro 
+`Centrifuge Gateway` is a user interface that showcases the [go-centrifuge node API](https://github.com/centrifuge/go-centrifuge/). It's main purpose is to act as a testing and rapid prototyping tool for simple integrations with Centrifuge OS.
+
+`Centrifuge Gateway` allows you to:
+  - Create and manage different users
+  - Create, anchor and exchange customised financial documents
+  - Mint and transfer non-fungible tokens (NFTs) based on these documents
+  - Request and accept funding based on these documents
+
+**Getting help**:
+Head over to our developer documentation at [developer.centrifuge.io](http://developer.centrifuge.io) to learn more about Centrifuge OS and the Centrifuge Node. If you have any questions, feel free to join our [slack channel](https://join.slack.com/t/centrifuge-io/shared_invite/enQtNDYwMzQ5ODA3ODc0LTU4ZjU0NDNkOTNhMmUwNjI2NmQ2MjRiNzA4MGIwYWViNTkxYzljODU2OTk4NzM4MjhlOTNjMDAwNWZkNzY2YWY).
 
 **DISCLAIMER**: The code released here presents a very early alpha version that should not be used in production and has not been audited. Use this at your own risk.
-
-
-** Getting help**:
- Head over to our developer documentation at [developer.centrifuge.io](http://developer.centrifuge.io) to learn how to setup a node and interact with it. If you have any questions, feel free to join our [slack channel](https://join.slack.com/t/centrifuge-io/shared_invite/enQtNDYwMzQ5ODA3ODc0LTU4ZjU0NDNkOTNhMmUwNjI2NmQ2MjRiNzA4MGIwYWViNTkxYzljODU2OTk4NzM4MjhlOTNjMDAwNWZkNzY2YWY) 
 
 ## Getting started
 
 ### Running locally
 
-Gateway required a Centrifuge Node to run. See [here](https://developer.centrifuge.io/cent-node/overview/introduction/), how to set-up and configure a Centrifuge Node. 
+Gateway requires a Centrifuge Node to run. See [here](https://developer.centrifuge.io/cent-node/overview/introduction/), how to set-up and configure a Centrifuge Node and interact with it. 
 
 Make sure you configure the node's webhooks to call your future Gateway instance.
-By default this will be `localhost:3001/webhooks`
+By default this will be `localhost:3001/webhooks`.
  
- After the node is up and running open `packaes/server/src/config/ts`
+After the node is up and running open `packaes/server/src/config/ts`
 update  the `centrifugeUrl`,`ethNetwork` and the `account` for the admin user to match your node.
 
 ```javascript
@@ -48,18 +55,10 @@ const config = {
 npx lerna bootstrap
 npm run start
 ```
-
-
- ## Features:
  
- Centrifuge Gateway allows you to:
- 
-  - Create and manage different users
-  - Create, anchor and exchange customised financial documents
-  - Mint and transfer non-fungible tokens (NFTs) based on these documents
-  - Request and accept funding based on these documents
-  
- ### Multi tenancy and managed identities
+## Using `Centrifuge Gateway`
+
+### Multi tenancy and managed identities
 
  Gateway is designed to use a multi tenancy Centrifuge Node. This means that all accounts created with gateway will
  have a on chain Identity where the node wallet is configured as a MANAGEMENT KEY. Gateway users do not 
@@ -83,23 +82,20 @@ export enum PERMISSIONS {
 }
 ``` 
 
+### Registering a new user
+
 By default a newly created account is in invite mode. This means that the invited user needs to register first with his given user name / email and define a password. Then he can use these credentials to log-in.
-Note, that Gateway will not send emails or notifications to invited users. Also note, that there is no "forgotten password" option
+Note, that Gateway will not send emails or notifications to invited users. Also note, that there is no "forgotten password" option.
  
  ### Creating and managing schemas for flexible documents (FlexDocs)
  
-Gateway can define document schemas that can be assigned to a user with a `CAN_MANAGE_DOCUMENTS` permission enabling  
-that user to create specific documents or do actions with those documents(Ex: Minting an NFT).
+Gateway allows you to define customizable financial document schemas that can be assigned to a user with a `CAN_MANAGE_DOCUMENTS` permission. This enables a user to create specific documents or do actions with those documents(Ex: Minting an NFT).
 
-You can read and understand how schemas work [here](https://centrifuge.hackmd.io/@rQf339bfSHi_a3rLcEuoaQ/S1Ofvf34B).
+You can read and understand how Gateway schemas work [here](https://centrifuge.hackmd.io/@rQf339bfSHi_a3rLcEuoaQ/S1Ofvf34B). 
  
- 
- ### Contact List
- 
-The contact list stores Centrifuge Identities. All Gateway interaction with a Centrifuge identity(Ex: Sending a document to some else)
-will perform a lookup in the contact list. 
+### Contact List
+Every user has a simple contact list that stores Centrifuge Identities of other users. Gateway interaction with another Centrifuge Identity(Ex: Sending a document to some else) require the Centrifuge Identity to be included in the contact list. These interactions will perform a lookup in the contact list. 
 
 
 ## Limitations
-
-Centrifuge Gateway, Centrifuge Protocol and all its components are Beta Software and in an early stage of their development. They have a limited feature set compared to the end-vision. Not all features are implemented yet, and tradeoffs between security, speed, end-user features, and protocol flexibility are made continuously. This might and will lead to substantial changes in the future, re-architecture, addition and removal of features, as well as unexpected behavior. Use at your own risk.
+Centrifuge Gateway, Centrifuge Protocol and all its components are in an early stage of their development. They have a limited feature set compared to the end-vision. Not all features are implemented yet, and tradeoffs between security, speed, end-user features, and protocol flexibility are made continuously. This might and will lead to substantial changes in the future, re-architecture, addition and removal of features, as well as unexpected behavior. Use at your own risk.
