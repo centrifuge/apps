@@ -56,7 +56,6 @@ describe('Create Document', () => {
 
   it('Should load the data and render the page', async () => {
 
-
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(

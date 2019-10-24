@@ -137,14 +137,19 @@ describe('Collaborators', () => {
     expect(firstRowColumns.at(0).text()).toBe(defaultContacts[1].name);
     expect(secondRowColumns.at(0).text()).toBe(defaultContacts[0].name + ' (Last update)');
 
-    //Should all all 3 actions: View, Edit, Remove
-    const firstRowActions = firstRowColumns.at(2).find(Anchor);
-    expect(firstRowActions.length).toBe(3);
+    // When reading the collaborators they will be sorted. The order of the list will be read_access collabs and
+    // after that write_access
 
-    // Should only have only one action for the Owner
+    // should have only view because it has read access
+    const firstRowActions = firstRowColumns.at(2).find(Anchor);
+    expect(firstRowActions.length).toBe(1);
+    expect(firstRowActions.text()).toBe('View');
+
+    //Should all all 3 actions: View, Edit, Remove because it has write access
     const secondRowActions = secondRowColumns.at(2).find(Anchor);
-    expect(secondRowActions.length).toBe(1);
-    expect(secondRowActions.text()).toBe('View');
+    expect(secondRowActions.length).toBe(3);
+
+
 
     const addCollaborator = component.find(Button).findWhere(node => node.key() === 'add-collaborator');
     expect(addCollaborator.length).toBe(1);
@@ -259,8 +264,8 @@ describe('Collaborators', () => {
     const dataTable = component.find(DataTable);
 
     const rows = dataTable.find('tbody tr');
-    const firstRowColumns = rows.at(0).find('td');
-    const removeAction = firstRowColumns.at(2).find(Anchor).at(2);
+    const columnWithWriteAccess = rows.at(1).find('td');
+    const removeAction = columnWithWriteAccess.at(2).find(Anchor).at(2);
     removeAction.simulate('click');
     component.update();
     expect(component.find(DataTable).find('tbody tr').length).toBe(1);
@@ -296,8 +301,8 @@ describe('Collaborators', () => {
     const dataTable = component.find(DataTable);
 
     const rows = dataTable.find('tbody tr');
-    const firstRowColumns = rows.at(0).find('td');
-    const editAction = firstRowColumns.at(2).find(Anchor).at(1);
+    const columnWithWriteAccess = rows.at(1).find('td');
+    const editAction = columnWithWriteAccess.at(2).find(Anchor).at(1);
     editAction.simulate('click');
     expect(component.find({title:'Edit collaborator'}).find(Modal).length).toBe(1);
     const collaboratorForm = component.find(CollaboratorForm);
@@ -305,8 +310,8 @@ describe('Collaborators', () => {
     expect(collaboratorForm.prop('viewMode')).toBe(false);
 
     expect(collaboratorForm.prop('selectedCollaborator')).toMatchObject({
-      ...defaultContacts[1],
-      access: DOCUMENT_ACCESS.READ,
+      ...defaultContacts[0],
+      access: DOCUMENT_ACCESS.WRITE,
     });
 
   });

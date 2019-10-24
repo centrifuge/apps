@@ -61,6 +61,8 @@ export class WebhooksController {
                 data: result.data,
                 attributes: unflattenedAttributes,
                 scheme: result.scheme,
+                fromId: notification.from_id,
+
               },
             },
             { upsert: true },

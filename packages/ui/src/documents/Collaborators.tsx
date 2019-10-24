@@ -222,7 +222,7 @@ export const Collaborators: FunctionComponent<Props> = (props) => {
                     openCollaboratorFormInViewMode(datum);
                   }}
                 />
-                {(!viewMode && !canWriteToDoc({account: datum.address},values)) && [
+                {(!viewMode && canWriteToDoc({account: datum.address},values)) && [
                   <Anchor
                     key={'edit-anchor'}
                     label={'Edit'}

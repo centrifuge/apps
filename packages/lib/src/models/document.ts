@@ -9,6 +9,7 @@ export interface DocumentRequest extends CoreapiCreateDocumentRequest {
 export interface Document extends CoreapiDocumentResponse {
   ownerId?: string;
   _id?: string;
+  fromId?:string,
   createdAt?: Date,
   updatedAt?: Date
 }

@@ -151,7 +151,7 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
               label="Save"
             />
           </Box>
-        </SecondaryHeader>
+        </SecondaryHeader>;
       }}
     >
 

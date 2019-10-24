@@ -49,6 +49,7 @@ describe('WebhooksController', () => {
         document_type: DocumentTypes.GENERIC_DOCUMENT,
         document_id: documentId,
         to_id: user.account,
+        from_id: '0xRandomId',
       });
 
       expect(result).toEqual('OK');
@@ -67,6 +68,7 @@ describe('WebhooksController', () => {
               nfts: [{ owner: 'owner', token_id: 'token_id' }],
             },
             data: { 'currency': 'USD' },
+            fromId: '0xRandomId',
             scheme: 'iUSDF2ax31e',
             attributes:
               {

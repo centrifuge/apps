@@ -25,12 +25,25 @@ export class DocumentsController {
    * @return {Promise<Document>} result
    */
   async create(@Req() request, @Body() document: Document): Promise<Document> {
+
+    const payload = {
+      ...document,
+      attributes: {
+        ...document.attributes,
+        // add created by custom field
+        _createdBy: {
+          type: 'bytes',
+          value: request.user.account,
+        },
+      },
+    };
+
     const createResult = await this.centrifugeService.documents.createDocument(
       request.user.account,
       {
-        attributes: document.attributes,
-        read_access: document.header.read_access,
-        write_access: document.header.write_access,
+        attributes: payload.attributes,
+        read_access: payload.header.read_access,
+        write_access: payload.header.write_access,
         scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
       },
     );
