@@ -135,7 +135,7 @@ describe('Collaborators', () => {
     const firstRowColumns = rows.at(0).find('td');
     const secondRowColumns = rows.at(1).find('td');
     expect(firstRowColumns.at(0).text()).toBe(defaultContacts[1].name);
-    expect(secondRowColumns.at(0).text()).toBe(defaultContacts[0].name + ' (Owner)');
+    expect(secondRowColumns.at(0).text()).toBe(defaultContacts[0].name + ' (Last update)');
 
     //Should all all 3 actions: View, Edit, Remove
     const firstRowActions = firstRowColumns.at(2).find(Anchor);

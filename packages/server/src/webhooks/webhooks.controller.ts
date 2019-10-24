@@ -45,9 +45,6 @@ export class WebhooksController {
           throw new Error('User is not present in database');
         }
 
-        // Gateways can receive and store invoices
-        // TODO this code should be removed when the node does not allow to send invoices
-        // anymore
         if (notification.document_type === DocumentTypes.GENERIC_DOCUMENT) {
           const result = await this.centrifugeService.documents.getDocument(
             user.account,

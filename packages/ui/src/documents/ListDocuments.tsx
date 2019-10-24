@@ -117,16 +117,19 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
             {
               property: '$_reference_id',
               header: 'Reference ID',
+              sortable: true,
             },
 
             {
               property: '$_schema',
               header: 'Schema',
+              sortable: true,
             },
 
             {
               property: 'createdAt',
               header: 'Date created',
+              sortable: true,
               render: datum => formatDate(datum.createdAt),
             },
             {

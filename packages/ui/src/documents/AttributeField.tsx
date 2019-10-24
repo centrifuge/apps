@@ -52,8 +52,8 @@ export const AttributeField: FunctionComponent<Props> = (props: Props) => {
           disabled={isViewMode}
           options={attr.options}
           {...commonProps}
-          onChange={({ value }) => {
-            setFieldValue(`${key}`, value.toString());
+          onChange={(ev: any) => {
+            setFieldValue(`${key}`, ev.value.toString());
           }}
         />;
       }

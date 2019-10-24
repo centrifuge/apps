@@ -1,22 +1,20 @@
 import React, { FunctionComponent } from 'react';
 import { useMergeState } from '../hooks';
 import { httpClient } from '../http-client';
-import { Contact } from '@centrifuge/gateway-lib/models/contact';
+import { Contact, getContactByAddress } from '@centrifuge/gateway-lib/models/contact';
 import FundingRequestForm from './FundingAgreementForm';
 import { Modal } from '@centrifuge/axis-modal';
 import { Document } from '@centrifuge/gateway-lib/models/document';
 import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan';
-import { extractDate, formatCurrency } from '@centrifuge/gateway-lib/utils/formaters';
+import { extractDate, formatCurrency, formatPercent } from '@centrifuge/gateway-lib/utils/formaters';
 import { Section } from '../components/Section';
 import { Anchor, Box, Button, DataTable, Paragraph } from 'grommet';
 import { DisplayField } from '@centrifuge/axis-display-field';
 import { Currency } from 'grommet-icons';
 import { canSignFunding, User } from '@centrifuge/gateway-lib/models/user';
-import { FundingStatus } from './FundingStatus';
+import { FUNDING_STATUS, FundingStatus } from './FundingStatus';
 import { getFundingStatus } from '@centrifuge/gateway-lib/utils/status';
 import { FundingAgreement, FundingRequest } from '@centrifuge/gateway-lib/models/funding-request';
-import { getContactByAddress } from '@centrifuge/gateway-lib/models/contact';
-import { formatPercent } from '@centrifuge/gateway-lib/utils/formaters';
 
 type Props = {
   onAsyncStart?: (message: string) => void;
@@ -187,7 +185,6 @@ export const FundingAgreements: FunctionComponent<Props> = (props) => {
     },
 
 
-
     {
       property: 'status',
       header: 'Status',
@@ -206,7 +203,7 @@ export const FundingAgreements: FunctionComponent<Props> = (props) => {
               openModalInViewMode(datum)
             }
           />
-          {canSignFunding(user, datum) && <Anchor
+          {datum.status !== FUNDING_STATUS.ACCEPTED && canSignFunding(user, datum) && <Anchor
             label={'Sign'}
             onClick={() =>
               singFundingAgreement(datum)

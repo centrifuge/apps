@@ -15,6 +15,7 @@ import { Contact } from '@centrifuge/gateway-lib/src/models/contact';
 import { connect, FormikContext } from 'formik';
 import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator';
 import CollaboratorForm from './CollaboratorForm';
+import { canWriteToDoc } from '@centrifuge/gateway-lib/models/user';
 
 
 interface OuterProps {
@@ -110,7 +111,7 @@ export const Collaborators: FunctionComponent<Props> = (props) => {
     });
   };
 
-  const isOwner = (collaborator: Collaborator) => {
+  const lastUpdatedBy = (collaborator: Collaborator) => {
     return values &&
       values.header &&
       values.header.author &&
@@ -180,7 +181,7 @@ export const Collaborators: FunctionComponent<Props> = (props) => {
 
       <DataTable
         size={'100%'}
-        sortable={false}
+        sortable={true}
         data={collaborators}
         primaryKey={'address'}
         columns={[
@@ -188,10 +189,11 @@ export const Collaborators: FunctionComponent<Props> = (props) => {
             property: 'name',
             header: 'Name',
             render: (datum: Collaborator) => {
-              return <Text>{datum.name}{isOwner(datum) && <Text weight={'bold'}> (Owner)</Text>}</Text>;
+              return <Text>{datum.name}{lastUpdatedBy(datum) && <Text weight={'bold'}> (Last update)</Text>}</Text>;
             },
           },
           {
+            sortable: false,
             property: 'address',
             header: 'Address',
             render: (datum: Collaborator) => <DisplayField
@@ -220,7 +222,7 @@ export const Collaborators: FunctionComponent<Props> = (props) => {
                     openCollaboratorFormInViewMode(datum);
                   }}
                 />
-                {(!viewMode && !isOwner(datum)) && [
+                {(!viewMode && !canWriteToDoc({account: datum.address},values)) && [
                   <Anchor
                     key={'edit-anchor'}
                     label={'Edit'}

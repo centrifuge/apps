@@ -168,6 +168,9 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
           registries={selectedSchema!.registries}/>
 
         {(selectedSchema!.formFeatures && selectedSchema!.formFeatures!.fundingAgreement) && <FundingAgreements
+          onAsyncStart={startLoading}
+          onAsyncComplete={loadData}
+          onAsyncError={displayModalError}
           user={user}
           viewMode={true}
           document={document!}

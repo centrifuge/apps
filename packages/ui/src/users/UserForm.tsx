@@ -117,6 +117,7 @@ export default class UserForm extends React.Component<InviteProps> {
                       error={errors!.permissions}
                     >
                       <MultipleSelect
+                        closeOnChange={false}
                         value={values.permissions}
                         options={permissionOptions}
                         onChange={(selection) => {
@@ -139,6 +140,7 @@ export default class UserForm extends React.Component<InviteProps> {
                             error={errors!.schemas}
                           >
                             <MultipleSelect
+                              closeOnChange={false}
                               labelKey={'name'}
                               valueKey={'name'}
                               value={mapSchemaNames(values.schemas, schemas)}

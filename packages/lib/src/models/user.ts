@@ -27,12 +27,13 @@ export class User implements IUser {
   invited: boolean;
 }
 
-export const canWriteToDoc = (user: User | null, doc?: Document): boolean => {
+
+export const canWriteToDoc = (user: { account: string } | null, doc?: Document): boolean => {
   if (!user || !doc) return false;
   return accountHasDocAccess(user.account, DOCUMENT_ACCESS.WRITE, doc);
 };
 
-export const canReadDoc = (user: User | null, doc?: Document): boolean => {
+export const canReadDoc = (user: { account: string } | null, doc?: Document): boolean => {
   if (!user || !doc) return false;
   return accountHasDocAccess(user.account, DOCUMENT_ACCESS.READ, doc);
 };
@@ -64,7 +65,6 @@ export const canTransferNft = (user: User, nft: CoreapiNFT): boolean => {
     console.log(e);
   }
   return false;
-
 
 
 };
