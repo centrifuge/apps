@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react';
-import { Anchor, Box, Button, CheckBox, DataTable, Heading, Text } from 'grommet';
+import { Anchor, Box, Button, CheckBox, Heading, Text } from 'grommet';
 import { Modal } from '@centrifuge/axis-modal';
 import { Schema } from '@centrifuge/gateway-lib/models/schema';
 import { SecondaryHeader } from '../components/SecondaryHeader';
@@ -11,6 +11,7 @@ import { useMergeState } from '../hooks';
 import { NOTIFICATION, NotificationContext } from '../components/NotificationContext';
 import { PageError } from '../components/PageError';
 import { AxiosError } from 'axios';
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
 
 type State = {
   schemas: Schema[];
@@ -235,7 +236,7 @@ const SchemaList: FunctionComponent = () => {
   const renderSchemas = (data) => {
 
     return (
-      <DataTable
+      <DataTableWithDynamicHeight
         data={data}
         primaryKey={'_id'}
         sortable={true}

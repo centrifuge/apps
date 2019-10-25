@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react';
-import { Anchor, Box, Button, DataTable, Heading, Text } from 'grommet';
+import { Anchor, Box, Button, Heading, Text } from 'grommet';
 import { User } from '@centrifuge/gateway-lib/models/user';
 import { Modal } from '@centrifuge/axis-modal';
 import UserForm from './UserForm';
@@ -16,6 +16,7 @@ import { PageError } from '../components/PageError';
 import { useMergeState } from '../hooks';
 import { NOTIFICATION, NotificationContext } from '../components/NotificationContext';
 import { AxiosError } from 'axios';
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
 
 
 type State = {
@@ -112,7 +113,7 @@ const UsersList: FunctionComponent = () => {
 
     try {
       setState({
-        userFormOpened:false,
+        userFormOpened: false,
         loadingMessage: context.loadingMessage,
       });
       await httpClient.user[context.method](user);
@@ -134,7 +135,7 @@ const UsersList: FunctionComponent = () => {
   const renderUsers = (data, schemas) => {
 
     return (
-      <DataTable
+      <DataTableWithDynamicHeight
         data={data}
         primaryKey={'_id'}
         sortable={true}

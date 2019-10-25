@@ -8,13 +8,14 @@ import { Document } from '@centrifuge/gateway-lib/models/document';
 import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan';
 import { extractDate, formatCurrency, formatPercent } from '@centrifuge/gateway-lib/utils/formaters';
 import { Section } from '../components/Section';
-import { Anchor, Box, Button, DataTable, Paragraph } from 'grommet';
+import { Anchor, Box, Button, Paragraph } from 'grommet';
 import { DisplayField } from '@centrifuge/axis-display-field';
 import { Currency } from 'grommet-icons';
 import { canSignFunding, User } from '@centrifuge/gateway-lib/models/user';
 import { FUNDING_STATUS, FundingStatus } from './FundingStatus';
 import { getFundingStatus } from '@centrifuge/gateway-lib/utils/status';
 import { FundingAgreement, FundingRequest } from '@centrifuge/gateway-lib/models/funding-request';
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
 
 type Props = {
   onAsyncStart?: (message: string) => void;
@@ -239,7 +240,7 @@ export const FundingAgreements: FunctionComponent<Props> = (props) => {
       actions={fundingActions}
     >
 
-      <DataTable
+      <DataTableWithDynamicHeight
         size={'100%'}
         sortable={true}
         data={mappedToSortable}

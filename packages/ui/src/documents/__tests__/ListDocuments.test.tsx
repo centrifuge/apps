@@ -1,8 +1,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Link } from 'react-router-dom';
 import { SearchSelect } from '@centrifuge/axis-search-select';
-import { Anchor, DataTable } from 'grommet';
+import { Anchor, DataTable, Select } from 'grommet';
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers';
 import { Modal } from '@centrifuge/axis-modal';
 import { PageError } from '../../components/PageError';
@@ -11,7 +11,6 @@ import { defaultUser } from '../../test-utilities/default-data';
 import { ListDocuments } from '../ListDocuments';
 import documentRoutes from '../routes';
 import { MemoryRouter } from 'react-router';
-import { Link } from 'react-router-dom';
 
 jest.mock('../../http-client');
 const httpClient = require('../../http-client').httpClient;
@@ -42,6 +41,7 @@ describe('List Documents', () => {
           value: 'first_schema',
         },
       },
+      fromId: '0xFaC5A4BA4CF34D82C7CA0c8004A8421be1679B71',
     },
     {
       _id: '2',
@@ -130,6 +130,34 @@ describe('List Documents', () => {
       expect(fistRowactions.at(1).text()).toEqual('Edit');
       expect(secondRowactions.length).toBe(1);
       expect(secondRowactions.at(0).text()).toEqual('View');
+    });
+
+  });
+
+  it('Should render the received documents', async () => {
+    await act(async () => {
+      const component = mount(
+        withAllProvidersAndContexts(
+          <MemoryRouter>
+            <ListDocuments
+              history={{ push } as any}
+            />
+          </MemoryRouter>
+          ,
+        ),
+      );
+
+      await new Promise(r => setTimeout(r, 0));
+      component.update();
+      component.find(Select).simulate('click');
+      // The first button is used to open the select so Received will be the 4th
+      // Keep in mind that the fromId must be a valid eth address. If it is not it will show up
+      // as sent
+      component.find(Select).find('button').at(3).simulate('click');
+      const dataTable = component.find(DataTable);
+      const rows = dataTable.find('tbody tr');
+      expect(rows.length).toBe(1);
+
     });
 
   });

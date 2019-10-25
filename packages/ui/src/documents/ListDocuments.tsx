@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Anchor, Box, Button, DataTable, Heading } from 'grommet';
+import { Anchor, Box, Button, FormField, Heading, Select } from 'grommet';
 import documentRoutes from './routes';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { Document } from '@centrifuge/gateway-lib/models/document';
@@ -12,15 +12,26 @@ import { httpClient } from '../http-client';
 import { AppContext } from '../App';
 import { useMergeState } from '../hooks';
 import { PageError } from '../components/PageError';
-
+import { isValidAddress } from 'ethereumjs-util';
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
 
 type Props = RouteComponentProps;
 
 type State = {
   documents: Document[];
   loadingMessage: string | null;
+  display: DisplayTypes
   error: any;
 }
+
+enum DisplayTypes {
+  All = 'All',
+  Sent = 'Sent',
+  Received = 'Received'
+}
+
+const displayOptions: DisplayTypes[] = [DisplayTypes.All, DisplayTypes.Sent, DisplayTypes.Received];
+
 
 export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
 
@@ -34,10 +45,12 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
     {
       loadingMessage,
       documents,
+      display,
       error,
     },
     setState] = useMergeState<State>({
     documents: [],
+    display: DisplayTypes.All,
     loadingMessage: 'Loading',
     error: null,
   });
@@ -62,7 +75,6 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
       const documents = (await httpClient.documents.list()).data;
       setState({
         loadingMessage: null,
-
         documents,
       });
 
@@ -71,6 +83,28 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
     }
   }, [setState, displayPageError]);
 
+
+  const getFilteredDocuments = () => {
+
+    const sortableDocuments = documents.map((doc: any) => {
+      return {
+        ...doc,
+        // Datable does not have support for nested props ex data.myValue
+        // We need make the props accessible top level and we use a special
+        // prefix in order to avoid overriding some prop
+        $_reference_id: doc.attributes.reference_id && doc.attributes.reference_id.value,
+        $_schema: doc.attributes._schema && doc.attributes._schema.value,
+      };
+    });
+
+    if (display !== DisplayTypes.All) {
+      return sortableDocuments.filter(doc => {
+        return display === DisplayTypes.Sent ? !isValidAddress(doc.fromId) : isValidAddress(doc.fromId);
+      });
+    }
+
+    return sortableDocuments;
+  };
 
   useEffect(() => {
     loadData();
@@ -85,33 +119,41 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
   }
 
 
-  const sortableDocuments = documents.map((doc: any) => {
-    return {
-      ...doc,
-      // Datable does not have support for nested props ex data.myValue
-      // We need make the props accessible top level and we use a special
-      // prefix in order to avoid overriding some prop
-      $_reference_id: doc.attributes.reference_id && doc.attributes.reference_id.value,
-      $_schema: doc.attributes._schema && doc.attributes._schema.value,
-    };
-  });
-
   return (
     <Box>
       <SecondaryHeader>
-        <Heading level="3">Documents</Heading>
+        <Box direction={'row'} gap={'medium'} align="center">
+          <Heading level="3">Documents</Heading>
+
+          <Box width={'126px'}>
+            <FormField>
+              <Select
+                name={'display'}
+                options={displayOptions}
+                value={display}
+                onChange={(ev: any) => {
+                  console.log('!!!!!!  ON CHANGE', ev);
+                  setState({ display: ev.value.toString() });
+                }}
+              />
+            </FormField>
+          </Box>
+        </Box>
         <Link to={documentRoutes.new}>
           {canCreateDocuments(user!) && <Button
             primary
             label="Create Document"
           />}
         </Link>
+
+
       </SecondaryHeader>
 
+
       <Box pad={{ horizontal: 'medium' }}>
-        <DataTable
+        <DataTableWithDynamicHeight
           sortable={true}
-          data={sortableDocuments}
+          data={getFilteredDocuments()}
           primaryKey={'_id'}
           columns={[
             {
@@ -159,6 +201,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
             },
           ]}
         />
+
       </Box>
     </Box>
   );

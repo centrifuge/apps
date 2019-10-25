@@ -8,7 +8,7 @@ import {
 } from '@centrifuge/gateway-lib/models/document';
 import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan';
 import { Section } from '../components/Section';
-import { Anchor, Box, Button, DataTable, Paragraph, Text } from 'grommet';
+import { Anchor, Box, Button, Paragraph, Text } from 'grommet';
 import { DisplayField } from '@centrifuge/axis-display-field';
 import { UserAdd } from 'grommet-icons';
 import { Contact } from '@centrifuge/gateway-lib/src/models/contact';
@@ -16,6 +16,7 @@ import { connect, FormikContext } from 'formik';
 import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator';
 import CollaboratorForm from './CollaboratorForm';
 import { canWriteToDoc } from '@centrifuge/gateway-lib/models/user';
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
 
 
 interface OuterProps {
@@ -179,8 +180,8 @@ export const Collaborators: FunctionComponent<Props> = (props) => {
       actions={collaboratorActions}
     >
 
-      <DataTable
-        size={'100%'}
+      <DataTableWithDynamicHeight
+        size={'360px'}
         sortable={true}
         data={collaborators}
         primaryKey={'address'}
@@ -222,7 +223,7 @@ export const Collaborators: FunctionComponent<Props> = (props) => {
                     openCollaboratorFormInViewMode(datum);
                   }}
                 />
-                {(!viewMode && canWriteToDoc({account: datum.address},values)) && [
+                {(!viewMode && canWriteToDoc({ account: datum.address }, values)) && [
                   <Anchor
                     key={'edit-anchor'}
                     label={'Edit'}

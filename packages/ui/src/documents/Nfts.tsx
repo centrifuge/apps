@@ -5,7 +5,7 @@ import { Modal } from '@centrifuge/axis-modal';
 import { Document } from '@centrifuge/gateway-lib/models/document';
 import { getAddressLink, getNFTLink, hexToInt } from '@centrifuge/gateway-lib/utils/etherscan';
 import { Section } from '../components/Section';
-import { Anchor, Box, Button, DataTable, Paragraph } from 'grommet';
+import { Anchor, Box, Button, Paragraph } from 'grommet';
 import { DisplayField } from '@centrifuge/axis-display-field';
 import { Money } from 'grommet-icons';
 import { Registry } from '@centrifuge/gateway-lib/models/schema';
@@ -15,6 +15,7 @@ import { TransferNftRequest } from '@centrifuge/gateway-lib/models/nfts';
 import TransferNftForm from './TransferNftForm';
 import { Contact } from '@centrifuge/gateway-lib/src/models/contact';
 import { CoreapiNFT } from '@centrifuge/gateway-lib/centrifuge-node-client';
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
 
 type Props = {
   onAsyncStart?: (message: string) => void;
@@ -125,8 +126,8 @@ export const Nfts: FunctionComponent<Props> = (props) => {
       actions={mintActions}
     >
 
-      <DataTable
-        size={'100%'}
+      <DataTableWithDynamicHeight
+        size={'360px'}
         sortable={false}
         data={document!.header!.nfts || []}
         primaryKey={'token_id'}
