@@ -228,13 +228,17 @@ export class DocumentForm extends React.Component<Props, State> {
                         >
                           <SearchSelect
                             disabled={isViewMode || isEditMode}
-                            labelKey={'name'}
+                            labelKey={(item) => {
+                              return  item.label || item.name;
+                            }}
                             options={schemas}
                             value={selectedSchema || ''}
                             onChange={(selected) => {
                               this.setState({ selectedSchema: selected });
                             }}
-                          />
+                          >
+
+                          </SearchSelect>
                         </FormField>
                       </Section>
                       <Collaborators

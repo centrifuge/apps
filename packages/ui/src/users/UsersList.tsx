@@ -194,7 +194,7 @@ const UsersList: FunctionComponent = () => {
             render: data => {// User has not schemas display
               if (!Array.isArray(data.schemas)) return '';
               const activeSchemas = mapSchemaNames(data.schemas, schemas)
-                .map(s => s.name).join(', ');
+                .map(s => s.label || s.name).join(', ');
               if (data.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS) && activeSchemas.length === 0) {
                 return <Text color="status-error">User should have at least one active schema assigned</Text>;
               }
