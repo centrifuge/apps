@@ -14,11 +14,14 @@ import { useMergeState } from '../hooks';
 import { PageError } from '../components/PageError';
 import { isValidAddress } from 'ethereumjs-util';
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
+import { Schema } from '@centrifuge/gateway-lib/models/schema';
+import { getSchemaLabel } from '@centrifuge/gateway-lib/utils/schema-utils';
 
 type Props = RouteComponentProps;
 
 type State = {
   documents: Document[];
+  schemas: Schema[];
   loadingMessage: string | null;
   display: DisplayTypes
   error: any;
@@ -45,11 +48,13 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
     {
       loadingMessage,
       documents,
+      schemas,
       display,
       error,
     },
     setState] = useMergeState<State>({
     documents: [],
+    schemas: [],
     display: DisplayTypes.All,
     loadingMessage: 'Loading',
     error: null,
@@ -73,8 +78,11 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
     try {
 
       const documents = (await httpClient.documents.list()).data;
+      //get All schemas. We need to display even archived ones
+      const schemas = (await httpClient.schemas.list()).data;
       setState({
         loadingMessage: null,
+        schemas,
         documents,
       });
 
@@ -85,7 +93,6 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
 
 
   const getFilteredDocuments = () => {
-
     const sortableDocuments = documents.map((doc: any) => {
       return {
         ...doc,
@@ -93,7 +100,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
         // We need make the props accessible top level and we use a special
         // prefix in order to avoid overriding some prop
         $_reference_id: doc.attributes.reference_id && doc.attributes.reference_id.value,
-        $_schema: doc.attributes._schema && doc.attributes._schema.value,
+        $_schema: doc.attributes._schema && getSchemaLabel(doc.attributes._schema.value, schemas),
       };
     });
 
@@ -132,7 +139,6 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
                 options={displayOptions}
                 value={display}
                 onChange={(ev: any) => {
-                  console.log('!!!!!!  ON CHANGE', ev);
                   setState({ display: ev.value.toString() });
                 }}
               />

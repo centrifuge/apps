@@ -30,7 +30,7 @@ export enum AttrTypes {
 export interface FormFeatures {
   columnNo?: number,
   comments?: boolean
-  fundingAgreement?:boolean,
+  fundingAgreement?: boolean,
   defaultSection?: string
 }
 
@@ -52,7 +52,7 @@ const generateDiffError = (identifier, message) => {
   return new Error(`Error on diff for '${identifier}': ${message}`);
 };
 
-const testForProperty = (obj: object, prop: string) => {
+const propertyUnset = (obj: object, prop: string) => {
   return !obj[prop] || !obj[prop].toString().trim();
 };
 
@@ -62,8 +62,9 @@ export enum DiffErrors {
   ATTRIBUTE_CHANGE_FORBIDEN = 'It is not allowed to delete attributes or change their name and type properties',
 }
 
-export enum NameErrors {
+export enum SchemaPropsErrors {
   NAME_FORMAT = 'Schema must have name set. This is a unique identifier for the schema.',
+  LABEL_VALUE_FORMAT = 'label must be a string if set'
 }
 
 export enum RegistriesErrors {
@@ -71,7 +72,8 @@ export enum RegistriesErrors {
   ADDRESS_PROP_MISSING = 'address property is missing or empty',
   ADDRESS_FORMAT = 'not a valid eth address',
   LABEL_PROP_MISSING = 'label property is missing or empty',
-  PROOF_ARRAY_MISSING = 'proofs array is missing or empty'
+  PROOF_ARRAY_MISSING = 'proofs array is missing or empty',
+
 }
 
 export enum AttributesErrors {
@@ -108,6 +110,7 @@ export class Schema {
     readonly formFeatures?: FormFeatures,
     readonly archived?: boolean,
     readonly _id?: string,
+    readonly label?: string,
   ) {
     Schema.validate(this);
   }
@@ -124,7 +127,7 @@ export class Schema {
       ],
       registries: [],
       formFeatures: {
-        fundingAgreement:false,
+        fundingAgreement: false,
         columnNo: 2,
         comments: true,
         defaultSection: 'Attributes',
@@ -139,9 +142,10 @@ export class Schema {
    * @param schema Schema
    */
   public static toEditableJson(schema: Schema): string {
-    const { name, attributes, registries, formFeatures } = schema;
+    const { name, attributes, registries, formFeatures, label } = schema;
     return JSON.stringify({
       name,
+      label,
       attributes,
       registries,
       formFeatures,
@@ -172,13 +176,18 @@ export class Schema {
     }
 
   }
+
   /**
-   * Validates a schema name has the proper format
+   * Validates a schema top level props that do not have their own validation
+   * it uses duck typing
    * @param name string
    */
-  public static validateName(name: string) {
-    if (testForProperty({ name }, 'name')) {
-      throw new Error(NameErrors.NAME_FORMAT);
+  public static validateSchemaProps(schema: any) {
+    if (propertyUnset(schema, 'name')) {
+      throw new Error(SchemaPropsErrors.NAME_FORMAT);
+    }
+    if (!propertyUnset(schema, 'label') && !isString(schema.label)) {
+      throw new Error(SchemaPropsErrors.LABEL_VALUE_FORMAT);
     }
   }
 
@@ -196,7 +205,7 @@ export class Schema {
     }
     registries.forEach(registry => {
 
-      if (testForProperty(registry, 'address'))
+      if (propertyUnset(registry, 'address'))
         throw new Error(RegistriesErrors.ADDRESS_PROP_MISSING);
 
       let valid = isValidAddress(registry.address);
@@ -204,7 +213,7 @@ export class Schema {
         throw generateRegistryError(registry.address, RegistriesErrors.ADDRESS_FORMAT);
       }
 
-      if (testForProperty(registry, 'label')) {
+      if (propertyUnset(registry, 'label')) {
         throw generateRegistryError(registry.address, RegistriesErrors.LABEL_PROP_MISSING);
       }
 
@@ -213,6 +222,7 @@ export class Schema {
       }
     });
   }
+
   /**
    * Validates attributes array for a schema
    * attributes must set and have at least one attribute
@@ -224,11 +234,11 @@ export class Schema {
     if (attributes && Array.isArray(attributes) && attributes.length > 0) {
       const refID = attributes.filter(attr => {
 
-        if (testForProperty(attr, 'name'))
+        if (propertyUnset(attr, 'name'))
           throw generateAttributeError(JSON.stringify(attr), AttributesErrors.NAME_PROP_MISSING);
-        if (testForProperty(attr, 'label'))
+        if (propertyUnset(attr, 'label'))
           throw generateAttributeError(attr.name, AttributesErrors.LABEL_PROP_MISSING);
-        if (testForProperty(attr, 'type'))
+        if (propertyUnset(attr, 'type'))
           throw generateAttributeError(attr.name, AttributesErrors.TYPE_PROP_MISSING);
 
         const supportedTypes = Object.values(AttrTypes);
@@ -253,11 +263,11 @@ export class Schema {
 
         //Make sure defaultValue is a string
         if (attr.hasOwnProperty('defaultValue') && !isString(attr.defaultValue)) {
-          throw generateAttributeError(attr.name,AttributesErrors.DEFAULT_VALUE_FORMAT)
+          throw generateAttributeError(attr.name, AttributesErrors.DEFAULT_VALUE_FORMAT);
         }
         //Make sure placeholder is a string
         if (attr.hasOwnProperty('placeholder') && !isString(attr.placeholder)) {
-          throw generateAttributeError(attr.name,AttributesErrors.PLACEHOLDER_FORMAT)
+          throw generateAttributeError(attr.name, AttributesErrors.PLACEHOLDER_FORMAT);
         }
 
         return attr.name === 'reference_id';
@@ -307,7 +317,7 @@ export class Schema {
    * @param schema Schema
    */
   public static validate(schema: Schema) {
-    Schema.validateName(schema.name);
+    Schema.validateSchemaProps(schema);
     Schema.validateRegistries(schema.registries);
     Schema.validateAttributes(schema.attributes);
     Schema.validateFormFeatures(schema.formFeatures);

@@ -141,7 +141,9 @@ export default class UserForm extends React.Component<InviteProps> {
                           >
                             <MultipleSelect
                               closeOnChange={false}
-                              labelKey={'name'}
+                              labelKey={(item) => {
+                                return  item.label || item.name;
+                              }}
                               valueKey={'name'}
                               value={mapSchemaNames(values.schemas, schemas)}
                               options={schemas}
