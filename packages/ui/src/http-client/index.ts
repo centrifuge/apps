@@ -39,7 +39,7 @@ export const httpClient = {
     create: async (schema: Schema) => instance.post(ROUTES.SCHEMAS, schema),
     list: async (query = {}) => instance.get(ROUTES.SCHEMAS, { params: { ...query } }),
     getById: async (id): Promise<Schema> => instance.get(`${ROUTES.SCHEMAS}/${id}`),
-    update: async (schema: Schema) => instance.put(`${ROUTES.SCHEMAS}/${schema._id}`, schema),
+    update: async (schema: Schema) => instance.put(t `${ROUTES.SCHEMAS}/${schema._id}`, schema),
     archive: async (id: string) => instance.put(`${ROUTES.SCHEMAS}/${id}/archive`),
     restore: async (id: string) => instance.put(`${ROUTES.SCHEMAS}/${id}/restore`),
   },
