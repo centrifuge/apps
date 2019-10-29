@@ -1,4 +1,4 @@
-import { Schema } from './models/schema';
+import { Schema } from '../models/schema';
 
 export const mapSchemaNames = (nameList: string[], schemas: Schema[]) : Schema[]  => {
   const map = nameList.map(name => {

@@ -1,12 +1,12 @@
-import React  from 'react';
+import React, { FunctionComponent } from 'react';
 import { NumberInput } from '@centrifuge/axis-number-input';
 import { DateInput } from '@centrifuge/axis-date-input';
-import { Attribute, AttrTypes } from '../common/models/schema';
+import { Attribute, AttrTypes } from '@centrifuge/gateway-lib/models/schema';
 import { Box, FormField, Select, TextInput } from 'grommet';
-import { dateToString, extractDate } from '../common/formaters';
+import { dateToString, extractDate, getPercentFormat } from '@centrifuge/gateway-lib/utils/formaters';
 import { get } from 'lodash';
 import { connect, FormikContext } from 'formik';
-import { Document } from '../common/models/document';
+import { Document } from '@centrifuge/gateway-lib/models/document';
 
 type Props = OuterProps & {
   formik: FormikContext<Document>
@@ -15,13 +15,30 @@ type Props = OuterProps & {
 
 interface OuterProps {
   attr: Attribute;
-  isViewMode: boolean;
+  isViewMode?: boolean;
 }
 
-const AttributeField = (props: Props) => {
+export const AttributeField: FunctionComponent<Props> = (props: Props) => {
 
-  const { attr, isViewMode, formik: { values, errors, handleChange, setFieldValue } } = props;
+  const {
+    attr,
+    isViewMode,
+    formik: {
+      values,
+      errors,
+      handleChange,
+      setFieldValue,
+    },
+  } = props;
+
   const key = `attributes.${attr.name}.value`;
+
+  const commonProps = {
+    name: key,
+    value: get(values, key) || attr.defaultValue,
+    disabled: isViewMode,
+    placeholder: attr.placeholder,
+  };
 
   return <Box><FormField
     key={key}
@@ -34,9 +51,9 @@ const AttributeField = (props: Props) => {
         return <Select
           disabled={isViewMode}
           options={attr.options}
-          value={get(values, key)}
-          onChange={({value}) => {
-            setFieldValue(`${key}`, value.toString());
+          {...commonProps}
+          onChange={(ev: any) => {
+            setFieldValue(`${key}`, ev.value.toString());
           }}
         />;
       }
@@ -44,23 +61,17 @@ const AttributeField = (props: Props) => {
       switch (attr.type) {
         case AttrTypes.STRING:
           return <TextInput
-            disabled={isViewMode}
-            value={get(values, key)}
-            name={`${key}`}
+            {...commonProps}
             onChange={handleChange}
           />;
         case AttrTypes.BYTES:
           return <TextInput
-            disabled={isViewMode}
-            value={get(values, key)}
-            name={`${key}`}
+            {...commonProps}
             onChange={handleChange}
           />;
         case AttrTypes.INTEGER:
           return <NumberInput
-            disabled={isViewMode}
-            value={get(values, key)}
-            name={`${key}`}
+            {...commonProps}
             precision={0}
             onChange={({ value }) => {
               setFieldValue(`${key}`, value);
@@ -68,20 +79,18 @@ const AttributeField = (props: Props) => {
           />;
         case AttrTypes.DECIMAL:
           return <NumberInput
-            disabled={isViewMode}
-            value={get(values, key)}
-            name={`${key}`}
+            {...commonProps}
             onChange={({ value }) => {
               setFieldValue(`${key}`, value);
             }}
           />;
 
         case AttrTypes.PERCENT:
+
+          const percentParts = getPercentFormat();
           return <NumberInput
-            disabled={isViewMode}
-            suffix={'%'}
-            value={get(values, key)}
-            name={`${key}`}
+            {...commonProps}
+            {...percentParts}
             onChange={({ value }) => {
               setFieldValue(`${key}`, value);
             }}
@@ -89,9 +98,8 @@ const AttributeField = (props: Props) => {
 
         case AttrTypes.TIMESTAMP:
           return <DateInput
-            disabled={isViewMode}
+            {...commonProps}
             value={extractDate(get(values, key))}
-            name={`${key}`}
             onChange={date => {
               setFieldValue(`${key}`, dateToString(date));
             }}

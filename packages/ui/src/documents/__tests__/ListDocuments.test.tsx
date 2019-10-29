@@ -7,7 +7,7 @@ import { withAllProvidersAndContexts } from '../../test-utilities/test-providers
 import { Modal } from '@centrifuge/axis-modal';
 import { PageError } from '../../components/PageError';
 import { act } from 'react-dom/test-utils';
-import { defaultSchemas, defaultUser } from '../../test-utilities/default-data';
+import { defaultUser } from '../../test-utilities/default-data';
 import { ListDocuments } from '../ListDocuments';
 import documentRoutes from '../routes';
 import { MemoryRouter } from 'react-router';
@@ -75,9 +75,6 @@ describe('List Documents', () => {
     push.mockClear();
     httpClient.documents.list.mockImplementation(async (data) => {
       return { data: documents };
-    });
-    httpClient.schemas.list.mockImplementation(async (data) => {
-      return { data: defaultSchemas };
     });
   });
 

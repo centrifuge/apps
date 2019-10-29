@@ -3,6 +3,7 @@ import {
   Body,
   ConflictException,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -104,13 +105,12 @@ export class SchemasController {
     } catch (err) {
       throw new BadRequestException(err.message);
     }
-    const { name, attributes, registries, formFeatures, label } = update;
+    const { name, attributes, registries, formFeatures } = update;
     return await this.databaseService.schemas.updateById(
       params.id,
       {
         $set: {
           name,
-          label,
           attributes,
           registries,
           formFeatures,

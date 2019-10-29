@@ -248,11 +248,6 @@ const SchemaList: FunctionComponent = () => {
               data.name ? <Text>{data.name}</Text> : null,
           },
           {
-            property: 'label',
-            header: 'Label',
-
-          },
-          {
             property: 'createdAt',
             header: 'Date added',
             render: data =>

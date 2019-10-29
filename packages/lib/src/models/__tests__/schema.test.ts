@@ -3,40 +3,24 @@ import {
   AttrTypes,
   DiffErrors,
   FormFeaturesErrors,
+  NameErrors,
   RegistriesErrors,
   Schema,
-  SchemaPropsErrors,
 } from '../schema';
 
 /* tslint:disable */
 describe('Schema validations', () => {
 
-  describe('Schema top level prop validation', () => {
+  describe('Name validation', () => {
     it('should fail when name is not set', () => {
       expect(() => {
-        Schema.validateSchemaProps({});
-      }).toThrow(SchemaPropsErrors.NAME_FORMAT);
+        Schema.validateName(undefined);
+      }).toThrow(NameErrors.NAME_FORMAT);
     });
 
-    it('should fail the label validation ', () => {
+    it('should pass the name validation ', () => {
       expect(() => {
-        Schema.validateSchemaProps({
-          name: 'some random string %##$%#$',
-          label: 2,
-        });
-      }).toThrow(SchemaPropsErrors.LABEL_VALUE_FORMAT);
-    });
-    it('should pass if label is not set', () => {
-      expect(() => {
-        Schema.validateSchemaProps({ name: 'some random string %##$%#$' });
-      }).not.toThrow();
-    });
-    it('should pass schema prop validation', () => {
-      expect(() => {
-        Schema.validateSchemaProps({
-          name: 'some random string %##$%#$',
-          label: 'Some randon label',
-        });
+        Schema.validateName('some random string %##$%#$');
       }).not.toThrow();
     });
 
@@ -318,11 +302,11 @@ describe('Schema validations', () => {
       }).toThrow(FormFeaturesErrors.COMMENTS_FORMAT);
 
       expect(() => {
-        Schema.validateFormFeatures({ comments: {} as any });
+        Schema.validateFormFeatures({ comments: {} as any});
       }).toThrow(FormFeaturesErrors.COMMENTS_FORMAT);
 
       expect(() => {
-        Schema.validateFormFeatures({ comments: 'yes' as any });
+        Schema.validateFormFeatures({ comments: 'yes' as any});
       }).toThrow(FormFeaturesErrors.COMMENTS_FORMAT);
 
     });
@@ -389,7 +373,7 @@ describe('Schema validations', () => {
         Schema.validateDiff({
           name: 'prev',
         } as any, {
-          name: 'next',
+          name:  'next',
         } as any);
       }).toThrow(DiffErrors.NAME_CHANGE_FORBIDEN);
     });
@@ -402,10 +386,10 @@ describe('Schema validations', () => {
               name: 'reference_id',
               label: 'test',
               type: AttrTypes.STRING,
-            },
-          ],
+            }
+          ]
         } as any, {
-          attributes: [],
+          attributes:[],
         } as any);
       }).toThrow(DiffErrors.ATTRIBUTE_CHANGE_FORBIDEN);
 
@@ -417,16 +401,16 @@ describe('Schema validations', () => {
               name: 'reference_id',
               label: 'test',
               type: AttrTypes.STRING,
-            },
-          ],
+            }
+          ]
         } as any, {
           attributes: [
             {
               name: 'reference_id',
               label: 'test',
               type: AttrTypes.TIMESTAMP,
-            },
-          ],
+            }
+          ]
         } as any);
       }).toThrow(DiffErrors.ATTRIBUTE_CHANGE_FORBIDEN);
 
@@ -437,16 +421,16 @@ describe('Schema validations', () => {
               name: 'reference_id',
               label: 'test',
               type: AttrTypes.STRING,
-            },
-          ],
+            }
+          ]
         } as any, {
           attributes: [
             {
               name: 'reference_id_new',
               label: 'test',
               type: AttrTypes.STRING,
-            },
-          ],
+            }
+          ]
         } as any);
       }).toThrow(DiffErrors.ATTRIBUTE_CHANGE_FORBIDEN);
 
@@ -458,17 +442,17 @@ describe('Schema validations', () => {
     it('should return only the editable props on name changes', () => {
 
       let schema: Schema = {
-        name: 'test',
-        attributes: [],
-        registries: [],
-        formFeatures: {},
+        name:'test',
+        attributes:[],
+        registries:[],
+        formFeatures:{},
         archived: true,
       };
 
       const editableJson = Schema.toEditableJson({
         ...schema,
         someRandomProps: 'some Random value',
-        createdAt: new Date(),
+        createdAt:new Date()
       } as any);
 
       const parsedJson = JSON.parse(editableJson);
