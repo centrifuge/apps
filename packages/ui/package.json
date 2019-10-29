@@ -1,0 +1,82 @@
+{
+  "name": "@centrifuge/gateway-ui",
+  "version": "0.1.0",
+  "description": "User interface to Centrifuge Gateway",
+  "keywords": [
+    "centrifuge",
+    "node",
+    "gateway",
+    "ui"
+  ],
+  "author": "razvan <razvan@centrifuge.io>",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rdinicut/gateway.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rdinicut/gateway/issues"
+  },
+  "dependencies": {
+    "@centrifuge/axis-date-input": "^0.3.2-develop.44",
+    "@centrifuge/axis-display-field": "^0.3.2-develop.51",
+    "@centrifuge/axis-modal": "^0.1.1-develop.28",
+    "@centrifuge/axis-multiple-select": "^0.3.2-develop.46",
+    "@centrifuge/axis-nav-bar": "^0.3.2-develop.47",
+    "@centrifuge/axis-number-input": "0.3.2-develop.49",
+    "@centrifuge/axis-search-select": "^0.3.2-develop.46",
+    "@centrifuge/axis-spinner": "^0.3.2-develop.44",
+    "@centrifuge/axis-theme": "0.2.1-develop.33",
+    "@centrifuge/axis-utils": "0.3.2-develop.49",
+    "@centrifuge/gateway-lib": "^0.1.0",
+    "axios": "^0.19.0",
+    "ethereumjs-util": "^6.1.0",
+    "formik": "^1.5.8",
+    "grommet": "2.7.11",
+    "grommet-icons": "^4.2.0",
+    "lodash": "^4.17.14",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "react-redux": "^5.1.1",
+    "react-router-dom": "^4.3.1",
+    "react-scripts": "^3.1.1",
+    "styled-components": "4.2.1",
+    "typescript": "3.2.2",
+    "yup": "^0.27.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "clean": "rm -rf ./build",
+    "test": "react-scripts test --coverage"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "devDependencies": {
+    "@types/jest": "^24.0.9",
+    "@types/react-router": "^4.3.1",
+    "@types/web3": "^1.0.12",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0",
+    "enzyme-to-json": "^3.3.4",
+    "prettier": "^1.14.2",
+    "react-test-renderer": "^16.9.0",
+    "supertest": "^3.1.0",
+    "ts-jest": "^24.0.2",
+    "ts-loader": "^4.4.2",
+    "tslint": "5.11.0"
+  },
+  "jest": {
+    "snapshotSerializers": [
+      "enzyme-to-json/serializer"
+    ]
+  },
+  "proxy": "http://localhost:3001"
+}

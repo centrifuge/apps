@@ -7,9 +7,8 @@ COPY . ./
 # https://github.com/npm/npm/issues/18163
 RUN npm config set unsafe-perm true
 
-RUN npm install
-
-RUN npm run build:frontend
+RUN npm ci
+RUN npm run build:series
 
 EXPOSE 3001
 
