@@ -42,9 +42,10 @@ export class CentrifugeService {
       if (result.status === 'pending') {
         return delay(500).then(() => this.pullForJobComplete(jobId, authorization));
       } else if(result.status === 'failed') {
+        console.log('Job Failed',result)
         throw new BadRequestException(result.message);
       } else {
-        console.log('complete', result);
+        console.log('Job Complete', result);
         return result;
       }
     });
