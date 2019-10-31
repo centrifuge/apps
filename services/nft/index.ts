@@ -16,7 +16,7 @@ export async function getNFT(tinlake: Tinlake, tokenId: string) {
     nftDataPromise = await tinlake.getNFTData(tokenId);
   } catch (e)
   {
-    return loggedError(e, 'wrong NFT ID format', tokenId);
+    console.log(`NFT Data not supported ${tokenId}`, e);
   }
 
   let nftOwner: Address;
@@ -36,10 +36,6 @@ export async function getNFT(tinlake: Tinlake, tokenId: string) {
     nftData = await nftDataPromise;
   } catch (e) {
     return loggedError(e, 'Could not get NFT data for NFT ID', tokenId);
-  }
-
-  if (!nftData) {
-    return loggedError(null, 'Could not get NFT data for NFT ID', tokenId);
   }
 
   const replacedTokenId = tokenId.replace(/^0x/, '');
