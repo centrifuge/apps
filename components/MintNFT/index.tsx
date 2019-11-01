@@ -98,7 +98,8 @@ class MintNFT extends React.Component<Props, State> {
             <p>In this demo, you can mint a test NFT reflecting an sample invoice worth USD 1.000 into your wallet. Please fill in a "NFT Reference" as a unique identifier for your invoice NFT below. Then proceed with Mint NFT.
               The NFT will be minted into your wallet and on the next screen, you will be provided with the Token ID of this NFT.</p>
            <b>Please store or copy this Token ID, as it will be used again to whitelist the NFT on Tinlake.</b>
-            <p>If you already have a token ID, please proceed directly to Whitelisting.</p>
+            <p>If you already have a token ID, <Link href={`/admin/whitelist-nft`}>
+              <Anchor>please proceed to whitelisting</Anchor></Link>.</p>
           </Alert>}
 
           <Box direction="row" gap="large" margin="medium">
@@ -112,7 +113,7 @@ class MintNFT extends React.Component<Props, State> {
                   disabled={true}
                 />
               </FormField> }
-              <FormField label="Reference ID">
+              <FormField label="NFT Reference">
                 <TextInput
                   value={referenceId}
                   onChange={e => this.setState({ referenceId: e.currentTarget.value })}
@@ -125,7 +126,7 @@ class MintNFT extends React.Component<Props, State> {
                   disabled
                 />
               </FormField>
-              <FormField label="Amount">
+              <FormField label="Invoice Amount">
                 <NumberInput
                   suffix=" USD"
                   value={amount}
