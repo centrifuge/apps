@@ -94,8 +94,8 @@ class MintNFT extends React.Component<Props, State> {
 
           {is === null && <Alert type="info">
             Tinlake requires you to have a non-fungible token ("NFT") to deposit as collateral.
-             An NFT is an on-chain, digital representation of an underlying real-world asset, such as an invoice, a mortgage or music royalties. This NFT also stores selected publicly accessible fields, e.g. to price the NFT, as metadata.
-            <p>In this demo, you can mint a test NFT reflecting an sample invoice worth USD 1.000 into your wallet. Please fill in a "NFT Reference" as a unique identifier for your invoice NFT below. This NFT reference will be stored as metadata together with the invoice amount (USD 1.000) and asset type ("Invoice"). Then proceed with Mint NFT.
+             An NFT is an on-chain, digital representation of an underlying real-world asset, such as an invoice, a mortgage or music royalties.
+            <p>In this demo, you can mint a test NFT reflecting an sample invoice worth USD 1.000 into your wallet. Please fill in a "NFT Reference" as a unique identifier for your invoice NFT below. Then proceed with Mint NFT.
               The NFT will be minted into your wallet and on the next screen, you will be provided with the Token ID of this NFT.</p>
            <b>Please store or copy this Token ID, as it will be used again to whitelist the NFT on Tinlake.</b>
             <p>If you already have a token ID, please proceed directly to Whitelisting.</p>
