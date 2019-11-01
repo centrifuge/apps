@@ -28,7 +28,7 @@ class MintNFT extends React.Component<Props, State> {
   state: State = {
     tokenId: this.generateTokenId(),
     referenceId: '',
-    amount: '1000',
+    amount: '1000.00',
     assetType: 'Invoice',
     is: null,
     errorMsg: ''
@@ -43,15 +43,15 @@ class MintNFT extends React.Component<Props, State> {
   }
 
   mint = async () => {
-    const { referenceId, amount, assetType } = this.state;
+    const { referenceId, assetType, amount } = this.state;
    
     {
       this.setState({ is: 'loading' });
       try {
         await authTinlake();
-
+        const base = displayToBase(baseToDisplay(amount, 2), 2)
         const res = await this.props.tinlake.mintNFT(
-          this.props.tinlake.ethConfig.from, this.state.tokenId, referenceId, amount, assetType);
+          this.props.tinlake.ethConfig.from, this.state.tokenId, referenceId, base, assetType);
         if (res.status === SUCCESS_STATUS && res.events[0].event.name === 'Transfer') {
           this.setState({ is: 'success' });
         } else {
@@ -65,7 +65,7 @@ class MintNFT extends React.Component<Props, State> {
   }
 
   render() {
-    const { is, tokenId, errorMsg, referenceId } = this.state;
+    const { is, tokenId, errorMsg, referenceId, assetType, amount } = this.state;
 
     return <Box>
       <SecondaryHeader>
@@ -92,14 +92,15 @@ class MintNFT extends React.Component<Props, State> {
             {errorMsg && <div><br />{errorMsg}</div>}
           </Alert>}
 
-          <Alert type="info">
+          {is === null && <Alert type="info">
             Tinlake requires you to have a non-fungible token ("NFT") to deposit as collateral.
              An NFT is an on-chain, digital representation of an underlying real-world asset, such as an invoice, a mortgage or music royalties. This NFT also stores selected publicly accessible fields, e.g. to price the NFT, as metadata.
             <p>In this demo, you can mint a test NFT reflecting an sample invoice worth USD 1.000 into your wallet. Please fill in a "NFT Reference" as a unique identifier for your invoice NFT below. This NFT reference will be stored as metadata together with the invoice amount (USD 1.000) and asset type ("Invoice"). Then proceed with Mint NFT.
               The NFT will be minted into your wallet and on the next screen, you will be provided with the Token ID of this NFT.</p>
            <b>Please store or copy this Token ID, as it will be used again to whitelist the NFT on Tinlake.</b>
             <p>If you already have a token ID, please proceed directly to Whitelisting.</p>
-          </Alert>
+          </Alert>}
+
           <Box direction="row" gap="large" margin="medium">
             <b>Please specify metadata of NFT:</b>
           </Box>
@@ -120,14 +121,14 @@ class MintNFT extends React.Component<Props, State> {
               </FormField>
               <FormField label="Asset Type">
                 <TextInput
-                  value="Invoice"
+                  value={assetType}
                   disabled
                 />
               </FormField>
               <FormField label="Amount">
                 <NumberInput
                   suffix=" USD"
-                  value="1000"
+                  value={amount}
                   disabled
                 />
               </FormField>
