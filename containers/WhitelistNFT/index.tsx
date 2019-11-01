@@ -2,9 +2,8 @@ import * as React from 'react';
 import Tinlake, { baseToDisplay, displayToBase, interestRateToFee } from 'tinlake';
 import { Box, FormField, TextInput, Button, Heading, Text } from 'grommet';
 import Alert from '../../components/Alert';
-import Link from 'next/link';
 import SecondaryHeader from '../../components/SecondaryHeader';
-import { LinkPrevious } from 'grommet-icons';
+import { BackLink } from '../../components/BackLink';
 import { connect } from 'react-redux';
 import NftData from '../../components/NftData';
 import { authTinlake } from '../../services/tinlake';
@@ -119,9 +118,7 @@ class WhitelistNFT extends React.Component<Props, State> {
     return <Box>
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">
-          <Link href="/admin">
-            <LinkPrevious />
-          </Link>
+          <BackLink href="/admin" />
           <Heading level="3">Whitelist NFT</Heading>
         </Box>
 
@@ -173,7 +170,7 @@ class WhitelistNFT extends React.Component<Props, State> {
               </FormField>
             </Box>
             <Box basis={'1/4'} gap="medium">
-              <FormField label="Interest Rate (Yearly)">
+              <FormField label="Interest Rate (Annually)">
                 <NumberInput
                   value={interestRate} suffix=" %" precision={2}
                   onValueChange={({ value }) =>

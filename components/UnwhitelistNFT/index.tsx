@@ -6,8 +6,7 @@ import Alert from '../Alert';
 import { Box, Button, Heading, Text, FormField, TextInput } from 'grommet';
 import NftData from '../NftData';
 import SecondaryHeader from '../SecondaryHeader';
-import Link from 'next/link';
-import { LinkPrevious } from 'grommet-icons';
+import { BackLink } from '../BackLink';
 import LoanData from '../LoanData';
 import { authTinlake } from '../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
@@ -89,9 +88,7 @@ class UnwhitelistNFT extends React.Component<Props, State> {
     return <Box>
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">
-          <Link href={`/admin/loan?loanId=${loanId}`}>
-            <LinkPrevious />
-          </Link>
+          <BackLink href={`/admin/loan?loanId=${loanId}`} />
           <Heading level="3">Unwhitelist NFT for Loan {loanId}</Heading>
         </Box>
 

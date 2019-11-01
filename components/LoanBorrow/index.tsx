@@ -7,7 +7,7 @@ import { Box, FormField, Button, Heading, Text } from 'grommet';
 import NftData from '../NftData';
 import SecondaryHeader from '../SecondaryHeader';
 import Link from 'next/link';
-import { LinkPrevious } from 'grommet-icons';
+import { BackLink } from '../BackLink';
 import NumberInput from '../NumberInput';
 import NumberDisplay from '../NumberDisplay';
 import LoanData from '../LoanData';
@@ -107,9 +107,7 @@ class LoanBorrow extends React.Component<Props, State> {
     return <Box>
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">
-          <Link href={`/borrower/loan?loanId=${loanId}`}>
-            <LinkPrevious />
-          </Link>
+          <BackLink href={`/borrower/loan?loanId=${loanId}`} />
           <Heading level="3">Borrow Loan {loanId}</Heading>
         </Box>
 

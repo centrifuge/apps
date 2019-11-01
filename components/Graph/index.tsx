@@ -31,7 +31,14 @@ const defaultLineData = {
 const defaultLineOptions = {
   scales: {
     yAxes: [
-      { }
+      {
+        scaleLabel:{
+          labelString: "DAI",
+          fontSize: 14,
+          display: true
+        }
+        
+      }
     ],
     xAxes: [
       {
@@ -61,7 +68,7 @@ export class Graph extends React.Component<Props> {
         borderColor: xValueSet.backgroundColor,
         pointBorderColor: xValueSet.backgroundColor,
         pointHoverBackgroundColor: xValueSet.backgroundColor,
-        pointHoverBorderColor: xValueSet.backgroundColor
+        pointHoverBorderColor: xValueSet.backgroundColor,
       };
     });
 

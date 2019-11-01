@@ -4,7 +4,7 @@ import { Box, FormField, TextInput, Button, Heading, Anchor, Text } from 'gromme
 import Alert from '../Alert';
 import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
-import { LinkPrevious } from 'grommet-icons';
+import { BackLink } from '../BackLink';
 import { authTinlake } from '../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import NumberInput from '../NumberInput';
@@ -73,9 +73,7 @@ class MintNFT extends React.Component<Props, State> {
     return <Box>
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">
-          <Link href="/borrower">
-            <LinkPrevious />
-          </Link>
+          <BackLink href="/borrower" />
           <Heading level="3">Mint NFT</Heading>
         </Box>
 

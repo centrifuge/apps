@@ -5,12 +5,12 @@ import { connect } from 'react-redux';
 import Alert from '../Alert';
 import { Box, FormField, TextInput, Button, Heading } from 'grommet';
 import NftData from '../NftData';
-import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
-import { LinkPrevious } from 'grommet-icons';
 import LoanData from '../LoanData';
 import Auth from '../Auth';
 import config from '../../config'
+import Link from 'next/link';
+import { BackLink } from '../BackLink';
 
 const { isDemo }  = config
 interface Props {
@@ -45,13 +45,10 @@ class LoanDetail extends React.Component<Props> {
     }
 
     const { status, loanOwner } = singleLoan!;
-
     return <Box>
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">
-          <Link href={`/${mode}`}>
-            <LinkPrevious />
-          </Link>
+          <BackLink href={`/${mode}`} /> 
           <Heading level="3">View Loan {loanId}</Heading>
         </Box>
 
