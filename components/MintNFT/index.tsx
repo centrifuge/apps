@@ -15,9 +15,9 @@ interface Props {
 
 interface State {
   tokenId: string;
-  referenceId: string;
   amount: string;
   assetType: string;
+  referenceId: string;
   is: 'loading' | 'success' | 'error' | null;
   errorMsg: string;
 }
@@ -28,8 +28,8 @@ class MintNFT extends React.Component<Props, State> {
   state: State = {
     tokenId: this.generateTokenId(),
     referenceId: '',
-    amount: '0',
-    assetType: '',
+    amount: '1000.00',
+    assetType: 'Invoice',
     is: null,
     errorMsg: ''
   };
@@ -43,18 +43,15 @@ class MintNFT extends React.Component<Props, State> {
   }
 
   mint = async () => {
-    const { referenceId, amount, assetType } = this.state;
-    if (referenceId === '' || assetType === '') {
-      this.setState({ is: 'error', errorMsg: 'Both Reference ID and Asset Type must be defined.' });
-    } else if (amount === '0') {
-      this.setState({ is: 'error', errorMsg: 'Amount cannot be 0.' });
-    } else {
+    const { referenceId, assetType, amount } = this.state;
+   
+    {
       this.setState({ is: 'loading' });
       try {
         await authTinlake();
-
+        const base = displayToBase(baseToDisplay(amount, 2), 2)
         const res = await this.props.tinlake.mintNFT(
-          this.props.tinlake.ethConfig.from, this.state.tokenId, referenceId, amount, assetType);
+          this.props.tinlake.ethConfig.from, this.state.tokenId, referenceId, base, assetType);
         if (res.status === SUCCESS_STATUS && res.events[0].event.name === 'Transfer') {
           this.setState({ is: 'success' });
         } else {
@@ -68,7 +65,7 @@ class MintNFT extends React.Component<Props, State> {
   }
 
   render() {
-    const { is, tokenId, errorMsg, referenceId, amount, assetType } = this.state;
+    const { is, tokenId, errorMsg, referenceId, assetType, amount } = this.state;
 
     return <Box>
       <SecondaryHeader>
@@ -76,9 +73,6 @@ class MintNFT extends React.Component<Props, State> {
           <BackLink href="/borrower" />
           <Heading level="3">Mint NFT</Heading>
         </Box>
-
-        <Button primary onClick={this.mint} label="Mint NFT"
-          disabled={is === 'loading' || is === 'success'} />
       </SecondaryHeader>
 
       {is === 'loading' ?
@@ -86,7 +80,7 @@ class MintNFT extends React.Component<Props, State> {
       :
         <Box pad={{ horizontal: 'xsmall' }}>
           {is === 'success' && <Alert type="success">
-            Successfully minted NFT for Token ID {tokenId}.
+            Successfully minted NFT for Token ID {tokenId}
             <b>Please make sure to copy your Token ID!</b>
             <Link href={`/admin/whitelist-nft?tokenId=${tokenId}`}>
               <Anchor>Then proceed to whitelisting</Anchor></Link></Alert>}
@@ -95,15 +89,29 @@ class MintNFT extends React.Component<Props, State> {
               Error minting NFT for Token ID {tokenId}, see console for details</Text>
             {errorMsg && <div><br />{errorMsg}</div>}
           </Alert>}
-          <Box direction="row" justify="center" gap="large" margin={{ vertical: 'large' }}>
-            <Box basis="1/3" gap="large">
+
+          {is === null && <Alert type="info">
+            Tinlake requires you to have a non-fungible token ("NFT") to deposit as collateral.
+             An NFT is an on-chain, digital representation of an underlying real-world asset, such as an invoice, a mortgage or music royalties.
+            <p>In this demo, you can mint a test NFT reflecting an sample invoice worth USD 1.000 into your wallet. Please fill in a "NFT Reference" as a unique identifier for your invoice NFT below. Then proceed with Mint NFT.
+              The NFT will be minted into your wallet and on the next screen, you will be provided with the Token ID of this NFT.</p>
+           <b>Please store or copy this Token ID, as it will be used again to whitelist the NFT on Tinlake.</b>
+            <p>If you already have a token ID, <Link href={`/admin/whitelist-nft`}>
+              <Anchor>please proceed to whitelisting</Anchor></Link>.</p>
+          </Alert>}
+
+          <Box direction="row" gap="large" margin="medium">
+            <b>Please specify metadata of NFT:</b>
+          </Box>
+
+          <Box direction="row" gap="large" margin={"medium"} justify="evenly">
               { is === 'success' && <FormField label="Token ID">
                 <TextInput
                   value={this.state.tokenId}
                   disabled={true}
                 />
               </FormField> }
-              <FormField label="Reference ID">
+              <FormField label="NFT Reference">
                 <TextInput
                   value={referenceId}
                   onChange={e => this.setState({ referenceId: e.currentTarget.value })}
@@ -113,24 +121,20 @@ class MintNFT extends React.Component<Props, State> {
               <FormField label="Asset Type">
                 <TextInput
                   value={assetType}
-                  onChange={e => this.setState({ assetType: e.currentTarget.value })}
-                  disabled={is === 'success'}
+                  disabled
                 />
               </FormField>
-              <FormField label="Amount">
+              <FormField label="Invoice Amount">
                 <NumberInput
-                  precision={18}
                   suffix=" USD"
-                  value={baseToDisplay(amount, 18)}
-                  onValueChange={({ value }) => {
-                    this.setState({ amount: displayToBase(value, 18) });
-                  }}
-                  disabled={is === 'success'}
+                  value={amount}
+                  disabled
                 />
               </FormField>
+            <Button primary onClick={this.mint} label="Mint NFT"
+                    disabled={is === 'loading' || is === 'success'} />
             </Box>
           </Box>
-        </Box>
       }
     </Box>;
   }
