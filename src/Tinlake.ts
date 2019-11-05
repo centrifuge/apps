@@ -1,9 +1,9 @@
 import Eth from 'ethjs';
 import { AbiCoder } from 'web3-eth-abi';
+import { Decimal } from 'decimal.js-light';
 const abiCoder = new AbiCoder();
 import BN from 'bn.js';
 import { sha3 } from 'web3-utils';
-
 
 import contractAbiNft from './abi/test/SimpleNFT.abi.json';
 import contractAbiTitle from './abi/Title.abi.json';
@@ -112,6 +112,7 @@ export interface Loan {
   tokenId: BN;
   price: BN;
   principal: BN;
+  status?: string 
 }
 
 export interface BalanceDebt {
@@ -231,6 +232,36 @@ export class Tinlake {
 
   getLoan = async (loanId: string): Promise<Loan> => {
     return await executeAndRetry(this.contracts.shelf.shelf, [loanId]);
+  }
+
+  getAllLoans = async (): Promise<Loan[]> => {
+    const loanCountBn = await this.loanCount()
+    const loanCount = loanCountBn && loanCountBn.toNumber() || 0;
+    const loans = [];
+
+    for (let id = 0; id < loanCount; id++) {
+      const loanId = `${id}`
+      const loan = await this.getLoan(loanId);
+      if (!loan) {
+        continue;
+      }
+      const balanceDebtRes = await this.getBalanceDebt(loanId);
+      const balanceDebt = balanceDebtRes && balanceDebtRes.debt && new Decimal(balanceDebtRes.debt.toString());
+      const principal = new Decimal(loan.principal.toString());
+      const zeroDecimal = new Decimal(0)
+
+      if (principal.greaterThan(zeroDecimal)) {
+        loan['status'] = 'Whitelisted';
+      } else if (principal.isZero() && balanceDebt.greaterThan(zeroDecimal)) {
+        loan['status'] = 'Ongoing';
+      } else if (principal.isZero() && balanceDebt.isZero()) {
+        loan['status'] = 'Repaid';
+      } else {
+        loan['status'] = 'Other';
+      }
+      loans.push(loan)
+    } 
+    return loans;
   }
 
   getBalanceDebt = async (loanId: string): Promise<BalanceDebt> => {

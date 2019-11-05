@@ -72,6 +72,7 @@ export interface Loan {
     tokenId: BN;
     price: BN;
     principal: BN;
+    status?: string;
 }
 export interface BalanceDebt {
     debt: BN;
@@ -101,6 +102,7 @@ export declare class Tinlake {
     isAdmin: (address: string) => Promise<boolean>;
     loanCount: () => Promise<BN>;
     getLoan: (loanId: string) => Promise<Loan>;
+    getAllLoans: () => Promise<Loan[]>;
     getBalanceDebt: (loanId: string) => Promise<BalanceDebt>;
     approveNFT: (tokenId: string, to: string) => Promise<unknown>;
     approveCollateral: (usr: string, wad: string) => Promise<unknown>;
