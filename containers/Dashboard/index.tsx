@@ -14,7 +14,7 @@ import { Graph, TimeSeriesData } from '../../components/Graph';
 import config from '../../config';
 
 const periodSelectionOptions = ['7d', '30d', '90d'];
-const defaultPeriodSelection = '7d';
+const defaultPeriodSelection = '90d';
 
 interface Props {
   tinlake: Tinlake;
@@ -163,6 +163,8 @@ class Dashboard extends React.Component<Props, State> {
       </Box>
 
       <LoanList tinlake={tinlake} mode="" />
+      <Box pad={{ horizontal: 'medium', vertical: 'medium' }}>
+      </Box>
     </Box>;
   }
 }

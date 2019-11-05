@@ -1,5 +1,5 @@
 import { AnyAction, Action } from 'redux';
-import Tinlake from 'tinlake';
+import Tinlake, { Loan } from 'tinlake';
 import BN from 'bn.js';
 import { ThunkAction } from 'redux-thunk';
 
@@ -37,13 +37,15 @@ export default function reducer(state: DashboardState = initialState,
 export function getDashboardData(tinlake: Tinlake):
   ThunkAction<Promise<void>, DashboardState, undefined, Action> {
   return async (dispatch) => {
-    const loanCountPromise = tinlake.loanCount();
     const totalDebtPromise = tinlake.getTotalDebt();
     const totalBalancePromise = tinlake.getTotalBalance();
     const totalValueOfNFTsPromise = tinlake.getTotalValueOfNFTs();
 
+    const loans = await tinlake.getAllLoans();
+    const ongoingLoans = loans.filter( (l:Loan) => l.status === "Ongoing")
+
     const data = {
-      loanCount: await loanCountPromise,
+      loanCount: ongoingLoans && ongoingLoans.length || 0,
       totalDebt: await totalDebtPromise,
       totalBalance: await totalBalancePromise,
       totalValueOfNFTs: await totalValueOfNFTsPromise
@@ -60,7 +62,7 @@ export function subscribeDashboardData(tinlake: Tinlake):
 
     const interval = setInterval(
       () => dispatch(getDashboardData(tinlake)),
-      3600000
+      600000
     );
     const discard = () => clearInterval(interval);
     return discard as any;
