@@ -12,6 +12,7 @@ module.exports = withTypescript({
     RPC_URL: process.env.RPC_URL,
     TINLAKE_DATA_BACKEND_URL: process.env.TINLAKE_DATA_BACKEND_URL,
     TRANSACTION_TIMEOUT: process.env.TRANSACTION_TIMEOUT,
-    ENV: process.env.ENV
+    ENV: process.env.ENV,
+    ETHERSCAN_URL: process.env.ETHERSCAN_URL
   }
 });

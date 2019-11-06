@@ -8,11 +8,13 @@ import Auth from '../../components/Auth';
 import { menuItems } from '../../menuItems';
 
 class WhitelistNFTPage extends React.Component<{ tokenId: string }> {
+
   static async getInitialProps({ query }: any) {
     return { tokenId: query.tokenId };
   }
 
   render() {
+    const { tokenId } = this.props;
     return <Box align="center">
       <Header
         selectedRoute={'/admin/whitelist-nft'}
@@ -26,7 +28,7 @@ class WhitelistNFTPage extends React.Component<{ tokenId: string }> {
           <WithTinlake render={tinlake =>
             <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization
               render={auth => auth.isAdmin ?
-                <WhitelistNFT tinlake={tinlake} />
+                <WhitelistNFT tinlake={tinlake} tokenId={tokenId} />
                 :
                 <Alert margin="medium" type="error">
                   Please use an admin account to access this page</Alert>

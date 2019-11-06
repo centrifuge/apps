@@ -23,8 +23,10 @@
   },
   "homepage": "https://github.com/centrifuge/tinlake-ui#readme",
   "dependencies": {
+    "@centrifuge/axis-display-field": "^0.3.2-develop.51",
     "@centrifuge/axis-spinner": "^0.3.1",
-    "@centrifuge/axis-theme": "^0.3.0",
+    "@centrifuge/axis-theme": "^0.2.1-develop.33",
+    "@centrifuge/axis-utils": "^0.3.2-develop.49",
     "apollo-cache-inmemory": "^1.6.3",
     "apollo-client": "^2.6.4",
     "apollo-link-http": "^1.5.15",

@@ -82,7 +82,7 @@ class MintNFT extends React.Component<Props, State> {
           {is === 'success' && <Alert type="success">
             Successfully minted NFT for Token ID {tokenId}
             <b>Please make sure to copy your Token ID!</b>
-            <Link href={`/admin/whitelist-nft?tokenId=${tokenId}`}>
+            <Link href={{ pathname: '/admin/whitelist-nft', query: { tokenId }}}>
               <Anchor>Then proceed to whitelisting</Anchor></Link></Alert>}
           {is === 'error' && <Alert type="error">
             <Text weight="bold">
