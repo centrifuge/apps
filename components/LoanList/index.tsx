@@ -35,7 +35,6 @@ class LoanList extends React.Component<Props> {
     return <Box pad={{ horizontal: 'medium', bottom: 'large' }}>
       <DataTable data={filteredLoans} sortable columns={[
         { header: <HeaderCell text={'Loan ID'}></HeaderCell>, property: 'loanId', align: 'end' },
-        { header: <HeaderCell text={'Reference ID'}></HeaderCell>, property: 'refId', align: 'end' },
         {
           header: 'NFT ID', property: 'tokenId', align: 'end',
           render: (l: InternalListLoan) => 
