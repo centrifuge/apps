@@ -81,9 +81,13 @@ class MintNFT extends React.Component<Props, State> {
         <Box pad={{ horizontal: 'xsmall' }}>
           {is === 'success' && <Alert type="success">
             Successfully minted NFT for Token ID {tokenId}
-            <b>Please make sure to copy your Token ID!</b>
-            <Link href={{ pathname: '/admin/whitelist-nft', query: { tokenId }}}>
-              <Anchor>Then proceed to whitelisting</Anchor></Link></Alert>}
+            <p> 
+              <Link href={{ pathname: '/admin/whitelist-nft', query: { tokenId }}}>
+                <Anchor>Please proceed to whitelisting</Anchor> 
+              </Link> your NFT.</p>
+            <p> Your NFT ID will automatically be pasted in the respective field.</p>
+            <p>If you want to whitelist your NFT later, <b>please make sure to copy your Token ID!</b></p>
+         </Alert>}
           {is === 'error' && <Alert type="error">
             <Text weight="bold">
               Error minting NFT for Token ID {tokenId}, see console for details</Text>
@@ -94,7 +98,7 @@ class MintNFT extends React.Component<Props, State> {
             Tinlake requires you to have a non-fungible token ("NFT") to deposit as collateral.
              An NFT is an on-chain, digital representation of an underlying real-world asset, such as an invoice, a mortgage or music royalties.
             <p>In this demo, you can mint a test NFT reflecting an sample invoice worth USD 1.000 into your wallet. Please fill in a "NFT Reference" as a unique identifier for your invoice NFT below. Then proceed with Mint NFT.
-              The NFT will be minted into your wallet and on the next screen, you will be provided with the Token ID of this NFT.</p>
+              The NFT will be minted into your wallet and on the next screen you will be provided with the Token ID of this NFT.</p>
            <b>Please store or copy this Token ID, as it will be used again to whitelist the NFT on Tinlake.</b>
             <p>If you already have a token ID, <Link href={`/admin/whitelist-nft`}>
               <Anchor>please proceed to whitelisting</Anchor></Link>.</p>

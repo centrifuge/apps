@@ -142,7 +142,9 @@ class WhitelistNFT extends React.Component<Props, State> {
               Error whitelisting NFT for Token ID {tokenId}, see console for details</Text>
             {errorMsg && <div><br />{errorMsg}</div>}
           </Alert>}
-
+          <Box direction="row" gap="medium">
+            <b>Please paste your NFT ID below and set the loan parameters:</b>
+          </Box>
           <Box direction="row" gap="medium" margin={{ vertical: 'large' }}>
             <Box basis={'1/4'} gap="medium">
               <FormField label="NFT ID">

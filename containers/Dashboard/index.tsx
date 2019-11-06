@@ -131,7 +131,7 @@ class Dashboard extends React.Component<Props, State> {
             </DashboardMetric>
           </Box>
           <Box basis={'1/4'} gap="medium">
-            <DashboardMetric label="Number of Loans">
+            <DashboardMetric label="Ongoing Loans">
               <NumberDisplay value={loanCount.toString()} precision={0} />
             </DashboardMetric>
           </Box>

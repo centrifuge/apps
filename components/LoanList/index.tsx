@@ -8,7 +8,7 @@ import NumberDisplay from '../NumberDisplay';
 import Badge from '../Badge';
 import { Spinner } from '@centrifuge/axis-spinner';
 import { DisplayField } from '@centrifuge/axis-display-field';
-import { getNFTLink, getAddressLink } from '../../utils/etherscanLinkGenerator'
+import { getNFTLink, getAddressLink, hexToInt } from '../../utils/etherscanLinkGenerator'
 
 interface Props {
   tinlake: Tinlake;
@@ -42,9 +42,9 @@ class LoanList extends React.Component<Props> {
               <DisplayField   
                 copy={true}
                 as={'span'}
-                value={bnToHex(l.tokenId).toString()}
+                value={hexToInt(bnToHex(l.tokenId).toString())}
                 link={{
-                    href: getNFTLink(bnToHex(l.tokenId).toString(), l.registry),
+                    href: getNFTLink(hexToInt(bnToHex(l.tokenId).toString()), l.registry),
                     target: '_blank',
                 }}
               />
@@ -76,9 +76,9 @@ class LoanList extends React.Component<Props> {
 
         { header: <HeaderCell text={'NFT Status'}></HeaderCell>, align: 'end', property: 'status' },
         {
-          header: 'Principal', property: 'principal', align: 'end',
+          header: 'Principal (DAI)', property: 'principal', align: 'end',
           render: (l: InternalListLoan) => l.status === 'Whitelisted' ?
-            <NumberDisplay suffix=" DAI" precision={18}
+            <NumberDisplay suffix="" precision={18}
               value={baseToDisplay(l.principal, 18)} />
             : '-'
         },
@@ -88,9 +88,9 @@ class LoanList extends React.Component<Props> {
             <NumberDisplay suffix="%" value={feeToInterestRate(l.fee)} />,
         },
         {
-          header: 'Debt', property: 'debt', align: 'end',
+          header: 'Debt (DAI)', property: 'debt', align: 'end',
           render: (l: InternalListLoan) => l.status === 'Whitelisted' ? '-' :
-            <NumberDisplay suffix=" DAI" precision={18} value={baseToDisplay(l.debt, 18)} />,
+            <NumberDisplay suffix="" precision={18} value={baseToDisplay(l.debt, 18)} />,
         },
         {
           header: 'Actions', property: 'id', align: 'end', sortable: false,

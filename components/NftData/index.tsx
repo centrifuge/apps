@@ -7,7 +7,7 @@ import { NFT } from '../../ducks/nft';
 import NftDataField, { DisplayedField } from '../NftDataField';
 import config from '../../config';
 import { DisplayField } from '@centrifuge/axis-display-field';
-import { getNFTLink, getAddressLink } from '../../utils/etherscanLinkGenerator'
+import { getNFTLink, getAddressLink, hexToInt } from '../../utils/etherscanLinkGenerator'
 import { bnToHex } from 'tinlake';
 
 interface Props {
@@ -46,9 +46,9 @@ class NftData extends React.Component<Props> {
             label={'NFT ID'}
             copy={true}
             as={'span'}
-            value={bnToHex(tokenId).toString()}
+            value={hexToInt(bnToHex(tokenId).toString())}
             link={{
-                href: getNFTLink(tokenId.toString(), contractAddresses["NFT_COLLATERAL"]),
+                href: getNFTLink(hexToInt(bnToHex(tokenId).toString()), contractAddresses["NFT_COLLATERAL"]),
                 target: '_blank',
             }}
           />

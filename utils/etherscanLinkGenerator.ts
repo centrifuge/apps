@@ -8,8 +8,7 @@ export const getAddressLink = (address: string) => {
 };
   
 export const getNFTLink = (tokenId: string, registyAddress: string) => {
-  const tokenToInt = hexToInt(tokenId);
-  return `${etherscanUrl}/token/${registyAddress}?a=${tokenToInt}`;
+  return `${etherscanUrl}/token/${registyAddress}?a=${tokenId}`;
 };
   
 export const hexToInt = (hex: string) => {
