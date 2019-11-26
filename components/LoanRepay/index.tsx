@@ -19,7 +19,7 @@ import BN from 'bn.js';
 const { isDemo } = config
 const SUCCESS_STATUS = '0x1';
 
-const playgroundDAIAmount = '1000';
+const playgroundDAIAmount = '100';
 
 interface Props {
   loanId: string;
@@ -182,7 +182,7 @@ class LoanRepay extends React.Component<Props, State> {
             {' '}for Loan ID {loanId}
           </Text></Alert>}
           {is === 'funded' && <Alert type="success" margin={{ vertical: 'large' }}><Text>
-            Successfully received 1000 playground DAI. Please confirm the repayment now.
+            Successfully received 100 playground DAI. Please confirm the repayment now.
           </Text></Alert>}
           {is === 'error' && <Alert type="error" margin={{ vertical: 'large' }}>
             <Text weight="bold">Error repaying Loan ID {loanId}, see console for details</Text>
