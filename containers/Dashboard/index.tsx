@@ -102,37 +102,45 @@ class Dashboard extends React.Component<Props, State> {
             loadingGraph
            } = this.state;
 
-    if (data === null || state === 'loading') { return null; }
-
-    const { loanCount, totalDebt, totalValueOfNFTs } = data!;
-
     return <Box >
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">
           <Heading level="3">Status Dashboard</Heading>
         </Box>
       </SecondaryHeader>
-
       <Box pad={{ horizontal: 'medium' }}>
         <Box direction="row" gap="medium" margin={{ vertical: 'medium' }}>
           <Box basis={'1/4'} gap="medium">
             <DashboardMetric label="DAI, Outstanding Debt">
-              <NumberDisplay value={baseToDisplay(totalDebt, 18)} />
+            { data ?
+              ( <NumberDisplay value={baseToDisplay(data.totalDebt, 18)} /> )
+            : ( <Spinner height={'calc(4vh)'} margin={{"bottom": "calc(1vh)"}}/> )   
+            }
             </DashboardMetric>
           </Box>
           <Box basis={'1/4'} gap="medium">
             <DashboardMetric label="DAI, Collateral Value">
-              <NumberDisplay value={baseToDisplay(totalValueOfNFTs, 18)} />
+              { data ?
+                ( <NumberDisplay value={baseToDisplay(data.totalValueOfNFTs, 18)} /> )
+              : ( <Spinner height={'calc(4vh)'} margin={{"bottom": "calc(1vh)"}}/> )   
+              }
             </DashboardMetric>
           </Box>
           <Box basis={'1/4'} gap="medium">
             <DashboardMetric label="Collateral Value / Debt">
-              <NumberDisplay value={calcRatioPercent(totalValueOfNFTs, totalDebt)} suffix=" %" />
+              { data ?
+                ( <NumberDisplay value={calcRatioPercent(data.totalValueOfNFTs, data.totalDebt)} suffix=" %" /> )
+              : ( <Spinner height={'calc(4vh)'} margin={{"bottom": "calc(1vh)"}}/> )   
+              }
             </DashboardMetric>
           </Box>
           <Box basis={'1/4'} gap="medium">
             <DashboardMetric label="Ongoing Loans">
-              <NumberDisplay value={loanCount.toString()} precision={0} />
+              { data ?
+                ( <NumberDisplay value={data.loanCount.toString()} precision={0} /> )
+              : ( <Spinner height={'calc(4vh)'} margin={{"bottom": "calc(1vh)"}}/> )   
+              }
+             
             </DashboardMetric>
           </Box>
         </Box>
