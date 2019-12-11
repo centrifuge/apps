@@ -33,7 +33,7 @@ class LoanList extends React.Component<Props> {
     filteredLoans && filteredLoans.sort((l1, l2) => parseInt(l2.loanId) - parseInt(l1.loanId) )
     
     return <Box pad={{ horizontal: 'medium', bottom: 'large' }}>
-      <DataTable data={filteredLoans} sortable columns={[
+      <DataTable  style={{ tableLayout: "auto" }} data={filteredLoans} sortable columns={[
         { header: <HeaderCell text={'Loan ID'}></HeaderCell>, property: 'loanId', align: 'end' },
         {
           header: 'NFT ID', property: 'tokenId', align: 'end',
