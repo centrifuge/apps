@@ -1,8 +1,6 @@
 import * as React from 'react';
-import Tinlake from 'tinlake';
 import { Box, Button, Heading, Text } from 'grommet';
 import Alert from '../Alert';
-import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
 import { BackLink } from '../BackLink';
 import { authTinlake } from '../../services/tinlake';
@@ -10,7 +8,7 @@ import { Spinner } from '@centrifuge/axis-spinner';
 import BN from 'bn.js';
 
 interface Props {
-  tinlake: Tinlake;
+  tinlake: any;
 }
 
 interface State {
@@ -63,7 +61,7 @@ class Approve extends React.Component<Props, State> {
     return <Box>
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">
-          <BackLink href="/borrower" />
+          <BackLink href="/loans" />
           <Heading level="3">Approve</Heading>
         </Box>
 

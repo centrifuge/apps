@@ -48,6 +48,11 @@ class NftDataField extends React.Component<Props> {
 
     if (field.type === 'uint') {
       const { label, decimals, precision, suffix } = field;
+      if (!decimals || !precision) {
+        return <FormField label={label}>
+          <NumberInput value={value.toNumber()} suffix={suffix} precision={0} disabled />
+        </FormField>;
+      }
       return <FormField label={label}>
         <NumberInput value={baseToDisplay(value, decimals || 18)} suffix={suffix}
           precision={precision} disabled />

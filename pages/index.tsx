@@ -2,7 +2,6 @@ import { Box } from 'grommet';
 import Header from '../components/Header';
 import Dashboard from '../containers/Dashboard';
 import WithTinlake from '../components/WithTinlake';
-import WithApollo from '../components/WithApollo';
 import { menuItems } from '../menuItems';
 
 function Home() {
@@ -17,7 +16,7 @@ function Home() {
   >
     <Box width="xlarge" >
       <WithTinlake render={tinlake =>
-        <WithApollo render={apolloClient => <Dashboard tinlake={tinlake} apolloClient={apolloClient} />} />
+        <Dashboard tinlake={tinlake} />
       }/>
     </Box>
   </Box>

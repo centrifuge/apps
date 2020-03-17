@@ -3,17 +3,15 @@ import { Box, Button, Image, Text, Anchor } from 'grommet';
 import { connect } from 'react-redux';
 import Link from 'next/link';
 import { AuthState } from '../../ducks/auth';
-import Badge from '../Badge';
 import { formatAddress } from '../../utils/formatAddress';
-import config from '../../config'
+import config from '../../config';
 import { authTinlake } from '../../services/tinlake';
 
-const { isDemo } = config
+const { isDemo } = config;
 export interface MenuItem {
   label: string;
   route: string;
   secondary?: boolean;
-  permission?: "admin" | "borrower" | "demo" 
 }
 
 interface HeaderProps {
@@ -28,19 +26,18 @@ class Header extends React.Component<HeaderProps> {
     try {
       await authTinlake();
     } catch (e) {
-      console.log(`authentication failed with Error ${e}`)
+      console.log(`authentication failed with Error ${e}`);
     }
   }
   render() {
     const { selectedRoute, menuItems, auth } = this.props;
-    const user = auth && auth.user
+    const user = auth && auth.user;
     const address = user && user.address;
-    const isAdmin = user && user.isAdmin;
     const network = auth && auth.network;
 
     const sectionGap = 'medium';
     const itemGap = 'small';
-    const logoUrl = isDemo && "/static/demo_logo.svg" || "/static/logo.svg";
+    const logoUrl = isDemo && '/static/demo_logo.svg' || '/static/logo.svg';
 
     return <Box
     justify="center"
@@ -65,37 +62,29 @@ class Header extends React.Component<HeaderProps> {
       </Link>
       <Box direction="row" gap={itemGap} margin={{ right: 'auto' }}>
 
-        {menuItems.filter(item => 
-        {
+        {menuItems.filter((item) => {
           return (
-            (user && isDemo ) ||
-            (user && isAdmin) && item.permission === "admin" ||
-            (user && !isAdmin) && item.permission === 'borrower' ||
-            !item.permission
-            ) 
+            user
+            &&  (isDemo && item.env === "demo"  || item.env === "")
             && !item.secondary
+          )
         }
         )
         .map((item) => {
           const anchorProps = {
             ...(item.route === selectedRoute ?
-              { className: 'selected', color: '#0828BE' } : {}),
+              { className: 'selected', color: '#0828BE' } : {})
           };
           return <Link href={item.route} key={item.label}><Button
             plain
             label={item.label}
             {...anchorProps}
           /></Link>;
-        },
+        }
         )}
       </Box>
       { !user && <Button onClick={this.connectAccount} label="Connect" /> }
-      { user && 
-        <Box direction="row" gap={itemGap} align="center" justify="end">
-        { isAdmin &&  <Badge text={'Admin'} style={{  }} /> }
-        </Box> 
-      }
-      { user && 
+      { user &&
         <Box direction="column">
           <Box direction="row" gap={itemGap} align="center" justify="start">
             <Text> { formatAddress(address || '') } </Text>
@@ -105,8 +94,8 @@ class Header extends React.Component<HeaderProps> {
           </Box>
         </Box>
       }
-      { isDemo && 
-      <Anchor href="https://centrifuge.hackmd.io/zRnaoPqfS7mTm9XL0dDRtQ?view" primary target="blank" label="Help"  style={{ textDecoration: 'none', fontWeight: 900}} />
+      { isDemo &&
+      <Anchor href="https://centrifuge.hackmd.io/zRnaoPqfS7mTm9XL0dDRtQ?view" target="blank" label="Help"  style={{ textDecoration: 'none', fontWeight: 900 }} />
       }
     </Box>
   </Box>;

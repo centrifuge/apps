@@ -4,7 +4,14 @@ const { parsed: localEnv } = require('dotenv').config()
 module.exports = withTypescript({
   webpack(config, options) {
     // Further custom configuration here
-    return config;
+    return {
+      ...config,
+      node: {
+        fs: 'empty',
+        child_process: 'empty',
+        net: 'empty'
+      }
+    }
   },
   publicRuntimeConfig: {
     TINLAKE_ADDRESSES: process.env.TINLAKE_ADDRESSES,

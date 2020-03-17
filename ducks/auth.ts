@@ -1,7 +1,6 @@
 import { AnyAction, Action } from 'redux';
-import Tinlake, { Address } from 'tinlake';
+import Tinlake, { Address } from '../containers/Loan/Issue/node_modules/tinlake';
 import { ThunkAction } from 'redux-thunk';
-import config from '../config';
 import { networkIdToName } from '../utils/networkNameResolver';
 
 // Actions
@@ -12,11 +11,27 @@ const CLEAR_NETWORK = 'tinlake-ui/auth/CLEAR_NETWORK';
 const RECEIVE_NETWORK = 'tinlake-ui/auth/RECEIVE_NETWORK';
 const OBSERVING_AUTH_CHANGES = 'tinlake-ui/auth/OBSERVING_AUTH_CHANGES';
 
-const { isDemo } = config;
-
 export interface User {
-  isAdmin: boolean;
   address: Address;
+  permissions: Permissions;
+}
+
+export interface Permissions {
+  // loan admin permissions
+  canIssueLoan: boolean;
+  canSetCeiling: boolean;
+  canSetInterestRate: boolean;
+  // tranche admin permissions
+  canSetEquityRatio: boolean;
+  canSetRiskScore: boolean;
+  canSetSeniorTrancheInterestRate: boolean;
+  // lender admin permissions
+  canSetInvestorAllowanceJunior: boolean;
+  // collector permissions
+  canSetThreshold: boolean;
+  canSetLoanPrice: boolean;
+  canActAsKeeper: boolean;
+  ownerOf: Array<number>;
 }
 
 export interface AuthState {
@@ -49,7 +64,7 @@ export default function reducer(state: AuthState = initialState,
 
 // side effects, only as applicable
 // e.g. thunks, epics, etc
-export function loadUser(tinlake: Tinlake, address: Address):
+export function loadUser(tinlake: any, address: Address):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     const { auth } = getState();
@@ -65,16 +80,33 @@ export function loadUser(tinlake: Tinlake, address: Address):
     }
 
     // if user is already loaded, don't load again
-    if (auth.user && auth.user.address === address) {
+    if (auth.user && auth.user.address.toLowerCase() === address.toLowerCase()) {
       return;
     }
 
     dispatch({ type: LOAD });
 
+    const ceilingPermission = await tinlake.canSetCeiling(address)
+    const interestRatePermission = await tinlake.canSetInterestRate(address)
+    const thresholdPermission = await tinlake.canSetThreshold(address)
+    const loanPricePermission = await tinlake.canSetLoanPrice(address)
+    const equityRatioPermission = await tinlake.canSetEquityRatio(address)
+    const riskScorePermission = await tinlake.canSetRiskScore(address)
+    const investorAllowancePermissionJunior = await tinlake.canSetInvestorAllowanceJunior(address)
+
     const user = {
       address,
-      isAdmin: isDemo || (await tinlake.isAdmin(address))
-    };
+      permissions: {
+        canSetCeiling: ceilingPermission,
+        canSetInterestRate: interestRatePermission,
+        canSetThreshold: thresholdPermission,
+        canSetLoanPrice: loanPricePermission,
+        canSetEquityRatio: equityRatioPermission,
+        canSetRiskScore: riskScorePermission,
+        canSetInvestorAllowanceJunior: investorAllowancePermissionJunior
+        // TODO: canActAsKeeper
+      }
+    }
     dispatch({ user, type: RECEIVE });
   };
 }
@@ -101,7 +133,7 @@ export function loadNetwork(network: string):
 
 let providerChecks: number;
 
-export function observeAuthChanges(tinlake: Tinlake):
+export function observeAuthChanges(tinlake: any):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
 

@@ -1,17 +1,16 @@
 import * as React from 'react';
-import { InternalSingleLoan } from '../../ducks/loans';
 import { Text, Box, Heading, Paragraph } from 'grommet';
 import styled from 'styled-components';
 import Badge from '../Badge';
-import { NFT } from '../../ducks/nft';
+import { NFT } from '../../services/tinlake/actions';
 import NftDataField, { DisplayedField } from '../NftDataField';
 import config from '../../config';
 import { DisplayField } from '@centrifuge/axis-display-field';
-import { getNFTLink, getAddressLink, hexToInt } from '../../utils/etherscanLinkGenerator'
+import { getNFTLink, getAddressLink, hexToInt } from '../../utils/etherscanLinkGenerator';
 import { bnToHex } from 'tinlake';
 
 interface Props {
-  data: InternalSingleLoan | NFT;
+  data: NFT;
   authedAddr: string;
 }
 
@@ -39,29 +38,29 @@ class NftData extends React.Component<Props> {
       ...Array(nftDataFillersNeeded(nftDataDefinition.displayedFields.length)).keys()];
 
     return <NftDataContainer>
-      <Heading level="6" margin="none">NFT Data</Heading>
+      <Heading level="5" margin="none">NFT Data</Heading>
       <Box direction="row" gap="medium" margin={{ bottom: 'large', top: 'medium' }}>
         <Box basis={'1/4'} gap="medium">
-         <DisplayField   
+         <DisplayField
             label={'NFT ID'}
             copy={true}
             as={'span'}
             value={hexToInt(bnToHex(tokenId).toString())}
             link={{
-                href: getNFTLink(hexToInt(bnToHex(tokenId).toString()), contractAddresses["NFT_COLLATERAL"]),
-                target: '_blank',
+              href: getNFTLink(hexToInt(bnToHex(tokenId).toString()), contractAddresses['NFT_COLLATERAL']),
+              target: '_blank'
             }}
           />
         </Box>
         <Box basis={'1/4'} gap="medium">
-          <DisplayField  
-            label={'NFT Owner'} 
+          <DisplayField
+            label={'NFT Owner'}
             copy={true}
             as={'span'}
             value={nftOwner}
             link={{
-                href: getAddressLink(nftOwner),
-                target: '_blank',
+              href: getAddressLink(nftOwner),
+              target: '_blank'
             }}
             />
             {authedAddr === nftOwner &&

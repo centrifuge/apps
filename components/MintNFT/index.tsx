@@ -10,7 +10,7 @@ import { Spinner } from '@centrifuge/axis-spinner';
 import NumberInput from '../NumberInput';
 
 interface Props {
-  tinlake: Tinlake;
+  tinlake: any;
 }
 
 interface State {
@@ -43,15 +43,15 @@ class MintNFT extends React.Component<Props, State> {
   }
 
   mint = async () => {
-    const { referenceId, assetType, amount } = this.state;
+    const { referenceId, assetType, amount, tokenId } = this.state;
    
     {
       this.setState({ is: 'loading' });
       try {
         await authTinlake();
-        const base = displayToBase(baseToDisplay(amount, 2), 2)
+        const base = displayToBase(baseToDisplay(amount, 2), 2);
         const res = await this.props.tinlake.mintNFT(
-          this.props.tinlake.ethConfig.from, this.state.tokenId, referenceId, base, assetType);
+          this.props.tinlake.ethConfig.from, tokenId, referenceId, base, assetType);
         if (res.status === SUCCESS_STATUS && res.events[0].event.name === 'Transfer') {
           this.setState({ is: 'success' });
         } else {
@@ -82,11 +82,11 @@ class MintNFT extends React.Component<Props, State> {
           {is === 'success' && <Alert type="success">
             Successfully minted NFT for Token ID {tokenId}
             <p> 
-              <Link href={{ pathname: '/admin/whitelist-nft', query: { tokenId }}}>
-                <Anchor>Please proceed to whitelisting</Anchor> 
+              <Link href={{ pathname: `/loans/issue`, query: { tokenId }}}>
+                <Anchor>Please proceed to loan opening</Anchor> 
               </Link> your NFT.</p>
             <p> Your NFT ID will automatically be pasted in the respective field.</p>
-            <p>If you want to whitelist your NFT later, <b>please make sure to copy your Token ID!</b></p>
+            <p>If you want to open a loan, <b>please make sure to copy your Token ID!</b></p>
          </Alert>}
           {is === 'error' && <Alert type="error">
             <Text weight="bold">
@@ -99,9 +99,9 @@ class MintNFT extends React.Component<Props, State> {
              An NFT is an on-chain, digital representation of an underlying real-world asset, such as an invoice, a mortgage or music royalties.
             <p>In this demo, you can mint a test NFT reflecting an sample invoice worth USD 1.000 into your wallet. Please fill in a "NFT Reference" as a unique identifier for your invoice NFT below. Then proceed with Mint NFT.
               The NFT will be minted into your wallet and on the next screen you will be provided with the Token ID of this NFT.</p>
-           <b>Please store or copy this Token ID, as it will be used again to whitelist the NFT on Tinlake.</b>
-            <p>If you already have a token ID, <Link href={`/admin/whitelist-nft`}>
-              <Anchor>please proceed to whitelisting</Anchor></Link>.</p>
+           <b>Please store or copy this Token ID, as it will be used again to open a loan on Tinlake.</b>
+            <p>If you already have a token ID, <Link href={`/loans/issue`}>
+              <Anchor>please proceed to loan opening</Anchor></Link>.</p>
           </Alert>}
 
           <Box direction="row" gap="large" margin="medium">

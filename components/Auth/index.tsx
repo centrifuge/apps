@@ -1,24 +1,22 @@
 import * as React from 'react';
-import Tinlake, { Address } from 'tinlake';
 import { AuthState, loadUser, loadNetwork, observeAuthChanges } from '../../ducks/auth';
 import { connect } from 'react-redux';
 import { authTinlake } from '../../services/tinlake';
 
 interface ExtendedAuthState extends AuthState {
-  isAdmin: boolean;
   isAuthenticated: boolean;
   isAuthorized: boolean;
 }
 
 interface Props {
-  tinlake: Tinlake;
+  tinlake: any;
   waitForAuthentication?: boolean;
   waitForAuthorization?: boolean;
   render: (auth: ExtendedAuthState) => React.ReactElement | null | false;
   auth?: AuthState;
-  loadUser?: (tinlake: Tinlake, address: Address) => Promise<void>;
+  loadUser?: (tinlake: any, address: string) => Promise<void>;
   loadNetwork?: (network: string) => Promise<void>;
-  observeAuthChanges?: (tinlake: Tinlake) => Promise<void>;
+  observeAuthChanges?: (tinlake: any) => Promise<void>;
 }
 
 interface State {
@@ -49,7 +47,7 @@ class Auth extends React.Component<Props, State> {
       try {
         await authTinlake();
       } catch (e) {
-        console.log(`authentication failed with Error ${e}`)
+        console.log(`authentication failed with Error ${e}`);
       }
       if (this.isMounted) {
         this.setState({ isAuthenticating: false });
@@ -82,7 +80,6 @@ class Auth extends React.Component<Props, State> {
       ...auth!,
       isAuthenticated: !isAuthenticating,
       isAuthorized: !isAuthorizing,
-      isAdmin: !!auth!.user && auth!.user.isAdmin
     };
 
     return this.props.render(extendedAuthState);
