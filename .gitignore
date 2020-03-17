@@ -65,3 +65,10 @@ typings/
 
 # Rollup Plugin Typescript 2 cache
 .rpt2_cache
+
+# IDE files
+.DS_Store
+.idea/
+bin/.idea/
+src/.DS_Store
+

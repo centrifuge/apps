@@ -21,8 +21,10 @@ const lookup: { [fee: string]: string } = {};
  * @param fee Fee
  */
 export const feeToInterestRate = (fee: string|BN): string => {
-  // tslint:disable-next-line:no-parameter-reassignment
+
   if (typeof fee !== 'string' && typeof fee !== 'number') { fee = fee.toString(); }
+  
+  if ( fee.toString() === "0") { return fee.toString() }
 
   if (lookup[fee]) { return lookup[fee]; }
 
