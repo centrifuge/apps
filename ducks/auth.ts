@@ -1,5 +1,4 @@
 import { AnyAction, Action } from 'redux';
-import Tinlake, { Address } from '../containers/Loan/Issue/node_modules/tinlake';
 import { ThunkAction } from 'redux-thunk';
 import { networkIdToName } from '../utils/networkNameResolver';
 
@@ -12,7 +11,7 @@ const RECEIVE_NETWORK = 'tinlake-ui/auth/RECEIVE_NETWORK';
 const OBSERVING_AUTH_CHANGES = 'tinlake-ui/auth/OBSERVING_AUTH_CHANGES';
 
 export interface User {
-  address: Address;
+  address: string;
   permissions: Permissions;
 }
 
@@ -31,7 +30,6 @@ export interface Permissions {
   canSetThreshold: boolean;
   canSetLoanPrice: boolean;
   canActAsKeeper: boolean;
-  ownerOf: Array<number>;
 }
 
 export interface AuthState {
@@ -64,7 +62,7 @@ export default function reducer(state: AuthState = initialState,
 
 // side effects, only as applicable
 // e.g. thunks, epics, etc
-export function loadUser(tinlake: any, address: Address):
+export function loadUser(tinlake: any, address: string):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     const { auth } = getState();

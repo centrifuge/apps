@@ -49,7 +49,7 @@ class LoanList extends React.Component<Props> {
         {
           header: '', property: '', align: 'end',
           render: (l: Loan) => <div>
-            {(l.ownerOf).toString() === userAddress && <Badge text={'Me'} />}
+            {l.proxyOwner && (l.proxyOwner).toString() === userAddress && <Badge text={'Me'} />}
           </div>
         },
         {

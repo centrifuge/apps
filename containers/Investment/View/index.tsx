@@ -59,7 +59,6 @@ class InvestmentView extends React.Component<Props, State> {
 
     const investor = investments && investments.investor;
     const investorState = investments && investments.investorState
-
     const isJuniorAdmin = auth.user && auth.user.permissions.canSetInvestorAllowanceJunior;
     const isInvestor = (auth.user && investor) && (auth.user.address.toLowerCase() === investor.address.toLowerCase());
    

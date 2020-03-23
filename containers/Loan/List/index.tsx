@@ -38,7 +38,7 @@ class LoanList extends React.Component<Props> {
     let filteredLoans: Array<Loan> = [];
     const hasAdminPermissions = auth.user && ( auth.user.permissions.canSetInterestRate || auth.user.permissions.canSetCeiling);
     if (loans && loans.loans && loans.loansState === 'found' && auth.user) {
-      filteredLoans = hasAdminPermissions  ? loans.loans : loans.loans.filter(l => l.ownerOf === auth.user.address);
+      filteredLoans = hasAdminPermissions  ? loans.loans : loans.loans.filter(l => l.proxyOwner && (l.proxyOwner === auth.user.address));
     }
 
     return <Box>
