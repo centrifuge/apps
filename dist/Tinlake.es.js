@@ -34653,9 +34653,7 @@ function LenderActions(Base) {
                     }
                 });
             }); };
-            _this.existsSenior = function () {
-                return _this.contractAddresses["SENIOR_OPERATOR"] !== "0x0000000000000000000000000000000000000000";
-            };
+            // junior tranche functions
             _this.supplyJunior = function (currencyAmount) { return __awaiter(_this, void 0, void 0, function () {
                 var txHash;
                 return __generator(this, function (_a) {
@@ -34691,17 +34689,6 @@ function LenderActions(Base) {
                     }
                 });
             }); };
-            _this.getSeniorTokenBalance = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].balanceOf, [user])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0]];
-                    }
-                });
-            }); };
             _this.approveJuniorToken = function (usr, tokenAmount) { return __awaiter(_this, void 0, void 0, function () {
                 var txHash;
                 return __generator(this, function (_a) {
@@ -34711,6 +34698,78 @@ function LenderActions(Base) {
                             txHash = _a.sent();
                             console.log("[Currency.approve] txHash: " + txHash);
                             return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_TOKEN'].abi, this.transactionTimeout)];
+                    }
+                });
+            }); };
+            _this.getMaxSupplyAmountJunior = function (user) { return __awaiter(_this, void 0, void 0, function () {
+                var res;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_OPERATOR'].maxCurrency, [user])];
+                        case 1:
+                            res = _a.sent();
+                            return [2 /*return*/, res[0]];
+                    }
+                });
+            }); };
+            _this.getMaxRedeemAmountJunior = function (user) { return __awaiter(_this, void 0, void 0, function () {
+                var res;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_OPERATOR'].maxToken, [user])];
+                        case 1:
+                            res = _a.sent();
+                            return [2 /*return*/, res[0]];
+                    }
+                });
+            }); };
+            _this.getTokenPriceJunior = function () { return __awaiter(_this, void 0, void 0, function () {
+                var res;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].calcTokenPrice, [this.contractAddresses['JUNIOR']])];
+                        case 1:
+                            res = _a.sent();
+                            return [2 /*return*/, res[0]];
+                    }
+                });
+            }); };
+            // senior tranche functions
+            _this.existsSenior = function () {
+                return _this.contractAddresses['SENIOR_OPERATOR'] !== '0x0000000000000000000000000000000000000000';
+            };
+            _this.supplySenior = function (currencyAmount) { return __awaiter(_this, void 0, void 0, function () {
+                var txHash;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].supply, [currencyAmount, this.ethConfig])];
+                        case 1:
+                            txHash = _a.sent();
+                            console.log("[Supply] txHash: " + txHash);
+                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_OPERATOR'].abi, this.transactionTimeout)];
+                    }
+                });
+            }); };
+            _this.redeemSenior = function (tokenAmount) { return __awaiter(_this, void 0, void 0, function () {
+                var txHash;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].redeem, [tokenAmount, this.ethConfig])];
+                        case 1:
+                            txHash = _a.sent();
+                            console.log("[Redeem] txHash: " + txHash);
+                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_OPERATOR'].abi, this.transactionTimeout)];
+                    }
+                });
+            }); };
+            _this.getSeniorTokenBalance = function (user) { return __awaiter(_this, void 0, void 0, function () {
+                var res;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].balanceOf, [user])];
+                        case 1:
+                            res = _a.sent();
+                            return [2 /*return*/, res[0]];
                     }
                 });
             }); };
@@ -34726,33 +34785,11 @@ function LenderActions(Base) {
                     }
                 });
             }); };
-            _this.getMaxSupplyAmountJunior = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts["JUNIOR_OPERATOR"].maxCurrency, [user])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0]];
-                    }
-                });
-            }); };
             _this.getMaxSupplyAmountSenior = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts["SENIOR_OPERATOR"].maxCurrency, [user])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0]];
-                    }
-                });
-            }); };
-            _this.getMaxRedeemAmountJunior = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts["JUNIOR_OPERATOR"].maxToken, [user])];
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxCurrency, [user])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0]];
@@ -34763,24 +34800,25 @@ function LenderActions(Base) {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts["SENIOR_OPERATOR"].maxToken, [user])];
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxToken, [user])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0]];
                     }
                 });
             }); };
-            _this.getTokenPriceJunior = function () { return __awaiter(_this, void 0, void 0, function () {
+            _this.getTokenPriceSenior = function () { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts["ASSESSOR"].calcTokenPrice, [this.contractAddresses["JUNIOR"]])];
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].calcTokenPrice, [this.contractAddresses['SENIOR']])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0]];
                     }
                 });
             }); };
+            // general lender functions
             _this.balance = function () { return __awaiter(_this, void 0, void 0, function () {
                 var txHash;
                 return __generator(this, function (_a) {

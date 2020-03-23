@@ -5,18 +5,21 @@ declare function LenderActions<ActionBase extends Constructor<Tinlake>>(Base: Ac
         contracts: Contracts;
         ethConfig: EthConfig;
         getInvestor: (user: string) => Promise<Investor>;
-        existsSenior: () => boolean;
         supplyJunior: (currencyAmount: string) => Promise<unknown>;
         redeemJunior: (tokenAmount: string) => Promise<unknown>;
         getJuniorTokenBalance: (user: string) => Promise<BN>;
-        getSeniorTokenBalance: (user: string) => Promise<BN>;
         approveJuniorToken: (usr: string, tokenAmount: string) => Promise<unknown>;
-        approveSeniorToken: (usr: string, tokenAmount: string) => Promise<unknown>;
         getMaxSupplyAmountJunior: (user: string) => Promise<BN>;
-        getMaxSupplyAmountSenior: (user: string) => Promise<BN>;
         getMaxRedeemAmountJunior: (user: string) => Promise<any>;
-        getMaxRedeemAmountSenior: (user: string) => Promise<any>;
         getTokenPriceJunior: () => Promise<any>;
+        existsSenior: () => boolean;
+        supplySenior: (currencyAmount: string) => Promise<unknown>;
+        redeemSenior: (tokenAmount: string) => Promise<unknown>;
+        getSeniorTokenBalance: (user: string) => Promise<BN>;
+        approveSeniorToken: (usr: string, tokenAmount: string) => Promise<unknown>;
+        getMaxSupplyAmountSenior: (user: string) => Promise<BN>;
+        getMaxRedeemAmountSenior: (user: string) => Promise<any>;
+        getTokenPriceSenior: () => Promise<any>;
         balance: () => Promise<unknown>;
         provider: any;
         eth: import("../types").ethI;
@@ -29,6 +32,8 @@ declare function LenderActions<ActionBase extends Constructor<Tinlake>>(Base: Ac
 export declare type ILenderActions = {
     supplyJunior(currencyAmount: string): Promise<any>;
     redeemJunior(tokenAmount: string): Promise<any>;
+    supplySenior(currencyAmount: string): Promise<any>;
+    redeemSenior(tokenAmount: string): Promise<any>;
     getJuniorTokenBalance(user: string): Promise<BN>;
     getSeniorTokenBalance(user: string): Promise<BN>;
     getMaxSupplyAmountJunior(user: string): Promise<BN>;
@@ -36,6 +41,7 @@ export declare type ILenderActions = {
     getMaxSupplyAmountSenior(user: string): Promise<BN>;
     getMaxRedeemAmountSenior(user: string): Promise<BN>;
     getTokenPriceJunior(): Promise<BN>;
+    getTokenPriceSenior(): Promise<BN>;
     getInvestor(user: string): Promise<Investor>;
     balance(): Promise<any>;
 };
