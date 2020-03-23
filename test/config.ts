@@ -9,14 +9,15 @@ const testConfig = {
     privateKey: '0xb2e0c8e791c37df214808cdadc187f0cba0e36160f1a38b321a25c9a0cea8c11',
   },
   transactionTimeout: 50000,
-  gasLimit: "70000000",
+  gasPrice: 5000000,
+  gasLimit: 2500000000,
   rpcUrl: 'http://127.0.0.1:8545',
   contractAddresses,
   contractAbis: abiDefinitions,
   nftDataContractCall,
   SUCCESS_STATUS: '0x1',
   FAIL_STATUS: '0x0',
-  FAUCET_AMOUNT: '200000000000000000000'
+  FAUCET_AMOUNT: '200000000000000000000',
 };
 
 export default testConfig;

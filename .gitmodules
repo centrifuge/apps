@@ -2,3 +2,13 @@
 	path = tinlake
 	url = https://github.com/centrifuge/tinlake
 	branch = develop
+
+[submodule "tinlake-proxy"]
+	path = tinlake-proxy
+	url = https://github.com/centrifuge/tinlake-proxy
+	branch = master
+
+[submodule "tinlake-actions"]
+	path = tinlake-actions
+	url = https://github.com/centrifuge/tinlake-actions
+	branch = master

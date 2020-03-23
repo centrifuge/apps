@@ -2,6 +2,7 @@ import { Constructor, Tinlake } from '../types';
 declare function BorrowerActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase): {
     new (...args: any[]): {
         issue: (registry: string, tokenId: string) => Promise<unknown>;
+        nftLookup: (registry: string, tokenId: string) => Promise<any>;
         lock: (loan: string) => Promise<unknown>;
         unlock: (loan: string) => Promise<unknown>;
         close: (loan: string) => Promise<unknown>;
@@ -20,6 +21,7 @@ declare function BorrowerActions<ActionsBase extends Constructor<Tinlake>>(Base:
 } & ActionsBase;
 export declare type IBorrowerActions = {
     issue(registry: string, tokenId: string): Promise<any>;
+    nftLookup(registry: string, tokenId: string): Promise<any>;
     lock(loan: string): Promise<any>;
     unlock(loan: string): Promise<any>;
     close(loan: string): Promise<any>;

@@ -49,9 +49,9 @@ export function createTinlake(usr: Account, testConfig: any) {
         contractAddresses,
         nftDataContractCall.outputs,
         transactionTimeout,
-      {
-        ethConfig: { from: usr.address, gasLimit: `0x${gasLimit.toString(16)}` },
-      },
+        {
+      ethConfig: { from: usr.address, gasLimit: `0x${gasLimit.toString(16)}` },
+    },
     );
 
   return tinlake;
@@ -59,8 +59,8 @@ export function createTinlake(usr: Account, testConfig: any) {
 
 function createSignerProvider(rpcUrl: string, usr: Account) {
   return new SignerProvider(rpcUrl, {
-      signTransaction: (rawTx: any, cb: (arg0: null, arg1: any) => void) =>
+    signTransaction: (rawTx: any, cb: (arg0: null, arg1: any) => void) =>
           cb(null, sign(rawTx, usr.privateKey)),
-      accounts: (cb: (arg0: null, arg1: string[]) => void) => cb(null, [usr.address]),
-    });
+    accounts: (cb: (arg0: null, arg1: string[]) => void) => cb(null, [usr.address]),
+  });
 }

@@ -11,13 +11,14 @@
   "dependencies": {
     "bignumber.js": "^9.0.0",
     "decimal.js-light": "^2.5.0",
+    "ethers": "^4.0.45",
     "ethjs": "^0.4.0",
     "ethjs-account": "^0.1.4",
     "ethjs-provider-signer": "^0.1.4",
     "ethjs-signer": "^0.1.1",
     "mocha": "^6.1.4",
     "randomstring": "^1.1.5",
-    "web3-eth-abi": "^1.0.0-beta.55",
+    "web3-eth-abi": "^1.2.6",
     "web3-utils": "^1.2.0"
   },
   "devDependencies": {

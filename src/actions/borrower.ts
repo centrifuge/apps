@@ -1,5 +1,6 @@
 import { Constructor, Tinlake  } from '../types';
 import { waitAndReturnEvents, executeAndRetry } from '../ethereum';
+import { ethers } from 'ethers';
 import BN from 'bn.js';
 
 function BorrowerActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
@@ -7,8 +8,15 @@ function BorrowerActions<ActionsBase extends Constructor<Tinlake>>(Base: Actions
 
     issue = async (registry: string, tokenId: string) => {
       const txHash = await executeAndRetry(this.contracts['SHELF'].issue, [registry, tokenId, this.ethConfig]);
-      console.log(`[Mint NFT] txHash: ${txHash}`);
+      console.log(`[Issue Loan] txHash: ${txHash}`);
       return waitAndReturnEvents(this.eth, txHash, this.contracts['SHELF'].abi, this.transactionTimeout);
+    }
+
+    nftLookup = async (registry: string, tokenId: string) => {
+      const nft = ethers.utils.solidityKeccak256(['address', 'uint'], [registry, tokenId]);
+      console.log('NFT Look Up]');
+      const res = await executeAndRetry(this.contracts['SHELF'].nftlookup, [nft, this.ethConfig]);
+      return res[0].toString();
     }
 
     lock = async (loan: string) => {
@@ -51,6 +59,7 @@ function BorrowerActions<ActionsBase extends Constructor<Tinlake>>(Base: Actions
 
 export type IBorrowerActions = {
   issue(registry: string, tokenId: string): Promise<any>,
+  nftLookup(registry: string, tokenId: string): Promise<any>,
   lock(loan: string): Promise<any>,
   unlock(loan: string): Promise<any>,
   close(loan: string): Promise<any>,
