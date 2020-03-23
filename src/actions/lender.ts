@@ -138,6 +138,7 @@ function LenderActions<ActionBase extends Constructor<Tinlake>>(Base: ActionBase
 }
 
 export type ILenderActions = {
+  existsSenior(): boolean,
   supplyJunior(currencyAmount: string): Promise<any>,
   redeemJunior(tokenAmount: string): Promise<any>,
   supplySenior(currencyAmount: string): Promise<any>,
