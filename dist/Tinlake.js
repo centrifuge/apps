@@ -29548,7 +29548,7 @@ var hmac_2 = hmac.computeHmac;
 var _args = [
   [
     "elliptic@6.5.2",
-    "/Users/ilinzweilin/Desktop/lock/tinlake.js"
+    "/Users/ilinzweilin/Desktop/tinlake.js"
   ]
 ];
 var _from = "elliptic@6.5.2";
@@ -29573,7 +29573,7 @@ var _requiredBy = [
 ];
 var _resolved = "https://registry.npmjs.org/elliptic/-/elliptic-6.5.2.tgz";
 var _spec = "6.5.2";
-var _where = "/Users/ilinzweilin/Desktop/lock/tinlake.js";
+var _where = "/Users/ilinzweilin/Desktop/tinlake.js";
 var author = {
   name: "Fedor Indutny",
   email: "fedor@indutny.com"
