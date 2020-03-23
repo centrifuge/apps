@@ -3,19 +3,20 @@ const account = require('ethjs-account');
 const randomString = require('randomstring');
 import testConfig from '../../test/config';
 import { ITinlake } from '../Tinlake';
-import { createTinlake, TestProvider} from '../../test/utils';
+import { createTinlake, TestProvider } from '../../test/utils';
+import { Account } from '../../test/types';
 
 const adminAccount = account.generate(randomString.generate(32));
-let borrowerAccount;
+let borrowerAccount: Account;
 
 // user with super powers can fund and rely accounts
 const governanceTinlake = createTinlake(testConfig.godAccount, testConfig);
 const adminTinlake = createTinlake(adminAccount, testConfig);
-let borrowerTinlake;
+let borrowerTinlake: ITinlake;
 
 const testProvider = new TestProvider(testConfig);
 
-const { SUCCESS_STATUS, FAUCET_AMOUNT, contractAddresses} = testConfig
+const { SUCCESS_STATUS, FAUCET_AMOUNT, contractAddresses } = testConfig;
 
 describe('borrower tests', async () => {
 
@@ -31,7 +32,7 @@ describe('borrower tests', async () => {
     borrowerAccount = account.generate(randomString.generate(32));
     borrowerTinlake = createTinlake(borrowerAccount, testConfig);
     await testProvider.fundAccountWithETH(borrowerAccount.address, FAUCET_AMOUNT);
-  })
+  });
 
   it('success: issue loan from a minted collateral NFT', async () => {
     await mintIssue(borrowerAccount.address, borrowerTinlake);
@@ -46,18 +47,18 @@ describe('borrower tests', async () => {
   it('success: lock nft', async () => {
     // mint nft & issue loan
     const { tokenId, loanId } = await mintIssue(borrowerAccount.address, borrowerTinlake);
-    await borrowerTinlake.approveNFT(tokenId, contractAddresses["SHELF"]);
-   
+    await borrowerTinlake.approveNFT(tokenId, contractAddresses['SHELF']);
+
     // lock nft
     await borrowerTinlake.lock(loanId);
-    assert.equal(await borrowerTinlake.getNFTOwner(tokenId), contractAddresses["SHELF"]);
+    assert.equal(await borrowerTinlake.getNFTOwner(tokenId), contractAddresses['SHELF']);
   });
 
   it('success: unlock nft', async () => {
-    // mint nft & issue loan 
+    // mint nft & issue loan
     const { tokenId, loanId } = await mintIssue(borrowerAccount.address, borrowerTinlake);
-    await borrowerTinlake.approveNFT(tokenId, contractAddresses["SHELF"]);
-    
+    await borrowerTinlake.approveNFT(tokenId, contractAddresses['SHELF']);
+
     // lock nft
     await borrowerTinlake.lock(loanId);
 
@@ -67,7 +68,7 @@ describe('borrower tests', async () => {
 
   it('success: borrow', async () => {
     const amount = '1000';
-     await mintIssueBorrow(borrowerAccount.address, borrowerTinlake, amount);
+    await mintIssueBorrow(borrowerAccount.address, borrowerTinlake, amount);
   });
 
   it('success: repay', async () => {
@@ -77,7 +78,6 @@ describe('borrower tests', async () => {
     await new Promise(r => setTimeout(r, 3000));
     // mint extra currency so that borrower can repay loan with interest
     await governanceTinlake.mintCurrency(borrowerAccount.address, FAUCET_AMOUNT);
-    
     // repay loan
     const initialDebt = await borrowerTinlake.getDebt(loanId);
     // approve shelf to take currency
@@ -87,20 +87,18 @@ describe('borrower tests', async () => {
 
     assert.equal(newDebt.toNumber(), 0);
     assert.equal(repayResult.status, SUCCESS_STATUS);
-  })
+  });
 });
 
 async function mintIssue(usr: string, tinlake: ITinlake) {
   // super user mints nft for borrower
-  const mintResult : any = await governanceTinlake.mintTitleNFT(usr);
-  const tokenId = mintResult.events[0].data[2].toString();
-  // assert nft successfully minted
-  assert.equal(mintResult.status, SUCCESS_STATUS);
+  const tokenId : any = await governanceTinlake.mintTitleNFT(usr);
+  assert(tokenId);
   // assert usr = nftOwner
   const nftOwner = `${await tinlake.getNFTOwner(tokenId)}`;
   assert.equal(nftOwner.toLowerCase(), usr.toLowerCase());
 
-  const issueResult : any = await tinlake.issue(contractAddresses["COLLATERAL_NFT"], tokenId);
+  const issueResult : any = await tinlake.issue(contractAddresses['COLLATERAL_NFT'], tokenId);
   const loanId = `${(await tinlake.loanCount()).toNumber() - 1}`;
   // assert loan successfully issued
   assert.equal(issueResult.status, SUCCESS_STATUS);
@@ -111,14 +109,14 @@ async function mintIssue(usr: string, tinlake: ITinlake) {
   return { tokenId: `${tokenId}`, loanId : `${loanId}` };
 }
 
-async function mintIssueBorrow (usr: string, tinlake: ITinlake, amount: string) {
+async function mintIssueBorrow(usr: string, tinlake: ITinlake, amount: string) {
   const { tokenId, loanId } = await mintIssue(usr, tinlake);
   // approve shelf to take nft
-  await borrowerTinlake.approveNFT(tokenId, contractAddresses["SHELF"]);
+  await borrowerTinlake.approveNFT(tokenId, contractAddresses['SHELF']);
   // lock nft
   await borrowerTinlake.lock(loanId);
   // admin sets ceiling
-  await governanceTinlake.relyAddress(adminAccount.address, contractAddresses["CEILING"]);
+  await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['CEILING']);
   await adminTinlake.setCeiling(loanId, amount);
 
   const initialBorrowerCurrencyBalance = await borrowerTinlake.getCurrencyBalance(borrowerAccount.address);
@@ -131,8 +129,8 @@ async function mintIssueBorrow (usr: string, tinlake: ITinlake, amount: string) 
   assert.equal(initialBorrowerCurrencyBalance.toNumber() + amount, newBorrowerCurrencyBalance.toNumber());
   assert.equal(borrowResult.status, SUCCESS_STATUS);
   assert.equal(withdrawResult.status, SUCCESS_STATUS);
-  
-  return { tokenId, loanId }
+
+  return { tokenId, loanId };
 }
 
 async function fundTranche(amount: string) {
@@ -141,7 +139,7 @@ async function fundTranche(amount: string) {
   // fund lender accoutn with eth
   await testProvider.fundAccountWithETH(lenderAccount.address, FAUCET_AMOUNT);
   // make admin adress ward on tranche operator
-  await governanceTinlake.relyAddress(adminAccount.address, contractAddresses["JUNIOR_OPERATOR"]);
+  await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['JUNIOR_OPERATOR']);
   // whitelist lender
   await adminTinlake.approveAllowanceJunior(lenderAccount.address, amount, amount);
   // lender approves tranche to take currency

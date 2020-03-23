@@ -5,16 +5,18 @@ import Currency, { ICurrencyActions } from './currency';
 import Collateral, { ICollateralActions } from './collateral';
 import Analytics, { IAnalyticsActions } from './analytics';
 import Governance, { IGovernanceActions } from './governance';
+import Proxy, { IProxyActions } from './proxy';
 
 export default {
-    Admin,
-    Borrower,
-    Lender,
-    Currency,
-    Collateral,
-    Analytics,
-    Governance
-}
+  Admin,
+  Borrower,
+  Lender,
+  Currency,
+  Collateral,
+  Analytics,
+  Governance,
+  Proxy,
+};
 
 export type TinlakeActions =
     IAdminActions &
@@ -23,4 +25,6 @@ export type TinlakeActions =
     ICurrencyActions &
     ILenderActions &
     IAnalyticsActions &
-    IGovernanceActions;
+    ICollateralActions &
+    IGovernanceActions &
+    IProxyActions;

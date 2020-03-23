@@ -1,5 +1,4 @@
 import testConfig from '../../test/config';
-import { ITinlake } from '../Tinlake';
 import { createTinlake, TestProvider} from '../../test/utils';
 
 
@@ -18,7 +17,7 @@ describe.only('setup', async () => {
     const currencyAmount = '1000000000000000000000000000000000000';
 
     await setupTestAccounts(adminAddress, lenderAddress, borrowerAddress, ethAmount, currencyAmount);
-    for (let i = 0; i<5; i++) {
+    for (let i = 5; i<15; i++) {
        await governanceTinlake.mintTitleNFT(borrowerAddress);
      }
   });

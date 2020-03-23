@@ -61,7 +61,7 @@ describe('admin tests', async () => {
       const allowanceResult: any = await adminTinlake.approveAllowanceJunior(lenderAccount.address, maxCurrency, maxToken);
 
       const maxSupplyAmount = await adminTinlake.getMaxSupplyAmountJunior(lenderAccount.address);
-      const maxRedeemAmount = await adminTinlake.getMaxRedeemAmount(lenderAccount.address);
+      const maxRedeemAmount = await adminTinlake.getMaxRedeemAmountJunior(lenderAccount.address);
       assert.equal(allowanceResult.status, testConfig.SUCCESS_STATUS);
       assert.equal(maxRedeemAmount, maxToken);
       assert.equal(maxSupplyAmount, maxCurrency);

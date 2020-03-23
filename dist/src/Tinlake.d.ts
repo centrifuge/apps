@@ -18,7 +18,30 @@ export declare class Tinlake {
 }
 declare const TinlakeWithActions: {
     new (...args: any[]): {
+        getProxyAccessTokenOwner: (tokenId: string) => Promise<BN>;
+        buildProxy: (owner: string) => Promise<any>;
+        getProxy: (accessTokenId: string) => Promise<any>;
+        getProxyAccessToken: (proxyAddr: string) => Promise<any>;
+        getProxyOwnerByLoan: (loanId: string) => Promise<BN>;
+        proxyCount: () => Promise<BN>;
+        checkProxyExists: (address: string) => Promise<string | null>;
+        proxyCreateNew: (address: string) => Promise<any>;
+        proxyTransferIssue: (proxyAddr: string, tokenId: string) => Promise<unknown>;
+        proxyLockBorrowWithdraw: (proxyAddr: string, loanId: string, amount: string, usr: string) => Promise<unknown>;
+        proxyRepayUnlockClose: (proxyAddr: string, tokenId: string, loanId: string) => Promise<unknown>;
+        provider: any;
+        eth: ethI;
+        ethOptions: any;
+        ethConfig: any;
+        contractAddresses: ContractAddresses;
+        transactionTimeout: number;
+        contracts: Contracts;
+        contractAbis: ContractAbis;
+    };
+} & {
+    new (...args: any[]): {
         issue: (registry: string, tokenId: string) => Promise<unknown>;
+        nftLookup: (registry: string, tokenId: string) => Promise<any>;
         lock: (loan: string) => Promise<unknown>;
         unlock: (loan: string) => Promise<unknown>;
         close: (loan: string) => Promise<unknown>;
@@ -128,11 +151,13 @@ declare const TinlakeWithActions: {
     };
 } & {
     new (...args: any[]): {
-        mintTitleNFT: (user: string) => Promise<unknown>;
+        mintTitleNFT: (user: string) => Promise<any>;
         mintNFT: (owner: string, tokenId: string, ref: string, amount: string, asset: string) => Promise<unknown>;
         approveNFT: (tokenId: string, to: string) => Promise<unknown>;
         getNFTCount: () => Promise<BN>;
         getNFTData: (tokenId: string) => Promise<any>;
+        getNFTOwner: (tokenId: string) => Promise<BN>;
+        transferNFT: (from: string, to: string, tokenId: string) => Promise<unknown>;
         provider: any;
         eth: ethI;
         ethOptions: any;

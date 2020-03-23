@@ -1,7 +1,6 @@
 import { ethI } from './types';
-import { AbiCoder } from 'web3-eth-abi';
+const abiCoder = require('web3-eth-abi');
 import { sha3 } from 'web3-utils';
-const abiCoder = new AbiCoder();
 // tslint:disable-next-line:prefer-array-literal
 export async function executeAndRetry(f: Function, args: Array<any> = []) : Promise<any> {
   try {
@@ -110,3 +109,5 @@ const getEvents = (receipt: {
   });
   return events;
 };
+
+

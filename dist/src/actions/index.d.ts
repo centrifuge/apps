@@ -2,9 +2,10 @@ import Admin, { IAdminActions } from './admin';
 import Borrower, { IBorrowerActions } from './borrower';
 import Lender, { ILenderActions } from './lender';
 import Currency, { ICurrencyActions } from './currency';
-import Collateral from './collateral';
+import Collateral, { ICollateralActions } from './collateral';
 import Analytics, { IAnalyticsActions } from './analytics';
 import Governance, { IGovernanceActions } from './governance';
+import Proxy, { IProxyActions } from './proxy';
 declare const _default: {
     Admin: typeof Admin;
     Borrower: typeof Borrower;
@@ -13,6 +14,7 @@ declare const _default: {
     Collateral: typeof Collateral;
     Analytics: typeof Analytics;
     Governance: typeof Governance;
+    Proxy: typeof Proxy;
 };
 export default _default;
-export declare type TinlakeActions = IAdminActions & IBorrowerActions & ILenderActions & ICurrencyActions & ILenderActions & IAnalyticsActions & IGovernanceActions;
+export declare type TinlakeActions = IAdminActions & IBorrowerActions & ILenderActions & ICurrencyActions & ILenderActions & IAnalyticsActions & ICollateralActions & IGovernanceActions & IProxyActions;

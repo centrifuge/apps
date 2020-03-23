@@ -52,8 +52,11 @@ export const contractNames = [
   'THRESHOLD',
   'PRICE_POOL',
   'COLLATERAL_NFT',
-  'ROOT_CONTRACT',
   'COLLATERAL_NFT_DATA',
+  'ROOT_CONTRACT',
+  'PROXY',
+  'PROXY_REGISTRY',
+  'ACTIONS',
 ];
 
 export type ContractNames = typeof contractNames[number];
