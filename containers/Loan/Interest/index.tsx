@@ -48,15 +48,15 @@ class LoanInterest extends React.Component<Props, State> {
     const { interestRate } = this.state;
     return <Box basis={'1/4'} gap="medium" margin={{ right: "large" }}>
       <Box gap="medium">
-        <FormField label="Interest Rate (APR)">
+        <FormField label="Annual interest rate (APR)">
           <NumberInput value={interestRate} suffix=" %"
             onValueChange={({ value }) =>
               this.setState({ interestRate: value })}
-          />  
+          />
         </FormField>
       </Box>
       <Box align="start">
-        <Button onClick={this.setInterestRate} primary label="Set interest rate"/>
+        <Button onClick={this.setInterestRate} primary label="Set Annual Interest Rate (APR)")/>
       </Box>
     </Box>;
   }
