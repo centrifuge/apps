@@ -35,6 +35,10 @@ class InvestmentView extends React.Component<Props, State> {
     this.props.resetTransactionState && this.props.resetTransactionState();
 
     this.setState({ is: null, errorMsg: '' });
+    if (investorAddress === '' || investorAddress !== '' && !isValidAddress(investorAddress)) {
+      this.setState({ is: 'error', errorMsg: 'Please input a valid Ethereum address.' });
+      return;
+    }
     this.props.loadInvestor(this.props.tinlake, investorAddress);
   }
 
