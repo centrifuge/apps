@@ -30,7 +30,7 @@ export const feeToInterestRate = (fee: string|BN): string => {
 
   const i = new Decimal(fee).div('1e27').pow(n);
 
-  const interestRate = i.minus(1).mul(100).toSignificantDigits(2);
+  const interestRate = i.minus(1).mul(100);
 
   const interestRateString = interestRate.toString();
 
