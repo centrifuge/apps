@@ -35,7 +35,7 @@ class InvestmentView extends React.Component<Props, State> {
     this.props.resetTransactionState && this.props.resetTransactionState();
 
     this.setState({ is: null, errorMsg: '' });
-    if (investorAddress === '' || investorAddress !== '' && !isValidAddress(investorAddress)) {
+    if (!isValidAddress(investorAddress)) {
       this.setState({ is: 'error', errorMsg: 'Please input a valid Ethereum address.' });
       return;
     }
@@ -109,7 +109,7 @@ class InvestmentView extends React.Component<Props, State> {
             </FormField>
           </Box>
           <Box gap="medium" align="end">
-            <Button onClick={this.showInvestor} primary label="Load investor details" disabled={is === 'loading' || !isValidAddress(investorAddress)} />
+            <Button onClick={this.showInvestor} primary label="Load investor details" disabled={is === 'loading' || investorAddress === '' || !isValidAddress(investorAddress)} />
           </Box>
         </Box>
       </Box>
