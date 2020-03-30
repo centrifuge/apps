@@ -1,7 +1,6 @@
 import { AnyAction, Action } from 'redux';
-import BN from 'bn.js';
 import { ThunkAction } from 'redux-thunk';
-import { getAnalytics, TinlakeResult } from '../services/tinlake/actions'
+import { getAnalytics, TinlakeResult, Tranche } from '../services/tinlake/actions'
 
 // Actions
 const LOAD_ANALYTICS = 'tinlake-ui/analytics/LOAD_ANALYTICS';
@@ -10,9 +9,8 @@ const RECEIVE_ANALYTICS = 'tinlake-ui/analytics/RECEIVE_ANALYTICS';
 export interface AnalyticsState {
   state: null | 'loading' | 'found';
   data: null | {
-    availableFunds: BN
-    // loanCount: BN;
-    // totalDebt: BN;
+    junior: Tranche,
+    senior?: Tranche
   };
 }
 

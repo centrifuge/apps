@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Tinlake, { bnToHex, baseToDisplay, feeToInterestRate } from 'tinlake';
+import{ bnToHex, baseToDisplay, feeToInterestRate } from 'tinlake';
 import Link from 'next/link';
 import { Box, DataTable, Anchor, Text } from 'grommet';
 import { Loan } from '../../../services/tinlake/actions';

@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { bnToHex, interestRateToFee } from 'tinlake';
+import { interestRateToFee } from 'tinlake';
 import config from '../../config';
 
 const { contractAddresses } = config;
@@ -42,6 +42,13 @@ export interface TinlakeResult {
   errorMsg?: string,
   tokenId?: string,
   loanId?: string
+}
+
+export interface Tranche {
+  availableFunds: BN, 
+  tokenPrice: BN,
+  type: string,
+  token: string
 }
 
 export async function getNFT(tinlake: any, tokenId: string) {
@@ -224,12 +231,14 @@ export async function setInterest(tinlake: any, loanId: string, debt: string, ra
 
 export async function getAnalytics(tinlake: any) {
   try {
-    const availableFunds = await tinlake.getTrancheBalance();
-    const tokenPriceJunior = await tinlake.getTokenPriceJunior();
     return {
       data: {
-        availableFunds,
-        tokenPriceJunior
+        junior: {
+          type: "Junior",
+          availableFunds: await tinlake.getTrancheBalance(),
+          tokenPrice: await tinlake.getTokenPriceJunior(),
+          token: "TIN"
+        }
       }
     }
   } catch(e) {
@@ -265,7 +274,6 @@ export async function borrow(tinlake: any, loan: Loan, amount: string) {
 // repay full loan debt
 export async function repay(tinlake: any, loan: Loan) {
   const { loanId } = loan;
-  const address = tinlake.ethConfig.from;
   const proxy = loan.ownerOf;
   // user entrie user balance as repay amount to make sure that enough funds are provided to cover the entire debt
   const approvalAmount  = await tinlake.getCurrencyBalance(tinlake.ethConfig.from);

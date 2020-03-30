@@ -5,6 +5,7 @@ import { Investor, supplyJunior } from '../../../services/tinlake/actions';
 import { transactionSubmitted, responseReceived } from '../../../ducks/transactions';
 import { baseToDisplay, displayToBase } from 'tinlake';
 import { loadInvestor } from '../../../ducks/investments';
+import { loadAnalyticsData } from '../../../ducks/analytics';
 import { connect } from 'react-redux';
 import { authTinlake } from '../../../services/tinlake';
 import BN from 'bn.js';
@@ -13,6 +14,7 @@ interface Props {
   investor: Investor;
   tinlake: any;
   loadInvestor?: (tinlake: any, address: string, refresh?: boolean) => Promise<void>;
+  loadAnalyticsData?: (tinlake: any) => Promise<void>;
   transactionSubmitted?: (loadingMessage: string) => Promise<void>;
   responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>;
 }
@@ -29,7 +31,8 @@ class InvestorSupply extends React.Component<Props, State> {
   }
 
   supplyJunior = async () => {
-    this.props.transactionSubmitted && this.props.transactionSubmitted("Investment initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.");
+    const { transactionSubmitted, responseReceived, tinlake, investor, loadInvestor, loadAnalyticsData } = this.props;
+    transactionSubmitted && transactionSubmitted("Investment initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.");
     try {
       await authTinlake();
       const { supplyAmount } = this.state;
@@ -37,13 +40,14 @@ class InvestorSupply extends React.Component<Props, State> {
      
       const res = await supplyJunior(tinlake, supplyAmount);
       if (res && res.errorMsg) {
-        this.props.responseReceived && this.props.responseReceived(null, `Investment failed. ${res.errorMsg}`);
+        responseReceived && responseReceived(null, `Investment failed. ${res.errorMsg}`);
         return;
       }
-      this.props.responseReceived && this.props.responseReceived(`Investment successful. Please check your wallet for TIN tokens.`, null);
-      this.props.loadInvestor && this.props.loadInvestor(tinlake, investor.address);
+      responseReceived && responseReceived(`Investment successful. Please check your wallet for TIN tokens.`, null);
+      loadInvestor && loadInvestor(tinlake, investor.address);
+      loadAnalyticsData && loadAnalyticsData(tinlake);
     } catch (e) {
-      this.props.responseReceived && this.props.responseReceived(null, `Investment failed. ${e}`);
+      responseReceived && responseReceived(null, `Investment failed. ${e}`);
       console.log(e);
     }
   }
@@ -80,4 +84,4 @@ class InvestorSupply extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadInvestor, transactionSubmitted, responseReceived })(InvestorSupply);
+export default connect(state => state, { loadInvestor, loadAnalyticsData, transactionSubmitted, responseReceived })(InvestorSupply);

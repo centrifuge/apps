@@ -30,7 +30,7 @@ class LoanList extends React.Component<Props> {
 
   render() {
     const { loans, analytics, auth, tinlake: { ethConfig: { from: ethFrom } } } = this.props;
-    const availableFunds = analytics && analytics.data && analytics.data.availableFunds || 0;
+    const availableFunds = analytics && analytics.data && analytics.data.junior && analytics.data.junior.availableFunds || 0;
     if (loans!.loansState === 'loading') {
       return <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />;
     }

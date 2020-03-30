@@ -31,18 +31,18 @@ class LoanRepay extends React.Component<Props, State> {
     try {
       await authTinlake();
       const { repayAmount } = this.state;
-      const { loan, tinlake } = this.props;
+      const { transactionSubmitted, responseReceived, loadLoan, loan, tinlake } = this.props;
       // support partial repay later
-      this.props.transactionSubmitted && this.props.transactionSubmitted("Repayment initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.");
+      transactionSubmitted && transactionSubmitted("Repayment initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.");
       const res = await repay(tinlake, loan);
-      if (res && res.errorMs) {
-        this.props.responseReceived && this.props.responseReceived(null, `Repayment failed. ${res.errorMsg}`);
+      if (res && res.errorMsg) {
+        responseReceived && responseReceived(null, `Repayment failed. ${res.errorMsg}`);
         return;
       }
-      this.props.responseReceived && this.props.responseReceived(`Repayment successful. Please check your wallet.`, null);
-      this.props.loadLoan && this.props.loadLoan(tinlake, loan.loanId);
+      responseReceived && responseReceived(`Repayment successful. Please check your wallet.`, null);
+      loadLoan && loadLoan(tinlake, loan.loanId);
     } catch (e) {
-      this.props.responseReceived && this.props.responseReceived(null, `Repayment failed. ${e}`);
+      responseReceived && responseReceived(null, `Repayment failed. ${e}`);
       console.log(e);
     }
   }

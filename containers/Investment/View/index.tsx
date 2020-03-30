@@ -10,7 +10,9 @@ import InvestorSupply from '../Supply';
 import InvestorRedeem from '../Redeem';
 import InvestorAllowance from '../Allowance';
 import InvestorMetric from '../../../components/Investment/Metric';
+import TrancheMetric from '../../../components/Investment/TrancheMetric';
 import { TransactionState, resetTransactionState } from '../../../ducks/transactions';
+import { AnalyticsState, loadAnalyticsData } from '../../../ducks/analytics';
 
 interface Props {
   tinlake: any;
@@ -19,6 +21,8 @@ interface Props {
   investments?: InvestorState;
   transactions?: TransactionState;
   resetTransactionState?: () => void;
+  loadAnalyticsData?: (tinlake: any) => Promise<void>;
+  analytics: AnalyticsState;
 }
 
 interface State {
@@ -43,10 +47,12 @@ class InvestmentView extends React.Component<Props, State> {
   }
 
   componentWillMount() {
+    const { resetTransactionState, loadAnalyticsData, tinlake } = this.props;
     this.setState({
       investorAddress: ''
     });
-    this.props.resetTransactionState && this.props.resetTransactionState();
+    resetTransactionState && resetTransactionState();
+    loadAnalyticsData && loadAnalyticsData(tinlake);
   }
 
   componentWillUnmount() {
@@ -55,12 +61,14 @@ class InvestmentView extends React.Component<Props, State> {
 
   render() {
     const { investorAddress, is, errorMsg } = this.state;
-    const { tinlake, investments, auth, transactions } = this.props;
+    const { tinlake, investments, auth, analytics, transactions } = this.props;
 
     const investor = investments && investments.investor;
     const investorState = investments && investments.investorState;
     const isJuniorAdmin = auth.user && auth.user.permissions.canSetInvestorAllowanceJunior;
     const isInvestor = (auth.user && investor) && (auth.user.address.toLowerCase() === investor.address.toLowerCase());
+   
+    const juniorTranche = analytics && analytics.data && analytics.data.junior;
 
     if (investorState && investorState === 'loading') {
       return <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading Investor information...'} />;
@@ -71,7 +79,7 @@ class InvestmentView extends React.Component<Props, State> {
     }
 
     return <Box>
-
+      { juniorTranche &&  <Box margin={{ bottom: "large" }}> <TrancheMetric tranche={juniorTranche}/> </Box>  }
       {transactions && transactions.successMessage &&
       <Box pad={{ horizontal: 'medium' }} margin={{ bottom: 'large' }}>
           <Alert type="success">
@@ -116,7 +124,8 @@ class InvestmentView extends React.Component<Props, State> {
 
       {is !== 'error' && investorState && investorState === 'found' && investor && investor.address === investorAddress &&
         <Box>
-          <Box pad={{ horizontal: 'medium' }} margin={{ top: 'large', bottom: 'large' }} >
+          <Box pad={{ horizontal: 'medium' }} margin={{ top: "large", bottom: "large" }} >
+          <Box margin={{ bottom: 'medium' }}>  <Heading level="3" margin="none">Investor Details</Heading> </Box>
             <Box>
               <InvestorMetric investor={investor} />
             </Box>
@@ -125,8 +134,8 @@ class InvestmentView extends React.Component<Props, State> {
           {isJuniorAdmin &&
             <Box pad={{ horizontal: 'medium' }} margin={{ top: 'large', bottom: 'large' }} >
               <Box>
-                <Box gap="medium" align="start" margin={{ bottom: 'medium' }} >
-                  <Heading level="5" margin="none"> Set Junior allowance </Heading>
+                <Box gap="medium" align="start" margin={{ bottom: "medium" }} >
+                 <Heading level="5" margin="none"> Set Junior allowance </Heading>
                 </Box>
                 <InvestorAllowance tinlake={tinlake} investor={investor} />
               </Box>
@@ -152,4 +161,5 @@ class InvestmentView extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadInvestor, resetTransactionState })(InvestmentView);
+
+export default connect(state => state, { loadInvestor, loadAnalyticsData, resetTransactionState })(InvestmentView);
