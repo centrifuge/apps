@@ -65,7 +65,7 @@ class LoanList extends React.Component<Props> {
               value={baseToDisplay(l.principal, 18)} />
         },
         {
-          header: <HeaderCell text={'Interest Rate'}></HeaderCell>, property: 'fee', align: 'end',
+          header: <HeaderCell text={'Annual interest rate (APR)'}></HeaderCell>, property: 'fee', align: 'end',
           render: (l: Loan) => l.status === 'Repaid' ? '-' :
             <NumberDisplay suffix="%" value={feeToInterestRate(l.interestRate)} />
         },

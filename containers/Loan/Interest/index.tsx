@@ -52,11 +52,11 @@ class LoanInterest extends React.Component<Props, State> {
           <NumberInput value={interestRate} suffix=" %"
             onValueChange={({ value }) =>
               this.setState({ interestRate: value })}
-          />  
+          />
         </FormField>
       </Box>
       <Box align="start">
-        <Button onClick={this.setInterestRate} primary label="Set interest rate"/>
+        <Button onClick={this.setInterestRate} primary label="Set Annual Interest Rate (APR)"/>
       </Box>
     </Box>;
   }
