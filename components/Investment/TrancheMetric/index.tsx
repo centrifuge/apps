@@ -18,6 +18,7 @@ class TrancheMetric extends React.Component<Props> {
     const reserveLabel = `${type} total funds in reserve`;
     const priceLable = `${type} token price`;
     const redeemLabel = `${type} maximum Redeem amount`;
+    const trancheTokenLabel =` ${token}`;
     const maxRedeemAmount = calcMaxRedeemAmount(availableFunds, tokenPrice);
     return <Box>
       <InfoContainer pad={{ vertical: 'large' }}  align="center" margin={{ bottom: 'small' }}>
@@ -36,7 +37,7 @@ class TrancheMetric extends React.Component<Props> {
         </Box>
         <Box basis={'1/2'}  gap="medium">
           <DashboardMetric label={redeemLabel} >
-            <NumberDisplay value={maxRedeemAmount.toString()} suffix={token} precision={18}> </NumberDisplay>
+            <NumberDisplay value={maxRedeemAmount.toString()} suffix={trancheTokenLabel} precision={18}> </NumberDisplay>
           </DashboardMetric>
         </Box>
       </InfoContainer>
