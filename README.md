@@ -99,3 +99,12 @@ Every user has a simple contact list that stores Centrifuge Identities of other 
 
 ## Limitations
 Centrifuge Gateway, Centrifuge Protocol and all its components are in an early stage of their development. They have a limited feature set compared to the end-vision. Not all features are implemented yet, and tradeoffs between security, speed, end-user features, and protocol flexibility are made continuously. This might and will lead to substantial changes in the future, re-architecture, addition and removal of features, as well as unexpected behavior. Use at your own risk.
+
+
+## Build locally
+Required Node Version: 12.16.1
+```bash
+npm install
+npm run test
+npm run build
+```

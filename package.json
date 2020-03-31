@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@centrifuge/gateway-server": "file:packages/server",
     "@centrifuge/gateway-lib": "file:packages/lib",
+    "@centrifuge/gateway-server": "file:packages/server",
     "@centrifuge/gateway-ui": "file:packages/ui"
   },
   "scripts": {

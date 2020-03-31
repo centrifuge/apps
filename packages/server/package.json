@@ -34,7 +34,7 @@
     "@nestjs/common": "^5.7.4",
     "@nestjs/core": "^5.7.4",
     "@nestjs/passport": "^5.1.0",
-    "bcrypt": "3.0.2",
+    "bcrypt": "3.0.8",
     "cross-env": "^5.2.0",
     "ethereumjs-util": "^6.1.0",
     "ethjs": "^0.4.0",
@@ -47,7 +47,9 @@
     "passport-local": "^1.0.0",
     "portable-fetch": "^3.0.0",
     "reflect-metadata": "^0.1.12",
-    "typescript": "3.2.2"
+    "typescript": "3.2.2",
+    "web3-eth": "^1.2.6",
+    "bignumber.js": "^9.0.0"
   },
   "eslintConfig": {
     "extends": "react-app"
