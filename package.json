@@ -28,6 +28,7 @@
   "homepage": "https://github.com/centrifuge/tinlake-ui#readme",
   "dependencies": {
     "@centrifuge/axis-display-field": "^0.3.2-develop.51",
+    "@centrifuge/axis-nav-bar": "^0.3.2-develop.47",
     "@centrifuge/axis-spinner": "^0.3.1",
     "@centrifuge/axis-theme": "^0.2.1-develop.33",
     "@centrifuge/axis-utils": "^0.3.2-develop.49",
