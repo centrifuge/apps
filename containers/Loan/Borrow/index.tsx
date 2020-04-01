@@ -56,11 +56,10 @@ class LoanBorrow extends React.Component<Props, State> {
     const { loan, analytics } = this.props;
 
     const ceilingSet = loan.principal.toString() !== '0';
-    const availableFunds = analytics && analytics.data && analytics.data.availableFunds || '0';
+    const availableFunds = analytics && analytics.data && analytics.data.junior && analytics.data.junior.availableFunds || '0';
     const ceilingOverflow = (new BN(borrowAmount).cmp(new BN(loan.principal)) > 0);
     const availableFundsOverflow = (new BN(borrowAmount).cmp(new BN(availableFunds)) > 0);
     const borrowEnabled = !ceilingOverflow && !availableFundsOverflow && ceilingSet;
-   
     return <Box basis={'1/4'} gap="medium" margin={{ right: "large" }}>
       <Box gap="medium">
         <FormField label="Borrow amount">
