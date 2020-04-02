@@ -7,7 +7,7 @@ import { menuItems } from '../../menuItems';
 
 class MintNFTPage extends React.Component {
   render() {
-    return <Box align="center">
+    return <Box align="center" pad={{horizontal: "small"}}>
       <Header
         selectedRoute={'/demo/mint-nft'}
         menuItems={menuItems}

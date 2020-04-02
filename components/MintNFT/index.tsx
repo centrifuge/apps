@@ -78,7 +78,7 @@ class MintNFT extends React.Component<Props, State> {
       {is === 'loading' ?
         <Spinner height={'calc(100vh - 89px - 84px)'} message={'Minting...'} />
       :
-        <Box pad={{ horizontal: 'xsmall' }}>
+        <Box >
           {is === 'success' && <Alert type="success">
             Successfully minted NFT for Token ID {tokenId}
             <p> 
@@ -104,11 +104,11 @@ class MintNFT extends React.Component<Props, State> {
               <Anchor>please proceed to loan opening</Anchor></Link>.</p>
           </Alert>}
 
-          <Box direction="row" gap="large" margin="medium">
+          <Box direction="row" gap="large" margin={{vertical:"large"}}>
             <b>Please specify metadata of NFT:</b>
           </Box>
 
-          <Box direction="row" gap="large" margin={"medium"} justify="evenly">
+          <Box direction="row" gap="large" justify="evenly">
               { is === 'success' && <FormField label="Token ID">
                 <TextInput
                   value={this.state.tokenId}

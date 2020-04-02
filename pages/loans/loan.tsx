@@ -20,7 +20,7 @@ class LoanPage extends React.Component<Props> {
 
   render() {
     const { loanId } = this.props;
-    return <Box align="center">
+    return <Box align="center" pad={{horizontal: "small"}}>
       <Header
         selectedRoute={'/loans/loan'}
         menuItems={menuItems}

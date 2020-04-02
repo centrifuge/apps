@@ -5,7 +5,7 @@ import WithTinlake from '../components/WithTinlake';
 import { menuItems } from '../menuItems';
 
 function Home() {
-  return <Box align="center">
+  return <Box align="center" pad={{horizontal: "small"}}>
   <Header
     selectedRoute={'/'}
     menuItems={menuItems}

@@ -54,13 +54,13 @@ class LoanView extends React.Component<Props> {
 
     return <Box>
       {transactions && transactions.successMessage &&
-      <Box pad={{ horizontal: 'medium' }} margin={{ bottom: "large" }}>
+      <Box margin={{ bottom: "large" }}>
           <Alert type="success">
             {transactions.successMessage} </Alert>
       </Box>}
 
       {transactions && transactions.errorMessage &&
-      <Box pad={{ horizontal: 'medium' }} margin={{ bottom: "large" }}>
+      <Box margin={{ bottom: "large" }}>
           <Alert type="error">
             {transactions.errorMessage}
           </Alert>
@@ -70,7 +70,7 @@ class LoanView extends React.Component<Props> {
       {loan && loan.status !== 'closed' &&
         <Box>
           {hasAdminPermissions &&
-            <Box pad={{ horizontal: 'medium' }} margin={{ top: "large", bottom: "large" }} >
+            <Box margin={{ top: "large", bottom: "large" }} >
               <Box gap="medium" align="start" margin={{ bottom: "medium" }} >
                 <Heading level="5" margin="none">Loan Settings</Heading>
               </Box>
@@ -86,7 +86,7 @@ class LoanView extends React.Component<Props> {
           }
 
           {hasBorrowerPermissions &&
-            <Box pad={{ horizontal: 'medium' }} margin={{ top: "large", bottom: "large" }} >
+            <Box margin={{ top: "large", bottom: "large" }} >
               <Box gap="medium" align="start" margin={{ bottom: "medium" }} >
                 <Heading level="5" margin="none">Borrow / Repay </Heading>
               </Box>

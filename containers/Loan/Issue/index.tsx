@@ -88,7 +88,7 @@ class IssueLoan extends React.Component<Props, State> {
         <Spinner height={'calc(100vh - 89px - 84px)'} message={'Initiating the opening loan process. Please confirm the pending transactions in MetaMask, and do not leave this page until all transactions have been confirmed.'} />
         :
         <Box>
-        <Box pad={{ horizontal: 'medium' }}>
+        <Box>
           {is === 'success' && <Alert type="success">
             Successfully opened loan for Token ID {tokenId}</Alert>}
           {is === 'error' && <Alert type="error">
@@ -104,7 +104,7 @@ class IssueLoan extends React.Component<Props, State> {
    
       
       {is !== 'success' &&
-      <Box pad={{ horizontal: 'medium' }} >
+      <Box>
         <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
           <Box basis={'1/4'} gap="medium">
             <FormField label="Token ID">

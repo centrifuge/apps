@@ -11,16 +11,17 @@ import Link from 'next/link';
 
 class LoanListPage extends React.Component {
   render() {
-    return <Box align="center">
+    return <Box pad={{horizontal: "small"}}>
       <Header
         selectedRoute={'/loans'}
         menuItems={menuItems}
       />
       <Box
-        justify="center"
+        justify="evenly"
         direction="row"
+       
       >
-        <Box width="xlarge" >
+        <Box width="xlarge" gap="medium" >
           <WithTinlake render={tinlake =>
               <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization
                 render={auth => auth && auth.state === 'loaded' && auth.user ?

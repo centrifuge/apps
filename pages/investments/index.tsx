@@ -10,7 +10,7 @@ import Alert from '../../components/Alert';
 
 class InvestmentPage extends React.Component {
   render() {
-    return <Box align="center">
+    return <Box align="center" pad={{horizontal: "small"}}>
       <Header
         selectedRoute={'/investments'}
         menuItems={menuItems}

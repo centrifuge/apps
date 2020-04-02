@@ -33,7 +33,7 @@ class Dashboard extends React.Component<Props> {
         <LoanListData loans={loans!.loans} userAddress={tinlake.ethConfig.from}> </LoanListData>
       }
 
-      <Box pad={{ horizontal: 'medium', vertical: 'medium' }}>
+      <Box pad={{ vertical: 'medium' }}>
       </Box>
     </Box>;
   }
