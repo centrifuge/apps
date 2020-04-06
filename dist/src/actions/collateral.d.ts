@@ -1,6 +1,6 @@
 import { Constructor, Tinlake } from '../types';
 import BN from 'bn.js';
-declare function CollateralActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase): {
+export declare function CollateralActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase): {
     new (...args: any[]): {
         mintTitleNFT: (user: string) => Promise<any>;
         mintNFT: (owner: string, tokenId: string, ref: string, amount: string, asset: string) => Promise<unknown>;

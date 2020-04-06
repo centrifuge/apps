@@ -37,8 +37,8 @@
     "ts-mocha": "^6.0.0",
     "tslint": "^5.18.0",
     "tslint-config-airbnb": "^5.11.1",
-    "typedoc": "^0.15.0",
-    "typescript": "^3.5.2"
+    "typedoc": "^0.17.3",
+    "typescript": "^3.8.3"
   },
   "scripts": {
     "build": "rollup -c",
@@ -47,7 +47,7 @@
     "test-unit": "ts-mocha -p test/tsconfig.json src/**/*.spec.ts --timeout 20000",
     "test-integration": "npm run build && ts-mocha -p test/tsconfig.json test/**/*",
     "nodemon": "nodemon node inspect dist/Tinlake.js",
-    "generate-docs": "typedoc --out docs --exclude \"./node_modules/**\" --excludeExternals --excludeNotExported ./src",
+    "generate-docs": "typedoc --out docs --exclude \"./node_modules/**\"  --exclude \"./src/actions/*.spec.ts\" --excludeExternals --excludeNotExported --ignoreCompilerErrors ./src",
     "lint": "tslint --project ."
   },
   "repository": {

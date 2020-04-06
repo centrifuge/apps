@@ -4,7 +4,7 @@ const abiCoder = require('web3-eth-abi');
 import BN from 'bn.js';
 import { ethers } from 'ethers';
 
-function ProxyActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
+export function ProxyActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
 
   return class extends Base implements IProxyActions {
 

@@ -1,5 +1,5 @@
 import { Constructor, Tinlake } from '../types';
-declare function GovernanceActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase): {
+export declare function GovernanceActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase): {
     new (...args: any[]): {
         relyAddress: (usr: string, contractAddress: string) => Promise<unknown>;
         provider: any;

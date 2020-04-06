@@ -1,6 +1,6 @@
 import { Constructor, Tinlake } from '../types';
 import BN from 'bn.js';
-declare function CurrencyActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase): {
+export declare function CurrencyActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase): {
     new (...args: any[]): {
         mintCurrency: (usr: string, amount: string) => Promise<void>;
         getCurrencyBalance: (user: string) => Promise<BN>;

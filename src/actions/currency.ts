@@ -2,7 +2,7 @@ import { Constructor, Tinlake  } from '../types';
 import { executeAndRetry, waitAndReturnEvents } from '../ethereum';
 import BN from 'bn.js';
 
-function CurrencyActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
+export function CurrencyActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
   return class extends Base implements ICurrencyActions {
 
     mintCurrency = async (usr: string, amount: string) => {

@@ -1,6 +1,6 @@
 import { Constructor, Tinlake, ContractNames } from '../types';
 import BN from 'bn.js';
-declare function AdminActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase): {
+export declare function AdminActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase): {
     new (...args: any[]): {
         isWard: (user: string, contractName: string) => Promise<BN>;
         canSetCeiling: (user: string) => Promise<boolean>;

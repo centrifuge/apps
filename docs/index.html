@@ -52,7 +52,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1> tinlake</h1>
+			<h1>tinlake</h1>
 		</div>
 	</div>
 </header>
@@ -66,7 +66,7 @@
 				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
 					<h2>Usage</h2>
 				</a>
-				<p>Documentation can be found in <code>./docs/</code> or at <a href="https://centrifuge.github.io/tinlake.js/docs/">https://centrifuge.github.io/tinlake.js/docs/</a>.</p>
+				<p>Documentation can be found in <code>./docs/</code> or at <a href="https://centrifuge.github.io/tinlake.js/">https://centrifuge.github.io/tinlake.js/</a>.</p>
 				<a href="#development" id="development" style="color: inherit; text-decoration: none;">
 					<h2>Development</h2>
 				</a>
@@ -74,7 +74,30 @@
 				<a href="#running-tests" id="running-tests" style="color: inherit; text-decoration: none;">
 					<h2>Running tests</h2>
 				</a>
-				<p>Run unit and integration tests at once with <code>npm test</code> or separate with <code>npm run test-unit</code> and <code>npm run test-integration</code>.</p>
+				<a href="#pre-installed" id="pre-installed" style="color: inherit; text-decoration: none;">
+					<h3>Pre Installed</h3>
+				</a>
+				<ul>
+					<li>DappTools (<a href="https://dapp.tools/">https://dapp.tools/</a>)</li>
+					<li>jq</li>
+				</ul>
+				<a href="#run-a-local-ethereum-node" id="run-a-local-ethereum-node" style="color: inherit; text-decoration: none;">
+					<h4>Run a local Ethereum Node</h4>
+				</a>
+				<p><code>dapp testnet --accounts=2</code></p>
+				<a href="#additional-flags" id="additional-flags" style="color: inherit; text-decoration: none;">
+					<h5>Additional Flags</h5>
+				</a>
+				<p><code>--save=name</code> after finishing, save snapshot
+				<code>--load=name</code> start from a previously saved snapshot</p>
+				<a href="#deploy-tinlake-contracts-for-tests" id="deploy-tinlake-contracts-for-tests" style="color: inherit; text-decoration: none;">
+					<h4>Deploy Tinlake Contracts for Tests</h4>
+				</a>
+				<p><code>./bin/deploy.sh</code></p>
+				<a href="#run-integration-tests" id="run-integration-tests" style="color: inherit; text-decoration: none;">
+					<h4>Run integration tests</h4>
+				</a>
+				<p><code>npm run test</code></p>
 				<a href="#building-for-production" id="building-for-production" style="color: inherit; text-decoration: none;">
 					<h2>Building for production</h2>
 				</a>
@@ -92,41 +115,77 @@
 					<li class="globals  ">
 						<a href="globals.html"><em>Globals</em></a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_tinlake_.html">"<wbr>Tinlake"</a>
+					<li class=" tsd-kind-module">
+						<a href="modules/_tinlake_.html">&quot;<wbr>Tinlake&quot;</a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_utils_basetodisplay_.html">"utils/base<wbr>ToDisplay"</a>
+					<li class=" tsd-kind-module">
+						<a href="modules/_abi_index_.html">&quot;abi/index&quot;</a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_utils_basetodisplay_spec_.html">"utils/base<wbr>ToDisplay.spec"</a>
+					<li class=" tsd-kind-module">
+						<a href="modules/_actions_admin_.html">&quot;actions/admin&quot;</a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_utils_bntohex_.html">"utils/bn<wbr>ToHex"</a>
+					<li class=" tsd-kind-module">
+						<a href="modules/_actions_analytics_.html">&quot;actions/analytics&quot;</a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_utils_bntohex_spec_.html">"utils/bn<wbr>ToHex.spec"</a>
+					<li class=" tsd-kind-module">
+						<a href="modules/_actions_borrower_.html">&quot;actions/borrower&quot;</a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_utils_displaytobase_.html">"utils/display<wbr>ToBase"</a>
+					<li class=" tsd-kind-module">
+						<a href="modules/_actions_collateral_.html">&quot;actions/collateral&quot;</a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_utils_displaytobase_spec_.html">"utils/display<wbr>ToBase.spec"</a>
+					<li class=" tsd-kind-module">
+						<a href="modules/_actions_currency_.html">&quot;actions/currency&quot;</a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_utils_feetointerestrate_.html">"utils/fee<wbr>ToInterest<wbr>Rate"</a>
+					<li class=" tsd-kind-module">
+						<a href="modules/_actions_governance_.html">&quot;actions/governance&quot;</a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_utils_feetointerestrate_spec_.html">"utils/fee<wbr>ToInterest<wbr>Rate.spec"</a>
+					<li class=" tsd-kind-module">
+						<a href="modules/_actions_index_.html">&quot;actions/index&quot;</a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_utils_getloanstatus_.html">"utils/get<wbr>Loan<wbr>Status"</a>
+					<li class=" tsd-kind-module">
+						<a href="modules/_actions_lender_.html">&quot;actions/lender&quot;</a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_utils_interestratetofee_.html">"utils/interest<wbr>Rate<wbr>ToFee"</a>
+					<li class=" tsd-kind-module">
+						<a href="modules/_actions_proxy_.html">&quot;actions/proxy&quot;</a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_utils_interestratetofee_spec_.html">"utils/interest<wbr>Rate<wbr>ToFee.spec"</a>
+					<li class=" tsd-kind-module">
+						<a href="modules/_ethereum_.html">&quot;ethereum&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_types_.html">&quot;types&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_utils_basetodisplay_.html">&quot;utils/base<wbr>ToDisplay&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_utils_basetodisplay_spec_.html">&quot;utils/base<wbr>ToDisplay.spec&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_utils_bntohex_.html">&quot;utils/bn<wbr>ToHex&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_utils_bntohex_spec_.html">&quot;utils/bn<wbr>ToHex.spec&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_utils_displaytobase_.html">&quot;utils/display<wbr>ToBase&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_utils_displaytobase_spec_.html">&quot;utils/display<wbr>ToBase.spec&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_utils_feetointerestrate_.html">&quot;utils/fee<wbr>ToInterest<wbr>Rate&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_utils_feetointerestrate_spec_.html">&quot;utils/fee<wbr>ToInterest<wbr>Rate.spec&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_utils_getloanstatus_.html">&quot;utils/get<wbr>Loan<wbr>Status&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_utils_interestratetofee_.html">&quot;utils/interest<wbr>Rate<wbr>ToFee&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_utils_interestratetofee_spec_.html">&quot;utils/interest<wbr>Rate<wbr>ToFee.spec&quot;</a>
 					</li>
 				</ul>
 			</nav>
@@ -142,57 +201,17 @@
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
 			<ul class="tsd-legend">
-				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
-				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
 				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
 				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
 				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
-				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
 				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
 				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
 			</ul>
 			<ul class="tsd-legend">
-				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
-				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
-				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
-			</ul>
-			<ul class="tsd-legend">
 				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
-				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
-				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
-				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
-				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
-				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
-				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
-				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
-				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
-				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
-				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
-				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
-				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
-				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
-				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
 			</ul>
 		</div>
 	</div>

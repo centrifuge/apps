@@ -3,7 +3,7 @@ import { waitAndReturnEvents, executeAndRetry } from '../ethereum';
 import { ethers } from 'ethers';
 import BN from 'bn.js';
 
-function BorrowerActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
+export function BorrowerActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
   return class extends Base implements IBorrowerActions {
 
     issue = async (registry: string, tokenId: string) => {

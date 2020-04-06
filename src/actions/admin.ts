@@ -2,7 +2,7 @@ import { Constructor, Tinlake, ContractNames } from '../types';
 import { waitAndReturnEvents, executeAndRetry } from '../ethereum';
 import BN from 'bn.js';
 
-function AdminActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
+export function AdminActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
   return class extends Base implements IAdminActions {
 
     isWard = async (user: string, contractName: ContractNames) => {

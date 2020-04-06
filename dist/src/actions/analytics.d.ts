@@ -1,6 +1,6 @@
 import { Loan, Constructor, Tinlake } from './../types';
 import BN from 'bn.js';
-declare function AnalyticsActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase): {
+export declare function AnalyticsActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase): {
     new (...args: any[]): {
         getTotalDebt: () => Promise<BN>;
         getTotalBalance: () => Promise<BN>;

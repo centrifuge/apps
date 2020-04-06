@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;utils/feeToInterestRate&quot; | tinlake</title>
+	<title>&quot;actions/governance&quot; | tinlake</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -52,10 +52,10 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="_utils_feetointerestrate_.html">&quot;utils/feeToInterestRate&quot;</a>
+					<a href="_actions_governance_.html">&quot;actions/governance&quot;</a>
 				</li>
 			</ul>
-			<h1>Module &quot;utils/feeToInterestRate&quot;</h1>
+			<h1>Module &quot;actions/governance&quot;</h1>
 		</div>
 	</div>
 </header>
@@ -67,51 +67,91 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
+							<h3>Type aliases</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="_actions_governance_.html#igovernanceactions" class="tsd-kind-icon">IGovernance<wbr>Actions</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_utils_feetointerestrate_.html#feetointerestrate" class="tsd-kind-icon">fee<wbr>ToInterest<wbr>Rate</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter"><a href="_actions_governance_.html#governanceactions" class="tsd-kind-icon">Governance<wbr>Actions</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Type aliases</h2>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-module">
+					<a name="igovernanceactions" class="tsd-anchor"></a>
+					<h3>IGovernance<wbr>Actions</h3>
+					<div class="tsd-signature tsd-kind-icon">IGovernance<wbr>Actions<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>relyAddress<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> }</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/760b634/src/actions/governance.ts#L16">actions/governance.ts:16</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter">
+								<h5>rely<wbr>Address<span class="tsd-signature-symbol">: </span>function</h5>
+								<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal">
+									<li class="tsd-signature tsd-kind-icon">rely<wbr>Address<span class="tsd-signature-symbol">(</span>usr<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, contractAddress<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+								</ul>
+								<ul class="tsd-descriptions">
+									<li class="tsd-description">
+										<aside class="tsd-sources">
+											<ul>
+												<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/760b634/src/actions/governance.ts#L17">actions/governance.ts:17</a></li>
+											</ul>
+										</aside>
+										<h4 class="tsd-parameters-title">Parameters</h4>
+										<ul class="tsd-parameters">
+											<li>
+												<h5>usr: <span class="tsd-signature-type">string</span></h5>
+											</li>
+											<li>
+												<h5>contractAddress: <span class="tsd-signature-type">string</span></h5>
+											</li>
+										</ul>
+										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-					<a name="feetointerestrate" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagConst">Const</span> fee<wbr>ToInterest<wbr>Rate</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">fee<wbr>ToInterest<wbr>Rate<span class="tsd-signature-symbol">(</span>fee<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">BN</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
+					<a name="governanceactions" class="tsd-anchor"></a>
+					<h3>Governance<wbr>Actions</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">Governance<wbr>Actions&lt;ActionsBase&gt;<span class="tsd-signature-symbol">(</span>Base<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ActionsBase</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">(Anonymous class)</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-type">ActionsBase</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/760b634/src/utils/feeToInterestRate.ts#L23">utils/feeToInterestRate.ts:23</a></li>
+									<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/760b634/src/actions/governance.ts#L4">actions/governance.ts:4</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Get interest rate in percentage points for a specified fee.
-										This function uses a lookup table for performance reasons.
-										This function uses decimal.js-light, since we need non-integer powers for our calculations here.
-										We can remove that dependency in the future if we decide to either add a hardcoded
-										lookup table for fees and interest rates or if we decide to implement the relevant
-									functions here by hand.</p>
-								</div>
-							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>ActionsBase<span class="tsd-signature-symbol">: </span><a href="_types_.html#constructor" class="tsd-signature-type">Constructor</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_.tinlake.html" class="tsd-signature-type">Tinlake</a><span class="tsd-signature-symbol">&gt;</span></h4>
+								</li>
+							</ul>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>fee: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">BN</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<p>Fee</p>
-										</div>
-									</div>
+									<h5>Base: <span class="tsd-signature-type">ActionsBase</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">(Anonymous class)</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-type">ActionsBase</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -144,7 +184,7 @@
 					<li class=" tsd-kind-module">
 						<a href="_actions_currency_.html">&quot;actions/currency&quot;</a>
 					</li>
-					<li class=" tsd-kind-module">
+					<li class="current tsd-kind-module">
 						<a href="_actions_governance_.html">&quot;actions/governance&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
@@ -180,7 +220,7 @@
 					<li class=" tsd-kind-module">
 						<a href="_utils_displaytobase_spec_.html">&quot;utils/display<wbr>ToBase.spec&quot;</a>
 					</li>
-					<li class="current tsd-kind-module">
+					<li class=" tsd-kind-module">
 						<a href="_utils_feetointerestrate_.html">&quot;utils/fee<wbr>ToInterest<wbr>Rate&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
@@ -199,8 +239,11 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="_utils_feetointerestrate_.html#feetointerestrate" class="tsd-kind-icon">fee<wbr>ToInterest<wbr>Rate</a>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
+						<a href="_actions_governance_.html#igovernanceactions" class="tsd-kind-icon">IGovernance<wbr>Actions</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="_actions_governance_.html#governanceactions" class="tsd-kind-icon">Governance<wbr>Actions</a>
 					</li>
 				</ul>
 			</nav>

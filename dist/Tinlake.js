@@ -24914,7 +24914,6 @@ var src$4 = {
 };
 var src_11 = src$4.sha3;
 
-var _this = undefined;
 var abiCoder = require('web3-eth-abi');
 // tslint:disable-next-line:prefer-array-literal
 function executeAndRetry(f, args) {
@@ -24949,7 +24948,7 @@ function executeAndRetry(f, args) {
         });
     });
 }
-var waitAndReturnEvents = function (eth, txHash, abi, transactionTimeout) { return __awaiter(_this, void 0, void 0, function () {
+var waitAndReturnEvents = function (eth, txHash, abi, transactionTimeout) { return __awaiter(void 0, void 0, void 0, function () {
     var tx;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -29545,6 +29544,12 @@ unwrapExports(hmac);
 var hmac_1 = hmac.SupportedAlgorithms;
 var hmac_2 = hmac.computeHmac;
 
+var _args = [
+  [
+    "elliptic@6.5.2",
+    "/Users/ilinzweilin/Desktop/centrifuge/forks/tinlake.js"
+  ]
+];
 var _from = "elliptic@6.5.2";
 var _id = "elliptic@6.5.2";
 var _inBundle = false;
@@ -29566,9 +29571,8 @@ var _requiredBy = [
   "/ethers"
 ];
 var _resolved = "https://registry.npmjs.org/elliptic/-/elliptic-6.5.2.tgz";
-var _shasum = "05c5678d7173c049d8ca433552224a495d0e3762";
-var _spec = "elliptic@6.5.2";
-var _where = "/Users/ch4rly/go/src/github.com/centrifuge/tinlake.js/node_modules/ethers";
+var _spec = "6.5.2";
+var _where = "/Users/ilinzweilin/Desktop/centrifuge/forks/tinlake.js";
 var author = {
   name: "Fedor Indutny",
   email: "fedor@indutny.com"
@@ -29576,7 +29580,6 @@ var author = {
 var bugs = {
   url: "https://github.com/indutny/elliptic/issues"
 };
-var bundleDependencies = false;
 var dependencies = {
   "bn.js": "^4.4.0",
   brorand: "^1.0.1",
@@ -29586,7 +29589,6 @@ var dependencies = {
   "minimalistic-assert": "^1.0.0",
   "minimalistic-crypto-utils": "^1.0.0"
 };
-var deprecated = false;
 var description = "EC cryptography";
 var devDependencies = {
   brfs: "^1.4.3",
@@ -29631,6 +29633,7 @@ var scripts = {
 };
 var version = "6.5.2";
 var _package = {
+  _args: _args,
   _from: _from,
   _id: _id,
   _inBundle: _inBundle,
@@ -29640,14 +29643,11 @@ var _package = {
   _requested: _requested,
   _requiredBy: _requiredBy,
   _resolved: _resolved,
-  _shasum: _shasum,
   _spec: _spec,
   _where: _where,
   author: author,
   bugs: bugs,
-  bundleDependencies: bundleDependencies,
   dependencies: dependencies,
-  deprecated: deprecated,
   description: description,
   devDependencies: devDependencies,
   files: files,
@@ -29662,6 +29662,7 @@ var _package = {
 };
 
 var _package$1 = /*#__PURE__*/Object.freeze({
+  _args: _args,
   _from: _from,
   _id: _id,
   _inBundle: _inBundle,
@@ -29671,14 +29672,11 @@ var _package$1 = /*#__PURE__*/Object.freeze({
   _requested: _requested,
   _requiredBy: _requiredBy,
   _resolved: _resolved,
-  _shasum: _shasum,
   _spec: _spec,
   _where: _where,
   author: author,
   bugs: bugs,
-  bundleDependencies: bundleDependencies,
   dependencies: dependencies,
-  deprecated: deprecated,
   description: description,
   devDependencies: devDependencies,
   files: files,
@@ -43745,9 +43743,9 @@ function LenderActions(Base) {
                             _d.label = 9;
                         case 9:
                             maxRedeemSenior = _c || null;
-                            return [2 /*return*/, __assign({ address: user, tokenBalanceJunior: tokenBalanceJunior,
+                            return [2 /*return*/, __assign(__assign(__assign({ address: user, tokenBalanceJunior: tokenBalanceJunior,
                                     maxSupplyJunior: maxSupplyJunior,
-                                    maxRedeemJunior: maxRedeemJunior }, (tokenBalanceSenior && { tokenBalanceSenior: tokenBalanceSenior }), (maxSupplySenior && { maxSupplySenior: maxSupplySenior }), (maxRedeemSenior && { maxRedeemSenior: maxRedeemSenior }))];
+                                    maxRedeemJunior: maxRedeemJunior }, (tokenBalanceSenior && { tokenBalanceSenior: tokenBalanceSenior })), (maxSupplySenior && { maxSupplySenior: maxSupplySenior })), (maxRedeemSenior && { maxRedeemSenior: maxRedeemSenior }))];
                     }
                 });
             }); };

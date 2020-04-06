@@ -81,8 +81,8 @@ describe('borrower tests', async () => {
     // repay loan
     const initialDebt = await borrowerTinlake.getDebt(loanId);
     // approve shelf to take currency
-    await borrowerTinlake.approveCurrency(contractAddresses['SHELF'], initialDebt);
-    const repayResult = await borrowerTinlake.repay(loanId, initialDebt);
+    await borrowerTinlake.approveCurrency(contractAddresses['SHELF'], initialDebt.toString());
+    const repayResult = await borrowerTinlake.repay(loanId, initialDebt.toString());
     const newDebt = await borrowerTinlake.getDebt(loanId);
 
     assert.equal(newDebt.toNumber(), 0);

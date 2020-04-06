@@ -1,5 +1,5 @@
 import { Constructor, Tinlake } from '../types';
-declare function BorrowerActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase): {
+export declare function BorrowerActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase): {
     new (...args: any[]): {
         issue: (registry: string, tokenId: string) => Promise<unknown>;
         nftLookup: (registry: string, tokenId: string) => Promise<any>;

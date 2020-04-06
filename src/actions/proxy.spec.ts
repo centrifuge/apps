@@ -4,7 +4,6 @@ import assert from 'assert';
 import { createTinlake, TestProvider } from '../../test/utils';
 import testConfig from '../../test/config';
 import { ethers } from 'ethers';
-import BN from 'bn.js';
 
 const testProvider = new TestProvider(testConfig);
 const borrowerAccount = account.generate(randomString.generate(32));
@@ -90,7 +89,7 @@ describe('proxy tests', async () => {
       // does not approve proxy to transfer currency
       await governanceTinlake.mintCurrency(borrowerAccount.address, amount.toString());
       // repay
-      const repayResult = await borrowerTinlake.proxyRepayUnlockClose(proxyAddr, nftId, loanId, amount.toString());
+      const repayResult = await borrowerTinlake.proxyRepayUnlockClose(proxyAddr, nftId, loanId);
       assert.equal(repayResult.status, FAIL_STATUS);
     });
   });

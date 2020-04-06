@@ -1,6 +1,6 @@
 import { Constructor, Tinlake } from '../types';
 import BN from 'bn.js';
-declare function ProxyActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase): {
+export declare function ProxyActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase): {
     new (...args: any[]): {
         getProxyAccessTokenOwner: (tokenId: string) => Promise<BN>;
         buildProxy: (owner: string) => Promise<any>;

@@ -4,7 +4,7 @@ import BN from 'bn.js';
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-function AnalyticsActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
+export function AnalyticsActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
   return class extends Base implements IAnalyticsActions {
 
     getTotalDebt = async (): Promise<BN> => {

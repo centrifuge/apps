@@ -1,7 +1,7 @@
 import { Constructor, Tinlake, ContractNames } from '../types';
 import { executeAndRetry, waitAndReturnEvents } from '../ethereum';
 
-function GovernanceActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
+export function GovernanceActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
   return class extends Base implements IGovernanceActions {
 
   relyAddress = async (usr: string, contractAddress: string) => {

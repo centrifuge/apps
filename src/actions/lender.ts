@@ -2,7 +2,7 @@ import { Constructor, Investor, Tinlake, Contracts, EthConfig } from '../types';
 import { executeAndRetry, waitAndReturnEvents } from '../ethereum';
 import BN from 'bn.js';
 
-function LenderActions<ActionBase extends Constructor<Tinlake>>(Base: ActionBase) {
+export function LenderActions<ActionBase extends Constructor<Tinlake>>(Base: ActionBase) {
   return class extends Base implements ILenderActions {
     contracts: Contracts;
     ethConfig: EthConfig;

@@ -1,6 +1,6 @@
 import { Constructor, Investor, Tinlake, Contracts, EthConfig } from '../types';
 import BN from 'bn.js';
-declare function LenderActions<ActionBase extends Constructor<Tinlake>>(Base: ActionBase): {
+export declare function LenderActions<ActionBase extends Constructor<Tinlake>>(Base: ActionBase): {
     new (...args: any[]): {
         contracts: Contracts;
         ethConfig: EthConfig;

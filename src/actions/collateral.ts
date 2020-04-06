@@ -2,7 +2,7 @@ import { Constructor, Tinlake  } from '../types';
 import { waitAndReturnEvents, executeAndRetry } from '../ethereum';
 import BN from 'bn.js';
 
-function CollateralActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
+export function CollateralActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
   return class extends Base implements ICollateralActions {
 
     mintTitleNFT = async (user: string) => {
