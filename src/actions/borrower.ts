@@ -1,9 +1,8 @@
-import { Constructor, Tinlake  } from '../types';
-import { waitAndReturnEvents, executeAndRetry } from '../ethereum';
+import { Constructor, TinlakeParams } from '../Tinlake';
+import { waitAndReturnEvents, executeAndRetry } from '../services/ethereum';
 import { ethers } from 'ethers';
-import BN from 'bn.js';
 
-export function BorrowerActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
+export function BorrowerActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IBorrowerActions {
 
     issue = async (registry: string, tokenId: string) => {
@@ -66,6 +65,6 @@ export type IBorrowerActions = {
   borrow(loan: string, currencyAmount: string): Promise<any>,
   withdraw(loan: string, currencyAmount: string, usr: string) : Promise<any>,
   repay(loan: string, currencyAmount: string): Promise<any>,
-}
+};
 
 export default BorrowerActions;

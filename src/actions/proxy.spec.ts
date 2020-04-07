@@ -1,15 +1,16 @@
 const randomString = require('randomstring');
 const account = require('ethjs-account');
 import assert from 'assert';
-import { createTinlake, TestProvider } from '../../test/utils';
-import testConfig from '../../test/config';
+import { createTinlake, TestProvider } from '../test/utils';
+import testConfig from '../test/config';
 import { ethers } from 'ethers';
+import { ITinlake } from '../types/tinlake';
 
 const testProvider = new TestProvider(testConfig);
 const borrowerAccount = account.generate(randomString.generate(32));
 const adminAccount = account.generate(randomString.generate(32));
-const borrowerTinlake = createTinlake(borrowerAccount, testConfig);
-const adminTinlake = createTinlake(adminAccount, testConfig);
+const borrowerTinlake: Partial<ITinlake> = createTinlake(borrowerAccount, testConfig);
+const adminTinlake: Partial<ITinlake>  = createTinlake(adminAccount, testConfig);
 const governanceTinlake = createTinlake(testConfig.godAccount, testConfig);
 
 const { SUCCESS_STATUS, FAIL_STATUS, FAUCET_AMOUNT, contractAddresses } = testConfig;

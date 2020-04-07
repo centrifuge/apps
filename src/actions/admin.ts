@@ -1,8 +1,8 @@
-import { Constructor, Tinlake, ContractNames } from '../types';
-import { waitAndReturnEvents, executeAndRetry } from '../ethereum';
+import { ContractNames, Constructor, TinlakeParams } from '../Tinlake';
+import { waitAndReturnEvents, executeAndRetry } from '../services/ethereum';
 import BN from 'bn.js';
 
-export function AdminActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
+export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IAdminActions {
 
     isWard = async (user: string, contractName: ContractNames) => {
@@ -10,7 +10,6 @@ export function AdminActions<ActionsBase extends Constructor<Tinlake>>(Base: Act
       return res[0];
     }
 
-    // loan admin permissions
     canSetCeiling = async (user: string) => {
       const res : { 0: BN } = await executeAndRetry(this.contracts['CEILING'].wards, [user]);
       return res[0].toNumber() === 1;
@@ -21,7 +20,6 @@ export function AdminActions<ActionsBase extends Constructor<Tinlake>>(Base: Act
       return res[0].toNumber() === 1;
     }
 
-    // tranche admin permissions
     canSetJuniorTrancheInterest = async (user: string) => {
       const res : { 0: BN } = await executeAndRetry(this.contracts['JUNIOR'].wards, [user]);
       return res[0].toNumber() === 1;
@@ -48,7 +46,6 @@ export function AdminActions<ActionsBase extends Constructor<Tinlake>>(Base: Act
       return res[0].toNumber() === 1;
     }
 
-    // collector permissions
     canSetThreshold = async (user: string) => {
       const res : { 0: BN } = await executeAndRetry(this.contracts['THRESHOLD'].wards, [user]);
       return res[0].toNumber() === 1;
@@ -106,7 +103,7 @@ const ONE : string = '1000000000000000000000000000';
 function getRateGroup(ratePerSecond: string) {
   return (ratePerSecond === ONE) ? 0 : ratePerSecond;
 }
- 
+
 export type IAdminActions = {
   isWard(user: string, contractName: ContractNames): Promise<BN>,
   canSetCeiling(user: string): Promise<boolean>,
@@ -119,7 +116,7 @@ export type IAdminActions = {
   canSetThreshold(user: string): Promise<boolean>,
   canSetLoanPrice(user: string): Promise<boolean>,
   setCeiling(loanId: string, amount: string): Promise<any>,
-  initRate(rate: string, speed: string): Promise<any>,
+  initRate(rate: string): Promise<any>,
   setRate(loan: string, rate: string): Promise<any>,
   approveAllowanceJunior(user: string, maxCurrency: string, maxToken: string): Promise<any>,
 };

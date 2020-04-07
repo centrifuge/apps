@@ -1,10 +1,10 @@
-import { Constructor, Tinlake } from '../types';
-import { waitAndReturnEvents, executeAndRetry } from '../ethereum';
+import { Constructor, TinlakeParams } from '../Tinlake';
+import { waitAndReturnEvents, executeAndRetry } from '../services/ethereum';
 const abiCoder = require('web3-eth-abi');
 import BN from 'bn.js';
 import { ethers } from 'ethers';
 
-export function ProxyActions<ActionsBase extends Constructor<Tinlake>>(Base: ActionsBase) {
+export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
 
   return class extends Base implements IProxyActions {
 
@@ -43,11 +43,11 @@ export function ProxyActions<ActionsBase extends Constructor<Tinlake>>(Base: Act
       return res[0];
     }
 
-    checkProxyExists = async (address: string) : Promise<string | null>=> {
+    checkProxyExists = async (address: string) : Promise<string | null> => {
       const count = (await this.proxyCount()).toNumber();
       for (let i = 1; i < count; i += 1) {
         const accessToken = i.toString();
-        const ownerBN = await this.getProxyAccessTokenOwner(accessToken)
+        const ownerBN = await this.getProxyAccessTokenOwner(accessToken);
         if (ownerBN && ethers.utils.getAddress(ownerBN.toString()) === ethers.utils.getAddress(address)) {
           return await this.getProxy(accessToken);
         }

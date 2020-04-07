@@ -1,0 +1,33 @@
+import { Constructor, TinlakeParams } from '../Tinlake';
+import BN from 'bn.js';
+export declare function CollateralActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase): {
+    new (...args: any[]): {
+        mintTitleNFT: (user: string) => Promise<any>;
+        mintNFT: (owner: string, tokenId: string, ref: string, amount: string, asset: string) => Promise<unknown>;
+        approveNFT: (tokenId: string, to: string) => Promise<unknown>;
+        getNFTCount: () => Promise<BN>;
+        getNFTData: (tokenId: string) => Promise<any>;
+        getNFTOwner: (tokenId: string) => Promise<BN>;
+        transferNFT: (from: string, to: string, tokenId: string) => Promise<unknown>;
+        provider: any;
+        eth: import("../services/ethereum").ethI;
+        ethOptions: any;
+        ethConfig: {} | import("../Tinlake").EthConfig;
+        contractAddresses: import("../Tinlake").ContractAddresses;
+        transactionTimeout: number;
+        contracts: import("../Tinlake").Contracts;
+        contractAbis: import("../Tinlake").ContractAbis;
+        setProvider: (provider: any, ethOptions?: any) => void;
+        setEthConfig: (ethConfig: {} | import("../Tinlake").EthConfig) => void;
+    };
+} & ActionsBase;
+export declare type ICollateralActions = {
+    mintTitleNFT(usr: string): Promise<any>;
+    mintNFT(owner: string, tokenId: string, ref: string, amount: string, asset: string): Promise<any>;
+    approveNFT(tokenId: string, to: string): Promise<any>;
+    getNFTCount(): Promise<BN>;
+    getNFTData(tokenId: string): Promise<any>;
+    getNFTOwner(tokenId: string): Promise<BN>;
+    transferNFT(from: string, to: string, tokenId: string): Promise<any>;
+};
+export default CollateralActions;

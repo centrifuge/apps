@@ -21,20 +21,20 @@ const lookup: { [fee: string]: string } = {};
  * @param fee Fee
  */
 export const feeToInterestRate = (fee: string|BN): string => {
+  let feeToConvert = fee;
+  if (typeof feeToConvert !== 'string' && typeof feeToConvert !== 'number') { feeToConvert = feeToConvert.toString(); }
 
-  if (typeof fee !== 'string' && typeof fee !== 'number') { fee = fee.toString(); }
-  
-  if ( fee.toString() === "0") { return fee.toString() }
+  if (feeToConvert.toString() === '0') { return feeToConvert.toString(); }
 
-  if (lookup[fee]) { return lookup[fee]; }
+  if (lookup[feeToConvert]) { return lookup[feeToConvert]; }
 
-  const i = new Decimal(fee).div('1e27').pow(n);
+  const i = new Decimal(feeToConvert).div('1e27').pow(n);
 
   const interestRate = i.minus(1).mul(100);
 
   const interestRateString = interestRate.toString();
 
-  lookup[fee] = interestRateString;
+  lookup[feeToConvert] = interestRateString;
 
   return interestRateString;
 };

@@ -1,18 +1,18 @@
 import assert from 'assert';
 const account = require('ethjs-account');
 const randomString = require('randomstring');
-import testConfig from '../../test/config';
-import { ITinlake } from '../Tinlake';
-import { createTinlake, TestProvider } from '../../test/utils';
-import { Account } from '../../test/types';
+import testConfig from '../test/config';
+import { ITinlake } from '../types/tinlake';
+import { createTinlake, TestProvider } from '../test/utils';
+import { Account } from '../test/types';
 
 const adminAccount = account.generate(randomString.generate(32));
 let borrowerAccount: Account;
 
 // user with super powers can fund and rely accounts
-const governanceTinlake = createTinlake(testConfig.godAccount, testConfig);
-const adminTinlake = createTinlake(adminAccount, testConfig);
-let borrowerTinlake: ITinlake;
+const governanceTinlake: Partial<ITinlake> = createTinlake(testConfig.godAccount, testConfig);
+const adminTinlake: Partial<ITinlake> = createTinlake(adminAccount, testConfig);
+let borrowerTinlake: Partial<ITinlake>;
 
 const testProvider = new TestProvider(testConfig);
 
@@ -90,7 +90,7 @@ describe('borrower tests', async () => {
   });
 });
 
-async function mintIssue(usr: string, tinlake: ITinlake) {
+async function mintIssue(usr: string, tinlake: Partial<ITinlake>) {
   // super user mints nft for borrower
   const tokenId : any = await governanceTinlake.mintTitleNFT(usr);
   assert(tokenId);
@@ -109,7 +109,7 @@ async function mintIssue(usr: string, tinlake: ITinlake) {
   return { tokenId: `${tokenId}`, loanId : `${loanId}` };
 }
 
-async function mintIssueBorrow(usr: string, tinlake: ITinlake, amount: string) {
+async function mintIssueBorrow(usr: string, tinlake: Partial<ITinlake>, amount: string) {
   const { tokenId, loanId } = await mintIssue(usr, tinlake);
   // approve shelf to take nft
   await borrowerTinlake.approveNFT(tokenId, contractAddresses['SHELF']);
