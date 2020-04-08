@@ -14,7 +14,6 @@ const SecondaryHeader = withTheme((props) => {
   return (
     <StyledSecondaryHeader
       background="white"
-      pad={{ horizontal: 'medium' }}
       justify="between"
       direction="row"
       align="center"

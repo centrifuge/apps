@@ -1,21 +1,20 @@
 import * as React from 'react';
-import Tinlake from 'tinlake';
+import {Tinlake} from 'tinlake';
 import { getTinlake } from '../../services/tinlake';
 
 interface Props {
-  render: (tinlake: Tinlake) => React.ReactElement;
+  render: (tinlake: any) => React.ReactElement;
 }
 
 class WithTinlake extends React.Component<Props> {
   state = { loading: true };
-  tinlake: Tinlake|null = null;
+  tinlake: any |null = null;
   isMounted = false;
 
-  componentWillMount() {
-    this.init();
-  }
+  componentWillMount() {}
 
   componentDidMount() {
+    this.init();
     this.isMounted = true;
   }
 
@@ -25,7 +24,6 @@ class WithTinlake extends React.Component<Props> {
 
   init = async () => {
     this.tinlake = await getTinlake();
-
     if (this.isMounted) {
       this.setState({ loading: false });
     }
@@ -33,7 +31,6 @@ class WithTinlake extends React.Component<Props> {
 
   render() {
     if (this.state.loading || !this.tinlake) { return null; }
-
     return this.props.render(this.tinlake);
   }
 }
