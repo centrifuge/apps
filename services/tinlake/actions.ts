@@ -1,54 +1,15 @@
 import BN from 'bn.js';
-import { interestRateToFee } from 'tinlake';
+import { Loan, Investor, NFT, interestRateToFee } from 'tinlake';
 import config from '../../config';
 
 const { contractAddresses } = config;
 const SUCCESS_STATUS = '0x1';
 const nftRegistryAddress = contractAddresses['COLLATERAL_NFT'];
-
-export interface NFT {
-  tokenId: BN;
-  nftOwner: string;
-  nftData: any;
-}
-
-export interface Loan {
-  loanId: BN;
-  registry: string;
-  tokenId: BN;
-  ownerOf: BN;
-  principal: BN;
-  interestRate: BN;
-  debt: BN;
-  threshold?: BN;
-  price?: BN;
-  status?: string;
-  nft?: NFT;
-  proxyOwner?: string
-}
-
-export interface Investor {
-  maxSupplyJunior: BN;
-  maxSupplySenior?: BN;
-  maxRedeemJunior: BN;
-  maxRedeemSenior?: BN;
-  tokenBalanceJunior: BN;
-  tokenBalanceSenior?: BN;
-  address: string;
-}
-
-export interface TinlakeResult {
+interface TinlakeResult {
   data?: any,
   errorMsg?: string,
   tokenId?: string,
   loanId?: string
-}
-
-export interface Tranche {
-  availableFunds: BN, 
-  tokenPrice: BN,
-  type: string,
-  token: string
 }
 
 export async function getNFT(tinlake: any, tokenId: string) {
@@ -235,7 +196,7 @@ export async function getAnalytics(tinlake: any) {
       data: {
         junior: {
           type: "Junior",
-          availableFunds: await tinlake.getTrancheBalance(),
+          availableFunds: await tinlake.getJuniorReserve(),
           tokenPrice: await tinlake.getTokenPriceJunior(),
           token: "TIN"
         }

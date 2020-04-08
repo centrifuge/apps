@@ -1,16 +1,9 @@
 import * as React from 'react';
 import { FormField, TextInput } from 'grommet';
 import NumberInput from '../NumberInput';
-import { baseToDisplay, AbiOutput, bnToHex } from 'tinlake';
+import { baseToDisplay, bnToHex } from 'tinlake';
 import { convert as convertToTimestamp } from './../../utils/timestampConverter';
 const web3 = require('web3-utils');
-
-export interface NftDataDefinition {
-  contractCall: {
-    outputs: AbiOutput[]
-  };
-  displayedFields: DisplayedField[];
-}
 
 interface DisplayedFieldBase {
   key: string;
