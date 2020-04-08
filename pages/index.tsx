@@ -1,17 +1,14 @@
-import { Box, Anchor, Grommet } from 'grommet';
+import { Box } from 'grommet';
 import Header from '../components/Header';
-import Link from 'next/link';
 import Dashboard from '../containers/Dashboard';
 import WithTinlake from '../components/WithTinlake';
-import WithApollo from '../components/WithApollo';
 import { menuItems } from '../menuItems';
 
 function Home() {
-  return <Box align="center">
+  return <Box align="center" pad={{horizontal: "small"}}>
   <Header
     selectedRoute={'/'}
     menuItems={menuItems}
-    section=""
   />
   <Box
     justify="center"
@@ -19,7 +16,7 @@ function Home() {
   >
     <Box width="xlarge" >
       <WithTinlake render={tinlake =>
-        <WithApollo render={apolloClient => <Dashboard tinlake={tinlake} apolloClient={apolloClient} />} />
+        <Dashboard tinlake={tinlake} />
       }/>
     </Box>
   </Box>

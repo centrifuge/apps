@@ -1,30 +1,49 @@
 import { AnyAction, Action } from 'redux';
-import Tinlake, { Address } from 'tinlake';
 import { ThunkAction } from 'redux-thunk';
-
-declare var web3: any;
+import { networkIdToName } from '../utils/networkNameResolver';
 
 // Actions
 const LOAD = 'tinlake-ui/auth/LOAD';
 const RECEIVE = 'tinlake-ui/auth/RECEIVE';
 const CLEAR = 'tinlake-ui/auth/CLEAR';
+const CLEAR_NETWORK = 'tinlake-ui/auth/CLEAR_NETWORK';
+const RECEIVE_NETWORK = 'tinlake-ui/auth/RECEIVE_NETWORK';
 const OBSERVING_AUTH_CHANGES = 'tinlake-ui/auth/OBSERVING_AUTH_CHANGES';
 
 export interface User {
-  isAdmin: boolean;
-  address: Address;
+  address: string;
+  permissions: Permissions;
+}
+
+export interface Permissions {
+  // loan admin permissions
+  canIssueLoan: boolean;
+  canSetCeiling: boolean;
+  canSetInterestRate: boolean;
+  // tranche admin permissions
+  canSetEquityRatio: boolean;
+  canSetRiskScore: boolean;
+  canSetSeniorTrancheInterestRate: boolean;
+  // lender admin permissions
+  canSetInvestorAllowanceJunior: boolean;
+  // collector permissions
+  canSetThreshold: boolean;
+  canSetLoanPrice: boolean;
+  canActAsKeeper: boolean;
 }
 
 export interface AuthState {
   observingAuthChanges: boolean;
   state: null | 'loading' | 'loaded';
   user: null | User;
+  network: null | string;
 }
 
 const initialState: AuthState = {
   observingAuthChanges: false,
   state: null,
   user: null,
+  network: null
 };
 
 // Reducer
@@ -35,17 +54,18 @@ export default function reducer(state: AuthState = initialState,
     case RECEIVE: return { ...state, state: 'loaded', user: action.user };
     case CLEAR: return { ...state, state: 'loaded', user: null };
     case OBSERVING_AUTH_CHANGES: return { ...state, observingAuthChanges: true };
+    case CLEAR_NETWORK: return { ...state, network: null };
+    case RECEIVE_NETWORK: return { ...state, network: action.network };
     default: return state;
   }
 }
 
 // side effects, only as applicable
 // e.g. thunks, epics, etc
-export function loadUser(tinlake: Tinlake, address: Address):
+export function loadUser(tinlake: any, address: string):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     const { auth } = getState();
-
     // don't load again if already loading
     if (auth.state === 'loading') {
       return;
@@ -58,26 +78,60 @@ export function loadUser(tinlake: Tinlake, address: Address):
     }
 
     // if user is already loaded, don't load again
-    if (auth.user && auth.user.address === address) {
+    if (auth.user && auth.user.address.toLowerCase() === address.toLowerCase()) {
       return;
     }
 
     dispatch({ type: LOAD });
 
-    const isAdminPromise = tinlake.isAdmin(address);
+    const ceilingPermission = await tinlake.canSetCeiling(address)
+    const interestRatePermission = await tinlake.canSetInterestRate(address)
+    const thresholdPermission = await tinlake.canSetThreshold(address)
+    const loanPricePermission = await tinlake.canSetLoanPrice(address)
+    const equityRatioPermission = await tinlake.canSetEquityRatio(address)
+    const riskScorePermission = await tinlake.canSetRiskScore(address)
+    const investorAllowancePermissionJunior = await tinlake.canSetInvestorAllowanceJunior(address)
 
     const user = {
       address,
-      isAdmin: await isAdminPromise,
-    };
-
+      permissions: {
+        canSetCeiling: ceilingPermission,
+        canSetInterestRate: interestRatePermission,
+        canSetThreshold: thresholdPermission,
+        canSetLoanPrice: loanPricePermission,
+        canSetEquityRatio: equityRatioPermission,
+        canSetRiskScore: riskScorePermission,
+        canSetInvestorAllowanceJunior: investorAllowancePermissionJunior
+        // TODO: canActAsKeeper
+      }
+    }
     dispatch({ user, type: RECEIVE });
+  };
+}
+
+export function loadNetwork(network: string):
+  ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+  return async (dispatch, getState) => {
+    const { auth } = getState();
+
+    if (!network) {
+      dispatch({ type: CLEAR_NETWORK });
+      return;
+    }
+
+    const networkName = networkIdToName(network);
+    // if network is already loaded, don't load again
+    if (auth.network === networkName) {
+      return;
+    }
+
+    dispatch({ network: networkName, type: RECEIVE_NETWORK });
   };
 }
 
 let providerChecks: number;
 
-export function observeAuthChanges(tinlake: Tinlake):
+export function observeAuthChanges(tinlake: any):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
 
@@ -85,26 +139,33 @@ export function observeAuthChanges(tinlake: Tinlake):
     if (state.auth.observingAuthChanges) {
       return;
     }
-
-    // if HTTPProvider is present, regularly check fox provider changes
+    // if HTTPProvider is present, regularly check for provider changes
     if (tinlake.provider.host) {
       if (!providerChecks) {
-        // console.log('Found HTTPProvider - check for provider changes every 200 ms');
-        providerChecks = setInterval(() => dispatch(observeAuthChanges(tinlake)), 2000);
+        // Found HTTPProvider - check for provider changes every 100 ms'
+        providerChecks = setInterval(() => dispatch(observeAuthChanges(tinlake)), 100);
       }
       return;
     }
 
     if (providerChecks) {
-      // console.log('Provider changed, clear checking');
+      // 'Provider changed, clear checking'
       clearInterval(providerChecks);
-      dispatch(loadUser(tinlake, tinlake.ethConfig.from));
+      const providerConfig = tinlake.provider && tinlake.provider.publicConfigStore && tinlake.provider.publicConfigStore.getState();
+      if (providerConfig) {
+        dispatch(loadUser(tinlake, providerConfig.selectedAddress));
+        dispatch(loadNetwork(providerConfig.networkVersion));
+      } else {
+        dispatch(loadUser(tinlake, tinlake.ethConfig.from));
+      }
     }
 
     dispatch({ type: OBSERVING_AUTH_CHANGES });
-    tinlake.provider.on('accountsChanged', (accounts: Address[]) => {
-      tinlake.ethConfig = { from: accounts[0] };
-      dispatch(loadUser(tinlake, accounts[0]));
+
+    tinlake.provider.publicConfigStore.on('update',  (state: any) => {
+      tinlake.ethConfig = { from: state.selectedAddress };
+      dispatch(loadNetwork(state.networkVersion));
+      dispatch(loadUser(tinlake, state.selectedAddress));
     });
   };
 }

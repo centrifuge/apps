@@ -7,7 +7,7 @@ const web3 = require('web3-utils');
 
 export interface NftDataDefinition {
   contractCall: {
-    outputs: AbiOutput[],
+    outputs: AbiOutput[]
   };
   displayedFields: DisplayedField[];
 }
@@ -48,6 +48,11 @@ class NftDataField extends React.Component<Props> {
 
     if (field.type === 'uint') {
       const { label, decimals, precision, suffix } = field;
+      if (!decimals || !precision) {
+        return <FormField label={label}>
+          <NumberInput value={value.toNumber()} suffix={suffix} precision={0} disabled />
+        </FormField>;
+      }
       return <FormField label={label}>
         <NumberInput value={baseToDisplay(value, decimals || 18)} suffix={suffix}
           precision={precision} disabled />
@@ -78,6 +83,13 @@ class NftDataField extends React.Component<Props> {
       const msg = web3.hexToUtf8(bnToHex(value));
       return <FormField label={label}>
         <TextInput value={msg} disabled />
+      </FormField>;
+    }
+
+    if (field.type === 'utf8_string') {
+      const { label } = field;
+      return <FormField label={label}>
+        <TextInput value={value} disabled />
       </FormField>;
     }
 

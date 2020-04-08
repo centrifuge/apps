@@ -1,16 +1,14 @@
 import * as React from 'react';
-import Tinlake from 'tinlake';
 import { Box, Button, Heading, Text } from 'grommet';
 import Alert from '../Alert';
-import Link from 'next/link';
 import SecondaryHeader from '../SecondaryHeader';
-import { LinkPrevious } from 'grommet-icons';
+import { BackLink } from '../BackLink';
 import { authTinlake } from '../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import BN from 'bn.js';
 
 interface Props {
-  tinlake: Tinlake;
+  tinlake: any;
 }
 
 interface State {
@@ -23,11 +21,11 @@ const SUCCESS_STATUS = '0x1';
 class Approve extends React.Component<Props, State> {
   state: State = {
     is: null,
-    errorMsg: '',
+    errorMsg: ''
   };
 
   approve = async () => {
-    const { tinlake } = this.props
+    const { tinlake } = this.props;
     const addresses = tinlake.contractAddresses;
 
     this.setState({ is: 'loading' });
@@ -35,7 +33,7 @@ class Approve extends React.Component<Props, State> {
     try {
       await authTinlake();
 
-      const amount = (new BN(-1)).toString()
+      const amount = (new BN(-1)).toString();
       const approveCurrencyResult = await tinlake.approveCurrency(addresses['LENDER'], amount);
 
       if (approveCurrencyResult.status !== SUCCESS_STATUS || approveCurrencyResult.events[0].event.name !== 'Approval') {
@@ -63,9 +61,7 @@ class Approve extends React.Component<Props, State> {
     return <Box>
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">
-          <Link href="/borrower">
-            <LinkPrevious />
-          </Link>
+          <BackLink href="/loans" />
           <Heading level="3">Approve</Heading>
         </Box>
 

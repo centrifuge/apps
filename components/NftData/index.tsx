@@ -1,24 +1,17 @@
 import * as React from 'react';
-import { InternalSingleLoan } from '../../ducks/loans';
-import { Text, Box, FormField, TextInput, Heading, Paragraph } from 'grommet';
+import { Text, Box, Heading, Paragraph } from 'grommet';
 import styled from 'styled-components';
-import { formatAddress } from '../../utils/formatAddress';
-import MeBadge from '../MeBadge';
-import { NFT } from '../../ducks/nft';
+import Badge from '../Badge';
+import { NFT } from '../../services/tinlake/actions';
 import NftDataField, { DisplayedField } from '../NftDataField';
 import config from '../../config';
+import { DisplayField } from '@centrifuge/axis-display-field';
+import { getNFTLink, getAddressLink, hexToInt } from '../../utils/etherscanLinkGenerator';
+import { bnToHex } from 'tinlake';
 
 interface Props {
-  data: InternalSingleLoan | NFT;
+  data: NFT;
   authedAddr: string;
-}
-
-interface NftData {
-  document_version: string;
-  amount: string;
-  asis_value: string;
-  rehab_value: string;
-  borrower: string;
 }
 
 class NftData extends React.Component<Props> {
@@ -32,12 +25,12 @@ class NftData extends React.Component<Props> {
     return nftDataDefinition.displayedFields.map((field: DisplayedField) =>
         <Box basis={'1/4'} gap="medium" key={field.key}>
           <NftDataField displayedField={field} value={data.nftData[field.key]} />
-        </Box>,
+        </Box>
       );
   }
 
   render() {
-    const { nftDataDefinition } = config;
+    const { nftDataDefinition, contractAddresses } = config;
     const { data: { tokenId, nftOwner }, authedAddr } = this.props;
 
     // create empty boxes for layout purposes if nft data has != 4 entries
@@ -45,17 +38,33 @@ class NftData extends React.Component<Props> {
       ...Array(nftDataFillersNeeded(nftDataDefinition.displayedFields.length)).keys()];
 
     return <NftDataContainer>
-      <Heading level="6" margin="none">NFT Data</Heading>
+      <Heading level="5" margin="none">NFT Data</Heading>
       <Box direction="row" gap="medium" margin={{ bottom: 'large', top: 'medium' }}>
-        <Box basis={'1/4'} gap="medium"><FormField label="NFT ID">
-          <TextInput value={formatAddress(tokenId.toString())} disabled
-            title={tokenId.toString()}/></FormField></Box>
         <Box basis={'1/4'} gap="medium">
-          <FormField label="NFT Owner" style={{ position: 'relative' }}>
-            <TextInput value={formatAddress(nftOwner)} disabled title={nftOwner} />
+         <DisplayField
+            label={'NFT ID'}
+            copy={true}
+            as={'span'}
+            value={hexToInt(bnToHex(tokenId).toString())}
+            link={{
+              href: getNFTLink(hexToInt(bnToHex(tokenId).toString()), contractAddresses['NFT_COLLATERAL']),
+              target: '_blank'
+            }}
+          />
+        </Box>
+        <Box basis={'1/4'} gap="medium">
+          <DisplayField
+            label={'NFT Owner'}
+            copy={true}
+            as={'span'}
+            value={nftOwner}
+            link={{
+              href: getAddressLink(nftOwner),
+              target: '_blank'
+            }}
+            />
             {authedAddr === nftOwner &&
-              <MeBadge style={{ position: 'absolute', left: 100, top: 32 }} />}
-          </FormField>
+            <Badge text={'Me'} style={{ position: 'absolute', left: 100, top: 32 }} />}
         </Box>
         <Box basis={'1/4'} gap="medium" />
         <Box basis={'1/4'} gap="medium" />
