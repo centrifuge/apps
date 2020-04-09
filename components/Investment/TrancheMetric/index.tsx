@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { Box, Text } from 'grommet';
+import { Box } from 'grommet';
 import { baseToDisplay } from 'tinlake';
 import NumberDisplay from '../../NumberDisplay';
 import { Tranche } from '../../../services/tinlake/actions';
 import DashboardMetric from '../../DashboardMetric';
 import styled from 'styled-components';
 import { calcMaxRedeemAmount } from '../../../utils/maxRedeemAmount';
-import NumberInput from '../../NumberInput';
 
 interface Props {
   tranche: Tranche;
@@ -17,7 +16,7 @@ class TrancheMetric extends React.Component<Props> {
     const { availableFunds, tokenPrice, type, token} = this.props.tranche;
     const reserveLabel = `${type} total funds in reserve`;
     const priceLable = `${type} token price`;
-    const redeemLabel = `${type} maximum Redeem amount`;
+    const redeemLabel = `${type} maximum redeem amount`;
     const trancheTokenLabel =` ${token}`;
     const maxRedeemAmount = calcMaxRedeemAmount(availableFunds, tokenPrice);
     return <Box>
