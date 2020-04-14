@@ -27,9 +27,9 @@ interface State {
 class LoanBorrow extends React.Component<Props, State> {
 
   componentWillMount() {
-    const { loan } = this.props;
+    const { loan, tinlake, loadAnalyticsData } = this.props;
     this.setState({ borrowAmount: (loan.principal || '0') });
-    loadAnalyticsData && loadAnalyticsData(this.props.tinlake);
+    loadAnalyticsData && loadAnalyticsData(tinlake);
   }
 
   borrow = async () => {
@@ -76,7 +76,7 @@ class LoanBorrow extends React.Component<Props, State> {
              Available funds exceeded. <br /> 
              Amount has to be lower then <br />
              <Text weight="bold">
-              {`${availableFunds.toString()}`}
+              {`${baseToDisplay(availableFunds, 18)}`}
              </Text>
            </Box>
            }
@@ -85,7 +85,7 @@ class LoanBorrow extends React.Component<Props, State> {
             Max borrow amount exceeded.   <br /> 
             Amount has to be lower then <br />
             <Text weight="bold">
-              {`${loan.principal.toString()}`}
+              {`${baseToDisplay(loan.principal, 18)}`}
             </Text>
           </Box>
         }

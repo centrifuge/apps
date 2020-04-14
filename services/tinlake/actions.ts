@@ -1,5 +1,5 @@
 import BN from 'bn.js';
-import { Loan, Investor, NFT, interestRateToFee } from 'tinlake';
+import { Loan, Investor, Tranche, NFT, interestRateToFee } from 'tinlake';
 import config from '../../config';
 
 const { contractAddresses } = config;
@@ -215,7 +215,9 @@ export async function borrow(tinlake: any, loan: Loan, amount: string) {
   const proxy = loan.ownerOf;
 
   // make sure tranche has enough funds
-  const trancheReserve = await tinlake.getTrancheBalance();
+  const juniorReserve = await tinlake.getJuniorReserve();
+  const seniorReserve = await tinlake.getSeniorReserve();
+  const trancheReserve = juniorReserve.add(seniorReserve);
   if(new BN(amount).cmp(trancheReserve) > 0) {
     return loggedError({},'There is not enough available funds.', loanId);
   }

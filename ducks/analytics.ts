@@ -1,6 +1,7 @@
 import { AnyAction, Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
-import { getAnalytics, TinlakeResult, Tranche } from '../services/tinlake/actions'
+import { getAnalytics, TinlakeResult } from '../services/tinlake/actions'
+import { Tranche } from 'tinlake';
 
 // Actions
 const LOAD_ANALYTICS = 'tinlake-ui/analytics/LOAD_ANALYTICS';

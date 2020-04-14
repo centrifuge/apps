@@ -27,7 +27,8 @@ interface Props {
 class LoanView extends React.Component<Props> {
 
   componentWillMount() {
-    this.props.loanId && this.props.loadLoan!(this.props.tinlake, this.props.loanId);
+    const { tinlake, loanId } = this.props;
+    this.props.loanId && this.props.loadLoan!(tinlake, loanId);
     this.props.resetTransactionState && this.props.resetTransactionState();
   }
 

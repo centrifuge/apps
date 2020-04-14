@@ -80,7 +80,7 @@ class InvestorRedeem extends React.Component<Props, State> {
             Max redeem amount exceeded.   <br /> 
             Amount has to be lower then <br />
             <Text weight="bold">
-              {`${maxRedeemAmount.toString()}`}
+              {`${baseToDisplay(maxRedeemAmount, 18)}`}
             </Text>
           </Box>
         }
@@ -90,7 +90,7 @@ class InvestorRedeem extends React.Component<Props, State> {
             Available token amount exceeded.   <br /> 
             Amount has to be lower then <br />
             <Text weight="bold">
-              {`${juniorTokenBalance.toString()}`}
+              {`${baseToDisplay(juniorTokenBalance, 18)}`}
             </Text>
           </Box>
         }
