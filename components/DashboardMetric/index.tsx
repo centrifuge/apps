@@ -8,9 +8,10 @@ interface Props {
 const DashboardMetric: FunctionComponent<Props> = ({ label, children }) => {
   return <Box
     pad="medium"
-    background="light-1"
+    background="white"
     elevation="medium"
     gap="xsmall"
+    margin="medium"
   >
     <Text textAlign="center" weight="bold" style={{ fontSize: 28, lineHeight: '40px' }}>
       {children}</Text>

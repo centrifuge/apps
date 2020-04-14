@@ -89,8 +89,6 @@ class IssueLoan extends React.Component<Props, State> {
         :
         <Box>
         <Box>
-          {is === 'success' && <Alert type="success">
-            Successfully opened loan for Token ID {tokenId}</Alert>}
           {is === 'error' && <Alert type="error">
             <Text weight="bold">
               Error opening loan for Token ID {tokenId}, see console for details</Text>
