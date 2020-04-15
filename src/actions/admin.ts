@@ -20,18 +20,8 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return res[0].toNumber() === 1;
     }
 
-    canSetJuniorTrancheInterest = async (user: string) => {
-      const res : { 0: BN } = await executeAndRetry(this.contracts['JUNIOR'].wards, [user]);
-      return res[0].toNumber() === 1;
-    }
-
     canSetSeniorTrancheInterest = async (user: string) => {
       const res : { 0: BN } = await executeAndRetry(this.contracts['SENIOR'].wards, [user]);
-      return res[0].toNumber() === 1;
-    }
-
-    canSetEquityRatio = async (user: string) => {
-      const res : { 0: BN } = await executeAndRetry(this.contracts['ASSESSOR'].wards, [user]);
       return res[0].toNumber() === 1;
     }
 
@@ -41,8 +31,18 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     // lender permissions (note: allowance operator for default deployment)
+    canSetEquityRatio = async (user: string) => {
+      const res : { 0: BN } = await executeAndRetry(this.contracts['ASSESSOR'].wards, [user]);
+      return res[0].toNumber() === 1;
+    }
+
     canSetInvestorAllowanceJunior = async (user: string) => {
       const res : { 0: BN } = await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].wards, [user]);
+      return res[0].toNumber() === 1;
+    }
+
+    canSetInvestorAllowanceSenior = async (user: string) => {
+      const res : { 0: BN } = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].wards, [user]);
       return res[0].toNumber() === 1;
     }
 
@@ -91,10 +91,22 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     // ------------ admin functions lender-site -------------
+    setEquityRatio = async (amount: string) => {
+      const txHash = await executeAndRetry(this.contracts['ASSESSOR'].file, ['minJuniorRatio', amount, this.ethConfig]);
+      console.log(`[Assessor file] txHash: ${txHash}`);
+      return waitAndReturnEvents(this.eth, txHash, this.contracts['ASSESSOR'].abi, this.transactionTimeout);
+    }
+    
     approveAllowanceJunior = async (user: string, maxCurrency: string, maxToken: string) => {
       const txHash = await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].approve, [user, maxCurrency, maxToken, this.ethConfig]);
-      console.log(`[Approve allowance] txHash: ${txHash}`);
+      console.log(`[Approve allowance Junior] txHash: ${txHash}`);
       return waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_OPERATOR'].abi, this.transactionTimeout);
+    }
+
+    approveAllowanceSenior = async (user: string, maxCurrency: string, maxToken: string) => {
+      const txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [user, maxCurrency, maxToken, this.ethConfig]);
+      console.log(`[Approve allowance Senior] txHash: ${txHash}`);
+      return waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_OPERATOR'].abi, this.transactionTimeout);
     }
   };
 }
@@ -108,17 +120,19 @@ export type IAdminActions = {
   isWard(user: string, contractName: ContractNames): Promise<BN>,
   canSetCeiling(user: string): Promise<boolean>,
   canSetInterestRate(user: string): Promise<boolean>,
-  canSetJuniorTrancheInterest(user: string): Promise<boolean>,
   canSetSeniorTrancheInterest(user: string): Promise<boolean>,
   canSetEquityRatio(user: string): Promise<boolean>,
   canSetRiskScore(user: string): Promise<boolean>,
   canSetInvestorAllowanceJunior(user: string): Promise<boolean>,
+  canSetInvestorAllowanceSenior(user: string): Promise<boolean>,
   canSetThreshold(user: string): Promise<boolean>,
   canSetLoanPrice(user: string): Promise<boolean>,
   setCeiling(loanId: string, amount: string): Promise<any>,
   initRate(rate: string): Promise<any>,
   setRate(loan: string, rate: string): Promise<any>,
+  setEquityRatio(amount: string): Promise<any>,
   approveAllowanceJunior(user: string, maxCurrency: string, maxToken: string): Promise<any>,
+  approveAllowanceSenior(user: string, maxCurrency: string, maxToken: string): Promise<any>,
 };
 
 export default AdminActions;

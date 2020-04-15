@@ -27,6 +27,10 @@ export declare function AnalyticsActions<ActionsBase extends Constructor<Tinlake
         getTokenPriceSenior: () => Promise<any>;
         getSeniorReserve: () => Promise<BN>;
         getJuniorReserve: () => Promise<BN>;
+        getMinEquityRatio: () => Promise<BN>;
+        getCurrentEquityRatio: () => Promise<BN>;
+        getSeniorDebt: () => Promise<BN>;
+        getSeniorInterestRate: () => Promise<BN>;
         provider: any;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;
@@ -62,6 +66,10 @@ export declare type IAnalyticsActions = {
     getMaxRedeemAmountSenior(user: string): Promise<BN>;
     getTokenPriceJunior(): Promise<BN>;
     getTokenPriceSenior(): Promise<BN>;
+    getSeniorDebt(): Promise<BN>;
+    getSeniorInterestRate(): Promise<BN>;
+    getMinEquityRatio(): Promise<BN>;
+    getCurrentEquityRatio(): Promise<BN>;
     getInvestor(user: string): Promise<Investor>;
 };
 export default AnalyticsActions;

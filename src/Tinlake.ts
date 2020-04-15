@@ -105,7 +105,9 @@ export default class Tinlake {
       }
     });
   }
+
   setEthConfig = (ethConfig: EthConfig | {}) => {
     this.ethConfig = ethConfig;
   }
+
 }

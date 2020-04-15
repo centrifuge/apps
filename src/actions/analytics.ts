@@ -175,6 +175,25 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return res[0] || new BN(0);
     }
 
+    getMinEquityRatio = async () => {
+      const res: { 0: BN } =  await executeAndRetry(this.contracts['ASSESSOR'].minJuniorRatio, []);
+      return res[0] || new BN(0);
+    }
+
+    getCurrentEquityRatio = async () => {
+      const res: { 0: BN } =  await executeAndRetry(this.contracts['ASSESSOR'].currentJuniorRatio, []);
+      return res[0] || new BN(0);
+    }
+
+    getSeniorDebt = async () => {
+      const res: { 0: BN } =  await executeAndRetry(this.contracts['SENIOR'].debt, []);
+      return res[0] || new BN(0);
+    }
+
+    getSeniorInterestRate = async () => {
+      const res: { 0: BN } =  await executeAndRetry(this.contracts['SENIOR'].ratePerSecond, []);
+      return res[0] || new BN(0);
+    }
   };
 }
 
@@ -201,6 +220,10 @@ export type IAnalyticsActions = {
   getMaxRedeemAmountSenior(user: string): Promise<BN>,
   getTokenPriceJunior(): Promise<BN>,
   getTokenPriceSenior(): Promise<BN>,
+  getSeniorDebt(): Promise<BN>,
+  getSeniorInterestRate(): Promise<BN>,
+  getMinEquityRatio(): Promise<BN>,
+  getCurrentEquityRatio(): Promise<BN>,
   getInvestor(user:string): Promise<Investor>,
 };
 
