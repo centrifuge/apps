@@ -8,7 +8,7 @@ interface Props {
 }
 
 const NumberDisplay: FunctionComponent<Props> = ({ value, precision, prefix, suffix }: Props) => {
-  const formatted = Number(parseFloat(value))
+  const formatted = parseFloat(value)
     .toLocaleString('en-GB', { style: 'decimal',
       minimumFractionDigits: precision, maximumFractionDigits: precision });
 
