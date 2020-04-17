@@ -29,6 +29,7 @@ export declare function AnalyticsActions<ActionsBase extends Constructor<Tinlake
         getJuniorReserve: () => Promise<BN>;
         getMinJuniorRatio: () => Promise<BN>;
         getCurrentJuniorRatio: () => Promise<BN>;
+        getAssetValueJunior: () => Promise<BN>;
         getSeniorDebt: () => Promise<BN>;
         getSeniorInterestRate: () => Promise<BN>;
         provider: any;
@@ -70,6 +71,7 @@ export declare type IAnalyticsActions = {
     getSeniorInterestRate(): Promise<BN>;
     getMinJuniorRatio(): Promise<BN>;
     getCurrentJuniorRatio(): Promise<BN>;
+    getAssetValueJunior(): Promise<BN>;
     getInvestor(user: string): Promise<Investor>;
 };
 export default AnalyticsActions;

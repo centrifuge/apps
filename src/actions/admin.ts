@@ -48,8 +48,8 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       if (this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS) {
         const res : { 0: BN } = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].wards, [user]);
         return res[0].toNumber() === 1;
-      } 
-      return false
+      }
+      return false;
     }
 
     canSetThreshold = async (user: string) => {

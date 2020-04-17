@@ -30003,6 +30003,17 @@ function AnalyticsActions(Base) {
                     }
                 });
             }); };
+            _this.getAssetValueJunior = function () { return __awaiter(_this, void 0, void 0, function () {
+                var res;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].calcAssetValue, [this.contractAddresses['JUNIOR']])];
+                        case 1:
+                            res = _a.sent();
+                            return [2 /*return*/, res[0] || new bn(0)];
+                    }
+                });
+            }); };
             _this.getSeniorDebt = function () { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {

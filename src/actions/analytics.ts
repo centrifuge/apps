@@ -118,9 +118,9 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
         senior: {
           tokenBalance: tokenBalanceSenior || new BN(0),
           maxSupply: maxSupplySenior || new BN(0),
-          maxRedeem: maxRedeemSenior || new BN(0)
+          maxRedeem: maxRedeemSenior || new BN(0),
         },
-        address: user
+        address: user,
       };
     }
 
@@ -176,7 +176,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
         const res =  await executeAndRetry(this.contracts['ASSESSOR'].calcTokenPrice, [this.contractAddresses['SENIOR']]);
         return res[0];
-      } 
+      }
       return new BN(0);
     }
 
@@ -200,6 +200,11 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
 
     getCurrentJuniorRatio = async () => {
       const res: { 0: BN } =  await executeAndRetry(this.contracts['ASSESSOR'].currentJuniorRatio, []);
+      return res[0] || new BN(0);
+    }
+
+    getAssetValueJunior = async () => {
+      const res: { 0: BN } =  await executeAndRetry(this.contracts['ASSESSOR'].calcAssetValue, [this.contractAddresses['JUNIOR']]);
       return res[0] || new BN(0);
     }
 
@@ -248,6 +253,7 @@ export type IAnalyticsActions = {
   getSeniorInterestRate(): Promise<BN>,
   getMinJuniorRatio(): Promise<BN>,
   getCurrentJuniorRatio(): Promise<BN>,
+  getAssetValueJunior(): Promise<BN>,
   getInvestor(user:string): Promise<Investor>,
 };
 
