@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { Box, FormField, Button } from 'grommet';
+import { Box, FormField, Button, Heading } from 'grommet';
 import NumberInput from '../../../components/NumberInput';
-import { Investor, setAllowanceJunior } from '../../../services/tinlake/actions';
+import { Investor, TrancheType, setAllowance } from '../../../services/tinlake/actions';
 import { transactionSubmitted, responseReceived } from '../../../ducks/transactions';
 import { baseToDisplay, displayToBase } from 'tinlake';
 import { loadInvestor } from '../../../ducks/investments';
@@ -14,6 +14,7 @@ interface Props {
   loadInvestor?: (tinlake: any, address: string, refresh?: boolean) => Promise<void>;
   transactionSubmitted?: (loadingMessage: string) => Promise<void>;
   responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>;
+  trancheType: TrancheType;
 }
 
 interface State {
@@ -24,17 +25,16 @@ interface State {
 class InvestorAllowance extends React.Component<Props, State> {
 
   componentWillMount() {
-    const { investor } = this.props;
-    this.setState({ supplyAmount: (investor && investor.maxSupplyJunior || '0'), redeemAmount: (investor.maxRedeemJunior || '0') });
+    this.setState({ supplyAmount: '0', redeemAmount: '0' });
   }
 
-  setJunior = async () => {
+  setAllowance = async () => {
     this.props.transactionSubmitted && this.props.transactionSubmitted("Allowance initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.");
     try {
       await authTinlake();
       const { supplyAmount, redeemAmount } = this.state;
-      const { investor, tinlake } = this.props;
-      const res = await setAllowanceJunior(tinlake, investor.address, supplyAmount, redeemAmount);
+      const { investor, trancheType, tinlake } = this.props;
+      const res = await setAllowance(tinlake, investor.address, supplyAmount, redeemAmount, trancheType);
       if (res && res.errorMsg) {
         this.props.responseReceived && this.props.responseReceived(null, `Allowance failed. ${res.errorMsg}`);
         return;
@@ -45,30 +45,35 @@ class InvestorAllowance extends React.Component<Props, State> {
       this.props.responseReceived && this.props.responseReceived(null, `Allowance failed. ${e}`);
       console.log(e);
     }
-}
+  }
 
   render() {
     const { supplyAmount, redeemAmount } = this.state;
-    return <Box gap="medium" direction="row" margin={{ right: "large" }}>
-       <Box basis={'1/3'}>
-          <FormField label="Junior maximum investment amount">
+    return <Box>
+      <Box gap="medium" align="start" margin={{ bottom: "medium" }} >
+        <Heading level="4" margin="none"> Set allowance </Heading>
+      </Box>
+      <Box gap="medium" direction="row" margin={{ right: "large" }}>
+        <Box basis={'1/3'}>
+          <FormField label="Max investment amount">
             <NumberInput value={baseToDisplay(supplyAmount, 18)} suffix=" DAI" precision={18}
               onValueChange={({ value }) =>
-                this.setState({ supplyAmount: displayToBase(value) })}
+                this.setState({ supplyAmount: displayToBase(value, 18) })}
             />
           </FormField>
         </Box>
         <Box basis={'1/3'}>
-          <FormField label="Junior maximum redeem amount">
+          <FormField label="Max redeem amount">
             <NumberInput value={baseToDisplay(redeemAmount, 18)} suffix=" TIN" precision={18}
               onValueChange={({ value }) =>
-                this.setState({ redeemAmount: displayToBase(value) })}
+                this.setState({ redeemAmount: displayToBase(value, 18) })}
             />
           </FormField>
         </Box>
         <Box >
-          <Button onClick={this.setJunior} primary label="Set junior limits" />
+          <Button onClick={this.setAllowance} primary label="Set Allowance" />
         </Box>
+      </Box>
     </Box>;
   }
 }

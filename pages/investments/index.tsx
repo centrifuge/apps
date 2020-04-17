@@ -1,5 +1,5 @@
 import * as React from 'react';
-import InvestmentView from '../../containers/Investment/View';
+import InvestmentsView from '../../containers/Investment/View';
 import WithTinlake from '../../components/WithTinlake';
 import { Box, Heading } from 'grommet';
 import Header from '../../components/Header';
@@ -27,7 +27,7 @@ class InvestmentPage extends React.Component {
                     <SecondaryHeader>
                       <Heading level="3">Investments</Heading>
                     </SecondaryHeader>
-                    <InvestmentView tinlake={tinlake} auth={auth} />
+                    <InvestmentsView tinlake={tinlake} auth={auth} />
                   </Box>
                   :
                   <Alert margin="medium" type="error">

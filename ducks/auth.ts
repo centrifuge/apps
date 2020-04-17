@@ -21,11 +21,12 @@ export interface Permissions {
   canSetCeiling: boolean;
   canSetInterestRate: boolean;
   // tranche admin permissions
-  canSetEquityRatio: boolean;
+  canSetMinimumJuniorRatio: boolean;
   canSetRiskScore: boolean;
   canSetSeniorTrancheInterestRate: boolean;
   // lender admin permissions
   canSetInvestorAllowanceJunior: boolean;
+  canSetInvestorAllowanceSenior: boolean;
   // collector permissions
   canSetThreshold: boolean;
   canSetLoanPrice: boolean;
@@ -88,9 +89,10 @@ export function loadUser(tinlake: any, address: string):
     const interestRatePermission = await tinlake.canSetInterestRate(address)
     const thresholdPermission = await tinlake.canSetThreshold(address)
     const loanPricePermission = await tinlake.canSetLoanPrice(address)
-    const equityRatioPermission = await tinlake.canSetEquityRatio(address)
+    const equityRatioPermission = await tinlake.canSetMinimumJuniorRatio(address)
     const riskScorePermission = await tinlake.canSetRiskScore(address)
     const investorAllowancePermissionJunior = await tinlake.canSetInvestorAllowanceJunior(address)
+    const investorAllowancePermissionSenior = await tinlake.canSetInvestorAllowanceSenior(address)
 
     const user = {
       address,
@@ -99,9 +101,10 @@ export function loadUser(tinlake: any, address: string):
         canSetInterestRate: interestRatePermission,
         canSetThreshold: thresholdPermission,
         canSetLoanPrice: loanPricePermission,
-        canSetEquityRatio: equityRatioPermission,
+        canSetMinimumJuniorRatio: equityRatioPermission,
         canSetRiskScore: riskScorePermission,
-        canSetInvestorAllowanceJunior: investorAllowancePermissionJunior
+        canSetInvestorAllowanceJunior: investorAllowancePermissionJunior,
+        canSetInvestorAllowanceSenior: investorAllowancePermissionSenior
         // TODO: canActAsKeeper
       }
     }

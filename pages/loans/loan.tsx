@@ -33,7 +33,7 @@ class LoanPage extends React.Component<Props> {
           <SecondaryHeader>
             <Box direction="row" gap="small" align="center">
               <BackLink href={'/loans'} />
-              <Heading level="3">View Loan</Heading>
+              <Heading level="3">Loan Details</Heading>
             </Box>
           </SecondaryHeader>
           <WithTinlake render={tinlake =>

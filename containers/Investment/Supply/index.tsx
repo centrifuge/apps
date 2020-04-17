@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Box, FormField, Button, Text } from 'grommet';
 import NumberInput from '../../../components/NumberInput';
-import { Investor, supplyJunior } from '../../../services/tinlake/actions';
+import { Investor, TrancheType, supply } from '../../../services/tinlake/actions';
 import { transactionSubmitted, responseReceived } from '../../../ducks/transactions';
 import { baseToDisplay, displayToBase } from 'tinlake';
 import { loadInvestor } from '../../../ducks/investments';
@@ -17,6 +17,7 @@ interface Props {
   loadAnalyticsData?: (tinlake: any) => Promise<void>;
   transactionSubmitted?: (loadingMessage: string) => Promise<void>;
   responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>;
+  trancheType: TrancheType
 }
 
 interface State {
@@ -26,19 +27,16 @@ interface State {
 class InvestorSupply extends React.Component<Props, State> {
 
   componentWillMount() {
-    const { investor } = this.props;
-    this.setState({ supplyAmount: investor && investor.maxSupplyJunior || '0' });
+    this.setState({ supplyAmount: '0' });
   }
 
-  supplyJunior = async () => {
-    const { transactionSubmitted, responseReceived, tinlake, investor, loadInvestor, loadAnalyticsData } = this.props;
+  supply = async () => {
+    const { transactionSubmitted, responseReceived, trancheType, tinlake, investor, loadInvestor, loadAnalyticsData } = this.props;
+    const { supplyAmount } = this.state;
     transactionSubmitted && transactionSubmitted("Investment initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.");
     try {
       await authTinlake();
-      const { supplyAmount } = this.state;
-      const { investor, tinlake } = this.props;
-     
-      const res = await supplyJunior(tinlake, supplyAmount);
+      const res = await supply(tinlake, supplyAmount, trancheType);
       if (res && res.errorMsg) {
         responseReceived && responseReceived(null, `Investment failed. ${res.errorMsg}`);
         return;
@@ -53,23 +51,23 @@ class InvestorSupply extends React.Component<Props, State> {
   }
 
   render() {
+    const { investor, trancheType } = this.props;
     const { supplyAmount } = this.state;
-    const { investor } = this.props;
-    const maxSupplyAmount =  (investor && investor.maxSupplyJunior || '0')
+    const trancheValues = investor[trancheType];
+    const maxSupplyAmount =  trancheValues.maxSupply || '0';
     const maxSupplyOverflow =  (new BN(supplyAmount).cmp(new BN(maxSupplyAmount)) > 0);
     const canSupply = maxSupplyAmount.toString() != '0' && !maxSupplyOverflow;
-
     return <Box basis={'1/4'} gap="medium" margin={{ right: "large" }}>
       <Box gap="medium">
         <FormField label="Investment amount">
           <NumberInput value={baseToDisplay(supplyAmount, 18)} suffix=" DAI" precision={18}
             onValueChange={({ value }) =>
-              this.setState({ supplyAmount: displayToBase(value) })}
+              this.setState({ supplyAmount: displayToBase(value, 18) })}
           />
         </FormField>
       </Box>
       <Box align="start">
-        <Button onClick={this.supplyJunior} primary label="Invest" disabled={!canSupply }  />
+        <Button onClick={this.supply} primary label="Invest" disabled={!canSupply }  />
         {maxSupplyOverflow &&
          <Box margin={{top: "small"}}>
              Max investment amount exceeded. <br /> 

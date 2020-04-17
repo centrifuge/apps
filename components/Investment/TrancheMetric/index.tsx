@@ -1,45 +1,57 @@
 import * as React from 'react';
-import { Box } from 'grommet';
+import { Box, Heading } from 'grommet';
 import { baseToDisplay } from 'tinlake';
 import NumberDisplay from '../../NumberDisplay';
-import { Tranche } from '../../../services/tinlake/actions';
+import { Investor, Tranche, TrancheType } from '../../../services/tinlake/actions';
 import DashboardMetric from '../../DashboardMetric';
 import { calcMaxRedeemAmount } from '../../../utils/maxRedeemAmount';
-import InfoBox from '../../InfoBox';
 
 interface Props {
+  investor: Investor;
   tranche: Tranche;
+  type: TrancheType;
 }
 
 class TrancheMetric extends React.Component<Props> {
   render() {
-    const { availableFunds, tokenPrice, type, token} = this.props.tranche;
-    const reserveLabel = `${type} total funds in reserve`;
-    const priceLable = `${type} token price`;
-    const redeemLabel = `${type} maximum redeem amount`;
-    const trancheTokenLabel =` ${token}`;
+    const { type, investor, tranche } = this.props;
+    const { maxSupply, maxRedeem, tokenBalance } = investor[type];
+    const { availableFunds, tokenPrice, token  } = tranche;
+    const currencyLabel = ` ${token}`;
     const maxRedeemAmount = calcMaxRedeemAmount(availableFunds, tokenPrice);
-    return <Box>
-      <InfoBox pad={{ vertical: 'large' }}  align="center" margin={{ bottom: 'small' }}>
-        <Box basis={'1/2'} gap="medium">
-          <DashboardMetric label={priceLable} >
-            <NumberDisplay value={baseToDisplay(tokenPrice, 27)} suffix=" DAI" precision={18} />
-          </DashboardMetric>
-        </Box>
-      </InfoBox>
 
-      <InfoBox pad={{ vertical: 'large' }} direction="row" >
-        <Box basis={'1/2'} gap="medium">
-          <DashboardMetric label={reserveLabel} >
-            <NumberDisplay value={baseToDisplay(availableFunds, 18)} suffix=" DAI" precision={18} />
-          </DashboardMetric>
+    return <Box margin="none">
+      <Box>
+        <Heading level="4" margin={{ bottom: 'medium' }}>Investment overview</Heading>
+        <Box direction="row" >
+          <Box basis={'1/3'} gap="medium">
+            <DashboardMetric label="Investor token balance">
+              <NumberDisplay value={baseToDisplay(tokenBalance, 18)} suffix={currencyLabel} precision={18} />
+            </DashboardMetric>
+          </Box>
         </Box>
-        <Box basis={'1/2'}  gap="medium">
-          <DashboardMetric label={redeemLabel} >
-            <NumberDisplay value={maxRedeemAmount.toString()} suffix={trancheTokenLabel} precision={18}> </NumberDisplay>
-          </DashboardMetric>
+      </Box>
+
+      <Box margin={{top: 'medium' }}>
+        <Heading level="4" margin={{ bottom: 'medium' }}>Invest/Redeem allowance</Heading>
+        <Box direction="row" >
+          <Box basis={'1/3'} gap="medium">
+            <DashboardMetric label="Max investment limit">
+              <NumberDisplay value={baseToDisplay(maxSupply, 18)} suffix=" DAI" precision={18} />
+            </DashboardMetric>
+          </Box>
+          <Box basis={'1/3'} gap="medium">
+            <DashboardMetric label="Max token redeem limit">
+              <NumberDisplay value={baseToDisplay(maxRedeem, 18)} suffix={currencyLabel} precision={18} />
+            </DashboardMetric>
+          </Box>
+          <Box basis={'1/3'} gap="medium">
+            <DashboardMetric label={`Max${currencyLabel} amount available for redeem`}>
+              <NumberDisplay value={maxRedeemAmount.toString()} suffix={currencyLabel} precision={18} />
+            </DashboardMetric>
+          </Box>
         </Box>
-      </InfoBox>
+      </Box>
     </Box>;
   }
 }
