@@ -1,8 +1,7 @@
 import { Constructor, TinlakeParams } from '../Tinlake';
-import { executeAndRetry } from '../services/ethereum';
+import { executeAndRetry, ZERO_ADDRESS } from '../services/ethereum';
 import { Loan, Investor } from '../types/tinlake';
 import BN from 'bn.js';
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IAnalyticsActions {
@@ -63,7 +62,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       if (await this.getOwnerOfCollateral(tokenId) === this.contracts['SHELF'].address) {
         return 'ongoing';
       }
-      if (await this.getOwnerOfLoan(loanId) === '0x0000000000000000000000000000000000000000') {
+      if (await this.getOwnerOfLoan(loanId) === ZERO_ADDRESS) {
         return 'closed';
       }
       return 'opened';
@@ -104,20 +103,24 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     getInvestor = async (user: string) : Promise<Investor> => {
       const includeSenior = this.existsSenior();
       const tokenBalanceJunior = await this.getJuniorTokenBalance(user);
-      const tokenBalanceSenior = includeSenior && await this.getSeniorTokenBalance(user) || null;
+      const tokenBalanceSenior = includeSenior && await this.getSeniorTokenBalance(user) || 0;
       const maxSupplyJunior = await this.getMaxSupplyAmountJunior(user);
-      const maxSupplySenior = includeSenior && await this.getMaxSupplyAmountJunior(user) || null;
+      const maxSupplySenior = includeSenior && await this.getMaxSupplyAmountJunior(user) || 0;
       const maxRedeemJunior = await this.getMaxRedeemAmountJunior(user);
-      const maxRedeemSenior = includeSenior && await this.getMaxRedeemAmountJunior(user) || null;
+      const maxRedeemSenior = includeSenior && await this.getMaxRedeemAmountJunior(user) || 0;
 
       return {
-        tokenBalanceJunior,
-        maxSupplyJunior,
-        maxRedeemJunior,
-        ...(tokenBalanceSenior && { tokenBalanceSenior }),
-        ...(maxSupplySenior  && { maxSupplySenior }),
-        ...(maxRedeemSenior  && { maxRedeemSenior }),
-        address: user,
+        junior: {
+          tokenBalance: tokenBalanceJunior,
+          maxSupply: maxSupplyJunior,
+          maxRedeem: maxRedeemJunior,
+        },
+        senior: {
+          tokenBalance: tokenBalanceSenior || new BN(0),
+          maxSupply: maxSupplySenior || new BN(0),
+          maxRedeem: maxRedeemSenior || new BN(0)
+        },
+        address: user
       };
     }
 
@@ -142,32 +145,47 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     existsSenior = () => {
-      return this.contractAddresses['SENIOR_OPERATOR'] !== '0x0000000000000000000000000000000000000000';
+      return this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS;
     }
 
     getSeniorTokenBalance = async (user: string) => {
-      const res : { 0: BN } = await executeAndRetry(this.contracts['SENIOR_TOKEN'].balanceOf, [user]);
-      return res[0];
+      if (this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS) {
+        const res : { 0: BN } = await executeAndRetry(this.contracts['SENIOR_TOKEN'].balanceOf, [user]);
+        return res[0];
+      }
+      return new BN(0);
     }
 
     getMaxSupplyAmountSenior = async (user: string) => {
-      const res : { 0: BN } =  await executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxCurrency, [user]);
-      return res[0];
+      if (this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS) {
+        const res : { 0: BN } =  await executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxCurrency, [user]);
+        return res[0];
+      }
+      return new BN(0);
     }
 
     getMaxRedeemAmountSenior = async (user: string) => {
-      const res  =  await executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxToken, [user]);
-      return res[0];
+      if (this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS) {
+        const res  =  await executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxToken, [user]);
+        return res[0];
+      }
+      return new BN(0);
     }
 
     getTokenPriceSenior = async () => {
-      const res =  await executeAndRetry(this.contracts['ASSESSOR'].calcTokenPrice, [this.contractAddresses['SENIOR']]);
-      return res[0];
+      if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
+        const res =  await executeAndRetry(this.contracts['ASSESSOR'].calcTokenPrice, [this.contractAddresses['SENIOR']]);
+        return res[0];
+      } 
+      return new BN(0);
     }
 
     getSeniorReserve = async () => {
-      const res: { 0: BN } =  await executeAndRetry(this.contracts['SENIOR'].balance, []);
-      return res[0] || new BN(0);
+      if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
+        const res: { 0: BN } =  await executeAndRetry(this.contracts['SENIOR'].balance, []);
+        return res[0] || new BN(0);
+      }
+      return new BN(0);
     }
 
     getJuniorReserve = async () => {
@@ -175,24 +193,30 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return res[0] || new BN(0);
     }
 
-    getMinEquityRatio = async () => {
+    getMinJuniorRatio = async () => {
       const res: { 0: BN } =  await executeAndRetry(this.contracts['ASSESSOR'].minJuniorRatio, []);
       return res[0] || new BN(0);
     }
 
-    getCurrentEquityRatio = async () => {
+    getCurrentJuniorRatio = async () => {
       const res: { 0: BN } =  await executeAndRetry(this.contracts['ASSESSOR'].currentJuniorRatio, []);
       return res[0] || new BN(0);
     }
 
     getSeniorDebt = async () => {
-      const res: { 0: BN } =  await executeAndRetry(this.contracts['SENIOR'].debt, []);
-      return res[0] || new BN(0);
+      if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
+        const res: { 0: BN } =  await executeAndRetry(this.contracts['SENIOR'].debt, []);
+        return res[0] || new BN(0);
+      }
+      return new BN(0);
     }
 
     getSeniorInterestRate = async () => {
-      const res: { 0: BN } =  await executeAndRetry(this.contracts['SENIOR'].ratePerSecond, []);
-      return res[0] || new BN(0);
+      if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
+        const res: { 0: BN } =  await executeAndRetry(this.contracts['SENIOR'].ratePerSecond, []);
+        return res[0] || new BN(0);
+      }
+      return new BN(0);
     }
   };
 }
@@ -222,8 +246,8 @@ export type IAnalyticsActions = {
   getTokenPriceSenior(): Promise<BN>,
   getSeniorDebt(): Promise<BN>,
   getSeniorInterestRate(): Promise<BN>,
-  getMinEquityRatio(): Promise<BN>,
-  getCurrentEquityRatio(): Promise<BN>,
+  getMinJuniorRatio(): Promise<BN>,
+  getCurrentJuniorRatio(): Promise<BN>,
   getInvestor(user:string): Promise<Investor>,
 };
 

@@ -7,7 +7,7 @@ export declare function AdminActions<ActionsBase extends Constructor<TinlakePara
         canSetInterestRate: (user: string) => Promise<boolean>;
         canSetSeniorTrancheInterest: (user: string) => Promise<boolean>;
         canSetRiskScore: (user: string) => Promise<boolean>;
-        canSetEquityRatio: (user: string) => Promise<boolean>;
+        canSetMinimumJuniorRatio: (user: string) => Promise<boolean>;
         canSetInvestorAllowanceJunior: (user: string) => Promise<boolean>;
         canSetInvestorAllowanceSenior: (user: string) => Promise<boolean>;
         canSetThreshold: (user: string) => Promise<boolean>;
@@ -17,7 +17,7 @@ export declare function AdminActions<ActionsBase extends Constructor<TinlakePara
         initRate: (ratePerSecond: string) => Promise<unknown>;
         changeRate: (loan: string, ratePerSecond: string) => Promise<unknown>;
         setRate: (loan: string, ratePerSecond: string) => Promise<unknown>;
-        setEquityRatio: (amount: string) => Promise<unknown>;
+        setMinimumJuniorRatio: (ratio: string) => Promise<unknown>;
         approveAllowanceJunior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
         approveAllowanceSenior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
         provider: any;
@@ -37,7 +37,7 @@ export declare type IAdminActions = {
     canSetCeiling(user: string): Promise<boolean>;
     canSetInterestRate(user: string): Promise<boolean>;
     canSetSeniorTrancheInterest(user: string): Promise<boolean>;
-    canSetEquityRatio(user: string): Promise<boolean>;
+    canSetMinimumJuniorRatio(user: string): Promise<boolean>;
     canSetRiskScore(user: string): Promise<boolean>;
     canSetInvestorAllowanceJunior(user: string): Promise<boolean>;
     canSetInvestorAllowanceSenior(user: string): Promise<boolean>;
@@ -46,7 +46,7 @@ export declare type IAdminActions = {
     setCeiling(loanId: string, amount: string): Promise<any>;
     initRate(rate: string): Promise<any>;
     setRate(loan: string, rate: string): Promise<any>;
-    setEquityRatio(amount: string): Promise<any>;
+    setMinimumJuniorRatio(amount: string): Promise<any>;
     approveAllowanceJunior(user: string, maxCurrency: string, maxToken: string): Promise<any>;
     approveAllowanceSenior(user: string, maxCurrency: string, maxToken: string): Promise<any>;
 };

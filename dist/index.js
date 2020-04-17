@@ -44,17 +44,6 @@ function __extends(d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
 
-var __assign = function() {
-    __assign = Object.assign || function __assign(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-
 function __awaiter(thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -10568,6 +10557,7 @@ var src$4 = {
 var src_11 = src$4.sha3;
 
 var abiCoder = require('web3-eth-abi');
+var ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 function executeAndRetry(f, args) {
     if (args === void 0) { args = []; }
     return __awaiter(this, void 0, void 0, function () {
@@ -10685,6 +10675,7 @@ var getEvents = function (receipt, abi) {
     return events;
 };
 
+var web3 = require('web3-utils');
 function AdminActions(Base) {
     return /** @class */ (function (_super) {
         __extends(class_1, _super);
@@ -10727,10 +10718,13 @@ function AdminActions(Base) {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR'].wards, [user])];
+                        case 0:
+                            if (!(this.contractAddresses['SENIOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
+                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR'].wards, [user])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0].toNumber() === 1];
+                        case 2: return [2 /*return*/, false];
                     }
                 });
             }); };
@@ -10746,7 +10740,7 @@ function AdminActions(Base) {
                 });
             }); };
             // lender permissions (note: allowance operator for default deployment)
-            _this.canSetEquityRatio = function (user) { return __awaiter(_this, void 0, void 0, function () {
+            _this.canSetMinimumJuniorRatio = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
@@ -10772,10 +10766,13 @@ function AdminActions(Base) {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].wards, [user])];
+                        case 0:
+                            if (!(this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
+                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].wards, [user])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0].toNumber() === 1];
+                        case 2: return [2 /*return*/, false];
                     }
                 });
             }); };
@@ -10870,11 +10867,11 @@ function AdminActions(Base) {
                 });
             }); };
             // ------------ admin functions lender-site -------------
-            _this.setEquityRatio = function (amount) { return __awaiter(_this, void 0, void 0, function () {
+            _this.setMinimumJuniorRatio = function (ratio) { return __awaiter(_this, void 0, void 0, function () {
                 var txHash;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].file, ['minJuniorRatio', amount, this.ethConfig])];
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].file, [web3.fromAscii('minJuniorRatio'), ratio, this.ethConfig])];
                         case 1:
                             txHash = _a.sent();
                             console.log("[Assessor file] txHash: " + txHash);
@@ -29612,7 +29609,6 @@ function CollateralActions(Base) {
     }(Base));
 }
 
-var ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 function AnalyticsActions(Base) {
     return /** @class */ (function (_super) {
         __extends(class_1, _super);
@@ -29736,7 +29732,7 @@ function AnalyticsActions(Base) {
                             }
                             return [4 /*yield*/, this.getOwnerOfLoan(loanId)];
                         case 2:
-                            if ((_a.sent()) === '0x0000000000000000000000000000000000000000') {
+                            if ((_a.sent()) === ZERO_ADDRESS) {
                                 return [2 /*return*/, 'closed'];
                             }
                             return [2 /*return*/, 'opened'];
@@ -29824,7 +29820,7 @@ function AnalyticsActions(Base) {
                             _a = (_d.sent());
                             _d.label = 3;
                         case 3:
-                            tokenBalanceSenior = _a || null;
+                            tokenBalanceSenior = _a || 0;
                             return [4 /*yield*/, this.getMaxSupplyAmountJunior(user)];
                         case 4:
                             maxSupplyJunior = _d.sent();
@@ -29835,7 +29831,7 @@ function AnalyticsActions(Base) {
                             _b = (_d.sent());
                             _d.label = 6;
                         case 6:
-                            maxSupplySenior = _b || null;
+                            maxSupplySenior = _b || 0;
                             return [4 /*yield*/, this.getMaxRedeemAmountJunior(user)];
                         case 7:
                             maxRedeemJunior = _d.sent();
@@ -29846,10 +29842,20 @@ function AnalyticsActions(Base) {
                             _c = (_d.sent());
                             _d.label = 9;
                         case 9:
-                            maxRedeemSenior = _c || null;
-                            return [2 /*return*/, __assign(__assign(__assign(__assign({ tokenBalanceJunior: tokenBalanceJunior,
-                                    maxSupplyJunior: maxSupplyJunior,
-                                    maxRedeemJunior: maxRedeemJunior }, (tokenBalanceSenior && { tokenBalanceSenior: tokenBalanceSenior })), (maxSupplySenior && { maxSupplySenior: maxSupplySenior })), (maxRedeemSenior && { maxRedeemSenior: maxRedeemSenior })), { address: user })];
+                            maxRedeemSenior = _c || 0;
+                            return [2 /*return*/, {
+                                    junior: {
+                                        tokenBalance: tokenBalanceJunior,
+                                        maxSupply: maxSupplyJunior,
+                                        maxRedeem: maxRedeemJunior,
+                                    },
+                                    senior: {
+                                        tokenBalance: tokenBalanceSenior || new bn(0),
+                                        maxSupply: maxSupplySenior || new bn(0),
+                                        maxRedeem: maxRedeemSenior || new bn(0),
+                                    },
+                                    address: user,
+                                }];
                     }
                 });
             }); };
@@ -29898,16 +29904,19 @@ function AnalyticsActions(Base) {
                 });
             }); };
             _this.existsSenior = function () {
-                return _this.contractAddresses['SENIOR_OPERATOR'] !== '0x0000000000000000000000000000000000000000';
+                return _this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS;
             };
             _this.getSeniorTokenBalance = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].balanceOf, [user])];
+                        case 0:
+                            if (!(this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
+                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].balanceOf, [user])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0]];
+                        case 2: return [2 /*return*/, new bn(0)];
                     }
                 });
             }); };
@@ -29915,10 +29924,13 @@ function AnalyticsActions(Base) {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxCurrency, [user])];
+                        case 0:
+                            if (!(this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
+                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxCurrency, [user])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0]];
+                        case 2: return [2 /*return*/, new bn(0)];
                     }
                 });
             }); };
@@ -29926,10 +29938,13 @@ function AnalyticsActions(Base) {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxToken, [user])];
+                        case 0:
+                            if (!(this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
+                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxToken, [user])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0]];
+                        case 2: return [2 /*return*/, new bn(0)];
                     }
                 });
             }); };
@@ -29937,10 +29952,13 @@ function AnalyticsActions(Base) {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].calcTokenPrice, [this.contractAddresses['SENIOR']])];
+                        case 0:
+                            if (!(this.contractAddresses['SENIOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
+                            return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].calcTokenPrice, [this.contractAddresses['SENIOR']])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0]];
+                        case 2: return [2 /*return*/, new bn(0)];
                     }
                 });
             }); };
@@ -29948,10 +29966,13 @@ function AnalyticsActions(Base) {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR'].balance, [])];
+                        case 0:
+                            if (!(this.contractAddresses['SENIOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
+                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR'].balance, [])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0] || new bn(0)];
+                        case 2: return [2 /*return*/, new bn(0)];
                     }
                 });
             }); };
@@ -29966,7 +29987,7 @@ function AnalyticsActions(Base) {
                     }
                 });
             }); };
-            _this.getMinEquityRatio = function () { return __awaiter(_this, void 0, void 0, function () {
+            _this.getMinJuniorRatio = function () { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
@@ -29977,7 +29998,7 @@ function AnalyticsActions(Base) {
                     }
                 });
             }); };
-            _this.getCurrentEquityRatio = function () { return __awaiter(_this, void 0, void 0, function () {
+            _this.getCurrentJuniorRatio = function () { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
@@ -29992,10 +30013,13 @@ function AnalyticsActions(Base) {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR'].debt, [])];
+                        case 0:
+                            if (!(this.contractAddresses['SENIOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
+                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR'].debt, [])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0] || new bn(0)];
+                        case 2: return [2 /*return*/, new bn(0)];
                     }
                 });
             }); };
@@ -30003,10 +30027,13 @@ function AnalyticsActions(Base) {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR'].ratePerSecond, [])];
+                        case 0:
+                            if (!(this.contractAddresses['SENIOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
+                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR'].ratePerSecond, [])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0] || new bn(0)];
+                        case 2: return [2 /*return*/, new bn(0)];
                     }
                 });
             }); };

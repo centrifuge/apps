@@ -1,6 +1,8 @@
 const abiCoder = require('web3-eth-abi');
 import { sha3 } from 'web3-utils';
 
+export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
 export interface ethI {
   send: Function;
   web3_sha3: (signature: string) => string;

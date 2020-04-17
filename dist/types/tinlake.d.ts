@@ -26,12 +26,16 @@ export declare type NFT = {
     nftData: any;
 };
 export declare type Investor = {
-    maxSupplyJunior: BN;
-    maxSupplySenior?: BN;
-    maxRedeemJunior: BN;
-    maxRedeemSenior?: BN;
-    tokenBalanceJunior: BN;
-    tokenBalanceSenior?: BN;
+    junior: {
+        maxSupply: BN;
+        tokenBalance: BN;
+        maxRedeem: BN;
+    };
+    senior: {
+        maxSupply?: BN;
+        tokenBalance?: BN;
+        maxRedeem?: BN;
+    };
     address: string;
 };
 export declare type ITinlake = TinlakeActions & {
