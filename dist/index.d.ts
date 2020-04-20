@@ -10,7 +10,7 @@ export declare const TinlakeWithActions: {
         proxyCount: () => Promise<import("bn.js")>;
         checkProxyExists: (address: string) => Promise<string | null>;
         proxyCreateNew: (address: string) => Promise<any>;
-        proxyTransferIssue: (proxyAddr: string, nftRegistryAddr: string, tokenId: string) => Promise<unknown>;
+        proxyTransferIssue: (proxyAddr: string, tokenId: string) => Promise<unknown>;
         proxyLockBorrowWithdraw: (proxyAddr: string, loanId: string, amount: string, usr: string) => Promise<unknown>;
         proxyRepayUnlockClose: (proxyAddr: string, tokenId: string, loanId: string) => Promise<unknown>;
         provider: any;
@@ -50,11 +50,11 @@ export declare const TinlakeWithActions: {
         isWard: (user: string, contractName: string) => Promise<import("bn.js")>;
         canSetCeiling: (user: string) => Promise<boolean>;
         canSetInterestRate: (user: string) => Promise<boolean>;
+        canSetJuniorTrancheInterest: (user: string) => Promise<boolean>;
         canSetSeniorTrancheInterest: (user: string) => Promise<boolean>;
-        canSetRiskScore: (user: string) => Promise<boolean>;
         canSetEquityRatio: (user: string) => Promise<boolean>;
+        canSetRiskScore: (user: string) => Promise<boolean>;
         canSetInvestorAllowanceJunior: (user: string) => Promise<boolean>;
-        canSetInvestorAllowanceSenior: (user: string) => Promise<boolean>;
         canSetThreshold: (user: string) => Promise<boolean>;
         canSetLoanPrice: (user: string) => Promise<boolean>;
         setCeiling: (loanId: string, amount: string) => Promise<unknown>;
@@ -62,9 +62,7 @@ export declare const TinlakeWithActions: {
         initRate: (ratePerSecond: string) => Promise<unknown>;
         changeRate: (loan: string, ratePerSecond: string) => Promise<unknown>;
         setRate: (loan: string, ratePerSecond: string) => Promise<unknown>;
-        setEquityRatio: (amount: string) => Promise<unknown>;
         approveAllowanceJunior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
-        approveAllowanceSenior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
         provider: any;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
@@ -122,10 +120,6 @@ export declare const TinlakeWithActions: {
         getTokenPriceSenior: () => Promise<any>;
         getSeniorReserve: () => Promise<import("bn.js")>;
         getJuniorReserve: () => Promise<import("bn.js")>;
-        getMinEquityRatio: () => Promise<import("bn.js")>;
-        getCurrentEquityRatio: () => Promise<import("bn.js")>;
-        getSeniorDebt: () => Promise<import("bn.js")>;
-        getSeniorInterestRate: () => Promise<import("bn.js")>;
         provider: any;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
@@ -155,13 +149,13 @@ export declare const TinlakeWithActions: {
     };
 } & {
     new (...args: any[]): {
-        mintTitleNFT: (nftAddr: string, user: string) => Promise<any>;
-        mintNFT: (nftAddr: string, owner: string, tokenId: string, ref: string, amount: string, asset: string) => Promise<unknown>;
-        approveNFT: (nftAddr: string, tokenId: string, to: string) => Promise<unknown>;
-        getNFTCount: (nftAddr: string) => Promise<import("bn.js")>;
-        getNFTData: (nftAddr: string, tokenId: string) => Promise<any>;
-        getNFTOwner: (nftAddr: string, tokenId: string) => Promise<import("bn.js")>;
-        transferNFT: (nftAddr: string, from: string, to: string, tokenId: string) => Promise<unknown>;
+        mintTitleNFT: (user: string) => Promise<any>;
+        mintNFT: (owner: string, tokenId: string, ref: string, amount: string, asset: string) => Promise<unknown>;
+        approveNFT: (tokenId: string, to: string) => Promise<unknown>;
+        getNFTCount: () => Promise<import("bn.js")>;
+        getNFTData: (tokenId: string) => Promise<any>;
+        getNFTOwner: (tokenId: string) => Promise<import("bn.js")>;
+        transferNFT: (from: string, to: string, tokenId: string) => Promise<unknown>;
         provider: any;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;

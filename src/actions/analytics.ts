@@ -105,9 +105,9 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       const tokenBalanceJunior = await this.getJuniorTokenBalance(user);
       const tokenBalanceSenior = includeSenior && await this.getSeniorTokenBalance(user) || 0;
       const maxSupplyJunior = await this.getMaxSupplyAmountJunior(user);
-      const maxSupplySenior = includeSenior && await this.getMaxSupplyAmountJunior(user) || 0;
+      const maxSupplySenior = includeSenior && await this.getMaxSupplyAmountSenior(user) || 0;
       const maxRedeemJunior = await this.getMaxRedeemAmountJunior(user);
-      const maxRedeemSenior = includeSenior && await this.getMaxRedeemAmountJunior(user) || 0;
+      const maxRedeemSenior = includeSenior && await this.getMaxRedeemAmountSenior(user) || 0;
 
       return {
         junior: {
