@@ -53,7 +53,7 @@ class JuniorRatio extends React.Component<Props, State> {
             <Box direction="row" gap="medium" >
                 <Box basis={'1/3'}>
                     <FormField label="Min junior ratio">
-                        <NumberInput value={baseToDisplay(minJuniorRatio, 18)} precision={18}
+                        <NumberInput value={baseToDisplay(minJuniorRatio, 18)} precision={2}
                             onValueChange={({ value }) =>
                                 this.setState({ minJuniorRatio: displayToBase(value, 18) })}
                         />

@@ -33,7 +33,6 @@ class LoanCeiling extends React.Component<Props, State> {
     try {
       const res = await setCeiling(tinlake, loan.loanId, ceiling);
       if (res && res.errorMsg) {
-        console.log(res);
         this.props.responseReceived && this.props.responseReceived(null, `Changing maximum borrow amount failed. ${res.errorMsg}`);
         return;
       } 

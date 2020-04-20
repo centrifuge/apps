@@ -57,7 +57,7 @@ class InvestmentsView extends React.Component<Props, State> {
         </Box>}
 
       {analytics && analytics.data && auth && auth.user && auth.user.permissions.canSetMinimumJuniorRatio &&
-        <JuniorRatio pad={{ horizontal: 'medium' }} tinlake={tinlake} minJuniorRatio={analytics.data.minJuniorRatio}> </JuniorRatio>
+        <JuniorRatio tinlake={tinlake} minJuniorRatio={analytics.data.minJuniorRatio}> </JuniorRatio>
       }
 
 

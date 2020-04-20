@@ -12,19 +12,20 @@ interface Props {
 class InvestmentsOverview extends React.Component<Props> {
   render() {
     const { minJuniorRatio, currentJuniorRatio, senior} = this.props.data;
+    console.log("analytics" ,minJuniorRatio.toString())
     const seniorInterestRate = senior && senior.interestRate || new BN(0);
    
     return <Box> 
       <Box direction="row" >
         <Box basis={'1/3'} >
           <DashboardMetric label={`Current TIN/DROP ratio`} >
-            <NumberDisplay value={baseToDisplay(currentJuniorRatio, 27)} suffix={' %'} precision={2} />
+            <NumberDisplay value={baseToDisplay(currentJuniorRatio, 25)} suffix={' %'} precision={2} />
           </DashboardMetric>
         </Box>
 
         <Box basis={'1/3'} >
           <DashboardMetric label={`Minimum TIN/DROP ratio`} >
-            <NumberDisplay value={baseToDisplay(minJuniorRatio, 27)} suffix={' %'} precision={2} />
+            <NumberDisplay value={baseToDisplay(minJuniorRatio, 18)} suffix={' %'} precision={2} />
           </DashboardMetric>
         </Box>
         <Box basis={'1/3'}  >

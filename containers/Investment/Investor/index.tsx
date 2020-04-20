@@ -85,6 +85,7 @@ class InvestorView extends React.Component<Props, State> {
         </Alert>}
       </Box>
 
+      { analytics && analytics.data  &&
       <Box pad={{ horizontal: 'medium', top: 'large' }} >
         <Tabs justify="center" flex="grow" onActive={(i) => this.selectTab(i)}>
           <Tab title='Junior tranche / TIN token' style={{
@@ -92,16 +93,17 @@ class InvestorView extends React.Component<Props, State> {
             fontWeight: 900,
           }}
           >
-            <TrancheView transactions={transactions} tinlake={tinlake} auth={auth} investor={investor} analytics={analytics} trancheType={"junior"} />
+            <TrancheView transactions={transactions} tinlake={tinlake} auth={auth} investor={investor} tranche={analytics.data["junior"]} />
           </Tab>
           <Tab title='Senior tranche / DROP token' style={{
             flex: 1,
             fontWeight: 900,
           }}>
-            <TrancheView tinlake={tinlake} transactions={transactions} auth={auth} investor={investor} analytics={analytics} trancheType={"senior"} />
+            <TrancheView tinlake={tinlake} transactions={transactions} auth={auth} investor={investor} tranche={analytics.data["senior"]} />
           </Tab>
         </Tabs>
       </Box>
+      }
     </Box>;
   }
 }

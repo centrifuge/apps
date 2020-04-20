@@ -7,9 +7,8 @@ import InvestorSupply from '../Supply';
 import InvestorRedeem from '../Redeem';
 import InvestorAllowance from '../Allowance';
 import TrancheMetric from '../../../components/Investment/TrancheMetric';
-import { TrancheType } from '../../../services/tinlake/actions';
+import { TrancheType, Tranche } from '../../../services/tinlake/actions';
 import { TransactionState } from '../../../ducks/transactions';
-import { AnalyticsState } from '../../../ducks/analytics';
 
 interface Props {
   tinlake: any;
@@ -17,19 +16,16 @@ interface Props {
   investor: Investor;
   transactions?: TransactionState;
   resetTransactionState?: () => void;
-  analytics: AnalyticsState;
-  trancheType: TrancheType;
+  tranche: Tranche;
 }
 
 class TrancheView extends React.Component<Props> {
 
   render() {
-    const { auth, investor, analytics, transactions, trancheType, tinlake } = this.props;
-    const isAdmin = (trancheType === "junior") && auth.user && auth.user.permissions.canSetInvestorAllowanceJunior
-      || (trancheType === "senior") && auth.user && auth.user.permissions.canSetInvestorAllowanceSenior;
+    const { auth, investor, transactions, tranche, tinlake } = this.props;
+    const isAdmin = (tranche.type === "junior") && auth.user && auth.user.permissions.canSetInvestorAllowanceJunior
+      || (tranche.type === "senior") && auth.user && auth.user.permissions.canSetInvestorAllowanceSenior;
     const isInvestor = (auth.user && investor) && (auth.user.address.toLowerCase() === investor.address.toLowerCase());
-    const tranche = analytics && analytics.data && analytics.data[trancheType];
-
     if (transactions && transactions.transactionState && transactions.transactionState === 'processing') {
       return <Spinner height={'calc(100vh - 89px - 84px)'} message={transactions.loadingMessage || 'Processing Transaction. This may take a fev seconds. Please wait...'} />;
     }
@@ -52,14 +48,14 @@ class TrancheView extends React.Component<Props> {
         <Box>
           <Box margin={{ top: "medium", bottom: "large" }} >
             <Box>
-              <TrancheMetric tranche={tranche} investor={investor} type={trancheType} />
+              <TrancheMetric tranche={tranche} investor={investor} type={tranche.type} />
             </Box>
           </Box>
 
           {isAdmin &&
             <Box margin={{ top: 'medium', bottom: 'large' }} >
               <Box>
-                <InvestorAllowance trancheType={trancheType} tinlake={tinlake} investor={investor} />
+                <InvestorAllowance trancheType={tranche.type} tinlake={tinlake} investor={investor} />
               </Box>
             </Box>
           }
@@ -71,7 +67,7 @@ class TrancheView extends React.Component<Props> {
               </Box>
 
               <Box direction="row">
-                <InvestorSupply trancheType={trancheType} investor={investor!} tinlake={tinlake}> </InvestorSupply>
+                <InvestorSupply trancheType={tranche.type} investor={investor!} tinlake={tinlake}> </InvestorSupply>
                 <InvestorRedeem tranche={tranche} investor={investor!} tinlake={tinlake}> </InvestorRedeem>
               </Box>
             </Box>
