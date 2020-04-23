@@ -76,7 +76,7 @@ class LoanList extends React.Component<Props> {
         {
           header: 'Actions', property: 'id', align: 'end', sortable: false,
           render: (l: Loan) => {
-            return <Link href={`/loans/loan?loanId=${l.loanId}`}><Anchor>View</Anchor></Link>;
+            return <Link href={{ pathname: `/loans/loan`, query: {loanId: l.loanId } }}><Anchor>View</Anchor></Link>;
           }
         }
       ]} />

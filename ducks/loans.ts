@@ -1,6 +1,6 @@
 import { AnyAction, Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
-import { getLoans, getLoan, TinlakeResult, Loan } from '../services/tinlake/actions'
+import { getLoans, getLoan, TinlakeResult, Loan } from '../services/tinlake/actions';
 
 // Actions
 const LOAD = 'tinlake-ui/loans/LOAD';
@@ -40,8 +40,8 @@ export function loadLoans(tinlake: any):
   ThunkAction<Promise<void>, LoansState, undefined, Action>  {
   return async (dispatch) => {
     dispatch({ type: LOAD });
-    const result = await getLoans(tinlake); 
-    dispatch({ type: RECEIVE, loans: result.data});
+    const result = await getLoans(tinlake);
+    dispatch({ type: RECEIVE, loans: result.data });
   };
 }
 
@@ -55,8 +55,8 @@ export function loadLoan(tinlake: any, loanId: string, refresh = false):
     if (result.errorMsg || !result.data) {
       dispatch({ type: LOAN_NOT_FOUND });
       return;
-    }   
-    dispatch({ type: RECEIVE_LOAN, loan: result.data});
-    
+    }
+    dispatch({ type: RECEIVE_LOAN, loan: result.data });
+
   };
 }

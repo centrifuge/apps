@@ -7,7 +7,14 @@ import { setMinJuniorRatio} from '../../../services/tinlake/actions';
 import { transactionSubmitted, responseReceived } from '../../../ducks/transactions';
 import { loadAnalyticsData } from '../../../ducks/analytics';
 import { connect } from 'react-redux';
+import { Decimal } from 'decimal.js-light';
 
+Decimal.set({
+    precision: 27,
+    toExpNeg: -7,
+    toExpPos: 30,
+  });
+  
 interface Props {
     minJuniorRatio: BN;
     tinlake: any;
@@ -24,15 +31,18 @@ class JuniorRatio extends React.Component<Props, State> {
 
     componentWillMount() {
         const { minJuniorRatio } = this.props;
-        this.setState({ minJuniorRatio: (minJuniorRatio && minJuniorRatio.toString() || '0') });
+        // multiply with 100 to show the percent value
+        const normalizedJuniorRatio = minJuniorRatio && (new Decimal(minJuniorRatio.toString())).mul(100);
+        this.setState({ minJuniorRatio: (normalizedJuniorRatio && normalizedJuniorRatio.toString() || '0') });
     }
 
     setMinJuniorRatio = async () => {
         const { minJuniorRatio } = this.state;
+        const normalizedRatio = new Decimal(minJuniorRatio).div(100).toString();
         const { tinlake, loadAnalyticsData, responseReceived, transactionSubmitted } = this.props;
         transactionSubmitted && transactionSubmitted(`Setting mininum junior ratio initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.`);
         try {
-          const res = await setMinJuniorRatio(tinlake, minJuniorRatio);
+          const res = await setMinJuniorRatio(tinlake, normalizedRatio);
           if (res && res.errorMsg) {
             responseReceived && responseReceived(null, `Setting minimun junior ratio failed. ${res.errorMsg}`);
             return;
@@ -53,9 +63,9 @@ class JuniorRatio extends React.Component<Props, State> {
             <Box direction="row" gap="medium" >
                 <Box basis={'1/3'}>
                     <FormField label="Min junior ratio">
-                        <NumberInput value={baseToDisplay(minJuniorRatio, 18)} precision={2}
+                        <NumberInput value={baseToDisplay(minJuniorRatio, 27)} precision={2}
                             onValueChange={({ value }) =>
-                                this.setState({ minJuniorRatio: displayToBase(value, 18) })}
+                                this.setState({ minJuniorRatio: displayToBase(value, 27) })}
                         />
                     </FormField>
                 </Box>

@@ -20,12 +20,14 @@ export async function getTinlake() {
     const accounts = await injectedProvider.enable();
     const account = accounts[0];
     tinlake = new Tinlake({provider: injectedProvider, contractAddresses, nftDataOutputs:nftDataDefinition.contractCall.outputs, transactionTimeout});
+    await tinlake.setContractAddresses();
     tinlake!.setEthConfig({ from: account, gasLimit: `0x${config.gasLimit.toString(16)}` });
     authed = true;
     authing = false;
   } else {
     const httpProvider = new Eth.HttpProvider(rpcUrl);
     tinlake = new Tinlake({provider: httpProvider, contractAddresses, nftDataOutputs:nftDataDefinition.contractCall.outputs, transactionTimeout});
+    await tinlake.setContractAddresses();
   }
 
   return tinlake;

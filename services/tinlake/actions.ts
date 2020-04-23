@@ -1,25 +1,25 @@
 import BN from 'bn.js';
-import { Loan, Investor, Tranche, NFT, interestRateToFee } from 'tinlake';
+import { Loan, NFT, interestRateToFee } from 'tinlake';
 import config from '../../config';
 
 export type TrancheType = "junior" | "senior";
 
 const { contractAddresses } = config;
 const SUCCESS_STATUS = '0x1';
-const nftRegistryAddress = contractAddresses['COLLATERAL_NFT'];
+
 interface TinlakeResult {
-  data?: any,
-  errorMsg?: string,
-  tokenId?: string,
-  loanId?: string
+  data?: any;
+  errorMsg?: string;
+  tokenId?: string;
+  loanId?: string;
 }
 
-export async function getNFT(tinlake: any, tokenId: string) {
+export async function getNFT(registry: string, tinlake: any, tokenId: string) {
   let nftOwner: string;
   let nftData: any;
 
   try {
-    nftOwner = await tinlake.getOwnerOfCollateral(tokenId);
+    nftOwner = await tinlake.getOwnerOfCollateral(registry, tokenId);
   } catch (e) {
     return loggedError(e, 'Could not get NFT owner for NFT ID', tokenId);
   }
@@ -29,7 +29,7 @@ export async function getNFT(tinlake: any, tokenId: string) {
   }
 
   try {
-    nftData = await tinlake.getNFTData(tokenId);
+    nftData = await tinlake.getNFTData(registry, tokenId);
   } catch (e) {
     // return loggedError(e, 'Could not get NFT data for NFT ID', tokenId);
     nftData = null;
@@ -40,6 +40,7 @@ export async function getNFT(tinlake: any, tokenId: string) {
   const nft: NFT = {
     nftOwner,
     nftData,
+    registry,
     tokenId: bnTokenId
   };
 
@@ -49,12 +50,12 @@ export async function getNFT(tinlake: any, tokenId: string) {
   };
 }
 
-export async function issue(tinlake: any, tokenId: string) {
+export async function issue(tinlake: any, tokenId: string, nftRegistryAddress: string) {
   let proxyAddress;
   const address = tinlake.ethConfig.from;
   try {
     proxyAddress = await tinlake.checkProxyExists(address);
-    console.log("proxy found", proxyAddress);
+    console.log('proxy found', proxyAddress);
   } catch (e) {
     proxyAddress = null;
   }
@@ -62,7 +63,7 @@ export async function issue(tinlake: any, tokenId: string) {
   if (!proxyAddress) {
     try {
       proxyAddress = await tinlake.proxyCreateNew(address);
-      console.log("proxy not found, new proxy address", proxyAddress);
+      console.log('proxy not found, new proxy address', proxyAddress);
     } catch (e) {
       return loggedError(e, 'Could not create Proxy.', address);
     }
@@ -73,7 +74,7 @@ export async function issue(tinlake: any, tokenId: string) {
 
   // approve proxy to take nft
   try {
-    await tinlake.approveNFT(tokenId, proxyAddress);
+    await tinlake.approveNFT(nftRegistryAddress, tokenId, proxyAddress);
   } catch (e) {
     return loggedError(e, 'Could not approve proxy to take NFT.', tokenId);
   }
@@ -81,26 +82,26 @@ export async function issue(tinlake: any, tokenId: string) {
   // transfer issue
   let result;
   try {
-    result = await tinlake.proxyTransferIssue(proxyAddress, tokenId);
+    result = await tinlake.proxyTransferIssue(proxyAddress, nftRegistryAddress, tokenId);
   } catch (e) {
-    return loggedError(e, 'Could not Issue loan.', tokenId)
+    return loggedError(e, 'Could not Issue loan.', tokenId);
   }
 
   if (result.status !== SUCCESS_STATUS) {
-    return loggedError({}, 'Could not Issue loan.', tokenId)
+    return loggedError({}, 'Could not Issue loan.', tokenId);
   }
 
   const loanId = await tinlake.nftLookup(nftRegistryAddress, tokenId);
   return {
     data: loanId
-  }
+  };
 }
 
 export async function getLoan(tinlake: any, loanId: string): Promise<TinlakeResult> {
   let loan;
   const count = await tinlake.loanCount();
 
-  if (count.toNumber() <= Number(loanId) || Number(loanId) == 0) {
+  if (count.toNumber() <= Number(loanId) || Number(loanId) === 0) {
     return loggedError({}, 'Loan not found', loanId);
   }
 
@@ -110,13 +111,13 @@ export async function getLoan(tinlake: any, loanId: string): Promise<TinlakeResu
     return loggedError(e, 'Loan not found', loanId);
   }
 
-  const nftData = await getNFT(tinlake, `${loan.tokenId}`);
+  const nftData = await getNFT(loan.registry, tinlake, `${loan.tokenId}`);
   loan.nft = nftData && nftData.nft || {};
   await addProxyDetails(tinlake, loan);
 
   return {
     data: loan
-  }
+  };
 }
 
 async function addProxyDetails(tinlake: any, loan: Loan) {
@@ -135,14 +136,14 @@ export async function getLoans(tinlake: any): Promise<TinlakeResult> {
   }
 
   const loansList = [];
-  for (let i = 0; i < loans.length; i++) {
+  for (let i = 0; i < loans.length; i += 1) {
     const loan = loans[i];
     await addProxyDetails(tinlake, loan);
     loansList.push(loan);
   }
   return {
     data: loansList
-  }
+  };
 }
 
 export async function setCeiling(tinlake: any, loanId: string, ceiling: string) {
@@ -160,7 +161,7 @@ export async function setCeiling(tinlake: any, loanId: string, ceiling: string) 
 
 export async function setInterest(tinlake: any, loanId: string, debt: string, rate: string) {
   const rateGroup = interestRateToFee(rate);
-  let existsRateGroup = await tinlake.existsRateGroup(rateGroup);
+  const existsRateGroup = await tinlake.existsRateGroup(rateGroup);
 
   // init rate group
   if (!existsRateGroup) {
@@ -178,7 +179,7 @@ export async function setInterest(tinlake: any, loanId: string, debt: string, ra
   // set rate group
   let setRes;
   try {
-    if (debt.toString() === "0") {
+    if (debt.toString() === '0') {
       setRes = await tinlake.setRate(loanId, rateGroup);
     } else {
       setRes = await tinlake.changeRate(loanId, rateGroup);
@@ -244,7 +245,7 @@ export async function borrow(tinlake: any, loan: Loan, amount: string) {
     return loggedError({}, 'There is not enough available funds.', loanId);
   }
 
-  //borrow with proxy
+  // borrow with proxy
   let borrowRes;
   try {
     borrowRes = await tinlake.proxyLockBorrowWithdraw(proxy, loanId, amount, address);
@@ -261,7 +262,7 @@ export async function repay(tinlake: any, loan: Loan) {
   const { loanId } = loan;
   const proxy = loan.ownerOf;
   // user entrie user balance as repay amount to make sure that enough funds are provided to cover the entire debt
-  const approvalAmount = await tinlake.getCurrencyBalance(tinlake.ethConfig.from);
+  const approvalAmount  = await tinlake.getCurrencyBalance(tinlake.ethConfig.from);
 
   let approveRes;
   try {
@@ -270,7 +271,7 @@ export async function repay(tinlake: any, loan: Loan) {
     return loggedError(e, 'Could not approve proxy.', loanId);
   }
   if (approveRes.status !== SUCCESS_STATUS) {
-    return loggedError({ "response": approveRes }, 'Could not approve proxy', loanId);
+    return loggedError({ response: approveRes }, 'Could not approve proxy', loanId);
   }
 
   // repay
@@ -281,7 +282,7 @@ export async function repay(tinlake: any, loan: Loan) {
     return loggedError(e, 'Could not repay.', loanId);
   }
   if (repayRes.status !== SUCCESS_STATUS) {
-    return loggedError({ "response": repayRes }, 'Could not repay', loanId);
+    return loggedError({ response : repayRes }, 'Could not repay', loanId);
   }
 }
 
@@ -294,7 +295,7 @@ export async function getInvestor(tinlake: any, address: string) {
   }
   return {
     data: investor
-  }
+  };
 }
 
 export async function setAllowance(tinlake: any, address: string, maxSupplyAmount: string, maxRedeemAmount: string, trancheType: TrancheType) {

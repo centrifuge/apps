@@ -17,7 +17,7 @@ interface Props {
   loadAnalyticsData?: (tinlake: any) => Promise<void>;
   transactionSubmitted?: (loadingMessage: string) => Promise<void>;
   responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>;
-  analytics: AnalyticsState
+  analytics: AnalyticsState;
 }
 
 interface State {
@@ -33,7 +33,7 @@ class LoanBorrow extends React.Component<Props, State> {
   }
 
   borrow = async () => {
-    this.props.transactionSubmitted && this.props.transactionSubmitted("Borrowing initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.");
+    this.props.transactionSubmitted && this.props.transactionSubmitted('Borrowing initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.');
     try {
       await authTinlake();
       const { borrowAmount } = this.state;
@@ -43,7 +43,7 @@ class LoanBorrow extends React.Component<Props, State> {
         this.props.responseReceived && this.props.responseReceived(null, `Borrowing failed. ${res.errorMsg}`);
         return;
       }
-      this.props.responseReceived && this.props.responseReceived(`Borrowing successful. Please check your wallet.`, null);
+      this.props.responseReceived && this.props.responseReceived('Borrowing successful. Please check your wallet.', null);
       this.props.loadLoan && this.props.loadLoan(tinlake, loan.loanId);
     } catch (e) {
       this.props.responseReceived && this.props.responseReceived(null, `Borrowing failed. ${e}`);
@@ -60,7 +60,7 @@ class LoanBorrow extends React.Component<Props, State> {
     const ceilingOverflow = (new BN(borrowAmount).cmp(new BN(loan.principal)) > 0);
     const availableFundsOverflow = (new BN(borrowAmount).cmp(new BN(availableFunds)) > 0);
     const borrowEnabled = !ceilingOverflow && !availableFundsOverflow && ceilingSet;
-    return <Box basis={'1/4'} gap="medium" margin={{ right: "large" }}>
+    return <Box basis={'1/4'} gap="medium" margin={{ right: 'large' }}>
       <Box gap="medium">
         <FormField label="Borrow amount">
           <NumberInput value={baseToDisplay(borrowAmount, 18)} suffix=" DAI" precision={18}
@@ -72,8 +72,8 @@ class LoanBorrow extends React.Component<Props, State> {
       <Box align="start">
         <Button onClick={this.borrow} primary label="Borrow" disabled={ !borrowEnabled } />
         {availableFundsOverflow &&
-          <Box margin={{top: "small"}}>
-             Available funds exceeded. <br /> 
+          <Box margin={{ top: 'small' }}>
+             Available funds exceeded. <br />
              Amount has to be lower then <br />
              <Text weight="bold">
               {`${baseToDisplay(availableFunds, 18)}`}
@@ -81,8 +81,8 @@ class LoanBorrow extends React.Component<Props, State> {
            </Box>
            }
         {ceilingOverflow && !availableFundsOverflow  &&
-          <Box margin={{top: "small"}}>
-            Max borrow amount exceeded.   <br /> 
+          <Box margin={{ top: 'small' }}>
+            Max borrow amount exceeded.   <br />
             Amount has to be lower then <br />
             <Text weight="bold">
               {`${baseToDisplay(loan.principal, 18)}`}

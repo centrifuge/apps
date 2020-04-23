@@ -39,7 +39,7 @@ class LoanPage extends React.Component<Props> {
           <WithTinlake render={tinlake =>
             <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization
               render={auth => auth && auth.state === 'loaded' && auth.user ?
-                <Box> {loanId && <LoanView tinlake={tinlake} loanId={loanId} />} </Box>
+                <Box> {loanId && <LoanView auth={auth} tinlake={tinlake} loanId={loanId} />} </Box>
                 :
                 <Alert margin="medium" type="error">
                   Please authenticate to access this page </Alert>

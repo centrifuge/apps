@@ -24,7 +24,7 @@ class InvestmentsOverview extends React.Component<Props> {
 
         <Box basis={'1/3'} >
           <DashboardMetric label={`Minimum TIN/DROP ratio`} >
-            <NumberDisplay value={baseToDisplay(minJuniorRatio, 18)} suffix={' %'} precision={2} />
+            <NumberDisplay value={baseToDisplay(minJuniorRatio, 25)} suffix={' %'} precision={2} />
           </DashboardMetric>
         </Box>
         <Box basis={'1/3'}  >

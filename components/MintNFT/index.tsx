@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Tinlake, { displayToBase, baseToDisplay } from 'tinlake';
+import { displayToBase, baseToDisplay } from 'tinlake';
 import { Box, FormField, TextInput, Button, Heading, Anchor, Text } from 'grommet';
 import Alert from '../Alert';
 import Link from 'next/link';
@@ -8,6 +8,7 @@ import { BackLink } from '../BackLink';
 import { authTinlake } from '../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import NumberInput from '../NumberInput';
+import config from '../../config';
 
 interface Props {
   tinlake: any;
@@ -22,7 +23,7 @@ interface State {
   errorMsg: string;
 }
 
-const SUCCESS_STATUS = '0x1'
+const SUCCESS_STATUS = '0x1';
 
 class MintNFT extends React.Component<Props, State> {
   state: State = {
@@ -44,14 +45,13 @@ class MintNFT extends React.Component<Props, State> {
 
   mint = async () => {
     const { referenceId, assetType, amount, tokenId } = this.state;
-   
+    const registry = config.contractAddresses.COLLATERAL_NFT;
     {
       this.setState({ is: 'loading' });
       try {
         await authTinlake();
         const base = displayToBase(baseToDisplay(amount, 2), 2);
-        const res = await this.props.tinlake.mintNFT(
-          this.props.tinlake.ethConfig.from, tokenId, referenceId, base, assetType);
+        const res = await this.props.tinlake.mintNFT(registry, this.props.tinlake.ethConfig.from, tokenId, referenceId, base, assetType);
         if (res.status === SUCCESS_STATUS && res.events[0].event.name === 'Transfer') {
           this.setState({ is: 'success' });
         } else {
@@ -66,7 +66,7 @@ class MintNFT extends React.Component<Props, State> {
 
   render() {
     const { is, tokenId, errorMsg, referenceId, assetType, amount } = this.state;
-
+    const registry = config.contractAddresses.COLLATERAL_NFT;
     return <Box>
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">
@@ -79,32 +79,32 @@ class MintNFT extends React.Component<Props, State> {
         <Spinner height={'calc(100vh - 89px - 84px)'} message={'Minting...'} />
       :
         <Box >
-          {is === 'success' && <Alert type="success">
+          {is === 'success' && <Alert pad={{horizontal : 'medium'}} type="success">
             Successfully minted NFT for Token ID {tokenId}
-            <p> 
-              <Link href={{ pathname: `/loans/issue`, query: { tokenId }}}>
-                <Anchor>Please proceed to loan opening</Anchor> 
+            <p>
+              <Link href={{ pathname: '/loans/issue', query: { tokenId, registry } }}>
+                <Anchor>Please proceed to loan opening</Anchor>
               </Link> your NFT.</p>
             <p> Your NFT ID will automatically be pasted in the respective field.</p>
             <p>If you want to open a loan, <b>please make sure to copy your Token ID!</b></p>
          </Alert>}
-          {is === 'error' && <Alert type="error">
+          {is === 'error' && <Alert pad={{horizontal : 'medium'}} type="error">
             <Text weight="bold">
               Error minting NFT for Token ID {tokenId}, see console for details</Text>
             {errorMsg && <div><br />{errorMsg}</div>}
           </Alert>}
 
-          {is === null && <Alert type="info">
+          {is === null && <Alert pad={{horizontal : 'medium'}} type="info">
             Tinlake requires you to have a non-fungible token ("NFT") to deposit as collateral.
              An NFT is an on-chain, digital representation of an underlying real-world asset, such as an invoice, a mortgage or music royalties.
             <p>In this demo, you can mint a test NFT reflecting an sample invoice worth USD 1.000 into your wallet. Please fill in a "NFT Reference" as a unique identifier for your invoice NFT below. Then proceed with Mint NFT.
               The NFT will be minted into your wallet and on the next screen you will be provided with the Token ID of this NFT.</p>
            <b>Please store or copy this Token ID, as it will be used again to open a loan on Tinlake.</b>
-            <p>If you already have a token ID, <Link href={`/loans/issue`}>
+            <p>If you already have a token ID, <Link href={'/loans/issue'}>
               <Anchor>please proceed to loan opening</Anchor></Link>.</p>
           </Alert>}
 
-          <Box direction="row" gap="large" margin={{vertical:"large"}}>
+          <Box direction="row" gap="large" margin={{ vertical:'large' }}>
             <b>Please specify metadata of NFT:</b>
           </Box>
 

@@ -20,7 +20,7 @@ interface Props {
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>;
   auth: AuthState;
   transactions?: TransactionState;
-  resetTransactionState?: () => void
+  resetTransactionState?: () => void;
 }
 
 // on state change tokenId --> load nft data for loan collateral
@@ -43,25 +43,25 @@ class LoanView extends React.Component<Props> {
     if (loanState === null || loanState === 'loading') { return null; }
     if (loanState === 'not found') {
       return <Alert margin="medium" type="error">
-        Could not find loan {loanId}</Alert>
+        Could not find loan {loanId}</Alert>;
     }
 
     const hasAdminPermissions = auth.user && (auth.user.permissions.canSetInterestRate || auth.user.permissions.canSetCeiling);
     const hasBorrowerPermissions = auth.user && loan && (loan.proxyOwner && loan.proxyOwner === auth.user.address);
 
     if (transactions && transactions.transactionState && transactions.transactionState === 'processing') {
-      return <Spinner height={'calc(100vh - 89px - 84px)'} message={transactions.loadingMessage || 'Processing Transaction. This may take a fev seconds. Please wait...'} />
+      return <Spinner height={'calc(100vh - 89px - 84px)'} message={transactions.loadingMessage || 'Processing Transaction. This may take a few seconds. Please wait...'} />;
     }
 
     return <Box>
       {transactions && transactions.successMessage &&
-      <Box margin={{ bottom: "large" }}>
+      <Box margin={{ bottom: 'large' }}>
           <Alert type="success">
             {transactions.successMessage} </Alert>
       </Box>}
 
       {transactions && transactions.errorMessage &&
-      <Box margin={{ bottom: "large" }}>
+      <Box margin={{ bottom: 'large' }}>
           <Alert type="error">
             {transactions.errorMessage}
           </Alert>
@@ -71,8 +71,8 @@ class LoanView extends React.Component<Props> {
       {loan && loan.status !== 'closed' &&
         <Box>
           {hasAdminPermissions &&
-            <Box margin={{ top: "large", bottom: "large" }} >
-              <Box gap="medium" align="start" margin={{ bottom: "medium" }} >
+            <Box margin={{ top: 'large', bottom: 'large' }} >
+              <Box gap="medium" align="start" margin={{ bottom: 'medium' }} >
                 <Heading level="5" margin="none">Loan Settings</Heading>
               </Box>
               <Box direction="row">
@@ -87,8 +87,8 @@ class LoanView extends React.Component<Props> {
           }
 
           {hasBorrowerPermissions &&
-            <Box margin={{ top: "large", bottom: "large" }} >
-              <Box gap="medium" align="start" margin={{ bottom: "medium" }} >
+            <Box margin={{ top: 'large', bottom: 'large' }} >
+              <Box gap="medium" align="start" margin={{ bottom: 'medium' }} >
                 <Heading level="5" margin="none">Borrow / Repay </Heading>
               </Box>
               <Box direction="row">
@@ -100,7 +100,7 @@ class LoanView extends React.Component<Props> {
         </Box>
       }
       {loan && loan.nft && <NftData data={loan.nft} authedAddr={tinlake.ethConfig.from} />}
-    </Box>
+    </Box>;
   }
 }
 

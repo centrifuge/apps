@@ -10,12 +10,16 @@ import Auth from '../../components/Auth';
 import Alert from '../../components/Alert';
 
 interface Props {
-  loanId: string;
+  tokenId: string;
+  registry: string;
 }
 
-class LoanPage extends React.Component<Props> {
+class LoanIssuePage extends React.Component<Props> {
+  static async getInitialProps({ query }: any) {
+    return { tokenId: query.tokenId, registry: query.registry };
+  }
   render() {
-    const { loanId } = this.props;
+    const { tokenId, registry } = this.props;
     return <Box align="center" pad={{horizontal: "small"}}>
       <Header
         selectedRoute={'/loans/issue'}
@@ -36,7 +40,7 @@ class LoanPage extends React.Component<Props> {
                       <Heading level="3">Open Loan</Heading>
                     </Box>
                   </SecondaryHeader>
-                  <IssueLoan tinlake={tinlake} loanId={loanId} />
+                  <IssueLoan tinlake={tinlake} auth={auth} tokenId={tokenId} registry={registry}/>
                 </Box>
                 :
                 <Alert margin="medium" type="error">
@@ -49,4 +53,4 @@ class LoanPage extends React.Component<Props> {
   }
 }
 
-export default LoanPage;
+export default LoanIssuePage;
