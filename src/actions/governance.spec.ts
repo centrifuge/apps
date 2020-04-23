@@ -1,17 +1,22 @@
 const randomString = require('randomstring');
 const account = require('ethjs-account');
 import assert from 'assert';
+import { ITinlake } from '../types/tinlake';
 import { createTinlake } from '../test/utils';
 import testConfig from '../test/config';
 import { ContractNames } from '../Tinlake';
 
 // god account = governance address for the tinlake test deployment
-const governanceTinlake = createTinlake(testConfig.godAccount, testConfig);
 const userAccount = account.generate(randomString.generate(32));
+let governanceTinlake : Partial<ITinlake> ;
 
 const { SUCCESS_STATUS, FAIL_STATUS, FAUCET_AMOUNT } = testConfig;
 
 describe('governance tests', async () => {
+  before(async () => {
+    governanceTinlake = await createTinlake(testConfig.godAccount, testConfig);
+  });
+
   describe('grant permissions', async () => {
 
     it('success: rely account on the ceiling contract', async () => {
@@ -31,7 +36,7 @@ describe('governance tests', async () => {
 
     it('fail: account has no governance permissions', async () => {
       const randomAccount = account.generate(randomString.generate(32));
-      const randomTinlake = createTinlake(randomAccount, testConfig);
+      const randomTinlake = await createTinlake(randomAccount, testConfig);
       const res = await randomTinlake.relyAddress(userAccount.address, testConfig.contractAddresses['CEILING']);
       assert.equal(res.status, FAIL_STATUS);
     });

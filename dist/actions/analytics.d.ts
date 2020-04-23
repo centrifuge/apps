@@ -9,10 +9,10 @@ export declare function AnalyticsActions<ActionsBase extends Constructor<Tinlake
         getDebt: (loanID: string) => Promise<BN>;
         loanCount: () => Promise<BN>;
         getCollateral: (loanId: string) => Promise<any>;
-        getOwnerOfCollateral: (tokenId: string) => Promise<BN>;
+        getOwnerOfCollateral: (nftRegistryAddr: string, tokenId: string) => Promise<BN>;
         getInterestRate: (loanId: string) => Promise<BN>;
         getOwnerOfLoan: (loanId: string) => Promise<any>;
-        getStatus: (tokenId: string, loanId: string) => Promise<any>;
+        getStatus: (nftRegistryAddr: string, tokenId: string, loanId: string) => Promise<any>;
         getLoan: (loanId: string) => Promise<Loan | null>;
         getLoanList: () => Promise<Loan[]>;
         getInvestor: (user: string) => Promise<Investor>;
@@ -42,6 +42,7 @@ export declare function AnalyticsActions<ActionsBase extends Constructor<Tinlake
         contractAbis: import("../Tinlake").ContractAbis;
         setProvider: (provider: any, ethOptions?: any) => void;
         setEthConfig: (ethConfig: {} | import("../Tinlake").EthConfig) => void;
+        setContractAddresses: () => Promise<void>;
     };
 } & ActionsBase;
 export declare type IAnalyticsActions = {
@@ -55,7 +56,7 @@ export declare type IAnalyticsActions = {
     getPrincipal(loanId: string): Promise<BN>;
     getInterestRate(loanId: string): Promise<BN>;
     getOwnerOfLoan(loanId: string): Promise<BN>;
-    getOwnerOfCollateral(tokenId: string, loanId: string): Promise<BN>;
+    getOwnerOfCollateral(nftRegistryAddr: string, tokenId: string, loanId: string): Promise<BN>;
     existsSenior(): boolean;
     getJuniorReserve(): Promise<BN>;
     getSeniorReserve(): Promise<BN>;

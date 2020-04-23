@@ -35,7 +35,7 @@ export class TestProvider {
   }
 }
 
-export function createTinlake(usr: Account, testConfig: any) : Partial<ITinlake> {
+export async function createTinlake(usr: Account, testConfig: any) : Partial<ITinlake> {
   const {
         rpcUrl,
         transactionTimeout,
@@ -51,7 +51,7 @@ export function createTinlake(usr: Account, testConfig: any) : Partial<ITinlake>
     nftDataOutputs: nftDataContractCall.outputs,
     ethConfig: { from: usr.address, gasLimit: `0x${gasLimit.toString(16)}` },
   });
-
+  await tinlake.setContractAddresses();
   return tinlake;
 }
 

@@ -18,6 +18,8 @@ import contractAbiTranche from './Tranche.abi.json';
 import contractAbiSeniorTranche from './SeniorTranche.abi.json';
 import contractAbiNFTData from './NftData.abi.json';
 import contractAbiNFT from './test/SimpleNFT.abi.json';
+import contractAbiBorrowerDeployer from './BorrowerDeployer.abi.json';
+import contractAbiLenderDeployer from './LenderDeployer.abi.json';
 import { ContractAbis } from '../Tinlake';
 
 export default {
@@ -44,4 +46,6 @@ export default {
   SENIOR_OPERATOR : contractAbiOperator,
   JUNIOR: contractAbiTranche,
   SENIOR: contractAbiSeniorTranche,
+  BORROWER_DEPLOYER: contractAbiBorrowerDeployer,
+  LENDER_DEPLOYER: contractAbiLenderDeployer,
 } as ContractAbis;

@@ -10,8 +10,8 @@ let lenderAccount;
 let lenderTinlake;
 
 const adminAccount = account.generate(randomString.generate(32));
-const adminTinlake: Partial<ITinlake>  = createTinlake(adminAccount, testConfig);
-const governanceTinlake: Partial<ITinlake> = createTinlake(testConfig.godAccount, testConfig);
+let adminTinlake: Partial<ITinlake>;
+let governanceTinlake: Partial<ITinlake>;
 const testProvider = new TestProvider(testConfig);
 
 const { SUCCESS_STATUS, FAUCET_AMOUNT, FAIL_STATUS, contractAddresses } = testConfig;
@@ -19,6 +19,8 @@ const { SUCCESS_STATUS, FAUCET_AMOUNT, FAIL_STATUS, contractAddresses } = testCo
 describe('lender functions', async () => {
 
   before(async () => {
+    adminTinlake = await createTinlake(adminAccount, testConfig);
+    governanceTinlake = await createTinlake(testConfig.godAccount, testConfig);
     // fund lender & admin accounts with currency
     await testProvider.fundAccountWithETH(adminAccount.address, FAUCET_AMOUNT);
     // rely admin on junior operator

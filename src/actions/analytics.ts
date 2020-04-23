@@ -37,8 +37,9 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return res;
     }
 
-    getOwnerOfCollateral = async (tokenId: string): Promise<BN> => {
-      const res : { 0: BN } = await executeAndRetry(this.contracts['COLLATERAL_NFT'].ownerOf, [tokenId]);
+    getOwnerOfCollateral = async (nftRegistryAddr:string, tokenId: string): Promise<BN> => {
+      const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftRegistryAddr);
+      const res : { 0: BN } = await executeAndRetry(nft.ownerOf, [tokenId]);
       return res[0];
     }
 
@@ -58,8 +59,8 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return address;
     }
 
-    getStatus = async(tokenId: string, loanId: string): Promise<any> => {
-      if (await this.getOwnerOfCollateral(tokenId) === this.contracts['SHELF'].address) {
+    getStatus = async(nftRegistryAddr: string, tokenId: string, loanId: string): Promise<any> => {
+      if (await this.getOwnerOfCollateral(nftRegistryAddr, tokenId) === this.contracts['SHELF'].address) {
         return 'ongoing';
       }
       if (await this.getOwnerOfLoan(loanId) === ZERO_ADDRESS) {
@@ -75,7 +76,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       const ownerOf = await this.getOwnerOfLoan(loanId);
       const interestRate = await this.getInterestRate(loanId);
       const debt = await this.getDebt(loanId);
-      const status = await this.getStatus(collateral.tokenId, loanId);
+      const status = await this.getStatus(collateral.registry, collateral.tokenId, loanId);
 
       return {
         loanId,
@@ -237,7 +238,7 @@ export type IAnalyticsActions = {
   getPrincipal(loanId:string):Promise<BN>,
   getInterestRate(loanId:string):Promise<BN>,
   getOwnerOfLoan(loanId:string):Promise<BN>,
-  getOwnerOfCollateral(tokenId:string, loanId:string):Promise<BN>,
+  getOwnerOfCollateral(nftRegistryAddr:string, tokenId:string, loanId:string):Promise<BN>,
   existsSenior(): boolean,
   getJuniorReserve(): Promise<BN>,
   getSeniorReserve(): Promise<BN>,

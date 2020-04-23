@@ -41,5 +41,6 @@ export default class Tinlake {
     constructor(params: TinlakeParams);
     setProvider: (provider: any, ethOptions?: any) => void;
     setEthConfig: (ethConfig: {} | EthConfig) => void;
+    setContractAddresses: () => Promise<void>;
 }
 export {};

@@ -60,7 +60,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return this.getProxy(accessToken);
     }
 
-    proxyTransferIssue = async (proxyAddr: string, tokenId: string)  => {
+    proxyTransferIssue = async (proxyAddr: string, nftRegistryAddr: string, tokenId: string)  => {
       const proxy: any = this.eth.contract(this.contractAbis['PROXY']).at(proxyAddr);
 
       const encoded = abiCoder.encodeFunctionCall({
@@ -69,7 +69,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         inputs: [
           { type: 'address', name: 'shelf' },
           { type: 'address', name: 'registry' },
-          { type: 'uint256', name: 'token' }]},   [this.contracts['SHELF'].address, this.contracts['COLLATERAL_NFT'].address, tokenId],
+          { type: 'uint256', name: 'token' }]},   [this.contracts['SHELF'].address, nftRegistryAddr, tokenId],
       );
 
       const txHash = await executeAndRetry(proxy.execute, [this.contracts['ACTIONS'].address, encoded, this.ethConfig]);
@@ -117,14 +117,14 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
 export type IProxyActions = {
   buildProxy(owner: string): Promise<any>,
-  checkProxyExists(provider:any, address: string): Promise<string | null>,
+  checkProxyExists(address: string): Promise<string | null>,
   getProxy(accessTokenId: string): Promise<any>,
   proxyCount(): Promise<any>,
   getProxyAccessToken(proxyAddr: string): Promise<any>,
   getProxyAccessTokenOwner(tokenId: string): Promise<any>,
   getProxyOwnerByLoan(loanId: string): Promise<any>,
   proxyCreateNew(address: string): Promise<any>,
-  proxyTransferIssue(proxyAddr:string , tokenId: string): Promise<any>,
+  proxyTransferIssue(proxyAddr:string, nftRegistryAddr: string, tokenId: string): Promise<any>,
   proxyLockBorrowWithdraw(proxyAddr:string, loanId: string, amount: string, usr: string): Promise<any>,
   proxyRepayUnlockClose(proxyAddr: string, tokenId: string, loanId: string): Promise<any>,
 };

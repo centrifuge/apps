@@ -10,8 +10,8 @@ const adminAccount = account.generate(randomString.generate(32));
 let borrowerAccount: Account;
 
 // user with super powers can fund and rely accounts
-const governanceTinlake: Partial<ITinlake> = createTinlake(testConfig.godAccount, testConfig);
-const adminTinlake: Partial<ITinlake> = createTinlake(adminAccount, testConfig);
+let governanceTinlake: Partial<ITinlake>;
+let adminTinlake: Partial<ITinlake>;
 let borrowerTinlake: Partial<ITinlake>;
 
 const testProvider = new TestProvider(testConfig);
@@ -21,6 +21,8 @@ const { SUCCESS_STATUS, FAUCET_AMOUNT, contractAddresses } = testConfig;
 describe('borrower tests', async () => {
 
   before(async () =>  {
+    governanceTinlake = await createTinlake(testConfig.godAccount, testConfig);
+    adminTinlake = await createTinlake(adminAccount, testConfig);
     // fund borrowerAccount with ETH
     await testProvider.fundAccountWithETH(adminAccount.address, FAUCET_AMOUNT);
     const amount = '5000';
@@ -30,7 +32,7 @@ describe('borrower tests', async () => {
 
   beforeEach(async() => {
     borrowerAccount = account.generate(randomString.generate(32));
-    borrowerTinlake = createTinlake(borrowerAccount, testConfig);
+    borrowerTinlake = await createTinlake(borrowerAccount, testConfig);
     await testProvider.fundAccountWithETH(borrowerAccount.address, FAUCET_AMOUNT);
   });
 
@@ -47,17 +49,17 @@ describe('borrower tests', async () => {
   it('success: lock nft', async () => {
     // mint nft & issue loan
     const { tokenId, loanId } = await mintIssue(borrowerAccount.address, borrowerTinlake);
-    await borrowerTinlake.approveNFT(tokenId, contractAddresses['SHELF']);
+    await borrowerTinlake.approveNFT(contractAddresses['COLLATERAL_NFT'], tokenId, contractAddresses['SHELF']);
 
     // lock nft
     await borrowerTinlake.lock(loanId);
-    assert.equal(await borrowerTinlake.getNFTOwner(tokenId), contractAddresses['SHELF']);
+    assert.equal(await borrowerTinlake.getNFTOwner(contractAddresses['COLLATERAL_NFT'], tokenId), contractAddresses['SHELF']);
   });
 
   it('success: unlock nft', async () => {
     // mint nft & issue loan
     const { tokenId, loanId } = await mintIssue(borrowerAccount.address, borrowerTinlake);
-    await borrowerTinlake.approveNFT(tokenId, contractAddresses['SHELF']);
+    await borrowerTinlake.approveNFT(contractAddresses['COLLATERAL_NFT'], tokenId, contractAddresses['SHELF']);
 
     // lock nft
     await borrowerTinlake.lock(loanId);
@@ -112,7 +114,7 @@ async function mintIssue(usr: string, tinlake: Partial<ITinlake>) {
 async function mintIssueBorrow(usr: string, tinlake: Partial<ITinlake>, amount: string) {
   const { tokenId, loanId } = await mintIssue(usr, tinlake);
   // approve shelf to take nft
-  await borrowerTinlake.approveNFT(tokenId, contractAddresses['SHELF']);
+  await borrowerTinlake.approveNFT(contractAddresses['COLLATERAL_NFT'], tokenId, contractAddresses['SHELF']);
   // lock nft
   await borrowerTinlake.lock(loanId);
   // admin sets ceiling
@@ -135,7 +137,7 @@ async function mintIssueBorrow(usr: string, tinlake: Partial<ITinlake>, amount: 
 
 async function fundTranche(amount: string) {
   const lenderAccount = account.generate(randomString.generate(32));
-  const lenderTinlake = createTinlake(lenderAccount, testConfig);
+  const lenderTinlake = await createTinlake(lenderAccount, testConfig);
   // fund lender accoutn with eth
   await testProvider.fundAccountWithETH(lenderAccount.address, FAUCET_AMOUNT);
   // make admin adress ward on tranche operator

@@ -10,16 +10,17 @@ const testProvider = new TestProvider(testConfig);
 const adminAccount = account.generate(randomString.generate(32));
 const borrowerAccount = account.generate(randomString.generate(32));
 const lenderAccount = account.generate(randomString.generate(32));
-const adminTinlake : Partial<ITinlake> = createTinlake(adminAccount, testConfig);
-const governanceTinlake = createTinlake(testConfig.godAccount, testConfig);
-
 const { SUCCESS_STATUS, FAUCET_AMOUNT, contractAddresses } = testConfig;
+let adminTinlake : Partial<ITinlake>;
+let governanceTinlake : Partial<ITinlake> ;
 
 // ------------ admin tests borrower-site -------------
 describe('admin tests', async () => {
 
   before(async () => {
     // fund admin account with eth
+    adminTinlake = await createTinlake(adminAccount, testConfig);
+    governanceTinlake = await createTinlake(testConfig.godAccount, testConfig);
     await testProvider.fundAccountWithETH(adminAccount.address, FAUCET_AMOUNT);
     await testProvider.fundAccountWithETH(borrowerAccount.address, FAUCET_AMOUNT);
   });

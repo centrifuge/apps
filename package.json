@@ -45,9 +45,7 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -cw",
-    "test": "npm run test-unit && npm run test-integration",
-    "test-unit": "ts-mocha -p test/tsconfig.json src/**/*.spec.ts --timeout 20000",
-    "test-integration": "npm run build && ts-mocha -p test/tsconfig.json test/**/*",
+    "test": "ts-mocha -p src/test/tsconfig.json src/**/*.spec.ts src/*.spec.ts --timeout 20000",
     "nodemon": "nodemon node inspect dist/Tinlake.js",
     "generate-docs": "typedoc --out docs --exclude \"./node_modules/**\"  --exclude \"./src/abi/**\" --exclude \"./src/index.ts\" --exclude \"./src/actions/*.spec.ts\" --exclude \"./src/test/**\" --excludeExternals --excludeNotExported --ignoreCompilerErrors ./src",
     "lint": "tslint --project .",

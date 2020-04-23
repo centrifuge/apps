@@ -3,8 +3,11 @@ import nftDataContractCall from './nft_data_contract_call.json';
 import abiDefinitions from '../abi/';
 
 const testConfig = {
-  contractAddresses,
   nftDataContractCall,
+  allAddresses: contractAddresses,
+  contractAddresses: {
+    ROOT_CONTRACT: contractAddresses['ROOT_CONTRACT'],
+  },
   godAccount: {
     address: '0xf6fa8a3f3199cdd85749ec749fb8f9c2551f9928',
     publicKey: '0x592ff5c6edfe1325d0af7ec33f56483e85ec33d30c213fa189f7887dc8525420db6a25cf1a1d1c1430c5a14d742750bbadd301cde5d87f8c7cc927c0fdcd5c2a',

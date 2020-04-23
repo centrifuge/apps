@@ -9,15 +9,18 @@ import { ITinlake } from '../types/tinlake';
 const testProvider = new TestProvider(testConfig);
 const borrowerAccount = account.generate(randomString.generate(32));
 const adminAccount = account.generate(randomString.generate(32));
-const borrowerTinlake: Partial<ITinlake> = createTinlake(borrowerAccount, testConfig);
-const adminTinlake: Partial<ITinlake>  = createTinlake(adminAccount, testConfig);
-const governanceTinlake = createTinlake(testConfig.godAccount, testConfig);
+let borrowerTinlake: Partial<ITinlake>;
+let adminTinlake: Partial<ITinlake>;
+let governanceTinlake: Partial<ITinlake>;
 
 const { SUCCESS_STATUS, FAIL_STATUS, FAUCET_AMOUNT, contractAddresses } = testConfig;
 
 describe('proxy tests', async () => {
 
   before(async () => {
+    borrowerTinlake = await createTinlake(borrowerAccount, testConfig);
+    adminTinlake = await createTinlake(adminAccount, testConfig);
+    governanceTinlake = await createTinlake(testConfig.godAccount, testConfig);
     // fund accounts with ETH
     await testProvider.fundAccountWithETH(adminAccount.address, FAUCET_AMOUNT);
     await testProvider.fundAccountWithETH(borrowerAccount.address, FAUCET_AMOUNT);
@@ -99,7 +102,7 @@ describe('proxy tests', async () => {
 // TODO: move to utils
 async function fundTranche(amount: string) {
   const lenderAccount = account.generate(randomString.generate(32));
-  const lenderTinlake = createTinlake(lenderAccount, testConfig);
+  const lenderTinlake = await createTinlake(lenderAccount, testConfig);
   // fund lender accoutn with eth
   await testProvider.fundAccountWithETH(lenderAccount.address, FAUCET_AMOUNT);
   // make admin adress ward on tranche operator

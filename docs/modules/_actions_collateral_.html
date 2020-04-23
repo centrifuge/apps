@@ -89,7 +89,7 @@
 					<div class="tsd-signature tsd-kind-icon">ICollateral<wbr>Actions<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>approveNFT<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>getNFTCount<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>getNFTData<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>getNFTOwner<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>mintNFT<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>mintTitleNFT<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>transferNFT<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/8dc0c9a/src/actions/collateral.ts#L50">actions/collateral.ts:50</a></li>
+							<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/6eff4db/src/actions/collateral.ts#L57">actions/collateral.ts:57</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -98,17 +98,20 @@
 							<li class="tsd-parameter">
 								<h5>approveNFT<span class="tsd-signature-symbol">: </span>function</h5>
 								<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal">
-									<li class="tsd-signature tsd-kind-icon">approveNFT<span class="tsd-signature-symbol">(</span>tokenId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, to<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+									<li class="tsd-signature tsd-kind-icon">approveNFT<span class="tsd-signature-symbol">(</span>nftAddr<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, tokenId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, to<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
 								</ul>
 								<ul class="tsd-descriptions">
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/8dc0c9a/src/actions/collateral.ts#L53">actions/collateral.ts:53</a></li>
+												<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/6eff4db/src/actions/collateral.ts#L60">actions/collateral.ts:60</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
 										<ul class="tsd-parameters">
+											<li>
+												<h5>nftAddr: <span class="tsd-signature-type">string</span></h5>
+											</li>
 											<li>
 												<h5>tokenId: <span class="tsd-signature-type">string</span></h5>
 											</li>
@@ -123,15 +126,21 @@
 							<li class="tsd-parameter">
 								<h5>getNFTCount<span class="tsd-signature-symbol">: </span>function</h5>
 								<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal">
-									<li class="tsd-signature tsd-kind-icon">getNFTCount<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">BN</span><span class="tsd-signature-symbol">&gt;</span></li>
+									<li class="tsd-signature tsd-kind-icon">getNFTCount<span class="tsd-signature-symbol">(</span>nftAddr<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">BN</span><span class="tsd-signature-symbol">&gt;</span></li>
 								</ul>
 								<ul class="tsd-descriptions">
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/8dc0c9a/src/actions/collateral.ts#L54">actions/collateral.ts:54</a></li>
+												<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/6eff4db/src/actions/collateral.ts#L61">actions/collateral.ts:61</a></li>
 											</ul>
 										</aside>
+										<h4 class="tsd-parameters-title">Parameters</h4>
+										<ul class="tsd-parameters">
+											<li>
+												<h5>nftAddr: <span class="tsd-signature-type">string</span></h5>
+											</li>
+										</ul>
 										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">BN</span><span class="tsd-signature-symbol">&gt;</span></h4>
 									</li>
 								</ul>
@@ -139,17 +148,20 @@
 							<li class="tsd-parameter">
 								<h5>getNFTData<span class="tsd-signature-symbol">: </span>function</h5>
 								<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal">
-									<li class="tsd-signature tsd-kind-icon">getNFTData<span class="tsd-signature-symbol">(</span>tokenId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+									<li class="tsd-signature tsd-kind-icon">getNFTData<span class="tsd-signature-symbol">(</span>nftAddr<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, tokenId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
 								</ul>
 								<ul class="tsd-descriptions">
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/8dc0c9a/src/actions/collateral.ts#L55">actions/collateral.ts:55</a></li>
+												<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/6eff4db/src/actions/collateral.ts#L62">actions/collateral.ts:62</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
 										<ul class="tsd-parameters">
+											<li>
+												<h5>nftAddr: <span class="tsd-signature-type">string</span></h5>
+											</li>
 											<li>
 												<h5>tokenId: <span class="tsd-signature-type">string</span></h5>
 											</li>
@@ -161,17 +173,20 @@
 							<li class="tsd-parameter">
 								<h5>getNFTOwner<span class="tsd-signature-symbol">: </span>function</h5>
 								<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal">
-									<li class="tsd-signature tsd-kind-icon">getNFTOwner<span class="tsd-signature-symbol">(</span>tokenId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">BN</span><span class="tsd-signature-symbol">&gt;</span></li>
+									<li class="tsd-signature tsd-kind-icon">getNFTOwner<span class="tsd-signature-symbol">(</span>nftAddr<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, tokenId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">BN</span><span class="tsd-signature-symbol">&gt;</span></li>
 								</ul>
 								<ul class="tsd-descriptions">
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/8dc0c9a/src/actions/collateral.ts#L56">actions/collateral.ts:56</a></li>
+												<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/6eff4db/src/actions/collateral.ts#L63">actions/collateral.ts:63</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
 										<ul class="tsd-parameters">
+											<li>
+												<h5>nftAddr: <span class="tsd-signature-type">string</span></h5>
+											</li>
 											<li>
 												<h5>tokenId: <span class="tsd-signature-type">string</span></h5>
 											</li>
@@ -183,17 +198,20 @@
 							<li class="tsd-parameter">
 								<h5>mintNFT<span class="tsd-signature-symbol">: </span>function</h5>
 								<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal">
-									<li class="tsd-signature tsd-kind-icon">mintNFT<span class="tsd-signature-symbol">(</span>owner<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, tokenId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, ref<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, amount<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, asset<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+									<li class="tsd-signature tsd-kind-icon">mintNFT<span class="tsd-signature-symbol">(</span>nftAddr<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, owner<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, tokenId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, ref<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, amount<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, asset<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
 								</ul>
 								<ul class="tsd-descriptions">
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/8dc0c9a/src/actions/collateral.ts#L52">actions/collateral.ts:52</a></li>
+												<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/6eff4db/src/actions/collateral.ts#L59">actions/collateral.ts:59</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
 										<ul class="tsd-parameters">
+											<li>
+												<h5>nftAddr: <span class="tsd-signature-type">string</span></h5>
+											</li>
 											<li>
 												<h5>owner: <span class="tsd-signature-type">string</span></h5>
 											</li>
@@ -217,17 +235,20 @@
 							<li class="tsd-parameter">
 								<h5>mint<wbr>TitleNFT<span class="tsd-signature-symbol">: </span>function</h5>
 								<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal">
-									<li class="tsd-signature tsd-kind-icon">mint<wbr>TitleNFT<span class="tsd-signature-symbol">(</span>usr<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+									<li class="tsd-signature tsd-kind-icon">mint<wbr>TitleNFT<span class="tsd-signature-symbol">(</span>nftAddr<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, usr<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
 								</ul>
 								<ul class="tsd-descriptions">
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/8dc0c9a/src/actions/collateral.ts#L51">actions/collateral.ts:51</a></li>
+												<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/6eff4db/src/actions/collateral.ts#L58">actions/collateral.ts:58</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
 										<ul class="tsd-parameters">
+											<li>
+												<h5>nftAddr: <span class="tsd-signature-type">string</span></h5>
+											</li>
 											<li>
 												<h5>usr: <span class="tsd-signature-type">string</span></h5>
 											</li>
@@ -239,17 +260,20 @@
 							<li class="tsd-parameter">
 								<h5>transferNFT<span class="tsd-signature-symbol">: </span>function</h5>
 								<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal">
-									<li class="tsd-signature tsd-kind-icon">transferNFT<span class="tsd-signature-symbol">(</span>from<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, to<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, tokenId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+									<li class="tsd-signature tsd-kind-icon">transferNFT<span class="tsd-signature-symbol">(</span>nftAddr<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, from<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, to<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, tokenId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
 								</ul>
 								<ul class="tsd-descriptions">
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/8dc0c9a/src/actions/collateral.ts#L57">actions/collateral.ts:57</a></li>
+												<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/6eff4db/src/actions/collateral.ts#L64">actions/collateral.ts:64</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
 										<ul class="tsd-parameters">
+											<li>
+												<h5>nftAddr: <span class="tsd-signature-type">string</span></h5>
+											</li>
 											<li>
 												<h5>from: <span class="tsd-signature-type">string</span></h5>
 											</li>
@@ -280,7 +304,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/8dc0c9a/src/actions/collateral.ts#L5">actions/collateral.ts:5</a></li>
+									<li>Defined in <a href="https://github.com/ilinzweilin/tinlake.js/blob/6eff4db/src/actions/collateral.ts#L5">actions/collateral.ts:5</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -309,6 +333,9 @@
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="_tinlake_.html">&quot;<wbr>Tinlake&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="_tinlake_spec_.html">&quot;<wbr>Tinlake.spec&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="_actions_admin_.html">&quot;actions/admin&quot;</a>

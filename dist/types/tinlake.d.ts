@@ -21,6 +21,7 @@ export declare type Tranche = {
     token: string;
 };
 export declare type NFT = {
+    registry: string;
     tokenId: BN;
     nftOwner: string;
     nftData: any;
@@ -51,4 +52,5 @@ export declare type ITinlake = TinlakeActions & {
     setEthConfig(ethConfig: {
         [key: string]: any;
     }): void;
+    setContractAddresses(): () => Promise<void>;
 };
