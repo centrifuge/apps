@@ -1,10 +1,8 @@
 import BN from 'bn.js';
 import { Loan, NFT, interestRateToFee } from 'tinlake';
-import config from '../../config';
 
 export type TrancheType = "junior" | "senior";
 
-const { contractAddresses } = config;
 const SUCCESS_STATUS = '0x1';
 
 interface TinlakeResult {
@@ -282,7 +280,7 @@ export async function repay(tinlake: any, loan: Loan) {
     return loggedError(e, 'Could not repay.', loanId);
   }
   if (repayRes.status !== SUCCESS_STATUS) {
-    return loggedError({ response : repayRes }, 'Could not repay', loanId);
+    return loggedError({ response: repayRes }, 'Could not repay', loanId);
   }
 }
 
@@ -332,9 +330,9 @@ export async function supply(tinlake: any, supplyAmount: string, trancheType: Tr
   let approveRes;
   try {
     if (trancheType === "junior") {
-      approveRes = await tinlake.approveCurrency(contractAddresses['JUNIOR'], supplyAmount);
+      approveRes = await tinlake.approveJuniorForCurrency(supplyAmount);
     } else if (trancheType === "senior") {
-      approveRes = await tinlake.approveCurrency(contractAddresses['SENIOR'], supplyAmount);
+      approveRes = await tinlake.approveSeniorForCurrency(supplyAmount);
     }
   } catch (e) {
     return loggedError(e, `Could not approve currency for ${trancheType}.`, '');
@@ -364,9 +362,9 @@ export async function redeem(tinlake: any, redeemAmount: string, trancheType: Tr
   let approveRes;
   try {
     if (trancheType === "junior") {
-      approveRes = await tinlake.approveJuniorToken(contractAddresses['JUNIOR'], redeemAmount)
+      approveRes = await tinlake.approveJuniorToken(redeemAmount)
     } else if (trancheType === "senior")
-      approveRes = await tinlake.approveSeniorToken(contractAddresses['SENIOR'], redeemAmount);
+      approveRes = await tinlake.approveSeniorToken(redeemAmount);
   } catch (e) {
     return loggedError(e, `Could not approve ${trancheType} Token.`, '');
   }

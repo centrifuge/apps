@@ -47,6 +47,7 @@ class InvestorView extends React.Component<Props, State> {
     resetTransactionState()
     loadAnalyticsData && loadAnalyticsData(tinlake);
     this.showInvestor();
+    this.setState({selectedTab: 0});
   }
 
   componentWillUnmount() {
@@ -67,7 +68,7 @@ class InvestorView extends React.Component<Props, State> {
   }
 
   render() {
-    const { is, errorMsg } = this.state;
+    const { is, errorMsg, selectedTab} = this.state;
     const { tinlake, investments, auth, analytics, transactions } = this.props;
     const investor = investments && investments.investor;
     const investorState = investments && investments.investorState;
@@ -87,7 +88,7 @@ class InvestorView extends React.Component<Props, State> {
 
       { analytics && analytics.data  &&
       <Box pad={{ horizontal: 'medium', top: 'large' }} >
-        <Tabs justify="center" flex="grow" onActive={(i) => this.selectTab(i)}>
+        <Tabs justify="center" activeIndex={selectedTab} flex="grow" onActive={(i) => this.selectTab(i)}>
           <Tab title='Junior tranche / TIN token' style={{
             flex: 1,
             fontWeight: 900,
