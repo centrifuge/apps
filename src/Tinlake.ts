@@ -161,7 +161,7 @@ export default class Tinlake {
       this.contractAddresses['SENIOR'] = (await executeAndRetry(this.contracts['SENIOR_OPERATOR'].tranche, []))[0];
       this.contracts['SENIOR'] = this.eth.contract(this.contractAbis['SENIOR']).at(this.contractAddresses['SENIOR']);
       this.contractAddresses['SENIOR_TOKEN'] = (await executeAndRetry(this.contracts['SENIOR'].token, []))[0];
-      this.contracts['SENIOR_TOKEN'] = this.eth.contract(this.contractAbis['SENIOR']).at(this.contractAddresses['SENIOR_TOKEN']);
+      this.contracts['SENIOR_TOKEN'] = this.eth.contract(this.contractAbis['SENIOR_TOKEN']).at(this.contractAddresses['SENIOR_TOKEN']);
     } else {
       this.contractAddresses['SENIOR'] = ZERO_ADDRESS;
       this.contractAddresses['SENIOR_TOKEN'] = ZERO_ADDRESS;

@@ -10651,7 +10651,7 @@ var findEvent = function (abi, funcSignature) {
     });
 };
 var getEvents = function (receipt, abi) {
-    if (receipt.logs.length === 0) {
+    if (!receipt.logs || receipt.logs.length === 0) {
         return null;
     }
     var events = [];
@@ -29399,11 +29399,11 @@ function LenderActions(Base) {
                     }
                 });
             }); };
-            _this.approveSeniorToken = function (usr, tokenAmount) { return __awaiter(_this, void 0, void 0, function () {
+            _this.approveSeniorToken = function (tokenAmount) { return __awaiter(_this, void 0, void 0, function () {
                 var txHash;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].approve, [usr, tokenAmount, this.ethConfig])];
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].approve, [this.contractAddresses['SENIOR'], tokenAmount, this.ethConfig])];
                         case 1:
                             txHash = _a.sent();
                             console.log("[Currency.approve] txHash: " + txHash);
@@ -29436,11 +29436,11 @@ function LenderActions(Base) {
                     }
                 });
             }); };
-            _this.approveJuniorToken = function (usr, tokenAmount) { return __awaiter(_this, void 0, void 0, function () {
+            _this.approveJuniorToken = function (tokenAmount) { return __awaiter(_this, void 0, void 0, function () {
                 var txHash;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_TOKEN'].approve, [usr, tokenAmount, this.ethConfig])];
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_TOKEN'].approve, [this.contractAddresses['JUNIOR'], tokenAmount, this.ethConfig])];
                         case 1:
                             txHash = _a.sent();
                             console.log("[Currency.approve] txHash: " + txHash);
@@ -29506,6 +29506,20 @@ function CurrencyActions(Base) {
                             console.log("[Currency.approve] txHash: " + txHash);
                             return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['TINLAKE_CURRENCY'].abi, this.transactionTimeout)];
                     }
+                });
+            }); };
+            _this.approveSeniorForCurrency = function (currencyAmount) { return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    if (!this.contractAddresses['SENIOR'])
+                        return [2 /*return*/];
+                    return [2 /*return*/, this.approveCurrency(this.contractAddresses['SENIOR'], currencyAmount)];
+                });
+            }); };
+            _this.approveJuniorForCurrency = function (currencyAmount) { return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    if (!this.contractAddresses['JUNIOR'])
+                        return [2 /*return*/];
+                    return [2 /*return*/, this.approveCurrency(this.contractAddresses['JUNIOR'], currencyAmount)];
                 });
             }); };
             return _this;
@@ -46378,7 +46392,7 @@ var Tinlake = /** @class */ (function () {
                         return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR'].token, [])];
                     case 18:
                         _10[_11] = (_12.sent())[0];
-                        this.contracts['SENIOR_TOKEN'] = this.eth.contract(this.contractAbis['SENIOR']).at(this.contractAddresses['SENIOR_TOKEN']);
+                        this.contracts['SENIOR_TOKEN'] = this.eth.contract(this.contractAbis['SENIOR_TOKEN']).at(this.contractAddresses['SENIOR_TOKEN']);
                         return [3 /*break*/, 20];
                     case 19:
                         this.contractAddresses['SENIOR'] = ZERO_ADDRESS;

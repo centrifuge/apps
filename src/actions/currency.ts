@@ -21,6 +21,16 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
       console.log(`[Currency.approve] txHash: ${txHash}`);
       return waitAndReturnEvents(this.eth, txHash, this.contracts['TINLAKE_CURRENCY'].abi, this.transactionTimeout);
     }
+
+    approveSeniorForCurrency = async (currencyAmount: string) => {
+      if (!this.contractAddresses['SENIOR']) return;
+      return this.approveCurrency(this.contractAddresses['SENIOR'], currencyAmount);
+    }
+
+    approveJuniorForCurrency = async (currencyAmount: string) => {
+      if (!this.contractAddresses['JUNIOR']) return;
+      return this.approveCurrency(this.contractAddresses['JUNIOR'], currencyAmount);
+    }
   };
 }
 

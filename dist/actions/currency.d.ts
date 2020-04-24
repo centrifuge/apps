@@ -5,6 +5,8 @@ export declare function CurrencyActions<ActionsBase extends Constructor<TinlakeP
         mintCurrency: (usr: string, amount: string) => Promise<void>;
         getCurrencyBalance: (user: string) => Promise<BN>;
         approveCurrency: (usr: string, currencyAmount: string) => Promise<unknown>;
+        approveSeniorForCurrency: (currencyAmount: string) => Promise<unknown>;
+        approveJuniorForCurrency: (currencyAmount: string) => Promise<unknown>;
         provider: any;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;
@@ -15,6 +17,7 @@ export declare function CurrencyActions<ActionsBase extends Constructor<TinlakeP
         contractAbis: import("../Tinlake").ContractAbis;
         setProvider: (provider: any, ethOptions?: any) => void;
         setEthConfig: (ethConfig: {} | import("../Tinlake").EthConfig) => void;
+        setContractAddresses: () => Promise<void>;
     };
 } & ActionsBase;
 export declare type ICurrencyActions = {

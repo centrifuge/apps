@@ -3,10 +3,10 @@ export declare function LenderActions<ActionBase extends Constructor<TinlakePara
     new (...args: any[]): {
         supplySenior: (currencyAmount: string) => Promise<unknown>;
         redeemSenior: (tokenAmount: string) => Promise<unknown>;
-        approveSeniorToken: (usr: string, tokenAmount: string) => Promise<unknown>;
+        approveSeniorToken: (tokenAmount: string) => Promise<unknown>;
         supplyJunior: (currencyAmount: string) => Promise<unknown>;
         redeemJunior: (tokenAmount: string) => Promise<unknown>;
-        approveJuniorToken: (usr: string, tokenAmount: string) => Promise<unknown>;
+        approveJuniorToken: (tokenAmount: string) => Promise<unknown>;
         balance: () => Promise<unknown>;
         provider: any;
         eth: import("../services/ethereum").ethI;
@@ -18,6 +18,7 @@ export declare function LenderActions<ActionBase extends Constructor<TinlakePara
         contractAbis: import("../Tinlake").ContractAbis;
         setProvider: (provider: any, ethOptions?: any) => void;
         setEthConfig: (ethConfig: {} | import("../Tinlake").EthConfig) => void;
+        setContractAddresses: () => Promise<void>;
     };
 } & ActionBase;
 export declare type ILenderActions = {

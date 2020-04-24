@@ -17,8 +17,8 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
       return waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_OPERATOR'].abi, this.transactionTimeout);
     }
 
-    approveSeniorToken = async (usr: string, tokenAmount: string) => {
-      const txHash = await executeAndRetry(this.contracts['SENIOR_TOKEN'].approve, [usr, tokenAmount, this.ethConfig]);
+    approveSeniorToken = async (tokenAmount: string) => {
+      const txHash = await executeAndRetry(this.contracts['SENIOR_TOKEN'].approve, [this.contractAddresses['SENIOR'], tokenAmount, this.ethConfig]);
       console.log(`[Currency.approve] txHash: ${txHash}`);
       return waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_TOKEN'].abi, this.transactionTimeout);
     }
@@ -36,8 +36,8 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
       return waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_OPERATOR'].abi, this.transactionTimeout);
     }
 
-    approveJuniorToken = async (usr: string, tokenAmount: string) => {
-      const txHash = await executeAndRetry(this.contracts['JUNIOR_TOKEN'].approve, [usr, tokenAmount, this.ethConfig]);
+    approveJuniorToken = async (tokenAmount: string) => {
+      const txHash = await executeAndRetry(this.contracts['JUNIOR_TOKEN'].approve, [this.contractAddresses['JUNIOR'], tokenAmount, this.ethConfig]);
       console.log(`[Currency.approve] txHash: ${txHash}`);
       return waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_TOKEN'].abi, this.transactionTimeout);
     }

@@ -102,7 +102,7 @@ const getEvents = (receipt: {
     { length: number; forEach: (arg0: (log: any) => void) => void; };
 },
                    abi: any) => {
-  if (receipt.logs.length === 0) {
+  if (!receipt.logs || receipt.logs.length === 0) {
     return null;
   }
   const events: { 'event': any; 'data': any; }[] = [];
