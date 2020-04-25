@@ -12,7 +12,7 @@ export declare function ProxyActions<ActionsBase extends Constructor<TinlakePara
         proxyCreateNew: (address: string) => Promise<any>;
         proxyTransferIssue: (proxyAddr: string, nftRegistryAddr: string, tokenId: string) => Promise<unknown>;
         proxyLockBorrowWithdraw: (proxyAddr: string, loanId: string, amount: string, usr: string) => Promise<unknown>;
-        proxyRepayUnlockClose: (proxyAddr: string, tokenId: string, loanId: string) => Promise<unknown>;
+        proxyRepayUnlockClose: (proxyAddr: string, tokenId: string, loanId: string, registry: string) => Promise<unknown>;
         provider: any;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;
@@ -37,6 +37,6 @@ export declare type IProxyActions = {
     proxyCreateNew(address: string): Promise<any>;
     proxyTransferIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<any>;
     proxyLockBorrowWithdraw(proxyAddr: string, loanId: string, amount: string, usr: string): Promise<any>;
-    proxyRepayUnlockClose(proxyAddr: string, tokenId: string, loanId: string): Promise<any>;
+    proxyRepayUnlockClose(proxyAddr: string, tokenId: string, loanId: string, registry: string): Promise<any>;
 };
 export default ProxyActions;

@@ -30268,7 +30268,7 @@ function ProxyActions(Base) {
                     }
                 });
             }); };
-            _this.proxyRepayUnlockClose = function (proxyAddr, tokenId, loanId) { return __awaiter(_this, void 0, void 0, function () {
+            _this.proxyRepayUnlockClose = function (proxyAddr, tokenId, loanId, registry) { return __awaiter(_this, void 0, void 0, function () {
                 var proxy, encoded, txHash;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
@@ -30285,7 +30285,7 @@ function ProxyActions(Base) {
                                     { type: 'address', name: 'erc20' },
                                     { type: 'uint256', name: 'loan' }
                                 ]
-                            }, [this.contracts['SHELF'].address, this.contracts['PILE'].address, this.contracts['COLLATERAL_NFT'].address, tokenId, this.contracts['TINLAKE_CURRENCY'].address, loanId]);
+                            }, [this.contracts['SHELF'].address, this.contracts['PILE'].address, registry, tokenId, this.contracts['TINLAKE_CURRENCY'].address, loanId]);
                             return [4 /*yield*/, executeAndRetry(proxy.execute, [this.contracts['ACTIONS'].address, encoded, this.ethConfig])];
                         case 1:
                             txHash = _a.sent();

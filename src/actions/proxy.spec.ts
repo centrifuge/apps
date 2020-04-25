@@ -54,7 +54,7 @@ describe('proxy tests', async () => {
       await governanceTinlake.mintCurrency(borrowerAccount.address, amount.toString());
       await borrowerTinlake.approveCurrency(proxyAddr, amount.toString());
       // repay
-      const repayResult = await borrowerTinlake.proxyRepayUnlockClose(proxyAddr, nftId, loanId);
+      const repayResult = await borrowerTinlake.proxyRepayUnlockClose(proxyAddr, nftId, loanId, contractAddresses.COLLATERAL_NFT);
       assert.equal(repayResult.status, SUCCESS_STATUS);
       // borrower should be owner of collateral NFT again
       // tranche balance should be back to pre-borrow amount
@@ -93,7 +93,7 @@ describe('proxy tests', async () => {
       // does not approve proxy to transfer currency
       await governanceTinlake.mintCurrency(borrowerAccount.address, amount.toString());
       // repay
-      const repayResult = await borrowerTinlake.proxyRepayUnlockClose(proxyAddr, nftId, loanId);
+      const repayResult = await borrowerTinlake.proxyRepayUnlockClose(proxyAddr, nftId, loanId, contractAddresses.COLLATERAL_NFT);
       assert.equal(repayResult.status, FAIL_STATUS);
     });
   });

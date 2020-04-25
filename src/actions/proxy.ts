@@ -94,7 +94,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return waitAndReturnEvents(this.eth, txHash, this.contractAbis['PROXY'], this.transactionTimeout);
     }
 
-    proxyRepayUnlockClose = async (proxyAddr: string, tokenId: string, loanId: string) => {
+    proxyRepayUnlockClose = async (proxyAddr: string, tokenId: string, loanId: string, registry: string) => {
       const proxy: any = this.eth.contract(this.contractAbis['PROXY']).at(proxyAddr);
       const encoded = abiCoder.encodeFunctionCall({
         name: 'repayUnlockClose',
@@ -106,7 +106,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
                                                       { type: 'uint256', name: 'token' },
                                                       { type: 'address', name: 'erc20' },
                                                       { type: 'uint256', name: 'loan' }]},
-                                                  [this.contracts['SHELF'].address, this.contracts['PILE'].address, this.contracts['COLLATERAL_NFT'].address, tokenId, this.contracts['TINLAKE_CURRENCY'].address, loanId],
+                                                  [this.contracts['SHELF'].address, this.contracts['PILE'].address, registry, tokenId, this.contracts['TINLAKE_CURRENCY'].address, loanId],
       );
       const txHash = await executeAndRetry(proxy.execute, [this.contracts['ACTIONS'].address, encoded, this.ethConfig]);
       console.log(`[Proxy Repay Unlock Close] txHash: ${txHash}`);
@@ -126,7 +126,7 @@ export type IProxyActions = {
   proxyCreateNew(address: string): Promise<any>,
   proxyTransferIssue(proxyAddr:string, nftRegistryAddr: string, tokenId: string): Promise<any>,
   proxyLockBorrowWithdraw(proxyAddr:string, loanId: string, amount: string, usr: string): Promise<any>,
-  proxyRepayUnlockClose(proxyAddr: string, tokenId: string, loanId: string): Promise<any>,
+  proxyRepayUnlockClose(proxyAddr: string, tokenId: string, loanId: string, registry: string): Promise<any>,
 };
 
 export default ProxyActions;
