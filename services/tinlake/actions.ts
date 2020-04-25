@@ -275,7 +275,7 @@ export async function repay(tinlake: any, loan: Loan) {
   // repay
   let repayRes;
   try {
-    repayRes = await tinlake.proxyRepayUnlockClose(proxy, loan.tokenId, loanId);
+    repayRes = await tinlake.proxyRepayUnlockClose(proxy, loan.tokenId, loanId, loan.registry);
   } catch (e) {
     return loggedError(e, 'Could not repay.', loanId);
   }
