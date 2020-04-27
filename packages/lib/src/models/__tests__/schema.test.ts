@@ -236,7 +236,6 @@ describe('Schema validations', () => {
       expect(() => {
         Schema.validateRegistries([{
           address: '0xFaC5A4BA4CF34D82C7CA0c8004A8421be1679B71',
-          asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
           label: 'Some Label',
         } as any]);
       }).toThrow(RegistriesErrors.PROOF_ARRAY_MISSING);
@@ -244,7 +243,6 @@ describe('Schema validations', () => {
       expect(() => {
         Schema.validateRegistries([{
           address: '0xFaC5A4BA4CF34D82C7CA0c8004A8421be1679B71',
-          asset_manager_address: '0xFaC5A4BA4CF34D82C7CA0c8004A8421be1679B71',
           label: 'Some Label',
           proofs: {} as any,
         }]);
@@ -253,7 +251,6 @@ describe('Schema validations', () => {
       expect(() => {
         Schema.validateRegistries([{
           address: '0xFaC5A4BA4CF34D82C7CA0c8004A8421be1679B71',
-          asset_manager_address: '0xFaC5A4BA4CF34D82C7CA0c8004A8421be1679B71',
           label: 'Some Label',
           proofs: [],
         }]);
@@ -264,7 +261,6 @@ describe('Schema validations', () => {
       expect(() => {
         Schema.validateRegistries([{
           address: '0xFaC5A4BA4CF34D82C7CA0c8004A8421be1679B71',
-          asset_manager_address: '0xFaC5A4BA4CF34D82C7CA0c8004A8421be1679B71',
           label: 'Some Label',
           proofs: ['someproof'],
         }]);

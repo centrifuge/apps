@@ -35,7 +35,6 @@ describe('SchemasController', () => {
       {
         label: 'BEST_ANIMALS_NFT',
         address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
-        asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
         proofs: [
           'attributes.animals.wingspans',
           'header.document_id',
@@ -44,6 +43,7 @@ describe('SchemasController', () => {
     ],
   });
   let schemaToCreate;
+
 
   const databaseSpies: any = {};
 
@@ -116,7 +116,6 @@ describe('SchemasController', () => {
           registries: [
             {
               address: '0x111',
-              asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
             },
           ],
         } as Schema);
@@ -146,7 +145,6 @@ describe('SchemasController', () => {
           registries: [
             {
               address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
-              asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
               label: 'sdsds',
               proofs: ['sss', 'saaass'],
             },
@@ -177,7 +175,6 @@ describe('SchemasController', () => {
           registries: [
             {
               address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
-              asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
               label: 'sdsds',
               proofs: ['sss', 'saaass'],
             },
@@ -200,7 +197,7 @@ describe('SchemasController', () => {
 
       for (let i = 0; i < 5; i++) {
         await delay(0);
-        const newSchema = getSchemaData();
+        let newSchema = getSchemaData();
         newSchema.registries[0].label = `increment_${i}`;
         newSchema.name = `increment_${i}`;
         await schemasController.create(newSchema);
@@ -218,7 +215,7 @@ describe('SchemasController', () => {
 
       for (let i = 0; i < 5; i++) {
         await delay(0);
-        const newSchema = getSchemaData();
+        let newSchema = getSchemaData();
         newSchema.registries[0].label = `increment_${i}`;
         newSchema.name = `increment_${i}`;
         await schemasController.create(newSchema);
@@ -236,6 +233,7 @@ describe('SchemasController', () => {
       expect(databaseSpies.spyGetCursor).toHaveBeenCalledTimes(2);
     });
   });
+
 
   describe('archive', () => {
     it('should archive a schema', async () => {
@@ -282,7 +280,6 @@ describe('SchemasController', () => {
           {
             label: 'animal_registry',
             address: '0x87c574FB2DF0EaA2dAf5fc4a8A16dd3Ce39011B1',
-            asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
             proofs: ['attributes.wingspan'],
           },
         ],
@@ -299,19 +296,18 @@ describe('SchemasController', () => {
           _id: result._id,
         },
         {
-          $set: {
-            formFeatures: undefined,
-            attributes: [{ label: 'ReferenceId', name: 'reference_id', type: 'string' }, {
-              label: 'wingspans',
-              type: 'string',
-              name: 'animal_wingspan',
-            }, { name: 'animal_reference_id', label: 'reference_id', type: 'string' }],
-            name: 'bestAnimals',
-            registries: [{
-              address: '0x87c574FB2DF0EaA2dAf5fc4a8A16dd3Ce39011B1',
-              asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
-              label: 'animal_registry',
-              proofs: ['attributes.wingspan'],
+          '$set': {
+            'formFeatures': undefined,
+            'attributes': [{ 'label': 'ReferenceId', 'name': 'reference_id', 'type': 'string' }, {
+              'label': 'wingspans',
+              'type': 'string',
+              'name': 'animal_wingspan',
+            }, { 'name': 'animal_reference_id', 'label': 'reference_id', 'type': 'string' }],
+            'name': 'bestAnimals',
+            'registries': [{
+              'address': '0x87c574FB2DF0EaA2dAf5fc4a8A16dd3Ce39011B1',
+              'label': 'animal_registry',
+              'proofs': ['attributes.wingspan'],
             }],
           },
         },

@@ -5,6 +5,7 @@ import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes';
 
+
 // TODO add this in Common package
 export enum DocumentTypes {
   INVOICE = 'http://github.com/centrifuge/centrifuge-protobufs/invoice/#invoice.InvoiceData',
@@ -36,28 +37,23 @@ export class WebhooksController {
   async receiveMessage(@Body() notification: NotificationMessage) {
     console.log('Receive Webhook', notification);
     try {
-      // @ts-ignore
       if (notification.event_type === EventTypes.DOCUMENT) {
         // Search for the user in the database
         const user = await this.databaseService.users
-            // @ts-ignore
-            .findOne({ $or: [{ account: notification.to_id!.toLowerCase() }, { account: notification.to_id }] });
+          .findOne({ $or: [{ account: notification.to_id.toLowerCase() }, { account: notification.to_id }] });
         if (!user) {
           throw new Error('User is not present in database');
         }
 
-        // @ts-ignore
         if (notification.document_type === DocumentTypes.GENERIC_DOCUMENT) {
           const result = await this.centrifugeService.documents.getDocument(
             user.account,
-              // @ts-ignore
-              notification.document_id!,
+            notification.document_id,
           );
 
           const unflattenedAttributes = unflatten(result.attributes);
           await this.databaseService.documents.update(
-              // @ts-ignore
-              { 'header.document_id': notification.document_id, 'ownerId': user._id },
+            { 'header.document_id': notification.document_id, 'ownerId': user._id },
             {
               $set: {
                 ownerId: user._id,
@@ -65,7 +61,6 @@ export class WebhooksController {
                 data: result.data,
                 attributes: unflattenedAttributes,
                 scheme: result.scheme,
-                // @ts-ignore
                 fromId: notification.from_id,
 
               },
@@ -73,7 +68,6 @@ export class WebhooksController {
             { upsert: true },
           );
         } else {
-          // @ts-ignore
           throw new Error(`Document type ${notification.document_type} not supported`);
         }
       }

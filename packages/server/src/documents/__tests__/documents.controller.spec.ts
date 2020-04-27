@@ -12,42 +12,42 @@ describe('DocumentsController', () => {
   let documentsModule: TestingModule;
   const documentToCreate: Document = {
     header: {
-      readAccess: ['0x111'],
-      writeAccess: ['0x222'],
+      read_access: ['0x111'],
+      write_access: ['0x222'],
     },
-    attributes: {
-      animal_type: {
-        type: 'string',
-        value: 'iguana',
+    'attributes': {
+      'animal_type': {
+        'type': 'string',
+        'value': 'iguana',
       },
-      diet: {
-        type: 'string',
-        value: 'insects',
+      'diet': {
+        'type': 'string',
+        'value': 'insects',
       },
-      schema: {
-        type: 'string',
-        value: 'zoology',
+      'schema': {
+        'type': 'string',
+        'value': 'zoology',
       },
     },
   };
 
   const documentToInsert: Document = {
     header: {
-      readAccess: ['0x111'],
-      writeAccess: ['0x222'],
+      read_access: ['0x111'],
+      write_access: ['0x222'],
     },
-    attributes: {
-      animal_type: {
-        type: 'string',
-        value: 'iguana',
+    'attributes': {
+      'animal_type': {
+        'type': 'string',
+        'value': 'iguana',
       },
-      diet: {
-        type: 'string',
-        value: 'insects',
+      'diet': {
+        'type': 'string',
+        'value': 'insects',
       },
-      schema: {
-        type: 'string',
-        value: 'zoology',
+      'schema': {
+        'type': 'string',
+        'value': 'zoology',
       },
     },
   };
@@ -69,7 +69,7 @@ describe('DocumentsController', () => {
     const databaseService = documentsModule.get<DatabaseService>(DatabaseService);
     insertedDocument = await databaseService.documents.insert({
       header: {
-        documentId: '0x39393939',
+        document_id: '0x39393939',
       },
       ...documentToInsert,
       ownerId: 'user_id',
@@ -85,69 +85,70 @@ describe('DocumentsController', () => {
     centApiSpies.spyGetDocument = jest.spyOn(centrifugeService.documents, 'getDocument');
   });
 
-  // describe('create', () => {
-  //   it('should return the created document', async () => {
-  //     const documentsController = documentsModule.get<DocumentsController>(
-  //       DocumentsController,
-  //     );
-  //
-  //     const payload: CoreapiCreateDocumentRequest = {
-  //       ...documentToCreate,
-  //     };
-  //     const result = await documentsController.create(
-  //       { user: { _id: 'user_id', account: 'user_account' } },
-  //       payload,
-  //     );
-  //
-  //     expect(result).toMatchObject({
-  //       ...documentToCreate,
-  //       header: {
-  //         job_id: 'some_job_id',
-  //       },
-  //       attributes: {
-  //         ...documentToCreate.attributes,
-  //         _createdBy: {
-  //           type: 'bytes',
-  //           value: 'user_account',
-  //         },
-  //       },
-  //       ownerId: 'user_id',
-  //     });
-  //
-  //     expect(databaseSpies.spyInsert).toHaveBeenCalledTimes(1);
-  //   });
-  // });
-  //
-  // describe('get documents list', () => {
-  //
-  //   it('should get the list of documents from the database', async () => {
-  //     const documentsController = documentsModule.get<DocumentsController>(
-  //       DocumentsController,
-  //     );
-  //
-  //     const payload: CoreapiCreateDocumentRequest = {
-  //       ...documentToCreate,
-  //     };
-  //
-  //     await documentsController.create(
-  //       { user: { _id: 'user_id' } },
-  //       payload,
-  //     );
-  //
-  //     payload.attributes = {};
-  //
-  //     await documentsController.create(
-  //       { user: { _id: 'user_id' } },
-  //       payload,
-  //     );
-  //
-  //     const result = await documentsController.getList({
-  //       user: { _id: 'user_id' },
-  //     });
-  //     expect(result.length).toEqual(3);
-  //     expect(databaseSpies.spyGetAll).toHaveBeenCalledTimes(1);
-  //   });
-  // });
+  describe('create', () => {
+    it('should return the created document', async () => {
+      const documentsController = documentsModule.get<DocumentsController>(
+        DocumentsController,
+      );
+
+      const payload: CoreapiCreateDocumentRequest = {
+        ...documentToCreate,
+      };
+      const result = await documentsController.create(
+        { user: { _id: 'user_id',account:'user_account' } },
+        payload,
+      );
+
+      expect(result).toMatchObject({
+        ...documentToCreate,
+        header: {
+          job_id: 'some_job_id',
+        },
+        attributes: {
+          ...documentToCreate.attributes,
+          _createdBy: {
+            type: 'bytes',
+            value: 'user_account',
+          },
+        },
+        ownerId: 'user_id',
+      });
+
+      expect(databaseSpies.spyInsert).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('get documents list', () => {
+
+    it('should get the list of documents from the database', async () => {
+      const documentsController = documentsModule.get<DocumentsController>(
+        DocumentsController,
+      );
+
+      const payload: CoreapiCreateDocumentRequest = {
+        ...documentToCreate,
+      };
+
+      await documentsController.create(
+        { user: { _id: 'user_id' } },
+        payload,
+      );
+
+      payload.attributes = {};
+
+      await documentsController.create(
+        { user: { _id: 'user_id' } },
+        payload,
+      );
+
+
+      const result = await documentsController.getList({
+        user: { _id: 'user_id' },
+      });
+      expect(result.length).toEqual(3);
+      expect(databaseSpies.spyGetAll).toHaveBeenCalledTimes(1);
+    });
+  });
 
   describe('update', function() {
     it('should update the specified document', async function() {
@@ -173,20 +174,20 @@ describe('DocumentsController', () => {
       expect(databaseSpies.spyUpdate).toHaveBeenCalledWith(
         { _id: insertedDocument._id },
         {
-          $set:
+          '$set':
             {
-              attributes:
+              'attributes':
                 {
-                  animal_type:
-                    { type: 'string', value: 'iguana' },
-                  diet: { type: 'string', value: 'insects' },
-                  schema: { type: 'string', value: 'zoology' },
+                  'animal_type':
+                    { 'type': 'string', 'value': 'iguana' },
+                  'diet': { 'type': 'string', 'value': 'insects' },
+                  'schema': { 'type': 'string', 'value': 'zoology' },
                 },
 
-              header: { job_id: 'some_job_id' },
+              'header': { 'job_id': 'some_job_id' },
             },
         },
-        { returnUpdatedDocs: true, upsert: false },
+        { 'returnUpdatedDocs': true, 'upsert': false },
       );
       expect(updateResult!.attributes).toMatchObject({
         ...updatedDocument.attributes,

@@ -98,10 +98,9 @@ export class UsersController {
 
     return this.upsertUser({
       ...user,
-      name: user.name!,
+      name: user.name,
       email: user.email,
-      account: undefined,
-      chain: undefined,
+      account: '',
       password: undefined,
       enabled: false,
       invited: true,
@@ -141,8 +140,7 @@ export class UsersController {
     // Create centrifuge identity in case user does not have one
     if (!user.account) {
       const account = await this.centrifugeService.accounts.generateAccount(
-          // @ts-ignore
-          config.admin.chain,
+        config.admin.account,
       );
       user.account = account.identity_id.toLowerCase();
     }
