@@ -1,4 +1,5 @@
 export class MintNftRequest {
+  asset_manager_address:string;
   document_id:string
   proof_fields: string[];
   deposit_address: string;

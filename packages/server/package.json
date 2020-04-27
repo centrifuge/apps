@@ -21,7 +21,7 @@
     "url": "git@github.com:centrifuge/gateway.git"
   },
   "scripts": {
-    "start": "nodemon",
+    "start": "nodemon --experimental-modules",
     "test": "jest --config jest.config.js",
     "build": "tsc --build",
     "clean": "rm -rf ./dist"
@@ -30,7 +30,7 @@
     "url": "https://github.com/centrifuge/gateway.git)/issues"
   },
   "dependencies": {
-    "@centrifuge/gateway-lib": "^0.1.0",
+    "@centrifuge/gateway-lib": "file:../lib",
     "@nestjs/common": "^5.7.4",
     "@nestjs/core": "^5.7.4",
     "@nestjs/passport": "^5.1.0",

@@ -44,7 +44,7 @@ export class DocumentForm extends React.Component<Props, State> {
     document: {
       attributes: {},
       header: {
-        read_access: [],
+        readAccess: [],
       },
     },
     contacts: [],
@@ -183,12 +183,12 @@ export class DocumentForm extends React.Component<Props, State> {
     }
 
     // TODO we should move this add them somewhere else?
-    if (!document.header.read_access || !Array.isArray(document.header.read_access)) {
-      document.header.read_access = [];
+    if (!document.header.readAccess || !Array.isArray(document.header.readAccess)) {
+      document.header.readAccess = [];
     }
 
-    if (!document.header.write_access || !Array.isArray(document.header.write_access)) {
-      document.header.write_access = [];
+    if (!document.header.writeAccess || !Array.isArray(document.header.writeAccess)) {
+      document.header.writeAccess = [];
     }
 
 

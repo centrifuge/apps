@@ -15,12 +15,21 @@ export interface IUser {
   invited: boolean;
 }
 
+export interface IChainAccount {
+  centrifuge_chain_account: {
+    id: string;
+    secret: string;
+    ss_58_address: string;
+  }
+}
+
 export class User implements IUser {
   name: string = '';
   password?: string = '';
   email: string = '';
   _id?: string;
   account: string = '';
+  chain: IChainAccount;
   permissions: PERMISSIONS[] = [];
   schemas: string[] = [];
   enabled: boolean;

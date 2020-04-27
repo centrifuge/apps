@@ -6,7 +6,7 @@ import { Contact } from '@centrifuge/gateway-lib/models/contact';
 import { Schema } from '@centrifuge/gateway-lib/models/schema';
 import config from '../config';
 import { DatabaseService } from './database.service';
-import { DocumentRequest } from "@centrifuge/gateway-lib/models/document";
+import { DocumentRequest } from '@centrifuge/gateway-lib/models/document';
 
 // TODO refactor this in mutiple providers,services
 
@@ -26,6 +26,7 @@ const initializeDatabase = async (inMemoryOnly: boolean) => {
     invited: false,
     schemas: [],
     account: config.admin.account,
+    chain: config.admin.chain,
     permissions: config.admin.permissions,
   };
 
@@ -61,7 +62,6 @@ const initializeDatabase = async (inMemoryOnly: boolean) => {
  * Initialize database lock. Used in order to provide a singleton connection to the database.
  */
 let initializeDatabasePromise;
-
 
 export const databaseServiceProvider = {
   provide: DatabaseService,

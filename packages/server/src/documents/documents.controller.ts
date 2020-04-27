@@ -38,20 +38,26 @@ export class DocumentsController {
       },
     };
 
-    const createResult = await this.centrifugeService.documents.createDocument(
+    const createResult = await this.centrifugeService.documents.createDocumentV2(
       request.user.account,
       {
         attributes: payload.attributes,
-        read_access: payload.header.read_access,
-        write_access: payload.header.write_access,
+        readAccess: payload.header.readAccess,
+        writeAccess: payload.header.writeAccess,
         scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
       },
     );
 
     const createAttributes = unflatten(createResult.attributes);
     createResult.attributes = createAttributes;
-
-    await this.centrifugeService.pullForJobComplete(createResult.header.job_id, request.user.account);
+    // @ts-ignore
+    const commitResult = await this.centrifugeService.documents.commitDocumentV2(
+        request.user.account,
+        // @ts-ignore
+        createResult.header.document_id,
+    );
+    // @ts-ignore
+    await this.centrifugeService.pullForJobComplete(commitResult.header.job_id, request.user.account);
     return await this.databaseService.documents.insert({
       ...createResult,
       ownerId: request.user._id,
@@ -87,6 +93,7 @@ export class DocumentsController {
     });
 
     if (!document) throw new NotFoundException('Document not found');
+    // @ts-ignore
     const docFromNode = await this.centrifugeService.documents.getDocument(request.user.account, document.header.document_id);
     return {
       _id: document._id,
@@ -124,15 +131,17 @@ export class DocumentsController {
 
     const updateResult: Document = await this.centrifugeService.documents.updateDocument(
       request.user.account,
-      documentFromDb.header.document_id,
+        // @ts-ignore
+        documentFromDb.header.document_id,
       {
         attributes: document.attributes,
-        read_access: document.header.read_access,
-        write_access: document.header.write_access,
+        readAccess: document.header.readAccess,
+        writeAccess: document.header.writeAccess,
         scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
       },
     );
 
+    // @ts-ignore
     await this.centrifugeService.pullForJobComplete(updateResult.header.job_id, request.user.account);
     const unflattenAttr = unflatten(updateResult.attributes);
 

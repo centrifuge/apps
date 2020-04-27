@@ -7,6 +7,13 @@ import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document';
 export const defaultUser: User = {
   name: 'Default User',
   account: '0xDefaultAccount',
+  chain: {
+    centrifuge_chain_account: {
+      id: 'testid',
+      secret: 'testsecret',
+      ss_58_address: 'testaddress'
+    }
+  },
   email: 'default@user.com',
   invited: true,
   enabled: true,
