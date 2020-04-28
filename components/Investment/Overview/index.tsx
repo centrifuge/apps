@@ -17,13 +17,13 @@ class InvestmentsOverview extends React.Component<Props> {
     return <Box> 
       <Box direction="row" >
         <Box basis={'1/3'} >
-          <DashboardMetric label={`Current TIN/DROP ratio`} >
+          <DashboardMetric label={`Current TIN ratio`} >
             <NumberDisplay value={baseToDisplay(currentJuniorRatio, 25)} suffix={' %'} precision={2} />
           </DashboardMetric>
         </Box>
 
         <Box basis={'1/3'} >
-          <DashboardMetric label={`Minimum TIN/DROP ratio`} >
+          <DashboardMetric label={`Minimum TIN ratio`} >
             <NumberDisplay value={baseToDisplay(minJuniorRatio, 25)} suffix={' %'} precision={2} />
           </DashboardMetric>
         </Box>
