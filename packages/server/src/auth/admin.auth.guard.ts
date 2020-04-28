@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { PERMISSIONS } from "@centrifuge/gateway-lib/utils/constants";
+import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants';
 
 @Injectable()
 export class UserAuthGuard implements CanActivate {
@@ -18,7 +18,7 @@ export class UserAuthGuard implements CanActivate {
    */
   async validateRequest(request) {
     if (request.user.permissions.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
-      return true
+      return true;
     }
     return false;
   }

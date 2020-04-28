@@ -1,0 +1,7 @@
+{
+  "verbose": true,
+  "watch": ["packages/server/src"],
+  "ext": "ts",
+  "ignore": ["server/src/**/*spec.ts"],
+  "exec": "ts-node --project tsconfig.json -r tsconfig-paths/register src/main.ts"
+}

@@ -1,7 +1,7 @@
 import { Body, Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
-import { UserapiMintNFTRequest } from '@centrifuge/gateway-lib/centrifuge-node-client';
+import { CoreapiMintNFTRequest } from '@centrifuge/gateway-lib/centrifuge-node-client';
 import { Document, DocumentRequest } from '@centrifuge/gateway-lib/models/document';
 import { MintNftRequest, TransferNftRequest } from '@centrifuge/gateway-lib/models/nfts';
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
@@ -28,18 +28,21 @@ export class NftsController {
     @Req() request,
     @Body() body: MintNftRequest,
   ) {
-    const payload: UserapiMintNFTRequest = {
+    const payload: CoreapiMintNFTRequest = {
+      // @ts-ignore
+      asset_manager_address: body.asset_manager_address,
       document_id: body.document_id,
       proof_fields: body.proof_fields,
       deposit_address: body.deposit_address,
     };
 
-    const mintingResult: Document = await this.centrifugeService.nftBeta.mintNft(
+    const mintingResult: Document = await this.centrifugeService.nft.mintNft(
       request.user.account,
       body.registry_address,
       payload,
     );
 
+    // @ts-ignore
     await this.centrifugeService.pullForJobComplete(mintingResult.header.job_id, request.user.account);
     return mintingResult;
   }
@@ -66,7 +69,7 @@ export class NftsController {
       },
     );
 
-    await this.centrifugeService.pullForJobComplete(transferResult.header.job_id, request.user.account);
+    await this.centrifugeService.pullForJobComplete(transferResult.header.jobId, request.user.account);
     return transferResult;
   }
 }

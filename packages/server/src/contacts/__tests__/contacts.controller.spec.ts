@@ -23,7 +23,6 @@ describe('ContactsController', () => {
   ];
   const databaseSpies: any = {};
 
-
   beforeEach(async () => {
     contactsModule = await Test.createTestingModule({
       controllers: [ContactsController],
@@ -52,14 +51,13 @@ describe('ContactsController', () => {
         ContactsController,
       );
 
-
       const result = await contactsController.create(
         { user: { _id: ownerId } },
         contactToCreate,
       );
 
       expect(result).toMatchObject({
-        ownerId: ownerId,
+        ownerId,
         name: contactToCreate.name,
         address: contactToCreate.address,
       });
@@ -72,7 +70,6 @@ describe('ContactsController', () => {
       const contactsController = contactsModule.get<ContactsController>(
         ContactsController,
       );
-
 
       try {
         await contactsController.create({ user: { _id: ownerId } }, {
@@ -119,10 +116,9 @@ describe('ContactsController', () => {
 
       expect(result.reverse()).toMatchObject(
         [
-          ...insertedContacts
+          ...insertedContacts,
         ],
       );
-
 
       expect(databaseSpies.spyGetCursor).toHaveBeenCalledTimes(1);
     });
@@ -154,9 +150,9 @@ describe('ContactsController', () => {
       expect(databaseSpies.spyUpdate).toHaveBeenCalledWith(
         {
           _id: updateContactObject._id,
-          ownerId: ownerId,
+          ownerId,
         },
-        { ...updateContactObject, ownerId: ownerId },
+        { ...updateContactObject, ownerId },
       );
     });
   });

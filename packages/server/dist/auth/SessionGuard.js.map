@@ -1,0 +1,1 @@
+{"version":3,"file":"SessionGuard.js","sourceRoot":"","sources":["../../src/auth/SessionGuard.ts"],"names":[],"mappings":";;AAKA,MAAa,YAAY;IAMvB,WAAW,CAAC,OAAyB;QACnC,MAAM,WAAW,GAAG,OAAO,CAAC,YAAY,EAAE,CAAC;QAC3C,MAAM,OAAO,GAAG,WAAW,CAAC,UAAU,EAAE,CAAC;QAEzC,OAAO,CAAC,CAAC,OAAO,CAAC,IAAI,CAAC;IACxB,CAAC;CACF;AAZD,oCAYC"}

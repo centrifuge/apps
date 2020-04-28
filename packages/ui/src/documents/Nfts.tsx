@@ -78,6 +78,7 @@ export const Nfts: FunctionComponent<Props> = (props) => {
           deposit_address: data.transfer ? data.deposit_address : user!.account,
           proof_fields: data.registry!.proofs,
           registry_address: data.registry!.address,
+          asset_manager_address: data.registry!.asset_manager_address
         },
       )).data);
     } catch (e) {
@@ -200,7 +201,8 @@ export const Nfts: FunctionComponent<Props> = (props) => {
       onClose={closeModal}
     >
       <MintNftForm
-        onSubmit={(data) => mintNFT(document!.header!.document_id!, data)}
+        // @ts-ignore
+          onSubmit={(data) => mintNFT(document.header!.document_id!, data)}
         onDiscard={closeModal}
         registries={registries}
       />
