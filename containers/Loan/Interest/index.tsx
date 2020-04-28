@@ -56,7 +56,7 @@ class LoanInterest extends React.Component<Props, State> {
         </FormField>
       </Box>
       <Box align="start">
-        <Button onClick={this.setInterestRate} primary label="Set Annual Interest Rate (APR)"/>
+        <Button onClick={this.setInterestRate} primary label="Set interest rate"/>
       </Box>
     </Box>;
   }
