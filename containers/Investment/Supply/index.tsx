@@ -41,7 +41,11 @@ class InvestorSupply extends React.Component<Props, State> {
         responseReceived && responseReceived(null, `Investment failed. ${res.errorMsg}`);
         return;
       }
-      responseReceived && responseReceived(`Investment successful. Please check your wallet for TIN tokens.`, null);
+      if (trancheType === 'junior') {
+        responseReceived && responseReceived(`Investment successful. Please check your wallet for TIN tokens.`, null);
+      } else if (trancheType === 'senior') {
+        responseReceived && responseReceived(`Investment successful. Please check your wallet for DROP tokens.`, null);
+      }
       loadInvestor && loadInvestor(tinlake, investor.address);
       loadAnalyticsData && loadAnalyticsData(tinlake);
     } catch (e) {

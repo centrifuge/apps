@@ -40,17 +40,17 @@ class JuniorRatio extends React.Component<Props, State> {
         const { minJuniorRatio } = this.state;
         const normalizedRatio = new Decimal(minJuniorRatio).div(100).toString();
         const { tinlake, loadAnalyticsData, responseReceived, transactionSubmitted } = this.props;
-        transactionSubmitted && transactionSubmitted(`Setting mininum junior ratio initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.`);
+        transactionSubmitted && transactionSubmitted(`Setting mininum TIN ratio initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.`);
         try {
           const res = await setMinJuniorRatio(tinlake, normalizedRatio);
           if (res && res.errorMsg) {
-            responseReceived && responseReceived(null, `Setting minimun junior ratio failed. ${res.errorMsg}`);
+            responseReceived && responseReceived(null, `Setting minimun TIN ratio failed. ${res.errorMsg}`);
             return;
           } 
-          responseReceived && responseReceived(`Minimum junior ratio set successfully.`, null);
+          responseReceived && responseReceived(`Minimum TIN ratio set successfully.`, null);
           loadAnalyticsData && loadAnalyticsData(tinlake);
         } catch(e) {
-          responseReceived && responseReceived(null, `Changing minimum junior ratio failed. ${e}`);
+          responseReceived && responseReceived(null, `Changing minimum TIN ratio failed. ${e}`);
           console.log(e);
         }
     }
@@ -58,11 +58,11 @@ class JuniorRatio extends React.Component<Props, State> {
         const { minJuniorRatio } = this.state;
         return <Box pad={{ horizontal: 'medium' }}>
             <Box direction="row" margin={{ top: 'medium' }}>
-                <Heading level="4">Set minimum junior ratio</Heading>
+                <Heading level="4">Set minimum TIN ratio</Heading>
             </Box>
             <Box direction="row" gap="medium" >
                 <Box basis={'1/3'}>
-                    <FormField label="Min junior ratio">
+                    <FormField label="Min TIN ratio">
                         <NumberInput value={baseToDisplay(minJuniorRatio, 27)} precision={2}
                             onValueChange={({ value }) =>
                                 this.setState({ minJuniorRatio: displayToBase(value, 27) })}
@@ -70,7 +70,7 @@ class JuniorRatio extends React.Component<Props, State> {
                     </FormField>
                 </Box>
                 <Box align="start">
-                    <Button primary label="Set min junior ratio" onClick={this.setMinJuniorRatio} />
+                    <Button primary label="Set min TIN ratio" onClick={this.setMinJuniorRatio} />
                 </Box>
             </Box>
         </Box>;

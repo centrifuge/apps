@@ -317,11 +317,11 @@ export async function setMinJuniorRatio(tinlake: any, ratio: string) {
   try {
     setRes = await tinlake.setMinimumJuniorRatio(ratio);
   } catch (e) {
-    return loggedError(e, 'Could not set min junior ratio', '');
+    return loggedError(e, 'Could not set min TIN ratio', '');
   }
 
   if (setRes.status !== SUCCESS_STATUS) {
-    return loggedError({}, 'Could not set min junior ratio', '');
+    return loggedError({}, 'Could not set min TIN ratio', '');
   }
 }
 
