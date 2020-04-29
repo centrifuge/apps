@@ -20,19 +20,41 @@ interface Props {
 interface State {
   supplyAmount: string;
   redeemAmount: string;
+  currentSupplyLimit: string;
+  currentRedeemLimit: string;
 }
 
 class InvestorAllowance extends React.Component<Props, State> {
 
+  updateLimits() {
+    if (!this.state) {
+      return
+    }
+    const { investor, trancheType } = this.props;
+    const { currentSupplyLimit, currentRedeemLimit } = this.state;
+    const tranche = investor[trancheType];
+    if (currentSupplyLimit != tranche.maxSupply || currentRedeemLimit != tranche.maxRedeem ) {
+      this.setState({ currentSupplyLimit: tranche && tranche.maxSupply || '0', currentRedeemLimit: tranche && tranche.maxRedeem || '0' });
+      this.setState({ supplyAmount: tranche && tranche.maxSupply || '0', redeemAmount: tranche && tranche.maxRedeem || '0' });
+    }
+  }
   componentWillMount() {
-    this.setState({ supplyAmount: '0', redeemAmount: '0' });
+    this.setState({
+      supplyAmount: '0',
+      redeemAmount: '0',
+      currentSupplyLimit: '0',
+      currentRedeemLimit: '0'
+    });
+    this.updateLimits();
   }
 
   setAllowance = async () => {
     this.props.transactionSubmitted && this.props.transactionSubmitted("Allowance initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.");
     try {
       await authTinlake();
+      this.updateLimits();
       const { supplyAmount, redeemAmount } = this.state;
+
       const { investor, trancheType, tinlake } = this.props;
       const res = await setAllowance(tinlake, investor.address, supplyAmount, redeemAmount, trancheType);
       if (res && res.errorMsg) {
@@ -49,6 +71,7 @@ class InvestorAllowance extends React.Component<Props, State> {
 
   render() {
     const { supplyAmount, redeemAmount } = this.state;
+    this.updateLimits();
     return <Box>
       <Box gap="medium" align="start" margin={{ bottom: "medium" }} >
         <Heading level="4" margin="none"> Set allowance </Heading>

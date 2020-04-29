@@ -2,7 +2,7 @@ import BN from 'bn.js';
 import { Loan, NFT, interestRateToFee } from 'tinlake';
 
 export type TrancheType = "junior" | "senior";
-
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 const SUCCESS_STATUS = '0x1';
 
 interface TinlakeResult {
@@ -95,7 +95,16 @@ export async function issue(tinlake: any, tokenId: string, nftRegistryAddress: s
   };
 }
 
-export async function getLoan(tinlake: any, loanId: string): Promise<TinlakeResult> {
+export async function getProxyOwner(tinlake: any, loanId: string) : Promise<TinlakeResult> {
+  let owner = ZERO_ADDRESS;
+  try {
+    owner = await tinlake.getProxyOwnerByLoan(loanId);
+  } catch (e) {
+  }
+  return { data: owner };
+}
+
+export async function getLoan(tinlake: any, loanId: string) : Promise<TinlakeResult> {
   let loan;
   const count = await tinlake.loanCount();
 
@@ -226,8 +235,6 @@ export async function getAnalytics(tinlake: any) {
   } catch (e) {
     return loggedError(e, 'Could not get analytics data', '');
   }
-
-
 }
 
 export async function borrow(tinlake: any, loan: Loan, amount: string) {

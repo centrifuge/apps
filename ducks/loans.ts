@@ -1,6 +1,6 @@
 import { AnyAction, Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
-import { getLoans, getLoan, TinlakeResult, Loan } from '../services/tinlake/actions';
+import { getLoans, getProxyOwner, getLoan, TinlakeResult, Loan } from '../services/tinlake/actions';
 import Apollo from '../services/apollo';
 
 // Actions
@@ -42,9 +42,15 @@ export function loadLoans(tinlake: any, root: string = '0xde1b98d083db90a00dee65
   ThunkAction<Promise<void>, LoansState, undefined, Action>  {
   return async (dispatch) => {
     dispatch({ type: LOAD });
-        await Apollo.getLoans(root);
+    // const result =  await Apollo.getLoans(root);
+    // const loans = result.data;
+    // for ( var i = 1; i < loans.length; i++) {
+    //   loans[i].proxyOwner = (await getProxyOwner(tinlake, loans[i].loanId)).data;
+    // }
     const result = await getLoans(tinlake);
-    dispatch({ type: RECEIVE, loans: result.data });
+    const loans = result.data;
+   
+    dispatch({ type: RECEIVE, loans });
   };
 }
 

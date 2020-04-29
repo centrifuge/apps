@@ -76,8 +76,7 @@ class InvestorView extends React.Component<Props, State> {
     if (investorState && investorState === 'loading') {
       return <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading Investor information...'} />;
     }
-
-
+    
     return <Box>
 
       <Box pad={{ horizontal: 'medium' }}>
@@ -85,7 +84,6 @@ class InvestorView extends React.Component<Props, State> {
           {errorMsg && <div>{errorMsg}</div>}
         </Alert>}
       </Box>
-
       { analytics && analytics.data  &&
       <Box pad={{ horizontal: 'medium', top: 'large' }} >
         <Tabs justify="center" activeIndex={selectedTab} flex="grow" onActive={(i) => this.selectTab(i)}>
