@@ -10,7 +10,7 @@ import LoanBorrow from '../Borrow';
 import LoanRepay from '../Repay';
 import { Spinner } from '@centrifuge/axis-spinner';
 import NftData from '../../../components/NftData';
-import { AuthState } from '../../../ducks/auth';
+import { AuthState,loadUserProxies } from '../../../ducks/auth';
 import { TransactionState, resetTransactionState } from '../../../ducks/transactions';
 
 interface Props {
@@ -21,15 +21,17 @@ interface Props {
   auth: AuthState;
   transactions?: TransactionState;
   resetTransactionState?: () => void;
+  loadUserProxies?: (address: string) => Promise<void>;
 }
 
 // on state change tokenId --> load nft data for loan collateral
 class LoanView extends React.Component<Props> {
 
   componentWillMount() {
-    const { tinlake, loanId } = this.props;
-    this.props.loanId && this.props.loadLoan!(tinlake, loanId);
-    this.props.resetTransactionState && this.props.resetTransactionState();
+    const { tinlake, loanId, loadLoan, resetTransactionState, loadUserProxies, auth } = this.props;
+    loanId && loadLoan!(tinlake, loanId);
+    resetTransactionState && resetTransactionState();
+    loadUserProxies && auth && auth.user && loadUserProxies(auth.user.address);
   }
 
   componentWillUnmount() {
@@ -47,7 +49,7 @@ class LoanView extends React.Component<Props> {
     }
 
     const hasAdminPermissions = auth.user && (auth.user.permissions.canSetInterestRate || auth.user.permissions.canSetCeiling);
-    const hasBorrowerPermissions = auth.user && loan && (loan.proxyOwner && loan.proxyOwner === auth.user.address);
+    const hasBorrowerPermissions = auth.user && loan && (auth.user.proxies.includes(loan.ownerOf));
 
     if (transactions && transactions.transactionState && transactions.transactionState === 'processing') {
       return <Spinner height={'calc(100vh - 89px - 84px)'} message={transactions.loadingMessage || 'Processing Transaction. This may take a few seconds. Please wait...'} />;
@@ -104,4 +106,4 @@ class LoanView extends React.Component<Props> {
   }
 }
 
-export default connect(state => state, { loadLoan, resetTransactionState })(LoanView);
+export default connect(state => state, { loadLoan, resetTransactionState, loadUserProxies })(LoanView);

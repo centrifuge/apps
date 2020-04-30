@@ -1,6 +1,7 @@
 import { AnyAction, Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
 import { networkIdToName } from '../utils/networkNameResolver';
+import Apollo from '../services/apollo';
 
 // Actions
 const LOAD = 'tinlake-ui/auth/LOAD';
@@ -8,6 +9,7 @@ const RECEIVE = 'tinlake-ui/auth/RECEIVE';
 const CLEAR = 'tinlake-ui/auth/CLEAR';
 const CLEAR_NETWORK = 'tinlake-ui/auth/CLEAR_NETWORK';
 const RECEIVE_NETWORK = 'tinlake-ui/auth/RECEIVE_NETWORK';
+const RECEIVE_PROXIES = 'tinlake-ui/auth/RECEIVE_PROXIES';
 const OBSERVING_AUTH_CHANGES = 'tinlake-ui/auth/OBSERVING_AUTH_CHANGES';
 
 export interface User {
@@ -38,13 +40,15 @@ export interface AuthState {
   state: null | 'loading' | 'loaded';
   user: null | User;
   network: null | string;
+  proxies: Array<String>
 }
 
 const initialState: AuthState = {
   observingAuthChanges: false,
   state: null,
   user: null,
-  network: null
+  network: null,
+  proxies: []
 };
 
 // Reducer
@@ -53,10 +57,11 @@ export default function reducer(state: AuthState = initialState,
   switch (action.type) {
     case LOAD: return { ...state, state: 'loading' };
     case RECEIVE: return { ...state, state: 'loaded', user: action.user };
-    case CLEAR: return { ...state, state: 'loaded', user: null };
+    case CLEAR: return { ...state, state: 'loaded', user: null, proxies: []};
     case OBSERVING_AUTH_CHANGES: return { ...state, observingAuthChanges: true };
     case CLEAR_NETWORK: return { ...state, network: null };
     case RECEIVE_NETWORK: return { ...state, network: action.network };
+    case RECEIVE_PROXIES: return { ...state, proxies: action.proxies };
     default: return state;
   }
 }
@@ -85,17 +90,19 @@ export function loadUser(tinlake: any, address: string):
 
     dispatch({ type: LOAD });
 
-    const ceilingPermission = await tinlake.canSetCeiling(address)
-    const interestRatePermission = await tinlake.canSetInterestRate(address)
-    const thresholdPermission = await tinlake.canSetThreshold(address)
-    const loanPricePermission = await tinlake.canSetLoanPrice(address)
-    const equityRatioPermission = await tinlake.canSetMinimumJuniorRatio(address)
-    const riskScorePermission = await tinlake.canSetRiskScore(address)
-    const investorAllowancePermissionJunior = await tinlake.canSetInvestorAllowanceJunior(address)
-    const investorAllowancePermissionSenior = await tinlake.canSetInvestorAllowanceSenior(address)
-
+    const ceilingPermission = await tinlake.canSetCeiling(address);
+    const interestRatePermission = await tinlake.canSetInterestRate(address);
+    const thresholdPermission = await tinlake.canSetThreshold(address);
+    const loanPricePermission = await tinlake.canSetLoanPrice(address);
+    const equityRatioPermission = await tinlake.canSetMinimumJuniorRatio(address);
+    const riskScorePermission = await tinlake.canSetRiskScore(address);
+    const investorAllowancePermissionJunior = await tinlake.canSetInvestorAllowanceJunior(address);
+    const investorAllowancePermissionSenior = await tinlake.canSetInvestorAllowanceSenior(address);
+    const result =  await Apollo.getProxies(address);
+    const proxies = result.data;
     const user = {
       address,
+      proxies,
       permissions: {
         canSetCeiling: ceilingPermission,
         canSetInterestRate: interestRatePermission,
@@ -109,6 +116,21 @@ export function loadUser(tinlake: any, address: string):
       }
     }
     dispatch({ user, type: RECEIVE });
+  };
+}
+
+export function loadUserProxies(address: string):
+ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+  return async (dispatch) => {
+    // clear user if no address given
+    if (!address) {
+      dispatch({ type: CLEAR });
+      return;
+    }
+    const result =  await Apollo.getProxies(address);
+    const proxies = result.data;
+
+    dispatch({ proxies, type: RECEIVE_PROXIES });
   };
 }
 

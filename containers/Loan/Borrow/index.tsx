@@ -17,7 +17,7 @@ interface Props {
   loadAnalyticsData?: (tinlake: any) => Promise<void>;
   transactionSubmitted?: (loadingMessage: string) => Promise<void>;
   responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>;
-  analytics: AnalyticsState;
+  analytics?: AnalyticsState;
 }
 
 interface State {

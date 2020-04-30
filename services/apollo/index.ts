@@ -63,12 +63,39 @@ class Apollo {
         `
       });
     } catch (err) {
-      console.log(`error occured while fetching time series data from apollo ${err}`);
-      return [];
+      console.log(`error occured while fetching loans from apollo ${err}`);
+      return {
+        data:[]
+      };
     }
-    //console.log("loans received", loans)
     const tinlakeLoans = toTinlakeLoans(result.data.loans);
     return tinlakeLoans;
+  }
+
+ 
+  async getProxies(user: string) {
+    let result;
+    try {
+      result = await this.client
+      .query({
+        query: gql`
+        {
+          proxies (where: {owner:"${user}"}) 
+            {
+              id
+              owner
+            }
+          }
+        `
+      });
+    } catch (err) {
+      console.log(`no proxies found for address ${user} ${err}`);
+      return {
+        data:[]
+      };
+    }
+    const proxies = result.data.proxies.map( (e: {id: string, owner: string}) => e.id );
+    return { data: proxies }
   }
 }
 
@@ -78,7 +105,7 @@ function toTinlakeLoans(loans: Array<any>) : {data: Array<Loan>} {
         const tinlakeLoan = {
             loanId: loan.index,
             registry: loan.nftRegistry,
-            tokenId: loan.nftId,
+            tokenId: new BN(loan.nftId),
             principal: loan.ceiling ? new BN(loan.ceiling) : new BN(0),
             ownerOf: loan.owner,
             interestRate: loan.interestRatePerSecond ? new BN(loan.interestRatePerSecond) : new BN(0),
@@ -89,6 +116,7 @@ function toTinlakeLoans(loans: Array<any>) : {data: Array<Loan>} {
         }
         tinlakeLoans.push(tinlakeLoan);
     })
+
     return {data: tinlakeLoans};
 }
 

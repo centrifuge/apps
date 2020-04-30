@@ -5,7 +5,7 @@ import { LoansState, loadLoans } from '../../../ducks/loans';
 import { AnalyticsState, loadAnalyticsData } from '../../../ducks/analytics';
 import { baseToDisplay } from 'tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
-import { AuthState } from '../../../ducks/auth';
+import { AuthState, loadUserProxies } from '../../../ducks/auth';
 import LoanListData from '../../../components/Loan/List';
 import NumberDisplay from '../../../components/NumberDisplay';
 import DashboardMetric from '../../../components/DashboardMetric';
@@ -16,19 +16,22 @@ interface Props {
   loans?: LoansState;
   loadLoans?: (tinlake: any) => Promise<void>;
   loadAnalyticsData?: (tinlake: any) => Promise<void>;
+  loadUserProxies?: (address: string) => Promise<void>;
   auth: AuthState;
   analytics?: AnalyticsState
 }
 
 class LoanList extends React.Component<Props> {
   componentWillMount() {
-    const { loadLoans, loadAnalyticsData } = this.props
-    loadLoans && loadLoans(this.props.tinlake);
-    loadAnalyticsData && loadAnalyticsData(this.props.tinlake);
+    const { loadLoans, loadAnalyticsData, loadUserProxies, auth, tinlake } = this.props
+    loadLoans && loadLoans(tinlake);
+    loadAnalyticsData && loadAnalyticsData(tinlake);
+    loadUserProxies && auth && auth.user && loadUserProxies(auth.user.address);
   }
 
   render() {
     const { loans, analytics, auth, tinlake: { ethConfig: { from: ethFrom } } } = this.props;
+    const proxies = auth && auth.user && auth.user.proxies || [];
     const availableFunds = analytics && analytics.data && analytics.data.availableFunds || 0;
     if (loans!.loansState === 'loading') {
       return <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />;
@@ -37,7 +40,7 @@ class LoanList extends React.Component<Props> {
     let filteredLoans: Array<Loan> = [];
     const hasAdminPermissions = auth.user && ( auth.user.permissions.canSetInterestRate || auth.user.permissions.canSetCeiling);
     if (loans && loans.loans && loans.loansState === 'found' && auth.user) {
-      filteredLoans = hasAdminPermissions  ? loans.loans : loans.loans.filter(l => l.proxyOwner && (l.proxyOwner === auth.user.address));
+      filteredLoans = hasAdminPermissions  ? loans.loans : loans.loans.filter(l => auth.user && auth.user.proxies.includes(l.ownerOf));
     }
 
     return <Box >
@@ -48,9 +51,9 @@ class LoanList extends React.Component<Props> {
         </DashboardMetric>
       </Box>
       </Box>
-      <LoanListData loans={filteredLoans} userAddress={ethFrom}> </LoanListData>
+      <LoanListData loans={filteredLoans} proxies={proxies} userAddress={ethFrom}> </LoanListData>
     </Box>;
   }
 }
 
-export default connect(state => state, { loadLoans, loadAnalyticsData })(LoanList);
+export default connect(state => state, { loadLoans, loadAnalyticsData, loadUserProxies })(LoanList);

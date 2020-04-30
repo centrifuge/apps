@@ -11,11 +11,17 @@ import { getNFTLink, hexToInt } from '../../../utils/etherscanLinkGenerator';
 interface Props {
   loans: Array<Loan>;
   userAddress: string;
+  proxies: Array<string>;
 }
 
 class LoanList extends React.Component<Props> {
+
+  componentWillMount() {
+
+  }
+
   render() {
-    const { loans, userAddress } =  this.props;
+    const { loans, proxies } =  this.props;
     return <Box margin={{bottom: "xlarge"}}>
       <DataTable style={{ tableLayout: 'auto' }} data={loans} sortable columns={[
         { header: <HeaderCell text={'Loan ID'}></HeaderCell>, property: 'loanId', align: 'end' },
@@ -49,7 +55,7 @@ class LoanList extends React.Component<Props> {
         {
           header: '', property: '', align: 'end',
           render: (l: Loan) => <div>
-            {l.proxyOwner && (l.proxyOwner).toString() === userAddress && <Badge text={'Me'} />}
+            {proxies.includes(l.ownerOf) && <Badge text={'Me'} />}
           </div>
         },
         {
