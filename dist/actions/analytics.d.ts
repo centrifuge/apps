@@ -23,8 +23,8 @@ export declare function AnalyticsActions<ActionsBase extends Constructor<Tinlake
         existsSenior: () => boolean;
         getSeniorTokenBalance: (user: string) => Promise<BN>;
         getMaxSupplyAmountSenior: (user: string) => Promise<BN>;
-        getMaxRedeemAmountSenior: (user: string) => Promise<any>;
-        getTokenPriceSenior: () => Promise<any>;
+        getMaxRedeemAmountSenior: (user: string) => Promise<BN>;
+        getTokenPriceSenior: (user: string) => Promise<BN>;
         getSeniorReserve: () => Promise<BN>;
         getJuniorReserve: () => Promise<BN>;
         getMinJuniorRatio: () => Promise<BN>;
@@ -40,9 +40,12 @@ export declare function AnalyticsActions<ActionsBase extends Constructor<Tinlake
         transactionTimeout: number;
         contracts: import("../Tinlake").Contracts;
         contractAbis: import("../Tinlake").ContractAbis;
+        contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
         setEthConfig: (ethConfig: {} | import("../Tinlake").EthConfig) => void;
         setContractAddresses: () => Promise<void>;
+        createContract(address: string, abiName: string): void;
+        getOperatorType: (tranche: string) => any;
     };
 } & ActionsBase;
 export declare type IAnalyticsActions = {
@@ -67,7 +70,7 @@ export declare type IAnalyticsActions = {
     getMaxSupplyAmountSenior(user: string): Promise<BN>;
     getMaxRedeemAmountSenior(user: string): Promise<BN>;
     getTokenPriceJunior(): Promise<BN>;
-    getTokenPriceSenior(): Promise<BN>;
+    getTokenPriceSenior(user: string): Promise<BN>;
     getSeniorDebt(): Promise<BN>;
     getSeniorInterestRate(): Promise<BN>;
     getMinJuniorRatio(): Promise<BN>;

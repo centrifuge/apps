@@ -11,11 +11,6 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return res[0];
     }
 
-    canSetCeiling = async (user: string) => {
-      const res : { 0: BN } = await executeAndRetry(this.contracts['CEILING'].wards, [user]);
-      return res[0].toNumber() === 1;
-    }
-
     canSetInterestRate = async (user: string) => {
       const res : { 0: BN } = await executeAndRetry(this.contracts['PILE'].wards, [user]);
       return res[0].toNumber() === 1;
@@ -52,23 +47,12 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return false;
     }
 
-    canSetThreshold = async (user: string) => {
-      const res : { 0: BN } = await executeAndRetry(this.contracts['THRESHOLD'].wards, [user]);
-      return res[0].toNumber() === 1;
-    }
-
     canSetLoanPrice = async (user: string) => {
       const res : { 0: BN } = await executeAndRetry(this.contracts['COLLECTOR'].wards, [user]);
       return res[0].toNumber() === 1;
     }
 
     // ------------ admin functions borrower-site -------------
-    setCeiling = async (loanId: string, amount: string) => {
-      const txHash = await executeAndRetry(this.contracts['CEILING'].file, [web3.fromAscii('loan'), loanId, amount, this.ethConfig]);
-      console.log(`[Ceiling file] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['CEILING'].abi, this.transactionTimeout);
-    }
-
     existsRateGroup = async (ratePerSecond: string) => {
       const rateGroup = getRateGroup(ratePerSecond);
       const res: { ratePerSecond: BN } = await executeAndRetry(this.contracts['PILE'].rates, [rateGroup]);
@@ -110,7 +94,15 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     approveAllowanceSenior = async (user: string, maxCurrency: string, maxToken: string) => {
-      const txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [user, maxCurrency, maxToken, this.ethConfig]);
+      const operatorType = this.getOperatorType('senior');
+      let txHash;
+      switch (operatorType) {
+        case 'PROPORTIONAL_OPERATOR':
+          txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [user, maxCurrency, this.ethConfig]);
+        // ALLOWANCE_OPERATOR
+        default:
+          txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [user, maxCurrency, maxToken, this.ethConfig]);
+      }
       console.log(`[Approve allowance Senior] txHash: ${txHash}`);
       return waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_OPERATOR'].abi, this.transactionTimeout);
     }
@@ -124,16 +116,13 @@ function getRateGroup(ratePerSecond: string) {
 
 export type IAdminActions = {
   isWard(user: string, contractName: ContractNames): Promise<BN>,
-  canSetCeiling(user: string): Promise<boolean>,
   canSetInterestRate(user: string): Promise<boolean>,
   canSetSeniorTrancheInterest(user: string): Promise<boolean>,
   canSetMinimumJuniorRatio(user: string): Promise<boolean>,
   canSetRiskScore(user: string): Promise<boolean>,
   canSetInvestorAllowanceJunior(user: string): Promise<boolean>,
   canSetInvestorAllowanceSenior(user: string): Promise<boolean>,
-  canSetThreshold(user: string): Promise<boolean>,
   canSetLoanPrice(user: string): Promise<boolean>,
-  setCeiling(loanId: string, amount: string): Promise<any>,
   initRate(rate: string): Promise<any>,
   setRate(loan: string, rate: string): Promise<any>,
   setMinimumJuniorRatio(amount: string): Promise<any>,

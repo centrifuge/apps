@@ -2,12 +2,12 @@
 import contractAbiTitle from './Title.abi.json';
 import contractAbiCurrency from './test/SimpleToken.abi.json';
 import contractAbiShelf from './Shelf.abi.json';
-import contractAbiCeiling from './Principal.abi.json';
+import contractAbiNftFeed from './NftFeed.abi.json';
 import contractAbiCollector from './Collector.abi.json';
-import contractAbiThreshold from './PushRegistry.abi.json';
 import contractAbiPricePool from './PricePool.abi.json';
 import contractAbiPile from './Pile.abi.json';
-import contractAbiOperator from './AllowanceOperator.abi.json';
+import contractAbiAllowanceOperator from './AllowanceOperator.abi.json';
+import contractAbiProportionalOperator from './ProportionalOperator.abi.json';
 import contractAbiDistributor from './DefaultDistributor.abi.json';
 import contractAbiAssessor from './DefaultAssessor.abi.json';
 import contractAbiRoot from './Root.abi.json';
@@ -29,9 +29,9 @@ export default {
   TITLE : contractAbiTitle,
   TINLAKE_CURRENCY : contractAbiCurrency,
   SHELF : contractAbiShelf,
-  CEILING : contractAbiCeiling,
+  CEILING : contractAbiNftFeed,
   COLLECTOR : contractAbiCollector,
-  THRESHOLD : contractAbiThreshold,
+  THRESHOLD : contractAbiNftFeed,
   PRICE_POOL : contractAbiPricePool,
   PILE: contractAbiPile,
   DISTRIBUTOR : contractAbiDistributor,
@@ -42,8 +42,8 @@ export default {
   PROXY: contractAbiProxy,
   PROXY_REGISTRY: contractAbiProxyRegistry,
   ACTIONS: contractAbiActions,
-  JUNIOR_OPERATOR : contractAbiOperator,
-  SENIOR_OPERATOR : contractAbiOperator,
+  ALLOWANCE_OPERATOR : contractAbiAllowanceOperator,
+  PROPORTIONAL_OPERATOR : contractAbiProportionalOperator,
   JUNIOR: contractAbiTranche,
   SENIOR: contractAbiSeniorTranche,
   BORROWER_DEPLOYER: contractAbiBorrowerDeployer,

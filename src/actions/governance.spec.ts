@@ -37,7 +37,7 @@ describe('governance tests', async () => {
     it('fail: account has no governance permissions', async () => {
       const randomAccount = account.generate(randomString.generate(32));
       const randomTinlake = await createTinlake(randomAccount, testConfig);
-      const res = await randomTinlake.relyAddress(userAccount.address, testConfig.contractAddresses['CEILING']);
+      const res = await randomTinlake.relyAddress(userAccount.address, testConfig.contractAddresses['PILE']);
       assert.equal(res.status, FAIL_STATUS);
     });
   });

@@ -3,16 +3,13 @@ import BN from 'bn.js';
 export declare function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase): {
     new (...args: any[]): {
         isWard: (user: string, contractName: string) => Promise<BN>;
-        canSetCeiling: (user: string) => Promise<boolean>;
         canSetInterestRate: (user: string) => Promise<boolean>;
         canSetSeniorTrancheInterest: (user: string) => Promise<boolean>;
         canSetRiskScore: (user: string) => Promise<boolean>;
         canSetMinimumJuniorRatio: (user: string) => Promise<boolean>;
         canSetInvestorAllowanceJunior: (user: string) => Promise<boolean>;
         canSetInvestorAllowanceSenior: (user: string) => Promise<boolean>;
-        canSetThreshold: (user: string) => Promise<boolean>;
         canSetLoanPrice: (user: string) => Promise<boolean>;
-        setCeiling: (loanId: string, amount: string) => Promise<unknown>;
         existsRateGroup: (ratePerSecond: string) => Promise<boolean>;
         initRate: (ratePerSecond: string) => Promise<unknown>;
         changeRate: (loan: string, ratePerSecond: string) => Promise<unknown>;
@@ -28,22 +25,23 @@ export declare function AdminActions<ActionsBase extends Constructor<TinlakePara
         transactionTimeout: number;
         contracts: import("../Tinlake").Contracts;
         contractAbis: import("../Tinlake").ContractAbis;
+        contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
         setEthConfig: (ethConfig: {} | import("../Tinlake").EthConfig) => void;
+        setContractAddresses: () => Promise<void>;
+        createContract(address: string, abiName: string): void;
+        getOperatorType: (tranche: string) => any;
     };
 } & ActionsBase;
 export declare type IAdminActions = {
     isWard(user: string, contractName: ContractNames): Promise<BN>;
-    canSetCeiling(user: string): Promise<boolean>;
     canSetInterestRate(user: string): Promise<boolean>;
     canSetSeniorTrancheInterest(user: string): Promise<boolean>;
     canSetMinimumJuniorRatio(user: string): Promise<boolean>;
     canSetRiskScore(user: string): Promise<boolean>;
     canSetInvestorAllowanceJunior(user: string): Promise<boolean>;
     canSetInvestorAllowanceSenior(user: string): Promise<boolean>;
-    canSetThreshold(user: string): Promise<boolean>;
     canSetLoanPrice(user: string): Promise<boolean>;
-    setCeiling(loanId: string, amount: string): Promise<any>;
     initRate(rate: string): Promise<any>;
     setRate(loan: string, rate: string): Promise<any>;
     setMinimumJuniorRatio(amount: string): Promise<any>;

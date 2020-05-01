@@ -117,9 +117,6 @@ async function mintIssueBorrow(usr: string, tinlake: Partial<ITinlake>, amount: 
   await borrowerTinlake.approveNFT(contractAddresses['COLLATERAL_NFT'], tokenId, contractAddresses['SHELF']);
   // lock nft
   await borrowerTinlake.lock(loanId);
-  // admin sets ceiling
-  await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['CEILING']);
-  await adminTinlake.setCeiling(loanId, amount);
 
   const initialBorrowerCurrencyBalance = await borrowerTinlake.getCurrencyBalance(borrowerAccount.address);
   // supply tranche with money

@@ -104,11 +104,11 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     getInvestor = async (user: string) : Promise<Investor> => {
       const includeSenior = this.existsSenior();
       const tokenBalanceJunior = await this.getJuniorTokenBalance(user);
-      const tokenBalanceSenior = includeSenior && await this.getSeniorTokenBalance(user) || 0;
+      const tokenBalanceSenior = includeSenior && await this.getSeniorTokenBalance(user) || new BN(0);
       const maxSupplyJunior = await this.getMaxSupplyAmountJunior(user);
-      const maxSupplySenior = includeSenior && await this.getMaxSupplyAmountSenior(user) || 0;
+      const maxSupplySenior = includeSenior && await this.getMaxSupplyAmountSenior(user) || new BN(0);
       const maxRedeemJunior = await this.getMaxRedeemAmountJunior(user);
-      const maxRedeemSenior = includeSenior && await this.getMaxRedeemAmountSenior(user) || 0;
+      const maxRedeemSenior = includeSenior && await this.getMaxRedeemAmountSenior(user) || new BN(0);
 
       return {
         junior: {
@@ -158,27 +158,65 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getMaxSupplyAmountSenior = async (user: string) => {
-      if (this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS) {
-        const res : { 0: BN } =  await executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxCurrency, [user]);
-        return res[0];
+      if (this.contractAddresses['SENIOR_OPERATOR'] === ZERO_ADDRESS) return new BN(0);
+
+      const operatorType = this.getOperatorType('senior');
+      let maxSupply : BN;
+      switch (operatorType) {
+        case 'PROPORTIONAL_OPERATOR':
+          const supplyLimitRes: { 0: BN } = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].supplyMaximum, [user]);
+          const suppliedRes: { 0: BN } = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].tokenReceived, [user]);
+          maxSupply = supplyLimitRes[0].sub(suppliedRes[0]);
+          break;
+
+        case 'ALLOWANCE_OPERATOR':
+          const res: { 0: BN } = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxCurrency, [user]);
+          maxSupply = res[0];
+          break;
+        default:
+          maxSupply = new BN(0);
       }
-      return new BN(0);
+      return maxSupply;
     }
 
     getMaxRedeemAmountSenior = async (user: string) => {
-      if (this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS) {
-        const res  =  await executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxToken, [user]);
-        return res[0];
+      if (this.contractAddresses['SENIOR_OPERATOR'] === ZERO_ADDRESS) return new BN(0);
+
+      const operatorType = this.getOperatorType('senior');
+      let maxRedeem : BN;
+      switch (operatorType) {
+        case 'PROPORTIONAL_OPERATOR':
+          const redeemLimitRes: { 0: BN } = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].calcMaxRedeemToken, [user]);
+          maxRedeem = redeemLimitRes[0];
+          break;
+        case 'ALLOWANCE_OPERATOR':
+          const res : { 0: BN } =  await executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxToken, [user]);
+          maxRedeem = res[0];
+          break;
+        default:
+          maxRedeem = new BN(0);
       }
-      return new BN(0);
+      return maxRedeem;
     }
 
-    getTokenPriceSenior = async () => {
-      if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
-        const res =  await executeAndRetry(this.contracts['ASSESSOR'].calcTokenPrice, [this.contractAddresses['SENIOR']]);
-        return res[0];
+    getTokenPriceSenior = async (user: string) => {
+      if (this.contractAddresses['SENIOR_OPERATOR'] === ZERO_ADDRESS) return new BN(0);
+
+      const operatorType = this.getOperatorType('senior');
+      let tokenPrice : BN;
+      switch (operatorType) {
+        case 'PROPORTIONAL_OPERATOR':
+          const customTokenPriceRes: { 0: BN } = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].calcTokenPrice, [user]);
+          tokenPrice = customTokenPriceRes[0];
+          break;
+        case 'ALLOWANCE_OPERATOR':
+          const res: { 0: BN } = await executeAndRetry(this.contracts['ASSESSOR'].calcTokenPrice, [this.contractAddresses['SENIOR']]);
+          tokenPrice = res[0];
+          break;
+        default:
+          tokenPrice = new BN(0);
       }
-      return new BN(0);
+      return tokenPrice;
     }
 
     getSeniorReserve = async () => {
@@ -249,7 +287,7 @@ export type IAnalyticsActions = {
   getMaxSupplyAmountSenior(user: string): Promise<BN>,
   getMaxRedeemAmountSenior(user: string): Promise<BN>,
   getTokenPriceJunior(): Promise<BN>,
-  getTokenPriceSenior(): Promise<BN>,
+  getTokenPriceSenior(user: string): Promise<BN>,
   getSeniorDebt(): Promise<BN>,
   getSeniorInterestRate(): Promise<BN>,
   getMinJuniorRatio(): Promise<BN>,
