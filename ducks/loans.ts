@@ -1,6 +1,6 @@
 import { AnyAction, Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
-import { getLoans, getLoan, TinlakeResult, Loan } from '../services/tinlake/actions';
+import { Tinlake, getLoans, getLoan, TinlakeResult, Loan } from '../services/tinlake/actions';
 import Apollo from '../services/apollo';
 
 // Actions
@@ -38,10 +38,11 @@ export default function reducer(state: LoansState = initialState,
 }
 
 // hardcoded root just for testing - will be removed in next pr
-export function loadLoans(root: string):
+export function loadLoans(tinlake: Tinlake):
   ThunkAction<Promise<void>, LoansState, undefined, Action>  {
   return async (dispatch) => {
     dispatch({ type: LOAD });
+    const root = tinlake.contractAddresses["ROOT_CONTRACT"];
     const result = await Apollo.getLoans(root);
     const loans = result.data;
    

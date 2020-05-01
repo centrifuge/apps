@@ -11,7 +11,7 @@ import LoanListData from  '../../components/Loan/List';
 interface Props {
   tinlake: any;
   loans?: LoansState;
-  loadLoans?: (tinlake: any) => Promise<void>;
+  loadLoans?: (root: string) => Promise<void>;
   analytics?: AnalyticsState;
   auth?: AuthState;
   loadUserProxies?: (address: string) => Promise<void>;

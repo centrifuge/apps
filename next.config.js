@@ -20,6 +20,7 @@ module.exports = withTypescript({
     TINLAKE_DATA_BACKEND_URL: process.env.TINLAKE_DATA_BACKEND_URL,
     TRANSACTION_TIMEOUT: process.env.TRANSACTION_TIMEOUT,
     ENV: process.env.ENV,
-    ETHERSCAN_URL: process.env.ETHERSCAN_URL
+    ETHERSCAN_URL: process.env.ETHERSCAN_URL,
+    CONTRACT_CONFIG: process.env.CONTRACT_CONFIG
   }
 });

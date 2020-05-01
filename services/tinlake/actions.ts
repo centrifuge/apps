@@ -153,19 +153,6 @@ export async function getLoans(tinlake: any): Promise<TinlakeResult> {
   };
 }
 
-export async function setCeiling(tinlake: any, loanId: string, ceiling: string) {
-  let setRes;
-  try {
-    setRes = await tinlake.setCeiling(loanId, ceiling);
-  } catch (e) {
-    return loggedError(e, 'Could not set ceiling', loanId);
-  }
-
-  if (setRes.status !== SUCCESS_STATUS) {
-    return loggedError({}, 'Could not set ceiling', loanId);
-  }
-}
-
 export async function setInterest(tinlake: any, loanId: string, debt: string, rate: string) {
   const rateGroup = interestRateToFee(rate);
   const existsRateGroup = await tinlake.existsRateGroup(rateGroup);
@@ -204,7 +191,7 @@ export async function getAnalytics(tinlake: any) {
   const juniorReserve = await tinlake.getJuniorReserve();
   const juniorTokenPrice = await tinlake.getTokenPriceJunior();
   const seniorReserve = await tinlake.getSeniorReserve();
-  const seniorTokenPrice = await tinlake.getTokenPriceSenior();
+  const seniorTokenPrice = await tinlake.getTokenPriceSenior(tinlake.ethConfig.from);
   const seniorInterestRate = await tinlake.getSeniorInterestRate();
   const minJuniorRatio = await tinlake.getMinJuniorRatio();
   const juniorAssetValue = await tinlake.getAssetValueJunior();

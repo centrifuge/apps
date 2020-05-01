@@ -20,7 +20,6 @@ export interface User {
 export interface Permissions {
   // loan admin permissions
   canIssueLoan: boolean;
-  canSetCeiling: boolean;
   canSetInterestRate: boolean;
   // tranche admin permissions
   canSetMinimumJuniorRatio: boolean;
@@ -30,7 +29,6 @@ export interface Permissions {
   canSetInvestorAllowanceJunior: boolean;
   canSetInvestorAllowanceSenior: boolean;
   // collector permissions
-  canSetThreshold: boolean;
   canSetLoanPrice: boolean;
   canActAsKeeper: boolean;
 }
@@ -90,9 +88,7 @@ export function loadUser(tinlake: any, address: string):
 
     dispatch({ type: LOAD });
 
-    const ceilingPermission = await tinlake.canSetCeiling(address);
     const interestRatePermission = await tinlake.canSetInterestRate(address);
-    const thresholdPermission = await tinlake.canSetThreshold(address);
     const loanPricePermission = await tinlake.canSetLoanPrice(address);
     const equityRatioPermission = await tinlake.canSetMinimumJuniorRatio(address);
     const riskScorePermission = await tinlake.canSetRiskScore(address);
@@ -104,9 +100,7 @@ export function loadUser(tinlake: any, address: string):
       address,
       proxies,
       permissions: {
-        canSetCeiling: ceilingPermission,
         canSetInterestRate: interestRatePermission,
-        canSetThreshold: thresholdPermission,
         canSetLoanPrice: loanPricePermission,
         canSetMinimumJuniorRatio: equityRatioPermission,
         canSetRiskScore: riskScorePermission,

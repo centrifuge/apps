@@ -36,10 +36,9 @@ class Apollo {
       .query({
         query: gql`
         {
-            loans (filter: {
-                pool: { id: "${root}"}
-            })
-            {
+          pools (where : {id: "${root}"}){
+            id
+            loans {
               id
               pool {
                 id
@@ -60,6 +59,7 @@ class Apollo {
               nftRegistry
             }
           }
+        }
         `
       });
     } catch (err) {
@@ -68,7 +68,8 @@ class Apollo {
         data:[]
       };
     }
-    const tinlakeLoans = toTinlakeLoans(result.data.loans);
+    const pool = result.data.pools[0];
+    const tinlakeLoans = pool && toTinlakeLoans(pool.loans) || [];
     return tinlakeLoans;
   }
 
@@ -116,7 +117,6 @@ function toTinlakeLoans(loans: Array<any>) : {data: Array<Loan>} {
         }
         tinlakeLoans.push(tinlakeLoan);
     })
-
     return {data: tinlakeLoans};
 }
 
