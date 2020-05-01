@@ -119,8 +119,8 @@ class IssueLoan extends React.Component<Props, State> {
 
       {is !== 'success' &&
       <Box>
-        <Box direction="column" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
-          <Box gap="medium">
+        <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
+          <Box basis={'1/3'} gap="medium">
             <FormField label="Collateral Token Registry Address">
               <TextInput
                 value={registry || ''}
@@ -129,8 +129,8 @@ class IssueLoan extends React.Component<Props, State> {
               />
             </FormField>
           </Box>
-          {registry &&
-          <Box gap="medium">
+  
+          <Box basis={'1/3'} gap="medium">
             <FormField label="Token ID">
               <TextInput
                 value={tokenId}
@@ -138,8 +138,8 @@ class IssueLoan extends React.Component<Props, State> {
                 disabled={is === 'success'}
               />
             </FormField>
-          </Box>}
-          <Box gap="medium" align="end">
+          </Box>
+          <Box basis={'1/3'} gap="medium" align="end">
             <Button onClick={this.issueLoan} primary label="Open loan" disabled={is === 'loading' || is === 'success' || !nft} />
           </Box>
         </Box>
