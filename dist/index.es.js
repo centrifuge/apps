@@ -10865,7 +10865,7 @@ function AdminActions(Base) {
                         case 1: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [user, maxCurrency, this.ethConfig])];
                         case 2:
                             txHash = _b.sent();
-                            _b.label = 3;
+                            return [3 /*break*/, 5];
                         case 3: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [user, maxCurrency, maxToken, this.ethConfig])];
                         case 4:
                             txHash = _b.sent();

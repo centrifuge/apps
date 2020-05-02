@@ -99,6 +99,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       switch (operatorType) {
         case 'PROPORTIONAL_OPERATOR':
           txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [user, maxCurrency, this.ethConfig]);
+          break;
         // ALLOWANCE_OPERATOR
         default:
           txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [user, maxCurrency, maxToken, this.ethConfig]);
