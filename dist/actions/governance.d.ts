@@ -10,8 +10,12 @@ declare function GovernanceActions<ActionsBase extends Constructor<TinlakeParams
         transactionTimeout: number;
         contracts: import("../Tinlake").Contracts;
         contractAbis: import("../Tinlake").ContractAbis;
+        contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
         setEthConfig: (ethConfig: {} | import("../Tinlake").EthConfig) => void;
+        setContractAddresses: () => Promise<void>;
+        createContract(address: string, abiName: string): void;
+        getOperatorType: (tranche: string) => any;
     };
 } & ActionsBase;
 export declare type IGovernanceActions = {
