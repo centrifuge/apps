@@ -14,7 +14,7 @@ interface Props {
   loadLoans?: (root: string) => Promise<void>;
   analytics?: AnalyticsState;
   auth?: AuthState;
-  loadUserProxies?: (address: string) => Promise<void>;
+  loadUserProxies?: () => Promise<void>;
 }
 
 class Dashboard extends React.Component<Props> {
@@ -22,7 +22,7 @@ class Dashboard extends React.Component<Props> {
   componentWillMount() {
     const { loadLoans, tinlake, loadUserProxies } = this.props
     loadLoans && loadLoans(tinlake);
-    loadUserProxies && loadUserProxies(tinlake.ethConfig.from);
+    loadUserProxies && loadUserProxies();
   }
   
   render() {

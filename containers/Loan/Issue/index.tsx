@@ -2,17 +2,19 @@ import * as React from 'react';
 import { Box, FormField, TextInput, Button, Text } from 'grommet';
 import Alert from '../../../components/Alert';
 import NftData from '../../../components/NftData';
+import { connect } from 'react-redux';
 import { getNFT, issue, NFT, TinlakeResult } from '../../../services/tinlake/actions';
 import { authTinlake } from '../../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import LoanView from '../View';
-import { AuthState } from '../../../ducks/auth';
+import { AuthState, loadUserProxies } from '../../../ducks/auth';
 
 interface Props {
   tinlake: any;
   tokenId: string;
   registry: string;
   auth: AuthState;
+  loadUserProxies?: () => Promise<void>;
 }
 
 interface State {
@@ -67,7 +69,7 @@ class IssueLoan extends React.Component<Props, State> {
   }
 
   issueLoan = async () => {
-    const { tinlake } = this.props;
+    const { tinlake, loadUserProxies } = this.props;
     const { tokenId } = this.state;
     this.setState({ is: 'loading' });
 
@@ -83,6 +85,7 @@ class IssueLoan extends React.Component<Props, State> {
       const loanId = result.data;
       this.setState({ loanId });
       this.setState({ is: 'success' });
+      loadUserProxies && loadUserProxies();
     } catch (e) {
       this.setState({ is: 'error', errorMsg: e.message });
     }
@@ -147,7 +150,7 @@ class IssueLoan extends React.Component<Props, State> {
       }
 
       {loanId ?
-        <Box margin={{ bottom: 'medium', top: 'large' }}> <LoanView auth={auth} tinlake={tinlake} loanId={loanId} /></Box>
+        <Box margin={{ bottom: 'medium', top: 'large' }}> <LoanView tinlake={tinlake} loanId={loanId} /></Box>
         :
         <Box>
           {nftError && <Alert type="error" margin={{ vertical: 'large' }}>
@@ -164,4 +167,4 @@ class IssueLoan extends React.Component<Props, State> {
   }
 }
 
-export default IssueLoan;
+export default connect(state => state, { loadUserProxies })(IssueLoan);

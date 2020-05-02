@@ -17,20 +17,20 @@ interface Props {
   loanId?: string;
   loans?: LoansState;
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>;
-  auth: AuthState;
+  auth?: AuthState;
   transactions?: TransactionState;
   resetTransactionState?: () => void;
-  loadUserProxies?: (address: string) => Promise<void>;
+  loadUserProxies?: () => Promise<void>;
 }
 
 // on state change tokenId --> load nft data for loan collateral
 class LoanView extends React.Component<Props> {
 
   componentWillMount() {
-    const { tinlake, loanId, loadLoan, resetTransactionState, loadUserProxies, auth } = this.props;
+    const { tinlake, loanId, loadLoan, resetTransactionState, loadUserProxies } = this.props;
     loanId && loadLoan!(tinlake, loanId);
     resetTransactionState && resetTransactionState();
-    loadUserProxies && auth && auth.user && loadUserProxies(auth.user.address);
+    loadUserProxies && loadUserProxies();
   }
 
   componentWillUnmount() {
@@ -46,10 +46,10 @@ class LoanView extends React.Component<Props> {
       return <Alert margin="medium" type="error">
         Could not find loan {loanId}</Alert>;
     }
-
-    const hasAdminPermissions = auth.user && auth.user.permissions.canSetInterestRate;
-    const hasBorrowerPermissions = auth.user && loan && (auth.user.proxies.includes(loan.ownerOf));
-
+   
+    const user = auth && auth.user
+    const hasAdminPermissions =  user && user.permissions.canSetInterestRate;
+    const hasBorrowerPermissions =  user && loan && (user.proxies.includes(loan.ownerOf));
     if (transactions && transactions.transactionState && transactions.transactionState === 'processing') {
       return <Spinner height={'calc(100vh - 89px - 84px)'} message={transactions.loadingMessage || 'Processing Transaction. This may take a few seconds. Please wait...'} />;
     }

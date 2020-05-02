@@ -16,31 +16,32 @@ interface Props {
   loans?: LoansState;
   loadLoans?: (tinlake: any) => Promise<void>;
   loadAnalyticsData?: (tinlake: any) => Promise<void>;
-  loadUserProxies?: (address: string) => Promise<void>;
-  auth: AuthState;
+  loadUserProxies?: () => Promise<void>;
+  auth?: AuthState;
   analytics?: AnalyticsState
 }
 
 class LoanList extends React.Component<Props> {
   componentWillMount() {
-    const { loadLoans, loadAnalyticsData, loadUserProxies, auth, tinlake } = this.props
+    const { loadLoans, loadAnalyticsData, loadUserProxies, tinlake } = this.props
     loadLoans && loadLoans(tinlake);
     loadAnalyticsData && loadAnalyticsData(tinlake);
-    loadUserProxies && auth && auth.user && loadUserProxies(auth.user.address);
+    loadUserProxies && loadUserProxies();
   }
 
   render() {
     const { loans, analytics, auth, tinlake: { ethConfig: { from: ethFrom } } } = this.props;
-    const proxies = auth && auth.user && auth.user.proxies || [];
+    const user = auth && auth.user
+    const proxies =  user && user.proxies || [];
     const availableFunds = analytics && analytics.data && analytics.data.availableFunds || 0;
     if (loans!.loansState === 'loading') {
       return <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />;
     }
 
     let filteredLoans: Array<Loan> = [];
-    const hasAdminPermissions = auth.user && auth.user.permissions.canSetInterestRate;
-    if (loans && loans.loans && loans.loansState === 'found' && auth.user) {
-      filteredLoans = hasAdminPermissions  ? loans.loans : loans.loans.filter(l => auth.user && auth.user.proxies.includes(l.ownerOf));
+    const hasAdminPermissions = user && user.permissions.canSetInterestRate;
+    if (loans && loans.loans && loans.loansState === 'found' && user) {
+      filteredLoans = hasAdminPermissions  ? loans.loans : loans.loans.filter(l => proxies.includes(l.ownerOf));
     }
 
     return <Box >

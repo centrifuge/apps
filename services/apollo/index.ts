@@ -1,4 +1,4 @@
-import { ApolloClient } from 'apollo-client';
+import { ApolloClient, DefaultOptions } from 'apollo-client';
 import { Loan } from '../tinlake';
 import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { createHttpLink } from 'apollo-link-http';
@@ -20,12 +20,20 @@ export interface TinlakeEventEntry {
   total_value_of_nfts: string;
 }
 
+const defaultOptions: DefaultOptions = {
+  query: {
+    fetchPolicy: 'no-cache',
+    errorPolicy: 'all',
+  }
+}
+
 class Apollo {
   client: ApolloClient<NormalizedCacheObject>;
   constructor() {
     this.client =  new ApolloClient({
       cache,
-      link
+      link,
+      defaultOptions
     });
   }
 

@@ -15,6 +15,7 @@ const OBSERVING_AUTH_CHANGES = 'tinlake-ui/auth/OBSERVING_AUTH_CHANGES';
 export interface User {
   address: string;
   permissions: Permissions;
+  proxies: []
 }
 
 export interface Permissions {
@@ -38,15 +39,13 @@ export interface AuthState {
   state: null | 'loading' | 'loaded';
   user: null | User;
   network: null | string;
-  proxies: Array<String>
 }
 
 const initialState: AuthState = {
   observingAuthChanges: false,
   state: null,
   user: null,
-  network: null,
-  proxies: []
+  network: null
 };
 
 // Reducer
@@ -55,11 +54,11 @@ export default function reducer(state: AuthState = initialState,
   switch (action.type) {
     case LOAD: return { ...state, state: 'loading' };
     case RECEIVE: return { ...state, state: 'loaded', user: action.user };
-    case CLEAR: return { ...state, state: 'loaded', user: null, proxies: []};
+    case CLEAR: return { ...state, state: 'loaded', user: null};
     case OBSERVING_AUTH_CHANGES: return { ...state, observingAuthChanges: true };
     case CLEAR_NETWORK: return { ...state, network: null };
     case RECEIVE_NETWORK: return { ...state, network: action.network };
-    case RECEIVE_PROXIES: return { ...state, proxies: action.proxies };
+    case RECEIVE_PROXIES: return { ...state, user: action.user };
     default: return state;
   }
 }
@@ -113,18 +112,23 @@ export function loadUser(tinlake: any, address: string):
   };
 }
 
-export function loadUserProxies(address: string):
+export function loadUserProxies():
 ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    const { auth } = getState();
     // clear user if no address given
-    if (!address) {
+    if (!auth.user || !auth.user.address) {
       dispatch({ type: CLEAR });
       return;
     }
-    const result =  await Apollo.getProxies(address);
-    const proxies = result.data;
 
-    dispatch({ proxies, type: RECEIVE_PROXIES });
+    const result =  await Apollo.getProxies(auth.user.address);
+    const proxies = result.data;
+    const user = {
+      ...auth.user,
+      proxies
+    }
+    dispatch({ user, type: RECEIVE_PROXIES });
   };
 }
 
