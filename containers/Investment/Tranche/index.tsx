@@ -63,7 +63,7 @@ class TrancheView extends React.Component<Props> {
           {isInvestor &&
             <Box margin={{ top: 'medium', bottom: 'large' }} >
               <Box gap="medium" align="start" margin={{ bottom: 'medium' }} >
-                <Heading level="4" margin="none">Supply / Redeem </Heading>
+                <Heading level="4" margin="none">Invest / Redeem </Heading>
               </Box>
 
               <Box direction="row">

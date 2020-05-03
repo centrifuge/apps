@@ -33,20 +33,20 @@ class TrancheMetric extends React.Component<Props> {
       </Box>
 
       <Box margin={{top: 'medium' }}>
-        <Heading level="4" margin={{ bottom: 'medium' }}>Invest/Redeem allowance</Heading>
+        <Heading level="4" margin={{ bottom: 'medium' }}>Invest / Redeem allowance</Heading>
         <Box direction="row" >
           <Box basis={'1/3'} gap="medium">
-            <DashboardMetric label="Max investment limit">
+            <DashboardMetric label="Investment limit">
               <NumberDisplay value={baseToDisplay(maxSupply, 18)} suffix=" DAI" precision={18} />
             </DashboardMetric>
           </Box>
           <Box basis={'1/3'} gap="medium">
-            <DashboardMetric label="Max token redeem limit">
+            <DashboardMetric label="Redeem limit">
               <NumberDisplay value={baseToDisplay(maxRedeem, 18)} suffix={currencyLabel} precision={18} />
             </DashboardMetric>
           </Box>
           <Box basis={'1/3'} gap="medium">
-            <DashboardMetric label={`Max${currencyLabel} amount available for redeem`}>
+            <DashboardMetric label={`Tranche token total`}>
               <NumberDisplay value={maxRedeemAmount.toString()} suffix={currencyLabel} precision={18} />
             </DashboardMetric>
           </Box>
