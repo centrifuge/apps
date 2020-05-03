@@ -45,6 +45,7 @@ export declare function AnalyticsActions<ActionsBase extends Constructor<Tinlake
         setEthConfig: (ethConfig: {} | import("../Tinlake").EthConfig) => void;
         setContractAddresses: () => Promise<void>;
         createContract(address: string, abiName: string): void;
+        nftLookup: (registry: string, tokenId: string) => Promise<any>;
         getOperatorType: (tranche: string) => any;
     };
 } & ActionsBase;

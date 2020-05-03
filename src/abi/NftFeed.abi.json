@@ -250,32 +250,6 @@
        "constant":true,
        "inputs":[
           {
-             "internalType":"address",
-             "name":"registry",
-             "type":"address"
-          },
-          {
-             "internalType":"uint256",
-             "name":"tokenId",
-             "type":"uint256"
-          }
-       ],
-       "name":"nftID",
-       "outputs":[
-          {
-             "internalType":"bytes32",
-             "name":"",
-             "type":"bytes32"
-          }
-       ],
-       "payable":false,
-       "stateMutability":"pure",
-       "type":"function"
-    },
-    {
-       "constant":true,
-       "inputs":[
-          {
              "internalType":"bytes32",
              "name":"",
              "type":"bytes32"
