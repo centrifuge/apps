@@ -20,7 +20,7 @@ class NftData extends React.Component<Props> {
     return <NftDataContainer>
       <Heading level="5" margin="none">NFT Data</Heading>
       <Box direction="row" gap="medium" margin={{ bottom: 'large', top: 'medium' }}>
-        <Box basis={'1/4'} gap="medium">
+        <Box basis={'1/3'} gap="medium">
          <DisplayField
             label={'NFT ID'}
             copy={true}
@@ -32,7 +32,19 @@ class NftData extends React.Component<Props> {
             }}
           />
         </Box>
-        <Box basis={'1/4'} gap="medium">
+        <Box basis={'1/3'} gap="medium">
+         <DisplayField
+            label={'NFT registry'}
+            copy={true}
+            as={'span'}
+            value={registry}
+            link={{
+              href: getAddressLink(registry),
+              target: '_blank'
+            }}
+          />
+        </Box>
+        <Box basis={'1/3'} gap="medium">
           <DisplayField
             label={'NFT Owner'}
             copy={true}
@@ -46,6 +58,8 @@ class NftData extends React.Component<Props> {
             {authedAddr === nftOwner &&
             <Badge text={'Me'} style={{ position: 'absolute', left: 100, top: 32 }} />}
         </Box>
+      </Box>
+      <Box direction="row" gap="medium" margin={{ bottom: 'small', top: 'medium' }}>
       </Box>
     </NftDataContainer>;
   }
