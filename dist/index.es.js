@@ -29516,7 +29516,7 @@ function CollateralActions(Base) {
                         case 1:
                             txHash = _a.sent();
                             console.log("[Mint NFT] txHash: " + txHash);
-                            return [4 /*yield*/, waitAndReturnEvents(this.eth, txHash, this.contracts['COLLATERAL_NFT'].abi, this.transactionTimeout)];
+                            return [4 /*yield*/, waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout)];
                         case 2:
                             res = _a.sent();
                             return [2 /*return*/, res.events[0].data[2].toString()];
@@ -29533,7 +29533,7 @@ function CollateralActions(Base) {
                         case 1:
                             txHash = _a.sent();
                             console.log("[NFT.mint] txHash: " + txHash);
-                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['COLLATERAL_NFT'].abi, this.transactionTimeout)];
+                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout)];
                     }
                 });
             }); };
@@ -29547,7 +29547,7 @@ function CollateralActions(Base) {
                         case 1:
                             txHash = _a.sent();
                             console.log("[NFT Approve] txHash: " + txHash);
-                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['COLLATERAL_NFT'].abi, this.transactionTimeout)];
+                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout)];
                     }
                 });
             }); };
@@ -29600,7 +29600,7 @@ function CollateralActions(Base) {
                         case 1:
                             txHash = _a.sent();
                             console.log("[NFT Approve] txHash: " + txHash);
-                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['COLLATERAL_NFT'].abi, this.transactionTimeout)];
+                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout)];
                     }
                 });
             }); };

@@ -9,7 +9,7 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
       const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
       const txHash = await executeAndRetry(nft.issue, [user, this.ethConfig]);
       console.log(`[Mint NFT] txHash: ${txHash}`);
-      const res: any = await waitAndReturnEvents(this.eth, txHash, this.contracts['COLLATERAL_NFT'].abi, this.transactionTimeout);
+      const res: any = await waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout);
       return res.events[0].data[2].toString();
     }
 
@@ -17,14 +17,14 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
       const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
       const txHash = await executeAndRetry(nft.mint, [owner, tokenId, ref, amount, asset, this.ethConfig]);
       console.log(`[NFT.mint] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['COLLATERAL_NFT'].abi, this.transactionTimeout);
+      return waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout);
     }
 
     approveNFT = async (nftAddr: string, tokenId: string, to: string) => {
       const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
       const txHash = await executeAndRetry(nft.approve, [to, tokenId, this.ethConfig]);
       console.log(`[NFT Approve] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['COLLATERAL_NFT'].abi, this.transactionTimeout);
+      return waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout);
     }
 
     getNFTCount = async (nftAddr: string): Promise<BN> => {
@@ -49,7 +49,7 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
       const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
       const txHash = await executeAndRetry(nft.transferFrom, [from, to, tokenId, this.ethConfig]);
       console.log(`[NFT Approve] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['COLLATERAL_NFT'].abi, this.transactionTimeout);
+      return waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout);
     }
   };
 }
