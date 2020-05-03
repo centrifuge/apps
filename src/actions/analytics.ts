@@ -44,8 +44,13 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getInterestRate = async (loanId: string): Promise<BN> => {
-      const res = await executeAndRetry(this.contracts['PILE'].loanRates, [loanId]);
-      return res ? res[0] : new BN(0);
+      // retrieve nftId = hash from tokenID & registry
+      const nftId = (await executeAndRetry(this.contracts['NFT_FEED'].nftID, [loanId]))[0];
+      // retrieve riskgroup fro nft
+      const riskGroupRes : { 0: BN } = await executeAndRetry(this.contracts['NFT_FEED'].risk, [nftId]);
+      const riskGroup = riskGroupRes[0] || new BN(0);
+      const res = await executeAndRetry(this.contracts['PILE'].rates, [riskGroup]);
+      return res ? res[2] : new BN(0);
     }
 
     getOwnerOfLoan = async (loanId: string): Promise<any> => {

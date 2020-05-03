@@ -27,6 +27,7 @@ const contractNames = [
   'ACTIONS',
   'BORROWER_DEPLOYER',
   'LENDER_DEPLOYER',
+  'NFT_FEED',
 ];
 
 type AbiOutput = {
@@ -136,7 +137,8 @@ export default class Tinlake {
     // use shelf to retrieve borrowersite addresses for this deployment
     this.contractAddresses['SHELF'] = (await executeAndRetry(borrowerDeployer.shelf, []))[0];
     this.contracts['SHELF'] = this.eth.contract(this.contractAbis['SHELF']).at(this.contractAddresses['SHELF']);
-
+    this.contractAddresses['NFT_FEED'] = (await executeAndRetry(borrowerDeployer.nftFeed, []))[0];
+    this.contracts['NFT_FEED'] = this.eth.contract(this.contractAbis['NFT_FEED']).at(this.contractAddresses['NFT_FEED']);
     this.contractAddresses['COLLECTOR'] = (await executeAndRetry(borrowerDeployer.collector, []))[0];
     this.contracts['COLLECTOR'] = this.eth.contract(this.contractAbis['COLLECTOR']).at(this.contractAddresses['COLLECTOR']);
     this.contractAddresses['THRESHOLD'] = (await executeAndRetry(borrowerDeployer.threshold, []))[0];
@@ -188,7 +190,7 @@ export default class Tinlake {
     const contract = this.eth.contract(this.contractAbis[abiName]).at(address);
     return contract;
   }
-
+  
   getOperatorType = (tranche: string) => {
     switch (tranche) {
       case 'senior':
