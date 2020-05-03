@@ -190,7 +190,7 @@ export default class Tinlake {
     const contract = this.eth.contract(this.contractAbis[abiName]).at(address);
     return contract;
   }
-  
+
   getOperatorType = (tranche: string) => {
     switch (tranche) {
       case 'senior':
