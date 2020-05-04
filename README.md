@@ -2,9 +2,10 @@
 
 ## Development
 
-Install dependencies with `npm install`
+1. Make sure you are on a stable node version, v12.16.3 on the time of writing this (the `sha3` dependency did not work with newer versions in some cases)
+2. Install dependencies with `npm install`
 
-### Setup environment 
+### Setup environment
 
 add the following env variables
 
