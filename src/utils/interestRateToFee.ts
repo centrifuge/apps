@@ -4,6 +4,7 @@ Decimal.set({
   precision: 28,
   toExpNeg: -7,
   toExpPos: 29,
+  rounding: Decimal.ROUND_HALF_CEIL,
 });
 
 const n = new Decimal(60 * 60 * 24 * 365);
@@ -21,9 +22,9 @@ const lookup: { [interestRate: string]: string } = {};
 export const interestRateToFee = (interestRate: string): string => {
   if (lookup[interestRate]) { return lookup[interestRate]; }
 
-  const i = new Decimal(interestRate).div(100).plus(1);
+  const i = new Decimal(interestRate).div(100);
 
-  const fee = i.pow(new Decimal(1).div(n)).mul('1e27').toDecimalPlaces(0);
+  const fee = i.div(n).plus(1).mul('1e27').toDecimalPlaces(0);
 
   const feeString = fee.toString();
 

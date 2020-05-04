@@ -15190,7 +15190,7 @@ var hmac_2 = hmac.computeHmac;
 var _args = [
   [
     "elliptic@6.5.2",
-    "/Users/ilinzweilin/Desktop/centrifuge/forks/tinlake.js"
+    "/Users/philipstanislaus/Code/centrifuge/tinlake.js"
   ]
 ];
 var _from = "elliptic@6.5.2";
@@ -15215,7 +15215,7 @@ var _requiredBy = [
 ];
 var _resolved = "https://registry.npmjs.org/elliptic/-/elliptic-6.5.2.tgz";
 var _spec = "6.5.2";
-var _where = "/Users/ilinzweilin/Desktop/centrifuge/forks/tinlake.js";
+var _where = "/Users/philipstanislaus/Code/centrifuge/tinlake.js";
 var author = {
   name: "Fedor Indutny",
   email: "fedor@indutny.com"
@@ -49413,9 +49413,10 @@ var Decimal = clone(defaults);
 ONE$1 = new Decimal(1);
 
 Decimal.set({
-    precision: 30,
+    precision: 28,
     toExpNeg: -7,
     toExpPos: 29,
+    rounding: Decimal.ROUND_HALF_CEIL,
 });
 var n = new Decimal(60 * 60 * 24 * 365);
 var lookup = {};
@@ -49439,8 +49440,8 @@ var feeToInterestRate = function (fee) {
     if (lookup[feeToConvert]) {
         return lookup[feeToConvert];
     }
-    var i = new Decimal(feeToConvert).div('1e27').pow(n);
-    var interestRate = i.minus(1).mul(100).toSignificantDigits(2, Decimal.ROUND_HALF_CEIL);
+    var i = new Decimal(feeToConvert).div('1e27').minus(1).times(n);
+    var interestRate = i.mul(100).toDecimalPlaces(1);
     var interestRateString = interestRate.toString();
     lookup[feeToConvert] = interestRateString;
     return interestRateString;
@@ -49463,6 +49464,7 @@ Decimal.set({
     precision: 28,
     toExpNeg: -7,
     toExpPos: 29,
+    rounding: Decimal.ROUND_HALF_CEIL,
 });
 var n$1 = new Decimal(60 * 60 * 24 * 365);
 var lookup$1 = {};
@@ -49478,8 +49480,8 @@ var interestRateToFee = function (interestRate) {
     if (lookup$1[interestRate]) {
         return lookup$1[interestRate];
     }
-    var i = new Decimal(interestRate).div(100).plus(1);
-    var fee = i.pow(new Decimal(1).div(n$1)).mul('1e27').toDecimalPlaces(0);
+    var i = new Decimal(interestRate).div(100);
+    var fee = i.div(n$1).plus(1).mul('1e27').toDecimalPlaces(0);
     var feeString = fee.toString();
     lookup$1[interestRate] = feeString;
     return feeString;

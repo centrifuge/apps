@@ -2,9 +2,10 @@ import { Decimal } from 'decimal.js-light';
 import BN from 'bn.js';
 
 Decimal.set({
-  precision: 30,
+  precision: 28,
   toExpNeg: -7,
   toExpPos: 29,
+  rounding: Decimal.ROUND_HALF_CEIL,
 });
 
 const n = new Decimal(60 * 60 * 24 * 365);
@@ -28,9 +29,9 @@ export const feeToInterestRate = (fee: string|BN): string => {
 
   if (lookup[feeToConvert]) { return lookup[feeToConvert]; }
 
-  const i = new Decimal(feeToConvert).div('1e27').pow(n);
+  const i = new Decimal(feeToConvert).div('1e27').minus(1).times(n);
 
-  const interestRate = i.minus(1).mul(100).toSignificantDigits(2, Decimal.ROUND_HALF_CEIL);
+  const interestRate = i.mul(100).toDecimalPlaces(1);
 
   const interestRateString = interestRate.toString();
 

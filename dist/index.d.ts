@@ -10,9 +10,9 @@ export declare const TinlakeWithActions: {
         proxyCount: () => Promise<import("bn.js")>;
         checkProxyExists: (address: string) => Promise<string | null>;
         proxyCreateNew: (address: string) => Promise<any>;
-        proxyTransferIssue: (proxyAddr: string, tokenId: string) => Promise<unknown>;
+        proxyTransferIssue: (proxyAddr: string, nftRegistryAddr: string, tokenId: string) => Promise<unknown>;
         proxyLockBorrowWithdraw: (proxyAddr: string, loanId: string, amount: string, usr: string) => Promise<unknown>;
-        proxyRepayUnlockClose: (proxyAddr: string, tokenId: string, loanId: string) => Promise<unknown>;
+        proxyRepayUnlockClose: (proxyAddr: string, tokenId: string, loanId: string, registry: string) => Promise<unknown>;
         provider: any;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
@@ -21,8 +21,12 @@ export declare const TinlakeWithActions: {
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
         contractAbis: import("./Tinlake").ContractAbis;
+        contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
+        setContractAddresses: () => Promise<void>;
+        createContract(address: string, abiName: string): void;
+        getOperatorType: (tranche: string) => any;
     };
 } & {
     new (...args: any[]): {
@@ -42,27 +46,30 @@ export declare const TinlakeWithActions: {
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
         contractAbis: import("./Tinlake").ContractAbis;
+        contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
+        setContractAddresses: () => Promise<void>;
+        createContract(address: string, abiName: string): void;
+        getOperatorType: (tranche: string) => any;
     };
 } & {
     new (...args: any[]): {
         isWard: (user: string, contractName: string) => Promise<import("bn.js")>;
-        canSetCeiling: (user: string) => Promise<boolean>;
         canSetInterestRate: (user: string) => Promise<boolean>;
-        canSetJuniorTrancheInterest: (user: string) => Promise<boolean>;
         canSetSeniorTrancheInterest: (user: string) => Promise<boolean>;
-        canSetEquityRatio: (user: string) => Promise<boolean>;
         canSetRiskScore: (user: string) => Promise<boolean>;
+        canSetMinimumJuniorRatio: (user: string) => Promise<boolean>;
         canSetInvestorAllowanceJunior: (user: string) => Promise<boolean>;
-        canSetThreshold: (user: string) => Promise<boolean>;
+        canSetInvestorAllowanceSenior: (user: string) => Promise<boolean>;
         canSetLoanPrice: (user: string) => Promise<boolean>;
-        setCeiling: (loanId: string, amount: string) => Promise<unknown>;
         existsRateGroup: (ratePerSecond: string) => Promise<boolean>;
         initRate: (ratePerSecond: string) => Promise<unknown>;
         changeRate: (loan: string, ratePerSecond: string) => Promise<unknown>;
         setRate: (loan: string, ratePerSecond: string) => Promise<unknown>;
+        setMinimumJuniorRatio: (ratio: string) => Promise<unknown>;
         approveAllowanceJunior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
+        approveAllowanceSenior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
         provider: any;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
@@ -71,17 +78,21 @@ export declare const TinlakeWithActions: {
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
         contractAbis: import("./Tinlake").ContractAbis;
+        contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
+        setContractAddresses: () => Promise<void>;
+        createContract(address: string, abiName: string): void;
+        getOperatorType: (tranche: string) => any;
     };
 } & {
     new (...args: any[]): {
         supplySenior: (currencyAmount: string) => Promise<unknown>;
         redeemSenior: (tokenAmount: string) => Promise<unknown>;
-        approveSeniorToken: (usr: string, tokenAmount: string) => Promise<unknown>;
+        approveSeniorToken: (tokenAmount: string) => Promise<unknown>;
         supplyJunior: (currencyAmount: string) => Promise<unknown>;
         redeemJunior: (tokenAmount: string) => Promise<unknown>;
-        approveJuniorToken: (usr: string, tokenAmount: string) => Promise<unknown>;
+        approveJuniorToken: (tokenAmount: string) => Promise<unknown>;
         balance: () => Promise<unknown>;
         provider: any;
         eth: import("./services/ethereum").ethI;
@@ -91,8 +102,12 @@ export declare const TinlakeWithActions: {
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
         contractAbis: import("./Tinlake").ContractAbis;
+        contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
+        setContractAddresses: () => Promise<void>;
+        createContract(address: string, abiName: string): void;
+        getOperatorType: (tranche: string) => any;
     };
 } & {
     new (...args: any[]): {
@@ -102,10 +117,10 @@ export declare const TinlakeWithActions: {
         getDebt: (loanID: string) => Promise<import("bn.js")>;
         loanCount: () => Promise<import("bn.js")>;
         getCollateral: (loanId: string) => Promise<any>;
-        getOwnerOfCollateral: (tokenId: string) => Promise<import("bn.js")>;
+        getOwnerOfCollateral: (nftRegistryAddr: string, tokenId: string) => Promise<import("bn.js")>;
         getInterestRate: (loanId: string) => Promise<import("bn.js")>;
         getOwnerOfLoan: (loanId: string) => Promise<any>;
-        getStatus: (tokenId: string, loanId: string) => Promise<any>;
+        getStatus: (nftRegistryAddr: string, tokenId: string, loanId: string) => Promise<any>;
         getLoan: (loanId: string) => Promise<import("./types/tinlake").Loan | null>;
         getLoanList: () => Promise<import("./types/tinlake").Loan[]>;
         getInvestor: (user: string) => Promise<import("./types/tinlake").Investor>;
@@ -116,10 +131,15 @@ export declare const TinlakeWithActions: {
         existsSenior: () => boolean;
         getSeniorTokenBalance: (user: string) => Promise<import("bn.js")>;
         getMaxSupplyAmountSenior: (user: string) => Promise<import("bn.js")>;
-        getMaxRedeemAmountSenior: (user: string) => Promise<any>;
-        getTokenPriceSenior: () => Promise<any>;
+        getMaxRedeemAmountSenior: (user: string) => Promise<import("bn.js")>;
+        getTokenPriceSenior: (user: string) => Promise<import("bn.js")>;
         getSeniorReserve: () => Promise<import("bn.js")>;
         getJuniorReserve: () => Promise<import("bn.js")>;
+        getMinJuniorRatio: () => Promise<import("bn.js")>;
+        getCurrentJuniorRatio: () => Promise<import("bn.js")>;
+        getAssetValueJunior: () => Promise<import("bn.js")>;
+        getSeniorDebt: () => Promise<import("bn.js")>;
+        getSeniorInterestRate: () => Promise<import("bn.js")>;
         provider: any;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
@@ -128,14 +148,20 @@ export declare const TinlakeWithActions: {
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
         contractAbis: import("./Tinlake").ContractAbis;
+        contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
+        setContractAddresses: () => Promise<void>;
+        createContract(address: string, abiName: string): void;
+        getOperatorType: (tranche: string) => any;
     };
 } & {
     new (...args: any[]): {
         mintCurrency: (usr: string, amount: string) => Promise<void>;
         getCurrencyBalance: (user: string) => Promise<import("bn.js")>;
         approveCurrency: (usr: string, currencyAmount: string) => Promise<unknown>;
+        approveSeniorForCurrency: (currencyAmount: string) => Promise<unknown>;
+        approveJuniorForCurrency: (currencyAmount: string) => Promise<unknown>;
         provider: any;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
@@ -144,18 +170,22 @@ export declare const TinlakeWithActions: {
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
         contractAbis: import("./Tinlake").ContractAbis;
+        contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
+        setContractAddresses: () => Promise<void>;
+        createContract(address: string, abiName: string): void;
+        getOperatorType: (tranche: string) => any;
     };
 } & {
     new (...args: any[]): {
-        mintTitleNFT: (user: string) => Promise<any>;
-        mintNFT: (owner: string, tokenId: string, ref: string, amount: string, asset: string) => Promise<unknown>;
-        approveNFT: (tokenId: string, to: string) => Promise<unknown>;
-        getNFTCount: () => Promise<import("bn.js")>;
-        getNFTData: (tokenId: string) => Promise<any>;
-        getNFTOwner: (tokenId: string) => Promise<import("bn.js")>;
-        transferNFT: (from: string, to: string, tokenId: string) => Promise<unknown>;
+        mintTitleNFT: (nftAddr: string, user: string) => Promise<any>;
+        mintNFT: (nftAddr: string, owner: string, tokenId: string, ref: string, amount: string, asset: string) => Promise<unknown>;
+        approveNFT: (nftAddr: string, tokenId: string, to: string) => Promise<unknown>;
+        getNFTCount: (nftAddr: string) => Promise<import("bn.js")>;
+        getNFTData: (nftAddr: string, tokenId: string) => Promise<any>;
+        getNFTOwner: (nftAddr: string, tokenId: string) => Promise<import("bn.js")>;
+        transferNFT: (nftAddr: string, from: string, to: string, tokenId: string) => Promise<unknown>;
         provider: any;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
@@ -164,8 +194,12 @@ export declare const TinlakeWithActions: {
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
         contractAbis: import("./Tinlake").ContractAbis;
+        contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
+        setContractAddresses: () => Promise<void>;
+        createContract(address: string, abiName: string): void;
+        getOperatorType: (tranche: string) => any;
     };
 } & {
     new (...args: any[]): {
@@ -178,8 +212,12 @@ export declare const TinlakeWithActions: {
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
         contractAbis: import("./Tinlake").ContractAbis;
+        contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
+        setContractAddresses: () => Promise<void>;
+        createContract(address: string, abiName: string): void;
+        getOperatorType: (tranche: string) => any;
     };
 } & typeof Tinlake;
 export default TinlakeWithActions;
