@@ -11,6 +11,10 @@ const { tinlakeDataBackendUrl } = config;
 const cache = new InMemoryCache();
 const link = new createHttpLink({
   fetch,
+  headers: {
+    "user-agent": null
+  },
+  // fetchOptions: '',
   uri: tinlakeDataBackendUrl
 });
 
@@ -24,7 +28,7 @@ const defaultOptions: DefaultOptions = {
   query: {
     fetchPolicy: 'no-cache',
     errorPolicy: 'all',
-  }
+  },
 }
 
 class Apollo {
@@ -81,7 +85,7 @@ class Apollo {
     return tinlakeLoans;
   }
 
- 
+
   async getProxies(user: string) {
     let result;
     try {
@@ -89,7 +93,7 @@ class Apollo {
       .query({
         query: gql`
         {
-          proxies (where: {owner:"${user}"}) 
+          proxies (where: {owner:"${user}"})
             {
               id
               owner
