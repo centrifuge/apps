@@ -45,11 +45,11 @@ class TrancheMetric extends React.Component<Props> {
               <NumberDisplay value={baseToDisplay(maxRedeem, 18)} suffix={currencyLabel} precision={18} />
             </DashboardMetric>
           </Box>
-          <Box basis={'1/3'} gap="medium">
+          {/* <Box basis={'1/3'} gap="medium">
             <DashboardMetric label={`Tranche token total`}>
               <NumberDisplay value={maxRedeemAmount.toString()} suffix={currencyLabel} precision={18} />
             </DashboardMetric>
-          </Box>
+          </Box> */}
         </Box>
       </Box>
     </Box>;

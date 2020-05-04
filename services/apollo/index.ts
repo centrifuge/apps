@@ -114,6 +114,7 @@ class Apollo {
 
 function toTinlakeLoans(loans: Array<any>) : {data: Array<Loan>} {
     const tinlakeLoans : Array<Loan> = [];
+    
     loans.forEach((loan) => {
         const tinlakeLoan = {
             loanId: loan.index,
@@ -129,6 +130,11 @@ function toTinlakeLoans(loans: Array<any>) : {data: Array<Loan>} {
         }
         tinlakeLoans.push(tinlakeLoan);
     })
+
+    tinlakeLoans.length && tinlakeLoans.sort((l1:Loan, l2:Loan) => {
+      return l1.loanId - l2.loanId;
+    });
+
     return {data: tinlakeLoans};
 }
 
