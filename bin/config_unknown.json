@@ -1,0 +1,9 @@
+{
+  "ETH_RPC_URL": "http://127.0.0.1:8545",
+  "ETH_FROM": "db150c7cd8dcdf8ba49cef334b515ba582c4b861",
+  "ETH_GAS": "7000000",
+  "ETH_KEYSTORE": "/Users/ch4rly/.dapp/testnet/8545/keystore",
+  "ETH_PASSWORD": "/Users/ch4rly/.dapp/testnet/8545/.empty-password",
+  "TINLAKE_CURRENCY": "0xaefda76cf6edb43b1aa35864c5ed8b5fe6bcac56",
+  "MAIN_DEPLOYER": "0x0db91d957d40e9f4ecc47090e8b08e5a43c7a015"
+}

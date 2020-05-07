@@ -15187,12 +15187,6 @@ unwrapExports(hmac);
 var hmac_1 = hmac.SupportedAlgorithms;
 var hmac_2 = hmac.computeHmac;
 
-var _args = [
-  [
-    "elliptic@6.5.2",
-    "/Users/philipstanislaus/Code/centrifuge/tinlake.js"
-  ]
-];
 var _from = "elliptic@6.5.2";
 var _id = "elliptic@6.5.2";
 var _inBundle = false;
@@ -15214,8 +15208,9 @@ var _requiredBy = [
   "/ethers"
 ];
 var _resolved = "https://registry.npmjs.org/elliptic/-/elliptic-6.5.2.tgz";
-var _spec = "6.5.2";
-var _where = "/Users/philipstanislaus/Code/centrifuge/tinlake.js";
+var _shasum = "05c5678d7173c049d8ca433552224a495d0e3762";
+var _spec = "elliptic@6.5.2";
+var _where = "/Users/ch4rly/go/src/github.com/centrifuge/tinlake.js/node_modules/ethers";
 var author = {
   name: "Fedor Indutny",
   email: "fedor@indutny.com"
@@ -15223,6 +15218,7 @@ var author = {
 var bugs = {
   url: "https://github.com/indutny/elliptic/issues"
 };
+var bundleDependencies = false;
 var dependencies = {
   "bn.js": "^4.4.0",
   brorand: "^1.0.1",
@@ -15232,6 +15228,7 @@ var dependencies = {
   "minimalistic-assert": "^1.0.0",
   "minimalistic-crypto-utils": "^1.0.0"
 };
+var deprecated = false;
 var description = "EC cryptography";
 var devDependencies = {
   brfs: "^1.4.3",
@@ -15276,7 +15273,6 @@ var scripts = {
 };
 var version = "6.5.2";
 var _package = {
-  _args: _args,
   _from: _from,
   _id: _id,
   _inBundle: _inBundle,
@@ -15286,11 +15282,14 @@ var _package = {
   _requested: _requested,
   _requiredBy: _requiredBy,
   _resolved: _resolved,
+  _shasum: _shasum,
   _spec: _spec,
   _where: _where,
   author: author,
   bugs: bugs,
+  bundleDependencies: bundleDependencies,
   dependencies: dependencies,
+  deprecated: deprecated,
   description: description,
   devDependencies: devDependencies,
   files: files,
@@ -15305,7 +15304,6 @@ var _package = {
 };
 
 var _package$1 = /*#__PURE__*/Object.freeze({
-    _args: _args,
     _from: _from,
     _id: _id,
     _inBundle: _inBundle,
@@ -15315,11 +15313,14 @@ var _package$1 = /*#__PURE__*/Object.freeze({
     _requested: _requested,
     _requiredBy: _requiredBy,
     _resolved: _resolved,
+    _shasum: _shasum,
     _spec: _spec,
     _where: _where,
     author: author,
     bugs: bugs,
+    bundleDependencies: bundleDependencies,
     dependencies: dependencies,
+    deprecated: deprecated,
     description: description,
     devDependencies: devDependencies,
     files: files,
