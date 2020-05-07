@@ -47422,17 +47422,23 @@ var Tinlake = /** @class */ (function () {
 
 var baseToDisplay = function (base, decimals) {
     var baseStr = typeof base === 'string' ? base : base.toString();
+    var neg = baseStr.includes('-');
+    baseStr = baseStr.replace(/-/g, '');
     var a = baseStr.slice(0, -decimals) || '0';
     var b = baseStr.slice(-decimals).padStart(decimals, '0');
-    return a + "." + b;
+    var res = a + "." + b;
+    return neg ? "-" + res : res;
 };
 
 var bnToHex = function (bn) { return "0x" + bn.toString(16); };
 
 var displayToBase = function (display, decimals) {
-    var a = display.split('.')[0];
-    var b = (display.split('.')[1] || '').padEnd(decimals, '0').substr(0, decimals);
-    return "" + a + b;
+    var neg = display.includes('-');
+    var str = display.replace(/-/g, '');
+    var a = str.split('.')[0];
+    var b = (str.split('.')[1] || '').padEnd(decimals, '0').substr(0, decimals);
+    var res = "" + a + b;
+    return neg ? "-" + res : res;
 };
 
 /*
