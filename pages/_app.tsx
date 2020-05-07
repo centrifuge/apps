@@ -20,7 +20,7 @@ class MyApp extends App<{ store: any }> {
 
     // Next.js currently does not allow trailing slash in a route, but Netlify appends trailing slashes. This is a
     // client side redirect in case trailing slash occurs. See https://github.com/zeit/next.js/issues/5214 for details
-    if (pageProps.statusCode === 404 && asPath && asPath.length > 1) {
+    if (asPath && asPath.length > 1) {
       const [path, query = ''] = asPath.split('?');
       if (path.endsWith('/')) {
         const asPathWithoutTrailingSlash = path.replace(/\/*$/gim, '') + (query ? `?${query}` : '');
