@@ -3,11 +3,12 @@ import { Box, FormField, TextInput, Button, Text } from 'grommet';
 import Alert from '../../../components/Alert';
 import NftData from '../../../components/NftData';
 import { connect } from 'react-redux';
-import { getNFT, issue, NFT, TinlakeResult } from '../../../services/tinlake/actions';
+import { getNFT, issue, TinlakeResult } from '../../../services/tinlake/actions';
 import { authTinlake } from '../../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import LoanView from '../View';
 import { AuthState, loadUserProxies } from '../../../ducks/auth';
+import { NFT } from 'tinlake';
 
 interface Props {
   tinlake: any;
@@ -55,7 +56,7 @@ class IssueLoan extends React.Component<Props, State> {
     const { registry } = this.state;
     const currentTokenId = this.state.tokenId;
     if (currentTokenId  && currentTokenId .length > 0) {
-      const result = await getNFT(registry, tinlake, currentTokenId );
+      const result = await getNFT(registry, tinlake, currentTokenId);
       const { tokenId, nft, errorMessage } = result as Partial<{ tokenId: string, nft: NFT, errorMessage: string }>;
       if (tokenId !== currentTokenId) {
         return;
@@ -91,18 +92,15 @@ class IssueLoan extends React.Component<Props, State> {
     }
   }
 
-  componentWillMount() {
-    const { tokenId, registry } = this.props;
-    this.setState({tokenId: tokenId || '', registry: registry || '' });
-  }
-
   componentDidMount() {
-   this.getNFT()
+    const { tokenId, registry } = this.props;
+    this.setState({ tokenId: tokenId || '', registry: registry || '' });
+    this.getNFT();
   }
 
   render() {
     const { tokenId, registry, is, nft, errorMsg, nftError, loanId } = this.state;
-    const { tinlake, auth } = this.props;
+    const { tinlake } = this.props;
     return <Box>
       {is === 'loading' ?
         <Spinner height={'calc(100vh - 89px - 84px)'} message={'Initiating the opening loan process. Please confirm the pending transactions in MetaMask, and do not leave this page until all transactions have been confirmed.'} />
@@ -132,7 +130,7 @@ class IssueLoan extends React.Component<Props, State> {
               />
             </FormField>
           </Box>
-  
+
           <Box basis={'1/3'} gap="medium">
             <FormField label="Token ID">
               <TextInput

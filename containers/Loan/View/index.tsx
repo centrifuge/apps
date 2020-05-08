@@ -4,12 +4,11 @@ import { Box, Heading } from 'grommet';
 import { connect } from 'react-redux';
 import Alert from '../../../components/Alert';
 import LoanData from '../../../components/Loan/Data';
-import LoanInterest from '../Interest';
 import LoanBorrow from '../Borrow';
 import LoanRepay from '../Repay';
 import { Spinner } from '@centrifuge/axis-spinner';
 import NftData from '../../../components/NftData';
-import { AuthState,loadUserProxies } from '../../../ducks/auth';
+import { AuthState, loadUserProxies } from '../../../ducks/auth';
 import { TransactionState, resetTransactionState } from '../../../ducks/transactions';
 
 interface Props {
@@ -26,7 +25,7 @@ interface Props {
 // on state change tokenId --> load nft data for loan collateral
 class LoanView extends React.Component<Props> {
 
-  componentWillMount() {
+  componentDidMount() {
     const { tinlake, loanId, loadLoan, resetTransactionState, loadUserProxies } = this.props;
     loanId && loadLoan!(tinlake, loanId);
     resetTransactionState && resetTransactionState();
@@ -46,12 +45,12 @@ class LoanView extends React.Component<Props> {
       return <Alert margin="medium" type="error">
         Could not find loan {loanId}</Alert>;
     }
-   
-    const user = auth && auth.user
-    const hasAdminPermissions =  user && user.permissions.canSetInterestRate;
-    const hasBorrowerPermissions =  user && loan && (user.proxies.includes(loan.ownerOf));
+
+    const user = auth && auth.user;
+    const hasBorrowerPermissions =  user && loan && (user.proxies.includes(loan.ownerOf.toString()));
     if (transactions && transactions.transactionState && transactions.transactionState === 'processing') {
-      return <Spinner height={'calc(100vh - 89px - 84px)'} message={transactions.loadingMessage || 'Processing Transaction. This may take a few seconds. Please wait...'} />;
+      return <Spinner height={'calc(100vh - 89px - 84px)'} message={transactions.loadingMessage ||
+        'Processing Transaction. This may take a few seconds. Please wait...'} />;
     }
 
     return <Box>
@@ -90,8 +89,8 @@ class LoanView extends React.Component<Props> {
                 <Heading level="5" margin="none">Borrow / Repay </Heading>
               </Box>
               <Box direction="row">
-                <LoanBorrow loan={loan!} tinlake={tinlake}> </LoanBorrow>
-                <LoanRepay loan={loan!} tinlake={tinlake}> </LoanRepay>
+                <LoanBorrow loan={loan!} tinlake={tinlake} />
+                <LoanRepay loan={loan!} tinlake={tinlake} />
               </Box>
             </Box>
           }

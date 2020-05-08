@@ -26,7 +26,7 @@ const colors = {
   }
 };
 
-const AlertContainer = styled(Box)<{ type: 'error' | 'success' }>`
+const AlertContainer = styled(Box)<{ type: 'error' | 'info' | 'success' }>`
   padding: 24px;
   background-color: ${p => colors[p.type].backgroundColor};
   color: ${p => colors[p.type].color};

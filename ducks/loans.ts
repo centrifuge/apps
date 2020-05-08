@@ -1,7 +1,9 @@
 import { AnyAction, Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
-import { Tinlake, getLoans, getLoan, TinlakeResult, Loan } from '../services/tinlake/actions';
+import { Loan } from 'tinlake';
+import { getLoan, TinlakeResult } from '../services/tinlake/actions';
 import Apollo from '../services/apollo';
+import Tinlake from 'tinlake/dist/Tinlake';
 
 // Actions
 const LOAD = 'tinlake-ui/loans/LOAD';
@@ -42,11 +44,14 @@ export function loadLoans(tinlake: Tinlake):
   ThunkAction<Promise<void>, LoansState, undefined, Action>  {
   return async (dispatch) => {
     dispatch({ type: LOAD });
-    const root = tinlake.contractAddresses["ROOT_CONTRACT"];
+    const root = tinlake.contractAddresses['ROOT_CONTRACT'];
+    if (root === undefined) {
+      throw new Error('could not get ROOT_CONTRACT address');
+    }
     const result = await Apollo.getLoans(root);
     const loans = result.data;
-   
-    dispatch({ type: RECEIVE, loans });
+
+    dispatch({ loans, type: RECEIVE });
   };
 }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Button, Image, Text, Anchor, ResponsiveContext } from 'grommet';
-import { Menu as MenuIcon, User as UserIcon, Close as CloseIcon } from "grommet-icons";
+import { Menu as MenuIcon, User as UserIcon, Close as CloseIcon } from 'grommet-icons';
 import { connect } from 'react-redux';
 import Link from 'next/link';
 import { AuthState } from '../../ducks/auth';
@@ -10,12 +10,12 @@ import { authTinlake } from '../../services/tinlake';
 import Router from 'next/router';
 import { NavBar } from '@centrifuge/axis-nav-bar';
 
-
 const { isDemo } = config;
 export interface MenuItem {
   label: string;
   route: string;
   secondary?: boolean;
+  env: string;
 }
 
 interface HeaderProps {
@@ -40,7 +40,6 @@ class Header extends React.Component<HeaderProps> {
       console.log(`authentication failed with Error ${e}`);
     }
   }
-
 
   render() {
     const { selectedRoute, menuItems, auth } = this.props;
@@ -77,9 +76,9 @@ class Header extends React.Component<HeaderProps> {
       align="center"
       direction="row"
       fill="horizontal"
-      pad={{horizontal: "small"}}
+      pad={{ horizontal: 'small' }}
     >
-      <ResponsiveContext.Consumer>{size => size === "large" ? (
+      <ResponsiveContext.Consumer>{size => size === 'large' ? (
 
         <Box direction="row" width="xlarge" align="center" >
           <Box align="center" direction="row" basis="full" >
@@ -90,12 +89,12 @@ class Header extends React.Component<HeaderProps> {
               <NavBar
                 border={false}
                 theme={theme}
-                menuItems={menuItems.filter(item => {
+                menuItems={menuItems.filter((item) => {
                   return (
                     user
-                    && (isDemo && item.env === "demo" || item.env === "")
+                    && (isDemo && item.env === 'demo' || item.env === '')
                     && !item.secondary
-                  )
+                  );
                 }
                 )}
                 overlayWidth="100vw"
@@ -109,7 +108,7 @@ class Header extends React.Component<HeaderProps> {
             </Box>
           </Box>
           <Box direction="row" basis="full">
-            {!user && 
+            {!user &&
               <Box direction="column" align="end" basis="full" alignSelf="center">
                <Button onClick={this.connectAccount} label="Connect" />
               </Box>
@@ -125,7 +124,7 @@ class Header extends React.Component<HeaderProps> {
               </Box>
             }
             {isDemo &&
-              <Box pad={{ left: "small" }} alignSelf="center"> <Anchor href="https://centrifuge.hackmd.io/zRnaoPqfS7mTm9XL0dDRtQ?view" target="blank" label="Help" style={{ textDecoration: 'none', fontWeight: 900 }} /> </Box>
+              <Box pad={{ left: 'small' }} alignSelf="center"> <Anchor href="https://centrifuge.hackmd.io/zRnaoPqfS7mTm9XL0dDRtQ?view" target="blank" label="Help" style={{ textDecoration: 'none', fontWeight: 900 }} /> </Box>
             }</Box>
         </Box>
       )
@@ -137,7 +136,7 @@ class Header extends React.Component<HeaderProps> {
               </Link>
             </Box>
             <Box direction="row" basis="full" >
-            {!user && 
+            {!user &&
               <Box direction="column" align="end" basis="full" alignSelf="center">
                <Button onClick={this.connectAccount} label="Connect" />
               </Box>
@@ -153,19 +152,19 @@ class Header extends React.Component<HeaderProps> {
             </Box>
             }
             {isDemo &&
-              <Box margin={{ horizontal: "small" }} alignSelf="center"> <Anchor href="https://centrifuge.hackmd.io/zRnaoPqfS7mTm9XL0dDRtQ?view" target="blank" label="Help" style={{ textDecoration: 'none', fontWeight: 900 }} /> </Box>
+              <Box margin={{ horizontal: 'small' }} alignSelf="center"> <Anchor href="https://centrifuge.hackmd.io/zRnaoPqfS7mTm9XL0dDRtQ?view" target="blank" label="Help" style={{ textDecoration: 'none', fontWeight: 900 }} /> </Box>
             }
-              
+
               <Box fill={false}>
                 <NavBar
                   border={false}
                   theme={theme}
-                  menuItems={menuItems.filter(item => {
+                  menuItems={menuItems.filter((item) => {
                     return (
                       user
-                      && (isDemo && item.env === "demo" || item.env === "")
+                      && (isDemo && item.env === 'demo' || item.env === '')
                       && !item.secondary
-                    )
+                    );
                   }
                   )}
                   overlayWidth="100vw"
@@ -178,7 +177,7 @@ class Header extends React.Component<HeaderProps> {
                 />
               </Box>
             </Box>
-           
+
           </Box>
         )}</ResponsiveContext.Consumer> </Box>;
   }

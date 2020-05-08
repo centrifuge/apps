@@ -29,11 +29,8 @@ class Auth extends React.Component<Props, State> {
   };
   isMounted = false;
 
-  componentWillMount() {
-    this.init();
-  }
-
   componentDidMount() {
+    this.init();
     this.isMounted = true;
   }
 
@@ -79,7 +76,7 @@ class Auth extends React.Component<Props, State> {
     const extendedAuthState: ExtendedAuthState = {
       ...auth!,
       isAuthenticated: !isAuthenticating,
-      isAuthorized: !isAuthorizing,
+      isAuthorized: !isAuthorizing
     };
 
     return this.props.render(extendedAuthState);

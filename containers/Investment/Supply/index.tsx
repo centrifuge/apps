@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Box, FormField, Button, Text } from 'grommet';
 import NumberInput from '../../../components/NumberInput';
-import { Investor, TrancheType, supply } from '../../../services/tinlake/actions';
+import { TrancheType, supply } from '../../../services/tinlake/actions';
 import { transactionSubmitted, responseReceived } from '../../../ducks/transactions';
-import { baseToDisplay, displayToBase } from 'tinlake';
+import { baseToDisplay, displayToBase, Investor } from 'tinlake';
 import { loadInvestor } from '../../../ducks/investments';
 import { loadAnalyticsData } from '../../../ducks/analytics';
 import { connect } from 'react-redux';
@@ -17,7 +17,7 @@ interface Props {
   loadAnalyticsData?: (tinlake: any) => Promise<void>;
   transactionSubmitted?: (loadingMessage: string) => Promise<void>;
   responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>;
-  trancheType: TrancheType
+  trancheType: TrancheType;
 }
 
 interface State {
@@ -26,14 +26,14 @@ interface State {
 
 class InvestorSupply extends React.Component<Props, State> {
 
-  componentWillMount() {
+  componentDidMount() {
     this.setState({ supplyAmount: '0' });
   }
 
   supply = async () => {
     const { transactionSubmitted, responseReceived, trancheType, tinlake, investor, loadInvestor, loadAnalyticsData } = this.props;
     const { supplyAmount } = this.state;
-    transactionSubmitted && transactionSubmitted("Investment initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.");
+    transactionSubmitted && transactionSubmitted('Investment initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.');
     try {
       await authTinlake();
       const res = await supply(tinlake, supplyAmount, trancheType);
@@ -42,9 +42,9 @@ class InvestorSupply extends React.Component<Props, State> {
         return;
       }
       if (trancheType === 'junior') {
-        responseReceived && responseReceived(`Investment successful. Please check your wallet for TIN tokens.`, null);
+        responseReceived && responseReceived('Investment successful. Please check your wallet for TIN tokens.', null);
       } else if (trancheType === 'senior') {
-        responseReceived && responseReceived(`Investment successful. Please check your wallet for DROP tokens.`, null);
+        responseReceived && responseReceived('Investment successful. Please check your wallet for DROP tokens.', null);
       }
       loadInvestor && loadInvestor(tinlake, investor.address);
       loadAnalyticsData && loadAnalyticsData(tinlake);
@@ -60,8 +60,8 @@ class InvestorSupply extends React.Component<Props, State> {
     const trancheValues = investor[trancheType];
     const maxSupplyAmount =  trancheValues.maxSupply || '0';
     const maxSupplyOverflow =  (new BN(supplyAmount).cmp(new BN(maxSupplyAmount)) > 0);
-    const canSupply = maxSupplyAmount.toString() != '0' && !maxSupplyOverflow;
-    return <Box basis={'1/4'} gap="medium" margin={{ right: "large" }}>
+    const canSupply = maxSupplyAmount.toString() !== '0' && !maxSupplyOverflow;
+    return <Box basis={'1/4'} gap="medium" margin={{ right: 'large' }}>
       <Box gap="medium">
         <FormField label="Investment amount">
           <NumberInput value={baseToDisplay(supplyAmount, 18)} suffix=" DAI" precision={18}
@@ -73,8 +73,8 @@ class InvestorSupply extends React.Component<Props, State> {
       <Box align="start">
         <Button onClick={this.supply} primary label="Invest" disabled={!canSupply }  />
         {maxSupplyOverflow &&
-         <Box margin={{top: "small"}}>
-             Max investment amount exceeded. <br /> 
+         <Box margin={{ top: 'small' }}>
+             Max investment amount exceeded. <br />
              Amount has to be lower then <br />
              <Text weight="bold">
               {`${maxSupplyAmount.toString()}`}

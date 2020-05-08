@@ -20,7 +20,7 @@ class InvestorPage extends React.Component<Props> {
 
   render() {
     const { investorAddress } = this.props;
-    return <Box align="center" pad={{ horizontal: "small" }}>
+    return <Box align="center" pad={{ horizontal: 'small' }}>
       <Header
         selectedRoute={'/investments/investor'}
         menuItems={menuItems}

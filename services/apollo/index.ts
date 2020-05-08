@@ -1,5 +1,5 @@
 import { ApolloClient, DefaultOptions } from 'apollo-client';
-import { Loan } from '../tinlake';
+import { Loan } from 'tinlake';
 import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { createHttpLink } from 'apollo-link-http';
 import config from '../../config';
@@ -9,10 +9,10 @@ import BN from 'bn.js';
 
 const { tinlakeDataBackendUrl } = config;
 const cache = new InMemoryCache();
-const link = new createHttpLink({
-  fetch,
+const link = createHttpLink({
+  fetch: fetch as any,
   headers: {
-    "user-agent": null
+    'user-agent': null
   },
   // fetchOptions: '',
   uri: tinlakeDataBackendUrl
@@ -27,9 +27,9 @@ export interface TinlakeEventEntry {
 const defaultOptions: DefaultOptions = {
   query: {
     fetchPolicy: 'no-cache',
-    errorPolicy: 'all',
-  },
-}
+    errorPolicy: 'all'
+  }
+};
 
 class Apollo {
   client: ApolloClient<NormalizedCacheObject>;
@@ -85,7 +85,6 @@ class Apollo {
     return tinlakeLoans;
   }
 
-
   async getProxies(user: string) {
     let result;
     try {
@@ -107,46 +106,45 @@ class Apollo {
         data:[]
       };
     }
-    const proxies = result.data.proxies.map( (e: {id: string, owner: string}) => e.id );
-    return { data: proxies }
+    const proxies = result.data.proxies.map((e: {id: string, owner: string}) => e.id);
+    return { data: proxies };
   }
 }
 
-function toTinlakeLoans(loans: Array<any>) : {data: Array<Loan>} {
-    const tinlakeLoans : Array<Loan> = [];
-    
-    loans.forEach((loan) => {
-        const tinlakeLoan = {
-            loanId: loan.index,
-            registry: loan.nftRegistry,
-            tokenId: new BN(loan.nftId),
-            principal: loan.ceiling ? new BN(loan.ceiling) : new BN(0),
-            ownerOf: loan.owner,
-            interestRate: loan.interestRatePerSecond ? new BN(loan.interestRatePerSecond) : new BN(0),
-            debt: new BN(loan.debt),
-            threshold: loan.threshold ? new BN(loan.threshold) : new BN(0),
-            price: loan.price || new BN(0),
-            status: getLoanStatus(loan)
-        }
-        tinlakeLoans.push(tinlakeLoan);
-    })
+function toTinlakeLoans(loans: any[]) : {data: Loan[]} {
+  const tinlakeLoans : Loan[] = [];
 
-    tinlakeLoans.length && tinlakeLoans.sort((l1:Loan, l2:Loan) => {
-      return l1.loanId - l2.loanId;
-    });
+  loans.forEach((loan) => {
+    const tinlakeLoan = {
+      loanId: loan.index,
+      registry: loan.nftRegistry,
+      tokenId: new BN(loan.nftId),
+      principal: loan.ceiling ? new BN(loan.ceiling) : new BN(0),
+      ownerOf: loan.owner,
+      interestRate: loan.interestRatePerSecond ? new BN(loan.interestRatePerSecond) : new BN(0),
+      debt: new BN(loan.debt),
+      threshold: loan.threshold ? new BN(loan.threshold) : new BN(0),
+      price: loan.price || new BN(0),
+      status: getLoanStatus(loan)
+    };
+    tinlakeLoans.push(tinlakeLoan);
+  });
 
-    return {data: tinlakeLoans};
+  tinlakeLoans.length && tinlakeLoans.sort((l1: Loan, l2: Loan) => {
+    return (l1.loanId as unknown as number) - (l2.loanId as unknown as number);
+  });
+
+  return { data: tinlakeLoans };
 }
 
 function getLoanStatus(loan: any) {
-    if (loan.closed) {
-        return "closed";
-    }
-    else if (loan.debt && loan.debt !== "0") {
-        return "ongoing";
-    }
-    return "opened";
+  if (loan.closed) {
+    return 'closed';
+  }
+  if (loan.debt && loan.debt !== '0') {
+    return 'ongoing';
+  }
+  return 'opened';
 }
-
 
 export default new Apollo();

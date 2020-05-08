@@ -42,16 +42,16 @@ class InvestorView extends React.Component<Props, State> {
     loadInvestor && loadInvestor(tinlake, investorAddress);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     const { loadAnalyticsData, tinlake } = this.props;
-    resetTransactionState()
+    resetTransactionState();
     loadAnalyticsData && loadAnalyticsData(tinlake);
     this.showInvestor();
-    this.setState({selectedTab: 0});
+    this.setState({ selectedTab: 0 });
   }
 
   componentWillUnmount() {
-   resetTransactionState()
+    resetTransactionState();
   }
 
   resetTransactionState() {
@@ -61,14 +61,14 @@ class InvestorView extends React.Component<Props, State> {
 
   selectTab(tab : number) {
     const { selectedTab } = this.state;
-    if (tab != selectedTab) {
-      this.resetTransactionState()
+    if (tab !== selectedTab) {
+      this.resetTransactionState();
     }
-    this.setState({selectedTab: tab});
+    this.setState({ selectedTab: tab });
   }
 
   render() {
-    const { is, errorMsg, selectedTab} = this.state;
+    const { is, errorMsg, selectedTab } = this.state;
     const { tinlake, investments, auth, analytics, transactions } = this.props;
     const investor = investments && investments.investor;
     const investorState = investments && investments.investorState;
@@ -76,7 +76,7 @@ class InvestorView extends React.Component<Props, State> {
     if (investorState && investorState === 'loading') {
       return <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading Investor information...'} />;
     }
-    
+
     return <Box>
 
       <Box pad={{ horizontal: 'medium' }}>
@@ -86,19 +86,20 @@ class InvestorView extends React.Component<Props, State> {
       </Box>
       { analytics && analytics.data  &&
       <Box pad={{ horizontal: 'medium', top: 'large' }} >
-        <Tabs justify="center" activeIndex={selectedTab} flex="grow" onActive={(i) => this.selectTab(i)}>
-          <Tab title='Senior tranche / DROP token' style={{
+        <Tabs justify="center" activeIndex={selectedTab} flex="grow" onActive={i => this.selectTab(i)}>
+          <Tab title="Senior tranche / DROP token" style={{
             flex: 1,
-            fontWeight: 900,
+            fontWeight: 900
           }}>
-            <TrancheView tinlake={tinlake} transactions={transactions} auth={auth} investor={investor} tranche={analytics.data["senior"]} />
+            <TrancheView tinlake={tinlake} transactions={transactions} auth={auth} investor={investor}
+              tranche={analytics.data.senior as any} />
           </Tab>
-          <Tab title='Junior tranche / TIN token' style={{
+          <Tab title="Junior tranche / TIN token" style={{
             flex: 1,
-            fontWeight: 900,
+            fontWeight: 900
           }}
           >
-            <TrancheView transactions={transactions} tinlake={tinlake} auth={auth} investor={investor} tranche={analytics.data["junior"]} />
+            <TrancheView transactions={transactions} tinlake={tinlake} auth={auth} investor={investor} tranche={analytics.data['junior']} />
           </Tab>
         </Tabs>
       </Box>
@@ -106,6 +107,5 @@ class InvestorView extends React.Component<Props, State> {
     </Box>;
   }
 }
-
 
 export default connect(state => state, { loadInvestor, loadAnalyticsData, resetTransactionState })(InvestorView);

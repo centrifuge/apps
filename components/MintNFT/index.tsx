@@ -79,7 +79,7 @@ class MintNFT extends React.Component<Props, State> {
         <Spinner height={'calc(100vh - 89px - 84px)'} message={'Minting...'} />
       :
         <Box >
-          {is === 'success' && <Alert pad={{horizontal : 'medium'}} type="success">
+          {is === 'success' && <Alert pad={{ horizontal : 'medium' }} type="success">
             Successfully minted NFT for Token ID {tokenId}
             <p>
               <Link href={{ pathname: '/loans/issue', query: { tokenId, registry } }}>
@@ -88,13 +88,13 @@ class MintNFT extends React.Component<Props, State> {
             <p> Your NFT ID will automatically be pasted in the respective field.</p>
             <p>If you want to open a loan, <b>please make sure to copy your Token ID!</b></p>
          </Alert>}
-          {is === 'error' && <Alert pad={{horizontal : 'medium'}} type="error">
+          {is === 'error' && <Alert pad={{ horizontal : 'medium' }} type="error">
             <Text weight="bold">
               Error minting NFT for Token ID {tokenId}, see console for details</Text>
             {errorMsg && <div><br />{errorMsg}</div>}
           </Alert>}
 
-          {is === null && <Alert pad={{horizontal : 'medium'}} type="info">
+          {is === null && <Alert pad={{ horizontal : 'medium' }} type="info">
             Tinlake requires you to have a non-fungible token ("NFT") to deposit as collateral.
              An NFT is an on-chain, digital representation of an underlying real-world asset, such as an invoice, a mortgage or music royalties.
             <p>In this demo, you can mint a test NFT reflecting an sample invoice worth USD 1.000 into your wallet. Please fill in a "NFT Reference" as a unique identifier for your invoice NFT below. Then proceed with Mint NFT.
@@ -136,7 +136,7 @@ class MintNFT extends React.Component<Props, State> {
                 />
               </FormField>
             <Button primary onClick={this.mint} label="Mint NFT"
-                    disabled={is === 'loading' || is === 'success'} />
+                    disabled={is === 'success'} />
             </Box>
           </Box>
       }

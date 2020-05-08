@@ -1,5 +1,4 @@
 import * as React from 'react';
-import {Tinlake} from 'tinlake';
 import { getTinlake } from '../../services/tinlake';
 
 interface Props {
@@ -10,9 +9,6 @@ class WithTinlake extends React.Component<Props> {
   state = { loading: true };
   tinlake: any |null = null;
   isMounted = false;
-
-  componentWillMount() {}
-
   componentDidMount() {
     this.init();
     this.isMounted = true;

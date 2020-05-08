@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 class LoanListPage extends React.Component {
   render() {
-    return <Box pad={{horizontal: "small"}}>
+    return <Box pad={{ horizontal: 'small' }}>
       <Header
         selectedRoute={'/loans'}
         menuItems={menuItems}
@@ -19,7 +19,7 @@ class LoanListPage extends React.Component {
       <Box
         justify="evenly"
         direction="row"
-       
+
       >
         <Box width="xlarge" gap="medium" >
           <WithTinlake render={tinlake =>
@@ -28,7 +28,7 @@ class LoanListPage extends React.Component {
                   <Box>
                     <SecondaryHeader>
                       <Heading level="3">Loans</Heading>
-                      <Link href={`/loans/issue`}>
+                      <Link href={'/loans/issue'}>
                         <Button primary label="Open Loan" />
                       </Link>
                     </SecondaryHeader>
@@ -41,7 +41,7 @@ class LoanListPage extends React.Component {
           } />
         </Box>
       </Box>
-    </Box>
+    </Box>;
   }
 }
 export default LoanListPage;

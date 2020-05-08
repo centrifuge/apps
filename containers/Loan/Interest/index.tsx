@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Box, FormField, Button } from 'grommet';
-import { feeToInterestRate } from 'tinlake';
+import { feeToInterestRate, Loan } from 'tinlake';
 import NumberInput from '../../../components/NumberInput';
-import { Loan, setInterest } from '../../../services/tinlake/actions';
+import { setInterest } from '../../../services/tinlake/actions';
 import { transactionSubmitted, responseReceived } from '../../../ducks/transactions';
 import { loadLoan } from '../../../ducks/loans';
 import { connect } from 'react-redux';
@@ -21,24 +21,26 @@ interface State {
 
 class LoanInterest extends React.Component<Props, State> {
 
-  componentWillMount() {
+  componentDidMount() {
     const { loan } = this.props;
-    this.setState({ interestRate: feeToInterestRate(loan.interestRate)});
+    this.setState({ interestRate: feeToInterestRate(loan.interestRate) });
   }
 
   setInterestRate = async () => {
     const { interestRate } = this.state;
     const { loan, tinlake } = this.props;
-    this.props.transactionSubmitted && this.props.transactionSubmitted("Changing interest rate initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.");
+    this.props.transactionSubmitted && this.props.transactionSubmitted('Changing interest rate initiated. Please ' +
+      'confirm the pending transactions in MetaMask. Processing may take a few seconds.');
     try {
-      const res = await setInterest(tinlake, loan.loanId, loan.debt, interestRate);
+      const res = await setInterest(tinlake, loan.loanId, loan.debt.toString(), interestRate);
       if (res && res.errorMsg) {
-        this.props.responseReceived && this.props.responseReceived(null, `Changing interest rate failed. ${res.errorMsg}`);
+        this.props.responseReceived && this.props.responseReceived(null,
+                                                                   `Changing interest rate failed. ${res.errorMsg}`);
         return;
       }
-      this.props.responseReceived && this.props.responseReceived(`Interest rate changed successfully.`, null);
+      this.props.responseReceived && this.props.responseReceived('Interest rate changed successfully.', null);
       this.props.loadLoan && this.props.loadLoan(tinlake, loan.loanId);
-    } catch(e) {
+    } catch (e) {
       this.props.responseReceived && this.props.responseReceived(null, `Changing interest rate failed. ${e}`);
       console.log(e);
     }
@@ -46,7 +48,7 @@ class LoanInterest extends React.Component<Props, State> {
 
   render() {
     const { interestRate } = this.state;
-    return <Box basis={'1/4'} gap="medium" margin={{ right: "large" }}>
+    return <Box basis={'1/4'} gap="medium" margin={{ right: 'large' }}>
       <Box gap="medium">
         <FormField label="Interest rate">
           <NumberInput value={interestRate} suffix=" %"

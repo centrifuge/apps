@@ -1,6 +1,6 @@
 import { AnyAction, Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
-import { getAnalytics, TinlakeResult } from '../services/tinlake/actions'
+import { getAnalytics, TinlakeResult } from '../services/tinlake/actions';
 import { Tranche } from 'tinlake';
 import BN from 'bn.js';
 
@@ -14,14 +14,17 @@ export interface AnalyticsState {
     junior: Tranche,
     senior?: Tranche
   };
-  availableFunds: BN,
-  minJuniorRatio: BN,
-  currentJuniorRatio: BN
+  availableFunds: BN;
+  minJuniorRatio: BN;
+  currentJuniorRatio: BN;
 }
 
 const initialState: AnalyticsState = {
   state: null,
-  data: null
+  data: null,
+  availableFunds: new BN(0),
+  minJuniorRatio: new BN(0),
+  currentJuniorRatio: new BN(0)
 };
 
 export default function reducer(state: AnalyticsState = initialState,

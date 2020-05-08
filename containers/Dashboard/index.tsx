@@ -7,11 +7,12 @@ import { LoansState, loadLoans } from '../../ducks/loans';
 import { AuthState, loadUserProxies } from '../../ducks/auth';
 import { Spinner } from '@centrifuge/axis-spinner';
 import LoanListData from  '../../components/Loan/List';
+import Tinlake from 'tinlake/dist/Tinlake';
 
 interface Props {
   tinlake: any;
   loans?: LoansState;
-  loadLoans?: (root: string) => Promise<void>;
+  loadLoans?: (tinlake: Tinlake) => Promise<void>;
   analytics?: AnalyticsState;
   auth?: AuthState;
   loadUserProxies?: () => Promise<void>;
@@ -19,16 +20,16 @@ interface Props {
 
 class Dashboard extends React.Component<Props> {
 
-  componentWillMount() {
-    const { loadLoans, tinlake, loadUserProxies } = this.props
+  componentDidMount() {
+    const { loadLoans, tinlake, loadUserProxies } = this.props;
     loadLoans && loadLoans(tinlake);
     loadUserProxies && loadUserProxies();
   }
-  
+
   render() {
     const { tinlake, loans, auth } = this.props;
     const userAddress = auth && auth.user && auth.user.address || tinlake.ethConfig.from;
-    const proxies = auth && auth.user && auth.user.proxies || []
+    const proxies = auth && auth.user && auth.user.proxies || [];
 
     return <Box >
       <SecondaryHeader>

@@ -22,12 +22,12 @@ const makeStore = (initialState: any) => {
         analytics: analyticsReducer,
         auth: authReducer,
         transactions: transactionReducer
-      },
+      }
     ),
     initialState,
     composeEnhancers(
-      applyMiddleware(thunk),
-    ),
+      applyMiddleware(thunk)
+    )
   );
 };
 

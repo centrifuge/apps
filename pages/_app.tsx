@@ -16,20 +16,7 @@ class MyApp extends App<{ store: any }> {
   }
 
   render() {
-    const { Component, pageProps, store, router, router: { asPath } } = this.props;
-
-    // Next.js currently does not allow trailing slash in a route, but Netlify appends trailing slashes. This is a
-    // client side redirect in case trailing slash occurs. See https://github.com/zeit/next.js/issues/5214 for details
-    if (asPath && asPath.length > 1) {
-      const [path, query = ''] = asPath.split('?');
-      if (path.endsWith('/')) {
-        const asPathWithoutTrailingSlash = path.replace(/\/*$/gim, '') + (query ? `?${query}` : '');
-        if (typeof window !== 'undefined') {
-          router.replace(asPathWithoutTrailingSlash, undefined, { shallow: true })
-          return null;
-        }
-      }
-    }
+    const { Component, pageProps, store } = this.props;
 
     return (
       <AxisTheme full={true}>
