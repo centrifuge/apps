@@ -17,6 +17,7 @@ class MyApp extends App<{ store: any }> {
 
   render() {
     const { Component, pageProps, store } = this.props;
+
     return (
       <AxisTheme full={true}>
         <StyledApp>

@@ -9,10 +9,6 @@ interface Props {
 }
 
 const NumberDisplay: FunctionComponent<Props> = ({ value, precision, prefix, suffix }: Props) => {
-  if (value.toString().includes('-')) {
-    value = '0';
-  }
-
   Decimal.set({
     precision
   });

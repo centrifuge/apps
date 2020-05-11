@@ -15,7 +15,7 @@ const OBSERVING_AUTH_CHANGES = 'tinlake-ui/auth/OBSERVING_AUTH_CHANGES';
 export interface User {
   address: string;
   permissions: Permissions;
-  proxies: []
+  proxies: string[];
 }
 
 export interface Permissions {
@@ -54,7 +54,7 @@ export default function reducer(state: AuthState = initialState,
   switch (action.type) {
     case LOAD: return { ...state, state: 'loading' };
     case RECEIVE: return { ...state, state: 'loaded', user: action.user };
-    case CLEAR: return { ...state, state: 'loaded', user: null};
+    case CLEAR: return { ...state, state: 'loaded', user: null };
     case OBSERVING_AUTH_CHANGES: return { ...state, observingAuthChanges: true };
     case CLEAR_NETWORK: return { ...state, network: null };
     case RECEIVE_NETWORK: return { ...state, network: action.network };
@@ -107,7 +107,7 @@ export function loadUser(tinlake: any, address: string):
         canSetInvestorAllowanceSenior: investorAllowancePermissionSenior
         // TODO: canActAsKeeper
       }
-    }
+    };
     dispatch({ user, type: RECEIVE });
   };
 }
@@ -127,7 +127,7 @@ ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
     const user = {
       ...auth.user,
       proxies
-    }
+    };
     dispatch({ user, type: RECEIVE_PROXIES });
   };
 }

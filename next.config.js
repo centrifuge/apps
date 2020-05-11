@@ -1,7 +1,6 @@
-const withTypescript = require('@zeit/next-typescript');
 const { parsed: localEnv } = require('dotenv').config()
 
-module.exports = withTypescript({
+module.exports = {
   webpack(config, options) {
     // Further custom configuration here
     return {
@@ -22,5 +21,8 @@ module.exports = withTypescript({
     ENV: process.env.ENV,
     ETHERSCAN_URL: process.env.ETHERSCAN_URL,
     CONTRACT_CONFIG: process.env.CONTRACT_CONFIG
-  }
-});
+  },
+  experimental: {
+    exportTrailingSlash: false,
+  },
+};

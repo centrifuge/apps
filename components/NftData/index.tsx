@@ -2,10 +2,9 @@ import * as React from 'react';
 import { Box, Heading } from 'grommet';
 import styled from 'styled-components';
 import Badge from '../Badge';
-import { NFT } from '../../services/tinlake/actions';
 import { DisplayField } from '@centrifuge/axis-display-field';
 import { getNFTLink, getAddressLink, hexToInt } from '../../utils/etherscanLinkGenerator';
-import { bnToHex } from 'tinlake';
+import { bnToHex, NFT } from 'tinlake';
 
 interface Props {
   data: NFT;
@@ -73,4 +72,3 @@ const NftDataContainer = styled(Box)`
   border-radius: 3px;
   background: #f7f7f7;
 `;
-

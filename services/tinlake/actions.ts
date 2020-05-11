@@ -1,11 +1,11 @@
 import BN from 'bn.js';
 import { Loan, NFT, interestRateToFee } from 'tinlake';
 
-export type TrancheType = "junior" | "senior";
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+export type TrancheType = 'junior' | 'senior';
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 const SUCCESS_STATUS = '0x1';
 
-interface TinlakeResult {
+export interface TinlakeResult {
   data?: any;
   errorMsg?: string;
   tokenId?: string;
@@ -119,7 +119,7 @@ export async function getLoan(tinlake: any, loanId: string) : Promise<TinlakeRes
   }
 
   const nftData = await getNFT(loan.registry, tinlake, `${loan.tokenId}`);
-  loan.nft = nftData && nftData.nft || {};
+  loan.nft = nftData && (nftData as any).nft || {};
   await addProxyDetails(tinlake, loan);
 
   return {
@@ -201,24 +201,24 @@ export async function getAnalytics(tinlake: any) {
   try {
     return {
       data: {
+        minJuniorRatio,
+        currentJuniorRatio,
         junior: {
-          type: "junior",
+          type: 'junior',
           availableFunds: juniorReserve,
           tokenPrice: juniorTokenPrice,
-          token: "TIN"
+          token: 'TIN'
         },
         senior: {
-          type: "senior",
+          type: 'senior',
           availableFunds: seniorReserve,
           tokenPrice: seniorTokenPrice,
-          token: "DROP",
+          token: 'DROP',
           interestRate: seniorInterestRate
         },
-        availableFunds: juniorReserve.add(seniorReserve),
-        minJuniorRatio: minJuniorRatio,
-        currentJuniorRatio: currentJuniorRatio
+        availableFunds: juniorReserve.add(seniorReserve)
       }
-    }
+    };
   } catch (e) {
     return loggedError(e, 'Could not get analytics data', '');
   }
@@ -293,9 +293,9 @@ export async function getInvestor(tinlake: any, address: string) {
 export async function setAllowance(tinlake: any, address: string, maxSupplyAmount: string, maxRedeemAmount: string, trancheType: TrancheType) {
   let setRes;
   try {
-    if (trancheType === "junior") {
+    if (trancheType === 'junior') {
       setRes = await tinlake.approveAllowanceJunior(address, maxSupplyAmount, maxRedeemAmount);
-    } else if (trancheType === "senior") {
+    } else if (trancheType === 'senior') {
       setRes = await tinlake.approveAllowanceSenior(address, maxSupplyAmount, maxRedeemAmount);
     }
   } catch (e) {
@@ -323,9 +323,9 @@ export async function supply(tinlake: any, supplyAmount: string, trancheType: Tr
   // approve currency
   let approveRes;
   try {
-    if (trancheType === "junior") {
+    if (trancheType === 'junior') {
       approveRes = await tinlake.approveJuniorForCurrency(supplyAmount);
-    } else if (trancheType === "senior") {
+    } else if (trancheType === 'senior') {
       approveRes = await tinlake.approveSeniorForCurrency(supplyAmount);
     }
   } catch (e) {
@@ -338,9 +338,9 @@ export async function supply(tinlake: any, supplyAmount: string, trancheType: Tr
   // supply
   let supplyRes;
   try {
-    if (trancheType === "junior") {
+    if (trancheType === 'junior') {
       supplyRes = await tinlake.supplyJunior(supplyAmount);
-    } else if (trancheType === "senior") {
+    } else if (trancheType === 'senior') {
       supplyRes = await tinlake.supplySenior(supplyAmount);
     }
   } catch (e) {
@@ -352,13 +352,14 @@ export async function supply(tinlake: any, supplyAmount: string, trancheType: Tr
 }
 
 export async function redeem(tinlake: any, redeemAmount: string, trancheType: TrancheType) {
-  // approve junior token 
+  // approve junior token
   let approveRes;
   try {
-    if (trancheType === "junior") {
-      approveRes = await tinlake.approveJuniorToken(redeemAmount)
-    } else if (trancheType === "senior")
+    if (trancheType === 'junior') {
+      approveRes = await tinlake.approveJuniorToken(redeemAmount);
+    } else if (trancheType === 'senior') {
       approveRes = await tinlake.approveSeniorToken(redeemAmount);
+    }
   } catch (e) {
     return loggedError(e, `Could not approve ${trancheType} Token.`, '');
   }
@@ -369,9 +370,9 @@ export async function redeem(tinlake: any, redeemAmount: string, trancheType: Tr
   // repay
   let redeemRes;
   try {
-    if (trancheType === "junior") {
+    if (trancheType === 'junior') {
       redeemRes = await tinlake.redeemJunior(redeemAmount);
-    } else if (trancheType === "senior") {
+    } else if (trancheType === 'senior') {
       redeemRes = await tinlake.redeemSenior(redeemAmount);
     }
   } catch (e) {
@@ -385,7 +386,7 @@ export async function redeem(tinlake: any, redeemAmount: string, trancheType: Tr
 function loggedError(error: any, message: string, id: string) {
   console.log(`${message} ${id}`, error);
   return {
-    errorMsg: `${error} - ${message} ${id}`,
-    id
+    id,
+    errorMsg: `${error} - ${message} ${id}`
   };
 }

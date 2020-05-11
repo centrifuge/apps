@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Box, FormField, Button } from 'grommet';
 import NumberInput from '../../../components/NumberInput';
-import { Loan, repay } from '../../../services/tinlake/actions';
-import { baseToDisplay, displayToBase } from 'tinlake';
+import { repay } from '../../../services/tinlake/actions';
+import { baseToDisplay, displayToBase, Loan } from 'tinlake';
 import { transactionSubmitted, responseReceived } from '../../../ducks/transactions';
 import { loadLoan } from '../../../ducks/loans';
 import { connect } from 'react-redux';
@@ -22,24 +22,24 @@ interface State {
 
 class LoanRepay extends React.Component<Props, State> {
 
-  componentWillMount() {
+  componentDidMount() {
     const { loan } = this.props;
-    this.setState({ repayAmount: (loan.debt || '0') });
+    this.setState({ repayAmount: (loan.debt && loan.debt.toString()) || '0' });
   }
 
   repay = async () => {
     try {
       await authTinlake();
-      const { repayAmount } = this.state;
       const { transactionSubmitted, responseReceived, loadLoan, loan, tinlake } = this.props;
       // support partial repay later
-      transactionSubmitted && transactionSubmitted("Repayment initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.");
+      transactionSubmitted && transactionSubmitted('Repayment initiated. Please confirm the pending transactions in ' +
+        'MetaMask. Processing may take a few seconds.');
       const res = await repay(tinlake, loan);
       if (res && res.errorMsg) {
         responseReceived && responseReceived(null, `Repayment failed. ${res.errorMsg}`);
         return;
       }
-      responseReceived && responseReceived(`Repayment successful. Please check your wallet.`, null);
+      responseReceived && responseReceived('Repayment successful. Please check your wallet.', null);
       loadLoan && loadLoan(tinlake, loan.loanId);
     } catch (e) {
       responseReceived && responseReceived(null, `Repayment failed. ${e}`);
@@ -52,12 +52,12 @@ class LoanRepay extends React.Component<Props, State> {
     const { loan } = this.props;
     const hasDebt = loan.debt.toString() !== '0';
 
-    return <Box basis={'1/4'} gap="medium" margin={{ right: "large" }}>
+    return <Box basis={'1/4'} gap="medium" margin={{ right: 'large' }}>
       <Box gap="medium">
         <FormField label="Repay amount">
           <NumberInput value={baseToDisplay(repayAmount, 18)} suffix=" DAI" precision={18}
             onValueChange={({ value }) =>
-              this.setState({ repayAmount: displayToBase(value) })}
+              this.setState({ repayAmount: displayToBase(value, 18) })}
             disabled
           />
         </FormField>

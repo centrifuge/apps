@@ -27,7 +27,7 @@ interface State {
 
 class InvestmentsView extends React.Component<Props, State> {
 
-  componentWillMount() {
+  componentDidMount() {
     const { loadAnalyticsData, tinlake } = this.props;
     this.setState({
       investorAddress: ''
@@ -47,7 +47,7 @@ class InvestmentsView extends React.Component<Props, State> {
 
     return <Box>
 
-      {analytics && analytics.data && <Box margin={{ bottom: "medium" }}> <InvestmentsOverview data={analytics && analytics.data} /> </Box>}
+      {analytics && analytics.data && <Box margin={{ bottom: 'medium' }}> <InvestmentsOverview data={analytics && analytics.data} /> </Box>}
 
       {transactions && transactions.errorMessage &&
         <Box pad={{ horizontal: 'medium' }} margin={{ bottom: 'small' }}>
@@ -57,9 +57,8 @@ class InvestmentsView extends React.Component<Props, State> {
         </Box>}
 
       {analytics && analytics.data && auth && auth.user && auth.user.permissions.canSetMinimumJuniorRatio &&
-        <JuniorRatio tinlake={tinlake} minJuniorRatio={analytics.data.minJuniorRatio}> </JuniorRatio>
+        <JuniorRatio tinlake={tinlake} minJuniorRatio={analytics.data.minJuniorRatio} />
       }
-
 
       <Box margin={{ top: 'large' }} pad={{ horizontal: 'medium' }}>
         <Box direction="row" gap="medium" margin={{ top: 'medium' }}>
@@ -73,13 +72,13 @@ class InvestmentsView extends React.Component<Props, State> {
             <FormField label="Investor Address">
               <TextInput
                 value={investorAddress}
-                onChange={(event) =>
+                onChange={event =>
                   this.setState({ investorAddress: event.currentTarget.value })}
               />
             </FormField>
           </Box>
           <Box align="start">
-            <Link href={{ pathname: `/investments/investor`, query: { investorAddress: this.state.investorAddress } }} >
+            <Link href={{ pathname: '/investments/investor', query: { investorAddress: this.state.investorAddress } }} >
               <Anchor>
                 <Button primary label="Load investor details" disabled={!canLoadInvestor} />
               </Anchor>

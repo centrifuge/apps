@@ -28,7 +28,16 @@ interface DisplayedFieldTimestamp extends DisplayedFieldBase {
   suffix?: string;
 }
 
-export type DisplayedField = DisplayedFieldUint | DisplayedFieldAddress | DisplayedFieldTimestamp;
+interface DisplayedFieldString extends DisplayedFieldBase {
+  type: 'string';
+}
+
+interface DisplayedFieldUTF8String extends DisplayedFieldBase {
+  type: 'utf8_string';
+}
+
+export type DisplayedField = DisplayedFieldUint | DisplayedFieldAddress | DisplayedFieldTimestamp |
+  DisplayedFieldString | DisplayedFieldUTF8String;
 
 interface Props {
   displayedField: DisplayedField;

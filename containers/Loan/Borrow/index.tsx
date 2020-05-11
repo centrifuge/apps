@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Box, FormField, Button, Text } from 'grommet';
 import NumberInput from '../../../components/NumberInput';
-import { Loan, borrow } from '../../../services/tinlake/actions';
-import { baseToDisplay, displayToBase } from 'tinlake';
+import { borrow } from '../../../services/tinlake/actions';
+import { baseToDisplay, displayToBase, Loan } from 'tinlake';
 import { transactionSubmitted, responseReceived } from '../../../ducks/transactions';
 import { AnalyticsState, loadAnalyticsData } from '../../../ducks/analytics';
 import { loadLoan } from '../../../ducks/loans';
@@ -26,9 +26,9 @@ interface State {
 
 class LoanBorrow extends React.Component<Props, State> {
 
-  componentWillMount() {
+  componentDidMount() {
     const { loan, tinlake, loadAnalyticsData } = this.props;
-    this.setState({ borrowAmount: (loan.principal || '0') });
+    this.setState({ borrowAmount: (loan.principal && loan.principal.toString()) || '0' });
     loadAnalyticsData && loadAnalyticsData(tinlake);
   }
 
@@ -57,7 +57,7 @@ class LoanBorrow extends React.Component<Props, State> {
 
     const ceilingSet = loan.principal.toString() !== '0';
     const availableFunds = analytics && analytics.data && analytics.data.availableFunds || '0';
-    const ceilingOverflow = (new BN(borrowAmount).cmp(new BN(loan.principal)) > 0);
+    const ceilingOverflow = new BN(borrowAmount).cmp(new BN(loan.principal)) > 0;
     const availableFundsOverflow = (new BN(borrowAmount).cmp(new BN(availableFunds)) > 0);
     const borrowEnabled = !ceilingOverflow && !availableFundsOverflow && ceilingSet;
     return <Box basis={'1/4'} gap="medium" margin={{ right: 'large' }}>

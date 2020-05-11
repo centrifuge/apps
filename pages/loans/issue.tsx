@@ -20,7 +20,7 @@ class LoanIssuePage extends React.Component<Props> {
   }
   render() {
     const { tokenId, registry } = this.props;
-    return <Box align="center" pad={{horizontal: "small"}}>
+    return <Box align="center" pad={{ horizontal: 'small' }}>
       <Header
         selectedRoute={'/loans/issue'}
         menuItems={menuItems}
@@ -49,7 +49,7 @@ class LoanIssuePage extends React.Component<Props> {
           } />
         </Box>
       </Box>
-    </Box>
+    </Box>;
   }
 }
 

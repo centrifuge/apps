@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Box, FormField, Button, Heading } from 'grommet';
 import NumberInput from '../../../components/NumberInput';
-import { Investor, TrancheType, setAllowance } from '../../../services/tinlake/actions';
+import { TrancheType, setAllowance } from '../../../services/tinlake/actions';
 import { transactionSubmitted, responseReceived } from '../../../ducks/transactions';
-import { baseToDisplay, displayToBase } from 'tinlake';
+import { baseToDisplay, displayToBase, Investor } from 'tinlake';
 import { loadInvestor } from '../../../ducks/investments';
 import { connect } from 'react-redux';
 import { authTinlake } from '../../../services/tinlake';
@@ -28,17 +28,22 @@ class InvestorAllowance extends React.Component<Props, State> {
 
   updateLimits() {
     if (!this.state) {
-      return
+      return;
     }
     const { investor, trancheType } = this.props;
     const { currentSupplyLimit, currentRedeemLimit } = this.state;
     const tranche = investor[trancheType];
-    if (currentSupplyLimit != tranche.maxSupply || currentRedeemLimit != tranche.maxRedeem ) {
-      this.setState({ currentSupplyLimit: tranche && tranche.maxSupply || '0', currentRedeemLimit: tranche && tranche.maxRedeem || '0' });
-      this.setState({ supplyAmount: tranche && tranche.maxSupply || '0', redeemAmount: tranche && tranche.maxRedeem || '0' });
+    if ((tranche.maxSupply && currentSupplyLimit !== tranche.maxSupply.toString()) ||
+      (tranche.maxRedeem && currentRedeemLimit !== tranche.maxRedeem.toString())) {
+      this.setState({
+        currentSupplyLimit: (tranche.maxSupply && tranche.maxSupply.toString()) || '0',
+        currentRedeemLimit: (tranche.maxRedeem && tranche.maxRedeem.toString()) || '0',
+        supplyAmount: (tranche.maxSupply && tranche.maxSupply.toString()) || '0',
+        redeemAmount: (tranche.maxRedeem && tranche.maxRedeem.toString()) || '0'
+      });
     }
   }
-  componentWillMount() {
+  componentDidMount() {
     this.setState({
       supplyAmount: '0',
       redeemAmount: '0',
@@ -49,7 +54,7 @@ class InvestorAllowance extends React.Component<Props, State> {
   }
 
   setAllowance = async () => {
-    this.props.transactionSubmitted && this.props.transactionSubmitted("Allowance initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.");
+    this.props.transactionSubmitted && this.props.transactionSubmitted('Allowance initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.');
     try {
       await authTinlake();
       this.updateLimits();
@@ -61,7 +66,7 @@ class InvestorAllowance extends React.Component<Props, State> {
         this.props.responseReceived && this.props.responseReceived(null, `Allowance failed. ${res.errorMsg}`);
         return;
       }
-      this.props.responseReceived && this.props.responseReceived(`Allowance successful.`, null);
+      this.props.responseReceived && this.props.responseReceived('Allowance successful.', null);
       this.props.loadInvestor && this.props.loadInvestor(tinlake, investor.address);
     } catch (e) {
       this.props.responseReceived && this.props.responseReceived(null, `Allowance failed. ${e}`);
@@ -73,10 +78,10 @@ class InvestorAllowance extends React.Component<Props, State> {
     const { supplyAmount, redeemAmount } = this.state;
     this.updateLimits();
     return <Box>
-      <Box gap="medium" align="start" margin={{ bottom: "medium" }} >
+      <Box gap="medium" align="start" margin={{ bottom: 'medium' }} >
         <Heading level="4" margin="none"> Set allowance </Heading>
       </Box>
-      <Box gap="medium" direction="row" margin={{ right: "large" }}>
+      <Box gap="medium" direction="row" margin={{ right: 'large' }}>
         <Box basis={'1/3'}>
           <FormField label="Max investment amount">
             <NumberInput value={baseToDisplay(supplyAmount, 18)} suffix=" DAI" precision={18}

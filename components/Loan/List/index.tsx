@@ -1,28 +1,22 @@
 import * as React from 'react';
-import{ bnToHex, baseToDisplay, feeToInterestRate } from 'tinlake';
+import{ bnToHex, baseToDisplay, feeToInterestRate, Loan } from 'tinlake';
 import Link from 'next/link';
 import { Box, DataTable, Anchor, Text } from 'grommet';
-import { Loan } from '../../../services/tinlake/actions';
 import NumberDisplay from '../../../components/NumberDisplay';
 import Badge from '../../../components/Badge';
 import { DisplayField } from '@centrifuge/axis-display-field';
 import { getNFTLink, hexToInt } from '../../../utils/etherscanLinkGenerator';
 
 interface Props {
-  loans: Array<Loan>;
+  loans: Loan[];
   userAddress: string;
-  proxies: Array<string>;
+  proxies: string[];
 }
 
 class LoanList extends React.Component<Props> {
-
-  componentWillMount() {
-
-  }
-
   render() {
     const { loans, proxies } =  this.props;
-    return <Box margin={{bottom: "xlarge"}}>
+    return <Box margin={{ bottom: 'xlarge' }}>
       <DataTable style={{ tableLayout: 'auto' }} data={loans} sortable columns={[
         { header: <HeaderCell text={'Loan ID'}></HeaderCell>, property: 'loanId', align: 'end' },
         {
@@ -55,7 +49,7 @@ class LoanList extends React.Component<Props> {
         {
           header: '', property: '', align: 'end',
           render: (l: Loan) => <div>
-            {proxies.includes(l.ownerOf) && <Badge text={'Me'} />}
+            {proxies.includes(l.ownerOf.toString()) && <Badge text={'Me'} />}
           </div>
         },
         {
@@ -82,7 +76,7 @@ class LoanList extends React.Component<Props> {
         {
           header: 'Actions', property: 'id', align: 'end', sortable: false,
           render: (l: Loan) => {
-            return <Link href={{ pathname: `/loans/loan`, query: {loanId: l.loanId } }}><Anchor>View</Anchor></Link>;
+            return <Link href={{ pathname: '/loans/loan', query: { loanId: l.loanId } }}><Anchor>View</Anchor></Link>;
           }
         }
       ]} />
