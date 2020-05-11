@@ -99,7 +99,7 @@ class InvestorView extends React.Component<Props, State> {
             fontWeight: 900
           }}
           >
-            <TrancheView transactions={transactions} tinlake={tinlake} auth={auth} investor={investor} tranche={analytics.data['junior']} />
+            <TrancheView transactions={transactions} tinlake={tinlake} auth={auth} investor={investor} tranche={analytics.data.junior} />
           </Tab>
         </Tabs>
       </Box>

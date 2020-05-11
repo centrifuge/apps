@@ -4,15 +4,16 @@ import { baseToDisplay, feeToInterestRate } from 'tinlake';
 import BN from 'bn.js';
 import NumberDisplay from '../../NumberDisplay';
 import DashboardMetric from '../../DashboardMetric';
+import { AnalyticsData } from '../../../ducks/analytics';
 
 interface Props {
-  data: any;
+  data: AnalyticsData;
 }
 
 class InvestmentsOverview extends React.Component<Props> {
   render() {
     const { minJuniorRatio, currentJuniorRatio, senior } = this.props.data;
-    const seniorInterestRate = senior && senior.interestRate || new BN(0);
+    const seniorInterestRate = senior && (senior as any).interestRate || new BN(0);
 
     return <Box>
       <Box direction="row" >

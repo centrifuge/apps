@@ -8,23 +8,22 @@ import BN from 'bn.js';
 const LOAD_ANALYTICS = 'tinlake-ui/analytics/LOAD_ANALYTICS';
 const RECEIVE_ANALYTICS = 'tinlake-ui/analytics/RECEIVE_ANALYTICS';
 
-export interface AnalyticsState {
-  state: null | 'loading' | 'found';
-  data: null | {
-    junior: Tranche,
-    senior?: Tranche
-  };
+export interface AnalyticsData {
+  junior: Tranche;
+  senior?: Tranche;
   availableFunds: BN;
   minJuniorRatio: BN;
   currentJuniorRatio: BN;
 }
 
+export interface AnalyticsState {
+  state: null | 'loading' | 'found';
+  data: null | AnalyticsData;
+}
+
 const initialState: AnalyticsState = {
   state: null,
-  data: null,
-  availableFunds: new BN(0),
-  minJuniorRatio: new BN(0),
-  currentJuniorRatio: new BN(0)
+  data: null
 };
 
 export default function reducer(state: AnalyticsState = initialState,
