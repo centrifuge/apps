@@ -1,5 +1,5 @@
-# run testnet
-# dapp testnet
+# Run testnet with dapp testnet
+# NOTE: SENIOR_TRANCHE must be set to true in the environmental variables for a senior tranche to be deployed
 
 # remove submodules and install newest dependencies
 [ -d ./tinlake-proxy ] && rm -rf ./tinlake-proxy
