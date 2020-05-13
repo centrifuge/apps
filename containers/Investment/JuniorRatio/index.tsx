@@ -28,7 +28,7 @@ interface State {
 }
 
 class JuniorRatio extends React.Component<Props, State> {
-  state = {
+  state: State = {
     minJuniorRatio: '0'
   };
 

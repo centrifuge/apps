@@ -29,7 +29,7 @@ interface State {
 }
 
 class InvestorView extends React.Component<Props, State> {
-  state = {
+  state: State = {
     errorMsg: '',
     is: null,
     selectedTab: 0

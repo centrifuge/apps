@@ -26,8 +26,12 @@ interface HeaderProps {
   router: NextRouter;
 }
 
-class Header extends React.Component<HeaderProps> {
-  state = {
+interface State {
+  chosenRoute: string;
+}
+
+class Header extends React.Component<HeaderProps, State> {
+  state: State = {
     chosenRoute: '/'
   };
 

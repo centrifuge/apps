@@ -10,7 +10,7 @@ interface Props {
   root: string;
 }
 
-function Pool({ root }: Props) {
+function Pool({}: Props) {
   return (
     <Box align="center" pad={{ horizontal: 'small' }}>
       <Header selectedRoute={'/'} menuItems={menuItems} />

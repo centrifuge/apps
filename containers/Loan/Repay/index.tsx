@@ -21,7 +21,7 @@ interface State {
 }
 
 class LoanRepay extends React.Component<Props, State> {
-  state = {
+  state: State = {
     repayAmount: '0'
   };
 

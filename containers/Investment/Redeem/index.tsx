@@ -25,7 +25,7 @@ interface State {
 }
 
 class InvestorRedeem extends React.Component<Props, State> {
-  state = {
+  state: State = {
     redeemAmount: '0'
   };
 

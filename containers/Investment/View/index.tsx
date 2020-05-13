@@ -26,7 +26,7 @@ interface State {
 }
 
 class InvestmentsView extends React.Component<Props, State> {
-  state = {
+  state: State = {
     errorMsg: '',
     is: null,
     investorAddress: ''

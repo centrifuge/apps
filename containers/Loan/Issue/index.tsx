@@ -29,7 +29,7 @@ interface State {
 }
 
 class IssueLoan extends React.Component<Props, State> {
-  state = {
+  state: State = {
     nft: null,
     registry: '',
     nftError: '',
