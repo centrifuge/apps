@@ -27,6 +27,7 @@ class Auth extends React.Component<Props, State> {
   state = {
     isAuthenticating: true
   };
+
   isMounted = false;
 
   componentDidMount() {

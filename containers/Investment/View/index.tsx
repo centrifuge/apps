@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { AuthState } from '../../../ducks/auth';
 import { connect } from 'react-redux';
-import Link from 'next/link';
 import { Box, FormField, TextInput, Button, Heading, Anchor } from 'grommet';
 import { isValidAddress } from '../../../utils/address';
 import JuniorRatio from '../JuniorRatio';
@@ -9,6 +8,7 @@ import InvestmentsOverview from '../../../components/Investment/Overview';
 import { AnalyticsState, loadAnalyticsData } from '../../../ducks/analytics';
 import { TransactionState, resetTransactionState } from '../../../ducks/transactions';
 import Alert from '../../../components/Alert';
+import { PoolLink } from '../../../components/PoolLink';
 
 interface Props {
   tinlake: any;
@@ -26,12 +26,14 @@ interface State {
 }
 
 class InvestmentsView extends React.Component<Props, State> {
+  state = {
+    errorMsg: '',
+    is: null,
+    investorAddress: '',
+  }
 
   componentDidMount() {
     const { loadAnalyticsData, tinlake } = this.props;
-    this.setState({
-      investorAddress: ''
-    });
     loadAnalyticsData && loadAnalyticsData(tinlake);
   }
 
@@ -78,11 +80,12 @@ class InvestmentsView extends React.Component<Props, State> {
             </FormField>
           </Box>
           <Box align="start">
-            <Link href={{ pathname: '/investments/investor', query: { investorAddress: this.state.investorAddress } }} >
+            <PoolLink href={{ pathname: '/investments/investor', query: { investorAddress: this.state.investorAddress }
+              }}>
               <Anchor>
                 <Button primary label="Load investor details" disabled={!canLoadInvestor} />
               </Anchor>
-            </Link>
+            </PoolLink>
           </Box>
         </Box>
       </Box>

@@ -3,6 +3,7 @@ import { ThunkAction } from 'redux-thunk';
 import { getAnalytics, TinlakeResult } from '../services/tinlake/actions';
 import { Tranche } from 'tinlake';
 import BN from 'bn.js';
+import { HYDRATE } from 'next-redux-wrapper';
 
 // Actions
 const LOAD_ANALYTICS = 'tinlake-ui/analytics/LOAD_ANALYTICS';
@@ -29,6 +30,7 @@ const initialState: AnalyticsState = {
 export default function reducer(state: AnalyticsState = initialState,
                                 action: AnyAction = { type: '' }): AnalyticsState {
   switch (action.type) {
+    case HYDRATE: return { ...state, ...(action.payload.analytics || {}) }
     case LOAD_ANALYTICS: return { ...state, state: 'loading' };
     case RECEIVE_ANALYTICS: return { ...state, state: 'found', data: action.data };
     default: return state;

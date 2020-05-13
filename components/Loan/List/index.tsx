@@ -1,7 +1,7 @@
 import * as React from 'react';
 import{ bnToHex, baseToDisplay, feeToInterestRate, Loan } from 'tinlake';
-import Link from 'next/link';
 import { Box, DataTable, Anchor, Text } from 'grommet';
+import { PoolLink } from '../../../components/PoolLink';
 import NumberDisplay from '../../../components/NumberDisplay';
 import Badge from '../../../components/Badge';
 import { DisplayField } from '@centrifuge/axis-display-field';
@@ -76,7 +76,8 @@ class LoanList extends React.Component<Props> {
         {
           header: 'Actions', property: 'id', align: 'end', sortable: false,
           render: (l: Loan) => {
-            return <Link href={{ pathname: '/loans/loan', query: { loanId: l.loanId } }}><Anchor>View</Anchor></Link>;
+            return <PoolLink href={{ pathname: '/loans/loan', query: { loanId: l.loanId } }}>
+              <Anchor>View</Anchor></PoolLink>;
           }
         }
       ]} />

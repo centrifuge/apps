@@ -7,7 +7,7 @@ import { menuItems } from '../../../menuItems';
 import SecondaryHeader from '../../../components/SecondaryHeader';
 import Auth from '../../../components/Auth';
 import Alert from '../../../components/Alert';
-import Link from 'next/link';
+import { PoolLink } from '../../../components/PoolLink';
 
 class LoanListPage extends React.Component {
   render() {
@@ -28,9 +28,9 @@ class LoanListPage extends React.Component {
                   <Box>
                     <SecondaryHeader>
                       <Heading level="3">Loans</Heading>
-                      <Link href={'/loans/issue'}>
+                      <PoolLink href={'/loans/issue'}>
                         <Button primary label="Open Loan" />
-                      </Link>
+                      </PoolLink>
                     </SecondaryHeader>
                     <LoanList tinlake={tinlake} auth={auth} />
                   </Box>

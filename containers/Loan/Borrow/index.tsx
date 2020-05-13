@@ -25,6 +25,7 @@ interface State {
 }
 
 class LoanBorrow extends React.Component<Props, State> {
+  state = { borrowAmount: '0' }
 
   componentDidMount() {
     const { loan, tinlake, loadAnalyticsData } = this.props;
@@ -73,13 +74,13 @@ class LoanBorrow extends React.Component<Props, State> {
         <Button onClick={this.borrow} primary label="Borrow" disabled={ !borrowEnabled } />
         {availableFundsOverflow &&
           <Box margin={{ top: 'small' }}>
-             Available funds exceeded. <br />
-             Amount has to be lower then <br />
-             <Text weight="bold">
-              {`${baseToDisplay(availableFunds, 18)}`}
-             </Text>
-           </Box>
-           }
+            Available funds exceeded. <br />
+            Amount has to be lower then <br />
+            <Text weight="bold">
+            {`${baseToDisplay(availableFunds, 18)}`}
+            </Text>
+          </Box>
+        }
         {ceilingOverflow && !availableFundsOverflow  &&
           <Box margin={{ top: 'small' }}>
             Max borrow amount exceeded.   <br />
