@@ -20,13 +20,11 @@ class MyApp extends App {
     return (
       <AxisTheme full={true}>
         <StyledApp>
-          <Container>
-            <WithTinlake render={tinlake =>
-              <Auth tinlake={tinlake} render={() =>
-                <Component {...pageProps} />
-              } />
+          <WithTinlake render={tinlake =>
+            <Auth tinlake={tinlake} render={() =>
+              <Component {...pageProps} />
             } />
-          </Container>
+          } />
         </StyledApp>
       </AxisTheme >
     );
