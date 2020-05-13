@@ -15187,6 +15187,12 @@ unwrapExports(hmac);
 var hmac_1 = hmac.SupportedAlgorithms;
 var hmac_2 = hmac.computeHmac;
 
+var _args = [
+  [
+    "elliptic@6.5.2",
+    "/Users/ilinzweilin/Desktop/centrifuge/forks/tinlake.js"
+  ]
+];
 var _from = "elliptic@6.5.2";
 var _id = "elliptic@6.5.2";
 var _inBundle = false;
@@ -15208,9 +15214,8 @@ var _requiredBy = [
   "/ethers"
 ];
 var _resolved = "https://registry.npmjs.org/elliptic/-/elliptic-6.5.2.tgz";
-var _shasum = "05c5678d7173c049d8ca433552224a495d0e3762";
-var _spec = "elliptic@6.5.2";
-var _where = "/Users/ch4rly/go/src/github.com/centrifuge/tinlake.js/node_modules/ethers";
+var _spec = "6.5.2";
+var _where = "/Users/ilinzweilin/Desktop/centrifuge/forks/tinlake.js";
 var author = {
   name: "Fedor Indutny",
   email: "fedor@indutny.com"
@@ -15218,7 +15223,6 @@ var author = {
 var bugs = {
   url: "https://github.com/indutny/elliptic/issues"
 };
-var bundleDependencies = false;
 var dependencies = {
   "bn.js": "^4.4.0",
   brorand: "^1.0.1",
@@ -15228,7 +15232,6 @@ var dependencies = {
   "minimalistic-assert": "^1.0.0",
   "minimalistic-crypto-utils": "^1.0.0"
 };
-var deprecated = false;
 var description = "EC cryptography";
 var devDependencies = {
   brfs: "^1.4.3",
@@ -15273,6 +15276,7 @@ var scripts = {
 };
 var version = "6.5.2";
 var _package = {
+  _args: _args,
   _from: _from,
   _id: _id,
   _inBundle: _inBundle,
@@ -15282,14 +15286,11 @@ var _package = {
   _requested: _requested,
   _requiredBy: _requiredBy,
   _resolved: _resolved,
-  _shasum: _shasum,
   _spec: _spec,
   _where: _where,
   author: author,
   bugs: bugs,
-  bundleDependencies: bundleDependencies,
   dependencies: dependencies,
-  deprecated: deprecated,
   description: description,
   devDependencies: devDependencies,
   files: files,
@@ -15304,6 +15305,7 @@ var _package = {
 };
 
 var _package$1 = /*#__PURE__*/Object.freeze({
+    _args: _args,
     _from: _from,
     _id: _id,
     _inBundle: _inBundle,
@@ -15313,14 +15315,11 @@ var _package$1 = /*#__PURE__*/Object.freeze({
     _requested: _requested,
     _requiredBy: _requiredBy,
     _resolved: _resolved,
-    _shasum: _shasum,
     _spec: _spec,
     _where: _where,
     author: author,
     bugs: bugs,
-    bundleDependencies: bundleDependencies,
     dependencies: dependencies,
-    deprecated: deprecated,
     description: description,
     devDependencies: devDependencies,
     files: files,
@@ -29881,6 +29880,17 @@ function AnalyticsActions(Base) {
                     }
                 });
             }); };
+            _this.getJuniorTotalSupply = function (user) { return __awaiter(_this, void 0, void 0, function () {
+                var res;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_TOKEN'].totalSupply, [])];
+                        case 1:
+                            res = _a.sent();
+                            return [2 /*return*/, res[0]];
+                    }
+                });
+            }); };
             _this.getMaxSupplyAmountJunior = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
@@ -29922,12 +29932,28 @@ function AnalyticsActions(Base) {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            if (!(this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
+                            if (!this.existsSenior()) {
+                                return [2 /*return*/, new bn(0)];
+                            }
                             return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].balanceOf, [user])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0]];
-                        case 2: return [2 /*return*/, new bn(0)];
+                    }
+                });
+            }); };
+            _this.getSeniorTotalSupply = function (user) { return __awaiter(_this, void 0, void 0, function () {
+                var res;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (!this.existsSenior()) {
+                                return [2 /*return*/, new bn(0)];
+                            }
+                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].totalSupply, [])];
+                        case 1:
+                            res = _a.sent();
+                            return [2 /*return*/, res[0]];
                     }
                 });
             }); };
@@ -30003,7 +30029,7 @@ function AnalyticsActions(Base) {
                         case 0:
                             if (this.contractAddresses['SENIOR_OPERATOR'] === ZERO_ADDRESS)
                                 return [2 /*return*/, new bn(0)];
-                            operatorType = this.getOperatorType('senior');
+                            operatorType = user ? this.getOperatorType('senior') : 'ALLOWANCE_OPERATOR';
                             _a = operatorType;
                             switch (_a) {
                                 case 'PROPORTIONAL_OPERATOR': return [3 /*break*/, 1];

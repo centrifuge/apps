@@ -1,9 +1,5 @@
 import { ethI } from './services/ethereum';
 declare const contractNames: string[];
-declare type AbiOutput = {
-    name: string;
-    type: 'address' | 'uint256';
-};
 export declare type EthConfig = {
     from: string;
     gasLimit: string;
@@ -21,7 +17,6 @@ export declare type ContractAddresses = {
 export declare type TinlakeParams = {
     provider: any;
     contractAddresses: ContractAddresses;
-    nftDataOutputs: AbiOutput;
     transactionTimeout: number;
     contractAbis?: ContractAbis | {};
     ethConfig?: EthConfig | {};

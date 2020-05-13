@@ -17,14 +17,16 @@ export declare function AnalyticsActions<ActionsBase extends Constructor<Tinlake
         getLoanList: () => Promise<Loan[]>;
         getInvestor: (user: string) => Promise<Investor>;
         getJuniorTokenBalance: (user: string) => Promise<BN>;
+        getJuniorTotalSupply: (user: string) => Promise<BN>;
         getMaxSupplyAmountJunior: (user: string) => Promise<BN>;
         getMaxRedeemAmountJunior: (user: string) => Promise<any>;
         getTokenPriceJunior: () => Promise<any>;
         existsSenior: () => boolean;
         getSeniorTokenBalance: (user: string) => Promise<BN>;
+        getSeniorTotalSupply: (user: string) => Promise<BN>;
         getMaxSupplyAmountSenior: (user: string) => Promise<BN>;
         getMaxRedeemAmountSenior: (user: string) => Promise<BN>;
-        getTokenPriceSenior: (user: string) => Promise<BN>;
+        getTokenPriceSenior: (user?: string | undefined) => Promise<BN>;
         getSeniorReserve: () => Promise<BN>;
         getJuniorReserve: () => Promise<BN>;
         getMinJuniorRatio: () => Promise<BN>;

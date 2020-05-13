@@ -57,7 +57,6 @@ export type ContractAddresses = {
 export type TinlakeParams = {
   provider: any;
   contractAddresses: ContractAddresses;
-  nftDataOutputs: AbiOutput;
   transactionTimeout: number;
   contractAbis?: ContractAbis |{};
   ethConfig?: EthConfig | {};

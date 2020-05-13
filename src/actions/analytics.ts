@@ -135,6 +135,11 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return res[0];
     }
 
+    getJuniorTotalSupply = async (user: string) => {
+      const res : { 0: BN } = await executeAndRetry(this.contracts['JUNIOR_TOKEN'].totalSupply, []);
+      return res[0];
+    }
+
     getMaxSupplyAmountJunior = async (user: string) => {
       const res : { 0: BN } =  await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].maxCurrency, [user]);
       return res[0];
@@ -155,11 +160,19 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getSeniorTokenBalance = async (user: string) => {
-      if (this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS) {
-        const res : { 0: BN } = await executeAndRetry(this.contracts['SENIOR_TOKEN'].balanceOf, [user]);
-        return res[0];
+      if (!this.existsSenior()) {
+        return new BN(0);
       }
-      return new BN(0);
+      const res : { 0: BN } = await executeAndRetry(this.contracts['SENIOR_TOKEN'].balanceOf, [user]);
+      return res[0];
+    }
+
+    getSeniorTotalSupply = async (user: string) => {
+      if (!this.existsSenior()) {
+        return new BN(0);
+      }
+      const res : { 0: BN } = await executeAndRetry(this.contracts['SENIOR_TOKEN'].totalSupply, []);
+      return res[0];
     }
 
     getMaxSupplyAmountSenior = async (user: string) => {
@@ -204,10 +217,11 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return maxRedeem;
     }
 
-    getTokenPriceSenior = async (user: string) => {
+    getTokenPriceSenior = async (user?: string) => {
       if (this.contractAddresses['SENIOR_OPERATOR'] === ZERO_ADDRESS) return new BN(0);
 
-      const operatorType = this.getOperatorType('senior');
+      // if no user address is passed always use price from asessor
+      const operatorType = user ? this.getOperatorType('senior') : 'ALLOWANCE_OPERATOR';
       let tokenPrice : BN;
       switch (operatorType) {
         case 'PROPORTIONAL_OPERATOR':
