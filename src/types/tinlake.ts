@@ -21,6 +21,8 @@ export type Tranche = {
   tokenPrice: BN;
   type: string;
   token: string;
+  totalSupply: BN;
+  interestRate?: BN;
 };
 export type NFT = {
   registry: string;

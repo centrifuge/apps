@@ -19,6 +19,8 @@ export declare type Tranche = {
     tokenPrice: BN;
     type: string;
     token: string;
+    totalSupply: BN;
+    interestRate?: BN;
 };
 export declare type NFT = {
     registry: string;
