@@ -3,6 +3,7 @@ import Header from "../../components/Header";
 import Overview from "../../containers/Overview";
 import WithTinlake from "../../components/WithTinlake";
 import { menuItems } from "../../menuItems";
+import config from "../../config";
 
 function Pool() {
   return (
@@ -15,6 +16,20 @@ function Pool() {
       </Box>
     </Box>
   );
+}
+
+export async function getStaticPaths() {
+  // We'll pre-render only these paths at build time.
+  const paths = [{
+    params: { root: config.contractAddresses.ROOT_CONTRACT },
+  }]
+
+  // { fallback: false } means other routes should 404.
+  return { paths, fallback: false }
+}
+
+export async function getStaticProps() {
+  return { props: {} }
 }
 
 export default Pool;

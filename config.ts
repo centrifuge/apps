@@ -1,6 +1,4 @@
-import getConfig from 'next/config';
 import { networkUrlToName } from './utils/networkNameResolver';
-const { publicRuntimeConfig } = getConfig();
 import * as yup from 'yup';
 
 interface ContractAddresses {
@@ -83,17 +81,17 @@ interface Config {
 }
 
 const config: Config = {
-  rpcUrl: yup.string().required().url().validateSync(publicRuntimeConfig.RPC_URL),
-  etherscanUrl: yup.string().required().url().validateSync(publicRuntimeConfig.ETHERSCAN_URL),
+  rpcUrl: yup.string().required().url().validateSync(process.env.NEXT_PUBLIC_RPC_URL),
+  etherscanUrl: yup.string().required().url().validateSync(process.env.NEXT_PUBLIC_ETHERSCAN_URL),
   gasLimit: yup.number().required().validateSync(1000000000000000000), // TODO: make this into publicRuntimeConfig
-  contractAddresses: contractAddressesSchema.validateSync(publicRuntimeConfig.TINLAKE_ADDRESSES),
-  nftDataDefinition: nftDataDefinitionSchema.validateSync(publicRuntimeConfig.NFT_DATA_DEFINITION),
-  transactionTimeout: yup.number().required().moreThan(0).validateSync(publicRuntimeConfig.TRANSACTION_TIMEOUT),
-  tinlakeDataBackendUrl: yup.string().required().url().validateSync(publicRuntimeConfig.TINLAKE_DATA_BACKEND_URL),
-  isDemo: yup.string().required().validateSync(publicRuntimeConfig.ENV) === 'demo',
+  contractAddresses: contractAddressesSchema.validateSync(process.env.NEXT_PUBLIC_TINLAKE_ADDRESSES),
+  nftDataDefinition: nftDataDefinitionSchema.validateSync(process.env.NEXT_PUBLIC_NFT_DATA_DEFINITION),
+  transactionTimeout: yup.number().required().moreThan(0).validateSync(process.env.NEXT_PUBLIC_TRANSACTION_TIMEOUT),
+  tinlakeDataBackendUrl: yup.string().required().url().validateSync(process.env.NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL),
+  isDemo: yup.string().required().validateSync(process.env.NEXT_PUBLIC_ENV) === 'demo',
   network: yup.mixed<'Mainnet' | 'Kovan'>().required().oneOf(['Mainnet', 'Kovan'])
-    .validateSync(networkUrlToName(publicRuntimeConfig.RPC_URL)),
-  contractConfig:  contractConfigSchema.validateSync(publicRuntimeConfig.CONTRACT_CONFIG),
+    .validateSync(networkUrlToName(process.env.NEXT_PUBLIC_RPC_URL || '')),
+  contractConfig:  contractConfigSchema.validateSync(process.env.NEXT_PUBLIC_CONTRACT_CONFIG),
 }
 
 export default config;
