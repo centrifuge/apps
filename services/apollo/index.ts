@@ -6,6 +6,7 @@ import config from '../../config';
 import fetch from 'node-fetch';
 import gql from 'graphql-tag';
 import BN from 'bn.js';
+import { PoolData, PoolsData } from '../../ducks/pools';
 
 const { tinlakeDataBackendUrl } = config;
 const cache = new InMemoryCache();
@@ -39,6 +40,52 @@ class Apollo {
       link,
       defaultOptions
     });
+  }
+
+  async getPools(): Promise<PoolsData> {
+    let result;
+    try {
+      result = await this.client
+      .query({ // TODO query only pools from env to exclude inactive pools
+        query: gql`
+        {
+          pools {
+            id,
+            totalDebt,
+            totalRepaysAggregatedAmount,
+            ongoingLoans: loans (where: {opened_gt:0, closed:null}) {
+							id
+            },
+            weightedInterestRate,
+          }
+        }
+        `
+      });
+    } catch (err) {
+      console.log(`error occured while fetching loans from apollo ${err}`);
+      // return {
+      //   data: {}
+      // };
+    }
+
+    const pools: PoolData[] = result?.data.pools.map((pool: any) => ({
+      id: pool.id,
+      name: '', // TODO read from env
+      type: '', // TODO read from env
+      ongoingLoans: pool.ongoingLoans.length, // TODO add count field to subgraph, inefficient to query all loans
+      totalDebt: new BN(pool.totalDebt),
+      totalRepaysAggregatedAmount: new BN(pool.totalRepaysAggregatedAmount),
+      weightedInterestRate: new BN(pool.weightedInterestRate),
+      weightedInterestRateDrop: new BN(0), // TODO how to get this value?
+    }))
+
+    return {
+      ongoingPools: pools.length,
+      ongoingLoans: pools.reduce((p, c) => p + c.ongoingLoans, 0),
+      totalDebt: pools.reduce((p, c) => p.add(c.totalDebt), new BN(0)),
+      totalRepaysAggregatedAmount: pools.reduce((p, c) => p.add(c.totalRepaysAggregatedAmount), new BN(0)),
+      pools,
+    }
   }
 
   async getLoans(root: string) {
