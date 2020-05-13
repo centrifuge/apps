@@ -4,8 +4,13 @@ import Overview from "../../containers/Overview";
 import WithTinlake from "../../components/WithTinlake";
 import { menuItems } from "../../menuItems";
 import config from "../../config";
+import { GetStaticProps } from "next";
 
-function Pool() {
+interface Props {
+  root: string
+}
+
+function Pool({ root }: Props) {
   return (
     <Box align="center" pad={{ horizontal: "small" }}>
       <Header selectedRoute={"/"} menuItems={menuItems} />
@@ -28,8 +33,8 @@ export async function getStaticPaths() {
   return { paths, fallback: false }
 }
 
-export async function getStaticProps() {
-  return { props: {} }
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  return { props: { root: params?.root } }
 }
 
 export default Pool;
