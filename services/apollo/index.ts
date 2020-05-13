@@ -62,10 +62,7 @@ class Apollo {
         `
       });
     } catch (err) {
-      console.log(`error occured while fetching loans from apollo ${err}`);
-      // return {
-      //   data: {}
-      // };
+      throw new Error(`error occured while fetching loans from apollo ${err}`);
     }
 
     const pools: PoolData[] = result?.data.pools.map((pool: any) => ({
@@ -81,7 +78,7 @@ class Apollo {
 
     return {
       pools,
-      ongoingPools: pools.length,
+      ongoingPools: pools.filter(pool => pool.ongoingLoans > 0).length,
       ongoingLoans: pools.reduce((p, c) => p + c.ongoingLoans, 0),
       totalDebt: pools.reduce((p, c) => p.add(c.totalDebt), new BN(0)),
       totalRepaysAggregatedAmount: pools.reduce((p, c) => p.add(c.totalRepaysAggregatedAmount), new BN(0))
