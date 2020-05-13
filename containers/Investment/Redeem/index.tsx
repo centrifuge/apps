@@ -26,8 +26,8 @@ interface State {
 
 class InvestorRedeem extends React.Component<Props, State> {
   state = {
-    redeemAmount: '0',
-  }
+    redeemAmount: '0'
+  };
 
   redeem = async () => {
     const { tranche, transactionSubmitted, responseReceived, loadInvestor, loadAnalyticsData, investor, tinlake } = this.props;

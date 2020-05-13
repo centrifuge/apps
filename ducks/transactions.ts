@@ -26,7 +26,7 @@ const initialState: TransactionState = {
 export default function reducer(state: TransactionState = initialState,
                                 action: AnyAction = { type: '' }): TransactionState {
   switch (action.type) {
-    case HYDRATE: return { ...state, ...action.payload.transactions }
+    case HYDRATE: return { ...state, ...action.payload.transactions };
     case TRANSACTION_PROCESSING: return { ...state, transactionState: 'processing', successMessage: null, errorMessage: null, loadingMessage: action.loadingMessage };
     case TRANSACTION_SUBMITTED: return { ...state, transactionState: 'submitted', loadingMessage: null, successMessage: action.successMessage, errorMessage: action.errorMessage };
     case RESET_TRANSACTION_STATE: return { ...state, transactionState: null, loadingMessage: null, successMessage: null, errorMessage: null };

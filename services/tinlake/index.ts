@@ -28,7 +28,7 @@ export async function getTinlake() {
   } else {
     const httpProvider = new Eth.HttpProvider(rpcUrl);
     tinlake = new Tinlake({ transactionTimeout, contractConfig, contractAddresses: contractAddresses as any,
-        provider: httpProvider, nftDataOutputs: nftDataDefinition.contractCall.outputs as any });
+      provider: httpProvider, nftDataOutputs: nftDataDefinition.contractCall.outputs as any });
     await tinlake.setContractAddresses();
   }
 

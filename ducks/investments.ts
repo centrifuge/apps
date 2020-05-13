@@ -22,7 +22,7 @@ const initialState: InvestorState = {
 export default function reducer(state: InvestorState = initialState,
                                 action: AnyAction = { type: '' }): InvestorState {
   switch (action.type) {
-    case HYDRATE: return { ...state, ...(action.payload.investments || {}) }
+    case HYDRATE: return { ...state, ...(action.payload.investments || {}) };
     case LOAD_INVESTOR: return { ...state, investorState: 'loading', investor: null };
     case INVESTOR_NOT_FOUND: return { ...state, investorState: 'not found' };
     case RECEIVE_INVESTOR: return { ...state, investorState: 'found', investor: action.investor };

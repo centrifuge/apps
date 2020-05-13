@@ -21,8 +21,8 @@ interface State {
 
 class LoanInterest extends React.Component<Props, State> {
   state = {
-    interestRate: '',
-  }
+    interestRate: ''
+  };
 
   componentDidMount() {
     const { loan } = this.props;

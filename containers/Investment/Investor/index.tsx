@@ -32,8 +32,8 @@ class InvestorView extends React.Component<Props, State> {
   state = {
     errorMsg: '',
     is: null,
-    selectedTab: 0,
-  }
+    selectedTab: 0
+  };
 
   showInvestor = async () => {
     const { investorAddress } = this.props;

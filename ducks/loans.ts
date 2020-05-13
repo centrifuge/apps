@@ -31,7 +31,7 @@ const initialState: LoansState = {
 export default function reducer(state: LoansState = initialState,
                                 action: AnyAction = { type: '' }): LoansState {
   switch (action.type) {
-    case HYDRATE: return { ...state, ...(action.payload.loans || {}) }
+    case HYDRATE: return { ...state, ...(action.payload.loans || {}) };
     case LOAD: return { ...state, loansState: 'loading' };
     case RECEIVE: return { ...state, loansState: 'found', loans: action.loans };
     case LOAD_LOAN: return { ...state, loanState: 'loading', loan: null };

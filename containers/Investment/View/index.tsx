@@ -29,8 +29,8 @@ class InvestmentsView extends React.Component<Props, State> {
   state = {
     errorMsg: '',
     is: null,
-    investorAddress: '',
-  }
+    investorAddress: ''
+  };
 
   componentDidMount() {
     const { loadAnalyticsData, tinlake } = this.props;
@@ -81,7 +81,7 @@ class InvestmentsView extends React.Component<Props, State> {
           </Box>
           <Box align="start">
             <PoolLink href={{ pathname: '/investments/investor', query: { investorAddress: this.state.investorAddress }
-              }}>
+            }}>
               <Anchor>
                 <Button primary label="Load investor details" disabled={!canLoadInvestor} />
               </Anchor>

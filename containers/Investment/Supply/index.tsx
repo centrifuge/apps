@@ -26,8 +26,8 @@ interface State {
 
 class InvestorSupply extends React.Component<Props, State> {
   state = {
-    supplyAmount: '0',
-  }
+    supplyAmount: '0'
+  };
 
   supply = async () => {
     const { transactionSubmitted, responseReceived, trancheType, tinlake, investor, loadInvestor, loadAnalyticsData } = this.props;

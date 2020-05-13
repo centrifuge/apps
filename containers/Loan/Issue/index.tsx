@@ -36,8 +36,8 @@ class IssueLoan extends React.Component<Props, State> {
     tokenId: '',
     loanId: '',
     errorMsg: '',
-    is: null,
-  }
+    is: null
+  };
 
   // handlers
   onTokenIdValueChange = async (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -25,7 +25,7 @@ interface State {
 }
 
 class LoanBorrow extends React.Component<Props, State> {
-  state = { borrowAmount: '0' }
+  state = { borrowAmount: '0' };
 
   componentDidMount() {
     const { loan, tinlake, loadAnalyticsData } = this.props;

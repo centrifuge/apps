@@ -30,7 +30,7 @@ const initialState: AnalyticsState = {
 export default function reducer(state: AnalyticsState = initialState,
                                 action: AnyAction = { type: '' }): AnalyticsState {
   switch (action.type) {
-    case HYDRATE: return { ...state, ...(action.payload.analytics || {}) }
+    case HYDRATE: return { ...state, ...(action.payload.analytics || {}) };
     case LOAD_ANALYTICS: return { ...state, state: 'loading' };
     case RECEIVE_ANALYTICS: return { ...state, state: 'found', data: action.data };
     default: return state;

@@ -42,7 +42,7 @@ class Header extends React.Component<HeaderProps> {
   onRouteClick = (item: MenuItem) => {
     this.setState({ chosenRoute: item.route });
     if (item.route.startsWith('/')) {
-      this.pushWithPrefixIfInPool(item)
+      this.pushWithPrefixIfInPool(item);
     } else {
       window.open(item.route);
     }
@@ -50,9 +50,9 @@ class Header extends React.Component<HeaderProps> {
 
   pushWithPrefixIfInPool = (item: MenuItem) => {
     if (item.inPool) {
-      const { root } = this.props.router.query
+      const { root } = this.props.router.query;
       Router.push(`/[root]${item.route}`, `/${root}${item.route}`);
-      return
+      return;
     }
     Router.push(item.route);
   }

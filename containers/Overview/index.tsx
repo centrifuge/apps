@@ -1,13 +1,13 @@
-import * as React from "react";
-import { connect } from "react-redux";
-import { Box, Heading } from "grommet";
-import SecondaryHeader from "../../components/SecondaryHeader";
-import { AnalyticsState } from "../../ducks/analytics";
-import { LoansState, loadLoans } from "../../ducks/loans";
-import { AuthState, loadUserProxies } from "../../ducks/auth";
-import { Spinner } from "@centrifuge/axis-spinner";
-import LoanListData from "../../components/Loan/List";
-import Tinlake from "tinlake/dist/Tinlake";
+import * as React from 'react';
+import { connect } from 'react-redux';
+import { Box, Heading } from 'grommet';
+import SecondaryHeader from '../../components/SecondaryHeader';
+import { AnalyticsState } from '../../ducks/analytics';
+import { LoansState, loadLoans } from '../../ducks/loans';
+import { AuthState, loadUserProxies } from '../../ducks/auth';
+import { Spinner } from '@centrifuge/axis-spinner';
+import LoanListData from '../../components/Loan/List';
+import Tinlake from 'tinlake/dist/Tinlake';
 
 interface Props {
   tinlake: any;
@@ -36,10 +36,10 @@ class Overview extends React.Component<Props> {
         <SecondaryHeader>
           <Heading level="3">Loans</Heading>
         </SecondaryHeader>
-        {loans!.loansState === "loading" ? (
+        {loans!.loansState === 'loading' ? (
           <Spinner
-            height={"calc(100vh - 89px - 84px)"}
-            message={"Loading..."}
+            height={'calc(100vh - 89px - 84px)'}
+            message={'Loading...'}
           />
         ) : (
           <LoanListData
@@ -47,16 +47,16 @@ class Overview extends React.Component<Props> {
             proxies={proxies}
             userAddress={userAddress}
           >
-            {" "}
+            {' '}
           </LoanListData>
         )}
 
-        <Box pad={{ vertical: "medium" }}></Box>
+        <Box pad={{ vertical: 'medium' }}></Box>
       </Box>
     );
   }
 }
 
-export default connect((state) => state, { loadLoans, loadUserProxies })(
+export default connect(state => state, { loadLoans, loadUserProxies })(
   Overview
 );
