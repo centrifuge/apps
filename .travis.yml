@@ -7,6 +7,12 @@ branches:
     - develop
     - master
 
+cache:
+  directories:
+    - $HOME/.cache/yarn
+    - node_modules
+    - .next/cache
+
 install:
   - npm install
 
