@@ -1,13 +1,13 @@
 import * as React from 'react';
-import WithTinlake from '../../components/WithTinlake';
-import LoanView from '../../containers/Loan/View';
+import WithTinlake from '../../../components/WithTinlake';
+import LoanView from '../../../containers/Loan/View';
 import { Box, Heading } from 'grommet';
-import Header from '../../components/Header';
-import SecondaryHeader from '../../components/SecondaryHeader';
-import { menuItems } from '../../menuItems';
-import { BackLink } from '../../components/BackLink';
-import Auth from '../../components/Auth';
-import Alert from '../../components/Alert';
+import Header from '../../../components/Header';
+import SecondaryHeader from '../../../components/SecondaryHeader';
+import { menuItems } from '../../../menuItems';
+import { BackLink } from '../../../components/BackLink';
+import Auth from '../../../components/Auth';
+import Alert from '../../../components/Alert';
 
 interface Props {
   loanId: string;

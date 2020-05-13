@@ -1,12 +1,12 @@
 import * as React from 'react';
-import LoanList from '../../containers/Loan/List';
-import WithTinlake from '../../components/WithTinlake';
+import LoanList from '../../../containers/Loan/List';
+import WithTinlake from '../../../components/WithTinlake';
 import { Box, Heading, Button } from 'grommet';
-import Header from '../../components/Header';
-import { menuItems } from '../../menuItems';
-import SecondaryHeader from '../../components/SecondaryHeader';
-import Auth from '../../components/Auth';
-import Alert from '../../components/Alert';
+import Header from '../../../components/Header';
+import { menuItems } from '../../../menuItems';
+import SecondaryHeader from '../../../components/SecondaryHeader';
+import Auth from '../../../components/Auth';
+import Alert from '../../../components/Alert';
 import Link from 'next/link';
 
 class LoanListPage extends React.Component {

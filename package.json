@@ -54,7 +54,8 @@
     "styled-components": "^5.1.0",
     "tinlake": "github:centrifuge/tinlake.js#266d72fb53cc8be0297b4535189558b7c98f131f",
     "web3-utils": "^1.2.7",
-    "web3connect": "^1.0.0-beta.13"
+    "web3connect": "^1.0.0-beta.13",
+    "yup": "^0.28.5"
   },
   "devDependencies": {
     "@types/bn.js": "^4.11.6",
@@ -64,6 +65,7 @@
     "@types/react-redux": "^7.1.8",
     "@types/react-test-renderer": "^16.9.2",
     "@types/styled-components": "^4.4.3",
+    "@types/yup": "^0.28.3",
     "@zeit/next-typescript": "^1.1.1",
     "dotenv": "^8.2.0",
     "jest": "^24.9.0",
