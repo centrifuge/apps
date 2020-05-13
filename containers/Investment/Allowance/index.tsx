@@ -25,6 +25,12 @@ interface State {
 }
 
 class InvestorAllowance extends React.Component<Props, State> {
+  state: State = {
+    supplyAmount: '0',
+    redeemAmount: '0',
+    currentSupplyLimit: '0',
+    currentRedeemLimit: '0'
+  };
 
   updateLimits() {
     if (!this.state) {
@@ -44,12 +50,6 @@ class InvestorAllowance extends React.Component<Props, State> {
     }
   }
   componentDidMount() {
-    this.setState({
-      supplyAmount: '0',
-      redeemAmount: '0',
-      currentSupplyLimit: '0',
-      currentRedeemLimit: '0'
-    });
     this.updateLimits();
   }
 

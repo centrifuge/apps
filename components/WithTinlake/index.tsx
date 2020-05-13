@@ -5,8 +5,12 @@ interface Props {
   render: (tinlake: any) => React.ReactElement;
 }
 
-class WithTinlake extends React.Component<Props> {
-  state = { loading: true };
+interface State {
+  loading: boolean;
+}
+
+class WithTinlake extends React.Component<Props, State> {
+  state: State = { loading: true };
   tinlake: any |null = null;
   isMounted = false;
   componentDidMount() {

@@ -4,6 +4,7 @@ import { Loan } from 'tinlake';
 import { getLoan, TinlakeResult } from '../services/tinlake/actions';
 import Apollo from '../services/apollo';
 import Tinlake from 'tinlake/dist/Tinlake';
+import { HYDRATE } from 'next-redux-wrapper';
 
 // Actions
 const LOAD = 'tinlake-ui/loans/LOAD';
@@ -30,6 +31,7 @@ const initialState: LoansState = {
 export default function reducer(state: LoansState = initialState,
                                 action: AnyAction = { type: '' }): LoansState {
   switch (action.type) {
+    case HYDRATE: return { ...state, ...(action.payload.loans || {}) };
     case LOAD: return { ...state, loansState: 'loading' };
     case RECEIVE: return { ...state, loansState: 'found', loans: action.loans };
     case LOAD_LOAN: return { ...state, loanState: 'loading', loan: null };

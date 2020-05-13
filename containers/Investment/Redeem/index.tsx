@@ -25,10 +25,9 @@ interface State {
 }
 
 class InvestorRedeem extends React.Component<Props, State> {
-
-  componentDidMount() {
-    this.setState({ redeemAmount: '0' });
-  }
+  state: State = {
+    redeemAmount: '0'
+  };
 
   redeem = async () => {
     const { tranche, transactionSubmitted, responseReceived, loadInvestor, loadAnalyticsData, investor, tinlake } = this.props;

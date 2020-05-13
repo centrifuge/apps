@@ -20,6 +20,9 @@ interface State {
 }
 
 class LoanInterest extends React.Component<Props, State> {
+  state: State = {
+    interestRate: ''
+  };
 
   componentDidMount() {
     const { loan } = this.props;

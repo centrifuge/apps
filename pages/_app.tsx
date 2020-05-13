@@ -1,14 +1,13 @@
 import React from 'react';
-import { Provider } from 'react-redux';
-import App, { Container } from 'next/app';
-import withRedux from 'next-redux-wrapper';
+import App from 'next/app';
+import { createWrapper } from 'next-redux-wrapper';
 import makeStore from '../utils/makeStore';
 import { AxisTheme } from '@centrifuge/axis-theme';
 import Auth from '../components/Auth';
 import WithTinlake from '../components/WithTinlake';
 import { StyledApp } from '../components/StyledApp';
 
-class MyApp extends App<{ store: any }> {
+class MyApp extends App {
   static async getInitialProps({ Component, ctx }: { Component: any, ctx: any }) {
     const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {};
 
@@ -16,24 +15,22 @@ class MyApp extends App<{ store: any }> {
   }
 
   render() {
-    const { Component, pageProps, store } = this.props;
+    const { Component, pageProps } = this.props;
 
     return (
       <AxisTheme full={true}>
         <StyledApp>
-          <Container>
-            <Provider store={store}>
-              <WithTinlake render={tinlake =>
-                <Auth tinlake={tinlake} render={() =>
-                  <Component {...pageProps} />
-                } />
-              } />
-            </Provider>
-          </Container>
+          <WithTinlake render={tinlake =>
+            <Auth tinlake={tinlake} render={() =>
+              <Component {...pageProps} />
+            } />
+          } />
         </StyledApp>
       </AxisTheme >
     );
   }
 }
 
-export default withRedux(makeStore)(MyApp);
+const wrapper = createWrapper(makeStore, { debug: true });
+
+export default wrapper.withRedux(MyApp);

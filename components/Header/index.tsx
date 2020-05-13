@@ -7,13 +7,14 @@ import { AuthState } from '../../ducks/auth';
 import { formatAddress } from '../../utils/formatAddress';
 import config from '../../config';
 import { authTinlake } from '../../services/tinlake';
-import Router from 'next/router';
+import Router, { withRouter, NextRouter } from 'next/router';
 import { NavBar } from '@centrifuge/axis-nav-bar';
 
 const { isDemo } = config;
 export interface MenuItem {
   label: string;
   route: string;
+  inPool: boolean;
   secondary?: boolean;
   env: string;
 }
@@ -22,16 +23,17 @@ interface HeaderProps {
   selectedRoute: string;
   menuItems: MenuItem[];
   auth?: AuthState;
+  router: NextRouter;
 }
 
-class Header extends React.Component<HeaderProps> {
+interface State {
+  chosenRoute: string;
+}
 
-  constructor(props: HeaderProps) {
-    super(props);
-    this.state = {
-      chosenRoute: '/'
-    };
-  }
+class Header extends React.Component<HeaderProps, State> {
+  state: State = {
+    chosenRoute: '/'
+  };
 
   connectAccount = async () => {
     try {
@@ -39,6 +41,24 @@ class Header extends React.Component<HeaderProps> {
     } catch (e) {
       console.log(`authentication failed with Error ${e}`);
     }
+  }
+
+  onRouteClick = (item: MenuItem) => {
+    this.setState({ chosenRoute: item.route });
+    if (item.route.startsWith('/')) {
+      this.pushWithPrefixIfInPool(item);
+    } else {
+      window.open(item.route);
+    }
+  }
+
+  pushWithPrefixIfInPool = (item: MenuItem) => {
+    if (item.inPool) {
+      const { root } = this.props.router.query;
+      Router.push(`/[root]${item.route}`, `/${root}${item.route}`);
+      return;
+    }
+    Router.push(item.route);
   }
 
   render() {
@@ -50,14 +70,6 @@ class Header extends React.Component<HeaderProps> {
     const itemGap = 'small';
     const logoUrl = isDemo && '/static/demo_logo.svg' || '/static/logo.svg';
 
-    const onRouteClick = (route: string) => {
-      this.setState({ chosenRoute: route });
-      if (route.startsWith('/')) {
-        Router.push(route);
-      } else {
-        window.open(route);
-      }
-    };
     const theme = {
       navBar: {
         icons: {
@@ -99,18 +111,14 @@ class Header extends React.Component<HeaderProps> {
                 )}
                 overlayWidth="100vw"
                 selectedRoute={selectedRoute}
-                onRouteClick={
-                  (item: MenuItem) => {
-                    onRouteClick(item.route);
-                  }
-                }
+                onRouteClick={this.onRouteClick}
               />
             </Box>
           </Box>
           <Box direction="row" basis="full">
             {!user &&
               <Box direction="column" align="end" basis="full" alignSelf="center">
-               <Button onClick={this.connectAccount} label="Connect" />
+                <Button onClick={this.connectAccount} label="Connect" />
               </Box>
             }
             {user &&
@@ -138,7 +146,7 @@ class Header extends React.Component<HeaderProps> {
             <Box direction="row" basis="full" >
             {!user &&
               <Box direction="column" align="end" basis="full" alignSelf="center">
-               <Button onClick={this.connectAccount} label="Connect" />
+                <Button onClick={this.connectAccount} label="Connect" />
               </Box>
             }
             {user &&
@@ -169,11 +177,7 @@ class Header extends React.Component<HeaderProps> {
                   )}
                   overlayWidth="100vw"
                   selectedRoute={selectedRoute}
-                  onRouteClick={
-                    (item: MenuItem) => {
-                      onRouteClick(item.route);
-                    }
-                  }
+                  onRouteClick={this.onRouteClick}
                 />
               </Box>
             </Box>
@@ -183,4 +187,4 @@ class Header extends React.Component<HeaderProps> {
   }
 }
 
-export default connect(state => state)(Header);
+export default connect(state => state)(withRouter(Header));

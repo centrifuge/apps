@@ -24,9 +24,10 @@ interface State {
 }
 
 class Auth extends React.Component<Props, State> {
-  state = {
+  state: State = {
     isAuthenticating: true
   };
+
   isMounted = false;
 
   componentDidMount() {

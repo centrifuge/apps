@@ -2,6 +2,7 @@ import { AnyAction, Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
 import { networkIdToName } from '../utils/networkNameResolver';
 import Apollo from '../services/apollo';
+import { HYDRATE } from 'next-redux-wrapper';
 
 // Actions
 const LOAD = 'tinlake-ui/auth/LOAD';
@@ -52,6 +53,7 @@ const initialState: AuthState = {
 export default function reducer(state: AuthState = initialState,
                                 action: AnyAction = { type: '' }): AuthState {
   switch (action.type) {
+    case HYDRATE: return { ...state, ...(action.payload.auth || {}) };
     case LOAD: return { ...state, state: 'loading' };
     case RECEIVE: return { ...state, state: 'loaded', user: action.user };
     case CLEAR: return { ...state, state: 'loaded', user: null };

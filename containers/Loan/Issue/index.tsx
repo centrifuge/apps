@@ -25,10 +25,19 @@ interface State {
   tokenId: string;
   loanId: string;
   errorMsg: string;
-  is: string;
+  is: string | null;
 }
 
 class IssueLoan extends React.Component<Props, State> {
+  state: State = {
+    nft: null,
+    registry: '',
+    nftError: '',
+    tokenId: '',
+    loanId: '',
+    errorMsg: '',
+    is: null
+  };
 
   // handlers
   onTokenIdValueChange = async (event: React.ChangeEvent<HTMLInputElement>) => {

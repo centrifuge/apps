@@ -1,13 +1,13 @@
 import * as React from 'react';
-import InvestorView from '../../containers/Investment/Investor';
-import WithTinlake from '../../components/WithTinlake';
+import InvestorView from '../../../containers/Investment/Investor';
+import WithTinlake from '../../../components/WithTinlake';
 import { Box, Heading, Text } from 'grommet';
-import Header from '../../components/Header';
-import { menuItems } from '../../menuItems';
-import SecondaryHeader from '../../components/SecondaryHeader';
-import { BackLink } from '../../components/BackLink';
-import Auth from '../../components/Auth';
-import Alert from '../../components/Alert';
+import Header from '../../../components/Header';
+import { menuItems } from '../../../menuItems';
+import SecondaryHeader from '../../../components/SecondaryHeader';
+import { BackLink } from '../../../components/BackLink';
+import Auth from '../../../components/Auth';
+import Alert from '../../../components/Alert';
 
 interface Props {
   investorAddress: string;

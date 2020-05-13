@@ -13,7 +13,7 @@ const composeEnhancers = typeof window !== 'undefined' &&
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ : compose;
 
-const makeStore = (initialState: any) => {
+const makeStore = () => {
   return createStore(
     combineReducers(
       {
@@ -24,7 +24,6 @@ const makeStore = (initialState: any) => {
         transactions: transactionReducer
       }
     ),
-    initialState,
     composeEnhancers(
       applyMiddleware(thunk)
     )

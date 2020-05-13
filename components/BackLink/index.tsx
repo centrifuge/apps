@@ -1,8 +1,8 @@
 import { LinkPrevious } from 'grommet-icons';
-import Link from 'next/link';
+import { PoolLink } from '../PoolLink';
 
 export const BackLink = (props : {href: string}) => (
-  <Link href={props.href} >
+  <PoolLink href={props.href}>
     <LinkPrevious style={{ cursor: 'pointer' }}/>
-  </Link>
-  );
+  </PoolLink>
+);

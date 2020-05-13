@@ -2,6 +2,17 @@ language: node_js
 node_js:
   - 12.16
 
+branches:
+  only:
+    - develop
+    - master
+
+cache:
+  directories:
+    - $HOME/.cache/yarn
+    - node_modules
+    - .next/cache
+
 install:
   - npm install
 
@@ -9,3 +20,6 @@ script:
   - npm run lint
   # - npm run test # TODO: add
   - npm run export
+
+env:
+  - NEXT_PUBLIC_RPC_URL=https://kovan.infura.io/v3/092108ec6aea46ab97b2175b45130455 NEXT_PUBLIC_TINLAKE_ADDRESSES='{"DEPLOYMENT_NAME":"Kovan Naxos Deployment", "ROOT_CONTRACT":"0x41b7b379dee711b1a9bfbabd4b1309a584f5fe5a", "TINLAKE_CURRENCY":"0xe689a4f88e332b016f6800259355e23ef6df338a", "ACTIONS":"0x60cc4a2868559e513112f0742e6f546d339ea17b", "PROXY_REGISTRY":"0x99a31c86d95e907dcf0001857b8aa83456e746c1", "COLLATERAL_NFT":"0xac0c1ef395290288028a0a9fdfc8fdebebe54a24"}' NEXT_PUBLIC_NFT_DATA_DEFINITION='{"contractCall":{"outputs":[{"name":"reference_id","type":"string"},{"name":"amount","type":"uint256"},{"name":"asset_type","type":"string"},{"name":"borrower","type":"address"}]},"displayedFields":[{"key":"reference_id","label":"NFT Reference","type":"utf8_string"},{"key":"amount","label":"Invoice Amount","type":"uint","decimals":2,"precision":2},{"key":"asset_type","label":"Asset Type","type":"utf8_string"}]}' NEXT_PUBLIC_ETHERSCAN_URL=https://kovan.etherscan.io NEXT_PUBLIC_ENV=demo NEXT_PUBLIC_TRANSACTION_TIMEOUT=3600 NEXT_PUBLIC_ETH_GAS=7000000 NEXT_PUBLIC_ETH_GAS_PRICE=10000000000 NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL=https://api.thegraph.com/subgraphs/name/ilinzweilin/tinlake NEXT_PUBLIC_CONTRACT_CONFIG='{"JUNIOR_OPERATOR":"ALLOWANCE_OPERATOR","SENIOR_OPERATOR":"PROPORTIONAL_OPERATOR"}'

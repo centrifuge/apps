@@ -1,12 +1,12 @@
 import * as React from 'react';
-import InvestmentsView from '../../containers/Investment/View';
-import WithTinlake from '../../components/WithTinlake';
+import InvestmentsView from '../../../containers/Investment/View';
+import WithTinlake from '../../../components/WithTinlake';
 import { Box, Heading } from 'grommet';
-import Header from '../../components/Header';
-import { menuItems } from '../../menuItems';
-import SecondaryHeader from '../../components/SecondaryHeader';
-import Auth from '../../components/Auth';
-import Alert from '../../components/Alert';
+import Header from '../../../components/Header';
+import { menuItems } from '../../../menuItems';
+import SecondaryHeader from '../../../components/SecondaryHeader';
+import Auth from '../../../components/Auth';
+import Alert from '../../../components/Alert';
 
 class InvestmentPage extends React.Component {
   render() {
