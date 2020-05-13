@@ -1,6 +1,6 @@
 import React from 'react';
-import App, { Container } from 'next/app';
-import withRedux from 'next-redux-wrapper';
+import App from 'next/app';
+import { createWrapper } from 'next-redux-wrapper';
 import makeStore from '../utils/makeStore';
 import { AxisTheme } from '@centrifuge/axis-theme';
 import Auth from '../components/Auth';
@@ -31,4 +31,6 @@ class MyApp extends App {
   }
 }
 
-export default withRedux(makeStore)(MyApp);
+const wrapper = createWrapper(makeStore, {debug: true})
+
+export default wrapper.withRedux(MyApp);
