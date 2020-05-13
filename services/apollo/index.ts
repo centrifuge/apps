@@ -76,16 +76,16 @@ class Apollo {
       totalDebt: new BN(pool.totalDebt),
       totalRepaysAggregatedAmount: new BN(pool.totalRepaysAggregatedAmount),
       weightedInterestRate: new BN(pool.weightedInterestRate),
-      weightedInterestRateDrop: new BN(0), // TODO how to get this value?
-    }))
+      weightedInterestRateDrop: new BN(0) // TODO how to get this value?
+    }));
 
     return {
+      pools,
       ongoingPools: pools.length,
       ongoingLoans: pools.reduce((p, c) => p + c.ongoingLoans, 0),
       totalDebt: pools.reduce((p, c) => p.add(c.totalDebt), new BN(0)),
-      totalRepaysAggregatedAmount: pools.reduce((p, c) => p.add(c.totalRepaysAggregatedAmount), new BN(0)),
-      pools,
-    }
+      totalRepaysAggregatedAmount: pools.reduce((p, c) => p.add(c.totalRepaysAggregatedAmount), new BN(0))
+    };
   }
 
   async getLoans(root: string) {

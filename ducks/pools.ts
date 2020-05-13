@@ -25,9 +25,8 @@ export interface PoolsData {
   ongoingLoans: number;
   totalDebt: BN;
   totalRepaysAggregatedAmount: BN;
-  pools: PoolData[]
+  pools: PoolData[];
 }
-
 
 export interface PoolsState {
   state: null | 'loading' | 'found';
@@ -42,7 +41,7 @@ const initialState: PoolsState = {
 export default function reducer(state: PoolsState = initialState,
                                 action: AnyAction = { type: '' }): PoolsState {
   switch (action.type) {
-    case HYDRATE: return { ...state, ...(action.payload.pools || {}) }
+    case HYDRATE: return { ...state, ...(action.payload.pools || {}) };
     case LOAD_POOLS: return { ...state, state: 'loading' };
     case RECEIVE_POOLS: return { ...state, state: 'found', data: action.data };
     default: return state;
@@ -53,7 +52,7 @@ export function loadPools(): ThunkAction<Promise<void>, PoolsState, undefined, A
   return async (dispatch) => {
     dispatch({ type: LOAD_POOLS });
     const poolsData = await Apollo.getPools();
-    console.log({poolsData})
+    console.log({ poolsData });
     dispatch({ data: poolsData, type: RECEIVE_POOLS });
   };
 }
