@@ -1,6 +1,5 @@
 import { AnyAction, Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
-import { TinlakeResult } from '../services/tinlake/actions';
 import { HYDRATE } from 'next-redux-wrapper';
 import BN from 'bn.js';
 import Apollo from '../services/apollo';
