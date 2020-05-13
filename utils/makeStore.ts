@@ -1,4 +1,5 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
+import poolsReducer from '../ducks/pools';
 import loansReducer from '../ducks/loans';
 import investmentsReducer from '../ducks/investments';
 import analyticsReducer from '../ducks/analytics';
@@ -17,6 +18,7 @@ const makeStore = () => {
   return createStore(
     combineReducers(
       {
+        pools: poolsReducer,
         loans: loansReducer,
         investments: investmentsReducer,
         analytics: analyticsReducer,
