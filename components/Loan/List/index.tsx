@@ -3,20 +3,18 @@ import{ bnToHex, baseToDisplay, feeToInterestRate, Loan } from 'tinlake';
 import { Box, DataTable, Anchor, Text } from 'grommet';
 import { PoolLink } from '../../../components/PoolLink';
 import NumberDisplay from '../../../components/NumberDisplay';
-import Badge from '../../../components/Badge';
 import { DisplayField } from '@centrifuge/axis-display-field';
 import { getNFTLink, hexToInt } from '../../../utils/etherscanLinkGenerator';
 
 interface Props {
   loans: Loan[];
   userAddress: string;
-  proxies: string[];
 }
 
 class LoanList extends React.Component<Props> {
   render() {
-    const { loans, proxies } =  this.props;
-    return <Box margin={{ bottom: 'xlarge' }}>
+    const { loans } =  this.props;
+    return <Box>
       <DataTable style={{ tableLayout: 'auto' }} data={loans} sortable columns={[
         { header: <HeaderCell text={'Loan ID'}></HeaderCell>, property: 'loanId', align: 'end' },
         {
@@ -32,25 +30,6 @@ class LoanList extends React.Component<Props> {
                 }}
               />
             </Box>
-        },
-        {
-          header: 'LoanOwner', property: 'loanOwner', align: 'end',
-          render: (l: Loan) => <div>
-            <Box style={{ maxWidth: '150px' }}>
-              <DisplayField
-                copy={true}
-                as={'span'}
-                value={l.ownerOf}
-              />
-            </Box>
-
-          </div>
-        },
-        {
-          header: '', property: '', align: 'end',
-          render: (l: Loan) => <div>
-            {proxies.includes(l.ownerOf.toString()) && <Badge text={'Me'} />}
-          </div>
         },
         {
           header: 'Debt (DAI)', property: 'debt', align: 'end',

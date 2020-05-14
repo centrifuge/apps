@@ -5,7 +5,7 @@ import { baseToDisplay, displayToBase } from 'tinlake';
 import NumberInput from '../../../components/NumberInput';
 import { setMinJuniorRatio } from '../../../services/tinlake/actions';
 import { transactionSubmitted, responseReceived } from '../../../ducks/transactions';
-import { loadAnalyticsData } from '../../../ducks/analytics';
+import { loadPool } from '../../../ducks/pool';
 import { connect } from 'react-redux';
 import { Decimal } from 'decimal.js-light';
 
@@ -18,7 +18,7 @@ Decimal.set({
 interface Props {
   minJuniorRatio: BN;
   tinlake: any;
-  loadAnalyticsData?: (tinlake: any) => Promise<void>;
+  loadPool?: (tinlake: any) => Promise<void>;
   transactionSubmitted?: (loadingMessage: string) => Promise<void>;
   responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>;
 }
@@ -42,7 +42,7 @@ class JuniorRatio extends React.Component<Props, State> {
   setMinJuniorRatio = async () => {
     const { minJuniorRatio } = this.state;
     const normalizedRatio = new Decimal(minJuniorRatio).div(100).toString();
-    const { tinlake, loadAnalyticsData, responseReceived, transactionSubmitted } = this.props;
+    const { tinlake, loadPool, responseReceived, transactionSubmitted } = this.props;
     transactionSubmitted && transactionSubmitted('Setting mininum TIN ratio initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.');
     try {
       const res = await setMinJuniorRatio(tinlake, normalizedRatio);
@@ -51,7 +51,7 @@ class JuniorRatio extends React.Component<Props, State> {
         return;
       }
       responseReceived && responseReceived('Minimum TIN ratio set successfully.', null);
-      loadAnalyticsData && loadAnalyticsData(tinlake);
+      loadPool && loadPool(tinlake);
     } catch (e) {
       responseReceived && responseReceived(null, `Changing minimum TIN ratio failed. ${e}`);
       console.log(e);
@@ -80,4 +80,4 @@ class JuniorRatio extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadAnalyticsData, transactionSubmitted, responseReceived })(JuniorRatio);
+export default connect(state => state, { loadPool, transactionSubmitted, responseReceived })(JuniorRatio);

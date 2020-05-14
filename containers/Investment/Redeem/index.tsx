@@ -5,7 +5,7 @@ import { redeem, TrancheType } from '../../../services/tinlake/actions';
 import { transactionSubmitted, responseReceived } from '../../../ducks/transactions';
 import { baseToDisplay, displayToBase, Investor, Tranche } from 'tinlake';
 import { loadInvestor } from '../../../ducks/investments';
-import { loadAnalyticsData } from '../../../ducks/analytics';
+import { loadPool } from '../../../ducks/pool';
 import { connect } from 'react-redux';
 import { authTinlake } from '../../../services/tinlake';
 import BN from 'bn.js';
@@ -14,7 +14,7 @@ interface Props {
   investor: Investor;
   tinlake: any;
   loadInvestor?: (tinlake: any, address: string, refresh?: boolean) => Promise<void>;
-  loadAnalyticsData?: (tinlake: any) => Promise<void>;
+  loadPool?: (tinlake: any) => Promise<void>;
   transactionSubmitted?: (loadingMessage: string) => Promise<void>;
   responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>;
   tranche: Tranche;
@@ -30,7 +30,7 @@ class InvestorRedeem extends React.Component<Props, State> {
   };
 
   redeem = async () => {
-    const { tranche, transactionSubmitted, responseReceived, loadInvestor, loadAnalyticsData, investor, tinlake } = this.props;
+    const { tranche, transactionSubmitted, responseReceived, loadInvestor, loadPool, investor, tinlake } = this.props;
     const { redeemAmount } = this.state;
     transactionSubmitted && transactionSubmitted('Redeem initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.');
     try {
@@ -42,7 +42,7 @@ class InvestorRedeem extends React.Component<Props, State> {
       }
       responseReceived && responseReceived('Redeem successful. Please check your wallet.', null);
       loadInvestor && loadInvestor(tinlake, investor.address);
-      loadAnalyticsData && loadAnalyticsData(tinlake);
+      loadPool && loadPool(tinlake);
     } catch (e) {
       responseReceived && responseReceived(null, `Redeem failed. ${e}`);
       console.log(e);
@@ -97,4 +97,4 @@ class InvestorRedeem extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadInvestor, loadAnalyticsData, transactionSubmitted, responseReceived })(InvestorRedeem);
+export default connect(state => state, { loadInvestor, loadPool, transactionSubmitted, responseReceived })(InvestorRedeem);

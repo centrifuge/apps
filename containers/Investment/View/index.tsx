@@ -5,7 +5,7 @@ import { Box, FormField, TextInput, Button, Heading, Anchor } from 'grommet';
 import { isValidAddress } from '../../../utils/address';
 import JuniorRatio from '../JuniorRatio';
 import InvestmentsOverview from '../../../components/Investment/Overview';
-import { AnalyticsState, loadAnalyticsData } from '../../../ducks/analytics';
+import { PoolState, loadPool } from '../../../ducks/pool';
 import { TransactionState, resetTransactionState } from '../../../ducks/transactions';
 import Alert from '../../../components/Alert';
 import { PoolLink } from '../../../components/PoolLink';
@@ -13,9 +13,9 @@ import { PoolLink } from '../../../components/PoolLink';
 interface Props {
   tinlake: any;
   auth: AuthState;
-  loadAnalyticsData?: (tinlake: any) => Promise<void>;
+  loadPool?: (tinlake: any) => Promise<void>;
   resetTransactionState?: () => void;
-  analytics?: AnalyticsState;
+  pool?: PoolState;
   transactions?: TransactionState;
 }
 
@@ -33,8 +33,8 @@ class InvestmentsView extends React.Component<Props, State> {
   };
 
   componentDidMount() {
-    const { loadAnalyticsData, tinlake } = this.props;
-    loadAnalyticsData && loadAnalyticsData(tinlake);
+    const { loadPool, tinlake } = this.props;
+    loadPool && loadPool(tinlake);
   }
 
   componentWillUnmount() {
@@ -44,12 +44,12 @@ class InvestmentsView extends React.Component<Props, State> {
 
   render() {
     const { investorAddress, is } = this.state;
-    const { analytics, auth, tinlake, transactions } = this.props;
+    const { pool, auth, tinlake, transactions } = this.props;
     const canLoadInvestor = (is !== 'loading') && (investorAddress !== '') && isValidAddress(investorAddress);
 
     return <Box>
 
-      {analytics && analytics.data && <Box margin={{ bottom: 'medium' }}> <InvestmentsOverview data={analytics && analytics.data} /> </Box>}
+      {pool && pool.data && <Box margin={{ bottom: 'medium' }}> <InvestmentsOverview data={pool && pool.data} /> </Box>}
 
       {transactions && transactions.errorMessage &&
         <Box pad={{ horizontal: 'medium' }} margin={{ bottom: 'small' }}>
@@ -58,8 +58,8 @@ class InvestmentsView extends React.Component<Props, State> {
           </Alert>
         </Box>}
 
-      {analytics && analytics.data && auth && auth.user && auth.user.permissions.canSetMinimumJuniorRatio &&
-        <JuniorRatio tinlake={tinlake} minJuniorRatio={analytics.data.minJuniorRatio} />
+      {pool && pool.data && auth && auth.user && auth.user.permissions.canSetMinimumJuniorRatio &&
+        <JuniorRatio tinlake={tinlake} minJuniorRatio={pool.data.minJuniorRatio} />
       }
 
       <Box margin={{ top: 'large' }} pad={{ horizontal: 'medium' }}>
@@ -93,4 +93,4 @@ class InvestmentsView extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadAnalyticsData, resetTransactionState })(InvestmentsView);
+export default connect(state => state, { loadPool, resetTransactionState })(InvestmentsView);

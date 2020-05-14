@@ -1,14 +1,16 @@
 import Tinlake from 'tinlake';
-import config from '../../config';
+import config, { Pool } from '../../config';
 import Eth from 'ethjs';
 
-const { contractAddresses, nftDataDefinition, transactionTimeout, rpcUrl, contractConfig } = config;
 let tinlake: any | null = null;
 let authing = false;
 let authed = false;
 
 export async function getTinlake() {
-
+  // TODO: pass pool as param to function
+  const pool = config.pools[0] as Pool;
+  const { addresses,  contractConfig } = pool;
+  const { transactionTimeout, rpcUrl } = config;
   if (tinlake) { return tinlake; }
 
   const chosenProvider = sessionStorage && sessionStorage.getItem('chosenProvider');
@@ -19,16 +21,15 @@ export async function getTinlake() {
     const injectedProvider = await Web3Connect.ConnectToInjected();
     const accounts = await injectedProvider.enable();
     const account = accounts[0];
-    tinlake = new Tinlake({ transactionTimeout, contractConfig, contractAddresses: contractAddresses as any,
-      provider: injectedProvider, nftDataOutputs: nftDataDefinition.contractCall.outputs as any });
+
+    tinlake = new Tinlake({ transactionTimeout, contractConfig, contractAddresses: addresses, provider: injectedProvider });
     await tinlake.setContractAddresses();
     tinlake!.setEthConfig({ from: account, gasLimit: `0x${config.gasLimit.toString(16)}` });
     authed = true;
     authing = false;
   } else {
     const httpProvider = new Eth.HttpProvider(rpcUrl);
-    tinlake = new Tinlake({ transactionTimeout, contractConfig, contractAddresses: contractAddresses as any,
-      provider: httpProvider, nftDataOutputs: nftDataDefinition.contractCall.outputs as any });
+    tinlake = new Tinlake({ transactionTimeout, contractConfig, contractAddresses: addresses, provider: httpProvider });
     await tinlake.setContractAddresses();
   }
 

@@ -7,8 +7,9 @@ import { BackLink } from '../BackLink';
 import { authTinlake } from '../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import NumberInput from '../NumberInput';
-import config from '../../config';
 import { PoolLink } from '../PoolLink';
+
+const NFT_REGISTRY = '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24';
 
 interface Props {
   tinlake: any;
@@ -45,7 +46,7 @@ class MintNFT extends React.Component<Props, State> {
 
   mint = async () => {
     const { referenceId, assetType, amount, tokenId } = this.state;
-    const registry = config.contractAddresses.COLLATERAL_NFT;
+    const registry = NFT_REGISTRY;
     {
       this.setState({ is: 'loading' });
       try {
@@ -66,7 +67,7 @@ class MintNFT extends React.Component<Props, State> {
 
   render() {
     const { is, tokenId, errorMsg, referenceId, assetType, amount } = this.state;
-    const registry = config.contractAddresses.COLLATERAL_NFT;
+    const registry = NFT_REGISTRY;
     return <Box>
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">

@@ -187,14 +187,16 @@ export async function setInterest(tinlake: any, loanId: string, debt: string, ra
   }
 }
 
-export async function getAnalytics(tinlake: any) {
+export async function getPool(tinlake: any) {
   const juniorReserve = await tinlake.getJuniorReserve();
   const juniorTokenPrice = await tinlake.getTokenPriceJunior();
   const seniorReserve = await tinlake.getSeniorReserve();
   const seniorTokenPrice = await tinlake.getTokenPriceSenior(tinlake.ethConfig.from);
   const seniorInterestRate = await tinlake.getSeniorInterestRate();
+  const seniorTokenSupply = await tinlake.getSeniorTotalSupply();
   const minJuniorRatio = await tinlake.getMinJuniorRatio();
   const juniorAssetValue = await tinlake.getAssetValueJunior();
+  const juniorTokenSupply = await tinlake.getJuniorTotalSupply();
   // temp fix: until solved on contract level
   const currentJuniorRatio = (juniorAssetValue.toString() === '0') ? new BN(0) : await tinlake.getCurrentJuniorRatio();
 
@@ -207,12 +209,14 @@ export async function getAnalytics(tinlake: any) {
           type: 'junior',
           availableFunds: juniorReserve,
           tokenPrice: juniorTokenPrice,
+          totalSupply: juniorTokenSupply,
           token: 'TIN'
         },
         senior: {
           type: 'senior',
           availableFunds: seniorReserve,
           tokenPrice: seniorTokenPrice,
+          totalSupply: seniorTokenSupply,
           token: 'DROP',
           interestRate: seniorInterestRate
         },
@@ -220,7 +224,7 @@ export async function getAnalytics(tinlake: any) {
       }
     };
   } catch (e) {
-    return loggedError(e, 'Could not get analytics data', '');
+    return loggedError(e, 'Could not get pool data', '');
   }
 }
 

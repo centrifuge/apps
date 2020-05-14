@@ -5,7 +5,7 @@ import { TrancheType, supply } from '../../../services/tinlake/actions';
 import { transactionSubmitted, responseReceived } from '../../../ducks/transactions';
 import { baseToDisplay, displayToBase, Investor } from 'tinlake';
 import { loadInvestor } from '../../../ducks/investments';
-import { loadAnalyticsData } from '../../../ducks/analytics';
+import { loadPool } from '../../../ducks/pool';
 import { connect } from 'react-redux';
 import { authTinlake } from '../../../services/tinlake';
 import BN from 'bn.js';
@@ -14,7 +14,7 @@ interface Props {
   investor: Investor;
   tinlake: any;
   loadInvestor?: (tinlake: any, address: string, refresh?: boolean) => Promise<void>;
-  loadAnalyticsData?: (tinlake: any) => Promise<void>;
+  loadPool?: (tinlake: any) => Promise<void>;
   transactionSubmitted?: (loadingMessage: string) => Promise<void>;
   responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>;
   trancheType: TrancheType;
@@ -30,7 +30,7 @@ class InvestorSupply extends React.Component<Props, State> {
   };
 
   supply = async () => {
-    const { transactionSubmitted, responseReceived, trancheType, tinlake, investor, loadInvestor, loadAnalyticsData } = this.props;
+    const { transactionSubmitted, responseReceived, trancheType, tinlake, investor, loadInvestor, loadPool } = this.props;
     const { supplyAmount } = this.state;
     transactionSubmitted && transactionSubmitted('Investment initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.');
     try {
@@ -46,7 +46,7 @@ class InvestorSupply extends React.Component<Props, State> {
         responseReceived && responseReceived('Investment successful. Please check your wallet for DROP tokens.', null);
       }
       loadInvestor && loadInvestor(tinlake, investor.address);
-      loadAnalyticsData && loadAnalyticsData(tinlake);
+      loadPool && loadPool(tinlake);
     } catch (e) {
       responseReceived && responseReceived(null, `Investment failed. ${e}`);
       console.log(e);
@@ -85,4 +85,4 @@ class InvestorSupply extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadInvestor, loadAnalyticsData, transactionSubmitted, responseReceived })(InvestorSupply);
+export default connect(state => state, { loadInvestor, loadPool, transactionSubmitted, responseReceived })(InvestorSupply);

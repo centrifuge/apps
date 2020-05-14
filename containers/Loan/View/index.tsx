@@ -70,19 +70,6 @@ class LoanView extends React.Component<Props> {
       <LoanData loan={loan!} />
       {loan && loan.status !== 'closed' &&
         <Box>
-          {/* {hasAdminPermissions &&
-            <Box margin={{ top: 'large', bottom: 'large' }} >
-              <Box gap="medium" align="start" margin={{ bottom: 'medium' }} >
-                <Heading level="5" margin="none">Loan Settings</Heading>
-              </Box>
-              <Box direction="row">
-                {auth.user && auth.user.permissions.canSetInterestRate &&
-                  <LoanInterest loan={loan!} tinlake={tinlake}> </LoanInterest>
-                }
-              </Box>
-            </Box>
-          } */}
-
           {hasBorrowerPermissions &&
             <Box margin={{ top: 'large', bottom: 'large' }} >
               <Box gap="medium" align="start" margin={{ bottom: 'medium' }} >

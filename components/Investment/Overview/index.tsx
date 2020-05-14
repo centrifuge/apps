@@ -4,10 +4,10 @@ import { baseToDisplay, feeToInterestRate } from 'tinlake';
 import BN from 'bn.js';
 import NumberDisplay from '../../NumberDisplay';
 import DashboardMetric from '../../DashboardMetric';
-import { AnalyticsData } from '../../../ducks/analytics';
+import { PoolData } from '../../../ducks/pool';
 
 interface Props {
-  data: AnalyticsData;
+  data: PoolData;
 }
 
 class InvestmentsOverview extends React.Component<Props> {
