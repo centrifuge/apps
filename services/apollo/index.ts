@@ -42,6 +42,49 @@ class Apollo {
     });
   }
 
+  // TODO: REFACTOR
+
+  injectPoolData(result: any): PoolData[] {
+    const configPools: object[] = [];
+    config.pools.forEach((cPool) => {
+      const cache = {};
+      const cache2 = {
+        asset: cPool.asset,
+        name: cPool.name
+      };
+                            // @ts-ignore
+      cache[`${cPool.addresses.ROOT_CONTRACT}`] = cache2;
+      configPools.push(cache);
+    }
+     );
+    const pools =  result.data.pools;
+    // @ts-ignore
+    pools.forEach((gPool) => {
+      configPools.forEach((cPool) => {
+         // @ts-ignore
+        if (cPool[gPool.id]) {
+           // @ts-ignore
+          gPool.name = cPool[gPool.id].name;
+           // @ts-ignore
+          gPool.asset = cPool[gPool.id].asset;
+        }
+      });
+    });
+
+    const r = pools.map((pool: any) => ({
+      id: pool.id,
+      name: pool.name,
+      asset: pool.asset,
+      ongoingLoans: pool.ongoingLoans.length, // TODO add count field to subgraph, inefficient to query all loans
+      totalDebt: new BN(pool.totalDebt),
+      totalRepaysAggregatedAmount: new BN(pool.totalRepaysAggregatedAmount),
+      weightedInterestRate: new BN(pool.weightedInterestRate),
+      weightedInterestRateDrop: new BN(0) // TODO how to get this value?
+    }));
+
+    return r;
+  }
+
   async getPools(): Promise<PoolsData> {
     let result;
     try {
@@ -65,16 +108,7 @@ class Apollo {
       throw new Error(`error occured while fetching loans from apollo ${err}`);
     }
 
-    const pools: PoolData[] = result?.data.pools.map((pool: any) => ({
-      id: pool.id,
-      name: '', // TODO read from env
-      type: '', // TODO read from env
-      ongoingLoans: pool.ongoingLoans.length, // TODO add count field to subgraph, inefficient to query all loans
-      totalDebt: new BN(pool.totalDebt),
-      totalRepaysAggregatedAmount: new BN(pool.totalRepaysAggregatedAmount),
-      weightedInterestRate: new BN(pool.weightedInterestRate),
-      weightedInterestRateDrop: new BN(0) // TODO how to get this value?
-    }));
+    const pools: PoolData[] = this.injectPoolData(result);
 
     return {
       pools,

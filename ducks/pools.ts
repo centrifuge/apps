@@ -11,7 +11,7 @@ const RECEIVE_POOLS = 'tinlake-ui/pools/RECEIVE_POOLS';
 export interface PoolData {
   id: string;
   name: string;
-  type: string;
+  asset: string;
   ongoingLoans: number;
   totalDebt: BN;
   totalRepaysAggregatedAmount: BN;
@@ -51,7 +51,6 @@ export function loadPools(): ThunkAction<Promise<void>, PoolsState, undefined, A
   return async (dispatch) => {
     dispatch({ type: LOAD_POOLS });
     const poolsData = await Apollo.getPools();
-    console.log({ poolsData });
     dispatch({ data: poolsData, type: RECEIVE_POOLS });
   };
 }
