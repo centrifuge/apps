@@ -29,7 +29,7 @@ class Dashboard extends React.Component<Props> {
           />
         ) : (
           pools.data &&
-            <Box>
+            <Box basis={'full'}>
               <Box margin="large">
                 <Text alignSelf="center">
                   Text Placeholder

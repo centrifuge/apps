@@ -16,7 +16,7 @@ class PoolList extends React.Component<Props> {
     return <Box margin={{ bottom: 'xlarge' }}>
       <DataTable style={{ tableLayout: 'auto' }} data={pools} sortable columns={[
         {
-          header: 'Pool', property: 'name', align: 'end',
+          header: 'Pool', property: 'name', align: 'center',
           render: (p: PoolData) =>
             <Box style={{ maxWidth: '150px' }}>
               <DisplayField
@@ -26,7 +26,7 @@ class PoolList extends React.Component<Props> {
             </Box>
         },
         {
-          header: 'Asset Type', property: 'type', align: 'end',
+          header: 'Asset Type', property: 'type', align: 'center',
           render: (p: PoolData) =>
             <Box style={{ maxWidth: '150px' }}>
               <DisplayField
@@ -36,7 +36,7 @@ class PoolList extends React.Component<Props> {
             </Box>
         },
         {
-          header: 'Ongoing Loans', property: 'ongoingLoans', align: 'end',
+          header: 'Ongoing Loans', property: 'ongoingLoans', align: 'center',
           render: (p: PoolData) =>
             <Box style={{ maxWidth: '150px' }}>
               <DisplayField
@@ -46,7 +46,7 @@ class PoolList extends React.Component<Props> {
             </Box>
         },
         {
-          header: 'Outstanding Debt (DAI)', property: 'totalDebt', align: 'end',
+          header: 'Outstanding Debt (DAI)', property: 'totalDebt', align: 'center',
           render: (p: PoolData) =>
             <Box style={{ maxWidth: '150px' }}>
               <NumberDisplay suffix="" precision={4}
@@ -54,24 +54,24 @@ class PoolList extends React.Component<Props> {
             </Box>
         },
         {
-          header: 'Total Repaid Debt (DAI)', property: 'totalRepaid', align: 'end',
+          header: 'Total Repaid Debt (DAI)', property: 'totalRepaid', align: 'center',
           render: (p: PoolData) =>
             <NumberDisplay suffix="" precision={4}
             value={baseToDisplay(p.totalRepaysAggregatedAmount, 18)} />
         },
         {
-          header: 'Avg Interest Rate (APY)', property: 'avgInterest', align: 'end',
+          header: 'Avg Interest Rate (APY)', property: 'avgInterest', align: 'center',
           render: (p: PoolData) =>
             <NumberDisplay suffix="%" value={feeToInterestRate(p.weightedInterestRate)} />
         },
         {
-          header: 'DROP Interest Rate', property: 'dropInterest', align: 'end',
+          header: 'DROP Interest Rate', property: 'dropInterest', align: 'center',
           render: (p: PoolData) =>
             <NumberDisplay suffix="%" value={feeToInterestRate(p.weightedInterestRateDrop)} />
         }
         ,
         {
-          header: 'Actions', property: 'id', align: 'end',
+          header: 'Actions', property: 'id', align: 'center',
           render: (p: PoolData) => {
             return <Box direction="row" gap="small">
                 <Link href={p.id }>
