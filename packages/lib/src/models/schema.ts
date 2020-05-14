@@ -9,6 +9,8 @@ export interface Attribute {
   placeholder?: string,
   defaultValue?: string,
   type: AttrTypes.STRING | AttrTypes.TIMESTAMP | AttrTypes.INTEGER | AttrTypes.BYTES | AttrTypes.DECIMAL | AttrTypes.PERCENT
+  subtype?: AttrSubtypes.SIGNED,
+  fieldWriteAccess?: string
 }
 
 export interface Registry {
@@ -27,6 +29,9 @@ export enum AttrTypes {
   PERCENT = 'percent',
 }
 
+export enum AttrSubtypes {
+  SIGNED = 'signed',
+}
 
 export interface FormFeatures {
   columnNo?: number,
@@ -93,6 +98,8 @@ export enum AttributesErrors {
   REFERENCE_ID_MISSING = 'Attributes does not contain a reference_id field',
   PLACEHOLDER_FORMAT = 'Placeholder property must be a string',
   DEFAULT_VALUE_FORMAT = 'defaultValue property must be a string',
+  SUBTYPE_NOT_SUPPORTED = 'subtype is not valid. Please also check for white spaces!',
+  FIELD_WRITE_ACCESS_FORMAT = 'fieldWriteAccess property must be a valid eth address',
 }
 
 
@@ -274,6 +281,16 @@ export class Schema {
         //Make sure placeholder is a string
         if (attr.hasOwnProperty('placeholder') && !isString(attr.placeholder)) {
           throw generateAttributeError(attr.name, AttributesErrors.PLACEHOLDER_FORMAT);
+        }
+
+        //Make sure subtype belongs to AttrSubtypes
+        const supportedSubtypes = Object.values(AttrSubtypes);
+        if (attr.hasOwnProperty('subtype') && supportedSubtypes.indexOf(attr.subtype) < 0)
+          throw generateAttributeError(attr.name, AttributesErrors.SUBTYPE_NOT_SUPPORTED);
+
+        //Make sure fieldWriteAccess is a valid string representing an eth address
+        if (attr.hasOwnProperty('fieldWriteAccess') && !isValidAddress(typeof attr.fieldWriteAccess === 'string' ? attr.fieldWriteAccess : '')) {
+          throw generateAttributeError(attr.name, AttributesErrors.FIELD_WRITE_ACCESS_FORMAT);
         }
 
         return attr.name === 'reference_id';

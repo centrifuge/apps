@@ -96,6 +96,39 @@ describe('Schema validations', () => {
       }).toThrow(AttributesErrors.PLACEHOLDER_FORMAT);
     });
 
+    it('should fail when subtype is not supported', () => {
+      expect(() => {
+        Schema.validateAttributes([{
+          name: 'test',
+          label: 'test',
+          type: AttrTypes.STRING,
+          subtype: 'test',
+        } as any]);
+      }).toThrow(AttributesErrors.SUBTYPE_NOT_SUPPORTED);
+    });
+
+    it('should fail when fieldWriteAccess is not a string', () => {
+      expect(() => {
+        Schema.validateAttributes([{
+          name: 'test',
+          label: 'test',
+          type: AttrTypes.STRING,
+          fieldWriteAccess: 33,
+        } as any]);
+      }).toThrow(AttributesErrors.FIELD_WRITE_ACCESS_FORMAT);
+    });
+
+    it('should fail when fieldWriteAccess is not a valid eth address', () => {
+      expect(() => {
+        Schema.validateAttributes([{
+          name: 'test',
+          label: 'test',
+          type: AttrTypes.STRING,
+          fieldWriteAccess: 'test',
+        } as any]);
+      }).toThrow(AttributesErrors.FIELD_WRITE_ACCESS_FORMAT);
+    });
+
     it('should fail when defaultValue is not a string', () => {
       expect(() => {
         Schema.validateAttributes([{
