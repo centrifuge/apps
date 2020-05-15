@@ -35,19 +35,37 @@ const defaultOptions: DefaultOptions = {
 class Apollo {
   client: ApolloClient<NormalizedCacheObject>;
   constructor() {
-    this.client =  new ApolloClient({
+    this.client = new ApolloClient({
       cache,
       link,
       defaultOptions
     });
   }
 
+  injectPoolData(pools: any[]): PoolData[] {
+    const configPools = config.pools;
+    const tinlakePools = pools.map((pool: any) => {
+      const configPool = configPools.find(p => p.addresses.ROOT_CONTRACT === pool.id);
+      return {
+        id: pool.id,
+        name: configPool && configPool?.name || '',
+        asset: configPool && configPool?.asset || '',
+        ongoingLoans: pool.ongoingLoans.length, // TODO add count field to subgraph, inefficient to query all loans
+        totalDebt: new BN(pool.totalDebt),
+        totalRepaysAggregatedAmount: new BN(pool.totalRepaysAggregatedAmount),
+        weightedInterestRate: new BN(pool.weightedInterestRate),
+        weightedInterestRateDrop: new BN(0) // TODO how to get this value?
+      };
+    }).filter(pool => pool.name !== '');
+    return tinlakePools;
+  }
+
   async getPools(): Promise<PoolsData> {
     let result;
     try {
       result = await this.client
-      .query({ // TODO query only pools from env to exclude inactive pools
-        query: gql`
+        .query({
+          query: gql`
         {
           pools {
             id,
@@ -60,21 +78,12 @@ class Apollo {
           }
         }
         `
-      });
+        });
     } catch (err) {
       throw new Error(`error occured while fetching loans from apollo ${err}`);
     }
 
-    const pools: PoolData[] = result?.data.pools.map((pool: any) => ({
-      id: pool.id,
-      name: '', // TODO read from env
-      type: '', // TODO read from env
-      ongoingLoans: pool.ongoingLoans.length, // TODO add count field to subgraph, inefficient to query all loans
-      totalDebt: new BN(pool.totalDebt),
-      totalRepaysAggregatedAmount: new BN(pool.totalRepaysAggregatedAmount),
-      weightedInterestRate: new BN(pool.weightedInterestRate),
-      weightedInterestRateDrop: new BN(0) // TODO how to get this value?
-    }));
+    const pools = (!result.data || !result.data.pools) ? [] : this.injectPoolData(result.data.pools);
 
     return {
       pools,
@@ -89,8 +98,8 @@ class Apollo {
     let result;
     try {
       result = await this.client
-      .query({
-        query: gql`
+        .query({
+          query: gql`
         {
           pools (where : {id: "${root}"}){
             id
@@ -117,11 +126,11 @@ class Apollo {
           }
         }
         `
-      });
+        });
     } catch (err) {
       console.log(`error occured while fetching loans from apollo ${err}`);
       return {
-        data:[]
+        data: []
       };
     }
     const pool = result.data.pools[0];
@@ -133,8 +142,8 @@ class Apollo {
     let result;
     try {
       result = await this.client
-      .query({
-        query: gql`
+        .query({
+          query: gql`
         {
           proxies (where: {owner:"${user}"})
             {
@@ -143,20 +152,20 @@ class Apollo {
             }
           }
         `
-      });
+        });
     } catch (err) {
       console.log(`no proxies found for address ${user} ${err}`);
       return {
-        data:[]
+        data: []
       };
     }
-    const proxies = result.data.proxies.map((e: {id: string, owner: string}) => e.id);
+    const proxies = result.data.proxies.map((e: { id: string, owner: string }) => e.id);
     return { data: proxies };
   }
 }
 
-function toTinlakeLoans(loans: any[]) : {data: Loan[]} {
-  const tinlakeLoans : Loan[] = [];
+function toTinlakeLoans(loans: any[]): { data: Loan[] } {
+  const tinlakeLoans: Loan[] = [];
 
   loans.forEach((loan) => {
     const tinlakeLoan = {
