@@ -89,7 +89,7 @@ class Apollo {
     let result;
     try {
       result = await this.client
-      .query({ // TODO query only pools from env to exclude inactive pools
+      .query({
         query: gql`
         {
           pools {
