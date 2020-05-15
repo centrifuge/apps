@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import {Box, Text} from 'grommet';
+import { Box, Text } from 'grommet';
 import { Spinner } from '@centrifuge/axis-spinner';
 import { loadPools, PoolsState } from '../../ducks/pools';
 import PoolList from '../../components/PoolList';
