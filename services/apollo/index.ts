@@ -44,8 +44,6 @@ class Apollo {
 
   injectPoolData(pools: any[]): PoolData[] {
     const configPools = config.pools;
-
-    console.log("pools", pools);
     const tinlakePools = pools.map((pool: any) => {
       const configPool = configPools.find(p => p.addresses.ROOT_CONTRACT === pool.id);
       return {
