@@ -50,7 +50,7 @@ class Apollo {
         id: pool.id,
         name: configPool && configPool?.name || '',
         asset: configPool && configPool?.asset || '',
-        ongoingLoans: pool.ongoingLoans.length || 0, // TODO add count field to subgraph, inefficient to query all loans
+        ongoingLoans: pool.ongoingLoans.length, // TODO add count field to subgraph, inefficient to query all loans
         totalDebt: new BN(pool.totalDebt),
         totalRepaysAggregatedAmount: new BN(pool.totalRepaysAggregatedAmount),
         weightedInterestRate: new BN(pool.weightedInterestRate),
