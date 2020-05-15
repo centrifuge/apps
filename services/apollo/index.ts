@@ -55,8 +55,8 @@ class Apollo {
         totalRepaysAggregatedAmount: new BN(pool.totalRepaysAggregatedAmount),
         weightedInterestRate: new BN(pool.weightedInterestRate),
         weightedInterestRateDrop: new BN(0) // TODO how to get this value?
-      }
-    }).filter(pool => pool.name != '');
+      };
+    }).filter(pool => pool.name !== '');
     return tinlakePools;
   }
 
@@ -83,7 +83,7 @@ class Apollo {
       throw new Error(`error occured while fetching loans from apollo ${err}`);
     }
 
-    let pools = (!result.data || !result.data.pools) ? [] : this.injectPoolData(result.data.pools);
+    const pools = (!result.data || !result.data.pools) ? [] : this.injectPoolData(result.data.pools);
 
     return {
       pools,
