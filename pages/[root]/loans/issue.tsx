@@ -7,7 +7,6 @@ import SecondaryHeader from '../../../components/SecondaryHeader';
 import { menuItems } from '../../../menuItems';
 import { BackLink } from '../../../components/BackLink';
 import Auth from '../../../components/Auth';
-import Alert from '../../../components/Alert';
 
 interface Props {
   tokenId: string;
@@ -31,8 +30,8 @@ class LoanIssuePage extends React.Component<Props> {
       >
         <Box width="xlarge" >
           <WithTinlake render={tinlake =>
-            <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization
-              render={auth => auth && auth.state === 'loaded' && auth.user ?
+            <Auth tinlake={tinlake}
+              render={auth =>
                 <Box>
                   <SecondaryHeader>
                     <Box direction="row" gap="small" align="center">
@@ -42,9 +41,6 @@ class LoanIssuePage extends React.Component<Props> {
                   </SecondaryHeader>
                   <IssueLoan tinlake={tinlake} auth={auth} tokenId={tokenId} registry={registry}/>
                 </Box>
-                :
-                <Alert margin="medium" type="error">
-                  Please authenticate to access this page</Alert>
               } />
           } />
         </Box>
