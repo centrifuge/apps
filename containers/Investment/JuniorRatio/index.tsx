@@ -61,11 +61,11 @@ class JuniorRatio extends React.Component<Props, State> {
     const { minJuniorRatio } = this.state;
     return <Box pad={{ horizontal: 'medium' }}>
             <Box direction="row" margin={{ top: 'medium' }}>
-                <Heading level="4">Set minimum TIN/DROP ratio</Heading>
+                <Heading level="4">Set minimum TIN ratio</Heading>
             </Box>
             <Box direction="row" gap="medium" >
                 <Box basis={'1/3'}>
-                    <FormField label="Min TIN/DROP ratio">
+                    <FormField label="Min TIN ratio">
                         <NumberInput value={baseToDisplay(minJuniorRatio, 27)} precision={2}
                             onValueChange={({ value }) =>
                                 this.setState({ minJuniorRatio: displayToBase(value, 27) })}
@@ -73,7 +73,7 @@ class JuniorRatio extends React.Component<Props, State> {
                     </FormField>
                 </Box>
                 <Box align="start">
-                    <Button primary label="Set min TIN/DROP ratio" onClick={this.setMinJuniorRatio} />
+                    <Button primary label="Set min TIN ratio" onClick={this.setMinJuniorRatio} />
                 </Box>
             </Box>
         </Box>;
