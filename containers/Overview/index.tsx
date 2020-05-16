@@ -12,6 +12,7 @@ import LoanListData from '../../components/Loan/List';
 import Tinlake from 'tinlake/dist/Tinlake';
 import { Pool } from '../../config';
 import { PoolLink } from '../../components/PoolLink';
+import { toPrecision } from '../../utils/toPrecision';
 
 interface Props {
   tinlake: any;
@@ -74,13 +75,13 @@ class Overview extends React.Component<Props> {
                   <TableCell scope="row">
                     Outstanding Debt
                   </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>DAI {baseToDisplay(outstandingDebt, 18)}</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>DAI {toPrecision(baseToDisplay(outstandingDebt, 18), 2)}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
                     DAI available to borrow
                   </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>DAI {baseToDisplay(availableFunds, 18)}</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>DAI {toPrecision(baseToDisplay(availableFunds, 18), 2)}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -92,31 +93,31 @@ class Overview extends React.Component<Props> {
                   <TableCell scope="row">
                     Current TIN ratio
                     </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>{baseToDisplay(currentJuniorRatio, 25)} %</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>{toPrecision(baseToDisplay(currentJuniorRatio, 25), 2)} %</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
                     Minimum TIN ratio
                   </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>{baseToDisplay(minJuniorRatio, 25)} %</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>{toPrecision(baseToDisplay(minJuniorRatio, 25), 2)} %</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
                     DROP APY
                   </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>{feeToInterestRate(dropRate)} %</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>{toPrecision(feeToInterestRate(dropRate), 2)} %</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
                     DROP Supply
                   </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>{baseToDisplay(seniorTokenSupply, 18)}</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>{toPrecision(baseToDisplay(seniorTokenSupply, 18), 2)}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
                     TIN Supply
                   </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>{baseToDisplay(juniorTokenSupply, 18)}</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>{toPrecision(baseToDisplay(juniorTokenSupply, 18), 2)}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>

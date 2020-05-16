@@ -49,14 +49,14 @@ class PoolList extends React.Component<Props> {
           header: 'Outstanding Debt (DAI)', property: 'totalDebt', align: 'center',
           render: (p: PoolData) =>
             <Box style={{ maxWidth: '150px' }}>
-              <NumberDisplay suffix="" precision={4}
+              <NumberDisplay suffix="" precision={2}
               value={baseToDisplay(p.totalDebt, 18)} />
             </Box>
         },
         {
           header: 'Total Repaid Debt (DAI)', property: 'totalRepaid', align: 'center',
           render: (p: PoolData) =>
-            <NumberDisplay suffix="" precision={4}
+            <NumberDisplay suffix="" precision={2}
             value={baseToDisplay(p.totalRepaysAggregatedAmount, 18)} />
         },
         {
