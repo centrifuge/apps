@@ -67,6 +67,7 @@
     "@types/styled-components": "^4.4.3",
     "@types/yup": "^0.28.3",
     "@zeit/next-typescript": "^1.1.1",
+    "babel-plugin-styled-components": "^1.10.7",
     "dotenv": "^8.2.0",
     "jest": "^24.9.0",
     "react-test-renderer": "^16.13.1",
