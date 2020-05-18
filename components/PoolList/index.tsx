@@ -5,7 +5,7 @@ import { DisplayField } from '@centrifuge/axis-display-field';
 import { baseToDisplay, feeToInterestRate } from 'tinlake';
 import NumberDisplay from '../NumberDisplay';
 import ChevronRight from '../ChevronRight';
-import Router from 'next/router'
+import Router from 'next/router';
 
 interface Props {
   pools?: PoolData[];
@@ -14,7 +14,7 @@ interface Props {
 class PoolList extends React.Component<Props> {
 
   clickRow = ({ datum }: { datum?: PoolData, index?: number}) => {
-    Router.push("/[root]", `/${datum!.id}`)
+    Router.push('/[root]', `/${datum!.id}`);
   }
 
   render() {

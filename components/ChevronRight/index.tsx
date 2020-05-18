@@ -7,7 +7,7 @@ interface Props {
 }
 
 const ChevronRight: FunctionComponent<Props> = (props) => {
-  return <Img src="/static/chevron-right.svg" style={{ width: 130 }} />
+  return <Img src="/static/chevron-right.svg" style={{ width: 130 }} />;
 };
 
 const Img = styled(Image)`
