@@ -33,10 +33,6 @@ class LoanList extends React.Component<Props> {
               <DisplayField
                 as={'span'}
                 value={hexToInt(bnToHex(l.tokenId).toString())}
-                link={{
-                  href: getNFTLink(hexToInt(bnToHex(l.tokenId).toString()), l.registry),
-                  target: '_blank'
-                }}
               />
             </Box>
         },
