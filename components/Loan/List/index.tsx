@@ -24,7 +24,7 @@ class LoanList extends React.Component<Props> {
   render() {
     const { loans } =  this.props;
     return <Box>
-      <DataTable style={{ tableLayout: 'auto' }} data={loans} sort={{ direction: "desc", property: 'loanId' }} sortable
+      <DataTable style={{ tableLayout: 'auto' }} data={loans} sort={{ direction: 'desc', property: 'loanId' }} sortable
         onClickRow={this.clickRow as any} columns={[
           { header: <HeaderCell text={'Loan ID'}></HeaderCell>, property: 'loanId', align: 'end' },
           {
