@@ -7,7 +7,6 @@ import { menuItems } from '../../../menuItems';
 import SecondaryHeader from '../../../components/SecondaryHeader';
 import { BackLink } from '../../../components/BackLink';
 import Auth from '../../../components/Auth';
-import Alert from '../../../components/Alert';
 
 interface Props {
   investorAddress: string;
@@ -31,8 +30,8 @@ class InvestorPage extends React.Component<Props> {
       >
         <Box width="xlarge" >
           <WithTinlake render={tinlake =>
-            <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization
-              render={auth => auth && auth.state === 'loaded' && auth.user ?
+            <Auth tinlake={tinlake}
+              render={auth =>
                 <Box>
                   <SecondaryHeader>
                     <Box direction="row" gap="small" align="center">
@@ -48,9 +47,6 @@ class InvestorPage extends React.Component<Props> {
                   </SecondaryHeader>
                   <InvestorView investorAddress={investorAddress} tinlake={tinlake} auth={auth} />
                 </Box>
-                :
-                <Alert margin="medium" type="error">
-                  Please authenticate to access this page </Alert>
               } />
           } />
         </Box>

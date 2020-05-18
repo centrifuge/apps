@@ -103,8 +103,7 @@ class Header extends React.Component<HeaderProps, State> {
                 theme={theme}
                 menuItems={menuItems.filter((item) => {
                   return (
-                    user
-                    && (isDemo && item.env === 'demo' || item.env === '')
+                    (isDemo && item.env === 'demo' || item.env === '')
                     && !item.secondary
                   );
                 }
@@ -169,8 +168,7 @@ class Header extends React.Component<HeaderProps, State> {
                   theme={theme}
                   menuItems={menuItems.filter((item) => {
                     return (
-                      user
-                      && (isDemo && item.env === 'demo' || item.env === '')
+                      (isDemo && item.env === 'demo' || item.env === '')
                       && !item.secondary
                     );
                   }
