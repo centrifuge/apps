@@ -30,7 +30,7 @@
     "@centrifuge/axis-display-field": "^0.3.2-develop.51",
     "@centrifuge/axis-nav-bar": "^0.3.2-develop.47",
     "@centrifuge/axis-spinner": "^0.3.1",
-    "@centrifuge/axis-theme": "^0.2.1-develop.33",
+    "@centrifuge/axis-theme": "^0.2.1-develop.38",
     "@centrifuge/axis-utils": "^0.3.2-develop.49",
     "@types/node-fetch": "^2.5.7",
     "apollo-cache-inmemory": "^1.6.5",
