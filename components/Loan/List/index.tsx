@@ -1,6 +1,6 @@
 import * as React from 'react';
 import{ bnToHex, baseToDisplay, feeToInterestRate, Loan } from 'tinlake';
-import { Box, DataTable, Anchor, Text } from 'grommet';
+import { Box, DataTable, Text } from 'grommet';
 import NumberDisplay from '../../../components/NumberDisplay';
 import { DisplayField } from '@centrifuge/axis-display-field';
 import { hexToInt } from '../../../utils/etherscanLinkGenerator';
