@@ -1,20 +1,26 @@
 import * as React from 'react';
-import { Anchor, Box, DataTable } from 'grommet';
+import { Box, DataTable } from 'grommet';
 import { PoolData } from '../../ducks/pools';
 import { DisplayField } from '@centrifuge/axis-display-field';
 import { baseToDisplay, feeToInterestRate } from 'tinlake';
 import NumberDisplay from '../NumberDisplay';
-import Link from 'next/link';
+import ChevronRight from '../ChevronRight';
+import Router from 'next/router'
 
 interface Props {
   pools?: PoolData[];
 }
 
 class PoolList extends React.Component<Props> {
+
+  clickRow = ({ datum }: { datum?: PoolData, index?: number}) => {
+    Router.push("/[root]", `/${datum!.id}`)
+  }
+
   render() {
     const { pools } =  this.props;
     return <Box margin={{ bottom: 'xlarge' }}>
-      <DataTable style={{ tableLayout: 'auto' }} data={pools} sortable columns={[
+      <DataTable style={{ tableLayout: 'auto' }} data={pools} sortable onClickRow={this.clickRow as any} columns={[
         {
           header: 'Pool', property: 'name', align: 'center',
           render: (p: PoolData) =>
@@ -71,16 +77,9 @@ class PoolList extends React.Component<Props> {
         }
         ,
         {
-          header: 'Actions', property: 'id', align: 'center',
-          render: (p: PoolData) => {
-            return <Box direction="row" gap="small">
-                <Link href={p.id }>
-              <Anchor>View </Anchor></Link>
-              <Link href={`${p.id}/loans/issue`}>
-                <Anchor>Open Loan</Anchor></Link>
-              <Link href={`${p.id}/investments`}>
-                <Anchor>Invest</Anchor></Link>
-            </Box>;
+          header: '', property: 'id', align: 'center', sortable: false, size: '36px',
+          render: (_p: PoolData) => {
+            return <ChevronRight />;
           }
         }
       ]} />
