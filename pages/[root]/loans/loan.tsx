@@ -7,18 +7,17 @@ import SecondaryHeader from '../../../components/SecondaryHeader';
 import { menuItems } from '../../../menuItems';
 import { BackLink } from '../../../components/BackLink';
 import Auth from '../../../components/Auth';
+import { withRouter } from 'next/router';
+import { WithRouterProps } from 'next/dist/client/with-router';
 
-interface Props {
-  loanId: string;
+interface Props extends WithRouterProps {
 }
 
 class LoanPage extends React.Component<Props> {
-  static async getInitialProps({ query }: any) {
-    return { loanId: query.loanId };
-  }
 
   render() {
-    const { loanId } = this.props;
+    const { loanId }: { loanId: string } = this.props.router.query as any;
+
     return <Box align="center" pad={{ horizontal: 'small' }}>
       <Header
         selectedRoute={'/loans/loan'}
@@ -45,4 +44,4 @@ class LoanPage extends React.Component<Props> {
   }
 }
 
-export default LoanPage;
+export default withRouter(LoanPage);
