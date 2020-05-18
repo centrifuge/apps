@@ -28,7 +28,7 @@ class LoanListPage extends React.Component {
                     <SecondaryHeader>
                       <Heading level="3">Loans</Heading>
                       <PoolLink href={'/loans/issue'}>
-                        <Button primary label="Open Loan" disabled={!auth || !auth.user} />
+                        <Button primary label="Open Loan" />
                       </PoolLink>
                     </SecondaryHeader>
                     <LoanList tinlake={tinlake} auth={auth} />
