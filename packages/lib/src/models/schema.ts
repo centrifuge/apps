@@ -1,5 +1,6 @@
 import { isValidAddress } from 'ethereumjs-util';
 import { differenceWith, groupBy, isString } from 'lodash';
+import { Collaborator } from './collaborator';
 
 export interface Attribute {
   name: string,
@@ -75,6 +76,7 @@ export enum SchemaPropsErrors {
 
 export enum RegistriesErrors {
   REGISTRIES_FORMAT = 'Registries must an array of Registry objects. It can be empty',
+  COLLABORATORS_FORMAT = 'Collaborators must be an array of Collaborator objects. It can be empty',
   ADDRESS_PROP_MISSING = 'address property is missing or empty',
   ADDRESS_FORMAT = 'not a valid eth address',
   LABEL_PROP_MISSING = 'label property is missing or empty',
@@ -116,6 +118,7 @@ export class Schema {
     readonly name: string,
     readonly attributes: Attribute[],
     readonly registries: Registry[],
+    readonly collaborators: Collaborator[],
     readonly formFeatures?: FormFeatures,
     readonly archived?: boolean,
     readonly _id?: string,
@@ -135,6 +138,7 @@ export class Schema {
         },
       ],
       registries: [],
+      collaborators: [],
       formFeatures: {
         fundingAgreement: false,
         columnNo: 2,
@@ -151,12 +155,13 @@ export class Schema {
    * @param schema Schema
    */
   public static toEditableJson(schema: Schema): string {
-    const { name, attributes, registries, formFeatures, label } = schema;
+    const { name, attributes, registries, collaborators, formFeatures, label } = schema;
     return JSON.stringify({
       name,
       label,
       attributes,
       registries,
+      collaborators,
       formFeatures,
 
     }, null, 2);
@@ -243,6 +248,26 @@ export class Schema {
    * for finding a specific document in a list of documents created based on the schema
    * @param attributes Attribute[]
    */
+  public static validateCollaborators(collaborators: Collaborator[]) {
+    // Do not throw errors if the prop is undefined, null, false, empty string
+    if (!collaborators) return;
+
+    if (!Array.isArray(collaborators)) {
+      throw new Error(RegistriesErrors.COLLABORATORS_FORMAT);
+    }
+
+    collaborators.forEach(collaborator => {
+      Collaborator.validate(collaborator);
+    });
+  }
+
+  /**
+   * Validates attributes array for a schema
+   * attributes must set and have at least one attribute
+   * The method enforces the presence of a reference_id prop which is used
+   * for finding a specific document in a list of documents created based on the schema
+   * @param attributes Attribute[]
+   */
   public static validateAttributes(attributes: Attribute[]) {
     if (attributes && Array.isArray(attributes) && attributes.length > 0) {
       const refID = attributes.filter(attr => {
@@ -289,7 +314,7 @@ export class Schema {
           throw generateAttributeError(attr.name, AttributesErrors.SUBTYPE_NOT_SUPPORTED);
 
         //Make sure fieldWriteAccess is a valid string representing an eth address
-        if (attr.hasOwnProperty('fieldWriteAccess') && !isValidAddress(typeof attr.fieldWriteAccess === 'string' ? attr.fieldWriteAccess : '')) {
+        if (attr.hasOwnProperty('fieldWriteAccess') && !(isString(attr.fieldWriteAccess) && isValidAddress(attr.fieldWriteAccess || ''))) {
           throw generateAttributeError(attr.name, AttributesErrors.FIELD_WRITE_ACCESS_FORMAT);
         }
 
@@ -342,6 +367,7 @@ export class Schema {
   public static validate(schema: Schema) {
     Schema.validateSchemaProps(schema);
     Schema.validateRegistries(schema.registries);
+    Schema.validateCollaborators(schema.collaborators);
     Schema.validateAttributes(schema.attributes);
     Schema.validateFormFeatures(schema.formFeatures);
   }

@@ -24,11 +24,11 @@ export const defaultUser: User = {
 export const defaultContacts: Contact[] = [
   {
     name: 'First Contact',
-    address: '0xFirstContact',
+    address: '0xf15B1DDb4Ec697bf148F0417A0f397f2F6Bb6166',
   },
   {
     name: 'Second Contact',
-    address: '0xSecondContact',
+    address: '0x8d9015C37901ac41872Ddfc34fb97B1644c281c6',
   },
   {
     name: 'Third Contact',
@@ -39,18 +39,9 @@ export const defaultContacts: Contact[] = [
 
 
 export const defaultCollaborators = [
-  {
-    ...defaultContacts[0],
-    access: DOCUMENT_ACCESS.WRITE,
-  },
-  {
-    ...defaultContacts[1],
-    access: DOCUMENT_ACCESS.READ,
-  },
-  {
-    ...defaultContacts[2],
-    access: DOCUMENT_ACCESS.WRITE,
-  },
+  new Collaborator(defaultContacts[0].address || '', defaultContacts[0].name || '', DOCUMENT_ACCESS.WRITE),
+  new Collaborator(defaultContacts[1].address || '', defaultContacts[1].name || '', DOCUMENT_ACCESS.READ),
+  new Collaborator(defaultContacts[2].address || '', defaultContacts[2].name || '', DOCUMENT_ACCESS.WRITE),
 ];
 
 
@@ -75,6 +66,7 @@ export const defaultSchemas = [
         ],
       },
     ],
+    collaborators: [],
     formFeatures: {
       fundingAgreement: true,
       comments: true,
@@ -116,6 +108,7 @@ export const defaultSchemas = [
   {
     name: 'second_schema',
     registries: [],
+    collaborators: [],
     attributes: [
       {
         name: 'reference_id',

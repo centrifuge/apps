@@ -7,6 +7,7 @@ import {
   Schema,
   SchemaPropsErrors,
 } from '../schema';
+import { Collaborator, CollaboratorErrors } from '../collaborator';
 
 /* tslint:disable */
 describe('Schema validations', () => {
@@ -242,6 +243,18 @@ describe('Schema validations', () => {
       expect(() => {
         Schema.validateRegistries({} as any);
       }).toThrow(RegistriesErrors.REGISTRIES_FORMAT);
+    });
+
+    it('should fail when collaborators is not set or not an array', () => {
+      expect(() => {
+        Schema.validateCollaborators({} as any);
+      }).toThrow(RegistriesErrors.COLLABORATORS_FORMAT);
+    });
+
+    it('should fail when collaborators is invalid', () => {
+      expect(() => {
+        Schema.validateCollaborators([{ address: '0xInvalid' } as any]);
+      }).toThrow(CollaboratorErrors.ADDRESS_FORMAT);
     });
 
     it('should fail if a registry does not contain an address prop', () => {
@@ -498,6 +511,7 @@ describe('Schema validations', () => {
         name: 'test',
         attributes: [],
         registries: [],
+        collaborators: [],
         formFeatures: {},
         archived: true,
       };

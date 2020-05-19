@@ -42,6 +42,7 @@ describe('SchemasController', () => {
         ],
       },
     ],
+    collaborators: [],
   });
   let schemaToCreate;
 
@@ -53,6 +54,7 @@ describe('SchemasController', () => {
       schemaData.name,
       schemaData.attributes,
       schemaData.registries,
+      schemaData.collaborators,
     );
 
     schemaModule = await Test.createTestingModule({

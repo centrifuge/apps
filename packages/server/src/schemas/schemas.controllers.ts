@@ -37,6 +37,7 @@ export class SchemasController {
         schema.name,
         schema.attributes,
         schema.registries,
+        schema.collaborators,
         schema.formFeatures,
       );
     } catch (err) {
