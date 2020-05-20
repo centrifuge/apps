@@ -66,12 +66,12 @@ class PoolList extends React.Component<Props> {
             value={baseToDisplay(p.totalRepaysAggregatedAmount, 18)} />
         },
         {
-          header: 'Avg Interest Rate (APY)', property: 'avgInterest', align: 'center',
+          header: 'Avg Loan APR', property: 'avgInterest', align: 'center',
           render: (p: PoolData) =>
             <NumberDisplay suffix="%" value={feeToInterestRate(p.weightedInterestRate)} />
         },
         {
-          header: 'DROP Interest Rate', property: 'dropInterest', align: 'center',
+          header: 'DROP APR', property: 'dropInterest', align: 'center',
           render: (p: PoolData) =>
             <NumberDisplay suffix="%" value={feeToInterestRate(p.weightedInterestRateDrop)} />
         }

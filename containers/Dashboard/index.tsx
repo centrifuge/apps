@@ -39,9 +39,8 @@ class Dashboard extends React.Component<Props> {
                     Asset Originators can responsibly bridge real-world assets into DeFi and access bankless liquidity.
                     Investors can earn attractive yields on different tokenized real-world assets such as invoices, mortgages or streaming royalties.
                     Tinlake’s smart contract platform coordinates the different parties required to structure, administer and finance collateralized pools of these real-world assets.
+                    <Anchor margin={{ left: 'xsmall', top: 'small' }} href="https://centrifuge.io/products/tinlake/" target="_blank" label="Learn More" />
                   </Text>
-                  <Anchor margin={{ top: 'small' }} href="https://centrifuge.io/products/tinlake/" target="_blank" label="Learn More" />
-
                 </Box>
               </Box>
               <Box direction="row" gap="large" margin={{ bottom: 'medium' }} justify="evenly">
