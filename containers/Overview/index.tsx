@@ -103,7 +103,7 @@ class Overview extends React.Component<Props> {
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
-                    DROP APY
+                    DROP APR
                   </TableCell>
                   <TableCell style={{ textAlign: 'end' }}>{toPrecision(feeToInterestRate(dropRate), 2)} %</TableCell>
                 </TableRow>

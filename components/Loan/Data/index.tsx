@@ -22,7 +22,7 @@ class LoanData extends React.Component<Props> {
 
       <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
         <Box basis={'1/3'} gap="medium">
-          <FormField label="Maximum borrow amount">
+          <FormField label="Available to borrow">
             <NumberInput value={baseToDisplay(principal, 18)} suffix=" DAI" disabled precision={18} />
           </FormField>
         </Box>
@@ -32,7 +32,7 @@ class LoanData extends React.Component<Props> {
           </FormField>
         </Box>
         <Box basis={'1/3'} gap="medium">
-          <FormField label="Interest rate">
+          <FormField label="Loan APR">
             <NumberInput value={feeToInterestRate(interestRate)} suffix="%" disabled />
           </FormField>
         </Box>
