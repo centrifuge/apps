@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 module.exports = {
   webpack(config, options) {
     // Further custom configuration here
