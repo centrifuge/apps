@@ -96,7 +96,7 @@ export default class Tinlake {
     this.ethOptions = ethOptions || {};
     this.eth = new Eth(this.provider, this.ethOptions) as ethI;
 
-    this.setContracts()
+    this.setContracts();
   }
 
   setContracts = () => {
