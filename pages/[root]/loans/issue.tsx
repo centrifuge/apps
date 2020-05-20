@@ -25,6 +25,7 @@ class LoanIssuePage extends React.Component<Props> {
 
     return <ContainerWithFooter>
       <Header
+        poolTitle={pool.name}
         selectedRoute={'/loans/issue'}
         menuItems={menuItems}
       />

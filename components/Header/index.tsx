@@ -20,6 +20,7 @@ export interface MenuItem {
 }
 
 interface HeaderProps {
+  poolTitle?: string;
   selectedRoute: string;
   menuItems: MenuItem[];
   auth?: AuthState;
@@ -62,7 +63,7 @@ class Header extends React.Component<HeaderProps, State> {
   }
 
   render() {
-    const { selectedRoute, menuItems, auth } = this.props;
+    const { poolTitle, selectedRoute, menuItems, auth } = this.props;
     const user = auth && auth.user;
     const address = user && user.address;
     const network = auth && auth.network;
@@ -97,7 +98,9 @@ class Header extends React.Component<HeaderProps, State> {
             <Link href="/">
               <a title="Tinlake"><Image src={logoUrl} style={{ width: 130 }} /></a>
             </Link>
-            <Box fill={false} basis="full">
+            <Box margin={{ left: '80px', right: '56px' }} flex="grow" basis="auto"
+              style={{ fontSize: 16, fontWeight: 500 }}>{poolTitle}</Box>
+            <Box flex="grow" basis="auto">
               <NavBar
                 border={false}
                 theme={theme}
@@ -142,6 +145,7 @@ class Header extends React.Component<HeaderProps, State> {
                 <a title="Tinlake"><Image src={logoUrl} style={{ width: 130 }} /></a>
               </Link>
             </Box>
+            <Box flex="grow" basis="auto" style={{ fontSize: 16, fontWeight: 500 }}>{poolTitle}</Box>
             <Box direction="row" basis="full" >
             {!user &&
               <Box direction="column" align="end" basis="full" alignSelf="center">

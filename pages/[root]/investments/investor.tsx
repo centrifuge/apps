@@ -25,6 +25,7 @@ class InvestorPage extends React.Component<Props> {
 
     return <ContainerWithFooter>
       <Header
+        poolTitle={pool.name}
         selectedRoute={'/investments/investor'}
         menuItems={menuItems}
       />
