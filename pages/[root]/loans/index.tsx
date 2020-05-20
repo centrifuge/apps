@@ -7,10 +7,11 @@ import { menuItems } from '../../../menuItems';
 import SecondaryHeader from '../../../components/SecondaryHeader';
 import Auth from '../../../components/Auth';
 import { PoolLink } from '../../../components/PoolLink';
+import ContainerWithFooter from '../../../components/ContainerWithFooter';
 
 class LoanListPage extends React.Component {
   render() {
-    return <Box pad={{ horizontal: 'small' }} >
+    return <ContainerWithFooter>
       <Header
         selectedRoute={'/loans'}
         menuItems={menuItems}
@@ -36,7 +37,7 @@ class LoanListPage extends React.Component {
           } />
         </Box>
       </Box>
-    </Box>;
+    </ContainerWithFooter>;
   }
 }
 export default LoanListPage;

@@ -4,10 +4,11 @@ import { Box } from 'grommet';
 import MintNFT from '../../../components/MintNFT';
 import Header from '../../../components/Header';
 import { menuItems } from '../../../menuItems';
+import ContainerWithFooter from '../../../components/ContainerWithFooter';
 
 class MintNFTPage extends React.Component {
   render() {
-    return <Box align="center" pad={{ horizontal: 'small' }}>
+    return <ContainerWithFooter>
       <Header
         selectedRoute={'/demo/mint-nft'}
         menuItems={menuItems}
@@ -20,7 +21,7 @@ class MintNFTPage extends React.Component {
           <WithTinlake render={tinlake => <MintNFT tinlake={tinlake} />} />
         </Box>
       </Box>
-    </Box>;
+    </ContainerWithFooter>;
   }
 }
 

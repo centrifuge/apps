@@ -6,7 +6,6 @@ import { AxisTheme } from '@centrifuge/axis-theme';
 import Auth from '../components/Auth';
 import WithTinlake from '../components/WithTinlake';
 import { StyledApp } from '../components/StyledApp';
-import Footer from '../components/Footer';
 
 class MyApp extends App {
   static async getInitialProps({ Component, ctx }: { Component: any, ctx: any }) {
@@ -20,17 +19,13 @@ class MyApp extends App {
 
     return (
       <AxisTheme full={true}>
-        <StyledApp
-        style={{
-          minHeight: 'calc(100vh - 150px)'
-        }}>
+        <StyledApp>
           <WithTinlake render={tinlake =>
             <Auth tinlake={tinlake} render={() =>
               <Component {...pageProps} />
             } />
           } />
         </StyledApp>
-        <Footer/>
       </AxisTheme >
     );
   }

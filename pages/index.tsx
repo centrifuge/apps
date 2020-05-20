@@ -1,17 +1,18 @@
 import { Box } from 'grommet';
 import Header from '../components/Header';
 import Dashboard from '../containers/Dashboard';
+import ContainerWithFooter from '../components/ContainerWithFooter';
 
 function Home() {
   return (
-    <Box align="center" pad={{ horizontal: 'small' }}>
+    <ContainerWithFooter>
       <Header selectedRoute={'/'} menuItems={[]} />
       <Box justify="center" direction="row" >
         <Box width="xlarge">
           <Dashboard />
         </Box>
       </Box>
-    </Box>
+    </ContainerWithFooter>
   );
 }
 

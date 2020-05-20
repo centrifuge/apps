@@ -8,6 +8,7 @@ import { menuItems } from '../../../menuItems';
 import { BackLink } from '../../../components/BackLink';
 import Auth from '../../../components/Auth';
 import withRouter, { WithRouterProps } from 'next/dist/client/with-router';
+import ContainerWithFooter from '../../../components/ContainerWithFooter';
 
 interface Props extends WithRouterProps {
 }
@@ -17,7 +18,7 @@ class LoanIssuePage extends React.Component<Props> {
   render() {
     const { tokenId, registry }: { tokenId: string, registry: string } = this.props.router.query as any;
 
-    return <Box align="center" pad={{ horizontal: 'small' }}>
+    return <ContainerWithFooter>
       <Header
         selectedRoute={'/loans/issue'}
         menuItems={menuItems}
@@ -43,7 +44,7 @@ class LoanIssuePage extends React.Component<Props> {
           } />
         </Box>
       </Box>
-    </Box>;
+    </ContainerWithFooter>;
   }
 }
 

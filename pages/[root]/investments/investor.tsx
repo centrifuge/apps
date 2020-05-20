@@ -8,6 +8,7 @@ import SecondaryHeader from '../../../components/SecondaryHeader';
 import { BackLink } from '../../../components/BackLink';
 import Auth from '../../../components/Auth';
 import withRouter, { WithRouterProps } from 'next/dist/client/with-router';
+import ContainerWithFooter from '../../../components/ContainerWithFooter';
 
 interface Props extends WithRouterProps {
 }
@@ -17,7 +18,7 @@ class InvestorPage extends React.Component<Props> {
   render() {
     const { investorAddress }: { investorAddress: string } = this.props.router.query as any;
 
-    return <Box align="center" pad={{ horizontal: 'small' }}>
+    return <ContainerWithFooter>
       <Header
         selectedRoute={'/investments/investor'}
         menuItems={menuItems}
@@ -50,7 +51,7 @@ class InvestorPage extends React.Component<Props> {
           } />
         </Box>
       </Box>
-    </Box>;
+    </ContainerWithFooter>;
   }
 }
 
