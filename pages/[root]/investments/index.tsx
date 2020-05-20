@@ -6,10 +6,11 @@ import Header from '../../../components/Header';
 import { menuItems } from '../../../menuItems';
 import SecondaryHeader from '../../../components/SecondaryHeader';
 import Auth from '../../../components/Auth';
+import ContainerWithFooter from '../../../components/ContainerWithFooter';
 
 class InvestmentPage extends React.Component {
   render() {
-    return <Box align="center" pad={{ horizontal: 'small' }}>
+    return <ContainerWithFooter>
       <Header
         selectedRoute={'/investments'}
         menuItems={menuItems}
@@ -31,7 +32,7 @@ class InvestmentPage extends React.Component {
           } />
         </Box>
       </Box>
-    </Box>;
+    </ContainerWithFooter>;
   }
 }
 export default InvestmentPage;

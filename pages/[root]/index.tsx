@@ -6,6 +6,7 @@ import WithTinlake from '../../components/WithTinlake';
 import { menuItems } from '../../menuItems';
 import config from '../../config';
 import { GetStaticProps } from 'next';
+import ContainerWithFooter from '../../components/ContainerWithFooter';
 
 const pools = config.pools;
 
@@ -19,7 +20,7 @@ class Pool extends React.Component <Props> {
     const { root } = this.props;
     const selectedPool = pools.find(pool => pool.addresses.ROOT_CONTRACT === root);
     return (
-      <Box align="center" pad={{ horizontal: 'small' }}>
+      <ContainerWithFooter>
         <Header selectedRoute={'/'} menuItems={menuItems} />
         { selectedPool &&
           <Box justify="center" direction="row" >
@@ -28,7 +29,7 @@ class Pool extends React.Component <Props> {
             </Box>
           </Box>
         }
-      </Box>
+      </ContainerWithFooter>
     );
   }
 }
