@@ -103,8 +103,7 @@ class Header extends React.Component<HeaderProps, State> {
                 theme={theme}
                 menuItems={menuItems.filter((item) => {
                   return (
-                    user
-                    && (isDemo && item.env === 'demo' || item.env === '')
+                    (isDemo && item.env === 'demo' || item.env === '')
                     && !item.secondary
                   );
                 }
@@ -132,7 +131,7 @@ class Header extends React.Component<HeaderProps, State> {
               </Box>
             }
             {isDemo &&
-              <Box pad={{ left: 'small' }} alignSelf="center"> <Anchor href="https://centrifuge.hackmd.io/zRnaoPqfS7mTm9XL0dDRtQ?view" target="blank" label="Help" style={{ textDecoration: 'none', fontWeight: 900 }} /> </Box>
+              <Box pad={{ left: 'small' }} alignSelf="center"> <Anchor href="https://centrifuge.hackmd.io/zRnaoPqfS7mTm9XL0dDRtQ?view" target="_blank" label="Help" style={{ textDecoration: 'none', fontWeight: 900 }} /> </Box>
             }</Box>
         </Box>
       )
@@ -160,7 +159,7 @@ class Header extends React.Component<HeaderProps, State> {
             </Box>
             }
             {isDemo &&
-              <Box margin={{ horizontal: 'small' }} alignSelf="center"> <Anchor href="https://centrifuge.hackmd.io/zRnaoPqfS7mTm9XL0dDRtQ?view" target="blank" label="Help" style={{ textDecoration: 'none', fontWeight: 900 }} /> </Box>
+              <Box margin={{ horizontal: 'small' }} alignSelf="center"> <Anchor href="https://centrifuge.hackmd.io/zRnaoPqfS7mTm9XL0dDRtQ?view" target="_blank" label="Help" style={{ textDecoration: 'none', fontWeight: 900 }} /> </Box>
             }
 
               <Box fill={false}>
@@ -169,8 +168,7 @@ class Header extends React.Component<HeaderProps, State> {
                   theme={theme}
                   menuItems={menuItems.filter((item) => {
                     return (
-                      user
-                      && (isDemo && item.env === 'demo' || item.env === '')
+                      (isDemo && item.env === 'demo' || item.env === '')
                       && !item.secondary
                     );
                   }

@@ -22,7 +22,7 @@ class Pool extends React.Component <Props> {
       <Box align="center" pad={{ horizontal: 'small' }}>
         <Header selectedRoute={'/'} menuItems={menuItems} />
         { selectedPool &&
-          <Box justify="center" direction="row">
+          <Box justify="center" direction="row" >
             <Box width="xlarge">
               <WithTinlake render={tinlake => <Overview tinlake={tinlake} selectedPool={selectedPool}  />} />
             </Box>

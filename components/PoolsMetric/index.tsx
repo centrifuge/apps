@@ -13,7 +13,7 @@ const PoolsMetric: FunctionComponent<MetricProps> = ({ label, children }) => {
     pad={{ left: 'large', right: 'large', top: 'small', bottom: 'small' }}
     margin={{ top: 'large' }}
   >
-    <Text textAlign="center" truncate={true} style={{ fontSize: '2.7em', lineHeight: '40px', textOverflow: 'clip' }}>
+    <Text textAlign="center" truncate={true} weight="bold" style={{ fontSize: '1.7em', lineHeight: '40px', textOverflow: 'clip' }}>
       {children}</Text>
     <Text textAlign="center">{label}</Text>
   </Box>;

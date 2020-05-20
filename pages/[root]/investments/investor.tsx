@@ -7,19 +7,16 @@ import { menuItems } from '../../../menuItems';
 import SecondaryHeader from '../../../components/SecondaryHeader';
 import { BackLink } from '../../../components/BackLink';
 import Auth from '../../../components/Auth';
-import Alert from '../../../components/Alert';
+import withRouter, { WithRouterProps } from 'next/dist/client/with-router';
 
-interface Props {
-  investorAddress: string;
+interface Props extends WithRouterProps {
 }
 
 class InvestorPage extends React.Component<Props> {
-  static async getInitialProps({ query }: any) {
-    return { investorAddress: query.investorAddress };
-  }
 
   render() {
-    const { investorAddress } = this.props;
+    const { investorAddress }: { investorAddress: string } = this.props.router.query as any;
+
     return <Box align="center" pad={{ horizontal: 'small' }}>
       <Header
         selectedRoute={'/investments/investor'}
@@ -28,11 +25,12 @@ class InvestorPage extends React.Component<Props> {
       <Box
         justify="center"
         direction="row"
+        style={{ flex: 1 }}
       >
         <Box width="xlarge" >
           <WithTinlake render={tinlake =>
-            <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization
-              render={auth => auth && auth.state === 'loaded' && auth.user ?
+            <Auth tinlake={tinlake}
+              render={auth =>
                 <Box>
                   <SecondaryHeader>
                     <Box direction="row" gap="small" align="center">
@@ -48,9 +46,6 @@ class InvestorPage extends React.Component<Props> {
                   </SecondaryHeader>
                   <InvestorView investorAddress={investorAddress} tinlake={tinlake} auth={auth} />
                 </Box>
-                :
-                <Alert margin="medium" type="error">
-                  Please authenticate to access this page </Alert>
               } />
           } />
         </Box>
@@ -58,4 +53,5 @@ class InvestorPage extends React.Component<Props> {
     </Box>;
   }
 }
-export default InvestorPage;
+
+export default withRouter(InvestorPage);

@@ -6,7 +6,6 @@ import Header from '../../../components/Header';
 import { menuItems } from '../../../menuItems';
 import SecondaryHeader from '../../../components/SecondaryHeader';
 import Auth from '../../../components/Auth';
-import Alert from '../../../components/Alert';
 
 class InvestmentPage extends React.Component {
   render() {
@@ -21,18 +20,14 @@ class InvestmentPage extends React.Component {
       >
         <Box width="xlarge" >
           <WithTinlake render={tinlake =>
-              <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization
-                render={auth => auth && auth.state === 'loaded' && auth.user ?
-                  <Box>
-                    <SecondaryHeader>
-                      <Heading level="3">Investments</Heading>
-                    </SecondaryHeader>
-                    <InvestmentsView tinlake={tinlake} auth={auth} />
-                  </Box>
-                  :
-                  <Alert margin="medium" type="error">
-                    Please authenticate to access this page </Alert>
-              } />
+            <Auth tinlake={tinlake} render={auth =>
+              <Box>
+                <SecondaryHeader>
+                  <Heading level="3">Investments</Heading>
+                </SecondaryHeader>
+                <InvestmentsView tinlake={tinlake} auth={auth} />
+              </Box>
+            } />
           } />
         </Box>
       </Box>

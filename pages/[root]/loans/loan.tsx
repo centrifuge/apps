@@ -7,19 +7,17 @@ import SecondaryHeader from '../../../components/SecondaryHeader';
 import { menuItems } from '../../../menuItems';
 import { BackLink } from '../../../components/BackLink';
 import Auth from '../../../components/Auth';
-import Alert from '../../../components/Alert';
+import { withRouter } from 'next/router';
+import { WithRouterProps } from 'next/dist/client/with-router';
 
-interface Props {
-  loanId: string;
+interface Props extends WithRouterProps {
 }
 
 class LoanPage extends React.Component<Props> {
-  static async getInitialProps({ query }: any) {
-    return { loanId: query.loanId };
-  }
 
   render() {
-    const { loanId } = this.props;
+    const { loanId }: { loanId: string } = this.props.router.query as any;
+
     return <Box align="center" pad={{ horizontal: 'small' }}>
       <Header
         selectedRoute={'/loans/loan'}
@@ -37,13 +35,8 @@ class LoanPage extends React.Component<Props> {
             </Box>
           </SecondaryHeader>
           <WithTinlake render={tinlake =>
-            <Auth tinlake={tinlake} waitForAuthentication waitForAuthorization
-              render={auth => auth && auth.state === 'loaded' && auth.user ?
-                <Box> {loanId && <LoanView auth={auth} tinlake={tinlake} loanId={loanId} />} </Box>
-                :
-                <Alert margin="medium" type="error">
-                  Please authenticate to access this page </Alert>
-              } />
+            <Auth tinlake={tinlake}
+              render={auth => <Box>{loanId && <LoanView auth={auth} tinlake={tinlake} loanId={loanId} />}</Box>} />
           } />
         </Box>
       </Box>
@@ -51,4 +44,4 @@ class LoanPage extends React.Component<Props> {
   }
 }
 
-export default LoanPage;
+export default withRouter(LoanPage);

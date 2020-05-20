@@ -6,7 +6,7 @@ function Home() {
   return (
     <Box align="center" pad={{ horizontal: 'small' }}>
       <Header selectedRoute={'/'} menuItems={[]} />
-      <Box justify="center" direction="row">
+      <Box justify="center" direction="row" >
         <Box width="xlarge">
           <Dashboard />
         </Box>
