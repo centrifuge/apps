@@ -8,7 +8,7 @@ class ContainerWithFooter extends React.Component<PropsWithChildren<{}>> {
         {this.props.children}
       </Box>
       <Footer />
-    </>
+    </>;
   }
 }
 
