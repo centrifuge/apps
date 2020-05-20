@@ -56,9 +56,9 @@ export type ContractAddresses = {
 
 export type TinlakeParams = {
   provider: any;
-  contractAddresses: ContractAddresses;
   transactionTimeout: number;
-  contractAbis?: ContractAbis |{};
+  contractAddresses?: ContractAddresses | {};
+  contractAbis?: ContractAbis | {};
   ethConfig?: EthConfig | {};
   ethOptions?: any | {};
   contracts?: Contracts | {};
@@ -84,8 +84,8 @@ export default class Tinlake {
       this.contractAbis = abiDefinitions;
     }
 
-    this.contractConfig = contractConfig;
-    this.contractAddresses = contractAddresses;
+    this.contractConfig = contractConfig || {};
+    this.contractAddresses = contractAddresses || {};
     this.transactionTimeout = transactionTimeout;
     this.setProvider(provider, ethOptions);
     this.setEthConfig(ethConfig || {});
@@ -96,8 +96,10 @@ export default class Tinlake {
     this.ethOptions = ethOptions || {};
     this.eth = new Eth(this.provider, this.ethOptions) as ethI;
 
-    // following code for backwards compatibility (can be removed once we do not need to support the old deployments)
+    this.setContracts();
+  }
 
+  setContracts = () => {
     // set root & proxy contracts
     contractNames.forEach((name) => {
       if (this.contractAbis[name] && this.contractAddresses[name]) {
@@ -117,7 +119,6 @@ export default class Tinlake {
                   ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
                   : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
     }
-
   }
 
   setEthConfig = (ethConfig: EthConfig | {}) => {

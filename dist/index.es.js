@@ -47244,7 +47244,9 @@ var Tinlake = /** @class */ (function () {
             _this.provider = provider;
             _this.ethOptions = ethOptions || {};
             _this.eth = new lib$a(_this.provider, _this.ethOptions);
-            // following code for backwards compatibility (can be removed once we do not need to support the old deployments)
+            _this.setContracts();
+        };
+        this.setContracts = function () {
             // set root & proxy contracts
             contractNames.forEach(function (name) {
                 if (_this.contractAbis[name] && _this.contractAddresses[name]) {
@@ -47387,8 +47389,8 @@ var Tinlake = /** @class */ (function () {
         if (!contractAbis) {
             this.contractAbis = abiDefinitions;
         }
-        this.contractConfig = contractConfig;
-        this.contractAddresses = contractAddresses;
+        this.contractConfig = contractConfig || {};
+        this.contractAddresses = contractAddresses || {};
         this.transactionTimeout = transactionTimeout;
         this.setProvider(provider, ethOptions);
         this.setEthConfig(ethConfig || {});
