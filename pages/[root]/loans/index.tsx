@@ -8,9 +8,19 @@ import SecondaryHeader from '../../../components/SecondaryHeader';
 import Auth from '../../../components/Auth';
 import { PoolLink } from '../../../components/PoolLink';
 import ContainerWithFooter from '../../../components/ContainerWithFooter';
+import { WithRouterProps } from 'next/dist/client/with-router';
+import config, { Pool } from '../../../config';
+import { GetStaticProps } from 'next';
 
-class LoanListPage extends React.Component {
+interface Props extends WithRouterProps {
+  root: string;
+  pool: Pool;
+}
+
+class LoanListPage extends React.Component<Props> {
   render() {
+    const { pool } = this.props;
+
     return <ContainerWithFooter>
       <Header
         selectedRoute={'/loans'}
@@ -21,7 +31,7 @@ class LoanListPage extends React.Component {
         direction="row"
       >
         <Box width="xlarge" gap="medium" >
-          <WithTinlake render={tinlake =>
+          <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
               <Auth tinlake={tinlake}
                 render={auth =>
                   <Box>
@@ -40,4 +50,17 @@ class LoanListPage extends React.Component {
     </ContainerWithFooter>;
   }
 }
+
+export async function getStaticPaths() {
+  // We'll pre-render only these paths at build time.
+  const paths = config.pools.map(pool => ({ params: { root: pool.addresses.ROOT_CONTRACT } }));
+
+  // { fallback: false } means other routes should 404.
+  return { paths, fallback: false };
+}
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  return { props: { root: params?.root, pool: config.pools.find(p => p.addresses.ROOT_CONTRACT === params?.root) } };
+};
+
 export default LoanListPage;

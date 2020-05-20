@@ -1,35 +1,54 @@
 import Tinlake from 'tinlake';
-import config, { Pool } from '../../config';
+import config from '../../config';
 import Eth from 'ethjs';
+import { ContractAddresses } from 'tinlake/dist/Tinlake';
 
 let tinlake: any | null = null;
 let authing = false;
 let authed = false;
+let currentAddresses: null | ContractAddresses = null;
+let currentContractConfig: null | any = null;
 
-export async function getTinlake() {
-  // TODO: pass pool as param to function
-  const pool = config.pools[0] as Pool;
-  const { addresses,  contractConfig } = pool;
-  const { transactionTimeout, rpcUrl } = config;
-  if (tinlake) { return tinlake; }
+export async function getTinlake({ addresses, contractConfig }: {addresses?: ContractAddresses | null, contractConfig?: any | null} = {}) {
 
-  const chosenProvider = sessionStorage && sessionStorage.getItem('chosenProvider');
-  if (chosenProvider === 'injected') {
-    authing = true;
+  if (tinlake === null) {
+    const { transactionTimeout, rpcUrl } = config;
 
-    const Web3Connect = require('web3connect').default;
-    const injectedProvider = await Web3Connect.ConnectToInjected();
-    const accounts = await injectedProvider.enable();
-    const account = accounts[0];
+    const chosenProvider = sessionStorage && sessionStorage.getItem('chosenProvider');
 
-    tinlake = new Tinlake({ transactionTimeout, contractConfig, contractAddresses: addresses, provider: injectedProvider });
-    await tinlake.setContractAddresses();
-    tinlake!.setEthConfig({ from: account, gasLimit: `0x${config.gasLimit.toString(16)}` });
-    authed = true;
-    authing = false;
-  } else {
-    const httpProvider = new Eth.HttpProvider(rpcUrl);
-    tinlake = new Tinlake({ transactionTimeout, contractConfig, contractAddresses: addresses, provider: httpProvider });
+    if (chosenProvider === 'injected') {
+      authing = true;
+
+      const Web3Connect = require('web3connect').default;
+      const injectedProvider = await Web3Connect.ConnectToInjected();
+      const accounts = await injectedProvider.enable();
+      const account = accounts[0];
+
+      tinlake = new Tinlake({ transactionTimeout, provider: injectedProvider });
+      tinlake!.setEthConfig({ from: account, gasLimit: `0x${config.gasLimit.toString(16)}` });
+      authed = true;
+      authing = false;
+    } else {
+      const httpProvider = new Eth.HttpProvider(rpcUrl);
+      tinlake = new Tinlake({ transactionTimeout, provider: httpProvider });
+    }
+  }
+
+  let resetContractAddresses = false;
+  if (!deepEqual(addresses || null, currentAddresses)) {
+    currentAddresses = addresses || null;
+    tinlake.contractAddresses = currentAddresses || {};
+    resetContractAddresses = true;
+  }
+
+  if (!deepEqual(contractConfig || null, currentContractConfig)) {
+    currentContractConfig = contractConfig || null;
+    tinlake.contractConfig = currentContractConfig || {};
+    resetContractAddresses = true;
+  }
+
+  if (resetContractAddresses && tinlake.contractAddresses && tinlake.contractConfig) {
+    tinlake.setContracts();
     await tinlake.setContractAddresses();
   }
 
@@ -51,7 +70,7 @@ export async function authTinlake() {
     authed = true;
     authing = false;
   } catch (e) {
-    console.log(`Tinlake Auth failed ${e}`);
+    console.error(`Tinlake Auth failed ${e}`);
     authing = false;
   }
 }
@@ -93,4 +112,8 @@ async function web3ConnectToLast(): Promise<any> {
     default:
       return web3Connect();
   }
+}
+
+function deepEqual(a: any, b: any): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
 }
