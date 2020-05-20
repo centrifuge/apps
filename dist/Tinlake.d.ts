@@ -16,8 +16,8 @@ export declare type ContractAddresses = {
 };
 export declare type TinlakeParams = {
     provider: any;
-    contractAddresses: ContractAddresses;
     transactionTimeout: number;
+    contractAddresses?: ContractAddresses | {};
     contractAbis?: ContractAbis | {};
     ethConfig?: EthConfig | {};
     ethOptions?: any | {};
@@ -37,6 +37,7 @@ export default class Tinlake {
     contractConfig: any;
     constructor(params: TinlakeParams);
     setProvider: (provider: any, ethOptions?: any) => void;
+    setContracts: () => void;
     setEthConfig: (ethConfig: {} | EthConfig) => void;
     setContractAddresses: () => Promise<void>;
     createContract(address: string, abiName: string): void;
