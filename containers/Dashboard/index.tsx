@@ -15,7 +15,6 @@ class Dashboard extends React.Component<Props> {
   componentDidMount() {
     const { loadPools } = this.props;
     loadPools && loadPools();
-
   }
 
   render() {

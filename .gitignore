@@ -7,6 +7,7 @@ services/tinlake/addresses_tinlake.json
 nft_data_definition.json
 .DS_Store
 .env*.local
+.env
 
 # Local Netlify folder
 .netlify

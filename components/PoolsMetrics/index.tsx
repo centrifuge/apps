@@ -20,11 +20,11 @@ class PoolsMetrics extends React.Component<Props> {
       <span>{pools.ongoingLoans}</span>
       </PoolsMetric>
       <PoolsMetric label="Total Outstanding Debt (DAI)">
-        <NumberDisplay suffix="" precision={4}
+        <NumberDisplay suffix="" precision={2}
                        value={baseToDisplay(pools.totalDebt, 18)} />
       </PoolsMetric>
       <PoolsMetric label="Total Repaid Debt (DAI)">
-        <NumberDisplay suffix="" precision={4}
+        <NumberDisplay suffix="" precision={2}
                        value={baseToDisplay(pools.totalRepaysAggregatedAmount, 18)} />
       </PoolsMetric>
     </Box>;
