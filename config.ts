@@ -37,39 +37,48 @@ interface Config {
   pools: Pool[];
 }
 
-const contractAddressesSchema = yup.object().required().shape({
-  ROOT_CONTRACT: yup.string().length(42).matches(/0x[0-9a-fA-F]{40}/).required(),
-  ACTIONS: yup.string().length(42).matches(/0x[0-9a-fA-F]{40}/).required(),
-  PROXY_REGISTRY: yup.string().length(42).matches(/0x[0-9a-fA-F]{40}/).required(),
+const contractAddressesSchema = yup.object().shape({
+  ROOT_CONTRACT: yup.string().length(42).matches(/0x[0-9a-fA-F]{40}/)
+    .required('contractAddressesSchema.ROOT_CONTRACT is required'),
+  ACTIONS: yup.string().length(42).matches(/0x[0-9a-fA-F]{40}/)
+    .required('contractAddressesSchema.ACTIONS is required'),
+  PROXY_REGISTRY: yup.string().length(42).matches(/0x[0-9a-fA-F]{40}/)
+    .required('contractAddressesSchema.PROXY_REGISTRY is required'),
   COLLATERAL_NFT: yup.string().length(42).matches(/0x[0-9a-fA-F]{40}/)
 });
 
-const contractConfigSchema = yup.object().required().shape({
-  JUNIOR_OPERATOR: yup.mixed<'ALLOWANCE_OPERATOR'>().required().oneOf(['ALLOWANCE_OPERATOR']),
-  SENIOR_OPERATOR: yup.mixed<'PROPORTIONAL_OPERATOR' | 'ALLOWANCE_OPERATOR'>().required().oneOf(['PROPORTIONAL_OPERATOR', 'ALLOWANCE_OPERATOR'])
+const contractConfigSchema = yup.object().shape({
+  JUNIOR_OPERATOR: yup.mixed<'ALLOWANCE_OPERATOR'>().required('contractConfigSchema.JUNIOR_OPERATOR is required')
+    .oneOf(['ALLOWANCE_OPERATOR']),
+  SENIOR_OPERATOR: yup.mixed<'PROPORTIONAL_OPERATOR' | 'ALLOWANCE_OPERATOR'>()
+    .required('contractConfigSchema.SENIOR_OPERATOR is required').oneOf(['PROPORTIONAL_OPERATOR', 'ALLOWANCE_OPERATOR'])
 });
 
-const poolSchema = yup.object().required().shape({
-  addresses: contractAddressesSchema,
-  graph: yup.string().required(),
-  contractConfig: contractConfigSchema,
-  name: yup.string().required(),
-  description: yup.string().required(),
-  asset: yup.string().required()
+const poolSchema = yup.object().shape({
+  addresses: contractAddressesSchema.required('poolSchema.addresses is required'),
+  graph: yup.string().required('poolSchema.graph is required'),
+  contractConfig: contractConfigSchema.required('poolSchema.contractConfig is required'),
+  name: yup.string().required('poolSchema.name is required'),
+  description: yup.string().required('poolSchema.description is required'),
+  asset: yup.string().required('poolSchema.asset is required')
 });
 
-const poolsSchema = yup.array().required().of(poolSchema);
+const poolsSchema = yup.array().of(poolSchema);
 
 const config: Config = {
-  rpcUrl: yup.string().required().url().validateSync(process.env.NEXT_PUBLIC_RPC_URL),
-  etherscanUrl: yup.string().required().url().validateSync(process.env.NEXT_PUBLIC_ETHERSCAN_URL),
-  gasLimit: yup.number().required().validateSync(1000000000000000000), // TODO: make this into publicRuntimeConfig
-  transactionTimeout: yup.number().required().moreThan(0).validateSync(process.env.NEXT_PUBLIC_TRANSACTION_TIMEOUT),
-  tinlakeDataBackendUrl: yup.string().required().url().validateSync(process.env.NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL),
-  isDemo: yup.string().required().validateSync(process.env.NEXT_PUBLIC_ENV) === 'demo',
-  network: yup.mixed<'Mainnet' | 'Kovan'>().required().oneOf(['Mainnet', 'Kovan'])
+  rpcUrl: yup.string().required('NEXT_PUBLIC_RPC_URL is required').url().validateSync(process.env.NEXT_PUBLIC_RPC_URL),
+  etherscanUrl: yup.string().required('NEXT_PUBLIC_ETHERSCAN_URL is required').url()
+    .validateSync(process.env.NEXT_PUBLIC_ETHERSCAN_URL),
+  // TODO: make this into publicRuntimeConfig
+  gasLimit: yup.number().required('gasLimit is required').validateSync(1000000000000000000),
+  transactionTimeout: yup.number().required('NEXT_PUBLIC_TRANSACTION_TIMEOUT is required').moreThan(0)
+    .validateSync(process.env.NEXT_PUBLIC_TRANSACTION_TIMEOUT),
+  tinlakeDataBackendUrl: yup.string().required('NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL is required').url()
+    .validateSync(process.env.NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL),
+  isDemo: yup.string().required('NEXT_PUBLIC_ENV is required').validateSync(process.env.NEXT_PUBLIC_ENV) === 'demo',
+  network: yup.mixed<'Mainnet' | 'Kovan'>().required('NEXT_PUBLIC_RPC_URL is required').oneOf(['Mainnet', 'Kovan'])
     .validateSync(networkUrlToName(process.env.NEXT_PUBLIC_RPC_URL || '')),
-  pools: poolsSchema.validateSync(process.env.NEXT_PUBLIC_POOLS)
+  pools: poolsSchema.required('NEXT_PUBLIC_POOLS is required').validateSync(process.env.NEXT_PUBLIC_POOLS)
 };
 
 export default config;

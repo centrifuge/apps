@@ -1,4 +1,4 @@
-const { parsed: localEnv } = require('dotenv').config()
+require('dotenv').config()
 
 module.exports = {
   webpack(config, options) {
@@ -23,7 +23,7 @@ module.exports = {
     /** @type {{ addresses?: { 'ROOT_CONTRACT'?: string } }[]} */
     let pools
     try {
-      pools = JSON.parse(localEnv.NEXT_PUBLIC_POOLS) || []
+      pools = JSON.parse(process.env.NEXT_PUBLIC_POOLS) || []
     } catch (e) {
       throw new Error(`could not parse JSON in env variable 'NEXT_PUBLIC_POOLS': ${e.message || e}`)
     }
