@@ -6,6 +6,7 @@ import { AxisTheme } from '@centrifuge/axis-theme';
 import Auth from '../components/Auth';
 import WithTinlake from '../components/WithTinlake';
 import { StyledApp } from '../components/StyledApp';
+import { Head } from 'next/document';
 
 class MyApp extends App {
   static async getInitialProps({ Component, ctx }: { Component: any, ctx: any }) {
@@ -19,6 +20,9 @@ class MyApp extends App {
 
     return (
       <AxisTheme full={true}>
+        <Head>
+          <title>Tinlake | Centrifuge | Decentralized Asset Financing</title>
+        </Head>
         <StyledApp>
           <WithTinlake render={tinlake =>
             <Auth tinlake={tinlake} render={() =>

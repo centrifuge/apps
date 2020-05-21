@@ -30,7 +30,6 @@ export default class MyDocument extends Document {
     return (
       <Html>
       <Head>
-        <title>Tinlake | Centrifuge Decentralized Asset Financing</title>
         <link rel="shortcut icon" href="/static/Tinlake_Favicon.png" />
       </Head>
       <body>
