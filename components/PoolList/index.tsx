@@ -73,7 +73,7 @@ class PoolList extends React.Component<Props> {
         {
           header: 'DROP APR', property: 'dropInterest', align: 'center',
           render: (p: PoolData) =>
-            <NumberDisplay suffix="%" value={feeToInterestRate(p.weightedInterestRateDrop)} />
+            <NumberDisplay suffix="%" value={feeToInterestRate(p.seniorInterestRate)} />
         }
         ,
         {

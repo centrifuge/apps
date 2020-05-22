@@ -57,7 +57,7 @@ class TrancheView extends React.Component<Props> {
           {isAdmin &&
             <Box margin={{ top: 'medium', bottom: 'large' }} >
               <Box>
-                <InvestorAllowance trancheType={tranche.type as any as TrancheType} tinlake={tinlake}
+                <InvestorAllowance tranche={tranche} tinlake={tinlake}
                   investor={investor} />
               </Box>
             </Box>

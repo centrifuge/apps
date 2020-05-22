@@ -3,7 +3,7 @@ import { Box, FormField, Button, Heading } from 'grommet';
 import NumberInput from '../../../components/NumberInput';
 import { TrancheType, setAllowance } from '../../../services/tinlake/actions';
 import { transactionSubmitted, responseReceived } from '../../../ducks/transactions';
-import { baseToDisplay, displayToBase, Investor } from 'tinlake';
+import { baseToDisplay, displayToBase, Investor, Tranche } from 'tinlake';
 import { loadInvestor } from '../../../ducks/investments';
 import { connect } from 'react-redux';
 import { authTinlake } from '../../../services/tinlake';
@@ -14,7 +14,7 @@ interface Props {
   loadInvestor?: (tinlake: any, address: string, refresh?: boolean) => Promise<void>;
   transactionSubmitted?: (loadingMessage: string) => Promise<void>;
   responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>;
-  trancheType: TrancheType;
+  tranche: Tranche;
 }
 
 interface State {
@@ -36,8 +36,9 @@ class InvestorAllowance extends React.Component<Props, State> {
     if (!this.state) {
       return;
     }
-    const { investor, trancheType } = this.props;
+    const { investor, tranche: selectedTranche } = this.props;
     const { currentSupplyLimit, currentRedeemLimit } = this.state;
+    const trancheType = selectedTranche.type as TrancheType;
     const tranche = investor[trancheType];
     if ((tranche.maxSupply && currentSupplyLimit !== tranche.maxSupply.toString()) ||
       (tranche.maxRedeem && currentRedeemLimit !== tranche.maxRedeem.toString())) {
@@ -47,6 +48,7 @@ class InvestorAllowance extends React.Component<Props, State> {
         supplyAmount: (tranche.maxSupply && tranche.maxSupply.toString()) || '0',
         redeemAmount: (tranche.maxRedeem && tranche.maxRedeem.toString()) || '0'
       });
+
     }
   }
   componentDidMount() {
@@ -59,8 +61,8 @@ class InvestorAllowance extends React.Component<Props, State> {
       await authTinlake();
       this.updateLimits();
       const { supplyAmount, redeemAmount } = this.state;
-
-      const { investor, trancheType, tinlake } = this.props;
+      const { investor, tranche, tinlake } = this.props;
+      const trancheType = tranche.type as TrancheType;
       const res = await setAllowance(tinlake, investor.address, supplyAmount, redeemAmount, trancheType);
       if (res && res.errorMsg) {
         this.props.responseReceived && this.props.responseReceived(null, `Allowance failed. ${res.errorMsg}`);
@@ -76,6 +78,8 @@ class InvestorAllowance extends React.Component<Props, State> {
 
   render() {
     const { supplyAmount, redeemAmount } = this.state;
+    const { tranche } = this.props;
+
     this.updateLimits();
     return <Box>
       <Box gap="medium" align="start" margin={{ bottom: 'medium' }} >
@@ -92,7 +96,7 @@ class InvestorAllowance extends React.Component<Props, State> {
         </Box>
         <Box basis={'1/3'}>
           <FormField label="Max redeem amount">
-            <NumberInput value={baseToDisplay(redeemAmount, 18)} suffix=" TIN" precision={18}
+            <NumberInput value={baseToDisplay(redeemAmount, 18)} suffix={` ${tranche.token}`} precision={18}
               onValueChange={({ value }) =>
                 this.setState({ redeemAmount: displayToBase(value, 18) })}
             />

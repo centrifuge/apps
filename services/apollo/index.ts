@@ -55,7 +55,7 @@ class Apollo {
         totalDebt: pool && new BN(pool.totalDebt) || new BN('0'),
         totalRepaysAggregatedAmount: pool && new BN(pool.totalRepaysAggregatedAmount) || new BN('0'),
         weightedInterestRate: pool && new BN(pool.weightedInterestRate) || new BN('0'),
-        weightedInterestRateDrop: new BN('0') // TODO how to get this value?
+        seniorInterestRate: pool && pool.seniorInterestRate && new BN(pool.seniorInterestRate) || new BN('0') // TODO how to get this value?
       };
     });
     return tinlakePools;
@@ -76,6 +76,7 @@ class Apollo {
 							id
             },
             weightedInterestRate,
+            seniorInterestRate
           }
         }
         `

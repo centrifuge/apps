@@ -16,7 +16,7 @@ export interface PoolData {
   totalDebt: BN;
   totalRepaysAggregatedAmount: BN;
   weightedInterestRate: BN;
-  weightedInterestRateDrop: BN;
+  seniorInterestRate: BN;
 }
 
 export interface PoolsData {
