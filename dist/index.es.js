@@ -10677,35 +10677,49 @@ function AdminActions(Base) {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.isWard = function (user, contractName) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts[contractName].wards, [user])];
+                var _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            if (!((_a = this.contracts[contractName]) === null || _a === void 0 ? void 0 : _a.wards)) {
+                                return [2 /*return*/, new bn(0)];
+                            }
+                            return [4 /*yield*/, executeAndRetry(this.contracts[contractName].wards, [user])];
                         case 1:
-                            res = _a.sent();
+                            res = _b.sent();
                             return [2 /*return*/, res[0]];
                     }
                 });
             }); };
             _this.canSetInterestRate = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['PILE'].wards, [user])];
+                var _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            if (!((_a = this.contracts['PILE']) === null || _a === void 0 ? void 0 : _a.wards)) {
+                                return [2 /*return*/, false];
+                            }
+                            return [4 /*yield*/, executeAndRetry(this.contracts['PILE'].wards, [user])];
                         case 1:
-                            res = _a.sent();
+                            res = _b.sent();
                             return [2 /*return*/, res[0].toNumber() === 1];
                     }
                 });
             }); };
             _this.canSetSeniorTrancheInterest = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
+                var _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
                         case 0:
                             if (!(this.contractAddresses['SENIOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
+                            if (!((_a = this.contracts['SENIOR']) === null || _a === void 0 ? void 0 : _a.wards)) {
+                                return [2 /*return*/, false];
+                            }
                             return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR'].wards, [user])];
                         case 1:
-                            res = _a.sent();
+                            res = _b.sent();
                             return [2 /*return*/, res[0].toNumber() === 1];
                         case 2: return [2 /*return*/, false];
                     }
@@ -10713,11 +10727,16 @@ function AdminActions(Base) {
             }); };
             _this.canSetRiskScore = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['PRICE_POOL'].wards, [user])];
+                var _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            if (!((_a = this.contracts['PRICE_POOL']) === null || _a === void 0 ? void 0 : _a.wards)) {
+                                return [2 /*return*/, false];
+                            }
+                            return [4 /*yield*/, executeAndRetry(this.contracts['PRICE_POOL'].wards, [user])];
                         case 1:
-                            res = _a.sent();
+                            res = _b.sent();
                             return [2 /*return*/, res[0].toNumber() === 1];
                     }
                 });
@@ -10725,35 +10744,49 @@ function AdminActions(Base) {
             // lender permissions (note: allowance operator for default deployment)
             _this.canSetMinimumJuniorRatio = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].wards, [user])];
+                var _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            if (!((_a = this.contracts['ASSESSOR']) === null || _a === void 0 ? void 0 : _a.wards)) {
+                                return [2 /*return*/, false];
+                            }
+                            return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].wards, [user])];
                         case 1:
-                            res = _a.sent();
+                            res = _b.sent();
                             return [2 /*return*/, res[0].toNumber() === 1];
                     }
                 });
             }); };
             _this.canSetInvestorAllowanceJunior = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_OPERATOR'].wards, [user])];
+                var _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            if (!((_a = this.contracts['JUNIOR_OPERATOR']) === null || _a === void 0 ? void 0 : _a.wards)) {
+                                return [2 /*return*/, false];
+                            }
+                            return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_OPERATOR'].wards, [user])];
                         case 1:
-                            res = _a.sent();
+                            res = _b.sent();
                             return [2 /*return*/, res[0].toNumber() === 1];
                     }
                 });
             }); };
             _this.canSetInvestorAllowanceSenior = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
+                var _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
                         case 0:
+                            if (!((_a = this.contracts['SENIOR_OPERATOR']) === null || _a === void 0 ? void 0 : _a.wards)) {
+                                return [2 /*return*/, false];
+                            }
                             if (!(this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
                             return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].wards, [user])];
                         case 1:
-                            res = _a.sent();
+                            res = _b.sent();
                             return [2 /*return*/, res[0].toNumber() === 1];
                         case 2: return [2 /*return*/, false];
                     }
@@ -10761,11 +10794,16 @@ function AdminActions(Base) {
             }); };
             _this.canSetLoanPrice = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['COLLECTOR'].wards, [user])];
+                var _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            if (!((_a = this.contracts['COLLECTOR']) === null || _a === void 0 ? void 0 : _a.wards)) {
+                                return [2 /*return*/, false];
+                            }
+                            return [4 /*yield*/, executeAndRetry(this.contracts['COLLECTOR'].wards, [user])];
                         case 1:
-                            res = _a.sent();
+                            res = _b.sent();
                             return [2 /*return*/, res[0].toNumber() === 1];
                     }
                 });

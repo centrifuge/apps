@@ -7,39 +7,46 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
   return class extends Base implements IAdminActions {
 
     isWard = async (user: string, contractName: ContractNames) => {
+      if (!this.contracts[contractName]?.wards) { return new BN(0); }
       const res : { 0: BN } = await executeAndRetry(this.contracts[contractName].wards, [user]);
       return res[0];
     }
 
     canSetInterestRate = async (user: string) => {
+      if (!this.contracts['PILE']?.wards) { return false }
       const res : { 0: BN } = await executeAndRetry(this.contracts['PILE'].wards, [user]);
       return res[0].toNumber() === 1;
     }
 
     canSetSeniorTrancheInterest = async (user: string) => {
       if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
+        if (!this.contracts['SENIOR']?.wards) { return false }
         const res : { 0: BN } = await executeAndRetry(this.contracts['SENIOR'].wards, [user]);
         return res[0].toNumber() === 1;
       } return false;
     }
 
     canSetRiskScore = async (user: string) => {
+      if (!this.contracts['PRICE_POOL']?.wards) { return false }
       const res : { 0: BN } = await executeAndRetry(this.contracts['PRICE_POOL'].wards, [user]);
       return res[0].toNumber() === 1;
     }
 
     // lender permissions (note: allowance operator for default deployment)
     canSetMinimumJuniorRatio = async (user: string) => {
+      if (!this.contracts['ASSESSOR']?.wards) { return false }
       const res : { 0: BN } = await executeAndRetry(this.contracts['ASSESSOR'].wards, [user]);
       return res[0].toNumber() === 1;
     }
 
     canSetInvestorAllowanceJunior = async (user: string) => {
+      if (!this.contracts['JUNIOR_OPERATOR']?.wards) { return false }
       const res : { 0: BN } = await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].wards, [user]);
       return res[0].toNumber() === 1;
     }
 
     canSetInvestorAllowanceSenior = async (user: string) => {
+      if (!this.contracts['SENIOR_OPERATOR']?.wards) { return false }
       if (this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS) {
         const res : { 0: BN } = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].wards, [user]);
         return res[0].toNumber() === 1;
@@ -48,6 +55,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     canSetLoanPrice = async (user: string) => {
+      if (!this.contracts['COLLECTOR']?.wards) { return false }
       const res : { 0: BN } = await executeAndRetry(this.contracts['COLLECTOR'].wards, [user]);
       return res[0].toNumber() === 1;
     }
