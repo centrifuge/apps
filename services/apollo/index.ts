@@ -72,7 +72,7 @@ class Apollo {
             id,
             totalDebt,
             totalRepaysAggregatedAmount,
-            ongoingLoans: loans (where: {opened_gt:0, closed:null}) {
+            ongoingLoans: loans (where: {opened_gt:0, closed:null, debt_gt:0}) {
 							id
             },
             weightedInterestRate,
