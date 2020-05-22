@@ -4,31 +4,30 @@ import Header from '../../components/Header';
 import Overview from '../../containers/Overview';
 import WithTinlake from '../../components/WithTinlake';
 import { menuItems } from '../../menuItems';
-import config from '../../config';
+import config, { Pool as IPool } from '../../config';
 import { GetStaticProps } from 'next';
 import ContainerWithFooter from '../../components/ContainerWithFooter';
 
-const pools = config.pools;
-
 interface Props {
   root: string;
+  pool: IPool;
 }
 
 class Pool extends React.Component <Props> {
 
   render() {
-    const { root } = this.props;
-    const selectedPool = pools.find(pool => pool.addresses.ROOT_CONTRACT === root);
+    const { pool } = this.props;
+
     return (
       <ContainerWithFooter>
         <Header selectedRoute={'/'} menuItems={menuItems} />
-        { selectedPool &&
-          <Box justify="center" direction="row" >
-            <Box width="xlarge">
-              <WithTinlake render={tinlake => <Overview tinlake={tinlake} selectedPool={selectedPool}  />} />
-            </Box>
+        <Box justify="center" direction="row" >
+          <Box width="xlarge">
+            <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
+              <Overview tinlake={tinlake} selectedPool={pool} />
+            } />
           </Box>
-        }
+        </Box>
       </ContainerWithFooter>
     );
   }
@@ -43,7 +42,7 @@ export async function getStaticPaths() {
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  return { props: { root: params?.root } };
+  return { props: { root: params?.root, pool: config.pools.find(p => p.addresses.ROOT_CONTRACT === params?.root) } };
 };
 
 export default Pool;

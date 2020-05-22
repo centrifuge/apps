@@ -3,6 +3,16 @@ import { getTinlake } from '../../services/tinlake';
 
 interface Props {
   render: (tinlake: any) => React.ReactElement;
+  addresses?: {
+    'ROOT_CONTRACT': string,
+    'ACTIONS': string,
+    'PROXY_REGISTRY': string,
+    'COLLATERAL_NFT': string
+  };
+  contractConfig?: {
+    'JUNIOR_OPERATOR': 'ALLOWANCE_OPERATOR',
+    'SENIOR_OPERATOR': 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
+  };
 }
 
 interface State {
@@ -23,7 +33,9 @@ class WithTinlake extends React.Component<Props, State> {
   }
 
   init = async () => {
-    this.tinlake = await getTinlake();
+    const { addresses, contractConfig } = this.props;
+
+    this.tinlake = await getTinlake({ addresses, contractConfig });
     if (this.isMounted) {
       this.setState({ loading: false });
     }
