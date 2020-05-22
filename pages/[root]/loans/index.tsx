@@ -23,6 +23,7 @@ class LoanListPage extends React.Component<Props> {
 
     return <ContainerWithFooter>
       <Header
+        poolTitle={pool.name}
         selectedRoute={'/loans'}
         menuItems={menuItems}
       />

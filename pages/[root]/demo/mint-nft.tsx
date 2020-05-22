@@ -20,6 +20,7 @@ class MintNFTPage extends React.Component<Props> {
 
     return <ContainerWithFooter>
       <Header
+        poolTitle={pool.name}
         selectedRoute={'/demo/mint-nft'}
         menuItems={menuItems}
       />

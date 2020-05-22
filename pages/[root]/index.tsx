@@ -20,7 +20,7 @@ class Pool extends React.Component <Props> {
 
     return (
       <ContainerWithFooter>
-        <Header selectedRoute={'/'} menuItems={menuItems} />
+        <Header poolTitle={pool.name} selectedRoute={'/'} menuItems={menuItems} />
         <Box justify="center" direction="row" >
           <Box width="xlarge">
             <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
