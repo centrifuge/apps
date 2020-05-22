@@ -101,12 +101,14 @@ class IssueLoan extends React.Component<Props, State> {
     }
   }
 
-  componentDidMount() {
+  componentWillMount() {
     const { tokenId, registry } = this.props;
     this.setState({ tokenId: tokenId || '', registry: registry || '' });
-    this.getNFT();
   }
 
+  componentDidMount() {
+    this.getNFT();
+  }
   render() {
     const { tokenId, registry, is, nft, errorMsg, nftError, loanId } = this.state;
     const { tinlake } = this.props;

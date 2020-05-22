@@ -51,7 +51,8 @@ class InvestorAllowance extends React.Component<Props, State> {
 
     }
   }
-  componentDidMount() {
+
+  componentWillMount() {
     this.updateLimits();
   }
 
