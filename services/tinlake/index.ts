@@ -10,6 +10,7 @@ let currentAddresses: null | ContractAddresses = null;
 let currentContractConfig: null | any = null;
 
 export async function getTinlake({ addresses, contractConfig }: {addresses?: ContractAddresses | null, contractConfig?: any | null} = {}) {
+  console.log(`services/tinlake getTinlake({ addresses: ${JSON.stringify(addresses)}, contractConfig: ${JSON.stringify(contractConfig)}})`);
 
   if (tinlake === null) {
     const { transactionTimeout, rpcUrl } = config;
@@ -56,6 +57,8 @@ export async function getTinlake({ addresses, contractConfig }: {addresses?: Con
 }
 
 export async function authTinlake() {
+  console.log('services/tinlake authTinlake');
+
   if (!tinlake) { await getTinlake(); }
   if (authing || authed) { return; }
 

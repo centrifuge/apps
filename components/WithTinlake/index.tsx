@@ -33,6 +33,8 @@ class WithTinlake extends React.Component<Props, State> {
   }
 
   init = async () => {
+    console.log('components/WithTinlake init');
+
     const { addresses, contractConfig } = this.props;
 
     this.tinlake = await getTinlake({ addresses, contractConfig });

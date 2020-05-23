@@ -36,24 +36,23 @@ class InvestorPage extends React.Component<Props> {
       >
         <Box width="xlarge" >
           <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
-            <Auth tinlake={tinlake}
-              render={auth =>
-                <Box>
-                  <SecondaryHeader>
+            <Auth tinlake={tinlake} render={auth =>
+              <Box>
+                <SecondaryHeader>
+                  <Box direction="row" gap="small" align="center">
+                    <BackLink href={'/investments'} />
                     <Box direction="row" gap="small" align="center">
-                      <BackLink href={'/investments'} />
-                      <Box direction="row" gap="small" align="center">
-                        <Heading level="3">Investor Details </Heading>
-                      </Box>
-                      <Box align="end">
-                          <Text style={{ color: '#808080' }}> address: {investorAddress}</Text>
-                      </Box>
-
+                      <Heading level="3">Investor Details </Heading>
                     </Box>
-                  </SecondaryHeader>
-                  <InvestorView investorAddress={investorAddress} tinlake={tinlake} auth={auth} />
-                </Box>
-              } />
+                    <Box align="end">
+                        <Text style={{ color: '#808080' }}> address: {investorAddress}</Text>
+                    </Box>
+
+                  </Box>
+                </SecondaryHeader>
+                <InvestorView investorAddress={investorAddress} tinlake={tinlake} auth={auth} />
+              </Box>
+            } />
           } />
         </Box>
       </Box>

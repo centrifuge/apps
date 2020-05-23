@@ -33,17 +33,16 @@ class LoanListPage extends React.Component<Props> {
       >
         <Box width="xlarge" gap="medium" >
           <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
-              <Auth tinlake={tinlake}
-                render={auth =>
-                  <Box>
-                    <SecondaryHeader>
-                      <Heading level="3">Loans</Heading>
-                      <PoolLink href={'/loans/issue'}>
-                        <Button primary label="Open Loan" />
-                      </PoolLink>
-                    </SecondaryHeader>
-                    <LoanList tinlake={tinlake} auth={auth} />
-                  </Box>
+              <Auth tinlake={tinlake} render={auth =>
+                <Box>
+                  <SecondaryHeader>
+                    <Heading level="3">Loans</Heading>
+                    <PoolLink href={'/loans/issue'}>
+                      <Button primary label="Open Loan" />
+                    </PoolLink>
+                  </SecondaryHeader>
+                  <LoanList tinlake={tinlake} auth={auth} />
+                </Box>
               } />
           } />
         </Box>

@@ -5,7 +5,7 @@ import { LoansState, loadLoans } from '../../../ducks/loans';
 import { PoolState, loadPool } from '../../../ducks/pool';
 import { baseToDisplay } from 'tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
-import { AuthState, loadUserProxies } from '../../../ducks/auth';
+import { AuthState } from '../../../ducks/auth';
 import LoanListData from '../../../components/Loan/List';
 import NumberDisplay from '../../../components/NumberDisplay';
 import DashboardMetric from '../../../components/DashboardMetric';
@@ -46,4 +46,4 @@ class LoanList extends React.Component<Props> {
   }
 }
 
-export default connect(state => state, { loadLoans, loadPool, loadUserProxies })(LoanList);
+export default connect(state => state, { loadLoans, loadPool })(LoanList);

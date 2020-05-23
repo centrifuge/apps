@@ -7,6 +7,7 @@ import { menuItems } from '../../menuItems';
 import config, { Pool as IPool } from '../../config';
 import { GetStaticProps } from 'next';
 import ContainerWithFooter from '../../components/ContainerWithFooter';
+import Auth from '../../components/Auth';
 
 interface Props {
   root: string;
@@ -24,7 +25,9 @@ class Pool extends React.Component <Props> {
         <Box justify="center" direction="row" >
           <Box width="xlarge">
             <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
-              <Overview tinlake={tinlake} selectedPool={pool} />
+              <Auth tinlake={tinlake} render={() =>
+                <Overview tinlake={tinlake} selectedPool={pool} />
+              } />
             } />
           </Box>
         </Box>

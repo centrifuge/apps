@@ -35,18 +35,17 @@ class LoanIssuePage extends React.Component<Props> {
       >
         <Box width="xlarge" >
           <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
-            <Auth tinlake={tinlake}
-              render={auth =>
-                <Box>
-                  <SecondaryHeader>
-                    <Box direction="row" gap="small" align="center">
-                      <BackLink href={'/loans'} />
-                      <Heading level="3">Open Loan</Heading>
-                    </Box>
-                  </SecondaryHeader>
-                  <IssueLoan tinlake={tinlake} auth={auth} tokenId={tokenId} registry={registry}/>
-                </Box>
-              } />
+            <Auth tinlake={tinlake} render={auth =>
+              <Box>
+                <SecondaryHeader>
+                  <Box direction="row" gap="small" align="center">
+                    <BackLink href={'/loans'} />
+                    <Heading level="3">Open Loan</Heading>
+                  </Box>
+                </SecondaryHeader>
+                <IssueLoan tinlake={tinlake} auth={auth} tokenId={tokenId} registry={registry}/>
+              </Box>
+            } />
           } />
         </Box>
       </Box>

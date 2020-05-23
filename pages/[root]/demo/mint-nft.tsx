@@ -8,6 +8,7 @@ import ContainerWithFooter from '../../../components/ContainerWithFooter';
 import config, { Pool } from '../../../config';
 import { WithRouterProps } from 'next/dist/client/with-router';
 import { GetStaticProps } from 'next';
+import Auth from '../../../components/Auth';
 
 interface Props extends WithRouterProps {
   root: string;
@@ -29,7 +30,11 @@ class MintNFTPage extends React.Component<Props> {
         direction="row"
       >
         <Box width="xlarge" >
-          <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake => <MintNFT tinlake={tinlake} />} />
+          <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
+            <Auth tinlake={tinlake} render={() =>
+              <MintNFT tinlake={tinlake} />
+            } />
+          } />
         </Box>
       </Box>
     </ContainerWithFooter>;

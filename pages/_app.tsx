@@ -3,8 +3,6 @@ import App from 'next/app';
 import { createWrapper } from 'next-redux-wrapper';
 import makeStore from '../utils/makeStore';
 import { AxisTheme } from '@centrifuge/axis-theme';
-import Auth from '../components/Auth';
-import WithTinlake from '../components/WithTinlake';
 import { StyledApp } from '../components/StyledApp';
 import Head from 'next/head';
 
@@ -24,11 +22,7 @@ class MyApp extends App {
           <title>Tinlake | Centrifuge | Decentralized Asset Financing</title>
         </Head>
         <StyledApp>
-          <WithTinlake render={tinlake =>
-            <Auth tinlake={tinlake} render={() =>
-              <Component {...pageProps} />
-            } />
-          } />
+          <Component {...pageProps} />
         </StyledApp>
       </AxisTheme >
     );
