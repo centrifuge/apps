@@ -8,7 +8,7 @@ import LoanBorrow from '../Borrow';
 import LoanRepay from '../Repay';
 import { Spinner } from '@centrifuge/axis-spinner';
 import NftData from '../../../components/NftData';
-import { AuthState, loadUserProxies } from '../../../ducks/auth';
+import { AuthState, loadProxies } from '../../../ducks/auth';
 import { TransactionState, resetTransactionState } from '../../../ducks/transactions';
 
 interface Props {
@@ -19,17 +19,17 @@ interface Props {
   auth?: AuthState;
   transactions?: TransactionState;
   resetTransactionState?: () => void;
-  loadUserProxies?: () => Promise<void>;
+  loadProxies?: () => Promise<void>;
 }
 
 // on state change tokenId --> load nft data for loan collateral
 class LoanView extends React.Component<Props> {
 
   componentDidMount() {
-    const { tinlake, loanId, loadLoan, resetTransactionState, loadUserProxies } = this.props;
+    const { tinlake, loanId, loadLoan, resetTransactionState, loadProxies } = this.props;
     loanId && loadLoan!(tinlake, loanId);
     resetTransactionState && resetTransactionState();
-    loadUserProxies && loadUserProxies();
+    loadProxies && loadProxies();
   }
 
   componentWillUnmount() {
@@ -45,8 +45,7 @@ class LoanView extends React.Component<Props> {
         Could not find loan {loanId}</Alert>;
     }
 
-    const user = auth && auth.user;
-    const hasBorrowerPermissions =  user && loan && (user.proxies.includes(loan.ownerOf.toString()));
+    const hasBorrowerPermissions = loan && auth?.proxies?.includes(loan.ownerOf.toString());
     if (transactions && transactions.transactionState && transactions.transactionState === 'processing') {
       return <Spinner height={'calc(100vh - 89px - 84px)'} message={transactions.loadingMessage ||
         'Processing Transaction. This may take a few seconds. Please wait...'} />;
@@ -87,4 +86,4 @@ class LoanView extends React.Component<Props> {
   }
 }
 
-export default connect(state => state, { loadLoan, resetTransactionState, loadUserProxies })(LoanView);
+export default connect(state => state, { loadLoan, resetTransactionState, loadProxies })(LoanView);

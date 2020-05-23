@@ -49,7 +49,7 @@ class InvestmentsView extends React.Component<Props, State> {
 
     return <Box>
 
-      {pool && pool.data && <Box margin={{ bottom: 'medium' }}> <InvestmentsOverview data={pool && pool.data} /> </Box>}
+      {pool?.data && <Box margin={{ bottom: 'medium' }}> <InvestmentsOverview data={pool?.data} /> </Box>}
 
       {transactions && transactions.errorMessage &&
         <Box pad={{ horizontal: 'medium' }} margin={{ bottom: 'small' }}>
@@ -58,7 +58,7 @@ class InvestmentsView extends React.Component<Props, State> {
           </Alert>
         </Box>}
 
-      {pool && pool.data && auth && auth.user && auth.user.permissions.canSetMinimumJuniorRatio &&
+      {pool?.data && auth.permissions?.canSetMinimumJuniorRatio &&
         <JuniorRatio tinlake={tinlake} minJuniorRatio={pool.data.minJuniorRatio} />
       }
 

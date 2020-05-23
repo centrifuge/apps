@@ -42,8 +42,9 @@ class LoanPage extends React.Component<Props> {
             </Box>
           </SecondaryHeader>
           <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
-            <Auth tinlake={tinlake}
-              render={auth => <Box>{loanId && <LoanView auth={auth} tinlake={tinlake} loanId={loanId} />}</Box>} />
+            <Auth tinlake={tinlake} render={auth =>
+              <Box>{loanId && <LoanView auth={auth} tinlake={tinlake} loanId={loanId} />}</Box>
+            } />
           } />
         </Box>
       </Box>

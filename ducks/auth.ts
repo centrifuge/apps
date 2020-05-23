@@ -5,20 +5,20 @@ import Apollo from '../services/apollo';
 import { HYDRATE } from 'next-redux-wrapper';
 
 // Actions
-const LOAD = 'tinlake-ui/auth/LOAD';
-const RECEIVE = 'tinlake-ui/auth/RECEIVE';
 const CLEAR = 'tinlake-ui/auth/CLEAR';
-const CLEAR_NETWORK = 'tinlake-ui/auth/CLEAR_NETWORK';
-const RECEIVE_NETWORK = 'tinlake-ui/auth/RECEIVE_NETWORK';
+const RECEIVE_ADDRESS = 'tinlake-ui/auth/RECEIVE_ADDRESS';
+const LOAD_PERMISSIONS = 'tinlake-ui/auth/LOAD_PERMISSIONS';
+const RECEIVE_PERMISSIONS = 'tinlake-ui/auth/RECEIVE_PERMISSIONS';
+const LOAD_PROXIES = 'tinlake-ui/auth/LOAD_PROXIES';
 const RECEIVE_PROXIES = 'tinlake-ui/auth/RECEIVE_PROXIES';
+const RECEIVE_NETWORK = 'tinlake-ui/auth/RECEIVE_NETWORK';
+const CLEAR_NETWORK = 'tinlake-ui/auth/CLEAR_NETWORK';
 const OBSERVING_AUTH_CHANGES = 'tinlake-ui/auth/OBSERVING_AUTH_CHANGES';
 
-export interface User {
-  address: string;
-  permissions: Permissions;
-  proxies: string[];
-}
+// Address is independent of the selected pool/registry.
+export type Address = string;
 
+// Permissions depend on both the user and the selected pool/registry.
 export interface Permissions {
   // loan admin permissions
   canIssueLoan: boolean;
@@ -35,17 +35,26 @@ export interface Permissions {
   canActAsKeeper: boolean;
 }
 
+// Proxies depend on both the user and the selected pool/registry.
+export type Proxies = string[];
+
 export interface AuthState {
   observingAuthChanges: boolean;
-  state: null | 'loading' | 'loaded';
-  user: null | User;
+  address: null | Address;
+  permissionsState: null | 'loading' | 'loaded';
+  permissions: null | Permissions;
+  proxiesState: null | 'loading' | 'loaded';
+  proxies: null | Proxies;
   network: null | string;
 }
 
 const initialState: AuthState = {
   observingAuthChanges: false,
-  state: null,
-  user: null,
+  address: null,
+  permissionsState: null,
+  permissions: null,
+  proxiesState: null,
+  proxies: null,
   network: null
 };
 
@@ -54,13 +63,15 @@ export default function reducer(state: AuthState = initialState,
                                 action: AnyAction = { type: '' }): AuthState {
   switch (action.type) {
     case HYDRATE: return { ...state, ...(action.payload.auth || {}) };
-    case LOAD: return { ...state, state: 'loading' };
-    case RECEIVE: return { ...state, state: 'loaded', user: action.user };
-    case CLEAR: return { ...state, state: 'loaded', user: null };
+    case RECEIVE_ADDRESS: return { ...state, address: action.address };
+    case CLEAR: return { ...state, address: null, permissions: null };
+    case LOAD_PERMISSIONS: return { ...state, permissionsState: 'loading' };
+    case RECEIVE_PERMISSIONS: return { ...state, permissionsState: 'loaded', permissions: action.permissions };
+    case LOAD_PROXIES: return { ...state, proxiesState: 'loading' };
+    case RECEIVE_PROXIES: return { ...state, proxiesState: 'loaded', proxies: action.proxies };
     case OBSERVING_AUTH_CHANGES: return { ...state, observingAuthChanges: true };
     case CLEAR_NETWORK: return { ...state, network: null };
     case RECEIVE_NETWORK: return { ...state, network: action.network };
-    case RECEIVE_PROXIES: return { ...state, user: action.user };
     default: return state;
   }
 }
@@ -69,80 +80,112 @@ export default function reducer(state: AuthState = initialState,
 // e.g. thunks, epics, etc
 export function loadUser(tinlake: any, address: string):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
-  return async (dispatch, getState) => {
-    const { auth } = getState();
-    // don't load again if already loading
-    if (auth.state === 'loading') {
-      return;
-    }
+  return async (dispatch) => {
+    console.log(`ducks/auth.ts loadUser(tinlake: _, address: ${address}), tinlake.addresses`, tinlake.contractAddresses);
 
-    // clear user if no address given
+    // clear if no address given
     if (!address) {
       dispatch({ type: CLEAR });
       return;
     }
 
-    // if user is already loaded, don't load again
-    if (auth.user && auth.user.address.toLowerCase() === address.toLowerCase()) {
-      return;
-    }
+    dispatch({ address, type: RECEIVE_ADDRESS });
 
-    dispatch({ type: LOAD });
-
-    const interestRatePermission = await tinlake.canSetInterestRate(address);
-    const loanPricePermission = await tinlake.canSetLoanPrice(address);
-    const equityRatioPermission = await tinlake.canSetMinimumJuniorRatio(address);
-    const riskScorePermission = await tinlake.canSetRiskScore(address);
-    const investorAllowancePermissionJunior = await tinlake.canSetInvestorAllowanceJunior(address);
-    const investorAllowancePermissionSenior = await tinlake.canSetInvestorAllowanceSenior(address);
-    const result =  await Apollo.getProxies(address);
-    const proxies = result.data;
-    const user = {
-      address,
-      proxies,
-      permissions: {
-        canSetInterestRate: interestRatePermission,
-        canSetLoanPrice: loanPricePermission,
-        canSetMinimumJuniorRatio: equityRatioPermission,
-        canSetRiskScore: riskScorePermission,
-        canSetInvestorAllowanceJunior: investorAllowancePermissionJunior,
-        canSetInvestorAllowanceSenior: investorAllowancePermissionSenior
-        // TODO: canActAsKeeper
-      }
-    };
-    dispatch({ user, type: RECEIVE });
+    dispatch(loadProxies());
+    dispatch(loadPermissions(tinlake));
   };
 }
 
-export function loadUserProxies():
-ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+export function loadProxies():
+  ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
+    console.log('ducks/auth.ts loadProxies()');
+
     const { auth } = getState();
-    // clear user if no address given
-    if (!auth.user || !auth.user.address) {
-      dispatch({ type: CLEAR });
+
+    // don't load again if already loading
+    if (auth.proxiesState === 'loading') {
       return;
     }
 
-    const result =  await Apollo.getProxies(auth.user.address);
+    if (!auth.address) {
+      return;
+    }
+
+    dispatch({ type: LOAD_PROXIES });
+
+    const result =  await Apollo.getProxies(auth.address);
     const proxies = result.data;
-    const user = {
-      ...auth.user,
-      proxies
+
+    dispatch({ proxies, type: RECEIVE_PROXIES });
+  };
+}
+
+export function loadPermissions(tinlake: any):
+  ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+  return async (dispatch, getState) => {
+    console.log('ducks/auth.ts loadPermissions(tinlake: _), tinlake.addresses', tinlake.contractAddresses);
+
+    const { auth } = getState();
+
+    // don't load again if already loading
+    if (auth.permissionsState === 'loading') {
+      return;
+    }
+
+    if (!auth.address) {
+      return;
+    }
+
+    if (!tinlake.canQueryPermissions) {
+      return;
+    }
+
+    dispatch({ type: LOAD_PERMISSIONS });
+
+    const [
+      interestRatePermission,
+      loanPricePermission,
+      equityRatioPermission,
+      riskScorePermission,
+      investorAllowancePermissionJunior,
+      investorAllowancePermissionSenior
+    ] = await Promise.all([
+      tinlake.canSetInterestRate(auth.address),
+      tinlake.canSetLoanPrice(auth.address),
+      tinlake.canSetMinimumJuniorRatio(auth.address),
+      tinlake.canSetRiskScore(auth.address),
+      tinlake.canSetInvestorAllowanceJunior(auth.address),
+      tinlake.canSetInvestorAllowanceSenior(auth.address)
+    ]);
+
+    const permissions = {
+      canSetInterestRate: interestRatePermission,
+      canSetLoanPrice: loanPricePermission,
+      canSetMinimumJuniorRatio: equityRatioPermission,
+      canSetRiskScore: riskScorePermission,
+      canSetInvestorAllowanceJunior: investorAllowancePermissionJunior,
+      canSetInvestorAllowanceSenior: investorAllowancePermissionSenior
+      // TODO: canActAsKeeper
     };
-    dispatch({ user, type: RECEIVE_PROXIES });
+
+    console.log('ducks/auth.ts loadPermissions: got permissions:', permissions);
+
+    dispatch({ permissions, type: RECEIVE_PERMISSIONS });
   };
 }
 
 export function loadNetwork(network: string):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
-    const { auth } = getState();
+    console.log('ducks/auth.ts loadNetwork');
 
     if (!network) {
       dispatch({ type: CLEAR_NETWORK });
       return;
     }
+
+    const { auth } = getState();
 
     const networkName = networkIdToName(network);
     // if network is already loaded, don't load again
@@ -160,6 +203,8 @@ export function observeAuthChanges(tinlake: any):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
 
+    console.log('ducks/auth.ts observeAuthChanges');
+
     const state = getState();
     if (state.auth.observingAuthChanges) {
       return;
@@ -168,7 +213,7 @@ export function observeAuthChanges(tinlake: any):
     if (tinlake.provider.host) {
       if (!providerChecks) {
         // Found HTTPProvider - check for provider changes every 100 ms'
-        providerChecks = setInterval(() => dispatch(observeAuthChanges(tinlake)), 100);
+        providerChecks = setInterval(() => dispatch(observeAuthChanges(tinlake)), 500);
       }
       return;
     }
@@ -198,6 +243,8 @@ export function observeAuthChanges(tinlake: any):
 export function clearUser():
   ThunkAction<Promise<void>, AuthState, undefined, Action> {
   return async (dispatch) => {
+    console.log('ducks/auth.ts clearUser');
+
     dispatch({ type: CLEAR });
   };
 }

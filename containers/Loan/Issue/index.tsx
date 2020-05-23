@@ -7,7 +7,7 @@ import { getNFT, issue, TinlakeResult } from '../../../services/tinlake/actions'
 import { authTinlake } from '../../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import LoanView from '../View';
-import { AuthState, loadUserProxies } from '../../../ducks/auth';
+import { AuthState, loadProxies } from '../../../ducks/auth';
 import { NFT } from 'tinlake';
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
   tokenId: string;
   registry: string;
   auth: AuthState;
-  loadUserProxies?: () => Promise<void>;
+  loadProxies?: () => Promise<void>;
 }
 
 interface State {
@@ -42,7 +42,7 @@ class IssueLoan extends React.Component<Props, State> {
   // handlers
   onTokenIdValueChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const currentTokenId = event.currentTarget.value;
-    await this.setState({
+    this.setState({
       tokenId: currentTokenId,
       nft: null,
       nftError: ''
@@ -52,7 +52,7 @@ class IssueLoan extends React.Component<Props, State> {
 
   onRegistryAddressValueChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const currentRegistryAddress = event.currentTarget.value;
-    await this.setState({
+    this.setState({
       registry: currentRegistryAddress,
       nft: null,
       nftError: ''
@@ -79,7 +79,7 @@ class IssueLoan extends React.Component<Props, State> {
   }
 
   issueLoan = async () => {
-    const { tinlake, loadUserProxies } = this.props;
+    const { tinlake, loadProxies } = this.props;
     const { tokenId } = this.state;
     this.setState({ is: 'loading' });
 
@@ -95,7 +95,7 @@ class IssueLoan extends React.Component<Props, State> {
       const loanId = result.data;
       this.setState({ loanId });
       this.setState({ is: 'success' });
-      loadUserProxies && loadUserProxies();
+      loadProxies && loadProxies();
     } catch (e) {
       this.setState({ is: 'error', errorMsg: e.message });
     }
@@ -176,4 +176,4 @@ class IssueLoan extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadUserProxies })(IssueLoan);
+export default connect(state => state, { loadProxies })(IssueLoan);

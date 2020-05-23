@@ -35,7 +35,7 @@ class Overview extends React.Component<Props> {
 
   render() {
     const { tinlake, loans, auth, selectedPool, pool } = this.props;
-    const userAddress = auth && auth.user && auth.user.address || tinlake.ethConfig.from;
+    const userAddress = auth?.address || tinlake.ethConfig.from;
 
     const { name, description } = selectedPool;
     const allLoans = loans && loans.loans || [];
