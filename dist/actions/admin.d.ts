@@ -2,6 +2,7 @@ import { ContractNames, Constructor, TinlakeParams } from '../Tinlake';
 import BN from 'bn.js';
 export declare function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase): {
     new (...args: any[]): {
+        canQueryPermissions: () => boolean;
         isWard: (user: string, contractName: string) => Promise<BN>;
         canSetInterestRate: (user: string) => Promise<boolean>;
         canSetSeniorTrancheInterest: (user: string) => Promise<boolean>;

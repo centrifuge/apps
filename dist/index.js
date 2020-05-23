@@ -10681,6 +10681,16 @@ function AdminActions(Base) {
         __extends(class_1, _super);
         function class_1() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.canQueryPermissions = function () {
+                var _a, _b, _c, _d, _e, _f, _g;
+                return !!((_a = _this.contracts['PILE']) === null || _a === void 0 ? void 0 : _a.wards) &&
+                    !!((_b = _this.contracts['SENIOR']) === null || _b === void 0 ? void 0 : _b.wards) &&
+                    !!((_c = _this.contracts['PRICE_POOL']) === null || _c === void 0 ? void 0 : _c.wards) &&
+                    !!((_d = _this.contracts['ASSESSOR']) === null || _d === void 0 ? void 0 : _d.wards) &&
+                    !!((_e = _this.contracts['JUNIOR_OPERATOR']) === null || _e === void 0 ? void 0 : _e.wards) &&
+                    !!((_f = _this.contracts['SENIOR_OPERATOR']) === null || _f === void 0 ? void 0 : _f.wards) &&
+                    !!((_g = _this.contracts['COLLECTOR']) === null || _g === void 0 ? void 0 : _g.wards);
+            };
             _this.isWard = function (user, contractName) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 var _a;
