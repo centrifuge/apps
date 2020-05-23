@@ -62,7 +62,7 @@ class InvestorRedeem extends React.Component<Props, State> {
 
     return <Box basis={'1/4'} gap="medium" margin={{ right: 'large' }}>
       <Box gap="medium">
-        <FormField label="Redeem token">
+        <FormField label="Redeem amount">
           <NumberInput value={baseToDisplay(redeemAmount, 18)} suffix={` ${tranche.token}`} precision={18}
             onValueChange={({ value }) =>
               this.setState({ redeemAmount: displayToBase(value, 18) })}

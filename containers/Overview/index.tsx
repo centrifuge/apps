@@ -67,7 +67,7 @@ class Overview extends React.Component<Props> {
               <TableBody>
                 <TableRow>
                   <TableCell scope="row">
-                    Oustanding Loans
+                    Ongoing Loans
                     </TableCell>
                   <TableCell style={{ textAlign: 'end' }}> {outstandingLoans} </TableCell>
                 </TableRow>

@@ -36,7 +36,7 @@ class LoanList extends React.Component<Props> {
     return <Box margin={{ bottom: 'large' }}>
       <Box direction="row" align="center">
       <Box basis={'full'} gap="medium" alignSelf="center" margin={{ bottom: 'medium' }}>
-        <DashboardMetric label="Total funds available for borrowing">
+        <DashboardMetric label="Total funds available to borrow">
             <NumberDisplay value={baseToDisplay(availableFunds, 18)} suffix=" DAI" precision={18} />
         </DashboardMetric>
       </Box>

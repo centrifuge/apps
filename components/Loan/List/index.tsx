@@ -38,7 +38,7 @@ class LoanList extends React.Component<Props> {
               </Box>
           },
           {
-            header: 'Debt (DAI)', property: 'debt', align: 'end',
+            header: 'Outstanding Debt (DAI)', property: 'debt', align: 'end',
             render: (l: Loan) =>
               <NumberDisplay suffix="" precision={2}
                 value={baseToDisplay(l.debt, 18)} />
