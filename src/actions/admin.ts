@@ -6,6 +6,16 @@ const web3 = require('web3-utils');
 export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IAdminActions {
 
+    canQueryPermissions = () => {
+      return !!this.contracts['PILE']?.wards &&
+        !!this.contracts['SENIOR']?.wards &&
+        !!this.contracts['PRICE_POOL']?.wards &&
+        !!this.contracts['ASSESSOR']?.wards &&
+        !!this.contracts['JUNIOR_OPERATOR']?.wards &&
+        !!this.contracts['SENIOR_OPERATOR']?.wards &&
+        !!this.contracts['COLLECTOR']?.wards
+    }
+
     isWard = async (user: string, contractName: ContractNames) => {
       if (!this.contracts[contractName]?.wards) { return new BN(0); }
       const res : { 0: BN } = await executeAndRetry(this.contracts[contractName].wards, [user]);
