@@ -27,7 +27,7 @@ class LoanData extends React.Component<Props> {
           </FormField>
         </Box>
         <Box basis={'1/3'} gap="medium">
-          <FormField label="Debt">
+          <FormField label="Outstanding Debt">
             <NumberInput value={baseToDisplay(debt, 18)} suffix=" DAI" precision={18} disabled />
           </FormField>
         </Box>
