@@ -16,7 +16,6 @@ export type Pool = {
   name: string
   shortName?: string
   description: string
-  details?: string
   asset: string
 };
 
@@ -63,7 +62,6 @@ const poolSchema = yup.object().shape({
   name: yup.string().required('poolSchema.name is required'),
   shortName: yup.string(),
   description: yup.string().required('poolSchema.description is required'),
-  details: yup.string(),
   asset: yup.string().required('poolSchema.asset is required')
 });
 
