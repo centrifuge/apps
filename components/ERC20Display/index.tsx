@@ -3,6 +3,7 @@ import { Decimal } from 'decimal.js-light';
 import { Box, Text } from 'grommet';
 import styled from 'styled-components';
 import { baseToDisplay } from 'tinlake';
+import { addThousandsSeparators } from '../../utils/addThousandsSeparators';
 
 export interface TokenMeta {
   symbol: string;
@@ -29,7 +30,7 @@ const ERC20Display: FunctionComponent<Props> = ({ value, precision, tokenMetas }
   const { decimals, logo, symbol } = firstOrThrow(tokenMetas);
 
   const valueToDecimal  = new Decimal(baseToDisplay(value, decimals)).toFixed(precision);
-  const formatted = valueToDecimal.toString();
+  const formatted = addThousandsSeparators(valueToDecimal.toString());
   return <Box direction="row">
       <Amount>
         <Text style={{ fontSize: '0.8em' }}>

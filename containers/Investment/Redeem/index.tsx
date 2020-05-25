@@ -9,6 +9,7 @@ import { loadPool } from '../../../ducks/pool';
 import { connect } from 'react-redux';
 import { authTinlake } from '../../../services/tinlake';
 import BN from 'bn.js';
+import { addThousandsSeparators } from '../../../utils/addThousandsSeparators';
 
 interface Props {
   investor: Investor;
@@ -77,7 +78,7 @@ class InvestorRedeem extends React.Component<Props, State> {
             Max redeem amount exceeded.   <br />
             Amount has to be lower then <br />
             <Text weight="bold">
-              {`${baseToDisplay(maxRedeemAmount, 18)}`}
+              {`${addThousandsSeparators(baseToDisplay(maxRedeemAmount, 18))}`}
             </Text>
           </Box>
         }
@@ -87,7 +88,7 @@ class InvestorRedeem extends React.Component<Props, State> {
             Available token amount exceeded.   <br />
             Amount has to be lower then <br />
             <Text weight="bold">
-              {`${baseToDisplay(tokenBalance, 18)}`}
+              {`${addThousandsSeparators(baseToDisplay(tokenBalance, 18))}`}
             </Text>
           </Box>
         }
