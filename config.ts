@@ -14,7 +14,9 @@ export type Pool = {
     'SENIOR_OPERATOR': 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
   }
   name: string
+  shortName?: string
   description: string
+  details?: string
   asset: string
 };
 
@@ -59,7 +61,9 @@ const poolSchema = yup.object().shape({
   graph: yup.string().required('poolSchema.graph is required'),
   contractConfig: contractConfigSchema.required('poolSchema.contractConfig is required'),
   name: yup.string().required('poolSchema.name is required'),
+  shortName: yup.string(),
   description: yup.string().required('poolSchema.description is required'),
+  details: yup.string(),
   asset: yup.string().required('poolSchema.asset is required')
 });
 
