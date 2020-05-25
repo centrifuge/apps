@@ -6,7 +6,6 @@ import { baseToDisplay, feeToInterestRate } from 'tinlake';
 import NumberDisplay from '../NumberDisplay';
 import ChevronRight from '../ChevronRight';
 import Router from 'next/router';
-import { addThousandsSeparators } from '../../utils/addThousandsSeparators';
 
 interface Props {
   pools?: PoolData[];
@@ -56,15 +55,13 @@ class PoolList extends React.Component<Props> {
           header: 'Outstanding Debt (DAI)', property: 'totalDebt', align: 'center',
           render: (p: PoolData) =>
             <Box style={{ maxWidth: '150px' }}>
-              <NumberDisplay suffix="" precision={2}
-                value={addThousandsSeparators(baseToDisplay(p.totalDebt, 18))} />
+              <NumberDisplay suffix="" precision={2} value={baseToDisplay(p.totalDebt, 18)} />
             </Box>
         },
         {
           header: 'Total Repaid Debt (DAI)', property: 'totalRepaid', align: 'center',
           render: (p: PoolData) =>
-            <NumberDisplay suffix="" precision={2}
-              value={addThousandsSeparators(baseToDisplay(p.totalRepaysAggregatedAmount, 18))} />
+            <NumberDisplay suffix="" precision={2} value={baseToDisplay(p.totalRepaysAggregatedAmount, 18)} />
         },
         {
           header: 'Avg Loan APR', property: 'avgInterest', align: 'center',

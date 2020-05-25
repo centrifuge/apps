@@ -5,7 +5,6 @@ import BN from 'bn.js';
 import NumberDisplay from '../../NumberDisplay';
 import DashboardMetric from '../../DashboardMetric';
 import { PoolData } from '../../../ducks/pool';
-import { addThousandsSeparators } from '../../../utils/addThousandsSeparators';
 
 interface Props {
   data: PoolData;
@@ -20,15 +19,13 @@ class InvestmentsOverview extends React.Component<Props> {
       <Box direction="row" >
         <Box basis={'1/3'} >
           <DashboardMetric label={'Current TIN ratio'} >
-            <NumberDisplay value={addThousandsSeparators(baseToDisplay(currentJuniorRatio, 25))} suffix={' %'}
-              precision={2} />
+            <NumberDisplay value={baseToDisplay(currentJuniorRatio, 25)} suffix={' %'} precision={2} />
           </DashboardMetric>
         </Box>
 
         <Box basis={'1/3'} >
           <DashboardMetric label={'Minimum TIN ratio'} >
-            <NumberDisplay value={addThousandsSeparators(baseToDisplay(minJuniorRatio, 25))} suffix={' %'}
-              precision={2} />
+            <NumberDisplay value={baseToDisplay(minJuniorRatio, 25)} suffix={' %'} precision={2} />
           </DashboardMetric>
         </Box>
         <Box basis={'1/3'}  >

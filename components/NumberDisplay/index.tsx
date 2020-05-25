@@ -1,5 +1,6 @@
 import { FunctionComponent } from 'react';
 import { Decimal } from 'decimal.js-light';
+import { addThousandsSeparators } from '../../utils/addThousandsSeparators';
 
 interface Props {
   value: string;
@@ -14,7 +15,7 @@ const NumberDisplay: FunctionComponent<Props> = ({ value, precision, prefix, suf
   });
 
   const valueToDecimal  = new Decimal(value.toString()).toFixed(precision);
-  const formatted = valueToDecimal.toString();
+  const formatted = addThousandsSeparators(valueToDecimal.toString());
   return <span>{prefix}{formatted}{suffix}</span>;
 };
 
