@@ -3,8 +3,8 @@ import { Box, Heading } from 'grommet';
 import { Investor } from 'tinlake';
 import { TrancheType } from '../../../services/tinlake/actions';
 import DashboardMetric from '../../DashboardMetric';
-import { Erc20Widget } from '../../../components/erc20-widget';
 import DAI from '../../../static/dai.json';
+import ERC20Display from '../../ERC20Display';
 
 interface Props {
   investor: Investor;
@@ -23,7 +23,7 @@ class TrancheMetric extends React.Component<Props> {
         <Box direction="row" >
 
             <DashboardMetric label="Investor token balance">
-              <Erc20Widget value={tokenBalance ? tokenBalance.toString() : '0'} tokenData={tokenData} precision={18}  />
+              <ERC20Display value={tokenBalance ? tokenBalance.toString() : '0'} tokenMetas={tokenData} precision={4} />
             </DashboardMetric>
 
         </Box>
@@ -34,11 +34,11 @@ class TrancheMetric extends React.Component<Props> {
         <Box direction="row" >
 
             <DashboardMetric label="Investment limit">
-              <Erc20Widget value={maxSupply ? maxSupply.toString() : '0'} tokenData={DAI} precision={18} />
+              <ERC20Display value={maxSupply ? maxSupply.toString() : '0'} tokenMetas={DAI} precision={2} />
             </DashboardMetric>
 
             <DashboardMetric label="Redeem limit">
-             <Erc20Widget value={maxRedeem ? maxRedeem.toString() : '0'} tokenData={tokenData} precision={18} />
+              <ERC20Display value={maxRedeem ? maxRedeem.toString() : '0'} tokenMetas={tokenData} precision={4} />
             </DashboardMetric>
 
         </Box>

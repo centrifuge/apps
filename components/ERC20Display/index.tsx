@@ -2,26 +2,33 @@ import { FunctionComponent } from 'react';
 import { Decimal } from 'decimal.js-light';
 import { Box, Text } from 'grommet';
 import styled from 'styled-components';
+import { baseToDisplay } from 'tinlake';
 
 export interface TokenMeta {
   symbol: string;
   logo: string;
   address: string;
-  decimals: Number;
+  decimals: number;
+}
+
+export interface TokenMetas {
+  [addr: string]: TokenMeta;
 }
 
 interface Props {
   value: string;
   precision?: number;
-  tokenMeta: TokenMeta;
+  tokenMetas: TokenMetas;
 }
 
-const ERC20Display: FunctionComponent<Props> = ({ value, precision, tokenMeta }: Props) => {
+const ERC20Display: FunctionComponent<Props> = ({ value, precision, tokenMetas }: Props) => {
   Decimal.set({
     precision
   });
 
-  const valueToDecimal  = new Decimal(value.toString()).toFixed(precision);
+  const { decimals, logo, symbol } = firstOrThrow(tokenMetas);
+
+  const valueToDecimal  = new Decimal(baseToDisplay(value, decimals)).toFixed(precision);
   const formatted = valueToDecimal.toString();
   return <Box direction="row">
       <Amount>
@@ -30,9 +37,9 @@ const ERC20Display: FunctionComponent<Props> = ({ value, precision, tokenMeta }:
         </Text>
       </Amount>
       <LogoAndSymbol>
-        <Logo src={tokenMeta.logo} />
+        <Logo src={logo} />
         <Text style={{ fontSize: '0.8em' }} >
-          {tokenMeta.symbol}
+          {symbol}
         </Text>
       </LogoAndSymbol>
   </Box>;
@@ -55,8 +62,17 @@ const LogoAndSymbol = styled.div`
 
 const Logo = styled.img`
   position: relative;
-  top: 1px;
+  top: -1px;
+  vertical-align: middle;
   margin: 0 8px 0 0;
   width: 16px;
   height: 16px;
 `;
+
+function firstOrThrow(tokenMetas: TokenMetas): TokenMeta {
+  const keys = Object.keys(tokenMetas);
+  if (keys.length === 0) {
+    throw new Error('tokenMeta property must have > 1 entry, found 0');
+  }
+  return tokenMetas[keys[0]];
+}

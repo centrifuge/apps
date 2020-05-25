@@ -2,9 +2,7 @@ import * as React from 'react';
 import { Box, Text } from 'grommet';
 import { PoolsData } from '../../ducks/pools';
 import PoolsMetric from '../PoolsMetric';
-import { Erc20Widget } from '../../components/erc20-widget';
 import DAI from '../../static/dai.json';
-import { baseToDisplay } from 'tinlake';
 import ERC20Display from '../ERC20Display';
 
 interface Props {
@@ -32,16 +30,10 @@ class PoolsMetrics extends React.Component<Props> {
         </Box>
       </PoolsMetric>
       <PoolsMetric label="Total Outstanding Debt">
-        <ERC20Display
-          value={baseToDisplay(pools.totalDebt, 18)}
-          tokenMeta={DAI['0x6b175474e89094c44da98b954eedeac495271d0f']} precision={2}
-        />
+        <ERC20Display value={pools.totalDebt.toString()} tokenMetas={DAI} precision={2} />
       </PoolsMetric>
       <PoolsMetric label="Total Repaid Debt">
-        <ERC20Display
-          value={baseToDisplay(pools.totalRepaysAggregatedAmount, 18)}
-          tokenMeta={DAI['0x6b175474e89094c44da98b954eedeac495271d0f']} precision={2}
-        />
+        <ERC20Display value={pools.totalRepaysAggregatedAmount.toString()} tokenMetas={DAI} precision={2} />
       </PoolsMetric>
     </Box>;
   }
