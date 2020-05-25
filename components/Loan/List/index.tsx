@@ -41,14 +41,12 @@ class LoanList extends React.Component<Props> {
           {
             header: 'Outstanding Debt (DAI)', property: 'debt', align: 'end',
             render: (l: Loan) =>
-              <NumberDisplay suffix="" precision={2}
-                value={baseToDisplay(l.debt, 18)} />
+              <NumberDisplay suffix="" precision={2} value={baseToDisplay(l.debt, 18)} />
           },
           {
             header: 'Available to borrow (DAI)', property: 'principal', align: 'end',
             render: (l: Loan) =>
-              <NumberDisplay suffix="" precision={2}
-                value={baseToDisplay(l.principal, 18)} />
+              <NumberDisplay suffix="" precision={2} value={baseToDisplay(l.principal, 18)} />
           },
           {
             header: <HeaderCell text={'Loan APR'}></HeaderCell>, property: 'fee', align: 'end',

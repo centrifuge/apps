@@ -13,7 +13,7 @@ const DashboardMetric: FunctionComponent<Props> = ({ label, children }) => {
     gap="xsmall"
     margin="small"
   >
-    <Text textAlign="center" truncate={true} weight="bold" style={{ fontSize: '1.2em', lineHeight: '40px', textOverflow: 'clip' }}>
+    <Text textAlign="center" truncate={true} weight="bold" style={{ fontSize: '1.2em', lineHeight: '40px', textOverflow: 'clip', borderBottom: '1px solid #EEEEEE' }}>
       {children}</Text>
     <Text textAlign="center">{label}</Text>
   </Box>;

@@ -13,6 +13,7 @@ import Tinlake from 'tinlake/dist/Tinlake';
 import { Pool } from '../../config';
 import { PoolLink } from '../../components/PoolLink';
 import { toPrecision } from '../../utils/toPrecision';
+import { addThousandsSeparators } from '../../utils/addThousandsSeparators';
 
 interface Props {
   tinlake: any;
@@ -75,13 +76,14 @@ class Overview extends React.Component<Props> {
                   <TableCell scope="row">
                     Outstanding Debt
                   </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>DAI {toPrecision(baseToDisplay(outstandingDebt, 18), 2)}</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>DAI {addThousandsSeparators(toPrecision(baseToDisplay(
+                    outstandingDebt, 18),                                                         2))}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
                     DAI available to borrow
                   </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>DAI {toPrecision(baseToDisplay(availableFunds, 18), 2)}</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>DAI {addThousandsSeparators(toPrecision(baseToDisplay(availableFunds, 18),                                                         2))}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -93,13 +95,15 @@ class Overview extends React.Component<Props> {
                   <TableCell scope="row">
                     Current TIN ratio
                     </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>{toPrecision(baseToDisplay(currentJuniorRatio, 25), 2)} %</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>{addThousandsSeparators(toPrecision(baseToDisplay(
+                    currentJuniorRatio, 25),                                                  2))} %</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
                     Minimum TIN ratio
                   </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>{toPrecision(baseToDisplay(minJuniorRatio, 25), 2)} %</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>{addThousandsSeparators(toPrecision(baseToDisplay(
+                    minJuniorRatio, 25),                                                      2))} %</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
@@ -111,13 +115,15 @@ class Overview extends React.Component<Props> {
                   <TableCell scope="row">
                     DROP Supply
                   </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>{toPrecision(baseToDisplay(seniorTokenSupply, 18), 2)}</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>{addThousandsSeparators(toPrecision(baseToDisplay(
+                    seniorTokenSupply, 18),                                                   2))}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
                     TIN Supply
                   </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>{toPrecision(baseToDisplay(juniorTokenSupply, 18), 2)}</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>{addThousandsSeparators(toPrecision(baseToDisplay(
+                    juniorTokenSupply, 18),                                                   2))}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>

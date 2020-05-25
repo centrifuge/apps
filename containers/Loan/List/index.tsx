@@ -7,8 +7,8 @@ import { Spinner } from '@centrifuge/axis-spinner';
 import { AuthState } from '../../../ducks/auth';
 import LoanListData from '../../../components/Loan/List';
 import DashboardMetric from '../../../components/DashboardMetric';
-import { Erc20Widget } from '../../../components/erc20-widget';
 import DAI from '../../../static/dai.json';
+import ERC20Display from '../../../components/ERC20Display';
 
 interface Props {
   tinlake: any;
@@ -38,7 +38,7 @@ class LoanList extends React.Component<Props> {
       <Box basis={'full'} gap="medium" align="center" alignSelf="center" margin={{ bottom: 'medium' }}>
         <DashboardMetric label="Total funds available for borrowing">
           <Box align="center">
-            <Erc20Widget value={availableFunds ? availableFunds.toString() : '0'} tokenData={DAI} precision={18} />
+            <ERC20Display value={availableFunds ? availableFunds.toString() : '0'} tokenMetas={DAI} precision={2} />
           </Box>
         </DashboardMetric>
       </Box>

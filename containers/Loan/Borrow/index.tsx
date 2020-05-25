@@ -9,6 +9,7 @@ import { loadLoan } from '../../../ducks/loans';
 import { connect } from 'react-redux';
 import { authTinlake } from '../../../services/tinlake';
 import BN from 'bn.js';
+import { addThousandsSeparators } from '../../../utils/addThousandsSeparators';
 
 interface Props {
   loan: Loan;
@@ -77,7 +78,7 @@ class LoanBorrow extends React.Component<Props, State> {
             Available funds exceeded. <br />
             Amount has to be lower then <br />
             <Text weight="bold">
-            {`${baseToDisplay(availableFunds, 18)}`}
+            {`${addThousandsSeparators(baseToDisplay(availableFunds, 18))}`}
             </Text>
           </Box>
         }
@@ -86,7 +87,7 @@ class LoanBorrow extends React.Component<Props, State> {
             Max borrow amount exceeded.   <br />
             Amount has to be lower then <br />
             <Text weight="bold">
-              {`${baseToDisplay(loan.principal, 18)}`}
+              {`${addThousandsSeparators(baseToDisplay(loan.principal, 18))}`}
             </Text>
           </Box>
         }
