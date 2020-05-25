@@ -3,12 +3,12 @@ import { Box } from 'grommet';
 import { connect } from 'react-redux';
 import { LoansState, loadLoans } from '../../../ducks/loans';
 import { PoolState, loadPool } from '../../../ducks/pool';
-import { baseToDisplay } from 'tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import { AuthState } from '../../../ducks/auth';
 import LoanListData from '../../../components/Loan/List';
-import NumberDisplay from '../../../components/NumberDisplay';
 import DashboardMetric from '../../../components/DashboardMetric';
+import { Erc20Widget } from '../../../components/erc20-widget';
+import DAI from '../../../static/dai.json';
 
 interface Props {
   tinlake: any;
@@ -35,9 +35,11 @@ class LoanList extends React.Component<Props> {
 
     return <Box margin={{ bottom: 'large' }}>
       <Box direction="row" align="center">
-      <Box basis={'full'} gap="medium" alignSelf="center" margin={{ bottom: 'medium' }}>
-        <DashboardMetric label="Total funds available to borrow">
-            <NumberDisplay value={baseToDisplay(availableFunds, 18)} suffix=" DAI" precision={18} />
+      <Box basis={'full'} gap="medium" align="center" alignSelf="center" margin={{ bottom: 'medium' }}>
+        <DashboardMetric label="Total funds available for borrowing">
+          <Box align="center">
+            <Erc20Widget value={availableFunds ? availableFunds.toString() : '0'} tokenData={DAI} precision={18} />
+          </Box>
         </DashboardMetric>
       </Box>
       </Box>

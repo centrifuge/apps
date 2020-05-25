@@ -64,7 +64,7 @@ class InvestorView extends React.Component<Props, State> {
     resetTransactionState && resetTransactionState();
   }
 
-  selectTab(tab : number) {
+  selectTab(tab: number) {
     const { selectedTab } = this.state;
     if (tab !== selectedTab) {
       this.resetTransactionState();
@@ -77,6 +77,28 @@ class InvestorView extends React.Component<Props, State> {
     const { tinlake, investments, auth, pool, transactions } = this.props;
     const investor = investments && investments.investor;
     const investorState = investments && investments.investorState;
+    const dropAddress = this.props.tinlake.contractAddresses.SENIOR_TOKEN as string;
+    const tinAddress = this.props.tinlake.contractAddresses.JUNIOR_TOKEN as string;
+
+    const dropToken = {
+      [dropAddress]: {
+        symbol: 'DROP',
+        logo: '../../static/DROP_final.svg',
+        decimals: 18,
+        name: 'DROP'
+      }
+    };
+    const tinToken = {
+      [tinAddress]: {
+        symbol: 'TIN',
+        logo: '../../static/TIN_final.svg',
+        decimals: 18,
+        name: 'TIN'
+      }
+    };
+
+    const seniorTranche = pool?.data ? { ...pool.data.senior, ...{ tokenData: { ...dropToken } } } : null;
+    const juniorTranche = pool?.data ? { ...pool.data.junior, ...{ tokenData: { ...tinToken } } } : null;
 
     if (investorState && investorState === 'loading') {
       return <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading Investor information...'} />;
@@ -89,25 +111,25 @@ class InvestorView extends React.Component<Props, State> {
           {errorMsg && <div>{errorMsg}</div>}
         </Alert>}
       </Box>
-      { pool && pool.data  &&
-      <Box pad={{ horizontal: 'medium', top: 'large' }} >
-        <Tabs justify="center" activeIndex={selectedTab} flex="grow" onActive={i => this.selectTab(i)}>
-          <Tab title="Senior tranche / DROP token" style={{
-            flex: 1,
-            fontWeight: 900
-          }}>
-            <TrancheView tinlake={tinlake} transactions={transactions} auth={auth} investor={investor}
-              tranche={pool.data.senior as any} />
-          </Tab>
-          <Tab title="Junior tranche / TIN token" style={{
-            flex: 1,
-            fontWeight: 900
-          }}
-          >
-            <TrancheView transactions={transactions} tinlake={tinlake} auth={auth} investor={investor} tranche={pool.data.junior} />
-          </Tab>
-        </Tabs>
-      </Box>
+      {pool && pool.data &&
+        <Box pad={{ horizontal: 'medium', top: 'large' }} >
+          <Tabs justify="center" activeIndex={selectedTab} flex="grow" onActive={i => this.selectTab(i)}>
+            <Tab title="Senior tranche / DROP token" style={{
+              flex: 1,
+              fontWeight: 900
+            }}>
+              <TrancheView tinlake={tinlake} transactions={transactions} auth={auth} investor={investor}
+                tranche={seniorTranche} />
+            </Tab>
+            <Tab title="Junior tranche / TIN token" style={{
+              flex: 1,
+              fontWeight: 900
+            }}
+            ><span></span>
+              <TrancheView transactions={transactions} tinlake={tinlake} auth={auth} investor={investor} tranche={juniorTranche} />
+            </Tab>
+          </Tabs>
+        </Box>
       }
     </Box>;
   }

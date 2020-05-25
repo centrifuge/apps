@@ -10,12 +10,17 @@ const PoolsMetric: FunctionComponent<MetricProps> = ({ label, children }) => {
     background="white"
     elevation="small"
     gap="xsmall"
-    pad={{ left: 'large', right: 'large', top: 'small', bottom: 'small' }}
+    pad="small"
     margin={{ top: 'large' }}
   >
-    <Text textAlign="center" truncate={true} weight="bold" style={{ fontSize: '1.7em', lineHeight: '40px', textOverflow: 'clip' }}>
+    <Box style={{ margin:'auto' }}>
+    <Text textAlign="center" truncate={true} style={{ fontSize: '1.7em', lineHeight: '40px', textOverflow: 'clip' }}>
       {children}</Text>
-    <Text textAlign="center">{label}</Text>
+      <Box pad={{ top:'small' }}>
+      <Text textAlign="center" >{label}</Text>
+      </Box>
+
+    </Box>
   </Box>;
 };
 

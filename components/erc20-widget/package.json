@@ -1,0 +1,69 @@
+{
+  "name": "@centrifuge/erc20-widget",
+  "version": "0.3.1",
+  "description": "ERC20 Widget",
+  "author": "razvan <razvan@centrifuge.io>",
+  "homepage": "https://github.com/centrifuge/axis/tree/master/packages/axis-sample-component#readme",
+  "license": "ISC",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "source": "src/index.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/centrifuge/axis.git"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "test": "jest --no-cache --coverage --verbose"
+  },
+  "bugs": {
+    "url": "https://github.com/centrifuge/axis/issues"
+  },
+  "peerDependencies": {
+    "grommet": "2.7.x",
+    "react": ">= 16.6.1",
+    "react-dom": ">= 16.6.1",
+    "styled-components": ">= 4.x"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-transform-typescript": "^7.5.2",
+    "@babel/preset-env": "^7.5.4",
+    "@babel/runtime": "^7.3.1",
+    "@types/react": "^16.8.23",
+    "@types/react-dom": "^16.8.4",
+    "@types/styled-components": "^4.1.18",
+    "babel-jest": "^24.1.0",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-styled-components": "^1.10.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-react-app": "^7.0.2",
+    "enzyme": "^3.8.0",
+    "enzyme-adapter-react-16": "^1.9.1",
+    "jest": "^24.1.0",
+    "prop-types": "^15.7.2",
+    "rollup": "^1.1.2",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-filesize": "^6.0.1",
+    "rollup-plugin-node-resolve": "^4.0.0",
+    "rollup-plugin-peer-deps-external": "^2.2.0",
+    "rollup-plugin-progress": "^1.0.0",
+    "rollup-plugin-url": "^2.2.0",
+    "typescript": "^3.5.2"
+  },
+  "gitHead": "ef53db97aa8cc0b402b3544a731dc10c9ff12641",
+  "dependencies": {
+    "@centrifuge/axis-search-select": "^0.3.2-develop.41",
+    "@centrifuge/axis-theme": "^0.3.1",
+    "@centrifuge/axis-utils": "^0.3.2-develop.49",
+    "bignumber.js": "^9.0.0"
+  }
+}

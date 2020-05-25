@@ -24,7 +24,8 @@
     "resolveJsonModule": true
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "components/erc20-widget"
   ],
   "include": [
     "next-env.d.ts",
