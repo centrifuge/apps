@@ -37,7 +37,7 @@ class Overview extends React.Component<Props> {
     const { tinlake, loans, auth, selectedPool, pool } = this.props;
     const userAddress = auth?.address || tinlake.ethConfig.from;
 
-    const { name, description, details } = selectedPool;
+    const { name, description } = selectedPool;
     const allLoans = loans && loans.loans || [];
     const poolData = pool && pool.data;
 
@@ -125,15 +125,7 @@ class Overview extends React.Component<Props> {
         </Box>
         <Box basis={'1/2'} margin={{ left: 'large' }}>
           <div>
-            <Heading level="4" margin={{ top: 'small', bottom: 'small' }}>The following information is provided by the Asset Originator</Heading>
-
             <div dangerouslySetInnerHTML={{ __html: description }} />
-
-            {details && <Heading level="4" margin={{ top: 'small', bottom: 'small' }}>Pool Details</Heading>}
-
-            {details && <div dangerouslySetInnerHTML={{ __html: details }} />}
-
-            <p>Want to invest in this Tinlake pool? <a href="http://centrifuge.io/invest" target="_blank">Learn how...</a></p>
           </div>
         </Box>
       </Box>
