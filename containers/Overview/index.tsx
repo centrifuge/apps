@@ -2,7 +2,7 @@ import * as React from 'react';
 import BN from 'bn.js';
 import { connect } from 'react-redux';
 import { baseToDisplay, feeToInterestRate } from 'tinlake';
-import { Box, Heading, Table, TableCell, TableRow, TableBody, Text, Button, Anchor } from 'grommet';
+import { Box, Heading, Table, TableCell, TableRow, TableBody, Button, Anchor } from 'grommet';
 import SecondaryHeader from '../../components/SecondaryHeader';
 import { PoolState, loadPool } from '../../ducks/pool';
 import { LoansState, loadLoans } from '../../ducks/loans';
@@ -37,7 +37,7 @@ class Overview extends React.Component<Props> {
     const { tinlake, loans, auth, selectedPool, pool } = this.props;
     const userAddress = auth?.address || tinlake.ethConfig.from;
 
-    const { name, description } = selectedPool;
+    const { name, description, details } = selectedPool;
     const allLoans = loans && loans.loans || [];
     const poolData = pool && pool.data;
 
@@ -124,15 +124,17 @@ class Overview extends React.Component<Props> {
           </Box>
         </Box>
         <Box basis={'1/2'} margin={{ left: 'large' }}>
-          <Box>
-            <Heading level="4" margin={{ top: 'small', bottom: 'small' }}>Asset Originator Details</Heading>
-
-            <Text margin={{ top: 'xsmall' }}> {name} </Text>
-            <Text margin={{ top: 'medium' }}> The following information is provided by the Asset Originator: </Text>
+          <div>
+            <Heading level="4" margin={{ top: 'small', bottom: 'small' }}>The following information is provided by the Asset Originator</Heading>
 
             <div dangerouslySetInnerHTML={{ __html: description }} />
 
-          </Box>
+            {details && <Heading level="4" margin={{ top: 'small', bottom: 'small' }}>Pool Details</Heading>}
+
+            {details && <div dangerouslySetInnerHTML={{ __html: details }} />}
+
+            <p>Want to invest in this Tinlake pool? <a href="http://centrifuge.io/invest" target="_blank">Learn how...</a></p>
+          </div>
         </Box>
       </Box>
 

@@ -15,6 +15,7 @@ export type Pool = {
   }
   name: string
   description: string
+  details?: string
   asset: string
 };
 
@@ -60,6 +61,7 @@ const poolSchema = yup.object().shape({
   contractConfig: contractConfigSchema.required('poolSchema.contractConfig is required'),
   name: yup.string().required('poolSchema.name is required'),
   description: yup.string().required('poolSchema.description is required'),
+  details: yup.string(),
   asset: yup.string().required('poolSchema.asset is required')
 });
 
