@@ -3458,8 +3458,9 @@ var Tooltip = function Tooltip(_ref) {
     target: target
   }, /*#__PURE__*/React.createElement(Box, {
     align: "center",
-    round: "large",
-    background: "dark-2"
+    round: "small",
+    background: "dark-2",
+    overflow: "hidden"
   }, children));
 };
 
@@ -3547,6 +3548,11 @@ var Erc20Widget = function Erc20Widget(_ref2) {
       _useState14 = _slicedToArray(_useState13, 2),
       showToolTip = _useState14[0],
       setToolTip = _useState14[1];
+
+  var _useState15 = useState("Copy to clipboard"),
+      _useState16 = _slicedToArray(_useState15, 2),
+      copied = _useState16[0],
+      setCopied = _useState16[1];
 
   var toolRef = useRef();
   var dropRef = useRef();
@@ -3690,7 +3696,6 @@ var Erc20Widget = function Erc20Widget(_ref2) {
       fontSize: "small"
     }
   }, fieldLabel), /*#__PURE__*/React.createElement(Box, {
-    pad: "xxxsmall",
     ref: dropRef,
     onMouseOver: function onMouseOver() {
       return selectedToken ? setDrop(true) : undefined;
@@ -3763,7 +3768,8 @@ var Erc20Widget = function Erc20Widget(_ref2) {
       alignItems: "center"
     },
     onClick: function onClick(event) {
-      if (event.detail == 2) {
+      if (event.detail == 1) {
+        setCopied("Copied");
         copyAndHighlight();
       }
     },
@@ -3771,7 +3777,8 @@ var Erc20Widget = function Erc20Widget(_ref2) {
       return setToolTip(true);
     },
     onMouseOut: function onMouseOut() {
-      return setToolTip(false);
+      setToolTip(false);
+      setCopied("Copy to clipboard");
     }
   }, /*#__PURE__*/React.createElement(Text, {
     style: {
@@ -3783,7 +3790,7 @@ var Erc20Widget = function Erc20Widget(_ref2) {
     target: toolRef.current
   }, /*#__PURE__*/React.createElement(Text, {
     size: "small"
-  }, "Copy amount to clipboard")), tokens.length == 1 && /*#__PURE__*/React.createElement(Box, {
+  }, copied)), tokens.length == 1 && /*#__PURE__*/React.createElement(Box, {
     fill: "horizontal",
     direction: "row",
     gap: "small",

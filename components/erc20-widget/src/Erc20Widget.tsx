@@ -109,8 +109,9 @@ const Tooltip = ({ children, target }) => (
   >
     <Box
       align="center"
-      round="large"
+      round="small"
       background="dark-2"
+      overflow="hidden"
     >
       {children}
     </Box>
@@ -156,6 +157,7 @@ export const Erc20Widget: React.FunctionComponent<Props> = (
   const [showDrop, setDrop] = useState(false);
   const [ellipsis, setEllipsis] = useState(false);
   const [showToolTip, setToolTip] = useState(false);
+  const [copied, setCopied] = useState("Copy to clipboard");
   const toolRef = useRef();
   const dropRef = useRef();
 
@@ -277,7 +279,7 @@ export const Erc20Widget: React.FunctionComponent<Props> = (
 
         {!inline && <Box direction="row-responsive" justify="between" gap="xsmall" fill="horizontal" >
           <Text style={{ fontSize: "small" }}>{fieldLabel}</Text>
-            <Box pad="xxxsmall" ref={dropRef} onMouseOver={() => (selectedToken ? setDrop(true) : undefined)}
+            <Box ref={dropRef} onMouseOver={() => (selectedToken ? setDrop(true) : undefined)}
               onMouseOut={() => (selectedToken ? setDrop(false) : undefined)}><svg 
             width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M8.00008 15.3333C3.93341 15.3333 0.666748 12.0666 0.666748 7.99996C0.666748 3.93329 3.93341 0.666626 8.00008 0.666626C12.0667 0.666626 15.3334 3.93329 15.3334 7.99996C15.3334 12.0666 12.0667 15.3333 8.00008 15.3333ZM8.00008 1.99996C4.66675 1.99996 2.00008 4.66663 2.00008 7.99996C2.00008 11.3333 4.66675 14 8.00008 14C11.3334 14 14.0001 11.3333 14.0001 7.99996C14.0001 4.66663 11.3334 1.99996 8.00008 1.99996Z" fill="#EEEEEE" />
@@ -323,12 +325,16 @@ export const Erc20Widget: React.FunctionComponent<Props> = (
           {!input &&
             <Box ref={toolRef}
               flex="shrink" direction="row" style={{ borderBottom: (!inline) ? "1px solid #EEEEEE" : undefined, alignItems: "center" }} onClick={(event) => {
-                if (event.detail == 2) {
+                if (event.detail == 1) {
+                  setCopied("Copied")
                   copyAndHighlight();
                 }
               }}
               onMouseOver={() => setToolTip(true)}
-              onMouseOut={() => setToolTip(false)}>
+              onMouseOut={() => {
+                setToolTip(false);
+                setCopied("Copy to clipboard");
+              }}>
               <Text style={{ width: "212px" }}
                 truncate={true}
                 id="tokenValue">
@@ -339,9 +345,7 @@ export const Erc20Widget: React.FunctionComponent<Props> = (
             </Box>}
           {showToolTip &&
             <Tooltip target={toolRef.current}>
-              <Text size="small">
-                Copy amount to clipboard
-            </Text>
+              <Text size="small">{copied}</Text>
             </Tooltip>
           }
 
