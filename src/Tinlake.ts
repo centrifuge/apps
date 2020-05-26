@@ -166,38 +166,38 @@ export default class Tinlake {
     ]);
 
     // set borrower addresses & create contracts
-    if (!this.contracts['SHELF']) {
+    if (!this.contractAddresses['SHELF']) {
       this.contractAddresses['SHELF'] = shelfRes[0];
-      this.contracts['SHELF'] = this.eth.contract(this.contractAbis['SHELF']).at(this.contractAddresses['SHELF']);
     }
+    this.contracts['SHELF'] = this.eth.contract(this.contractAbis['SHELF']).at(this.contractAddresses['SHELF']);
 
-    if (!this.contracts['NFT_FEED']) {
+    if (!this.contractAddresses['NFT_FEED']) {
       this.contractAddresses['NFT_FEED'] = nftFeedRes[0];
-      this.contracts['NFT_FEED'] = this.eth.contract(this.contractAbis['NFT_FEED']).at(this.contractAddresses['NFT_FEED']);
     }
+    this.contracts['NFT_FEED'] = this.eth.contract(this.contractAbis['NFT_FEED']).at(this.contractAddresses['NFT_FEED']);
 
-    if (!this.contracts['COLLECTOR'])  {
+    if (!this.contractAddresses['COLLECTOR'])  {
       this.contractAddresses['COLLECTOR'] = collectorRes[0];
-      this.contracts['COLLECTOR'] = this.eth.contract(this.contractAbis['COLLECTOR']).at(this.contractAddresses['COLLECTOR']);
-    }
+    }this.contracts['COLLECTOR'] = this.eth.contract(this.contractAbis['COLLECTOR']).at(this.contractAddresses['COLLECTOR']);
 
-    if (!this.contracts['THRESHOLD'])  {
+
+    if (!this.contractAddresses['THRESHOLD'])  {
       this.contractAddresses['THRESHOLD'] = thresholdRes[0];
-      this.contracts['THRESHOLD'] = this.eth.contract(this.contractAbis['THRESHOLD']).at(this.contractAddresses['THRESHOLD']);
     }
+    this.contracts['THRESHOLD'] = this.eth.contract(this.contractAbis['THRESHOLD']).at(this.contractAddresses['THRESHOLD']);
 
-    if (!this.contracts['PRICE_POOL']) {
+    if (!this.contractAddresses['PRICE_POOL']) {
       this.contractAddresses['PRICE_POOL'] = pricePoolRes[0];
-      this.contracts['PRICE_POOL'] = this.eth.contract(this.contractAbis['PRICE_POOL']).at(this.contractAddresses['PRICE_POOL']);
     }
+    this.contracts['PRICE_POOL'] = this.eth.contract(this.contractAbis['PRICE_POOL']).at(this.contractAddresses['PRICE_POOL']);
 
     // set lender addresses & create contract
-    if (!this.contracts['JUNIOR_OPERATOR']) {
+    if (!this.contractAddresses['JUNIOR_OPERATOR']) {
       this.contractAddresses['JUNIOR_OPERATOR'] = juniorOperatorRes[0];
+    }
       this.contracts['JUNIOR_OPERATOR'] = this.contractAddresses['JUNIOR_OPERATOR'] && (this.contractConfig['JUNIOR_OPERATOR']
                             ? this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
                             : this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR'));
-    }
 
     const [
       titleRes,
@@ -245,16 +245,14 @@ export default class Tinlake {
     this.contracts['ASSESSOR'] = this.eth.contract(this.contractAbis['ASSESSOR']).at(this.contractAddresses['ASSESSOR']);
 
     // make sure senior tranche exists
-    if (!this.contracts['SENIOR_OPERATOR']) {
+    if (!this.contractAddresses['SENIOR_OPERATOR']) {
       this.contractAddresses['SENIOR_OPERATOR'] = seniorOperatorRes[0];
-      if (this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS) {
-        this.contracts['SENIOR_OPERATOR'] = this.contractAddresses['SENIOR_OPERATOR'] && (this.contractConfig['SENIOR_OPERATOR']
-          ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
-          : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR'));
-      }
     }
 
     if (this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS) {
+      this.contracts['SENIOR_OPERATOR'] = this.contractAddresses['SENIOR_OPERATOR'] && (this.contractConfig['SENIOR_OPERATOR']
+      ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
+      : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR'));
       this.contractAddresses['SENIOR'] = (await executeAndRetry(this.contracts['SENIOR_OPERATOR'].tranche, []))[0];
       this.contracts['SENIOR'] = this.eth.contract(this.contractAbis['SENIOR']).at(this.contractAddresses['SENIOR']);
       this.contractAddresses['SENIOR_TOKEN'] = (await executeAndRetry(this.contracts['SENIOR'].token, []))[0];

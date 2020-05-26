@@ -47352,33 +47352,33 @@ var Tinlake = /** @class */ (function () {
                     case 2:
                         _b = _k.sent(), shelfRes = _b[0], nftFeedRes = _b[1], collectorRes = _b[2], thresholdRes = _b[3], pricePoolRes = _b[4], juniorOperatorRes = _b[5], seniorOperatorRes = _b[6];
                         // set borrower addresses & create contracts
-                        if (!this.contracts['SHELF']) {
+                        if (!this.contractAddresses['SHELF']) {
                             this.contractAddresses['SHELF'] = shelfRes[0];
-                            this.contracts['SHELF'] = this.eth.contract(this.contractAbis['SHELF']).at(this.contractAddresses['SHELF']);
                         }
-                        if (!this.contracts['NFT_FEED']) {
+                        this.contracts['SHELF'] = this.eth.contract(this.contractAbis['SHELF']).at(this.contractAddresses['SHELF']);
+                        if (!this.contractAddresses['NFT_FEED']) {
                             this.contractAddresses['NFT_FEED'] = nftFeedRes[0];
-                            this.contracts['NFT_FEED'] = this.eth.contract(this.contractAbis['NFT_FEED']).at(this.contractAddresses['NFT_FEED']);
                         }
-                        if (!this.contracts['COLLECTOR']) {
+                        this.contracts['NFT_FEED'] = this.eth.contract(this.contractAbis['NFT_FEED']).at(this.contractAddresses['NFT_FEED']);
+                        if (!this.contractAddresses['COLLECTOR']) {
                             this.contractAddresses['COLLECTOR'] = collectorRes[0];
-                            this.contracts['COLLECTOR'] = this.eth.contract(this.contractAbis['COLLECTOR']).at(this.contractAddresses['COLLECTOR']);
                         }
-                        if (!this.contracts['THRESHOLD']) {
+                        this.contracts['COLLECTOR'] = this.eth.contract(this.contractAbis['COLLECTOR']).at(this.contractAddresses['COLLECTOR']);
+                        if (!this.contractAddresses['THRESHOLD']) {
                             this.contractAddresses['THRESHOLD'] = thresholdRes[0];
-                            this.contracts['THRESHOLD'] = this.eth.contract(this.contractAbis['THRESHOLD']).at(this.contractAddresses['THRESHOLD']);
                         }
-                        if (!this.contracts['PRICE_POOL']) {
+                        this.contracts['THRESHOLD'] = this.eth.contract(this.contractAbis['THRESHOLD']).at(this.contractAddresses['THRESHOLD']);
+                        if (!this.contractAddresses['PRICE_POOL']) {
                             this.contractAddresses['PRICE_POOL'] = pricePoolRes[0];
-                            this.contracts['PRICE_POOL'] = this.eth.contract(this.contractAbis['PRICE_POOL']).at(this.contractAddresses['PRICE_POOL']);
                         }
+                        this.contracts['PRICE_POOL'] = this.eth.contract(this.contractAbis['PRICE_POOL']).at(this.contractAddresses['PRICE_POOL']);
                         // set lender addresses & create contract
-                        if (!this.contracts['JUNIOR_OPERATOR']) {
+                        if (!this.contractAddresses['JUNIOR_OPERATOR']) {
                             this.contractAddresses['JUNIOR_OPERATOR'] = juniorOperatorRes[0];
-                            this.contracts['JUNIOR_OPERATOR'] = this.contractAddresses['JUNIOR_OPERATOR'] && (this.contractConfig['JUNIOR_OPERATOR']
-                                ? this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
-                                : this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR'));
                         }
+                        this.contracts['JUNIOR_OPERATOR'] = this.contractAddresses['JUNIOR_OPERATOR'] && (this.contractConfig['JUNIOR_OPERATOR']
+                            ? this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
+                            : this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR'));
                         return [4 /*yield*/, Promise.all([
                                 // use shelf to retrieve borrower side addresses for this deployment
                                 executeAndRetry(this.contracts['SHELF'].title, []),
@@ -47415,15 +47415,13 @@ var Tinlake = /** @class */ (function () {
                         this.contractAddresses['ASSESSOR'] = assessorRes[0];
                         this.contracts['ASSESSOR'] = this.eth.contract(this.contractAbis['ASSESSOR']).at(this.contractAddresses['ASSESSOR']);
                         // make sure senior tranche exists
-                        if (!this.contracts['SENIOR_OPERATOR']) {
+                        if (!this.contractAddresses['SENIOR_OPERATOR']) {
                             this.contractAddresses['SENIOR_OPERATOR'] = seniorOperatorRes[0];
-                            if (this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS) {
-                                this.contracts['SENIOR_OPERATOR'] = this.contractAddresses['SENIOR_OPERATOR'] && (this.contractConfig['SENIOR_OPERATOR']
-                                    ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
-                                    : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR'));
-                            }
                         }
                         if (!(this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 7];
+                        this.contracts['SENIOR_OPERATOR'] = this.contractAddresses['SENIOR_OPERATOR'] && (this.contractConfig['SENIOR_OPERATOR']
+                            ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
+                            : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR'));
                         _f = this.contractAddresses;
                         _g = 'SENIOR';
                         return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].tranche, [])];
