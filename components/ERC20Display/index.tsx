@@ -29,20 +29,25 @@ const ERC20Display: FunctionComponent<Props> = ({ value, precision, tokenMetas }
 
   const { decimals, logo, symbol } = firstOrThrow(tokenMetas);
 
-  const valueToDecimal  = new Decimal(baseToDisplay(value, decimals)).toFixed(precision);
+  const valueToDecimal = new Decimal(baseToDisplay(value, decimals)).toFixed(precision);
   const formatted = addThousandsSeparators(valueToDecimal.toString());
-  return <Box direction="row">
-      <Amount>
-        <Text style={{ fontSize: '0.8em' }}>
-          {formatted}
-        </Text>
-      </Amount>
-      <LogoAndSymbol>
-        <Logo src={logo} />
-        <Text style={{ fontSize: '0.8em' }} >
-          {symbol}
-        </Text>
-      </LogoAndSymbol>
+  return <Box direction="row" >
+    <Amount>
+
+      <Text style={{
+        fontSize: '0.7em', overflow: 'hidden', whiteSpace: 'nowrap',
+        display: 'inline-block', maxWidth: '100%', textOverflow: 'ellipsis', verticalAlign: 'middle'
+      }}>
+        {formatted}
+      </Text>
+    </Amount>
+
+    <LogoAndSymbol>
+      <Logo src={logo} />
+      <Text style={{ fontSize: '0.7em' }} >
+        {symbol}
+      </Text>
+    </LogoAndSymbol>
   </Box>;
 };
 
@@ -54,6 +59,8 @@ export default ERC20Display;
 
 const Amount = styled.div`
   flex: 4 1 auto;
+  overflow: hidden;
+  min-width: 0px;
 `;
 
 const LogoAndSymbol = styled.div`

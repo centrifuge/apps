@@ -12,10 +12,10 @@ interface Props {
 class PoolsMetrics extends React.Component<Props> {
   render() {
     const { pools } = this.props;
-    return <Box direction="row" gap="large" margin={{ bottom: 'medium' }} justify="evenly">
+    return <Box direction="row" gap="medium" margin={{ bottom: 'medium' }} justify="evenly">
       <PoolsMetric label="Ongoing Pools" >
         <Box direction="row" style={{  alignItems: 'center' }} >
-          <Text style={{ fontSize: '0.8em', width: '212px', height: 40, display: 'flex', justifyContent: 'center',
+          <Text style={{ fontSize: '0.7em', width: '250px', height: 40, display: 'flex', justifyContent: 'center',
             alignItems: 'center' }} >
             {pools.ongoingPools}
           </Text>
@@ -23,7 +23,7 @@ class PoolsMetrics extends React.Component<Props> {
       </PoolsMetric>
       <PoolsMetric label="Total Ongoing Loans">
         <Box direction="row" style={{ alignItems: 'center' }} >
-          <Text style={{ width: '212px', fontSize: '0.8em', height: 40, display: 'flex', justifyContent: 'center',
+          <Text style={{ width: '250px', fontSize: '0.7em', height: 40, display: 'flex', justifyContent: 'center',
             alignItems: 'center' }} >
             {pools.ongoingLoans}
           </Text>
