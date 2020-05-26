@@ -14,7 +14,7 @@ interface Props {
 class PoolList extends React.Component<Props> {
 
   clickRow = ({ datum }: { datum?: PoolData, index?: number}) => {
-    Router.push('/[root]', `/${datum!.id}`, { shallow: true });
+    Router.push('/[root]', `/${datum!.id}`);
   }
 
   render() {

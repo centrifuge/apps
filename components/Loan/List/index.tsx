@@ -18,8 +18,7 @@ class LoanList extends React.Component<Props> {
   clickRow = ({ datum }: { datum?: Loan, index?: number}) => {
     const { root } = this.props.router.query;
 
-    this.props.router.push(`/[root]/loans/loan?loanId=${datum!.loanId}`, `/${root}/loans/loan?loanId=${datum!.loanId}`,
-                           { shallow: true });
+    this.props.router.push(`/[root]/loans/loan?loanId=${datum!.loanId}`, `/${root}/loans/loan?loanId=${datum!.loanId}`);
   }
 
   render() {

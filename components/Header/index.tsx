@@ -57,10 +57,10 @@ class Header extends React.Component<HeaderProps, State> {
     if (item.inPool) {
       const { root } = this.props.router.query;
       const route = item.route === '/' ? '' : item.route;
-      Router.push(`/[root]${route}`, `/${root}${route}`, { shallow: true });
+      Router.push(`/[root]${route}`, `/${root}${route}`);
       return;
     }
-    Router.push(item.route, undefined, { shallow: true });
+    Router.push(item.route);
   }
 
   render() {
@@ -95,7 +95,7 @@ class Header extends React.Component<HeaderProps, State> {
 
         <Box direction="row" width="xlarge" align="center" >
           <Box align="center" direction="row" basis="full" >
-            <Link href="/" shallow>
+            <Link href="/">
               <a title="Tinlake"><Image src={logoUrl} style={{ width: 130 }} /></a>
             </Link>
             <Box margin={{ left: '80px', right: '56px' }} flex="grow" basis="auto"
@@ -141,7 +141,7 @@ class Header extends React.Component<HeaderProps, State> {
         : (
           <Box direction="row" width="xlarge" align="center">
             <Box align="center" direction="row" basis="full" >
-              <Link href="/" shallow>
+              <Link href="/">
                 <a title="Tinlake"><Image src={logoUrl} style={{ width: 130 }} /></a>
               </Link>
             </Box>

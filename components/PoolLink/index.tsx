@@ -35,5 +35,5 @@ export const PoolLink: React.FunctionComponent<Props> = ({ href, as, children })
       pathname: `/${root}${href.pathname}`
     };
   }
-  return <Link href={poolHref} as={poolAs} shallow>{children}</Link>;
+  return <Link href={poolHref} as={poolAs}>{children}</Link>;
 };
