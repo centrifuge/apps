@@ -57,7 +57,7 @@
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "styled-components": "^5.1.0",
-    "tinlake": "github:centrifuge/tinlake.js#d5934be8024e4f35e0ffe9af433843a94cabb0e2",
+    "tinlake": "github:centrifuge/tinlake.js#826d45e20853bb7dcde2a345be280b8678d28872",
     "web3-utils": "^1.2.7",
     "web3connect": "^1.0.0-beta.13",
     "yup": "^0.28.5"

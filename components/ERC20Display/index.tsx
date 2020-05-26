@@ -4,6 +4,7 @@ import { Box, Text } from 'grommet';
 import styled from 'styled-components';
 import { baseToDisplay } from 'tinlake';
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators';
+import { copyToClipboard } from '@centrifuge/axis-utils';
 
 export interface TokenMeta {
   symbol: string;
@@ -31,8 +32,14 @@ const ERC20Display: FunctionComponent<Props> = ({ value, precision, tokenMetas }
 
   const valueToDecimal = new Decimal(baseToDisplay(value, decimals)).toFixed(precision);
   const formatted = addThousandsSeparators(valueToDecimal.toString());
-  return <Box direction="row" >
-    <Amount>
+  return <Box direction="row">
+    <Amount onClick={(event) => {
+      if (event.detail === 1) {
+        // setCopied("Copied")
+        copyToClipboard(formatted);
+      }
+    }}
+    >
 
       <Text style={{
         fontSize: '0.7em', overflow: 'hidden', whiteSpace: 'nowrap',
@@ -61,6 +68,7 @@ const Amount = styled.div`
   flex: 4 1 auto;
   overflow: hidden;
   min-width: 0px;
+  :hover {cursor: copy}
 `;
 
 const LogoAndSymbol = styled.div`

@@ -27,7 +27,7 @@ interface Props {
 
 class Overview extends React.Component<Props> {
 
-  componentDidMount() {
+  componentWillMount() {
     const { loadLoans, loadPool, tinlake } = this.props;
     loadLoans && loadLoans(tinlake);
     loadPool && loadPool(tinlake);
