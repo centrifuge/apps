@@ -12,5 +12,5 @@ export class CentrifugeWorld {
   }
 }
 
-setDefaultTimeout(30 * 1000)
+setDefaultTimeout(100 * 1000)
 setWorldConstructor(CentrifugeWorld)

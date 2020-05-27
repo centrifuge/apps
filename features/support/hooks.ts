@@ -2,16 +2,24 @@
 import { After, Before, AfterAll, Status } from 'cucumber'
 import { openBrowser, closeBrowser, takeScreenshot } from './browser-actions'
 import { initMetamask } from './ethereum-actions'
+import { CentrifugeWorld } from './world'
 
-Before(async function(scenario) {
-  await openBrowser(this as any)
-  await initMetamask(this as any)
+Before(async function(this: CentrifugeWorld, scenario) {
+  await openBrowser(this)
+  await initMetamask(this)
 })
 
-After( async function(scenario) {
-  if (scenario.result.status === Status.FAILED) {
-    await takeScreenshot(this as any, 'screenshots/scenario-failed.png')
-  }
+After( async function(this: CentrifugeWorld, scenario) {
+  if (scenario.result.exception || scenario.result.status === Status.FAILED) {
+    await takeScreenshot(this, './screenshots/scenario-failed.png')
 
-  await closeBrowser(this as any)
+    // return if not on CI, which keeps the browser open for debugging
+    if (!process.env.CI) {
+      console.log('skipping close browser')
+      return
+    }
+  }
+  console.log('closing browser')
+
+  await closeBrowser(this)
 })

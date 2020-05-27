@@ -2,14 +2,18 @@ import * as puppeteer from 'puppeteer'
 import * as dappeteer from 'dappeteer'
 import { CentrifugeWorld } from './world'
 
-const headless = false
-let slowMo = 10
-
 export async function openBrowser(world: CentrifugeWorld) {
-  world.browser = await dappeteer.launch(puppeteer, { headless, slowMo, args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-  ]})
+  // console.log('Using chromium at', puppeteer.executablePath())
+
+  world.browser = await dappeteer.launch(puppeteer, {
+    headless: false,
+    slowMo: 0,
+    devtools: true,
+    args: [
+      // '--no-sandbox',
+      // '--disable-setuid-sandbox',
+    ],
+  })
 }
 
 export async function openPage(world: CentrifugeWorld, url: string) {
@@ -25,7 +29,7 @@ export async function closeBrowser(world: CentrifugeWorld) {
   }
 }
 
-export async function takeScreenshot(world: CentrifugeWorld, path = 'screenshots/error-occured-here.png') {
+export async function takeScreenshot(world: CentrifugeWorld, path = './screenshots/error-occured-here.png') {
   await world.currentPage.screenshot({ path })
 }
 

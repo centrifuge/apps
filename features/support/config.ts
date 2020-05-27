@@ -5,4 +5,5 @@ export const config = {
   tinlakeUrl: process.env.TINLAKE_URL,
   ethNetwork: process.env.ETH_NETWORK,
   ethAdminPrivateKey: process.env.ETH_ADMIN_PRIVATE_KEY,
+  tinlakePoolRoot: process.env.TINLAKE_POOL_ROOT,
 }
