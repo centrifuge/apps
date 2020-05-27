@@ -6,5 +6,6 @@ Feature: Set Min TIN ratio
     Given I am logged into MetaMask as Tinlake admin
     And I am on the Tinlake investments page
     And I am connected to Tinlake
-    When I set Min TIN ratio to 12%
-    Then I see that Min TIN ratio component is set to 12%
+    And the min TIN ratio is set to 10%
+    When I set Min TIN ratio to 11%
+    Then I see that Min TIN ratio component is set to 11%

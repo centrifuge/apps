@@ -5,8 +5,7 @@ import { importAdminPK, switchNetwork } from "./ethereum-actions";
 import { CentrifugeWorld } from "./world";
 import { selectors } from "./selectors";
 import { getTextContent } from './utils/getTextContent'
-import { debug } from './utils/debug'
-import * as assert from 'assert'
+import { waitUntil } from "./utils/waitUntil";
 
 Given("I am on the Gateway Page", async function (this: CentrifugeWorld) {
   await openPage(this, config.gatewayUrl);
@@ -29,12 +28,14 @@ Given("I am connected to Tinlake", async function (this: CentrifugeWorld) {
   await this.metamask.approve()
 });
 
-When('I set Min TIN ratio to {int}%', async function (this: CentrifugeWorld, int: number) {
-  const input = await this.currentPage.waitFor(selectors.tinlake.minTINRatioInput)
-  await input.click({ clickCount: 3 })
-  await input.type(`${int}`)
+Given('the min TIN ratio is set to {int}%', function (int) {
+  // TODO add logic to set the TIN ratio directly in tinlake.js
+});
 
-  await debug(this)
+When('I set Min TIN ratio to {int}%', async function (this: CentrifugeWorld, int: number) {
+  const input = await this.currentPage.waitForXPath(selectors.tinlake.minTINRatioInput)
+  await input.click({ clickCount: 3 }) // triple click to select all content
+  await input.type(`${int}`)
 
   const button = await this.currentPage.waitForXPath(selectors.tinlake.setMinTINRatioButton)
   await button.click()
@@ -43,9 +44,12 @@ When('I set Min TIN ratio to {int}%', async function (this: CentrifugeWorld, int
 });
 
 Then('I see that Min TIN ratio component is set to {int}%', async function (this: CentrifugeWorld, int: number) {
-  const display = await this.currentPage.waitFor(selectors.tinlake.minTINRatioDisplay)
-  const content = await getTextContent(display)
-  await debug(this)
+  const expected = `${int}.00 %`
+  let actual = ''
+  await waitUntil(async () => {
+    const display = await this.currentPage.waitForXPath(selectors.tinlake.minTINRatioDisplay)
+    actual = await getTextContent(display)
 
-  assert.equal(content, `${int}%%`)
+    return actual === expected
+  }, { errorMsg: `expected min tin ratio display to show ${int} %, but got ${actual}`})
 });

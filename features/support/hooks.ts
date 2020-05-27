@@ -11,6 +11,8 @@ Before(async function(this: CentrifugeWorld, scenario) {
 
 After( async function(this: CentrifugeWorld, scenario) {
   if (scenario.result.exception || scenario.result.status === Status.FAILED) {
+    console.log('exception or failure – will take a screenshot')
+
     await takeScreenshot(this, './screenshots/scenario-failed.png')
 
     // return if not on CI, which keeps the browser open for debugging
