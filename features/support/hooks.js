@@ -5,9 +5,11 @@ const {
   closeBrowser,
   takeScreenshot,
 }  = require('./browser-actions')
+const { initMetamask } = require('./ethereum-actions')
 
 Before( async function(scenario) {
   await openBrowser(this)
+  await initMetamask(this)
 })
 
 After( async function(scenario) {

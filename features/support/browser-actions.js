@@ -1,8 +1,5 @@
 const puppeteer = require('puppeteer');
 const dappeteer = require('dappeteer')
-const config = require('../config')
-const { expect } = require("chai")
-const selectors = require('./selectors')
 const fs = require('fs')
 const { CentrifugeWorld } = require('./world')
 
@@ -17,9 +14,6 @@ async function openBrowser(world) {
     '--no-sandbox',
     '--disable-setuid-sandbox',
   ]})
-  world.metamask = await dappeteer.getMetamask(world.browser)
-
-  await world.metamask.switchNetwork(config.network)
 }
 
 /**
