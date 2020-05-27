@@ -1,15 +1,19 @@
 // Dependencies
-const { After, Before, AfterAll } = require('cucumber')
+const { After, Before, AfterAll, Status } = require('cucumber')
 const {
   openBrowser,
-  closeBrowser
+  closeBrowser,
+  takeScreenshot,
 }  = require('./browser-actions')
 
 Before( async function(scenario) {
-  await openBrowser()
+  await openBrowser(this)
 })
 
 After( async function(scenario) {
-  const status = scenario.result.status
-  await closeBrowser()
+  if (scenario.result.status === Status.FAILED) {
+    await takeScreenshot(this, 'screenshots/scenario-failed.png')
+  }
+
+  await closeBrowser(this)
 })

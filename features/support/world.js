@@ -1,14 +1,21 @@
+const { setWorldConstructor, setDefaultTimeout } = require('cucumber');
 const puppeteer = require('puppeteer');
 const dappeteer =  require('dappeteer')
 
-const { setWorldConstructor, setDefaultTimeout } = require('cucumber');
-const scope = require('./scope');
+class CentrifugeWorld {
 
-const CentrifugeWorld = function(){
-  //called before each scenario 
-  scope.driver = puppeteer;
-  scope.provider = dappeteer;
+  /** @type {null | puppeteer.Browser} */
+  browser = null
+  /** @type {null | dappeteer.Dappeteer} */
+  metamask = null
+  /** @type {null | puppeteer.Page} */
+  currentPage = null
+
+  constructor() {
+  }
 }
 
-setDefaultTimeout(30000)
+setDefaultTimeout(30 * 1000)
 setWorldConstructor(CentrifugeWorld)
+
+module.exports = { CentrifugeWorld }

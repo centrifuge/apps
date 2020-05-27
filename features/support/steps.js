@@ -1,31 +1,30 @@
 const { Given, When, Then } = require("cucumber");
-const {
-  openPage,
-  takeScreenshot
-}  = require('./browser-actions')
-const { getConfig } = require('../config')
-const config = getConfig()
+const { openPage, takeScreenshot } = require("./browser-actions");
+const config = require("../config");
 const increasedTimeout = {
-  timeout: 5 * 60 * 1000
-}
+  timeout: 5 * 60 * 1000,
+};
 
-Given("I am on the Gateway Page", increasedTimeout, async function() {
-  console.log("url", config.gatewayUrl)
-  return await openPage(config.gatewayUrl)
-  .catch( async ( err ) => {
-    await handleTimeoutError(err)
-  })
-})
+Given("I am on the Gateway Page", increasedTimeout, async function () {
+  return await openPage(this, config.gatewayUrl);
+});
 
-When("", increasedTimeout, async function() {
-  return
-})
+Given(
+  "I am on the Tinlake investments page",
+  increasedTimeout,
+  async function () {
+    return await openPage(this, config.tinlakeUrl);
+  }
+);
 
-Then("", increasedTimeout, async function() {
-  return
-})
+// Given('I am connected as admin', async function () {
+//   await this.metamask.importAccount(config.ethAdminPrivateKey)
+// });
 
-async function handleTimeoutError(err) {
-  await takeScreenshot()  
-  throw err
-}
+// When("", increasedTimeout, async function () {
+//   return;
+// });
+
+// Then("", increasedTimeout, async function () {
+//   return;
+// });

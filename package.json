@@ -9,9 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "chai": "^4.1.2",
-    "cucumber": "^4.2.1",
-    "dappeteer": "^0.6.0",
-    "puppeteer": "^1.6.2"
+    "chai": "^4.2.0",
+    "cucumber": "^6.0.5",
+    "dappeteer": "^1.0.0",
+    "dotenv": "^8.2.0",
+    "puppeteer": "^3.1.0"
   }
 }

@@ -1,44 +1,53 @@
+const puppeteer = require('puppeteer');
+const dappeteer = require('dappeteer')
+const config = require('../config')
 const { expect } = require("chai")
-const scope = require('./scope')
 const selectors = require('./selectors')
 const fs = require('fs')
+const { CentrifugeWorld } = require('./world')
 
 const headless = false
-let slowMo = 100
+let slowMo = 10
 
-async function openBrowser() {
+/**
+ * @param {CentrifugeWorld} world
+ */
+async function openBrowser(world) {
+  world.browser = await dappeteer.launch(puppeteer, { headless, slowMo, args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+  ]})
+  world.metamask = await dappeteer.getMetamask(world.browser)
 
-  /*
-  scope.browser = await scope.driver.launch({
-    headless, slowMo, args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-    ]
-  })
-  */
-
-  scope.browser  = await scope.provider.launch(scope.driver)
-  scope.wallet = await scope.provider.getMetamask(scope.browser)
-
-  await scope.wallet.switchNetwork('kovan')
-  scope.context = {}
+  await world.metamask.switchNetwork(config.network)
 }
 
-async function openPage(url) {
-  scope.context.currentPage = await scope.browser.newPage()
-  await scope.context.currentPage.goto(url, {
+/**
+ * @param {CentrifugeWorld} world
+ * @param {string} url
+ */
+async function openPage(world, url) {
+  world.currentPage = await world.browser.newPage()
+  await world.currentPage.goto(url, {
     waitUntil: ['load'],
   })
 }
 
-async function closeBrowser() {
-  if (scope.browser) {
-    await scope.browser.close()
+/**
+ * @param {CentrifugeWorld} world
+ */
+async function closeBrowser(world) {
+  if (world.browser) {
+    await world.browser.close()
   }
 }
 
-async function takeScreenshot() {
-  await scope.context.currentPage.screenshot({ path: 'screenshots/error-occured-here.png' })
+/**
+ * @param {CentrifugeWorld} world
+ * @param {string} path
+ */
+async function takeScreenshot(world, path = 'screenshots/error-occured-here.png') {
+  await world.currentPage.screenshot({ path })
 }
 
 module.exports = {
@@ -46,4 +55,4 @@ module.exports = {
   openBrowser,
   closeBrowser,
   takeScreenshot
-} 
+}
