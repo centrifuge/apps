@@ -19,7 +19,7 @@ class PoolList extends React.Component<Props> {
 
   render() {
     const { pools } =  this.props;
-    return <Box margin={{ bottom: 'xlarge' }}>
+    return <Box>
       <DataTable style={{ tableLayout: 'auto' }} data={pools} sortable onClickRow={this.clickRow as any} columns={[
         {
           header: 'Pool', property: 'name', align: 'center',

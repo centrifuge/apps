@@ -47,6 +47,9 @@ class Dashboard extends React.Component<Props> {
                 <PoolsMetrics pools={pools.data}/>
               </Box>
               <PoolList pools={pools.data.pools}/>
+              <Box style={{ borderBottom: '1px solid #bdbdbd' }} align="center" justify="center" >
+                 <Anchor margin={{ top: 'small', bottom: 'small' }} href="https://centrifuge.io/products/tinlake" target="_blank" label="Learn more about creating Tinlake pools" />
+              </Box>
             </Box>
         )}
         <Box pad={{ vertical: 'medium' }}></Box>

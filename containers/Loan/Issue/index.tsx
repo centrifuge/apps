@@ -42,7 +42,7 @@ class IssueLoan extends React.Component<Props, State> {
   // handlers
   onTokenIdValueChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const currentTokenId = event.currentTarget.value;
-    this.setState({
+    await this.setState({
       tokenId: currentTokenId,
       nft: null,
       nftError: ''
@@ -52,7 +52,7 @@ class IssueLoan extends React.Component<Props, State> {
 
   onRegistryAddressValueChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const currentRegistryAddress = event.currentTarget.value;
-    this.setState({
+    await this.setState({
       registry: currentRegistryAddress,
       nft: null,
       nftError: ''
