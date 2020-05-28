@@ -221,22 +221,26 @@ export function observeAuthChanges(tinlake: any):
     if (providerChecks) {
       // 'Provider changed, clear checking'
       clearInterval(providerChecks);
+
       const providerConfig = tinlake.provider && tinlake.provider.publicConfigStore && tinlake.provider.publicConfigStore.getState();
       if (providerConfig) {
         dispatch(loadUser(tinlake, providerConfig.selectedAddress));
         dispatch(loadNetwork(providerConfig.networkVersion));
       } else {
         dispatch(loadUser(tinlake, tinlake.ethConfig.from));
+        dispatch(loadNetwork(await tinlake.eth.net_version()));
       }
     }
 
     dispatch({ type: OBSERVING_AUTH_CHANGES });
 
-    tinlake.provider.publicConfigStore.on('update',  (state: any) => {
-      tinlake.ethConfig = { from: state.selectedAddress };
-      dispatch(loadNetwork(state.networkVersion));
-      dispatch(loadUser(tinlake, state.selectedAddress));
-    });
+    if (tinlake.provider && tinlake.provider.publicConfigStore) {
+      tinlake.provider.publicConfigStore.on('update',  (state: any) => {
+        tinlake.ethConfig = { from: state.selectedAddress };
+        dispatch(loadNetwork(state.networkVersion));
+        dispatch(loadUser(tinlake, state.selectedAddress));
+      });
+    }
   };
 }
 

@@ -30,6 +30,7 @@ class Auth extends React.Component<Props> {
       await loadNetwork!(providerConfig.networkVersion);
     } else {
       await loadUser!(tinlake, tinlake.ethConfig.from);
+      await loadNetwork!(await tinlake.eth.net_version());
     }
 
     observeAuthChanges!(tinlake);
