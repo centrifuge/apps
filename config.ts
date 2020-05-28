@@ -16,6 +16,7 @@ export type Pool = {
   name: string
   shortName?: string
   description: string
+  investHtml: string
   asset: string
 };
 
@@ -63,6 +64,7 @@ const poolSchema = yup.object().shape({
   name: yup.string().required('poolSchema.name is required'),
   shortName: yup.string(),
   description: yup.string().required('poolSchema.description is required'),
+  investHtml: yup.string().default('<p>You will need to get onboarded with the asset originator to start investing in this pool.</p><p>You can find their contact details in the pool overview page.</p>'),
   asset: yup.string().required('poolSchema.asset is required')
 });
 
