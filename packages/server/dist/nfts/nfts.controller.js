@@ -39,7 +39,6 @@ let NftsController = class NftsController {
                 proof_fields: body.proof_fields,
                 deposit_address: body.deposit_address,
             };
-            console.log('payload', payload);
             const mintingResult = yield this.centrifugeService.nft.mintNft(request.user.account, body.registry_address, payload);
             yield this.centrifugeService.pullForJobComplete(mintingResult.header.job_id, request.user.account);
             return mintingResult;

@@ -48,7 +48,7 @@ const generateAttributeError = (identifier, message) => {
 
 
 const generateRegistryError = (identifier, message) => {
-  return new Error(`Error on registry for '${identifier}': ${message}`);
+  return new Error(`Error with ${identifier}: ${message}`);
 };
 
 const generateFormFeaturesError = (message) => {
@@ -77,11 +77,11 @@ export enum SchemaPropsErrors {
 export enum RegistriesErrors {
   REGISTRIES_FORMAT = 'Registries must an array of Registry objects. It can be empty',
   COLLABORATORS_FORMAT = 'Collaborators must be an array of Collaborator objects. It can be empty',
-  ADDRESS_PROP_MISSING = 'address property is missing or empty',
-  ADDRESS_FORMAT = 'not a valid eth address',
-  LABEL_PROP_MISSING = 'label property is missing or empty',
-  PROOF_ARRAY_MISSING = 'proofs array is missing or empty',
-  ASSET_MANAGER_ADDRESS_MISSING = 'asset manager address is missing or empty'
+  ADDRESS_PROP_MISSING = 'Address property is missing or empty',
+  ADDRESS_FORMAT = 'Please check that the inserted address is a valid ETH address',
+  LABEL_PROP_MISSING = 'Label property is missing or empty',
+  PROOF_ARRAY_MISSING = 'Proofs array is missing or empty',
+  ASSET_MANAGER_ADDRESS_MISSING = 'Asset manager address is missing or empty'
 
 }
 
@@ -137,7 +137,14 @@ export class Schema {
           type: AttrTypes.STRING,
         },
       ],
-      registries: [],
+      registries: [
+        {
+          label: 'registry_name',
+          address: '0x0000000000000000000000000000000000000000',
+          asset_manager_address: '0x0000000000000000000000000000000000000000',
+          proofs: []
+        }
+      ],
       collaborators: [],
       formFeatures: {
         fundingAgreement: false,
@@ -219,24 +226,30 @@ export class Schema {
     }
     registries.forEach(registry => {
 
-      if (propertyUnset(registry, 'address'))
-        throw new Error(RegistriesErrors.ADDRESS_PROP_MISSING);
-
-      let valid = isValidAddress(registry.address);
-      if (!valid) {
-        throw generateRegistryError(registry.address, RegistriesErrors.ADDRESS_FORMAT);
+      if (propertyUnset(registry, 'label')) {
+        throw generateRegistryError('registry label', RegistriesErrors.LABEL_PROP_MISSING);
       }
 
-      if (propertyUnset(registry, 'label')) {
-        throw generateRegistryError(registry.address, RegistriesErrors.LABEL_PROP_MISSING);
+      if (propertyUnset(registry, 'address')) {
+        throw generateRegistryError('registry address', RegistriesErrors.ADDRESS_PROP_MISSING);
       }
 
       if (propertyUnset(registry, 'asset_manager_address')) {
-        throw generateRegistryError(registry.address, RegistriesErrors.LABEL_PROP_MISSING);
+        throw generateRegistryError('registry asset manager', RegistriesErrors.ASSET_MANAGER_ADDRESS_MISSING);
+      }
+
+      let validRegistry = isValidAddress(registry.address);
+      if (!validRegistry) {
+        throw generateRegistryError(`registry asset manager address ${registry.asset_manager_address}`, RegistriesErrors.ADDRESS_FORMAT);
+      }
+
+      let validAssetManager = isValidAddress(registry.asset_manager_address);
+      if (!validAssetManager) {
+        throw generateRegistryError(`registry address ${registry.address}`, RegistriesErrors.ADDRESS_FORMAT);
       }
 
       if (!registry.proofs || !Array.isArray(registry.proofs) || !registry.proofs.length) {
-        throw generateRegistryError(registry.address, RegistriesErrors.PROOF_ARRAY_MISSING);
+        throw generateRegistryError('registry proofs array', RegistriesErrors.PROOF_ARRAY_MISSING);
       }
     });
   }

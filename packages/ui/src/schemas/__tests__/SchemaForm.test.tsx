@@ -1,10 +1,5 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { Spinner } from '@centrifuge/axis-spinner';
-import { Modal } from '@centrifuge/axis-modal';
-import { NumberInput } from '@centrifuge/axis-number-input';
-import { DateInput } from '@centrifuge/axis-date-input';
-import { SearchSelect } from '@centrifuge/axis-search-select';
 import { Paragraph, TextArea } from 'grommet';
 import { withAxis } from '../../test-utilities/test-providers';
 import SchemaForm from '../SchemaForm';
@@ -46,7 +41,6 @@ describe('Schema Form', () => {
     expect(component.find(Paragraph).text()).toEqual(info);
     expect(component.find({ label: submitLabel }).find('button').length).toEqual(1);
     expect(component.find(TextArea).prop('defaultValue')).toEqual(Schema.toEditableJson(schema));
-
   });
 
 
@@ -71,7 +65,34 @@ describe('Schema Form', () => {
 
 
   it('should  submit the form', async () => {
-    const schema: any = Schema.getDefaultValues();
+    const schema: any =
+        {
+          "name": "TestAssetNFT",
+          "attributes": [
+            {
+              "name": "reference_id",
+              "label": "Reference ID",
+              "type": "string"
+            },
+          ],
+          "registries": [
+            {
+              "label": "TestAssetNFT",
+              "address": "0xc2c202c512786742A6A5C85C071ed140d03eF87c",
+              "asset_manager_address": "0x75d05e5a0EC4c6424b093c89425f1443991daf09",
+              "proofs": [
+                "cd_tree.attributes[0xe24e7917d4fcaf79095539ac23af9f6d5c80ea8b0d95c9cd860152bff8fdab17].byte_val",
+              ]
+            }
+          ],
+          "formFeatures": {
+            "fundingAgreement": false,
+            "columnNo": 2,
+            "comments": true,
+            "defaultSection": "Attributes"
+          }
+        };
+
     schema.name = 'test-schema';
 
     const component = mount(
@@ -130,11 +151,8 @@ describe('Schema Form', () => {
           onSubmit={onSubmit}/>,
       ),
     );
-
     expect(component.find({ readOnly: true }).find(TextArea).length).toBe(1);
-
   });
-
 });
 
 

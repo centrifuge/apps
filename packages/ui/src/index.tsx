@@ -8,7 +8,6 @@ import { createBrowserHistory } from 'history';
 const customHistory = createBrowserHistory();
 
 const runApplication = (preloadedState) => {
-  ;
   ReactDOM.render(
     <Router history={customHistory}>
       <Route render={() => {

@@ -11,7 +11,7 @@ export class DatabaseRepository<T> {
   private repository: DataStore;
 
   constructor(
-    private readonly options: DataStoreOptions) {
+      private readonly options: DataStoreOptions) {
 
     const defaultOptions: DataStoreOptions = {
       timestampData: true,
@@ -63,7 +63,7 @@ export class DatabaseRepository<T> {
    * @returns {Promise<T|null>} promise
    */
   updateById(id: string, updateObject: Modifier<T> | T, upsert: boolean = false): Promise<T | null> {
-    return this.update({ _id: id }, updateObject, { returnUpdatedDocs: true, upsert });
+    return this.update({_id: id}, updateObject, {returnUpdatedDocs: true, upsert});
   }
 
   /**
@@ -73,7 +73,7 @@ export class DatabaseRepository<T> {
    * @param {Nedb.UpdateOptions} options - {multi,upsert,returnUpdatedDocs}
    * @returns {Promise<T|null>} promise
    */
-  update(query: any, updateObject: Modifier<T> | T, options?: Nedb.UpdateOptions): Promise<T  | null> {
+  update(query: any, updateObject: Modifier<T> | T, options?: Nedb.UpdateOptions): Promise<T | null> {
     return this.repository.update(query, updateObject, options);
   }
 }

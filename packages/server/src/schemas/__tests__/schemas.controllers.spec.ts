@@ -117,6 +117,7 @@ describe('SchemasController', () => {
           ],
           registries: [
             {
+              label: 'test registry',
               address: '0x111',
               asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
             },

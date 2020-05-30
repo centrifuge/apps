@@ -21,7 +21,6 @@ import { FundingAgreements } from './FundingAgreements';
 import { AxiosError } from 'axios';
 import { NOTIFICATION, NotificationContext } from '../components/NotificationContext';
 
-
 type Props = RouteComponentProps<{ id: string }>
 
 type State = {
@@ -31,7 +30,6 @@ type State = {
   schemas: Schema[];
   error: any,
 }
-
 
 export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
 
@@ -124,9 +122,7 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
 
   const extendedContacts = extendContactsWithUsers(contacts, [user!]);
 
-
   return (
-
     <Box pad={{ bottom: 'large' }}>
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">
@@ -139,7 +135,7 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
           </Heading>
         </Box>
         <Box direction="row" gap="medium">
-          {canWriteToDoc(user, document) && <Button
+          {canWriteToDoc(user, document) && document && document.header && document.header.status === 'Created' && <Button
             onClick={() => {
               push(
                 documentRoutes.edit.replace(':id', id),
@@ -175,7 +171,6 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
           viewMode={true}
           document={document!}
           contacts={extendedContacts}/>}
-
       </DocumentForm>
     </Box>
   );

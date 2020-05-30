@@ -37,6 +37,9 @@ type State = {
 export const EditDocument: FunctionComponent<Props> = (props: Props) => {
 
   const {
+    history: {
+      push,
+    },
     match: {
       params: {
         id,
@@ -113,6 +116,10 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
   const startLoading = (loadingMessage: string = 'Loading') => {
     setState({ loadingMessage });
   };
+
+  const returnToList = () => {
+    push(documentRoutes.index);
+  }
 
   const displayModalError = (e: AxiosError, title: string = 'Error') => {
     setState({
@@ -191,6 +198,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
           onAsyncStart={startLoading}
           onAsyncComplete={loadData}
           onAsyncError={displayModalError}
+          onMintStart={returnToList}
           viewMode={!canMint}
           document={document!}
           user={user!}

@@ -259,14 +259,34 @@ describe('Schema validations', () => {
 
     it('should fail if a registry does not contain an address prop', () => {
       expect(() => {
-        Schema.validateRegistries([{} as any]);
+        Schema.validateRegistries([{
+          name: 'reference_id',
+            label: 'test',
+            type: AttrTypes.STRING,
+      } as any ]);
       }).toThrow(RegistriesErrors.ADDRESS_PROP_MISSING);
 
     });
 
     it('should fail if a registry has bad formatted eth address', () => {
       expect(() => {
-        Schema.validateRegistries([{ address: 'random stuff that is not an eth address' } as any]);
+        Schema.validateRegistries([{
+          name: 'reference_id',
+          label: 'test',
+          type: AttrTypes.STRING,
+          address: '0x000',
+          asset_manager_address: '0x8168a9046478331e423Da1561B859a3400E01ABD'
+        } as any]);
+      }).toThrow(RegistriesErrors.ADDRESS_FORMAT);
+
+      expect(() => {
+        Schema.validateRegistries([{
+          name: 'reference_id',
+          label: 'test',
+          type: AttrTypes.STRING,
+          address: '0x8168a9046478331e423Da1561B859a3400E01ABD',
+          asset_manager_address: '0x00'
+        } as any]);
       }).toThrow(RegistriesErrors.ADDRESS_FORMAT);
 
     });

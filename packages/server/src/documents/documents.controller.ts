@@ -1,7 +1,7 @@
 import { Body, Controller, Get, NotFoundException, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
-import { CoreapiCreateDocumentRequest } from '@centrifuge/gateway-lib/centrifuge-node-client';
+import {CoreapiCreateDocumentRequest, CoreapiDocumentResponse} from '@centrifuge/gateway-lib/centrifuge-node-client';
 import { Document, DocumentRequest } from '@centrifuge/gateway-lib/models/document';
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
 import { SessionGuard } from '../auth/SessionGuard';
@@ -38,7 +38,7 @@ export class DocumentsController {
       },
     };
 
-    const createResult = await this.centrifugeService.documents.createDocumentV2(
+    const createResult: Document = await this.centrifugeService.documents.createDocumentV2(
       request.user.account,
       {
         attributes: payload.attributes,
@@ -48,20 +48,36 @@ export class DocumentsController {
       },
     );
 
+    createResult.document_status = 'Creating...';
+    createResult.nft_status = 'No NFT minted';
+
+    const created = await this.databaseService.documents.insert({
+      ...createResult,
+      ownerId: request.user._id,
+    });
     const createAttributes = unflatten(createResult.attributes);
     createResult.attributes = createAttributes;
-    // @ts-ignore
     const commitResult = await this.centrifugeService.documents.commitDocumentV2(
         request.user.account,
         // @ts-ignore
         createResult.header.document_id,
     );
+
     // @ts-ignore
-    await this.centrifugeService.pullForJobComplete(commitResult.header.job_id, request.user.account);
-    return await this.databaseService.documents.insert({
-      ...createResult,
-      ownerId: request.user._id,
-    });
+    const commit = await this.centrifugeService.pullForJobComplete(commitResult.header.job_id, request.user.account);
+    if (commit.status === 'success') {
+      return await this.databaseService.documents.updateById(created._id, {
+        $set: {
+          document_status: 'Created',
+        },
+      });
+    } else {
+      return await this.databaseService.documents.updateById(created._id, {
+        $set: {
+          document_status: 'Document creation failed',
+        },
+      });
+    }
   }
 
   @Get()
@@ -93,16 +109,19 @@ export class DocumentsController {
     });
 
     if (!document) throw new NotFoundException('Document not found');
-    // @ts-ignore
-    const docFromNode = await this.centrifugeService.documents.getDocument(request.user.account, document.header.document_id);
-    return {
-      _id: document._id,
-      ...docFromNode,
-      attributes: {
-        ...unflatten(docFromNode.attributes),
-      },
-    };
-
+    try {
+      // @ts-ignore
+      const docFromNode = await this.centrifugeService.documents.getDocument(request.user.account, document.header.document_id);
+      return {
+        _id: document._id,
+        ...docFromNode,
+        attributes: {
+          ...unflatten(docFromNode.attributes),
+        },
+      };
+    } catch (error) {
+      return document;
+    }
   }
 
   /**

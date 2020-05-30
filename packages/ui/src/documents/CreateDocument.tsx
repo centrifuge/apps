@@ -4,7 +4,6 @@ import DocumentForm from './DocumentForm';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { Box, Button, Heading } from 'grommet';
 import { LinkPrevious } from 'grommet-icons';
-import { Preloader } from '../components/Preloader';
 import { SecondaryHeader } from '../components/SecondaryHeader';
 import documentRoutes from './routes';
 import { Schema } from '@centrifuge/gateway-lib/models/schema';
@@ -23,7 +22,6 @@ type Props = RouteComponentProps;
 
 type State = {
   defaultDocument: Document,
-  loadingMessage: string | null,
   error: any,
   contacts: Contact[];
   schemas: Schema[];
@@ -31,12 +29,11 @@ type State = {
 
 export const CreateDocument: FunctionComponent<Props> = (props) => {
 
-  const [{ defaultDocument, contacts, schemas, loadingMessage, error }, setState] = useMergeState<State>(
+  const [{ defaultDocument, contacts, schemas, error }, setState] = useMergeState<State>(
     {
       defaultDocument: {
         attributes: {},
       },
-      loadingMessage: 'Loading',
       error: null,
       contacts: [],
       schemas: [],
@@ -56,14 +53,12 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
 
   const displayPageError = useCallback((error) => {
     setState({
-      loadingMessage: null,
       error,
     });
   }, [setState]);
 
   const loadData = useCallback(async () => {
     setState({
-      loadingMessage: 'Loading',
     });
     try {
       const contacts = (await httpClient.contacts.list()).data;
@@ -71,7 +66,6 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
       setState({
         contacts,
         schemas,
-        loadingMessage: null,
       });
 
     } catch (e) {
@@ -86,22 +80,17 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
 
   const createDocument = async (document: Document) => {
     setState({
-      loadingMessage: 'Saving document',
       defaultDocument: document,
     });
 
     try {
-      const doc = (await httpClient.documents.create(document)).data;
-      push(documentRoutes.view.replace(':id', doc._id));
-
+      push(documentRoutes.index);
+      await httpClient.documents.create(document);
     } catch (e) {
       notification.alert({
         type: NOTIFICATION.ERROR,
         title: 'Failed to save document',
         message: (e as AxiosError)!.response!.data.message,
-      });
-      setState({
-        loadingMessage: null,
       });
     }
 
@@ -111,13 +100,8 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
     push(documentRoutes.index);
   };
 
-  if (loadingMessage) {
-    return <Preloader message={loadingMessage}/>;
-  }
-
   if (error)
     return <PageError error={error}/>;
-
 
   const availableSchemas = mapSchemaNames(user!.schemas, schemas);
 

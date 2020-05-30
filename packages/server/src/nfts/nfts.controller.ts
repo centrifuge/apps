@@ -42,9 +42,30 @@ export class NftsController {
       payload,
     );
 
+    const doc = await this.databaseService.documents.findOne(
+        { 'header.document_id': mintingResult.document_id },
+    );
+    await this.databaseService.documents.updateById(doc._id, {
+      $set: {
+        nft_status: 'Minting...',
+      },
+    });
     // @ts-ignore
-    await this.centrifugeService.pullForJobComplete(mintingResult.header.job_id, request.user.account);
-    return mintingResult;
+    const mint = await this.centrifugeService.pullForJobComplete(mintingResult.header.job_id, request.user.account);
+
+    if (mint.status === 'success') {
+      return await this.databaseService.documents.updateById(doc._id, {
+        $set: {
+          nft_status: 'Minted',
+        },
+      });
+    } else {
+      return await this.databaseService.documents.updateById(doc._id, {
+        $set: {
+          nft_status: 'NFT minting failed',
+        },
+      });
+    }
   }
 
   /**

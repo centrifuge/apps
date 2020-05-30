@@ -1,20 +1,18 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import { BrowserRouter, Link } from 'react-router-dom';
-import { SearchSelect } from '@centrifuge/axis-search-select';
+import { Link } from 'react-router-dom';
 import { Anchor, DataTable, Select } from 'grommet';
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers';
-import { Modal } from '@centrifuge/axis-modal';
 import { PageError } from '../../components/PageError';
 import { act } from 'react-dom/test-utils';
 import { defaultSchemas, defaultUser } from '../../test-utilities/default-data';
 import { ListDocuments } from '../ListDocuments';
 import documentRoutes from '../routes';
 import { MemoryRouter } from 'react-router';
+import {createMemoryHistory} from "history";
 
 jest.mock('../../http-client');
 const httpClient = require('../../http-client').httpClient;
-
 
 describe('List Documents', () => {
 
@@ -39,6 +37,18 @@ describe('List Documents', () => {
             '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
           type: 'string',
           value: 'first_schema',
+        },
+        ['document_status']: {
+          key:
+              '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
+          type: 'string',
+          value: 'Created',
+        },
+        ['nft_status']: {
+          key:
+              '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
+          type: 'string',
+          value: 'Minted',
         },
       },
       fromId: '0xFaC5A4BA4CF34D82C7CA0c8004A8421be1679B71',
@@ -107,13 +117,15 @@ describe('List Documents', () => {
   });
 
   it('Should render 2 documents with the proper actions', async () => {
+
+    const history = createMemoryHistory();
+
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
           <MemoryRouter>
             <ListDocuments
-              history={{ push } as any}
-            />
+              history={history}/>
           </MemoryRouter>
           ,
         ),
@@ -126,15 +138,14 @@ describe('List Documents', () => {
       expect(dataTable.length).toEqual(1);
       const rows = dataTable.find('tbody tr');
       expect(rows.length).toBe(2);
-      const fistRowactions = rows.at(0).find(Anchor);
+      const firstRowactions = rows.at(0).find(Anchor);
       const secondRowactions = rows.at(1).find(Anchor);
-      expect(fistRowactions.length).toBe(2);
-      expect(fistRowactions.at(0).text()).toEqual('View');
-      expect(fistRowactions.at(1).text()).toEqual('Edit');
+      expect(firstRowactions.length).toBe(1);
+      // NOTE: 'Edit should not be displayed until the document is anchored
+      expect(firstRowactions.at(0).text()).toEqual('View');
       expect(secondRowactions.length).toBe(1);
       expect(secondRowactions.at(0).text()).toEqual('View');
     });
-
   });
 
   it('Should render the received documents', async () => {
@@ -192,32 +203,6 @@ describe('List Documents', () => {
 
   });
 
-  it('Should edit document when clicking Edit', async () => {
-    await act(async () => {
-      const component = mount(
-        withAllProvidersAndContexts(
-          <MemoryRouter>
-            <ListDocuments
-              history={{ push } as any}
-            />
-          </MemoryRouter>
-          ,
-        ),
-      );
-
-      await new Promise(r => setTimeout(r, 0));
-      component.update();
-
-      const dataTable = component.find(DataTable);
-      expect(dataTable.length).toEqual(1);
-      const rows = dataTable.find('tbody tr');
-      const actions = rows.at(0).find(Anchor);
-      actions.at(1).simulate('click');
-      expect(push).toHaveBeenCalledWith(documentRoutes.edit.replace(':id', '1'));
-    });
-
-  });
-
   it('Should create document when clicking create button', async () => {
     await act(async () => {
       const component = mount(
@@ -237,7 +222,5 @@ describe('List Documents', () => {
     });
 
   });
-
-
 });
 

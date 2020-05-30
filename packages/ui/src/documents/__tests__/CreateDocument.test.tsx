@@ -31,29 +31,6 @@ describe('Create Document', () => {
     });
   });
 
-  it('Should render the preloader', async () => {
-
-    await act(async () => {
-      const component = mount(
-        withAllProvidersAndContexts(
-          <MemoryRouter>
-            <CreateDocument/>
-          </MemoryRouter>,
-          {
-            ...defaultUser,
-            schemas: [defaultSchemas[0].name],
-          },
-        ),
-      );
-
-      const preloader = component.find(Preloader);
-      // THe user has only one schema set
-      expect(preloader.length).toEqual(1);
-      expect(preloader.prop('message')).toEqual('Loading');
-    });
-
-  });
-
   it('Should load the data and render the page', async () => {
 
     await act(async () => {
@@ -174,9 +151,7 @@ describe('Create Document', () => {
         attributes: {},
       });
       component.update();
-      expect(component.find(Preloader).prop('message')).toEqual('Saving document');
-      expect(history.location.pathname).toBe(routes.view.replace(':id', 'new_document'));
-
+      expect(history.location.pathname).toBe(routes.index);
     });
   });
 
@@ -221,12 +196,8 @@ describe('Create Document', () => {
       const alert = component.find(Modal);
       expect(alert.find(Heading).text()).toBe('Failed to save document');
       expect(alert.find(Paragraph).text()).toBe('Document creation failed');
-
-
     });
   });
-
-
 });
 
 

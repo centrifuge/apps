@@ -55,13 +55,10 @@ export default class MintNftForm extends React.Component<Props> {
                 if (!isValidAddress(value))
                   return this.createError({ path: this.path, message: 'Not a valid account address' });
               }
-
-
             }
             return true;
           }),
         }),
-
     });
 
     const initialValues: MintNftFormData = {

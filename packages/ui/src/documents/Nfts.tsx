@@ -21,6 +21,7 @@ type Props = {
   onAsyncStart?: (message: string) => void;
   onAsyncComplete?: (data) => void;
   onAsyncError?: (error, title?: string) => void;
+  onMintStart?: () => void;
   document: Document,
   user: User,
   contacts: Contact[],
@@ -51,6 +52,7 @@ export const Nfts: FunctionComponent<Props> = (props) => {
     onAsyncStart,
     onAsyncComplete,
     onAsyncError,
+    onMintStart,
     document,
     contacts,
     registries,
@@ -63,15 +65,19 @@ export const Nfts: FunctionComponent<Props> = (props) => {
     },
     onAsyncError: (error, title?: string) => {
     },
+    onMintStart:() => {
+
+    },
     ...props,
   };
 
 
   const mintNFT = async (id: string, data: MintNftFormData) => {
 
-    onAsyncStart('Minting NFT');
+    closeModal()
 
     try {
+      onMintStart()
       onAsyncComplete((await httpClient.nfts.mint(
         {
           document_id: id,
@@ -201,8 +207,8 @@ export const Nfts: FunctionComponent<Props> = (props) => {
       onClose={closeModal}
     >
       <MintNftForm
-        // @ts-ignore
-          onSubmit={(data) => mintNFT(document.header!.document_id!, data)}
+//        @ts-ignore
+        onSubmit={(data) => mintNFT(document.header!.document_id!, data)}
         onDiscard={closeModal}
         registries={registries}
       />

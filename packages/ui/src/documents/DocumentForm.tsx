@@ -79,8 +79,6 @@ export class DocumentForm extends React.Component<Props, State> {
   onSubmit = (values) => {
     const { selectedSchema } = this.state;
 
-    //
-
     const payload = {
       ...values,
       attributes: {

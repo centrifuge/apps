@@ -109,7 +109,6 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
         return display === DisplayTypes.Sent ? !isValidAddress(doc.fromId) : isValidAddress(doc.fromId);
       });
     }
-
     return sortableDocuments;
   };
 
@@ -124,7 +123,6 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
   if (error) {
     return <PageError error={error}/>;
   }
-
 
   return (
     <Box>
@@ -173,7 +171,6 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               header: 'Schema',
               sortable: true,
             },
-
             {
               property: 'createdAt',
               header: 'Date created',
@@ -181,20 +178,30 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               render: datum => formatDate(datum.createdAt),
             },
             {
+              property: 'document_status',
+              header: 'Document Status',
+              sortable: true,
+            },
+            {
+              property: 'nft_status',
+              header: 'NFT Status',
+              sortable: true,
+            },
+            {
               property: '_id',
               header: 'Actions',
               sortable: false,
               render: datum => (
                 <Box direction="row" gap="small">
-                  <Anchor
+                  {datum.nft_status !== 'Minting...' && datum.document_status !== 'Document creation failed' && <Anchor
                     label={'View'}
                     onClick={() =>
                       push(
                         documentRoutes.view.replace(':id', datum._id),
                       )
                     }
-                  />
-                  {canWriteToDoc(user!, datum) && <Anchor
+                  />}
+                  {canWriteToDoc(user!, datum) && datum.document_status === 'Created' && datum.nft_status !== 'Minting...' && <Anchor
                     label={'Edit'}
                     onClick={() =>
                       push(
