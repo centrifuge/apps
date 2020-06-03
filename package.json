@@ -13,7 +13,10 @@
     "cucumber": "^6.0.5",
     "dappeteer": "^1.0.0",
     "dotenv": "^8.2.0",
+    "ethjs-provider-signer": "^0.1.4",
+    "ethjs-signer": "^0.1.1",
     "puppeteer": "^3.1.0",
+    "tinlake": "github:centrifuge/tinlake.js#d5934be8024e4f35e0ffe9af433843a94cabb0e2",
     "ts-node": "^8.10.1",
     "tsc": "^1.20150623.0",
     "typescript": "^3.9.3"

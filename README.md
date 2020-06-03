@@ -1,5 +1,7 @@
 # e2e-tests
 
+See https://cucumber.io/docs/bdd/ for an introduction into Cucumber.
+
 ## Recipies
 
 ### Debug the dapp
