@@ -6,7 +6,7 @@ import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document';
 
 export const defaultUser: User = {
   name: 'Default User',
-  account: '0xDefaultAccount',
+  account: '0xB198358FE22Ee4A8Ee9c739939B0eC5a1204bb6A',
   chain: {
     centrifuge_chain_account: {
       id: 'testid',
@@ -51,7 +51,8 @@ export const defaultSchemas = [
     registries: [
       {
         label: 'First Registry',
-        address: '0xFirstRegistry',
+        address: '0x414C30A8824D4Ed8479e0d58F35A629C671a8db1',
+        asset_manager_address: '0x414C30A8824D4Ed8479e0d58F35A629C671a8db1',
         proofs: [
           'firstRegistryFirstProof',
           'firstRegistrySecondProof',
@@ -59,7 +60,8 @@ export const defaultSchemas = [
       },
       {
         label: 'Second Registry',
-        address: '0xSecondRegistry',
+        address: '0x414C30A8824D4Ed8479e0d58F35A629C671a8db1',
+        asset_manager_address: '0x414C30A8824D4Ed8479e0d58F35A629C671a8db1',
         proofs: [
           'secondRegistryFirstProof',
           'secondRegistrySecondProof',

@@ -1,22 +1,25 @@
 import React from 'react';
-import { Box, Button, CheckBox, FormField, TextInput } from 'grommet';
+import { Box, Button, FormField, TextInput } from 'grommet';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { Registry } from '@centrifuge/gateway-lib/models/schema';
 import { SearchSelect } from '@centrifuge/axis-search-select';
 import { isValidAddress } from 'ethereumjs-util';
+import {User} from "@centrifuge/gateway-lib/models/user";
+import { DisplayField } from '@centrifuge/axis-display-field';
+import {getAddressLink} from "@centrifuge/gateway-lib/utils/etherscan";
 
 type Props = {
   onSubmit: (data: MintNftFormData) => void;
   onDiscard: () => void;
   registries: Registry[];
+  user: User;
 };
 
 
 export interface MintNftFormData {
   registry: Registry | undefined,
   deposit_address: string
-  transfer: boolean
 }
 
 // TODO use function components here
@@ -35,9 +38,7 @@ export default class MintNftForm extends React.Component<Props> {
   render() {
 
     const { submitted } = this.state;
-    const { registries } = this.props;
-    const columnGap = 'medium';
-    const sectionGap = 'large';
+    const { registries, user } = this.props;
 
     const formValidation = Yup.object().shape({
       registry: Yup.object().shape({
@@ -62,9 +63,8 @@ export default class MintNftForm extends React.Component<Props> {
     });
 
     const initialValues: MintNftFormData = {
-      registry: { label: '', address: '', asset_manager_address: '', proofs: [] },
-      deposit_address: '',
-      transfer: false,
+      registry: { label: registries[0].label, address: registries[0].address, asset_manager_address: registries[0].asset_manager_address, proofs: registries[0].proofs },
+      deposit_address: user.account,
     };
 
     return (
@@ -89,34 +89,38 @@ export default class MintNftForm extends React.Component<Props> {
              }) => {
               return (
                 <>
-                  <Box direction="column" gap={sectionGap}>
-
-                    <Box gap={columnGap}>
-                      <FormField
-                        label="Registry"
-                        error={errors!.registry ? (errors!.registry as any)!.address : ''}
-                      >
-                        <SearchSelect
-                          name="registry"
-                          labelKey={'label'}
-                          valueKey={'address'}
-                          options={registries}
-                          value={values.registry}
-                          onChange={(selected) => {
-                            setFieldValue('registry', selected);
-                          }}
+                  <Box direction="column" gap="large">
+                    <Box direction="row">
+                      <Box>
+                        <FormField
+                            label="Registry"
+                            error={errors!.registry ? (errors!.registry as any)!.address : ''}
+                        >
+                          <SearchSelect
+                              name="registry"
+                              labelKey={'label'}
+                              valueKey={'address'}
+                              options={registries}
+                              value={values.registry}
+                              onChange={(selected) => {
+                                setFieldValue('registry', selected);
+                              }}
+                          />
+                        </FormField>
+                      </Box>
+                      <Box margin={{top:'medium', left:'xlarge'}}>
+                        <DisplayField
+                            copy={true}
+                            as={'span'}
+                            link={{
+                              href: getAddressLink(values!.registry!.address),
+                              target: '_blank',
+                            }}
+                            value={values!.registry!.address}
                         />
-                      </FormField>
-
-                      <CheckBox
-                        label={'Transfer to someone else?'}
-                        name='transfer'
-                        checked={values.transfer}
-                        onChange={handleChange}
-                      />
-
-                      {
-                        values.transfer && <FormField
+                      </Box>
+                    </Box>
+                      <FormField
                           label="Deposit address"
                           error={errors.deposit_address}
                         >
@@ -126,8 +130,6 @@ export default class MintNftForm extends React.Component<Props> {
                             onChange={handleChange}
                           />
                         </FormField>
-                      }
-                    </Box>
                   </Box>
 
                   <Box direction="row" justify={'end'} gap="medium" margin={{ top: 'medium' }}>

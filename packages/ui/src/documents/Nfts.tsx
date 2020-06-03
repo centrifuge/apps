@@ -81,7 +81,7 @@ export const Nfts: FunctionComponent<Props> = (props) => {
       onAsyncComplete((await httpClient.nfts.mint(
         {
           document_id: id,
-          deposit_address: data.transfer ? data.deposit_address : user!.account,
+          deposit_address: user!.account,
           proof_fields: data.registry!.proofs,
           registry_address: data.registry!.address,
           asset_manager_address: data.registry!.asset_manager_address
@@ -211,6 +211,7 @@ export const Nfts: FunctionComponent<Props> = (props) => {
         onSubmit={(data) => mintNFT(document.header!.document_id!, data)}
         onDiscard={closeModal}
         registries={registries}
+        user={user}
       />
     </Modal>
 

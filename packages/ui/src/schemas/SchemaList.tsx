@@ -40,7 +40,7 @@ const formModePropMapping = {
     schemaForm: {
       submitLabel: 'Update',
       readonly: false,
-      infoParagraph: 'Please note that only edits to the registries will be saved. Any changes to the name or attributes of a schema will be discarded.',
+      infoParagraph: 'Please note that the schema must be a valid JSON object.',
     },
     modal: {
       title: 'Edit Schema',
