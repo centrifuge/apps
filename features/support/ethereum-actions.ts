@@ -10,6 +10,10 @@ export async function importAdminPK(world: CentrifugeWorld) {
   await world.metamask.importPK(config.ethAdminPrivateKey)
 }
 
+export async function importBorrowerPK(world: CentrifugeWorld) {
+  await world.metamask.importPK(config.ethBorrowerPrivateKey)
+}
+
 export async function switchNetwork(world: CentrifugeWorld) {
   await world.metamask.switchNetwork(config.ethNetwork)
 }

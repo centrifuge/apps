@@ -10,12 +10,17 @@ export class CentrifugeWorld {
   metamask: null | Dappeteer = null
   currentPage: null | Page = null
   tinlake: null | ITinlake = null
+  context: {[key: string]: any} = {}
 
   constructor() {
   }
 
   async initializedTinlake() {
     return await ensureTinlakeInit(this)
+  }
+
+  clearContext() {
+    this.context = {}
   }
 }
 

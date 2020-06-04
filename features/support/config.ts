@@ -7,8 +7,11 @@ export interface Config {
   ethNetwork: string,
   ethAdminAddress: string,
   ethAdminPrivateKey: string,
+  ethBorrowerAddress: string,
+  ethBorrowerPrivateKey: string,
   tinlakePool: Pool,
   gasLimit: number,
+  nftRegistry: string,
 }
 
 export const config: Config = {
@@ -18,8 +21,11 @@ export const config: Config = {
   ethNetwork: process.env.ETH_NETWORK,
   ethAdminAddress: process.env.ETH_ADMIN_ADDRESS,
   ethAdminPrivateKey: process.env.ETH_ADMIN_PRIVATE_KEY,
+  ethBorrowerAddress: process.env.ETH_BORROWER_ADDRESS,
+  ethBorrowerPrivateKey: process.env.ETH_BORROWER_PRIVATE_KEY,
   tinlakePool: JSON.parse(process.env.TINLAKE_POOL),
   gasLimit: 100000,
+  nftRegistry: process.env.NFT_REGISTRY,
 }
 
 export interface Pool {

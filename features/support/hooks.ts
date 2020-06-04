@@ -5,6 +5,8 @@ import { initMetamask } from './ethereum-actions'
 import { CentrifugeWorld } from './world'
 
 Before(async function(this: CentrifugeWorld, scenario) {
+  this.clearContext()
+
   await openBrowser(this)
   await initMetamask(this)
 })
@@ -24,4 +26,6 @@ After( async function(this: CentrifugeWorld, scenario) {
   console.log('closing browser')
 
   await closeBrowser(this)
+
+  this.clearContext()
 })
