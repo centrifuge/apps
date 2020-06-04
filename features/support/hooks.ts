@@ -1,17 +1,18 @@
 // Dependencies
 import { After, Before, AfterAll, Status } from 'cucumber'
 import { openBrowser, closeBrowser, takeScreenshot } from './browser-actions'
-import { initMetamask } from './ethereum-actions'
 import { CentrifugeWorld } from './world'
 
 Before(async function(this: CentrifugeWorld, scenario) {
   this.clearContext()
 
   await openBrowser(this)
-  await initMetamask(this)
+  await this.metamaskInit()
 })
 
 After( async function(this: CentrifugeWorld, scenario) {
+  this.clearContext()
+
   if (scenario.result.exception || scenario.result.status === Status.FAILED) {
     console.log('exception or failure – will take a screenshot')
 
@@ -26,6 +27,4 @@ After( async function(this: CentrifugeWorld, scenario) {
   console.log('closing browser')
 
   await closeBrowser(this)
-
-  this.clearContext()
 })

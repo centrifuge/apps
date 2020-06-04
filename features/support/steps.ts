@@ -1,7 +1,6 @@
 import { Given, When, Then } from "cucumber"
 import { openPage } from "./browser-actions"
 import { config } from "./config"
-import { importAdminPK, switchNetwork, importBorrowerPK } from "./ethereum-actions";
 import { CentrifugeWorld } from "./world";
 import { selectors } from "./selectors";
 import { getTextContent } from './utils/getTextContent'
@@ -14,13 +13,13 @@ Given("I am on the Gateway Page", async function (this: CentrifugeWorld) {
 });
 
 Given('I am logged into MetaMask as Tinlake admin', async function (this: CentrifugeWorld) {
-  await importAdminPK(this)
-  await switchNetwork(this)
+  await this.metamaskImportAdminPK()
+  await this.metamaskSwitchNetwork()
 });
 
 Given('I am logged into MetaMask as borrower', async function (this: CentrifugeWorld) {
-  await importBorrowerPK(this)
-  await switchNetwork(this)
+  await this.metamaskImportBorrowerPK()
+  await this.metamaskSwitchNetwork()
 });
 
 Given("I am on the Tinlake investments page", async function (this: CentrifugeWorld) {
@@ -36,7 +35,7 @@ Given("I am connected to Tinlake", async function (this: CentrifugeWorld) {
   await connect.click()
   const metamask = await this.currentPage.waitForXPath(selectors.tinlake.onboardMetamaskButton)
   await metamask.click()
-  await this.metamask.approve()
+  await this.metamaskApprove()
 });
 
 Given('the min TIN ratio is set to {int}%', async function (this: CentrifugeWorld, int: number) {
@@ -64,14 +63,14 @@ When('I set Min TIN ratio to {int}%', async function (this: CentrifugeWorld, int
   const button = await this.currentPage.waitForXPath(selectors.tinlake.setMinTINRatioButton)
   await button.click()
 
-  await this.metamask.confirmTransaction({ gas: 50, gasLimit: 100000 })
+  await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 100000 })
 });
 
 When('I do mint NFT', async function (this: CentrifugeWorld) {
   const button = await this.currentPage.waitForXPath(selectors.tinlake.mintNFTButton)
   await button.click()
 
-  await this.metamask.confirmTransaction({ gas: 50, gasLimit: 300000 })
+  await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 300000 })
 });
 
 Then('I see that Min TIN ratio component is set to {int}%', async function (this: CentrifugeWorld, int: number) {
