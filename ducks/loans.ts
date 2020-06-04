@@ -6,6 +6,13 @@ import Apollo from '../services/apollo';
 import Tinlake from 'tinlake/dist/Tinlake';
 import { HYDRATE } from 'next-redux-wrapper';
 
+// SortableLoan adds properties of number type that support sorting in numerical order for grommet DataTable
+export interface SortableLoan extends Loan {
+  debtNum: number;
+  principalNum: number;
+  interestRateNum: number;
+}
+
 // Actions
 const LOAD = 'tinlake-ui/loans/LOAD';
 const RECEIVE = 'tinlake-ui/loans/RECEIVE';
@@ -15,7 +22,7 @@ const RECEIVE_LOAN = 'tinlake-ui/loans/RECEIVE_LOAN';
 
 export interface LoansState {
   loansState: null | 'loading' | 'found';
-  loans: Loan[];
+  loans: SortableLoan[];
   loanState: null | 'loading' | 'not found' | 'found';
   loan: null | Loan;
 }
@@ -51,7 +58,13 @@ export function loadLoans(tinlake: Tinlake):
       throw new Error('could not get ROOT_CONTRACT address');
     }
     const result = await Apollo.getLoans(root);
-    const loans = result.data;
+
+    const loans: SortableLoan[] = result.data.map((l: Loan) => ({
+      ...l,
+      debtNum: parseFloat(l.debt.toString()),
+      principalNum: parseFloat(l.principal.toString()),
+      interestRateNum: parseFloat(l.interestRate.toString())
+    }));
 
     dispatch({ loans, type: RECEIVE });
   };
