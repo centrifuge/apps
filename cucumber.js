@@ -5,7 +5,7 @@ let common = [
     // `--format ${
     //   process.env.CI || !process.stdout.isTTY ? 'progress' : 'progress-bar'
     // }`,
-    '--parallel 20',
+    '--parallel 0',
   ].join(' ');
 
   module.exports = {
