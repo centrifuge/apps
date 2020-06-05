@@ -52,24 +52,24 @@ class PoolList extends React.Component<Props> {
             </Box>
         },
         {
-          header: 'Outstanding Debt (DAI)', property: 'totalDebt', align: 'center',
+          header: 'Outstanding Debt (DAI)', property: 'totalDebtNum', align: 'center',
           render: (p: PoolData) =>
             <Box style={{ maxWidth: '150px' }}>
               <NumberDisplay suffix="" precision={2} value={baseToDisplay(p.totalDebt, 18)} />
             </Box>
         },
         {
-          header: 'Total Repaid Debt (DAI)', property: 'totalRepaid', align: 'center',
+          header: 'Total Repaid Debt (DAI)', property: 'totalRepaysAggregatedAmountNum', align: 'center',
           render: (p: PoolData) =>
             <NumberDisplay suffix="" precision={2} value={baseToDisplay(p.totalRepaysAggregatedAmount, 18)} />
         },
         {
-          header: 'Avg Loan APR', property: 'avgInterest', align: 'center',
+          header: 'Avg Loan APR', property: 'weightedInterestRateNum', align: 'center',
           render: (p: PoolData) =>
             <NumberDisplay suffix="%" value={feeToInterestRate(p.weightedInterestRate)} />
         },
         {
-          header: 'DROP APR', property: 'dropInterest', align: 'center',
+          header: 'DROP APR', property: 'seniorInterestRateNum', align: 'center',
           render: (p: PoolData) =>
             <NumberDisplay suffix="%" value={feeToInterestRate(p.seniorInterestRate)} />
         }

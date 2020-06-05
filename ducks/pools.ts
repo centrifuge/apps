@@ -14,9 +14,13 @@ export interface PoolData {
   asset: string;
   ongoingLoans: number;
   totalDebt: BN;
+  totalDebtNum: number;
   totalRepaysAggregatedAmount: BN;
+  totalRepaysAggregatedAmountNum: number;
   weightedInterestRate: BN;
+  weightedInterestRateNum: number;
   seniorInterestRate: BN;
+  seniorInterestRateNum: number;
 }
 
 export interface PoolsData {

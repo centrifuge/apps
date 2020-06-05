@@ -47,15 +47,25 @@ class Apollo {
     const tinlakePools = configPools.map((configPool: any) => {
       const poolId = configPool.addresses.ROOT_CONTRACT;
       const pool = pools.find(p => p.id === poolId);
+
+      const totalDebt = pool && new BN(pool.totalDebt) || new BN('0');
+      const totalRepaysAggregatedAmount = pool && new BN(pool.totalRepaysAggregatedAmount) || new BN('0');
+      const weightedInterestRate = pool && new BN(pool.weightedInterestRate) || new BN('0');
+      const seniorInterestRate = pool && pool.seniorInterestRate && new BN(pool.seniorInterestRate) || new BN('0');
+
       return {
+        totalDebt,
+        totalRepaysAggregatedAmount,
+        weightedInterestRate,
+        seniorInterestRate,
         id: poolId,
         name: configPool.name,
         asset: configPool?.asset,
         ongoingLoans: pool && pool.ongoingLoans.length || 0, // TODO add count field to subgraph, inefficient to query all loans
-        totalDebt: pool && new BN(pool.totalDebt) || new BN('0'),
-        totalRepaysAggregatedAmount: pool && new BN(pool.totalRepaysAggregatedAmount) || new BN('0'),
-        weightedInterestRate: pool && new BN(pool.weightedInterestRate) || new BN('0'),
-        seniorInterestRate: pool && pool.seniorInterestRate && new BN(pool.seniorInterestRate) || new BN('0') // TODO how to get this value?
+        totalDebtNum: parseFloat(totalDebt.toString()),
+        totalRepaysAggregatedAmountNum: parseFloat(totalRepaysAggregatedAmount.toString()),
+        weightedInterestRateNum: parseFloat(weightedInterestRate.toString()),
+        seniorInterestRateNum: parseFloat(seniorInterestRate.toString())
       };
     });
     return tinlakePools;
