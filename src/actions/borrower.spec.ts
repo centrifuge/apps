@@ -21,8 +21,8 @@ const { SUCCESS_STATUS, FAUCET_AMOUNT, contractAddresses } = testConfig;
 describe('borrower tests', async () => {
 
   before(async () =>  {
-    governanceTinlake = await createTinlake(testConfig.godAccount, testConfig);
-    adminTinlake = await createTinlake(adminAccount, testConfig);
+    governanceTinlake = createTinlake(testConfig.godAccount, testConfig);
+    adminTinlake = createTinlake(adminAccount, testConfig);
     // fund borrowerAccount with ETH
     await testProvider.fundAccountWithETH(adminAccount.address, FAUCET_AMOUNT);
     const amount = '5000';
@@ -32,7 +32,7 @@ describe('borrower tests', async () => {
 
   beforeEach(async() => {
     borrowerAccount = account.generate(randomString.generate(32));
-    borrowerTinlake = await createTinlake(borrowerAccount, testConfig);
+    borrowerTinlake = createTinlake(borrowerAccount, testConfig);
     await testProvider.fundAccountWithETH(borrowerAccount.address, FAUCET_AMOUNT);
   });
 
@@ -134,7 +134,7 @@ async function mintIssueBorrow(usr: string, tinlake: Partial<ITinlake>, amount: 
 
 async function fundTranche(amount: string) {
   const lenderAccount = account.generate(randomString.generate(32));
-  const lenderTinlake = await createTinlake(lenderAccount, testConfig);
+  const lenderTinlake = createTinlake(lenderAccount, testConfig);
   // fund lender accoutn with eth
   await testProvider.fundAccountWithETH(lenderAccount.address, FAUCET_AMOUNT);
   // make admin adress ward on tranche operator

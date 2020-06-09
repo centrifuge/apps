@@ -14,7 +14,7 @@ const { SUCCESS_STATUS, FAIL_STATUS, FAUCET_AMOUNT } = testConfig;
 
 describe('governance tests', async () => {
   before(async () => {
-    governanceTinlake = await createTinlake(testConfig.godAccount, testConfig);
+    governanceTinlake = createTinlake(testConfig.godAccount, testConfig);
   });
 
   describe('grant permissions', async () => {
@@ -36,7 +36,7 @@ describe('governance tests', async () => {
 
     it('fail: account has no governance permissions', async () => {
       const randomAccount = account.generate(randomString.generate(32));
-      const randomTinlake = await createTinlake(randomAccount, testConfig);
+      const randomTinlake = createTinlake(randomAccount, testConfig);
       const res = await randomTinlake.relyAddress(userAccount.address, testConfig.contractAddresses['PILE']);
       assert.equal(res.status, FAIL_STATUS);
     });

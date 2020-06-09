@@ -19,8 +19,8 @@ describe('admin tests', async () => {
 
   before(async () => {
     // fund admin account with eth
-    adminTinlake = await createTinlake(adminAccount, testConfig);
-    governanceTinlake = await createTinlake(testConfig.godAccount, testConfig);
+    adminTinlake = createTinlake(adminAccount, testConfig);
+    governanceTinlake = createTinlake(testConfig.godAccount, testConfig);
     await testProvider.fundAccountWithETH(adminAccount.address, FAUCET_AMOUNT);
     await testProvider.fundAccountWithETH(borrowerAccount.address, FAUCET_AMOUNT);
   });

@@ -19,8 +19,8 @@ const { SUCCESS_STATUS, FAUCET_AMOUNT, FAIL_STATUS, contractAddresses } = testCo
 describe('lender functions', async () => {
 
   before(async () => {
-    adminTinlake = await createTinlake(adminAccount, testConfig);
-    governanceTinlake = await createTinlake(testConfig.godAccount, testConfig);
+    adminTinlake = createTinlake(adminAccount, testConfig);
+    governanceTinlake = createTinlake(testConfig.godAccount, testConfig);
     // fund lender & admin accounts with currency
     await testProvider.fundAccountWithETH(adminAccount.address, FAUCET_AMOUNT);
     // rely admin on junior operator

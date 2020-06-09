@@ -7,12 +7,12 @@ import { createTinlake } from './test/utils';
 describe('Tinlake setup tests', async () => {
 
   it('success: retrieve all addresses for a give contract root', async () => {
-    const tinlake: Partial<ITinlake> = await createTinlake(testConfig.godAccount, testConfig);
-    const { allAddresses } = testConfig;
+    const tinlake: Partial<ITinlake> = createTinlake(testConfig.godAccount, testConfig);
+    const { contractAddresses } = testConfig;
 
     // check whether the addresses derived based on the root contract are correct
     Object.keys(tinlake.contractAddresses).forEach((contractName) => {
-      assert(ethers.utils.getAddress(allAddresses[contractName]) === ethers.utils.getAddress(tinlake.contractAddresses[contractName]));
+      assert(ethers.utils.getAddress(contractAddresses[contractName]) === ethers.utils.getAddress(tinlake.contractAddresses[contractName]));
     });
   });
 });
