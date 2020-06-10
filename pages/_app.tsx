@@ -19,6 +19,7 @@ class MyApp extends App {
     return (
       <AxisTheme full={true}>
         <Head>
+          <meta name="viewport" content="width=900, initial-scale=1" />
           <title>Tinlake | Centrifuge | Decentralized Asset Financing</title>
         </Head>
         <StyledApp>
