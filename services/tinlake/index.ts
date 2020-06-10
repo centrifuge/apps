@@ -122,7 +122,6 @@ export async function getTinlake({ addresses, contractConfig }: { addresses?: Co
 
   if (resetContractAddresses && tinlake.contractAddresses && tinlake.contractConfig) {
     tinlake.setContracts();
-    await tinlake.setContractAddresses();
   }
 
   return tinlake;

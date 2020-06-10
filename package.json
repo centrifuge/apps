@@ -50,6 +50,7 @@
     "grommet": "^2.13.0",
     "next": "^9.4.0",
     "next-redux-wrapper": "^6.0.0",
+    "node-fetch": "^2.6.0",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -59,6 +60,7 @@
     "redux-thunk": "^2.3.0",
     "styled-components": "^5.1.0",
     "tinlake": "github:centrifuge/tinlake.js#826d45e20853bb7dcde2a345be280b8678d28872",
+    "tinlake-pool-config": "github:centrifuge/tinlake-pool-config#e8c07e20fcd13f9e96fb7eb429c21c9708ca8791",
     "web3-utils": "^1.2.7",
     "yup": "^0.28.5"
   },
