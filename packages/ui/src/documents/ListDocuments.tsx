@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Anchor, Box, Button, FormField, Heading, Select } from 'grommet';
+import { Anchor, Box, Button, Heading } from 'grommet';
 import documentRoutes from './routes';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { Document } from '@centrifuge/gateway-lib/models/document';
@@ -12,7 +12,6 @@ import { httpClient } from '../http-client';
 import { AppContext } from '../App';
 import { useMergeState } from '../hooks';
 import { PageError } from '../components/PageError';
-import { isValidAddress } from 'ethereumjs-util';
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
 import { Schema } from '@centrifuge/gateway-lib/models/schema';
 import { getSchemaLabel } from '@centrifuge/gateway-lib/utils/schema-utils';
@@ -23,18 +22,8 @@ type State = {
   documents: Document[];
   schemas: Schema[];
   loadingMessage: string | null;
-  display: DisplayTypes
   error: any;
 }
-
-enum DisplayTypes {
-  All = 'All',
-  Sent = 'Sent',
-  Received = 'Received'
-}
-
-const displayOptions: DisplayTypes[] = [DisplayTypes.All, DisplayTypes.Sent, DisplayTypes.Received];
-
 
 export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
 
@@ -49,13 +38,11 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
       loadingMessage,
       documents,
       schemas,
-      display,
       error,
     },
     setState] = useMergeState<State>({
     documents: [],
     schemas: [],
-    display: DisplayTypes.All,
     loadingMessage: 'Loading',
     error: null,
   });
@@ -104,11 +91,6 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
       };
     });
 
-    if (display !== DisplayTypes.All) {
-      return sortableDocuments.filter(doc => {
-        return display === DisplayTypes.Sent ? !isValidAddress(doc.fromId) : isValidAddress(doc.fromId);
-      });
-    }
     return sortableDocuments;
   };
 
@@ -129,19 +111,6 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
       <SecondaryHeader>
         <Box direction={'row'} gap={'medium'} align="center">
           <Heading level="3">Documents</Heading>
-
-          <Box width={'126px'}>
-            <FormField>
-              <Select
-                name={'display'}
-                options={displayOptions}
-                value={display}
-                onChange={(ev: any) => {
-                  setState({ display: ev.value.toString() });
-                }}
-              />
-            </FormField>
-          </Box>
         </Box>
         <Link to={documentRoutes.new}>
           {canCreateDocuments(user!) && <Button

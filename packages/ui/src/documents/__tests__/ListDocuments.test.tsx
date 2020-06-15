@@ -163,17 +163,13 @@ describe('List Documents', () => {
 
       await new Promise(r => setTimeout(r, 0));
       component.update();
-      component.find(Select).simulate('click');
       // The first button is used to open the select so Received will be the 4th
       // Keep in mind that the fromId must be a valid eth address. If it is not it will show up
       // as sent
-      component.find(Select).find('button').at(3).simulate('click');
       const dataTable = component.find(DataTable);
       const rows = dataTable.find('tbody tr');
-      expect(rows.length).toBe(1);
-
+      expect(rows.length).toBe(2);
     });
-
   });
 
 
