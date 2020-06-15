@@ -10,9 +10,7 @@ import { DisplayField } from '@centrifuge/axis-display-field';
 import { Money } from 'grommet-icons';
 import { Registry } from '@centrifuge/gateway-lib/models/schema';
 import MintNftForm, { MintNftFormData } from './MintNftForm';
-import { canTransferNft, User } from '@centrifuge/gateway-lib/models/user';
-import { TransferNftRequest } from '@centrifuge/gateway-lib/models/nfts';
-import TransferNftForm from './TransferNftForm';
+import { User } from '@centrifuge/gateway-lib/models/user';
 import { Contact } from '@centrifuge/gateway-lib/src/models/contact';
 import { CoreapiNFT } from '@centrifuge/gateway-lib/centrifuge-node-client';
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
@@ -39,8 +37,6 @@ export const Nfts: FunctionComponent<Props> = (props) => {
 
   const [{
     mintModalOpened,
-    transferModalOpened,
-    selectedNft,
   }, setState] = useMergeState<State>({
     mintModalOpened: false,
     transferModalOpened: false,
@@ -49,18 +45,15 @@ export const Nfts: FunctionComponent<Props> = (props) => {
 
 
   const {
-    onAsyncStart,
     onAsyncComplete,
     onAsyncError,
     onMintStart,
     document,
-    contacts,
     registries,
     user,
     viewMode,
   } = {
-    onAsyncStart: (message: string) => {
-    },
+
     onAsyncComplete: (data) => {
     },
     onAsyncError: (error, title?: string) => {
@@ -92,28 +85,8 @@ export const Nfts: FunctionComponent<Props> = (props) => {
     }
   };
 
-  const transferNFT = async (data: TransferNftRequest) => {
-
-    onAsyncStart('Transferring NFT');
-
-    try {
-      onAsyncComplete((await httpClient.nfts.tranfer(
-        data,
-      )).data);
-    } catch (e) {
-      onAsyncError(e, 'Failed to transfer NFT');
-    }
-  };
-
   const openMintModal = () => {
     setState({ mintModalOpened: true });
-  };
-
-  const openTransferModal = (selectedNft: CoreapiNFT) => {
-    setState({
-      selectedNft,
-      transferModalOpened: true,
-    });
   };
 
   const closeModal = () => {
@@ -121,6 +94,27 @@ export const Nfts: FunctionComponent<Props> = (props) => {
       mintModalOpened: false,
       transferModalOpened: false,
     });
+  };
+
+  const assembleDeepLink = (tokenId: string, registry: string, tinlakePool: string,) => {
+    const address = `${tinlakePool}/loans/issue?tokenId=${tokenId}&registry=${registry}`
+
+    return <Anchor
+        label={'Open Loan'}
+        href={address}
+    />
+  };
+
+  const renderNftActions = (datum: any, registries: Registry[]) => {
+    let actions;
+    if (registries[0].tinlakePool) {
+      actions = <Box direction="row" gap="small">
+        { assembleDeepLink(hexToInt(datum.token_id), datum.registry, registries[0].tinlakePool) }
+      </Box>
+    } else {
+      actions = [];
+    }
+    return actions
   };
 
   const mintActions = !viewMode ? [
@@ -151,7 +145,6 @@ export const Nfts: FunctionComponent<Props> = (props) => {
               }}
               value={hexToInt(datum.token_id)}/>,
           },
-
           {
             property: 'registry',
             header: 'Registry',
@@ -181,13 +174,7 @@ export const Nfts: FunctionComponent<Props> = (props) => {
             property: '_id',
             header: 'Actions',
             sortable: false,
-            render: datum => {
-              return canTransferNft(user, datum) ? <Box direction="row" gap="small">
-                <Anchor
-                  label={'Transfer'}
-                  onClick={() => openTransferModal(datum)}
-                />
-              </Box> : [];
+            render: datum => {return renderNftActions(datum, registries)
             },
           },
         ]}
@@ -212,21 +199,6 @@ export const Nfts: FunctionComponent<Props> = (props) => {
         onDiscard={closeModal}
         registries={registries}
         user={user}
-      />
-    </Modal>
-
-    <Modal
-      width={'large'}
-      opened={transferModalOpened}
-      headingProps={{ level: 3 }}
-      title={`Transfer NFT`}
-      onClose={closeModal}
-    >
-      <TransferNftForm
-        nft={selectedNft!}
-        onSubmit={(data) => transferNFT(data)}
-        onDiscard={closeModal}
-        contacts={contacts}
       />
     </Modal>
 

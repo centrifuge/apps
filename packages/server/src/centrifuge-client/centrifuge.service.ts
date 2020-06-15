@@ -36,8 +36,8 @@ export class CentrifugeService {
       if (result.status === 'pending') {
         return delay(250).then(() => this.pullForJobComplete(jobId, authorization));
       } else if (result.status === 'failed') {
-        console.log('Job Failed', result)
-        throw new BadRequestException(result.message);
+        console.log('Job Failed', result.message)
+        return result;
       } else {
         console.log('Job Complete', result);
         return result;

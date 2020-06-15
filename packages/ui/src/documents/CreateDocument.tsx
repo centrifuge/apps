@@ -43,6 +43,7 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
   const {
     history: {
       push,
+      go
     },
   } = props;
 
@@ -85,6 +86,7 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
 
     try {
       push(documentRoutes.index);
+      go(0);
       await httpClient.documents.create(document);
     } catch (e) {
       notification.alert({
@@ -98,6 +100,7 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
 
   const onCancel = () => {
     push(documentRoutes.index);
+    go(0);
   };
 
   if (error)

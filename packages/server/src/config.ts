@@ -15,12 +15,12 @@ const config = {
     email: env.CENTRIFUGE_ADMIN_EMAIL || 'test@test.org',
     password: env.CENTRIFUGE_ADMIN_PASSWORD || 'admin',
     // Centrifuge Identity Address
-    account: env.CENTRIFUGE_ADMIN_ACCOUNT || '0xA37Dee95eCDB1c10A476122C76908479cA1A495d',
+    account: env.CENTRIFUGE_ADMIN_ACCOUNT || '0x5e7be56f7b9F1684555F66b33bf019e8312707e2',
     chain: {
       centrifuge_chain_account : {
-        id: env.CENTRIFUGE_CHAIN_ID || '5GVimUaccBq1XbjZ99Zmm8aytG6HaPCjkZGKSHC1vgrsQsLQ',
-        secret: env.CENTRIFUGE_CHAIN_SECRET || '0xc405224448dcd4259816b09cfedbd8df0e6796b16286ea18efa2d6343da5992e',
-        ss_58_address: env.CENTRIFUGE_CHAIN_ADDRESS || '0xe22b94b0b31792a48c173066cc48cf2c0df646bc990add739430cd5cf99a4c36',
+        id: env.CENTRIFUGE_CHAIN_ID || '0xac4316c9699a37bd15493702c5a9a1aa3936a1ae6b6a3b4e92b38eae393ca659',
+        secret: env.CENTRIFUGE_CHAIN_SECRET || '0xafe50b689f0ee19376768e2aa913d283c25b834ab3aecb558c2c73c0585e63e9',
+        ss_58_address: env.CENTRIFUGE_CHAIN_ADDRESS || '5Fxa2HPJrZ95guPC7G5kitVyAFrrtPcUPR2uN62VKthZiqpg',
       },
     },
     permissions: [PERMISSIONS.CAN_MANAGE_USERS, PERMISSIONS.CAN_MANAGE_SCHEMAS, PERMISSIONS.CAN_VIEW_DOCUMENTS, PERMISSIONS.CAN_MANAGE_DOCUMENTS],

@@ -67,30 +67,4 @@ export class NftsController {
       });
     }
   }
-
-  /**
-   * Transfer a NFT to someone else
-   * @async
-   * @param {Param} request - the http request
-   * @param {MintNftRequest} body - minting information
-   * @return {Promise<DocumentRequest>} result
-   */
-  @Post('/transfer')
-  async transfer(
-    @Req() request,
-    @Body() body: TransferNftRequest,
-  ) {
-
-    const transferResult = await this.centrifugeService.nft.transferNft(
-      request.user.account,
-      body.registry,
-      body.token_id,
-      {
-        to: body.to,
-      },
-    );
-
-    await this.centrifugeService.pullForJobComplete(transferResult.header.jobId, request.user.account);
-    return transferResult;
-  }
 }
