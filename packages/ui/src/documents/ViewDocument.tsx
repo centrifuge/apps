@@ -158,7 +158,6 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
           onAsyncStart={startLoading}
           onAsyncComplete={loadData}
           onAsyncError={displayModalError}
-          user={user!}
           document={document!}
           contacts={contacts}
           registries={selectedSchema!.registries}/>

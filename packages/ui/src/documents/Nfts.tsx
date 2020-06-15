@@ -10,7 +10,6 @@ import { DisplayField } from '@centrifuge/axis-display-field';
 import { Money } from 'grommet-icons';
 import { Registry } from '@centrifuge/gateway-lib/models/schema';
 import MintNftForm, { MintNftFormData } from './MintNftForm';
-import { User } from '@centrifuge/gateway-lib/models/user';
 import { Contact } from '@centrifuge/gateway-lib/src/models/contact';
 import { CoreapiNFT } from '@centrifuge/gateway-lib/centrifuge-node-client';
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
@@ -21,7 +20,6 @@ type Props = {
   onAsyncError?: (error, title?: string) => void;
   onMintStart?: () => void;
   document: Document,
-  user: User,
   contacts: Contact[],
   registries: Registry[],
   viewMode: boolean,
@@ -50,7 +48,6 @@ export const Nfts: FunctionComponent<Props> = (props) => {
     onMintStart,
     document,
     registries,
-    user,
     viewMode,
   } = {
 
@@ -74,7 +71,7 @@ export const Nfts: FunctionComponent<Props> = (props) => {
       onAsyncComplete((await httpClient.nfts.mint(
         {
           document_id: id,
-          deposit_address: user!.account,
+          deposit_address: data.deposit_address,
           proof_fields: data.registry!.proofs,
           registry_address: data.registry!.address,
           asset_manager_address: data.registry!.asset_manager_address
@@ -198,7 +195,6 @@ export const Nfts: FunctionComponent<Props> = (props) => {
         onSubmit={(data) => mintNFT(document.header!.document_id!, data)}
         onDiscard={closeModal}
         registries={registries}
-        user={user}
       />
     </Modal>
 

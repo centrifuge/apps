@@ -8,12 +8,6 @@ import { TextInput } from 'grommet';
 
 describe('Mint NFT Form', () => {
 
-  const nft = {
-    token_id: '12345',
-    owner: '0x414C30A8824D4Ed8479e0d58F35A629C671a8db1',
-    registry: '0x73BBD27Add39096FA133E3DF998B9EB2Ef18cC0d',
-  };
-
   const onSubmit = jest.fn(() => {
   });
 
@@ -34,7 +28,6 @@ describe('Mint NFT Form', () => {
           onSubmit={onSubmit}
           onDiscard={onDiscard}
           registries={defaultSchemas[0].registries}
-          user={defaultUser}
         />,
       ),
     );
@@ -45,7 +38,7 @@ describe('Mint NFT Form', () => {
     expect(options).toBe(defaultSchemas[0].registries);
   });
 
-  it('Should display deposit_address field and prepopulate the form with the registry and user address', async () => {
+  it('Should display deposit_address field and prepopulate the form with the registry', async () => {
 
     const component = mount(
       withAxis(
@@ -53,13 +46,12 @@ describe('Mint NFT Form', () => {
           onSubmit={onSubmit}
           onDiscard={onDiscard}
           registries={defaultSchemas[0].registries}
-          user={defaultUser}
         />,
       ),
     );
     const depositAddress = component.find({ name: 'deposit_address' }).find(TextInput);
     expect(depositAddress.length).toBe(1);
-    expect(depositAddress.prop('value')).toEqual(defaultUser.account)
+    expect(depositAddress.prop('value')).toEqual('')
   });
 
   it('Should not submit the form because of validation', async () => {
@@ -70,7 +62,6 @@ describe('Mint NFT Form', () => {
           onSubmit={onSubmit}
           onDiscard={onDiscard}
           registries={defaultSchemas[0].registries}
-          user={defaultUser}
         />,
       ),
     );
@@ -80,7 +71,7 @@ describe('Mint NFT Form', () => {
     expect(onSubmit).toHaveBeenCalledTimes(0);
   });
 
-  it('Should  submit the form', async () => {
+  it('Should submit the form', async () => {
 
     const component = mount(
       withAxis(
@@ -88,7 +79,6 @@ describe('Mint NFT Form', () => {
           onSubmit={onSubmit}
           onDiscard={onDiscard}
           registries={defaultSchemas[0].registries}
-          user={defaultUser}
         />,
       ),
     );
@@ -102,7 +92,7 @@ describe('Mint NFT Form', () => {
     await new Promise(r => setTimeout(r, 0));
     expect(onSubmit).toHaveBeenCalledWith({
       registry: defaultSchemas[0].registries[0],
-      deposit_address: defaultUser.account,
+      deposit_address:'',
     });
   });
 
@@ -115,7 +105,6 @@ describe('Mint NFT Form', () => {
           onSubmit={onSubmit}
           onDiscard={onDiscard}
           registries={defaultSchemas[0].registries}
-          user={defaultUser}
         />,
       ),
     );

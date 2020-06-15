@@ -201,7 +201,6 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
           onMintStart={returnToList}
           viewMode={!canMint}
           document={document!}
-          user={user!}
           contacts={contacts}
           registries={selectedSchema!.registries}/>
 

@@ -5,7 +5,6 @@ import * as Yup from 'yup';
 import { Registry } from '@centrifuge/gateway-lib/models/schema';
 import { SearchSelect } from '@centrifuge/axis-search-select';
 import { isValidAddress } from 'ethereumjs-util';
-import {User} from "@centrifuge/gateway-lib/models/user";
 import { DisplayField } from '@centrifuge/axis-display-field';
 import {getAddressLink} from "@centrifuge/gateway-lib/utils/etherscan";
 
@@ -13,7 +12,6 @@ type Props = {
   onSubmit: (data: MintNftFormData) => void;
   onDiscard: () => void;
   registries: Registry[];
-  user: User;
 };
 
 
@@ -38,7 +36,7 @@ export default class MintNftForm extends React.Component<Props> {
   render() {
 
     const { submitted } = this.state;
-    const { registries, user } = this.props;
+    const { registries } = this.props;
 
     const formValidation = Yup.object().shape({
       registry: Yup.object().shape({
@@ -64,7 +62,7 @@ export default class MintNftForm extends React.Component<Props> {
 
     const initialValues: MintNftFormData = {
       registry: { label: registries[0].label, address: registries[0].address, asset_manager_address: registries[0].asset_manager_address, proofs: registries[0].proofs },
-      deposit_address: user.account,
+      deposit_address: '',
     };
 
     return (
