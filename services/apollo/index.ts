@@ -61,7 +61,7 @@ class Apollo {
         id: poolId,
         name: configPool.name,
         asset: configPool?.asset,
-        ongoingLoans: pool && pool.ongoingLoans.length || 0, // TODO add count field to subgraph, inefficient to query all loans
+        ongoingLoans: pool && pool.ongoingLoans.length || 0, // TODO add count field to subgraph, inefficient to query all assets
         totalDebtNum: parseFloat(totalDebt.toString()),
         totalRepaysAggregatedAmountNum: parseFloat(totalRepaysAggregatedAmount.toString()),
         weightedInterestRateNum: parseFloat(weightedInterestRate.toString()),
@@ -92,7 +92,7 @@ class Apollo {
         `
         });
     } catch (err) {
-      throw new Error(`error occured while fetching loans from apollo ${err}`);
+      throw new Error(`error occured while fetching assets from apollo ${err}`);
     }
 
     const pools = (!result.data || !result.data.pools) ? [] : this.injectPoolData(result.data.pools);

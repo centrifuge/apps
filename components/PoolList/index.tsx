@@ -42,7 +42,7 @@ class PoolList extends React.Component<Props> {
             </Box>
         },
         {
-          header: 'Ongoing Loans', property: 'ongoingLoans', align: 'center',
+          header: 'Active Financings', property: 'ongoingLoans', align: 'center',
           render: (p: PoolData) =>
             <Box style={{ maxWidth: '150px' }}>
               <DisplayField
@@ -52,24 +52,24 @@ class PoolList extends React.Component<Props> {
             </Box>
         },
         {
-          header: 'Outstanding Debt (DAI)', property: 'totalDebtNum', align: 'center',
+          header: 'Outstanding (DAI)', property: 'totalDebtNum', align: 'center',
           render: (p: PoolData) =>
             <Box style={{ maxWidth: '150px' }}>
               <NumberDisplay suffix="" precision={2} value={baseToDisplay(p.totalDebt, 18)} />
             </Box>
         },
         {
-          header: 'Total Repaid Debt (DAI)', property: 'totalRepaysAggregatedAmountNum', align: 'center',
+          header: 'Total Repaid (DAI)', property: 'totalRepaysAggregatedAmountNum', align: 'center',
           render: (p: PoolData) =>
             <NumberDisplay suffix="" precision={2} value={baseToDisplay(p.totalRepaysAggregatedAmount, 18)} />
         },
         {
-          header: 'Avg Loan APR', property: 'weightedInterestRateNum', align: 'center',
+          header: 'Avg Fee', property: 'weightedInterestRateNum', align: 'center',
           render: (p: PoolData) =>
             <NumberDisplay suffix="%" value={feeToInterestRate(p.weightedInterestRate)} />
         },
         {
-          header: 'DROP APR', property: 'seniorInterestRateNum', align: 'center',
+          header: 'DROP Rate', property: 'seniorInterestRateNum', align: 'center',
           render: (p: PoolData) =>
             <NumberDisplay suffix="%" value={feeToInterestRate(p.seniorInterestRate)} />
         }

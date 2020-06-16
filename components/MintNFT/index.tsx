@@ -71,7 +71,7 @@ class MintNFT extends React.Component<Props, State> {
     return <Box>
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">
-          <BackLink href="/borrower" />
+          <BackLink href="/assets" />
           <Heading level="3">Mint NFT</Heading>
         </Box>
       </SecondaryHeader>
@@ -83,11 +83,11 @@ class MintNFT extends React.Component<Props, State> {
           {is === 'success' && <Alert pad={{ horizontal : 'medium' }} type="success">
             Successfully minted NFT for Token ID {tokenId}
             <p>
-              <PoolLink href={{ pathname: '/loans/issue', query: { tokenId, registry } }}>
-                <Anchor>Please proceed to loan opening</Anchor>
+              <PoolLink href={{ pathname: '/assets/issue', query: { tokenId, registry } }}>
+                <Anchor>Please proceed to asset financing</Anchor>
               </PoolLink> your NFT.</p>
             <p> Your NFT ID will automatically be pasted in the respective field.</p>
-            <p>If you want to open a loan, <b>please make sure to copy your Token ID!</b></p>
+            <p>If you want to finance an asset, <b>please make sure to copy your Token ID!</b></p>
          </Alert>}
           {is === 'error' && <Alert pad={{ horizontal : 'medium' }} type="error">
             <Text weight="bold">
@@ -100,9 +100,9 @@ class MintNFT extends React.Component<Props, State> {
              An NFT is an on-chain, digital representation of an underlying real-world asset, such as an invoice, a mortgage or music royalties.
             <p>In this demo, you can mint a test NFT reflecting an sample invoice worth USD 1.000 into your wallet. Please fill in a "NFT Reference" as a unique identifier for your invoice NFT below. Then proceed with Mint NFT.
               The NFT will be minted into your wallet and on the next screen you will be provided with the Token ID of this NFT.</p>
-           <b>Please store or copy this Token ID, as it will be used again to open a loan on Tinlake.</b>
-            <p>If you already have a token ID, <PoolLink href={'/loans/issue'}>
-              <Anchor>please proceed to loan opening</Anchor></PoolLink>.</p>
+           <b>Please store or copy this Token ID, as it will be used again to finance an asset on Tinlake.</b>
+            <p>If you already have a token ID, <PoolLink href={'/assets/issue'}>
+              <Anchor>please proceed to finance an asset</Anchor></PoolLink>.</p>
           </Alert>}
 
           <Box direction="row" gap="large" margin={{ vertical:'large' }}>

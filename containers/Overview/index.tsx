@@ -52,7 +52,7 @@ class Overview extends React.Component<Props> {
     const seniorTokenSupply = poolData && poolData.senior && poolData.senior.totalSupply || '0';
     const juniorTokenSupply = poolData && poolData.junior.totalSupply || '0';
 
-    // show just recent 10 loans
+    // show just recent 10 assets
     const startIndex = (allLoans.length >= 10) ? (allLoans.length - 10) : 0;
     const latestLoans = allLoans.slice(startIndex, allLoans.length);
 
@@ -64,25 +64,25 @@ class Overview extends React.Component<Props> {
       <Box direction="row" margin={{ bottom: 'large' }}>
         <Box basis={'1/2'}>
           <Box>
-            <Heading level="4" margin={{ top: 'small', bottom: 'small' }}>Loans</Heading>
+            <Heading level="4" margin={{ top: 'small', bottom: 'small' }}>Assets</Heading>
             <Table>
               <TableBody>
                 <TableRow>
                   <TableCell scope="row">
-                    Ongoing Loans
-                    </TableCell>
+                    Active Financings
+                  </TableCell>
                   <TableCell style={{ textAlign: 'end' }}> {outstandingLoans} </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
-                    Outstanding Debt
+                    Outstanding Financing Volume
                   </TableCell>
                   <TableCell style={{ textAlign: 'end' }}>DAI {addThousandsSeparators(toPrecision(baseToDisplay(
                     outstandingDebt, 18),                                                         2))}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
-                    DAI available to borrow
+                    Pool Reserve
                   </TableCell>
                   <TableCell style={{ textAlign: 'end' }}>DAI {addThousandsSeparators(toPrecision(baseToDisplay(availableFunds, 18),                                                         2))}</TableCell>
                 </TableRow>
@@ -108,7 +108,7 @@ class Overview extends React.Component<Props> {
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
-                    DROP APR
+                    DROP Rate
                   </TableCell>
                   <TableCell style={{ textAlign: 'end' }}>{toPrecision(feeToInterestRate(dropRate), 2)} %</TableCell>
                 </TableRow>
@@ -138,15 +138,15 @@ class Overview extends React.Component<Props> {
         </Box>
       </Box>
 
-      <Heading level="4" margin={{ top: 'xsmall' }}>Latest loans</Heading>
+      <Heading level="4" margin={{ top: 'xsmall' }}>Latest assets</Heading>
       {(loans!.loansState === 'loading') ?
         <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} /> :
         <LoanListData loans={latestLoans} userAddress={userAddress}> </LoanListData>
       }
       <Box margin={{ top:'medium', bottom:'large' }} align="center">
-        <PoolLink href={{ pathname: '/loans' }}>
+        <PoolLink href={{ pathname: '/assets' }}>
           <Anchor>
-            <Button  label="View all loans" />
+            <Button  label="View all assets" />
           </Anchor>
         </PoolLink>
       </Box>
