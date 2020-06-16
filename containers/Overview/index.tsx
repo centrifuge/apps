@@ -75,7 +75,7 @@ class Overview extends React.Component<Props> {
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
-                    Outstanding Financing Volume
+                    Outstanding Volume
                   </TableCell>
                   <TableCell style={{ textAlign: 'end' }}>DAI {addThousandsSeparators(toPrecision(baseToDisplay(
                     outstandingDebt, 18),                                                         2))}</TableCell>

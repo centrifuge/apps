@@ -50,7 +50,7 @@ class LoanList extends React.Component<Props> {
               <NumberDisplay suffix="" precision={2} value={baseToDisplay(l.principal, 18)} />
           },
           {
-            header: <HeaderCell text={'Finance Fee'}></HeaderCell>, property: 'interestRateNum', align: 'end',
+            header: <HeaderCell text={'Financing Fee'}></HeaderCell>, property: 'interestRateNum', align: 'end',
             render: (l: SortableLoan) => l.status === 'Repaid' ? '-' :
               <NumberDisplay suffix="%" precision={2} value={feeToInterestRate(l.interestRate)} />
           },
