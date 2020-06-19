@@ -30289,6 +30289,17 @@ function ProxyActions(Base) {
                     }
                 });
             }); };
+            _this.getProxyOwnerByAddress = function (proxyAddress) { return __awaiter(_this, void 0, void 0, function () {
+                var accessToken;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, this.getProxyAccessToken(proxyAddress)];
+                        case 1:
+                            accessToken = _a.sent();
+                            return [2 /*return*/, this.getProxyAccessTokenOwner(accessToken)];
+                    }
+                });
+            }); };
             _this.proxyCount = function () { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
@@ -30333,6 +30344,29 @@ function ProxyActions(Base) {
                         case 1:
                             accessToken = _a.sent();
                             return [2 /*return*/, this.getProxy(accessToken)];
+                    }
+                });
+            }); };
+            _this.proxyIssue = function (proxyAddr, nftRegistryAddr, tokenId) { return __awaiter(_this, void 0, void 0, function () {
+                var proxy, encoded, txHash;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            proxy = this.eth.contract(this.contractAbis['PROXY']).at(proxyAddr);
+                            encoded = abiCoder$2.encodeFunctionCall({
+                                name: 'issue',
+                                type: 'function',
+                                inputs: [
+                                    { type: 'address', name: 'shelf' },
+                                    { type: 'address', name: 'registry' },
+                                    { type: 'uint256', name: 'token' }
+                                ]
+                            }, [this.contracts['SHELF'].address, nftRegistryAddr, tokenId]);
+                            return [4 /*yield*/, executeAndRetry(proxy.execute, [this.contracts['ACTIONS'].address, encoded, this.ethConfig])];
+                        case 1:
+                            txHash = _a.sent();
+                            console.log("[Proxy Issue Loan] txHash: " + txHash);
+                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contractAbis['PROXY'], this.transactionTimeout)];
                     }
                 });
             }); };

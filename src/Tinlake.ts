@@ -28,7 +28,7 @@ const contractNames = [
   'BORROWER_DEPLOYER',
   'LENDER_DEPLOYER',
   'NFT_FEED',
-  'GOVERNANCE'
+  'GOVERNANCE',
 ];
 
 type AbiOutput = {

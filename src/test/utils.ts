@@ -7,7 +7,6 @@ const Eth = require('ethjs');
 const SignerProvider = require('ethjs-provider-signer');
 const { sign } = require('ethjs-signer');
 
-
 export class TestProvider {
   public eth : ethI;
   public sponsorAccount: Account;

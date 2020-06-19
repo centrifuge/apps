@@ -7,6 +7,7 @@ export declare const TinlakeWithActions: {
         getProxy: (accessTokenId: string) => Promise<any>;
         getProxyAccessToken: (proxyAddr: string) => Promise<any>;
         getProxyOwnerByLoan: (loanId: string) => Promise<import("bn.js")>;
+        getProxyOwnerByAddress: (proxyAddress: string) => Promise<import("bn.js")>;
         proxyCount: () => Promise<import("bn.js")>;
         checkProxyExists: (address: string) => Promise<string | null>;
         proxyCreateNew: (address: string) => Promise<any>;
@@ -23,8 +24,8 @@ export declare const TinlakeWithActions: {
         contractAbis: import("./Tinlake").ContractAbis;
         contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
+        setContracts: () => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
-        setContractAddresses: () => Promise<void>;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
@@ -48,13 +49,14 @@ export declare const TinlakeWithActions: {
         contractAbis: import("./Tinlake").ContractAbis;
         contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
+        setContracts: () => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
-        setContractAddresses: () => Promise<void>;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
 } & {
     new (...args: any[]): {
+        canQueryPermissions: () => boolean;
         isWard: (user: string, contractName: string) => Promise<import("bn.js")>;
         canSetInterestRate: (user: string) => Promise<boolean>;
         canSetSeniorTrancheInterest: (user: string) => Promise<boolean>;
@@ -80,8 +82,8 @@ export declare const TinlakeWithActions: {
         contractAbis: import("./Tinlake").ContractAbis;
         contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
+        setContracts: () => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
-        setContractAddresses: () => Promise<void>;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
@@ -104,8 +106,8 @@ export declare const TinlakeWithActions: {
         contractAbis: import("./Tinlake").ContractAbis;
         contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
+        setContracts: () => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
-        setContractAddresses: () => Promise<void>;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
@@ -125,14 +127,16 @@ export declare const TinlakeWithActions: {
         getLoanList: () => Promise<import("./types/tinlake").Loan[]>;
         getInvestor: (user: string) => Promise<import("./types/tinlake").Investor>;
         getJuniorTokenBalance: (user: string) => Promise<import("bn.js")>;
+        getJuniorTotalSupply: (user: string) => Promise<import("bn.js")>;
         getMaxSupplyAmountJunior: (user: string) => Promise<import("bn.js")>;
         getMaxRedeemAmountJunior: (user: string) => Promise<any>;
         getTokenPriceJunior: () => Promise<any>;
         existsSenior: () => boolean;
         getSeniorTokenBalance: (user: string) => Promise<import("bn.js")>;
+        getSeniorTotalSupply: (user: string) => Promise<import("bn.js")>;
         getMaxSupplyAmountSenior: (user: string) => Promise<import("bn.js")>;
         getMaxRedeemAmountSenior: (user: string) => Promise<import("bn.js")>;
-        getTokenPriceSenior: (user: string) => Promise<import("bn.js")>;
+        getTokenPriceSenior: (user?: string | undefined) => Promise<import("bn.js")>;
         getSeniorReserve: () => Promise<import("bn.js")>;
         getJuniorReserve: () => Promise<import("bn.js")>;
         getMinJuniorRatio: () => Promise<import("bn.js")>;
@@ -150,8 +154,8 @@ export declare const TinlakeWithActions: {
         contractAbis: import("./Tinlake").ContractAbis;
         contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
+        setContracts: () => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
-        setContractAddresses: () => Promise<void>;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
@@ -172,8 +176,8 @@ export declare const TinlakeWithActions: {
         contractAbis: import("./Tinlake").ContractAbis;
         contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
+        setContracts: () => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
-        setContractAddresses: () => Promise<void>;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
@@ -196,8 +200,8 @@ export declare const TinlakeWithActions: {
         contractAbis: import("./Tinlake").ContractAbis;
         contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
+        setContracts: () => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
-        setContractAddresses: () => Promise<void>;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
@@ -214,8 +218,8 @@ export declare const TinlakeWithActions: {
         contractAbis: import("./Tinlake").ContractAbis;
         contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
+        setContracts: () => void;
         setEthConfig: (ethConfig: {} | import("./Tinlake").EthConfig) => void;
-        setContractAddresses: () => Promise<void>;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };

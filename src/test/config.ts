@@ -31,7 +31,6 @@ export type ProviderConfig = {
   SUCCESS_STATUS: '0x1';
   FAIL_STATUS: '0x0';
   FAUCET_AMOUNT: string;
-}
-
+};
 
 export default testConfig;

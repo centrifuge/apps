@@ -38,6 +38,11 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return this.getProxyAccessTokenOwner(accessToken);
     }
 
+    getProxyOwnerByAddress = async (proxyAddress: string) => {
+      const accessToken = await this.getProxyAccessToken(proxyAddress);
+      return this.getProxyAccessTokenOwner(accessToken);
+    }
+
     proxyCount = async (): Promise<BN> => {
       const res: { 0: BN }  = await executeAndRetry(this.contracts['PROXY_REGISTRY'].count, []);
       return res[0];
@@ -58,6 +63,23 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     proxyCreateNew = async (address: string) => {
       const accessToken = await this.buildProxy(address);
       return this.getProxy(accessToken);
+    }
+
+    proxyIssue = async (proxyAddr: string, nftRegistryAddr: string, tokenId: string) => {
+      const proxy: any = this.eth.contract(this.contractAbis['PROXY']).at(proxyAddr);
+
+      const encoded = abiCoder.encodeFunctionCall({
+        name: 'issue',
+        type :'function',
+        inputs: [
+          { type: 'address', name: 'shelf' },
+          { type: 'address', name: 'registry' },
+          { type: 'uint256', name: 'token' }]},   [this.contracts['SHELF'].address, nftRegistryAddr, tokenId],
+      );
+
+      const txHash = await executeAndRetry(proxy.execute, [this.contracts['ACTIONS'].address, encoded, this.ethConfig]);
+      console.log(`[Proxy Issue Loan] txHash: ${txHash}`);
+      return waitAndReturnEvents(this.eth, txHash, this.contractAbis['PROXY'], this.transactionTimeout);
     }
 
     proxyTransferIssue = async (proxyAddr: string, nftRegistryAddr: string, tokenId: string)  => {
@@ -123,7 +145,9 @@ export type IProxyActions = {
   getProxyAccessToken(proxyAddr: string): Promise<any>,
   getProxyAccessTokenOwner(tokenId: string): Promise<any>,
   getProxyOwnerByLoan(loanId: string): Promise<any>,
+  getProxyOwnerByAddress(proxyAddr: string): Promise<any>,
   proxyCreateNew(address: string): Promise<any>,
+  proxyIssue(proxyAddr:string, nftRegistryAddr: string, tokenId: string): Promise<any>,
   proxyTransferIssue(proxyAddr:string, nftRegistryAddr: string, tokenId: string): Promise<any>,
   proxyLockBorrowWithdraw(proxyAddr:string, loanId: string, amount: string, usr: string): Promise<any>,
   proxyRepayUnlockClose(proxyAddr: string, tokenId: string, loanId: string, registry: string): Promise<any>,

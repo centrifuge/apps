@@ -7,9 +7,11 @@ export declare function ProxyActions<ActionsBase extends Constructor<TinlakePara
         getProxy: (accessTokenId: string) => Promise<any>;
         getProxyAccessToken: (proxyAddr: string) => Promise<any>;
         getProxyOwnerByLoan: (loanId: string) => Promise<BN>;
+        getProxyOwnerByAddress: (proxyAddress: string) => Promise<BN>;
         proxyCount: () => Promise<BN>;
         checkProxyExists: (address: string) => Promise<string | null>;
         proxyCreateNew: (address: string) => Promise<any>;
+        proxyIssue: (proxyAddr: string, nftRegistryAddr: string, tokenId: string) => Promise<unknown>;
         proxyTransferIssue: (proxyAddr: string, nftRegistryAddr: string, tokenId: string) => Promise<unknown>;
         proxyLockBorrowWithdraw: (proxyAddr: string, loanId: string, amount: string, usr: string) => Promise<unknown>;
         proxyRepayUnlockClose: (proxyAddr: string, tokenId: string, loanId: string, registry: string) => Promise<unknown>;
@@ -23,8 +25,8 @@ export declare function ProxyActions<ActionsBase extends Constructor<TinlakePara
         contractAbis: import("../Tinlake").ContractAbis;
         contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
+        setContracts: () => void;
         setEthConfig: (ethConfig: {} | import("../Tinlake").EthConfig) => void;
-        setContractAddresses: () => Promise<void>;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
@@ -37,7 +39,9 @@ export declare type IProxyActions = {
     getProxyAccessToken(proxyAddr: string): Promise<any>;
     getProxyAccessTokenOwner(tokenId: string): Promise<any>;
     getProxyOwnerByLoan(loanId: string): Promise<any>;
+    getProxyOwnerByAddress(loanId: string): Promise<any>;
     proxyCreateNew(address: string): Promise<any>;
+    proxyIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<any>;
     proxyTransferIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<any>;
     proxyLockBorrowWithdraw(proxyAddr: string, loanId: string, amount: string, usr: string): Promise<any>;
     proxyRepayUnlockClose(proxyAddr: string, tokenId: string, loanId: string, registry: string): Promise<any>;
