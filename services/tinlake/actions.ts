@@ -48,9 +48,9 @@ export async function getNFT(registry: string, tinlake: any, tokenId: string) {
   };
 }
 
-export async function issue(tinlake: any, tokenId: string, nftRegistryAddress: string) {
+async function getOrCreateProxy(tinlake: any, address: string) {
   let proxyAddress;
-  const address = tinlake.ethConfig.from;
+  // check if user already has a proxy address
   try {
     proxyAddress = await tinlake.checkProxyExists(address);
     console.log('proxy found', proxyAddress);
@@ -58,41 +58,94 @@ export async function issue(tinlake: any, tokenId: string, nftRegistryAddress: s
     proxyAddress = null;
   }
 
+  // create new proxy address in case user did not have one
   if (!proxyAddress) {
     try {
       proxyAddress = await tinlake.proxyCreateNew(address);
       console.log('proxy not found, new proxy address', proxyAddress);
     } catch (e) {
-      return loggedError(e, 'Could not create Proxy.', address);
+      throw(e);
     }
   }
-  if (!proxyAddress) {
-    return loggedError(null, 'Could not create Proxy.', address);
-  }
+  return proxyAddress;
+}
 
-  // approve proxy to take nft
+export async function issue(tinlake: any, tokenId: string, nftRegistryAddress: string) {
+  let tokenOwner;
+  const user = tinlake.ethConfig.from;
+
   try {
-    await tinlake.approveNFT(nftRegistryAddress, tokenId, proxyAddress);
+    tokenOwner = await tinlake.getNFTOwner(nftRegistryAddress, tokenId);
   } catch (e) {
-    return loggedError(e, 'Could not approve proxy to take NFT.', tokenId);
+    return loggedError(e, 'Could not retrieve nft owner.', tokenId);
   }
 
-  // transfer issue
-  let result;
+  // case: borrower is owner of nft
+  if (user.toLowerCase() === tokenOwner.toLowerCase()) {
+
+    // get or create new proxy
+    let proxyAddress;
+    try {
+      proxyAddress = await getOrCreateProxy(tinlake, user);
+    } catch (e) {
+      return loggedError(e, 'Could not retrieve proxyAddress.', user);
+    }
+
+    // approve proxy to take nft
+    try {
+      await tinlake.approveNFT(nftRegistryAddress, tokenId, proxyAddress);
+    } catch (e) {
+      return loggedError(e, 'Could not approve proxy to take NFT.', tokenId);
+    }
+
+    // transfer issue
+    let result;
+    try {
+      result = await tinlake.proxyTransferIssue(proxyAddress, nftRegistryAddress, tokenId);
+    } catch (e) {
+      return loggedError(e, 'Could not Issue loan.', tokenId);
+    }
+
+    if (result.status !== SUCCESS_STATUS) {
+      return loggedError({}, 'Could not Issue loan.', tokenId);
+    }
+
+    const loanId = await tinlake.nftLookup(nftRegistryAddress, tokenId);
+    return {
+      data: loanId
+    };
+  }
+
+  let proxyOwner;
   try {
-    result = await tinlake.proxyTransferIssue(proxyAddress, nftRegistryAddress, tokenId);
+    proxyOwner = await tinlake.getProxyOwnerByAddress(tokenOwner);
   } catch (e) {
-    return loggedError(e, 'Could not Issue loan.', tokenId);
+    proxyOwner = ZERO_ADDRESS;
   }
 
-  if (result.status !== SUCCESS_STATUS) {
-    return loggedError({}, 'Could not Issue loan.', tokenId);
+  // case: borrower's proxy is owner of nft
+  if (user.toLowerCase() === proxyOwner.toLowerCase()) {
+    let result;
+    try {
+      result = await tinlake.proxyIssue(tokenOwner, nftRegistryAddress, tokenId);
+    } catch (e) {
+      return loggedError(e, 'Could not Issue loan.', tokenId);
+    }
+
+    if (result.status !== SUCCESS_STATUS) {
+      return loggedError({}, 'Could not Issue loan.', tokenId);
+    }
+
+    const loanId = await tinlake.nftLookup(nftRegistryAddress, tokenId);
+    return {
+      data: loanId
+    };
   }
 
-  const loanId = await tinlake.nftLookup(nftRegistryAddress, tokenId);
-  return {
-    data: loanId
-  };
+  // case: nft can not be used to open a loan -> borrower/borrower's proxy not nft owner
+
+  return loggedError({}, 'Borrower is not nft owner.', tokenId);
+
 }
 
 export async function getProxyOwner(tinlake: any, loanId: string) : Promise<TinlakeResult> {
