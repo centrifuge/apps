@@ -12,7 +12,7 @@ class LoanData extends React.Component<Props> {
     const { loanId, debt, principal, interestRate, status } =  this.props.loan;
     return <Box>
       <Box direction="row" gap="medium" >
-       <FormField label="Loan ID">
+       <FormField label="Asset ID">
           <TextInput value={loanId} disabled />
         </FormField>
         <FormField label="Status">
@@ -22,17 +22,17 @@ class LoanData extends React.Component<Props> {
 
       <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
         <Box basis={'1/3'} gap="medium">
-          <FormField label="Available to borrow">
+          <FormField label="Available for Financing">
             <NumberInput value={baseToDisplay(principal, 18)} suffix=" DAI" disabled precision={18} />
           </FormField>
         </Box>
         <Box basis={'1/3'} gap="medium">
-          <FormField label="Outstanding Debt">
+          <FormField label="Outstanding">
             <NumberInput value={baseToDisplay(debt, 18)} suffix=" DAI" precision={18} disabled />
           </FormField>
         </Box>
         <Box basis={'1/3'} gap="medium">
-          <FormField label="Loan APR">
+          <FormField label="Financing Fee">
             <NumberInput value={feeToInterestRate(interestRate)} suffix="%" disabled />
           </FormField>
         </Box>

@@ -1,14 +1,14 @@
 import * as React from 'react';
-import LoanList from '../../../containers/Loan/List';
 import WithTinlake from '../../../components/WithTinlake';
-import { Box, Heading, Button } from 'grommet';
+import IssueLoan from '../../../containers/Loan/Issue';
+import { Box, Heading } from 'grommet';
 import Header from '../../../components/Header';
-import { menuItems } from '../../../menuItems';
 import SecondaryHeader from '../../../components/SecondaryHeader';
+import { menuItems } from '../../../menuItems';
+import { BackLink } from '../../../components/BackLink';
 import Auth from '../../../components/Auth';
-import { PoolLink } from '../../../components/PoolLink';
+import withRouter, { WithRouterProps } from 'next/dist/client/with-router';
 import ContainerWithFooter from '../../../components/ContainerWithFooter';
-import { WithRouterProps } from 'next/dist/client/with-router';
 import config, { Pool } from '../../../config';
 import { GetStaticProps } from 'next';
 
@@ -17,33 +17,35 @@ interface Props extends WithRouterProps {
   pool: Pool;
 }
 
-class LoanListPage extends React.Component<Props> {
+class LoanIssuePage extends React.Component<Props> {
+
   render() {
     const { pool } = this.props;
+    const { tokenId, registry }: { tokenId: string, registry: string } = this.props.router.query as any;
 
     return <ContainerWithFooter>
       <Header
         poolTitle={pool.shortName || pool.name}
-        selectedRoute={'/loans'}
+        selectedRoute={'/assets/issue'}
         menuItems={menuItems}
       />
       <Box
-        justify="evenly"
+        justify="center"
         direction="row"
       >
-        <Box width="xlarge" gap="medium" >
+        <Box width="xlarge" >
           <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
-              <Auth tinlake={tinlake} render={auth =>
-                <Box>
-                  <SecondaryHeader>
-                    <Heading level="3">Loans</Heading>
-                    <PoolLink href={'/loans/issue'}>
-                      <Button primary label="Open Loan" />
-                    </PoolLink>
-                  </SecondaryHeader>
-                  <LoanList tinlake={tinlake} auth={auth} />
-                </Box>
-              } />
+            <Auth tinlake={tinlake} render={auth =>
+              <Box>
+                <SecondaryHeader>
+                  <Box direction="row" gap="small" align="center">
+                    <BackLink href={'/assets'} />
+                    <Heading level="3">Finance Asset</Heading>
+                  </Box>
+                </SecondaryHeader>
+                <IssueLoan tinlake={tinlake} auth={auth} tokenId={tokenId} registry={registry}/>
+              </Box>
+            } />
           } />
         </Box>
       </Box>
@@ -63,4 +65,4 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   return { props: { root: params?.root, pool: config.pools.find(p => p.addresses.ROOT_CONTRACT === params?.root) } };
 };
 
-export default LoanListPage;
+export default withRouter(LoanIssuePage);

@@ -22,7 +22,7 @@ interface Props {
   loadProxies?: () => Promise<void>;
 }
 
-// on state change tokenId --> load nft data for loan collateral
+// on state change tokenId --> load nft data for asset collateral
 class LoanView extends React.Component<Props> {
 
   componentDidMount() {
@@ -42,7 +42,7 @@ class LoanView extends React.Component<Props> {
     if (loanState === null || loanState === 'loading') { return null; }
     if (loanState === 'not found') {
       return <Alert margin="medium" type="error">
-        Could not find loan {loanId}</Alert>;
+        Could not find asset {loanId}</Alert>;
     }
 
     const hasBorrowerPermissions = loan && auth?.proxies?.includes(loan.ownerOf.toString());
@@ -71,7 +71,7 @@ class LoanView extends React.Component<Props> {
           {hasBorrowerPermissions &&
             <Box margin={{ top: 'large', bottom: 'large' }} >
               <Box gap="medium" align="start" margin={{ bottom: 'medium' }} >
-                <Heading level="5" margin="none">Borrow / Repay </Heading>
+                <Heading level="5" margin="none">Finance / Repay </Heading>
               </Box>
               <Box direction="row">
                 <LoanBorrow loan={loan!} tinlake={tinlake} />

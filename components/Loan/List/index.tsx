@@ -19,7 +19,7 @@ class LoanList extends React.Component<Props> {
   clickRow = ({ datum }: { datum?: SortableLoan, index?: number}) => {
     const { root } = this.props.router.query;
 
-    this.props.router.push(`/[root]/loans/loan?loanId=${datum!.loanId}`, `/${root}/loans/loan?loanId=${datum!.loanId}`,
+    this.props.router.push(`/[root]/assets/asset?assetId=${datum!.loanId}`, `/${root}/assets/asset?assetId=${datum!.loanId}`,
                            { shallow: true });
   }
 
@@ -28,7 +28,7 @@ class LoanList extends React.Component<Props> {
     return <Box>
       <DataTable style={{ tableLayout: 'auto' }} data={loans} sort={{ direction: 'desc', property: 'loanId' }} sortable
         onClickRow={this.clickRow as any} columns={[
-          { header: <HeaderCell text={'Loan ID'}></HeaderCell>, property: 'loanId', align: 'end' },
+          { header: <HeaderCell text={'Asset ID'}></HeaderCell>, property: 'loanId', align: 'end' },
           {
             header: 'NFT ID', primary: true, property: 'tokenId', align: 'end',
             render: (l: SortableLoan) =>
@@ -40,22 +40,22 @@ class LoanList extends React.Component<Props> {
               </Box>
           },
           {
-            header: 'Outstanding Debt (DAI)', property: 'debtNum', align: 'end',
+            header: 'Outstanding (DAI)', property: 'debtNum', align: 'end',
             render: (l: SortableLoan) =>
               <NumberDisplay suffix="" precision={2} value={baseToDisplay(l.debt, 18)} />
           },
           {
-            header: 'Available to borrow (DAI)', property: 'principalNum', align: 'end',
+            header: 'Available for Financing (DAI)', property: 'principalNum', align: 'end',
             render: (l: SortableLoan) =>
               <NumberDisplay suffix="" precision={2} value={baseToDisplay(l.principal, 18)} />
           },
           {
-            header: <HeaderCell text={'Loan APR'}></HeaderCell>, property: 'interestRateNum', align: 'end',
+            header: <HeaderCell text={'Financing Fee'}></HeaderCell>, property: 'interestRateNum', align: 'end',
             render: (l: SortableLoan) => l.status === 'Repaid' ? '-' :
               <NumberDisplay suffix="%" precision={2} value={feeToInterestRate(l.interestRate)} />
           },
           {
-            header: 'Loan Status', property: 'status', align: 'end',
+            header: 'Status', property: 'status', align: 'end',
             render: (l: SortableLoan) => l.status
           },
           {

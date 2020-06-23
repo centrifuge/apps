@@ -21,7 +21,7 @@ class PoolsMetrics extends React.Component<Props> {
           </Text>
         </Box>
       </PoolsMetric>
-      <PoolsMetric label="Total Ongoing Loans">
+      <PoolsMetric label="Total Active Financings">
         <Box direction="row" style={{ alignItems: 'center' }} >
           <Text style={{ width: '250px', fontSize: '0.7em', height: 40, display: 'flex', justifyContent: 'center',
             alignItems: 'center' }} >
@@ -29,10 +29,10 @@ class PoolsMetrics extends React.Component<Props> {
           </Text>
         </Box>
       </PoolsMetric>
-      <PoolsMetric label="Total Outstanding Debt">
+      <PoolsMetric label="Total Outstanding Volume">
         <ERC20Display value={pools.totalDebt.toString()} tokenMetas={DAI} precision={2} />
       </PoolsMetric>
-      <PoolsMetric label="Total Repaid Debt">
+      <PoolsMetric label="Total Repaid Volume">
         <ERC20Display value={pools.totalRepaysAggregatedAmount.toString()} tokenMetas={DAI} precision={2} />
       </PoolsMetric>
     </Box>;

@@ -299,10 +299,10 @@ export async function borrow(tinlake: any, loan: Loan, amount: string) {
   try {
     borrowRes = await tinlake.proxyLockBorrowWithdraw(proxy, loanId, amount, address);
   } catch (e) {
-    return loggedError(e, 'Could not borrow.', loanId);
+    return loggedError(e, 'Could not finance asset.', loanId);
   }
   if (borrowRes.status !== SUCCESS_STATUS) {
-    return loggedError({}, 'Could not borrow', loanId);
+    return loggedError({}, 'Could not finance asset', loanId);
   }
 }
 

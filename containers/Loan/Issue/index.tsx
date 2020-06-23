@@ -85,7 +85,7 @@ class IssueLoan extends React.Component<Props, State> {
 
     try {
       await authTinlake();
-      // issue loan
+      // finance asset
       const { registry } = this.state;
       const result: TinlakeResult = await issue(tinlake, tokenId, registry);
       if (result.errorMsg) {
@@ -114,18 +114,18 @@ class IssueLoan extends React.Component<Props, State> {
     const { tinlake } = this.props;
     return <Box>
       {is === 'loading' ?
-        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Initiating the opening loan process. Please confirm the pending transactions in MetaMask, and do not leave this page until all transactions have been confirmed.'} />
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Initiating the asset financing process. Please confirm the pending transactions in MetaMask, and do not leave this page until all transactions have been confirmed.'} />
         :
         <Box>
         <Box>
           {is === 'error' && <Alert type="error">
             <Text weight="bold">
-              Error opening loan for Token ID {tokenId}, see console for details</Text>
+              Error financing asset for Token ID {tokenId}, see console for details</Text>
             {errorMsg && <div><br />{errorMsg}</div>}
           </Alert>}
           {is !== 'success' &&
             <Box direction="row" gap="medium" margin={{ top: 'medium' }}>
-              <b>Please paste your Token ID and corresponding registry address below to open a loan:</b>
+              <b>Please paste your Token ID and corresponding registry address below to finance an asset:</b>
             </Box>}
         </Box>
 
@@ -152,7 +152,7 @@ class IssueLoan extends React.Component<Props, State> {
             </FormField>
           </Box>
           <Box basis={'1/3'} gap="medium" align="end">
-            <Button onClick={this.issueLoan} primary label="Open loan" disabled={is === 'loading' || is === 'success' || !nft} />
+            <Button onClick={this.issueLoan} primary label="Finance Asset" disabled={is === 'loading' || is === 'success' || !nft} />
           </Box>
         </Box>
       </Box>

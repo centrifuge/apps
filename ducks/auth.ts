@@ -20,7 +20,7 @@ export type Address = string;
 
 // Permissions depend on both the user and the selected pool/registry.
 export interface Permissions {
-  // loan admin permissions
+  // asset admin permissions
   canIssueLoan: boolean;
   canSetInterestRate: boolean;
   // tranche admin permissions
