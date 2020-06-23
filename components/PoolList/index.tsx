@@ -20,67 +20,68 @@ class PoolList extends React.Component<Props> {
   render() {
     const { pools } =  this.props;
     return <Box>
-      <DataTable style={{ tableLayout: 'auto' }} data={pools} sortable onClickRow={this.clickRow as any} columns={[
-        {
-          header: 'Pool', property: 'name', align: 'center',
-          render: (p: PoolData) =>
+      <DataTable style={{ tableLayout: 'auto' }} data={pools} sortable onClickRow={this.clickRow as any}
+        sort={{ property: 'totalDebtNum', direction: 'desc' }} columns={[
+          {
+            header: 'Pool', property: 'name', align: 'center',
+            render: (p: PoolData) =>
             <Box style={{ maxWidth: '150px' }}>
               <DisplayField
                 as={'span'}
                 value={p.name}
               />
             </Box>
-        },
-        {
-          header: 'Asset Type', property: 'type', align: 'center',
-          render: (p: PoolData) =>
+          },
+          {
+            header: 'Asset Type', property: 'type', align: 'center',
+            render: (p: PoolData) =>
             <Box style={{ maxWidth: '150px' }}>
               <DisplayField
                 as={'span'}
                 value={p.asset}
               />
             </Box>
-        },
-        {
-          header: 'Active Financings', property: 'ongoingLoans', align: 'center',
-          render: (p: PoolData) =>
+          },
+          {
+            header: 'Active Financings', property: 'ongoingLoans', align: 'center',
+            render: (p: PoolData) =>
             <Box style={{ maxWidth: '150px' }}>
               <DisplayField
                 as={'span'}
                 value={p.ongoingLoans}
               />
             </Box>
-        },
-        {
-          header: 'Outstanding (DAI)', property: 'totalDebtNum', align: 'center',
-          render: (p: PoolData) =>
+          },
+          {
+            header: 'Outstanding (DAI)', property: 'totalDebtNum', align: 'center',
+            render: (p: PoolData) =>
             <Box style={{ maxWidth: '150px' }}>
               <NumberDisplay suffix="" precision={2} value={baseToDisplay(p.totalDebt, 18)} />
             </Box>
-        },
-        {
-          header: 'Total Repaid (DAI)', property: 'totalRepaysAggregatedAmountNum', align: 'center',
-          render: (p: PoolData) =>
+          },
+          {
+            header: 'Total Repaid (DAI)', property: 'totalRepaysAggregatedAmountNum', align: 'center',
+            render: (p: PoolData) =>
             <NumberDisplay suffix="" precision={2} value={baseToDisplay(p.totalRepaysAggregatedAmount, 18)} />
-        },
-        {
-          header: 'Avg Fee', property: 'weightedInterestRateNum', align: 'center',
-          render: (p: PoolData) =>
+          },
+          {
+            header: 'Avg Fee', property: 'weightedInterestRateNum', align: 'center',
+            render: (p: PoolData) =>
             <NumberDisplay suffix="%" value={feeToInterestRate(p.weightedInterestRate)} />
-        },
-        {
-          header: 'DROP Rate', property: 'seniorInterestRateNum', align: 'center',
-          render: (p: PoolData) =>
+          },
+          {
+            header: 'DROP Rate', property: 'seniorInterestRateNum', align: 'center',
+            render: (p: PoolData) =>
             <NumberDisplay suffix="%" value={feeToInterestRate(p.seniorInterestRate)} />
-        }
-        ,
-        {
-          header: '', property: 'id', align: 'center', sortable: false, size: '36px',
-          render: (_p: PoolData) => {
-            return <ChevronRight />;
           }
-        }
-      ]} />
+        ,
+          {
+            header: '', property: 'id', align: 'center', sortable: false, size: '36px',
+            render: (_p: PoolData) => {
+              return <ChevronRight />;
+            }
+          }
+        ]} />
     </Box>;
   }
 }
