@@ -78,8 +78,8 @@ class PoolList extends React.Component<Props> {
           {
             header: '', property: 'id', align: 'center', sortable: false, size: '36px',
             render: (_p: PoolData) => {
-            return <ChevronRight />;
-          }
+              return <ChevronRight />;
+            }
           }
         ]} />
     </Box>;
