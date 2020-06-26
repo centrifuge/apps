@@ -15238,7 +15238,7 @@ var hmac_2 = hmac.computeHmac;
 var _args = [
   [
     "elliptic@6.5.2",
-    "/Users/ilinzweilin/Desktop/centrifuge/forks/tinlake.js"
+    "/Users/philipstanislaus/Code/centrifuge/tinlake.js"
   ]
 ];
 var _from = "elliptic@6.5.2";
@@ -15263,7 +15263,7 @@ var _requiredBy = [
 ];
 var _resolved = "https://registry.npmjs.org/elliptic/-/elliptic-6.5.2.tgz";
 var _spec = "6.5.2";
-var _where = "/Users/ilinzweilin/Desktop/centrifuge/forks/tinlake.js";
+var _where = "/Users/philipstanislaus/Code/centrifuge/tinlake.js";
 var author = {
   name: "Fedor Indutny",
   email: "fedor@indutny.com"
@@ -29420,6 +29420,17 @@ function LenderActions(Base) {
                     }
                 });
             }); };
+            _this.getSeniorTokenAllowance = function (owner) { return __awaiter(_this, void 0, void 0, function () {
+                var res;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].allowance, [owner, this.contractAddresses['SENIOR']])];
+                        case 1:
+                            res = _a.sent();
+                            return [2 /*return*/, res[0] || new bn(0)];
+                    }
+                });
+            }); };
             _this.approveSeniorToken = function (tokenAmount) { return __awaiter(_this, void 0, void 0, function () {
                 var txHash;
                 return __generator(this, function (_a) {
@@ -29454,6 +29465,17 @@ function LenderActions(Base) {
                             txHash = _a.sent();
                             console.log("[Redeem] txHash: " + txHash);
                             return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_OPERATOR'].abi, this.transactionTimeout)];
+                    }
+                });
+            }); };
+            _this.getJuniorTokenAllowance = function (owner) { return __awaiter(_this, void 0, void 0, function () {
+                var res;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_TOKEN'].allowance, [owner, this.contractAddresses['JUNIOR']])];
+                        case 1:
+                            res = _a.sent();
+                            return [2 /*return*/, res[0] || new bn(0)];
                     }
                 });
             }); };
@@ -29504,6 +29526,31 @@ function CurrencyActions(Base) {
                             console.log("[Mint currency] txHash: " + txHash);
                             return [2 /*return*/];
                     }
+                });
+            }); };
+            _this.getCurrencyAllowance = function (owner, spender) { return __awaiter(_this, void 0, void 0, function () {
+                var res;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['TINLAKE_CURRENCY'].allowance, [owner, spender])];
+                        case 1:
+                            res = _a.sent();
+                            return [2 /*return*/, res[0] || new bn(0)];
+                    }
+                });
+            }); };
+            _this.getJuniorForCurrencyAllowance = function (owner) { return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    if (!this.contractAddresses['JUNIOR'])
+                        return [2 /*return*/];
+                    return [2 /*return*/, this.getCurrencyAllowance(owner, this.contractAddresses['JUNIOR'])];
+                });
+            }); };
+            _this.getSeniorForCurrencyAllowance = function (owner) { return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    if (!this.contractAddresses['SENIOR'])
+                        return [2 /*return*/];
+                    return [2 /*return*/, this.getCurrencyAllowance(owner, this.contractAddresses['SENIOR'])];
                 });
             }); };
             _this.getCurrencyBalance = function (user) { return __awaiter(_this, void 0, void 0, function () {
@@ -31807,6 +31854,7 @@ function generateFnFor(rpcMethodName, methodObject) {
             return;
           }
         })['catch'](function (error) {
+          console.log('problemerror', error);
           var outputError = new Error('[ethjs-query] while formatting outputs from RPC \'' + JSON.stringify(error, null, _this.options.jsonSpace) + '\'');
           reject(outputError);
           return;

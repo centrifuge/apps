@@ -11,6 +11,21 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
       console.log(`[Mint currency] txHash: ${txHash}`);
     }
 
+    getCurrencyAllowance = async (owner: string, spender: string) => {
+      const res : { 0: BN } = await executeAndRetry(this.contracts['TINLAKE_CURRENCY'].allowance, [owner, spender]);
+      return res[0] || new BN(0);
+    }
+
+    getJuniorForCurrencyAllowance = async (owner: string) => {
+      if (!this.contractAddresses['JUNIOR']) return;
+      return this.getCurrencyAllowance(owner, this.contractAddresses['JUNIOR']);
+    }
+
+    getSeniorForCurrencyAllowance = async (owner: string) => {
+      if (!this.contractAddresses['SENIOR']) return;
+      return this.getCurrencyAllowance(owner, this.contractAddresses['SENIOR']);
+    }
+
     getCurrencyBalance = async (user: string) => {
       const res : { 0: BN } = await executeAndRetry(this.contracts['TINLAKE_CURRENCY'].balanceOf, [user]);
       return res[0] || new BN(0);

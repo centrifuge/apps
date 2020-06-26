@@ -1,5 +1,6 @@
 import { Constructor, TinlakeParams } from '../Tinlake';
 import { executeAndRetry, waitAndReturnEvents } from '../services/ethereum';
+import BN from 'bn.js';
 
 export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Base: ActionBase) {
   return class extends Base implements ILenderActions {
@@ -15,6 +16,11 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
       const txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].redeem, [tokenAmount, this.ethConfig]);
       console.log(`[Redeem] txHash: ${txHash}`);
       return waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_OPERATOR'].abi, this.transactionTimeout);
+    }
+
+    getSeniorTokenAllowance = async (owner: string) => {
+      const res: { 0: BN } = await executeAndRetry(this.contracts['SENIOR_TOKEN'].allowance, [owner, this.contractAddresses['SENIOR']]);
+      return res[0] || new BN(0);
     }
 
     approveSeniorToken = async (tokenAmount: string) => {
@@ -34,6 +40,11 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
       const txHash = await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].redeem, [tokenAmount, this.ethConfig]);
       console.log(`[Redeem] txHash: ${txHash}`);
       return waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_OPERATOR'].abi, this.transactionTimeout);
+    }
+
+    getJuniorTokenAllowance = async (owner: string) => {
+      const res: { 0: BN } = await executeAndRetry(this.contracts['JUNIOR_TOKEN'].allowance, [owner, this.contractAddresses['JUNIOR']]);
+      return res[0] || new BN(0);
     }
 
     approveJuniorToken = async (tokenAmount: string) => {

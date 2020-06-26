@@ -1,11 +1,14 @@
 import { Constructor, TinlakeParams } from '../Tinlake';
+import BN from 'bn.js';
 export declare function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Base: ActionBase): {
     new (...args: any[]): {
         supplySenior: (currencyAmount: string) => Promise<unknown>;
         redeemSenior: (tokenAmount: string) => Promise<unknown>;
+        getSeniorTokenAllowance: (owner: string) => Promise<BN>;
         approveSeniorToken: (tokenAmount: string) => Promise<unknown>;
         supplyJunior: (currencyAmount: string) => Promise<unknown>;
         redeemJunior: (tokenAmount: string) => Promise<unknown>;
+        getJuniorTokenAllowance: (owner: string) => Promise<BN>;
         approveJuniorToken: (tokenAmount: string) => Promise<unknown>;
         balance: () => Promise<unknown>;
         provider: any;
