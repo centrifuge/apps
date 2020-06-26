@@ -33,5 +33,7 @@ export declare type ICurrencyActions = {
     getCurrencyAllowance: (owner: string, spender: string) => Promise<BN>;
     getJuniorForCurrencyAllowance: (owner: string) => Promise<BN | undefined>;
     getSeniorForCurrencyAllowance: (owner: string) => Promise<BN | undefined>;
+    approveSeniorForCurrency: (currencyAmount: string) => Promise<unknown>;
+    approveJuniorForCurrency: (currencyAmount: string) => Promise<unknown>;
 };
 export default CurrencyActions;
