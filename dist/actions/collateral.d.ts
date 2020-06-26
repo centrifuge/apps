@@ -5,6 +5,8 @@ export declare function CollateralActions<ActionsBase extends Constructor<Tinlak
         mintTitleNFT: (nftAddr: string, user: string) => Promise<any>;
         mintNFT: (nftAddr: string, owner: string, tokenId: string, ref: string, amount: string, asset: string) => Promise<unknown>;
         approveNFT: (nftAddr: string, tokenId: string, to: string) => Promise<unknown>;
+        setNFTApprovalForAll: (nftAddr: string, to: string, approved: boolean) => Promise<unknown>;
+        isNFTApprovedForAll: (nftAddr: string, owner: string, operator: string) => Promise<boolean>;
         getNFTCount: (nftAddr: string) => Promise<BN>;
         getNFTData: (nftAddr: string, tokenId: string) => Promise<any>;
         getNFTOwner: (nftAddr: string, tokenId: string) => Promise<BN>;
@@ -19,8 +21,8 @@ export declare function CollateralActions<ActionsBase extends Constructor<Tinlak
         contractAbis: import("../Tinlake").ContractAbis;
         contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
+        setContracts: () => void;
         setEthConfig: (ethConfig: {} | import("../Tinlake").EthConfig) => void;
-        setContractAddresses: () => Promise<void>;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
@@ -29,6 +31,8 @@ export declare type ICollateralActions = {
     mintTitleNFT(nftAddr: string, usr: string): Promise<any>;
     mintNFT(nftAddr: string, owner: string, tokenId: string, ref: string, amount: string, asset: string): Promise<any>;
     approveNFT(nftAddr: string, tokenId: string, to: string): Promise<any>;
+    setNFTApprovalForAll(nftAddr: string, to: string, approved: boolean): Promise<unknown>;
+    isNFTApprovedForAll(nftAddr: string, owner: string, operator: string): Promise<boolean>;
     getNFTCount(nftAddr: string): Promise<BN>;
     getNFTData(nftAddr: string, tokenId: string): Promise<any>;
     getNFTOwner(nftAddr: string, tokenId: string): Promise<BN>;

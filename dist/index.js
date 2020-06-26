@@ -29652,6 +29652,32 @@ function CollateralActions(Base) {
                     }
                 });
             }); };
+            _this.setNFTApprovalForAll = function (nftAddr, to, approved) { return __awaiter(_this, void 0, void 0, function () {
+                var nft, txHash;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            nft = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
+                            return [4 /*yield*/, executeAndRetry(nft.setApprovalForAll, [to, approved, this.ethConfig])];
+                        case 1:
+                            txHash = _a.sent();
+                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout)];
+                    }
+                });
+            }); };
+            _this.isNFTApprovedForAll = function (nftAddr, owner, operator) { return __awaiter(_this, void 0, void 0, function () {
+                var nft, res;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            nft = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
+                            return [4 /*yield*/, executeAndRetry(nft.isApprovedForAll, [owner, operator, this.ethConfig])];
+                        case 1:
+                            res = _a.sent();
+                            return [2 /*return*/, res[0]];
+                    }
+                });
+            }); };
             _this.getNFTCount = function (nftAddr) { return __awaiter(_this, void 0, void 0, function () {
                 var nft, res;
                 return __generator(this, function (_a) {
