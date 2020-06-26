@@ -2,8 +2,8 @@ import { Body, Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { CoreapiMintNFTRequest } from '@centrifuge/gateway-lib/centrifuge-node-client';
-import { Document, DocumentRequest } from '@centrifuge/gateway-lib/models/document';
-import { MintNftRequest, TransferNftRequest } from '@centrifuge/gateway-lib/models/nfts';
+import {Document, DocumentRequest, NftStatus} from '@centrifuge/gateway-lib/models/document';
+import { MintNftRequest } from '@centrifuge/gateway-lib/models/nfts';
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
 import { SessionGuard } from '../auth/SessionGuard';
 
@@ -47,7 +47,7 @@ export class NftsController {
     );
     await this.databaseService.documents.updateById(doc._id, {
       $set: {
-        nft_status: 'Minting...',
+        nft_status: NftStatus.Minting,
       },
     });
     // @ts-ignore
@@ -56,13 +56,13 @@ export class NftsController {
     if (mint.status === 'success') {
       return await this.databaseService.documents.updateById(doc._id, {
         $set: {
-          nft_status: 'Minted',
+          nft_status: NftStatus.Minted,
         },
       });
     } else {
       return await this.databaseService.documents.updateById(doc._id, {
         $set: {
-          nft_status: 'NFT minting failed',
+          nft_status: NftStatus.MintingFail,
         },
       });
     }

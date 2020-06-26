@@ -12,7 +12,6 @@ import Attributes from './Attributes';
 import { ViewModeFormContainer } from '../components/ViewModeFormContainer';
 import Collaborators from './Collaborators';
 
-
 // TODO use function components here
 type Props = {
   onSubmit?: (document: Document) => void;
@@ -44,7 +43,9 @@ export class DocumentForm extends React.Component<Props, State> {
     document: {
       attributes: {},
       header: {
-        readAccess: [],
+        // @ts-ignore
+        read_access: [],
+        write_access:[]
       },
     },
     contacts: [],
@@ -77,10 +78,18 @@ export class DocumentForm extends React.Component<Props, State> {
   }
 
   onSubmit = (values) => {
-    const { selectedSchema } = this.state;
 
-    const payload = {
+    const { selectedSchema } = this.state;
+    const { onSubmit, document } = this.props;
+
+    let payload = {
       ...values,
+      header: {
+        // @ts-ignore
+        read_access: document.header.read_access,
+        // @ts-ignore
+        write_access: document.header.write_access,
+      },
       attributes: {
         ...values.attributes,
         // add schema as tech field
@@ -91,9 +100,31 @@ export class DocumentForm extends React.Component<Props, State> {
       },
     };
 
-    this.props.onSubmit && this.props.onSubmit(payload);
+    onSubmit && onSubmit(payload);
   };
 
+  addCollaboratorToPayload = (collaborators: Array<any>) => {
+    const { document } = this.props;
+    let read_access = [];
+    let write_access = [];
+
+      collaborators.forEach(c => {
+        // @ts-ignore
+        if ( c.access === 'read_access' && !read_access.includes(c.address)) {
+          // @ts-ignore
+          read_access.push(c.address)
+        }
+        // @ts-ignore
+        if (c.access === 'write_access' && !write_access.includes(c.address)) {
+          // @ts-ignore
+          write_access.push(c.address)
+        }
+      })
+    // @ts-ignore
+    document.header.read_access = read_access;
+    // @ts-ignore
+    document.header.write_access= write_access
+  };
 
   generateValidationSchema = (schema: Schema | undefined) => {
     // Attributes validation
@@ -176,19 +207,17 @@ export class DocumentForm extends React.Component<Props, State> {
         ...document.attributes,
       };
     }
+
     if (!document.header) {
-      document.header = {};
+      document.header = {
+        // @ts-ignore
+        read_access: [],
+        write_access: [],
+      }
     }
 
-    // TODO we should move this add them somewhere else?
-    if (!document.header.readAccess || !Array.isArray(document.header.readAccess)) {
-      document.header.readAccess = [];
-    }
-
-    if (!document.header.writeAccess || !Array.isArray(document.header.writeAccess)) {
-      document.header.writeAccess = [];
-    }
-
+    // If a set of collaborators is set on schema, use it as default
+    const collaborators = (selectedSchema && selectedSchema.collaborators) || [];
 
     return (
       <ViewModeFormContainer isViewMode={mode === 'view'} pad={{ bottom: 'xlarge' }}>
@@ -206,9 +235,6 @@ export class DocumentForm extends React.Component<Props, State> {
             >
               {
                 ({
-                   values,
-                   errors,
-                   handleChange,
                    handleSubmit,
                  }) => (
                   <form
@@ -241,7 +267,9 @@ export class DocumentForm extends React.Component<Props, State> {
                       </Section>
                       <Collaborators
                         contacts={contacts}
-                        viewMode={isViewMode}/>
+                        collaborators={collaborators}
+                        viewMode={isViewMode}
+                        addCollaboratorToPayload={this.addCollaboratorToPayload}/>
                       {children}
 
                       {selectedSchema && <>
@@ -249,7 +277,6 @@ export class DocumentForm extends React.Component<Props, State> {
                         {(selectedSchema.formFeatures && selectedSchema.formFeatures.comments) &&
                         <Comments columnGap={columnGap} isViewMode={isViewMode}/>}
                       </>}
-
                     </Box>
                   </form>
                 )

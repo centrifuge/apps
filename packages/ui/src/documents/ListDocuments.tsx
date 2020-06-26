@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Anchor, Box, Button, Heading } from 'grommet';
 import documentRoutes from './routes';
 import { RouteComponentProps, withRouter } from 'react-router';
-import { Document } from '@centrifuge/gateway-lib/models/document';
+import {Document, DocumentStatus, NftStatus} from '@centrifuge/gateway-lib/models/document';
 import { SecondaryHeader } from '../components/SecondaryHeader';
 import { canCreateDocuments, canWriteToDoc } from '@centrifuge/gateway-lib/models/user';
 import { Preloader } from '../components/Preloader';
@@ -78,7 +78,6 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
     }
   }, [setState, displayPageError]);
 
-
   const getFilteredDocuments = () => {
     const sortableDocuments = documents.map((doc: any) => {
       return {
@@ -105,6 +104,17 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
   if (error) {
     return <PageError error={error}/>;
   }
+
+  const displayEdit = (doc_status: string, nft_status: string) => {
+    if (nft_status !== NftStatus.Minting) {
+      return doc_status === DocumentStatus.Created || doc_status === '';
+    }
+    return false
+  };
+
+  const displayView = (doc_status: string, nft_status: string) => {
+    return nft_status !==  NftStatus.Minting && doc_status !== DocumentStatus.CreationFail;
+  };
 
   return (
     <Box>
@@ -162,7 +172,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               sortable: false,
               render: datum => (
                 <Box direction="row" gap="small">
-                  {datum.nft_status !== 'Minting...' && datum.document_status !== 'Document creation failed' && <Anchor
+                  {displayView(datum.document_status, datum.nft_status) && <Anchor
                     label={'View'}
                     onClick={() =>
                       push(
@@ -170,7 +180,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
                       )
                     }
                   />}
-                  {canWriteToDoc(user!, datum) && datum.document_status === 'Created' && datum.nft_status !== 'Minting...' && <Anchor
+                  {canWriteToDoc(user!, datum) && displayEdit(datum.document_status, datum.nft_status) && <Anchor
                     label={'Edit'}
                     onClick={() =>
                       push(

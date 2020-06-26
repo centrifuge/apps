@@ -22,6 +22,20 @@ export enum DOCUMENT_ACCESS {
   WRITE = 'write_access',
 }
 
+export enum DocumentStatus {
+  Creating = 'Creating',
+  Created = 'Created',
+  CreationFail = 'Document creation failed'
+}
+
+export enum NftStatus {
+  Minting = 'Minting',
+  Minted = 'Minted',
+  MintingFail = 'NFT minting failed',
+  NoNft = 'No NFT minted'
+}
+
+
 export const getDocumentCollaborators = (document: Document, contacts: Contact[]) => {
   if (!document || !document.header) return [];
   let userAccess = [];

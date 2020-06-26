@@ -1,9 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import { BrowserRouter } from 'react-router-dom';
-import { SearchSelect } from '@centrifuge/axis-search-select';
 import { Anchor, Button, DataTable } from 'grommet';
-import { defaultContacts, defaultUser } from '../../test-utilities/default-data';
+import { defaultCollaborators, defaultContacts, defaultUser } from '../../test-utilities/default-data';
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers';
 import Collaborators from '../Collaborators';
 import { Formik } from 'formik';
@@ -14,7 +12,6 @@ import { Modal } from '@centrifuge/axis-modal';
 
 
 describe('Collaborators', () => {
-
 
   const getDocument = () => {
     return {
@@ -74,6 +71,8 @@ describe('Collaborators', () => {
     };
   };
 
+  const addCollaboratorToPayload = jest.fn(() => {
+  });
 
   it('Should render a empty list of collaborators and not render the add button', () => {
 
@@ -87,8 +86,10 @@ describe('Collaborators', () => {
         >
           <Collaborators
             contacts={defaultContacts}
+            collaborators={[]}
             viewMode={true}
-            user={defaultUser}/>
+            addCollaboratorToPayload={addCollaboratorToPayload}
+          />
         </Formik>,
       ),
     );
@@ -123,8 +124,10 @@ describe('Collaborators', () => {
         >
           <Collaborators
             contacts={defaultContacts}
+            collaborators={[]}
             viewMode={false}
-            user={defaultUser}/>
+            addCollaboratorToPayload={addCollaboratorToPayload}
+          />
         </Formik>,
       ),
     );
@@ -141,18 +144,58 @@ describe('Collaborators', () => {
     // after that write_access
 
     // should have only view because it has read access
-    const firstRowActions = firstRowColumns.at(2).find(Anchor);
+    const firstRowActions = firstRowColumns.at(3).find(Anchor);
     expect(firstRowActions.length).toBe(1);
     expect(firstRowActions.text()).toBe('View');
 
     //Should all all 3 actions: View, Edit, Remove because it has write access
-    const secondRowActions = secondRowColumns.at(2).find(Anchor);
+    const secondRowActions = secondRowColumns.at(3).find(Anchor);
     expect(secondRowActions.length).toBe(3);
 
 
 
     const addCollaborator = component.find(Button).findWhere(node => node.key() === 'add-collaborator');
     expect(addCollaborator.length).toBe(1);
+  });
+
+
+  it('Should render 3 collaborators from the props', () => {
+
+    const doc: any = getDocument();
+    doc.header.author = defaultContacts[0].address;
+    doc.header.write_access = [
+      defaultContacts[0].address,
+    ];
+
+    doc.header.read_access = [
+      defaultContacts[1].address,
+    ];
+
+    const component = mount(
+      withAllProvidersAndContexts(
+        <Formik
+          initialValues={doc}
+          onSubmit={() => {
+
+          }}
+        >
+          <Collaborators
+            contacts={defaultContacts}
+            collaborators={defaultCollaborators}
+            viewMode={false}
+            addCollaboratorToPayload={addCollaboratorToPayload}
+          />
+        </Formik>,
+      ),
+    );
+    const dataTable = component.find(DataTable);
+    expect(dataTable.length).toEqual(1);
+    const rows = dataTable.find('tbody tr');
+    expect(rows.length).toBe(3);
+    const firstRowColumns = rows.at(0).find('td');
+    const secondRowColumns = rows.at(1).find('td');
+    expect(firstRowColumns.at(0).text()).toBe(defaultCollaborators[1].name);
+    expect(secondRowColumns.at(0).text()).toBe(defaultCollaborators[0].name + ' (Last update)');
   });
 
 
@@ -173,8 +216,10 @@ describe('Collaborators', () => {
         >
           <Collaborators
             contacts={defaultContacts}
+            collaborators={[]}
             viewMode={false}
-            user={defaultUser}/>
+            addCollaboratorToPayload={addCollaboratorToPayload}
+          />
         </Formik>,
       ),
     );
@@ -213,8 +258,10 @@ describe('Collaborators', () => {
         >
           <Collaborators
             contacts={defaultContacts}
+            collaborators={[]}
             viewMode={false}
-            user={defaultUser}/>
+            addCollaboratorToPayload={addCollaboratorToPayload}
+          />
         </Formik>,
       ),
     );
@@ -256,8 +303,10 @@ describe('Collaborators', () => {
         >
           <Collaborators
             contacts={defaultContacts}
+            collaborators={[]}
             viewMode={false}
-            user={defaultUser}/>
+            addCollaboratorToPayload={addCollaboratorToPayload}
+          />
         </Formik>,
       ),
     );
@@ -265,7 +314,7 @@ describe('Collaborators', () => {
 
     const rows = dataTable.find('tbody tr');
     const columnWithWriteAccess = rows.at(1).find('td');
-    const removeAction = columnWithWriteAccess.at(2).find(Anchor).at(2);
+    const removeAction = columnWithWriteAccess.at(3).find(Anchor).at(2);
     removeAction.simulate('click');
     component.update();
     expect(component.find(DataTable).find('tbody tr').length).toBe(1);
@@ -293,8 +342,10 @@ describe('Collaborators', () => {
         >
           <Collaborators
             contacts={defaultContacts}
+            collaborators={[]}
             viewMode={false}
-            user={defaultUser}/>
+            addCollaboratorToPayload={addCollaboratorToPayload}
+          />
         </Formik>,
       ),
     );
@@ -302,7 +353,7 @@ describe('Collaborators', () => {
 
     const rows = dataTable.find('tbody tr');
     const columnWithWriteAccess = rows.at(1).find('td');
-    const editAction = columnWithWriteAccess.at(2).find(Anchor).at(1);
+    const editAction = columnWithWriteAccess.at(3).find(Anchor).at(1);
     editAction.simulate('click');
     expect(component.find({title:'Edit collaborator'}).find(Modal).length).toBe(1);
     const collaboratorForm = component.find(CollaboratorForm);
@@ -338,8 +389,10 @@ describe('Collaborators', () => {
         >
           <Collaborators
             contacts={defaultContacts}
+            collaborators={[]}
             viewMode={false}
-            user={defaultUser}/>
+            addCollaboratorToPayload={addCollaboratorToPayload}
+          />
         </Formik>,
       ),
     );
@@ -347,7 +400,7 @@ describe('Collaborators', () => {
 
     const rows = dataTable.find('tbody tr');
     const firstRowColumns = rows.at(0).find('td');
-    const viewAction = firstRowColumns.at(2).find(Anchor).at(0);
+    const viewAction = firstRowColumns.at(3).find(Anchor).at(0);
     viewAction.simulate('click');
     expect(component.find({title:'View collaborator'}).find(Modal).length).toBe(1);
     const collaboratorForm = component.find(CollaboratorForm);

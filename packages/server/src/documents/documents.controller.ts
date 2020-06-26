@@ -2,7 +2,7 @@ import { Body, Controller, Get, NotFoundException, Param, Post, Put, Req, UseGua
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import {CoreapiCreateDocumentRequest, CoreapiDocumentResponse} from '@centrifuge/gateway-lib/centrifuge-node-client';
-import { Document, DocumentRequest } from '@centrifuge/gateway-lib/models/document';
+import {Document, DocumentRequest, DocumentStatus, NftStatus} from '@centrifuge/gateway-lib/models/document';
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
 import { SessionGuard } from '../auth/SessionGuard';
 import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes';
@@ -42,14 +42,16 @@ export class DocumentsController {
       request.user.account,
       {
         attributes: payload.attributes,
-        readAccess: payload.header.readAccess,
-        writeAccess: payload.header.writeAccess,
+        // @ts-ignore
+        read_access: payload.header.read_access ? payload.header.read_access : [],
+        // @ts-ignore
+        write_access: payload.header.write_access ? payload.header.write_access : [],
         scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
       },
     );
 
-    createResult.document_status = 'Creating...';
-    createResult.nft_status = 'No NFT minted';
+    createResult.document_status = DocumentStatus.Creating;
+    createResult.nft_status = NftStatus.NoNft;
 
     const created = await this.databaseService.documents.insert({
       ...createResult,
@@ -68,13 +70,13 @@ export class DocumentsController {
     if (commit.status === 'success') {
       return await this.databaseService.documents.updateById(created._id, {
         $set: {
-          document_status: 'Created',
+          document_status: DocumentStatus.Created,
         },
       });
     } else {
       return await this.databaseService.documents.updateById(created._id, {
         $set: {
-          document_status: 'Document creation failed',
+          document_status: DocumentStatus.CreationFail,
         },
       });
     }
@@ -154,8 +156,10 @@ export class DocumentsController {
         documentFromDb.header.document_id,
       {
         attributes: document.attributes,
-        readAccess: document.header.readAccess,
-        writeAccess: document.header.writeAccess,
+        // @ts-ignore
+        read_access: document.header ? document.header.read_access : [],
+        // @ts-ignore
+        write_access: document.header ? document.header.write_access : [],
         scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
       },
     );

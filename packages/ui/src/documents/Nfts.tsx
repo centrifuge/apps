@@ -7,7 +7,6 @@ import { getAddressLink, getNFTLink, hexToInt } from '@centrifuge/gateway-lib/ut
 import { Section } from '../components/Section';
 import { Anchor, Box, Button, Paragraph } from 'grommet';
 import { DisplayField } from '@centrifuge/axis-display-field';
-import { Money } from 'grommet-icons';
 import { Registry } from '@centrifuge/gateway-lib/models/schema';
 import MintNftForm, { MintNftFormData } from './MintNftForm';
 import { Contact } from '@centrifuge/gateway-lib/src/models/contact';
@@ -115,7 +114,7 @@ export const Nfts: FunctionComponent<Props> = (props) => {
   };
 
   const mintActions = !viewMode ? [
-    <Button key="mint-nft" onClick={openMintModal} icon={<Money/>} plain label={'Mint NFT'}/>,
+    <Button key="mint-nft" onClick={openMintModal} plain label={'Mint NFT'}/>,
   ] : [];
 
   const renderNftSection = () => {
