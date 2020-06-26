@@ -50,9 +50,12 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
 }
 
 export type  ICurrencyActions = {
-  mintCurrency(usr: string, amount: string): void,
+  mintCurrency(usr: string, amount: string): Promise<void>,
   getCurrencyBalance(usr: string): Promise<BN>,
-  approveCurrency(usr: string, amount: string): Promise<any>,
+  approveCurrency(usr: string, amount: string): Promise<unknown>,
+  getCurrencyAllowance: (owner: string, spender: string) => Promise<BN>;
+  getJuniorForCurrencyAllowance: (owner: string) => Promise<BN | undefined>;
+  getSeniorForCurrencyAllowance: (owner: string) => Promise<BN | undefined>;
 };
 
 export default CurrencyActions;
