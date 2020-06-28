@@ -6,10 +6,11 @@ import Header from '../../../components/Header';
 import { menuItems } from '../../../menuItems';
 import SecondaryHeader from '../../../components/SecondaryHeader';
 import Auth from '../../../components/Auth';
-import ContainerWithFooter from '../../../components/ContainerWithFooter';
+import WithFooter from '../../../components/WithFooter';
 import { WithRouterProps } from 'next/dist/client/with-router';
 import config, { Pool } from '../../../config';
 import { GetStaticProps } from 'next';
+import Container from '../../../components/Container';
 
 interface Props extends WithRouterProps {
   root: string;
@@ -20,30 +21,29 @@ class InvestmentPage extends React.Component<Props> {
   render() {
     const { pool } = this.props;
 
-    return <ContainerWithFooter>
+    return <WithFooter>
       <Header
         poolTitle={pool.shortName || pool.name}
         selectedRoute={'/investments'}
         menuItems={menuItems}
       />
-      <Box
-        justify="center"
-        direction="row"
-      >
-        <Box width="xlarge" >
-          <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
-            <Auth tinlake={tinlake} render={auth =>
-              <Box>
-                <SecondaryHeader>
-                  <Heading level="3">Investments</Heading>
-                </SecondaryHeader>
-                <InvestmentsView tinlake={tinlake} auth={auth} />
-              </Box>
+      <Container>
+        <Box justify="center" direction="row">
+          <Box width="xlarge" >
+            <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
+              <Auth tinlake={tinlake} render={auth =>
+                <Box>
+                  <SecondaryHeader>
+                    <Heading level="3">Investments</Heading>
+                  </SecondaryHeader>
+                  <InvestmentsView tinlake={tinlake} auth={auth} />
+                </Box>
+              } />
             } />
-          } />
+          </Box>
         </Box>
-      </Box>
-    </ContainerWithFooter>;
+      </Container>
+    </WithFooter>;
   }
 }
 

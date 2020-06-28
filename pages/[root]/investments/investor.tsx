@@ -8,9 +8,10 @@ import SecondaryHeader from '../../../components/SecondaryHeader';
 import { BackLink } from '../../../components/BackLink';
 import Auth from '../../../components/Auth';
 import withRouter, { WithRouterProps } from 'next/dist/client/with-router';
-import ContainerWithFooter from '../../../components/ContainerWithFooter';
+import WithFooter from '../../../components/WithFooter';
 import config, { Pool } from '../../../config';
 import { GetStaticProps } from 'next';
+import Container from '../../../components/Container';
 
 interface Props extends WithRouterProps {
   root: string;
@@ -23,40 +24,38 @@ class InvestorPage extends React.Component<Props> {
     const { pool } = this.props;
     const { investorAddress }: { investorAddress: string } = this.props.router.query as any;
 
-    return <ContainerWithFooter>
+    return <WithFooter>
       <Header
         poolTitle={pool.shortName || pool.name}
         selectedRoute={'/investments/investor'}
         menuItems={menuItems}
       />
-      <Box
-        justify="center"
-        direction="row"
-        style={{ flex: 1 }}
-      >
-        <Box width="xlarge" >
-          <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
-            <Auth tinlake={tinlake} render={auth =>
-              <Box>
-                <SecondaryHeader>
-                  <Box direction="row" gap="small" align="center">
-                    <BackLink href={'/investments'} />
+      <Container>
+        <Box justify="center" direction="row" style={{ flex: 1 }}>
+          <Box width="xlarge" >
+            <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
+              <Auth tinlake={tinlake} render={auth =>
+                <Box>
+                  <SecondaryHeader>
                     <Box direction="row" gap="small" align="center">
-                      <Heading level="3">Investor Details </Heading>
-                    </Box>
-                    <Box align="end">
-                        <Text style={{ color: '#808080' }}> address: {investorAddress}</Text>
-                    </Box>
+                      <BackLink href={'/investments'} />
+                      <Box direction="row" gap="small" align="center">
+                        <Heading level="3">Investor Details </Heading>
+                      </Box>
+                      <Box align="end">
+                          <Text style={{ color: '#808080' }}> address: {investorAddress}</Text>
+                      </Box>
 
-                  </Box>
-                </SecondaryHeader>
-                <InvestorView investorAddress={investorAddress} tinlake={tinlake} auth={auth} />
-              </Box>
+                    </Box>
+                  </SecondaryHeader>
+                  <InvestorView investorAddress={investorAddress} tinlake={tinlake} auth={auth} />
+                </Box>
+              } />
             } />
-          } />
+          </Box>
         </Box>
-      </Box>
-    </ContainerWithFooter>;
+      </Container>
+    </WithFooter>;
   }
 }
 

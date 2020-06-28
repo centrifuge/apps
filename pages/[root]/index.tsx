@@ -6,8 +6,9 @@ import WithTinlake from '../../components/WithTinlake';
 import { menuItems } from '../../menuItems';
 import config, { Pool as IPool } from '../../config';
 import { GetStaticProps } from 'next';
-import ContainerWithFooter from '../../components/ContainerWithFooter';
+import WithFooter from '../../components/WithFooter';
 import Auth from '../../components/Auth';
+import Container from '../../components/Container';
 
 interface Props {
   root: string;
@@ -20,18 +21,20 @@ class Pool extends React.Component <Props> {
     const { pool } = this.props;
 
     return (
-      <ContainerWithFooter>
+      <WithFooter>
         <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/'} menuItems={menuItems} />
-        <Box justify="center" direction="row" >
-          <Box width="xlarge">
-            <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
-              <Auth tinlake={tinlake} render={() =>
-                <Overview tinlake={tinlake} selectedPool={pool} />
+        <Container>
+          <Box justify="center" direction="row" >
+            <Box width="xlarge">
+              <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
+                <Auth tinlake={tinlake} render={() =>
+                  <Overview tinlake={tinlake} selectedPool={pool} />
+                } />
               } />
-            } />
+            </Box>
           </Box>
-        </Box>
-      </ContainerWithFooter>
+        </Container>
+      </WithFooter>
     );
   }
 }
