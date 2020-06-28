@@ -95,160 +95,71 @@ class Header extends React.Component<HeaderProps, State> {
         fill="horizontal"
         pad={{ horizontal: "small" }}
       >
-        <ResponsiveContext.Consumer>
-          {(size) =>
-            size === "large" ? (
-              <Box direction="row" width="xlarge" align="center">
-                <Box align="center" direction="row" basis="full">
-                  <Link href="/" shallow>
-                    <a title="Tinlake">
-                      <Image src={logoUrl} style={{ width: 130 }} />
-                    </a>
-                  </Link>
+        <Box direction="row" width="xlarge" align="center">
+          <Box align="center" direction="row" basis="full">
+            <div style={{ height: 32, paddingRight: 16, borderRight: '1px solid #D8D8D8', display: 'flex',
+              alignItems: 'center' }}>
+              <Link href="/" shallow><a title="Tinlake" style={{ display: 'block' }}>
+                <Image src={logoUrl} style={{ width: 130, verticalAlign: 'middle' }} />
+              </a></Link>
+            </div>
+            {poolTitle &&
+              <Box style={{ flex: '0 0 239px', height: 32, padding: "0 16px", borderRight: '1px solid #D8D8D8',
+                display: 'flex' }}>
+                <div style={{ height: 12, lineHeight: '12px', fontWeight: 500, fontSize: 10, color: '#bbb' }}>
+                  Investment Pool</div>
+                <div style={{ height: 16, lineHeight: '16px', fontWeight: 500, fontSize: 14, marginTop: 4 }}>
+                  {poolTitle}</div>
+              </Box>
+            }
+            <Box flex="grow" basis="auto" style={{ height: 32, padding: '0 32px', borderRight: '1px solid #D8D8D8' }}>
+              <NavBar
+                border={false}
+                theme={theme}
+                menuItems={menuItems.filter((item) => {
+                  return (
+                    ((isDemo && item.env === "demo") ||
+                      item.env === "") &&
+                    !item.secondary
+                  );
+                })}
+                selectedRoute={selectedRoute}
+                onRouteClick={this.onRouteClick}
+              />
+            </Box>
+            <div style={{ flex: '0 0 auto', paddingLeft: 16 }}>
+              {!address && (
+                <Button onClick={this.connectAccount} label="Connect" />
+              )}
+              {address && (
+                <Box direction="column" align="end" basis="full">
                   <Box
-                    margin={{ left: "80px", right: "56px" }}
-                    flex="grow"
-                    basis="auto"
-                    style={{ fontSize: 16, fontWeight: 500 }}
+                    direction="row"
+                    gap={itemGap}
+                    align="center"
+                    justify="start"
                   >
-                    {poolTitle}
+                    <Text> {formatAddress(address || "")} </Text>
                   </Box>
-                  <Box flex="grow" basis="auto">
-                    <NavBar
-                      border={false}
-                      theme={theme}
-                      menuItems={menuItems.filter((item) => {
-                        return (
-                          ((isDemo && item.env === "demo") ||
-                            item.env === "") &&
-                          !item.secondary
-                        );
-                      })}
-                      overlayWidth="100vw"
-                      selectedRoute={selectedRoute}
-                      onRouteClick={this.onRouteClick}
-                    />
-                  </Box>
-                </Box>
-                <Box direction="row" basis="full">
-                  {!address && (
-                    <Box
-                      direction="column"
-                      align="end"
-                      basis="full"
-                      alignSelf="center"
-                    >
-                      <Button onClick={this.connectAccount} label="Connect" />
-                    </Box>
-                  )}
-                  {address && (
-                    <Box direction="column" align="end" basis="full">
-                      <Box
-                        direction="row"
-                        gap={itemGap}
-                        align="center"
-                        justify="start"
+                  <Box direction="row" justify="start">
+                    {network && (
+                      <Text
+                        style={{
+                          color: "#808080",
+                          lineHeight: "12px",
+                          fontSize: "12px",
+                        }}
                       >
-                        <Text> {formatAddress(address || "")} </Text>
-                      </Box>
-                      <Box direction="row" justify="start">
-                        {network && (
-                          <Text
-                            style={{
-                              color: "#808080",
-                              lineHeight: "12px",
-                              fontSize: "12px",
-                            }}
-                          >
-                            {" "}
-                            Connected to {network}{" "}
-                          </Text>
-                        )}
-                      </Box>
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-            ) : (
-              <Box direction="row" width="xlarge" align="center">
-                <Box align="center" direction="row" basis="full">
-                  <Link href="/" shallow>
-                    <a title="Tinlake">
-                      <Image src={logoUrl} style={{ width: 130 }} />
-                    </a>
-                  </Link>
-                </Box>
-                <Box
-                  flex="grow"
-                  basis="auto"
-                  style={{ fontSize: 16, fontWeight: 500 }}
-                >
-                  {poolTitle}
-                </Box>
-                <Box direction="row" basis="full">
-                  {!address && (
-                    <Box
-                      direction="column"
-                      align="end"
-                      basis="full"
-                      alignSelf="center"
-                    >
-                      <Button onClick={this.connectAccount} label="Connect" />
-                    </Box>
-                  )}
-                  {address && (
-                    <Box
-                      direction="column"
-                      align="end"
-                      basis="full"
-                      alignSelf="center"
-                    >
-                      <Box
-                        direction="row"
-                        gap={itemGap}
-                        align="center"
-                        justify="start"
-                      >
-                        <Text> {formatAddress(address || "")} </Text>
-                      </Box>
-                      <Box direction="row" justify="start">
-                        {network && (
-                          <Text
-                            style={{
-                              color: "#808080",
-                              lineHeight: "12px",
-                              fontSize: "12px",
-                            }}
-                          >
-                            {" "}
-                            Connected to {network}{" "}
-                          </Text>
-                        )}
-                      </Box>
-                    </Box>
-                  )}
-
-                  <Box fill={false}>
-                    <NavBar
-                      border={false}
-                      theme={theme}
-                      menuItems={menuItems.filter((item) => {
-                        return (
-                          ((isDemo && item.env === "demo") ||
-                            item.env === "") &&
-                          !item.secondary
-                        );
-                      })}
-                      overlayWidth="100vw"
-                      selectedRoute={selectedRoute}
-                      onRouteClick={this.onRouteClick}
-                    />
+                        {" "}
+                        Connected to {network}{" "}
+                      </Text>
+                    )}
                   </Box>
                 </Box>
-              </Box>
-            )
-          }
-        </ResponsiveContext.Consumer>{" "}
+              )}
+            </div>
+          </Box>
+        </Box>
       </Box>
     );
   }
