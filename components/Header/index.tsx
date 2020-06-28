@@ -133,9 +133,7 @@ class Header extends React.Component<HeaderProps, State> {
                 </Box>
               </Box>
             }
-            {isDemo &&
-              <Box pad={{ left: 'small' }} alignSelf="center"> <Anchor href="https://centrifuge.hackmd.io/zRnaoPqfS7mTm9XL0dDRtQ?view" target="_blank" label="Help" style={{ textDecoration: 'none', fontWeight: 900 }} /> </Box>
-            }</Box>
+            </Box>
         </Box>
       )
         : (
@@ -161,9 +159,6 @@ class Header extends React.Component<HeaderProps, State> {
                 {network && <Text style={{ color: '#808080', lineHeight: '12px', fontSize: '12px' }}> Connected to {network} </Text>}
               </Box>
             </Box>
-            }
-            {isDemo &&
-              <Box margin={{ horizontal: 'small' }} alignSelf="center"> <Anchor href="https://centrifuge.hackmd.io/zRnaoPqfS7mTm9XL0dDRtQ?view" target="_blank" label="Help" style={{ textDecoration: 'none', fontWeight: 900 }} /> </Box>
             }
 
               <Box fill={false}>
