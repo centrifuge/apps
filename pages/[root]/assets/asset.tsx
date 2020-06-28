@@ -12,6 +12,7 @@ import { WithRouterProps } from 'next/dist/client/with-router';
 import WithFooter from '../../../components/WithFooter';
 import { GetStaticProps } from 'next';
 import config, { Pool } from '../../../config';
+import Container from '../../../components/Container';
 
 interface Props extends WithRouterProps {
   root: string;
