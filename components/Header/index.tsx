@@ -87,9 +87,8 @@ class Header extends React.Component<HeaderProps, State> {
 
     return (
       <Box
-        style={{ position: "sticky", top: 0, height: "56px", zIndex: 1 }}
+        style={{ position: "sticky", top: 0, height: "56px", zIndex: 2, boxShadow: '0 0 4px 0px #00000075' }}
         background="white"
-        border={{ side: "bottom", color: "light-4" }}
         justify="center"
         align="center"
         direction="row"
