@@ -70,7 +70,7 @@ class Approve extends React.Component<Props, State> {
       </SecondaryHeader>
 
       {is === 'loading' ?
-        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Please open MetaMask and approve both transactions. The approval might take a few seconds...'} />
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Please approve both transactions. The approval might take a few seconds...'} />
         :
         <Box pad={{ horizontal: 'medium' }}>
           {is === 'success' && <Alert type="success">

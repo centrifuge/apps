@@ -32,7 +32,7 @@ class InvestorSupply extends React.Component<Props, State> {
   supply = async () => {
     const { transactionSubmitted, responseReceived, trancheType, tinlake, investor, loadInvestor, loadPool } = this.props;
     const { supplyAmount } = this.state;
-    transactionSubmitted && transactionSubmitted('Investment initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.');
+    transactionSubmitted && transactionSubmitted('Investment initiated. Please confirm the pending transactions. Processing may take a few seconds.');
     try {
       await authTinlake();
       const res = await supply(tinlake, supplyAmount, trancheType);

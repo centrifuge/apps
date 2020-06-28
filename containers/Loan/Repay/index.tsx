@@ -35,8 +35,8 @@ class LoanRepay extends React.Component<Props, State> {
       await authTinlake();
       const { transactionSubmitted, responseReceived, loadLoan, loan, tinlake } = this.props;
       // support partial repay later
-      transactionSubmitted && transactionSubmitted('Repayment initiated. Please confirm the pending transactions in ' +
-        'MetaMask. Processing may take a few seconds.');
+      transactionSubmitted && transactionSubmitted('Repayment initiated. Please confirm the pending transactions. ' +
+        'Processing may take a few seconds.');
       const res = await repay(tinlake, loan);
       if (res && res.errorMsg) {
         responseReceived && responseReceived(null, `Repayment failed. ${res.errorMsg}`);

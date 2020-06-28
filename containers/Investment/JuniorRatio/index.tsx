@@ -43,7 +43,7 @@ class JuniorRatio extends React.Component<Props, State> {
     const { minJuniorRatio } = this.state;
     const normalizedRatio = new Decimal(minJuniorRatio).div(100).toString();
     const { tinlake, loadPool, responseReceived, transactionSubmitted } = this.props;
-    transactionSubmitted && transactionSubmitted('Setting mininum TIN ratio initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.');
+    transactionSubmitted && transactionSubmitted('Setting mininum TIN ratio initiated. Please confirm the pending transactions. Processing may take a few seconds.');
     try {
       const res = await setMinJuniorRatio(tinlake, normalizedRatio);
       if (res && res.errorMsg) {

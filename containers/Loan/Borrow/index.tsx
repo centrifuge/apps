@@ -35,7 +35,7 @@ class LoanBorrow extends React.Component<Props, State> {
   }
 
   borrow = async () => {
-    this.props.transactionSubmitted && this.props.transactionSubmitted('Financing initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.');
+    this.props.transactionSubmitted && this.props.transactionSubmitted('Financing initiated. Please confirm the pending transactions. Processing may take a few seconds.');
     try {
       await authTinlake();
       const { borrowAmount } = this.state;

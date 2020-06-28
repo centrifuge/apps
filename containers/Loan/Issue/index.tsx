@@ -114,7 +114,7 @@ class IssueLoan extends React.Component<Props, State> {
     const { tinlake } = this.props;
     return <Box>
       {is === 'loading' ?
-        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Initiating the asset financing process. Please confirm the pending transactions in MetaMask, and do not leave this page until all transactions have been confirmed.'} />
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Initiating the asset financing process. Please confirm the pending transactions and do not leave this page until all transactions have been confirmed.'} />
         :
         <Box>
         <Box>
