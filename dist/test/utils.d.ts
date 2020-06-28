@@ -11,5 +11,6 @@ export declare class TestProvider {
     gasLimit: number;
     constructor(testConfig: ProviderConfig);
     fundAccountWithETH(usr: string, amount: string): Promise<void>;
+    fundAccount2(addr: string, amount: string): Promise<void>;
 }
 export declare function createTinlake(usr: Account, testConfig: ProviderConfig): Partial<ITinlake>;

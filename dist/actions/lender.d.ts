@@ -1,11 +1,14 @@
 import { Constructor, TinlakeParams } from '../Tinlake';
+import BN from 'bn.js';
 export declare function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Base: ActionBase): {
     new (...args: any[]): {
         supplySenior: (currencyAmount: string) => Promise<unknown>;
         redeemSenior: (tokenAmount: string) => Promise<unknown>;
+        getSeniorTokenAllowance: (owner: string) => Promise<BN>;
         approveSeniorToken: (tokenAmount: string) => Promise<unknown>;
         supplyJunior: (currencyAmount: string) => Promise<unknown>;
         redeemJunior: (tokenAmount: string) => Promise<unknown>;
+        getJuniorTokenAllowance: (owner: string) => Promise<BN>;
         approveJuniorToken: (tokenAmount: string) => Promise<unknown>;
         balance: () => Promise<unknown>;
         provider: any;
@@ -25,7 +28,11 @@ export declare function LenderActions<ActionBase extends Constructor<TinlakePara
     };
 } & ActionBase;
 export declare type ILenderActions = {
+    getSeniorTokenAllowance(owner: string): Promise<BN>;
+    getJuniorTokenAllowance(owner: string): Promise<BN>;
     supplyJunior(currencyAmount: string): Promise<any>;
+    approveJuniorToken: (tokenAmount: string) => Promise<unknown>;
+    approveSeniorToken: (tokenAmount: string) => Promise<unknown>;
     redeemJunior(tokenAmount: string): Promise<any>;
     supplySenior(currencyAmount: string): Promise<any>;
     redeemSenior(tokenAmount: string): Promise<any>;
