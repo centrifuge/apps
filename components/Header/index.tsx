@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, Image, Text, ResponsiveContext } from "grommet";
+import { Box, Button, Image, Text } from "grommet";
 import {
   Menu as MenuIcon,
   User as UserIcon,
@@ -112,19 +112,17 @@ class Header extends React.Component<HeaderProps, State> {
                   {poolTitle}</div>
               </Box>
             }
-            <Box flex="grow" basis="auto" style={{ height: 32, padding: '0 32px', borderRight: '1px solid #D8D8D8' }}>
+            <Box flex="grow" basis="auto" style={{ height: 32, padding: '0 16px 0 32px',
+              borderRight: '1px solid #D8D8D8' }}>
               <NavBar
                 border={false}
+                itemGap="large"
                 theme={theme}
-                menuItems={menuItems.filter((item) => {
-                  return (
-                    ((isDemo && item.env === "demo") ||
-                      item.env === "") &&
-                    !item.secondary
-                  );
-                })}
+                menuItems={menuItems.filter((item) =>
+                  ((isDemo && item.env === "demo") || item.env === "") && !item.secondary)}
                 selectedRoute={selectedRoute}
                 onRouteClick={this.onRouteClick}
+                pad={{ horizontal: 'none' }}
               />
             </Box>
             <div style={{ flex: '0 0 auto', paddingLeft: 16 }}>
