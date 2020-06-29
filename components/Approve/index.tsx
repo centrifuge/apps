@@ -3,12 +3,14 @@ import { Box, Button, Heading, Text } from 'grommet';
 import Alert from '../Alert';
 import SecondaryHeader from '../SecondaryHeader';
 import { BackLink } from '../BackLink';
-import { authTinlake } from '../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import BN from 'bn.js';
+import { ensureAuthed } from '../../ducks/auth';
+import { connect } from 'react-redux';
 
 interface Props {
   tinlake: any;
+  ensureAuthed?: () => Promise<void>;
 }
 
 interface State {
@@ -25,13 +27,13 @@ class Approve extends React.Component<Props, State> {
   };
 
   approve = async () => {
-    const { tinlake } = this.props;
+    const { tinlake, ensureAuthed } = this.props;
     const addresses = tinlake.contractAddresses;
 
     this.setState({ is: 'loading' });
 
     try {
-      await authTinlake();
+      await ensureAuthed!();
 
       const amount = (new BN(-1)).toString();
       const approveCurrencyResult = await tinlake.approveCurrency(addresses['LENDER'], amount);
@@ -97,4 +99,4 @@ class Approve extends React.Component<Props, State> {
   }
 }
 
-export default Approve;
+export default connect(state => state, { ensureAuthed })(Approve);

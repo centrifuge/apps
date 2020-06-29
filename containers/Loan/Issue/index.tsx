@@ -4,11 +4,11 @@ import Alert from '../../../components/Alert';
 import NftData from '../../../components/NftData';
 import { connect } from 'react-redux';
 import { getNFT, issue, TinlakeResult } from '../../../services/tinlake/actions';
-import { authTinlake } from '../../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import LoanView from '../View';
 import { AuthState, loadProxies } from '../../../ducks/auth';
 import { NFT } from 'tinlake';
+import { ensureAuthed } from '../../../ducks/auth';
 
 interface Props {
   tinlake: any;
@@ -16,6 +16,7 @@ interface Props {
   registry: string;
   auth: AuthState;
   loadProxies?: () => Promise<void>;
+  ensureAuthed?: () => Promise<void>;
 }
 
 interface State {
@@ -79,12 +80,12 @@ class IssueLoan extends React.Component<Props, State> {
   }
 
   issueLoan = async () => {
-    const { tinlake, loadProxies } = this.props;
+    const { tinlake, loadProxies, ensureAuthed } = this.props;
     const { tokenId } = this.state;
     this.setState({ is: 'loading' });
 
     try {
-      await authTinlake();
+      await ensureAuthed!();
       // finance asset
       const { registry } = this.state;
       const result: TinlakeResult = await issue(tinlake, tokenId, registry);
@@ -176,4 +177,4 @@ class IssueLoan extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadProxies })(IssueLoan);
+export default connect(state => state, { loadProxies, ensureAuthed })(IssueLoan);

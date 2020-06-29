@@ -7,10 +7,9 @@ import {
 } from 'grommet-icons';
 import { connect } from 'react-redux';
 import Link from 'next/link';
-import { AuthState } from '../../ducks/auth';
+import { AuthState, ensureAuthed } from '../../ducks/auth';
 import { formatAddress } from '../../utils/formatAddress';
 import config from '../../config';
-import { authTinlake } from '../../services/tinlake';
 import Router, { withRouter, NextRouter } from 'next/router';
 import { NavBar } from '@centrifuge/axis-nav-bar';
 
@@ -29,6 +28,7 @@ interface HeaderProps {
   menuItems: MenuItem[];
   auth?: AuthState;
   router: NextRouter;
+  ensureAuthed?: () => Promise<void>;
 }
 
 interface State {
@@ -42,7 +42,7 @@ class Header extends React.Component<HeaderProps, State> {
 
   connectAccount = async () => {
     try {
-      await authTinlake();
+      await this.props.ensureAuthed!();
     } catch (e) {
       console.log(`authentication failed with Error ${e}`);
     }
@@ -163,4 +163,4 @@ class Header extends React.Component<HeaderProps, State> {
   }
 }
 
-export default connect(state => state)(withRouter(Header));
+export default connect(state => state, { ensureAuthed })(withRouter(Header));

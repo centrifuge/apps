@@ -7,7 +7,7 @@ import { transactionSubmitted, responseReceived } from '../../../ducks/transacti
 import { PoolState, loadPool } from '../../../ducks/pool';
 import { loadLoan } from '../../../ducks/loans';
 import { connect } from 'react-redux';
-import { authTinlake } from '../../../services/tinlake';
+import { ensureAuthed } from '../../../ducks/auth';
 import BN from 'bn.js';
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators';
 
@@ -19,6 +19,7 @@ interface Props {
   transactionSubmitted?: (loadingMessage: string) => Promise<void>;
   responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>;
   pool?: PoolState;
+  ensureAuthed?: () => Promise<void>;
 }
 
 interface State {
@@ -35,9 +36,10 @@ class LoanBorrow extends React.Component<Props, State> {
   }
 
   borrow = async () => {
-    this.props.transactionSubmitted && this.props.transactionSubmitted('Financing initiated. Please confirm the pending transactions. Processing may take a few seconds.');
+    this.props.transactionSubmitted && this.props.transactionSubmitted('Financing initiated. Please confirm the '+
+      'pending transactions. Processing may take a few seconds.');
     try {
-      await authTinlake();
+      await this.props.ensureAuthed!();
       const { borrowAmount } = this.state;
       const { loan, tinlake } = this.props;
       const res = await borrow(tinlake, loan, borrowAmount);
@@ -96,4 +98,5 @@ class LoanBorrow extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadLoan, transactionSubmitted, responseReceived, loadPool })(LoanBorrow);
+export default connect(state => state, { loadLoan, transactionSubmitted, responseReceived, loadPool, ensureAuthed,
+  })(LoanBorrow);

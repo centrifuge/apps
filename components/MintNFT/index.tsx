@@ -4,15 +4,17 @@ import { Box, FormField, TextInput, Button, Heading, Anchor, Text } from 'gromme
 import Alert from '../Alert';
 import SecondaryHeader from '../SecondaryHeader';
 import { BackLink } from '../BackLink';
-import { authTinlake } from '../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import NumberInput from '../NumberInput';
 import { PoolLink } from '../PoolLink';
+import { connect } from 'react-redux';
+import { ensureAuthed } from '../../ducks/auth';
 
 const NFT_REGISTRY = '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24';
 
 interface Props {
   tinlake: any;
+  ensureAuthed?: () => Promise<void>;
 }
 
 interface State {
@@ -45,14 +47,15 @@ class MintNFT extends React.Component<Props, State> {
   }
 
   mint = async () => {
+    const { tinlake, ensureAuthed } = this.props;
     const { referenceId, assetType, amount, tokenId } = this.state;
     const registry = NFT_REGISTRY;
     {
       this.setState({ is: 'loading' });
       try {
-        await authTinlake();
+        await ensureAuthed!();
         const base = displayToBase(baseToDisplay(amount, 2), 2);
-        const res = await this.props.tinlake.mintNFT(registry, this.props.tinlake.ethConfig.from, tokenId, referenceId, base, assetType);
+        const res = await tinlake.mintNFT(registry, tinlake.ethConfig.from, tokenId, referenceId, base, assetType);
         if (res.status === SUCCESS_STATUS && res.events[0].event.name === 'Transfer') {
           this.setState({ is: 'success' });
         } else {
@@ -145,4 +148,4 @@ class MintNFT extends React.Component<Props, State> {
   }
 }
 
-export default MintNFT;
+export default connect(state => state, { ensureAuthed })(MintNFT);
