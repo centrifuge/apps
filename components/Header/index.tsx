@@ -85,6 +85,9 @@ class Header extends React.Component<HeaderProps, State> {
       }
     };
 
+    const filtMenuItems = menuItems.filter(item =>
+      ((isDemo && item.env === 'demo') || item.env === '') && !item.secondary)
+
     return (
       <Box
         style={{ position: 'sticky', top: 0, height: '56px', zIndex: 2, boxShadow: '0 0 4px 0px #00000075' }}
@@ -114,16 +117,17 @@ class Header extends React.Component<HeaderProps, State> {
             }
             <Box flex="grow" basis="auto" style={{ height: 32, padding: '0 16px 0 32px',
               borderRight: '1px solid #D8D8D8' }}>
-              <NavBar
-                border={false}
-                itemGap="large"
-                theme={theme}
-                menuItems={menuItems.filter(item =>
-                  ((isDemo && item.env === 'demo') || item.env === '') && !item.secondary)}
-                selectedRoute={selectedRoute}
-                onRouteClick={this.onRouteClick}
-                pad={{ horizontal: 'none' }}
-              />
+              {filtMenuItems.length > 0 &&
+                <NavBar
+                  border={false}
+                  itemGap="large"
+                  theme={theme}
+                  menuItems={filtMenuItems}
+                  selectedRoute={selectedRoute}
+                  onRouteClick={this.onRouteClick}
+                  pad={{ horizontal: 'none' }}
+                />
+              }
             </Box>
             <div style={{ flex: '0 0 auto', paddingLeft: 16 }}>
               {!address && (
