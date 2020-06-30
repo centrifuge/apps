@@ -138,7 +138,7 @@ class Overview extends React.Component<Props> {
         </Box>
       </Box>
 
-      <Heading level="4" margin={{ top: 'xsmall' }}>Latest assets</Heading>
+      <Heading level="4" margin={{ top: 'xsmall' }}>Latest Assets</Heading>
       {(loans!.loansState === 'loading') ?
         <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} /> :
         <LoanListData loans={latestLoans} userAddress={userAddress}> </LoanListData>
