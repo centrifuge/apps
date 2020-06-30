@@ -5,6 +5,7 @@ import Apollo from '../services/apollo';
 import { HYDRATE } from 'next-redux-wrapper';
 import { initOnboard, getOnboard } from '../services/onboard';
 import { ITinlake } from 'tinlake';
+import { getDefaultHttpProvider } from '../services/tinlake';
 
 // Actions
 const CLEAR = 'tinlake-ui/auth/CLEAR';
@@ -104,7 +105,7 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
       const networkName = networkIdToName(network)
       if (networkName !== auth.network) { dispatch(setNetwork(networkName)) }
       if (tinlake.provider !== wallet.provider) { tinlake.setProvider(wallet.provider) }
-      if (wallet.name) { dispatch(setAuthState('authed')) }
+      if (address) { dispatch(setAuthState('authed')) }
       return
     }
 
@@ -128,7 +129,9 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
       wallet: ({ provider, name, instance }) => {
         console.log('new wallet: ', provider, name, instance);
 
-        tinlake.setProvider(provider);
+        if (provider) {
+          tinlake.setProvider(provider);
+        }
 
         // store the selected wallet name to be retrieved next time the app loads
         window.localStorage.setItem('selectedWallet', name || '');
@@ -146,13 +149,17 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
 
       const walletSelected = await onboard.walletSelect(previouslySelectedWallet)
       console.log('walletSelected', walletSelected)
-
-      if (walletSelected) {
-        await onboard.walletCheck()
-        dispatch(setAuthState('authed'))
-      } else {
+      if (!walletSelected) {
         dispatch(setAuthState(null))
+        return
       }
+
+      const walletChecked = await onboard.walletCheck()
+      if (!walletChecked) {
+        dispatch(setAuthState(null))
+        return
+      }
+      dispatch(setAuthState('authed'))
     }
   }
 }
@@ -230,14 +237,14 @@ export function ensureAuthed(): ThunkAction<Promise<void>, { auth: AuthState }, 
   }
 }
 
-export function setAddressAndLoadData(tinlake: any, address: string):
+export function setAddressAndLoadData(tinlake: ITinlake, address: string):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch) => {
     console.log(`ducks/auth.ts setAddressAndLoadData(tinlake: _, address: ${address}), tinlake.addresses`, tinlake.contractAddresses);
 
     // clear if no address given
     if (!address) {
-      dispatch({ type: CLEAR });
+      dispatch(clear(tinlake));
       return;
     }
 
@@ -357,10 +364,13 @@ export function setNetwork(network: string | null):
   };
 }
 
-export function clear():
-  ThunkAction<Promise<void>, AuthState, undefined, Action> {
+export function clear(tinlake: ITinlake):
+  ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch) => {
     console.log('ducks/auth.ts clear');
+
+    tinlake.setProvider(getDefaultHttpProvider())
+    tinlake.setEthConfig({ from: '' });
 
     const onboard = getOnboard()
     onboard?.walletReset()

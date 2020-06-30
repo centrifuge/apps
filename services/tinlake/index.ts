@@ -13,10 +13,8 @@ export function getTinlake({ addresses, contractConfig }: { addresses?: Contract
   console.log(`services/tinlake getTinlake({ addresses: ${JSON.stringify(addresses)}, contractConfig: ${JSON.stringify(contractConfig)}})`);
 
   if (tinlake === null) {
-    const { transactionTimeout, rpcUrl } = config;
-
-    const httpProvider = new Eth.HttpProvider(rpcUrl);
-    tinlake = new Tinlake({ transactionTimeout, provider: httpProvider }) as any;
+    const { transactionTimeout } = config;
+    tinlake = new Tinlake({ transactionTimeout, provider: getDefaultHttpProvider() }) as any;
     tinlake!.setEthConfig({ gasLimit: `0x${config.gasLimit.toString(16)}` });
   }
 
@@ -38,6 +36,12 @@ export function getTinlake({ addresses, contractConfig }: { addresses?: Contract
   }
 
   return tinlake;
+}
+
+export function getDefaultHttpProvider(): any {
+  const { rpcUrl } = config;
+  const httpProvider = new Eth.HttpProvider(rpcUrl);
+  return httpProvider
 }
 
 function deepEqual(a: any, b: any): boolean {
