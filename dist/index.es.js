@@ -38,6 +38,17 @@ function __extends(d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
 
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+
 function __awaiter(thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -47424,7 +47435,7 @@ var Tinlake = /** @class */ (function () {
             }
         };
         this.setEthConfig = function (ethConfig) {
-            _this.ethConfig = ethConfig;
+            _this.ethConfig = __assign(__assign({}, _this.ethConfig), ethConfig);
         };
         this.getOperatorType = function (tranche) {
             switch (tranche) {

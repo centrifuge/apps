@@ -1,8 +1,8 @@
 import { ethI } from './services/ethereum';
 declare const contractNames: string[];
 export declare type EthConfig = {
-    from: string;
-    gasLimit: string;
+    from?: string;
+    gasLimit?: string;
 };
 export declare type ContractNames = typeof contractNames[number];
 export declare type Contracts = {

@@ -1,5 +1,6 @@
  import { TinlakeActions } from '../actions';
 import BN from 'bn.js';
+import { EthConfig, ContractAddresses, ContractAbis, Contracts } from '../Tinlake';
 
 export type Loan = {
   loanId: string;
@@ -48,14 +49,14 @@ export type ITinlake = TinlakeActions & {
   provider: any;
   eth: any;
   ethOptions: any;
-  ethConfig: any;
-  contractAddresses: any;
+  ethConfig: EthConfig | {};
+  contractAddresses: ContractAddresses;
   transactionTimeout: number;
-  contracts: any;
-  contractAbis: any;
+  contracts: Contracts;
+  contractAbis: ContractAbis;
+  contractConfig: any;
   setProvider(provider: any, ethOptions?: any): void;
-  setEthConfig(ethConfig: {
-    [key: string]: any;
-  }): void;
+  setContracts(): void;
+  setEthConfig(ethConfig: EthConfig | {}): void;
   setContractAddresses(): () => Promise<void>;
 };
