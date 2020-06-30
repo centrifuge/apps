@@ -113,7 +113,6 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
       },
       network: (network) => {
         const networkName = networkIdToName(network)
-        if (networkName === null) { throw new Error(`unrecognized network ${network}`)}
         dispatch(setNetwork(networkName))
       },
       wallet: ({ provider, name, instance }) => {
@@ -312,7 +311,7 @@ export function loadPermissions(tinlake: any):
   };
 }
 
-export function setNetwork(network: string):
+export function setNetwork(network: string | null):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     if (!network) {

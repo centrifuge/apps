@@ -8,8 +8,8 @@ export function networkIdToName(id: number) {
     case 42: return 'Kovan';
     case 100: return 'XDai';
     case 99: return 'Local';
-    default: return null;
   }
+  return null
 }
 
 export function networkNameToId(name: string) {
