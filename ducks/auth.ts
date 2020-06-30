@@ -104,7 +104,7 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
       if (address !== auth.address) { dispatch(setAddressAndLoadData(tinlake, address)) }
       const networkName = networkIdToName(network)
       if (networkName !== auth.network) { dispatch(setNetwork(networkName)) }
-      if (tinlake.provider !== wallet.provider) { tinlake.setProvider(wallet.provider) }
+      if (tinlake.provider !== wallet.provider && wallet.provider) { tinlake.setProvider(wallet.provider) }
       if (address) { dispatch(setAuthState('authed')) }
       return
     }
