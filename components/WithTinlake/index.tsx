@@ -25,8 +25,8 @@ class WithTinlake extends React.Component<Props, State> {
   tinlake: ITinlake | null = null;
   isMounted = false;
   componentDidMount() {
-    this.init();
     this.isMounted = true;
+    this.init();
   }
 
   componentWillUnmount() {
@@ -34,8 +34,6 @@ class WithTinlake extends React.Component<Props, State> {
   }
 
   init = async () => {
-    console.log('components/WithTinlake init');
-
     const { addresses, contractConfig } = this.props;
 
     this.tinlake = getTinlake({ addresses, contractConfig });
