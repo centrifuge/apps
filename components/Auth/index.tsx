@@ -2,6 +2,8 @@ import * as React from 'react';
 import { AuthState, load } from '../../ducks/auth';
 import { connect } from 'react-redux';
 import { ITinlake } from 'tinlake';
+import config from '../../config';
+import WrongNetwork from '../WrongNetwork';
 
 interface Props {
   tinlake: ITinlake;
@@ -25,6 +27,10 @@ class Auth extends React.Component<Props> {
 
   render() {
     const { auth } = this.props;
+
+    if (auth!.network !== config.network) {
+      return <WrongNetwork expected={config.network} actual={auth!.network} />
+    }
 
     return this.props.render(auth!);
   }

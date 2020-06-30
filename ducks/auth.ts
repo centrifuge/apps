@@ -6,6 +6,7 @@ import { HYDRATE } from 'next-redux-wrapper';
 import { initOnboard, getOnboard } from '../services/onboard';
 import { ITinlake } from 'tinlake';
 import { getDefaultHttpProvider } from '../services/tinlake';
+import config from '../config';
 
 // Actions
 const CLEAR = 'tinlake-ui/auth/CLEAR';
@@ -48,7 +49,7 @@ export interface AuthState {
   permissions: null | Permissions;
   proxiesState: null | 'loading' | 'loaded';
   proxies: null | Proxies;
-  network: null | string;
+  network: string;
 }
 
 const initialState: AuthState = {
@@ -58,7 +59,7 @@ const initialState: AuthState = {
   permissions: null,
   proxiesState: null,
   proxies: null,
-  network: null
+  network: config.network,
 };
 
 // Reducer
@@ -69,12 +70,12 @@ export default function reducer(state: AuthState = initialState,
     case SET_AUTH_STATE: return { ...state, authState: action.authState };
     case RECEIVE_ADDRESS: return { ...state, address: action.address };
     case CLEAR: return { ...state, address: null, authState: null, permissionsState: null, permissions: null,
-      proxiesState: null, proxies: null, network: null };
+      proxiesState: null, proxies: null, network: config.network };
     case LOAD_PERMISSIONS: return { ...state, permissionsState: 'loading' };
     case RECEIVE_PERMISSIONS: return { ...state, permissionsState: 'loaded', permissions: action.permissions };
     case LOAD_PROXIES: return { ...state, proxiesState: 'loading' };
     case RECEIVE_PROXIES: return { ...state, proxiesState: 'loaded', proxies: action.proxies };
-    case CLEAR_NETWORK: return { ...state, network: null };
+    case CLEAR_NETWORK: return { ...state, network: config.network };
     case RECEIVE_NETWORK: return { ...state, network: action.network };
     default: return state;
   }
@@ -103,7 +104,7 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
       const { address, network, wallet } = onboard.getState()
       if (address !== auth.address) { dispatch(setAddressAndLoadData(tinlake, address)) }
       const networkName = networkIdToName(network)
-      if (networkName !== auth.network) { dispatch(setNetwork(networkName)) }
+      if (networkName !== auth.network && networkName) { dispatch(setNetwork(networkName)) }
       if (tinlake.provider !== wallet.provider && wallet.provider) { tinlake.setProvider(wallet.provider) }
       if (address) { dispatch(setAuthState('authed')) }
       return
@@ -119,13 +120,9 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
       network: (network) => {
         const networkName = networkIdToName(network)
         console.log('new network: ', networkName)
+        if (networkName === null) { throw new Error(`unrecognized network ${network}`)}
         dispatch(setNetwork(networkName))
-        // const state = getState()
-        // if (state.auth.network === networkName) {
-        //   window.location.reload()
-        // }
       },
-      // balance: (balance) => console.log('new balance: ', balance),
       wallet: ({ provider, name, instance }) => {
         console.log('new wallet: ', provider, name, instance);
 
@@ -343,7 +340,7 @@ export function loadPermissions(tinlake: any):
   };
 }
 
-export function setNetwork(network: string | null):
+export function setNetwork(network: string):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     console.log('ducks/auth.ts setNetwork');
