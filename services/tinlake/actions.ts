@@ -54,7 +54,6 @@ async function getOrCreateProxy(tinlake: any, address: string) {
   // check if user already has a proxy address
   try {
     proxyAddress = await tinlake.checkProxyExists(address);
-    console.log('proxy found', proxyAddress);
   } catch (e) {
     proxyAddress = null;
   }
@@ -63,7 +62,6 @@ async function getOrCreateProxy(tinlake: any, address: string) {
   if (!proxyAddress) {
     try {
       proxyAddress = await tinlake.proxyCreateNew(address);
-      console.log('proxy not found, new proxy address', proxyAddress);
     } catch (e) {
       throw(e);
     }
@@ -471,7 +469,7 @@ export async function redeem(tinlake: ITinlake, redeemAmount: string, trancheTyp
 }
 
 function loggedError(error: any, message: string, id: string) {
-  console.log(`${message} ${id}`, error);
+  console.error(`${message} ${id}`, error);
   return {
     id,
     errorMsg: `${error} - ${message} ${id}`

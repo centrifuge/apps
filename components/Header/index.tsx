@@ -44,7 +44,7 @@ class Header extends React.Component<HeaderProps, State> {
     try {
       await this.props.ensureAuthed!();
     } catch (e) {
-      console.log(`authentication failed with Error ${e}`);
+      console.error(`authentication failed with Error ${e}`);
     }
   }
 

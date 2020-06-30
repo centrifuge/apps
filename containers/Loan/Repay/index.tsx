@@ -47,7 +47,7 @@ class LoanRepay extends React.Component<Props, State> {
       loadLoan && loadLoan(tinlake, loan.loanId);
     } catch (e) {
       responseReceived && responseReceived(null, `Repayment failed. ${e}`);
-      console.log(e);
+      console.error(e);
     }
   }
 

@@ -49,7 +49,7 @@ class InvestorRedeem extends React.Component<Props, State> {
       loadPool && loadPool(tinlake);
     } catch (e) {
       responseReceived && responseReceived(null, `Redeem failed. ${e}`);
-      console.log(e);
+      console.error(e);
     }
   }
 

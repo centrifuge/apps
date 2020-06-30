@@ -52,7 +52,7 @@ class InvestorSupply extends React.Component<Props, State> {
       loadPool && loadPool(tinlake);
     } catch (e) {
       responseReceived && responseReceived(null, `Investment failed. ${e}`);
-      console.log(e);
+      console.error(e);
     }
   }
 

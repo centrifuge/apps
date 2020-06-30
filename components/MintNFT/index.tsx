@@ -62,7 +62,7 @@ class MintNFT extends React.Component<Props, State> {
           this.setState({ is: 'error' });
         }
       } catch (e) {
-        console.log(e);
+        console.error(e);
         this.setState({ is: 'error', errorMsg: e.message });
       }
     }

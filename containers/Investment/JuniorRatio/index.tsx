@@ -54,7 +54,7 @@ class JuniorRatio extends React.Component<Props, State> {
       loadPool && loadPool(tinlake);
     } catch (e) {
       responseReceived && responseReceived(null, `Changing minimum TIN ratio failed. ${e}`);
-      console.log(e);
+      console.error(e);
     }
   }
   render() {

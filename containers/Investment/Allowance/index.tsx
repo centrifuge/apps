@@ -74,7 +74,7 @@ class InvestorAllowance extends React.Component<Props, State> {
       this.props.loadInvestor && this.props.loadInvestor(tinlake, investor.address);
     } catch (e) {
       this.props.responseReceived && this.props.responseReceived(null, `Allowance failed. ${e}`);
-      console.log(e);
+      console.error(e);
     }
   }
 

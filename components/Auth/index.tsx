@@ -18,8 +18,6 @@ class Auth extends React.Component<Props> {
   }
 
   init = async () => {
-    console.log('components/Auth init');
-
     const { tinlake, load } = this.props;
 
     load!(tinlake);

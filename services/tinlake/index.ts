@@ -10,7 +10,6 @@ let currentContractConfig: null | any = null;
 // getTinlake returns a singleton tinlake. Tinlake is re-intialized if addresses or contractConfig has been changed.
 export function getTinlake({ addresses, contractConfig }: { addresses?: ContractAddresses | null;
   contractConfig?: any | null } = {}) {
-  console.log(`services/tinlake getTinlake({ addresses: ${JSON.stringify(addresses)}, contractConfig: ${JSON.stringify(contractConfig)}})`);
 
   if (tinlake === null) {
     const { transactionTimeout } = config;

@@ -45,7 +45,7 @@ class LoanInterest extends React.Component<Props, State> {
       this.props.loadLoan && this.props.loadLoan(tinlake, loan.loanId);
     } catch (e) {
       this.props.responseReceived && this.props.responseReceived(null, `Changing interest rate failed. ${e}`);
-      console.log(e);
+      console.error(e);
     }
   }
 

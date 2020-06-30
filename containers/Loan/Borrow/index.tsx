@@ -51,7 +51,7 @@ class LoanBorrow extends React.Component<Props, State> {
       this.props.loadLoan && this.props.loadLoan(tinlake, loan.loanId);
     } catch (e) {
       this.props.responseReceived && this.props.responseReceived(null, `Financing failed. ${e}`);
-      console.log(e);
+      console.error(e);
     }
   }
 
