@@ -32,7 +32,7 @@ class InvestorRedeem extends React.Component<Props, State> {
   };
 
   redeem = async () => {
-    const { tranche, transactionSubmitted, responseReceived, loadInvestor, loadPool, investor, tinlake, ensureAuthed,
+    const { tranche, transactionSubmitted, responseReceived, loadInvestor, loadPool, investor, tinlake, ensureAuthed
       } = this.props;
     const { redeemAmount } = this.state;
     transactionSubmitted && transactionSubmitted('Redeem initiated. Please confirm the pending transactions. ' +

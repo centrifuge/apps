@@ -9,7 +9,7 @@ export function networkIdToName(id: number) {
     case 100: return 'XDai';
     case 99: return 'Local';
   }
-  return null
+  return null;
 }
 
 export function networkNameToId(name: string) {

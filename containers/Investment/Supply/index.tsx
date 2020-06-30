@@ -34,7 +34,7 @@ class InvestorSupply extends React.Component<Props, State> {
     const { transactionSubmitted, responseReceived, trancheType, tinlake, investor, loadInvestor, loadPool,
       ensureAuthed } = this.props;
     const { supplyAmount } = this.state;
-    transactionSubmitted && transactionSubmitted('Investment initiated. Please confirm the pending transactions. '+
+    transactionSubmitted && transactionSubmitted('Investment initiated. Please confirm the pending transactions. ' +
       'Processing may take a few seconds.');
     try {
       await ensureAuthed!();
@@ -89,4 +89,4 @@ class InvestorSupply extends React.Component<Props, State> {
 }
 
 export default connect(state => state, { loadInvestor, loadPool, transactionSubmitted, responseReceived, ensureAuthed
-  })(InvestorSupply);
+})(InvestorSupply);

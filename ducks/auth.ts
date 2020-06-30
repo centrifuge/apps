@@ -59,7 +59,7 @@ const initialState: AuthState = {
   permissions: null,
   proxiesState: null,
   proxies: null,
-  network: config.network,
+  network: config.network
 };
 
 // Reducer
@@ -92,30 +92,30 @@ export default function reducer(state: AuthState = initialState,
 // stateful API here and manually sync values over on load.
 export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
-    const { auth } = getState()
-    let onboard = getOnboard()
+    const { auth } = getState();
+    let onboard = getOnboard();
 
     // onboard is already initialized, only ensure values are correct and return
     if (onboard) {
-      const { address, network, wallet } = onboard.getState()
-      if (address !== auth.address) { dispatch(setAddressAndLoadData(tinlake, address)) }
-      const networkName = networkIdToName(network)
-      if (networkName !== auth.network && networkName) { dispatch(setNetwork(networkName)) }
-      if (tinlake.provider !== wallet.provider && wallet.provider) { tinlake.setProvider(wallet.provider) }
-      if (address) { dispatch(setAuthState('authed')) }
-      return
+      const { address, network, wallet } = onboard.getState();
+      if (address !== auth.address) { dispatch(setAddressAndLoadData(tinlake, address)); }
+      const networkName = networkIdToName(network);
+      if (networkName !== auth.network && networkName) { dispatch(setNetwork(networkName)); }
+      if (tinlake.provider !== wallet.provider && wallet.provider) { tinlake.setProvider(wallet.provider); }
+      if (address) { dispatch(setAuthState('authed')); }
+      return;
     }
 
     // onboard not yet initialized, initialize now
     onboard = initOnboard({
       address: (address) => {
-        dispatch(setAddressAndLoadData(tinlake, address))
+        dispatch(setAddressAndLoadData(tinlake, address));
       },
       network: (network) => {
-        const networkName = networkIdToName(network)
-        dispatch(setNetwork(networkName))
+        const networkName = networkIdToName(network);
+        dispatch(setNetwork(networkName));
       },
-      wallet: ({ provider, name, instance }) => {
+      wallet: ({ provider, name }) => {
         if (provider) {
           tinlake.setProvider(provider);
         }
@@ -123,95 +123,95 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
         // store the selected wallet name to be retrieved next time the app loads
         window.localStorage.setItem('selectedWallet', name || '');
       }
-    })
+    });
 
     // get the selectedWallet value from local storage
-    const previouslySelectedWallet = window.localStorage.getItem('selectedWallet')
+    const previouslySelectedWallet = window.localStorage.getItem('selectedWallet');
 
     // call wallet select with that value if it exists
     if (previouslySelectedWallet !== null && previouslySelectedWallet !== '') {
-      dispatch(setAuthState('authing'))
+      dispatch(setAuthState('authing'));
 
-      const walletSelected = await onboard.walletSelect(previouslySelectedWallet)
+      const walletSelected = await onboard.walletSelect(previouslySelectedWallet);
       if (!walletSelected) {
-        dispatch(setAuthState(null))
-        return
+        dispatch(setAuthState(null));
+        return;
       }
 
-      const walletChecked = await onboard.walletCheck()
+      const walletChecked = await onboard.walletCheck();
       if (!walletChecked) {
-        dispatch(setAuthState(null))
-        return
+        dispatch(setAuthState(null));
+        return;
       }
     }
-  }
+  };
 }
 
-let openAuthPromise: Promise<void> | null = null
+let openAuthPromise: Promise<void> | null = null;
 
 // auth opens onboard wallet select. If there is already an auth process, it blocks until that auth promise is resolved.
 export function auth(): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch) => {
     if (openAuthPromise) {
-      return await openAuthPromise
+      return await openAuthPromise;
     }
 
     openAuthPromise = new Promise<void>(async (resolve, reject) => {
-      dispatch(setAuthState('authing'))
+      dispatch(setAuthState('authing'));
 
-      const onboard = getOnboard()
+      const onboard = getOnboard();
       if (!onboard) {
-        reject('onboard not found')
-        openAuthPromise = null
-        return
+        reject('onboard not found');
+        openAuthPromise = null;
+        return;
       }
 
-      const walletSelected = await onboard.walletSelect()
+      const walletSelected = await onboard.walletSelect();
 
       if (!walletSelected) {
-        dispatch(setAuthState('aborted'))
-        reject('wallet not selected')
-        openAuthPromise = null
-        return
+        dispatch(setAuthState('aborted'));
+        reject('wallet not selected');
+        openAuthPromise = null;
+        return;
       }
 
-      const walletChecked = await onboard.walletCheck()
+      const walletChecked = await onboard.walletCheck();
       if (!walletChecked) {
-        dispatch(setAuthState('aborted'))
-        reject('wallet not checked')
-        openAuthPromise = null
-        return
+        dispatch(setAuthState('aborted'));
+        reject('wallet not checked');
+        openAuthPromise = null;
+        return;
       }
 
-      dispatch(setAuthState('authed'))
-      resolve()
-      openAuthPromise = null
-      return
-    })
+      dispatch(setAuthState('authed'));
+      resolve();
+      openAuthPromise = null;
+      return;
+    });
 
-    return await openAuthPromise
-  }
+    return await openAuthPromise;
+  };
 }
 
 // ensureAuthed checks whether status is authed or authing, otherwise initiates auth
 export function ensureAuthed(): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     const state = getState();
-    if (openAuthPromise) { await openAuthPromise }
+    if (openAuthPromise) { await openAuthPromise; }
 
     if (state.auth.authState === 'aborted' || state.auth.authState === null) {
-      return dispatch(auth())
+      return dispatch(auth());
     }
 
-    const onboard = getOnboard()
+    const onboard = getOnboard();
     if (!onboard) {
-      throw new Error('onboard not found')
+      throw new Error('onboard not found');
     }
-    const walletChecked = await onboard!.walletCheck()
+    const walletChecked = await onboard!.walletCheck();
     if (!walletChecked) {
-      throw new Error('wallet not checked')
+      throw new Error('wallet not checked');
     }
-  }
+  };
 }
 
 export function setAddressAndLoadData(tinlake: ITinlake, address: string):
@@ -235,7 +235,7 @@ export function setAddressAndLoadData(tinlake: ITinlake, address: string):
 export function setAuthState(authState: null | 'authing' | 'aborted' | 'authed'):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch) => {
-    dispatch({ type: SET_AUTH_STATE, authState });
+    dispatch({ authState, type: SET_AUTH_STATE });
   };
 }
 
@@ -326,20 +326,20 @@ export function setNetwork(network: string | null):
       return;
     }
 
-    dispatch({ network: network, type: RECEIVE_NETWORK });
+    dispatch({ network, type: RECEIVE_NETWORK });
   };
 }
 
 export function clear(tinlake: ITinlake):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch) => {
-    tinlake.setProvider(getDefaultHttpProvider())
+    tinlake.setProvider(getDefaultHttpProvider());
     tinlake.setEthConfig({ from: '' });
 
-    const onboard = getOnboard()
-    onboard?.walletReset()
-    window.localStorage.removeItem('selectedWallet')
+    const onboard = getOnboard();
+    onboard?.walletReset();
+    window.localStorage.removeItem('selectedWallet');
 
-    dispatch({ type: CLEAR })
+    dispatch({ type: CLEAR });
   };
 }

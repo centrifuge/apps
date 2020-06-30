@@ -36,7 +36,7 @@ class LoanBorrow extends React.Component<Props, State> {
   }
 
   borrow = async () => {
-    this.props.transactionSubmitted && this.props.transactionSubmitted('Financing initiated. Please confirm the '+
+    this.props.transactionSubmitted && this.props.transactionSubmitted('Financing initiated. Please confirm the ' +
       'pending transactions. Processing may take a few seconds.');
     try {
       await this.props.ensureAuthed!();
@@ -98,5 +98,5 @@ class LoanBorrow extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadLoan, transactionSubmitted, responseReceived, loadPool, ensureAuthed,
-  })(LoanBorrow);
+export default connect(state => state, { loadLoan, transactionSubmitted, responseReceived, loadPool, ensureAuthed
+})(LoanBorrow);

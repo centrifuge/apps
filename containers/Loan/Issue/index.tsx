@@ -6,9 +6,8 @@ import { connect } from 'react-redux';
 import { getNFT, issue, TinlakeResult } from '../../../services/tinlake/actions';
 import { Spinner } from '@centrifuge/axis-spinner';
 import LoanView from '../View';
-import { AuthState, loadProxies } from '../../../ducks/auth';
+import { AuthState, loadProxies, ensureAuthed } from '../../../ducks/auth';
 import { NFT } from 'tinlake';
-import { ensureAuthed } from '../../../ducks/auth';
 
 interface Props {
   tinlake: any;

@@ -40,7 +40,7 @@ export function getTinlake({ addresses, contractConfig }: { addresses?: Contract
 export function getDefaultHttpProvider(): any {
   const { rpcUrl } = config;
   const httpProvider = new Eth.HttpProvider(rpcUrl);
-  return httpProvider
+  return httpProvider;
 }
 
 function deepEqual(a: any, b: any): boolean {

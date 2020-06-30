@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Alert from "../Alert";
+import Alert from '../Alert';
 import { getOnboard } from '../../services/onboard';
 
 interface Props {
@@ -9,11 +9,11 @@ interface Props {
 
 class WrongNetwork extends React.Component<Props> {
   componentDidMount() {
-    getOnboard()?.walletCheck()
+    getOnboard()?.walletCheck();
   }
 
   render() {
-    const { expected, actual } = this.props
+    const { expected, actual } = this.props;
 
     return (
       <Alert type="error" margin="large">

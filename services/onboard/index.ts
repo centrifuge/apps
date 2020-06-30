@@ -21,11 +21,11 @@ const wallets = [
   }
 ];
 
-let onboard: API | null = null
+let onboard: API | null = null;
 
 // initOnboard returns onboard singleton. Onboard is only initialized once and stored in global state.
 export function initOnboard(subscriptions?: Subscriptions): API {
-  if (onboard) { return onboard }
+  if (onboard) { return onboard; }
 
   onboard = Onboard({
     subscriptions,
@@ -40,9 +40,9 @@ export function initOnboard(subscriptions?: Subscriptions): API {
     hideBranding: true
   });
 
-  return onboard
+  return onboard;
 }
 
 export function getOnboard(): API | null {
-  return onboard
+  return onboard;
 }

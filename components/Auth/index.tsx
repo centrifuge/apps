@@ -27,7 +27,7 @@ class Auth extends React.Component<Props> {
     const { auth } = this.props;
 
     if (auth!.network !== config.network) {
-      return <WrongNetwork expected={config.network} actual={auth!.network} />
+      return <WrongNetwork expected={config.network} actual={auth!.network} />;
     }
 
     return this.props.render(auth!);

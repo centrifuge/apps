@@ -86,7 +86,7 @@ class Header extends React.Component<HeaderProps, State> {
     };
 
     const filtMenuItems = menuItems.filter(item =>
-      ((isDemo && item.env === 'demo') || item.env === '') && !item.secondary)
+      ((isDemo && item.env === 'demo') || item.env === '') && !item.secondary);
 
     return (
       <Box
