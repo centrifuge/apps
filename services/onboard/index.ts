@@ -23,13 +23,13 @@ const wallets = [
 
 let onboard: API | null = null
 
-// loadOnboard returns onboard. Onboard is only loaded once and stored in global state.
-export function loadOnboard(subscriptions?: Subscriptions): API {
+// initOnboard returns onboard singleton. Onboard is only initialized once and stored in global state.
+export function initOnboard(subscriptions?: Subscriptions): API {
   if (onboard) { return onboard }
 
   onboard = Onboard({
     subscriptions,
-    networkId: networkNameToId(config.network),
+    networkId: networkNameToId(config.network)!,
     walletSelect: { wallets },
     walletCheck: [
       { checkName: 'connect' },

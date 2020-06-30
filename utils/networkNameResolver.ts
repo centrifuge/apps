@@ -8,7 +8,7 @@ export function networkIdToName(id: number) {
     case 42: return 'Kovan';
     case 100: return 'XDai';
     case 99: return 'Local';
-    default: return 'unknown';
+    default: return null;
   }
 }
 
@@ -22,7 +22,7 @@ export function networkNameToId(name: string) {
     case 'Kovan': return 42;
     case 'XDai': return 100;
     case 'Local': return 99;
-    default: return 0;
+    default: return null;
   }
 }
 
@@ -35,5 +35,5 @@ export function networkUrlToName(url: string) {
   if (url.indexOf('kovan') > -1) return 'Kovan';
   if (url.indexOf('xDai') > -1) return 'XDai';
   if (url.indexOf('localhost') > -1) return 'Local';
-  return 'unknown';
+  return null;
 }

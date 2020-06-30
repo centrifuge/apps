@@ -3,7 +3,7 @@ import { ThunkAction } from 'redux-thunk';
 import { networkIdToName } from '../utils/networkNameResolver';
 import Apollo from '../services/apollo';
 import { HYDRATE } from 'next-redux-wrapper';
-import { loadOnboard, getOnboard } from '../services/onboard';
+import { initOnboard, getOnboard } from '../services/onboard';
 import { ITinlake } from 'tinlake';
 
 // Actions
@@ -65,7 +65,7 @@ export default function reducer(state: AuthState = initialState,
                                 action: AnyAction = { type: '' }): AuthState {
   switch (action.type) {
     case HYDRATE: return { ...state, ...(action.payload.auth || {}) };
-    case SET_AUTH_STATE: return { ...state, authState: action.payload.authState };
+    case SET_AUTH_STATE: return { ...state, authState: action.authState };
     case RECEIVE_ADDRESS: return { ...state, address: action.address };
     case CLEAR: return { ...state, address: null, authState: null, permissionsState: null, permissions: null,
       proxiesState: null, proxies: null, network: null };
@@ -82,37 +82,77 @@ export default function reducer(state: AuthState = initialState,
 // side effects, only as applicable
 // e.g. thunks, epics, etc
 
-// load loads onboard if not yet loaded, connects if the user previously chose a wallet and subscribes to changes
+// load loads onboard if not yet loaded, connects if the user previously chose a wallet and subscribes to changes. This
+// function is called in different places and should not re-initialize onboard on every load. Therefore, onboard is a
+// singleton. Unfortunately that implies that the subscriptions are not re-triggered for the initial load if a
+// navigation event between pages, which discards the redux state, but does not discard onboard. Putting onboard into
+// the state would work, but it would lead to two sources of truth. Consequently, we keep onboard as an external
+// stateful API here and manually sync values over on load.
 export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
-  return async (dispatch) => {
-    const onboard = loadOnboard({
+  return async (dispatch, getState) => {
+    const { auth } = getState()
+    console.log(`auth.load, authState: ${auth.authState}, address ${auth.address}, network ${auth.network}`, JSON.stringify(auth))
+
+    let onboard = getOnboard()
+
+    // onboard is already initialized, only ensure values are correct and return
+    if (onboard) {
+      console.log('onboard already exists, sync values')
+
+      const { address, network, wallet } = onboard.getState()
+      if (address !== auth.address) { dispatch(setAddressAndLoadData(tinlake, address)) }
+      const networkName = networkIdToName(network)
+      if (networkName !== auth.network) { dispatch(setNetwork(networkName)) }
+      if (tinlake.provider !== wallet.provider) { tinlake.setProvider(wallet.provider) }
+      if (wallet.name) { dispatch(setAuthState('authed')) }
+      return
+    }
+
+    // onboard not yet initialized, initialize now
+    onboard = initOnboard({
       address: (address) => {
         console.log('new address: ', address)
 
         dispatch(setAddressAndLoadData(tinlake, address))
       },
       network: (network) => {
-        console.log('new network: ', network)
-        dispatch(setNetwork(network))
+        const networkName = networkIdToName(network)
+        console.log('new network: ', networkName)
+        dispatch(setNetwork(networkName))
+        // const state = getState()
+        // if (state.auth.network === networkName) {
+        //   window.location.reload()
+        // }
       },
-      balance: (balance) => console.log('new balance: ', balance),
+      // balance: (balance) => console.log('new balance: ', balance),
       wallet: ({ provider, name, instance }) => {
         console.log('new wallet: ', provider, name, instance);
 
         tinlake.setProvider(provider);
 
         // store the selected wallet name to be retrieved next time the app loads
-        window.localStorage.set('selectedWallet', name);
+        window.localStorage.setItem('selectedWallet', name || '');
       }
     })
 
     // get the selectedWallet value from local storage
-    const previouslySelectedWallet = window.localStorage.get('selectedWallet')
+    const previouslySelectedWallet = window.localStorage.getItem('selectedWallet')
 
     // call wallet select with that value if it exists
-    if (previouslySelectedWallet != null) {
-      console.log('found previously selected wallet', previouslySelectedWallet)
-      await onboard.walletSelect(previouslySelectedWallet)
+    if (previouslySelectedWallet !== null && previouslySelectedWallet !== '') {
+      console.log('found previously selected wallet', previouslySelectedWallet, 'onboard', onboard)
+
+      dispatch(setAuthState('authing'))
+
+      const walletSelected = await onboard.walletSelect(previouslySelectedWallet)
+      console.log('walletSelected', walletSelected)
+
+      if (walletSelected) {
+        await onboard.walletCheck()
+        dispatch(setAuthState('authed'))
+      } else {
+        dispatch(setAuthState(null))
+      }
     }
   }
 }
@@ -135,6 +175,7 @@ export function auth(): ThunkAction<Promise<void>, { auth: AuthState }, undefine
       if (!onboard) {
         console.log('onboard not found');
         reject('onboard not found')
+        openAuthPromise = null
         return
       }
 
@@ -144,6 +185,7 @@ export function auth(): ThunkAction<Promise<void>, { auth: AuthState }, undefine
         console.log('wallet not selected');
         dispatch(setAuthState('aborted'))
         reject('wallet not selected')
+        openAuthPromise = null
         return
       }
 
@@ -152,11 +194,13 @@ export function auth(): ThunkAction<Promise<void>, { auth: AuthState }, undefine
         console.log('wallet not checked');
         dispatch(setAuthState('aborted'))
         reject('wallet not checked')
+        openAuthPromise = null
         return
       }
 
       dispatch(setAuthState('authed'))
       resolve()
+      openAuthPromise = null
       return
     })
 
@@ -292,7 +336,7 @@ export function loadPermissions(tinlake: any):
   };
 }
 
-export function setNetwork(network: number):
+export function setNetwork(network: string | null):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     console.log('ducks/auth.ts setNetwork');
@@ -304,14 +348,12 @@ export function setNetwork(network: number):
 
     const { auth } = getState();
 
-    const networkName = networkIdToName(network);
-
     // if network is already set, don't set again
-    if (auth.network === networkName) {
+    if (auth.network === network) {
       return;
     }
 
-    dispatch({ network: networkName, type: RECEIVE_NETWORK });
+    dispatch({ network: network, type: RECEIVE_NETWORK });
   };
 }
 
@@ -322,6 +364,7 @@ export function clear():
 
     const onboard = getOnboard()
     onboard?.walletReset()
+    window.localStorage.removeItem('selectedWallet')
 
     dispatch({ type: CLEAR })
   };
