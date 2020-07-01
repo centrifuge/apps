@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Image, Text, ThemeContext } from 'grommet';
+import { Box, Button, Image, Text } from 'grommet';
 import {
   Menu as MenuIcon,
   User as UserIcon,
