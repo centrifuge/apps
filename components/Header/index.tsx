@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Image, Text } from 'grommet';
+import { Box, Button, Image, Text, ThemeContext } from 'grommet';
 import {
   Menu as MenuIcon,
   User as UserIcon,
@@ -123,6 +123,7 @@ class Header extends React.Component<HeaderProps, State> {
                 selectedRoute={selectedRoute}
                 onRouteClick={this.onRouteClick}
                 pad={{ horizontal: 'none' }}
+                menuItemProps={{ style: { fontSize: 14 } }}
               />
             </Box>
             <div style={{ flex: '0 0 auto', paddingLeft: 16 }}>
