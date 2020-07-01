@@ -1,24 +1,27 @@
 import { Box } from 'grommet';
 import Header from '../components/Header';
 import Dashboard from '../containers/Dashboard';
-import ContainerWithFooter from '../components/ContainerWithFooter';
+import WithFooter from '../components/WithFooter';
 import WithTinlake from '../components/WithTinlake';
 import Auth from '../components/Auth';
+import Container from '../components/Container';
 
 function Home() {
   return (
-    <ContainerWithFooter>
+    <WithFooter>
       <Header selectedRoute={''} menuItems={[]} />
-      <Box justify="center" direction="row" >
-        <Box width="xlarge">
-          <WithTinlake render={tinlake =>
-            <Auth tinlake={tinlake} render={() =>
-              <Dashboard />
+      <Container>
+        <Box justify="center" direction="row" >
+          <Box width="xlarge">
+            <WithTinlake render={tinlake =>
+              <Auth tinlake={tinlake} render={() =>
+                <Dashboard />
+              } />
             } />
-          } />
+          </Box>
         </Box>
-      </Box>
-    </ContainerWithFooter>
+      </Container>
+    </WithFooter>
   );
 }
 

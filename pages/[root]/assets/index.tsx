@@ -7,10 +7,11 @@ import { menuItems } from '../../../menuItems';
 import SecondaryHeader from '../../../components/SecondaryHeader';
 import Auth from '../../../components/Auth';
 import { PoolLink } from '../../../components/PoolLink';
-import ContainerWithFooter from '../../../components/ContainerWithFooter';
+import WithFooter from '../../../components/WithFooter';
 import { WithRouterProps } from 'next/dist/client/with-router';
 import config, { Pool } from '../../../config';
 import { GetStaticProps } from 'next';
+import Container from '../../../components/Container';
 
 interface Props extends WithRouterProps {
   root: string;
@@ -21,33 +22,32 @@ class LoanListPage extends React.Component<Props> {
   render() {
     const { pool } = this.props;
 
-    return <ContainerWithFooter>
+    return <WithFooter>
       <Header
         poolTitle={pool.shortName || pool.name}
         selectedRoute={'/assets'}
         menuItems={menuItems}
       />
-      <Box
-        justify="evenly"
-        direction="row"
-      >
-        <Box width="xlarge" gap="medium" >
-          <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
-              <Auth tinlake={tinlake} render={auth =>
-                <Box>
-                  <SecondaryHeader>
-                    <Heading level="3">Assets</Heading>
-                    <PoolLink href={'/assets/issue'}>
-                      <Button primary label="Finance Asset" />
-                    </PoolLink>
-                  </SecondaryHeader>
-                  <LoanList tinlake={tinlake} auth={auth} />
-                </Box>
-              } />
-          } />
+      <Container>
+        <Box justify="evenly" direction="row">
+          <Box width="xlarge" gap="medium" >
+            <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
+                <Auth tinlake={tinlake} render={auth =>
+                  <Box>
+                    <SecondaryHeader>
+                      <Heading level="3">Assets</Heading>
+                      <PoolLink href={'/assets/issue'}>
+                        <Button primary label="Finance Asset" />
+                      </PoolLink>
+                    </SecondaryHeader>
+                    <LoanList tinlake={tinlake} auth={auth} />
+                  </Box>
+                } />
+            } />
+          </Box>
         </Box>
-      </Box>
-    </ContainerWithFooter>;
+      </Container>
+    </WithFooter>;
   }
 }
 

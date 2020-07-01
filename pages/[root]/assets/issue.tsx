@@ -8,9 +8,10 @@ import { menuItems } from '../../../menuItems';
 import { BackLink } from '../../../components/BackLink';
 import Auth from '../../../components/Auth';
 import withRouter, { WithRouterProps } from 'next/dist/client/with-router';
-import ContainerWithFooter from '../../../components/ContainerWithFooter';
+import WithFooter from '../../../components/WithFooter';
 import config, { Pool } from '../../../config';
 import { GetStaticProps } from 'next';
+import Container from '../../../components/Container';
 
 interface Props extends WithRouterProps {
   root: string;
@@ -23,33 +24,32 @@ class LoanIssuePage extends React.Component<Props> {
     const { pool } = this.props;
     const { tokenId, registry }: { tokenId: string, registry: string } = this.props.router.query as any;
 
-    return <ContainerWithFooter>
+    return <WithFooter>
       <Header
         poolTitle={pool.shortName || pool.name}
         selectedRoute={'/assets/issue'}
         menuItems={menuItems}
       />
-      <Box
-        justify="center"
-        direction="row"
-      >
-        <Box width="xlarge" >
-          <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
-            <Auth tinlake={tinlake} render={auth =>
-              <Box>
-                <SecondaryHeader>
-                  <Box direction="row" gap="small" align="center">
-                    <BackLink href={'/assets'} />
-                    <Heading level="3">Finance Asset</Heading>
-                  </Box>
-                </SecondaryHeader>
-                <IssueLoan tinlake={tinlake} auth={auth} tokenId={tokenId} registry={registry}/>
-              </Box>
+      <Container>
+        <Box justify="center" direction="row">
+          <Box width="xlarge" >
+            <WithTinlake addresses={pool.addresses} contractConfig={pool.contractConfig} render={tinlake =>
+              <Auth tinlake={tinlake} render={auth =>
+                <Box>
+                  <SecondaryHeader>
+                    <Box direction="row" gap="small" align="center">
+                      <BackLink href={'/assets'} />
+                      <Heading level="3">Finance Asset</Heading>
+                    </Box>
+                  </SecondaryHeader>
+                  <IssueLoan tinlake={tinlake} auth={auth} tokenId={tokenId} registry={registry}/>
+                </Box>
+              } />
             } />
-          } />
+          </Box>
         </Box>
-      </Box>
-    </ContainerWithFooter>;
+      </Container>
+    </WithFooter>;
   }
 }
 
