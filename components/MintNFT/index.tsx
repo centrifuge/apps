@@ -99,13 +99,18 @@ class MintNFT extends React.Component<Props, State> {
           </Alert>}
 
           {is === null && <Alert pad={{ horizontal : 'medium' }} type="info">
-            Tinlake requires you to have a non-fungible token ("NFT") to deposit as collateral.
-             An NFT is an on-chain, digital representation of an underlying real-world asset, such as an invoice, a mortgage or music royalties.
-            <p>In this demo, you can mint a test NFT reflecting an sample invoice worth USD 1.000 into your wallet. Please fill in a "NFT Reference" as a unique identifier for your invoice NFT below. Then proceed with Mint NFT.
-              The NFT will be minted into your wallet and on the next screen you will be provided with the Token ID of this NFT.</p>
-           <b>Please store or copy this Token ID, as it will be used again to finance an asset on Tinlake.</b>
-            <p>If you already have a token ID, <PoolLink href={'/assets/issue'}>
-              <Anchor>please proceed to finance an asset</Anchor></PoolLink>.</p>
+            <p>Tinlake requires you to have a non-fungible token ("NFT") to deposit as collateral. An NFT is an
+              on-chain, digital representation of an underlying real-world asset, such as an invoice, a mortgage or
+              music royalties.</p>
+            <p>In this demo, you can mint a test NFT reflecting an sample invoice worth USD 1.000 into your wallet.
+              Please fill in a "NFT Reference" as a unique identifier for your invoice NFT below. Then proceed with
+              Mint NFT. The NFT will be minted into your wallet and on the next screen you will be provided with the
+              Token ID of this NFT.</p>
+            <p><b>Please store or copy this Token ID, as it will be used again to finance an asset on Tinlake.</b></p>
+            <p>If you already have a token ID, <PoolLink href={'/assets/issue'}><Anchor>please proceed to open a
+              financing</Anchor></PoolLink>.</p>
+            <p>Note that this functionality is only available on Kovan Testnet. On Mainnet NFTs are minted using
+              Centrifuge’s P2P Protocol.</p>
           </Alert>}
 
           <Box direction="row" gap="large" margin={{ vertical:'large' }}>

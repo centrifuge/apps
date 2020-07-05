@@ -33,7 +33,7 @@
   "homepage": "https://github.com/centrifuge/tinlake-ui#readme",
   "dependencies": {
     "@centrifuge/axis-display-field": "^0.3.2-develop.51",
-    "@centrifuge/axis-nav-bar": "^0.4.1-develop.62",
+    "@centrifuge/axis-nav-bar": "^0.4.1-develop.65",
     "@centrifuge/axis-spinner": "^0.3.1",
     "@centrifuge/axis-theme": "^0.2.1-develop.38",
     "@centrifuge/axis-utils": "^0.3.2-develop.49",
@@ -60,7 +60,7 @@
     "redux-thunk": "^2.3.0",
     "styled-components": "^5.1.0",
     "tinlake": "github:centrifuge/tinlake.js#7393e568c64a47e05f77dc3c44436a79b7f27e37",
-    "tinlake-pool-config": "github:centrifuge/tinlake-pool-config#883316e8438920df8cd6650984d6968b373ea622",
+    "tinlake-pool-config": "github:centrifuge/tinlake-pool-config#514744318db96694d4bd99e8afacab17b6683d80",
     "web3-utils": "^1.2.7",
     "yup": "^0.28.5"
   },

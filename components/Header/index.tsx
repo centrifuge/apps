@@ -126,6 +126,7 @@ class Header extends React.Component<HeaderProps, State> {
                   selectedRoute={selectedRoute}
                   onRouteClick={this.onRouteClick}
                   pad={{ horizontal: 'none' }}
+                  menuItemProps={{ style: { fontSize: 14 } }}
                 />
               }
             </Box>
