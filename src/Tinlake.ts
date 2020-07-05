@@ -37,8 +37,8 @@ type AbiOutput = {
 };
 
 export type EthConfig = {
-  from: string;
-  gasLimit: string;
+  from?: string;
+  gasLimit?: string;
 };
 
 export type ContractNames = typeof contractNames[number];
@@ -123,7 +123,10 @@ export default class Tinlake {
   }
 
   setEthConfig = (ethConfig: EthConfig | {}) => {
-    this.ethConfig = ethConfig;
+    this.ethConfig = {
+      ...this.ethConfig,
+      ...ethConfig,
+    };
   }
 
   createContract(address: string, abiName: string) {
