@@ -6,7 +6,7 @@ import { baseToDisplay, displayToBase, Loan } from 'tinlake';
 import { transactionSubmitted, responseReceived } from '../../../ducks/transactions';
 import { loadLoan } from '../../../ducks/loans';
 import { connect } from 'react-redux';
-import { authTinlake } from '../../../services/tinlake';
+import { ensureAuthed } from '../../../ducks/auth';
 
 interface Props {
   loan: Loan;
@@ -14,6 +14,7 @@ interface Props {
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>;
   transactionSubmitted?: (loadingMessage: string) => Promise<void>;
   responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>;
+  ensureAuthed?: () => Promise<void>;
 }
 
 interface State {
@@ -32,11 +33,11 @@ class LoanRepay extends React.Component<Props, State> {
 
   repay = async () => {
     try {
-      await authTinlake();
+      await this.props.ensureAuthed!();
       const { transactionSubmitted, responseReceived, loadLoan, loan, tinlake } = this.props;
       // support partial repay later
-      transactionSubmitted && transactionSubmitted('Repayment initiated. Please confirm the pending transactions in ' +
-        'MetaMask. Processing may take a few seconds.');
+      transactionSubmitted && transactionSubmitted('Repayment initiated. Please confirm the pending transactions. ' +
+        'Processing may take a few seconds.');
       const res = await repay(tinlake, loan);
       if (res && res.errorMsg) {
         responseReceived && responseReceived(null, `Repayment failed. ${res.errorMsg}`);
@@ -46,7 +47,7 @@ class LoanRepay extends React.Component<Props, State> {
       loadLoan && loadLoan(tinlake, loan.loanId);
     } catch (e) {
       responseReceived && responseReceived(null, `Repayment failed. ${e}`);
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -72,4 +73,4 @@ class LoanRepay extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadLoan, transactionSubmitted, responseReceived })(LoanRepay);
+export default connect(state => state, { loadLoan, transactionSubmitted, responseReceived, ensureAuthed })(LoanRepay);

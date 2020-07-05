@@ -4,10 +4,9 @@ import Alert from '../../../components/Alert';
 import NftData from '../../../components/NftData';
 import { connect } from 'react-redux';
 import { getNFT, issue, TinlakeResult } from '../../../services/tinlake/actions';
-import { authTinlake } from '../../../services/tinlake';
 import { Spinner } from '@centrifuge/axis-spinner';
 import LoanView from '../View';
-import { AuthState, loadProxies } from '../../../ducks/auth';
+import { AuthState, loadProxies, ensureAuthed } from '../../../ducks/auth';
 import { NFT } from 'tinlake';
 
 interface Props {
@@ -16,6 +15,7 @@ interface Props {
   registry: string;
   auth: AuthState;
   loadProxies?: () => Promise<void>;
+  ensureAuthed?: () => Promise<void>;
 }
 
 interface State {
@@ -79,12 +79,12 @@ class IssueLoan extends React.Component<Props, State> {
   }
 
   issueLoan = async () => {
-    const { tinlake, loadProxies } = this.props;
+    const { tinlake, loadProxies, ensureAuthed } = this.props;
     const { tokenId } = this.state;
     this.setState({ is: 'loading' });
 
     try {
-      await authTinlake();
+      await ensureAuthed!();
       // finance asset
       const { registry } = this.state;
       const result: TinlakeResult = await issue(tinlake, tokenId, registry);
@@ -114,7 +114,7 @@ class IssueLoan extends React.Component<Props, State> {
     const { tinlake } = this.props;
     return <Box>
       {is === 'loading' ?
-        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Initiating the asset financing process. Please confirm the pending transactions in MetaMask, and do not leave this page until all transactions have been confirmed.'} />
+        <Spinner height={'calc(100vh - 89px - 84px)'} message={'Initiating the asset financing process. Please confirm the pending transactions and do not leave this page until all transactions have been confirmed.'} />
         :
         <Box>
         <Box>
@@ -176,4 +176,4 @@ class IssueLoan extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadProxies })(IssueLoan);
+export default connect(state => state, { loadProxies, ensureAuthed })(IssueLoan);

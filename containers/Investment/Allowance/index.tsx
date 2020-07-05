@@ -6,7 +6,7 @@ import { transactionSubmitted, responseReceived } from '../../../ducks/transacti
 import { baseToDisplay, displayToBase, Investor, Tranche } from 'tinlake';
 import { loadInvestor } from '../../../ducks/investments';
 import { connect } from 'react-redux';
-import { authTinlake } from '../../../services/tinlake';
+import { ensureAuthed } from '../../../ducks/auth';
 
 interface Props {
   investor: Investor;
@@ -15,6 +15,7 @@ interface Props {
   transactionSubmitted?: (loadingMessage: string) => Promise<void>;
   responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>;
   tranche: Tranche;
+  ensureAuthed?: () => Promise<void>;
 }
 
 interface State {
@@ -57,9 +58,9 @@ class InvestorAllowance extends React.Component<Props, State> {
   }
 
   setAllowance = async () => {
-    this.props.transactionSubmitted && this.props.transactionSubmitted('Allowance initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.');
+    this.props.transactionSubmitted && this.props.transactionSubmitted('Allowance initiated. Please confirm the pending transactions. Processing may take a few seconds.');
     try {
-      await authTinlake();
+      await this.props.ensureAuthed!();
       this.updateLimits();
       const { supplyAmount, redeemAmount } = this.state;
       const { investor, tranche, tinlake } = this.props;
@@ -73,7 +74,7 @@ class InvestorAllowance extends React.Component<Props, State> {
       this.props.loadInvestor && this.props.loadInvestor(tinlake, investor.address);
     } catch (e) {
       this.props.responseReceived && this.props.responseReceived(null, `Allowance failed. ${e}`);
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -111,4 +112,4 @@ class InvestorAllowance extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadInvestor, transactionSubmitted, responseReceived })(InvestorAllowance);
+export default connect(state => state, { loadInvestor, transactionSubmitted, responseReceived, ensureAuthed })(InvestorAllowance);

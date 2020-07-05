@@ -140,7 +140,7 @@ class Apollo {
         `
         });
     } catch (err) {
-      console.log(`error occured while fetching loans from apollo ${err}`);
+      console.error(`error occured while fetching loans from apollo ${err}`);
       return {
         data: []
       };
@@ -166,7 +166,7 @@ class Apollo {
         `
         });
     } catch (err) {
-      console.log(`no proxies found for address ${user} ${err}`);
+      console.error(`no proxies found for address ${user} ${err}`);
       return {
         data: []
       };

@@ -1,17 +1,15 @@
 import * as React from 'react';
-import { AuthState, loadUser, loadNetwork, observeAuthChanges } from '../../ducks/auth';
+import { AuthState, load } from '../../ducks/auth';
 import { connect } from 'react-redux';
-
-interface ExtendedAuthState extends AuthState {
-}
+import { ITinlake } from 'tinlake';
+import config from '../../config';
+import WrongNetwork from '../WrongNetwork';
 
 interface Props {
-  tinlake: any;
-  render: (auth: ExtendedAuthState) => React.ReactElement | null | false;
+  tinlake: ITinlake;
+  render: (auth: AuthState) => React.ReactElement | null | false;
   auth?: AuthState;
-  loadUser?: (tinlake: any, address: string) => Promise<void>;
-  loadNetwork?: (network: string) => Promise<void>;
-  observeAuthChanges?: (tinlake: any) => Promise<void>;
+  load?: (tinlake: ITinlake) => Promise<void>;
 }
 
 class Auth extends React.Component<Props> {
@@ -20,27 +18,20 @@ class Auth extends React.Component<Props> {
   }
 
   init = async () => {
-    console.log('components/Auth init');
+    const { tinlake, load } = this.props;
 
-    const { tinlake, loadUser, loadNetwork, observeAuthChanges } = this.props;
-
-    const providerConfig = tinlake?.provider?.publicConfigStore?.getState();
-    if (providerConfig) {
-      await loadUser!(tinlake, providerConfig.selectedAddress);
-      await loadNetwork!(providerConfig.networkVersion);
-    } else {
-      await loadUser!(tinlake, tinlake.ethConfig.from);
-      await loadNetwork!(await tinlake.eth.net_version());
-    }
-
-    observeAuthChanges!(tinlake);
+    load!(tinlake);
   }
 
   render() {
     const { auth } = this.props;
 
+    if (auth!.network !== config.network) {
+      return <WrongNetwork expected={config.network} actual={auth!.network} />;
+    }
+
     return this.props.render(auth!);
   }
 }
 
-export default connect(state => state, { loadUser, loadNetwork, observeAuthChanges })(Auth);
+export default connect(state => state, { load })(Auth);

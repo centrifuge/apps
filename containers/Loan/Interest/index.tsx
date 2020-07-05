@@ -33,7 +33,7 @@ class LoanInterest extends React.Component<Props, State> {
     const { interestRate } = this.state;
     const { loan, tinlake } = this.props;
     this.props.transactionSubmitted && this.props.transactionSubmitted('Changing interest rate initiated. Please ' +
-      'confirm the pending transactions in MetaMask. Processing may take a few seconds.');
+      'confirm the pending transactions. Processing may take a few seconds.');
     try {
       const res = await setInterest(tinlake, loan.loanId, loan.debt.toString(), interestRate);
       if (res && res.errorMsg) {
@@ -45,7 +45,7 @@ class LoanInterest extends React.Component<Props, State> {
       this.props.loadLoan && this.props.loadLoan(tinlake, loan.loanId);
     } catch (e) {
       this.props.responseReceived && this.props.responseReceived(null, `Changing interest rate failed. ${e}`);
-      console.log(e);
+      console.error(e);
     }
   }
 

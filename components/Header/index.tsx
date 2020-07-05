@@ -7,10 +7,9 @@ import {
 } from 'grommet-icons';
 import { connect } from 'react-redux';
 import Link from 'next/link';
-import { AuthState } from '../../ducks/auth';
+import { AuthState, ensureAuthed } from '../../ducks/auth';
 import { formatAddress } from '../../utils/formatAddress';
 import config from '../../config';
-import { authTinlake } from '../../services/tinlake';
 import Router, { withRouter, NextRouter } from 'next/router';
 import { NavBar } from '@centrifuge/axis-nav-bar';
 
@@ -29,6 +28,7 @@ interface HeaderProps {
   menuItems: MenuItem[];
   auth?: AuthState;
   router: NextRouter;
+  ensureAuthed?: () => Promise<void>;
 }
 
 interface State {
@@ -42,9 +42,9 @@ class Header extends React.Component<HeaderProps, State> {
 
   connectAccount = async () => {
     try {
-      await authTinlake();
+      await this.props.ensureAuthed!();
     } catch (e) {
-      console.log(`authentication failed with Error ${e}`);
+      console.error(`authentication failed with Error ${e}`);
     }
   }
 
@@ -85,6 +85,9 @@ class Header extends React.Component<HeaderProps, State> {
       }
     };
 
+    const filtMenuItems = menuItems.filter(item =>
+      ((isDemo && item.env === 'demo') || item.env === '') && !item.secondary);
+
     return (
       <Box
         style={{ position: 'sticky', top: 0, height: '56px', zIndex: 2, boxShadow: '0 0 4px 0px #00000075' }}
@@ -114,17 +117,18 @@ class Header extends React.Component<HeaderProps, State> {
             }
             <Box flex="grow" basis="auto" style={{ height: 32, padding: '0 16px 0 32px',
               borderRight: '1px solid #D8D8D8' }}>
-              <NavBar
-                border={false}
-                itemGap="large"
-                theme={theme}
-                menuItems={menuItems.filter(item =>
-                  ((isDemo && item.env === 'demo') || item.env === '') && !item.secondary)}
-                selectedRoute={selectedRoute}
-                onRouteClick={this.onRouteClick}
-                pad={{ horizontal: 'none' }}
-                menuItemProps={{ style: { fontSize: 14 } }}
-              />
+              {filtMenuItems.length > 0 &&
+                <NavBar
+                  border={false}
+                  itemGap="large"
+                  theme={theme}
+                  menuItems={filtMenuItems}
+                  selectedRoute={selectedRoute}
+                  onRouteClick={this.onRouteClick}
+                  pad={{ horizontal: 'none' }}
+                  menuItemProps={{ style: { fontSize: 14 } }}
+                />
+              }
             </Box>
             <div style={{ flex: '0 0 auto', paddingLeft: 16 }}>
               {!address && (
@@ -164,4 +168,4 @@ class Header extends React.Component<HeaderProps, State> {
   }
 }
 
-export default connect(state => state)(withRouter(Header));
+export default connect(state => state, { ensureAuthed })(withRouter(Header));

@@ -7,7 +7,7 @@ import { baseToDisplay, displayToBase, Investor } from 'tinlake';
 import { loadInvestor } from '../../../ducks/investments';
 import { loadPool } from '../../../ducks/pool';
 import { connect } from 'react-redux';
-import { authTinlake } from '../../../services/tinlake';
+import { ensureAuthed } from '../../../ducks/auth';
 import BN from 'bn.js';
 
 interface Props {
@@ -18,6 +18,7 @@ interface Props {
   transactionSubmitted?: (loadingMessage: string) => Promise<void>;
   responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>;
   trancheType: TrancheType;
+  ensureAuthed?: () => Promise<void>;
 }
 
 interface State {
@@ -30,11 +31,13 @@ class InvestorSupply extends React.Component<Props, State> {
   };
 
   supply = async () => {
-    const { transactionSubmitted, responseReceived, trancheType, tinlake, investor, loadInvestor, loadPool } = this.props;
+    const { transactionSubmitted, responseReceived, trancheType, tinlake, investor, loadInvestor, loadPool,
+      ensureAuthed } = this.props;
     const { supplyAmount } = this.state;
-    transactionSubmitted && transactionSubmitted('Investment initiated. Please confirm the pending transactions in MetaMask. Processing may take a few seconds.');
+    transactionSubmitted && transactionSubmitted('Investment initiated. Please confirm the pending transactions. ' +
+      'Processing may take a few seconds.');
     try {
-      await authTinlake();
+      await ensureAuthed!();
       const res = await supply(tinlake, supplyAmount, trancheType);
       if (res && res.errorMsg) {
         responseReceived && responseReceived(null, `Investment failed. ${res.errorMsg}`);
@@ -49,7 +52,7 @@ class InvestorSupply extends React.Component<Props, State> {
       loadPool && loadPool(tinlake);
     } catch (e) {
       responseReceived && responseReceived(null, `Investment failed. ${e}`);
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -85,4 +88,5 @@ class InvestorSupply extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadInvestor, loadPool, transactionSubmitted, responseReceived })(InvestorSupply);
+export default connect(state => state, { loadInvestor, loadPool, transactionSubmitted, responseReceived, ensureAuthed
+})(InvestorSupply);

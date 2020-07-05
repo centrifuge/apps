@@ -3,9 +3,14 @@ import { ThunkAction } from 'redux-thunk';
 import { networkIdToName } from '../utils/networkNameResolver';
 import Apollo from '../services/apollo';
 import { HYDRATE } from 'next-redux-wrapper';
+import { initOnboard, getOnboard } from '../services/onboard';
+import { ITinlake } from 'tinlake';
+import { getDefaultHttpProvider } from '../services/tinlake';
+import config from '../config';
 
 // Actions
 const CLEAR = 'tinlake-ui/auth/CLEAR';
+const SET_AUTH_STATE = 'tinlake-ui/auth/SET_AUTH_STATE';
 const RECEIVE_ADDRESS = 'tinlake-ui/auth/RECEIVE_ADDRESS';
 const LOAD_PERMISSIONS = 'tinlake-ui/auth/LOAD_PERMISSIONS';
 const RECEIVE_PERMISSIONS = 'tinlake-ui/auth/RECEIVE_PERMISSIONS';
@@ -13,12 +18,11 @@ const LOAD_PROXIES = 'tinlake-ui/auth/LOAD_PROXIES';
 const RECEIVE_PROXIES = 'tinlake-ui/auth/RECEIVE_PROXIES';
 const RECEIVE_NETWORK = 'tinlake-ui/auth/RECEIVE_NETWORK';
 const CLEAR_NETWORK = 'tinlake-ui/auth/CLEAR_NETWORK';
-const OBSERVING_AUTH_CHANGES = 'tinlake-ui/auth/OBSERVING_AUTH_CHANGES';
 
 // Address is independent of the selected pool/registry.
 export type Address = string;
 
-// Permissions depend on both the user and the selected pool/registry.
+// Permissions depend on both the address and the selected pool/registry.
 export interface Permissions {
   // asset admin permissions
   canIssueLoan: boolean;
@@ -35,27 +39,27 @@ export interface Permissions {
   canActAsKeeper: boolean;
 }
 
-// Proxies depend on both the user and the selected pool/registry.
+// Proxies depend on both the address and the selected pool/registry.
 export type Proxies = string[];
 
 export interface AuthState {
-  observingAuthChanges: boolean;
   address: null | Address;
+  authState: null | 'authing' | 'aborted' | 'authed';
   permissionsState: null | 'loading' | 'loaded';
   permissions: null | Permissions;
   proxiesState: null | 'loading' | 'loaded';
   proxies: null | Proxies;
-  network: null | string;
+  network: string;
 }
 
 const initialState: AuthState = {
-  observingAuthChanges: false,
   address: null,
+  authState: null,
   permissionsState: null,
   permissions: null,
   proxiesState: null,
   proxies: null,
-  network: null
+  network: config.network
 };
 
 // Reducer
@@ -63,14 +67,15 @@ export default function reducer(state: AuthState = initialState,
                                 action: AnyAction = { type: '' }): AuthState {
   switch (action.type) {
     case HYDRATE: return { ...state, ...(action.payload.auth || {}) };
+    case SET_AUTH_STATE: return { ...state, authState: action.authState };
     case RECEIVE_ADDRESS: return { ...state, address: action.address };
-    case CLEAR: return { ...state, address: null, permissions: null };
+    case CLEAR: return { ...state, address: null, authState: null, permissionsState: null, permissions: null,
+      proxiesState: null, proxies: null, network: config.network };
     case LOAD_PERMISSIONS: return { ...state, permissionsState: 'loading' };
     case RECEIVE_PERMISSIONS: return { ...state, permissionsState: 'loaded', permissions: action.permissions };
     case LOAD_PROXIES: return { ...state, proxiesState: 'loading' };
     case RECEIVE_PROXIES: return { ...state, proxiesState: 'loaded', proxies: action.proxies };
-    case OBSERVING_AUTH_CHANGES: return { ...state, observingAuthChanges: true };
-    case CLEAR_NETWORK: return { ...state, network: null };
+    case CLEAR_NETWORK: return { ...state, network: config.network };
     case RECEIVE_NETWORK: return { ...state, network: action.network };
     default: return state;
   }
@@ -78,16 +83,147 @@ export default function reducer(state: AuthState = initialState,
 
 // side effects, only as applicable
 // e.g. thunks, epics, etc
-export function loadUser(tinlake: any, address: string):
-  ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
-  return async (dispatch) => {
-    console.log(`ducks/auth.ts loadUser(tinlake: _, address: ${address}), tinlake.addresses`, tinlake.contractAddresses);
 
-    // clear if no address given
-    if (!address) {
-      dispatch({ type: CLEAR });
+// load loads onboard if not yet loaded, connects if the user previously chose a wallet and subscribes to changes. This
+// function is called in different places and should not re-initialize onboard on every load. Therefore, onboard is a
+// singleton. Unfortunately that implies that the subscriptions are not re-triggered for the initial load if a
+// navigation event between pages, which discards the redux state, but does not discard onboard. Putting onboard into
+// the state would work, but it would lead to two sources of truth. Consequently, we keep onboard as an external
+// stateful API here and manually sync values over on load.
+export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+  return async (dispatch, getState) => {
+    const { auth } = getState();
+    let onboard = getOnboard();
+
+    // onboard is already initialized, only ensure values are correct and return
+    if (onboard) {
+      const { address, network, wallet } = onboard.getState();
+      if (address !== auth.address) { dispatch(setAddressAndLoadData(tinlake, address)); }
+      const networkName = networkIdToName(network);
+      if (networkName !== auth.network && networkName) { dispatch(setNetwork(networkName)); }
+      if (tinlake.provider !== wallet.provider && wallet.provider) { tinlake.setProvider(wallet.provider); }
+      if (address) { dispatch(setAuthState('authed')); }
       return;
     }
+
+    // onboard not yet initialized, initialize now
+    onboard = initOnboard({
+      address: (address) => {
+        dispatch(setAddressAndLoadData(tinlake, address));
+      },
+      network: (network) => {
+        const networkName = networkIdToName(network);
+        dispatch(setNetwork(networkName));
+      },
+      wallet: ({ provider, name }) => {
+        if (provider) {
+          tinlake.setProvider(provider);
+        }
+
+        // store the selected wallet name to be retrieved next time the app loads
+        window.localStorage.setItem('selectedWallet', name || '');
+      }
+    });
+
+    // get the selectedWallet value from local storage
+    const previouslySelectedWallet = window.localStorage.getItem('selectedWallet');
+
+    // call wallet select with that value if it exists
+    if (previouslySelectedWallet !== null && previouslySelectedWallet !== '') {
+      dispatch(setAuthState('authing'));
+
+      const walletSelected = await onboard.walletSelect(previouslySelectedWallet);
+      if (!walletSelected) {
+        dispatch(setAuthState(null));
+        return;
+      }
+
+      const walletChecked = await onboard.walletCheck();
+      if (!walletChecked) {
+        dispatch(setAuthState(null));
+        return;
+      }
+    }
+  };
+}
+
+let openAuthPromise: Promise<void> | null = null;
+
+// auth opens onboard wallet select. If there is already an auth process, it blocks until that auth promise is resolved.
+export function auth(): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+  return async (dispatch) => {
+    if (openAuthPromise) {
+      return await openAuthPromise;
+    }
+
+    openAuthPromise = new Promise<void>(async (resolve, reject) => {
+      dispatch(setAuthState('authing'));
+
+      const onboard = getOnboard();
+      if (!onboard) {
+        reject('onboard not found');
+        openAuthPromise = null;
+        return;
+      }
+
+      const walletSelected = await onboard.walletSelect();
+
+      if (!walletSelected) {
+        dispatch(setAuthState('aborted'));
+        reject('wallet not selected');
+        openAuthPromise = null;
+        return;
+      }
+
+      const walletChecked = await onboard.walletCheck();
+      if (!walletChecked) {
+        dispatch(setAuthState('aborted'));
+        reject('wallet not checked');
+        openAuthPromise = null;
+        return;
+      }
+
+      dispatch(setAuthState('authed'));
+      resolve();
+      openAuthPromise = null;
+      return;
+    });
+
+    return await openAuthPromise;
+  };
+}
+
+// ensureAuthed checks whether status is authed or authing, otherwise initiates auth
+export function ensureAuthed(): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+  return async (dispatch, getState) => {
+    const state = getState();
+    if (openAuthPromise) { await openAuthPromise; }
+
+    if (state.auth.authState === 'aborted' || state.auth.authState === null) {
+      return dispatch(auth());
+    }
+
+    const onboard = getOnboard();
+    if (!onboard) {
+      throw new Error('onboard not found');
+    }
+    const walletChecked = await onboard!.walletCheck();
+    if (!walletChecked) {
+      throw new Error('wallet not checked');
+    }
+  };
+}
+
+export function setAddressAndLoadData(tinlake: ITinlake, address: string):
+  ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+  return async (dispatch) => {
+    // clear if no address given
+    if (!address) {
+      dispatch(clear(tinlake));
+      return;
+    }
+
+    tinlake.setEthConfig({ from: address });
 
     dispatch({ address, type: RECEIVE_ADDRESS });
 
@@ -96,11 +232,16 @@ export function loadUser(tinlake: any, address: string):
   };
 }
 
+export function setAuthState(authState: null | 'authing' | 'aborted' | 'authed'):
+  ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+  return async (dispatch) => {
+    dispatch({ authState, type: SET_AUTH_STATE });
+  };
+}
+
 export function loadProxies():
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
-    console.log('ducks/auth.ts loadProxies()');
-
     const { auth } = getState();
 
     // don't load again if already loading
@@ -124,8 +265,6 @@ export function loadProxies():
 export function loadPermissions(tinlake: any):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
-    console.log('ducks/auth.ts loadPermissions(tinlake: _), tinlake.addresses', tinlake.contractAddresses);
-
     const { auth } = getState();
 
     // don't load again if already loading
@@ -166,20 +305,15 @@ export function loadPermissions(tinlake: any):
       canSetRiskScore: riskScorePermission,
       canSetInvestorAllowanceJunior: investorAllowancePermissionJunior,
       canSetInvestorAllowanceSenior: investorAllowancePermissionSenior
-      // TODO: canActAsKeeper
     };
-
-    console.log('ducks/auth.ts loadPermissions: got permissions:', permissions);
 
     dispatch({ permissions, type: RECEIVE_PERMISSIONS });
   };
 }
 
-export function loadNetwork(network: string):
+export function setNetwork(network: string | null):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
-    console.log('ducks/auth.ts loadNetwork');
-
     if (!network) {
       dispatch({ type: CLEAR_NETWORK });
       return;
@@ -187,67 +321,24 @@ export function loadNetwork(network: string):
 
     const { auth } = getState();
 
-    const networkName = networkIdToName(network);
-    // if network is already loaded, don't load again
-    if (auth.network === networkName) {
+    // if network is already set, don't set again
+    if (auth.network === network) {
       return;
     }
 
-    dispatch({ network: networkName, type: RECEIVE_NETWORK });
+    dispatch({ network, type: RECEIVE_NETWORK });
   };
 }
 
-let providerChecks: number;
-
-export function observeAuthChanges(tinlake: any):
+export function clear(tinlake: ITinlake):
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
-  return async (dispatch, getState) => {
-
-    console.log('ducks/auth.ts observeAuthChanges');
-
-    const state = getState();
-    if (state.auth.observingAuthChanges) {
-      return;
-    }
-    // if HTTPProvider is present, regularly check for provider changes
-    if (tinlake.provider.host) {
-      if (!providerChecks) {
-        // Found HTTPProvider - check for provider changes every 100 ms'
-        providerChecks = setInterval(() => dispatch(observeAuthChanges(tinlake)), 500);
-      }
-      return;
-    }
-
-    if (providerChecks) {
-      // 'Provider changed, clear checking'
-      clearInterval(providerChecks);
-
-      const providerConfig = tinlake.provider && tinlake.provider.publicConfigStore && tinlake.provider.publicConfigStore.getState();
-      if (providerConfig) {
-        dispatch(loadUser(tinlake, providerConfig.selectedAddress));
-        dispatch(loadNetwork(providerConfig.networkVersion));
-      } else {
-        dispatch(loadUser(tinlake, tinlake.ethConfig.from));
-        dispatch(loadNetwork(await tinlake.eth.net_version()));
-      }
-    }
-
-    dispatch({ type: OBSERVING_AUTH_CHANGES });
-
-    if (tinlake.provider && tinlake.provider.publicConfigStore) {
-      tinlake.provider.publicConfigStore.on('update',  (state: any) => {
-        tinlake.ethConfig = { from: state.selectedAddress };
-        dispatch(loadNetwork(state.networkVersion));
-        dispatch(loadUser(tinlake, state.selectedAddress));
-      });
-    }
-  };
-}
-
-export function clearUser():
-  ThunkAction<Promise<void>, AuthState, undefined, Action> {
   return async (dispatch) => {
-    console.log('ducks/auth.ts clearUser');
+    tinlake.setProvider(getDefaultHttpProvider());
+    tinlake.setEthConfig({ from: '' });
+
+    const onboard = getOnboard();
+    onboard?.walletReset();
+    window.localStorage.removeItem('selectedWallet');
 
     dispatch({ type: CLEAR });
   };

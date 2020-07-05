@@ -54,7 +54,6 @@ async function getOrCreateProxy(tinlake: any, address: string) {
   // check if user already has a proxy address
   try {
     proxyAddress = await tinlake.checkProxyExists(address);
-    console.log('proxy found', proxyAddress);
   } catch (e) {
     proxyAddress = null;
   }
@@ -63,7 +62,6 @@ async function getOrCreateProxy(tinlake: any, address: string) {
   if (!proxyAddress) {
     try {
       proxyAddress = await tinlake.proxyCreateNew(address);
-      console.log('proxy not found, new proxy address', proxyAddress);
     } catch (e) {
       throw(e);
     }
@@ -73,7 +71,7 @@ async function getOrCreateProxy(tinlake: any, address: string) {
 
 export async function issue(tinlake: ITinlake, tokenId: string, nftRegistryAddress: string) {
   let tokenOwner;
-  const user = tinlake.ethConfig.from;
+  const user = tinlake.ethConfig.from!;
 
   try {
     tokenOwner = await tinlake.getNFTOwner(nftRegistryAddress, tokenId);
@@ -93,7 +91,7 @@ export async function issue(tinlake: ITinlake, tokenId: string, nftRegistryAddre
     }
 
     // approve proxy to take nft if not yet happened
-    if (!await tinlake.isNFTApprovedForAll(nftRegistryAddress, tinlake.ethConfig.from, proxyAddress)) {
+    if (!await tinlake.isNFTApprovedForAll(nftRegistryAddress, tinlake.ethConfig.from!, proxyAddress)) {
       try {
         await tinlake.setNFTApprovalForAll(nftRegistryAddress, proxyAddress, true);
       } catch (e) {
@@ -315,8 +313,8 @@ export async function repay(tinlake: ITinlake, loan: Loan) {
   const proxy = loan.ownerOf;
 
   // use entire user balance as repay amount to make sure that enough funds are provided to cover the entire debt
-  const balance  = await tinlake.getCurrencyBalance(tinlake.ethConfig.from);
-  const allowance = await tinlake.getCurrencyAllowance(tinlake.ethConfig.from, proxy.toString());
+  const balance  = await tinlake.getCurrencyBalance(tinlake.ethConfig.from!);
+  const allowance = await tinlake.getCurrencyAllowance(tinlake.ethConfig.from!, proxy.toString());
 
   // only approve if allowance is smaller than than the current balance
   if (allowance.lt(balance)) {
@@ -388,10 +386,10 @@ export async function supply(tinlake: ITinlake, supplyAmount: string, trancheTyp
 
   let allowance = new BN(0);
   if (trancheType === 'junior') {
-    // await tinlake.getCurrencyAllowance(tinlake.ethConfig.from, proxy.toString())
-    allowance = await tinlake.getJuniorForCurrencyAllowance(tinlake.ethConfig.from) || new BN(0);
+    // await tinlake.getCurrencyAllowance(tinlake.ethConfig.from!, proxy.toString())
+    allowance = await tinlake.getJuniorForCurrencyAllowance(tinlake.ethConfig.from!) || new BN(0);
   } else if (trancheType === 'senior') {
-    allowance = await tinlake.getSeniorForCurrencyAllowance(tinlake.ethConfig.from) || new BN(0);
+    allowance = await tinlake.getSeniorForCurrencyAllowance(tinlake.ethConfig.from!) || new BN(0);
   }
 
   // only approve if allowance is smaller than than supplyAmount
@@ -431,9 +429,9 @@ export async function supply(tinlake: ITinlake, supplyAmount: string, trancheTyp
 export async function redeem(tinlake: ITinlake, redeemAmount: string, trancheType: TrancheType) {
   let allowance = new BN(0);
   if (trancheType === 'junior') {
-    allowance = await tinlake.getJuniorTokenAllowance(tinlake.ethConfig.from) || new BN(0);
+    allowance = await tinlake.getJuniorTokenAllowance(tinlake.ethConfig.from!) || new BN(0);
   } else if (trancheType === 'senior') {
-    allowance = await tinlake.getSeniorTokenAllowance(tinlake.ethConfig.from) || new BN(0);
+    allowance = await tinlake.getSeniorTokenAllowance(tinlake.ethConfig.from!) || new BN(0);
   }
 
   // only approve if allowance is smaller than than redeemAmount
@@ -471,7 +469,7 @@ export async function redeem(tinlake: ITinlake, redeemAmount: string, trancheTyp
 }
 
 function loggedError(error: any, message: string, id: string) {
-  console.log(`${message} ${id}`, error);
+  console.error(`${message} ${id}`, error);
   return {
     id,
     errorMsg: `${error} - ${message} ${id}`
