@@ -5,7 +5,7 @@ import Apollo from '../services/apollo';
 import { HYDRATE } from 'next-redux-wrapper';
 import { initOnboard, getOnboard } from '../services/onboard';
 import { ITinlake } from 'tinlake';
-import { getDefaultHttpProvider } from '../services/tinlake';
+import { getDefaultHttpProvider, getTinlake } from '../services/tinlake';
 import config from '../config';
 
 // Actions
@@ -17,6 +17,7 @@ const RECEIVE_PERMISSIONS = 'tinlake-ui/auth/RECEIVE_PERMISSIONS';
 const LOAD_PROXIES = 'tinlake-ui/auth/LOAD_PROXIES';
 const RECEIVE_PROXIES = 'tinlake-ui/auth/RECEIVE_PROXIES';
 const RECEIVE_NETWORK = 'tinlake-ui/auth/RECEIVE_NETWORK';
+const RECEIVE_PROVIDER_NAME = 'tinlake-ui/auth/RECEIVE_PROVIDER_NAME';
 const CLEAR_NETWORK = 'tinlake-ui/auth/CLEAR_NETWORK';
 
 // Address is independent of the selected pool/registry.
@@ -50,6 +51,7 @@ export interface AuthState {
   proxiesState: null | 'loading' | 'loaded';
   proxies: null | Proxies;
   network: string;
+  providerName: null | string;
 }
 
 const initialState: AuthState = {
@@ -59,7 +61,8 @@ const initialState: AuthState = {
   permissions: null,
   proxiesState: null,
   proxies: null,
-  network: config.network
+  network: config.network,
+  providerName: null
 };
 
 // Reducer
@@ -77,6 +80,7 @@ export default function reducer(state: AuthState = initialState,
     case RECEIVE_PROXIES: return { ...state, proxiesState: 'loaded', proxies: action.proxies };
     case CLEAR_NETWORK: return { ...state, network: config.network };
     case RECEIVE_NETWORK: return { ...state, network: action.network };
+    case RECEIVE_PROVIDER_NAME: return { ...state, providerName: action.name };
     default: return state;
   }
 }
@@ -102,6 +106,7 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
       const networkName = networkIdToName(network);
       if (networkName !== auth.network && networkName) { dispatch(setNetwork(networkName)); }
       if (tinlake.provider !== wallet.provider && wallet.provider) { tinlake.setProvider(wallet.provider); }
+      if (wallet.name !== auth.providerName) { dispatch(setProviderName(wallet.name)); }
       if (address) { dispatch(setAuthState('authed')); }
       return;
     }
@@ -116,6 +121,8 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
         dispatch(setNetwork(networkName));
       },
       wallet: ({ provider, name }) => {
+        dispatch(setProviderName(name));
+
         if (provider) {
           tinlake.setProvider(provider);
         }
@@ -219,7 +226,7 @@ export function setAddressAndLoadData(tinlake: ITinlake, address: string):
   return async (dispatch) => {
     // clear if no address given
     if (!address) {
-      dispatch(clear(tinlake));
+      dispatch(clear());
       return;
     }
 
@@ -330,11 +337,18 @@ export function setNetwork(network: string | null):
   };
 }
 
-export function clear(tinlake: ITinlake):
+export function setProviderName(name: string | null) {
+  return { name, type: RECEIVE_PROVIDER_NAME };
+}
+
+export function clear():
   ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch) => {
-    tinlake.setProvider(getDefaultHttpProvider());
-    tinlake.setEthConfig({ from: '' });
+    const tinlake = getTinlake();
+    if (tinlake !== null) {
+      tinlake.setProvider(getDefaultHttpProvider());
+      tinlake.setEthConfig({ from: '' });
+    }
 
     const onboard = getOnboard();
     onboard?.walletReset();

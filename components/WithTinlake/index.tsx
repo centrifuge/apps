@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { getTinlake } from '../../services/tinlake';
+import { initTinlake } from '../../services/tinlake';
 import { ITinlake } from 'tinlake';
 
 interface Props {
@@ -36,7 +36,7 @@ class WithTinlake extends React.Component<Props, State> {
   init = async () => {
     const { addresses, contractConfig } = this.props;
 
-    this.tinlake = getTinlake({ addresses, contractConfig });
+    this.tinlake = initTinlake({ addresses, contractConfig });
     if (this.isMounted) {
       this.setState({ loading: false });
     }

@@ -39,6 +39,7 @@
     "@centrifuge/axis-spinner": "^0.3.1",
     "@centrifuge/axis-theme": "^0.2.1-develop.38",
     "@centrifuge/axis-utils": "^0.3.2-develop.49",
+    "@centrifuge/axis-web3-wallet": "0.0.2-develop.68",
     "@types/node-fetch": "^2.5.7",
     "apollo-cache-inmemory": "^1.6.5",
     "apollo-client": "^2.6.8",
