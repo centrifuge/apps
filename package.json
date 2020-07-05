@@ -10,15 +10,17 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
+    "build-for-husky": "tsc",
     "start": "next start",
     "test": "jest",
     "export": "npm run build && next export",
     "lint": "tslint --project .",
-    "lint-fix": "tslint --fix --project ."
+    "lint-fix": "tslint --fix --project .",
+    "lint-fix-staged": "git diff --staged --name-only | grep -E '\\.tsx?$' | xargs npm run lint-fix && git diff --staged --name-only | grep -E '\\.tsx?$' | xargs git add"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint-fix && npm run export"
+      "pre-commit": "npm run lint-fix-staged && npm run build-for-husky"
     }
   },
   "repository": {
