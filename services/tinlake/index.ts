@@ -7,9 +7,9 @@ let tinlake: ITinlake | null = null;
 let currentAddresses: null | ContractAddresses = null;
 let currentContractConfig: null | any = null;
 
-// getTinlake returns a singleton tinlake. Tinlake is re-intialized if addresses or contractConfig has been changed.
-export function getTinlake({ addresses, contractConfig }: { addresses?: ContractAddresses | null;
-  contractConfig?: any | null } = {}) {
+// initTinlake returns a singleton tinlake. Tinlake is re-intialized if addresses or contractConfig has been changed.
+export function initTinlake({ addresses, contractConfig }: { addresses?: ContractAddresses | null;
+  contractConfig?: any | null } = {}): ITinlake {
 
   if (tinlake === null) {
     const { transactionTimeout } = config;
@@ -34,6 +34,10 @@ export function getTinlake({ addresses, contractConfig }: { addresses?: Contract
     tinlake!.setContracts!();
   }
 
+  return tinlake!;
+}
+
+export function getTinlake(): ITinlake | null {
   return tinlake;
 }
 

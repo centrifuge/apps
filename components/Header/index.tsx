@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Image, Text } from 'grommet';
+import { Box, Button, Image } from 'grommet';
 import {
   Menu as MenuIcon,
   User as UserIcon,
@@ -7,11 +7,12 @@ import {
 } from 'grommet-icons';
 import { connect } from 'react-redux';
 import Link from 'next/link';
-import { AuthState, ensureAuthed } from '../../ducks/auth';
-import { formatAddress } from '../../utils/formatAddress';
+import { AuthState, ensureAuthed, clear } from '../../ducks/auth';
 import config from '../../config';
 import Router, { withRouter, NextRouter } from 'next/router';
 import { NavBar } from '@centrifuge/axis-nav-bar';
+import { Web3Wallet } from '@centrifuge/axis-web3-wallet';
+import { getAddressLink } from '../../utils/etherscanLinkGenerator';
 
 const { isDemo } = config;
 export interface MenuItem {
@@ -29,6 +30,7 @@ interface HeaderProps {
   auth?: AuthState;
   router: NextRouter;
   ensureAuthed?: () => Promise<void>;
+  clear?: () => Promise<void>;
 }
 
 interface State {
@@ -68,11 +70,8 @@ class Header extends React.Component<HeaderProps, State> {
   }
 
   render() {
-    const { poolTitle, selectedRoute, menuItems, auth } = this.props;
-    const address = auth?.address;
-    const network = auth?.network;
-
-    const itemGap = 'small';
+    const { poolTitle, selectedRoute, menuItems, auth, clear } = this.props;
+    const { address, network, providerName } = auth!;
     const logoUrl = (isDemo && '/static/demo_logo.svg') || '/static/logo.svg';
 
     const theme = {
@@ -135,30 +134,9 @@ class Header extends React.Component<HeaderProps, State> {
                 <Button onClick={this.connectAccount} label="Connect" />
               )}
               {address && (
-                <Box direction="column" align="end" basis="full">
-                  <Box
-                    direction="row"
-                    gap={itemGap}
-                    align="center"
-                    justify="start"
-                  >
-                    <Text> {formatAddress(address || '')} </Text>
-                  </Box>
-                  <Box direction="row" justify="start">
-                    {network && (
-                      <Text
-                        style={{
-                          color: '#808080',
-                          lineHeight: '12px',
-                          fontSize: '12px'
-                        }}
-                      >
-                        {' '}
-                        Connected to {network}{' '}
-                      </Text>
-                    )}
-                  </Box>
-                </Box>
+                <Web3Wallet address={address} providerName={providerName} networkName={network}
+                  onDisconnect={clear} transactions={[]}
+                  getAddressLink={getAddressLink} style={{ padding: 0 }} />
               )}
             </div>
           </Box>
@@ -168,4 +146,4 @@ class Header extends React.Component<HeaderProps, State> {
   }
 }
 
-export default connect(state => state, { ensureAuthed })(withRouter(Header));
+export default connect(state => state, { ensureAuthed, clear })(withRouter(Header));

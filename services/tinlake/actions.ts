@@ -71,7 +71,7 @@ async function getOrCreateProxy(tinlake: any, address: string) {
 
 export async function issue(tinlake: ITinlake, tokenId: string, nftRegistryAddress: string) {
   let tokenOwner;
-  const user = tinlake.ethConfig.from!;
+  const user = (tinlake.ethConfig as any).from!;
 
   try {
     tokenOwner = await tinlake.getNFTOwner(nftRegistryAddress, tokenId);
@@ -91,7 +91,7 @@ export async function issue(tinlake: ITinlake, tokenId: string, nftRegistryAddre
     }
 
     // approve proxy to take nft if not yet happened
-    if (!await tinlake.isNFTApprovedForAll(nftRegistryAddress, tinlake.ethConfig.from!, proxyAddress)) {
+    if (!await tinlake.isNFTApprovedForAll(nftRegistryAddress, (tinlake.ethConfig as any).from!, proxyAddress)) {
       try {
         await tinlake.setNFTApprovalForAll(nftRegistryAddress, proxyAddress, true);
       } catch (e) {
@@ -245,7 +245,7 @@ export async function getPool(tinlake: any) {
   const juniorReserve = await tinlake.getJuniorReserve();
   const juniorTokenPrice = await tinlake.getTokenPriceJunior();
   const seniorReserve = await tinlake.getSeniorReserve();
-  const seniorTokenPrice = await tinlake.getTokenPriceSenior(tinlake.ethConfig.from);
+  const seniorTokenPrice = await tinlake.getTokenPriceSenior((tinlake.ethConfig as any).from);
   const seniorInterestRate = await tinlake.getSeniorInterestRate();
   const seniorTokenSupply = await tinlake.getSeniorTotalSupply();
   const minJuniorRatio = await tinlake.getMinJuniorRatio();
@@ -284,7 +284,7 @@ export async function getPool(tinlake: any) {
 
 export async function borrow(tinlake: any, loan: Loan, amount: string) {
   const { loanId } = loan;
-  const address = tinlake.ethConfig.from;
+  const address = (tinlake.ethConfig as any).from;
   const proxy = loan.ownerOf;
 
   // make sure tranche has enough funds
@@ -313,8 +313,8 @@ export async function repay(tinlake: ITinlake, loan: Loan) {
   const proxy = loan.ownerOf;
 
   // use entire user balance as repay amount to make sure that enough funds are provided to cover the entire debt
-  const balance  = await tinlake.getCurrencyBalance(tinlake.ethConfig.from!);
-  const allowance = await tinlake.getCurrencyAllowance(tinlake.ethConfig.from!, proxy.toString());
+  const balance  = await tinlake.getCurrencyBalance((tinlake.ethConfig as any).from!);
+  const allowance = await tinlake.getCurrencyAllowance((tinlake.ethConfig as any).from!, proxy.toString());
 
   // only approve if allowance is smaller than than the current balance
   if (allowance.lt(balance)) {
@@ -386,10 +386,10 @@ export async function supply(tinlake: ITinlake, supplyAmount: string, trancheTyp
 
   let allowance = new BN(0);
   if (trancheType === 'junior') {
-    // await tinlake.getCurrencyAllowance(tinlake.ethConfig.from!, proxy.toString())
-    allowance = await tinlake.getJuniorForCurrencyAllowance(tinlake.ethConfig.from!) || new BN(0);
+    // await tinlake.getCurrencyAllowance((tinlake.ethConfig as any).from!, proxy.toString())
+    allowance = await tinlake.getJuniorForCurrencyAllowance((tinlake.ethConfig as any).from!) || new BN(0);
   } else if (trancheType === 'senior') {
-    allowance = await tinlake.getSeniorForCurrencyAllowance(tinlake.ethConfig.from!) || new BN(0);
+    allowance = await tinlake.getSeniorForCurrencyAllowance((tinlake.ethConfig as any).from!) || new BN(0);
   }
 
   // only approve if allowance is smaller than than supplyAmount
@@ -429,9 +429,9 @@ export async function supply(tinlake: ITinlake, supplyAmount: string, trancheTyp
 export async function redeem(tinlake: ITinlake, redeemAmount: string, trancheType: TrancheType) {
   let allowance = new BN(0);
   if (trancheType === 'junior') {
-    allowance = await tinlake.getJuniorTokenAllowance(tinlake.ethConfig.from!) || new BN(0);
+    allowance = await tinlake.getJuniorTokenAllowance((tinlake.ethConfig as any).from!) || new BN(0);
   } else if (trancheType === 'senior') {
-    allowance = await tinlake.getSeniorTokenAllowance(tinlake.ethConfig.from!) || new BN(0);
+    allowance = await tinlake.getSeniorTokenAllowance((tinlake.ethConfig as any).from!) || new BN(0);
   }
 
   // only approve if allowance is smaller than than redeemAmount
