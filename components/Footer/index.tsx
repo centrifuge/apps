@@ -20,15 +20,23 @@ class Footer extends React.Component<FooterProps> {
         >
 
       <Box direction="row" width="xlarge" justify="between" margin={{ top:'medium', bottom:'medium' }} pad={{ horizontal:'small' }}>
-      <Box basis={'1/5'}>
-        <Text> Centrifuge Tinlake </Text>
-      </Box>
-      <Box basis={'1/5'}>
-        <Text> Learn More </Text>
-        <Anchor  margin={{ top: 'xsmall' }} href="https://centrifuge.io/products/tinlake/" target="_blank" style={{ textDecoration: 'none', color: '#2762FF' }} label="Website" />
-        <Anchor  margin={{ top: 'xsmall' }} href="https://developer.centrifuge.io/" target="_blank" style={{ textDecoration: 'none', color: '#2762FF' }} label="Documentation" />
-        <Anchor  margin={{ top: 'xsmall' }} href="https://github.com/centrifuge" target="_blank" style={{ textDecoration: 'none', color: '#2762FF' }} label="GitHub" />
-      </Box>
+        <Box basis={'1/5'}>
+          <Text> Centrifuge Tinlake </Text>
+        </Box>
+        <Box basis={'1/5'} direction="row" gap={'80px'}>
+          <Box>
+            <Text> Learn More </Text>
+            <Anchor  margin={{ top: 'xsmall' }} href="https://centrifuge.io/products/tinlake/" target="_blank" style={{ textDecoration: 'none', color: '#2762FF' }} label="Website" />
+            <Anchor  margin={{ top: 'xsmall' }} href="https://developer.centrifuge.io/" target="_blank" style={{ textDecoration: 'none', color: '#2762FF' }} label="Documentation" />
+            <Anchor  margin={{ top: 'xsmall' }} href="https://github.com/centrifuge" target="_blank" style={{ textDecoration: 'none', color: '#2762FF' }} label="GitHub" />
+          </Box>
+          <Box>
+            <Text>&nbsp;</Text>
+            <Anchor  margin={{ top: 'xsmall' }} href="https://centrifuge.io/products/tinlake/" target="_blank" style={{ textDecoration: 'none', color: '#2762FF' }} label="Investment Disclaimer" />
+            <Anchor  margin={{ top: 'xsmall' }} href="https://centrifuge.io/data-privacy-policy/" target="_blank" style={{ textDecoration: 'none', color: '#2762FF' }} label="Data Privacy Policy" />
+            <Anchor  margin={{ top: 'xsmall' }} href="https://centrifuge.io/imprint" target="_blank" style={{ textDecoration: 'none', color: '#2762FF' }} label="Imprint" />
+          </Box>
+        </Box>
       </Box>
     </Box>;
   }
