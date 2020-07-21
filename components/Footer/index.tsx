@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Button, Text, Anchor, Paragraph } from 'grommet';
+import { StatusInfo as StatusInfoIcon } from 'grommet-icons';
 import { Modal } from '@centrifuge/axis-modal';
 
 interface Props {
@@ -54,6 +55,7 @@ class Footer extends React.Component<Props, State> {
       <Modal
         opened={this.state.modalIsOpen}
         title={'Investment Disclaimer'}
+        titleIcon={<StatusInfoIcon />}
         onClose={() => this.closeModal()}
       >
         <Paragraph margin={{ top: 'medium', bottom: 'medium' }}>
