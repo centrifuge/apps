@@ -66,22 +66,41 @@ const initialState: AuthState = {
 };
 
 // Reducer
-export default function reducer(state: AuthState = initialState,
-                                action: AnyAction = { type: '' }): AuthState {
+export default function reducer(state: AuthState = initialState, action: AnyAction = { type: '' }): AuthState {
   switch (action.type) {
-    case HYDRATE: return { ...state, ...(action.payload.auth || {}) };
-    case SET_AUTH_STATE: return { ...state, authState: action.authState };
-    case RECEIVE_ADDRESS: return { ...state, address: action.address };
-    case CLEAR: return { ...state, address: null, authState: null, permissionsState: null, permissions: null,
-      proxiesState: null, proxies: null, network: config.network };
-    case LOAD_PERMISSIONS: return { ...state, permissionsState: 'loading' };
-    case RECEIVE_PERMISSIONS: return { ...state, permissionsState: 'loaded', permissions: action.permissions };
-    case LOAD_PROXIES: return { ...state, proxiesState: 'loading' };
-    case RECEIVE_PROXIES: return { ...state, proxiesState: 'loaded', proxies: action.proxies };
-    case CLEAR_NETWORK: return { ...state, network: config.network };
-    case RECEIVE_NETWORK: return { ...state, network: action.network };
-    case RECEIVE_PROVIDER_NAME: return { ...state, providerName: action.name };
-    default: return state;
+    case HYDRATE:
+      return { ...state, ...(action.payload.auth || {}) };
+    case SET_AUTH_STATE:
+      return { ...state, authState: action.authState };
+    case RECEIVE_ADDRESS:
+      return { ...state, address: action.address };
+    case CLEAR:
+      return {
+        ...state,
+        address: null,
+        authState: null,
+        permissionsState: null,
+        permissions: null,
+        proxiesState: null,
+        proxies: null,
+        network: config.network
+      };
+    case LOAD_PERMISSIONS:
+      return { ...state, permissionsState: 'loading' };
+    case RECEIVE_PERMISSIONS:
+      return { ...state, permissionsState: 'loaded', permissions: action.permissions };
+    case LOAD_PROXIES:
+      return { ...state, proxiesState: 'loading' };
+    case RECEIVE_PROXIES:
+      return { ...state, proxiesState: 'loaded', proxies: action.proxies };
+    case CLEAR_NETWORK:
+      return { ...state, network: config.network };
+    case RECEIVE_NETWORK:
+      return { ...state, network: action.network };
+    case RECEIVE_PROVIDER_NAME:
+      return { ...state, providerName: action.name };
+    default:
+      return state;
   }
 }
 
@@ -102,21 +121,31 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
     // onboard is already initialized, only ensure values are correct and return
     if (onboard) {
       const { address, network, wallet } = onboard.getState();
-      if (address !== auth.address) { dispatch(setAddressAndLoadData(tinlake, address)); }
+      if (address !== auth.address) {
+        dispatch(setAddressAndLoadData(tinlake, address));
+      }
       const networkName = networkIdToName(network);
-      if (networkName !== auth.network && networkName) { dispatch(setNetwork(networkName)); }
-      if (tinlake.provider !== wallet.provider && wallet.provider) { tinlake.setProvider(wallet.provider); }
-      if (wallet.name !== auth.providerName) { dispatch(setProviderName(wallet.name)); }
-      if (address) { dispatch(setAuthState('authed')); }
+      if (networkName !== auth.network && networkName) {
+        dispatch(setNetwork(networkName));
+      }
+      if (tinlake.provider !== wallet.provider && wallet.provider) {
+        tinlake.setProvider(wallet.provider);
+      }
+      if (wallet.name !== auth.providerName) {
+        dispatch(setProviderName(wallet.name));
+      }
+      if (address) {
+        dispatch(setAuthState('authed'));
+      }
       return;
     }
 
     // onboard not yet initialized, initialize now
     onboard = initOnboard({
-      address: (address) => {
+      address: address => {
         dispatch(setAddressAndLoadData(tinlake, address));
       },
-      network: (network) => {
+      network: network => {
         const networkName = networkIdToName(network);
         dispatch(setNetwork(networkName));
       },
@@ -158,7 +187,7 @@ let openAuthPromise: Promise<void> | null = null;
 
 // auth opens onboard wallet select. If there is already an auth process, it blocks until that auth promise is resolved.
 export function auth(): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
-  return async (dispatch) => {
+  return async dispatch => {
     if (openAuthPromise) {
       return await openAuthPromise;
     }
@@ -204,7 +233,9 @@ export function auth(): ThunkAction<Promise<void>, { auth: AuthState }, undefine
 export function ensureAuthed(): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     const state = getState();
-    if (openAuthPromise) { await openAuthPromise; }
+    if (openAuthPromise) {
+      await openAuthPromise;
+    }
 
     if (state.auth.authState === 'aborted' || state.auth.authState === null) {
       return dispatch(auth());
@@ -221,9 +252,11 @@ export function ensureAuthed(): ThunkAction<Promise<void>, { auth: AuthState }, 
   };
 }
 
-export function setAddressAndLoadData(tinlake: ITinlake, address: string):
-  ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
-  return async (dispatch) => {
+export function setAddressAndLoadData(
+  tinlake: ITinlake,
+  address: string
+): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+  return async dispatch => {
     // clear if no address given
     if (!address) {
       dispatch(clear());
@@ -239,15 +272,15 @@ export function setAddressAndLoadData(tinlake: ITinlake, address: string):
   };
 }
 
-export function setAuthState(authState: null | 'authing' | 'aborted' | 'authed'):
-  ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
-  return async (dispatch) => {
+export function setAuthState(
+  authState: null | 'authing' | 'aborted' | 'authed'
+): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+  return async dispatch => {
     dispatch({ authState, type: SET_AUTH_STATE });
   };
 }
 
-export function loadProxies():
-  ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+export function loadProxies(): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     const { auth } = getState();
 
@@ -262,15 +295,14 @@ export function loadProxies():
 
     dispatch({ type: LOAD_PROXIES });
 
-    const result =  await Apollo.getProxies(auth.address);
+    const result = await Apollo.getProxies(auth.address);
     const proxies = result.data;
 
     dispatch({ proxies, type: RECEIVE_PROXIES });
   };
 }
 
-export function loadPermissions(tinlake: any):
-  ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     const { auth } = getState();
 
@@ -318,8 +350,7 @@ export function loadPermissions(tinlake: any):
   };
 }
 
-export function setNetwork(network: string | null):
-  ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+export function setNetwork(network: string | null): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     if (!network) {
       dispatch({ type: CLEAR_NETWORK });
@@ -341,9 +372,8 @@ export function setProviderName(name: string | null) {
   return { name, type: RECEIVE_PROVIDER_NAME };
 }
 
-export function clear():
-  ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
-  return async (dispatch) => {
+export function clear(): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+  return async dispatch => {
     const tinlake = getTinlake();
     if (tinlake !== null) {
       tinlake.setProvider(getDefaultHttpProvider());

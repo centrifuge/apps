@@ -1,6 +1,4 @@
 language: node_js
-node_js:
-  - 12.16
 
 branches:
   only:
@@ -18,6 +16,7 @@ install:
 
 script:
   - npm run lint
+  - npm run check-format
   # - npm run test # TODO: add
   - npm run export
 

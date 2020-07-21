@@ -8,9 +8,10 @@ let currentAddresses: null | ContractAddresses = null;
 let currentContractConfig: null | any = null;
 
 // initTinlake returns a singleton tinlake. Tinlake is re-intialized if addresses or contractConfig has been changed.
-export function initTinlake({ addresses, contractConfig }: { addresses?: ContractAddresses | null;
-  contractConfig?: any | null } = {}): ITinlake {
-
+export function initTinlake({
+  addresses,
+  contractConfig
+}: { addresses?: ContractAddresses | null; contractConfig?: any | null } = {}): ITinlake {
   if (tinlake === null) {
     const { transactionTimeout } = config;
     tinlake = new Tinlake({ transactionTimeout, provider: getDefaultHttpProvider() }) as any;

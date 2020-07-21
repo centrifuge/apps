@@ -35,23 +35,28 @@ const initialState: LoansState = {
 };
 
 // Reducer
-export default function reducer(state: LoansState = initialState,
-                                action: AnyAction = { type: '' }): LoansState {
+export default function reducer(state: LoansState = initialState, action: AnyAction = { type: '' }): LoansState {
   switch (action.type) {
-    case HYDRATE: return { ...state, ...(action.payload.loans || {}) };
-    case LOAD: return { ...state, loansState: 'loading' };
-    case RECEIVE: return { ...state, loansState: 'found', loans: action.loans };
-    case LOAD_LOAN: return { ...state, loanState: 'loading', loan: null };
-    case LOAN_NOT_FOUND: return { ...state, loanState: 'not found' };
-    case RECEIVE_LOAN: return { ...state, loanState: 'found', loan: action.loan };
-    default: return state;
+    case HYDRATE:
+      return { ...state, ...(action.payload.loans || {}) };
+    case LOAD:
+      return { ...state, loansState: 'loading' };
+    case RECEIVE:
+      return { ...state, loansState: 'found', loans: action.loans };
+    case LOAD_LOAN:
+      return { ...state, loanState: 'loading', loan: null };
+    case LOAN_NOT_FOUND:
+      return { ...state, loanState: 'not found' };
+    case RECEIVE_LOAN:
+      return { ...state, loanState: 'found', loan: action.loan };
+    default:
+      return state;
   }
 }
 
 // hardcoded root just for testing - will be removed in next pr
-export function loadLoans(tinlake: Tinlake):
-  ThunkAction<Promise<void>, LoansState, undefined, Action>  {
-  return async (dispatch) => {
+export function loadLoans(tinlake: Tinlake): ThunkAction<Promise<void>, LoansState, undefined, Action> {
+  return async dispatch => {
     dispatch({ type: LOAD });
     const root = tinlake.contractAddresses['ROOT_CONTRACT'];
     if (root === undefined) {
@@ -70,18 +75,20 @@ export function loadLoans(tinlake: Tinlake):
   };
 }
 
-export function loadLoan(tinlake: any, loanId: string, refresh = false):
-  ThunkAction<Promise<void>, LoansState, undefined, Action> {
-  return async (dispatch) => {
+export function loadLoan(
+  tinlake: any,
+  loanId: string,
+  refresh = false
+): ThunkAction<Promise<void>, LoansState, undefined, Action> {
+  return async dispatch => {
     if (!refresh) {
       dispatch({ type: LOAD_LOAN });
     }
-    const result : TinlakeResult  = await getLoan(tinlake, loanId);
+    const result: TinlakeResult = await getLoan(tinlake, loanId);
     if (result.errorMsg || !result.data) {
       dispatch({ type: LOAN_NOT_FOUND });
       return;
     }
     dispatch({ type: RECEIVE_LOAN, loan: result.data });
-
   };
 }

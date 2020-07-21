@@ -16,11 +16,13 @@
     "export": "npm run build && next export",
     "lint": "tslint --project .",
     "lint-fix": "tslint --fix --project .",
-    "lint-fix-staged": "git diff --staged --name-only | grep -E '\\.tsx?$' | xargs npm run lint-fix && git diff --staged --name-only | grep -E '\\.tsx?$' | xargs git add"
+    "lint-fix-staged": "git diff --staged --name-only | grep -E '\\.tsx?$' | xargs npm run lint-fix && git diff --staged --name-only | grep -E '\\.tsx?$' | xargs git add",
+    "format": "prettier --write \"./**/*.{ts,tsx}\"",
+    "check-format": "prettier --check \"./**/*.{ts,tsx}\""
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint-fix-staged && npm run build-for-husky"
+      "pre-commit": "npm run lint-fix-staged && npm run format && git add"
     }
   },
   "repository": {
@@ -81,9 +83,11 @@
     "dotenv": "^8.2.0",
     "husky": "^4.2.5",
     "jest": "^24.9.0",
+    "prettier": "1.19.1",
     "react-test-renderer": "^16.13.1",
     "tslint": "^5.20.1",
     "tslint-config-airbnb": "^5.11.2",
+    "tslint-config-prettier": "1.18.0",
     "typescript": "^3.8.3"
   }
 }

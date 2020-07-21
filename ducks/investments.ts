@@ -19,24 +19,31 @@ const initialState: InvestorState = {
 };
 
 // Reducer
-export default function reducer(state: InvestorState = initialState,
-                                action: AnyAction = { type: '' }): InvestorState {
+export default function reducer(state: InvestorState = initialState, action: AnyAction = { type: '' }): InvestorState {
   switch (action.type) {
-    case HYDRATE: return { ...state, ...(action.payload.investments || {}) };
-    case LOAD_INVESTOR: return { ...state, investorState: 'loading', investor: null };
-    case INVESTOR_NOT_FOUND: return { ...state, investorState: 'not found' };
-    case RECEIVE_INVESTOR: return { ...state, investorState: 'found', investor: action.investor };
-    default: return state;
+    case HYDRATE:
+      return { ...state, ...(action.payload.investments || {}) };
+    case LOAD_INVESTOR:
+      return { ...state, investorState: 'loading', investor: null };
+    case INVESTOR_NOT_FOUND:
+      return { ...state, investorState: 'not found' };
+    case RECEIVE_INVESTOR:
+      return { ...state, investorState: 'found', investor: action.investor };
+    default:
+      return state;
   }
 }
 
-export function loadInvestor(tinlake: any, address: string, refresh = false):
-  ThunkAction<Promise<void>, InvestorState, undefined, Action> {
-  return async (dispatch) => {
+export function loadInvestor(
+  tinlake: any,
+  address: string,
+  refresh = false
+): ThunkAction<Promise<void>, InvestorState, undefined, Action> {
+  return async dispatch => {
     if (!refresh) {
       dispatch({ type: LOAD_INVESTOR });
     }
-    const result : TinlakeResult  = await getInvestor(tinlake, address);
+    const result: TinlakeResult = await getInvestor(tinlake, address);
     if (result.errorMsg) {
       dispatch({ type: INVESTOR_NOT_FOUND });
     }

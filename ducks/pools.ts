@@ -41,18 +41,21 @@ const initialState: PoolsState = {
   data: null
 };
 
-export default function reducer(state: PoolsState = initialState,
-                                action: AnyAction = { type: '' }): PoolsState {
+export default function reducer(state: PoolsState = initialState, action: AnyAction = { type: '' }): PoolsState {
   switch (action.type) {
-    case HYDRATE: return { ...state, ...(action.payload.pools || {}) };
-    case LOAD_POOLS: return { ...state, state: 'loading' };
-    case RECEIVE_POOLS: return { ...state, state: 'found', data: action.data };
-    default: return state;
+    case HYDRATE:
+      return { ...state, ...(action.payload.pools || {}) };
+    case LOAD_POOLS:
+      return { ...state, state: 'loading' };
+    case RECEIVE_POOLS:
+      return { ...state, state: 'found', data: action.data };
+    default:
+      return state;
   }
 }
 
 export function loadPools(): ThunkAction<Promise<void>, PoolsState, undefined, Action> {
-  return async (dispatch) => {
+  return async dispatch => {
     dispatch({ type: LOAD_POOLS });
     const poolsData = await Apollo.getPools();
     dispatch({ data: poolsData, type: RECEIVE_POOLS });

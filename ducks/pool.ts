@@ -27,21 +27,23 @@ const initialState: PoolState = {
   data: null
 };
 
-export default function reducer(state: PoolState = initialState,
-                                action: AnyAction = { type: '' }): PoolState {
+export default function reducer(state: PoolState = initialState, action: AnyAction = { type: '' }): PoolState {
   switch (action.type) {
-    case HYDRATE: return { ...state, ...(action.payload.pool || {}) };
-    case LOAD_POOL: return { ...state, state: 'loading' };
-    case RECEIVE_POOL: return { ...state, state: 'found', data: action.data };
-    default: return state;
+    case HYDRATE:
+      return { ...state, ...(action.payload.pool || {}) };
+    case LOAD_POOL:
+      return { ...state, state: 'loading' };
+    case RECEIVE_POOL:
+      return { ...state, state: 'found', data: action.data };
+    default:
+      return state;
   }
 }
 
-export function loadPool(tinlake: any):
-  ThunkAction<Promise<void>, PoolState, undefined, Action> {
-  return async (dispatch) => {
+export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, undefined, Action> {
+  return async dispatch => {
     dispatch({ type: LOAD_POOL });
-    const PoolData : TinlakeResult = await getPool(tinlake);
+    const PoolData: TinlakeResult = await getPool(tinlake);
     dispatch({ data: PoolData && PoolData.data, type: RECEIVE_POOL });
   };
 }
