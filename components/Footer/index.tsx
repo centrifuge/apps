@@ -1,10 +1,22 @@
 import React from 'react';
-import { Box, Text, Anchor } from 'grommet';
+import { Box, Button, Text, Anchor, Paragraph } from 'grommet';
+import { Modal } from '@centrifuge/axis-modal';
 
-interface FooterProps {
+interface Props {
 }
 
-class Footer extends React.Component<FooterProps> {
+interface State {
+  modalIsOpen: boolean;
+}
+
+class Footer extends React.Component<Props, State> {
+
+  state: State = {
+    modalIsOpen: false
+  };
+
+  openModal = () => { this.setState({ modalIsOpen: true }); };
+  closeModal = () => { this.setState({ modalIsOpen: false }); };
 
   render() {
     return <Box
@@ -32,12 +44,28 @@ class Footer extends React.Component<FooterProps> {
           </Box>
           <Box>
             <Text>&nbsp;</Text>
-            <Anchor  margin={{ top: 'xsmall' }} href="https://centrifuge.io/products/tinlake/" target="_blank" style={{ textDecoration: 'none', color: '#2762FF' }} label="Investment Disclaimer" />
+            <Anchor  margin={{ top: 'xsmall' }} onClick={this.openModal} style={{ textDecoration: 'none', color: '#2762FF' }} label="Investment Disclaimer" />
             <Anchor  margin={{ top: 'xsmall' }} href="https://centrifuge.io/data-privacy-policy/" target="_blank" style={{ textDecoration: 'none', color: '#2762FF' }} label="Data Privacy Policy" />
             <Anchor  margin={{ top: 'xsmall' }} href="https://centrifuge.io/imprint" target="_blank" style={{ textDecoration: 'none', color: '#2762FF' }} label="Imprint" />
           </Box>
         </Box>
       </Box>
+
+      <Modal
+        opened={this.state.modalIsOpen}
+        title={'Investment Disclaimer'}
+        onClose={() => this.closeModal()}
+      >
+        <Paragraph margin={{ top: 'medium', bottom: 'medium' }}>
+          Nothing contained in this website is to be construed as a solicitation or offer, or recommendation, to buy or sell any interest in any note or other security, or to engage in any other transaction, and the content herein does not constitute, and should not be considered to constitute, an offer of securities. No statement herein made constitutes an offer to sell or a solicitation of an offer to buy a note or other security.
+        </Paragraph>
+
+        <Box direction="row" justify="end">
+          <Box basis={'1/5'}>
+            <Button primary onClick={this.closeModal} label="OK" fill={true} />
+          </Box>
+        </Box>
+      </Modal>
     </Box>;
   }
 }
