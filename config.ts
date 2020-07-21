@@ -1,6 +1,6 @@
-import { networkUrlToName } from './utils/networkNameResolver';
-import poolConfigs from 'tinlake-pool-config';
-import * as yup from 'yup';
+import { networkUrlToName } from './utils/networkNameResolver'
+import poolConfigs from 'tinlake-pool-config'
+import * as yup from 'yup'
 
 export type Pool = {
   addresses: {
@@ -19,26 +19,26 @@ export type Pool = {
   description: string
   investHtml: string
   asset: string
-};
+}
 
 export interface DisplayedField {
-  key: string;
-  label: string;
-  type: string;
-  decimals?: number;
-  precision?: number;
+  key: string
+  label: string
+  type: string
+  decimals?: number
+  precision?: number
 }
 
 interface Config {
-  rpcUrl: string;
-  etherscanUrl: string;
-  gasLimit: number;
-  transactionTimeout: number;
-  tinlakeDataBackendUrl: string;
-  isDemo: boolean;
-  network: 'Mainnet' | 'Kovan';
-  pools: Pool[];
-  portisApiKey: string;
+  rpcUrl: string
+  etherscanUrl: string
+  gasLimit: number
+  transactionTimeout: number
+  tinlakeDataBackendUrl: string
+  isDemo: boolean
+  network: 'Mainnet' | 'Kovan'
+  pools: Pool[]
+  portisApiKey: string
 }
 
 const contractAddressesSchema = yup.object().shape({
@@ -60,8 +60,8 @@ const contractAddressesSchema = yup.object().shape({
   COLLATERAL_NFT: yup
     .string()
     .length(42)
-    .matches(/0x[0-9a-fA-F]{40}/)
-});
+    .matches(/0x[0-9a-fA-F]{40}/),
+})
 
 const contractConfigSchema = yup.object().shape({
   JUNIOR_OPERATOR: yup
@@ -71,8 +71,8 @@ const contractConfigSchema = yup.object().shape({
   SENIOR_OPERATOR: yup
     .mixed<'PROPORTIONAL_OPERATOR' | 'ALLOWANCE_OPERATOR'>()
     .required('contractConfigSchema.SENIOR_OPERATOR is required')
-    .oneOf(['PROPORTIONAL_OPERATOR', 'ALLOWANCE_OPERATOR'])
-});
+    .oneOf(['PROPORTIONAL_OPERATOR', 'ALLOWANCE_OPERATOR']),
+})
 
 const poolSchema = yup.object().shape({
   addresses: contractAddressesSchema.required('poolSchema.addresses is required'),
@@ -86,17 +86,17 @@ const poolSchema = yup.object().shape({
     .default(
       '<p>You will need to get onboarded with the asset originator to start investing in this pool.</p><p>You can find their contact details in the pool overview page.</p>'
     ),
-  asset: yup.string().required('poolSchema.asset is required')
-});
+  asset: yup.string().required('poolSchema.asset is required'),
+})
 
-const poolsSchema = yup.array().of(poolSchema);
+const poolsSchema = yup.array().of(poolSchema)
 const selectedPoolConfig = yup
   .mixed<'kovanStaging' | 'mainnetStaging' | 'mainnetProduction'>()
   .required('POOLS config is required')
   .oneOf(['kovanStaging', 'mainnetStaging', 'mainnetProduction'])
-  .validateSync(process.env.NEXT_PUBLIC_POOLS_CONFIG);
+  .validateSync(process.env.NEXT_PUBLIC_POOLS_CONFIG)
 
-const pools = poolConfigs[`${selectedPoolConfig}`];
+const pools = poolConfigs[`${selectedPoolConfig}`]
 const config: Config = {
   rpcUrl: yup
     .string()
@@ -137,7 +137,7 @@ const config: Config = {
   portisApiKey: yup
     .string()
     .required()
-    .validateSync(process.env.NEXT_PUBLIC_PORTIS_KEY)
-};
+    .validateSync(process.env.NEXT_PUBLIC_PORTIS_KEY),
+}
 
-export default config;
+export default config

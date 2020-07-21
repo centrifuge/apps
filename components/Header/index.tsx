@@ -1,88 +1,88 @@
-import React from 'react';
-import { Box, Button, Image } from 'grommet';
-import { Menu as MenuIcon, User as UserIcon, Close as CloseIcon } from 'grommet-icons';
-import { connect } from 'react-redux';
-import Link from 'next/link';
-import { AuthState, ensureAuthed, clear } from '../../ducks/auth';
-import config from '../../config';
-import Router, { withRouter, NextRouter } from 'next/router';
-import { NavBar } from '@centrifuge/axis-nav-bar';
-import { Web3Wallet } from '@centrifuge/axis-web3-wallet';
-import { getAddressLink } from '../../utils/etherscanLinkGenerator';
+import React from 'react'
+import { Box, Button, Image } from 'grommet'
+import { Menu as MenuIcon, User as UserIcon, Close as CloseIcon } from 'grommet-icons'
+import { connect } from 'react-redux'
+import Link from 'next/link'
+import { AuthState, ensureAuthed, clear } from '../../ducks/auth'
+import config from '../../config'
+import Router, { withRouter, NextRouter } from 'next/router'
+import { NavBar } from '@centrifuge/axis-nav-bar'
+import { Web3Wallet } from '@centrifuge/axis-web3-wallet'
+import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 
-const { isDemo } = config;
+const { isDemo } = config
 export interface MenuItem {
-  label: string;
-  route: string;
-  inPool: boolean;
-  secondary?: boolean;
-  env: string;
+  label: string
+  route: string
+  inPool: boolean
+  secondary?: boolean
+  env: string
 }
 
 interface HeaderProps {
-  poolTitle?: string;
-  selectedRoute: string;
-  menuItems: MenuItem[];
-  auth?: AuthState;
-  router: NextRouter;
-  ensureAuthed?: () => Promise<void>;
-  clear?: () => Promise<void>;
+  poolTitle?: string
+  selectedRoute: string
+  menuItems: MenuItem[]
+  auth?: AuthState
+  router: NextRouter
+  ensureAuthed?: () => Promise<void>
+  clear?: () => Promise<void>
 }
 
 interface State {
-  chosenRoute: string;
+  chosenRoute: string
 }
 
 class Header extends React.Component<HeaderProps, State> {
   state: State = {
-    chosenRoute: '/'
-  };
+    chosenRoute: '/',
+  }
 
   connectAccount = async () => {
     try {
-      await this.props.ensureAuthed!();
+      await this.props.ensureAuthed!()
     } catch (e) {
-      console.error(`authentication failed with Error ${e}`);
+      console.error(`authentication failed with Error ${e}`)
     }
   }
 
   onRouteClick = (item: MenuItem) => {
-    this.setState({ chosenRoute: item.route });
+    this.setState({ chosenRoute: item.route })
     if (item.route.startsWith('/')) {
-      this.pushWithPrefixIfInPool(item);
+      this.pushWithPrefixIfInPool(item)
     } else {
-      window.open(item.route);
+      window.open(item.route)
     }
   }
 
   pushWithPrefixIfInPool = (item: MenuItem) => {
     if (item.inPool) {
-      const { root } = this.props.router.query;
-      const route = item.route === '/' ? '' : item.route;
-      Router.push(`/[root]${route}`, `/${root}${route}`, { shallow: true });
-      return;
+      const { root } = this.props.router.query
+      const route = item.route === '/' ? '' : item.route
+      Router.push(`/[root]${route}`, `/${root}${route}`, { shallow: true })
+      return
     }
-    Router.push(item.route, undefined, { shallow: true });
+    Router.push(item.route, undefined, { shallow: true })
   }
 
   render() {
-    const { poolTitle, selectedRoute, menuItems, auth, clear } = this.props;
-    const { address, network, providerName } = auth!;
-    const logoUrl = (isDemo && '/static/demo_logo.svg') || '/static/logo.svg';
+    const { poolTitle, selectedRoute, menuItems, auth, clear } = this.props
+    const { address, network, providerName } = auth!
+    const logoUrl = (isDemo && '/static/demo_logo.svg') || '/static/logo.svg'
 
     const theme = {
       navBar: {
         icons: {
           menu: MenuIcon,
           close: CloseIcon,
-          user: UserIcon
-        }
-      }
-    };
+          user: UserIcon,
+        },
+      },
+    }
 
     const filtMenuItems = menuItems.filter(
       item => ((isDemo && item.env === 'demo') || item.env === '') && !item.secondary
-    );
+    )
 
     return (
       <Box
@@ -102,7 +102,7 @@ class Header extends React.Component<HeaderProps, State> {
                 paddingRight: 16,
                 borderRight: '1px solid #D8D8D8',
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
               }}
             >
               <Link href="/" shallow>
@@ -118,7 +118,7 @@ class Header extends React.Component<HeaderProps, State> {
                   height: 32,
                   padding: '0 16px',
                   borderRight: '1px solid #D8D8D8',
-                  display: 'flex'
+                  display: 'flex',
                 }}
               >
                 <div style={{ height: 12, lineHeight: '12px', fontWeight: 500, fontSize: 10, color: '#bbb' }}>
@@ -164,8 +164,8 @@ class Header extends React.Component<HeaderProps, State> {
           </Box>
         </Box>
       </Box>
-    );
+    )
   }
 }
 
-export default connect(state => state, { ensureAuthed, clear })(withRouter(Header));
+export default connect(state => state, { ensureAuthed, clear })(withRouter(Header))
