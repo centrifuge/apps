@@ -100,7 +100,7 @@ class InvestorSupply extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, {
+export default connect((state) => state, {
   loadInvestor,
   loadPool,
   transactionSubmitted,

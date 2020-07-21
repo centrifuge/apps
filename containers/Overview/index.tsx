@@ -41,8 +41,8 @@ class Overview extends React.Component<Props> {
     const allLoans = (loans && loans.loans) || []
     const poolData = pool && pool.data
 
-    const outstandingLoans = allLoans.filter(loan => loan.status && loan.status === 'ongoing').length
-    const outstandingDebt = allLoans.map(loan => loan.debt).reduce((sum, debt) => sum.add(debt), new BN('0'))
+    const outstandingLoans = allLoans.filter((loan) => loan.status && loan.status === 'ongoing').length
+    const outstandingDebt = allLoans.map((loan) => loan.debt).reduce((sum, debt) => sum.add(debt), new BN('0'))
     const availableFunds = poolData?.availableFunds || '0'
     const minJuniorRatio = poolData?.minJuniorRatio || '0'
     const currentJuniorRatio = poolData?.currentJuniorRatio || '0'
@@ -154,4 +154,4 @@ class Overview extends React.Component<Props> {
   }
 }
 
-export default connect(state => state, { loadLoans, loadPool })(Overview)
+export default connect((state) => state, { loadLoans, loadPool })(Overview)

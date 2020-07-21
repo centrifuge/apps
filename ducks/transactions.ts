@@ -56,7 +56,7 @@ export default function reducer(
 export function transactionSubmitted(
   loadingMessage: string
 ): ThunkAction<Promise<void>, { transactions: TransactionState }, undefined, Action> {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch({ loadingMessage, type: TRANSACTION_PROCESSING })
   }
 }
@@ -65,7 +65,7 @@ export function responseReceived(
   successMessage: null | string,
   errorMessage: null | string
 ): ThunkAction<Promise<void>, { transactions: TransactionState }, undefined, Action> {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch({
       successMessage,
       errorMessage,
@@ -80,7 +80,7 @@ export function resetTransactionState(): ThunkAction<
   undefined,
   Action
 > {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch({
       type: RESET_TRANSACTION_STATE,
     })

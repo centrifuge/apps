@@ -142,10 +142,10 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
 
     // onboard not yet initialized, initialize now
     onboard = initOnboard({
-      address: address => {
+      address: (address) => {
         dispatch(setAddressAndLoadData(tinlake, address))
       },
-      network: network => {
+      network: (network) => {
         const networkName = networkIdToName(network)
         dispatch(setNetwork(networkName))
       },
@@ -187,7 +187,7 @@ let openAuthPromise: Promise<void> | null = null
 
 // auth opens onboard wallet select. If there is already an auth process, it blocks until that auth promise is resolved.
 export function auth(): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
-  return async dispatch => {
+  return async (dispatch) => {
     if (openAuthPromise) {
       return await openAuthPromise
     }
@@ -256,7 +256,7 @@ export function setAddressAndLoadData(
   tinlake: ITinlake,
   address: string
 ): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
-  return async dispatch => {
+  return async (dispatch) => {
     // clear if no address given
     if (!address) {
       dispatch(clear())
@@ -275,7 +275,7 @@ export function setAddressAndLoadData(
 export function setAuthState(
   authState: null | 'authing' | 'aborted' | 'authed'
 ): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch({ authState, type: SET_AUTH_STATE })
   }
 }
@@ -373,7 +373,7 @@ export function setProviderName(name: string | null) {
 }
 
 export function clear(): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
-  return async dispatch => {
+  return async (dispatch) => {
     const tinlake = getTinlake()
     if (tinlake !== null) {
       tinlake.setProvider(getDefaultHttpProvider())

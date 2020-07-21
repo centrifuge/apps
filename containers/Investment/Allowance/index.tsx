@@ -125,6 +125,6 @@ class InvestorAllowance extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadInvestor, transactionSubmitted, responseReceived, ensureAuthed })(
+export default connect((state) => state, { loadInvestor, transactionSubmitted, responseReceived, ensureAuthed })(
   InvestorAllowance
 )

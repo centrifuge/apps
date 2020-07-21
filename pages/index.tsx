@@ -13,7 +13,7 @@ function Home() {
       <Container>
         <Box justify="center" direction="row">
           <Box width="xlarge">
-            <WithTinlake render={tinlake => <Auth tinlake={tinlake} render={() => <Dashboard />} />} />
+            <WithTinlake render={(tinlake) => <Auth tinlake={tinlake} render={() => <Dashboard />} />} />
           </Box>
         </Box>
       </Container>

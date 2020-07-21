@@ -111,7 +111,7 @@ class InvestorView extends React.Component<Props, State> {
         </Box>
         {pool && pool.data && (
           <Box pad={{ horizontal: 'medium', top: 'large' }}>
-            <Tabs justify="center" activeIndex={selectedTab} flex="grow" onActive={i => this.selectTab(i)}>
+            <Tabs justify="center" activeIndex={selectedTab} flex="grow" onActive={(i) => this.selectTab(i)}>
               <Tab
                 title="Senior tranche / DROP token"
                 style={{
@@ -151,4 +151,4 @@ class InvestorView extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadInvestor, loadPool, resetTransactionState })(InvestorView)
+export default connect((state) => state, { loadInvestor, loadPool, resetTransactionState })(InvestorView)

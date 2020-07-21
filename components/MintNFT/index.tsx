@@ -154,7 +154,7 @@ class MintNFT extends React.Component<Props, State> {
               <FormField label="NFT Reference">
                 <TextInput
                   value={referenceId}
-                  onChange={e => this.setState({ referenceId: e.currentTarget.value })}
+                  onChange={(e) => this.setState({ referenceId: e.currentTarget.value })}
                   disabled={is === 'success'}
                 />
               </FormField>
@@ -173,4 +173,4 @@ class MintNFT extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { ensureAuthed })(MintNFT)
+export default connect((state) => state, { ensureAuthed })(MintNFT)

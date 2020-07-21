@@ -41,7 +41,7 @@ export default function reducer(state: PoolState = initialState, action: AnyActi
 }
 
 export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, undefined, Action> {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch({ type: LOAD_POOL })
     const PoolData: TinlakeResult = await getPool(tinlake)
     dispatch({ data: PoolData && PoolData.data, type: RECEIVE_POOL })

@@ -97,4 +97,4 @@ class LoanView extends React.Component<Props> {
   }
 }
 
-export default connect(state => state, { loadLoan, resetTransactionState, loadProxies })(LoanView)
+export default connect((state) => state, { loadLoan, resetTransactionState, loadProxies })(LoanView)

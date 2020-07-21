@@ -35,7 +35,7 @@ const ERC20Display: FunctionComponent<Props> = ({ value, precision, tokenMetas }
   return (
     <Box direction="row">
       <Amount
-        onClick={event => {
+        onClick={(event) => {
           if (event.detail === 1) {
             // setCopied("Copied")
             copyToClipboard(formatted)

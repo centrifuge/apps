@@ -101,6 +101,6 @@ class LoanBorrow extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadLoan, transactionSubmitted, responseReceived, loadPool, ensureAuthed })(
+export default connect((state) => state, { loadLoan, transactionSubmitted, responseReceived, loadPool, ensureAuthed })(
   LoanBorrow
 )

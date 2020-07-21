@@ -68,4 +68,4 @@ class Dashboard extends React.Component<Props> {
   }
 }
 
-export default connect(state => state, { loadPools })(Dashboard)
+export default connect((state) => state, { loadPools })(Dashboard)

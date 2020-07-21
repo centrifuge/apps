@@ -116,4 +116,4 @@ class Approve extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { ensureAuthed })(Approve)
+export default connect((state) => state, { ensureAuthed })(Approve)

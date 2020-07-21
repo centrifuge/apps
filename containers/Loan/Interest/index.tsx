@@ -73,4 +73,4 @@ class LoanInterest extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadLoan, transactionSubmitted, responseReceived })(LoanInterest)
+export default connect((state) => state, { loadLoan, transactionSubmitted, responseReceived })(LoanInterest)

@@ -39,7 +39,7 @@ export function loadInvestor(
   address: string,
   refresh = false
 ): ThunkAction<Promise<void>, InvestorState, undefined, Action> {
-  return async dispatch => {
+  return async (dispatch) => {
     if (!refresh) {
       dispatch({ type: LOAD_INVESTOR })
     }

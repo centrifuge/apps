@@ -194,4 +194,4 @@ class IssueLoan extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadProxies, ensureAuthed })(IssueLoan)
+export default connect((state) => state, { loadProxies, ensureAuthed })(IssueLoan)

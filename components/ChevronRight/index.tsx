@@ -6,7 +6,7 @@ interface Props {
   [key: string]: any
 }
 
-const ChevronRight: FunctionComponent<Props> = props => {
+const ChevronRight: FunctionComponent<Props> = (props) => {
   return <Img src="/static/chevron-right.svg" style={{ width: 130 }} {...props} />
 }
 

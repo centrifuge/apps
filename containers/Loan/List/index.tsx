@@ -65,4 +65,4 @@ class LoanList extends React.Component<Props> {
   }
 }
 
-export default connect(state => state, { loadLoans, loadPool })(LoanList)
+export default connect((state) => state, { loadLoans, loadPool })(LoanList)

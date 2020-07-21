@@ -8,7 +8,7 @@ const StyledSecondaryHeader = styled(Box)`
   z-index: 1;
 `
 
-const SecondaryHeader = withTheme(props => {
+const SecondaryHeader = withTheme((props) => {
   const { children, ...rest } = props
 
   return (

@@ -6,7 +6,7 @@ interface Props {
   text: string
 }
 
-const Badge: FunctionComponent<Props> = props => {
+const Badge: FunctionComponent<Props> = (props) => {
   return <Container {...props}>{props.text}</Container>
 }
 

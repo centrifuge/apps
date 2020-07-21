@@ -55,7 +55,7 @@ export default function reducer(state: PoolsState = initialState, action: AnyAct
 }
 
 export function loadPools(): ThunkAction<Promise<void>, PoolsState, undefined, Action> {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch({ type: LOAD_POOLS })
     const poolsData = await Apollo.getPools()
     dispatch({ data: poolsData, type: RECEIVE_POOLS })

@@ -78,7 +78,7 @@ class InvestmentsView extends React.Component<Props, State> {
               <FormField label="Investor Address">
                 <TextInput
                   value={investorAddress}
-                  onChange={event => this.setState({ investorAddress: event.currentTarget.value })}
+                  onChange={(event) => this.setState({ investorAddress: event.currentTarget.value })}
                 />
               </FormField>
             </Box>
@@ -98,4 +98,4 @@ class InvestmentsView extends React.Component<Props, State> {
   }
 }
 
-export default connect(state => state, { loadPool, resetTransactionState })(InvestmentsView)
+export default connect((state) => state, { loadPool, resetTransactionState })(InvestmentsView)

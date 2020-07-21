@@ -81,7 +81,7 @@ class Header extends React.Component<HeaderProps, State> {
     }
 
     const filtMenuItems = menuItems.filter(
-      item => ((isDemo && item.env === 'demo') || item.env === '') && !item.secondary
+      (item) => ((isDemo && item.env === 'demo') || item.env === '') && !item.secondary
     )
 
     return (
@@ -168,4 +168,4 @@ class Header extends React.Component<HeaderProps, State> {
   }
 }
 
-export default connect(state => state, { ensureAuthed, clear })(withRouter(Header))
+export default connect((state) => state, { ensureAuthed, clear })(withRouter(Header))

@@ -34,4 +34,4 @@ class Auth extends React.Component<Props> {
   }
 }
 
-export default connect(state => state, { load })(Auth)
+export default connect((state) => state, { load })(Auth)
