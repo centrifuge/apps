@@ -56,7 +56,7 @@ class Footer extends React.Component<Props, State> {
         opened={this.state.modalIsOpen}
         title={'Investment Disclaimer'}
         titleIcon={<StatusInfoIcon />}
-        onClose={() => this.closeModal()}
+        onClose={this.closeModal}
       >
         <Paragraph margin={{ top: 'medium', bottom: 'medium' }}>
           Nothing contained in this website is to be construed as a solicitation or offer, or recommendation, to buy or sell any interest in any note or other security, or to engage in any other transaction, and the content herein does not constitute, and should not be considered to constitute, an offer of securities. No statement herein made constitutes an offer to sell or a solicitation of an offer to buy a note or other security.
