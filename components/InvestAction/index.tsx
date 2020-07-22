@@ -1,9 +1,10 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import { Box, Button, Paragraph, CheckBox, FormField, TextInput, Select } from 'grommet'
+import { Box, Button, Paragraph, CheckBox, Form, FormField, TextInput, Select } from 'grommet'
 import { Modal } from '@centrifuge/axis-modal'
 
 import { countryList } from './countries'
+import { isValidEmail } from '../../utils/email'
 
 const InvestmentSteps = styled.img`
   max-width: 600px;
@@ -12,29 +13,79 @@ const InvestmentSteps = styled.img`
 
 interface Props {}
 
-interface State {
-  open: boolean
+interface FormSubmission {
+  title: 'mr' | 'ms' | undefined
+  givenName: string
+  surname: string
+  email: string
+  countryOfResidence: string | undefined
+  investorType: string | undefined
+  investmentSize: string | undefined
+  investorConfirmation: boolean
 }
 
-class InvestAction extends React.Component<Props, State> {
-  state: State = {
-    open: false,
+const initialForm: FormSubmission = {
+  title: undefined,
+  givenName: '',
+  surname: '',
+  email: '',
+  countryOfResidence: undefined,
+  investorType: undefined,
+  investmentSize: undefined,
+  investorConfirmation: false,
+}
+
+type FormErrors = { [K in keyof FormSubmission]?: string }
+
+const InvestAction: React.FunctionComponent<Props> = () => {
+  const [modalIsOpen, setModalIsOpen] = React.useState<boolean>(false)
+
+  const [form, setForm] = React.useState<FormSubmission>(initialForm)
+  const [errors, setErrors] = React.useState<FormErrors>({})
+
+  const handleOnChange = (fieldName: keyof FormSubmission) => {
+    return (event: React.FormEvent<HTMLInputElement>) => {
+      setForm({ ...form, [fieldName]: event.currentTarget.value })
+    }
   }
 
-  onOpen = () => {
-    this.setState({ open: true })
+  const handleOnChangeSelect = (fieldName: keyof FormSubmission) => {
+    return (event: { option: any }) => {
+      setForm({ ...form, [fieldName]: event.option })
+    }
   }
 
-  onClose = () => {
-    this.setState({ open: false })
+  const onOpen = () => {
+    setModalIsOpen(true)
   }
 
-  render() {
-    return (
-      <Box>
-        <Button primary label="Invest" margin={{ left: 'auto', vertical: 'large' }} onClick={this.onOpen} />
+  const onClose = () => {
+    setModalIsOpen(false)
+  }
 
-        <Modal opened={this.state.open} title={'Interested in investing?'} onClose={this.onClose}>
+  const onSubmit = () => {
+    // Check if any is undefined
+    const newErrors: FormErrors = { ...errors }
+    ;(Object.keys(form) as (keyof FormSubmission)[]).map((fieldName: keyof FormSubmission) => {
+      if (form[fieldName] === undefined || (form[fieldName] as string).length === 0) {
+        newErrors[fieldName] = 'This needs to be set'
+      }
+    })
+
+    if (!newErrors['email'] && !isValidEmail(form.email)) {
+      newErrors['email'] = 'This is not a valid email address'
+    }
+
+    setErrors(newErrors)
+    console.log(newErrors)
+  }
+
+  return (
+    <Box>
+      <Button primary label="Invest" margin={{ left: 'auto', vertical: 'large' }} onClick={onOpen} />
+
+      <Modal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose}>
+        <Form onSubmit={onSubmit}>
           <InvestmentSteps src="../../static/invest-steps1.png" alt="Investment steps" />
           <Paragraph margin={{ top: 'medium', bottom: 'medium' }}>
             To invest in this pool please provide your information to go through KYC. Submit your information below to
@@ -52,32 +103,39 @@ class InvestAction extends React.Component<Props, State> {
 
           <Box direction="row" gap={'medium'}>
             <Box basis={'1/2'}>
-              <FormField label="Given Name" margin={{ bottom: 'medium' }}>
-                <TextInput />
+              <FormField label="Given Name" margin={{ bottom: 'medium' }} error={errors.givenName}>
+                <TextInput value={form.givenName} onChange={handleOnChange('givenName')} />
               </FormField>
-              <FormField label="Email" margin={{ bottom: 'medium' }}>
-                <TextInput />
+              <FormField label="Email" margin={{ bottom: 'medium' }} error={errors.email}>
+                <TextInput type="email" value={form.email} onChange={handleOnChange('email')} />
               </FormField>
-              <FormField label="Type of Investor">
+              <FormField label="Type of Investor" error={errors.investorType}>
                 <Select
                   placeholder="Select Investor Type"
                   options={['Individual', 'Representing a legal entity']}
-                  onChange={() => {}}
+                  value={form.investorType}
+                  onChange={handleOnChangeSelect('investorType')}
                 />
               </FormField>
             </Box>
             <Box basis={'1/2'}>
-              <FormField label="Surname" margin={{ bottom: 'medium' }}>
-                <TextInput />
+              <FormField label="Surname" margin={{ bottom: 'medium' }} error={errors.surname}>
+                <TextInput value={form.surname} onChange={handleOnChange('surname')} />
               </FormField>
-              <FormField label="Country of Residence" margin={{ bottom: 'medium' }}>
-                <Select placeholder="Select a country" options={countryList} onChange={() => {}} />
+              <FormField label="Country of Residence" margin={{ bottom: 'medium' }} error={errors.countryOfResidence}>
+                <Select
+                  placeholder="Select a country"
+                  options={countryList}
+                  value={form.countryOfResidence}
+                  onChange={handleOnChangeSelect('countryOfResidence')}
+                />
               </FormField>
-              <FormField label="Estimated Size of Investment, USD">
+              <FormField label="Estimated Size of Investment, USD" error={errors.investmentSize}>
                 <Select
                   placeholder="Select Investment Size"
                   options={['<25,000 USD', '25,000-50,000 USD', '>50,000 USD']}
-                  onChange={() => {}}
+                  value={form.investmentSize}
+                  onChange={handleOnChangeSelect('investmentSize')}
                 />
               </FormField>
             </Box>
@@ -101,7 +159,7 @@ class InvestAction extends React.Component<Props, State> {
 
           <Paragraph margin={{ top: 'small', bottom: 'small' }}>
             Any questions left? Feel free to reach out to the Issuer directly (see{' '}
-            <a href="#" onClick={this.onClose}>
+            <a href="#" onClick={onClose}>
               Pool Overview
             </a>
             ).
@@ -109,13 +167,13 @@ class InvestAction extends React.Component<Props, State> {
 
           <Box direction="row" justify="end">
             <Box basis={'1/5'}>
-              <Button primary onClick={this.onClose} label="Submit" fill={true} />
+              <Button primary onClick={onSubmit} label="Submit" fill={true} />
             </Box>
           </Box>
-        </Modal>
-      </Box>
-    )
-  }
+        </Form>
+      </Modal>
+    </Box>
+  )
 }
 
 export default InvestAction
