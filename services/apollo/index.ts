@@ -1,57 +1,57 @@
-import { ApolloClient, DefaultOptions } from 'apollo-client';
-import { Loan } from 'tinlake';
-import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
-import { createHttpLink } from 'apollo-link-http';
-import config from '../../config';
-import fetch from 'node-fetch';
-import gql from 'graphql-tag';
-import BN from 'bn.js';
-import { PoolData, PoolsData } from '../../ducks/pools';
+import { ApolloClient, DefaultOptions } from 'apollo-client'
+import { Loan } from 'tinlake'
+import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory'
+import { createHttpLink } from 'apollo-link-http'
+import config from '../../config'
+import fetch from 'node-fetch'
+import gql from 'graphql-tag'
+import BN from 'bn.js'
+import { PoolData, PoolsData } from '../../ducks/pools'
 
-const { tinlakeDataBackendUrl } = config;
-const cache = new InMemoryCache();
+const { tinlakeDataBackendUrl } = config
+const cache = new InMemoryCache()
 const link = createHttpLink({
   fetch: fetch as any,
   headers: {
-    'user-agent': null
+    'user-agent': null,
   },
   // fetchOptions: '',
-  uri: tinlakeDataBackendUrl
-});
+  uri: tinlakeDataBackendUrl,
+})
 
 export interface TinlakeEventEntry {
-  timestamp: string;
-  total_debt: string;
-  total_value_of_nfts: string;
+  timestamp: string
+  total_debt: string
+  total_value_of_nfts: string
 }
 
 const defaultOptions: DefaultOptions = {
   query: {
     fetchPolicy: 'no-cache',
-    errorPolicy: 'all'
-  }
-};
+    errorPolicy: 'all',
+  },
+}
 
 class Apollo {
-  client: ApolloClient<NormalizedCacheObject>;
+  client: ApolloClient<NormalizedCacheObject>
   constructor() {
     this.client = new ApolloClient({
       cache,
       link,
-      defaultOptions
-    });
+      defaultOptions,
+    })
   }
 
   injectPoolData(pools: any[]): PoolData[] {
-    const configPools = config.pools;
+    const configPools = config.pools
     const tinlakePools = configPools.map((configPool: any) => {
-      const poolId = configPool.addresses.ROOT_CONTRACT;
-      const pool = pools.find(p => p.id === poolId);
+      const poolId = configPool.addresses.ROOT_CONTRACT
+      const pool = pools.find((p) => p.id === poolId)
 
-      const totalDebt = pool && new BN(pool.totalDebt) || new BN('0');
-      const totalRepaysAggregatedAmount = pool && new BN(pool.totalRepaysAggregatedAmount) || new BN('0');
-      const weightedInterestRate = pool && new BN(pool.weightedInterestRate) || new BN('0');
-      const seniorInterestRate = pool && pool.seniorInterestRate && new BN(pool.seniorInterestRate) || new BN('0');
+      const totalDebt = (pool && new BN(pool.totalDebt)) || new BN('0')
+      const totalRepaysAggregatedAmount = (pool && new BN(pool.totalRepaysAggregatedAmount)) || new BN('0')
+      const weightedInterestRate = (pool && new BN(pool.weightedInterestRate)) || new BN('0')
+      const seniorInterestRate = (pool && pool.seniorInterestRate && new BN(pool.seniorInterestRate)) || new BN('0')
 
       return {
         totalDebt,
@@ -61,57 +61,55 @@ class Apollo {
         id: poolId,
         name: configPool.name,
         asset: configPool?.asset,
-        ongoingLoans: pool && pool.ongoingLoans.length || 0, // TODO add count field to subgraph, inefficient to query all assets
+        ongoingLoans: (pool && pool.ongoingLoans.length) || 0, // TODO add count field to subgraph, inefficient to query all assets
         totalDebtNum: parseFloat(totalDebt.toString()),
         totalRepaysAggregatedAmountNum: parseFloat(totalRepaysAggregatedAmount.toString()),
         weightedInterestRateNum: parseFloat(weightedInterestRate.toString()),
-        seniorInterestRateNum: parseFloat(seniorInterestRate.toString())
-      };
-    });
-    return tinlakePools;
+        seniorInterestRateNum: parseFloat(seniorInterestRate.toString()),
+      }
+    })
+    return tinlakePools
   }
 
   async getPools(): Promise<PoolsData> {
-    let result;
+    let result
     try {
-      result = await this.client
-        .query({
-          query: gql`
-        {
-          pools {
-            id,
-            totalDebt,
-            totalRepaysAggregatedAmount,
-            ongoingLoans: loans (where: {opened_gt:0, closed:null, debt_gt:0}) {
-							id
-            },
-            weightedInterestRate,
-            seniorInterestRate
+      result = await this.client.query({
+        query: gql`
+          {
+            pools {
+              id
+              totalDebt
+              totalRepaysAggregatedAmount
+              ongoingLoans: loans(where: { opened_gt: 0, closed: null, debt_gt: 0 }) {
+                id
+              }
+              weightedInterestRate
+              seniorInterestRate
+            }
           }
-        }
-        `
-        });
+        `,
+      })
     } catch (err) {
-      throw new Error(`error occured while fetching assets from apollo ${err}`);
+      throw new Error(`error occured while fetching assets from apollo ${err}`)
     }
 
-    const pools = (!result.data || !result.data.pools) ? [] : this.injectPoolData(result.data.pools);
+    const pools = !result.data || !result.data.pools ? [] : this.injectPoolData(result.data.pools)
 
     return {
       pools,
-      ongoingPools: pools.filter(pool => pool.ongoingLoans > 0).length,
+      ongoingPools: pools.filter((pool) => pool.ongoingLoans > 0).length,
       ongoingLoans: pools.reduce((p, c) => p + c.ongoingLoans, 0),
       totalDebt: pools.reduce((p, c) => p.add(c.totalDebt), new BN(0)),
-      totalRepaysAggregatedAmount: pools.reduce((p, c) => p.add(c.totalRepaysAggregatedAmount), new BN(0))
-    };
+      totalRepaysAggregatedAmount: pools.reduce((p, c) => p.add(c.totalRepaysAggregatedAmount), new BN(0)),
+    }
   }
 
   async getLoans(root: string) {
-    let result;
+    let result
     try {
-      result = await this.client
-        .query({
-          query: gql`
+      result = await this.client.query({
+        query: gql`
         {
           pools (where : {id: "${root}"}){
             id
@@ -137,25 +135,24 @@ class Apollo {
             }
           }
         }
-        `
-        });
+        `,
+      })
     } catch (err) {
-      console.error(`error occured while fetching loans from apollo ${err}`);
+      console.error(`error occured while fetching loans from apollo ${err}`)
       return {
-        data: []
-      };
+        data: [],
+      }
     }
-    const pool = result.data.pools[0];
-    const tinlakeLoans = pool && toTinlakeLoans(pool.loans) || [];
-    return tinlakeLoans;
+    const pool = result.data.pools[0]
+    const tinlakeLoans = (pool && toTinlakeLoans(pool.loans)) || []
+    return tinlakeLoans
   }
 
   async getProxies(user: string) {
-    let result;
+    let result
     try {
-      result = await this.client
-        .query({
-          query: gql`
+      result = await this.client.query({
+        query: gql`
         {
           proxies (where: {owner:"${user}"})
             {
@@ -163,21 +160,21 @@ class Apollo {
               owner
             }
           }
-        `
-        });
+        `,
+      })
     } catch (err) {
-      console.error(`no proxies found for address ${user} ${err}`);
+      console.error(`no proxies found for address ${user} ${err}`)
       return {
-        data: []
-      };
+        data: [],
+      }
     }
-    const proxies = result.data.proxies.map((e: { id: string, owner: string }) => e.id);
-    return { data: proxies };
+    const proxies = result.data.proxies.map((e: { id: string; owner: string }) => e.id)
+    return { data: proxies }
   }
 }
 
 function toTinlakeLoans(loans: any[]): { data: Loan[] } {
-  const tinlakeLoans: Loan[] = [];
+  const tinlakeLoans: Loan[] = []
 
   loans.forEach((loan) => {
     const tinlakeLoan = {
@@ -190,26 +187,27 @@ function toTinlakeLoans(loans: any[]): { data: Loan[] } {
       debt: new BN(loan.debt),
       threshold: loan.threshold ? new BN(loan.threshold) : new BN(0),
       price: loan.price || new BN(0),
-      status: getLoanStatus(loan)
-    };
-    tinlakeLoans.push(tinlakeLoan);
-  });
+      status: getLoanStatus(loan),
+    }
+    tinlakeLoans.push(tinlakeLoan)
+  })
 
-  tinlakeLoans.length && tinlakeLoans.sort((l1: Loan, l2: Loan) => {
-    return (l1.loanId as unknown as number) - (l2.loanId as unknown as number);
-  });
+  tinlakeLoans.length &&
+    tinlakeLoans.sort((l1: Loan, l2: Loan) => {
+      return ((l1.loanId as unknown) as number) - ((l2.loanId as unknown) as number)
+    })
 
-  return { data: tinlakeLoans };
+  return { data: tinlakeLoans }
 }
 
 function getLoanStatus(loan: any) {
   if (loan.closed) {
-    return 'closed';
+    return 'closed'
   }
   if (loan.debt && loan.debt !== '0') {
-    return 'ongoing';
+    return 'ongoing'
   }
-  return 'opened';
+  return 'opened'
 }
 
-export default new Apollo();
+export default new Apollo()
