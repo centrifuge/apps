@@ -60,7 +60,7 @@ class InvestAction extends React.Component<Props, State> {
               </FormField>
               <FormField label="Type of Investor">
                 <Select
-                  placeholder="Select investor type"
+                  placeholder="Select Investor Type"
                   options={['Individual', 'Representing a legal entity']}
                   onChange={() => {}}
                 />
@@ -75,7 +75,7 @@ class InvestAction extends React.Component<Props, State> {
               </FormField>
               <FormField label="Estimated Size of Investment, USD">
                 <Select
-                  placeholder="Select investor type"
+                  placeholder="Select Investment Size"
                   options={['<25,000 USD', '25,000-50,000 USD', '>50,000 USD']}
                   onChange={() => {}}
                 />
@@ -83,8 +83,28 @@ class InvestAction extends React.Component<Props, State> {
             </Box>
           </Box>
 
-          <Paragraph margin={{ top: 'medium', bottom: 'medium' }}>
-            Any questions left? Feel free to reach out to the Issuer directly (see Pool Overview).
+          <Box direction="row" margin={{ top: 'small' }}>
+            <Box style={{ minWidth: '40px', paddingTop: '20px' }}>
+              <CheckBox name="check" checked={true} onChange={(event) => console.log(event)} />
+            </Box>
+            <Box flex={'grow'}>
+              <Paragraph>
+                I hereby confirm that I’m or I’m representing either:
+                <br />
+                A non-US investor not located in a jurisdiction restricting the purchase and holding of crypto assets
+                <br />
+                or
+                <br />A US accredited investor, and I’m able to prove my accredited investor status to the Issuer.
+              </Paragraph>
+            </Box>
+          </Box>
+
+          <Paragraph margin={{ top: 'small', bottom: 'small' }}>
+            Any questions left? Feel free to reach out to the Issuer directly (see{' '}
+            <a href="#" onClick={this.onClose}>
+              Pool Overview
+            </a>
+            ).
           </Paragraph>
 
           <Box direction="row" justify="end">
