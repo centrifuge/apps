@@ -144,6 +144,7 @@ class Header extends React.Component<HeaderProps, State> {
                   onRouteClick={this.onRouteClick}
                   pad={{ horizontal: 'none' }}
                   menuItemProps={{ style: { fontSize: 14 } }}
+                  hamburgerBreakpoint={1000}
                 />
               )}
             </Box>
