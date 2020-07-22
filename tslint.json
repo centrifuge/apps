@@ -1,5 +1,8 @@
 {
-  "extends": "tslint-config-airbnb",
+  "extends": [
+    "tslint-config-airbnb",
+    "tslint-config-prettier"
+  ],
   "rules": {
     "function-name": [
       true,
@@ -12,9 +15,6 @@
       }
     ],
     "variable-name": false,
-    "import-name": false,
-    "semicolon": true,
-    "max-line-length": [true, 500],
-    "trailing-comma": [true, {"multiline": "never", "singleline": "never"}]
+    "import-name": false
   }
 }

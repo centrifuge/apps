@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from 'styled-components'
 
 export const StyledApp = styled.div`
   /*
@@ -8,4 +8,4 @@ export const StyledApp = styled.div`
   input:disabled {
     opacity: 0.5;
   }
-`;
+`

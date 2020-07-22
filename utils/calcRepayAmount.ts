@@ -1,13 +1,13 @@
-import { Decimal } from 'decimal.js-light';
-import BN from 'bn.js';
+import { Decimal } from 'decimal.js-light'
+import BN from 'bn.js'
 
 Decimal.set({
   precision: 30,
   toExpNeg: -7,
-  toExpPos: 29
-});
+  toExpPos: 29,
+})
 
-const bufferInSeconds = 60 * 60;
+const bufferInSeconds = 60 * 60
 
 /**
  * Adds a fee buffer of 5 minutes to the debt. This function can be used to calculate
@@ -17,12 +17,12 @@ const bufferInSeconds = 60 * 60;
  * @param fee
  */
 export const calcRepayAmount = (debt: BN, fee: BN): BN => {
-  const _debt = new Decimal(debt.toString());
-  const _fee = new Decimal(fee.toString()).div(1e27);
+  const _debt = new Decimal(debt.toString())
+  const _fee = new Decimal(fee.toString()).div(1e27)
 
-  const _feeFactor = _fee.pow(bufferInSeconds);
-  const _buffer = _debt.mul(_feeFactor.minus(1));
-  const _repayAmount = _debt.plus(_buffer);
+  const _feeFactor = _fee.pow(bufferInSeconds)
+  const _buffer = _debt.mul(_feeFactor.minus(1))
+  const _repayAmount = _debt.plus(_buffer)
 
-  return new BN(_repayAmount.toFixed(0));
-};
+  return new BN(_repayAmount.toFixed(0))
+}

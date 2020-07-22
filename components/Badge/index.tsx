@@ -1,14 +1,14 @@
-import React, { FunctionComponent } from 'react';
-import styled from 'styled-components';
+import React, { FunctionComponent } from 'react'
+import styled from 'styled-components'
 
 interface Props {
-  [key: string]: any;
-  text: string;
+  [key: string]: any
+  text: string
 }
 
 const Badge: FunctionComponent<Props> = (props) => {
-  return <Container {...props}>{ props.text }</Container>;
-};
+  return <Container {...props}>{props.text}</Container>
+}
 
 const Container = styled.div`
   display: inline-block;
@@ -18,6 +18,6 @@ const Container = styled.div`
   line-height: 12px;
   font-size: 12px;
   color: #808080;
-`;
+`
 
-export default Badge;
+export default Badge

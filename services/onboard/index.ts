@@ -1,31 +1,33 @@
-import Onboard from 'bnc-onboard';
-import { networkNameToId } from '../../utils/networkNameResolver';
-import config from '../../config';
-import { Subscriptions, API } from 'bnc-onboard/dist/src/interfaces';
+import Onboard from 'bnc-onboard'
+import { networkNameToId } from '../../utils/networkNameResolver'
+import config from '../../config'
+import { Subscriptions, API } from 'bnc-onboard/dist/src/interfaces'
 
 const wallets = [
   {
     walletName: 'metamask',
-    preferred: true
+    preferred: true,
   },
   {
     walletName: 'portis',
     apiKey: config.portisApiKey,
     label: 'Login with Portis',
-    preferred: true
+    preferred: true,
   },
   {
     walletName: 'ledger',
     rpcUrl: config.rpcUrl,
-    preferred: true
-  }
-];
+    preferred: true,
+  },
+]
 
-let onboard: API | null = null;
+let onboard: API | null = null
 
 // initOnboard returns onboard singleton. Onboard is only initialized once and stored in global state.
 export function initOnboard(subscriptions?: Subscriptions): API {
-  if (onboard) { return onboard; }
+  if (onboard) {
+    return onboard
+  }
 
   onboard = Onboard({
     subscriptions,
@@ -35,14 +37,14 @@ export function initOnboard(subscriptions?: Subscriptions): API {
       { checkName: 'connect' },
       { checkName: 'derivationPath' },
       { checkName: 'accounts' },
-      { checkName: 'network' }
+      { checkName: 'network' },
     ],
-    hideBranding: true
-  });
+    hideBranding: true,
+  })
 
-  return onboard;
+  return onboard
 }
 
 export function getOnboard(): API | null {
-  return onboard;
+  return onboard
 }
