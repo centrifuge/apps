@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import { Box, Button, Paragraph, CheckBox, Form, FormField, TextInput, Select } from 'grommet'
+import { Box, Button, Paragraph, CheckBox, RadioButton, Form, FormField, TextInput, Select } from 'grommet'
 import { Modal } from '@centrifuge/axis-modal'
 
 import { countryList } from './countries'
@@ -14,7 +14,7 @@ const InvestmentSteps = styled.img`
 interface Props {}
 
 interface FormSubmission {
-  title: 'mr' | 'ms' | undefined
+  title: 'Mr.' | 'Ms.' | undefined
   givenName: string
   surname: string
   email: string
@@ -65,15 +65,20 @@ const InvestAction: React.FunctionComponent<Props> = () => {
 
   const onSubmit = () => {
     // Check if any is undefined
-    const newErrors: FormErrors = { ...errors }
+    const newErrors: FormErrors = {}
+
     ;(Object.keys(form) as (keyof FormSubmission)[]).map((fieldName: keyof FormSubmission) => {
       if (form[fieldName] === undefined || (form[fieldName] as string).length === 0) {
-        newErrors[fieldName] = 'This needs to be set'
+        newErrors[fieldName] = 'This is required'
       }
     })
 
     if (!newErrors['email'] && !isValidEmail(form.email)) {
-      newErrors['email'] = 'This is not a valid email address'
+      newErrors['email'] = 'Please insert a valid email address'
+    }
+
+    if (!form['investorConfirmation'] || (form['investorConfirmation'] && form['investorConfirmation'] !== true)) {
+      newErrors['investorConfirmation'] = 'This needs to be checked'
     }
 
     setErrors(newErrors)
@@ -94,10 +99,20 @@ const InvestAction: React.FunctionComponent<Props> = () => {
 
           <Box direction="row" margin={{ bottom: 'medium' }}>
             <Box basis={'1/4'}>
-              <CheckBox name="check" checked={true} label="Mr." onChange={(event) => console.log(event)} />
+              <RadioButton
+                name="radio"
+                checked={form.title === 'Mr.'}
+                label="Mr."
+                onChange={(event: any) => setForm({ ...form, title: event.target.checked ? 'Mr.' : 'Ms.' })}
+              />
             </Box>
             <Box basis={'1/4'}>
-              <CheckBox name="check" checked={true} label="Ms." onChange={(event) => console.log(event)} />
+              <RadioButton
+                name="radio"
+                checked={form.title === 'Ms.'}
+                label="Ms."
+                onChange={(event: any) => setForm({ ...form, title: event.target.checked ? 'Ms.' : 'Mr.' })}
+              />
             </Box>
           </Box>
 
@@ -143,7 +158,13 @@ const InvestAction: React.FunctionComponent<Props> = () => {
 
           <Box direction="row" margin={{ top: 'small' }}>
             <Box style={{ minWidth: '40px', paddingTop: '20px' }}>
-              <CheckBox name="check" checked={true} onChange={(event) => console.log(event)} />
+              <FormField error={errors.investorConfirmation}>
+                <CheckBox
+                  name="check"
+                  checked={form.investorConfirmation}
+                  onChange={(event: any) => setForm({ ...form, investorConfirmation: event.target.checked })}
+                />
+              </FormField>
             </Box>
             <Box flex={'grow'}>
               <Paragraph>
