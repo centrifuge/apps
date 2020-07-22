@@ -7,8 +7,15 @@ import { countryList } from './countries'
 import { isValidEmail } from '../../utils/email'
 
 const InvestmentSteps = styled.img`
+  display: block;
   max-width: 600px;
   margin: 20px auto;
+`
+
+const FormFieldWithoutBorder = styled(FormField)`
+  > div {
+    border-bottom-color: rgba(0, 0, 0, 0);
+  }
 `
 
 interface Props {}
@@ -66,7 +73,6 @@ const InvestAction: React.FunctionComponent<Props> = () => {
   const onSubmit = () => {
     // Check if any is undefined
     const newErrors: FormErrors = {}
-
     ;(Object.keys(form) as (keyof FormSubmission)[]).map((fieldName: keyof FormSubmission) => {
       if (form[fieldName] === undefined || (form[fieldName] as string).length === 0) {
         newErrors[fieldName] = 'This is required'
@@ -97,8 +103,8 @@ const InvestAction: React.FunctionComponent<Props> = () => {
             start the KYC and onboarding process. The Issuer will shortly reach out to you.
           </Paragraph>
 
-          <Box direction="row" margin={{ bottom: 'medium' }}>
-            <Box basis={'1/4'}>
+          <Box direction="row" margin={{ bottom: 'medium' }} gap={'medium'}>
+            <Box>
               <RadioButton
                 name="radio"
                 checked={form.title === 'Mr.'}
@@ -106,7 +112,7 @@ const InvestAction: React.FunctionComponent<Props> = () => {
                 onChange={(event: any) => setForm({ ...form, title: event.target.checked ? 'Mr.' : 'Ms.' })}
               />
             </Box>
-            <Box basis={'1/4'}>
+            <Box>
               <RadioButton
                 name="radio"
                 checked={form.title === 'Ms.'}
@@ -121,9 +127,32 @@ const InvestAction: React.FunctionComponent<Props> = () => {
               <FormField label="Given Name" margin={{ bottom: 'medium' }} error={errors.givenName}>
                 <TextInput value={form.givenName} onChange={handleOnChange('givenName')} />
               </FormField>
+            </Box>
+            <Box basis={'1/2'}>
+              <FormField label="Surname" margin={{ bottom: 'medium' }} error={errors.surname}>
+                <TextInput value={form.surname} onChange={handleOnChange('surname')} />
+              </FormField>
+            </Box>
+          </Box>
+          <Box direction="row" gap={'medium'}>
+            <Box basis={'1/2'}>
               <FormField label="Email" margin={{ bottom: 'medium' }} error={errors.email}>
                 <TextInput type="email" value={form.email} onChange={handleOnChange('email')} />
               </FormField>
+            </Box>
+            <Box basis={'1/2'}>
+              <FormField label="Country of Residence" margin={{ bottom: 'medium' }} error={errors.countryOfResidence}>
+                <Select
+                  placeholder="Select Country"
+                  options={countryList}
+                  value={form.countryOfResidence}
+                  onChange={handleOnChangeSelect('countryOfResidence')}
+                />
+              </FormField>
+            </Box>
+          </Box>
+          <Box direction="row" gap={'medium'}>
+            <Box basis={'1/2'}>
               <FormField label="Type of Investor" error={errors.investorType}>
                 <Select
                   placeholder="Select Investor Type"
@@ -134,17 +163,6 @@ const InvestAction: React.FunctionComponent<Props> = () => {
               </FormField>
             </Box>
             <Box basis={'1/2'}>
-              <FormField label="Surname" margin={{ bottom: 'medium' }} error={errors.surname}>
-                <TextInput value={form.surname} onChange={handleOnChange('surname')} />
-              </FormField>
-              <FormField label="Country of Residence" margin={{ bottom: 'medium' }} error={errors.countryOfResidence}>
-                <Select
-                  placeholder="Select a country"
-                  options={countryList}
-                  value={form.countryOfResidence}
-                  onChange={handleOnChangeSelect('countryOfResidence')}
-                />
-              </FormField>
               <FormField label="Estimated Size of Investment, USD" error={errors.investmentSize}>
                 <Select
                   placeholder="Select Investment Size"
@@ -156,27 +174,27 @@ const InvestAction: React.FunctionComponent<Props> = () => {
             </Box>
           </Box>
 
-          <Box direction="row" margin={{ top: 'small' }}>
-            <Box style={{ minWidth: '40px', paddingTop: '20px' }}>
-              <FormField error={errors.investorConfirmation}>
+          <FormFieldWithoutBorder error={errors.investorConfirmation}>
+            <Box direction="row" margin={{ top: 'small' }}>
+              <Box style={{ minWidth: '40px', paddingTop: '20px' }}>
                 <CheckBox
                   name="check"
                   checked={form.investorConfirmation}
                   onChange={(event: any) => setForm({ ...form, investorConfirmation: event.target.checked })}
                 />
-              </FormField>
+              </Box>
+              <Box flex={'grow'}>
+                <Paragraph>
+                  I hereby confirm that I’m or I’m representing either:
+                  <br />
+                  A non-US investor not located in a jurisdiction restricting the purchase and holding of crypto assets
+                  <br />
+                  or
+                  <br />A US accredited investor, and I’m able to prove my accredited investor status to the Issuer.
+                </Paragraph>
+              </Box>
             </Box>
-            <Box flex={'grow'}>
-              <Paragraph>
-                I hereby confirm that I’m or I’m representing either:
-                <br />
-                A non-US investor not located in a jurisdiction restricting the purchase and holding of crypto assets
-                <br />
-                or
-                <br />A US accredited investor, and I’m able to prove my accredited investor status to the Issuer.
-              </Paragraph>
-            </Box>
-          </Box>
+          </FormFieldWithoutBorder>
 
           <Paragraph margin={{ top: 'small', bottom: 'small' }}>
             Any questions left? Feel free to reach out to the Issuer directly (see{' '}
