@@ -248,5 +248,5 @@ export const countryList = [
   'Yemen',
   'Zambia',
   'Zimbabwe',
-  'Åland Islands'
-];
+  'Åland Islands',
+]

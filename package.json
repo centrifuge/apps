@@ -16,11 +16,13 @@
     "export": "npm run build && next export",
     "lint": "tslint --project .",
     "lint-fix": "tslint --fix --project .",
-    "lint-fix-staged": "git diff --staged --name-only | grep -E '\\.tsx?$' | xargs npm run lint-fix && git diff --staged --name-only | grep -E '\\.tsx?$' | xargs git add"
+    "lint-fix-staged": "git diff --staged --name-only | grep -E '\\.tsx?$' | xargs npm run lint-fix && git diff --staged --name-only | grep -E '\\.tsx?$' | xargs git add",
+    "format": "prettier --write \"./**/*.{ts,tsx}\"",
+    "check-format": "prettier --check \"./**/*.{ts,tsx}\""
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint-fix-staged && npm run build-for-husky"
+      "pre-commit": "npm run lint-fix-staged && npm run format"
     }
   },
   "repository": {
@@ -64,7 +66,7 @@
     "redux-thunk": "^2.3.0",
     "styled-components": "^5.1.0",
     "tinlake": "github:centrifuge/tinlake.js#7393e568c64a47e05f77dc3c44436a79b7f27e37",
-    "tinlake-pool-config": "github:centrifuge/tinlake-pool-config#514744318db96694d4bd99e8afacab17b6683d80",
+    "tinlake-pool-config": "github:centrifuge/tinlake-pool-config#024a512ddd639de1d24b08fe6a69027d73fbf687",
     "web3-utils": "^1.2.7",
     "yup": "^0.28.5"
   },
@@ -82,9 +84,11 @@
     "dotenv": "^8.2.0",
     "husky": "^4.2.5",
     "jest": "^24.9.0",
+    "prettier": "1.19.1",
     "react-test-renderer": "^16.13.1",
     "tslint": "^5.20.1",
     "tslint-config-airbnb": "^5.11.2",
+    "tslint-config-prettier": "1.18.0",
     "typescript": "^3.8.3"
   }
 }
