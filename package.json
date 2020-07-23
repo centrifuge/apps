@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
+    "build:all": "npm run build && npm run build:lambda",
     "build-for-husky": "tsc",
     "start": "next start",
     "test": "jest",
@@ -18,7 +19,9 @@
     "lint-fix": "tslint --fix --project .",
     "lint-fix-staged": "git diff --staged --name-only | grep -E '\\.tsx?$' | xargs npm run lint-fix && git diff --staged --name-only | grep -E '\\.tsx?$' | xargs git add",
     "format": "prettier --write \"./**/*.{ts,tsx}\"",
-    "check-format": "prettier --check \"./**/*.{ts,tsx}\""
+    "check-format": "prettier --check \"./**/*.{ts,tsx}\"",
+    "start:lambda": "netlify-lambda serve lambda",
+    "build:lambda": "netlify-lambda build lambda"
   },
   "husky": {
     "hooks": {
@@ -43,6 +46,7 @@
     "@centrifuge/axis-theme": "^0.2.1-develop.38",
     "@centrifuge/axis-utils": "^0.3.2-develop.49",
     "@centrifuge/axis-web3-wallet": "0.0.2-develop.75",
+    "@sendgrid/mail": "^7.1.1",
     "@types/node-fetch": "^2.5.7",
     "apollo-cache-inmemory": "^1.6.5",
     "apollo-client": "^2.6.8",
@@ -84,6 +88,7 @@
     "dotenv": "^8.2.0",
     "husky": "^4.2.5",
     "jest": "^24.9.0",
+    "netlify-lambda": "1.1.1",
     "prettier": "1.19.1",
     "react-test-renderer": "^16.13.1",
     "tslint": "^5.20.1",
