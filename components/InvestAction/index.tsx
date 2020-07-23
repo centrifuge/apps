@@ -1,23 +1,13 @@
 import * as React from 'react'
-import styled from 'styled-components'
 import { Box, Button, Paragraph, CheckBox, RadioButton, Form, FormField, TextInput, Select } from 'grommet'
 import { Modal } from '@centrifuge/axis-modal'
 
 import { countryList } from './countries'
 import { isValidEmail } from '../../utils/email'
 import InvestActionSuccessModal from './SuccessModal'
+import { InvestmentSteps, FormFieldWithoutBorder } from './styles'
 
-const InvestmentSteps = styled.img`
-  display: block;
-  max-width: 600px;
-  margin: 20px auto;
-`
-
-const FormFieldWithoutBorder = styled(FormField)`
-  > div {
-    border-bottom-color: rgba(0, 0, 0, 0);
-  }
-`
+const LAMBDA_SEND_INVESTOR_EMAIL_URL = 'http://localhost:9000/sendInvestorEmail'
 
 interface Props {
   poolName: string
@@ -49,10 +39,8 @@ const initialForm: FormData = {
 
 type FormErrors = { [K in keyof FormData]?: string }
 
-const lambdaSendEmailUrl = 'http://localhost:9000/sendInvestorEmail'
-
 const submitForm = async (form: FormData) => {
-  return await fetch(lambdaSendEmailUrl, {
+  return await fetch(LAMBDA_SEND_INVESTOR_EMAIL_URL, {
     method: 'POST',
     body: JSON.stringify(form),
   })
@@ -79,20 +67,17 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   const onSearchCountries = (searchQuery: string) => {
-    if (searchQuery.trim().length === 0) setFilteredCountries(countryList)
-
-    setFilteredCountries(
-      countryList.filter((country: string) => country.toLowerCase().includes(searchQuery.toLowerCase()))
-    )
+    if (searchQuery.trim().length === 0) {
+      setFilteredCountries(countryList)
+    } else {
+      setFilteredCountries(
+        countryList.filter((country: string) => country.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+      )
+    }
   }
 
-  const onOpen = () => {
-    setModalIsOpen(true)
-  }
-
-  const onClose = () => {
-    setModalIsOpen(false)
-  }
+  const onOpen = () => setModalIsOpen(true)
+  const onClose = () => setModalIsOpen(false)
 
   const onSubmit = async () => {
     // Check if all of the fields are set
@@ -134,6 +119,7 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
       <Modal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose}>
         <Form onSubmit={onSubmit}>
           <InvestmentSteps src="../../static/invest-steps1.svg" alt="Investment steps" />
+
           <Paragraph margin={{ top: 'medium', bottom: 'medium' }}>
             To invest in this pool please provide your information to go through KYC. Submit your information below to
             start the KYC and onboarding process. The Issuer will shortly reach out to you.
