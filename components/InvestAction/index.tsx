@@ -5,6 +5,7 @@ import { Modal } from '@centrifuge/axis-modal'
 
 import { countryList } from './countries'
 import { isValidEmail } from '../../utils/email'
+import InvestActionSuccessModal from './SuccessModal'
 
 const InvestmentSteps = styled.img`
   display: block;
@@ -51,7 +52,7 @@ type FormErrors = { [K in keyof FormData]?: string }
 const lambdaSendEmailUrl = 'http://localhost:9000/sendInvestorEmail'
 
 const submitForm = async (form: FormData) => {
-  await fetch(lambdaSendEmailUrl, {
+  return await fetch(lambdaSendEmailUrl, {
     method: 'POST',
     body: JSON.stringify(form),
   })
@@ -60,6 +61,7 @@ const submitForm = async (form: FormData) => {
 const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
   const [filteredCountries, setFilteredCountries] = React.useState<string[]>(countryList)
   const [modalIsOpen, setModalIsOpen] = React.useState<boolean>(false)
+  const [successModalIsOpen, setSuccessModalIsOpen] = React.useState<boolean>(false)
 
   const [form, setForm] = React.useState<FormData>(initialForm)
   const [errors, setErrors] = React.useState<FormErrors>({})
@@ -92,7 +94,7 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
     setModalIsOpen(false)
   }
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     // Check if all of the fields are set
     const newErrors: FormErrors = {}
     ;(Object.keys(form) as (keyof FormData)[]).map((fieldName: keyof FormData) => {
@@ -111,12 +113,17 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
       newErrors['investorConfirmation'] = 'This needs to be checked'
     }
 
+    setErrors(newErrors)
+
     if (Object.keys(newErrors).length === 0) {
-      console.log('submit form', form)
-      submitForm({ ...form, ...props } as FormSubmission)
-    } else {
-      console.log('set errors', newErrors)
-      setErrors(newErrors)
+      const response = await submitForm({ ...form, ...props } as FormSubmission)
+
+      if (response.ok) {
+        onClose()
+        setSuccessModalIsOpen(true)
+      } else {
+        console.error('Failed to submit investor interest form', response.statusText)
+      }
     }
   }
 
@@ -126,7 +133,7 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
 
       <Modal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose}>
         <Form onSubmit={onSubmit}>
-          <InvestmentSteps src="../../static/invest-steps1.png" alt="Investment steps" />
+          <InvestmentSteps src="../../static/invest-steps1.svg" alt="Investment steps" />
           <Paragraph margin={{ top: 'medium', bottom: 'medium' }}>
             To invest in this pool please provide your information to go through KYC. Submit your information below to
             start the KYC and onboarding process. The Issuer will shortly reach out to you.
@@ -241,6 +248,8 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
           </Box>
         </Form>
       </Modal>
+
+      <InvestActionSuccessModal open={successModalIsOpen} onClose={() => setSuccessModalIsOpen(false)} />
     </Box>
   )
 }
