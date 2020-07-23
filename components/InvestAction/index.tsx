@@ -45,6 +45,7 @@ const initialForm: FormSubmission = {
 type FormErrors = { [K in keyof FormSubmission]?: string }
 
 const InvestAction: React.FunctionComponent<Props> = () => {
+  const [filteredCountries, setFilteredCountries] = React.useState<string[]>(countryList)
   const [modalIsOpen, setModalIsOpen] = React.useState<boolean>(false)
 
   const [form, setForm] = React.useState<FormSubmission>(initialForm)
@@ -62,6 +63,14 @@ const InvestAction: React.FunctionComponent<Props> = () => {
     }
   }
 
+  const onSearchCountries = (searchQuery: string) => {
+    if (searchQuery.trim().length === 0) setFilteredCountries(countryList)
+
+    setFilteredCountries(
+      countryList.filter((country: string) => country.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
+  }
+
   const onOpen = () => {
     setModalIsOpen(true)
   }
@@ -71,7 +80,7 @@ const InvestAction: React.FunctionComponent<Props> = () => {
   }
 
   const onSubmit = () => {
-    // Check if any is undefined
+    // Check if all of the fields are set
     const newErrors: FormErrors = {}
     ;(Object.keys(form) as (keyof FormSubmission)[]).map((fieldName: keyof FormSubmission) => {
       if (form[fieldName] === undefined || (form[fieldName] as string).length === 0) {
@@ -79,16 +88,17 @@ const InvestAction: React.FunctionComponent<Props> = () => {
       }
     })
 
+    // Check for a valid email address
     if (!newErrors['email'] && !isValidEmail(form.email)) {
       newErrors['email'] = 'Please insert a valid email address'
     }
 
+    // Check that the investor confirmation is checked
     if (!form['investorConfirmation'] || (form['investorConfirmation'] && form['investorConfirmation'] !== true)) {
       newErrors['investorConfirmation'] = 'This needs to be checked'
     }
 
     setErrors(newErrors)
-    console.log(newErrors)
   }
 
   return (
@@ -144,9 +154,10 @@ const InvestAction: React.FunctionComponent<Props> = () => {
               <FormField label="Country of Residence" margin={{ bottom: 'medium' }} error={errors.countryOfResidence}>
                 <Select
                   placeholder="Select Country"
-                  options={countryList}
+                  options={filteredCountries}
                   value={form.countryOfResidence}
                   onChange={handleOnChangeSelect('countryOfResidence')}
+                  onSearch={onSearchCountries}
                 />
               </FormField>
             </Box>
