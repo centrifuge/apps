@@ -5,7 +5,7 @@ dotenv.config()
 
 import { FormSubmission } from '../components/InvestAction/index'
 
-const { SENDGRID_API_KEY } = process.env
+const { SENDGRID_API_KEY, SENDGRID_FROM_EMAIL } = process.env
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'http://localhost:3000',
@@ -54,7 +54,7 @@ exports.handler = async (event: APIGatewayEvent) => {
 
   const msg = {
     to: form.email,
-    from: 'info@centrifuge.io',
+    from: SENDGRID_FROM_EMAIL,
     subject: `New Investor Request - ${form.poolName}`,
     text: body,
   }
