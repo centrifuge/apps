@@ -122,7 +122,7 @@ class Overview extends React.Component<Props> {
                   </TableRow>
                 </TableBody>
               </Table>
-              <InvestAction />
+              <InvestAction poolName={name} />
             </Box>
           </Box>
           <Box basis={'1/2'} margin={{ left: 'large' }}>

@@ -18,9 +18,11 @@ const FormFieldWithoutBorder = styled(FormField)`
   }
 `
 
-interface Props {}
+interface Props {
+  poolName: string
+}
 
-interface FormSubmission {
+interface FormData {
   title: 'Mr.' | 'Ms.' | undefined
   givenName: string
   surname: string
@@ -31,7 +33,9 @@ interface FormSubmission {
   investorConfirmation: boolean
 }
 
-const initialForm: FormSubmission = {
+export interface FormSubmission extends FormData, Props {}
+
+const initialForm: FormData = {
   title: undefined,
   givenName: '',
   surname: '',
@@ -42,22 +46,31 @@ const initialForm: FormSubmission = {
   investorConfirmation: false,
 }
 
-type FormErrors = { [K in keyof FormSubmission]?: string }
+type FormErrors = { [K in keyof FormData]?: string }
 
-const InvestAction: React.FunctionComponent<Props> = () => {
+const lambdaSendEmailUrl = 'http://localhost:9000/sendInvestorEmail'
+
+const submitForm = async (form: FormData) => {
+  await fetch(lambdaSendEmailUrl, {
+    method: 'POST',
+    body: JSON.stringify(form),
+  })
+}
+
+const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
   const [filteredCountries, setFilteredCountries] = React.useState<string[]>(countryList)
   const [modalIsOpen, setModalIsOpen] = React.useState<boolean>(false)
 
-  const [form, setForm] = React.useState<FormSubmission>(initialForm)
+  const [form, setForm] = React.useState<FormData>(initialForm)
   const [errors, setErrors] = React.useState<FormErrors>({})
 
-  const handleOnChange = (fieldName: keyof FormSubmission) => {
+  const handleOnChange = (fieldName: keyof FormData) => {
     return (event: React.FormEvent<HTMLInputElement>) => {
       setForm({ ...form, [fieldName]: event.currentTarget.value })
     }
   }
 
-  const handleOnChangeSelect = (fieldName: keyof FormSubmission) => {
+  const handleOnChangeSelect = (fieldName: keyof FormData) => {
     return (event: { option: any }) => {
       setForm({ ...form, [fieldName]: event.option })
     }
@@ -82,7 +95,7 @@ const InvestAction: React.FunctionComponent<Props> = () => {
   const onSubmit = () => {
     // Check if all of the fields are set
     const newErrors: FormErrors = {}
-    ;(Object.keys(form) as (keyof FormSubmission)[]).map((fieldName: keyof FormSubmission) => {
+    ;(Object.keys(form) as (keyof FormData)[]).map((fieldName: keyof FormData) => {
       if (form[fieldName] === undefined || (form[fieldName] as string).length === 0) {
         newErrors[fieldName] = 'This is required'
       }
@@ -98,7 +111,13 @@ const InvestAction: React.FunctionComponent<Props> = () => {
       newErrors['investorConfirmation'] = 'This needs to be checked'
     }
 
-    setErrors(newErrors)
+    if (Object.keys(newErrors).length === 0) {
+      console.log('submit form', form)
+      submitForm({ ...form, ...props } as FormSubmission)
+    } else {
+      console.log('set errors', newErrors)
+      setErrors(newErrors)
+    }
   }
 
   return (
