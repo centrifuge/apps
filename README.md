@@ -19,4 +19,5 @@ add the following env variables
 
 ```shell
 npm run dev # to start the dev serrver
-npm run lambda:start # to run the Netlify lambdas locally```
+npm run lambda:start # to run the Netlify lambdas locally
+```
