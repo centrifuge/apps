@@ -25,8 +25,8 @@ export const Icon = styled.div<IconProps>`
   padding: 8px 12px 8px 4px;
 
   svg {
-      fill: ${(props: IconProps) => props.color || '#000'};
-      stroke: ${(props: IconProps) => props.color || '#000'};
+    fill: ${(props: IconProps) => props.color || '#000'};
+    stroke: ${(props: IconProps) => props.color || '#000'};
   }
 `
 
@@ -40,7 +40,7 @@ interface TitleProps {
 }
 
 export const Title = styled.div<TitleProps>`
-  color: ${(props: TitleProps) => (props.color || '#000')};
+  color: ${(props: TitleProps) => props.color || '#000'};
   font-size: 11px;
 `
 
@@ -50,5 +50,5 @@ export const Description = styled.div`
 `
 
 export const Action = styled.div`
-    padding-top: 4px;
+  padding-top: 4px;
 `
