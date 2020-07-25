@@ -1,8 +1,9 @@
 import * as React from 'react'
 import { useTheme } from 'styled-components'
-import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
+import { StatusInfo, Checkmark, Close } from 'grommet-icons'
 
 import { Container, ToastCard, Icon, Content, Action, Title, Description } from './styles'
+import { Spinner } from './Spinner'
 
 export type ToastStatus = 'ok' | 'error' | 'warning' | 'pending'
 
@@ -18,21 +19,30 @@ export const Toast: React.FC<Props> = (props: Props) => {
 
   const getColor = () => {
     if (props.status === 'ok') return themeColors['status-ok']
-     if (props.status === 'error') return themeColors['status-error']
-     if (props.status === 'warning') return themeColors['status-warning']
-     if (props.status === 'pending') return themeColors['status-unknown']
+    if (props.status === 'error') return themeColors['status-error']
+    if (props.status === 'warning') return themeColors['status-warning']
+    if (props.status === 'pending') return themeColors['status-unknown']
   }
 
   return (
     <ToastCard>
-      <Icon>
-        <StatusInfoIcon color={'status-warning'} />
+      <Icon color={getColor()}>
+        {props.status === 'ok' && <Checkmark />}
+        {props.status === 'error' && <Close />}
+        {props.status === 'warning' && <StatusInfo />}
+        {props.status === 'pending' && <Spinner color={getColor()} />}
       </Icon>
       <Content>
         <Title color={getColor()}>{props.title}</Title>
         <Description>{props.description}</Description>
       </Content>
-      {props.externalLink && <Action>&nbsp;</Action>}
+      {props.externalLink && (
+        <Action>
+          <a href={props.externalLink} target="_blank">
+            <img src="../../static/external-link.svg" alt="Open link" />
+          </a>
+        </Action>
+      )}
     </ToastCard>
   )
 }
@@ -43,9 +53,24 @@ export const ToastContainer: React.FC<ContainerProps> = () => {
   return (
     <Container>
       <Toast status="warning" title="Waiting for confirmation" description="Approve DROP" />
-      <Toast status="pending" title="Transaction pending" description="Supply 5,000.00 DAI" />
-      <Toast status="ok" title="Transaction confirmed" description="Borrow 1,000.00 DAI" />
-      <Toast status="error" title="Transaction failed" description="Borrow 1,000.00 DAI" />
+      <Toast
+        status="pending"
+        title="Transaction pending"
+        description="Supply 5,000.00 DAI"
+        externalLink="https://centrifuge.io/"
+      />
+      <Toast
+        status="ok"
+        title="Transaction confirmed"
+        description="Borrow 1,000.00 DAI"
+        externalLink="https://centrifuge.io/"
+      />
+      <Toast
+        status="error"
+        title="Transaction failed"
+        description="Borrow 1,000.00 DAI"
+        externalLink="https://centrifuge.io/"
+      />
     </Container>
   )
 }
