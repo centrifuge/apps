@@ -1,11 +1,10 @@
 import * as React from 'react'
 import { Box, Button, Paragraph, CheckBox, RadioButton, Form, FormField, TextInput, Select } from 'grommet'
-import { Modal } from '@centrifuge/axis-modal'
 
 import { countryList } from './countries'
 import { isValidEmail } from '../../utils/email'
 import InvestActionSuccessModal from './SuccessModal'
-import { InvestmentSteps, FormFieldWithoutBorder } from './styles'
+import { FormModal, InvestmentSteps, FormFieldWithoutBorder, AcceptButton } from './styles'
 
 const LAMBDA_SEND_INVESTOR_EMAIL_URL = 'http://localhost:9000/sendInvestorEmail'
 
@@ -116,7 +115,7 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
     <Box>
       <Button primary label="Invest" margin={{ left: 'auto', vertical: 'large' }} onClick={onOpen} />
 
-      <Modal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose}>
+      <FormModal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose}>
         <Form onSubmit={onSubmit}>
           <InvestmentSteps src="../../static/invest-steps1.svg" alt="Investment steps" />
 
@@ -229,11 +228,11 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
 
           <Box direction="row" justify="end">
             <Box basis={'1/5'}>
-              <Button primary onClick={onSubmit} label="Submit" fill={true} />
+              <AcceptButton primary onClick={onSubmit} label="Submit" fill={true} />
             </Box>
           </Box>
         </Form>
-      </Modal>
+      </FormModal>
 
       <InvestActionSuccessModal open={successModalIsOpen} onClose={() => setSuccessModalIsOpen(false)} />
     </Box>

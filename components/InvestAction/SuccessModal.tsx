@@ -1,13 +1,7 @@
 import * as React from 'react'
-import styled from 'styled-components'
-import { Paragraph, Box, Button } from 'grommet'
-import { Modal } from '@centrifuge/axis-modal'
+import { Paragraph, Box } from 'grommet'
 
-const InvestmentSteps = styled.img`
-  display: block;
-  max-width: 600px;
-  margin: 20px auto;
-`
+import { FormModal, InvestmentSteps, AcceptButton } from './styles'
 
 interface Props {
   open: boolean
@@ -16,7 +10,12 @@ interface Props {
 
 const InvestActionSuccessModal: React.FunctionComponent<Props> = (props: Props) => {
   return (
-    <Modal opened={props.open} title={'Congratulations!'} headingProps={{ color: 'status-ok' }} onClose={props.onClose}>
+    <FormModal
+      opened={props.open}
+      title={'Congratulations!'}
+      headingProps={{ color: 'status-ok' }}
+      onClose={props.onClose}
+    >
       <InvestmentSteps src="../../static/invest-steps2.svg" alt="Investment steps" />
 
       <Paragraph margin={{ top: 'medium' }}>
@@ -46,10 +45,10 @@ const InvestActionSuccessModal: React.FunctionComponent<Props> = (props: Props) 
 
       <Box direction="row" justify="end">
         <Box basis={'1/5'}>
-          <Button primary onClick={props.onClose} label="OK" fill={true} />
+          <AcceptButton primary onClick={props.onClose} label="OK" fill={true} />
         </Box>
       </Box>
-    </Modal>
+    </FormModal>
   )
 }
 

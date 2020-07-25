@@ -5,7 +5,7 @@ dotenv.config()
 
 import { FormSubmission } from '../components/InvestAction/index'
 
-const { SENDGRID_API_KEY, SENDGRID_FROM_EMAIL } = process.env
+const { SENDGRID_API_KEY, SENDGRID_FROM_EMAIL, INVESTOR_REQUEST_EMAIL } = process.env
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'http://localhost:3000',
@@ -17,11 +17,11 @@ const corsHeaders = {
 }
 
 exports.handler = async (event: APIGatewayEvent) => {
-  if (!SENDGRID_API_KEY) {
+  if (!SENDGRID_API_KEY || !SENDGRID_FROM_EMAIL || !INVESTOR_REQUEST_EMAIL) {
     return {
       statusCode: 500,
       headers: corsHeaders,
-      body: 'The environment variable SENDGRID_API_KEY needs to be set for the sendInvestorEmail lambda to work',
+      body: 'One of the required environment variables for the sendInvestorEmail lambda to work is not set',
     }
   }
 
@@ -53,7 +53,7 @@ exports.handler = async (event: APIGatewayEvent) => {
     Investor Status: ${form.investorConfirmation ? 'Confirmed' : 'Unconfirmed'}`
 
   const msg = {
-    to: form.email,
+    to: INVESTOR_REQUEST_EMAIL,
     from: SENDGRID_FROM_EMAIL,
     subject: `New Investor Request - ${form.poolName}`,
     text: body,
