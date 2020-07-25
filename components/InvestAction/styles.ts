@@ -4,8 +4,8 @@ import styled from 'styled-components'
 import { Modal } from '@centrifuge/axis-modal'
 
 export const FormModal = styled(Modal)`
-    max-height: 100%;
-    overflow-y: scroll;
+  max-height: 100%;
+  overflow-y: scroll;
 `
 
 export const InvestmentSteps = styled.img`
