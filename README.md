@@ -2,7 +2,7 @@
 
 ## Development
 
-1. Make sure you are on a stable node version, v12.16.3 on the time of writing this (the `sha3` dependency did not work with newer versions in some cases): `nvm use v12.16.3`
+1. Make sure you are on a stable node version, v12.16.3 on the time of writing this (the `sha3` dependency did not work with newer versions in some cases): `nvm use`
 2. Install dependencies with `npm install`
 
 ### Setup environment
@@ -17,4 +17,6 @@ add the following env variables
 
 ### Run
 
-`npm run dev`
+```shell
+npm run dev # to start the dev serrver
+npm run lambda:start # to run the Netlify lambdas locally```
