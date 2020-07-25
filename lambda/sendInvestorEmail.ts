@@ -8,7 +8,7 @@ import { FormSubmission } from '../components/InvestAction/index'
 const { SENDGRID_API_KEY, SENDGRID_FROM_EMAIL, INVESTOR_REQUEST_EMAIL } = process.env
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'http://localhost:3000',
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
   'Content-Type': 'application/json',
   'Access-Control-Allow-Methods': '*',
