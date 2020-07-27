@@ -28,7 +28,7 @@ interface Props {
   poolTitle?: string
   selectedRoute: string
   menuItems: MenuItem[]
-  toasts: ToastState
+  toasts?: ToastState
   auth?: AuthState
   router: NextRouter
   showTimedToast?: (rawToast: Toast, timeInMs: number) => Promise<Toast>
@@ -112,6 +112,7 @@ const Header: React.FC<Props> = (props: Props) => {
                 title="Tinlake"
                 style={{ display: 'block' }}
                 onClick={() =>
+                  showTimedToast &&
                   showTimedToast({ title: 'Go to homepage', description: 'Now!', status: 'pending' }, 2000)
                 }
               >
@@ -172,7 +173,7 @@ const Header: React.FC<Props> = (props: Props) => {
                   />
                 </WalletContainer>
 
-                {walletRef.current && (
+                {walletRef.current && toasts && (
                   <Drop
                     plain
                     responsive
