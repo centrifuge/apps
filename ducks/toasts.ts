@@ -17,11 +17,11 @@ export interface Toast {
 }
 
 export interface ToastState {
-  toasts: Toast[]
+  data: Toast[]
 }
 
 const initialState: ToastState = {
-  toasts: [],
+  data: [],
 }
 
 // Reducer
@@ -31,14 +31,14 @@ export default function reducer(state: ToastState = initialState, action: AnyAct
       return { ...state, ...action.payload.toasts }
     case SHOW_TOAST:
       return {
-        toasts: [...state.toasts, action.toast],
+        data: [...state.data, action.toast],
       }
     case HIDE_TOAST:
-      const index = state.toasts.indexOf(action.toast)
+      const index = state.data.indexOf(action.toast)
       if (index < 0) return state
 
       return {
-        toasts: state.toasts.splice(index, 1),
+        data: state.data.splice(index, 1),
       }
     default:
       return state

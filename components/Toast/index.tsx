@@ -4,7 +4,7 @@ import { StatusInfo, Checkmark, Close } from 'grommet-icons'
 
 import { Container, ToastCard, Icon, Content, Action, Title, Description } from './styles'
 import { Spinner } from './Spinner'
-import { ToastState, Toast } from '../../ducks/toasts'
+import { Toast } from '../../ducks/toasts'
 
 export const ToastWrapper: React.FC<Toast> = (props: Toast) => {
   const themeColors = (useTheme() as any).global.colors
@@ -40,13 +40,13 @@ export const ToastWrapper: React.FC<Toast> = (props: Toast) => {
 }
 
 interface ContainerProps {
-  toastState?: ToastState
+  toasts?: Toast[]
 }
 
 export const ToastContainer: React.FC<ContainerProps> = (props: ContainerProps) => {
   return (
     <Container>
-      {props.toasts?.toasts?.map((toast: Toast, index: number) => (
+      {props.toasts?.map((toast: Toast, index: number) => (
         <ToastWrapper key={toast.id || index} {...toast} />
       ))}
     </Container>
