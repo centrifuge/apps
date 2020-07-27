@@ -4,17 +4,9 @@ import { StatusInfo, Checkmark, Close } from 'grommet-icons'
 
 import { Container, ToastCard, Icon, Content, Action, Title, Description } from './styles'
 import { Spinner } from './Spinner'
+import { Toast } from '../../ducks/toasts'
 
-export type ToastStatus = 'ok' | 'error' | 'warning' | 'pending'
-
-interface Props {
-  title: string
-  description: string
-  status: ToastStatus
-  externalLink?: string
-}
-
-export const Toast: React.FC<Props> = (props: Props) => {
+export const ToastWrapper: React.FC<Toast> = (props: Toast) => {
   const themeColors = (useTheme() as any).global.colors
 
   const getColor = () => {
@@ -47,30 +39,16 @@ export const Toast: React.FC<Props> = (props: Props) => {
   )
 }
 
-interface ContainerProps {}
+interface ContainerProps {
+  toasts?: Toast[]
+}
 
-export const ToastContainer: React.FC<ContainerProps> = () => {
+export const ToastContainer: React.FC<ContainerProps> = (props: ContainerProps) => {
   return (
     <Container>
-      <Toast status="warning" title="Waiting for confirmation" description="Approve DROP" />
-      <Toast
-        status="pending"
-        title="Transaction pending"
-        description="Supply 5,000.00 DAI"
-        externalLink="https://centrifuge.io/"
-      />
-      <Toast
-        status="ok"
-        title="Transaction confirmed"
-        description="Borrow 1,000.00 DAI"
-        externalLink="https://centrifuge.io/"
-      />
-      <Toast
-        status="error"
-        title="Transaction failed"
-        description="Borrow 1,000.00 DAI"
-        externalLink="https://centrifuge.io/"
-      />
+      {props.toasts?.toasts?.map((toast: Toast) => (
+        <ToastWrapper {...toast} />
+      ))}
     </Container>
   )
 }

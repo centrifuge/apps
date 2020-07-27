@@ -11,6 +11,7 @@ import { NavBar } from '@centrifuge/axis-nav-bar'
 import { Web3Wallet } from '@centrifuge/axis-web3-wallet'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import { ToastContainer } from '../../components/Toast'
+import { Toast } from '../../ducks/toasts'
 
 const WalletContainer = styled.div``
 
@@ -27,6 +28,7 @@ interface Props {
   poolTitle?: string
   selectedRoute: string
   menuItems: MenuItem[]
+  toasts: Toast[]
   auth?: AuthState
   router: NextRouter
   ensureAuthed?: () => Promise<void>
@@ -65,7 +67,7 @@ const Header: React.FC<Props> = (props: Props) => {
     Router.push(item.route, undefined, { shallow: true })
   }
 
-  const { poolTitle, selectedRoute, menuItems, auth, clear } = props
+  const { poolTitle, selectedRoute, toasts, menuItems, auth, clear } = props
   const { address, network, providerName } = auth!
   const logoUrl = (isDemo && '/static/demo_logo.svg') || '/static/logo.svg'
 
@@ -171,7 +173,7 @@ const Header: React.FC<Props> = (props: Props) => {
                     target={walletRef.current}
                     align={{ right: 'right', top: 'bottom' }}
                   >
-                    <ToastContainer />
+                    <ToastContainer toasts={toasts} />
                   </Drop>
                 )}
               </>
