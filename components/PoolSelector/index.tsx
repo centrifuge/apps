@@ -20,10 +20,16 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
   const poolRef = React.useRef<HTMLDivElement>(null)
 
   const [open, setOpen] = React.useState<boolean>(false)
+  const [justClosed, setJustClosed] = React.useState<boolean>(false)
+
   const [searchQuery, setSearchQuery] = React.useState<string>('')
 
-  const toggle = () => {
-    setOpen(!open)
+  const onClickOutside = () => {
+    if (open) {
+      setJustClosed(true)
+      setOpen(false)
+      setTimeout(() => setJustClosed(false), 0)
+    }
   }
 
   React.useEffect(() => {
@@ -60,7 +66,11 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
           display: 'flex',
         }}
         ref={poolRef}
-        onClick={toggle}
+        onClick={(e) => {
+          if (!justClosed) {
+            setOpen(true)
+          }
+        }}
         focusIndicator={false}
       >
         <Title>
@@ -85,7 +95,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
           target={poolRef.current}
           align={{ right: 'right', top: 'bottom' }}
           style={{ padding: 6, marginTop: 10 }}
-          onClickOutside={() => setOpen(false)}
+          onClickOutside={onClickOutside}
           onEsc={() => setOpen(false)}
         >
           <Wrapper>
