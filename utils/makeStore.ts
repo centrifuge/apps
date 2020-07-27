@@ -27,7 +27,7 @@ const makeStore = () => {
       pool: poolReducer,
       auth: authReducer,
       transactions: transactionReducer,
-      toasts: toastReducer
+      toasts: toastReducer,
     }),
     composeEnhancers(applyMiddleware(thunk))
   )

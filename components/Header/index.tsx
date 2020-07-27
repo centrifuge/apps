@@ -11,7 +11,7 @@ import { NavBar } from '@centrifuge/axis-nav-bar'
 import { Web3Wallet } from '@centrifuge/axis-web3-wallet'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import { ToastContainer } from '../../components/Toast'
-import { Toast } from '../../ducks/toasts'
+import { Toast, showTimedToast } from '../../ducks/toasts'
 
 const WalletContainer = styled.div``
 
@@ -31,6 +31,7 @@ interface Props {
   toasts: Toast[]
   auth?: AuthState
   router: NextRouter
+  showTimedToast?: (toast: Toast, timeInMs: number) => Promise<void>
   ensureAuthed?: () => Promise<void>
   clear?: () => Promise<void>
 }
@@ -67,7 +68,7 @@ const Header: React.FC<Props> = (props: Props) => {
     Router.push(item.route, undefined, { shallow: true })
   }
 
-  const { poolTitle, selectedRoute, toasts, menuItems, auth, clear } = props
+  const { poolTitle, selectedRoute, toasts, menuItems, showTimedToast, auth, clear } = props
   const { address, network, providerName } = auth!
   const logoUrl = (isDemo && '/static/demo_logo.svg') || '/static/logo.svg'
 
@@ -107,7 +108,13 @@ const Header: React.FC<Props> = (props: Props) => {
             }}
           >
             <Link href="/" shallow>
-              <a title="Tinlake" style={{ display: 'block' }}>
+              <a
+                title="Tinlake"
+                style={{ display: 'block' }}
+                onClick={() =>
+                  showTimedToast({ title: 'Go to homepage', description: 'Now!', status: 'pending' }, 2000)
+                }
+              >
                 <Image src={logoUrl} style={{ width: 130, verticalAlign: 'middle' }} />
               </a>
             </Link>
@@ -185,4 +192,4 @@ const Header: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { ensureAuthed, clear })(withRouter(Header))
+export default connect((state) => state, { showTimedToast, ensureAuthed, clear })(withRouter(Header))
