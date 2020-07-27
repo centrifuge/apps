@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Box, Drop, TextInput } from 'grommet'
 import { useSelector, useDispatch } from 'react-redux'
 import { loadPools, PoolData } from '../../ducks/pools'
-import Router from 'next/router'
+import { useRouter } from 'next/router'
 import { FormDown, FormSearch } from 'grommet-icons'
 
 import { Wrapper, Title, TitleText, PoolList, SearchField, PoolLink, Caret } from './styles'
@@ -12,6 +12,8 @@ interface Props {
 }
 
 export const PoolSelector: React.FC<Props> = (props: Props) => {
+  const router = useRouter()
+
   const pools = useSelector((state) => state.pools)
   const dispatch = useDispatch()
 
@@ -26,7 +28,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     dispatch(loadPools())
-  }, [])
+  }, [router.query])
 
   const onChangeSearchQuery = (event: React.FormEvent<HTMLInputElement>) => {
     setSearchQuery(event.currentTarget.value)
@@ -35,15 +37,15 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
   const filterPools = (pools: PoolData[] | undefined) => {
     if (!pools) {
       return []
-    }  if (searchQuery.trim().length === 0) {
+    }
+    if (searchQuery.trim().length === 0) {
       return pools
-    } 
-      return pools.filter((pool: PoolData) => pool.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
-    
+    }
+    return pools.filter((pool: PoolData) => pool.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
   }
 
   const navigateToPool = (pool: PoolData) => {
-    Router.push('/[root]', `/${pool.id}`)
+    router.push('/[root]', `/${pool.id}`)
     setOpen(false)
   }
 

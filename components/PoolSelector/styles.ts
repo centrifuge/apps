@@ -24,7 +24,7 @@ export const Caret = styled.div`
 export const Wrapper = styled.div`
   background: #fff;
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
-  border-radius: 4px;
+  border-radius: 8px;
   max-height: 200px;
   overflow-y: scroll;
 `

@@ -112,6 +112,7 @@ const Header: React.FC<Props> = (props: Props) => {
                 title="Tinlake"
                 style={{ display: 'block' }}
                 onClick={() =>
+                  showTimedToast &&
                   showTimedToast({ title: 'Go to homepage', description: 'Now!', status: 'pending' }, 2000)
                 }
               >
