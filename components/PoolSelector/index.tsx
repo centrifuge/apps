@@ -1,35 +1,11 @@
 import * as React from 'react'
-import styled from 'styled-components'
-import { Box, Drop } from 'grommet'
+import { Box, Drop, TextInput } from 'grommet'
 import { useSelector, useDispatch } from 'react-redux'
 import { loadPools, PoolData } from '../../ducks/pools'
 import Router from 'next/router'
+import { FormDown, FormSearch } from 'grommet-icons'
 
-const Wrapper = styled.div`
-  background: #fff;
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
-  border-radius: 4px;
-  max-height: 200px;
-  overflow-y: scroll;
-`
-
-const PoolList = styled.div``
-
-interface PoolLinkProps {
-  active?: boolean
-}
-
-const PoolLink = styled.div<PoolLinkProps>`
-  padding: 12px 10px;
-  width: 100%;
-  color: ${(props) => (props.active ? '#2762FF' : '#000')};
-  cursor: pointer;
-
-  &:hover,
-  &:focus {
-    background: #efefef;
-  }
-`
+import { Wrapper, Title, TitleText, PoolList, SearchField, PoolLink, Caret } from './styles'
 
 interface Props {
   title: string
@@ -40,17 +16,35 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch()
 
   const poolRef = React.useRef<HTMLDivElement>(null)
-  const [open, setOpen] = React.useState<boolean>(false)
 
-  const toggle = () => setOpen(!open)
+  const [open, setOpen] = React.useState<boolean>(false)
+  const [searchQuery, setSearchQuery] = React.useState<string>('')
+
+  const toggle = () => {
+    setOpen(!open)
+  }
 
   React.useEffect(() => {
     dispatch(loadPools())
   }, [])
 
+  const onChangeSearchQuery = (event: React.FormEvent<HTMLInputElement>) => {
+    setSearchQuery(event.currentTarget.value)
+  }
+
+  const filterPools = (pools: PoolData[] | undefined) => {
+    if (!pools) {
+      return []
+    }  if (searchQuery.trim().length === 0) {
+      return pools
+    } 
+      return pools.filter((pool: PoolData) => pool.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+    
+  }
+
   const navigateToPool = (pool: PoolData) => {
     Router.push('/[root]', `/${pool.id}`)
-    toggle()
+    setOpen(false)
   }
 
   return (
@@ -67,10 +61,19 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
         onClick={toggle}
         focusIndicator={false}
       >
-        <div style={{ height: 12, lineHeight: '12px', fontWeight: 500, fontSize: 10, color: '#bbb' }}>
-          Investment Pool
-        </div>
-        <div style={{ height: 16, lineHeight: '16px', fontWeight: 500, fontSize: 14, marginTop: 4 }}>{props.title}</div>
+        <Title>
+          <TitleText>
+            <div style={{ height: 12, lineHeight: '12px', fontWeight: 500, fontSize: 10, color: '#bbb' }}>
+              Investment Pool
+            </div>
+            <div style={{ height: 16, lineHeight: '16px', fontWeight: 500, fontSize: 14, marginTop: 4 }}>
+              {props.title}
+            </div>
+          </TitleText>
+          <Caret>
+            <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
+          </Caret>
+        </Title>
       </Box>
 
       {open && poolRef.current && (
@@ -80,10 +83,21 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
           target={poolRef.current}
           align={{ right: 'right', top: 'bottom' }}
           style={{ padding: 6, marginTop: 10 }}
+          onClickOutside={() => setOpen(false)}
+          onEsc={() => setOpen(false)}
         >
           <Wrapper>
             <PoolList>
-              {pools.data?.pools.map((pool: PoolData) => (
+              <SearchField>
+                <TextInput
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={onChangeSearchQuery}
+                  icon={<FormSearch />}
+                  reverse
+                />
+              </SearchField>
+              {filterPools(pools.data?.pools).map((pool: PoolData) => (
                 <PoolLink key={pool.id} active={pool.name === props.title} onClick={() => navigateToPool(pool)}>
                   {pool.name}
                 </PoolLink>
