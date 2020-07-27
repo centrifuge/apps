@@ -18,6 +18,5 @@ add the following env variables
 ### Run
 
 ```shell
-npm run dev # to start the dev serrver
-npm run lambda:start # to run the Netlify lambdas locally
+npm start # to start the NextJs server and serve the Netlify lambdas locally
 ```
