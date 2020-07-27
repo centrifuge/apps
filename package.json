@@ -8,11 +8,11 @@
     "fs": false
   },
   "scripts": {
-    "dev": "next",
+    "dev:next": "PORT=3000 node server.js",
     "build": "next build",
     "build:all": "npm run build && npm run build:lambda",
     "build-for-husky": "tsc",
-    "start": "next start",
+    "start": "run-p -l dev:next dev:lambda",
     "test": "jest",
     "export": "npm run build && next export",
     "lint": "tslint --project .",
@@ -20,7 +20,7 @@
     "lint-fix-staged": "git diff --staged --name-only | grep -E '\\.tsx?$' | xargs npm run lint-fix && git diff --staged --name-only | grep -E '\\.tsx?$' | xargs git add",
     "format": "prettier --write \"./**/*.{ts,tsx}\"",
     "check-format": "prettier --check \"./**/*.{ts,tsx}\"",
-    "start:lambda": "netlify-lambda serve lambda",
+    "dev:lambda": "netlify-lambda serve lambda",
     "build:lambda": "netlify-lambda build lambda"
   },
   "husky": {
@@ -75,8 +75,8 @@
     "yup": "^0.28.5"
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.59",
     "@babel/preset-typescript": "7.10.4",
+    "@types/aws-lambda": "8.10.59",
     "@types/bn.js": "^4.11.6",
     "@types/jest": "^24.9.1",
     "@types/next": "^9.0.0",
@@ -88,9 +88,12 @@
     "@zeit/next-typescript": "^1.1.1",
     "babel-plugin-styled-components": "^1.10.7",
     "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "http-proxy-middleware": "^1.0.5",
     "husky": "^4.2.5",
     "jest": "^24.9.0",
     "netlify-lambda": "1.1.1",
+    "npm-run-all": "^4.1.5",
     "prettier": "1.19.1",
     "react-test-renderer": "^16.13.1",
     "tslint": "^5.20.1",

@@ -6,7 +6,7 @@ import { isValidEmail } from '../../utils/email'
 import InvestActionSuccessModal from './SuccessModal'
 import { FormModal, InvestmentSteps, FormFieldWithoutBorder, AcceptButton } from './styles'
 
-const LAMBDA_SEND_INVESTOR_EMAIL_URL = 'http://localhost:9000/sendInvestorEmail'
+const LAMBDA_SEND_INVESTOR_EMAIL_URL = '/.netlify/functions/sendInvestorEmail'
 
 interface Props {
   poolName: string
