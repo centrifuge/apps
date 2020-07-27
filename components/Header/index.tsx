@@ -12,6 +12,7 @@ import { Web3Wallet } from '@centrifuge/axis-web3-wallet'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import { ToastContainer } from '../../components/Toast'
 import { Toast, showTimedToast } from '../../ducks/toasts'
+import { PoolSelector } from '../../components/PoolSelector'
 
 const WalletContainer = styled.div``
 
@@ -37,7 +38,6 @@ interface Props {
 }
 
 const Header: React.FC<Props> = (props: Props) => {
-  // const [chosenRoute, setChosenRoute] = React.useState('/')
   const walletRef = React.useRef<HTMLDivElement>(null)
 
   const connectAccount = async () => {
@@ -119,24 +119,7 @@ const Header: React.FC<Props> = (props: Props) => {
               </a>
             </Link>
           </div>
-          {poolTitle && (
-            <Box
-              style={{
-                flex: '0 0 239px',
-                height: 32,
-                padding: '0 16px',
-                borderRight: '1px solid #D8D8D8',
-                display: 'flex',
-              }}
-            >
-              <div style={{ height: 12, lineHeight: '12px', fontWeight: 500, fontSize: 10, color: '#bbb' }}>
-                Investment Pool
-              </div>
-              <div style={{ height: 16, lineHeight: '16px', fontWeight: 500, fontSize: 14, marginTop: 4 }}>
-                {poolTitle}
-              </div>
-            </Box>
-          )}
+          {poolTitle && <PoolSelector title={poolTitle} />}
           <Box
             flex="grow"
             basis="auto"
