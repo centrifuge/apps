@@ -13,6 +13,7 @@ import Container from '../../components/Container'
 interface Props {
   root: string
   pool: IPool
+  key: string
 }
 
 class Pool extends React.Component<Props> {
@@ -49,7 +50,13 @@ export async function getStaticPaths() {
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  return { props: { root: params?.root, pool: config.pools.find((p) => p.addresses.ROOT_CONTRACT === params?.root) } }
+  const pool = config.pools.find((p) => p.addresses.ROOT_CONTRACT === params!.root)
+  let newProps: Props = { root: params?.root, pool: pool }
+
+  // Fix to force page rerender, from https://github.com/vercel/next.js/issues/9992
+  newProps.key = pool?.name || '-'
+
+  return { props: newProps }
 }
 
 export default Pool

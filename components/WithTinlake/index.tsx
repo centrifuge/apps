@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { initTinlake } from '../../services/tinlake'
 import { ITinlake } from 'tinlake'
+import { withRouter, NextRouter } from 'next/router'
 
 interface Props {
   render: (tinlake: any) => React.ReactElement
@@ -14,6 +15,7 @@ interface Props {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
     SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
   }
+  router: NextRouter
 }
 
 interface State {
@@ -50,4 +52,4 @@ class WithTinlake extends React.Component<Props, State> {
   }
 }
 
-export default WithTinlake
+export default withRouter(WithTinlake)

@@ -5,7 +5,6 @@ import investmentsReducer from '../ducks/investments'
 import poolReducer from '../ducks/pool'
 import authReducer from '../ducks/auth'
 import transactionReducer from '../ducks/transactions'
-import toastReducer from '../ducks/toasts'
 import thunk from 'redux-thunk'
 
 declare global {
@@ -27,7 +26,6 @@ const makeStore = () => {
       pool: poolReducer,
       auth: authReducer,
       transactions: transactionReducer,
-      toasts: toastReducer,
     }),
     composeEnhancers(applyMiddleware(thunk))
   )

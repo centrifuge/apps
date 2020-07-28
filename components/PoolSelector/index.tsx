@@ -100,15 +100,18 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
         >
           <Wrapper>
             <PoolList>
-              <SearchField>
-                <TextInput
-                  placeholder="Search"
-                  value={searchQuery}
-                  onChange={onChangeSearchQuery}
-                  icon={<FormSearch />}
-                  reverse
-                />
-              </SearchField>
+              {pools.data?.pools.length >= 5 && (
+                <SearchField>
+                  <TextInput
+                    placeholder="Search"
+                    value={searchQuery}
+                    onChange={onChangeSearchQuery}
+                    icon={<FormSearch />}
+                    reverse
+                    autoFocus
+                  />
+                </SearchField>
+              )}
               {filterPools(pools.data?.pools).map((pool: PoolData) => (
                 <PoolLink key={pool.id} active={pool.name === props.title} onClick={() => navigateToPool(pool)}>
                   {pool.name}
