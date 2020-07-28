@@ -5,6 +5,7 @@ import { countryList } from './countries'
 import { isValidEmail } from '../../utils/email'
 import InvestActionSuccessModal from './SuccessModal'
 import { FormModal, InvestmentSteps, FormFieldWithoutBorder, AcceptButton } from './styles'
+import Alert from '../Alert'
 
 const LAMBDA_SEND_INVESTOR_EMAIL_URL = '/.netlify/functions/sendInvestorEmail'
 
@@ -49,6 +50,7 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
   const [filteredCountries, setFilteredCountries] = React.useState<string[]>(countryList)
   const [modalIsOpen, setModalIsOpen] = React.useState<boolean>(false)
   const [successModalIsOpen, setSuccessModalIsOpen] = React.useState<boolean>(false)
+  const [failedSubmission, setFailedSubmission] = React.useState<boolean>(false)
 
   const [form, setForm] = React.useState<FormData>(initialForm)
   const [errors, setErrors] = React.useState<FormErrors>({})
@@ -107,6 +109,7 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
         setSuccessModalIsOpen(true)
       } else {
         console.error('Failed to submit investor interest form', response.statusText)
+        setFailedSubmission(true)
       }
     }
   }
@@ -117,6 +120,15 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
 
       <FormModal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose}>
         <Form onSubmit={onSubmit}>
+          {failedSubmission && (
+            <Alert type="error">
+              Failed to submit investor interest form. Please try again or reach out to us:{' '}
+              <a href="mailto:ask@centrifuge.io" target="_blank">
+                ask@centrifuge.io
+              </a>
+            </Alert>
+          )}
+
           <InvestmentSteps src="../../static/invest-steps1.svg" alt="Investment steps" />
 
           <Paragraph margin={{ top: 'medium', bottom: 'medium' }}>
@@ -124,24 +136,26 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
             start the KYC and onboarding process. The Issuer will shortly reach out to you.
           </Paragraph>
 
-          <Box direction="row" margin={{ bottom: 'medium' }} gap={'medium'}>
-            <Box>
-              <RadioButton
-                name="radio"
-                checked={form.title === 'Mr.'}
-                label="Mr."
-                onChange={(event: any) => setForm({ ...form, title: event.target.checked ? 'Mr.' : 'Ms.' })}
-              />
+          <FormFieldWithoutBorder error={errors.title} margin={{ bottom: 'medium' }}>
+            <Box direction="row" gap={'medium'}>
+              <Box>
+                <RadioButton
+                  name="radio"
+                  checked={form.title === 'Mr.'}
+                  label="Mr."
+                  onChange={(event: any) => setForm({ ...form, title: event.target.checked ? 'Mr.' : 'Ms.' })}
+                />
+              </Box>
+              <Box>
+                <RadioButton
+                  name="radio"
+                  checked={form.title === 'Ms.'}
+                  label="Ms."
+                  onChange={(event: any) => setForm({ ...form, title: event.target.checked ? 'Ms.' : 'Mr.' })}
+                />
+              </Box>
             </Box>
-            <Box>
-              <RadioButton
-                name="radio"
-                checked={form.title === 'Ms.'}
-                label="Ms."
-                onChange={(event: any) => setForm({ ...form, title: event.target.checked ? 'Ms.' : 'Mr.' })}
-              />
-            </Box>
-          </Box>
+          </FormFieldWithoutBorder>
 
           <Box direction="row" gap={'medium'}>
             <Box basis={'1/2'}>
@@ -198,7 +212,7 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
 
           <FormFieldWithoutBorder error={errors.investorConfirmation}>
             <Box direction="row" margin={{ top: 'small' }}>
-              <Box style={{ minWidth: '40px', paddingTop: '20px' }}>
+              <Box style={{ minWidth: '40px', paddingTop: '20px', paddingLeft: '4px' }}>
                 <CheckBox
                   name="check"
                   checked={form.investorConfirmation}

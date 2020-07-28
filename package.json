@@ -8,10 +8,10 @@
     "fs": false
   },
   "scripts": {
-    "dev:next": "PORT=3000 node server.js",
-    "build": "next build",
-    "build:all": "npm run build && npm run build:lambda",
+    "build": "npm run build && npm run build:lambda",
     "build-for-husky": "tsc",
+    "dev:next": "PORT=3000 node server.js",
+    "build:next": "next build",
     "start": "run-p -l dev:next dev:lambda",
     "test": "jest",
     "export": "npm run build && next export",
@@ -57,7 +57,7 @@
     "decimal.js-light": "^2.5.0",
     "graphql": "^15.0.0",
     "graphql-tag": "^2.10.3",
-    "grommet": "^2.13.0",
+    "grommet": "^2.14.0",
     "next": "^9.4.0",
     "next-redux-wrapper": "^6.0.0",
     "node-fetch": "^2.6.0",
