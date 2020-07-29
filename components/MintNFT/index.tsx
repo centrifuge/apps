@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { displayToBase, baseToDisplay } from 'tinlake'
+import { ITinlake, displayToBase, baseToDisplay } from 'tinlake'
 import { Box, FormField, TextInput, Button, Heading, Anchor, Text } from 'grommet'
 import Alert from '../Alert'
 import SecondaryHeader from '../SecondaryHeader'
@@ -16,10 +16,11 @@ const NFT_REGISTRY = '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24'
 interface Props {
   tinlake: any
   ensureAuthed?: () => Promise<void>
-  createTransaction: (
+  createTransaction: <M extends keyof ITinlake>(
     description: string,
-    methodCall: Function,
-    onCompleteCallback: (status: TransactionStatus) => void
+    tinlake: ITinlake,
+    methodName: M,
+    args: Parameters<ITinlake[M]>
   ) => Promise<void>
 }
 
@@ -64,13 +65,22 @@ class MintNFT extends React.Component<Props, State> {
         await ensureAuthed!()
 
         const base = displayToBase(baseToDisplay(amount, 2), 2)
-        const tinlakeCall = () =>
-          tinlake.mintNFT(registry, tinlake.ethConfig.from, tokenId, referenceId, base, assetType)
+        // const tinlakeCall = () =>
+        //   tinlake.mintNFT(registry, tinlake.ethConfig.from, tokenId, referenceId, base, assetType)
 
-        createTransaction('Mint NFT', tinlakeCall, (status: TransactionStatus) => {
-          if (status === 'succeeded') this.setState({ is: 'success' })
-          else this.setState({ is: 'error' })
-        })
+        createTransaction('Mint NFT', tinlake, 'mintNFT', [
+          registry,
+          tinlake.ethConfig.from,
+          tokenId,
+          referenceId,
+          base,
+          assetType,
+        ])
+
+        // createTransaction('Mint NFT', tinlakeCall, (status: TransactionStatus) => {
+        //   if (status === 'succeeded') this.setState({ is: 'success' })
+        //   else this.setState({ is: 'error' })
+        // })
       } catch (e) {
         console.error(e)
         this.setState({ is: 'error', errorMsg: e.message })

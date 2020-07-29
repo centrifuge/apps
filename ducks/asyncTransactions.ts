@@ -1,9 +1,10 @@
 import { AnyAction, Action } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { HYDRATE } from 'next-redux-wrapper'
+import { ITinlake } from 'tinlake'
+import { initTinlake } from '../services/tinlake'
 
-// import { Transaction as WalletTransaction } from '@centrifuge/axis-web3-wallet'
-
+// TODO: should be imported from @centrifuge/axis-web3-wallet
 export interface WalletTransaction {
   description: string
   status: 'unconfirmed' | 'pending' | 'succeeded' | 'failed'
@@ -16,25 +17,35 @@ export interface WalletTransaction {
 const SET_ACTIVE_TRANSACTION = 'tinlake-ui/transactions/SET_ACTIVE_TRANSACTION'
 const QUEUE_TRANSACTION = 'tinlake-ui/transactions/QUEUE_TRANSACTION'
 
-// extend by potential error messages
+export type TransactionId = string
 export type TransactionStatus = 'unconfirmed' | 'pending' | 'succeeded' | 'failed'
 
+interface TinlakeConfig {
+  addresses?: any
+  contractConfig?: {
+    JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
+    SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
+  }
+}
+
 export interface Transaction {
-    description: string
-    methodCall: Function
-    onCompleteCallback: (status: TransactionStatus) => void
-    status: TransactionStatus
-    showIfClosed?: boolean
+  id: string
+  description: string
+  methodName: keyof ITinlake
+  args: any[] // TODO: should be something like Parameters<ITinlake[methodName]>
+  status: TransactionStatus
+  tinlakeConfig: TinlakeConfig
+  showIfClosed: boolean
 }
 
 export interface TransactionState {
   active: { [key: string]: Transaction }
-  queue: Transaction[]
+  queue: { [key: string]: Transaction }
 }
 
 const initialState: TransactionState = {
   active: {},
-  queue: []
+  queue: {}
 }
 
 // Reducer
@@ -56,7 +67,10 @@ export default function reducer(
     case QUEUE_TRANSACTION:
       return {
         ...state,
-        queue: [...state.queue, action.transaction],
+        queue: {
+          ...state.queue,
+          [action.id]: action.transaction,
+        },
       }
     default:
       return state
@@ -65,50 +79,84 @@ export default function reducer(
 
 const SUCCESS_STATUS = '0x1'
 
-export function createTransaction<R extends any>(
+export function createTransaction<M extends keyof ITinlake>(
     description: string,
-    methodCall: () => Promise<R>,
-    onCompleteCallback: (status: TransactionStatus) => void,
-    methodResponseValidation?: (response: R) => boolean
-): ThunkAction<Promise<void>, { transactions: TransactionState }, undefined, Action> {
-    return async (dispatch) => {
-        const id = (new Date().getTime()).toString()
+    tinlake: ITinlake,
+    methodName: M,
+    args: Parameters<ITinlake[M]>
+): ThunkAction<Promise<string>, { asyncTransactions: TransactionState }, undefined, Action> {
+  return async (dispatch, getState) => {
+    const id: TransactionId = (new Date().getTime() + Math.floor(Math.random() * 10000)).toString()
 
-        const unconfirmedTx: Transaction = { description, methodCall, onCompleteCallback, status: 'unconfirmed', showIfClosed: true }
-        dispatch({ id, transaction: unconfirmedTx, type: SET_ACTIVE_TRANSACTION })
-        
-        const response = await methodCall()
-
-        // TODO: link to tinlake.js for checking whether transaction has been confirmed yet
-        // const pendingTx: Transaction = {
-        //   ...unconfirmedTx,
-        //   status: 'pending',
-        //   showIfClosed: true
-        // }
-        // dispatch({ id, transaction: pendingTx, type: SET_ACTIVE_TRANSACTION })
-
-        const outcome = methodResponseValidation
-          ? methodResponseValidation(response)
-          : (response as any).status === SUCCESS_STATUS
-        
-        onCompleteCallback(outcome ? 'succeeded' : 'failed')
-        
-        const outcomeTx: Transaction = {
-          ...unconfirmedTx,
-          status: outcome ? 'succeeded' : 'failed',
-          showIfClosed: true,
-        }
-        dispatch({ id, transaction: outcomeTx, type: SET_ACTIVE_TRANSACTION })
-
-        setTimeout(() => {
-          const hiddenTx: Transaction = {
-            ...outcomeTx,
-            showIfClosed: false
-          }
-          dispatch({ id, transaction: hiddenTx, type: SET_ACTIVE_TRANSACTION })
-        }, 5000)
+    const tinlakeConfig = {
+      addresses: tinlake.contractAddresses,
+      contractConfig: tinlake.contractConfig
     }
-}   
+
+    const unconfirmedTx: Transaction = {
+      id,
+      description,
+      methodName,
+      args,
+      tinlakeConfig,
+      status: 'unconfirmed',
+      showIfClosed: true,
+    }
+
+    if (Object.keys(getState().asyncTransactions.queue).length === 0) {
+      dispatch({ id, transaction: unconfirmedTx, type: SET_ACTIVE_TRANSACTION })
+      dispatch(processTransaction(unconfirmedTx))
+    }
+    else {
+      dispatch({ id, transaction: unconfirmedTx, type: QUEUE_TRANSACTION })
+    }
+
+
+    return id
+  }
+}
+
+
+export function processTransaction(
+  unconfirmedTx: Transaction
+): ThunkAction<Promise<void>, { asyncTransactions: TransactionState }, undefined, Action> {
+    return async (dispatch) => {
+      const id = unconfirmedTx.id
+      console.log('run', unconfirmedTx)
+      // TODO: remove this from queue
+      
+      const tinlake = initTinlake(unconfirmedTx.tinlakeConfig)
+      const response = await tinlake[unconfirmedTx.methodName](...unconfirmedTx.args)
+
+      // TODO: link to tinlake.js for checking whether transaction has been confirmed yet
+      // const pendingTx: Transaction = {
+      //   ...unconfirmedTx,
+      //   status: 'pending',
+      //   showIfClosed: true
+      // }
+      // await dispatch({ id, transaction: pendingTx, type: SET_ACTIVE_TRANSACTION })
+
+      const outcome = (response as any).status === SUCCESS_STATUS
+            
+      const outcomeTx: Transaction = {
+        ...unconfirmedTx,
+        status: outcome ? 'succeeded' : 'failed',
+        showIfClosed: true,
+      }
+      await dispatch({ id, transaction: outcomeTx, type: SET_ACTIVE_TRANSACTION })
+
+      setTimeout(async () => {
+        const hiddenTx: Transaction = {
+          ...outcomeTx,
+          showIfClosed: false
+        }
+        await dispatch({ id, transaction: hiddenTx, type: SET_ACTIVE_TRANSACTION })
+      }, 5000)
+
+      // TODO: check if there is another item in the queue, and if so, call processTransaction() on that item
+  }
+}
+
 
 // Selectors
 export function selectWalletTransactions(state?: TransactionState): WalletTransaction[] {
