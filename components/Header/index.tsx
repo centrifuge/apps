@@ -9,6 +9,7 @@ import Router, { withRouter, NextRouter } from 'next/router'
 import { NavBar } from '@centrifuge/axis-nav-bar'
 import { Web3Wallet } from '@centrifuge/axis-web3-wallet'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
+import { TransactionState, selectWalletTransactions } from '../../ducks/asyncTransactions'
 
 const { isDemo } = config
 export interface MenuItem {
@@ -25,6 +26,7 @@ interface HeaderProps {
   menuItems: MenuItem[]
   auth?: AuthState
   router: NextRouter
+  asyncTransactions?: TransactionState
   ensureAuthed?: () => Promise<void>
   clear?: () => Promise<void>
 }
@@ -66,7 +68,7 @@ class Header extends React.Component<HeaderProps, State> {
   }
 
   render() {
-    const { poolTitle, selectedRoute, menuItems, auth, clear } = this.props
+    const { poolTitle, selectedRoute, menuItems, asyncTransactions, auth, clear } = this.props
     const { address, network, providerName } = auth!
     const logoUrl = (isDemo && '/static/demo_logo.svg') || '/static/logo.svg'
 
@@ -156,7 +158,7 @@ class Header extends React.Component<HeaderProps, State> {
                   providerName={providerName}
                   networkName={network}
                   onDisconnect={clear}
-                  transactions={[]}
+                  transactions={selectWalletTransactions(asyncTransactions)}
                   getAddressLink={getAddressLink}
                   style={{ padding: 0 }}
                 />

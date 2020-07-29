@@ -9,12 +9,18 @@ import NumberInput from '../NumberInput'
 import { PoolLink } from '../PoolLink'
 import { connect } from 'react-redux'
 import { ensureAuthed } from '../../ducks/auth'
+import { createTransaction, TransactionStatus } from '../../ducks/asyncTransactions'
 
 const NFT_REGISTRY = '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24'
 
 interface Props {
   tinlake: any
   ensureAuthed?: () => Promise<void>
+  createTransaction: (
+    description: string,
+    methodCall: Function,
+    onCompleteCallback: (status: TransactionStatus) => void
+  ) => Promise<void>
 }
 
 interface State {
@@ -47,20 +53,24 @@ class MintNFT extends React.Component<Props, State> {
   }
 
   mint = async () => {
-    const { tinlake, ensureAuthed } = this.props
+    const { tinlake, ensureAuthed, createTransaction } = this.props
     const { referenceId, assetType, amount, tokenId } = this.state
+
     const registry = NFT_REGISTRY
     {
       this.setState({ is: 'loading' })
+
       try {
         await ensureAuthed!()
+
         const base = displayToBase(baseToDisplay(amount, 2), 2)
-        const res = await tinlake.mintNFT(registry, tinlake.ethConfig.from, tokenId, referenceId, base, assetType)
-        if (res.status === SUCCESS_STATUS && res.events[0].event.name === 'Transfer') {
-          this.setState({ is: 'success' })
-        } else {
-          this.setState({ is: 'error' })
-        }
+        const tinlakeCall = () =>
+          tinlake.mintNFT(registry, tinlake.ethConfig.from, tokenId, referenceId, base, assetType)
+
+        createTransaction('Mint NFT', tinlakeCall, (status: TransactionStatus) => {
+          if (status === 'succeeded') this.setState({ is: 'success' })
+          else this.setState({ is: 'error' })
+        })
       } catch (e) {
         console.error(e)
         this.setState({ is: 'error', errorMsg: e.message })
@@ -173,4 +183,4 @@ class MintNFT extends React.Component<Props, State> {
   }
 }
 
-export default connect((state) => state, { ensureAuthed })(MintNFT)
+export default connect((state) => state, { ensureAuthed, createTransaction })(MintNFT)
