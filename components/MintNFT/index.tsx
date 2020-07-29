@@ -14,7 +14,6 @@ import { createTransaction } from '../../ducks/asyncTransactions'
 const NFT_REGISTRY = '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24'
 
 interface Props {
-  state: any
   tinlake: any
   ensureAuthed?: () => Promise<void>
   createTransaction: <M extends keyof ITinlake>(
@@ -22,7 +21,7 @@ interface Props {
     tinlake: ITinlake,
     methodName: M,
     args: Parameters<ITinlake[M]>
-  ) => Promise<void>
+  ) => Promise<string>
 }
 
 interface State {
@@ -34,7 +33,7 @@ interface State {
   errorMsg: string
 }
 
-const SUCCESS_STATUS = '0x1'
+// const SUCCESS_STATUS = '0x1'
 
 class MintNFT extends React.Component<Props, State> {
   state: State = {
