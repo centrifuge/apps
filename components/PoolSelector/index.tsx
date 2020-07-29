@@ -1,11 +1,11 @@
 import * as React from 'react'
-import { Box, Drop, TextInput } from 'grommet'
+import { Drop, TextInput } from 'grommet'
 import { useSelector, useDispatch } from 'react-redux'
 import { loadPools, PoolData } from '../../ducks/pools'
 import { useRouter } from 'next/router'
 import { FormDown, FormSearch } from 'grommet-icons'
 
-import { Wrapper, Title, TitleText, PoolList, SearchField, PoolLink, Caret } from './styles'
+import { Button, Wrapper, Title, PoolTitle, Desc, PoolList, SearchField, PoolLink, Caret } from './styles'
 
 interface Props {
   title: string
@@ -14,7 +14,7 @@ interface Props {
 export const PoolSelector: React.FC<Props> = (props: Props) => {
   const router = useRouter()
 
-  const pools = useSelector((state) => state.pools)
+  const pools = useSelector((state: any) => state.pools)
   const dispatch = useDispatch()
 
   const poolRef = React.useRef<HTMLDivElement>(null)
@@ -57,36 +57,22 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <Box
-        style={{
-          flex: '0 0 239px',
-          height: 32,
-          padding: '0 16px',
-          borderRight: '1px solid #D8D8D8',
-          display: 'flex',
-        }}
+      <Button
         ref={poolRef}
-        onClick={(e) => {
+        onClick={() => {
           if (!justClosed) {
             setOpen(true)
           }
         }}
-        focusIndicator={false}
       >
-        <Title>
-          <TitleText>
-            <div style={{ height: 12, lineHeight: '12px', fontWeight: 500, fontSize: 10, color: '#bbb' }}>
-              Investment Pool
-            </div>
-            <div style={{ height: 16, lineHeight: '16px', fontWeight: 500, fontSize: 14, marginTop: 4 }}>
-              {props.title}
-            </div>
-          </TitleText>
-          <Caret>
-            <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
-          </Caret>
-        </Title>
-      </Box>
+        <PoolTitle>
+          <Desc>Investment Pool</Desc>
+          <Title>{props.title}</Title>
+        </PoolTitle>
+        <Caret>
+          <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
+        </Caret>
+      </Button>
 
       {open && poolRef.current && (
         <Drop
