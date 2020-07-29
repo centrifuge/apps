@@ -5,10 +5,10 @@ export const Button = styled(Box)`
   flex: 0 0 239px;
   height: 32;
   padding: 0 16px;
-  border-right: 1px solid #D8D8D8;
+  border-right: 1px solid #d8d8d8;
   display: flex;
   flex-direction: row;
-  `
+`
 
 export const PoolTitle = styled.div`
   flex-grow: 1;
