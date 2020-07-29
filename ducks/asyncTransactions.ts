@@ -14,8 +14,11 @@ export interface WalletTransaction {
 }
 
 // Actions
+const START_PROCESSING = 'tinlake-ui/transactions/START_PROCESSING'
+const STOP_PROCESSING = 'tinlake-ui/transactions/STOP_PROCESSING'
 const SET_ACTIVE_TRANSACTION = 'tinlake-ui/transactions/SET_ACTIVE_TRANSACTION'
 const QUEUE_TRANSACTION = 'tinlake-ui/transactions/QUEUE_TRANSACTION'
+const DEQUEUE_TRANSACTION = 'tinlake-ui/transactions/DEQUEUE_TRANSACTION'
 
 export type TransactionId = string
 export type TransactionStatus = 'unconfirmed' | 'pending' | 'succeeded' | 'failed'
@@ -39,13 +42,15 @@ export interface Transaction {
 }
 
 export interface TransactionState {
+  processing: boolean
   active: { [key: string]: Transaction }
   queue: { [key: string]: Transaction }
 }
 
 const initialState: TransactionState = {
+  processing: false,
   active: {},
-  queue: {}
+  queue: {},
 }
 
 // Reducer
@@ -56,13 +61,23 @@ export default function reducer(
   switch (action.type) {
     case HYDRATE:
       return { ...state, ...action.payload.transactionQueue }
+    case START_PROCESSING:
+      return {
+        ...state,
+        processing: true,
+      }
+    case STOP_PROCESSING:
+      return {
+        ...state,
+        processing: false,
+      }
     case SET_ACTIVE_TRANSACTION:
       return {
         ...state,
         active: {
           ...state.active,
-          [action.id]: action.transaction
-        }
+          [action.id]: action.transaction,
+        },
       }
     case QUEUE_TRANSACTION:
       return {
@@ -72,6 +87,17 @@ export default function reducer(
           [action.id]: action.transaction,
         },
       }
+    case DEQUEUE_TRANSACTION:
+      const newQueue = state.queue
+
+      if (action.id in state.queue) {
+        delete newQueue[action.id]
+      }
+
+      return {
+        ...state,
+        queue: newQueue,
+      }
     default:
       return state
   }
@@ -80,17 +106,17 @@ export default function reducer(
 const SUCCESS_STATUS = '0x1'
 
 export function createTransaction<M extends keyof ITinlake>(
-    description: string,
-    tinlake: ITinlake,
-    methodName: M,
-    args: Parameters<ITinlake[M]>
+  description: string,
+  tinlake: ITinlake,
+  methodName: M,
+  args: Parameters<ITinlake[M]>
 ): ThunkAction<Promise<string>, { asyncTransactions: TransactionState }, undefined, Action> {
   return async (dispatch, getState) => {
-    const id: TransactionId = (new Date().getTime() + Math.floor(Math.random() * 10000)).toString()
+    const id: TransactionId = (new Date().getTime() + Math.floor(Math.random() * 1000000)).toString()
 
     const tinlakeConfig = {
       addresses: tinlake.contractAddresses,
-      contractConfig: tinlake.contractConfig
+      contractConfig: tinlake.contractConfig,
     }
 
     const unconfirmedTx: Transaction = {
@@ -102,73 +128,80 @@ export function createTransaction<M extends keyof ITinlake>(
       status: 'unconfirmed',
       showIfClosed: true,
     }
+    dispatch({ id, transaction: unconfirmedTx, type: QUEUE_TRANSACTION })
 
-    if (Object.keys(getState().asyncTransactions.queue).length === 0) {
-      dispatch({ id, transaction: unconfirmedTx, type: SET_ACTIVE_TRANSACTION })
+    if (!getState().asyncTransactions.processing) {
+      dispatch({ type: START_PROCESSING })
       dispatch(processTransaction(unconfirmedTx))
     }
-    else {
-      dispatch({ id, transaction: unconfirmedTx, type: QUEUE_TRANSACTION })
-    }
-
 
     return id
   }
 }
 
-
 export function processTransaction(
   unconfirmedTx: Transaction
 ): ThunkAction<Promise<void>, { asyncTransactions: TransactionState }, undefined, Action> {
-    return async (dispatch) => {
-      const id = unconfirmedTx.id
-      console.log('run', unconfirmedTx)
-      // TODO: remove this from queue
-      
-      const tinlake = initTinlake(unconfirmedTx.tinlakeConfig)
-      const response = await tinlake[unconfirmedTx.methodName](...unconfirmedTx.args)
+  return async (dispatch, getState) => {
+    // Dequeue
+    const id = unconfirmedTx.id
+    dispatch({ id, transaction: unconfirmedTx, type: DEQUEUE_TRANSACTION })
+    dispatch({ id, transaction: unconfirmedTx, type: SET_ACTIVE_TRANSACTION })
 
-      // TODO: link to tinlake.js for checking whether transaction has been confirmed yet
-      // const pendingTx: Transaction = {
-      //   ...unconfirmedTx,
-      //   status: 'pending',
-      //   showIfClosed: true
-      // }
-      // await dispatch({ id, transaction: pendingTx, type: SET_ACTIVE_TRANSACTION })
+    // Start transaction
+    const tinlake = initTinlake(unconfirmedTx.tinlakeConfig)
+    const response = await tinlake[unconfirmedTx.methodName](...unconfirmedTx.args)
 
-      const outcome = (response as any).status === SUCCESS_STATUS
-            
-      const outcomeTx: Transaction = {
-        ...unconfirmedTx,
-        status: outcome ? 'succeeded' : 'failed',
-        showIfClosed: true,
+    // TODO: link to tinlake.js for checking whether transaction has been confirmed yet
+    // const pendingTx: Transaction = {
+    //   ...unconfirmedTx,
+    //   status: 'pending',
+    //   showIfClosed: true
+    // }
+    // await dispatch({ id, transaction: pendingTx, type: SET_ACTIVE_TRANSACTION })
+
+    // Check response
+    const outcome = (response as any).status === SUCCESS_STATUS
+
+    const outcomeTx: Transaction = {
+      ...unconfirmedTx,
+      status: outcome ? 'succeeded' : 'failed',
+      showIfClosed: true,
+    }
+    await dispatch({ id, transaction: outcomeTx, type: SET_ACTIVE_TRANSACTION })
+
+    // Hide after 5s
+    setTimeout(async () => {
+      const hiddenTx: Transaction = {
+        ...outcomeTx,
+        showIfClosed: false,
       }
-      await dispatch({ id, transaction: outcomeTx, type: SET_ACTIVE_TRANSACTION })
+      await dispatch({ id, transaction: hiddenTx, type: SET_ACTIVE_TRANSACTION })
+    }, 5000)
 
-      setTimeout(async () => {
-        const hiddenTx: Transaction = {
-          ...outcomeTx,
-          showIfClosed: false
-        }
-        await dispatch({ id, transaction: hiddenTx, type: SET_ACTIVE_TRANSACTION })
-      }, 5000)
+    // Start the next transaction in the queue
 
-      // TODO: check if there is another item in the queue, and if so, call processTransaction() on that item
+    if (Object.keys(getState().asyncTransactions.queue).length > 0) {
+      const nextTransactionId = Object.keys(getState().asyncTransactions.queue)[0]
+      const nextTransaction = getState().asyncTransactions.queue[nextTransactionId]
+      dispatch(processTransaction(nextTransaction))
+    } else {
+      dispatch({ type: STOP_PROCESSING })
+    }
   }
 }
-
 
 // Selectors
 export function selectWalletTransactions(state?: TransactionState): WalletTransaction[] {
   if (!state) return []
-  
+
   const transactions: WalletTransaction[] = Object.keys(state.active).map((id: string) => {
     const tx = state.active[id]
     return {
       description: tx.description,
       status: tx.status,
       txHahs: '-',
-      showIfClosed: tx.showIfClosed
+      showIfClosed: tx.showIfClosed,
     }
   })
 

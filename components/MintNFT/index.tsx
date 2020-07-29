@@ -14,6 +14,7 @@ import { createTransaction, TransactionStatus } from '../../ducks/asyncTransacti
 const NFT_REGISTRY = '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24'
 
 interface Props {
+  state: any
   tinlake: any
   ensureAuthed?: () => Promise<void>
   createTransaction: <M extends keyof ITinlake>(
@@ -59,16 +60,13 @@ class MintNFT extends React.Component<Props, State> {
 
     const registry = NFT_REGISTRY
     {
-      this.setState({ is: 'loading' })
+      // this.setState({ is: 'loading' })
 
       try {
         await ensureAuthed!()
-
         const base = displayToBase(baseToDisplay(amount, 2), 2)
-        // const tinlakeCall = () =>
-        //   tinlake.mintNFT(registry, tinlake.ethConfig.from, tokenId, referenceId, base, assetType)
 
-        createTransaction('Mint NFT', tinlake, 'mintNFT', [
+        createTransaction(`Mint NFT ${referenceId}`, tinlake, 'mintNFT', [
           registry,
           tinlake.ethConfig.from,
           tokenId,
@@ -76,11 +74,6 @@ class MintNFT extends React.Component<Props, State> {
           base,
           assetType,
         ])
-
-        // createTransaction('Mint NFT', tinlakeCall, (status: TransactionStatus) => {
-        //   if (status === 'succeeded') this.setState({ is: 'success' })
-        //   else this.setState({ is: 'error' })
-        // })
       } catch (e) {
         console.error(e)
         this.setState({ is: 'error', errorMsg: e.message })
