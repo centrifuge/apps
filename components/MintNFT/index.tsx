@@ -9,7 +9,7 @@ import NumberInput from '../NumberInput'
 import { PoolLink } from '../PoolLink'
 import { connect } from 'react-redux'
 import { ensureAuthed } from '../../ducks/auth'
-import { createTransaction, TransactionStatus } from '../../ducks/asyncTransactions'
+import { createTransaction } from '../../ducks/asyncTransactions'
 
 const NFT_REGISTRY = '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24'
 
