@@ -50,13 +50,20 @@ export async function getStaticPaths() {
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const pool = config.pools.find((p) => p.addresses.ROOT_CONTRACT === params!.root)
-  let newProps: Props = { root: params?.root, pool: pool }
+  if (params) {
+    const pool = config.pools.find((p) => p.addresses.ROOT_CONTRACT === params!.root)
 
-  // Fix to force page rerender, from https://github.com/vercel/next.js/issues/9992
-  newProps.key = pool?.name || '-'
+    if (pool) {
+      // Fix to force page rerender, from https://github.com/vercel/next.js/issues/9992
+      const newProps: Props = { root: params.root as string, pool, key: pool.name || '-' }
 
-  return { props: newProps }
+      return { props: newProps }
+    } else {
+      throw new Error(`Pool ${params.root} cannot be loaded`)
+    }
+  } else {
+    throw new Error(`Params are not passed`)
+  }
 }
 
 export default Pool
