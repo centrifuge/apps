@@ -55,12 +55,12 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
     if (pool) {
       // Fix to force page rerender, from https://github.com/vercel/next.js/issues/9992
-      const newProps: Props = { root: params.root as string, pool, key: pool.name || '-' }
+      const newProps: Props = { pool, root: params.root as string, key: pool.name || '-' }
 
       return { props: newProps }
-    } else {
-      throw new Error(`Pool ${params.root} cannot be loaded`)
     }
+
+    throw new Error(`Pool ${params.root} cannot be loaded`)
   } else {
     throw new Error(`Params are not passed`)
   }
