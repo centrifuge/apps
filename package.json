@@ -8,7 +8,7 @@
     "fs": false
   },
   "scripts": {
-    "build": "npm run build && npm run build:lambda",
+    "build": "npm run build:next && npm run build:lambda",
     "build-for-husky": "tsc",
     "dev:next": "PORT=3000 node server.js",
     "build:next": "next build",
