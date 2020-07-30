@@ -49,7 +49,7 @@ class Overview extends React.Component<Props> {
     const { tinlake, loans, auth, selectedPool, pool } = this.props
     const userAddress = auth?.address || tinlake.ethConfig.from
 
-    const { name, description, investHtml } = selectedPool
+    const { name, description } = selectedPool
     const allLoans = (loans && loans.loans) || []
     const poolData = pool && pool.data
 
@@ -134,7 +134,7 @@ class Overview extends React.Component<Props> {
                   </TableRow>
                 </TableBody>
               </Table>
-              <InvestAction investHtml={investHtml} />
+              <InvestAction poolName={name} />
             </Box>
           </Box>
           <Box basis={'1/2'} margin={{ left: 'large' }}>

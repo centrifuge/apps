@@ -6,6 +6,8 @@ import { AxisTheme } from '@centrifuge/axis-theme'
 import { StyledApp } from '../components/StyledApp'
 import Head from 'next/head'
 
+require('regenerator-runtime/runtime')
+
 class MyApp extends App {
   static async getInitialProps({ Component, ctx }: { Component: any; ctx: any }) {
     const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {}
