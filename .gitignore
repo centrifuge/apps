@@ -8,6 +8,7 @@ nft_data_definition.json
 .DS_Store
 .env*.local
 .env
+functions
 
 # Local Netlify folder
 .netlify
