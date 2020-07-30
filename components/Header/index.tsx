@@ -40,8 +40,6 @@ const Header: React.FC<Props> = (props: Props) => {
   }
 
   const onRouteClick = (item: MenuItem) => {
-    setChosenRoute(item.route)
-
     if (item.route.startsWith('/')) {
       pushWithPrefixIfInPool(item)
     } else {
