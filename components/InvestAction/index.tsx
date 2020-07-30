@@ -4,8 +4,7 @@ import { Box, Button, Paragraph, CheckBox, RadioButton, Form, FormField, TextInp
 import { countryList } from './countries'
 import { isValidEmail } from '../../utils/email'
 import InvestActionSuccessModal from './SuccessModal'
-import { FormModal, InvestmentSteps, FormFieldWithoutBorder, AcceptButton } from './styles'
-import Alert from '../Alert'
+import { FormModal, InvestmentSteps, FormFieldWithoutBorder, AcceptButton, ErrorMessage } from './styles'
 
 const LAMBDA_SEND_INVESTOR_EMAIL_URL = '/.netlify/functions/sendInvestorEmail'
 
@@ -120,15 +119,6 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
 
       <FormModal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose}>
         <Form onSubmit={onSubmit}>
-          {failedSubmission && (
-            <Alert type="error">
-              Failed to submit investor interest form. Please try again or reach out to us:{' '}
-              <a href="mailto:ask@centrifuge.io" target="_blank">
-                ask@centrifuge.io
-              </a>
-            </Alert>
-          )}
-
           <InvestmentSteps src="../../static/invest-steps1.svg" alt="Investment steps" />
 
           <Paragraph margin={{ top: 'medium', bottom: 'medium' }}>
@@ -239,6 +229,15 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
             </a>
             ).
           </Paragraph>
+
+          {failedSubmission && (
+            <ErrorMessage type="error">
+              Failed to submit investor interest form. Please try again or reach out to us:{' '}
+              <a href="mailto:ask@centrifuge.io" target="_blank">
+                ask@centrifuge.io
+              </a>
+            </ErrorMessage>
+          )}
 
           <Box direction="row" justify="end">
             <Box basis={'1/5'}>
