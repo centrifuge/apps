@@ -8,6 +8,7 @@ import { Spinner } from '@centrifuge/axis-spinner'
 import LoanView from '../View'
 import { AuthState, loadProxies, ensureAuthed } from '../../../ducks/auth'
 import { NFT } from 'tinlake'
+import { createTransaction } from '../../../ducks/asyncTransactions'
 
 interface Props {
   tinlake: any
@@ -16,6 +17,7 @@ interface Props {
   auth: AuthState
   loadProxies?: () => Promise<void>
   ensureAuthed?: () => Promise<void>
+  createTransaction: typeof createTransaction
 }
 
 interface State {
@@ -79,7 +81,7 @@ class IssueLoan extends React.Component<Props, State> {
   }
 
   issueLoan = async () => {
-    const { tinlake, loadProxies, ensureAuthed } = this.props
+    const { tinlake, loadProxies, ensureAuthed, createTransaction } = this.props
     const { tokenId } = this.state
     this.setState({ is: 'loading' })
 
@@ -87,15 +89,18 @@ class IssueLoan extends React.Component<Props, State> {
       await ensureAuthed!()
       // finance asset
       const { registry } = this.state
-      const result: TinlakeResult = await issue(tinlake, tokenId, registry)
-      if (result.errorMsg) {
-        this.setState({ is: 'error', errorMsg: result.errorMsg })
-        return
-      }
-      const loanId = result.data
-      this.setState({ loanId })
-      this.setState({ is: 'success' })
-      loadProxies && loadProxies()
+      // const result: TinlakeResult = await issue(tinlake, tokenId, registry)
+
+      createTransaction(`Finance asset`, tinlake, 'issue', [tokenId, registry, 5, 6])
+
+      // if (result.errorMsg) {
+      //   this.setState({ is: 'error', errorMsg: result.errorMsg })
+      //   return
+      // }
+      // const loanId = result.data
+      // this.setState({ loanId })
+      // this.setState({ is: 'success' })
+      // loadProxies && loadProxies()
     } catch (e) {
       this.setState({ is: 'error', errorMsg: e.message })
     }
@@ -194,4 +199,4 @@ class IssueLoan extends React.Component<Props, State> {
   }
 }
 
-export default connect((state) => state, { loadProxies, ensureAuthed })(IssueLoan)
+export default connect((state) => state, { loadProxies, ensureAuthed, createTransaction })(IssueLoan)

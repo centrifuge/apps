@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ITinlake, displayToBase, baseToDisplay } from 'tinlake'
+import { displayToBase, baseToDisplay } from 'tinlake'
 import { Box, FormField, TextInput, Button, Heading, Anchor, Text } from 'grommet'
 import Alert from '../Alert'
 import SecondaryHeader from '../SecondaryHeader'
@@ -10,18 +10,14 @@ import { PoolLink } from '../PoolLink'
 import { connect } from 'react-redux'
 import { ensureAuthed } from '../../ducks/auth'
 import { createTransaction } from '../../ducks/asyncTransactions'
+import { mintNFT } from '../../services/tinlake/actions'
 
 const NFT_REGISTRY = '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24'
 
 interface Props {
   tinlake: any
   ensureAuthed?: () => Promise<void>
-  createTransaction: <M extends keyof ITinlake>(
-    description: string,
-    tinlake: ITinlake,
-    methodName: M,
-    args: Parameters<ITinlake[M]>
-  ) => Promise<string>
+  createTransaction: typeof createTransaction
 }
 
 interface State {
@@ -64,13 +60,14 @@ class MintNFT extends React.Component<Props, State> {
       try {
         await ensureAuthed!()
         const base = displayToBase(baseToDisplay(amount, 2), 2)
-        createTransaction(`Mint NFT ${referenceId}`, tinlake, 'mintNFT', [
+        createTransaction(`Mint NFT ${referenceId}`, tinlake, mintNFT, [
           registry,
           tinlake.ethConfig.from,
           tokenId,
           referenceId,
           base,
           assetType,
+          3,
         ])
       } catch (e) {
         console.error(e)

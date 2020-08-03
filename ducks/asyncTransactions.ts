@@ -14,11 +14,11 @@ export interface WalletTransaction {
   showIfClosed?: boolean
 }
 
-// Action registry
-type ActionRegistry = { [key: string]: actions.TinlakeAction }
-const actionRegistry: ActionRegistry = {
-  'mintNFT': actions.mintNFT,
-}
+type TransactionAction = { [P in keyof typeof actions]: typeof actions[P] extends actions.TinlakeAction? P : never}[keyof typeof actions];
+
+type RemoveFirstFromTuple<T extends any[]> = 
+  T['length'] extends 0 ? undefined :
+  (((...b: T) => void) extends (a: any, ...b: infer I) => void ? I : [])
 
 // Actions
 const START_PROCESSING = 'tinlake-ui/transactions/START_PROCESSING'
@@ -38,11 +38,11 @@ interface TinlakeConfig {
   }
 }
 
-export interface Transaction {
+export interface Transaction<Params extends any[]> {
   id: string
   description: string
-  methodName: keyof ActionRegistry
-  args: any[] // TODO: should be something like Parameters<ActionRegistry[methodName]>
+  action: (...args: Params) => any
+  args: Params
   status: TransactionStatus
   tinlakeConfig: TinlakeConfig
   showIfClosed: boolean
@@ -50,8 +50,8 @@ export interface Transaction {
 
 export interface TransactionState {
   processing: boolean
-  active: { [key: string]: Transaction }
-  queue: { [key: string]: Transaction }
+  active: { [key: string]: Transaction<any> }
+  queue: { [key: string]: Transaction<any> }
 }
 
 const initialState: TransactionState = {
@@ -113,13 +113,15 @@ export default function reducer(
 
 const SUCCESS_STATUS = '0x1'
 
-export function createTransaction<M extends keyof ActionRegistry>(
+export function createTransaction<Params extends any[]>(
   description: string,
   tinlake: ITinlake,
-  methodName: M,
-  args: Parameters<ActionRegistry[M]>
+  action: (...args: Params) => any,
+  args: Params
 ): ThunkAction<Promise<string>, { asyncTransactions: TransactionState }, undefined, Action> {
   return async (dispatch, getState) => {
+    const actionName = action.name as keyof typeof actions
+    console.log(actionName)
     const id: TransactionId = (new Date().getTime() + Math.floor(Math.random() * 1000000)).toString()
 
     const tinlakeConfig = {
@@ -127,13 +129,13 @@ export function createTransaction<M extends keyof ActionRegistry>(
       contractConfig: tinlake.contractConfig,
     }
 
-    const unconfirmedTx: Transaction = {
+    const unconfirmedTx: Transaction<Params> = {
       id,
       description,
-      methodName,
+      actionName,
       args,
       tinlakeConfig,
-      status: 'unconfirmed',
+      status: 'pending',
       showIfClosed: true,
     }
     dispatch({ id, transaction: unconfirmedTx, type: QUEUE_TRANSACTION })
@@ -147,8 +149,8 @@ export function createTransaction<M extends keyof ActionRegistry>(
   }
 }
 
-export function processTransaction(
-  unconfirmedTx: Transaction
+export function processTransaction<M extends TransactionAction>(
+  unconfirmedTx: Transaction<M>
 ): ThunkAction<Promise<void>, { asyncTransactions: TransactionState }, undefined, Action> {
   return async (dispatch, getState) => {
     // Dequeue
@@ -159,12 +161,15 @@ export function processTransaction(
     // Start transaction
     const tinlake = initTinlake(unconfirmedTx.tinlakeConfig)
 
-    const outcomeTx: Transaction = {
+    const outcomeTx: Transaction<M> = {
       ...unconfirmedTx,
       showIfClosed: true,
     }
+
     try {
-      const response = await actionRegistry[unconfirmedTx.methodName](tinlake, ...unconfirmedTx.args)
+      const actionCall = actions[unconfirmedTx.actionName]
+      const response = await (actionCall as any)(tinlake, ...unconfirmedTx.args as any[])
+      // const response = await actions[unconfirmedTx.actionName](tinlake, unconfirmedTx.args)
 
       // TODO: link to tinlake.js for checking whether transaction has been confirmed yet
       // const pendingTx: Transaction = {
@@ -180,18 +185,19 @@ export function processTransaction(
       console.error('error response', error)
       outcomeTx.status = 'failed'
     }
-    
+
     await dispatch({ id, transaction: outcomeTx, type: SET_ACTIVE_TRANSACTION })
 
     // Hide after 5s
     setTimeout(async () => {
-      const hiddenTx: Transaction = {
+      const hiddenTx: Transaction<M> = {
         ...outcomeTx,
         showIfClosed: false,
       }
       await dispatch({ id, transaction: hiddenTx, type: SET_ACTIVE_TRANSACTION })
     }, 5000)
 
+    // Process next transaction in queue
     if (Object.keys(getState().asyncTransactions.queue).length > 0) {
       const nextTransactionId = Object.keys(getState().asyncTransactions.queue)[0]
       const nextTransaction = getState().asyncTransactions.queue[nextTransactionId]

@@ -6,14 +6,14 @@ export type TrancheType = 'junior' | 'senior'
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 const SUCCESS_STATUS = '0x1'
 
-export type TinlakeAction = (tinlake: ITinlake, ...args: any[]) => Promise<any>
-
 export interface TinlakeResult {
   data?: any
   errorMsg?: string
   tokenId?: string
   loanId?: string
 }
+
+export type TinlakeAction = (tinlake: ITinlake, ...args: any[]) => Promise<TinlakeResult>
 
 export async function getNFT(registry: string, tinlake: any, tokenId: string) {
   let nftOwner: string
@@ -71,7 +71,15 @@ async function getOrCreateProxy(tinlake: any, address: string) {
   return proxyAddress
 }
 
-export const mintNFT: TinlakeAction = async (tinlake: ITinlake, nftAddr: string, owner: string, tokenId: string, ref: string, amount: string, asset: string) => {
+export const mintNFT: TinlakeAction = async (
+  tinlake: ITinlake,
+  nftAddr: string,
+  owner: string,
+  tokenId: string,
+  ref: string,
+  amount: string,
+  asset: string
+) => {
   return tinlake.mintNFT(nftAddr, owner, tokenId, ref, amount, asset)
 }
 
