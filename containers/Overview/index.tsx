@@ -15,6 +15,7 @@ import { PoolLink } from '../../components/PoolLink'
 import { toPrecision } from '../../utils/toPrecision'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import InvestAction from '../../components/InvestAction'
+import { withRouter, NextRouter } from 'next/router'
 
 interface Props {
   tinlake: any
@@ -24,10 +25,21 @@ interface Props {
   auth?: AuthState
   loadPool?: (tinlake: Tinlake) => Promise<void>
   selectedPool: Pool
+  router: NextRouter
 }
 
 class Overview extends React.Component<Props> {
   componentWillMount() {
+    this.loadData()
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    if (this.props.router.query.root !== prevProps.router.query.root) {
+      this.loadData()
+    }
+  }
+
+  loadData() {
     const { loadLoans, loadPool, tinlake } = this.props
     loadLoans && loadLoans(tinlake)
     loadPool && loadPool(tinlake)
@@ -37,7 +49,7 @@ class Overview extends React.Component<Props> {
     const { tinlake, loans, auth, selectedPool, pool } = this.props
     const userAddress = auth?.address || tinlake.ethConfig.from
 
-    const { name, description, investHtml } = selectedPool
+    const { name, description } = selectedPool
     const allLoans = (loans && loans.loans) || []
     const poolData = pool && pool.data
 
@@ -122,7 +134,7 @@ class Overview extends React.Component<Props> {
                   </TableRow>
                 </TableBody>
               </Table>
-              <InvestAction investHtml={investHtml} />
+              <InvestAction poolName={name} />
             </Box>
           </Box>
           <Box basis={'1/2'} margin={{ left: 'large' }}>
@@ -154,4 +166,4 @@ class Overview extends React.Component<Props> {
   }
 }
 
-export default connect((state) => state, { loadLoans, loadPool })(Overview)
+export default connect((state) => state, { loadLoans, loadPool })(withRouter(Overview))

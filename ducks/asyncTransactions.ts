@@ -3,6 +3,7 @@ import { ThunkAction } from 'redux-thunk'
 import { HYDRATE } from 'next-redux-wrapper'
 import { ITinlake } from 'tinlake'
 import { initTinlake } from '../services/tinlake'
+import * as actions from '../services/tinlake/actions'
 
 // TODO: should be imported from @centrifuge/axis-web3-wallet
 export interface WalletTransaction {
@@ -11,6 +12,12 @@ export interface WalletTransaction {
   txHahs: string
   externalLink?: string
   showIfClosed?: boolean
+}
+
+// Action registry
+type ActionRegistry = { [key: string]: actions.TinlakeAction }
+const actionRegistry: ActionRegistry = {
+  'mintNFT': actions.mintNFT,
 }
 
 // Actions
@@ -34,8 +41,8 @@ interface TinlakeConfig {
 export interface Transaction {
   id: string
   description: string
-  methodName: keyof ITinlake
-  args: any[] // TODO: should be something like Parameters<ITinlake[methodName]>
+  methodName: keyof ActionRegistry
+  args: any[] // TODO: should be something like Parameters<ActionRegistry[methodName]>
   status: TransactionStatus
   tinlakeConfig: TinlakeConfig
   showIfClosed: boolean
@@ -60,6 +67,7 @@ export default function reducer(
 ): TransactionState {
   switch (action.type) {
     case HYDRATE:
+      // TODO: change pending transactions to failed transactions
       return { ...state, ...action.payload.transactionQueue }
     case START_PROCESSING:
       return {
@@ -105,11 +113,11 @@ export default function reducer(
 
 const SUCCESS_STATUS = '0x1'
 
-export function createTransaction<M extends keyof ITinlake>(
+export function createTransaction<M extends keyof ActionRegistry>(
   description: string,
   tinlake: ITinlake,
   methodName: M,
-  args: Parameters<ITinlake[M]>
+  args: Parameters<ActionRegistry[M]>
 ): ThunkAction<Promise<string>, { asyncTransactions: TransactionState }, undefined, Action> {
   return async (dispatch, getState) => {
     const id: TransactionId = (new Date().getTime() + Math.floor(Math.random() * 1000000)).toString()
@@ -150,24 +158,29 @@ export function processTransaction(
 
     // Start transaction
     const tinlake = initTinlake(unconfirmedTx.tinlakeConfig)
-    const response = await tinlake[unconfirmedTx.methodName](...unconfirmedTx.args)
-
-    // TODO: link to tinlake.js for checking whether transaction has been confirmed yet
-    // const pendingTx: Transaction = {
-    //   ...unconfirmedTx,
-    //   status: 'pending',
-    //   showIfClosed: true
-    // }
-    // await dispatch({ id, transaction: pendingTx, type: SET_ACTIVE_TRANSACTION })
-
-    // Check response
-    const outcome = (response as any).status === SUCCESS_STATUS
 
     const outcomeTx: Transaction = {
       ...unconfirmedTx,
-      status: outcome ? 'succeeded' : 'failed',
       showIfClosed: true,
     }
+    try {
+      const response = await actionRegistry[unconfirmedTx.methodName](tinlake, ...unconfirmedTx.args)
+
+      // TODO: link to tinlake.js for checking whether transaction has been confirmed yet
+      // const pendingTx: Transaction = {
+      //   ...unconfirmedTx,
+      //   status: 'pending',
+      //   showIfClosed: true
+      // }
+      // await dispatch({ id, transaction: pendingTx, type: SET_ACTIVE_TRANSACTION })
+
+      const outcome = (response as any).status === SUCCESS_STATUS
+      outcomeTx.status = outcome ? 'succeeded' : 'failed'
+    } catch (error) {
+      console.error('error response', error)
+      outcomeTx.status = 'failed'
+    }
+    
     await dispatch({ id, transaction: outcomeTx, type: SET_ACTIVE_TRANSACTION })
 
     // Hide after 5s
@@ -178,8 +191,6 @@ export function processTransaction(
       }
       await dispatch({ id, transaction: hiddenTx, type: SET_ACTIVE_TRANSACTION })
     }, 5000)
-
-    // Start the next transaction in the queue
 
     if (Object.keys(getState().asyncTransactions.queue).length > 0) {
       const nextTransactionId = Object.keys(getState().asyncTransactions.queue)[0]

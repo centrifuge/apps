@@ -64,7 +64,6 @@ class MintNFT extends React.Component<Props, State> {
       try {
         await ensureAuthed!()
         const base = displayToBase(baseToDisplay(amount, 2), 2)
-
         createTransaction(`Mint NFT ${referenceId}`, tinlake, 'mintNFT', [
           registry,
           tinlake.ethConfig.from,
