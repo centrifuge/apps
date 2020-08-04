@@ -1,7 +1,6 @@
 import { AnyAction, Action } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { HYDRATE } from 'next-redux-wrapper'
-import { ITinlake } from 'tinlake'
 import { initTinlake } from '../services/tinlake'
 import * as actions from '../services/tinlake/actions'
 
@@ -14,11 +13,7 @@ export interface WalletTransaction {
   showIfClosed?: boolean
 }
 
-type TransactionAction = { [P in keyof typeof actions]: typeof actions[P] extends actions.TinlakeAction? P : never}[keyof typeof actions];
-
-type RemoveFirstFromTuple<T extends any[]> = 
-  T['length'] extends 0 ? undefined :
-  (((...b: T) => void) extends (a: any, ...b: infer I) => void ? I : [])
+export type TransactionAction = { [P in keyof typeof actions]: typeof actions[P] extends actions.TinlakeAction? P : never}[keyof typeof actions];
 
 // Actions
 const START_PROCESSING = 'tinlake-ui/transactions/START_PROCESSING'
@@ -38,11 +33,11 @@ interface TinlakeConfig {
   }
 }
 
-export interface Transaction<Params extends any[]> {
+export interface Transaction {
   id: string
   description: string
-  action: (...args: Params) => any
-  args: Params
+  actionName: TransactionAction
+  actionArgs: any[]
   status: TransactionStatus
   tinlakeConfig: TinlakeConfig
   showIfClosed: boolean
@@ -50,8 +45,8 @@ export interface Transaction<Params extends any[]> {
 
 export interface TransactionState {
   processing: boolean
-  active: { [key: string]: Transaction<any> }
-  queue: { [key: string]: Transaction<any> }
+  active: { [key: string]: Transaction }
+  queue: { [key: string]: Transaction }
 }
 
 const initialState: TransactionState = {
@@ -111,29 +106,29 @@ export default function reducer(
   }
 }
 
+// Action creators
 const SUCCESS_STATUS = '0x1'
 
-export function createTransaction<Params extends any[]>(
+export function createTransaction<A extends TransactionAction>(
   description: string,
-  tinlake: ITinlake,
-  action: (...args: Params) => any,
-  args: Params
+  actionName: A,
+  args: Parameters<typeof actions[A]>
 ): ThunkAction<Promise<string>, { asyncTransactions: TransactionState }, undefined, Action> {
   return async (dispatch, getState) => {
-    const actionName = action.name as keyof typeof actions
-    console.log(actionName)
     const id: TransactionId = (new Date().getTime() + Math.floor(Math.random() * 1000000)).toString()
 
     const tinlakeConfig = {
-      addresses: tinlake.contractAddresses,
-      contractConfig: tinlake.contractConfig,
+      addresses: args[0].contractAddresses,
+      contractConfig: args[0].contractConfig,
     }
 
-    const unconfirmedTx: Transaction<Params> = {
+    const actionArgs = args.slice(1)
+
+    const unconfirmedTx: Transaction = {
       id,
       description,
       actionName,
-      args,
+      actionArgs,
       tinlakeConfig,
       status: 'pending',
       showIfClosed: true,
@@ -149,8 +144,8 @@ export function createTransaction<Params extends any[]>(
   }
 }
 
-export function processTransaction<M extends TransactionAction>(
-  unconfirmedTx: Transaction<M>
+export function processTransaction(
+  unconfirmedTx: Transaction
 ): ThunkAction<Promise<void>, { asyncTransactions: TransactionState }, undefined, Action> {
   return async (dispatch, getState) => {
     // Dequeue
@@ -161,14 +156,14 @@ export function processTransaction<M extends TransactionAction>(
     // Start transaction
     const tinlake = initTinlake(unconfirmedTx.tinlakeConfig)
 
-    const outcomeTx: Transaction<M> = {
+    const outcomeTx: Transaction = {
       ...unconfirmedTx,
       showIfClosed: true,
     }
 
     try {
-      const actionCall = actions[unconfirmedTx.actionName]
-      const response = await (actionCall as any)(tinlake, ...unconfirmedTx.args as any[])
+      const actionCall = actions[unconfirmedTx.actionName as keyof typeof actions]
+      const response = await (actionCall as any)(tinlake, ...unconfirmedTx.actionArgs)
       // const response = await actions[unconfirmedTx.actionName](tinlake, unconfirmedTx.args)
 
       // TODO: link to tinlake.js for checking whether transaction has been confirmed yet
@@ -190,7 +185,7 @@ export function processTransaction<M extends TransactionAction>(
 
     // Hide after 5s
     setTimeout(async () => {
-      const hiddenTx: Transaction<M> = {
+      const hiddenTx: Transaction = {
         ...outcomeTx,
         showIfClosed: false,
       }

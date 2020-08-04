@@ -13,7 +13,17 @@ export interface TinlakeResult {
   loanId?: string
 }
 
-export type TinlakeAction = (tinlake: ITinlake, ...args: any[]) => Promise<TinlakeResult>
+// TinlakeAction args need to be serializable, as they are stored in Redux state for the async transactions duck
+// Based on: https://github.com/microsoft/TypeScript/issues/1897#issuecomment-657294463
+type SerializableScalar = string & number & boolean
+type SerializableObject = { [key: string]: SerializableScalar & SerializableObject & SerializableArray }
+type SerializableArray = (SerializableScalar & SerializableObject & SerializableArray)[]
+type Serializable = SerializableScalar & SerializableObject & SerializableArray
+
+export type TinlakeAction = (
+  tinlake: ITinlake,
+  ...args: Serializable[]
+) => Promise<TinlakeResult>
 
 export async function getNFT(registry: string, tinlake: any, tokenId: string) {
   let nftOwner: string
@@ -71,7 +81,7 @@ async function getOrCreateProxy(tinlake: any, address: string) {
   return proxyAddress
 }
 
-export const mintNFT: TinlakeAction = async (
+export const mintNFT = async (
   tinlake: ITinlake,
   nftAddr: string,
   owner: string,
@@ -83,7 +93,7 @@ export const mintNFT: TinlakeAction = async (
   return tinlake.mintNFT(nftAddr, owner, tokenId, ref, amount, asset)
 }
 
-export const issue: TinlakeAction = async (tinlake: ITinlake, tokenId: string, nftRegistryAddress: string) => {
+export const issue = async (tinlake: ITinlake, tokenId: string, nftRegistryAddress: string) => {
   let tokenOwner
   const user = (tinlake.ethConfig as any).from!
 

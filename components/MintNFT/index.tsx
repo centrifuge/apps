@@ -9,15 +9,19 @@ import NumberInput from '../NumberInput'
 import { PoolLink } from '../PoolLink'
 import { connect } from 'react-redux'
 import { ensureAuthed } from '../../ducks/auth'
-import { createTransaction } from '../../ducks/asyncTransactions'
-import { mintNFT } from '../../services/tinlake/actions'
+import { createTransaction, TransactionAction } from '../../ducks/asyncTransactions'
+import * as actions from '../../services/tinlake/actions'
 
 const NFT_REGISTRY = '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24'
 
 interface Props {
   tinlake: any
   ensureAuthed?: () => Promise<void>
-  createTransaction: typeof createTransaction
+  createTransaction: <A extends TransactionAction>(
+    description: string,
+    actionName: A,
+    args: Parameters<typeof actions[A]>
+  ) => Promise<string>
 }
 
 interface State {
@@ -60,14 +64,14 @@ class MintNFT extends React.Component<Props, State> {
       try {
         await ensureAuthed!()
         const base = displayToBase(baseToDisplay(amount, 2), 2)
-        createTransaction(`Mint NFT ${referenceId}`, tinlake, mintNFT, [
+        createTransaction(`Mint NFT ${referenceId}`, 'mintNFT', [
+          tinlake,
           registry,
           tinlake.ethConfig.from,
           tokenId,
           referenceId,
           base,
           assetType,
-          3,
         ])
       } catch (e) {
         console.error(e)

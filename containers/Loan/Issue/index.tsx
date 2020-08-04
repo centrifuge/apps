@@ -3,21 +3,24 @@ import { Box, FormField, TextInput, Button, Text } from 'grommet'
 import Alert from '../../../components/Alert'
 import NftData from '../../../components/NftData'
 import { connect } from 'react-redux'
-import { getNFT, issue, TinlakeResult } from '../../../services/tinlake/actions'
 import { Spinner } from '@centrifuge/axis-spinner'
 import LoanView from '../View'
-import { AuthState, loadProxies, ensureAuthed } from '../../../ducks/auth'
+import { AuthState, ensureAuthed } from '../../../ducks/auth'
 import { NFT } from 'tinlake'
-import { createTransaction } from '../../../ducks/asyncTransactions'
+import { createTransaction, TransactionAction } from '../../../ducks/asyncTransactions'
+import * as actions from '../../../services/tinlake/actions'
 
 interface Props {
   tinlake: any
   tokenId: string
   registry: string
   auth: AuthState
-  loadProxies?: () => Promise<void>
   ensureAuthed?: () => Promise<void>
-  createTransaction: typeof createTransaction
+  createTransaction: <A extends TransactionAction>(
+    description: string,
+    actionName: A,
+    args: Parameters<typeof actions[A]>
+  ) => Promise<string>
 }
 
 interface State {
@@ -67,7 +70,7 @@ class IssueLoan extends React.Component<Props, State> {
     const { registry } = this.state
     const currentTokenId = this.state.tokenId
     if (currentTokenId && currentTokenId.length > 0) {
-      const result = await getNFT(registry, tinlake, currentTokenId)
+      const result = await actions.getNFT(registry, tinlake, currentTokenId)
       const { tokenId, nft, errorMessage } = result as Partial<{ tokenId: string; nft: NFT; errorMessage: string }>
       if (tokenId !== currentTokenId) {
         return
@@ -81,7 +84,7 @@ class IssueLoan extends React.Component<Props, State> {
   }
 
   issueLoan = async () => {
-    const { tinlake, loadProxies, ensureAuthed, createTransaction } = this.props
+    const { tinlake, ensureAuthed, createTransaction } = this.props
     const { tokenId } = this.state
     this.setState({ is: 'loading' })
 
@@ -91,7 +94,7 @@ class IssueLoan extends React.Component<Props, State> {
       const { registry } = this.state
       // const result: TinlakeResult = await issue(tinlake, tokenId, registry)
 
-      createTransaction(`Finance asset`, tinlake, 'issue', [tokenId, registry, 5, 6])
+      createTransaction(`Finance asset`, 'issue', [tinlake, tokenId, registry])
 
       // if (result.errorMsg) {
       //   this.setState({ is: 'error', errorMsg: result.errorMsg })
@@ -199,4 +202,4 @@ class IssueLoan extends React.Component<Props, State> {
   }
 }
 
-export default connect((state) => state, { loadProxies, ensureAuthed, createTransaction })(IssueLoan)
+export default connect((state) => state, { ensureAuthed, createTransaction })(IssueLoan)
