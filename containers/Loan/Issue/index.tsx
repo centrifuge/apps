@@ -8,7 +8,7 @@ import LoanView from '../View'
 import { AuthState, loadProxies, ensureAuthed } from '../../../ducks/auth'
 import { NFT } from 'tinlake'
 import { createTransaction, TxProps, TransactionState, getTransaction } from '../../../ducks/asyncTransactions'
-import * as actions from '../../../services/tinlake/actions'
+import { getNFT } from '../../../services/tinlake/actions'
 
 interface Props extends TxProps {
   tinlake: any
@@ -65,7 +65,7 @@ class IssueLoan extends React.Component<Props, State> {
     const { registry } = this.state
     const currentTokenId = this.state.tokenId
     if (currentTokenId && currentTokenId.length > 0) {
-      const result = await actions.getNFT(registry, tinlake, currentTokenId)
+      const result = await getNFT(registry, tinlake, currentTokenId)
       const { tokenId, nft, errorMessage } = result as Partial<{ tokenId: string; nft: NFT; errorMessage: string }>
       if (tokenId !== currentTokenId) {
         return
