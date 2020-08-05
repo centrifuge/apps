@@ -7,20 +7,16 @@ import { Spinner } from '@centrifuge/axis-spinner'
 import LoanView from '../View'
 import { AuthState, ensureAuthed } from '../../../ducks/auth'
 import { NFT } from 'tinlake'
-import { createTransaction, TransactionAction } from '../../../ducks/asyncTransactions'
+import { createTransaction, TxProps, TransactionState, getTransaction } from '../../../ducks/asyncTransactions'
 import * as actions from '../../../services/tinlake/actions'
 
-interface Props {
+interface Props extends TxProps {
   tinlake: any
   tokenId: string
   registry: string
   auth: AuthState
   ensureAuthed?: () => Promise<void>
-  createTransaction: <A extends TransactionAction>(
-    description: string,
-    actionName: A,
-    args: Parameters<typeof actions[A]>
-  ) => Promise<string>
+  asyncTransactions?: TransactionState
 }
 
 interface State {
@@ -29,8 +25,7 @@ interface State {
   nftError: string
   tokenId: string
   loanId: string
-  errorMsg: string
-  is: string | null
+  txId: string | undefined
 }
 
 class IssueLoan extends React.Component<Props, State> {
@@ -40,8 +35,7 @@ class IssueLoan extends React.Component<Props, State> {
     nftError: '',
     tokenId: '',
     loanId: '',
-    errorMsg: '',
-    is: null,
+    txId: undefined,
   }
 
   // handlers
@@ -86,27 +80,30 @@ class IssueLoan extends React.Component<Props, State> {
   issueLoan = async () => {
     const { tinlake, ensureAuthed, createTransaction } = this.props
     const { tokenId } = this.state
-    this.setState({ is: 'loading' })
 
-    try {
-      await ensureAuthed!()
-      // finance asset
-      const { registry } = this.state
-      // const result: TinlakeResult = await issue(tinlake, tokenId, registry)
+    await ensureAuthed!()
+    // finance asset
+    const { registry } = this.state
 
-      createTransaction(`Finance asset`, 'issue', [tinlake, tokenId, registry])
+    const txId = await createTransaction(`Finance asset`, 'issue', [tinlake, tokenId, registry])
+    this.setState({ txId })
 
-      // if (result.errorMsg) {
-      //   this.setState({ is: 'error', errorMsg: result.errorMsg })
-      //   return
-      // }
-      // const loanId = result.data
-      // this.setState({ loanId })
-      // this.setState({ is: 'success' })
-      // loadProxies && loadProxies()
-    } catch (e) {
-      this.setState({ is: 'error', errorMsg: e.message })
-    }
+    // if (result.errorMsg) {
+    //   this.setState({ is: 'error', errorMsg: result.errorMsg })
+    //   return
+    // }
+    // const loanId = result.data
+    // this.setState({ loanId })
+    // this.setState({ is: 'success' })
+    // loadProxies && loadProxies()
+  }
+
+  is() {
+    return getTransaction(this.props.asyncTransactions, this.state.txId)?.status
+  }
+
+  errorMsg() {
+    return getTransaction(this.props.asyncTransactions, this.state.txId)?.result.errorMsg
   }
 
   componentWillMount() {
@@ -118,11 +115,12 @@ class IssueLoan extends React.Component<Props, State> {
     this.getNFT()
   }
   render() {
-    const { tokenId, registry, is, nft, errorMsg, nftError, loanId } = this.state
+    const is = this.is()
+    const { tokenId, registry, nft, nftError, loanId } = this.state
     const { tinlake } = this.props
     return (
       <Box>
-        {is === 'loading' ? (
+        {is === 'unconfirmed' || is === 'pending' ? (
           <Spinner
             height={'calc(100vh - 89px - 84px)'}
             message={
@@ -132,49 +130,40 @@ class IssueLoan extends React.Component<Props, State> {
         ) : (
           <Box>
             <Box>
-              {is === 'error' && (
+              {is === 'failed' && (
                 <Alert type="error">
                   <Text weight="bold">Error financing asset for Token ID {tokenId}, see console for details</Text>
-                  {errorMsg && (
+                  {this.errorMsg() && (
                     <div>
                       <br />
-                      {errorMsg}
+                      {this.errorMsg()}
                     </div>
                   )}
                 </Alert>
               )}
-              {is !== 'success' && (
+              {is !== 'succeeded' && (
                 <Box direction="row" gap="medium" margin={{ top: 'medium' }}>
                   <b>Please paste your Token ID and corresponding registry address below to finance an asset:</b>
                 </Box>
               )}
             </Box>
 
-            {is !== 'success' && (
+            {is !== 'succeeded' && (
               <Box>
                 <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
                   <Box basis={'1/3'} gap="medium">
                     <FormField label="Collateral Token Registry Address">
-                      <TextInput
-                        value={registry || ''}
-                        onChange={this.onRegistryAddressValueChange}
-                        disabled={is === 'success'}
-                      />
+                      <TextInput value={registry || ''} onChange={this.onRegistryAddressValueChange} disabled={false} />
                     </FormField>
                   </Box>
 
                   <Box basis={'1/3'} gap="medium">
                     <FormField label="Token ID">
-                      <TextInput value={tokenId} onChange={this.onTokenIdValueChange} disabled={is === 'success'} />
+                      <TextInput value={tokenId} onChange={this.onTokenIdValueChange} disabled={false} />
                     </FormField>
                   </Box>
                   <Box basis={'1/3'} gap="medium" align="end">
-                    <Button
-                      onClick={this.issueLoan}
-                      primary
-                      label="Finance Asset"
-                      disabled={is === 'loading' || is === 'success' || !nft}
-                    />
+                    <Button onClick={this.issueLoan} primary label="Finance Asset" disabled={!nft} />
                   </Box>
                 </Box>
               </Box>

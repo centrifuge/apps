@@ -9,27 +9,22 @@ import NumberInput from '../NumberInput'
 import { PoolLink } from '../PoolLink'
 import { connect } from 'react-redux'
 import { ensureAuthed } from '../../ducks/auth'
-import { createTransaction, TransactionAction } from '../../ducks/asyncTransactions'
-import * as actions from '../../services/tinlake/actions'
+import { TransactionState, createTransaction, getTransaction, TxProps } from '../../ducks/asyncTransactions'
 
 const NFT_REGISTRY = '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24'
 
-interface Props {
+interface Props extends TxProps {
   tinlake: any
   ensureAuthed?: () => Promise<void>
-  createTransaction: <A extends TransactionAction>(
-    description: string,
-    actionName: A,
-    args: Parameters<typeof actions[A]>
-  ) => Promise<string>
+  asyncTransactions?: TransactionState
 }
 
 interface State {
   tokenId: string
+  txId: string | undefined
   amount: string
   assetType: string
   referenceId: string
-  is: 'loading' | 'success' | 'error' | null
   errorMsg: string
 }
 
@@ -38,10 +33,10 @@ interface State {
 class MintNFT extends React.Component<Props, State> {
   state: State = {
     tokenId: this.generateTokenId(),
+    txId: undefined,
     referenceId: '',
     amount: '1000.00',
     assetType: 'Invoice',
-    is: null,
     errorMsg: '',
   }
 
@@ -53,35 +48,36 @@ class MintNFT extends React.Component<Props, State> {
     return id
   }
 
+  is() {
+    return getTransaction(this.props.asyncTransactions, this.state.txId)?.status
+  }
+
   mint = async () => {
     const { tinlake, ensureAuthed, createTransaction } = this.props
     const { referenceId, assetType, amount, tokenId } = this.state
 
     const registry = NFT_REGISTRY
     {
-      // this.setState({ is: 'loading' })
+      await ensureAuthed!()
+      const base = displayToBase(baseToDisplay(amount, 2), 2)
 
-      try {
-        await ensureAuthed!()
-        const base = displayToBase(baseToDisplay(amount, 2), 2)
-        createTransaction(`Mint NFT ${referenceId}`, 'mintNFT', [
-          tinlake,
-          registry,
-          tinlake.ethConfig.from,
-          tokenId,
-          referenceId,
-          base,
-          assetType,
-        ])
-      } catch (e) {
-        console.error(e)
-        this.setState({ is: 'error', errorMsg: e.message })
-      }
+      const txId = await createTransaction(`Mint NFT ${referenceId}`, 'mintNFT', [
+        tinlake,
+        registry,
+        tinlake.ethConfig.from,
+        tokenId,
+        referenceId,
+        base,
+        assetType,
+      ])
+
+      this.setState({ txId })
     }
   }
 
   render() {
-    const { is, tokenId, errorMsg, referenceId, assetType, amount } = this.state
+    const is = this.is()
+    const { tokenId, errorMsg, referenceId, assetType, amount } = this.state
     const registry = NFT_REGISTRY
     return (
       <Box>
@@ -92,11 +88,11 @@ class MintNFT extends React.Component<Props, State> {
           </Box>
         </SecondaryHeader>
 
-        {is === 'loading' ? (
+        {is === 'unconfirmed' || is === 'pending' ? (
           <Spinner height={'calc(100vh - 89px - 84px)'} message={'Minting...'} />
         ) : (
           <Box>
-            {is === 'success' && (
+            {is === 'succeeded' && (
               <Alert pad={{ horizontal: 'medium' }} type="success">
                 Successfully minted NFT for Token ID {tokenId}
                 <p>
@@ -111,7 +107,7 @@ class MintNFT extends React.Component<Props, State> {
                 </p>
               </Alert>
             )}
-            {is === 'error' && (
+            {is === 'failed' && (
               <Alert pad={{ horizontal: 'medium' }} type="error">
                 <Text weight="bold">Error minting NFT for Token ID {tokenId}, see console for details</Text>
                 {errorMsg && (
@@ -123,7 +119,7 @@ class MintNFT extends React.Component<Props, State> {
               </Alert>
             )}
 
-            {is === null && (
+            {is === undefined && (
               <Alert pad={{ horizontal: 'medium' }} type="info">
                 <p>
                   Tinlake requires you to have a non-fungible token ("NFT") to deposit as collateral. An NFT is an
@@ -158,7 +154,7 @@ class MintNFT extends React.Component<Props, State> {
             </Box>
 
             <Box direction="row" gap="large" justify="evenly">
-              {is === 'success' && (
+              {is === 'succeeded' && (
                 <FormField label="Token ID">
                   <TextInput value={this.state.tokenId} disabled={true} />
                 </FormField>
@@ -167,7 +163,7 @@ class MintNFT extends React.Component<Props, State> {
                 <TextInput
                   value={referenceId}
                   onChange={(e) => this.setState({ referenceId: e.currentTarget.value })}
-                  disabled={is === 'success'}
+                  disabled={is === 'succeeded'}
                 />
               </FormField>
               <FormField label="Asset Type">
@@ -176,7 +172,7 @@ class MintNFT extends React.Component<Props, State> {
               <FormField label="Invoice Amount">
                 <NumberInput suffix=" USD" value={amount} disabled />
               </FormField>
-              <Button primary onClick={this.mint} label="Mint NFT" disabled={is === 'success'} />
+              <Button primary onClick={this.mint} label="Mint NFT" disabled={is === 'succeeded'} />
             </Box>
           </Box>
         )}

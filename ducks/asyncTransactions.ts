@@ -13,7 +13,18 @@ export interface WalletTransaction {
   showIfClosed?: boolean
 }
 
-export type TransactionAction = { [P in keyof typeof actions]: typeof actions[P] extends actions.TinlakeAction? P : never}[keyof typeof actions];
+export type TransactionAction = {
+  [P in keyof typeof actions]: typeof actions[P] extends actions.TinlakeAction ? P : never
+}[keyof typeof actions]
+
+// Can be extended by components which create and subscribe to transactions
+export interface TxProps {
+  createTransaction: <A extends TransactionAction>(
+    description: string,
+    actionName: A,
+    args: Parameters<typeof actions[A]>
+  ) => Promise<string>
+}
 
 // Actions
 const START_PROCESSING = 'tinlake-ui/transactions/START_PROCESSING'
@@ -39,6 +50,7 @@ export interface Transaction {
   actionName: TransactionAction
   actionArgs: any[]
   status: TransactionStatus
+  result?: any
   tinlakeConfig: TinlakeConfig
   showIfClosed: boolean
 }
@@ -152,6 +164,18 @@ export function processTransaction(
     const id = unconfirmedTx.id
     dispatch({ id, transaction: unconfirmedTx, type: DEQUEUE_TRANSACTION })
     dispatch({ id, transaction: unconfirmedTx, type: SET_ACTIVE_TRANSACTION })
+    let hasCompleted = false
+
+    // Hide pending tx after 10s
+    setTimeout(async () => {
+      if (!hasCompleted) {
+        const hiddenPendingTx: Transaction = {
+          ...unconfirmedTx,
+          showIfClosed: false,
+        }
+        await dispatch({ id, transaction: hiddenPendingTx, type: SET_ACTIVE_TRANSACTION })
+      }
+    }, 10000)
 
     // Start transaction
     const tinlake = initTinlake(unconfirmedTx.tinlakeConfig)
@@ -164,26 +188,20 @@ export function processTransaction(
     try {
       const actionCall = actions[unconfirmedTx.actionName as keyof typeof actions]
       const response = await (actionCall as any)(tinlake, ...unconfirmedTx.actionArgs)
-      // const response = await actions[unconfirmedTx.actionName](tinlake, unconfirmedTx.args)
-
-      // TODO: link to tinlake.js for checking whether transaction has been confirmed yet
-      // const pendingTx: Transaction = {
-      //   ...unconfirmedTx,
-      //   status: 'pending',
-      //   showIfClosed: true
-      // }
-      // await dispatch({ id, transaction: pendingTx, type: SET_ACTIVE_TRANSACTION })
+      hasCompleted = true
+      console.log('response', response)
 
       const outcome = (response as any).status === SUCCESS_STATUS
       outcomeTx.status = outcome ? 'succeeded' : 'failed'
+      outcomeTx.result = response
     } catch (error) {
-      console.error('error response', error)
+      console.error(`Failed to process action ${unconfirmedTx.actionName}(${unconfirmedTx.actionArgs.join(',')})`, error)
       outcomeTx.status = 'failed'
     }
 
     await dispatch({ id, transaction: outcomeTx, type: SET_ACTIVE_TRANSACTION })
 
-    // Hide after 5s
+    // Hide succeeded/failed tx after 5s
     setTimeout(async () => {
       const hiddenTx: Transaction = {
         ...outcomeTx,
@@ -218,4 +236,9 @@ export function selectWalletTransactions(state?: TransactionState): WalletTransa
   })
 
   return transactions
+}
+
+export function getTransaction(state?: TransactionState, txId?: TransactionId): Transaction | undefined {
+  if (!state || !txId || !(txId in state.active)) return undefined
+  return state.active[txId]
 }

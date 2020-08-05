@@ -20,10 +20,7 @@ type SerializableObject = { [key: string]: SerializableScalar & SerializableObje
 type SerializableArray = (SerializableScalar & SerializableObject & SerializableArray)[]
 type Serializable = SerializableScalar & SerializableObject & SerializableArray
 
-export type TinlakeAction = (
-  tinlake: ITinlake,
-  ...args: Serializable[]
-) => Promise<TinlakeResult>
+export type TinlakeAction = (tinlake: ITinlake, ...args: Serializable[]) => Promise<TinlakeResult>
 
 export async function getNFT(registry: string, tinlake: any, tokenId: string) {
   let nftOwner: string
