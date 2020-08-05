@@ -5,7 +5,7 @@ import NftData from '../../../components/NftData'
 import { connect } from 'react-redux'
 import { Spinner } from '@centrifuge/axis-spinner'
 import LoanView from '../View'
-import { AuthState, ensureAuthed } from '../../../ducks/auth'
+import { AuthState, loadProxies, ensureAuthed } from '../../../ducks/auth'
 import { NFT } from 'tinlake'
 import { createTransaction, TxProps, TransactionState, getTransaction } from '../../../ducks/asyncTransactions'
 import * as actions from '../../../services/tinlake/actions'
@@ -15,6 +15,7 @@ interface Props extends TxProps {
   tokenId: string
   registry: string
   auth: AuthState
+  loadProxies?: () => Promise<void>
   ensureAuthed?: () => Promise<void>
   asyncTransactions?: TransactionState
 }
@@ -79,23 +80,11 @@ class IssueLoan extends React.Component<Props, State> {
 
   issueLoan = async () => {
     const { tinlake, ensureAuthed, createTransaction } = this.props
-    const { tokenId } = this.state
-
+    const { tokenId, registry } = this.state
     await ensureAuthed!()
-    // finance asset
-    const { registry } = this.state
 
     const txId = await createTransaction(`Finance asset`, 'issue', [tinlake, tokenId, registry])
     this.setState({ txId })
-
-    // if (result.errorMsg) {
-    //   this.setState({ is: 'error', errorMsg: result.errorMsg })
-    //   return
-    // }
-    // const loanId = result.data
-    // this.setState({ loanId })
-    // this.setState({ is: 'success' })
-    // loadProxies && loadProxies()
   }
 
   is() {
@@ -114,6 +103,21 @@ class IssueLoan extends React.Component<Props, State> {
   componentDidMount() {
     this.getNFT()
   }
+
+  componentDidUpdate(prevProps: Props) {
+    if (
+      this.state.txId &&
+      prevProps.asyncTransactions?.active[this.state.txId] !== this.props.asyncTransactions?.active[this.state.txId]
+    ) {
+      const tx = getTransaction(this.props.asyncTransactions, this.state.txId)
+      if (tx?.status === 'succeeded') {
+        const loanId = tx.result.data
+        this.setState({ loanId })
+        this.props.loadProxies && this.props.loadProxies()
+      }
+    }
+  }
+
   render() {
     const is = this.is()
     const { tokenId, registry, nft, nftError, loanId } = this.state
@@ -191,4 +195,4 @@ class IssueLoan extends React.Component<Props, State> {
   }
 }
 
-export default connect((state) => state, { ensureAuthed, createTransaction })(IssueLoan)
+export default connect((state) => state, { loadProxies, ensureAuthed, createTransaction })(IssueLoan)

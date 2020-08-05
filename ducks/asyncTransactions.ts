@@ -189,13 +189,15 @@ export function processTransaction(
       const actionCall = actions[unconfirmedTx.actionName as keyof typeof actions]
       const response = await (actionCall as any)(tinlake, ...unconfirmedTx.actionArgs)
       hasCompleted = true
-      console.log('response', response)
 
       const outcome = (response as any).status === SUCCESS_STATUS
       outcomeTx.status = outcome ? 'succeeded' : 'failed'
       outcomeTx.result = response
     } catch (error) {
-      console.error(`Failed to process action ${unconfirmedTx.actionName}(${unconfirmedTx.actionArgs.join(',')})`, error)
+      console.error(
+        `Failed to process action ${unconfirmedTx.actionName}(${unconfirmedTx.actionArgs.join(',')})`,
+        error
+      )
       outcomeTx.status = 'failed'
     }
 
