@@ -54,6 +54,7 @@ export interface Transaction {
   result?: any
   tinlakeConfig: TinlakeConfig
   showIfClosed: boolean
+  updatedAt?: number
 }
 
 export interface TransactionState {
@@ -92,7 +93,7 @@ export default function reducer(
         ...state,
         active: {
           ...state.active,
-          [action.id]: action.transaction,
+          [action.id]: { ...action.transaction, updatedAt: new Date().getTime() },
         },
       }
     case QUEUE_TRANSACTION:
@@ -100,7 +101,7 @@ export default function reducer(
         ...state,
         queue: {
           ...state.queue,
-          [action.id]: action.transaction,
+          [action.id]: { ...action.transaction, updatedAt: new Date().getTime() },
         },
       }
     case DEQUEUE_TRANSACTION:
@@ -225,18 +226,22 @@ export function processTransaction(
 }
 
 // Selectors
+const sortByMostRecent = (a: Transaction, b: Transaction) => a.updatedAt && b.updatedAt ? b.updatedAt - a.updatedAt : 0
+
 export function selectWalletTransactions(state?: TransactionState): WalletTransaction[] {
   if (!state) return []
 
-  const transactions: WalletTransaction[] = Object.keys(state.active).map((id: string) => {
-    const tx = state.active[id]
-    return {
-      description: tx.description,
-      status: tx.status,
-      txHahs: '-',
-      showIfClosed: tx.showIfClosed,
-    }
-  })
+  const transactions: WalletTransaction[] = Object.keys(state.active)
+    .map((id: string) => state.active[id])
+    .sort(sortByMostRecent)
+    .map((tx: Transaction) => {
+      return {
+        description: tx.description,
+        status: tx.status,
+        txHahs: '-',
+        showIfClosed: tx.showIfClosed,
+      }
+    })
 
   return transactions
 }

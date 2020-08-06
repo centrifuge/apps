@@ -83,7 +83,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
     setTokenId(props.tokenId || '')
     setRegistry(props.registry || '')
     getNFT()
-  }, [])
+  }, [props])
 
   useTransactionCallback(
     (status: string, result: any) => {
