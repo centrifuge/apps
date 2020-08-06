@@ -247,6 +247,14 @@ export function getTransaction(state?: TransactionState, txId?: TransactionId): 
 }
 
 // Hooks
+export const useTransactionState = (
+  asyncTransactions: TransactionState | undefined,
+  txId: string | undefined
+): [TransactionStatus | undefined, any] => {
+  const tx = getTransaction(asyncTransactions, txId)
+  return [tx?.status, tx?.result]
+}
+
 export const useTransactionCallback = (
   onChange: (status: string, result?: any) => void,
   asyncTransactions: TransactionState | undefined,

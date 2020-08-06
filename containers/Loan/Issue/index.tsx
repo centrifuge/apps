@@ -9,10 +9,10 @@ import { AuthState, loadProxies, ensureAuthed } from '../../../ducks/auth'
 import { NFT } from 'tinlake'
 import {
   createTransaction,
+  useTransactionState,
   useTransactionCallback,
   TxProps,
   TransactionState,
-  getTransaction,
 } from '../../../ducks/asyncTransactions'
 import { getNFT as getNFTAction } from '../../../services/tinlake/actions'
 
@@ -76,13 +76,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
     setTxId(txId)
   }
 
-  const is = () => {
-    return getTransaction(props.asyncTransactions, txId)?.status
-  }
-
-  const errorMsg = () => {
-    return getTransaction(props.asyncTransactions, txId)?.result.errorMsg
-  }
+  const [status, result] = useTransactionState(props.asyncTransactions, txId)
 
   // TODO: this isn't called every time it should be called
   React.useEffect(() => {
@@ -105,7 +99,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
 
   return (
     <Box>
-      {is() === 'unconfirmed' || is() === 'pending' ? (
+      {status === 'unconfirmed' || status === 'pending' ? (
         <Spinner
           height={'calc(100vh - 89px - 84px)'}
           message={
@@ -115,25 +109,25 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
       ) : (
         <Box>
           <Box>
-            {is() === 'failed' && (
+            {status === 'failed' && (
               <Alert type="error">
                 <Text weight="bold">Error financing asset for Token ID {tokenId}, see console for details</Text>
-                {errorMsg() && (
+                {result?.errorMsg && (
                   <div>
                     <br />
-                    {errorMsg()}
+                    {result?.errorMsg}
                   </div>
                 )}
               </Alert>
             )}
-            {is() !== 'succeeded' && (
+            {status !== 'succeeded' && (
               <Box direction="row" gap="medium" margin={{ top: 'medium' }}>
                 <b>Please paste your Token ID and corresponding registry address below to finance an asset:</b>
               </Box>
             )}
           </Box>
 
-          {is() !== 'succeeded' && (
+          {status !== 'succeeded' && (
             <Box>
               <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
                 <Box basis={'1/3'} gap="medium">
