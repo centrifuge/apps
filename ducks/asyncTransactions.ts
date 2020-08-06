@@ -226,7 +226,8 @@ export function processTransaction(
 }
 
 // Selectors
-const sortByMostRecent = (a: Transaction, b: Transaction) => a.updatedAt && b.updatedAt ? b.updatedAt - a.updatedAt : 0
+const sortByMostRecent = (a: Transaction, b: Transaction) =>
+  a.updatedAt && b.updatedAt ? b.updatedAt - a.updatedAt : 0
 
 export function selectWalletTransactions(state?: TransactionState): WalletTransaction[] {
   if (!state) return []
