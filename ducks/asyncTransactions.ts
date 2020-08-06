@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { AnyAction, Action } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { HYDRATE } from 'next-redux-wrapper'
@@ -243,4 +244,29 @@ export function selectWalletTransactions(state?: TransactionState): WalletTransa
 export function getTransaction(state?: TransactionState, txId?: TransactionId): Transaction | undefined {
   if (!state || !txId || !(txId in state.active)) return undefined
   return state.active[txId]
+}
+
+// Hooks
+export const useTransactionCallback = (
+  onChange: (status: string, result?: any) => void,
+  asyncTransactions: TransactionState | undefined,
+  txId: string | undefined
+) => {
+  const [prevTx, setPrevTx] = React.useState<Transaction | undefined>(
+    txId ? asyncTransactions?.active[txId] : undefined
+  )
+
+  React.useEffect(
+    () => {
+      if (asyncTransactions && txId) {
+        const tx = asyncTransactions.active[txId]
+
+        if (prevTx !== tx) {
+          onChange(tx.status, tx.result)
+          setPrevTx(tx)
+        }
+      }
+    },
+    txId ? [asyncTransactions?.active[txId]] : [undefined]
+  )
 }
