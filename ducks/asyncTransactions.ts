@@ -262,10 +262,11 @@ export function getTransaction(state?: TransactionState, txId?: TransactionId): 
 }
 
 // Hooks
-export const useTransactionState = (
-): [TransactionStatus | undefined, any, (txId: TransactionId) => void] => {
+export const useTransactionState = (): [TransactionStatus | undefined, any, (txId: TransactionId) => void] => {
   const [txId, setTxId] = React.useState<TransactionId | undefined>(undefined)
 
-  const tx = useSelector((state: { asyncTransactions: TransactionState }) => txId ? state.asyncTransactions.active[txId] : undefined)
+  const tx = useSelector((state: { asyncTransactions: TransactionState }) =>
+    txId ? state.asyncTransactions.active[txId] : undefined
+  )
   return [tx?.status, tx?.result, setTxId]
 }
