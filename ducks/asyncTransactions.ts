@@ -254,33 +254,10 @@ export function getTransaction(state?: TransactionState, txId?: TransactionId): 
 
 // Hooks
 export const useTransactionState = (
-  asyncTransactions: TransactionState | undefined,
-  txId: string | undefined
-): [TransactionStatus | undefined, any] => {
+  asyncTransactions: TransactionState | undefined
+): [TransactionStatus | undefined, any, (txId: TransactionId) => void] => {
+  const [txId, setTxId] = React.useState<TransactionId | undefined>(undefined)
+
   const tx = getTransaction(asyncTransactions, txId)
-  return [tx?.status, tx?.result]
-}
-
-export const useTransactionCallback = (
-  onChange: (status: string, result?: any) => void,
-  asyncTransactions: TransactionState | undefined,
-  txId: string | undefined
-) => {
-  const [prevTx, setPrevTx] = React.useState<Transaction | undefined>(
-    txId ? asyncTransactions?.active[txId] : undefined
-  )
-
-  React.useEffect(
-    () => {
-      if (asyncTransactions && txId) {
-        const tx = asyncTransactions.active[txId]
-
-        if (prevTx !== tx) {
-          onChange(tx.status, tx.result)
-          setPrevTx(tx)
-        }
-      }
-    },
-    txId ? [asyncTransactions?.active[txId]] : [undefined]
-  )
+  return [tx?.status, tx?.result, setTxId]
 }

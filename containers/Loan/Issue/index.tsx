@@ -7,13 +7,7 @@ import { Spinner } from '@centrifuge/axis-spinner'
 import LoanView from '../View'
 import { AuthState, loadProxies, ensureAuthed } from '../../../ducks/auth'
 import { NFT } from 'tinlake'
-import {
-  createTransaction,
-  useTransactionState,
-  useTransactionCallback,
-  TxProps,
-  TransactionState,
-} from '../../../ducks/asyncTransactions'
+import { createTransaction, useTransactionState, TxProps, TransactionState } from '../../../ducks/asyncTransactions'
 import { getNFT as getNFTAction } from '../../../services/tinlake/actions'
 
 interface Props extends TxProps {
@@ -34,7 +28,6 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
   const [nftError, setNftError] = React.useState('')
 
   const [loanId, setLoanId] = React.useState('')
-  const [txId, setTxId] = React.useState<string | undefined>(undefined)
 
   // handlers
   const onTokenIdValueChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,6 +62,16 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
     }
   }
 
+  const [status, result, setTxId] = useTransactionState(props.asyncTransactions)
+
+  React.useEffect(() => {
+    if (status === 'succeeded') {
+      const loanId = result.data
+      setLoanId(loanId)
+      props.loadProxies && props.loadProxies()
+    }
+  }, [status])
+
   const issueLoan = async () => {
     await props.ensureAuthed!()
 
@@ -76,26 +79,12 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
     setTxId(txId)
   }
 
-  const [status, result] = useTransactionState(props.asyncTransactions, txId)
-
   // TODO: this isn't called every time it should be called
   React.useEffect(() => {
     setTokenId(props.tokenId || '')
     setRegistry(props.registry || '')
     getNFT()
   }, [props])
-
-  useTransactionCallback(
-    (status: string, result: any) => {
-      if (status === 'succeeded') {
-        const loanId = result.data
-        setLoanId(loanId)
-        props.loadProxies && props.loadProxies()
-      }
-    },
-    props.asyncTransactions,
-    txId
-  )
 
   return (
     <Box>
