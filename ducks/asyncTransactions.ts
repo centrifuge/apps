@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { AnyAction, Action } from 'redux'
+import { useSelector } from 'react-redux'
 import { ThunkAction } from 'redux-thunk'
 import { HYDRATE } from 'next-redux-wrapper'
 import { initTinlake } from '../services/tinlake'
@@ -14,12 +15,13 @@ export interface WalletTransaction {
   showIfClosed?: boolean
 }
 
+// This refers to any function in ../services/tinlake/actions which aligns to the TinlakeAction type
 export type TransactionAction = {
   [P in keyof typeof actions]: typeof actions[P] extends actions.TinlakeAction ? P : never
 }[keyof typeof actions]
 
 // Can be extended by components which create and subscribe to transactions
-export interface TxProps {
+export interface TransactionProps {
   createTransaction: <A extends TransactionAction>(
     description: string,
     actionName: A,
@@ -129,8 +131,13 @@ export function createTransaction<A extends TransactionAction>(
   args: Parameters<typeof actions[A]>
 ): ThunkAction<Promise<string>, { asyncTransactions: TransactionState }, undefined, Action> {
   return async (dispatch, getState) => {
+    // Generate a unique id
     const id: TransactionId = (new Date().getTime() + Math.floor(Math.random() * 1000000)).toString()
 
+    /**
+     * We store the tinlake config, remove the tinlake service from the state (as it's not serializable and can therefore not be stored in Redux state),
+     * and then re-initialize Tinlake.js with the same config when processing the transaction.
+     * */
     const tinlakeConfig = {
       addresses: args[0].contractAddresses,
       contractConfig: args[0].contractConfig,
@@ -149,6 +156,7 @@ export function createTransaction<A extends TransactionAction>(
     }
     dispatch({ id, transaction: unconfirmedTx, type: QUEUE_TRANSACTION })
 
+    // Start processing this transaction if no transaction is currently being processed
     if (!getState().asyncTransactions.processing) {
       dispatch({ type: START_PROCESSING })
       dispatch(processTransaction(unconfirmedTx))
@@ -232,6 +240,7 @@ const sortByMostRecent = (a: Transaction, b: Transaction) =>
 export function selectWalletTransactions(state?: TransactionState): WalletTransaction[] {
   if (!state) return []
 
+  // Retrieve active transactions, sort them by most recent, and then convert them into the type required for the wallet
   const transactions: WalletTransaction[] = Object.keys(state.active)
     .map((id: string) => state.active[id])
     .sort(sortByMostRecent)
@@ -254,10 +263,9 @@ export function getTransaction(state?: TransactionState, txId?: TransactionId): 
 
 // Hooks
 export const useTransactionState = (
-  asyncTransactions: TransactionState | undefined
 ): [TransactionStatus | undefined, any, (txId: TransactionId) => void] => {
   const [txId, setTxId] = React.useState<TransactionId | undefined>(undefined)
 
-  const tx = getTransaction(asyncTransactions, txId)
+  const tx = useSelector((state: { asyncTransactions: TransactionState }) => txId ? state.asyncTransactions.active[txId] : undefined)
   return [tx?.status, tx?.result, setTxId]
 }

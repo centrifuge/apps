@@ -7,17 +7,16 @@ import { Spinner } from '@centrifuge/axis-spinner'
 import LoanView from '../View'
 import { AuthState, loadProxies, ensureAuthed } from '../../../ducks/auth'
 import { NFT } from 'tinlake'
-import { createTransaction, useTransactionState, TxProps, TransactionState } from '../../../ducks/asyncTransactions'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/asyncTransactions'
 import { getNFT as getNFTAction } from '../../../services/tinlake/actions'
 
-interface Props extends TxProps {
+interface Props extends TransactionProps {
   tinlake: any
   tokenId: string
   registry: string
   auth: AuthState
   loadProxies?: () => Promise<void>
   ensureAuthed?: () => Promise<void>
-  asyncTransactions?: TransactionState
 }
 
 const IssueLoan: React.FC<Props> = (props: Props) => {
@@ -62,7 +61,14 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
     }
   }
 
-  const [status, result, setTxId] = useTransactionState(props.asyncTransactions)
+  const [status, result, setTxId] = useTransactionState()
+
+  const issueLoan = async () => {
+    await props.ensureAuthed!()
+
+    const txId = await props.createTransaction(`Finance asset`, 'issue', [props.tinlake, tokenId, registry])
+    setTxId(txId)
+  }
 
   React.useEffect(() => {
     if (status === 'succeeded') {
@@ -72,14 +78,6 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
     }
   }, [status])
 
-  const issueLoan = async () => {
-    await props.ensureAuthed!()
-
-    const txId = await props.createTransaction(`Finance asset`, 'issue', [props.tinlake, tokenId, registry])
-    setTxId(txId)
-  }
-
-  // TODO: this isn't called every time it should be called
   React.useEffect(() => {
     setTokenId(props.tokenId || '')
     setRegistry(props.registry || '')

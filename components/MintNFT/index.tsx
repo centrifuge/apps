@@ -9,14 +9,13 @@ import NumberInput from '../NumberInput'
 import { PoolLink } from '../PoolLink'
 import { connect } from 'react-redux'
 import { ensureAuthed } from '../../ducks/auth'
-import { TransactionState, createTransaction, useTransactionState, TxProps } from '../../ducks/asyncTransactions'
+import { createTransaction, useTransactionState, TransactionProps } from '../../ducks/asyncTransactions'
 
 const NFT_REGISTRY = '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24'
 
-interface Props extends TxProps {
+interface Props extends TransactionProps {
   tinlake: any
   ensureAuthed?: () => Promise<void>
-  asyncTransactions?: TransactionState
 }
 
 const MintNFT: React.FC<Props> = (props: Props) => {
@@ -33,7 +32,7 @@ const MintNFT: React.FC<Props> = (props: Props) => {
   const amount = '1000.00'
   const assetType = 'Invoice'
 
-  const [status, result, setTxId] = useTransactionState(props.asyncTransactions)
+  const [status, result, setTxId] = useTransactionState()
 
   const mint = async () => {
     const registry = NFT_REGISTRY
