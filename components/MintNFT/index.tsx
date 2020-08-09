@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { displayToBase, baseToDisplay } from 'tinlake'
-import { Box, FormField, TextInput, Button, Heading, Anchor, Text, generate } from 'grommet'
+import { Box, FormField, TextInput, Button, Heading, Anchor, Text } from 'grommet'
 import Alert from '../Alert'
 import SecondaryHeader from '../SecondaryHeader'
 import { BackLink } from '../BackLink'
