@@ -407,7 +407,11 @@ export async function setMinJuniorRatio(tinlake: ITinlake, ratio: string): Promi
   return setRes
 }
 
-export async function supply(tinlake: ITinlake, supplyAmount: string, trancheType: TrancheType) {
+export async function supply(
+  tinlake: ITinlake,
+  supplyAmount: string,
+  trancheType: TrancheType
+): Promise<TinlakeResult> {
   let allowance = new BN(0)
   if (trancheType === 'junior') {
     // await tinlake.getCurrencyAllowance((tinlake.ethConfig as any).from!, proxy.toString())
@@ -448,6 +452,8 @@ export async function supply(tinlake: ITinlake, supplyAmount: string, trancheTyp
   if (supplyRes.status !== SUCCESS_STATUS) {
     return loggedError({}, `Could not supply ${trancheType}`, '')
   }
+
+  return supplyRes
 }
 
 export async function redeem(tinlake: ITinlake, redeemAmount: string, trancheType: TrancheType) {
