@@ -392,7 +392,7 @@ export async function setAllowance(
   }
 }
 
-export async function setMinJuniorRatio(tinlake: any, ratio: string) {
+export async function setMinJuniorRatio(tinlake: ITinlake, ratio: string): Promise<TinlakeResult> {
   let setRes
   try {
     setRes = await tinlake.setMinimumJuniorRatio(ratio)
@@ -403,6 +403,8 @@ export async function setMinJuniorRatio(tinlake: any, ratio: string) {
   if (setRes.status !== SUCCESS_STATUS) {
     return loggedError({}, 'Could not set min TIN ratio', '')
   }
+
+  return setRes
 }
 
 export async function supply(tinlake: ITinlake, supplyAmount: string, trancheType: TrancheType) {
