@@ -9,6 +9,8 @@ import { connect } from 'react-redux'
 import { ensureAuthed } from '../../../ducks/auth'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/asyncTransactions'
 import BN from 'bn.js'
+import { Decimal } from 'decimal.js-light'
+import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 
 interface Props extends TransactionProps {
   investor: Investor
@@ -28,7 +30,10 @@ const InvestorSupply: React.FC<Props> = (props: Props) => {
   const supply = async () => {
     await ensureAuthed!()
 
-    const txId = await props.createTransaction(`Invest in ${props.trancheType} tranche`, 'supply', [
+    const valueToDecimal = new Decimal(baseToDisplay(supplyAmount, 18)).toFixed(2)
+    const formatted = addThousandsSeparators(valueToDecimal.toString())
+
+    const txId = await props.createTransaction(`Supply ${formatted} DAI`, 'supply', [
       props.tinlake,
       supplyAmount,
       props.trancheType,
