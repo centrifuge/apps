@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { displayToBase, baseToDisplay } from 'tinlake'
-import { Box, FormField, TextInput, Button, Heading, Anchor, Text } from 'grommet'
+import { Box, FormField, TextInput, Button, Heading, Anchor, Text, generate } from 'grommet'
 import Alert from '../Alert'
 import SecondaryHeader from '../SecondaryHeader'
 import { BackLink } from '../BackLink'
@@ -18,24 +18,24 @@ interface Props extends TransactionProps {
   ensureAuthed?: () => Promise<void>
 }
 
-const MintNFT: React.FC<Props> = (props: Props) => {
-  const generateTokenId = (): string => {
-    let id = ''
-    for (let i = 0; i < 32; i = i + 1) {
-      id += Math.round(Math.random() * 16)
-    }
-    return id
+const generateTokenId = (): string => {
+  let id = ''
+  for (let i = 0; i < 32; i = i + 1) {
+    id += Math.round(Math.random() * 16)
   }
+  return id
+}
 
-  const tokenId = generateTokenId()
+const MintNFT: React.FC<Props> = (props: Props) => {
+  const [tokenId, setTokenId] = React.useState(generateTokenId())
   const [referenceId, setReferenceId] = React.useState<string>('')
   const amount = '1000.00'
   const assetType = 'Invoice'
+  const registry = NFT_REGISTRY
 
   const [status, result, setTxId] = useTransactionState()
 
   const mint = async () => {
-    const registry = NFT_REGISTRY
     await props.ensureAuthed!()
     const base = displayToBase(baseToDisplay(amount, 2), 2)
 
@@ -52,7 +52,7 @@ const MintNFT: React.FC<Props> = (props: Props) => {
     setTxId(txId)
   }
 
-  const registry = NFT_REGISTRY
+  React.useEffect(() => setTokenId(generateTokenId()), [])
 
   return (
     <Box>
