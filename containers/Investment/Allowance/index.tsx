@@ -1,19 +1,18 @@
 import * as React from 'react'
 import { Box, FormField, Button, Heading } from 'grommet'
 import NumberInput from '../../../components/NumberInput'
-import { TrancheType, setAllowance as setAllowanceAction } from '../../../services/tinlake/actions'
-import { transactionSubmitted, responseReceived } from '../../../ducks/transactions'
+import { TrancheType } from '../../../services/tinlake/actions'
 import { baseToDisplay, displayToBase, Investor, Tranche } from 'tinlake'
 import { loadInvestor } from '../../../ducks/investments'
 import { connect } from 'react-redux'
 import { ensureAuthed } from '../../../ducks/auth'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/asyncTransactions'
 
-interface Props {
+interface Props extends TransactionProps {
   investor: Investor
   tinlake: any
+  setErrorMsg: (errorMsg: string) => void
   loadInvestor?: (tinlake: any, address: string, refresh?: boolean) => Promise<void>
-  transactionSubmitted?: (loadingMessage: string) => Promise<void>
-  responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>
   tranche: Tranche
   ensureAuthed?: () => Promise<void>
 }
@@ -40,35 +39,31 @@ const InvestorAllowance: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => updateLimits(), [props])
 
+  const [status, result, setTxId] = useTransactionState()
+
   const setAllowance = async () => {
-    props.transactionSubmitted &&
-      props.transactionSubmitted(
-        'Allowance initiated. Please confirm the pending transactions. Processing may take a few seconds.'
-      )
-    try {
-      await props.ensureAuthed!()
-      updateLimits()
-      const trancheType = props.tranche.type as TrancheType
-      const res = await setAllowanceAction(
-        props.tinlake,
-        props.investor.address,
-        supplyAmount,
-        redeemAmount,
-        trancheType
-      )
+    await props.ensureAuthed!()
+    updateLimits()
+    const trancheType = props.tranche.type as TrancheType
 
-      if (res && res.errorMsg) {
-        props.responseReceived && props.responseReceived(null, `Allowance failed. ${res.errorMsg}`)
-        return
-      }
-
-      props.responseReceived && props.responseReceived('Allowance successful.', null)
-      props.loadInvestor && props.loadInvestor(props.tinlake, props.investor.address)
-    } catch (e) {
-      props.responseReceived && props.responseReceived(null, `Allowance failed. ${e}`)
-      console.error(e)
-    }
+    const txId = await props.createTransaction(`Set allowance`, 'setAllowance', [
+      props.tinlake,
+      props.investor.address,
+      supplyAmount,
+      redeemAmount,
+      trancheType,
+    ])
+    setTxId(txId)
   }
+
+  React.useEffect(() => {
+    if (status === 'succeeded') {
+      props.setErrorMsg('')
+      props.loadInvestor && props.loadInvestor(props.tinlake, props.investor.address)
+    }
+
+    if (result?.errorMsg) props.setErrorMsg(result.errorMsg)
+  }, [result])
 
   return (
     <Box>
@@ -100,13 +95,16 @@ const InvestorAllowance: React.FC<Props> = (props: Props) => {
           </FormField>
         </Box>
         <Box>
-          <Button onClick={setAllowance} primary label="Set Allowance" />
+          <Button
+            onClick={setAllowance}
+            primary
+            label="Set Allowance"
+            disabled={status === 'unconfirmed' || status === 'pending'}
+          />
         </Box>
       </Box>
     </Box>
   )
 }
 
-export default connect((state) => state, { loadInvestor, transactionSubmitted, responseReceived, ensureAuthed })(
-  InvestorAllowance
-)
+export default connect((state) => state, { loadInvestor, createTransaction, ensureAuthed })(InvestorAllowance)

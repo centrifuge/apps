@@ -376,7 +376,7 @@ export async function setAllowance(
   maxSupplyAmount: string,
   maxRedeemAmount: string,
   trancheType: TrancheType
-) {
+): Promise<TinlakeResult> {
   let setRes
   try {
     if (trancheType === 'junior') {
@@ -390,6 +390,8 @@ export async function setAllowance(
   if (setRes.status !== SUCCESS_STATUS) {
     return loggedError(null, `Could not set allowance for ${trancheType}`, address)
   }
+
+  return setRes
 }
 
 export async function setMinJuniorRatio(tinlake: ITinlake, ratio: string): Promise<TinlakeResult> {

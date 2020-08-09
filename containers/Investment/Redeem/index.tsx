@@ -43,6 +43,7 @@ const InvestorRedeem: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (status === 'succeeded') {
+      props.setErrorMsg('')
       loadInvestor && loadInvestor(props.tinlake, props.investor.address)
       loadPool && loadPool(props.tinlake)
     }
