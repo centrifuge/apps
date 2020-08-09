@@ -53,7 +53,8 @@ const InvestorSupply: React.FC<Props> = (props: Props) => {
   const trancheValues = props.investor[props.trancheType]
   const maxSupplyAmount = trancheValues.maxSupply || '0'
   const maxSupplyOverflow = new BN(supplyAmount).cmp(new BN(maxSupplyAmount)) > 0
-  const canSupply = maxSupplyAmount.toString() !== '0' && !maxSupplyOverflow
+  const canSupply =
+    maxSupplyAmount.toString() !== '0' && !maxSupplyOverflow && !(status === 'unconfirmed' || status === 'pending')
 
   return (
     <Box basis={'1/4'} gap="medium" margin={{ right: 'large' }}>

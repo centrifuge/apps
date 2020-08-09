@@ -496,6 +496,8 @@ export async function redeem(tinlake: ITinlake, redeemAmount: string, trancheTyp
   if (redeemRes.status !== SUCCESS_STATUS) {
     return loggedError({}, `Could not redeem ${trancheType}.`, '')
   }
+
+  return redeemRes
 }
 
 function loggedError(error: any, message: string, id: string) {

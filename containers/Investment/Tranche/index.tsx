@@ -98,7 +98,12 @@ const TrancheView: React.FC<Props> = (props: Props) => {
                   tinlake={props.tinlake}
                   setErrorMsg={setErrorMsg}
                 />
-                <InvestorRedeem tranche={props.tranche} investor={props.investor!} tinlake={props.tinlake} />
+                <InvestorRedeem
+                  tranche={props.tranche}
+                  investor={props.investor!}
+                  tinlake={props.tinlake}
+                  setErrorMsg={setErrorMsg}
+                />
               </Box>
             </Box>
           )}
