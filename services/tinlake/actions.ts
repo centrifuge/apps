@@ -320,6 +320,8 @@ export async function borrow(tinlake: any, loan: Loan, amount: string) {
   if (borrowRes.status !== SUCCESS_STATUS) {
     return loggedError({}, 'Could not finance asset', loanId)
   }
+
+  return borrowRes
 }
 
 // repay full loan debt

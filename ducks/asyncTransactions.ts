@@ -98,7 +98,10 @@ export default function reducer(
         ...state,
         active: {
           ...state.active,
-          [action.id]: { ...action.transaction, updatedAt: action.dontChangeUpdatedAt ? action.transaction.updatedAt : new Date().getTime() },
+          [action.id]: {
+            ...action.transaction,
+            updatedAt: action.dontChangeUpdatedAt ? action.transaction.updatedAt : new Date().getTime(),
+          },
         },
       }
     case QUEUE_TRANSACTION:
@@ -270,7 +273,9 @@ export function selectWalletTransactions(state?: TransactionState): WalletTransa
     .map((id: string) => state.active[id])
     .sort(sortByMostRecent)
     .map((tx: Transaction) => {
-      const externalLink = tx.result?.txHash ? `https://${config.network === 'Kovan' ? 'kovan.' : ''}etherscan.io/address/${tx.result.txHash}` : undefined
+      const externalLink = tx.result?.txHash
+        ? `https://${config.network === 'Kovan' ? 'kovan.' : ''}etherscan.io/address/${tx.result.txHash}`
+        : undefined
 
       return {
         externalLink,
