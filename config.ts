@@ -112,12 +112,12 @@ const config: Config = {
   // TODO: make this into publicRuntimeConfig
   gasPrice: yup
     .string()
-    .required('NEXT_PUBLIC_ETH_GAS_PRICE is required')
-    .validateSync(process.env.NEXT_PUBLIC_ETH_GAS_PRICE),
+    .required('gasPrice is required')
+    .validateSync('10000000000'),
   gas: yup
     .string()
-    .required('NEXT_PUBLIC_ETH_GAS is required')
-    .validateSync(process.env.NEXT_PUBLIC_ETH_GAS),
+    .required('gas is required')
+    .validateSync('7000000'),
   transactionTimeout: yup
     .number()
     .required('NEXT_PUBLIC_TRANSACTION_TIMEOUT is required')
