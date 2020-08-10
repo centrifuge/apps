@@ -506,6 +506,8 @@ function loggedError(error: any, message: string, id: string) {
   console.error(`${message} ${id}`, error)
   return {
     id,
-    errorMsg: `${error} - ${message} ${id}`,
+    error,
+    message,
+    errorMsg: `${error} - ${message} ${id}` // TODO: all references to this should be removed
   }
 }

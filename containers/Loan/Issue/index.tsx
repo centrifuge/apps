@@ -66,7 +66,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
   const issueLoan = async () => {
     await props.ensureAuthed!()
 
-    const txId = await props.createTransaction(`Finance asset`, 'issue', [props.tinlake, tokenId, registry])
+    const txId = await props.createTransaction(`Open asset financing`, 'issue', [props.tinlake, tokenId, registry])
     setTxId(txId)
   }
 
