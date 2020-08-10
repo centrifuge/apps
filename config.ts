@@ -32,7 +32,8 @@ export interface DisplayedField {
 interface Config {
   rpcUrl: string
   etherscanUrl: string
-  gasLimit: number
+  gasPrice: string
+  gas: string
   transactionTimeout: number
   tinlakeDataBackendUrl: string
   isDemo: boolean
@@ -109,10 +110,14 @@ const config: Config = {
     .url()
     .validateSync(process.env.NEXT_PUBLIC_ETHERSCAN_URL),
   // TODO: make this into publicRuntimeConfig
-  gasLimit: yup
-    .number()
-    .required('gasLimit is required')
-    .validateSync(1000000000000000000),
+  gasPrice: yup
+    .string()
+    .required('gasPrice is required')
+    .validateSync('10000000000'),
+  gas: yup
+    .string()
+    .required('gas is required')
+    .validateSync('7000000'),
   transactionTimeout: yup
     .number()
     .required('NEXT_PUBLIC_TRANSACTION_TIMEOUT is required')
