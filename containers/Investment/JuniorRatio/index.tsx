@@ -6,7 +6,7 @@ import NumberInput from '../../../components/NumberInput'
 import { loadPool } from '../../../ducks/pool'
 import { connect } from 'react-redux'
 import { Decimal } from 'decimal.js-light'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/asyncTransactions'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 
 Decimal.set({
   precision: 27,

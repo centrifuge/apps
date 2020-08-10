@@ -5,7 +5,7 @@ import { baseToDisplay, displayToBase, Loan } from 'tinlake'
 import { loadLoan } from '../../../ducks/loans'
 import { connect } from 'react-redux'
 import { ensureAuthed } from '../../../ducks/auth'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/asyncTransactions'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 import { Decimal } from 'decimal.js-light'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 

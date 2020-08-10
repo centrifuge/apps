@@ -8,7 +8,7 @@ import { connect } from 'react-redux'
 import { ensureAuthed } from '../../../ducks/auth'
 import BN from 'bn.js'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/asyncTransactions'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 import { Decimal } from 'decimal.js-light'
 
 interface Props extends TransactionProps {

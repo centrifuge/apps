@@ -6,7 +6,7 @@ import { baseToDisplay, displayToBase, Investor, Tranche } from 'tinlake'
 import { loadInvestor } from '../../../ducks/investments'
 import { connect } from 'react-redux'
 import { ensureAuthed } from '../../../ducks/auth'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/asyncTransactions'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 
 interface Props extends TransactionProps {
   investor: Investor

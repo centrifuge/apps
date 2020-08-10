@@ -6,10 +6,9 @@ import Alert from '../../../components/Alert'
 import LoanData from '../../../components/Loan/Data'
 import LoanBorrow from '../Borrow'
 import LoanRepay from '../Repay'
-import { Spinner } from '@centrifuge/axis-spinner'
 import NftData from '../../../components/NftData'
 import { AuthState, loadProxies } from '../../../ducks/auth'
-import { TransactionState, resetTransactionState } from '../../../ducks/transactions'
+import { TransactionState } from '../../../ducks/transactions'
 
 interface Props {
   tinlake: any
@@ -18,26 +17,20 @@ interface Props {
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>
   auth?: AuthState
   transactions?: TransactionState
-  resetTransactionState?: () => void
   loadProxies?: () => Promise<void>
 }
 
 // on state change tokenId --> load nft data for asset collateral
 class LoanView extends React.Component<Props> {
   componentDidMount() {
-    const { tinlake, loanId, loadLoan, resetTransactionState, loadProxies } = this.props
+    const { tinlake, loanId, loadLoan, loadProxies } = this.props
     loanId && loadLoan!(tinlake, loanId)
-    resetTransactionState && resetTransactionState()
     loadProxies && loadProxies()
     console.log(this.props.auth?.permissions)
   }
 
-  componentWillUnmount() {
-    this.props.resetTransactionState && this.props.resetTransactionState()
-  }
-
   render() {
-    const { loans, loanId, tinlake, auth, transactions } = this.props
+    const { loans, loanId, tinlake, auth } = this.props
     const { loan, loanState } = loans!
     if (loanState === null || loanState === 'loading') {
       return null
@@ -51,29 +44,9 @@ class LoanView extends React.Component<Props> {
     }
 
     const hasBorrowerPermissions = loan && auth?.proxies?.includes(loan.ownerOf.toString())
-    if (transactions && transactions.transactionState && transactions.transactionState === 'processing') {
-      return (
-        <Spinner
-          height={'calc(100vh - 89px - 84px)'}
-          message={transactions.loadingMessage || 'Processing Transaction. This may take a few seconds. Please wait...'}
-        />
-      )
-    }
 
     return (
       <Box>
-        {transactions && transactions.successMessage && (
-          <Box margin={{ bottom: 'large' }}>
-            <Alert type="success">{transactions.successMessage} </Alert>
-          </Box>
-        )}
-
-        {transactions && transactions.errorMessage && (
-          <Box margin={{ bottom: 'large' }}>
-            <Alert type="error">{transactions.errorMessage}</Alert>
-          </Box>
-        )}
-
         <LoanData loan={loan!} />
         {loan && loan.status !== 'closed' && (
           <Box>
@@ -98,4 +71,4 @@ class LoanView extends React.Component<Props> {
   }
 }
 
-export default connect((state) => state, { loadLoan, resetTransactionState, loadProxies })(LoanView)
+export default connect((state) => state, { loadLoan, loadProxies })(LoanView)

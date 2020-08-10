@@ -4,9 +4,8 @@ import loansReducer from '../ducks/loans'
 import investmentsReducer from '../ducks/investments'
 import poolReducer from '../ducks/pool'
 import authReducer from '../ducks/auth'
-import transactionReducer from '../ducks/transactions'
 import thunk from 'redux-thunk'
-import asyncTransactionReducer from '../ducks/asyncTransactions'
+import transactionReducer from '../ducks/transactions'
 
 declare global {
   interface Window {
@@ -27,7 +26,6 @@ const makeStore = () => {
       pool: poolReducer,
       auth: authReducer,
       transactions: transactionReducer,
-      asyncTransactions: asyncTransactionReducer, // TODO: asyncTransactions should eventually replace transactions
     }),
     composeEnhancers(applyMiddleware(thunk))
   )

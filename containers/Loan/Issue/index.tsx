@@ -7,7 +7,7 @@ import { Spinner } from '@centrifuge/axis-spinner'
 import LoanView from '../View'
 import { AuthState, loadProxies, ensureAuthed } from '../../../ducks/auth'
 import { NFT } from 'tinlake'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/asyncTransactions'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 import { getNFT as getNFTAction } from '../../../services/tinlake/actions'
 
 interface Props extends TransactionProps {

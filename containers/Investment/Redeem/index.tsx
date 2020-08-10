@@ -10,7 +10,7 @@ import BN from 'bn.js'
 import { ensureAuthed } from '../../../ducks/auth'
 import { Decimal } from 'decimal.js-light'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/asyncTransactions'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 
 interface Props extends TransactionProps {
   investor: Investor

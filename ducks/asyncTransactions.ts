@@ -138,7 +138,7 @@ export function createTransaction<A extends TransactionAction>(
   description: string,
   actionName: A,
   args: Parameters<typeof actions[A]>
-): ThunkAction<Promise<string>, { asyncTransactions: TransactionState }, undefined, Action> {
+): ThunkAction<Promise<string>, { transactions: TransactionState }, undefined, Action> {
   return async (dispatch, getState) => {
     // Generate a unique id
     const id: TransactionId = (new Date().getTime() + Math.floor(Math.random() * 1000000)).toString()
@@ -166,7 +166,7 @@ export function createTransaction<A extends TransactionAction>(
     dispatch({ id, transaction: unconfirmedTx, type: QUEUE_TRANSACTION })
 
     // Start processing this transaction if no transaction is currently being processed
-    if (!getState().asyncTransactions.processing) {
+    if (!getState().transactions.processing) {
       dispatch({ type: START_PROCESSING })
       dispatch(processTransaction(unconfirmedTx))
     }
@@ -177,7 +177,7 @@ export function createTransaction<A extends TransactionAction>(
 
 export function processTransaction(
   unconfirmedTx: Transaction
-): ThunkAction<Promise<void>, { asyncTransactions: TransactionState }, undefined, Action> {
+): ThunkAction<Promise<void>, { transactions: TransactionState }, undefined, Action> {
   return async (dispatch, getState) => {
     // Dequeue
     const id = unconfirmedTx.id
@@ -251,9 +251,9 @@ export function processTransaction(
     }, 5000)
 
     // Process next transaction in queue
-    if (Object.keys(getState().asyncTransactions.queue).length > 0) {
-      const nextTransactionId = Object.keys(getState().asyncTransactions.queue)[0]
-      const nextTransaction = getState().asyncTransactions.queue[nextTransactionId]
+    if (Object.keys(getState().transactions.queue).length > 0) {
+      const nextTransactionId = Object.keys(getState().transactions.queue)[0]
+      const nextTransaction = getState().transactions.queue[nextTransactionId]
       dispatch(processTransaction(nextTransaction))
     } else {
       dispatch({ type: STOP_PROCESSING })
@@ -298,8 +298,8 @@ export function getTransaction(state?: TransactionState, txId?: TransactionId): 
 export const useTransactionState = (): [TransactionStatus | undefined, any, (txId: TransactionId) => void] => {
   const [txId, setTxId] = React.useState<TransactionId | undefined>(undefined)
 
-  const tx = useSelector((state: { asyncTransactions: TransactionState }) =>
-    txId ? state.asyncTransactions.active[txId] : undefined
+  const tx = useSelector((state: { transactions: TransactionState }) =>
+    txId ? state.transactions.active[txId] : undefined
   )
   return [tx?.status, tx?.result, setTxId]
 }

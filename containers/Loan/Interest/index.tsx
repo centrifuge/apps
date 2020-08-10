@@ -4,7 +4,7 @@ import { feeToInterestRate, Loan } from 'tinlake'
 import NumberInput from '../../../components/NumberInput'
 import { loadLoan } from '../../../ducks/loans'
 import { connect } from 'react-redux'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/asyncTransactions'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 
 interface Props extends TransactionProps {
   loan: Loan
