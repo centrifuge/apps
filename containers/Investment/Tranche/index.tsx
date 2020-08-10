@@ -18,8 +18,6 @@ interface Props {
 }
 
 const TrancheView: React.FC<Props> = (props: Props) => {
-  const [errorMsg, setErrorMsg] = React.useState<string | undefined>(undefined)
-
   const isAdmin =
     (props.tranche.type === 'junior' && props.auth.permissions?.canSetInvestorAllowanceJunior) ||
     (props.tranche.type === 'senior' && props.auth.permissions?.canSetInvestorAllowanceSenior)
@@ -27,12 +25,6 @@ const TrancheView: React.FC<Props> = (props: Props) => {
 
   return (
     <Box>
-      {errorMsg && (
-        <Box margin={{ top: 'medium' }}>
-          <Alert type="error">{errorMsg}</Alert>
-        </Box>
-      )}
-
       {props.investor && props.tranche && (
         <Box>
           <Box margin={{ top: 'medium', bottom: 'large' }}>
@@ -48,12 +40,7 @@ const TrancheView: React.FC<Props> = (props: Props) => {
           {isAdmin && (
             <Box margin={{ top: 'medium', bottom: 'large' }}>
               <Box>
-                <InvestorAllowance
-                  tranche={props.tranche}
-                  tinlake={props.tinlake}
-                  investor={props.investor}
-                  setErrorMsg={setErrorMsg}
-                />
+                <InvestorAllowance tranche={props.tranche} tinlake={props.tinlake} investor={props.investor} />
               </Box>
             </Box>
           )}
@@ -71,14 +58,8 @@ const TrancheView: React.FC<Props> = (props: Props) => {
                   trancheType={(props.tranche.type as any) as TrancheType}
                   investor={props.investor!}
                   tinlake={props.tinlake}
-                  setErrorMsg={setErrorMsg}
                 />
-                <InvestorRedeem
-                  tranche={props.tranche}
-                  investor={props.investor!}
-                  tinlake={props.tinlake}
-                  setErrorMsg={setErrorMsg}
-                />
+                <InvestorRedeem tranche={props.tranche} investor={props.investor!} tinlake={props.tinlake} />
               </Box>
             </Box>
           )}

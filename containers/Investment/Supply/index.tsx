@@ -15,7 +15,6 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 interface Props extends TransactionProps {
   investor: Investor
   tinlake: any
-  setErrorMsg: (errorMsg: string) => void
   loadInvestor?: (tinlake: any, address: string, refresh?: boolean) => Promise<void>
   loadPool?: (tinlake: any) => Promise<void>
   trancheType: TrancheType
@@ -43,12 +42,9 @@ const InvestorSupply: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (status === 'succeeded') {
-      props.setErrorMsg('')
       loadInvestor && loadInvestor(props.tinlake, props.investor.address)
       loadPool && loadPool(props.tinlake)
     }
-
-    if (result?.errorMsg) props.setErrorMsg(result.errorMsg)
   }, [status, result])
 
   const trancheValues = props.investor[props.trancheType]

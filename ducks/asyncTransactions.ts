@@ -235,6 +235,7 @@ export function processTransaction(
 
     // Hide succeeded/failed tx after 5s
     setTimeout(async () => {
+      // TODO: this shouldn't update the 'updatedAt' property, since it pushes up transactions which haven't actually changed
       const hiddenTx: Transaction = {
         ...outcomeTx,
         showIfClosed: false,

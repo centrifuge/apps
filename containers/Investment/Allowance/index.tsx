@@ -11,7 +11,6 @@ import { createTransaction, useTransactionState, TransactionProps } from '../../
 interface Props extends TransactionProps {
   investor: Investor
   tinlake: any
-  setErrorMsg: (errorMsg: string) => void
   loadInvestor?: (tinlake: any, address: string, refresh?: boolean) => Promise<void>
   tranche: Tranche
   ensureAuthed?: () => Promise<void>
@@ -58,11 +57,8 @@ const InvestorAllowance: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (status === 'succeeded') {
-      props.setErrorMsg('')
       props.loadInvestor && props.loadInvestor(props.tinlake, props.investor.address)
     }
-
-    if (result?.errorMsg) props.setErrorMsg(result.errorMsg)
   }, [result])
 
   return (
