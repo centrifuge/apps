@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Box, FormField, TextInput, Button, Text } from 'grommet'
+import { Box, FormField, TextInput, Button } from 'grommet'
 import Alert from '../../../components/Alert'
 import NftData from '../../../components/NftData'
 import { connect } from 'react-redux'

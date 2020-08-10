@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { displayToBase, baseToDisplay } from 'tinlake'
-import { Box, FormField, TextInput, Button, Heading, Anchor, Text } from 'grommet'
+import { Box, FormField, TextInput, Button, Heading, Anchor } from 'grommet'
 import Alert from '../Alert'
 import SecondaryHeader from '../SecondaryHeader'
 import { BackLink } from '../BackLink'
@@ -33,7 +33,7 @@ const MintNFT: React.FC<Props> = (props: Props) => {
   const assetType = 'Invoice'
   const registry = NFT_REGISTRY
 
-  const [status, result, setTxId] = useTransactionState()
+  const [status, , setTxId] = useTransactionState()
 
   const mint = async () => {
     await props.ensureAuthed!()
