@@ -205,8 +205,10 @@ export function processTransaction(
       hasCompleted = true
 
       const outcome = (response as any).status === SUCCESS_STATUS
+      console.log(outcome)
       outcomeTx.status = outcome ? 'succeeded' : 'failed'
       outcomeTx.result = response
+      console.log('response', response)
 
       if (errorMessageRegex.test(response.error)) {
         const matches = response.error.toString().match(errorMessageRegex)

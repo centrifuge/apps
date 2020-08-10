@@ -96,33 +96,29 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
       ) : (
         <Box>
           <Box>
-            {status !== 'succeeded' && (
-              <Box direction="row" gap="medium" margin={{ top: 'medium' }}>
-                <b>Please paste your Token ID and corresponding registry address below to finance an asset:</b>
-              </Box>
-            )}
+            <Box direction="row" gap="medium" margin={{ top: 'medium' }}>
+              <b>Please paste your Token ID and corresponding registry address below to finance an asset:</b>
+            </Box>
           </Box>
 
-          {status !== 'succeeded' && (
-            <Box>
-              <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
-                <Box basis={'1/3'} gap="medium">
-                  <FormField label="Collateral Token Registry Address">
-                    <TextInput value={registry || ''} onChange={onRegistryAddressValueChange} disabled={false} />
-                  </FormField>
-                </Box>
+          <Box>
+            <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
+              <Box basis={'1/3'} gap="medium">
+                <FormField label="Collateral Token Registry Address">
+                  <TextInput value={registry || ''} onChange={onRegistryAddressValueChange} disabled={false} />
+                </FormField>
+              </Box>
 
-                <Box basis={'1/3'} gap="medium">
-                  <FormField label="Token ID">
-                    <TextInput value={tokenId} onChange={onTokenIdValueChange} disabled={false} />
-                  </FormField>
-                </Box>
-                <Box basis={'1/3'} gap="medium" align="end">
-                  <Button onClick={issueLoan} primary label="Finance Asset" disabled={!nft} />
-                </Box>
+              <Box basis={'1/3'} gap="medium">
+                <FormField label="Token ID">
+                  <TextInput value={tokenId} onChange={onTokenIdValueChange} disabled={false} />
+                </FormField>
+              </Box>
+              <Box basis={'1/3'} gap="medium" align="end">
+                <Button onClick={issueLoan} primary label="Finance Asset" disabled={!nft} />
               </Box>
             </Box>
-          )}
+          </Box>
 
           {loanId ? (
             <Box margin={{ bottom: 'medium', top: 'large' }}>

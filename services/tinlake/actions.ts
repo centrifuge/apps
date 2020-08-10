@@ -94,7 +94,7 @@ export const mintNFT = async (
   }
 }
 
-export const issue = async (tinlake: ITinlake, tokenId: string, nftRegistryAddress: string) => {
+export const issue = async (tinlake: ITinlake, tokenId: string, nftRegistryAddress: string): Promise<TinlakeResult> => {
   let tokenOwner
   const user = (tinlake.ethConfig as any).from!
 
@@ -135,10 +135,7 @@ export const issue = async (tinlake: ITinlake, tokenId: string, nftRegistryAddre
       return loggedError({}, 'Could not Issue loan.', tokenId)
     }
 
-    const loanId = await tinlake.nftLookup(nftRegistryAddress, tokenId)
-    return {
-      data: loanId,
-    }
+    return result
   }
 
   let proxyOwner
@@ -161,10 +158,7 @@ export const issue = async (tinlake: ITinlake, tokenId: string, nftRegistryAddre
       return loggedError({}, 'Could not Issue loan.', tokenId)
     }
 
-    const loanId = await tinlake.nftLookup(nftRegistryAddress, tokenId)
-    return {
-      data: loanId,
-    }
+    return result
   }
 
   // case: nft can not be used to open a loan -> borrower/borrower's proxy not nft owner
