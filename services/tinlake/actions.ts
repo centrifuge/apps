@@ -508,6 +508,6 @@ function loggedError(error: any, message: string, id: string) {
     id,
     error,
     message,
-    errorMsg: `${error} - ${message} ${id}` // TODO: all references to this should be removed
+    errorMsg: `${error} - ${message} ${id}`, // TODO: all references to this should be removed
   }
 }
