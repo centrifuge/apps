@@ -46,15 +46,13 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (status === 'succeeded') {
-      props.loadLoan && props.loadLoan(props.tinlake, loan.loanId)
+      props.loadLoan && props.loadLoan(props.tinlake, props.loan.loanId)
     }
   }, [status])
 
-  const { loan, pool } = props
-
-  const ceilingSet = loan.principal.toString() !== '0'
-  const availableFunds = (pool && pool.data && pool.data.availableFunds) || '0'
-  const ceilingOverflow = new BN(borrowAmount).cmp(new BN(loan.principal)) > 0
+  const ceilingSet = props.loan.principal.toString() !== '0'
+  const availableFunds = (props.pool && props.pool.data && props.pool.data.availableFunds) || '0'
+  const ceilingOverflow = new BN(borrowAmount).cmp(new BN(props.loan.principal)) > 0
   const availableFundsOverflow = new BN(borrowAmount).cmp(new BN(availableFunds)) > 0
   const borrowEnabled = !ceilingOverflow && !availableFundsOverflow && ceilingSet
   return (
@@ -82,7 +80,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
           <Box margin={{ top: 'small' }}>
             Max financing amount exceeded. <br />
             Amount has to be lower than <br />
-            <Text weight="bold">{`${addThousandsSeparators(baseToDisplay(loan.principal, 18))}`}</Text>
+            <Text weight="bold">{`${addThousandsSeparators(baseToDisplay(props.loan.principal, 18))}`}</Text>
           </Box>
         )}
       </Box>
