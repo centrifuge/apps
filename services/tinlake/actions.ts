@@ -87,7 +87,11 @@ export const mintNFT = async (
   amount: string,
   asset: string
 ) => {
-  return tinlake.mintNFT(nftAddr, owner, tokenId, ref, amount, asset)
+  try {
+    return await tinlake.mintNFT(nftAddr, owner, tokenId, ref, amount, asset)
+  } catch (e) {
+    return loggedError(e, 'Could not mint NFT.', tokenId)
+  }
 }
 
 export const issue = async (tinlake: ITinlake, tokenId: string, nftRegistryAddress: string) => {

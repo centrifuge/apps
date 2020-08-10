@@ -45,7 +45,7 @@
     "@centrifuge/axis-spinner": "0.4.2-develop.109",
     "@centrifuge/axis-theme": "0.2.1-develop.57",
     "@centrifuge/axis-utils": "0.4.2-develop.109",
-    "@centrifuge/axis-web3-wallet": "0.0.3-develop.109",
+    "@centrifuge/axis-web3-wallet": "0.0.3-develop.111",
     "@sendgrid/mail": "7.1.1",
     "@types/node-fetch": "2.5.7",
     "apollo-cache-inmemory": "1.6.5",

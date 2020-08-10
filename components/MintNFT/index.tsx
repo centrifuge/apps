@@ -82,19 +82,8 @@ const MintNFT: React.FC<Props> = (props: Props) => {
               </p>
             </Alert>
           )}
-          {status === 'failed' && (
-            <Alert pad={{ horizontal: 'medium' }} type="error">
-              <Text weight="bold">Error minting NFT for Token ID {tokenId}, see console for details</Text>
-              {result?.errorMsg && (
-                <div>
-                  <br />
-                  {result?.errorMsg}
-                </div>
-              )}
-            </Alert>
-          )}
 
-          {status === undefined && (
+          {status !== 'succeeded' && (
             <Alert pad={{ horizontal: 'medium' }} type="info">
               <p>
                 Tinlake requires you to have a non-fungible token ("NFT") to deposit as collateral. An NFT is an

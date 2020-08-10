@@ -10,9 +10,9 @@ import * as actions from '../services/tinlake/actions'
 export interface WalletTransaction {
   description: string
   status: 'unconfirmed' | 'pending' | 'succeeded' | 'failed'
-  txHahs: string
   externalLink?: string
   showIfClosed?: boolean
+  failedReason?: string
 }
 
 // This refers to any function in ../services/tinlake/actions which aligns to the TinlakeAction type
@@ -56,6 +56,7 @@ export interface Transaction {
   result?: any
   tinlakeConfig: TinlakeConfig
   showIfClosed: boolean
+  failedReason?: string
   updatedAt?: number
 }
 
@@ -195,6 +196,9 @@ export function processTransaction(
       showIfClosed: true,
     }
 
+    // This is a hack to grab a human-friendly error. We should eventually refactor Tinlake.js to return this error directly.
+    const errorMessageRegex = /MetaMask Tx Signature\:[\s?](.*)[\.?][\"?],/
+
     try {
       const actionCall = actions[unconfirmedTx.actionName as keyof typeof actions]
       const response = await (actionCall as any)(tinlake, ...unconfirmedTx.actionArgs)
@@ -203,12 +207,26 @@ export function processTransaction(
       const outcome = (response as any).status === SUCCESS_STATUS
       outcomeTx.status = outcome ? 'succeeded' : 'failed'
       outcomeTx.result = response
+
+      if (errorMessageRegex.test(response.error)) {
+        const matches = response.error.toString().match(errorMessageRegex)
+        if (matches) outcomeTx.failedReason = matches[1]
+      } else if (outcomeTx.status === 'failed' && outcomeTx.result.message) {
+        outcomeTx.failedReason = outcomeTx.result.message
+      }
     } catch (error) {
       console.error(
         `Failed to process action ${unconfirmedTx.actionName}(${unconfirmedTx.actionArgs.join(',')})`,
         error
       )
+
       outcomeTx.status = 'failed'
+
+      if (errorMessageRegex.test(error.toString())) {
+        const matches = error.toString().match(errorMessageRegex)
+        if (matches) outcomeTx.failedReason = matches[1]
+      } else {
+      }
     }
 
     await dispatch({ id, transaction: outcomeTx, type: SET_ACTIVE_TRANSACTION })
@@ -248,8 +266,8 @@ export function selectWalletTransactions(state?: TransactionState): WalletTransa
       return {
         description: tx.description,
         status: tx.status,
-        txHahs: '-',
         showIfClosed: tx.showIfClosed,
+        failedReason: tx.failedReason,
       }
     })
 

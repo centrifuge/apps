@@ -96,17 +96,6 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
       ) : (
         <Box>
           <Box>
-            {status === 'failed' && (
-              <Alert type="error">
-                <Text weight="bold">Error financing asset for Token ID {tokenId}, see console for details</Text>
-                {result?.errorMsg && (
-                  <div>
-                    <br />
-                    {result?.errorMsg}
-                  </div>
-                )}
-              </Alert>
-            )}
             {status !== 'succeeded' && (
               <Box direction="row" gap="medium" margin={{ top: 'medium' }}>
                 <b>Please paste your Token ID and corresponding registry address below to finance an asset:</b>
