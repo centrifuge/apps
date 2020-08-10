@@ -6,6 +6,7 @@ import Alert from '../../../components/Alert'
 import LoanData from '../../../components/Loan/Data'
 import LoanBorrow from '../Borrow'
 import LoanRepay from '../Repay'
+import LoanInterest from '../Interest'
 import { Spinner } from '@centrifuge/axis-spinner'
 import NftData from '../../../components/NftData'
 import { AuthState, loadProxies } from '../../../ducks/auth'
@@ -29,6 +30,7 @@ class LoanView extends React.Component<Props> {
     loanId && loadLoan!(tinlake, loanId)
     resetTransactionState && resetTransactionState()
     loadProxies && loadProxies()
+    console.log(this.props.auth?.permissions)
   }
 
   componentWillUnmount() {
@@ -59,6 +61,8 @@ class LoanView extends React.Component<Props> {
       )
     }
 
+    const isAdmin = this.props.auth?.permissions?.canSetMinimumJuniorRatio
+
     return (
       <Box>
         {transactions && transactions.successMessage && (
@@ -86,6 +90,19 @@ class LoanView extends React.Component<Props> {
                 <Box direction="row">
                   <LoanBorrow loan={loan!} tinlake={tinlake} />
                   <LoanRepay loan={loan!} tinlake={tinlake} />
+                </Box>
+              </Box>
+            )}
+
+            {isAdmin && (
+              <Box margin={{ top: 'large', bottom: 'large' }}>
+                <Box gap="medium" align="start" margin={{ bottom: 'medium' }}>
+                  <Heading level="5" margin="none">
+                    Admin Actions
+                  </Heading>
+                </Box>
+                <Box direction="row">
+                  <LoanInterest loan={loan!} tinlake={tinlake} />
                 </Box>
               </Box>
             )}

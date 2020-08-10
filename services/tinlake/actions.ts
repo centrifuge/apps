@@ -254,6 +254,8 @@ export async function setInterest(tinlake: any, loanId: string, debt: string, ra
   if (setRes.status !== SUCCESS_STATUS) {
     return loggedError({}, 'Could not set rate group', loanId)
   }
+
+  return setRes
 }
 
 export async function getPool(tinlake: any) {
