@@ -213,7 +213,6 @@ export function processTransaction(
       hasCompleted = true
 
       const outcome = (response as any).status === SUCCESS_STATUS
-      console.log(outcome)
       outcomeTx.status = outcome ? 'succeeded' : 'failed'
       outcomeTx.result = response
 
