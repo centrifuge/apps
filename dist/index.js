@@ -29541,7 +29541,7 @@ function CurrencyActions(Base) {
                         case 1:
                             txHash = _a.sent();
                             console.log("[Mint currency] txHash: " + txHash);
-                            return [2 /*return*/];
+                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['TINLAKE_CURRENCY'].abi, this.transactionTimeout)];
                     }
                 });
             }); };

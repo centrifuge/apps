@@ -38,7 +38,8 @@ type AbiOutput = {
 
 export type EthConfig = {
   from?: string;
-  gasLimit?: string;
+  gasPrice?: string;
+  gas?: string;
 };
 
 export type ContractNames = typeof contractNames[number];
@@ -60,7 +61,7 @@ export type TinlakeParams = {
   transactionTimeout: number;
   contractAddresses?: ContractAddresses | {};
   contractAbis?: ContractAbis | {};
-  ethConfig?: EthConfig | {};
+  ethConfig?: EthConfig;
   ethOptions?: any | {};
   contracts?: Contracts | {};
   contractConfig?: any | {};
@@ -72,7 +73,7 @@ export default class Tinlake {
   public provider: any;
   public eth: ethI;
   public ethOptions: any;
-  public ethConfig: EthConfig | {};
+  public ethConfig: EthConfig;
   public contractAddresses: ContractAddresses;
   public transactionTimeout: number;
   public contracts: Contracts = {};
@@ -122,7 +123,7 @@ export default class Tinlake {
     }
   }
 
-  setEthConfig = (ethConfig: EthConfig | {}) => {
+  setEthConfig = (ethConfig: EthConfig) => {
     this.ethConfig = {
       ...this.ethConfig,
       ...ethConfig,

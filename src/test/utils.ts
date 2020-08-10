@@ -1,54 +1,50 @@
 import { Account } from './types';
-import Tinlake, { EthConfig } from '../Tinlake';
+import Tinlake from '..';
+import { EthConfig } from '../Tinlake';
 import { ITinlake } from '../types/tinlake';
-import { ethI, executeAndRetry  } from '../services/ethereum';
 import { ProviderConfig } from './config';
-const Eth = require('ethjs');
+import { ethers, Signer } from 'ethers';
 const SignerProvider = require('ethjs-provider-signer');
 const { sign } = require('ethjs-signer');
 
 export class TestProvider {
-  public eth : ethI;
-  public sponsorAccount: Account;
+  public wallet: ethers.Wallet;
   public ethConfig: EthConfig;
   public transactionTimeout: number;
-  public gasLimit: number;
 
   constructor(testConfig: ProviderConfig) {
-    const { rpcUrl, godAccount, gasLimit, transactionTimeout } = testConfig;
-    this.eth = new Eth(createSignerProvider(rpcUrl, godAccount));
-    this.ethConfig = { from: godAccount.address, gasLimit: `0x${gasLimit.toString(16)}` };
+    const { rpcUrl, godAccount, transactionTimeout } = testConfig;
+    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    this.wallet = new ethers.Wallet(godAccount.privateKey, provider);
+    this.ethConfig = { from: godAccount.address };
     this.transactionTimeout = transactionTimeout;
-    this.sponsorAccount = godAccount;
   }
 
   async fundAccountWithETH(usr: string, amount: string) {
-    const nonce = await this.eth.getTransactionCount(this.ethConfig.from);
     const transaction = {
-      nonce,
-      from: this.ethConfig.from,
       to: usr,
-      value: amount,
-      gas: this.ethConfig.gasLimit,
+      value: ethers.utils.bigNumberify(amount),
     };
-    const signedTransaction = sign(transaction, this.sponsorAccount.privateKey);
-    await executeAndRetry(this.eth.sendRawTransaction, [signedTransaction]);
+
+    const res = await this.wallet.sendTransaction(transaction);
+    await res.wait(1);
   }
 }
 
-export function createTinlake(usr: Account, testConfig: ProviderConfig) : Partial<ITinlake> {
+export function createTinlake(usr: Account, testConfig: ProviderConfig) : ITinlake {
   const {
-        rpcUrl,
-        transactionTimeout,
-        gasLimit,
-        contractAddresses,
-    } = testConfig;
+      rpcUrl,
+      transactionTimeout,
+      gas,
+      gasPrice,
+      contractAddresses,
+  } = testConfig;
 
   const tinlake = new Tinlake({
     contractAddresses,
     transactionTimeout,
     provider: createSignerProvider(rpcUrl, usr),
-    ethConfig: { from: usr.address, gasLimit: `0x${gasLimit.toString(16)}` },
+    ethConfig: { gas, gasPrice, from: usr.address },
   });
 
   return tinlake;

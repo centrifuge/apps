@@ -1,6 +1,6 @@
 import { TinlakeActions } from '../actions';
 import BN from 'bn.js';
-import { EthConfig, ContractAddresses, ContractAbis, Contracts } from '../Tinlake';
+import Tinlake from '../Tinlake';
 export declare type Loan = {
     loanId: string;
     registry: string;
@@ -42,18 +42,4 @@ export declare type Investor = {
     };
     address: string;
 };
-export declare type ITinlake = TinlakeActions & {
-    provider: any;
-    eth: any;
-    ethOptions: any;
-    ethConfig: EthConfig | {};
-    contractAddresses: ContractAddresses;
-    transactionTimeout: number;
-    contracts: Contracts;
-    contractAbis: ContractAbis;
-    contractConfig: any;
-    setProvider(provider: any, ethOptions?: any): void;
-    setContracts(): void;
-    setEthConfig(ethConfig: EthConfig | {}): void;
-    setContractAddresses(): () => Promise<void>;
-};
+export declare type ITinlake = TinlakeActions & Tinlake;

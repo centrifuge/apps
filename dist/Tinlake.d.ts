@@ -2,7 +2,8 @@ import { ethI } from './services/ethereum';
 declare const contractNames: string[];
 export declare type EthConfig = {
     from?: string;
-    gasLimit?: string;
+    gasPrice?: string;
+    gas?: string;
 };
 export declare type ContractNames = typeof contractNames[number];
 export declare type Contracts = {
@@ -19,7 +20,7 @@ export declare type TinlakeParams = {
     transactionTimeout: number;
     contractAddresses?: ContractAddresses | {};
     contractAbis?: ContractAbis | {};
-    ethConfig?: EthConfig | {};
+    ethConfig?: EthConfig;
     ethOptions?: any | {};
     contracts?: Contracts | {};
     contractConfig?: any | {};
@@ -29,7 +30,7 @@ export default class Tinlake {
     provider: any;
     eth: ethI;
     ethOptions: any;
-    ethConfig: EthConfig | {};
+    ethConfig: EthConfig;
     contractAddresses: ContractAddresses;
     transactionTimeout: number;
     contracts: Contracts;
@@ -38,7 +39,7 @@ export default class Tinlake {
     constructor(params: TinlakeParams);
     setProvider: (provider: any, ethOptions?: any) => void;
     setContracts: () => void;
-    setEthConfig: (ethConfig: {} | EthConfig) => void;
+    setEthConfig: (ethConfig: EthConfig) => void;
     createContract(address: string, abiName: string): void;
     getOperatorType: (tranche: string) => any;
 }

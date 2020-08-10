@@ -11,6 +11,7 @@
   "dependencies": {
     "bignumber.js": "^9.0.0",
     "decimal.js-light": "^2.5.0",
+    "dotenv": "^8.2.0",
     "ethers": "^4.0.45",
     "ethjs": "^0.4.0",
     "ethjs-account": "^0.1.4",
@@ -45,7 +46,7 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -cw",
-    "test": "ts-mocha -p src/test/tsconfig.json src/**/*.spec.ts src/*.spec.ts --timeout 20000",
+    "test": "ts-mocha -p src/test/tsconfig.json src/**/*.spec.ts src/*.spec.ts --timeout 40000",
     "nodemon": "nodemon node inspect dist/Tinlake.js",
     "generate-docs": "typedoc --out docs --exclude \"./node_modules/**\"  --exclude \"./src/abi/**\" --exclude \"./src/index.ts\" --exclude \"./src/actions/*.spec.ts\" --exclude \"./src/test/**\" --excludeExternals --excludeNotExported --ignoreCompilerErrors ./src",
     "lint": "tslint --project .",

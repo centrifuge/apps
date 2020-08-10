@@ -9,6 +9,7 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
     mintCurrency = async (usr: string, amount: string) => {
       const txHash = await executeAndRetry(this.contracts['TINLAKE_CURRENCY'].mint, [usr, amount, this.ethConfig]);
       console.log(`[Mint currency] txHash: ${txHash}`);
+      return waitAndReturnEvents(this.eth, txHash, this.contracts['TINLAKE_CURRENCY'].abi, this.transactionTimeout);
     }
 
     getCurrencyAllowance = async (owner: string, spender: string) => {
@@ -50,7 +51,7 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
 }
 
 export type  ICurrencyActions = {
-  mintCurrency(usr: string, amount: string): Promise<void>,
+  mintCurrency(usr: string, amount: string): Promise<unknown>,
   getCurrencyBalance(usr: string): Promise<BN>,
   approveCurrency(usr: string, amount: string): Promise<unknown>,
   getCurrencyAllowance: (owner: string, spender: string) => Promise<BN>;
