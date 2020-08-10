@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { AuthState } from '../../../ducks/auth'
 import { Box, Heading } from 'grommet'
-import Alert from '../../../components/Alert'
 import InvestorSupply from '../Supply'
 import InvestorRedeem from '../Redeem'
 import InvestorAllowance from '../Allowance'
