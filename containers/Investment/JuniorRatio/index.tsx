@@ -29,7 +29,7 @@ const JuniorRatio: React.FC<Props> = (props: Props) => {
     setMinJuniorRatio((normalizedJuniorRatio && normalizedJuniorRatio.toString()) || '0')
   }, [props.minJuniorRatio])
 
-  const [status, _, setTxId] = useTransactionState()
+  const [status, , setTxId] = useTransactionState()
 
   const updateMinJuniorRatio = async () => {
     const normalizedRatio = new Decimal(minJuniorRatio).div(100).toString()

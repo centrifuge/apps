@@ -74,7 +74,7 @@ class InvestorView extends React.Component<Props, State> {
 
   render() {
     const { is, errorMsg, selectedTab } = this.state
-    const { tinlake, investments, auth, pool, transactions } = this.props
+    const { tinlake, investments, auth, pool } = this.props
     const investor = investments && investments.investor
     const investorState = investments && investments.investorState
     const dropAddress = this.props.tinlake.contractAddresses.SENIOR_TOKEN as string
@@ -119,13 +119,7 @@ class InvestorView extends React.Component<Props, State> {
                   fontWeight: 900,
                 }}
               >
-                <TrancheView
-                  tinlake={tinlake}
-                  transactions={transactions}
-                  auth={auth}
-                  investor={investor}
-                  tranche={seniorTranche}
-                />
+                <TrancheView tinlake={tinlake} auth={auth} investor={investor} tranche={seniorTranche} />
               </Tab>
               <Tab
                 title="Junior tranche / TIN token"
@@ -135,13 +129,7 @@ class InvestorView extends React.Component<Props, State> {
                 }}
               >
                 <span></span>
-                <TrancheView
-                  transactions={transactions}
-                  tinlake={tinlake}
-                  auth={auth}
-                  investor={investor}
-                  tranche={juniorTranche}
-                />
+                <TrancheView tinlake={tinlake} auth={auth} investor={investor} tranche={juniorTranche} />
               </Tab>
             </Tabs>
           </Box>
