@@ -6,6 +6,8 @@ import { HYDRATE } from 'next-redux-wrapper'
 import { initTinlake } from '../services/tinlake'
 import * as actions from '../services/tinlake/actions'
 
+import config from '../config'
+
 // TODO: should be imported from @centrifuge/axis-web3-wallet
 export interface WalletTransaction {
   description: string
@@ -96,7 +98,7 @@ export default function reducer(
         ...state,
         active: {
           ...state.active,
-          [action.id]: { ...action.transaction, updatedAt: new Date().getTime() },
+          [action.id]: { ...action.transaction, updatedAt: action.dontChangeUpdatedAt ? action.transaction.updatedAt : new Date().getTime() },
         },
       }
     case QUEUE_TRANSACTION:
@@ -104,7 +106,10 @@ export default function reducer(
         ...state,
         queue: {
           ...state.queue,
-          [action.id]: { ...action.transaction, updatedAt: new Date().getTime() },
+          [action.id]: {
+            ...action.transaction,
+            updatedAt: action.dontChangeUpdatedAt ? action.transaction.updatedAt : new Date().getTime(),
+          },
         },
       }
     case DEQUEUE_TRANSACTION:
@@ -184,7 +189,7 @@ export function processTransaction(
           ...unconfirmedTx,
           showIfClosed: false,
         }
-        await dispatch({ id, transaction: hiddenPendingTx, type: SET_ACTIVE_TRANSACTION })
+        await dispatch({ id, transaction: hiddenPendingTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
       }
     }, 10000)
 
@@ -208,7 +213,6 @@ export function processTransaction(
       console.log(outcome)
       outcomeTx.status = outcome ? 'succeeded' : 'failed'
       outcomeTx.result = response
-      console.log('response', response)
 
       if (errorMessageRegex.test(response.error)) {
         const matches = response.error.toString().match(errorMessageRegex)
@@ -240,7 +244,7 @@ export function processTransaction(
         ...outcomeTx,
         showIfClosed: false,
       }
-      await dispatch({ id, transaction: hiddenTx, type: SET_ACTIVE_TRANSACTION })
+      await dispatch({ id, transaction: hiddenTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
     }, 5000)
 
     // Process next transaction in queue
@@ -266,7 +270,10 @@ export function selectWalletTransactions(state?: TransactionState): WalletTransa
     .map((id: string) => state.active[id])
     .sort(sortByMostRecent)
     .map((tx: Transaction) => {
+      const externalLink = tx.result?.txHash ? `https://${config.network === 'Kovan' ? 'kovan.' : ''}etherscan.io/address/${tx.result.txHash}` : undefined
+
       return {
+        externalLink,
         description: tx.description,
         status: tx.status,
         showIfClosed: tx.showIfClosed,
