@@ -31,11 +31,7 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
     const valueToDecimal = new Decimal(baseToDisplay(repayAmount, 18)).toFixed(2)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
-    const txId = await props.createTransaction(`Borrow ${formatted} DAI`, 'borrow', [
-      props.tinlake,
-      props.loan,
-      repayAmount,
-    ])
+    const txId = await props.createTransaction(`Repay ${formatted} DAI`, 'repay', [props.tinlake, props.loan])
     setTxId(txId)
   }
 
@@ -61,7 +57,12 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
         </FormField>
       </Box>
       <Box align="start">
-        <Button onClick={repay} primary label="Repay" disabled={!hasDebt} />
+        <Button
+          onClick={repay}
+          primary
+          label="Repay"
+          disabled={!hasDebt || status === 'unconfirmed' || status === 'pending'}
+        />
       </Box>
     </Box>
   )

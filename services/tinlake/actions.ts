@@ -358,6 +358,8 @@ export async function repay(tinlake: ITinlake, loan: Loan) {
   if (repayRes.status !== SUCCESS_STATUS) {
     return loggedError({ response: repayRes }, 'Could not repay', loanId)
   }
+
+  return repayRes
 }
 
 export async function getInvestor(tinlake: any, address: string) {
