@@ -13,6 +13,15 @@ export interface TinlakeResult {
   loanId?: string
 }
 
+// TinlakeAction args need to be serializable, as they are stored in Redux state for the async transactions duck
+// Based on: https://github.com/microsoft/TypeScript/issues/1897#issuecomment-657294463
+type SerializableScalar = string & number & boolean
+type SerializableObject = { [key: string]: SerializableScalar & SerializableObject & SerializableArray }
+type SerializableArray = (SerializableScalar & SerializableObject & SerializableArray)[]
+type Serializable = SerializableScalar & SerializableObject & SerializableArray
+
+export type TinlakeAction = (tinlake: ITinlake, ...args: Serializable[]) => Promise<TinlakeResult>
+
 export async function getNFT(registry: string, tinlake: any, tokenId: string) {
   let nftOwner: string
   let nftData: any
@@ -69,7 +78,23 @@ async function getOrCreateProxy(tinlake: any, address: string) {
   return proxyAddress
 }
 
-export async function issue(tinlake: ITinlake, tokenId: string, nftRegistryAddress: string) {
+export const mintNFT = async (
+  tinlake: ITinlake,
+  nftAddr: string,
+  owner: string,
+  tokenId: string,
+  ref: string,
+  amount: string,
+  asset: string
+) => {
+  try {
+    return await tinlake.mintNFT(nftAddr, owner, tokenId, ref, amount, asset)
+  } catch (e) {
+    return loggedError(e, 'Could not mint NFT.', tokenId)
+  }
+}
+
+export const issue = async (tinlake: ITinlake, tokenId: string, nftRegistryAddress: string): Promise<TinlakeResult> => {
   let tokenOwner
   const user = (tinlake.ethConfig as any).from!
 
@@ -110,10 +135,7 @@ export async function issue(tinlake: ITinlake, tokenId: string, nftRegistryAddre
       return loggedError({}, 'Could not Issue loan.', tokenId)
     }
 
-    const loanId = await tinlake.nftLookup(nftRegistryAddress, tokenId)
-    return {
-      data: loanId,
-    }
+    return result
   }
 
   let proxyOwner
@@ -136,10 +158,7 @@ export async function issue(tinlake: ITinlake, tokenId: string, nftRegistryAddre
       return loggedError({}, 'Could not Issue loan.', tokenId)
     }
 
-    const loanId = await tinlake.nftLookup(nftRegistryAddress, tokenId)
-    return {
-      data: loanId,
-    }
+    return result
   }
 
   // case: nft can not be used to open a loan -> borrower/borrower's proxy not nft owner
@@ -235,6 +254,8 @@ export async function setInterest(tinlake: any, loanId: string, debt: string, ra
   if (setRes.status !== SUCCESS_STATUS) {
     return loggedError({}, 'Could not set rate group', loanId)
   }
+
+  return setRes
 }
 
 export async function getPool(tinlake: any) {
@@ -301,6 +322,8 @@ export async function borrow(tinlake: any, loan: Loan, amount: string) {
   if (borrowRes.status !== SUCCESS_STATUS) {
     return loggedError({}, 'Could not finance asset', loanId)
   }
+
+  return borrowRes
 }
 
 // repay full loan debt
@@ -335,6 +358,8 @@ export async function repay(tinlake: ITinlake, loan: Loan) {
   if (repayRes.status !== SUCCESS_STATUS) {
     return loggedError({ response: repayRes }, 'Could not repay', loanId)
   }
+
+  return repayRes
 }
 
 export async function getInvestor(tinlake: any, address: string) {
@@ -355,7 +380,7 @@ export async function setAllowance(
   maxSupplyAmount: string,
   maxRedeemAmount: string,
   trancheType: TrancheType
-) {
+): Promise<TinlakeResult> {
   let setRes
   try {
     if (trancheType === 'junior') {
@@ -369,9 +394,11 @@ export async function setAllowance(
   if (setRes.status !== SUCCESS_STATUS) {
     return loggedError(null, `Could not set allowance for ${trancheType}`, address)
   }
+
+  return setRes
 }
 
-export async function setMinJuniorRatio(tinlake: any, ratio: string) {
+export async function setMinJuniorRatio(tinlake: ITinlake, ratio: string): Promise<TinlakeResult> {
   let setRes
   try {
     setRes = await tinlake.setMinimumJuniorRatio(ratio)
@@ -382,9 +409,15 @@ export async function setMinJuniorRatio(tinlake: any, ratio: string) {
   if (setRes.status !== SUCCESS_STATUS) {
     return loggedError({}, 'Could not set min TIN ratio', '')
   }
+
+  return setRes
 }
 
-export async function supply(tinlake: ITinlake, supplyAmount: string, trancheType: TrancheType) {
+export async function supply(
+  tinlake: ITinlake,
+  supplyAmount: string,
+  trancheType: TrancheType
+): Promise<TinlakeResult> {
   let allowance = new BN(0)
   if (trancheType === 'junior') {
     // await tinlake.getCurrencyAllowance((tinlake.ethConfig as any).from!, proxy.toString())
@@ -425,6 +458,8 @@ export async function supply(tinlake: ITinlake, supplyAmount: string, trancheTyp
   if (supplyRes.status !== SUCCESS_STATUS) {
     return loggedError({}, `Could not supply ${trancheType}`, '')
   }
+
+  return supplyRes
 }
 
 export async function redeem(tinlake: ITinlake, redeemAmount: string, trancheType: TrancheType) {
@@ -467,12 +502,16 @@ export async function redeem(tinlake: ITinlake, redeemAmount: string, trancheTyp
   if (redeemRes.status !== SUCCESS_STATUS) {
     return loggedError({}, `Could not redeem ${trancheType}.`, '')
   }
+
+  return redeemRes
 }
 
 function loggedError(error: any, message: string, id: string) {
   console.error(`${message} ${id}`, error)
   return {
     id,
-    errorMsg: `${error} - ${message} ${id}`,
+    error,
+    message,
+    errorMsg: `${error} - ${message} ${id}`, // TODO: all references to this should be removed
   }
 }

@@ -9,6 +9,7 @@ import Router, { withRouter, NextRouter } from 'next/router'
 import { NavBar } from '@centrifuge/axis-nav-bar'
 import { Web3Wallet } from '@centrifuge/axis-web3-wallet'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
+import { TransactionState, selectWalletTransactions } from '../../ducks/transactions'
 import { PoolSelector } from '../../components/PoolSelector'
 
 const { isDemo } = config
@@ -26,6 +27,7 @@ interface Props {
   menuItems: MenuItem[]
   auth?: AuthState
   router: NextRouter
+  transactions?: TransactionState
   ensureAuthed?: () => Promise<void>
   clear?: () => Promise<void>
 }
@@ -57,7 +59,7 @@ const Header: React.FC<Props> = (props: Props) => {
     Router.push(item.route, undefined, { shallow: true })
   }
 
-  const { poolTitle, selectedRoute, menuItems, auth, clear } = props
+  const { poolTitle, selectedRoute, menuItems, transactions, auth, clear } = props
   const { address, network, providerName } = auth!
   const logoUrl = (isDemo && '/static/demo_logo.svg') || '/static/logo.svg'
 
@@ -130,7 +132,7 @@ const Header: React.FC<Props> = (props: Props) => {
                 providerName={providerName}
                 networkName={network}
                 onDisconnect={clear}
-                transactions={[]}
+                transactions={selectWalletTransactions(transactions)}
                 getAddressLink={getAddressLink}
                 style={{ padding: 0 }}
               />

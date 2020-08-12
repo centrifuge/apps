@@ -4,8 +4,8 @@ import loansReducer from '../ducks/loans'
 import investmentsReducer from '../ducks/investments'
 import poolReducer from '../ducks/pool'
 import authReducer from '../ducks/auth'
-import transactionReducer from '../ducks/transactions'
 import thunk from 'redux-thunk'
+import transactionReducer from '../ducks/transactions'
 
 declare global {
   interface Window {

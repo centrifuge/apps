@@ -2,75 +2,53 @@ import * as React from 'react'
 import { Box, FormField, Button } from 'grommet'
 import { feeToInterestRate, Loan } from 'tinlake'
 import NumberInput from '../../../components/NumberInput'
-import { setInterest } from '../../../services/tinlake/actions'
-import { transactionSubmitted, responseReceived } from '../../../ducks/transactions'
 import { loadLoan } from '../../../ducks/loans'
 import { connect } from 'react-redux'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 
-interface Props {
+interface Props extends TransactionProps {
   loan: Loan
   tinlake: any
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>
-  transactionSubmitted?: (loadingMessage: string) => Promise<void>
-  responseReceived?: (successMessage: string | null, errorMessage: string | null) => Promise<void>
 }
 
-interface State {
-  interestRate: string
-}
+const LoanInterest: React.FC<Props> = (props: Props) => {
+  const [interestRate, setInterestRate] = React.useState('')
 
-class LoanInterest extends React.Component<Props, State> {
-  state: State = {
-    interestRate: '',
+  React.useEffect(() => {
+    setInterestRate(feeToInterestRate(props.loan.interestRate))
+  }, [props])
+
+  const [status, , setTxId] = useTransactionState()
+
+  const setInterestRateAction = async () => {
+    const txId = await props.createTransaction(`Set interest rate for asset`, 'setInterest', [
+      props.tinlake,
+      props.loan.loanId,
+      props.loan.debt.toString(),
+      interestRate,
+    ])
+    setTxId(txId)
   }
 
-  componentDidMount() {
-    const { loan } = this.props
-    this.setState({ interestRate: feeToInterestRate(loan.interestRate) })
-  }
-
-  setInterestRate = async () => {
-    const { interestRate } = this.state
-    const { loan, tinlake } = this.props
-    this.props.transactionSubmitted &&
-      this.props.transactionSubmitted(
-        'Changing interest rate initiated. Please ' +
-          'confirm the pending transactions. Processing may take a few seconds.'
-      )
-    try {
-      const res = await setInterest(tinlake, loan.loanId, loan.debt.toString(), interestRate)
-      if (res && res.errorMsg) {
-        this.props.responseReceived &&
-          this.props.responseReceived(null, `Changing interest rate failed. ${res.errorMsg}`)
-        return
-      }
-      this.props.responseReceived && this.props.responseReceived('Interest rate changed successfully.', null)
-      this.props.loadLoan && this.props.loadLoan(tinlake, loan.loanId)
-    } catch (e) {
-      this.props.responseReceived && this.props.responseReceived(null, `Changing interest rate failed. ${e}`)
-      console.error(e)
+  React.useEffect(() => {
+    if (status === 'succeeded') {
+      props.loadLoan && props.loadLoan(props.tinlake, props.loan.loanId)
     }
-  }
+  }, [status])
 
-  render() {
-    const { interestRate } = this.state
-    return (
-      <Box basis={'1/4'} gap="medium" margin={{ right: 'large' }}>
-        <Box gap="medium">
-          <FormField label="Interest rate">
-            <NumberInput
-              value={interestRate}
-              suffix=" %"
-              onValueChange={({ value }) => this.setState({ interestRate: value })}
-            />
-          </FormField>
-        </Box>
-        <Box align="start">
-          <Button onClick={this.setInterestRate} primary label="Set interest rate" />
-        </Box>
+  return (
+    <Box basis={'1/4'} gap="medium" margin={{ right: 'large' }}>
+      <Box gap="medium">
+        <FormField label="Interest rate">
+          <NumberInput value={interestRate} suffix=" %" onValueChange={({ value }) => setInterestRate(value)} />
+        </FormField>
       </Box>
-    )
-  }
+      <Box align="start">
+        <Button onClick={setInterestRateAction} primary label="Set interest rate" />
+      </Box>
+    </Box>
+  )
 }
 
-export default connect((state) => state, { loadLoan, transactionSubmitted, responseReceived })(LoanInterest)
+export default connect((state) => state, { loadLoan, createTransaction })(LoanInterest)

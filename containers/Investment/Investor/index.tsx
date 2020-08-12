@@ -7,7 +7,7 @@ import Alert from '../../../components/Alert'
 import { Spinner } from '@centrifuge/axis-spinner'
 import { isValidAddress } from '../../../utils/address'
 import TrancheView from '../Tranche'
-import { TransactionState, resetTransactionState } from '../../../ducks/transactions'
+import { TransactionState } from '../../../ducks/transactions'
 import { PoolState, loadPool } from '../../../ducks/pool'
 
 interface Props {
@@ -16,7 +16,6 @@ interface Props {
   loadInvestor?: (tinlake: any, address: string) => Promise<void>
   investments?: InvestorState
   transactions?: TransactionState
-  resetTransactionState?: () => void
   loadPool?: (tinlake: any) => Promise<void>
   pool?: PoolState
   investorAddress: string
@@ -38,7 +37,6 @@ class InvestorView extends React.Component<Props, State> {
   showInvestor = async () => {
     const { investorAddress } = this.props
     const { loadInvestor, tinlake } = this.props
-    resetTransactionState && resetTransactionState()
     this.setState({ is: null, errorMsg: '' })
     if (!isValidAddress(investorAddress)) {
       this.setState({ is: 'error', errorMsg: 'Please input a valid Ethereum address.' })
@@ -49,32 +47,18 @@ class InvestorView extends React.Component<Props, State> {
 
   componentDidMount() {
     const { loadPool, tinlake } = this.props
-    resetTransactionState()
     loadPool && loadPool(tinlake)
     this.showInvestor()
     this.setState({ selectedTab: 0 })
   }
 
-  componentWillUnmount() {
-    resetTransactionState()
-  }
-
-  resetTransactionState() {
-    const { resetTransactionState } = this.props
-    resetTransactionState && resetTransactionState()
-  }
-
   selectTab(tab: number) {
-    const { selectedTab } = this.state
-    if (tab !== selectedTab) {
-      this.resetTransactionState()
-    }
     this.setState({ selectedTab: tab })
   }
 
   render() {
     const { is, errorMsg, selectedTab } = this.state
-    const { tinlake, investments, auth, pool, transactions } = this.props
+    const { tinlake, investments, auth, pool } = this.props
     const investor = investments && investments.investor
     const investorState = investments && investments.investorState
     const dropAddress = this.props.tinlake.contractAddresses.SENIOR_TOKEN as string
@@ -119,13 +103,7 @@ class InvestorView extends React.Component<Props, State> {
                   fontWeight: 900,
                 }}
               >
-                <TrancheView
-                  tinlake={tinlake}
-                  transactions={transactions}
-                  auth={auth}
-                  investor={investor}
-                  tranche={seniorTranche}
-                />
+                <TrancheView tinlake={tinlake} auth={auth} investor={investor} tranche={seniorTranche} />
               </Tab>
               <Tab
                 title="Junior tranche / TIN token"
@@ -135,13 +113,7 @@ class InvestorView extends React.Component<Props, State> {
                 }}
               >
                 <span></span>
-                <TrancheView
-                  transactions={transactions}
-                  tinlake={tinlake}
-                  auth={auth}
-                  investor={investor}
-                  tranche={juniorTranche}
-                />
+                <TrancheView tinlake={tinlake} auth={auth} investor={investor} tranche={juniorTranche} />
               </Tab>
             </Tabs>
           </Box>
@@ -151,4 +123,4 @@ class InvestorView extends React.Component<Props, State> {
   }
 }
 
-export default connect((state) => state, { loadInvestor, loadPool, resetTransactionState })(InvestorView)
+export default connect((state) => state, { loadInvestor, loadPool })(InvestorView)

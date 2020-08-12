@@ -100,7 +100,7 @@ export default function reducer(
           ...state.active,
           [action.id]: {
             ...action.transaction,
-            updatedAt: new Date().getTime(),
+            updatedAt: action.dontChangeUpdatedAt ? action.transaction.updatedAt : new Date().getTime(),
           },
         },
       }
@@ -111,7 +111,7 @@ export default function reducer(
           ...state.queue,
           [action.id]: {
             ...action.transaction,
-            updatedAt: new Date().getTime(),
+            updatedAt: action.dontChangeUpdatedAt ? action.transaction.updatedAt : new Date().getTime(),
           },
         },
       }
@@ -213,7 +213,6 @@ export function processTransaction(
       hasCompleted = true
 
       const outcome = (response as any).status === SUCCESS_STATUS
-      console.log(outcome)
       outcomeTx.status = outcome ? 'succeeded' : 'failed'
       outcomeTx.result = response
 

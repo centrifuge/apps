@@ -6,29 +6,23 @@ import { isValidAddress } from '../../../utils/address'
 import JuniorRatio from '../JuniorRatio'
 import InvestmentsOverview from '../../../components/Investment/Overview'
 import { PoolState, loadPool } from '../../../ducks/pool'
-import { TransactionState, resetTransactionState } from '../../../ducks/transactions'
-import Alert from '../../../components/Alert'
+import { TransactionState } from '../../../ducks/transactions'
 import { PoolLink } from '../../../components/PoolLink'
 
 interface Props {
   tinlake: any
   auth: AuthState
   loadPool?: (tinlake: any) => Promise<void>
-  resetTransactionState?: () => void
   pool?: PoolState
   transactions?: TransactionState
 }
 
 interface State {
-  errorMsg: string
-  is: string | null
   investorAddress: string
 }
 
 class InvestmentsView extends React.Component<Props, State> {
   state: State = {
-    errorMsg: '',
-    is: null,
     investorAddress: '',
   }
 
@@ -37,15 +31,9 @@ class InvestmentsView extends React.Component<Props, State> {
     loadPool && loadPool(tinlake)
   }
 
-  componentWillUnmount() {
-    const { resetTransactionState } = this.props
-    resetTransactionState && resetTransactionState()
-  }
-
   render() {
-    const { investorAddress, is } = this.state
-    const { pool, auth, tinlake, transactions } = this.props
-    const canLoadInvestor = is !== 'loading' && investorAddress !== '' && isValidAddress(investorAddress)
+    const { pool, auth, tinlake } = this.props
+    const canLoadInvestor = this.state.investorAddress !== '' && isValidAddress(this.state.investorAddress)
 
     return (
       <Box>
@@ -53,12 +41,6 @@ class InvestmentsView extends React.Component<Props, State> {
           <Box margin={{ bottom: 'medium' }}>
             {' '}
             <InvestmentsOverview data={pool?.data} />{' '}
-          </Box>
-        )}
-
-        {transactions && transactions.errorMessage && (
-          <Box pad={{ horizontal: 'medium' }} margin={{ bottom: 'small' }}>
-            <Alert type="error">{transactions.errorMessage}</Alert>
           </Box>
         )}
 
@@ -77,7 +59,7 @@ class InvestmentsView extends React.Component<Props, State> {
             <Box basis={'1/3'}>
               <FormField label="Investor Address">
                 <TextInput
-                  value={investorAddress}
+                  value={this.state.investorAddress}
                   onChange={(event) => this.setState({ investorAddress: event.currentTarget.value })}
                 />
               </FormField>
@@ -98,4 +80,4 @@ class InvestmentsView extends React.Component<Props, State> {
   }
 }
 
-export default connect((state) => state, { loadPool, resetTransactionState })(InvestmentsView)
+export default connect((state) => state, { loadPool })(InvestmentsView)
