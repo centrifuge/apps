@@ -100,7 +100,7 @@ export default function reducer(
           ...state.active,
           [action.id]: {
             ...action.transaction,
-            updatedAt: action.dontChangeUpdatedAt ? action.transaction.updatedAt : new Date().getTime(),
+            updatedAt: new Date().getTime(),
           },
         },
       }
@@ -111,7 +111,7 @@ export default function reducer(
           ...state.queue,
           [action.id]: {
             ...action.transaction,
-            updatedAt: action.dontChangeUpdatedAt ? action.transaction.updatedAt : new Date().getTime(),
+            updatedAt: new Date().getTime(),
           },
         },
       }
