@@ -131,7 +131,6 @@ class Overview extends React.Component<Props> {
           </Box>
         </Box>
         <Box basis={'1/2'} margin={{ left: 'large' }}>
-          {console.log(selectedPool)}
           {selectedPool.description &&
             <div dangerouslySetInnerHTML={{ __html: selectedPool.description }} />
           }

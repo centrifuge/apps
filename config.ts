@@ -64,7 +64,8 @@ const contractConfigSchema = yup.object().shape({
     .required('contractConfigSchema.SENIOR_OPERATOR is required').oneOf(['PROPORTIONAL_OPERATOR', 'ALLOWANCE_OPERATOR'])
 });
 
-// TODO: info should be required once we migrate all pool configs to the new format
+// TODO: text/logo/etc should be required and description/investHtml removed,
+// once we migrate all pool configs to the new format
 const poolSchema = yup.object().shape({
   addresses: contractAddressesSchema.required('poolSchema.addresses is required'),
   graph: yup.string(),
