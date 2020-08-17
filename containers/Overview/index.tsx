@@ -39,7 +39,6 @@ class Overview extends React.Component<Props> {
     const { tinlake, loans, auth, selectedPool, pool } = this.props;
     const userAddress = auth?.address || tinlake.ethConfig.from;
 
-    const { name, description, investHtml } = selectedPool;
     const allLoans = loans && loans.loans || [];
     const poolData = pool && pool.data;
 
@@ -58,7 +57,7 @@ class Overview extends React.Component<Props> {
 
     return <Box margin={{ bottom: 'large' }}>
       <SecondaryHeader>
-        <Heading level="3">Pool Overview: {name} </Heading>
+        <Heading level="3">Pool Overview: {selectedPool.name} </Heading>
       </SecondaryHeader>
 
       <Box direction="row" margin={{ bottom: 'large' }}>
@@ -128,13 +127,43 @@ class Overview extends React.Component<Props> {
                 </TableRow>
               </TableBody>
             </Table>
-            <InvestAction investHtml={investHtml} />
+            <InvestAction investHtml={selectedPool.investHtml || `<p>You will need to get onboarded with the asset originator to start investing in this pool.</p><p>Please contact ${selectedPool.assetOriginatorName} with an email to <a href=${`mailto:${selectedPool.email}`} target="_blank">${selectedPool.email}</a> for further information.</p>`} />
           </Box>
         </Box>
         <Box basis={'1/2'} margin={{ left: 'large' }}>
-          <div>
-            <div dangerouslySetInnerHTML={{ __html: description }} />
-          </div>
+          {console.log(selectedPool)}
+          {selectedPool.description &&
+            <div dangerouslySetInnerHTML={{ __html: selectedPool.description }} />
+          }
+
+          {!selectedPool.description &&
+            <div>
+              {console.log(selectedPool)}
+              <h4>Asset Originator Details</h4>
+              <p>The following information was provided by the Asset Originator.</p>
+              <a href={selectedPool.website} target="_blank">
+                <img src={selectedPool.logo} width="275px" />
+              </a>
+
+              <p>{selectedPool.text}</p>
+
+              <h4>Pool Details</h4>
+              <p>
+                {Object.keys(selectedPool.details).map((key: string) => (
+                  <>
+                    <strong>{key}:</strong> {selectedPool.details[key]}<br />
+                  </>
+                ))}
+              </p>
+
+              {selectedPool.website &&
+                <p>
+                  <strong>Contact the Asset Originator</strong><br />
+                  Interested in investing or want to learn more?<br /><a href={selectedPool.website} target="_blank">{(new URL(selectedPool.website)).hostname}</a><br /><a href={`mailto:${selectedPool.email}`} target="_blank">{selectedPool.email}</a>
+                </p>
+              }
+            </div>
+          }
         </Box>
       </Box>
 
