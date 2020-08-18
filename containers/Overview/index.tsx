@@ -158,7 +158,7 @@ class Overview extends React.Component<Props> {
               {selectedPool.website &&
                 <p>
                   <strong>Contact the Asset Originator</strong><br />
-                  Interested in investing or want to learn more?<br /><a href={selectedPool.website} target="_blank">{(new URL(selectedPool.website)).hostname}</a><br /><a href={`mailto:${selectedPool.email}`} target="_blank">{selectedPool.email}</a>
+                  Interested in learning more?<br /><a href={selectedPool.website} target="_blank">{(new URL(selectedPool.website)).hostname}</a><br /><a href={`mailto:${selectedPool.email}`} target="_blank">{selectedPool.email}</a>
                 </p>
               }
             </div>
