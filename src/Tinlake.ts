@@ -45,7 +45,7 @@ export type EthConfig = {
 
 export type EthersConfig = {
   provider?: ethers.providers.Provider
-  signer?: ethers.Signer
+  signer?: ethers.Signer,
 };
 
 export type ContractNames = typeof contractNames[number];
