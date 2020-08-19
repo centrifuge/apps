@@ -1,6 +1,7 @@
 import Tinlake, { ITinlake } from 'tinlake'
 import { ContractAddresses } from 'tinlake/dist/Tinlake'
 import Eth from 'ethjs'
+import { ethers } from 'ethers'
 import config from '../../config'
 
 let tinlake: ITinlake | null = null
@@ -16,6 +17,12 @@ export function initTinlake({
     const { transactionTimeout } = config
     tinlake = new Tinlake({ transactionTimeout, provider: getDefaultHttpProvider() }) as any
     tinlake!.setEthConfig({ gas: config.gas, gasPrice: config.gasPrice })
+
+    if (window && (window as any).ethereum) {
+      const web3Provider = new ethers.providers.Web3Provider((window as any).ethereum)
+      console.log('setEthersConfig', { provider: web3Provider, signer: web3Provider.getSigner() })
+      tinlake!.setEthersConfig({ provider: web3Provider, signer: web3Provider.getSigner() })
+    }
   }
 
   let resetContractAddresses = false
