@@ -22,7 +22,7 @@ class InvestAction extends React.Component<Props, State> {
     const { investHtml } = this.props;
 
     return <Box>
-      <Button primary label="Invest" margin={{ left: 'auto', vertical: 'large' }} onClick={this.onOpen} />
+      <Button primary label="Learn more" margin={{ left: 'auto', vertical: 'large' }} onClick={this.onOpen} />
       {this.state.open && (
         <Layer position="center" onClickOutside={this.onClose} onEsc={this.onClose}>
           <Box pad="medium" gap="small" width="large">
