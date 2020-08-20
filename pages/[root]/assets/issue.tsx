@@ -40,7 +40,7 @@ class LoanIssuePage extends React.Component<Props> {
                         <SecondaryHeader>
                           <Box direction="row" gap="small" align="center">
                             <BackLink href={'/assets'} />
-                            <Heading level="3">Finance Asset</Heading>
+                            <Heading level="3">Open Financing</Heading>
                           </Box>
                         </SecondaryHeader>
                         <IssueLoan tinlake={tinlake} auth={auth} tokenId={tokenId} registry={registry} />

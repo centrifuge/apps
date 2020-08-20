@@ -36,9 +36,9 @@ class LoanList extends React.Component<Props> {
           sortable
           onClickRow={this.clickRow as any}
           columns={[
-            { header: <HeaderCell text={'ID'}></HeaderCell>, property: 'loanId', align: 'end' },
+            { header: <HeaderCell text={'Asset ID'}></HeaderCell>, property: 'loanId', align: 'end' },
             {
-              header: 'NFT',
+              header: 'NFT ID',
               primary: true,
               property: 'tokenId',
               align: 'end',
