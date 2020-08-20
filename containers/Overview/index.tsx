@@ -49,7 +49,6 @@ class Overview extends React.Component<Props> {
     const { tinlake, loans, auth, selectedPool, pool } = this.props
     const userAddress = auth?.address || tinlake.ethConfig.from
 
-    const { name, description } = selectedPool
     const allLoans = (loans && loans.loans) || []
     const poolData = pool && pool.data
 
@@ -69,7 +68,7 @@ class Overview extends React.Component<Props> {
     return (
       <Box margin={{ bottom: 'large' }}>
         <SecondaryHeader>
-          <Heading level="3">Pool Overview: {name} </Heading>
+          <Heading level="3">Pool Overview: {selectedPool.name} </Heading>
         </SecondaryHeader>
 
         <Box direction="row" margin={{ bottom: 'large' }}>
@@ -134,7 +133,7 @@ class Overview extends React.Component<Props> {
                   </TableRow>
                 </TableBody>
               </Table>
-              <InvestAction poolName={name} />
+              <InvestAction poolName={selectedPool.name} />
             </Box>
           </Box>
           <Box basis={'1/2'} margin={{ left: 'large' }}>
