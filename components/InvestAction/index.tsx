@@ -115,7 +115,7 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
 
   return (
     <Box>
-      <Button primary label="Invest" margin={{ left: 'auto', vertical: 'large' }} onClick={onOpen} />
+      <Button primary label="Learn more" margin={{ left: 'auto', vertical: 'large' }} onClick={onOpen} />
 
       <FormModal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose}>
         <Form onSubmit={onSubmit}>

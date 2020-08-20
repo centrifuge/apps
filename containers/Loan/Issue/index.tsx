@@ -115,7 +115,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
                 </FormField>
               </Box>
               <Box basis={'1/3'} gap="medium" align="end">
-                <Button onClick={issueLoan} primary label="Finance Asset" disabled={!nft} />
+                <Button onClick={issueLoan} primary label="Open financing" disabled={!nft} />
               </Box>
             </Box>
           </Box>

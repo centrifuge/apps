@@ -64,15 +64,20 @@ export function loadLoans(tinlake: Tinlake): ThunkAction<Promise<void>, LoansSta
     }
     const result = await Apollo.getLoans(root)
 
-    const loans: SortableLoan[] = result.data.map((l: Loan) => ({
-      ...l,
-      debtNum: parseFloat(l.debt.toString()),
-      principalNum: parseFloat(l.principal.toString()),
-      interestRateNum: parseFloat(l.interestRate.toString()),
-    }))
+    if (result.data) {
+      const loans: SortableLoan[] = result.data.map((l: Loan) => ({
+        ...l,
+        debtNum: parseFloat(l.debt.toString()),
+        principalNum: parseFloat(l.principal.toString()),
+        interestRateNum: parseFloat(l.interestRate.toString())
+      }));
 
-    dispatch({ loans, type: RECEIVE })
-  }
+      dispatch({ loans, type: RECEIVE });
+    } else {
+      const loans: any[] = [];
+      dispatch({ loans, type: RECEIVE });
+    }
+  };
 }
 
 export function loadLoan(

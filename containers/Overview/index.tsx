@@ -117,7 +117,7 @@ class Overview extends React.Component<Props> {
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell scope="row">DROP Rate</TableCell>
+                    <TableCell scope="row">DROP APR</TableCell>
                     <TableCell style={{ textAlign: 'end' }}>{toPrecision(feeToInterestRate(dropRate), 2)} %</TableCell>
                   </TableRow>
                   <TableRow>
@@ -138,9 +138,46 @@ class Overview extends React.Component<Props> {
             </Box>
           </Box>
           <Box basis={'1/2'} margin={{ left: 'large' }}>
-            <div>
-              <div dangerouslySetInnerHTML={{ __html: description }} />
-            </div>
+            {selectedPool.description && <div dangerouslySetInnerHTML={{ __html: selectedPool.description }} />}
+
+            {!selectedPool.description && (
+              <div>
+                {console.log(selectedPool)}
+                <h4>Asset Originator Details</h4>
+                <p>The following information was provided by the Asset Originator.</p>
+                <a href={selectedPool.website} target="_blank">
+                  <img src={selectedPool.logo} width="275px" />
+                </a>
+
+                <p>{selectedPool.text}</p>
+
+                <h4>Pool Details</h4>
+                <p>
+                  {Object.keys(selectedPool.details).map((key: string) => (
+                    <>
+                      <strong>{key}:</strong> {selectedPool.details[key]}
+                      <br />
+                    </>
+                  ))}
+                </p>
+
+                {selectedPool.website && (
+                  <p>
+                    <strong>Contact the Asset Originator</strong>
+                    <br />
+                    Interested in learning more?
+                    <br />
+                    <a href={selectedPool.website} target="_blank">
+                      {new URL(selectedPool.website).hostname}
+                    </a>
+                    <br />
+                    <a href={`mailto:${selectedPool.email}`} target="_blank">
+                      {selectedPool.email}
+                    </a>
+                  </p>
+                )}
+              </div>
+            )}
           </Box>
         </Box>
 
