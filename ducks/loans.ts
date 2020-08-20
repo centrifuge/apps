@@ -69,15 +69,15 @@ export function loadLoans(tinlake: Tinlake): ThunkAction<Promise<void>, LoansSta
         ...l,
         debtNum: parseFloat(l.debt.toString()),
         principalNum: parseFloat(l.principal.toString()),
-        interestRateNum: parseFloat(l.interestRate.toString())
-      }));
+        interestRateNum: parseFloat(l.interestRate.toString()),
+      }))
 
-      dispatch({ loans, type: RECEIVE });
+      dispatch({ loans, type: RECEIVE })
     } else {
-      const loans: any[] = [];
-      dispatch({ loans, type: RECEIVE });
+      const loans: any[] = []
+      dispatch({ loans, type: RECEIVE })
     }
-  };
+  }
 }
 
 export function loadLoan(

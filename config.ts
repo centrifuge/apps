@@ -4,28 +4,28 @@ import * as yup from 'yup'
 
 export type Pool = {
   addresses: {
-    ROOT_CONTRACT: string;
-    ACTIONS: string;
-    PROXY_REGISTRY: string;
-    COLLATERAL_NFT: string;
-  };
-  graph?: string;
+    ROOT_CONTRACT: string
+    ACTIONS: string
+    PROXY_REGISTRY: string
+    COLLATERAL_NFT: string
+  }
+  graph?: string
   contractConfig: {
-    JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR';
-    SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR';
-  };
-  name: string;
-  shortName?: string;
-  assetOriginatorName?: string;
-  description?: string;
-  text?: string;
-  logo?: string;
-  website?: string;
-  email?: string;
-  details?: any;
-  investHtml?: string;
-  asset: string;
-};
+    JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
+    SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
+  }
+  name: string
+  shortName?: string
+  assetOriginatorName?: string
+  description?: string
+  text?: string
+  logo?: string
+  website?: string
+  email?: string
+  details?: any
+  investHtml?: string
+  asset: string
+}
 
 export interface DisplayedField {
   key: string
@@ -97,13 +97,16 @@ const poolSchema = yup.object().shape({
   details: yup.object(),
   description: yup.string(),
   investHtml: yup.string(),
-  asset: yup.string().required('poolSchema.asset is required')
-});
+  asset: yup.string().required('poolSchema.asset is required'),
+})
 
-const poolsSchema = yup.array().of(poolSchema);
+const poolsSchema = yup.array().of(poolSchema)
 
-const selectedPoolConfig = yup.mixed<'kovanStaging' | 'mainnetStaging' | 'mainnetProduction'>().required('POOLS config is required').oneOf(['kovanStaging', 'mainnetStaging', 'mainnetProduction'])
-  .validateSync(process.env.NEXT_PUBLIC_POOLS_CONFIG);
+const selectedPoolConfig = yup
+  .mixed<'kovanStaging' | 'mainnetStaging' | 'mainnetProduction'>()
+  .required('POOLS config is required')
+  .oneOf(['kovanStaging', 'mainnetStaging', 'mainnetProduction'])
+  .validateSync(process.env.NEXT_PUBLIC_POOLS_CONFIG)
 
 const pools = poolConfigs[`${selectedPoolConfig}`]
 const config: Config = {
