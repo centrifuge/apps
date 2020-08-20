@@ -323,6 +323,7 @@ export class Schema {
 
         //Make sure subtype belongs to AttrSubtypes
         const supportedSubtypes = Object.values(AttrSubtypes);
+        // @ts-ignore
         if (attr.hasOwnProperty('subtype') && supportedSubtypes.indexOf(attr.subtype) < 0)
           throw generateAttributeError(attr.name, AttributesErrors.SUBTYPE_NOT_SUPPORTED);
 

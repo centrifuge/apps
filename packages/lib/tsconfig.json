@@ -30,6 +30,7 @@
     "./src/**/*.ts"
   ],
   "exclude": [
+    "node_modules",
     "src/utils/__tests__",
     "**/*test.ts"
   ]

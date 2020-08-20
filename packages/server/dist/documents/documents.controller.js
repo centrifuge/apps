@@ -12,10 +12,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -24,6 +25,7 @@ const common_1 = require("@nestjs/common");
 const database_service_1 = require("../database/database.service");
 const centrifuge_service_1 = require("../centrifuge-client/centrifuge.service");
 const centrifuge_node_client_1 = require("@centrifuge/gateway-lib/centrifuge-node-client");
+const document_1 = require("@centrifuge/gateway-lib/models/document");
 const constants_1 = require("@centrifuge/gateway-lib/utils/constants");
 const SessionGuard_1 = require("../auth/SessionGuard");
 const custom_attributes_1 = require("@centrifuge/gateway-lib/utils/custom-attributes");
@@ -34,21 +36,37 @@ let DocumentsController = class DocumentsController {
     }
     create(request, document) {
         return __awaiter(this, void 0, void 0, function* () {
-            const payload = Object.assign({}, document, { attributes: Object.assign({}, document.attributes, { _createdBy: {
+            const payload = Object.assign(Object.assign({}, document), { attributes: Object.assign(Object.assign({}, document.attributes), { _createdBy: {
                         type: 'bytes',
                         value: request.user.account,
                     } }) });
             const createResult = yield this.centrifugeService.documents.createDocumentV2(request.user.account, {
                 attributes: payload.attributes,
-                readAccess: payload.header.readAccess,
-                writeAccess: payload.header.writeAccess,
+                read_access: payload.header.read_access ? payload.header.read_access : [],
+                write_access: payload.header.write_access ? payload.header.write_access : [],
                 scheme: centrifuge_node_client_1.CoreapiCreateDocumentRequest.SchemeEnum.Generic,
             });
+            createResult.document_status = document_1.DocumentStatus.Creating;
+            createResult.nft_status = document_1.NftStatus.NoNft;
+            const created = yield this.databaseService.documents.insert(Object.assign(Object.assign({}, createResult), { ownerId: request.user._id }));
             const createAttributes = custom_attributes_1.unflatten(createResult.attributes);
             createResult.attributes = createAttributes;
             const commitResult = yield this.centrifugeService.documents.commitDocumentV2(request.user.account, createResult.header.document_id);
-            yield this.centrifugeService.pullForJobComplete(commitResult.header.job_id, request.user.account);
-            return yield this.databaseService.documents.insert(Object.assign({}, createResult, { ownerId: request.user._id }));
+            const commit = yield this.centrifugeService.pullForJobComplete(commitResult.header.job_id, request.user.account);
+            if (commit.status === 'success') {
+                return yield this.databaseService.documents.updateById(created._id, {
+                    $set: {
+                        document_status: document_1.DocumentStatus.Created,
+                    },
+                });
+            }
+            else {
+                return yield this.databaseService.documents.updateById(created._id, {
+                    $set: {
+                        document_status: document_1.DocumentStatus.CreationFail,
+                    },
+                });
+            }
         });
     }
     getList(request) {
@@ -67,8 +85,13 @@ let DocumentsController = class DocumentsController {
             });
             if (!document)
                 throw new common_1.NotFoundException('Document not found');
-            const docFromNode = yield this.centrifugeService.documents.getDocument(request.user.account, document.header.document_id);
-            return Object.assign({ _id: document._id }, docFromNode, { attributes: Object.assign({}, custom_attributes_1.unflatten(docFromNode.attributes)) });
+            try {
+                const docFromNode = yield this.centrifugeService.documents.getDocument(request.user.account, document.header.document_id);
+                return Object.assign(Object.assign({ _id: document._id }, docFromNode), { attributes: Object.assign({}, custom_attributes_1.unflatten(docFromNode.attributes)) });
+            }
+            catch (error) {
+                return document;
+            }
         });
     }
     updateById(params, request, document) {
@@ -79,8 +102,8 @@ let DocumentsController = class DocumentsController {
             delete document.attributes.funding_agreement;
             const updateResult = yield this.centrifugeService.documents.updateDocument(request.user.account, documentFromDb.header.document_id, {
                 attributes: document.attributes,
-                readAccess: document.header.readAccess,
-                writeAccess: document.header.writeAccess,
+                read_access: document.header ? document.header.read_access : [],
+                write_access: document.header ? document.header.write_access : [],
                 scheme: centrifuge_node_client_1.CoreapiCreateDocumentRequest.SchemeEnum.Generic,
             });
             yield this.centrifugeService.pullForJobComplete(updateResult.header.job_id, request.user.account);

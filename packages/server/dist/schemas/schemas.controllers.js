@@ -12,10 +12,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -33,7 +34,7 @@ let SchemasController = class SchemasController {
         return __awaiter(this, void 0, void 0, function* () {
             let newSchema;
             try {
-                newSchema = new schema_1.Schema(schema.name, schema.attributes, schema.registries, schema.formFeatures);
+                newSchema = new schema_1.Schema(schema.name, schema.attributes, schema.registries, schema.collaborators, schema.formFeatures);
             }
             catch (err) {
                 throw new common_1.BadRequestException(err.message);

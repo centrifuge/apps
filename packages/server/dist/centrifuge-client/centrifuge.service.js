@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const centrifuge_node_client_1 = require("@centrifuge/gateway-lib/centrifuge-node-client");
 const config_1 = require("../config");
 const util_1 = require("util");
-const common_1 = require("@nestjs/common");
 const delay = util_1.promisify(setTimeout);
 class CentrifugeService {
     constructor() {
@@ -17,11 +16,11 @@ class CentrifugeService {
     pullForJobComplete(jobId, authorization) {
         return this.job.getJobStatus(authorization, jobId).then(result => {
             if (result.status === 'pending') {
-                return delay(500).then(() => this.pullForJobComplete(jobId, authorization));
+                return delay(250).then(() => this.pullForJobComplete(jobId, authorization));
             }
             else if (result.status === 'failed') {
-                console.log('Job Failed', result);
-                throw new common_1.BadRequestException(result.message);
+                console.log('Job Failed', result.message);
+                return result;
             }
             else {
                 console.log('Job Complete', result);

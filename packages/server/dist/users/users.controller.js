@@ -12,10 +12,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -60,7 +61,7 @@ let UsersController = class UsersController {
             }
             if (config_1.default.inviteOnly) {
                 if (existingUser && existingUser.invited && !existingUser.enabled) {
-                    return this.upsertUser(Object.assign({}, existingUser, { password: user.password, enabled: true }), existingUser._id);
+                    return this.upsertUser(Object.assign(Object.assign({}, existingUser), { password: user.password, enabled: true }), existingUser._id);
                 }
                 else {
                     throw new common_1.ForbiddenException('Email taken!');
@@ -70,7 +71,7 @@ let UsersController = class UsersController {
                 if (existingUser) {
                     throw new common_1.ForbiddenException('Email taken!');
                 }
-                return this.upsertUser(Object.assign({}, user, { enabled: true, invited: false }));
+                return this.upsertUser(Object.assign(Object.assign({}, user), { enabled: true, invited: false }));
             }
         });
     }
@@ -85,7 +86,7 @@ let UsersController = class UsersController {
             if (userExists) {
                 throw new common_1.ForbiddenException('User already invited!');
             }
-            return this.upsertUser(Object.assign({}, user, { name: user.name, email: user.email, account: undefined, chain: undefined, password: undefined, enabled: false, invited: true, schemas: user.schemas, permissions: user.permissions }));
+            return this.upsertUser(Object.assign(Object.assign({}, user), { name: user.name, email: user.email, account: undefined, chain: undefined, password: undefined, enabled: false, invited: true, schemas: user.schemas, permissions: user.permissions }));
         });
     }
     update(user) {

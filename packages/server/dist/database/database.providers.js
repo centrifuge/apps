@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -13,7 +14,7 @@ const bcrypt = require("bcrypt");
 const database_repository_1 = require("./database.repository");
 const config_1 = require("../config");
 const database_service_1 = require("./database.service");
-const initializeDatabase = (inMemoryOnly) => __awaiter(this, void 0, void 0, function* () {
+const initializeDatabase = (inMemoryOnly) => __awaiter(void 0, void 0, void 0, function* () {
     const usersRepository = new database_repository_1.DatabaseRepository({ filename: `${config_1.default.dbPath}/usersDb`, inMemoryOnly });
     const admin = {
         name: config_1.default.admin.name,
@@ -45,7 +46,7 @@ const initializeDatabase = (inMemoryOnly) => __awaiter(this, void 0, void 0, fun
 let initializeDatabasePromise;
 exports.databaseServiceProvider = {
     provide: database_service_1.DatabaseService,
-    useFactory: () => __awaiter(this, void 0, void 0, function* () {
+    useFactory: () => __awaiter(void 0, void 0, void 0, function* () {
         let testingMode;
         if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'functional') {
             testingMode = true;

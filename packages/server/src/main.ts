@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import {NestExpressApplication} from '@nestjs/platform-express';
 import * as path from 'path';
 import * as session from 'express-session';
 import * as passport from 'passport';
@@ -9,7 +10,7 @@ import config from './config';
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // set up the express session storage
   app.use(

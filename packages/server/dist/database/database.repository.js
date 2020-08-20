@@ -7,7 +7,7 @@ class DatabaseRepository {
         const defaultOptions = {
             timestampData: true,
         };
-        this.repository = DataStore.create(Object.assign({}, defaultOptions, options));
+        this.repository = DataStore.create(Object.assign(Object.assign({}, defaultOptions), options));
     }
     insert(object) {
         return this.repository.insert(object);

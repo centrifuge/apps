@@ -12,10 +12,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -23,6 +24,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const database_service_1 = require("../database/database.service");
 const centrifuge_service_1 = require("../centrifuge-client/centrifuge.service");
+const document_1 = require("@centrifuge/gateway-lib/models/document");
 const nfts_1 = require("@centrifuge/gateway-lib/models/nfts");
 const constants_1 = require("@centrifuge/gateway-lib/utils/constants");
 const SessionGuard_1 = require("../auth/SessionGuard");
@@ -40,17 +42,27 @@ let NftsController = class NftsController {
                 deposit_address: body.deposit_address,
             };
             const mintingResult = yield this.centrifugeService.nft.mintNft(request.user.account, body.registry_address, payload);
-            yield this.centrifugeService.pullForJobComplete(mintingResult.header.job_id, request.user.account);
-            return mintingResult;
-        });
-    }
-    transfer(request, body) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const transferResult = yield this.centrifugeService.nft.transferNft(request.user.account, body.registry, body.token_id, {
-                to: body.to,
+            const doc = yield this.databaseService.documents.findOne({ 'header.document_id': mintingResult.document_id });
+            yield this.databaseService.documents.updateById(doc._id, {
+                $set: {
+                    nft_status: document_1.NftStatus.Minting,
+                },
             });
-            yield this.centrifugeService.pullForJobComplete(transferResult.header.jobId, request.user.account);
-            return transferResult;
+            const mint = yield this.centrifugeService.pullForJobComplete(mintingResult.header.job_id, request.user.account);
+            if (mint.status === 'success') {
+                return yield this.databaseService.documents.updateById(doc._id, {
+                    $set: {
+                        nft_status: document_1.NftStatus.Minted,
+                    },
+                });
+            }
+            else {
+                return yield this.databaseService.documents.updateById(doc._id, {
+                    $set: {
+                        nft_status: document_1.NftStatus.MintingFail,
+                    },
+                });
+            }
         });
     }
 };
@@ -62,14 +74,6 @@ __decorate([
     __metadata("design:paramtypes", [Object, nfts_1.MintNftRequest]),
     __metadata("design:returntype", Promise)
 ], NftsController.prototype, "mintNFT", null);
-__decorate([
-    common_1.Post('/transfer'),
-    __param(0, common_1.Req()),
-    __param(1, common_1.Body()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, nfts_1.TransferNftRequest]),
-    __metadata("design:returntype", Promise)
-], NftsController.prototype, "transfer", null);
 NftsController = __decorate([
     common_1.Controller(constants_1.ROUTES.NFTS),
     common_1.UseGuards(SessionGuard_1.SessionGuard),
