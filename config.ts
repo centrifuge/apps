@@ -16,8 +16,14 @@ export type Pool = {
   }
   name: string
   shortName?: string
-  description: string
-  investHtml: string
+  assetOriginatorName?: string
+  description?: string
+  text?: string
+  logo?: string
+  website?: string
+  email?: string
+  details?: any
+  investHtml?: string
   asset: string
 }
 
@@ -75,22 +81,27 @@ const contractConfigSchema = yup.object().shape({
     .oneOf(['PROPORTIONAL_OPERATOR', 'ALLOWANCE_OPERATOR']),
 })
 
+// TODO: text/logo/etc should be required and description/investHtml removed,
+// once we migrate all pool configs to the new format
 const poolSchema = yup.object().shape({
   addresses: contractAddressesSchema.required('poolSchema.addresses is required'),
   graph: yup.string(),
   contractConfig: contractConfigSchema.required('poolSchema.contractConfig is required'),
   name: yup.string().required('poolSchema.name is required'),
   shortName: yup.string(),
-  description: yup.string().required('poolSchema.description is required'),
-  investHtml: yup
-    .string()
-    .default(
-      '<p>You will need to get onboarded with the asset originator to start investing in this pool.</p><p>You can find their contact details in the pool overview page.</p>'
-    ),
+  assetOriginatorName: yup.string(),
+  text: yup.string(),
+  logo: yup.string(),
+  website: yup.string(),
+  email: yup.string(),
+  details: yup.object(),
+  description: yup.string(),
+  investHtml: yup.string(),
   asset: yup.string().required('poolSchema.asset is required'),
 })
 
 const poolsSchema = yup.array().of(poolSchema)
+
 const selectedPoolConfig = yup
   .mixed<'kovanStaging' | 'mainnetStaging' | 'mainnetProduction'>()
   .required('POOLS config is required')

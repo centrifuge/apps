@@ -70,8 +70,8 @@
     "redux": "4.0.5",
     "redux-thunk": "2.3.0",
     "styled-components": "5.1.1",
-    "tinlake": "github:centrifuge/tinlake.js#7d03da6436fff2db23943c1d10597ea77df2c2d3",
-    "tinlake-pool-config": "github:centrifuge/tinlake-pool-config#1ec5009275c3993696f0493e5c0d9a833a9de08e",
+    "tinlake": "github:centrifuge/tinlake.js#90825d9a5fa0689f7155e53b2225ca7e803add3a",
+    "tinlake-pool-config": "github:centrifuge/tinlake-pool-config#0e87d04136e1fcdd9ad036f758e839c19ae32576",
     "web3": "^1.2.11",
     "web3-utils": "1.2.7",
     "yup": "0.28.5"

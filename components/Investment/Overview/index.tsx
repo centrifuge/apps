@@ -30,7 +30,7 @@ class InvestmentsOverview extends React.Component<Props> {
             </DashboardMetric>
           </Box>
           <Box basis={'1/3'}>
-            <DashboardMetric label={'DROP Rate'}>
+            <DashboardMetric label={'DROP APR'}>
               <NumberDisplay value={feeToInterestRate(seniorInterestRate)} suffix={' %'} precision={2}>
                 {' '}
               </NumberDisplay>
