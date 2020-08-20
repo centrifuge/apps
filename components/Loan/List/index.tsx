@@ -28,9 +28,9 @@ class LoanList extends React.Component<Props> {
     return <Box>
       <DataTable style={{ tableLayout: 'auto' }} data={loans} sort={{ direction: 'desc', property: 'loanId' }} sortable
         onClickRow={this.clickRow as any} columns={[
-          { header: <HeaderCell text={'Asset ID'}></HeaderCell>, property: 'loanId', align: 'end' },
+          { header: <HeaderCell text={'ID'}></HeaderCell>, property: 'loanId', align: 'end' },
           {
-            header: 'NFT ID', primary: true, property: 'tokenId', align: 'end',
+            header: 'NFT', primary: true, property: 'tokenId', align: 'end',
             render: (l: SortableLoan) =>
               <Box style={{ maxWidth: '150px' }}>
                 <DisplayField

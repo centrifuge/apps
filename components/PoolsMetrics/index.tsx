@@ -13,27 +13,16 @@ class PoolsMetrics extends React.Component<Props> {
   render() {
     const { pools } = this.props;
     return <Box direction="row" gap="medium" margin={{ bottom: 'medium' }} justify="evenly">
-      <PoolsMetric label="Ongoing Pools" >
+      <PoolsMetric label="Total Number of Pools" >
         <Box direction="row" style={{  alignItems: 'center' }} >
           <Text style={{ fontSize: '0.7em', width: '250px', height: 40, display: 'flex', justifyContent: 'center',
             alignItems: 'center' }} >
-            {pools.ongoingPools}
+            {pools.pools.length}
           </Text>
         </Box>
       </PoolsMetric>
-      <PoolsMetric label="Total Active Financings">
-        <Box direction="row" style={{ alignItems: 'center' }} >
-          <Text style={{ width: '250px', fontSize: '0.7em', height: 40, display: 'flex', justifyContent: 'center',
-            alignItems: 'center' }} >
-            {pools.ongoingLoans}
-          </Text>
-        </Box>
-      </PoolsMetric>
-      <PoolsMetric label="Total Outstanding Volume">
-        <ERC20Display value={pools.totalDebt.toString()} tokenMetas={DAI} precision={2} />
-      </PoolsMetric>
-      <PoolsMetric label="Total Repaid Volume">
-        <ERC20Display value={pools.totalRepaysAggregatedAmount.toString()} tokenMetas={DAI} precision={2} />
+      <PoolsMetric label="Total Financed to Date">
+        <ERC20Display value={pools.totalDebt.add(pools.totalRepaysAggregatedAmount).toString()} tokenMetas={DAI} precision={2} />
       </PoolsMetric>
     </Box>;
   }

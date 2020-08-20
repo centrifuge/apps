@@ -152,7 +152,7 @@ class IssueLoan extends React.Component<Props, State> {
             </FormField>
           </Box>
           <Box basis={'1/3'} gap="medium" align="end">
-            <Button onClick={this.issueLoan} primary label="Finance Asset" disabled={is === 'loading' || is === 'success' || !nft} />
+            <Button onClick={this.issueLoan} primary label="Open Financing" disabled={is === 'loading' || is === 'success' || !nft} />
           </Box>
         </Box>
       </Box>
