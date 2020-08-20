@@ -34,7 +34,7 @@
     "@nestjs/common": "^5.7.4",
     "@nestjs/core": "^5.7.4",
     "@nestjs/passport": "^5.1.0",
-    "bcrypt": "3.0.8",
+    "bcrypt": "5.0.0",
     "cross-env": "^5.2.0",
     "ethereumjs-util": "^6.1.0",
     "ethjs": "^0.4.0",
