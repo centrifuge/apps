@@ -38,6 +38,7 @@ export interface DisplayedField {
 interface Config {
   rpcUrl: string
   etherscanUrl: string
+  gasLimit: string
   gasPrice: string
   gas: string
   transactionTimeout: number
@@ -121,6 +122,10 @@ const config: Config = {
     .url()
     .validateSync(process.env.NEXT_PUBLIC_ETHERSCAN_URL),
   // TODO: make this into publicRuntimeConfig
+  gasLimit: yup
+    .number()
+    .required('gasLimit is required')
+    .validateSync(1000000000000000000),
   gasPrice: yup
     .string()
     .required('gasPrice is required')

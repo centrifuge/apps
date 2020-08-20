@@ -210,6 +210,9 @@ export function processTransaction(
     try {
       const actionCall = actions[unconfirmedTx.actionName as keyof typeof actions]
       const response = await (actionCall as any)(tinlake, ...unconfirmedTx.actionArgs)
+
+      // if (response.hash) {
+
       hasCompleted = true
 
       const outcome = (response as any).status === SUCCESS_STATUS

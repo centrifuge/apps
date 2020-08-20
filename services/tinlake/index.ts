@@ -20,8 +20,16 @@ export function initTinlake({
 
     if (window && (window as any).ethereum) {
       const web3Provider = new ethers.providers.Web3Provider((window as any).ethereum)
-      console.log('setEthersConfig', { provider: web3Provider, signer: web3Provider.getSigner() })
-      tinlake!.setEthersConfig({ provider: web3Provider, signer: web3Provider.getSigner() })
+      const ethersConfig = {
+        provider: web3Provider,
+        signer: web3Provider.getSigner(),
+        overrides: {
+          gasLimit: Number(config.gasLimit),
+          gasPrice: Number(config.gasPrice),
+        },
+      }
+      console.log('setEthersConfig', ethersConfig)
+      tinlake!.setEthersConfig(ethersConfig)
     }
   }
 
