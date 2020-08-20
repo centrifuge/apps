@@ -14,10 +14,21 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
     }
 
     mintNFT = async (nftAddr: string, owner: string, tokenId: string, ref: string, amount: string, asset:string) => {
-      const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
-      const txHash = await executeAndRetry(nft.mint, [owner, tokenId, ref, amount, asset, this.ethConfig]);
-      console.log(`[NFT.mint] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout);
+      const nft = this.getContract(nftAddr, "COLLATERAL_NFT")
+
+      if (nft) {
+        try {
+          const tx = await nft.mint(owner, tokenId, ref, amount, asset);
+          return { hash: tx.hash, contractKey: "COLLATERAL_NFT", timesOutAt: 0 };
+        } catch (error) {
+          return error
+        }
+      } else {
+        const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
+        const txHash = await executeAndRetry(nft.mint, [owner, tokenId, ref, amount, asset, this.ethConfig]);
+        console.log(`[NFT.mint] txHash: ${txHash}`);
+        return waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout);
+      }
     }
 
     approveNFT = async (nftAddr: string, tokenId: string, to: string) => {

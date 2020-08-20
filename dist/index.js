@@ -29637,13 +29637,26 @@ function CollateralActions(Base) {
                 });
             }); };
             _this.mintNFT = function (nftAddr, owner, tokenId, ref, amount, asset) { return __awaiter(_this, void 0, void 0, function () {
-                var nft, txHash;
+                var nft, tx, error_1, nft_1, txHash;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            nft = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
-                            return [4 /*yield*/, executeAndRetry(nft.mint, [owner, tokenId, ref, amount, asset, this.ethConfig])];
+                            nft = this.getContract(nftAddr, 'COLLATERAL_NFT');
+                            if (!nft) return [3 /*break*/, 4];
+                            _a.label = 1;
                         case 1:
+                            _a.trys.push([1, 3, , 4]);
+                            return [4 /*yield*/, nft.mint(owner, tokenId, ref, amount, asset)];
+                        case 2:
+                            tx = _a.sent();
+                            return [2 /*return*/, { hash: tx.hash, contractKey: 'COLLATERAL_NFT', timesOutAt: 0 }];
+                        case 3:
+                            error_1 = _a.sent();
+                            return [2 /*return*/, error_1];
+                        case 4:
+                            nft_1 = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
+                            return [4 /*yield*/, executeAndRetry(nft_1.mint, [owner, tokenId, ref, amount, asset, this.ethConfig])];
+                        case 5:
                             txHash = _a.sent();
                             console.log("[NFT.mint] txHash: " + txHash);
                             return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout)];
@@ -47470,6 +47483,23 @@ var Tinlake = /** @class */ (function () {
     Tinlake.prototype.createContract = function (address, abiName) {
         var contract = this.eth.contract(this.contractAbis[abiName]).at(address);
         return contract;
+    };
+    Tinlake.prototype.getContract = function (address, abiName) {
+        return this.ethersConfig.signer ? new ethers_2$1.Contract(address, this.contractAbis[abiName], this.ethersConfig.signer) : undefined;
+    };
+    Tinlake.prototype.subscribe = function (tx, callback) {
+        return __awaiter(this, void 0, void 0, function () {
+            var response;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.ethersConfig.provider.waitForTransaction(tx.hash)];
+                    case 1:
+                        response = _a.sent();
+                        callback(response);
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     return Tinlake;
 }());

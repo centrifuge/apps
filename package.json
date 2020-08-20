@@ -8,6 +8,15 @@
   "files": [
     "dist"
   ],
+  "scripts": {
+    "build": "rollup -c",
+    "start": "rollup -cw",
+    "test": "ts-mocha -p src/test/tsconfig.json src/**/*.spec.ts src/*.spec.ts --timeout 40000",
+    "nodemon": "nodemon node inspect dist/Tinlake.js",
+    "generate-docs": "typedoc --out docs --exclude \"./node_modules/**\"  --exclude \"./src/abi/**\" --exclude \"./src/index.ts\" --exclude \"./src/actions/*.spec.ts\" --exclude \"./src/test/**\" --excludeExternals --excludeNotExported --ignoreCompilerErrors ./src",
+    "lint": "tslint --project .",
+    "lint-fix": "tslint --fix -c ./tslint.json 'src/**/*{.ts,.tsx}'"
+  },
   "dependencies": {
     "bignumber.js": "^9.0.0",
     "decimal.js-light": "^2.5.0",
@@ -42,15 +51,6 @@
     "tslint-config-airbnb": "^5.11.1",
     "typedoc": "^0.17.3",
     "typescript": "^3.8.3"
-  },
-  "scripts": {
-    "build": "rollup -c",
-    "watch": "rollup -cw",
-    "test": "ts-mocha -p src/test/tsconfig.json src/**/*.spec.ts src/*.spec.ts --timeout 40000",
-    "nodemon": "nodemon node inspect dist/Tinlake.js",
-    "generate-docs": "typedoc --out docs --exclude \"./node_modules/**\"  --exclude \"./src/abi/**\" --exclude \"./src/index.ts\" --exclude \"./src/actions/*.spec.ts\" --exclude \"./src/test/**\" --excludeExternals --excludeNotExported --ignoreCompilerErrors ./src",
-    "lint": "tslint --project .",
-    "lint-fix": "tslint --fix -c ./tslint.json 'src/**/*{.ts,.tsx}'"
   },
   "husky": {
     "hooks": {

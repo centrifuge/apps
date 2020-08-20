@@ -3,7 +3,7 @@ import BN from 'bn.js';
 export declare function CollateralActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase): {
     new (...args: any[]): {
         mintTitleNFT: (nftAddr: string, user: string) => Promise<any>;
-        mintNFT: (nftAddr: string, owner: string, tokenId: string, ref: string, amount: string, asset: string) => Promise<unknown>;
+        mintNFT: (nftAddr: string, owner: string, tokenId: string, ref: string, amount: string, asset: string) => Promise<any>;
         approveNFT: (nftAddr: string, tokenId: string, to: string) => Promise<unknown>;
         setNFTApprovalForAll: (nftAddr: string, to: string, approved: boolean) => Promise<unknown>;
         isNFTApprovedForAll: (nftAddr: string, owner: string, operator: string) => Promise<boolean>;
@@ -24,8 +24,10 @@ export declare function CollateralActions<ActionsBase extends Constructor<Tinlak
         setProvider: (provider: any, ethOptions?: any) => void;
         setContracts: () => void;
         setEthConfig: (ethConfig: import("../Tinlake").EthConfig) => void;
-        setEthersConfig: (ethersConfig: import("../Tinlake").EthersConfig | undefined) => void;
+        setEthersConfig: (ethersConfig: import("../Tinlake").EthersConfig) => void;
         createContract(address: string, abiName: string): void;
+        getContract(address: string, abiName: string): import("ethers").Contract | undefined;
+        subscribe(tx: import("../Tinlake").PendingTransaction, callback: (response: import("ethers/providers").TransactionReceipt) => void): Promise<void>;
         getOperatorType: (tranche: string) => any;
     };
 } & ActionsBase;

@@ -1,14 +1,24 @@
 import { ethI } from './services/ethereum';
 import { ethers } from 'ethers';
 declare const contractNames: string[];
+export declare type PendingTransaction = {
+    hash: string;
+    contractKey: string;
+    timesOutAt: number;
+};
 export declare type EthConfig = {
     from?: string;
     gasPrice?: string;
     gas?: string;
 };
+export declare type EthersOverrides = {
+    gasPrice?: number;
+    gasLimit?: number;
+};
 export declare type EthersConfig = {
     provider?: ethers.providers.Provider;
     signer?: ethers.Signer;
+    overrides?: EthersOverrides;
 };
 export declare type ContractNames = typeof contractNames[number];
 export declare type Contracts = {
@@ -49,6 +59,8 @@ export default class Tinlake {
     setEthConfig: (ethConfig: EthConfig) => void;
     setEthersConfig: (ethersConfig: EthersConfig) => void;
     createContract(address: string, abiName: string): void;
+    getContract(address: string, abiName: string): ethers.Contract | undefined;
+    subscribe(tx: PendingTransaction, callback: (response: ethers.providers.TransactionReceipt) => void): Promise<void>;
     getOperatorType: (tranche: string) => any;
 }
 export {};
