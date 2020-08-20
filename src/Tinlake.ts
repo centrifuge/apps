@@ -40,8 +40,8 @@ type AbiOutput = {
 export type PendingTransaction = {
   hash: string
   contractKey: string
-  timesOutAt: number
-}
+  timesOutAt: number,
+};
 
 export type EthConfig = {
   from?: string;
@@ -57,7 +57,7 @@ export type EthersOverrides = {
 export type EthersConfig = {
   provider?: ethers.providers.Provider
   signer?: ethers.Signer,
-  overrides?: EthersOverrides
+  overrides?: EthersOverrides,
 };
 
 export type ContractNames = typeof contractNames[number];
@@ -167,13 +167,13 @@ export default class Tinlake {
     return this.ethersConfig.signer ? new ethers.Contract(
       address,
       this.contractAbis[abiName],
-      this.ethersConfig.signer
-    ) : undefined
+      this.ethersConfig.signer,
+    ) : undefined;
   }
 
   async subscribe(tx: PendingTransaction, callback: (response: ethers.providers.TransactionReceipt) => void) {
     const response = await this.ethersConfig.provider!.waitForTransaction(tx.hash);
-    callback(response)
+    callback(response);
   }
 
   getOperatorType = (tranche: string) => {
