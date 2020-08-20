@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "ethereumjs-util": "^6.1.0",
-    "lodash": "^4.17.14",
+    "lodash": "^4.17.19",
     "typescript": "3.2.2",
     "portable-fetch": "^3.0.0"
   },
