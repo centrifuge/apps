@@ -1,6 +1,7 @@
 import Eth from 'ethjs';
 import { ethI }  from './services/ethereum';
 import  abiDefinitions  from './abi';
+import { ethers } from 'ethers';
 
 const contractNames = [
   'TINLAKE_CURRENCY',
@@ -42,6 +43,11 @@ export type EthConfig = {
   gas?: string;
 };
 
+export type EthersConfig = {
+  provider?: ethers.providers.Provider
+  signer?: ethers.Signer,
+};
+
 export type ContractNames = typeof contractNames[number];
 
 export type Contracts = {
@@ -62,6 +68,7 @@ export type TinlakeParams = {
   contractAddresses?: ContractAddresses | {};
   contractAbis?: ContractAbis | {};
   ethConfig?: EthConfig;
+  ethersConfig?: EthersConfig;
   ethOptions?: any | {};
   contracts?: Contracts | {};
   contractConfig?: any | {};
@@ -74,6 +81,7 @@ export default class Tinlake {
   public eth: ethI;
   public ethOptions: any;
   public ethConfig: EthConfig;
+  public ethersConfig: EthersConfig;
   public contractAddresses: ContractAddresses;
   public transactionTimeout: number;
   public contracts: Contracts = {};
@@ -81,7 +89,7 @@ export default class Tinlake {
   public contractConfig: any = {};
 
   constructor(params: TinlakeParams) {
-    const { provider, contractAddresses, transactionTimeout, contractAbis, ethOptions, ethConfig, contractConfig } = params;
+    const { provider, contractAddresses, transactionTimeout, contractAbis, ethOptions, ethConfig, ethersConfig, contractConfig } = params;
     if (!contractAbis) {
       this.contractAbis = abiDefinitions;
     }
@@ -91,6 +99,7 @@ export default class Tinlake {
     this.transactionTimeout = transactionTimeout;
     this.setProvider(provider, ethOptions);
     this.setEthConfig(ethConfig || {});
+    this.setEthersConfig(ethersConfig || {});
   }
 
   setProvider = (provider: any, ethOptions?: any) => {
@@ -127,6 +136,13 @@ export default class Tinlake {
     this.ethConfig = {
       ...this.ethConfig,
       ...ethConfig,
+    };
+  }
+
+  setEthersConfig = (ethersConfig: EthersConfig) => {
+    this.ethersConfig = {
+      ...this.ethersConfig,
+      ...ethersConfig,
     };
   }
 

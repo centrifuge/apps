@@ -12,7 +12,7 @@
     "bignumber.js": "^9.0.0",
     "decimal.js-light": "^2.5.0",
     "dotenv": "^8.2.0",
-    "ethers": "^4.0.45",
+    "ethers": "4.0.45",
     "ethjs": "^0.4.0",
     "ethjs-account": "^0.1.4",
     "ethjs-provider-signer": "^0.1.4",
