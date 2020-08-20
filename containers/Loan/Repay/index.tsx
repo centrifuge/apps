@@ -31,7 +31,10 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
     const valueToDecimal = new Decimal(baseToDisplay(repayAmount, 18)).toFixed(2)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
-    const txId = await props.createTransaction(`Repay ${formatted} DAI`, 'repay', [props.tinlake, props.loan])
+    const txId = await props.createTransaction(`Repay Asset ${props.loan.loanId} (${formatted} DAI)`, 'repay', [
+      props.tinlake,
+      props.loan,
+    ])
     setTxId(txId)
   }
 
