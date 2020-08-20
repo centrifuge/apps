@@ -37,7 +37,7 @@ class LoanListPage extends React.Component<Props> {
                     <SecondaryHeader>
                       <Heading level="3">Assets</Heading>
                       <PoolLink href={'/assets/issue'}>
-                        <Button primary label="Finance Asset" />
+                        <Button primary label="Open Financing" />
                       </PoolLink>
                     </SecondaryHeader>
                     <LoanList tinlake={tinlake} auth={auth} />

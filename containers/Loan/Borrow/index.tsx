@@ -74,7 +74,7 @@ class LoanBorrow extends React.Component<Props, State> {
         </FormField>
       </Box>
       <Box align="start">
-        <Button onClick={this.borrow} primary label="Finance Asset" disabled={ !borrowEnabled } />
+        <Button onClick={this.borrow} primary label="Open Financing" disabled={ !borrowEnabled } />
         {availableFundsOverflow &&
           <Box margin={{ top: 'small' }}>
             Available funds exceeded. <br />
