@@ -9,6 +9,8 @@
     "isolatedModules": true,
     "suppressExcessPropertyErrors": true,
     "strictFunctionTypes": false,
-
+    "lib": [
+      "es2015",
+    ]
   }
 }

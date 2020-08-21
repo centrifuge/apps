@@ -46,7 +46,7 @@ describe('Schema validations', () => {
   describe('Attributes Validation', () => {
     it('should fail when attributes is not set or not an array', () => {
       expect(() => {
-        Schema.validateAttributes(undefined);
+        Schema.validateAttributes([]);
       }).toThrow(AttributesErrors.ATTRIBUTES_FORMAT);
 
       expect(() => {
@@ -235,7 +235,7 @@ describe('Schema validations', () => {
       }).not.toThrow();
 
       expect(() => {
-        Schema.validateRegistries(null);
+        Schema.validateRegistries([]);
       }).not.toThrow();
     });
 
@@ -357,7 +357,7 @@ describe('Schema validations', () => {
 
     it('should  fail if columnNo is not integer bigger than 0', () => {
       expect(() => {
-        Schema.validateFormFeatures({ columnNo: null });
+        Schema.validateFormFeatures({ columnNo: 0 });
       }).toThrow(FormFeaturesErrors.COLUMN_NO_FORMAT);
 
       expect(() => {
@@ -380,7 +380,7 @@ describe('Schema validations', () => {
 
     it('should  fail if comments in not a boolean', () => {
       expect(() => {
-        Schema.validateFormFeatures({ comments: null });
+        Schema.validateFormFeatures({ comments: undefined });
       }).toThrow(FormFeaturesErrors.COMMENTS_FORMAT);
 
       expect(() => {
@@ -419,7 +419,7 @@ describe('Schema validations', () => {
         Schema.validateFormFeatures({
           columnNo: 4,
           comments: true,
-          defaultSection: null,
+          defaultSection: undefined,
         });
       }).toThrow(FormFeaturesErrors.DEFAULT_SECTION_FORMAT);
 

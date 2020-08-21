@@ -76,7 +76,7 @@ describe('ContactsController', () => {
           address: '0xc111111111a4e539741ca11b590b9447b26a8057',
         } as Contact);
       } catch (err) {
-        expect(err.message.message).toEqual('Contact name not specified');
+        expect(err.message).toEqual('Contact name not specified');
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }
@@ -95,7 +95,7 @@ describe('ContactsController', () => {
           name: 'Joe',
         } as Contact);
       } catch (err) {
-        expect(err.message.message).toEqual('Contact address must have ETH format');
+        expect(err.message).toEqual('Contact address must have ETH format');
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }

@@ -18,14 +18,15 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "noEmit": true,
-    "jsx": "preserve",
     "strictPropertyInitialization": false,
     "lib": [
+      "es2015",
       "dom",
       "dom.iterable",
       "esnext"
     ],
-    "isolatedModules": true
+    "isolatedModules": true,
+    "jsx": "react"
   },
   "include": [
     "src/**/*",
@@ -34,7 +35,6 @@
   "exclude": [
     "**/*spec.ts",
     "**/*test.ts"
-
   ],
   "lib": [
     "es2018",

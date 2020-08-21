@@ -93,9 +93,7 @@ describe('SchemasController', () => {
       await expect(schemasController.create(
         schemaToCreate,
       )).rejects.toMatchObject({
-        message: {
           message: `Schema with name ${schemaToCreate.name} exists in the database`,
-        },
       });
     });
 
@@ -124,7 +122,7 @@ describe('SchemasController', () => {
           ],
         } as Schema);
       } catch (err) {
-        expect(err.message.message).toMatch(RegistriesErrors.ADDRESS_FORMAT);
+        expect(err.message).toMatch(RegistriesErrors.ADDRESS_FORMAT);
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }
@@ -156,12 +154,12 @@ describe('SchemasController', () => {
           ],
         } as Schema);
       } catch (err) {
-        expect(err.message.message).toEqual(AttributesErrors.REFERENCE_ID_MISSING);
+        expect(err.message).toEqual(AttributesErrors.REFERENCE_ID_MISSING);
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }
     });
-    it('should throw error when there attributes are nested', async function() {
+    it('should throw error when attributes are nested', async function() {
       expect.assertions(4);
       const schemasController = schemaModule.get<SchemasController>(
         SchemasController,
@@ -187,8 +185,8 @@ describe('SchemasController', () => {
           ],
         } as Schema);
       } catch (err) {
-        expect(err.message.message).toMatch(AttributesErrors.NESTED_ATTRIBUTES_NOT_SUPPORTED);
-        expect(err.message.message).toMatch('document.qualities');
+        expect(err.message).toMatch(AttributesErrors.NESTED_ATTRIBUTES_NOT_SUPPORTED);
+        expect(err.message).toMatch('document.qualities');
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }
@@ -340,7 +338,7 @@ describe('SchemasController', () => {
           updateSchemaObject2,
         );
       } catch (err) {
-        expect(err.message.message).toEqual(DiffErrors.NAME_CHANGE_FORBIDEN);
+        expect(err.message).toEqual(DiffErrors.NAME_CHANGE_FORBIDEN);
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }
