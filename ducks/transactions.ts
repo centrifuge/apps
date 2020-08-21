@@ -206,7 +206,7 @@ export function processTransaction(
         // Confirmed
         const pendingTx: Transaction = {
           ...unconfirmedTx,
-          status: 'pending'
+          status: 'pending',
         }
         await dispatch({ id, transaction: pendingTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
 
@@ -217,7 +217,12 @@ export function processTransaction(
               ...pendingTx,
               showIfClosed: false,
             }
-            await dispatch({ id, transaction: hiddenPendingTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
+            await dispatch({
+              id,
+              transaction: hiddenPendingTx,
+              dontChangeUpdatedAt: true,
+              type: SET_ACTIVE_TRANSACTION,
+            })
           }
         }, 10000)
 
