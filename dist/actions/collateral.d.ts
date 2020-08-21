@@ -27,7 +27,7 @@ export declare function CollateralActions<ActionsBase extends Constructor<Tinlak
         setEthersConfig: (ethersConfig: import("../Tinlake").EthersConfig) => void;
         createContract(address: string, abiName: string): void;
         getContract(address: string, abiName: string): import("ethers").Contract | undefined;
-        subscribe(tx: import("../Tinlake").PendingTransaction, callback: (response: import("ethers/providers").TransactionReceipt) => void): Promise<void>;
+        getTransactionReceipt(tx: import("../Tinlake").PendingTransaction): Promise<import("ethers/providers").TransactionReceipt>;
         getOperatorType: (tranche: string) => any;
     };
 } & ActionsBase;

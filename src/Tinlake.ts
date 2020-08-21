@@ -171,9 +171,8 @@ export default class Tinlake {
     ) : undefined;
   }
 
-  async subscribe(tx: PendingTransaction, callback: (response: ethers.providers.TransactionReceipt) => void) {
-    const response = await this.ethersConfig.provider!.waitForTransaction(tx.hash);
-    callback(response);
+  async getTransactionReceipt(tx: PendingTransaction): Promise<ethers.providers.TransactionReceipt> {
+    return await this.ethersConfig.provider!.waitForTransaction(tx.hash);
   }
 
   getOperatorType = (tranche: string) => {

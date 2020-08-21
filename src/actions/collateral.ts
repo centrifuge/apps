@@ -14,12 +14,17 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
     }
 
     mintNFT = async (nftAddr: string, owner: string, tokenId: string, ref: string, amount: string, asset:string) => {
-      const nft = this.getContract(nftAddr, 'COLLATERAL_NFT');
+      const nftContract = this.getContract(nftAddr, 'COLLATERAL_NFT');
 
-      if (nft) {
+      if (nftContract) {
         try {
-          const tx = await nft.mint(owner, tokenId, ref, amount, asset);
-          return { hash: tx.hash, contractKey: 'COLLATERAL_NFT', timesOutAt: 0 };
+          const tx = await nftContract.mint(owner, tokenId, ref, amount, asset);
+
+          return {
+            hash: tx.hash,
+            contractKey: 'COLLATERAL_NFT',
+            timesOutAt: 0,
+          };
         } catch (error) {
           return error;
         }

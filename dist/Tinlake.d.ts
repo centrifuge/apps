@@ -60,7 +60,7 @@ export default class Tinlake {
     setEthersConfig: (ethersConfig: EthersConfig) => void;
     createContract(address: string, abiName: string): void;
     getContract(address: string, abiName: string): ethers.Contract | undefined;
-    subscribe(tx: PendingTransaction, callback: (response: ethers.providers.TransactionReceipt) => void): Promise<void>;
+    getTransactionReceipt(tx: PendingTransaction): Promise<ethers.providers.TransactionReceipt>;
     getOperatorType: (tranche: string) => any;
 }
 export {};
