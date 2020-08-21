@@ -33,11 +33,11 @@ const InvestorRedeem: React.FC<Props> = (props: Props) => {
     const formatted = addThousandsSeparators(valueToDecimal.toString())
     const tokenSymbol = ((props.tranche.type as any) as TrancheType) === 'senior' ? 'DROP' : 'TIN'
 
-    const txId = await props.createTransaction(
-      `[${tokenSymbol}] Redeem ${formatted} ${props.tranche.token}`,
-      'redeem',
-      [props.tinlake, redeemAmount, (props.tranche.type as any) as TrancheType]
-    )
+    const txId = await props.createTransaction(`${tokenSymbol} Redeem ${formatted} ${props.tranche.token}`, 'redeem', [
+      props.tinlake,
+      redeemAmount,
+      (props.tranche.type as any) as TrancheType,
+    ])
     setTxId(txId)
   }
 

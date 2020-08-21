@@ -33,7 +33,7 @@ const InvestorSupply: React.FC<Props> = (props: Props) => {
     const formatted = addThousandsSeparators(valueToDecimal.toString())
     const tokenSymbol = props.trancheType === 'senior' ? 'DROP' : 'TIN'
 
-    const txId = await props.createTransaction(`[${tokenSymbol}] Invest ${formatted} DAI`, 'supply', [
+    const txId = await props.createTransaction(`${tokenSymbol} Invest ${formatted} DAI`, 'supply', [
       props.tinlake,
       supplyAmount,
       props.trancheType,
