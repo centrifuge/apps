@@ -160,7 +160,7 @@ export function createTransaction<A extends TransactionAction>(
       actionName,
       actionArgs,
       tinlakeConfig,
-      status: 'pending',
+      status: 'unconfirmed',
       showIfClosed: true,
     }
     dispatch({ id, transaction: unconfirmedTx, type: QUEUE_TRANSACTION })
@@ -185,17 +185,6 @@ export function processTransaction(
     dispatch({ id, transaction: unconfirmedTx, type: SET_ACTIVE_TRANSACTION })
     let hasCompleted = false
 
-    // Hide pending tx after 10s
-    setTimeout(async () => {
-      if (!hasCompleted) {
-        const hiddenPendingTx: Transaction = {
-          ...unconfirmedTx,
-          showIfClosed: false,
-        }
-        await dispatch({ id, transaction: hiddenPendingTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
-      }
-    }, 10000)
-
     // Start transaction
     const tinlake = initTinlake(unconfirmedTx.tinlakeConfig)
 
@@ -209,22 +198,42 @@ export function processTransaction(
 
     try {
       const actionCall = actions[unconfirmedTx.actionName as keyof typeof actions]
-      const response = await (actionCall as any)(tinlake, ...unconfirmedTx.actionArgs)
+      const tx = await (actionCall as any)(tinlake, ...unconfirmedTx.actionArgs)
 
-      // if (response.hash) {
+      console.log('Transaction', tx)
 
-      hasCompleted = true
+      if (tx.hash) {
+        // Confirmed
+        const pendingTx: Transaction = {
+          ...unconfirmedTx,
+          status: 'pending'
+        }
+        await dispatch({ id, transaction: pendingTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
 
-      const outcome = (response as any).status === SUCCESS_STATUS
-      console.log(outcome)
-      outcomeTx.status = outcome ? 'succeeded' : 'failed'
-      outcomeTx.result = response
+        // Hide pending tx after 10s
+        setTimeout(async () => {
+          if (!hasCompleted) {
+            const hiddenPendingTx: Transaction = {
+              ...pendingTx,
+              showIfClosed: false,
+            }
+            await dispatch({ id, transaction: hiddenPendingTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
+          }
+        }, 10000)
 
-      if (errorMessageRegex.test(response.error)) {
-        const matches = response.error.toString().match(errorMessageRegex)
-        if (matches) outcomeTx.failedReason = matches[1]
-      } else if (outcomeTx.status === 'failed' && outcomeTx.result.message) {
-        outcomeTx.failedReason = outcomeTx.result.message
+        const receipt = await tinlake.getTransactionReceipt(tx)
+        console.log('Receipt', receipt)
+
+        hasCompleted = true
+
+        const outcome = receipt.status === 1
+        outcomeTx.status = outcome ? 'succeeded' : 'failed'
+        outcomeTx.result = receipt
+      } else {
+        // Failed or rejected
+        hasCompleted = true
+        outcomeTx.status = 'failed'
+        outcomeTx.failedReason = tx.message
       }
     } catch (error) {
       console.error(
@@ -237,7 +246,6 @@ export function processTransaction(
       if (errorMessageRegex.test(error.toString())) {
         const matches = error.toString().match(errorMessageRegex)
         if (matches) outcomeTx.failedReason = matches[1]
-      } else {
       }
     }
 
