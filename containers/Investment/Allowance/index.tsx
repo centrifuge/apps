@@ -45,13 +45,11 @@ const InvestorAllowance: React.FC<Props> = (props: Props) => {
     updateLimits()
     const trancheType = props.tranche.type as TrancheType
 
-    const txId = await props.createTransaction(`Set allowance`, 'setAllowance', [
-      props.tinlake,
-      props.investor.address,
-      supplyAmount,
-      redeemAmount,
-      trancheType,
-    ])
+    const txId = await props.createTransaction(
+      `Set allowance ${props.investor.address.substring(0, 8)}...`,
+      'setAllowance',
+      [props.tinlake, props.investor.address, supplyAmount, redeemAmount, trancheType]
+    )
     setTxId(txId)
   }
 
@@ -77,6 +75,7 @@ const InvestorAllowance: React.FC<Props> = (props: Props) => {
               suffix=" DAI"
               precision={18}
               onValueChange={({ value }) => setSupplyAmount(displayToBase(value, 18))}
+              disabled={status === 'unconfirmed' || status === 'pending'}
             />
           </FormField>
         </Box>
@@ -87,6 +86,7 @@ const InvestorAllowance: React.FC<Props> = (props: Props) => {
               suffix={` ${props.tranche.token}`}
               precision={18}
               onValueChange={({ value }) => setRedeemAmount(displayToBase(value, 18))}
+              disabled={status === 'unconfirmed' || status === 'pending'}
             />
           </FormField>
         </Box>

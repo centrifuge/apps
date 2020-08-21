@@ -59,6 +59,7 @@ const JuniorRatio: React.FC<Props> = (props: Props) => {
               value={baseToDisplay(minJuniorRatio, 27)}
               precision={2}
               onValueChange={({ value }) => setMinJuniorRatio(displayToBase(value, 27))}
+              disabled={status === 'unconfirmed' || status === 'pending'}
             />
           </FormField>
         </Box>

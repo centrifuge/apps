@@ -31,8 +31,9 @@ const InvestorSupply: React.FC<Props> = (props: Props) => {
 
     const valueToDecimal = new Decimal(baseToDisplay(supplyAmount, 18)).toFixed(2)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
+    const tokenSymbol = props.trancheType === 'senior' ? 'DROP' : 'TIN'
 
-    const txId = await props.createTransaction(`Supply ${formatted} DAI`, 'supply', [
+    const txId = await props.createTransaction(`${tokenSymbol} Invest ${formatted} DAI`, 'supply', [
       props.tinlake,
       supplyAmount,
       props.trancheType,
@@ -62,6 +63,7 @@ const InvestorSupply: React.FC<Props> = (props: Props) => {
             suffix=" DAI"
             precision={18}
             onValueChange={({ value }) => setSupplyAmount(displayToBase(value, 18))}
+            disabled={status === 'unconfirmed' || status === 'pending'}
           />
         </FormField>
       </Box>

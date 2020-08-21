@@ -3,7 +3,6 @@ import { Box, FormField, TextInput, Button } from 'grommet'
 import Alert from '../../../components/Alert'
 import NftData from '../../../components/NftData'
 import { connect } from 'react-redux'
-import { Spinner } from '@centrifuge/axis-spinner'
 import LoanView from '../View'
 import { AuthState, loadProxies, ensureAuthed } from '../../../ducks/auth'
 import { NFT } from 'tinlake'
@@ -66,7 +65,11 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
   const issueLoan = async () => {
     await props.ensureAuthed!()
 
-    const txId = await props.createTransaction(`Open asset financing`, 'issue', [props.tinlake, tokenId, registry])
+    const txId = await props.createTransaction(`Open financing NFT ${tokenId.slice(0, 4)}...`, 'issue', [
+      props.tinlake,
+      tokenId,
+      registry,
+    ])
     setTxId(txId)
   }
 
@@ -86,57 +89,61 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
 
   return (
     <Box>
-      {status === 'unconfirmed' || status === 'pending' ? (
-        <Spinner
-          height={'calc(100vh - 89px - 84px)'}
-          message={
-            'Initiating the asset financing process. Please confirm the pending transactions and do not leave this page until all transactions have been confirmed.'
-          }
-        />
-      ) : (
+      <Box>
         <Box>
-          <Box>
-            <Box direction="row" gap="medium" margin={{ top: 'medium' }}>
-              <b>Please paste your Token ID and corresponding registry address below to finance an asset:</b>
-            </Box>
+          <Box direction="row" gap="medium" margin={{ top: 'medium' }}>
+            <b>Please paste your Token ID and corresponding registry address below to finance an asset:</b>
           </Box>
-
-          <Box>
-            <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
-              <Box basis={'1/3'} gap="medium">
-                <FormField label="Collateral Token Registry Address">
-                  <TextInput value={registry || ''} onChange={onRegistryAddressValueChange} disabled={false} />
-                </FormField>
-              </Box>
-
-              <Box basis={'1/3'} gap="medium">
-                <FormField label="Token ID">
-                  <TextInput value={tokenId} onChange={onTokenIdValueChange} disabled={false} />
-                </FormField>
-              </Box>
-              <Box basis={'1/3'} gap="medium" align="end">
-                <Button onClick={issueLoan} primary label="Open financing" disabled={!nft} />
-              </Box>
-            </Box>
-          </Box>
-
-          {loanId ? (
-            <Box margin={{ bottom: 'medium', top: 'large' }}>
-              {' '}
-              <LoanView tinlake={props.tinlake} loanId={loanId} />
-            </Box>
-          ) : (
-            <Box>
-              {nftError && (
-                <Alert type="error" margin={{ vertical: 'large' }}>
-                  {nftError}{' '}
-                </Alert>
-              )}
-              {nft && <NftData data={nft} authedAddr={props.tinlake.ethConfig.from} />}
-            </Box>
-          )}
         </Box>
-      )}
+
+        <Box>
+          <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
+            <Box basis={'1/3'} gap="medium">
+              <FormField label="Collateral Token Registry Address">
+                <TextInput
+                  value={registry || ''}
+                  onChange={onRegistryAddressValueChange}
+                  disabled={status === 'unconfirmed' || status === 'pending'}
+                />
+              </FormField>
+            </Box>
+
+            <Box basis={'1/3'} gap="medium">
+              <FormField label="Token ID">
+                <TextInput
+                  value={tokenId}
+                  onChange={onTokenIdValueChange}
+                  disabled={status === 'unconfirmed' || status === 'pending'}
+                />
+              </FormField>
+            </Box>
+            <Box basis={'1/3'} gap="medium" align="end">
+              <Button
+                onClick={issueLoan}
+                primary
+                label="Open financing"
+                disabled={!nft || status === 'unconfirmed' || status === 'pending'}
+              />
+            </Box>
+          </Box>
+        </Box>
+
+        {loanId ? (
+          <Box margin={{ bottom: 'medium', top: 'large' }}>
+            {' '}
+            <LoanView tinlake={props.tinlake} loanId={loanId} />
+          </Box>
+        ) : (
+          <Box>
+            {nftError && (
+              <Alert type="error" margin={{ vertical: 'large' }}>
+                {nftError}{' '}
+              </Alert>
+            )}
+            {nft && <NftData data={nft} authedAddr={props.tinlake.ethConfig.from} />}
+          </Box>
+        )}
+      </Box>
     </Box>
   )
 }

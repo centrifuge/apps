@@ -36,7 +36,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
     const valueToDecimal = new Decimal(baseToDisplay(borrowAmount, 18)).toFixed(2)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
-    const txId = await props.createTransaction(`Borrow ${formatted} DAI`, 'borrow', [
+    const txId = await props.createTransaction(`Finance Asset ${props.loan.loanId} (${formatted} DAI)`, 'borrow', [
       props.tinlake,
       props.loan,
       borrowAmount,
@@ -64,11 +64,17 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
             suffix=" DAI"
             precision={18}
             onValueChange={({ value }) => setBorrowAmount(displayToBase(value, 18))}
+            disabled={status === 'unconfirmed' || status === 'pending'}
           />
         </FormField>
       </Box>
       <Box align="start">
-        <Button onClick={borrow} primary label="Finance Asset" disabled={!borrowEnabled} />
+        <Button
+          onClick={borrow}
+          primary
+          label="Finance Asset"
+          disabled={!borrowEnabled || status === 'unconfirmed' || status === 'pending'}
+        />
         {availableFundsOverflow && (
           <Box margin={{ top: 'small' }}>
             Available funds exceeded. <br />
