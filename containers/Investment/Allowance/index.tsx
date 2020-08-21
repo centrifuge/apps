@@ -46,7 +46,7 @@ const InvestorAllowance: React.FC<Props> = (props: Props) => {
     const trancheType = props.tranche.type as TrancheType
 
     const txId = await props.createTransaction(
-      `Set allowance ${props.investor.address.substring(0, 4)}...`,
+      `Set allowance ${props.investor.address.substring(0, 8)}...`,
       'setAllowance',
       [props.tinlake, props.investor.address, supplyAmount, redeemAmount, trancheType]
     )

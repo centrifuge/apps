@@ -69,7 +69,12 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
         </FormField>
       </Box>
       <Box align="start">
-        <Button onClick={borrow} primary label="Finance Asset" disabled={!borrowEnabled} />
+        <Button
+          onClick={borrow}
+          primary
+          label="Finance Asset"
+          disabled={!borrowEnabled || status === 'unconfirmed' || status === 'pending'}
+        />
         {availableFundsOverflow && (
           <Box margin={{ top: 'small' }}>
             Available funds exceeded. <br />
