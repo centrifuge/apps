@@ -1,6 +1,7 @@
 import BN from 'bn.js'
 import { Loan, NFT, interestRateToFee, ITinlake } from 'tinlake'
 import { maxUint256 } from '../../utils/maxUint256'
+import { PendingTransaction } from 'tinlake/dist/Tinlake'
 
 export type TrancheType = 'junior' | 'senior'
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -20,7 +21,7 @@ type SerializableObject = { [key: string]: SerializableScalar & SerializableObje
 type SerializableArray = (SerializableScalar & SerializableObject & SerializableArray)[]
 type Serializable = SerializableScalar & SerializableObject & SerializableArray
 
-export type TinlakeAction = (tinlake: ITinlake, ...args: Serializable[]) => Promise<TinlakeResult>
+export type TinlakeAction = (tinlake: ITinlake, ...args: Serializable[]) => Promise<PendingTransaction | TinlakeResult>
 
 export async function getNFT(registry: string, tinlake: any, tokenId: string) {
   let nftOwner: string
@@ -106,6 +107,8 @@ export const issue = async (tinlake: ITinlake, tokenId: string, nftRegistryAddre
 
   // case: borrower is owner of nft
   if (user.toLowerCase() === tokenOwner.toString().toLowerCase()) {
+    console.log('case 1')
+
     // get or create new proxy
     let proxyAddress
     try {
@@ -147,6 +150,8 @@ export const issue = async (tinlake: ITinlake, tokenId: string, nftRegistryAddre
 
   // case: borrower's proxy is owner of nft
   if (user.toLowerCase() === proxyOwner.toLowerCase()) {
+    console.log('case 2')
+
     let result
     try {
       result = await tinlake.proxyIssue(tokenOwner.toString(), nftRegistryAddress, tokenId)
@@ -398,19 +403,8 @@ export async function setAllowance(
   return setRes
 }
 
-export async function setMinJuniorRatio(tinlake: ITinlake, ratio: string): Promise<TinlakeResult> {
-  let setRes
-  try {
-    setRes = await tinlake.setMinimumJuniorRatio(ratio)
-  } catch (e) {
-    return loggedError(e, 'Could not set min TIN ratio', '')
-  }
-
-  if (setRes.status !== SUCCESS_STATUS) {
-    return loggedError({}, 'Could not set min TIN ratio', '')
-  }
-
-  return setRes
+export async function setMinJuniorRatio(tinlake: ITinlake, ratio: string): Promise<PendingTransaction> {
+  return await tinlake.setMinimumJuniorRatio(ratio)
 }
 
 export async function supply(
@@ -425,6 +419,8 @@ export async function supply(
   } else if (trancheType === 'senior') {
     allowance = (await tinlake.getSeniorForCurrencyAllowance((tinlake.ethConfig as any).from!)) || new BN(0)
   }
+
+  console.log('allowance', allowance)
 
   // only approve if allowance is smaller than than supplyAmount
   if (allowance.lt(new BN(supplyAmount))) {

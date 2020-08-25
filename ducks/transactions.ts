@@ -238,7 +238,7 @@ export function processTransaction(
         // Failed or rejected
         hasCompleted = true
         outcomeTx.status = 'failed'
-        outcomeTx.failedReason = tx.message
+        outcomeTx.failedReason = tx.error?.message || tx.message
       }
     } catch (error) {
       console.error(
@@ -289,8 +289,8 @@ export function selectWalletTransactions(state?: TransactionState): WalletTransa
     .map((id: string) => state.active[id])
     .sort(sortByMostRecent)
     .map((tx: Transaction) => {
-      const externalLink = tx.result?.txHash
-        ? `https://${config.network === 'Kovan' ? 'kovan.' : ''}etherscan.io/tx/${tx.result.txHash}`
+      const externalLink = tx.result?.transactionHash
+        ? `https://${config.network === 'Kovan' ? 'kovan.' : ''}etherscan.io/tx/${tx.result.transactionHash}`
         : undefined
 
       return {
