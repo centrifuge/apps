@@ -33,7 +33,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
     setTokenId(currentTokenId)
     setNft(null)
     setNftError('')
-    await getNFT(currentTokenId)
+    await getNFT(registry, currentTokenId)
   }
 
   const onRegistryAddressValueChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,12 +41,12 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
     setRegistry(currentRegistryAddress)
     setNft(null)
     setNftError('')
-    await getNFT(tokenId)
+    await getNFT(currentRegistryAddress, tokenId)
   }
 
-  const getNFT = async (currentTokenId: string) => {
+  const getNFT = async (currentRegistry: string, currentTokenId: string) => {
     if (currentTokenId && currentTokenId.length > 0) {
-      const result = await getNFTAction(registry, props.tinlake, currentTokenId)
+      const result = await getNFTAction(currentRegistry, props.tinlake, currentTokenId)
       const { tokenId, nft, errorMessage } = result as Partial<{ tokenId: string; nft: NFT; errorMessage: string }>
       if (tokenId !== currentTokenId) {
         return
@@ -83,7 +83,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     setTokenId(props.tokenId || '')
     setRegistry(props.registry || '')
-    getNFT(props.tokenId)
+    getNFT(props.registry, props.tokenId)
   }, [props])
 
   return (
