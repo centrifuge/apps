@@ -6,13 +6,13 @@ import Alert from '../Alert'
 
 export const FormModal = styled(Modal)`
   max-height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
 `
 
 export const InvestmentSteps = styled.img`
   display: block;
-  width: 100%;
-  margin: 20px 0;
+  width: 80%;
+  margin: 20px auto;
 `
 
 export const FormFieldWithoutBorder = styled(FormField)`
