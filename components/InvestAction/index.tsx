@@ -1,4 +1,5 @@
 import * as React from 'react'
+import styled from 'styled-components'
 import { Box, Button, Paragraph, CheckBox, RadioButton, Form, FormField, TextInput, Select } from 'grommet'
 
 import { countryList } from './countries'
@@ -7,6 +8,11 @@ import InvestActionSuccessModal from './SuccessModal'
 import { FormModal, InvestmentSteps, FormFieldWithoutBorder, AcceptButton, ErrorMessage } from './styles'
 
 const LAMBDA_SEND_INVESTOR_EMAIL_URL = '/.netlify/functions/sendInvestorEmail'
+
+// Fixes the radio button alignment in firefox
+const StyledRadioButton = styled(RadioButton)`
+  display: none;
+`
 
 interface Props {
   poolName: string
@@ -129,7 +135,7 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
           <FormFieldWithoutBorder error={errors.title} margin={{ bottom: 'medium' }}>
             <Box direction="row" gap={'medium'}>
               <Box>
-                <RadioButton
+                <StyledRadioButton
                   name="radio"
                   checked={form.title === 'Mr.'}
                   label="Mr."
@@ -137,7 +143,7 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
                 />
               </Box>
               <Box>
-                <RadioButton
+                <StyledRadioButton
                   name="radio"
                   checked={form.title === 'Ms.'}
                   label="Ms."
