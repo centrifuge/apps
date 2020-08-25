@@ -15,7 +15,7 @@ const config = {
     email: env.CENTRIFUGE_ADMIN_EMAIL || 'test@test.org',
     password: env.CENTRIFUGE_ADMIN_PASSWORD || 'admin',
     // Centrifuge Identity Address
-    account: env.CENTRIFUGE_ADMIN_ACCOUNT || '0x5e7be56f7b9F1684555F66b33bf019e8312707e2',
+    account: env.CENTRIFUGE_ADMIN_ACCOUNT || '0x113Aa53dDD25F9074489b864163BFDb77EeB1109',
     chain: {
       centrifuge_chain_account : {
         id: env.CENTRIFUGE_CHAIN_ID || '0xac4316c9699a37bd15493702c5a9a1aa3936a1ae6b6a3b4e92b38eae393ca659',

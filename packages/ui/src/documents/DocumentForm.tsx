@@ -47,6 +47,7 @@ export class DocumentForm extends React.Component<Props, State> {
         read_access: [],
         write_access:[]
       },
+      template: '',
     },
     contacts: [],
   };
@@ -81,6 +82,7 @@ export class DocumentForm extends React.Component<Props, State> {
 
     const { selectedSchema } = this.state;
     const { onSubmit, document } = this.props;
+    const template =  selectedSchema && selectedSchema.template
 
     let payload = {
       ...values,
@@ -98,6 +100,7 @@ export class DocumentForm extends React.Component<Props, State> {
           value: selectedSchema!.name,
         },
       },
+      template: template,
     };
 
     onSubmit && onSubmit(payload);

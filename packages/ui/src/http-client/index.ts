@@ -48,6 +48,7 @@ export const httpClient = {
     list: async () => instance.get(ROUTES.DOCUMENTS),
     getById: async (id): Promise<Document> => instance.get(`${ROUTES.DOCUMENTS}/${id}`),
     update: async (document: Document) => instance.put(`${ROUTES.DOCUMENTS}/${document._id}`, document),
+    clone: async (document: Document) => instance.post(`${ROUTES.DOCUMENTS}/${document.template}/clone`, document),
   },
   nfts: {
     mint: async (payload: MintNftRequest) => instance.post(`${ROUTES.NFTS}/mint`, payload),

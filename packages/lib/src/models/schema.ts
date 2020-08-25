@@ -118,6 +118,7 @@ export class Schema {
     readonly attributes: Attribute[],
     readonly registries: Registry[],
     readonly collaborators: Collaborator[],
+    readonly template: string = '',
     readonly formFeatures?: FormFeatures,
     readonly archived?: boolean,
     readonly _id?: string,
@@ -145,6 +146,7 @@ export class Schema {
           proofs: []
         }
       ],
+      template: '',
       collaborators: [],
       formFeatures: {
         fundingAgreement: false,

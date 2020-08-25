@@ -534,6 +534,7 @@ describe('Schema validations', () => {
         collaborators: [],
         formFeatures: {},
         archived: true,
+        template: '',
       };
 
       const editableJson = Schema.toEditableJson({

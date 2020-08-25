@@ -78,23 +78,26 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
   }, [loadData]);
 
 
-  const createDocument = async (document: Document) => {
+  const handleOnSubmit = async (document: Document) => {
     setState({
       defaultDocument: document,
     });
-
-    try {
-      push(documentRoutes.index);
-      go(0);
-      await httpClient.documents.create(document);
-    } catch (e) {
-      notification.alert({
-        type: NOTIFICATION.ERROR,
-        title: 'Failed to save document',
-        message: (e as AxiosError)!.response!.data.message,
-      });
-    }
-  };
+      try {
+        push(documentRoutes.index);
+        go(0);
+        if (document.template && document.template !== '') {
+          await httpClient.documents.clone(document);
+        } else {
+          await httpClient.documents.create(document);
+        }
+      } catch (e) {
+        notification.alert({
+          type: NOTIFICATION.ERROR,
+          title: 'Failed to save document',
+          message: (e as AxiosError)!.response!.data.message,
+        });
+      }
+    };
 
   const onCancel = () => {
     push(documentRoutes.index);
@@ -110,7 +113,7 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
     <DocumentForm
       document={defaultDocument}
       schemas={availableSchemas}
-      onSubmit={createDocument}
+      onSubmit={handleOnSubmit}
       mode={'create'}
       contacts={contacts}
       renderHeader={() => {

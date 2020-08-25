@@ -130,6 +130,7 @@ export const FundingAgreements: FunctionComponent<Props> = (props) => {
 
   const agreements = document!.attributes!.funding_agreement || [];
 
+  // @ts-ignore
   const mappedToSortable = agreements.map((fundingAgreement, index) => {
     return {
       agreement_id: fundingAgreement.agreement_id.value,

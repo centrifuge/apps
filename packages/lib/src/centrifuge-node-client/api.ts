@@ -14,8 +14,8 @@
 
 
 import * as url from "url";
+const portableFetch = require("portable-fetch")
 import { Configuration } from "./configuration";
-const portableFetch = require("portable-fetch");
 
 const BASE_PATH = "http://localhost:8082".replace(/\/+$/, "");
 
@@ -40,7 +40,7 @@ export interface FetchAPI {
 }
 
 /**
- *  
+ *
  * @export
  * @interface FetchArgs
  */
@@ -50,7 +50,7 @@ export interface FetchArgs {
 }
 
 /**
- * 
+ *
  * @export
  * @class BaseAPI
  */
@@ -66,7 +66,7 @@ export class BaseAPI {
 };
 
 /**
- * 
+ *
  * @export
  * @class RequiredError
  * @extends {Error}
@@ -83,7 +83,7 @@ export class RequiredError extends Error {
  * @export
  * @interface ByteutilsHexBytes
  */
-export interface ByteutilsHexBytes extends Array<any> {
+export interface ByteutilsHexBytes extends Array<number> {
 }
 
 /**
@@ -94,10 +94,10 @@ export interface ByteutilsHexBytes extends Array<any> {
 export interface ByteutilsOptionalHex {
     /**
      * 
-     * @type {Array<any>}
+     * @type {Array<number>}
      * @memberof ByteutilsOptionalHex
      */
-    hexBytes?: Array<any>;
+    hexBytes?: Array<number>;
 }
 
 /**
@@ -196,7 +196,7 @@ export interface CoreapiAccounts {
  * @interface CoreapiAttributeMapRequest
  */
 export interface CoreapiAttributeMapRequest {
-    [key: string]: any;
+    [key: string]: CoreapiAttributeRequest;
 
 }
 
@@ -206,7 +206,7 @@ export interface CoreapiAttributeMapRequest {
  * @interface CoreapiAttributeMapResponse
  */
 export interface CoreapiAttributeMapResponse {
-    [key: string]: any;
+    [key: string]: CoreapiAttributeResponse;
 
 }
 
@@ -273,6 +273,12 @@ export interface CoreapiAttributeResponse {
      * @memberof CoreapiAttributeResponse
      */
     monetaryValue?: CoreapiMonetaryValue;
+    /**
+     * 
+     * @type {CoreapiSignedValue}
+     * @memberof CoreapiAttributeResponse
+     */
+    signedValue?: CoreapiSignedValue;
     /**
      * 
      * @type {string}
@@ -723,6 +729,12 @@ export interface CoreapiResponseHeader {
      * @type {string}
      * @memberof CoreapiResponseHeader
      */
+    fingerprint?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CoreapiResponseHeader
+     */
     jobId?: string;
     /**
      * 
@@ -800,6 +812,26 @@ export interface CoreapiSignResponse {
      * @memberof CoreapiSignResponse
      */
     signerId?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface CoreapiSignedValue
+ */
+export interface CoreapiSignedValue {
+    /**
+     * 
+     * @type {string}
+     * @memberof CoreapiSignedValue
+     */
+    identity?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CoreapiSignedValue
+     */
+    value?: string;
 }
 
 /**
@@ -1333,7 +1365,7 @@ export interface HttputilsHTTPError {
  * @export
  * @interface IdentityDID
  */
-export interface IdentityDID extends Array<any> {
+export interface IdentityDID extends Array<number> {
 }
 
 /**
@@ -1428,6 +1460,72 @@ export interface NotificationMessage {
      * @memberof NotificationMessage
      */
     toId?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface PendingAddTransitionRules
+ */
+export interface PendingAddTransitionRules {
+    /**
+     * 
+     * @type {Array<PendingAttributeRule>}
+     * @memberof PendingAddTransitionRules
+     */
+    attributeRules?: Array<PendingAttributeRule>;
+    /**
+     * 
+     * @type {Array<PendingComputeFieldsRule>}
+     * @memberof PendingAddTransitionRules
+     */
+    computeFieldsRules?: Array<PendingComputeFieldsRule>;
+}
+
+/**
+ * 
+ * @export
+ * @interface PendingAttributeRule
+ */
+export interface PendingAttributeRule {
+    /**
+     * attribute key label
+     * @type {string}
+     * @memberof PendingAttributeRule
+     */
+    keyLabel?: string;
+    /**
+     * roleID is 32 byte role ID in hex. RoleID should already be part of the document.
+     * @type {string}
+     * @memberof PendingAttributeRule
+     */
+    roleId?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface PendingComputeFieldsRule
+ */
+export interface PendingComputeFieldsRule {
+    /**
+     * AttributeLabels that are passed to the WASM for execution
+     * @type {Array<string>}
+     * @memberof PendingComputeFieldsRule
+     */
+    attributeLabels?: Array<string>;
+    /**
+     * TargetAttributeLabel is the label of the attribute which holds the result from the executed WASM. This attribute is automatically added and updated everytime document is updated.
+     * @type {string}
+     * @memberof PendingComputeFieldsRule
+     */
+    targetAttributeLabel?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PendingComputeFieldsRule
+     */
+    wasm?: string;
 }
 
 /**
@@ -1811,6 +1909,55 @@ export interface UserapiUpdateTransferDetailRequest {
 /**
  * 
  * @export
+ * @interface V2AddRole
+ */
+export interface V2AddRole {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof V2AddRole
+     */
+    collaborators?: Array<string>;
+    /**
+     * Key is either hex encoded 32 byte ID or string label. String label is used as a preimage to sha256 for 32 byte hash.
+     * @type {string}
+     * @memberof V2AddRole
+     */
+    key?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface V2CloneDocumentRequest
+ */
+export interface V2CloneDocumentRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof V2CloneDocumentRequest
+     */
+    scheme?: V2CloneDocumentRequest.SchemeEnum;
+}
+
+/**
+ * @export
+ * @namespace V2CloneDocumentRequest
+ */
+export namespace V2CloneDocumentRequest {
+    /**
+     * @export
+     * @enum {string}
+     */
+    export enum SchemeEnum {
+        Generic = <any> 'generic',
+        Entity = <any> 'entity'
+    }
+}
+
+/**
+ * 
+ * @export
  * @interface V2CreateDocumentRequest
  */
 export interface V2CreateDocumentRequest {
@@ -1884,6 +2031,26 @@ export interface V2RemoveCollaboratorsRequest {
 /**
  * 
  * @export
+ * @interface V2Role
+ */
+export interface V2Role {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof V2Role
+     */
+    collaborators?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof V2Role
+     */
+    id?: string;
+}
+
+/**
+ * 
+ * @export
  * @interface V2SignedAttributeRequest
  */
 export interface V2SignedAttributeRequest {
@@ -1894,11 +2061,98 @@ export interface V2SignedAttributeRequest {
      */
     label?: string;
     /**
-     * payload to be signed in hex
+     * 
      * @type {string}
      * @memberof V2SignedAttributeRequest
      */
     payload?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof V2SignedAttributeRequest
+     */
+    type?: V2SignedAttributeRequest.TypeEnum;
+}
+
+/**
+ * @export
+ * @namespace V2SignedAttributeRequest
+ */
+export namespace V2SignedAttributeRequest {
+    /**
+     * @export
+     * @enum {string}
+     */
+    export enum TypeEnum {
+        Integer = <any> 'integer',
+        String = <any> 'string',
+        Bytes = <any> 'bytes',
+        Timestamp = <any> 'timestamp'
+    }
+}
+
+/**
+ * 
+ * @export
+ * @interface V2TransitionRule
+ */
+export interface V2TransitionRule {
+    /**
+     * 
+     * @type {string}
+     * @memberof V2TransitionRule
+     */
+    action?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof V2TransitionRule
+     */
+    attributeLabels?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof V2TransitionRule
+     */
+    field?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof V2TransitionRule
+     */
+    roles?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof V2TransitionRule
+     */
+    ruleId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof V2TransitionRule
+     */
+    targetAttributeLabel?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof V2TransitionRule
+     */
+    wasm?: string;
+}
+
+/**
+ * 
+ * @export
+ * @interface V2TransitionRules
+ */
+export interface V2TransitionRules {
+    /**
+     * 
+     * @type {Array<V2TransitionRule>}
+     * @memberof V2TransitionRules
+     */
+    rules?: Array<V2TransitionRule>;
 }
 
 /**
@@ -1952,6 +2206,20 @@ export namespace V2UpdateDocumentRequest {
         Generic = <any> 'generic',
         Entity = <any> 'entity'
     }
+}
+
+/**
+ * 
+ * @export
+ * @interface V2UpdateRole
+ */
+export interface V2UpdateRole {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof V2UpdateRole
+     */
+    collaborators?: Array<string>;
 }
 
 
@@ -2439,14 +2707,62 @@ export class AccountsApi extends BaseAPI {
 export const DocumentsApiFetchParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Adds a new role to the document.
+         * @summary Adds a new role to the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {V2AddRole} body Add Role Request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        addRole(authorization: string, documentId: string, body: V2AddRole, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling addRole.');
+            }
+            // verify required parameter 'documentId' is not null or undefined
+            if (documentId === null || documentId === undefined) {
+                throw new RequiredError('documentId','Required parameter documentId was null or undefined when calling addRole.');
+            }
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling addRole.');
+            }
+            const localVarPath = `/v2/documents/{document_id}/roles`
+                .replace(`{${"document_id"}}`, encodeURIComponent(String(documentId)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"V2AddRole" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Signs the given payload and add it the pending document.
          * @summary Signs the given payload and add it the pending document.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
          * @param {V2SignedAttributeRequest} body Signed Attribute request
+         * @param {string} documentId Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        addSignedAttribute(authorization: string, body: V2SignedAttributeRequest, options: any = {}): FetchArgs {
+        addSignedAttribute(authorization: string, body: V2SignedAttributeRequest, documentId: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
                 throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling addSignedAttribute.');
@@ -2455,7 +2771,12 @@ export const DocumentsApiFetchParamCreator = function (configuration?: Configura
             if (body === null || body === undefined) {
                 throw new RequiredError('body','Required parameter body was null or undefined when calling addSignedAttribute.');
             }
-            const localVarPath = `/v2/documents/{document_id}/signed_attribute`;
+            // verify required parameter 'documentId' is not null or undefined
+            if (documentId === null || documentId === undefined) {
+                throw new RequiredError('documentId','Required parameter documentId was null or undefined when calling addSignedAttribute.');
+            }
+            const localVarPath = `/v2/documents/{document_id}/signed_attribute`
+                .replace(`{${"document_id"}}`, encodeURIComponent(String(documentId)));
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
             const localVarHeaderParameter = {} as any;
@@ -2472,6 +2793,100 @@ export const DocumentsApiFetchParamCreator = function (configuration?: Configura
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
             const needsSerialization = (<any>"V2SignedAttributeRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Adds a new transition rules to the document.
+         * @summary Adds a transition new rules to the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {PendingAddTransitionRules} body Add Transition rules Request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        addTransitionRule(authorization: string, documentId: string, body: PendingAddTransitionRules, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling addTransitionRule.');
+            }
+            // verify required parameter 'documentId' is not null or undefined
+            if (documentId === null || documentId === undefined) {
+                throw new RequiredError('documentId','Required parameter documentId was null or undefined when calling addTransitionRule.');
+            }
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling addTransitionRule.');
+            }
+            const localVarPath = `/v2/documents/{document_id}/transition_rules`
+                .replace(`{${"document_id"}}`, encodeURIComponent(String(documentId)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"PendingAddTransitionRules" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Creates a new cloned document from an existing Template document.
+         * @summary Creates a new cloned document from an existing Template document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {V2CloneDocumentRequest} body Document Clone request
+         * @param {string} documentId Document Identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        cloneDocumentV2(authorization: string, body: V2CloneDocumentRequest, documentId: string, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling cloneDocumentV2.');
+            }
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling cloneDocumentV2.');
+            }
+            // verify required parameter 'documentId' is not null or undefined
+            if (documentId === null || documentId === undefined) {
+                throw new RequiredError('documentId','Required parameter documentId was null or undefined when calling cloneDocumentV2.');
+            }
+            const localVarPath = `/v2/documents/{document_id}/clone`
+                .replace(`{${"document_id"}}`, encodeURIComponent(String(documentId)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"V2CloneDocumentRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
             localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
 
             return {
@@ -2593,6 +3008,50 @@ export const DocumentsApiFetchParamCreator = function (configuration?: Configura
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
             const needsSerialization = (<any>"V2CreateDocumentRequest" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
             localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Deletes the transition rule associated with ruleID from the document.
+         * @summary Deletes the transition rule associated with ruleID from the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {string} ruleId Transition rule ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteTransitionRule(authorization: string, documentId: string, ruleId: string, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling deleteTransitionRule.');
+            }
+            // verify required parameter 'documentId' is not null or undefined
+            if (documentId === null || documentId === undefined) {
+                throw new RequiredError('documentId','Required parameter documentId was null or undefined when calling deleteTransitionRule.');
+            }
+            // verify required parameter 'ruleId' is not null or undefined
+            if (ruleId === null || ruleId === undefined) {
+                throw new RequiredError('ruleId','Required parameter ruleId was null or undefined when calling deleteTransitionRule.');
+            }
+            const localVarPath = `/v2/documents/{document_id}/transition_rules/{rule_id}`
+                .replace(`{${"document_id"}}`, encodeURIComponent(String(documentId)))
+                .replace(`{${"rule_id"}}`, encodeURIComponent(String(ruleId)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'DELETE' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
 
             return {
                 url: url.format(localVarUrlObj),
@@ -2902,14 +3361,103 @@ export const DocumentsApiFetchParamCreator = function (configuration?: Configura
             };
         },
         /**
+         * Returns the role associated with the role ID in the document.
+         * @summary Returns the role associated with the role ID in the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {string} roleId Role ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRole(authorization: string, documentId: string, roleId: string, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling getRole.');
+            }
+            // verify required parameter 'documentId' is not null or undefined
+            if (documentId === null || documentId === undefined) {
+                throw new RequiredError('documentId','Required parameter documentId was null or undefined when calling getRole.');
+            }
+            // verify required parameter 'roleId' is not null or undefined
+            if (roleId === null || roleId === undefined) {
+                throw new RequiredError('roleId','Required parameter roleId was null or undefined when calling getRole.');
+            }
+            const localVarPath = `/v2/documents/{document_id}/roles/{role_id}`
+                .replace(`{${"document_id"}}`, encodeURIComponent(String(documentId)))
+                .replace(`{${"role_id"}}`, encodeURIComponent(String(roleId)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Returns the rule associated with the ruleID in the document.
+         * @summary Returns the rule associated with the ruleID in the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {string} ruleId Transition rule ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getTransitionRule(authorization: string, documentId: string, ruleId: string, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling getTransitionRule.');
+            }
+            // verify required parameter 'documentId' is not null or undefined
+            if (documentId === null || documentId === undefined) {
+                throw new RequiredError('documentId','Required parameter documentId was null or undefined when calling getTransitionRule.');
+            }
+            // verify required parameter 'ruleId' is not null or undefined
+            if (ruleId === null || ruleId === undefined) {
+                throw new RequiredError('ruleId','Required parameter ruleId was null or undefined when calling getTransitionRule.');
+            }
+            const localVarPath = `/v2/documents/{document_id}/transition_rules/{rule_id}`
+                .replace(`{${"document_id"}}`, encodeURIComponent(String(documentId)))
+                .replace(`{${"rule_id"}}`, encodeURIComponent(String(ruleId)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Removes the collaborators from the document.
          * @summary Removes the collaborators from the document.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
          * @param {V2RemoveCollaboratorsRequest} body Remove Collaborators request
+         * @param {string} documentId Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        removeCollaborators(authorization: string, body: V2RemoveCollaboratorsRequest, options: any = {}): FetchArgs {
+        removeCollaborators(authorization: string, body: V2RemoveCollaboratorsRequest, documentId: string, options: any = {}): FetchArgs {
             // verify required parameter 'authorization' is not null or undefined
             if (authorization === null || authorization === undefined) {
                 throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling removeCollaborators.');
@@ -2918,7 +3466,12 @@ export const DocumentsApiFetchParamCreator = function (configuration?: Configura
             if (body === null || body === undefined) {
                 throw new RequiredError('body','Required parameter body was null or undefined when calling removeCollaborators.');
             }
-            const localVarPath = `/v2/documents/{document_id}/collaborators`;
+            // verify required parameter 'documentId' is not null or undefined
+            if (documentId === null || documentId === undefined) {
+                throw new RequiredError('documentId','Required parameter documentId was null or undefined when calling removeCollaborators.');
+            }
+            const localVarPath = `/v2/documents/{document_id}/collaborators`
+                .replace(`{${"document_id"}}`, encodeURIComponent(String(documentId)));
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'DELETE' }, options);
             const localVarHeaderParameter = {} as any;
@@ -3036,6 +3589,59 @@ export const DocumentsApiFetchParamCreator = function (configuration?: Configura
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Updates an existing role on the document.
+         * @summary Updates an existing role on the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {string} roleId Role ID
+         * @param {V2UpdateRole} body Update Role Request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateRole(authorization: string, documentId: string, roleId: string, body: V2UpdateRole, options: any = {}): FetchArgs {
+            // verify required parameter 'authorization' is not null or undefined
+            if (authorization === null || authorization === undefined) {
+                throw new RequiredError('authorization','Required parameter authorization was null or undefined when calling updateRole.');
+            }
+            // verify required parameter 'documentId' is not null or undefined
+            if (documentId === null || documentId === undefined) {
+                throw new RequiredError('documentId','Required parameter documentId was null or undefined when calling updateRole.');
+            }
+            // verify required parameter 'roleId' is not null or undefined
+            if (roleId === null || roleId === undefined) {
+                throw new RequiredError('roleId','Required parameter roleId was null or undefined when calling updateRole.');
+            }
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling updateRole.');
+            }
+            const localVarPath = `/v2/documents/{document_id}/roles/{role_id}`
+                .replace(`{${"document_id"}}`, encodeURIComponent(String(documentId)))
+                .replace(`{${"role_id"}}`, encodeURIComponent(String(roleId)));
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'PATCH' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (authorization !== undefined && authorization !== null) {
+                localVarHeaderParameter['authorization'] = String(authorization);
+            }
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"V2UpdateRole" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -3046,15 +3652,79 @@ export const DocumentsApiFetchParamCreator = function (configuration?: Configura
 export const DocumentsApiFp = function(configuration?: Configuration) {
     return {
         /**
+         * Adds a new role to the document.
+         * @summary Adds a new role to the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {V2AddRole} body Add Role Request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        addRole(authorization: string, documentId: string, body: V2AddRole, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<V2Role> {
+            const localVarFetchArgs = DocumentsApiFetchParamCreator(configuration).addRole(authorization, documentId, body, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
          * Signs the given payload and add it the pending document.
          * @summary Signs the given payload and add it the pending document.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
          * @param {V2SignedAttributeRequest} body Signed Attribute request
+         * @param {string} documentId Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        addSignedAttribute(authorization: string, body: V2SignedAttributeRequest, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiDocumentResponse> {
-            const localVarFetchArgs = DocumentsApiFetchParamCreator(configuration).addSignedAttribute(authorization, body, options);
+        addSignedAttribute(authorization: string, body: V2SignedAttributeRequest, documentId: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiDocumentResponse> {
+            const localVarFetchArgs = DocumentsApiFetchParamCreator(configuration).addSignedAttribute(authorization, body, documentId, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Adds a new transition rules to the document.
+         * @summary Adds a transition new rules to the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {PendingAddTransitionRules} body Add Transition rules Request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        addTransitionRule(authorization: string, documentId: string, body: PendingAddTransitionRules, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<V2TransitionRules> {
+            const localVarFetchArgs = DocumentsApiFetchParamCreator(configuration).addTransitionRule(authorization, documentId, body, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Creates a new cloned document from an existing Template document.
+         * @summary Creates a new cloned document from an existing Template document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {V2CloneDocumentRequest} body Document Clone request
+         * @param {string} documentId Document Identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        cloneDocumentV2(authorization: string, body: V2CloneDocumentRequest, documentId: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiDocumentResponse> {
+            const localVarFetchArgs = DocumentsApiFetchParamCreator(configuration).cloneDocumentV2(authorization, body, documentId, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -3119,6 +3789,27 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
                         return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Deletes the transition rule associated with ruleID from the document.
+         * @summary Deletes the transition rule associated with ruleID from the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {string} ruleId Transition rule ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteTransitionRule(authorization: string, documentId: string, ruleId: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = DocumentsApiFetchParamCreator(configuration).deleteTransitionRule(authorization, documentId, ruleId, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
                     } else {
                         throw response;
                     }
@@ -3271,15 +3962,58 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
             };
         },
         /**
+         * Returns the role associated with the role ID in the document.
+         * @summary Returns the role associated with the role ID in the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {string} roleId Role ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRole(authorization: string, documentId: string, roleId: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<V2Role> {
+            const localVarFetchArgs = DocumentsApiFetchParamCreator(configuration).getRole(authorization, documentId, roleId, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Returns the rule associated with the ruleID in the document.
+         * @summary Returns the rule associated with the ruleID in the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {string} ruleId Transition rule ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getTransitionRule(authorization: string, documentId: string, ruleId: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<V2TransitionRule> {
+            const localVarFetchArgs = DocumentsApiFetchParamCreator(configuration).getTransitionRule(authorization, documentId, ruleId, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
          * Removes the collaborators from the document.
          * @summary Removes the collaborators from the document.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
          * @param {V2RemoveCollaboratorsRequest} body Remove Collaborators request
+         * @param {string} documentId Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        removeCollaborators(authorization: string, body: V2RemoveCollaboratorsRequest, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiDocumentResponse> {
-            const localVarFetchArgs = DocumentsApiFetchParamCreator(configuration).removeCollaborators(authorization, body, options);
+        removeCollaborators(authorization: string, body: V2RemoveCollaboratorsRequest, documentId: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<CoreapiDocumentResponse> {
+            const localVarFetchArgs = DocumentsApiFetchParamCreator(configuration).removeCollaborators(authorization, body, documentId, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -3332,6 +4066,28 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
                 });
             };
         },
+        /**
+         * Updates an existing role on the document.
+         * @summary Updates an existing role on the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {string} roleId Role ID
+         * @param {V2UpdateRole} body Update Role Request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateRole(authorization: string, documentId: string, roleId: string, body: V2UpdateRole, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<V2Role> {
+            const localVarFetchArgs = DocumentsApiFetchParamCreator(configuration).updateRole(authorization, documentId, roleId, body, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
     }
 };
 
@@ -3342,15 +4098,52 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
 export const DocumentsApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
     return {
         /**
+         * Adds a new role to the document.
+         * @summary Adds a new role to the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {V2AddRole} body Add Role Request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        addRole(authorization: string, documentId: string, body: V2AddRole, options?: any) {
+            return DocumentsApiFp(configuration).addRole(authorization, documentId, body, options)(fetch, basePath);
+        },
+        /**
          * Signs the given payload and add it the pending document.
          * @summary Signs the given payload and add it the pending document.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
          * @param {V2SignedAttributeRequest} body Signed Attribute request
+         * @param {string} documentId Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        addSignedAttribute(authorization: string, body: V2SignedAttributeRequest, options?: any) {
-            return DocumentsApiFp(configuration).addSignedAttribute(authorization, body, options)(fetch, basePath);
+        addSignedAttribute(authorization: string, body: V2SignedAttributeRequest, documentId: string, options?: any) {
+            return DocumentsApiFp(configuration).addSignedAttribute(authorization, body, documentId, options)(fetch, basePath);
+        },
+        /**
+         * Adds a new transition rules to the document.
+         * @summary Adds a transition new rules to the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {PendingAddTransitionRules} body Add Transition rules Request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        addTransitionRule(authorization: string, documentId: string, body: PendingAddTransitionRules, options?: any) {
+            return DocumentsApiFp(configuration).addTransitionRule(authorization, documentId, body, options)(fetch, basePath);
+        },
+        /**
+         * Creates a new cloned document from an existing Template document.
+         * @summary Creates a new cloned document from an existing Template document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {V2CloneDocumentRequest} body Document Clone request
+         * @param {string} documentId Document Identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        cloneDocumentV2(authorization: string, body: V2CloneDocumentRequest, documentId: string, options?: any) {
+            return DocumentsApiFp(configuration).cloneDocumentV2(authorization, body, documentId, options)(fetch, basePath);
         },
         /**
          * Commits a pending document.
@@ -3384,6 +4177,18 @@ export const DocumentsApiFactory = function (configuration?: Configuration, fetc
          */
         createDocumentV2(authorization: string, body: V2CreateDocumentRequest, options?: any) {
             return DocumentsApiFp(configuration).createDocumentV2(authorization, body, options)(fetch, basePath);
+        },
+        /**
+         * Deletes the transition rule associated with ruleID from the document.
+         * @summary Deletes the transition rule associated with ruleID from the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {string} ruleId Transition rule ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteTransitionRule(authorization: string, documentId: string, ruleId: string, options?: any) {
+            return DocumentsApiFp(configuration).deleteTransitionRule(authorization, documentId, ruleId, options)(fetch, basePath);
         },
         /**
          * Generates proofs for the fields from latest version of the document.
@@ -3468,15 +4273,40 @@ export const DocumentsApiFactory = function (configuration?: Configuration, fetc
             return DocumentsApiFp(configuration).getPendingDocument(authorization, documentId, options)(fetch, basePath);
         },
         /**
+         * Returns the role associated with the role ID in the document.
+         * @summary Returns the role associated with the role ID in the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {string} roleId Role ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRole(authorization: string, documentId: string, roleId: string, options?: any) {
+            return DocumentsApiFp(configuration).getRole(authorization, documentId, roleId, options)(fetch, basePath);
+        },
+        /**
+         * Returns the rule associated with the ruleID in the document.
+         * @summary Returns the rule associated with the ruleID in the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {string} ruleId Transition rule ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getTransitionRule(authorization: string, documentId: string, ruleId: string, options?: any) {
+            return DocumentsApiFp(configuration).getTransitionRule(authorization, documentId, ruleId, options)(fetch, basePath);
+        },
+        /**
          * Removes the collaborators from the document.
          * @summary Removes the collaborators from the document.
          * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
          * @param {V2RemoveCollaboratorsRequest} body Remove Collaborators request
+         * @param {string} documentId Document Identifier
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        removeCollaborators(authorization: string, body: V2RemoveCollaboratorsRequest, options?: any) {
-            return DocumentsApiFp(configuration).removeCollaborators(authorization, body, options)(fetch, basePath);
+        removeCollaborators(authorization: string, body: V2RemoveCollaboratorsRequest, documentId: string, options?: any) {
+            return DocumentsApiFp(configuration).removeCollaborators(authorization, body, documentId, options)(fetch, basePath);
         },
         /**
          * Updates an existing document and anchors it.
@@ -3502,6 +4332,19 @@ export const DocumentsApiFactory = function (configuration?: Configuration, fetc
         updateDocumentV2(authorization: string, body: V2UpdateDocumentRequest, documentId: string, options?: any) {
             return DocumentsApiFp(configuration).updateDocumentV2(authorization, body, documentId, options)(fetch, basePath);
         },
+        /**
+         * Updates an existing role on the document.
+         * @summary Updates an existing role on the document.
+         * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+         * @param {string} documentId Document Identifier
+         * @param {string} roleId Role ID
+         * @param {V2UpdateRole} body Update Role Request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateRole(authorization: string, documentId: string, roleId: string, body: V2UpdateRole, options?: any) {
+            return DocumentsApiFp(configuration).updateRole(authorization, documentId, roleId, body, options)(fetch, basePath);
+        },
     };
 };
 
@@ -3513,16 +4356,59 @@ export const DocumentsApiFactory = function (configuration?: Configuration, fetc
  */
 export class DocumentsApi extends BaseAPI {
     /**
-     * Signs the given payload and add it the pending document.
-     * @summary Signs the given payload and add it the pending document.
+     * Adds a new role to the document.
+     * @summary Adds a new role to the document.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-     * @param {V2SignedAttributeRequest} body Signed Attribute request
+     * @param {string} documentId Document Identifier
+     * @param {V2AddRole} body Add Role Request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApi
      */
-    public addSignedAttribute(authorization: string, body: V2SignedAttributeRequest, options?: any) {
-        return DocumentsApiFp(this.configuration).addSignedAttribute(authorization, body, options)(this.fetch, this.basePath);
+    public addRole(authorization: string, documentId: string, body: V2AddRole, options?: any) {
+        return DocumentsApiFp(this.configuration).addRole(authorization, documentId, body, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * Signs the given payload and add it the pending document.
+     * @summary Signs the given payload and add it the pending document.
+     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {V2SignedAttributeRequest} body Signed Attribute request
+     * @param {string} documentId Document Identifier
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DocumentsApi
+     */
+    public addSignedAttribute(authorization: string, body: V2SignedAttributeRequest, documentId: string, options?: any) {
+        return DocumentsApiFp(this.configuration).addSignedAttribute(authorization, body, documentId, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * Adds a new transition rules to the document.
+     * @summary Adds a transition new rules to the document.
+     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} documentId Document Identifier
+     * @param {PendingAddTransitionRules} body Add Transition rules Request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DocumentsApi
+     */
+    public addTransitionRule(authorization: string, documentId: string, body: PendingAddTransitionRules, options?: any) {
+        return DocumentsApiFp(this.configuration).addTransitionRule(authorization, documentId, body, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * Creates a new cloned document from an existing Template document.
+     * @summary Creates a new cloned document from an existing Template document.
+     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {V2CloneDocumentRequest} body Document Clone request
+     * @param {string} documentId Document Identifier
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DocumentsApi
+     */
+    public cloneDocumentV2(authorization: string, body: V2CloneDocumentRequest, documentId: string, options?: any) {
+        return DocumentsApiFp(this.configuration).cloneDocumentV2(authorization, body, documentId, options)(this.fetch, this.basePath);
     }
 
     /**
@@ -3562,6 +4448,20 @@ export class DocumentsApi extends BaseAPI {
      */
     public createDocumentV2(authorization: string, body: V2CreateDocumentRequest, options?: any) {
         return DocumentsApiFp(this.configuration).createDocumentV2(authorization, body, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * Deletes the transition rule associated with ruleID from the document.
+     * @summary Deletes the transition rule associated with ruleID from the document.
+     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} documentId Document Identifier
+     * @param {string} ruleId Transition rule ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DocumentsApi
+     */
+    public deleteTransitionRule(authorization: string, documentId: string, ruleId: string, options?: any) {
+        return DocumentsApiFp(this.configuration).deleteTransitionRule(authorization, documentId, ruleId, options)(this.fetch, this.basePath);
     }
 
     /**
@@ -3661,16 +4561,45 @@ export class DocumentsApi extends BaseAPI {
     }
 
     /**
-     * Removes the collaborators from the document.
-     * @summary Removes the collaborators from the document.
+     * Returns the role associated with the role ID in the document.
+     * @summary Returns the role associated with the role ID in the document.
      * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
-     * @param {V2RemoveCollaboratorsRequest} body Remove Collaborators request
+     * @param {string} documentId Document Identifier
+     * @param {string} roleId Role ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApi
      */
-    public removeCollaborators(authorization: string, body: V2RemoveCollaboratorsRequest, options?: any) {
-        return DocumentsApiFp(this.configuration).removeCollaborators(authorization, body, options)(this.fetch, this.basePath);
+    public getRole(authorization: string, documentId: string, roleId: string, options?: any) {
+        return DocumentsApiFp(this.configuration).getRole(authorization, documentId, roleId, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * Returns the rule associated with the ruleID in the document.
+     * @summary Returns the rule associated with the ruleID in the document.
+     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} documentId Document Identifier
+     * @param {string} ruleId Transition rule ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DocumentsApi
+     */
+    public getTransitionRule(authorization: string, documentId: string, ruleId: string, options?: any) {
+        return DocumentsApiFp(this.configuration).getTransitionRule(authorization, documentId, ruleId, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * Removes the collaborators from the document.
+     * @summary Removes the collaborators from the document.
+     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {V2RemoveCollaboratorsRequest} body Remove Collaborators request
+     * @param {string} documentId Document Identifier
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DocumentsApi
+     */
+    public removeCollaborators(authorization: string, body: V2RemoveCollaboratorsRequest, documentId: string, options?: any) {
+        return DocumentsApiFp(this.configuration).removeCollaborators(authorization, body, documentId, options)(this.fetch, this.basePath);
     }
 
     /**
@@ -3699,6 +4628,21 @@ export class DocumentsApi extends BaseAPI {
      */
     public updateDocumentV2(authorization: string, body: V2UpdateDocumentRequest, documentId: string, options?: any) {
         return DocumentsApiFp(this.configuration).updateDocumentV2(authorization, body, documentId, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * Updates an existing role on the document.
+     * @summary Updates an existing role on the document.
+     * @param {string} authorization Hex encoded centrifuge ID of the account for the intended API action
+     * @param {string} documentId Document Identifier
+     * @param {string} roleId Role ID
+     * @param {V2UpdateRole} body Update Role Request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DocumentsApi
+     */
+    public updateRole(authorization: string, documentId: string, roleId: string, body: V2UpdateRole, options?: any) {
+        return DocumentsApiFp(this.configuration).updateRole(authorization, documentId, roleId, body, options)(this.fetch, this.basePath);
     }
 
 }

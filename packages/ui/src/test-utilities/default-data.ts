@@ -73,6 +73,7 @@ export const defaultSchemas = [
       fundingAgreement: true,
       comments: true,
     },
+    template: '',
     attributes: [
       {
         name: 'reference_id',

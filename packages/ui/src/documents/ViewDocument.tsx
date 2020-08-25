@@ -113,7 +113,7 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
   if (error) return <PageError error={error}/>;
 
   const selectedSchema: Schema | undefined = !document ? undefined : schemas.find(s => {
-    return (
+    return !!(
       document.attributes &&
       document.attributes._schema &&
       s.name === document.attributes._schema.value

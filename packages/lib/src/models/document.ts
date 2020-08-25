@@ -1,4 +1,4 @@
-import {CoreapiCreateDocumentRequest, CoreapiDocumentResponse, CoreapiResponseHeader} from '../centrifuge-node-client';
+import {CoreapiCreateDocumentRequest, CoreapiDocumentResponse} from '../centrifuge-node-client';
 import { Contact, extendContactLikeObjects } from './contact';
 import { Collaborator, collaboratorsToAccessList } from './collaborator';
 
@@ -15,6 +15,7 @@ export interface Document extends CoreapiDocumentResponse {
   document_id?:string,
   nft_status?:string,
   document_status?:string,
+  template?:string,
 }
 
 export enum DOCUMENT_ACCESS {

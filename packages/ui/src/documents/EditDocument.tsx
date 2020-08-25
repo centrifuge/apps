@@ -143,11 +143,11 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
   if (!canWriteToDoc(user!, document)) return <Redirect to={documentRoutes.view.replace(':id', id)}/>;
 
   const selectedSchema: Schema | undefined = schemas.find(s => {
-    return (
-      document &&
-      document.attributes &&
-      document.attributes._schema &&
-      s.name === document.attributes._schema.value
+    return !!(
+        document &&
+        document.attributes &&
+        document.attributes._schema &&
+        s.name === document.attributes._schema.value
     );
   });
 

@@ -1,12 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { Document } from '../../../../lib/models/document';
-import { SessionGuard } from '../../auth/SessionGuard';
-import { databaseServiceProvider } from '../../database/database.providers';
-import { DatabaseService } from '../../database/database.service';
-import { DocumentsController } from '../documents.controller';
-import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module';
-import { CoreapiCreateDocumentRequest } from '../../../../lib/centrifuge-node-client';
-import { CentrifugeService } from '../../centrifuge-client/centrifuge.service';
+import {Test, TestingModule} from '@nestjs/testing';
+import {Document} from '../../../../lib/models/document';
+import {SessionGuard} from '../../auth/SessionGuard';
+import {databaseServiceProvider} from '../../database/database.providers';
+import {DatabaseService} from '../../database/database.service';
+import {DocumentsController} from '../documents.controller';
+import {centrifugeServiceProvider} from '../../centrifuge-client/centrifuge.module';
+import {CentrifugeService} from '../../centrifuge-client/centrifuge.service';
+import {V2SignedAttributeRequest} from '@centrifuge/gateway-lib/centrifuge-node-client';
+import TypeEnum = V2SignedAttributeRequest.TypeEnum;
 
 describe('DocumentsController', () => {
   let documentsModule: TestingModule;
@@ -17,15 +18,15 @@ describe('DocumentsController', () => {
     },
     attributes: {
       animal_type: {
-        type: 'string',
+        type: TypeEnum.String,
         value: 'iguana',
       },
       diet: {
-        type: 'string',
+        type: TypeEnum.String,
         value: 'insects',
       },
       schema: {
-        type: 'string',
+        type: TypeEnum.String,
         value: 'zoology',
       },
     },
@@ -38,15 +39,15 @@ describe('DocumentsController', () => {
     },
     attributes: {
       animal_type: {
-        type: 'string',
+        type: TypeEnum.String,
         value: 'iguana',
       },
       diet: {
-        type: 'string',
+        type: TypeEnum.String,
         value: 'insects',
       },
       schema: {
-        type: 'string',
+        type: TypeEnum.String,
         value: 'zoology',
       },
     },
@@ -149,8 +150,8 @@ describe('DocumentsController', () => {
   //   });
   // });
 
-  describe('update', function() {
-    it('should update the specified document', async function() {
+  describe('update', () => {
+    it('should update the specified document', async () => {
       const documentsController = documentsModule.get<DocumentsController>(
         DocumentsController,
       );
@@ -193,7 +194,7 @@ describe('DocumentsController', () => {
       });
     });
 
-    it('should throw and error because the document does not exist', async function() {
+    it('should throw and error because the document does not exist', async () => {
       const documentsController = documentsModule.get<DocumentsController>(
         DocumentsController,
       );
@@ -213,20 +214,16 @@ describe('DocumentsController', () => {
     });
   });
 
-  describe('get by id', function() {
-    it('should return the document by id', async function() {
+  describe.only('get by id', () => {
+    it('should return the document by id', async () => {
       const documentsController = documentsModule.get<DocumentsController>(
         DocumentsController,
       );
 
-      const result = await documentsController.getById(
+      await documentsController.getById(
         { id: insertedDocument._id },
         { user: { _id: 'user_id', account: '0x4441' } },
       );
-      expect(databaseSpies.spyFindOne).toHaveBeenCalledWith({
-        _id: insertedDocument._id,
-        ownerId: 'user_id',
-      });
 
       expect(centApiSpies.spyGetDocument).toHaveBeenCalledWith(
         '0x4441',
