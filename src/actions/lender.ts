@@ -12,7 +12,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
       return {
         hash: tx.hash,
         contractKey: 'SENIOR_OPERATOR',
-      }
+      };
     }
 
     redeemSenior = async (tokenAmount: string) => {
@@ -39,7 +39,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
       return {
         hash: tx.hash,
         contractKey: 'JUNIOR_OPERATOR',
-      }
+      };
     }
 
     redeemJunior = async (tokenAmount: string) => {

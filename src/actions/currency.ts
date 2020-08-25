@@ -14,8 +14,8 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
 
     getCurrencyAllowance = async (owner: string, spender: string) => {
       const currencyContract = this.getContract(this.contractAddresses['TINLAKE_CURRENCY']!, 'TINLAKE_CURRENCY');
-      const allowance = await currencyContract.allowance(owner, spender)
-      return allowance.toBN()
+      const allowance = await currencyContract.allowance(owner, spender);
+      return allowance.toBN();
     }
 
     getJuniorForCurrencyAllowance = async (owner: string) => {
@@ -40,7 +40,7 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
       return {
         hash: tx.hash,
         contractKey: 'TINLAKE_CURRENCY',
-      }
+      };
     }
 
     approveSeniorForCurrency = async (currencyAmount: string) => {

@@ -133,7 +133,7 @@ export default class Tinlake {
     contractNames.forEach((name) => {
       if (this.contractAbis[name] && this.contractAddresses[name]) {
         this.contracts[name] = this.eth.contract(this.contractAbis[name]).at(this.contractAddresses[name]);
-        this.ethersContracts[name] = this.createContract(this.contractAddresses[name]!, name)
+        this.ethersContracts[name] = this.createContract(this.contractAddresses[name]!, name);
       }
     });
 
@@ -182,7 +182,7 @@ export default class Tinlake {
       address,
       this.contractAbis[abiName],
       this.ethersConfig.provider,
-    )
+    );
   }
 
   getContract(address: string, abiName: string): ethers.Contract {
@@ -190,7 +190,7 @@ export default class Tinlake {
       address,
       this.contractAbis[abiName],
       this.ethersConfig.signer,
-    )
+    );
   }
 
   async getTransactionReceipt(tx: PendingTransaction): Promise<ethers.providers.TransactionReceipt> {

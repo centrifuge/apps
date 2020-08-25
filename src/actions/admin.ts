@@ -103,13 +103,13 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
       const tx = await this.ethersContracts['ASSESSOR'].connect(this.ethersConfig.signer).file(web3.fromAscii('minJuniorRatio').padEnd(66, '0'), ratio);
 
-      console.log(this.transactionTimeout)
+      console.log(this.transactionTimeout);
 
       return {
         hash: tx.hash,
         contractKey: 'ASSESSOR',
-        timesOutAt: Date.now() + this.transactionTimeout * 1000
-      }
+        timesOutAt: Date.now() + this.transactionTimeout * 1000,
+      };
     }
 
     approveAllowanceJunior = async (user: string, maxCurrency: string, maxToken: string) => {

@@ -20,7 +20,7 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
       return {
         hash: tx.hash,
         contractKey: 'COLLATERAL_NFT',
-      }
+      };
     }
 
     approveNFT = async (nftAddr: string, tokenId: string, to: string) => {
@@ -37,11 +37,11 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
       return {
         hash: tx.hash,
         contractKey: 'COLLATERAL_NFT',
-      }
+      };
     }
 
     isNFTApprovedForAll = async (nftAddr: string, owner: string, operator: string) => {
-      return await this.getContract(nftAddr, 'COLLATERAL_NFT').isApprovedForAll(owner, operator)
+      return await this.getContract(nftAddr, 'COLLATERAL_NFT').isApprovedForAll(owner, operator);
     }
 
     getNFTCount = async (nftAddr: string): Promise<BN> => {
@@ -51,7 +51,7 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
     }
 
     getNFTData = async (nftAddr: string, tokenId: string): Promise<any> => {
-      return this.getContract(nftAddr, 'COLLATERAL_NFT').data(tokenId)
+      return this.getContract(nftAddr, 'COLLATERAL_NFT').data(tokenId);
 
       // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
       // const res = await executeAndRetry(nft.data, [tokenId]);
@@ -59,7 +59,7 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
     }
 
     getNFTOwner = async (nftAddr: string, tokenId: string): Promise<BN> => {
-      return await this.getContract(nftAddr, 'COLLATERAL_NFT').ownerOf(tokenId)
+      return await this.getContract(nftAddr, 'COLLATERAL_NFT').ownerOf(tokenId);
       // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
       // const res : { 0: BN } = await executeAndRetry(nft.ownerOf, [tokenId]);
       // return res[0];

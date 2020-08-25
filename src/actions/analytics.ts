@@ -38,7 +38,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getOwnerOfCollateral = async (nftRegistryAddr:string, tokenId: string): Promise<BN> => {
-      return await this.getContract(nftRegistryAddr, 'COLLATERAL_NFT').ownerOf(tokenId)
+      return await this.getContract(nftRegistryAddr, 'COLLATERAL_NFT').ownerOf(tokenId);
 
       // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftRegistryAddr);
       // const res : { 0: BN } = await executeAndRetry(nft.ownerOf, [tokenId]);
