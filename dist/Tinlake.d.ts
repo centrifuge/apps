@@ -4,7 +4,7 @@ declare const contractNames: string[];
 export declare type PendingTransaction = {
     hash: string;
     contractKey: string;
-    timesOutAt: number;
+    timesOutAt?: number;
 };
 export declare type EthConfig = {
     from?: string;
@@ -16,8 +16,8 @@ export declare type EthersOverrides = {
     gasLimit?: number;
 };
 export declare type EthersConfig = {
-    provider?: ethers.providers.Provider;
-    signer?: ethers.Signer;
+    provider: ethers.providers.Provider;
+    signer: ethers.Signer;
     overrides?: EthersOverrides;
 };
 export declare type ContractNames = typeof contractNames[number];
@@ -51,15 +51,17 @@ export default class Tinlake {
     contractAddresses: ContractAddresses;
     transactionTimeout: number;
     contracts: Contracts;
+    ethersContracts: Contracts;
     contractAbis: ContractAbis;
     contractConfig: any;
     constructor(params: TinlakeParams);
     setProvider: (provider: any, ethOptions?: any) => void;
     setContracts: () => void;
     setEthConfig: (ethConfig: EthConfig) => void;
-    setEthersConfig: (ethersConfig: EthersConfig) => void;
-    createContract(address: string, abiName: string): void;
-    getContract(address: string, abiName: string): ethers.Contract | undefined;
+    setEthersConfig: (ethersConfig: EthersConfig | undefined) => void;
+    createEthContract(address: string, abiName: string): void;
+    createContract(address: string, abiName: string): ethers.Contract;
+    getContract(address: string, abiName: string): ethers.Contract;
     getTransactionReceipt(tx: PendingTransaction): Promise<ethers.providers.TransactionReceipt>;
     getOperatorType: (tranche: string) => any;
 }

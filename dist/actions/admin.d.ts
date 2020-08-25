@@ -1,4 +1,4 @@
-import { ContractNames, Constructor, TinlakeParams } from '../Tinlake';
+import { ContractNames, Constructor, TinlakeParams, PendingTransaction } from '../Tinlake';
 import BN from 'bn.js';
 export declare function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase): {
     new (...args: any[]): {
@@ -15,23 +15,32 @@ export declare function AdminActions<ActionsBase extends Constructor<TinlakePara
         initRate: (ratePerSecond: string) => Promise<unknown>;
         changeRate: (loan: string, ratePerSecond: string) => Promise<unknown>;
         setRate: (loan: string, ratePerSecond: string) => Promise<unknown>;
-        setMinimumJuniorRatio: (ratio: string) => Promise<unknown>;
+        setMinimumJuniorRatio: (ratio: string) => Promise<{
+            hash: any;
+            contractKey: string;
+            timesOutAt: number;
+        }>;
         approveAllowanceJunior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
         approveAllowanceSenior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
         provider: any;
-        signer: import("ethers").Signer;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("../Tinlake").EthConfig;
+        ethersConfig: import("../Tinlake").EthersConfig;
         contractAddresses: import("../Tinlake").ContractAddresses;
         transactionTimeout: number;
         contracts: import("../Tinlake").Contracts;
+        ethersContracts: import("../Tinlake").Contracts;
         contractAbis: import("../Tinlake").ContractAbis;
         contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
         setContracts: () => void;
         setEthConfig: (ethConfig: import("../Tinlake").EthConfig) => void;
-        createContract(address: string, abiName: string): void;
+        setEthersConfig: (ethersConfig: import("../Tinlake").EthersConfig | undefined) => void;
+        createEthContract(address: string, abiName: string): void;
+        createContract(address: string, abiName: string): import("ethers").Contract;
+        getContract(address: string, abiName: string): import("ethers").Contract;
+        getTransactionReceipt(tx: PendingTransaction): Promise<import("ethers/providers").TransactionReceipt>;
         getOperatorType: (tranche: string) => any;
     };
 } & ActionsBase;
@@ -46,7 +55,7 @@ export declare type IAdminActions = {
     canSetLoanPrice(user: string): Promise<boolean>;
     initRate(rate: string): Promise<any>;
     setRate(loan: string, rate: string): Promise<any>;
-    setMinimumJuniorRatio(amount: string): Promise<any>;
+    setMinimumJuniorRatio(amount: string): Promise<PendingTransaction>;
     approveAllowanceJunior(user: string, maxCurrency: string, maxToken: string): Promise<any>;
     approveAllowanceSenior(user: string, maxCurrency: string, maxToken: string): Promise<any>;
 };

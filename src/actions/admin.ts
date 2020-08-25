@@ -1,4 +1,4 @@
-import { ContractNames, Constructor, TinlakeParams } from '../Tinlake';
+import { ContractNames, Constructor, TinlakeParams, PendingTransaction } from '../Tinlake';
 import { waitAndReturnEvents, executeAndRetry, ZERO_ADDRESS } from '../services/ethereum';
 import BN from 'bn.js';
 const web3 = require('web3-utils');
@@ -100,9 +100,16 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     // ------------ admin functions lender-site -------------
     setMinimumJuniorRatio = async (ratio: string) => {
-      const txHash = await executeAndRetry(this.contracts['ASSESSOR'].file, [web3.fromAscii('minJuniorRatio'), ratio, this.ethConfig]);
-      console.log(`[Assessor file] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['ASSESSOR'].abi, this.transactionTimeout);
+      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
+      const tx = await this.ethersContracts['ASSESSOR'].connect(this.ethersConfig.signer).file(web3.fromAscii('minJuniorRatio').padEnd(66, '0'), ratio);
+
+      console.log(this.transactionTimeout)
+
+      return {
+        hash: tx.hash,
+        contractKey: 'ASSESSOR',
+        timesOutAt: Date.now() + this.transactionTimeout * 1000
+      }
     }
 
     approveAllowanceJunior = async (user: string, maxCurrency: string, maxToken: string) => {
@@ -144,7 +151,7 @@ export type IAdminActions = {
   canSetLoanPrice(user: string): Promise<boolean>,
   initRate(rate: string): Promise<any>,
   setRate(loan: string, rate: string): Promise<any>,
-  setMinimumJuniorRatio(amount: string): Promise<any>,
+  setMinimumJuniorRatio(amount: string): Promise<PendingTransaction>,
   approveAllowanceJunior(user: string, maxCurrency: string, maxToken: string): Promise<any>,
   approveAllowanceSenior(user: string, maxCurrency: string, maxToken: string): Promise<any>,
 };

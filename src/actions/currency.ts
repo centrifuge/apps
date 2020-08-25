@@ -1,4 +1,4 @@
-import { Constructor, TinlakeParams } from '../Tinlake';
+import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake';
 import { executeAndRetry, waitAndReturnEvents } from '../services/ethereum';
 import BN from 'bn.js';
 
@@ -13,8 +13,9 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
     }
 
     getCurrencyAllowance = async (owner: string, spender: string) => {
-      const res : { 0: BN } = await executeAndRetry(this.contracts['TINLAKE_CURRENCY'].allowance, [owner, spender]);
-      return res[0] || new BN(0);
+      const currencyContract = this.getContract(this.contractAddresses['TINLAKE_CURRENCY']!, 'TINLAKE_CURRENCY');
+      const allowance = await currencyContract.allowance(owner, spender)
+      return allowance.toBN()
     }
 
     getJuniorForCurrencyAllowance = async (owner: string) => {
@@ -33,9 +34,13 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
     }
 
     approveCurrency = async (usr: string, currencyAmount: string) => {
-      const txHash = await executeAndRetry(this.contracts['TINLAKE_CURRENCY'].approve, [usr, currencyAmount, this.ethConfig]);
-      console.log(`[Currency.approve] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['TINLAKE_CURRENCY'].abi, this.transactionTimeout);
+      const currencyContract = this.getContract(this.contractAddresses['TINLAKE_CURRENCY']!, 'TINLAKE_CURRENCY');
+      const tx = await currencyContract.approve(usr, currencyAmount);
+
+      return {
+        hash: tx.hash,
+        contractKey: 'TINLAKE_CURRENCY',
+      }
     }
 
     approveSeniorForCurrency = async (currencyAmount: string) => {
@@ -53,12 +58,12 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
 export type  ICurrencyActions = {
   mintCurrency(usr: string, amount: string): Promise<unknown>,
   getCurrencyBalance(usr: string): Promise<BN>,
-  approveCurrency(usr: string, amount: string): Promise<unknown>,
   getCurrencyAllowance: (owner: string, spender: string) => Promise<BN>;
   getJuniorForCurrencyAllowance: (owner: string) => Promise<BN | undefined>;
   getSeniorForCurrencyAllowance: (owner: string) => Promise<BN | undefined>;
-  approveSeniorForCurrency: (currencyAmount: string) => Promise<unknown>;
-  approveJuniorForCurrency: (currencyAmount: string) => Promise<unknown>;
+  approveCurrency(usr: string, amount: string): Promise<PendingTransaction>,
+  approveSeniorForCurrency: (currencyAmount: string) => Promise<PendingTransaction | undefined>;
+  approveJuniorForCurrency: (currencyAmount: string) => Promise<PendingTransaction | undefined>;
 };
 
 export default CurrencyActions;

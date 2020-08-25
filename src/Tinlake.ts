@@ -2,6 +2,7 @@ import Eth from 'ethjs';
 import { ethI }  from './services/ethereum';
 import  abiDefinitions  from './abi';
 import { ethers } from 'ethers';
+import BN from 'bn.js';
 
 const contractNames = [
   'TINLAKE_CURRENCY',
@@ -40,7 +41,7 @@ type AbiOutput = {
 export type PendingTransaction = {
   hash: string
   contractKey: string
-  timesOutAt: number,
+  timesOutAt?: number,
 };
 
 export type EthConfig = {
@@ -55,8 +56,8 @@ export type EthersOverrides = {
 };
 
 export type EthersConfig = {
-  provider?: ethers.providers.Provider
-  signer?: ethers.Signer,
+  provider: ethers.providers.Provider
+  signer: ethers.Signer,
   overrides?: EthersOverrides,
 };
 
@@ -88,6 +89,10 @@ export type TinlakeParams = {
 
 export type Constructor<T = {}> = new (...args: any[]) => Tinlake;
 
+(ethers.utils.BigNumber as any).prototype.toBN = function () {
+  return new BN((this as any).toString());
+};
+
 export default class Tinlake {
   public provider: any;
   public eth: ethI;
@@ -97,6 +102,7 @@ export default class Tinlake {
   public contractAddresses: ContractAddresses;
   public transactionTimeout: number;
   public contracts: Contracts = {};
+  public ethersContracts: Contracts = {};
   public contractAbis: ContractAbis = {};
   public contractConfig: any = {};
 
@@ -111,7 +117,7 @@ export default class Tinlake {
     this.transactionTimeout = transactionTimeout;
     this.setProvider(provider, ethOptions);
     this.setEthConfig(ethConfig || {});
-    this.setEthersConfig(ethersConfig || {});
+    this.setEthersConfig(ethersConfig);
   }
 
   setProvider = (provider: any, ethOptions?: any) => {
@@ -126,21 +132,29 @@ export default class Tinlake {
     // set root & proxy contracts
     contractNames.forEach((name) => {
       if (this.contractAbis[name] && this.contractAddresses[name]) {
-        this.contracts[name] = this.eth.contract(this.contractAbis[name])
-        .at(this.contractAddresses[name]);
+        this.contracts[name] = this.eth.contract(this.contractAbis[name]).at(this.contractAddresses[name]);
+        this.ethersContracts[name] = this.createContract(this.contractAddresses[name]!, name)
       }
     });
 
     // modular contracts
     if (this.contractAddresses['JUNIOR_OPERATOR']) {
       this.contracts['JUNIOR_OPERATOR'] = this.contractConfig['JUNIOR_OPERATOR']
-                  ? this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
-                  : this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
+                  ? this.createEthContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
+                  : this.createEthContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
+
+      this.ethersContracts['JUNIOR_OPERATOR'] = this.contractConfig['JUNIOR_OPERATOR']
+        ? this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
+        : this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
     }
     if (this.contractAddresses['SENIOR_OPERATOR']) {
       this.contracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR']
-                  ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
-                  : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
+                  ? this.createEthContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
+                  : this.createEthContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
+
+      this.ethersContracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR']
+        ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
+        : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
     }
   }
 
@@ -151,24 +165,32 @@ export default class Tinlake {
     };
   }
 
-  setEthersConfig = (ethersConfig: EthersConfig) => {
+  setEthersConfig = (ethersConfig: EthersConfig | undefined) => {
     this.ethersConfig = {
       ...this.ethersConfig,
       ...ethersConfig,
     };
   }
 
-  createContract(address: string, abiName: string) {
+  createEthContract(address: string, abiName: string) {
     const contract = this.eth.contract(this.contractAbis[abiName]).at(address);
     return contract;
   }
 
-  getContract(address: string, abiName: string): ethers.Contract | undefined {
-    return this.ethersConfig.signer ? new ethers.Contract(
+  createContract(address: string, abiName: string) {
+    return new ethers.Contract(
+      address,
+      this.contractAbis[abiName],
+      this.ethersConfig.provider,
+    )
+  }
+
+  getContract(address: string, abiName: string): ethers.Contract {
+    return new ethers.Contract(
       address,
       this.contractAbis[abiName],
       this.ethersConfig.signer,
-    ) : undefined;
+    )
   }
 
   async getTransactionReceipt(tx: PendingTransaction): Promise<ethers.providers.TransactionReceipt> {

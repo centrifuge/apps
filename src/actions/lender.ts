@@ -1,15 +1,18 @@
-import { Constructor, TinlakeParams } from '../Tinlake';
+import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake';
 import { executeAndRetry, waitAndReturnEvents } from '../services/ethereum';
 import BN from 'bn.js';
 
 export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Base: ActionBase) {
   return class extends Base implements ILenderActions {
 
-    // senior tranch functions
+    // senior tranche functions
     supplySenior = async (currencyAmount: string) => {
-      const txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].supply, [currencyAmount, this.ethConfig]);
-      console.log(`[Supply] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_OPERATOR'].abi, this.transactionTimeout);
+      const tx = await this.ethersContracts['SENIOR_OPERATOR'].connect(this.ethersConfig.signer).supply(currencyAmount);
+
+      return {
+        hash: tx.hash,
+        contractKey: 'SENIOR_OPERATOR',
+      }
     }
 
     redeemSenior = async (tokenAmount: string) => {
@@ -31,9 +34,12 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
 
     // junior tranche functions
     supplyJunior = async (currencyAmount: string) => {
-      const txHash = await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].supply, [currencyAmount, this.ethConfig]);
-      console.log(`[Supply] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_OPERATOR'].abi, this.transactionTimeout);
+      const tx = await this.ethersContracts['JUNIOR_OPERATOR'].connect(this.ethersConfig.signer).supply(currencyAmount);
+
+      return {
+        hash: tx.hash,
+        contractKey: 'JUNIOR_OPERATOR',
+      }
     }
 
     redeemJunior = async (tokenAmount: string) => {
@@ -65,11 +71,11 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
 export type ILenderActions = {
   getSeniorTokenAllowance(owner: string): Promise<BN>,
   getJuniorTokenAllowance(owner: string): Promise<BN>;
-  supplyJunior(currencyAmount: string): Promise<any>,
+  supplyJunior(currencyAmount: string): Promise<PendingTransaction>,
   approveJuniorToken: (tokenAmount: string) => Promise<unknown>;
   approveSeniorToken: (tokenAmount: string) => Promise<unknown>;
   redeemJunior(tokenAmount: string): Promise<any>,
-  supplySenior(currencyAmount: string): Promise<any>,
+  supplySenior(currencyAmount: string): Promise<PendingTransaction>,
   redeemSenior(tokenAmount: string): Promise<any>,
   balance(): Promise<any>,
 };
