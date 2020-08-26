@@ -15,7 +15,6 @@ export function initTinlake({
   if (tinlake === null) {
     const { transactionTimeout } = config
     tinlake = new Tinlake({ transactionTimeout, provider: getDefaultHttpProvider() }) as any
-    tinlake!.setEthConfig({ gas: config.gas, gasPrice: config.gasPrice })
   }
 
   let resetContractAddresses = false
