@@ -1,6 +1,7 @@
-import Eth from 'ethjs'
-import { ethI } from './services/ethereum'
-import abiDefinitions from './abi'
+import Eth from 'ethjs';
+import { ethI }  from './services/ethereum';
+import  abiDefinitions  from './abi';
+import { ethers } from 'ethers';
 
 const contractNames = [
   'TINLAKE_CURRENCY',
@@ -42,7 +43,12 @@ export type EthConfig = {
   gas?: string
 }
 
-export type ContractNames = typeof contractNames[number]
+export type EthersConfig = {
+  provider?: ethers.providers.Provider
+  signer?: ethers.Signer,
+};
+
+export type ContractNames = typeof contractNames[number];
 
 export type Contracts = {
   [key in ContractNames]?: any
@@ -57,48 +63,43 @@ export type ContractAddresses = {
 }
 
 export type TinlakeParams = {
-  provider: any
-  transactionTimeout: number
-  contractAddresses?: ContractAddresses | {}
-  contractAbis?: ContractAbis | {}
-  ethConfig?: EthConfig
-  ethOptions?: any | {}
-  contracts?: Contracts | {}
-  contractConfig?: any | {}
-}
+  provider: any;
+  transactionTimeout: number;
+  contractAddresses?: ContractAddresses | {};
+  contractAbis?: ContractAbis | {};
+  ethConfig?: EthConfig;
+  ethersConfig?: EthersConfig;
+  ethOptions?: any | {};
+  contracts?: Contracts | {};
+  contractConfig?: any | {};
+};
 
-export type Constructor<T = {}> = new (...args: any[]) => Tinlake
+export type Constructor<T = {}> = new (...args: any[]) => Tinlake;
 
 export default class Tinlake {
-  public provider: any
-  public eth: ethI
-  public ethOptions: any
-  public ethConfig: EthConfig
-  public contractAddresses: ContractAddresses
-  public transactionTimeout: number
-  public contracts: Contracts = {}
-  public contractAbis: ContractAbis = {}
-  public contractConfig: any = {}
+  public provider: any;
+  public eth: ethI;
+  public ethOptions: any;
+  public ethConfig: EthConfig;
+  public ethersConfig: EthersConfig;
+  public contractAddresses: ContractAddresses;
+  public transactionTimeout: number;
+  public contracts: Contracts = {};
+  public contractAbis: ContractAbis = {};
+  public contractConfig: any = {};
 
   constructor(params: TinlakeParams) {
-    const {
-      provider,
-      contractAddresses,
-      transactionTimeout,
-      contractAbis,
-      ethOptions,
-      ethConfig,
-      contractConfig,
-    } = params
+    const { provider, contractAddresses, transactionTimeout, contractAbis, ethOptions, ethConfig, ethersConfig, contractConfig } = params;
     if (!contractAbis) {
       this.contractAbis = abiDefinitions
     }
 
-    this.contractConfig = contractConfig || {}
-    this.contractAddresses = contractAddresses || {}
-    this.transactionTimeout = transactionTimeout
-    this.setProvider(provider, ethOptions)
-    this.setEthConfig(ethConfig || {})
+    this.contractConfig = contractConfig || {};
+    this.contractAddresses = contractAddresses || {};
+    this.transactionTimeout = transactionTimeout;
+    this.setProvider(provider, ethOptions);
+    this.setEthConfig(ethConfig || {});
+    this.setEthersConfig(ethersConfig || {});
   }
 
   setProvider = (provider: any, ethOptions?: any) => {
@@ -135,6 +136,13 @@ export default class Tinlake {
       ...this.ethConfig,
       ...ethConfig,
     }
+  }
+
+  setEthersConfig = (ethersConfig: EthersConfig) => {
+    this.ethersConfig = {
+      ...this.ethersConfig,
+      ...ethersConfig,
+    };
   }
 
   createContract(address: string, abiName: string) {

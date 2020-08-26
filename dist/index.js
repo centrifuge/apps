@@ -47500,6 +47500,9 @@ var Tinlake = /** @class */ (function () {
         this.setEthConfig = function (ethConfig) {
             _this.ethConfig = __assign(__assign({}, _this.ethConfig), ethConfig);
         };
+        this.setEthersConfig = function (ethersConfig) {
+            _this.ethersConfig = __assign(__assign({}, _this.ethersConfig), ethersConfig);
+        };
         this.getOperatorType = function (tranche) {
             switch (tranche) {
                 case 'senior':
@@ -47510,7 +47513,7 @@ var Tinlake = /** @class */ (function () {
                     return 'ALLOWANCE_OPERATOR';
             }
         };
-        var provider = params.provider, contractAddresses = params.contractAddresses, transactionTimeout = params.transactionTimeout, contractAbis = params.contractAbis, ethOptions = params.ethOptions, ethConfig = params.ethConfig, contractConfig = params.contractConfig;
+        var provider = params.provider, contractAddresses = params.contractAddresses, transactionTimeout = params.transactionTimeout, contractAbis = params.contractAbis, ethOptions = params.ethOptions, ethConfig = params.ethConfig, ethersConfig = params.ethersConfig, contractConfig = params.contractConfig;
         if (!contractAbis) {
             this.contractAbis = abiDefinitions;
         }
@@ -47519,6 +47522,7 @@ var Tinlake = /** @class */ (function () {
         this.transactionTimeout = transactionTimeout;
         this.setProvider(provider, ethOptions);
         this.setEthConfig(ethConfig || {});
+        this.setEthersConfig(ethersConfig || {});
     }
     Tinlake.prototype.createContract = function (address, abiName) {
         var contract = this.eth.contract(this.contractAbis[abiName]).at(address);
