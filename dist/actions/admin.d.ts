@@ -1,9 +1,9 @@
-import { ContractNames, Constructor, TinlakeParams, PendingTransaction } from '../Tinlake';
+import { ContractName, Constructor, TinlakeParams, PendingTransaction } from '../Tinlake';
 import BN from 'bn.js';
 export declare function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase): {
     new (...args: any[]): {
         canQueryPermissions: () => boolean;
-        isWard: (user: string, contractName: string) => Promise<BN>;
+        isWard: (user: string, contractName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR") => Promise<BN>;
         canSetInterestRate: (user: string) => Promise<boolean>;
         canSetSeniorTrancheInterest: (user: string) => Promise<boolean>;
         canSetRiskScore: (user: string) => Promise<boolean>;
@@ -37,15 +37,17 @@ export declare function AdminActions<ActionsBase extends Constructor<TinlakePara
         setContracts: () => void;
         setEthConfig: (ethConfig: import("../Tinlake").EthConfig) => void;
         setEthersConfig: (ethersConfig: import("../Tinlake").EthersConfig | undefined) => void;
-        createEthContract(address: string, abiName: string): void;
-        createContract(address: string, abiName: string): import("ethers").Contract;
-        getContract(address: string, abiName: string): import("ethers").Contract;
+        createEthContract(address: string, abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR"): void;
+        createContract(address: string, abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR"): import("ethers").Contract;
+        getContract(address: string, abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR"): import("ethers").Contract;
+        contract(abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR", address?: string | undefined): import("ethers").Contract;
+        pending(txPromise: Promise<import("ethers/providers").TransactionResponse>): Promise<PendingTransaction>;
         getTransactionReceipt(tx: PendingTransaction): Promise<import("ethers/providers").TransactionReceipt>;
         getOperatorType: (tranche: string) => any;
     };
 } & ActionsBase;
 export declare type IAdminActions = {
-    isWard(user: string, contractName: ContractNames): Promise<BN>;
+    isWard(user: string, contractName: ContractName): Promise<BN>;
     canSetInterestRate(user: string): Promise<boolean>;
     canSetSeniorTrancheInterest(user: string): Promise<boolean>;
     canSetMinimumJuniorRatio(user: string): Promise<boolean>;

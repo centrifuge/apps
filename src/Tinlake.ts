@@ -31,7 +31,8 @@ const contractNames = [
   'LENDER_DEPLOYER',
   'NFT_FEED',
   'GOVERNANCE',
-];
+  'ALLOWANCE_OPERATOR',
+] as const;
 
 type AbiOutput = {
   name: string;
@@ -39,8 +40,7 @@ type AbiOutput = {
 };
 
 export type PendingTransaction = {
-  hash: string
-  contractKey: string
+  hash: string | undefined
   timesOutAt?: number,
 };
 
@@ -61,18 +61,18 @@ export type EthersConfig = {
   overrides?: EthersOverrides,
 };
 
-export type ContractNames = typeof contractNames[number];
+export type ContractName = typeof contractNames[number];
 
 export type Contracts = {
-  [key in ContractNames]?: any;
+  [key in ContractName]?: any;
 };
 
 export type ContractAbis = {
-  [key in ContractNames]?: any;
+  [key in ContractName]?: any;
 };
 
 export type ContractAddresses = {
-  [key in ContractNames]?: string;
+  [key in ContractName]?: string;
 };
 
 export type TinlakeParams = {
@@ -107,7 +107,16 @@ export default class Tinlake {
   public contractConfig: any = {};
 
   constructor(params: TinlakeParams) {
-    const { provider, contractAddresses, transactionTimeout, contractAbis, ethOptions, ethConfig, ethersConfig, contractConfig } = params;
+    const {
+      provider,
+      contractAddresses,
+      transactionTimeout,
+      contractAbis,
+      ethOptions,
+      ethConfig,
+      ethersConfig,
+      contractConfig,
+    } = params;
     if (!contractAbis) {
       this.contractAbis = abiDefinitions;
     }
@@ -132,29 +141,60 @@ export default class Tinlake {
     // set root & proxy contracts
     contractNames.forEach((name) => {
       if (this.contractAbis[name] && this.contractAddresses[name]) {
-        this.contracts[name] = this.eth.contract(this.contractAbis[name]).at(this.contractAddresses[name]);
-        this.ethersContracts[name] = this.createContract(this.contractAddresses[name]!, name);
+        this.contracts[name] = this.eth
+          .contract(this.contractAbis[name])
+          .at(this.contractAddresses[name]);
+        this.ethersContracts[name] = this.createContract(
+          this.contractAddresses[name]!,
+          name,
+        );
       }
     });
 
     // modular contracts
     if (this.contractAddresses['JUNIOR_OPERATOR']) {
       this.contracts['JUNIOR_OPERATOR'] = this.contractConfig['JUNIOR_OPERATOR']
-                  ? this.createEthContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
-                  : this.createEthContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
+        ? this.createEthContract(
+            this.contractAddresses['JUNIOR_OPERATOR'],
+            this.contractConfig['JUNIOR_OPERATOR'],
+          )
+        : this.createEthContract(
+            this.contractAddresses['JUNIOR_OPERATOR'],
+            'ALLOWANCE_OPERATOR',
+          );
 
-      this.ethersContracts['JUNIOR_OPERATOR'] = this.contractConfig['JUNIOR_OPERATOR']
-        ? this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
-        : this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
+      this.ethersContracts['JUNIOR_OPERATOR'] = this.contractConfig[ 'JUNIOR_OPERATOR'
+]
+        ? this.createContract(
+            this.contractAddresses['JUNIOR_OPERATOR'],
+            this.contractConfig['JUNIOR_OPERATOR'],
+          )
+        : this.createContract(
+            this.contractAddresses['JUNIOR_OPERATOR'],
+            'ALLOWANCE_OPERATOR',
+          );
     }
     if (this.contractAddresses['SENIOR_OPERATOR']) {
       this.contracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR']
-                  ? this.createEthContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
-                  : this.createEthContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
+        ? this.createEthContract(
+            this.contractAddresses['SENIOR_OPERATOR'],
+            this.contractConfig['SENIOR_OPERATOR'],
+          )
+        : this.createEthContract(
+            this.contractAddresses['SENIOR_OPERATOR'],
+            'ALLOWANCE_OPERATOR',
+          );
 
-      this.ethersContracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR']
-        ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
-        : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
+      this.ethersContracts['SENIOR_OPERATOR'] = this.contractConfig[ 'SENIOR_OPERATOR'
+]
+        ? this.createContract(
+            this.contractAddresses['SENIOR_OPERATOR'],
+            this.contractConfig['SENIOR_OPERATOR'],
+          )
+        : this.createContract(
+            this.contractAddresses['SENIOR_OPERATOR'],
+            'ALLOWANCE_OPERATOR',
+          );
     }
   }
 
@@ -172,12 +212,12 @@ export default class Tinlake {
     };
   }
 
-  createEthContract(address: string, abiName: string) {
+  createEthContract(address: string, abiName: ContractName) {
     const contract = this.eth.contract(this.contractAbis[abiName]).at(address);
     return contract;
   }
 
-  createContract(address: string, abiName: string) {
+  createContract(address: string, abiName: ContractName) {
     return new ethers.Contract(
       address,
       this.contractAbis[abiName],
@@ -185,7 +225,7 @@ export default class Tinlake {
     );
   }
 
-  getContract(address: string, abiName: string): ethers.Contract {
+  getContract(address: string, abiName: ContractName): ethers.Contract {
     return new ethers.Contract(
       address,
       this.contractAbis[abiName],
@@ -193,8 +233,43 @@ export default class Tinlake {
     );
   }
 
-  async getTransactionReceipt(tx: PendingTransaction): Promise<ethers.providers.TransactionReceipt> {
-    return await this.ethersConfig.provider!.waitForTransaction(tx.hash);
+  contract(abiName: ContractName, address?: string): ethers.Contract {
+    if (address) {
+      return new ethers.Contract(
+        address,
+        this.contractAbis[abiName],
+        this.ethersConfig.signer,
+      );
+    }
+      return this.ethersContracts[abiName];
+
+  }
+
+  async pending(txPromise: Promise<ethers.providers.TransactionResponse>): Promise<PendingTransaction> {
+    const tx = await txPromise;
+    return {
+      hash: tx.hash,
+      timesOutAt: Date.now() + this.transactionTimeout * 1000,
+    };
+  }
+
+  async getTransactionReceipt(
+    tx: PendingTransaction,
+  ): Promise<ethers.providers.TransactionReceipt> {
+    return new Promise(async (resolve, reject) => {
+      if (!tx.hash) return reject();
+
+      let timer: NodeJS.Timer | undefined = undefined;
+      if (tx.timesOutAt) {
+        timer = setTimeout(() => {
+          return reject();
+        },                 tx.timesOutAt - Date.now());
+      }
+
+      const receipt = await this.ethersConfig.provider!.waitForTransaction(tx.hash);
+      if (timer) clearTimeout(timer);
+      return resolve(receipt);
+    });
   }
 
   getOperatorType = (tranche: string) => {
@@ -207,5 +282,4 @@ export default class Tinlake {
         return 'ALLOWANCE_OPERATOR';
     }
   }
-
 }

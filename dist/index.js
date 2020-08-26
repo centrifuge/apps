@@ -29628,6 +29628,14 @@ function CurrencyActions(Base) {
     }(Base));
 }
 
+/**
+ * - See if we can remove ICollateralActions,
+ * - Make sure all actions have a non-unkonwn/any return type
+//  * - Remove contractKey
+//  * - Remove timesOutAt from every action (use this.transactionTimeout)
+//  * - Create ticket for adding RetryProvider later in tinlake-ui
+ * - Create issue in ethers.js for window is undefined error
+ */
 function CollateralActions(Base) {
     return /** @class */ (function (_super) {
         __extends(class_1, _super);
@@ -29650,20 +29658,11 @@ function CollateralActions(Base) {
                     }
                 });
             }); };
-            _this.mintNFT = function (nftAddr, owner, tokenId, ref, amount, asset) { return __awaiter(_this, void 0, void 0, function () {
-                var nftContract, tx;
+            _this.mintNFT = function (nftAddress, owner, tokenId, ref, amount, asset) { return __awaiter(_this, void 0, void 0, function () {
+                var nft;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            nftContract = this.getContract(nftAddr, 'COLLATERAL_NFT');
-                            return [4 /*yield*/, nftContract.mint(owner, tokenId, ref, amount, asset)];
-                        case 1:
-                            tx = _a.sent();
-                            return [2 /*return*/, {
-                                    hash: tx.hash,
-                                    contractKey: 'COLLATERAL_NFT',
-                                }];
-                    }
+                    nft = this.contract('COLLATERAL_NFT', nftAddress);
+                    return [2 /*return*/, this.pending(nft.mint(owner, tokenId, ref, amount, asset))];
                 });
             }); };
             _this.approveNFT = function (nftAddr, tokenId, to) { return __awaiter(_this, void 0, void 0, function () {
@@ -29689,10 +29688,7 @@ function CollateralActions(Base) {
                             return [4 /*yield*/, nftContract.setApprovalForAll(to, approved)];
                         case 1:
                             tx = _a.sent();
-                            return [2 /*return*/, {
-                                    hash: tx.hash,
-                                    contractKey: 'COLLATERAL_NFT',
-                                }];
+                            return [2 /*return*/, this.pending(tx)];
                     }
                 });
             }); };
@@ -47404,6 +47400,7 @@ var contractNames = [
     'LENDER_DEPLOYER',
     'NFT_FEED',
     'GOVERNANCE',
+    'ALLOWANCE_OPERATOR',
 ];
 ethers_2$1.utils.BigNumber.prototype.toBN = function () {
     return new bn(this.toString());
@@ -47425,7 +47422,9 @@ var Tinlake = /** @class */ (function () {
             // set root & proxy contracts
             contractNames.forEach(function (name) {
                 if (_this.contractAbis[name] && _this.contractAddresses[name]) {
-                    _this.contracts[name] = _this.eth.contract(_this.contractAbis[name]).at(_this.contractAddresses[name]);
+                    _this.contracts[name] = _this.eth
+                        .contract(_this.contractAbis[name])
+                        .at(_this.contractAddresses[name]);
                     _this.ethersContracts[name] = _this.createContract(_this.contractAddresses[name], name);
                 }
             });
@@ -47484,13 +47483,54 @@ var Tinlake = /** @class */ (function () {
     Tinlake.prototype.getContract = function (address, abiName) {
         return new ethers_2$1.Contract(address, this.contractAbis[abiName], this.ethersConfig.signer);
     };
-    Tinlake.prototype.getTransactionReceipt = function (tx) {
+    Tinlake.prototype.contract = function (abiName, address) {
+        if (address) {
+            return new ethers_2$1.Contract(address, this.contractAbis[abiName], this.ethersConfig.signer);
+        }
+        return this.ethersContracts[abiName];
+    };
+    Tinlake.prototype.pending = function (txPromise) {
         return __awaiter(this, void 0, void 0, function () {
+            var tx;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.ethersConfig.provider.waitForTransaction(tx.hash)];
-                    case 1: return [2 /*return*/, _a.sent()];
+                    case 0: return [4 /*yield*/, txPromise];
+                    case 1:
+                        tx = _a.sent();
+                        return [2 /*return*/, {
+                                hash: tx.hash,
+                                timesOutAt: Date.now() + this.transactionTimeout * 1000,
+                            }];
                 }
+            });
+        });
+    };
+    Tinlake.prototype.getTransactionReceipt = function (tx) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var timer, receipt;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    if (!tx.hash)
+                                        return [2 /*return*/, reject()];
+                                    timer = undefined;
+                                    if (tx.timesOutAt) {
+                                        timer = setTimeout(function () {
+                                            return reject();
+                                        }, tx.timesOutAt - Date.now());
+                                    }
+                                    return [4 /*yield*/, this.ethersConfig.provider.waitForTransaction(tx.hash)];
+                                case 1:
+                                    receipt = _a.sent();
+                                    if (timer)
+                                        clearTimeout(timer);
+                                    return [2 /*return*/, resolve(receipt)];
+                            }
+                        });
+                    }); })];
             });
         });
     };

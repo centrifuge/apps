@@ -1,9 +1,8 @@
 import { ethI } from './services/ethereum';
 import { ethers } from 'ethers';
-declare const contractNames: string[];
+declare const contractNames: readonly ["TINLAKE_CURRENCY", "JUNIOR_OPERATOR", "JUNIOR", "JUNIOR_TOKEN", "SENIOR", "SENIOR_TOKEN", "SENIOR_OPERATOR", "DISTRIBUTOR", "ASSESSOR", "TITLE", "PILE", "SHELF", "CEILING", "COLLECTOR", "THRESHOLD", "PRICE_POOL", "COLLATERAL_NFT", "COLLATERAL_NFT_DATA", "ROOT_CONTRACT", "PROXY", "PROXY_REGISTRY", "ACTIONS", "BORROWER_DEPLOYER", "LENDER_DEPLOYER", "NFT_FEED", "GOVERNANCE", "ALLOWANCE_OPERATOR"];
 export declare type PendingTransaction = {
-    hash: string;
-    contractKey: string;
+    hash: string | undefined;
     timesOutAt?: number;
 };
 export declare type EthConfig = {
@@ -20,15 +19,15 @@ export declare type EthersConfig = {
     signer: ethers.Signer;
     overrides?: EthersOverrides;
 };
-export declare type ContractNames = typeof contractNames[number];
+export declare type ContractName = typeof contractNames[number];
 export declare type Contracts = {
-    [key in ContractNames]?: any;
+    [key in ContractName]?: any;
 };
 export declare type ContractAbis = {
-    [key in ContractNames]?: any;
+    [key in ContractName]?: any;
 };
 export declare type ContractAddresses = {
-    [key in ContractNames]?: string;
+    [key in ContractName]?: string;
 };
 export declare type TinlakeParams = {
     provider: any;
@@ -59,9 +58,11 @@ export default class Tinlake {
     setContracts: () => void;
     setEthConfig: (ethConfig: EthConfig) => void;
     setEthersConfig: (ethersConfig: EthersConfig | undefined) => void;
-    createEthContract(address: string, abiName: string): void;
-    createContract(address: string, abiName: string): ethers.Contract;
-    getContract(address: string, abiName: string): ethers.Contract;
+    createEthContract(address: string, abiName: ContractName): void;
+    createContract(address: string, abiName: ContractName): ethers.Contract;
+    getContract(address: string, abiName: ContractName): ethers.Contract;
+    contract(abiName: ContractName, address?: string): ethers.Contract;
+    pending(txPromise: Promise<ethers.providers.TransactionResponse>): Promise<PendingTransaction>;
     getTransactionReceipt(tx: PendingTransaction): Promise<ethers.providers.TransactionReceipt>;
     getOperatorType: (tranche: string) => any;
 }

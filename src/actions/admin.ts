@@ -1,4 +1,4 @@
-import { ContractNames, Constructor, TinlakeParams, PendingTransaction } from '../Tinlake';
+import { ContractName, Constructor, TinlakeParams, PendingTransaction } from '../Tinlake';
 import { waitAndReturnEvents, executeAndRetry, ZERO_ADDRESS } from '../services/ethereum';
 import BN from 'bn.js';
 const web3 = require('web3-utils');
@@ -16,7 +16,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         !!this.contracts['COLLECTOR']?.wards;
     }
 
-    isWard = async (user: string, contractName: ContractNames) => {
+    isWard = async (user: string, contractName: ContractName) => {
       if (!this.contracts[contractName]?.wards) { return new BN(0); }
       const res : { 0: BN } = await executeAndRetry(this.contracts[contractName].wards, [user]);
       return res[0];
@@ -141,7 +141,7 @@ function getRateGroup(ratePerSecond: string) {
 }
 
 export type IAdminActions = {
-  isWard(user: string, contractName: ContractNames): Promise<BN>,
+  isWard(user: string, contractName: ContractName): Promise<BN>,
   canSetInterestRate(user: string): Promise<boolean>,
   canSetSeniorTrancheInterest(user: string): Promise<boolean>,
   canSetMinimumJuniorRatio(user: string): Promise<boolean>,
