@@ -20,15 +20,17 @@ export function initTinlake({
 
     if (window && (window as any).ethereum) {
       const web3Provider = new ethers.providers.Web3Provider((window as any).ethereum)
+      const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+      const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
+
       const ethersConfig = {
-        provider: web3Provider, // TODO: consensus provider
+        provider: fallbackProvider,
         signer: web3Provider.getSigner(),
         overrides: {
           gasLimit: Number(config.gasLimit),
           gasPrice: Number(config.gasPrice),
         },
       }
-      console.log('setEthersConfig', ethersConfig)
       tinlake!.setEthersConfig(ethersConfig)
     }
   }
