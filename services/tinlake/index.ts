@@ -21,7 +21,7 @@ export function initTinlake({
     if (window && (window as any).ethereum) {
       const web3Provider = new ethers.providers.Web3Provider((window as any).ethereum)
       const ethersConfig = {
-        provider: web3Provider,
+        provider: web3Provider, // TODO: consensus provider
         signer: web3Provider.getSigner(),
         overrides: {
           gasLimit: Number(config.gasLimit),
