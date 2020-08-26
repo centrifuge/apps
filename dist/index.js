@@ -10899,21 +10899,11 @@ function AdminActions(Base) {
             }); };
             // ------------ admin functions lender-site -------------
             _this.setMinimumJuniorRatio = function (ratio) { return __awaiter(_this, void 0, void 0, function () {
-                var tx;
+                var assessor;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.ethersContracts['ASSESSOR']
-                                .connect(this.ethersConfig.signer)
-                                .file(web3.fromAscii('minJuniorRatio').padEnd(66, '0'), ratio)];
-                        case 1:
-                            tx = _a.sent();
-                            console.log(this.transactionTimeout);
-                            return [2 /*return*/, {
-                                    hash: tx.hash,
-                                    contractKey: 'ASSESSOR',
-                                    timesOutAt: Date.now() + this.transactionTimeout * 1000,
-                                }];
-                    }
+                    assessor = this.contract('ASSESSOR');
+                    // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
+                    return [2 /*return*/, this.pending(assessor.file(web3.fromAscii('minJuniorRatio').padEnd(66, '0'), ratio))];
                 });
             }); };
             _this.approveAllowanceJunior = function (user, maxCurrency, maxToken) { return __awaiter(_this, void 0, void 0, function () {
@@ -29442,17 +29432,10 @@ function LenderActions(Base) {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             // senior tranche functions
             _this.supplySenior = function (currencyAmount) { return __awaiter(_this, void 0, void 0, function () {
-                var tx;
+                var seniorOperator;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.ethersContracts['SENIOR_OPERATOR'].connect(this.ethersConfig.signer).supply(currencyAmount)];
-                        case 1:
-                            tx = _a.sent();
-                            return [2 /*return*/, {
-                                    hash: tx.hash,
-                                    contractKey: 'SENIOR_OPERATOR',
-                                }];
-                    }
+                    seniorOperator = this.contract('SENIOR_OPERATOR');
+                    return [2 /*return*/, this.pending(seniorOperator.supply(currencyAmount))];
                 });
             }); };
             _this.redeemSenior = function (tokenAmount) { return __awaiter(_this, void 0, void 0, function () {
@@ -29499,17 +29482,10 @@ function LenderActions(Base) {
             }); };
             // junior tranche functions
             _this.supplyJunior = function (currencyAmount) { return __awaiter(_this, void 0, void 0, function () {
-                var tx;
+                var juniorOperator;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.ethersContracts['JUNIOR_OPERATOR'].connect(this.ethersConfig.signer).supply(currencyAmount)];
-                        case 1:
-                            tx = _a.sent();
-                            return [2 /*return*/, {
-                                    hash: tx.hash,
-                                    contractKey: 'JUNIOR_OPERATOR',
-                                }];
-                    }
+                    juniorOperator = this.contract('JUNIOR_OPERATOR');
+                    return [2 /*return*/, this.pending(juniorOperator.supply(currencyAmount))];
                 });
             }); };
             _this.redeemJunior = function (tokenAmount) { return __awaiter(_this, void 0, void 0, function () {
@@ -29596,7 +29572,7 @@ function CurrencyActions(Base) {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            currencyContract = this.getContract(this.contractAddresses['TINLAKE_CURRENCY'], 'TINLAKE_CURRENCY');
+                            currencyContract = this.contract('TINLAKE_CURRENCY');
                             return [4 /*yield*/, currencyContract.allowance(owner, spender)];
                         case 1:
                             allowance = _a.sent();
@@ -29634,7 +29610,7 @@ function CurrencyActions(Base) {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            currencyContract = this.getContract(this.contractAddresses['TINLAKE_CURRENCY'], 'TINLAKE_CURRENCY');
+                            currencyContract = this.contract('TINLAKE_CURRENCY');
                             return [4 /*yield*/, currencyContract.approve(usr, currencyAmount)];
                         case 1:
                             tx = _a.sent();
@@ -29694,39 +29670,23 @@ function CollateralActions(Base) {
                     return [2 /*return*/, this.pending(nft.mint(owner, tokenId, ref, amount, asset))];
                 });
             }); };
-            _this.approveNFT = function (nftAddr, tokenId, to) { return __awaiter(_this, void 0, void 0, function () {
-                var nft, txHash;
+            _this.approveNFT = function (nftAddress, tokenId, to) { return __awaiter(_this, void 0, void 0, function () {
+                var nft;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            nft = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
-                            return [4 /*yield*/, executeAndRetry(nft.approve, [to, tokenId, this.ethConfig])];
-                        case 1:
-                            txHash = _a.sent();
-                            console.log("[NFT Approve] txHash: " + txHash);
-                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout)];
-                    }
+                    nft = this.contract('COLLATERAL_NFT', nftAddress);
+                    return [2 /*return*/, this.pending(nft.approve(to, tokenId))];
                 });
             }); };
-            _this.setNFTApprovalForAll = function (nftAddr, to, approved) { return __awaiter(_this, void 0, void 0, function () {
-                var nftContract, tx;
+            _this.setNFTApprovalForAll = function (nftAddress, to, approved) { return __awaiter(_this, void 0, void 0, function () {
+                var nft;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            nftContract = this.getContract(nftAddr, 'COLLATERAL_NFT');
-                            return [4 /*yield*/, nftContract.setApprovalForAll(to, approved)];
-                        case 1:
-                            tx = _a.sent();
-                            return [2 /*return*/, this.pending(tx)];
-                    }
+                    nft = this.contract('COLLATERAL_NFT', nftAddress);
+                    return [2 /*return*/, this.pending(nft.setApprovalForAll(to, approved))];
                 });
             }); };
-            _this.isNFTApprovedForAll = function (nftAddr, owner, operator) { return __awaiter(_this, void 0, void 0, function () {
+            _this.isNFTApprovedForAll = function (nftAddress, owner, operator) { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.getContract(nftAddr, 'COLLATERAL_NFT').isApprovedForAll(owner, operator)];
-                        case 1: return [2 /*return*/, _a.sent()];
-                    }
+                    return [2 /*return*/, this.contract('COLLATERAL_NFT', nftAddress).isApprovedForAll(owner, operator)];
                 });
             }); };
             _this.getNFTCount = function (nftAddr) { return __awaiter(_this, void 0, void 0, function () {
@@ -29742,37 +29702,22 @@ function CollateralActions(Base) {
                     }
                 });
             }); };
-            _this.getNFTData = function (nftAddr, tokenId) { return __awaiter(_this, void 0, void 0, function () {
+            _this.getNFTData = function (nftAddress, tokenId) { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
-                    return [2 /*return*/, this.getContract(nftAddr, 'COLLATERAL_NFT').data(tokenId)
-                        // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
-                        // const res = await executeAndRetry(nft.data, [tokenId]);
-                        // return res;
-                    ];
+                    return [2 /*return*/, this.contract('COLLATERAL_NFT', nftAddress).data(tokenId)];
                 });
             }); };
-            _this.getNFTOwner = function (nftAddr, tokenId) { return __awaiter(_this, void 0, void 0, function () {
+            _this.getNFTOwner = function (nftAddresss, tokenId) { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.getContract(nftAddr, 'COLLATERAL_NFT').ownerOf(tokenId)
-                            // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
-                            // const res : { 0: BN } = await executeAndRetry(nft.ownerOf, [tokenId]);
-                            // return res[0];
-                        ];
-                        case 1: return [2 /*return*/, _a.sent()
-                            // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
-                            // const res : { 0: BN } = await executeAndRetry(nft.ownerOf, [tokenId]);
-                            // return res[0];
-                        ];
-                    }
+                    return [2 /*return*/, this.contract('COLLATERAL_NFT', nftAddresss).ownerOf(tokenId)];
                 });
             }); };
-            _this.transferNFT = function (nftAddr, from, to, tokenId) { return __awaiter(_this, void 0, void 0, function () {
+            _this.transferNFT = function (nftAddress, from, to, tokenId) { return __awaiter(_this, void 0, void 0, function () {
                 var nft, txHash;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            nft = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
+                            nft = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddress);
                             return [4 /*yield*/, executeAndRetry(nft.transferFrom, [from, to, tokenId, this.ethConfig])];
                         case 1:
                             txHash = _a.sent();
@@ -29794,115 +29739,92 @@ function AnalyticsActions(Base) {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             // borrower analytics
             _this.getTotalDebt = function () { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['PILE'].total, [])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0]];
+                        case 0: return [4 /*yield*/, this.contract('PILE').total()];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
             _this.getTotalBalance = function () { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SHELF'].balance, [])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0]];
+                        case 0: return [4 /*yield*/, this.contract('SHELF').balance()];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
             _this.getPrincipal = function (loanId) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['CEILING'].ceiling, [loanId])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res ? res[0] : new bn(0)];
+                        case 0: return [4 /*yield*/, this.contract('CEILING').ceiling(loanId)];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
-            _this.getDebt = function (loanID) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
+            _this.getDebt = function (loanId) { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['PILE'].debt, [loanID])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res ? res[0] : new bn(0)];
+                        case 0: return [4 /*yield*/, this.contract('PILE').debt(loanId)];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
             _this.loanCount = function () { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['TITLE'].count, [])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0]];
+                        case 0: return [4 /*yield*/, this.contract('TITLE').count()];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
             _this.getCollateral = function (loanId) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SHELF'].shelf, [loanId])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res];
+                        case 0: return [4 /*yield*/, this.contract('SHELF').shelf(loanId)];
+                        case 1: return [2 /*return*/, _a.sent()];
                     }
                 });
             }); };
-            _this.getOwnerOfCollateral = function (nftRegistryAddr, tokenId) { return __awaiter(_this, void 0, void 0, function () {
+            _this.getOwnerOfCollateral = function (nftRegistryAddress, tokenId) { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.getContract(nftRegistryAddr, 'COLLATERAL_NFT').ownerOf(tokenId)
-                            // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftRegistryAddr);
-                            // const res : { 0: BN } = await executeAndRetry(nft.ownerOf, [tokenId]);
-                            // return res[0];
-                        ];
-                        case 1: return [2 /*return*/, _a.sent()
-                            // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftRegistryAddr);
-                            // const res : { 0: BN } = await executeAndRetry(nft.ownerOf, [tokenId]);
-                            // return res[0];
-                        ];
-                    }
+                    return [2 /*return*/, this.contract('COLLATERAL_NFT', nftRegistryAddress).ownerOf(tokenId)];
                 });
             }); };
             _this.getInterestRate = function (loanId) { return __awaiter(_this, void 0, void 0, function () {
-                var nftId, riskGroupRes, riskGroup, res;
+                var nftId, riskGroup, resEthers, res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['NFT_FEED'].nftID, [loanId])];
+                        case 0: return [4 /*yield*/, this.contract('NFT_FEED').nftID(loanId)
+                            // retrieve riskgroup from nft
+                        ];
                         case 1:
-                            nftId = (_a.sent())[0];
-                            return [4 /*yield*/, executeAndRetry(this.contracts['NFT_FEED'].risk, [nftId])];
+                            nftId = _a.sent();
+                            return [4 /*yield*/, this.contract('NFT_FEED').risk(nftId)
+                                // retrieve rates for this risk group
+                            ];
                         case 2:
-                            riskGroupRes = _a.sent();
-                            riskGroup = riskGroupRes[0] || new bn(0);
-                            return [4 /*yield*/, executeAndRetry(this.contracts['PILE'].rates, [riskGroup])];
+                            riskGroup = _a.sent();
+                            return [4 /*yield*/, this.contract('PILE').rates(riskGroup)];
                         case 3:
+                            resEthers = _a.sent();
+                            console.log('getInterestRate res', resEthers);
+                            return [4 /*yield*/, executeAndRetry(this.contracts['PILE'].rates, [riskGroup])];
+                        case 4:
                             res = _a.sent();
                             return [2 /*return*/, res ? res[2] : new bn(0)];
                     }
                 });
             }); };
             _this.getOwnerOfLoan = function (loanId) { return __awaiter(_this, void 0, void 0, function () {
-                var address, res, e_1;
+                var address, e_1;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             _a.trys.push([0, 2, , 3]);
-                            return [4 /*yield*/, executeAndRetry(this.contracts['TITLE'].ownerOf, [loanId])];
+                            return [4 /*yield*/, this.contract('TITLE').ownerOf(loanId)];
                         case 1:
-                            res = _a.sent();
-                            address = res[0];
+                            address = _a.sent();
                             return [3 /*break*/, 3];
                         case 2:
                             e_1 = _a.sent();
@@ -30050,57 +29972,42 @@ function AnalyticsActions(Base) {
                 });
             }); };
             _this.getJuniorTokenBalance = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_TOKEN'].balanceOf, [user])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0]];
+                        case 0: return [4 /*yield*/, this.contract('JUNIOR_TOKEN').balanceOf(user)];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
-            _this.getJuniorTotalSupply = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
+            _this.getJuniorTotalSupply = function () { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_TOKEN'].totalSupply, [])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0]];
+                        case 0: return [4 /*yield*/, this.contract('JUNIOR_TOKEN').totalSupply()];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
             _this.getMaxSupplyAmountJunior = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_OPERATOR'].maxCurrency, [user])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0]];
+                        case 0: return [4 /*yield*/, this.contract('JUNIOR_TOKEN').maxCurrency(user)];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
             _this.getMaxRedeemAmountJunior = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_OPERATOR'].maxToken, [user])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0]];
+                        case 0: return [4 /*yield*/, this.contract('JUNIOR_TOKEN').maxToken(user)];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
             _this.getTokenPriceJunior = function () { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].calcTokenPrice, [this.contractAddresses['JUNIOR']])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0]];
+                        case 0: return [4 /*yield*/, this.contract('ASSESSOR').calcTokenPrice(this.contractAddresses['JUNIOR'])];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
@@ -30108,37 +30015,29 @@ function AnalyticsActions(Base) {
                 return _this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS;
             };
             _this.getSeniorTokenBalance = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            if (!this.existsSenior()) {
+                            if (!this.existsSenior())
                                 return [2 /*return*/, new bn(0)];
-                            }
-                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].balanceOf, [user])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0]];
+                            return [4 /*yield*/, this.contract('SENIOR_TOKEN').balanceOf(user)];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
-            _this.getSeniorTotalSupply = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
+            _this.getSeniorTotalSupply = function () { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            if (!this.existsSenior()) {
+                            if (!this.existsSenior())
                                 return [2 /*return*/, new bn(0)];
-                            }
-                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].totalSupply, [])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0]];
+                            return [4 /*yield*/, this.contract('SENIOR_TOKEN').totalSupply()];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
             _this.getMaxSupplyAmountSenior = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var operatorType, maxSupply, _a, supplyLimitRes, suppliedRes, res;
+                var operatorType, maxSupply, _a, supplyLimit, supplied;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
@@ -30151,20 +30050,17 @@ function AnalyticsActions(Base) {
                                 case 'ALLOWANCE_OPERATOR': return [3 /*break*/, 4];
                             }
                             return [3 /*break*/, 6];
-                        case 1: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].supplyMaximum, [
-                                user,
-                            ])];
+                        case 1: return [4 /*yield*/, this.contract('SENIOR_OPERATOR').supplyMaximum(user)];
                         case 2:
-                            supplyLimitRes = _b.sent();
-                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].tokenReceived, [user])];
+                            supplyLimit = (_b.sent()).toBN();
+                            return [4 /*yield*/, this.contract('SENIOR_OPERATOR').tokenReceived(user)];
                         case 3:
-                            suppliedRes = _b.sent();
-                            maxSupply = supplyLimitRes[0].sub(suppliedRes[0]);
+                            supplied = (_b.sent()).toBN();
+                            maxSupply = supplyLimit.sub(supplied);
                             return [3 /*break*/, 7];
-                        case 4: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxCurrency, [user])];
+                        case 4: return [4 /*yield*/, this.contract('SENIOR_OPERATOR').maxCurrency(user)];
                         case 5:
-                            res = _b.sent();
-                            maxSupply = res[0];
+                            maxSupply = (_b.sent()).toBN();
                             return [3 /*break*/, 7];
                         case 6:
                             maxSupply = new bn(0);
@@ -30254,75 +30150,55 @@ function AnalyticsActions(Base) {
                 });
             }); };
             _this.getJuniorReserve = function () { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR'].balance, [])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0] || new bn(0)];
+                        case 0: return [4 /*yield*/, this.contract('JUNIOR').balance()];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
             _this.getMinJuniorRatio = function () { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].minJuniorRatio, [])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0] || new bn(0)];
+                        case 0: return [4 /*yield*/, this.contract('ASSESSOR').minJuniorRatio()];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
             _this.getCurrentJuniorRatio = function () { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].currentJuniorRatio, [])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0] || new bn(0)];
+                        case 0: return [4 /*yield*/, this.contract('ASSESSOR').currentJuniorRatio()];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
             _this.getAssetValueJunior = function () { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].calcAssetValue, [
-                                this.contractAddresses['JUNIOR'],
-                            ])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0] || new bn(0)];
+                        case 0: return [4 /*yield*/, this.contract('ASSESSOR').calcAssetValue(this.contractAddresses['JUNIOR'])];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
             _this.getSeniorDebt = function () { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             if (!(this.contractAddresses['SENIOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
-                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR'].debt, [])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0] || new bn(0)];
+                            return [4 /*yield*/, this.contract('SENIOR').debt()];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                         case 2: return [2 /*return*/, new bn(0)];
                     }
                 });
             }); };
             _this.getSeniorInterestRate = function () { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             if (!(this.contractAddresses['SENIOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
-                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR'].ratePerSecond, [])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0] || new bn(0)];
+                            return [4 /*yield*/, this.contract('SENIOR').ratePerSecond()];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                         case 2: return [2 /*return*/, new bn(0)];
                     }
                 });
@@ -30366,16 +30242,7 @@ function ProxyActions(Base) {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.getProxyAccessTokenOwner = function (tokenId) { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.ethersContracts['PROXY_REGISTRY'].ownerOf(tokenId)
-                            // const res : { 0: BN } = await executeAndRetry(this.contracts['PROXY_REGISTRY'].ownerOf, [tokenId]);
-                            // return res[0];
-                        ];
-                        case 1: return [2 /*return*/, _a.sent()
-                            // const res : { 0: BN } = await executeAndRetry(this.contracts['PROXY_REGISTRY'].ownerOf, [tokenId]);
-                            // return res[0];
-                        ];
-                    }
+                    return [2 /*return*/, this.contract('PROXY_REGISTRY').ownerOf(tokenId)];
                 });
             }); };
             _this.buildProxy = function (owner) { return __awaiter(_this, void 0, void 0, function () {
@@ -30404,20 +30271,16 @@ function ProxyActions(Base) {
                     }
                 });
             }); };
-            _this.getProxyAccessToken = function (proxyAddr) { return __awaiter(_this, void 0, void 0, function () {
+            _this.getProxyAccessToken = function (proxyAddress) { return __awaiter(_this, void 0, void 0, function () {
                 var proxy, accessToken;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            proxy = this.getContract(proxyAddr, 'PROXY');
+                            proxy = this.contract('PROXY', proxyAddress);
                             return [4 /*yield*/, proxy.accessToken()];
                         case 1:
                             accessToken = _a.sent();
-                            return [2 /*return*/, accessToken.toNumber()
-                                // const proxy: any = this.eth.contract(this.contractAbis['PROXY']).at(proxyAddr);
-                                // const res = await executeAndRetry(proxy.accessToken, []);
-                                // return res[0].toNumber();
-                            ];
+                            return [2 /*return*/, accessToken.toNumber()];
                     }
                 });
             }); };
@@ -30494,54 +30357,36 @@ function ProxyActions(Base) {
                     }
                 });
             }); };
-            _this.proxyIssue = function (proxyAddr, nftRegistryAddr, tokenId) { return __awaiter(_this, void 0, void 0, function () {
-                var proxy, encoded, tx;
+            _this.proxyIssue = function (proxyAddress, nftRegistryAddress, tokenId) { return __awaiter(_this, void 0, void 0, function () {
+                var proxy, encoded;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            proxy = this.getContract(proxyAddr, 'PROXY');
-                            encoded = abiCoder$2.encodeFunctionCall({
-                                name: 'issue',
-                                type: 'function',
-                                inputs: [
-                                    { type: 'address', name: 'shelf' },
-                                    { type: 'address', name: 'registry' },
-                                    { type: 'uint256', name: 'token' },
-                                ],
-                            }, [this.ethersContracts['SHELF'].address, nftRegistryAddr, tokenId]);
-                            return [4 /*yield*/, proxy.execute(this.ethersContracts['ACTIONS'].address, encoded)];
-                        case 1:
-                            tx = _a.sent();
-                            return [2 /*return*/, {
-                                    hash: tx.hash,
-                                    contractKey: 'PROXY',
-                                }];
-                    }
+                    proxy = this.contract('PROXY', proxyAddress);
+                    encoded = abiCoder$2.encodeFunctionCall({
+                        name: 'issue',
+                        type: 'function',
+                        inputs: [
+                            { type: 'address', name: 'shelf' },
+                            { type: 'address', name: 'registry' },
+                            { type: 'uint256', name: 'token' },
+                        ],
+                    }, [this.contract('SHELF').address, nftRegistryAddress, tokenId]);
+                    return [2 /*return*/, this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))];
                 });
             }); };
-            _this.proxyTransferIssue = function (proxyAddr, nftRegistryAddr, tokenId) { return __awaiter(_this, void 0, void 0, function () {
-                var proxy, encoded, tx;
+            _this.proxyTransferIssue = function (proxyAddress, nftRegistryAddress, tokenId) { return __awaiter(_this, void 0, void 0, function () {
+                var proxy, encoded;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            proxy = this.getContract(proxyAddr, 'PROXY');
-                            encoded = abiCoder$2.encodeFunctionCall({
-                                name: 'transferIssue',
-                                type: 'function',
-                                inputs: [
-                                    { type: 'address', name: 'shelf' },
-                                    { type: 'address', name: 'registry' },
-                                    { type: 'uint256', name: 'token' },
-                                ],
-                            }, [this.ethersContracts['SHELF'].address, nftRegistryAddr, tokenId]);
-                            return [4 /*yield*/, proxy.execute(this.ethersContracts['ACTIONS'].address, encoded)];
-                        case 1:
-                            tx = _a.sent();
-                            return [2 /*return*/, {
-                                    hash: tx.hash,
-                                    contractKey: 'PROXY',
-                                }];
-                    }
+                    proxy = this.contract('PROXY', proxyAddress);
+                    encoded = abiCoder$2.encodeFunctionCall({
+                        name: 'transferIssue',
+                        type: 'function',
+                        inputs: [
+                            { type: 'address', name: 'shelf' },
+                            { type: 'address', name: 'registry' },
+                            { type: 'uint256', name: 'token' },
+                        ],
+                    }, [this.contract('SHELF').address, nftRegistryAddress, tokenId]);
+                    return [2 /*return*/, this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))];
                 });
             }); };
             _this.proxyLockBorrowWithdraw = function (proxyAddr, loanId, amount, usr) { return __awaiter(_this, void 0, void 0, function () {
@@ -47557,12 +47402,12 @@ var Tinlake = /** @class */ (function () {
     Tinlake.prototype.createContract = function (address, abiName) {
         return new ethers_2$1.Contract(address, this.contractAbis[abiName], this.ethersConfig.provider);
     };
-    Tinlake.prototype.getContract = function (address, abiName) {
-        return new ethers_2$1.Contract(address, this.contractAbis[abiName], this.ethersConfig.signer);
-    };
     Tinlake.prototype.contract = function (abiName, address) {
         if (address) {
             return new ethers_2$1.Contract(address, this.contractAbis[abiName], this.ethersConfig.signer);
+        }
+        if (this.ethersConfig.signer) {
+            return this.ethersContracts[abiName].connect(this.ethersConfig.signer);
         }
         return this.ethersContracts[abiName];
     };

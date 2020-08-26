@@ -52,7 +52,6 @@ function createSignerProvider(rpcUrl: string, usr: Account) {
   })
 }
 
-
 function createEthersConfig(rpcUrl: string) {
   const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
   const signer = provider.getSigner()

@@ -29,22 +29,18 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
       return this.pending(nft.mint(owner, tokenId, ref, amount, asset))
     }
 
-    approveNFT = async (nftAddr: string, tokenId: string, to: string) => {
-      const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr)
-      const txHash = await executeAndRetry(nft.approve, [to, tokenId, this.ethConfig])
-      console.log(`[NFT Approve] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout)
+    approveNFT = async (nftAddress: string, tokenId: string, to: string) => {
+      const nft = this.contract('COLLATERAL_NFT', nftAddress)
+      return this.pending(nft.approve(to, tokenId))
     }
 
-    setNFTApprovalForAll = async (nftAddr: string, to: string, approved: boolean) => {
-      const nftContract = this.getContract(nftAddr, 'COLLATERAL_NFT')
-      const tx = await nftContract.setApprovalForAll(to, approved)
-
-      return this.pending(tx)
+    setNFTApprovalForAll = async (nftAddress: string, to: string, approved: boolean) => {
+      const nft = this.contract('COLLATERAL_NFT', nftAddress)
+      return this.pending(nft.setApprovalForAll(to, approved))
     }
 
-    isNFTApprovedForAll = async (nftAddr: string, owner: string, operator: string) => {
-      return await this.getContract(nftAddr, 'COLLATERAL_NFT').isApprovedForAll(owner, operator)
+    isNFTApprovedForAll = async (nftAddress: string, owner: string, operator: string) => {
+      return this.contract('COLLATERAL_NFT', nftAddress).isApprovedForAll(owner, operator)
     }
 
     getNFTCount = async (nftAddr: string): Promise<BN> => {
@@ -53,23 +49,16 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
       return res[0]
     }
 
-    getNFTData = async (nftAddr: string, tokenId: string): Promise<any> => {
-      return this.getContract(nftAddr, 'COLLATERAL_NFT').data(tokenId)
-
-      // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
-      // const res = await executeAndRetry(nft.data, [tokenId]);
-      // return res;
+    getNFTData = async (nftAddress: string, tokenId: string): Promise<any> => {
+      return this.contract('COLLATERAL_NFT', nftAddress).data(tokenId)
     }
 
-    getNFTOwner = async (nftAddr: string, tokenId: string): Promise<BN> => {
-      return await this.getContract(nftAddr, 'COLLATERAL_NFT').ownerOf(tokenId)
-      // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
-      // const res : { 0: BN } = await executeAndRetry(nft.ownerOf, [tokenId]);
-      // return res[0];
+    getNFTOwner = async (nftAddresss: string, tokenId: string): Promise<BN> => {
+      return this.contract('COLLATERAL_NFT', nftAddresss).ownerOf(tokenId)
     }
 
-    transferNFT = async (nftAddr: string, from: string, to: string, tokenId: string) => {
-      const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr)
+    transferNFT = async (nftAddress: string, from: string, to: string, tokenId: string) => {
+      const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddress)
       const txHash = await executeAndRetry(nft.transferFrom, [from, to, tokenId, this.ethConfig])
       console.log(`[NFT Approve] txHash: ${txHash}`)
       return waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout)
@@ -87,7 +76,7 @@ export type ICollateralActions = {
     amount: string,
     asset: string
   ): Promise<PendingTransaction>
-  approveNFT(nftAddr: string, tokenId: string, to: string): Promise<any>
+  approveNFT(nftAddr: string, tokenId: string, to: string): Promise<PendingTransaction>
   setNFTApprovalForAll(nftAddr: string, to: string, approved: boolean): Promise<PendingTransaction>
   isNFTApprovedForAll(nftAddr: string, owner: string, operator: string): Promise<boolean>
   getNFTCount(nftAddr: string): Promise<BN>

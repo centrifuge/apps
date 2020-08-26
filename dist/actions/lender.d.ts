@@ -2,17 +2,11 @@ import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake';
 import BN from 'bn.js';
 export declare function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Base: ActionBase): {
     new (...args: any[]): {
-        supplySenior: (currencyAmount: string) => Promise<{
-            hash: any;
-            contractKey: string;
-        }>;
+        supplySenior: (currencyAmount: string) => Promise<PendingTransaction>;
         redeemSenior: (tokenAmount: string) => Promise<unknown>;
         getSeniorTokenAllowance: (owner: string) => Promise<BN>;
         approveSeniorToken: (tokenAmount: string) => Promise<unknown>;
-        supplyJunior: (currencyAmount: string) => Promise<{
-            hash: any;
-            contractKey: string;
-        }>;
+        supplyJunior: (currencyAmount: string) => Promise<PendingTransaction>;
         redeemJunior: (tokenAmount: string) => Promise<unknown>;
         getJuniorTokenAllowance: (owner: string) => Promise<BN>;
         approveJuniorToken: (tokenAmount: string) => Promise<unknown>;
@@ -34,7 +28,6 @@ export declare function LenderActions<ActionBase extends Constructor<TinlakePara
         setEthersConfig: (ethersConfig: import("../Tinlake").EthersConfig | undefined) => void;
         createEthContract(address: string, abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR"): void;
         createContract(address: string, abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR"): import("ethers").Contract;
-        getContract(address: string, abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR"): import("ethers").Contract;
         contract(abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR", address?: string | undefined): import("ethers").Contract;
         pending(txPromise: Promise<import("ethers/providers").TransactionResponse>): Promise<PendingTransaction>;
         getTransactionReceipt(tx: PendingTransaction): Promise<import("ethers/providers").TransactionReceipt>;

@@ -4,13 +4,13 @@ export declare function CollateralActions<ActionsBase extends Constructor<Tinlak
     new (...args: any[]): {
         mintTitleNFT: (nftAddr: string, user: string) => Promise<any>;
         mintNFT: (nftAddress: string, owner: string, tokenId: string, ref: string, amount: string, asset: string) => Promise<PendingTransaction>;
-        approveNFT: (nftAddr: string, tokenId: string, to: string) => Promise<unknown>;
-        setNFTApprovalForAll: (nftAddr: string, to: string, approved: boolean) => Promise<PendingTransaction>;
-        isNFTApprovedForAll: (nftAddr: string, owner: string, operator: string) => Promise<any>;
+        approveNFT: (nftAddress: string, tokenId: string, to: string) => Promise<PendingTransaction>;
+        setNFTApprovalForAll: (nftAddress: string, to: string, approved: boolean) => Promise<PendingTransaction>;
+        isNFTApprovedForAll: (nftAddress: string, owner: string, operator: string) => Promise<any>;
         getNFTCount: (nftAddr: string) => Promise<BN>;
-        getNFTData: (nftAddr: string, tokenId: string) => Promise<any>;
-        getNFTOwner: (nftAddr: string, tokenId: string) => Promise<BN>;
-        transferNFT: (nftAddr: string, from: string, to: string, tokenId: string) => Promise<unknown>;
+        getNFTData: (nftAddress: string, tokenId: string) => Promise<any>;
+        getNFTOwner: (nftAddresss: string, tokenId: string) => Promise<BN>;
+        transferNFT: (nftAddress: string, from: string, to: string, tokenId: string) => Promise<unknown>;
         provider: any;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;
@@ -28,7 +28,6 @@ export declare function CollateralActions<ActionsBase extends Constructor<Tinlak
         setEthersConfig: (ethersConfig: import("../Tinlake").EthersConfig | undefined) => void;
         createEthContract(address: string, abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR"): void;
         createContract(address: string, abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR"): import("ethers").Contract;
-        getContract(address: string, abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR"): import("ethers").Contract;
         contract(abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR", address?: string | undefined): import("ethers").Contract;
         pending(txPromise: Promise<import("ethers/providers").TransactionResponse>): Promise<PendingTransaction>;
         getTransactionReceipt(tx: PendingTransaction): Promise<import("ethers/providers").TransactionReceipt>;
@@ -38,7 +37,7 @@ export declare function CollateralActions<ActionsBase extends Constructor<Tinlak
 export declare type ICollateralActions = {
     mintTitleNFT(nftAddr: string, usr: string): Promise<any>;
     mintNFT(nftAddr: string, owner: string, tokenId: string, ref: string, amount: string, asset: string): Promise<PendingTransaction>;
-    approveNFT(nftAddr: string, tokenId: string, to: string): Promise<any>;
+    approveNFT(nftAddr: string, tokenId: string, to: string): Promise<PendingTransaction>;
     setNFTApprovalForAll(nftAddr: string, to: string, approved: boolean): Promise<PendingTransaction>;
     isNFTApprovedForAll(nftAddr: string, owner: string, operator: string): Promise<boolean>;
     getNFTCount(nftAddr: string): Promise<BN>;

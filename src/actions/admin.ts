@@ -123,18 +123,9 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     // ------------ admin functions lender-site -------------
     setMinimumJuniorRatio = async (ratio: string) => {
+      const assessor = this.contract('ASSESSOR')
       // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
-      const tx = await this.ethersContracts['ASSESSOR']
-        .connect(this.ethersConfig.signer)
-        .file(web3.fromAscii('minJuniorRatio').padEnd(66, '0'), ratio)
-
-      console.log(this.transactionTimeout)
-
-      return {
-        hash: tx.hash,
-        contractKey: 'ASSESSOR',
-        timesOutAt: Date.now() + this.transactionTimeout * 1000,
-      }
+      return this.pending(assessor.file(web3.fromAscii('minJuniorRatio').padEnd(66, '0'), ratio))
     }
 
     approveAllowanceJunior = async (user: string, maxCurrency: string, maxToken: string) => {

@@ -7,49 +7,43 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
   return class extends Base implements IAnalyticsActions {
     // borrower analytics
     getTotalDebt = async (): Promise<BN> => {
-      const res: { 0: BN } = await executeAndRetry(this.contracts['PILE'].total, [])
-      return res[0]
+      return (await this.contract('PILE').total()).toBN()
     }
 
     getTotalBalance = async (): Promise<BN> => {
-      const res: { 0: BN } = await executeAndRetry(this.contracts['SHELF'].balance, [])
-      return res[0]
+      return (await this.contract('SHELF').balance()).toBN()
     }
 
     getPrincipal = async (loanId: string): Promise<BN> => {
-      const res = await executeAndRetry(this.contracts['CEILING'].ceiling, [loanId])
-      return res ? res[0] : new BN(0)
+      return (await this.contract('CEILING').ceiling(loanId)).toBN()
     }
 
-    getDebt = async (loanID: string): Promise<BN> => {
-      const res = await executeAndRetry(this.contracts['PILE'].debt, [loanID])
-      return res ? res[0] : new BN(0)
+    getDebt = async (loanId: string): Promise<BN> => {
+      return (await this.contract('PILE').debt(loanId)).toBN()
     }
 
     loanCount = async (): Promise<BN> => {
-      const res: { 0: BN } = await executeAndRetry(this.contracts['TITLE'].count, [])
-      return res[0]
+      return (await this.contract('TITLE').count()).toBN()
     }
 
     getCollateral = async (loanId: string): Promise<any> => {
-      const res = await executeAndRetry(this.contracts['SHELF'].shelf, [loanId])
-      return res
+      return await this.contract('SHELF').shelf(loanId)
     }
 
-    getOwnerOfCollateral = async (nftRegistryAddr: string, tokenId: string): Promise<BN> => {
-      return await this.getContract(nftRegistryAddr, 'COLLATERAL_NFT').ownerOf(tokenId)
-
-      // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftRegistryAddr);
-      // const res : { 0: BN } = await executeAndRetry(nft.ownerOf, [tokenId]);
-      // return res[0];
+    getOwnerOfCollateral = async (nftRegistryAddress: string, tokenId: string): Promise<BN> => {
+      return this.contract('COLLATERAL_NFT', nftRegistryAddress).ownerOf(tokenId)
     }
 
     getInterestRate = async (loanId: string): Promise<BN> => {
       // retrieve nftId = hash from tokenID & registry
-      const nftId = (await executeAndRetry(this.contracts['NFT_FEED'].nftID, [loanId]))[0]
-      // retrieve riskgroup fro nft
-      const riskGroupRes: { 0: BN } = await executeAndRetry(this.contracts['NFT_FEED'].risk, [nftId])
-      const riskGroup = riskGroupRes[0] || new BN(0)
+      const nftId = await this.contract('NFT_FEED').nftID(loanId)
+
+      // retrieve riskgroup from nft
+      const riskGroup = await this.contract('NFT_FEED').risk(nftId)
+
+      // retrieve rates for this risk group
+      const resEthers = await this.contract('PILE').rates(riskGroup)
+      console.log('getInterestRate res', resEthers)
       const res = await executeAndRetry(this.contracts['PILE'].rates, [riskGroup])
       return res ? res[2] : new BN(0)
     }
@@ -57,8 +51,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     getOwnerOfLoan = async (loanId: string): Promise<any> => {
       let address
       try {
-        const res = await executeAndRetry(this.contracts['TITLE'].ownerOf, [loanId])
-        address = res[0]
+        address = await this.contract('TITLE').ownerOf(loanId)
       } catch (e) {
         address = ZERO_ADDRESS
       }
@@ -135,28 +128,23 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getJuniorTokenBalance = async (user: string) => {
-      const res: { 0: BN } = await executeAndRetry(this.contracts['JUNIOR_TOKEN'].balanceOf, [user])
-      return res[0]
+      return (await this.contract('JUNIOR_TOKEN').balanceOf(user)).toBN()
     }
 
-    getJuniorTotalSupply = async (user: string) => {
-      const res: { 0: BN } = await executeAndRetry(this.contracts['JUNIOR_TOKEN'].totalSupply, [])
-      return res[0]
+    getJuniorTotalSupply = async () => {
+      return (await this.contract('JUNIOR_TOKEN').totalSupply()).toBN()
     }
 
     getMaxSupplyAmountJunior = async (user: string) => {
-      const res: { 0: BN } = await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].maxCurrency, [user])
-      return res[0]
+      return (await this.contract('JUNIOR_TOKEN').maxCurrency(user)).toBN()
     }
 
     getMaxRedeemAmountJunior = async (user: string) => {
-      const res = await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].maxToken, [user])
-      return res[0]
+      return (await this.contract('JUNIOR_TOKEN').maxToken(user)).toBN()
     }
 
     getTokenPriceJunior = async () => {
-      const res = await executeAndRetry(this.contracts['ASSESSOR'].calcTokenPrice, [this.contractAddresses['JUNIOR']])
-      return res[0]
+      return (await this.contract('ASSESSOR').calcTokenPrice(this.contractAddresses['JUNIOR'])).toBN()
     }
 
     existsSenior = () => {
@@ -164,19 +152,13 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getSeniorTokenBalance = async (user: string) => {
-      if (!this.existsSenior()) {
-        return new BN(0)
-      }
-      const res: { 0: BN } = await executeAndRetry(this.contracts['SENIOR_TOKEN'].balanceOf, [user])
-      return res[0]
+      if (!this.existsSenior()) return new BN(0)
+      return (await this.contract('SENIOR_TOKEN').balanceOf(user)).toBN()
     }
 
-    getSeniorTotalSupply = async (user: string) => {
-      if (!this.existsSenior()) {
-        return new BN(0)
-      }
-      const res: { 0: BN } = await executeAndRetry(this.contracts['SENIOR_TOKEN'].totalSupply, [])
-      return res[0]
+    getSeniorTotalSupply = async () => {
+      if (!this.existsSenior()) return new BN(0)
+      return (await this.contract('SENIOR_TOKEN').totalSupply()).toBN()
     }
 
     getMaxSupplyAmountSenior = async (user: string) => {
@@ -186,16 +168,13 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       let maxSupply: BN
       switch (operatorType) {
         case 'PROPORTIONAL_OPERATOR':
-          const supplyLimitRes: { 0: BN } = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].supplyMaximum, [
-            user,
-          ])
-          const suppliedRes: { 0: BN } = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].tokenReceived, [user])
-          maxSupply = supplyLimitRes[0].sub(suppliedRes[0])
+          const supplyLimit = (await this.contract('SENIOR_OPERATOR').supplyMaximum(user)).toBN()
+          const supplied = (await this.contract('SENIOR_OPERATOR').tokenReceived(user)).toBN()
+          maxSupply = supplyLimit.sub(supplied)
           break
 
         case 'ALLOWANCE_OPERATOR':
-          const res: { 0: BN } = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxCurrency, [user])
-          maxSupply = res[0]
+          maxSupply = (await this.contract('SENIOR_OPERATOR').maxCurrency(user)).toBN()
           break
         default:
           maxSupply = new BN(0)
@@ -261,39 +240,31 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getJuniorReserve = async () => {
-      const res: { 0: BN } = await executeAndRetry(this.contracts['JUNIOR'].balance, [])
-      return res[0] || new BN(0)
+      return (await this.contract('JUNIOR').balance()).toBN()
     }
 
     getMinJuniorRatio = async () => {
-      const res: { 0: BN } = await executeAndRetry(this.contracts['ASSESSOR'].minJuniorRatio, [])
-      return res[0] || new BN(0)
+      return (await this.contract('ASSESSOR').minJuniorRatio()).toBN()
     }
 
     getCurrentJuniorRatio = async () => {
-      const res: { 0: BN } = await executeAndRetry(this.contracts['ASSESSOR'].currentJuniorRatio, [])
-      return res[0] || new BN(0)
+      return (await this.contract('ASSESSOR').currentJuniorRatio()).toBN()
     }
 
     getAssetValueJunior = async () => {
-      const res: { 0: BN } = await executeAndRetry(this.contracts['ASSESSOR'].calcAssetValue, [
-        this.contractAddresses['JUNIOR'],
-      ])
-      return res[0] || new BN(0)
+      return (await this.contract('ASSESSOR').calcAssetValue(this.contractAddresses['JUNIOR'])).toBN()
     }
 
     getSeniorDebt = async () => {
       if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
-        const res: { 0: BN } = await executeAndRetry(this.contracts['SENIOR'].debt, [])
-        return res[0] || new BN(0)
+        return (await this.contract('SENIOR').debt()).toBN()
       }
       return new BN(0)
     }
 
     getSeniorInterestRate = async () => {
       if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
-        const res: { 0: BN } = await executeAndRetry(this.contracts['SENIOR'].ratePerSecond, [])
-        return res[0] || new BN(0)
+        return (await this.contract('SENIOR').ratePerSecond()).toBN()
       }
       return new BN(0)
     }

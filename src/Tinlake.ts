@@ -34,11 +34,6 @@ const contractNames = [
   'ALLOWANCE_OPERATOR',
 ] as const
 
-type AbiOutput = {
-  name: string
-  type: 'address' | 'uint256'
-}
-
 export type PendingTransaction = {
   hash: string | undefined
   timesOutAt?: number
@@ -88,7 +83,6 @@ export type TinlakeParams = {
 }
 
 export type Constructor<T = {}> = new (...args: any[]) => Tinlake
-
 ;(ethers.utils.BigNumber as any).prototype.toBN = function () {
   return new BN((this as any).toString())
 }
@@ -195,15 +189,14 @@ export default class Tinlake {
     return new ethers.Contract(address, this.contractAbis[abiName], this.ethersConfig.provider)
   }
 
-  getContract(address: string, abiName: ContractName): ethers.Contract {
-    return new ethers.Contract(address, this.contractAbis[abiName], this.ethersConfig.signer)
-  }
-
   contract(abiName: ContractName, address?: string): ethers.Contract {
     if (address) {
       return new ethers.Contract(address, this.contractAbis[abiName], this.ethersConfig.signer)
+    }  if (this.ethersConfig.signer) {
+      return this.ethersContracts[abiName].connect(this.ethersConfig.signer)
+    } else {
+      return this.ethersContracts[abiName]
     }
-    return this.ethersContracts[abiName]
   }
 
   async pending(txPromise: Promise<ethers.providers.TransactionResponse>): Promise<PendingTransaction> {

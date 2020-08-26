@@ -12,7 +12,7 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
     }
 
     getCurrencyAllowance = async (owner: string, spender: string) => {
-      const currencyContract = this.getContract(this.contractAddresses['TINLAKE_CURRENCY']!, 'TINLAKE_CURRENCY')
+      const currencyContract = this.contract('TINLAKE_CURRENCY')
       const allowance = await currencyContract.allowance(owner, spender)
       return allowance.toBN()
     }
@@ -33,7 +33,7 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
     }
 
     approveCurrency = async (usr: string, currencyAmount: string) => {
-      const currencyContract = this.getContract(this.contractAddresses['TINLAKE_CURRENCY']!, 'TINLAKE_CURRENCY')
+      const currencyContract = this.contract('TINLAKE_CURRENCY')
       const tx = await currencyContract.approve(usr, currencyAmount)
 
       return {

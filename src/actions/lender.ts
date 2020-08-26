@@ -6,12 +6,8 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
   return class extends Base implements ILenderActions {
     // senior tranche functions
     supplySenior = async (currencyAmount: string) => {
-      const tx = await this.ethersContracts['SENIOR_OPERATOR'].connect(this.ethersConfig.signer).supply(currencyAmount)
-
-      return {
-        hash: tx.hash,
-        contractKey: 'SENIOR_OPERATOR',
-      }
+      const seniorOperator = this.contract('SENIOR_OPERATOR')
+      return this.pending(seniorOperator.supply(currencyAmount))
     }
 
     redeemSenior = async (tokenAmount: string) => {
@@ -40,12 +36,8 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
 
     // junior tranche functions
     supplyJunior = async (currencyAmount: string) => {
-      const tx = await this.ethersContracts['JUNIOR_OPERATOR'].connect(this.ethersConfig.signer).supply(currencyAmount)
-
-      return {
-        hash: tx.hash,
-        contractKey: 'JUNIOR_OPERATOR',
-      }
+      const juniorOperator = this.contract('JUNIOR_OPERATOR')
+      return this.pending(juniorOperator.supply(currencyAmount))
     }
 
     redeemJunior = async (tokenAmount: string) => {

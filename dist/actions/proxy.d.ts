@@ -1,4 +1,4 @@
-import { Constructor, TinlakeParams } from '../Tinlake';
+import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake';
 import BN from 'bn.js';
 import { ethers } from 'ethers';
 export declare function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase): {
@@ -6,20 +6,14 @@ export declare function ProxyActions<ActionsBase extends Constructor<TinlakePara
         getProxyAccessTokenOwner: (tokenId: string) => Promise<BN>;
         buildProxy: (owner: string) => Promise<any>;
         getProxy: (accessTokenId: string) => Promise<any>;
-        getProxyAccessToken: (proxyAddr: string) => Promise<any>;
+        getProxyAccessToken: (proxyAddress: string) => Promise<any>;
         getProxyOwnerByLoan: (loanId: string) => Promise<BN>;
         getProxyOwnerByAddress: (proxyAddress: string) => Promise<BN>;
         proxyCount: () => Promise<BN>;
         checkProxyExists: (address: string) => Promise<string | null>;
         proxyCreateNew: (address: string) => Promise<any>;
-        proxyIssue: (proxyAddr: string, nftRegistryAddr: string, tokenId: string) => Promise<{
-            hash: any;
-            contractKey: string;
-        }>;
-        proxyTransferIssue: (proxyAddr: string, nftRegistryAddr: string, tokenId: string) => Promise<{
-            hash: any;
-            contractKey: string;
-        }>;
+        proxyIssue: (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => Promise<PendingTransaction>;
+        proxyTransferIssue: (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => Promise<PendingTransaction>;
         proxyLockBorrowWithdraw: (proxyAddr: string, loanId: string, amount: string, usr: string) => Promise<unknown>;
         proxyRepayUnlockClose: (proxyAddr: string, tokenId: string, loanId: string, registry: string) => Promise<unknown>;
         provider: any;
@@ -39,10 +33,9 @@ export declare function ProxyActions<ActionsBase extends Constructor<TinlakePara
         setEthersConfig: (ethersConfig: import("../Tinlake").EthersConfig | undefined) => void;
         createEthContract(address: string, abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR"): void;
         createContract(address: string, abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR"): ethers.Contract;
-        getContract(address: string, abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR"): ethers.Contract;
         contract(abiName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR", address?: string | undefined): ethers.Contract;
-        pending(txPromise: Promise<ethers.providers.TransactionResponse>): Promise<import("../Tinlake").PendingTransaction>;
-        getTransactionReceipt(tx: import("../Tinlake").PendingTransaction): Promise<ethers.providers.TransactionReceipt>;
+        pending(txPromise: Promise<ethers.providers.TransactionResponse>): Promise<PendingTransaction>;
+        getTransactionReceipt(tx: PendingTransaction): Promise<ethers.providers.TransactionReceipt>;
         getOperatorType: (tranche: string) => any;
     };
 } & ActionsBase;
@@ -56,8 +49,8 @@ export declare type IProxyActions = {
     getProxyOwnerByLoan(loanId: string): Promise<any>;
     getProxyOwnerByAddress(proxyAddr: string): Promise<any>;
     proxyCreateNew(address: string): Promise<any>;
-    proxyIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<any>;
-    proxyTransferIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<any>;
+    proxyIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<PendingTransaction>;
+    proxyTransferIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<PendingTransaction>;
     proxyLockBorrowWithdraw(proxyAddr: string, loanId: string, amount: string, usr: string): Promise<any>;
     proxyRepayUnlockClose(proxyAddr: string, tokenId: string, loanId: string, registry: string): Promise<any>;
 };
