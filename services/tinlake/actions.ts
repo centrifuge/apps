@@ -107,8 +107,6 @@ export const issue = async (tinlake: ITinlake, tokenId: string, nftRegistryAddre
 
   // case: borrower is owner of nft
   if (user.toLowerCase() === tokenOwner.toString().toLowerCase()) {
-    console.log('case 1')
-
     // get or create new proxy
     let proxyAddress
     try {
@@ -134,10 +132,6 @@ export const issue = async (tinlake: ITinlake, tokenId: string, nftRegistryAddre
       return loggedError(e, 'Could not Issue loan.', tokenId)
     }
 
-    if (result.status !== SUCCESS_STATUS) {
-      return loggedError({}, 'Could not Issue loan.', tokenId)
-    }
-
     return result
   }
 
@@ -150,17 +144,11 @@ export const issue = async (tinlake: ITinlake, tokenId: string, nftRegistryAddre
 
   // case: borrower's proxy is owner of nft
   if (user.toLowerCase() === proxyOwner.toLowerCase()) {
-    console.log('case 2')
-
     let result
     try {
       result = await tinlake.proxyIssue(tokenOwner.toString(), nftRegistryAddress, tokenId)
     } catch (e) {
       return loggedError(e, 'Could not Issue loan.', tokenId)
-    }
-
-    if (result.status !== SUCCESS_STATUS) {
-      return loggedError({}, 'Could not Issue loan.', tokenId)
     }
 
     return result
