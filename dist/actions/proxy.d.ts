@@ -18,7 +18,7 @@ export declare function ProxyActions<ActionsBase extends Constructor<TinlakePara
         provider: any;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;
-        ethConfig: {} | import("../Tinlake").EthConfig;
+        ethConfig: import("../Tinlake").EthConfig;
         contractAddresses: import("../Tinlake").ContractAddresses;
         transactionTimeout: number;
         contracts: import("../Tinlake").Contracts;
@@ -26,7 +26,7 @@ export declare function ProxyActions<ActionsBase extends Constructor<TinlakePara
         contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
         setContracts: () => void;
-        setEthConfig: (ethConfig: {} | import("../Tinlake").EthConfig) => void;
+        setEthConfig: (ethConfig: import("../Tinlake").EthConfig) => void;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };

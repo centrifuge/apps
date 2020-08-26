@@ -1,22 +1,22 @@
-import contractAddresses from './addresses.json';
-import abiDefinitions from '../abi/';
-import { Account } from './types';
-import { ContractAddresses, ContractAbis } from '../Tinlake';
-import dotenv from 'dotenv';
+import contractAddresses from './addresses.json'
+import abiDefinitions from '../abi/'
+import { Account } from './types'
+import { ContractAddresses, ContractAbis } from '../Tinlake'
+import dotenv from 'dotenv'
 
-dotenv.config();
+dotenv.config()
 
-const KWEI = 1000;
-const MWEI = 1000 * KWEI;
-const GWEI = 1000 * MWEI;
-const MILLI_ETH = 1e15; // 0.001 ETH
-const FAUCET_AMOUNT = 5000 * MILLI_ETH;
+const KWEI = 1000
+const MWEI = 1000 * KWEI
+const GWEI = 1000 * MWEI
+const MILLI_ETH = 1e15 // 0.001 ETH
+const FAUCET_AMOUNT = 5000 * MILLI_ETH
 
-const GAS_PRICE = 100 * GWEI;
-const GAS = 1000000;
+const GAS_PRICE = 100 * GWEI
+const GAS = 1000000
 
-const testConfig : ProviderConfig = {
-  contractAddresses: process.env.CONTRACTS && JSON.parse(process.env.CONTRACTS) || contractAddresses,
+const testConfig: ProviderConfig = {
+  contractAddresses: (process.env.CONTRACTS && JSON.parse(process.env.CONTRACTS)) || contractAddresses,
   godAccount: {
     address: process.env.GOD_ADDRESS || '0xf6fa8a3f3199cdd85749ec749fb8f9c2551f9928',
     publicKey: process.env.GOD_PUB_KEY || '',
@@ -31,20 +31,20 @@ const testConfig : ProviderConfig = {
   SUCCESS_STATUS: '0x1',
   FAIL_STATUS: '0x0',
   FAUCET_AMOUNT: `${FAUCET_AMOUNT}`,
-};
+}
 
 export type ProviderConfig = {
-  rpcUrl: string;
-  godAccount: Account;
-  gas: string;
-  gasPrice: string;
-  nftRegistry: string;
-  transactionTimeout: number;
-  contractAddresses: ContractAddresses;
-  contractAbis: ContractAbis;
-  SUCCESS_STATUS: '0x1';
-  FAIL_STATUS: '0x0';
-  FAUCET_AMOUNT: string;
-};
+  rpcUrl: string
+  godAccount: Account
+  gas: string
+  gasPrice: string
+  nftRegistry: string
+  transactionTimeout: number
+  contractAddresses: ContractAddresses
+  contractAbis: ContractAbis
+  SUCCESS_STATUS: '0x1'
+  FAIL_STATUS: '0x0'
+  FAUCET_AMOUNT: string
+}
 
-export default testConfig;
+export default testConfig
