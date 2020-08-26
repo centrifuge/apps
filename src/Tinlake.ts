@@ -88,6 +88,7 @@ export type TinlakeParams = {
 }
 
 export type Constructor<T = {}> = new (...args: any[]) => Tinlake
+
 ;(ethers.utils.BigNumber as any).prototype.toBN = function () {
   return new BN((this as any).toString())
 }
@@ -141,7 +142,8 @@ export default class Tinlake {
     contractNames.forEach((name) => {
       if (this.contractAbis[name] && this.contractAddresses[name]) {
         this.contracts[name] = this.eth.contract(this.contractAbis[name]).at(this.contractAddresses[name])
-        this.ethersContracts[name] = this.createContract(this.contractAddresses[name]!, name)
+
+        if (this.ethersConfig) this.ethersContracts[name] = this.createContract(this.contractAddresses[name]!, name)
       }
     })
 
@@ -151,18 +153,22 @@ export default class Tinlake {
         ? this.createEthContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
         : this.createEthContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
 
-      this.ethersContracts['JUNIOR_OPERATOR'] = this.contractConfig['JUNIOR_OPERATOR']
-        ? this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
-        : this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
+      if (this.ethersConfig) {
+        this.ethersContracts['JUNIOR_OPERATOR'] = this.contractConfig['JUNIOR_OPERATOR']
+          ? this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
+          : this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
+      }
     }
     if (this.contractAddresses['SENIOR_OPERATOR']) {
       this.contracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR']
         ? this.createEthContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
         : this.createEthContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
 
-      this.ethersContracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR']
-        ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
-        : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
+      if (this.ethersConfig) {
+        this.ethersContracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR']
+          ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
+          : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
+      }
     }
   }
 

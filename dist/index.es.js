@@ -47491,7 +47491,8 @@ var Tinlake = /** @class */ (function () {
             contractNames.forEach(function (name) {
                 if (_this.contractAbis[name] && _this.contractAddresses[name]) {
                     _this.contracts[name] = _this.eth.contract(_this.contractAbis[name]).at(_this.contractAddresses[name]);
-                    _this.ethersContracts[name] = _this.createContract(_this.contractAddresses[name], name);
+                    if (_this.ethersConfig)
+                        _this.ethersContracts[name] = _this.createContract(_this.contractAddresses[name], name);
                 }
             });
             // modular contracts
@@ -47499,17 +47500,21 @@ var Tinlake = /** @class */ (function () {
                 _this.contracts['JUNIOR_OPERATOR'] = _this.contractConfig['JUNIOR_OPERATOR']
                     ? _this.createEthContract(_this.contractAddresses['JUNIOR_OPERATOR'], _this.contractConfig['JUNIOR_OPERATOR'])
                     : _this.createEthContract(_this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
-                _this.ethersContracts['JUNIOR_OPERATOR'] = _this.contractConfig['JUNIOR_OPERATOR']
-                    ? _this.createContract(_this.contractAddresses['JUNIOR_OPERATOR'], _this.contractConfig['JUNIOR_OPERATOR'])
-                    : _this.createContract(_this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
+                if (_this.ethersConfig) {
+                    _this.ethersContracts['JUNIOR_OPERATOR'] = _this.contractConfig['JUNIOR_OPERATOR']
+                        ? _this.createContract(_this.contractAddresses['JUNIOR_OPERATOR'], _this.contractConfig['JUNIOR_OPERATOR'])
+                        : _this.createContract(_this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
+                }
             }
             if (_this.contractAddresses['SENIOR_OPERATOR']) {
                 _this.contracts['SENIOR_OPERATOR'] = _this.contractConfig['SENIOR_OPERATOR']
                     ? _this.createEthContract(_this.contractAddresses['SENIOR_OPERATOR'], _this.contractConfig['SENIOR_OPERATOR'])
                     : _this.createEthContract(_this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
-                _this.ethersContracts['SENIOR_OPERATOR'] = _this.contractConfig['SENIOR_OPERATOR']
-                    ? _this.createContract(_this.contractAddresses['SENIOR_OPERATOR'], _this.contractConfig['SENIOR_OPERATOR'])
-                    : _this.createContract(_this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
+                if (_this.ethersConfig) {
+                    _this.ethersContracts['SENIOR_OPERATOR'] = _this.contractConfig['SENIOR_OPERATOR']
+                        ? _this.createContract(_this.contractAddresses['SENIOR_OPERATOR'], _this.contractConfig['SENIOR_OPERATOR'])
+                        : _this.createContract(_this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
+                }
             }
         };
         this.setEthConfig = function (ethConfig) {
