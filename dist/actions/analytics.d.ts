@@ -35,7 +35,6 @@ export declare function AnalyticsActions<ActionsBase extends Constructor<Tinlake
         getSeniorDebt: () => Promise<BN>;
         getSeniorInterestRate: () => Promise<BN>;
         provider: any;
-        signer: import("ethers").Signer;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("../Tinlake").EthConfig;

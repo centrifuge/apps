@@ -16,7 +16,6 @@ export declare const TinlakeWithActions: {
         proxyLockBorrowWithdraw: (proxyAddr: string, loanId: string, amount: string, usr: string) => Promise<unknown>;
         proxyRepayUnlockClose: (proxyAddr: string, tokenId: string, loanId: string, registry: string) => Promise<unknown>;
         provider: any;
-        signer: import("ethers").Signer;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;
@@ -42,7 +41,6 @@ export declare const TinlakeWithActions: {
         withdraw: (loan: string, currencyAmount: string, usr: string) => Promise<unknown>;
         repay: (loan: string, currencyAmount: string) => Promise<unknown>;
         provider: any;
-        signer: import("ethers").Signer;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;
@@ -76,7 +74,6 @@ export declare const TinlakeWithActions: {
         approveAllowanceJunior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
         approveAllowanceSenior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
         provider: any;
-        signer: import("ethers").Signer;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;
@@ -103,7 +100,6 @@ export declare const TinlakeWithActions: {
         approveJuniorToken: (tokenAmount: string) => Promise<unknown>;
         balance: () => Promise<unknown>;
         provider: any;
-        signer: import("ethers").Signer;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;
@@ -152,7 +148,6 @@ export declare const TinlakeWithActions: {
         getSeniorDebt: () => Promise<import("bn.js")>;
         getSeniorInterestRate: () => Promise<import("bn.js")>;
         provider: any;
-        signer: import("ethers").Signer;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;
@@ -169,7 +164,7 @@ export declare const TinlakeWithActions: {
     };
 } & {
     new (...args: any[]): {
-        mintCurrency: (usr: string, amount: string) => Promise<void>;
+        mintCurrency: (usr: string, amount: string) => Promise<unknown>;
         getCurrencyAllowance: (owner: string, spender: string) => Promise<import("bn.js")>;
         getJuniorForCurrencyAllowance: (owner: string) => Promise<import("bn.js") | undefined>;
         getSeniorForCurrencyAllowance: (owner: string) => Promise<import("bn.js") | undefined>;
@@ -178,7 +173,6 @@ export declare const TinlakeWithActions: {
         approveSeniorForCurrency: (currencyAmount: string) => Promise<unknown>;
         approveJuniorForCurrency: (currencyAmount: string) => Promise<unknown>;
         provider: any;
-        signer: import("ethers").Signer;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;
@@ -205,7 +199,6 @@ export declare const TinlakeWithActions: {
         getNFTOwner: (nftAddr: string, tokenId: string) => Promise<import("bn.js")>;
         transferNFT: (nftAddr: string, from: string, to: string, tokenId: string) => Promise<unknown>;
         provider: any;
-        signer: import("ethers").Signer;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;
@@ -224,7 +217,6 @@ export declare const TinlakeWithActions: {
     new (...args: any[]): {
         relyAddress: (usr: string, contractAddress: string) => Promise<unknown>;
         provider: any;
-        signer: import("ethers").Signer;
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;

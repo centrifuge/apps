@@ -30,18 +30,18 @@ const contractNames = [
   'LENDER_DEPLOYER',
   'NFT_FEED',
   'GOVERNANCE',
-];
+]
 
 type AbiOutput = {
-  name: string;
-  type: 'address' | 'uint256';
-};
+  name: string
+  type: 'address' | 'uint256'
+}
 
 export type EthConfig = {
-  from?: string;
-  gasPrice?: string;
-  gas?: string;
-};
+  from?: string
+  gasPrice?: string
+  gas?: string
+}
 
 export type EthersConfig = {
   provider?: ethers.providers.Provider
@@ -51,16 +51,16 @@ export type EthersConfig = {
 export type ContractNames = typeof contractNames[number];
 
 export type Contracts = {
-  [key in ContractNames]?: any;
-};
+  [key in ContractNames]?: any
+}
 
 export type ContractAbis = {
-  [key in ContractNames]?: any;
-};
+  [key in ContractNames]?: any
+}
 
 export type ContractAddresses = {
-  [key in ContractNames]?: string;
-};
+  [key in ContractNames]?: string
+}
 
 export type TinlakeParams = {
   provider: any;
@@ -91,7 +91,7 @@ export default class Tinlake {
   constructor(params: TinlakeParams) {
     const { provider, contractAddresses, transactionTimeout, contractAbis, ethOptions, ethConfig, ethersConfig, contractConfig } = params;
     if (!contractAbis) {
-      this.contractAbis = abiDefinitions;
+      this.contractAbis = abiDefinitions
     }
 
     this.contractConfig = contractConfig || {};
@@ -103,32 +103,31 @@ export default class Tinlake {
   }
 
   setProvider = (provider: any, ethOptions?: any) => {
-    this.provider = provider;
-    this.ethOptions = ethOptions || {};
-    this.eth = new Eth(this.provider, this.ethOptions) as ethI;
+    this.provider = provider
+    this.ethOptions = ethOptions || {}
+    this.eth = new Eth(this.provider, this.ethOptions) as ethI
 
-    this.setContracts();
+    this.setContracts()
   }
 
   setContracts = () => {
     // set root & proxy contracts
     contractNames.forEach((name) => {
       if (this.contractAbis[name] && this.contractAddresses[name]) {
-        this.contracts[name] = this.eth.contract(this.contractAbis[name])
-        .at(this.contractAddresses[name]);
+        this.contracts[name] = this.eth.contract(this.contractAbis[name]).at(this.contractAddresses[name])
       }
-    });
+    })
 
     // modular contracts
     if (this.contractAddresses['JUNIOR_OPERATOR']) {
       this.contracts['JUNIOR_OPERATOR'] = this.contractConfig['JUNIOR_OPERATOR']
-                  ? this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
-                  : this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
+        ? this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
+        : this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
     }
     if (this.contractAddresses['SENIOR_OPERATOR']) {
       this.contracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR']
-                  ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
-                  : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
+        ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
+        : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
     }
   }
 
@@ -136,7 +135,7 @@ export default class Tinlake {
     this.ethConfig = {
       ...this.ethConfig,
       ...ethConfig,
-    };
+    }
   }
 
   setEthersConfig = (ethersConfig: EthersConfig) => {
@@ -147,19 +146,18 @@ export default class Tinlake {
   }
 
   createContract(address: string, abiName: string) {
-    const contract = this.eth.contract(this.contractAbis[abiName]).at(address);
-    return contract;
+    const contract = this.eth.contract(this.contractAbis[abiName]).at(address)
+    return contract
   }
 
   getOperatorType = (tranche: string) => {
     switch (tranche) {
       case 'senior':
-        return this.contractConfig['SENIOR_OPERATOR'] || 'ALLOWANCE_OPERATOR';
+        return this.contractConfig['SENIOR_OPERATOR'] || 'ALLOWANCE_OPERATOR'
       case 'junior':
-        return this.contractConfig['SENIOR_OPERATOR'] || 'ALLOWANCE_OPERATOR';
+        return this.contractConfig['SENIOR_OPERATOR'] || 'ALLOWANCE_OPERATOR'
       default:
-        return 'ALLOWANCE_OPERATOR';
+        return 'ALLOWANCE_OPERATOR'
     }
   }
-
 }

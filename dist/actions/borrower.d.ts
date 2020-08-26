@@ -1,5 +1,4 @@
 import { Constructor, TinlakeParams } from '../Tinlake';
-import { ethers } from 'ethers';
 export declare function BorrowerActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase): {
     new (...args: any[]): {
         issue: (registry: string, tokenId: string) => Promise<unknown>;
@@ -11,7 +10,6 @@ export declare function BorrowerActions<ActionsBase extends Constructor<TinlakeP
         withdraw: (loan: string, currencyAmount: string, usr: string) => Promise<unknown>;
         repay: (loan: string, currencyAmount: string) => Promise<unknown>;
         provider: any;
-        signer: ethers.Signer;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("../Tinlake").EthConfig;

@@ -3,7 +3,6 @@ declare function GovernanceActions<ActionsBase extends Constructor<TinlakeParams
     new (...args: any[]): {
         relyAddress: (usr: string, contractAddress: string) => Promise<unknown>;
         provider: any;
-        signer: import("ethers").Signer;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("../Tinlake").EthConfig;

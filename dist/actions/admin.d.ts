@@ -19,7 +19,6 @@ export declare function AdminActions<ActionsBase extends Constructor<TinlakePara
         approveAllowanceJunior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
         approveAllowanceSenior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
         provider: any;
-        signer: import("ethers").Signer;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("../Tinlake").EthConfig;

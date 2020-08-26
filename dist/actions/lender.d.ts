@@ -12,7 +12,6 @@ export declare function LenderActions<ActionBase extends Constructor<TinlakePara
         approveJuniorToken: (tokenAmount: string) => Promise<unknown>;
         balance: () => Promise<unknown>;
         provider: any;
-        signer: import("ethers").Signer;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("../Tinlake").EthConfig;

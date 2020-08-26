@@ -1,6 +1,5 @@
 import { Constructor, TinlakeParams } from '../Tinlake';
 import BN from 'bn.js';
-import { ethers } from 'ethers';
 export declare function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase): {
     new (...args: any[]): {
         getProxyAccessTokenOwner: (tokenId: string) => Promise<BN>;
@@ -17,7 +16,6 @@ export declare function ProxyActions<ActionsBase extends Constructor<TinlakePara
         proxyLockBorrowWithdraw: (proxyAddr: string, loanId: string, amount: string, usr: string) => Promise<unknown>;
         proxyRepayUnlockClose: (proxyAddr: string, tokenId: string, loanId: string, registry: string) => Promise<unknown>;
         provider: any;
-        signer: ethers.Signer;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("../Tinlake").EthConfig;
