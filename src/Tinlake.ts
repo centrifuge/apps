@@ -194,9 +194,9 @@ export default class Tinlake {
       return new ethers.Contract(address, this.contractAbis[abiName], this.ethersConfig.signer)
     }  if (this.ethersConfig.signer) {
       return this.ethersContracts[abiName].connect(this.ethersConfig.signer)
-    } else {
+    } 
       return this.ethersContracts[abiName]
-    }
+    
   }
 
   async pending(txPromise: Promise<ethers.providers.TransactionResponse>): Promise<PendingTransaction> {
