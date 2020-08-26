@@ -163,7 +163,7 @@ export default class Tinlake {
             'ALLOWANCE_OPERATOR',
           );
 
-      this.ethersContracts['JUNIOR_OPERATOR'] = this.contractConfig[ 'JUNIOR_OPERATOR'
+      this.ethersContracts['JUNIOR_OPERATOR'] = this.contractConfig['JUNIOR_OPERATOR'
 ]
         ? this.createContract(
             this.contractAddresses['JUNIOR_OPERATOR'],
@@ -185,7 +185,7 @@ export default class Tinlake {
             'ALLOWANCE_OPERATOR',
           );
 
-      this.ethersContracts['SENIOR_OPERATOR'] = this.contractConfig[ 'SENIOR_OPERATOR'
+      this.ethersContracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR'
 ]
         ? this.createContract(
             this.contractAddresses['SENIOR_OPERATOR'],
@@ -241,7 +241,7 @@ export default class Tinlake {
         this.ethersConfig.signer,
       );
     }
-      return this.ethersContracts[abiName];
+    return this.ethersContracts[abiName];
 
   }
 
