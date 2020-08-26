@@ -1,13 +1,5 @@
 import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake';
 import BN from 'bn.js';
-/**
- * - See if we can remove ICollateralActions,
- * - Make sure all actions have a non-unkonwn/any return type
-//  * - Remove contractKey
-//  * - Remove timesOutAt from every action (use this.transactionTimeout)
-//  * - Create ticket for adding RetryProvider later in tinlake-ui
- * - Create issue in ethers.js for window is undefined error
- */
 export declare function CollateralActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase): {
     new (...args: any[]): {
         mintTitleNFT: (nftAddr: string, user: string) => Promise<any>;

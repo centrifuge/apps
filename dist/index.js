@@ -10585,15 +10585,17 @@ function executeAndRetry(f, args) {
                     e_1 = _a.sent();
                     // using error message, since error code -32603 is not unique enough
                     // todo introduce retry limit
-                    if (e_1 && e_1.message && (e_1.message.indexOf("Cannot read property 'number' of null") !== -1 ||
-                        e_1.message.indexOf('error with payload') !== -1)) {
+                    if (e_1 &&
+                        e_1.message &&
+                        (e_1.message.indexOf("Cannot read property 'number' of null") !== -1 ||
+                            e_1.message.indexOf('error with payload') !== -1)) {
                         console.log('internal RPC error detected, retry triggered...', e_1);
-                        throw (new Error('Internal RPC Error. Please try again.'));
+                        throw new Error('Internal RPC Error. Please try again.');
                         // await sleep(1000);
                         // return executeAndRetry(f, args);
                     }
                     else {
-                        throw (e_1);
+                        throw e_1;
                     }
                     return [3 /*break*/, 3];
                 case 3: return [2 /*return*/];
@@ -10671,12 +10673,11 @@ var getEvents = function (receipt, abi) {
         var matches = findEvent(abi, funcSignature);
         if (matches.length === 1) {
             var event = matches[0];
-            var inputs = event.inputs.filter(function (input) { return input.indexed; })
+            var inputs = event.inputs
+                .filter(function (input) { return input.indexed; })
                 .map(function (input) { return input.type; });
             // remove 0x prefix from topics
-            var topics = log.topics.map(function (t) {
-                return t.replace('0x', '');
-            });
+            var topics = log.topics.map(function (t) { return t.replace('0x', ''); });
             // concat topics without first topic (func signature)
             var bytes = "0x" + topics.slice(1).join('');
             var data = abiCoder.decodeParameters(inputs, bytes);
@@ -10694,13 +10695,13 @@ function AdminActions(Base) {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.canQueryPermissions = function () {
                 var _a, _b, _c, _d, _e, _f, _g;
-                return !!((_a = _this.contracts['PILE']) === null || _a === void 0 ? void 0 : _a.wards) &&
+                return (!!((_a = _this.contracts['PILE']) === null || _a === void 0 ? void 0 : _a.wards) &&
                     !!((_b = _this.contracts['SENIOR']) === null || _b === void 0 ? void 0 : _b.wards) &&
                     !!((_c = _this.contracts['PRICE_POOL']) === null || _c === void 0 ? void 0 : _c.wards) &&
                     !!((_d = _this.contracts['ASSESSOR']) === null || _d === void 0 ? void 0 : _d.wards) &&
                     !!((_e = _this.contracts['JUNIOR_OPERATOR']) === null || _e === void 0 ? void 0 : _e.wards) &&
                     !!((_f = _this.contracts['SENIOR_OPERATOR']) === null || _f === void 0 ? void 0 : _f.wards) &&
-                    !!((_g = _this.contracts['COLLECTOR']) === null || _g === void 0 ? void 0 : _g.wards);
+                    !!((_g = _this.contracts['COLLECTOR']) === null || _g === void 0 ? void 0 : _g.wards));
             };
             _this.isWard = function (user, contractName) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
@@ -10855,7 +10856,12 @@ function AdminActions(Base) {
                     switch (_a.label) {
                         case 0:
                             rateGroup = getRateGroup(ratePerSecond);
-                            return [4 /*yield*/, executeAndRetry(this.contracts['PILE'].file, [web3.fromAscii('rate'), rateGroup, ratePerSecond, this.ethConfig])];
+                            return [4 /*yield*/, executeAndRetry(this.contracts['PILE'].file, [
+                                    web3.fromAscii('rate'),
+                                    rateGroup,
+                                    ratePerSecond,
+                                    this.ethConfig,
+                                ])];
                         case 1:
                             txHash = _a.sent();
                             console.log("[Initialising rate] txHash: " + txHash);
@@ -10896,7 +10902,9 @@ function AdminActions(Base) {
                 var tx;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.ethersContracts['ASSESSOR'].connect(this.ethersConfig.signer).file(web3.fromAscii('minJuniorRatio').padEnd(66, '0'), ratio)];
+                        case 0: return [4 /*yield*/, this.ethersContracts['ASSESSOR']
+                                .connect(this.ethersConfig.signer)
+                                .file(web3.fromAscii('minJuniorRatio').padEnd(66, '0'), ratio)];
                         case 1:
                             tx = _a.sent();
                             console.log(this.transactionTimeout);
@@ -10912,7 +10920,12 @@ function AdminActions(Base) {
                 var txHash;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_OPERATOR'].approve, [user, maxCurrency, maxToken, this.ethConfig])];
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_OPERATOR'].approve, [
+                                user,
+                                maxCurrency,
+                                maxToken,
+                                this.ethConfig,
+                            ])];
                         case 1:
                             txHash = _a.sent();
                             console.log("[Approve allowance Junior] txHash: " + txHash);
@@ -10935,7 +10948,12 @@ function AdminActions(Base) {
                         case 2:
                             txHash = _b.sent();
                             return [3 /*break*/, 5];
-                        case 3: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [user, maxCurrency, maxToken, this.ethConfig])];
+                        case 3: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [
+                                user,
+                                maxCurrency,
+                                maxToken,
+                                this.ethConfig,
+                            ])];
                         case 4:
                             txHash = _b.sent();
                             _b.label = 5;
@@ -10952,7 +10970,7 @@ function AdminActions(Base) {
 }
 var ONE = '1000000000000000000000000000';
 function getRateGroup(ratePerSecond) {
-    return (ratePerSecond === ONE) ? 0 : ratePerSecond;
+    return ratePerSecond === ONE ? 0 : ratePerSecond;
 }
 
 var _version = createCommonjsModule(function (module, exports) {
@@ -29386,7 +29404,12 @@ function BorrowerActions(Base) {
                 var txHash;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SHELF'].withdraw, [loan, currencyAmount, usr, this.ethConfig])];
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SHELF'].withdraw, [
+                                loan,
+                                currencyAmount,
+                                usr,
+                                this.ethConfig,
+                            ])];
                         case 1:
                             txHash = _a.sent();
                             console.log("[Withdraw] txHash: " + txHash);
@@ -29448,7 +29471,10 @@ function LenderActions(Base) {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].allowance, [owner, this.contractAddresses['SENIOR']])];
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].allowance, [
+                                owner,
+                                this.contractAddresses['SENIOR'],
+                            ])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0] || new bn(0)];
@@ -29459,7 +29485,11 @@ function LenderActions(Base) {
                 var txHash;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].approve, [this.contractAddresses['SENIOR'], tokenAmount, this.ethConfig])];
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].approve, [
+                                this.contractAddresses['SENIOR'],
+                                tokenAmount,
+                                this.ethConfig,
+                            ])];
                         case 1:
                             txHash = _a.sent();
                             console.log("[Currency.approve] txHash: " + txHash);
@@ -29498,7 +29528,10 @@ function LenderActions(Base) {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_TOKEN'].allowance, [owner, this.contractAddresses['JUNIOR']])];
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_TOKEN'].allowance, [
+                                owner,
+                                this.contractAddresses['JUNIOR'],
+                            ])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0] || new bn(0)];
@@ -29509,7 +29542,11 @@ function LenderActions(Base) {
                 var txHash;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_TOKEN'].approve, [this.contractAddresses['JUNIOR'], tokenAmount, this.ethConfig])];
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_TOKEN'].approve, [
+                                this.contractAddresses['JUNIOR'],
+                                tokenAmount,
+                                this.ethConfig,
+                            ])];
                         case 1:
                             txHash = _a.sent();
                             console.log("[Currency.approve] txHash: " + txHash);
@@ -29628,14 +29665,6 @@ function CurrencyActions(Base) {
     }(Base));
 }
 
-/**
- * - See if we can remove ICollateralActions,
- * - Make sure all actions have a non-unkonwn/any return type
-//  * - Remove contractKey
-//  * - Remove timesOutAt from every action (use this.transactionTimeout)
-//  * - Create ticket for adding RetryProvider later in tinlake-ui
- * - Create issue in ethers.js for window is undefined error
- */
 function CollateralActions(Base) {
     return /** @class */ (function (_super) {
         __extends(class_1, _super);
@@ -29715,14 +29744,26 @@ function CollateralActions(Base) {
             }); };
             _this.getNFTData = function (nftAddr, tokenId) { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
-                    return [2 /*return*/, this.getContract(nftAddr, 'COLLATERAL_NFT').data(tokenId)];
+                    return [2 /*return*/, this.getContract(nftAddr, 'COLLATERAL_NFT').data(tokenId)
+                        // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
+                        // const res = await executeAndRetry(nft.data, [tokenId]);
+                        // return res;
+                    ];
                 });
             }); };
             _this.getNFTOwner = function (nftAddr, tokenId) { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.getContract(nftAddr, 'COLLATERAL_NFT').ownerOf(tokenId)];
-                        case 1: return [2 /*return*/, _a.sent()];
+                        case 0: return [4 /*yield*/, this.getContract(nftAddr, 'COLLATERAL_NFT').ownerOf(tokenId)
+                            // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
+                            // const res : { 0: BN } = await executeAndRetry(nft.ownerOf, [tokenId]);
+                            // return res[0];
+                        ];
+                        case 1: return [2 /*return*/, _a.sent()
+                            // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr);
+                            // const res : { 0: BN } = await executeAndRetry(nft.ownerOf, [tokenId]);
+                            // return res[0];
+                        ];
                     }
                 });
             }); };
@@ -29821,8 +29862,16 @@ function AnalyticsActions(Base) {
             _this.getOwnerOfCollateral = function (nftRegistryAddr, tokenId) { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.getContract(nftRegistryAddr, 'COLLATERAL_NFT').ownerOf(tokenId)];
-                        case 1: return [2 /*return*/, _a.sent()];
+                        case 0: return [4 /*yield*/, this.getContract(nftRegistryAddr, 'COLLATERAL_NFT').ownerOf(tokenId)
+                            // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftRegistryAddr);
+                            // const res : { 0: BN } = await executeAndRetry(nft.ownerOf, [tokenId]);
+                            // return res[0];
+                        ];
+                        case 1: return [2 /*return*/, _a.sent()
+                            // const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftRegistryAddr);
+                            // const res : { 0: BN } = await executeAndRetry(nft.ownerOf, [tokenId]);
+                            // return res[0];
+                        ];
                     }
                 });
             }); };
@@ -29961,7 +30010,7 @@ function AnalyticsActions(Base) {
                             _a = (_d.sent());
                             _d.label = 3;
                         case 3:
-                            tokenBalanceSenior = _a || new bn(0);
+                            tokenBalanceSenior = (_a) || new bn(0);
                             return [4 /*yield*/, this.getMaxSupplyAmountJunior(user)];
                         case 4:
                             maxSupplyJunior = _d.sent();
@@ -29972,7 +30021,7 @@ function AnalyticsActions(Base) {
                             _b = (_d.sent());
                             _d.label = 6;
                         case 6:
-                            maxSupplySenior = _b || new bn(0);
+                            maxSupplySenior = (_b) || new bn(0);
                             return [4 /*yield*/, this.getMaxRedeemAmountJunior(user)];
                         case 7:
                             maxRedeemJunior = _d.sent();
@@ -29983,7 +30032,7 @@ function AnalyticsActions(Base) {
                             _c = (_d.sent());
                             _d.label = 9;
                         case 9:
-                            maxRedeemSenior = _c || new bn(0);
+                            maxRedeemSenior = (_c) || new bn(0);
                             return [2 /*return*/, {
                                     junior: {
                                         tokenBalance: tokenBalanceJunior,
@@ -30102,7 +30151,9 @@ function AnalyticsActions(Base) {
                                 case 'ALLOWANCE_OPERATOR': return [3 /*break*/, 4];
                             }
                             return [3 /*break*/, 6];
-                        case 1: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].supplyMaximum, [user])];
+                        case 1: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].supplyMaximum, [
+                                user,
+                            ])];
                         case 2:
                             supplyLimitRes = _b.sent();
                             return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].tokenReceived, [user])];
@@ -30159,7 +30210,9 @@ function AnalyticsActions(Base) {
                     switch (_b.label) {
                         case 0:
                             if (this.contractAddresses['SENIOR_OPERATOR'] === ZERO_ADDRESS)
-                                return [2 /*return*/, new bn(0)];
+                                return [2 /*return*/, new bn(0)
+                                    // if no user address is passed always use price from asessor
+                                ];
                             operatorType = user ? this.getOperatorType('senior') : 'ALLOWANCE_OPERATOR';
                             _a = operatorType;
                             switch (_a) {
@@ -30172,7 +30225,9 @@ function AnalyticsActions(Base) {
                             customTokenPriceRes = _b.sent();
                             tokenPrice = customTokenPriceRes[0];
                             return [3 /*break*/, 6];
-                        case 3: return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].calcTokenPrice, [this.contractAddresses['SENIOR']])];
+                        case 3: return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].calcTokenPrice, [
+                                this.contractAddresses['SENIOR'],
+                            ])];
                         case 4:
                             res = _b.sent();
                             tokenPrice = res[0];
@@ -30235,7 +30290,9 @@ function AnalyticsActions(Base) {
                 var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].calcAssetValue, [this.contractAddresses['JUNIOR']])];
+                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].calcAssetValue, [
+                                this.contractAddresses['JUNIOR'],
+                            ])];
                         case 1:
                             res = _a.sent();
                             return [2 /*return*/, res[0] || new bn(0)];
@@ -30310,8 +30367,14 @@ function ProxyActions(Base) {
             _this.getProxyAccessTokenOwner = function (tokenId) { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.ethersContracts['PROXY_REGISTRY'].ownerOf(tokenId)];
-                        case 1: return [2 /*return*/, _a.sent()];
+                        case 0: return [4 /*yield*/, this.ethersContracts['PROXY_REGISTRY'].ownerOf(tokenId)
+                            // const res : { 0: BN } = await executeAndRetry(this.contracts['PROXY_REGISTRY'].ownerOf, [tokenId]);
+                            // return res[0];
+                        ];
+                        case 1: return [2 /*return*/, _a.sent()
+                            // const res : { 0: BN } = await executeAndRetry(this.contracts['PROXY_REGISTRY'].ownerOf, [tokenId]);
+                            // return res[0];
+                        ];
                     }
                 });
             }); };
@@ -30350,7 +30413,11 @@ function ProxyActions(Base) {
                             return [4 /*yield*/, proxy.accessToken()];
                         case 1:
                             accessToken = _a.sent();
-                            return [2 /*return*/, accessToken.toNumber()];
+                            return [2 /*return*/, accessToken.toNumber()
+                                // const proxy: any = this.eth.contract(this.contractAbis['PROXY']).at(proxyAddr);
+                                // const res = await executeAndRetry(proxy.accessToken, []);
+                                // return res[0].toNumber();
+                            ];
                     }
                 });
             }); };
@@ -30439,8 +30506,8 @@ function ProxyActions(Base) {
                                 inputs: [
                                     { type: 'address', name: 'shelf' },
                                     { type: 'address', name: 'registry' },
-                                    { type: 'uint256', name: 'token' }
-                                ]
+                                    { type: 'uint256', name: 'token' },
+                                ],
                             }, [this.ethersContracts['SHELF'].address, nftRegistryAddr, tokenId]);
                             return [4 /*yield*/, proxy.execute(this.ethersContracts['ACTIONS'].address, encoded)];
                         case 1:
@@ -30464,8 +30531,8 @@ function ProxyActions(Base) {
                                 inputs: [
                                     { type: 'address', name: 'shelf' },
                                     { type: 'address', name: 'registry' },
-                                    { type: 'uint256', name: 'token' }
-                                ]
+                                    { type: 'uint256', name: 'token' },
+                                ],
                             }, [this.ethersContracts['SHELF'].address, nftRegistryAddr, tokenId]);
                             return [4 /*yield*/, proxy.execute(this.ethersContracts['ACTIONS'].address, encoded)];
                         case 1:
@@ -30490,8 +30557,8 @@ function ProxyActions(Base) {
                                     { type: 'address', name: 'shelf' },
                                     { type: 'uint256', name: 'loan' },
                                     { type: 'uint256', name: 'amount' },
-                                    { type: 'address', name: 'usr' }
-                                ]
+                                    { type: 'address', name: 'usr' },
+                                ],
                             }, [this.contracts['SHELF'].address, loanId, amount, usr]);
                             return [4 /*yield*/, executeAndRetry(proxy.execute, [this.contracts['ACTIONS'].address, encoded, this.ethConfig])];
                         case 1:
@@ -30516,9 +30583,16 @@ function ProxyActions(Base) {
                                     { type: 'address', name: 'registry' },
                                     { type: 'uint256', name: 'token' },
                                     { type: 'address', name: 'erc20' },
-                                    { type: 'uint256', name: 'loan' }
-                                ]
-                            }, [this.contracts['SHELF'].address, this.contracts['PILE'].address, registry, tokenId, this.contracts['TINLAKE_CURRENCY'].address, loanId]);
+                                    { type: 'uint256', name: 'loan' },
+                                ],
+                            }, [
+                                this.contracts['SHELF'].address,
+                                this.contracts['PILE'].address,
+                                registry,
+                                tokenId,
+                                this.contracts['TINLAKE_CURRENCY'].address,
+                                loanId,
+                            ]);
                             return [4 /*yield*/, executeAndRetry(proxy.execute, [this.contracts['ACTIONS'].address, encoded, this.ethConfig])];
                         case 1:
                             txHash = _a.sent();
@@ -47422,9 +47496,7 @@ var Tinlake = /** @class */ (function () {
             // set root & proxy contracts
             contractNames.forEach(function (name) {
                 if (_this.contractAbis[name] && _this.contractAddresses[name]) {
-                    _this.contracts[name] = _this.eth
-                        .contract(_this.contractAbis[name])
-                        .at(_this.contractAddresses[name]);
+                    _this.contracts[name] = _this.eth.contract(_this.contractAbis[name]).at(_this.contractAddresses[name]);
                     _this.ethersContracts[name] = _this.createContract(_this.contractAddresses[name], name);
                 }
             });
@@ -49618,7 +49690,7 @@ var interestRateToFee = function (interestRate) {
 };
 
 var Admin = actions.Admin, Borrower = actions.Borrower, Lender = actions.Lender, Analytics = actions.Analytics, Currency = actions.Currency, Collateral = actions.Collateral, Governance = actions.Governance, Proxy = actions.Proxy;
-var TinlakeWithActions = (Proxy(Borrower(Admin(Lender(Analytics(Currency(Collateral(Governance(Tinlake)))))))));
+var TinlakeWithActions = Proxy(Borrower(Admin(Lender(Analytics(Currency(Collateral(Governance(Tinlake))))))));
 
 exports.TinlakeWithActions = TinlakeWithActions;
 exports.baseToDisplay = baseToDisplay;
