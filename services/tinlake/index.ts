@@ -16,7 +16,6 @@ export function initTinlake({
   if (tinlake === null) {
     const { transactionTimeout } = config
     tinlake = new Tinlake({ transactionTimeout, provider: getDefaultHttpProvider() }) as any
-    tinlake!.setEthConfig({ gas: config.gas, gasPrice: config.gasPrice })
 
     if (window && (window as any).ethereum) {
       const web3Provider = new ethers.providers.Web3Provider((window as any).ethereum)
@@ -26,10 +25,6 @@ export function initTinlake({
       const ethersConfig = {
         provider: fallbackProvider,
         signer: web3Provider.getSigner(),
-        overrides: {
-          gasLimit: Number(config.gasLimit),
-          gasPrice: Number(config.gasPrice),
-        },
       }
       tinlake!.setEthersConfig(ethersConfig)
     }
