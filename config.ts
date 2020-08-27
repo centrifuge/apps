@@ -15,6 +15,7 @@ export type Pool = {
     SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
   }
   name: string
+  slug: string
   shortName?: string
   assetOriginatorName?: string
   description?: string
@@ -50,18 +51,18 @@ const contractAddressesSchema = yup.object().shape({
   ROOT_CONTRACT: yup
     .string()
     .length(42)
-    .matches(/0x[0-9a-fA-F]{40}/)
-    .required('contractAddressesSchema.ROOT_CONTRACT is required'),
+    .matches(/0x[0-9a-fA-F]{40}/),
+    // .required('contractAddressesSchema.ROOT_CONTRACT is required'),
   ACTIONS: yup
     .string()
     .length(42)
-    .matches(/0x[0-9a-fA-F]{40}/)
-    .required('contractAddressesSchema.ACTIONS is required'),
+    .matches(/0x[0-9a-fA-F]{40}/),
+    // .required('contractAddressesSchema.ACTIONS is required'),
   PROXY_REGISTRY: yup
     .string()
     .length(42)
-    .matches(/0x[0-9a-fA-F]{40}/)
-    .required('contractAddressesSchema.PROXY_REGISTRY is required'),
+    .matches(/0x[0-9a-fA-F]{40}/),
+    // .required('contractAddressesSchema.PROXY_REGISTRY is required'),
   COLLATERAL_NFT: yup
     .string()
     .length(42)
@@ -71,21 +72,22 @@ const contractAddressesSchema = yup.object().shape({
 const contractConfigSchema = yup.object().shape({
   JUNIOR_OPERATOR: yup
     .mixed<'ALLOWANCE_OPERATOR'>()
-    .required('contractConfigSchema.JUNIOR_OPERATOR is required')
+    // .required('contractConfigSchema.JUNIOR_OPERATOR is required')
     .oneOf(['ALLOWANCE_OPERATOR']),
   SENIOR_OPERATOR: yup
     .mixed<'PROPORTIONAL_OPERATOR' | 'ALLOWANCE_OPERATOR'>()
-    .required('contractConfigSchema.SENIOR_OPERATOR is required')
+    // .required('contractConfigSchema.SENIOR_OPERATOR is required')
     .oneOf(['PROPORTIONAL_OPERATOR', 'ALLOWANCE_OPERATOR']),
 })
 
 // TODO: text/logo/etc should be required and description/investHtml removed,
 // once we migrate all pool configs to the new format
 const poolSchema = yup.object().shape({
-  addresses: contractAddressesSchema.required('poolSchema.addresses is required'),
+  addresses: contractAddressesSchema,
   graph: yup.string(),
-  contractConfig: contractConfigSchema.required('poolSchema.contractConfig is required'),
+  contractConfig: contractConfigSchema,
   name: yup.string().required('poolSchema.name is required'),
+  slug: yup.string().required('poolSchema.slug is required'),
   shortName: yup.string(),
   assetOriginatorName: yup.string(),
   text: yup.string(),

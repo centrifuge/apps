@@ -13,7 +13,8 @@ interface Props {
 
 class PoolList extends React.Component<Props> {
   clickRow = ({ datum }: { datum?: PoolData; index?: number }) => {
-    Router.push('/[root]', `/${datum!.id}`, { shallow: true })
+    console.log('clickrow', datum)
+    Router.push('/pool/[root]/[slug]', `/pool/${datum!.id}/${datum!.slug}`, { shallow: true })
   }
 
   render() {

@@ -60,6 +60,7 @@ class Apollo {
         seniorInterestRate,
         id: poolId,
         name: configPool.name,
+        slug: configPool.slug,
         asset: configPool?.asset,
         ongoingLoans: (pool && pool.ongoingLoans.length) || 0, // TODO add count field to subgraph, inefficient to query all assets
         totalDebtNum: parseFloat(totalDebt.toString()),

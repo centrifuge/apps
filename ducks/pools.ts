@@ -11,6 +11,7 @@ const RECEIVE_POOLS = 'tinlake-ui/pools/RECEIVE_POOLS'
 export interface PoolData {
   id: string
   name: string
+  slug: string
   asset: string
   ongoingLoans: number
   totalDebt: BN

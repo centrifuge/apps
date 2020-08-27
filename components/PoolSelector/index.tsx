@@ -51,7 +51,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
   }
 
   const navigateToPool = (pool: PoolData) => {
-    router.push('/[root]', `/${pool.id}`)
+    router.push('/pool/[root]/[slug]', `/pool/${pool.id}/${pool.slug}`)
     setOpen(false)
   }
 

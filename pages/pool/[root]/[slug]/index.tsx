@@ -1,14 +1,15 @@
 import { Box } from 'grommet'
+import { GetStaticPaths } from 'next'
 import * as React from 'react'
-import Header from '../../components/Header'
-import Overview from '../../containers/Overview'
-import WithTinlake from '../../components/WithTinlake'
-import { menuItems } from '../../menuItems'
-import config, { Pool as IPool } from '../../config'
+import Header from '../../../../components/Header'
+import Overview from '../../../../containers/Overview'
+import WithTinlake from '../../../../components/WithTinlake'
+import { menuItems } from '../../../../menuItems'
+import config, { Pool as IPool } from '../../../../config'
 import { GetStaticProps } from 'next'
-import WithFooter from '../../components/WithFooter'
-import Auth from '../../components/Auth'
-import Container from '../../components/Container'
+import WithFooter from '../../../../components/WithFooter'
+import Auth from '../../../../components/Auth'
+import Container from '../../../../components/Container'
 
 interface Props {
   root: string
@@ -41,9 +42,13 @@ class Pool extends React.Component<Props> {
   }
 }
 
-export async function getStaticPaths() {
+export const getStaticPaths: GetStaticPaths = async () => {
   // We'll pre-render only these paths at build time.
-  const paths = config.pools.map((pool) => ({ params: { root: pool.addresses.ROOT_CONTRACT } }))
+  const paths = config.pools
+    .filter((pool) => pool.addresses.ROOT_CONTRACT !== undefined)
+    .map((pool) => ({ params: { root: pool.addresses.ROOT_CONTRACT, slug: pool.slug } }))
+
+  console.log('paths', paths)
 
   // { fallback: false } means other routes should 404.
   return { paths, fallback: false }

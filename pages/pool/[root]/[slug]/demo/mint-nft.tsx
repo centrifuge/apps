@@ -1,15 +1,15 @@
 import * as React from 'react'
-import WithTinlake from '../../../components/WithTinlake'
+import WithTinlake from '../../../../../components/WithTinlake'
 import { Box } from 'grommet'
-import MintNFT from '../../../components/MintNFT'
-import Header from '../../../components/Header'
-import { menuItems } from '../../../menuItems'
-import WithFooter from '../../../components/WithFooter'
-import config, { Pool } from '../../../config'
+import MintNFT from '../../../../../components/MintNFT'
+import Header from '../../../../../components/Header'
+import { menuItems } from '../../../../../menuItems'
+import WithFooter from '../../../../../components/WithFooter'
+import config, { Pool } from '../../../../../config'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import { GetStaticProps } from 'next'
-import Auth from '../../../components/Auth'
-import Container from '../../../components/Container'
+import Auth from '../../../../../components/Auth'
+import Container from '../../../../../components/Container'
 
 interface Props extends WithRouterProps {
   root: string
