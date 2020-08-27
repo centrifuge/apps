@@ -138,9 +138,9 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
       if (this.getOperatorType('senior') === 'PROPERTIONAL_OPERATOR') {
         return this.pending(seniorOperator.approve(user, maxCurrency))
-      } else {
+      } 
         return this.pending(seniorOperator.approve(user, maxCurrency, maxToken))
-      }
+      
     }
   }
 }
