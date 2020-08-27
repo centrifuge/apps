@@ -52,17 +52,17 @@ const contractAddressesSchema = yup.object().shape({
     .string()
     .length(42)
     .matches(/0x[0-9a-fA-F]{40}/),
-    // .required('contractAddressesSchema.ROOT_CONTRACT is required'),
+  // .required('contractAddressesSchema.ROOT_CONTRACT is required'),
   ACTIONS: yup
     .string()
     .length(42)
     .matches(/0x[0-9a-fA-F]{40}/),
-    // .required('contractAddressesSchema.ACTIONS is required'),
+  // .required('contractAddressesSchema.ACTIONS is required'),
   PROXY_REGISTRY: yup
     .string()
     .length(42)
     .matches(/0x[0-9a-fA-F]{40}/),
-    // .required('contractAddressesSchema.PROXY_REGISTRY is required'),
+  // .required('contractAddressesSchema.PROXY_REGISTRY is required'),
   COLLATERAL_NFT: yup
     .string()
     .length(42)
