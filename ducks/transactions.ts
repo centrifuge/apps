@@ -54,6 +54,7 @@ export interface Transaction {
   description: string
   actionName: TransactionAction
   actionArgs: any[]
+  hash?: string
   status: TransactionStatus
   result?: any
   tinlakeConfig: TinlakeConfig
@@ -207,6 +208,7 @@ export function processTransaction(
         const pendingTx: Transaction = {
           ...unconfirmedTx,
           status: 'pending',
+          hash: tx.hash
         }
         await dispatch({ id, transaction: pendingTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
 
@@ -239,6 +241,7 @@ export function processTransaction(
         hasCompleted = true
         outcomeTx.status = 'failed'
         outcomeTx.failedReason = tx.error?.message || tx.message
+        if (tx.result?.transactionHash) outcomeTx.hash = tx.result.transactionHash
       }
     } catch (error) {
       console.error(
@@ -289,8 +292,8 @@ export function selectWalletTransactions(state?: TransactionState): WalletTransa
     .map((id: string) => state.active[id])
     .sort(sortByMostRecent)
     .map((tx: Transaction) => {
-      const externalLink = tx.result?.transactionHash
-        ? `https://${config.network === 'Kovan' ? 'kovan.' : ''}etherscan.io/tx/${tx.result.transactionHash}`
+      const externalLink = tx.hash
+        ? `https://${config.network === 'Kovan' ? 'kovan.' : ''}etherscan.io/tx/${tx.hash}`
         : undefined
 
       return {
