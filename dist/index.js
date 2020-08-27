@@ -30598,6 +30598,53 @@ function ProxyActions(Base) {
     }(Base));
 }
 
+function EpochActions(Base) {
+    return /** @class */ (function (_super) {
+        __extends(class_1, _super);
+        function class_1() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.solveEpoch = function () { return __awaiter(_this, void 0, void 0, function () {
+                var tinlake, reserve, _a, _b, state, _c;
+                return __generator(this, function (_d) {
+                    switch (_d.label) {
+                        case 0:
+                            tinlake = this;
+                            return [4 /*yield*/, tinlake.getJuniorReserve()];
+                        case 1:
+                            _b = (_a = (_d.sent())).add;
+                            return [4 /*yield*/, tinlake.getSeniorReserve()];
+                        case 2:
+                            reserve = _b.apply(_a, [_d.sent()]);
+                            _c = {
+                                reserve: reserve,
+                                netAssetValue: 0
+                            };
+                            return [4 /*yield*/, tinlake.getSeniorDebt()];
+                        case 3:
+                            _c.seniorDebt = _d.sent(),
+                                _c.seniorBalance = 0;
+                            return [4 /*yield*/, tinlake.getMinJuniorRatio()];
+                        case 4:
+                            state = (_c.minTinRatio = _d.sent(),
+                                _c.maxTinRatio = 0,
+                                _c.maxReserve = 0,
+                                _c);
+                            console.log('state', state);
+                            return [2 /*return*/, Promise.resolve({
+                                    tinRedeem: 1,
+                                    dropRedeem: 2,
+                                    tinInvest: 3,
+                                    dropInvest: 4
+                                })];
+                    }
+                });
+            }); };
+            return _this;
+        }
+        return class_1;
+    }(Base));
+}
+
 var actions = {
     Admin: AdminActions,
     Borrower: BorrowerActions,
@@ -30607,6 +30654,7 @@ var actions = {
     Analytics: AnalyticsActions,
     Governance: GovernanceActions,
     Proxy: ProxyActions,
+    Epoch: EpochActions
 };
 
 var methods = {
@@ -49611,8 +49659,8 @@ var interestRateToFee = function (interestRate) {
     return feeString;
 };
 
-var Admin = actions.Admin, Borrower = actions.Borrower, Lender = actions.Lender, Analytics = actions.Analytics, Currency = actions.Currency, Collateral = actions.Collateral, Governance = actions.Governance, Proxy = actions.Proxy;
-var TinlakeWithActions = Proxy(Borrower(Admin(Lender(Analytics(Currency(Collateral(Governance(Tinlake))))))));
+var Admin = actions.Admin, Borrower = actions.Borrower, Lender = actions.Lender, Analytics = actions.Analytics, Currency = actions.Currency, Collateral = actions.Collateral, Governance = actions.Governance, Proxy = actions.Proxy, Epoch = actions.Epoch;
+var TinlakeWithActions = Epoch(Proxy(Borrower(Admin(Lender(Analytics(Currency(Collateral(Governance(Tinlake)))))))));
 
 exports.TinlakeWithActions = TinlakeWithActions;
 exports.baseToDisplay = baseToDisplay;

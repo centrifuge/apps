@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;actions/index&quot; | tinlake</title>
+	<title>&quot;actions/epoch&quot; | tinlake</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -52,10 +52,10 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="_actions_index_.html">&quot;actions/index&quot;</a>
+					<a href="_actions_epoch_.html">&quot;actions/epoch&quot;</a>
 				</li>
 			</ul>
-			<h1>Module &quot;actions/index&quot;</h1>
+			<h1>Module &quot;actions/epoch&quot;</h1>
 		</div>
 	</div>
 </header>
@@ -67,9 +67,23 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
+							<h3>Interfaces</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-interface tsd-parent-kind-module"><a href="../interfaces/_actions_epoch_.orderstate.html" class="tsd-kind-icon">Order<wbr>State</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-module"><a href="../interfaces/_actions_epoch_.solversolution.html" class="tsd-kind-icon">Solver<wbr>Solution</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-module"><a href="../interfaces/_actions_epoch_.state.html" class="tsd-kind-icon">State</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
 							<h3>Type aliases</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="_actions_index_.html#tinlakeactions" class="tsd-kind-icon">Tinlake<wbr>Actions</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="_actions_epoch_.html#iepochactions" class="tsd-kind-icon">IEpoch<wbr>Actions</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Functions</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter"><a href="_actions_epoch_.html#epochactions" class="tsd-kind-icon">Epoch<wbr>Actions</a></li>
 							</ul>
 						</section>
 					</div>
@@ -78,14 +92,67 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Type aliases</h2>
 				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-module">
-					<a name="tinlakeactions" class="tsd-anchor"></a>
-					<h3>Tinlake<wbr>Actions</h3>
-					<div class="tsd-signature tsd-kind-icon">Tinlake<wbr>Actions<span class="tsd-signature-symbol">:</span> <a href="_actions_admin_.html#iadminactions" class="tsd-signature-type">IAdminActions</a><span class="tsd-signature-symbol"> &amp; </span><a href="_actions_borrower_.html#iborroweractions" class="tsd-signature-type">IBorrowerActions</a><span class="tsd-signature-symbol"> &amp; </span><a href="_actions_lender_.html#ilenderactions" class="tsd-signature-type">ILenderActions</a><span class="tsd-signature-symbol"> &amp; </span><a href="_actions_currency_.html#icurrencyactions" class="tsd-signature-type">ICurrencyActions</a><span class="tsd-signature-symbol"> &amp; </span><a href="_actions_lender_.html#ilenderactions" class="tsd-signature-type">ILenderActions</a><span class="tsd-signature-symbol"> &amp; </span><a href="_actions_analytics_.html#ianalyticsactions" class="tsd-signature-type">IAnalyticsActions</a><span class="tsd-signature-symbol"> &amp; </span><a href="_actions_collateral_.html#icollateralactions" class="tsd-signature-type">ICollateralActions</a><span class="tsd-signature-symbol"> &amp; </span><a href="_actions_governance_.html#igovernanceactions" class="tsd-signature-type">IGovernanceActions</a><span class="tsd-signature-symbol"> &amp; </span><a href="_actions_proxy_.html#iproxyactions" class="tsd-signature-type">IProxyActions</a><span class="tsd-signature-symbol"> &amp; </span><a href="_actions_epoch_.html#iepochactions" class="tsd-signature-type">IEpochActions</a></div>
+					<a name="iepochactions" class="tsd-anchor"></a>
+					<h3>IEpoch<wbr>Actions</h3>
+					<div class="tsd-signature tsd-kind-icon">IEpoch<wbr>Actions<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>solveEpoch<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/8ea6c17/src/actions/index.ts#L23">actions/index.ts:23</a></li>
+							<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/8ea6c17/src/actions/epoch.ts#L33">actions/epoch.ts:33</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter">
+								<h5>solve<wbr>Epoch<span class="tsd-signature-symbol">: </span>function</h5>
+								<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal">
+									<li class="tsd-signature tsd-kind-icon">solve<wbr>Epoch<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_actions_epoch_.solversolution.html" class="tsd-signature-type">SolverSolution</a><span class="tsd-signature-symbol">&gt;</span></li>
+								</ul>
+								<ul class="tsd-descriptions">
+									<li class="tsd-description">
+										<aside class="tsd-sources">
+											<ul>
+												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/8ea6c17/src/actions/epoch.ts#L34">actions/epoch.ts:34</a></li>
+											</ul>
+										</aside>
+										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_actions_epoch_.solversolution.html" class="tsd-signature-type">SolverSolution</a><span class="tsd-signature-symbol">&gt;</span></h4>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Functions</h2>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
+					<a name="epochactions" class="tsd-anchor"></a>
+					<h3>Epoch<wbr>Actions</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">Epoch<wbr>Actions&lt;ActionsBase&gt;<span class="tsd-signature-symbol">(</span>Base<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ActionsBase</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">(Anonymous class)</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-type">ActionsBase</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/8ea6c17/src/actions/epoch.ts#L4">actions/epoch.ts:4</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>ActionsBase<span class="tsd-signature-symbol">: </span><a href="_tinlake_.html#constructor" class="tsd-signature-type">Constructor</a><span class="tsd-signature-symbol">&lt;</span><a href="_tinlake_.html#tinlakeparams" class="tsd-signature-type">TinlakeParams</a><span class="tsd-signature-symbol">&gt;</span></h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>Base: <span class="tsd-signature-type">ActionsBase</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">(Anonymous class)</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-type">ActionsBase</span></h4>
+						</li>
+					</ul>
 				</section>
 			</section>
 		</div>
@@ -113,13 +180,13 @@
 					<li class=" tsd-kind-module">
 						<a href="_actions_currency_.html">&quot;actions/currency&quot;</a>
 					</li>
-					<li class=" tsd-kind-module">
+					<li class="current tsd-kind-module">
 						<a href="_actions_epoch_.html">&quot;actions/epoch&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="_actions_governance_.html">&quot;actions/governance&quot;</a>
 					</li>
-					<li class="current tsd-kind-module">
+					<li class=" tsd-kind-module">
 						<a href="_actions_index_.html">&quot;actions/index&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
@@ -171,8 +238,20 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/_actions_epoch_.orderstate.html" class="tsd-kind-icon">Order<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/_actions_epoch_.solversolution.html" class="tsd-kind-icon">Solver<wbr>Solution</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/_actions_epoch_.state.html" class="tsd-kind-icon">State</a>
+					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
-						<a href="_actions_index_.html#tinlakeactions" class="tsd-kind-icon">Tinlake<wbr>Actions</a>
+						<a href="_actions_epoch_.html#iepochactions" class="tsd-kind-icon">IEpoch<wbr>Actions</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="_actions_epoch_.html#epochactions" class="tsd-kind-icon">Epoch<wbr>Actions</a>
 					</li>
 				</ul>
 			</nav>

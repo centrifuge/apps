@@ -2,6 +2,31 @@
 import Tinlake from './Tinlake';
 export declare const TinlakeWithActions: {
     new (...args: any[]): {
+        solveEpoch: () => Promise<{
+            tinRedeem: number;
+            dropRedeem: number;
+            tinInvest: number;
+            dropInvest: number;
+        }>;
+        provider: any;
+        eth: import("./services/ethereum").ethI;
+        ethOptions: any;
+        ethConfig: import("./Tinlake").EthConfig;
+        ethersConfig: import("./Tinlake").EthersConfig;
+        contractAddresses: import("./Tinlake").ContractAddresses;
+        transactionTimeout: number;
+        contracts: import("./Tinlake").Contracts;
+        contractAbis: import("./Tinlake").ContractAbis;
+        contractConfig: any;
+        setProvider: (provider: any, ethOptions?: any) => void;
+        setContracts: () => void;
+        setEthConfig: (ethConfig: import("./Tinlake").EthConfig) => void;
+        setEthersConfig: (ethersConfig: import("./Tinlake").EthersConfig) => void;
+        createContract(address: string, abiName: string): void;
+        getOperatorType: (tranche: string) => any;
+    };
+} & {
+    new (...args: any[]): {
         getProxyAccessTokenOwner: (tokenId: string) => Promise<import("bn.js")>;
         buildProxy: (owner: string) => Promise<any>;
         getProxy: (accessTokenId: string) => Promise<any>;
@@ -19,6 +44,7 @@ export declare const TinlakeWithActions: {
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;
+        ethersConfig: import("./Tinlake").EthersConfig;
         contractAddresses: import("./Tinlake").ContractAddresses;
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
@@ -27,6 +53,7 @@ export declare const TinlakeWithActions: {
         setProvider: (provider: any, ethOptions?: any) => void;
         setContracts: () => void;
         setEthConfig: (ethConfig: import("./Tinlake").EthConfig) => void;
+        setEthersConfig: (ethersConfig: import("./Tinlake").EthersConfig) => void;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
@@ -44,6 +71,7 @@ export declare const TinlakeWithActions: {
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;
+        ethersConfig: import("./Tinlake").EthersConfig;
         contractAddresses: import("./Tinlake").ContractAddresses;
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
@@ -52,6 +80,7 @@ export declare const TinlakeWithActions: {
         setProvider: (provider: any, ethOptions?: any) => void;
         setContracts: () => void;
         setEthConfig: (ethConfig: import("./Tinlake").EthConfig) => void;
+        setEthersConfig: (ethersConfig: import("./Tinlake").EthersConfig) => void;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
@@ -77,6 +106,7 @@ export declare const TinlakeWithActions: {
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;
+        ethersConfig: import("./Tinlake").EthersConfig;
         contractAddresses: import("./Tinlake").ContractAddresses;
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
@@ -85,6 +115,7 @@ export declare const TinlakeWithActions: {
         setProvider: (provider: any, ethOptions?: any) => void;
         setContracts: () => void;
         setEthConfig: (ethConfig: import("./Tinlake").EthConfig) => void;
+        setEthersConfig: (ethersConfig: import("./Tinlake").EthersConfig) => void;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
@@ -103,6 +134,7 @@ export declare const TinlakeWithActions: {
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;
+        ethersConfig: import("./Tinlake").EthersConfig;
         contractAddresses: import("./Tinlake").ContractAddresses;
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
@@ -111,6 +143,7 @@ export declare const TinlakeWithActions: {
         setProvider: (provider: any, ethOptions?: any) => void;
         setContracts: () => void;
         setEthConfig: (ethConfig: import("./Tinlake").EthConfig) => void;
+        setEthersConfig: (ethersConfig: import("./Tinlake").EthersConfig) => void;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
@@ -151,6 +184,7 @@ export declare const TinlakeWithActions: {
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;
+        ethersConfig: import("./Tinlake").EthersConfig;
         contractAddresses: import("./Tinlake").ContractAddresses;
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
@@ -159,6 +193,7 @@ export declare const TinlakeWithActions: {
         setProvider: (provider: any, ethOptions?: any) => void;
         setContracts: () => void;
         setEthConfig: (ethConfig: import("./Tinlake").EthConfig) => void;
+        setEthersConfig: (ethersConfig: import("./Tinlake").EthersConfig) => void;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
@@ -176,6 +211,7 @@ export declare const TinlakeWithActions: {
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;
+        ethersConfig: import("./Tinlake").EthersConfig;
         contractAddresses: import("./Tinlake").ContractAddresses;
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
@@ -184,6 +220,7 @@ export declare const TinlakeWithActions: {
         setProvider: (provider: any, ethOptions?: any) => void;
         setContracts: () => void;
         setEthConfig: (ethConfig: import("./Tinlake").EthConfig) => void;
+        setEthersConfig: (ethersConfig: import("./Tinlake").EthersConfig) => void;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
@@ -202,6 +239,7 @@ export declare const TinlakeWithActions: {
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;
+        ethersConfig: import("./Tinlake").EthersConfig;
         contractAddresses: import("./Tinlake").ContractAddresses;
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
@@ -210,6 +248,7 @@ export declare const TinlakeWithActions: {
         setProvider: (provider: any, ethOptions?: any) => void;
         setContracts: () => void;
         setEthConfig: (ethConfig: import("./Tinlake").EthConfig) => void;
+        setEthersConfig: (ethersConfig: import("./Tinlake").EthersConfig) => void;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
@@ -220,6 +259,7 @@ export declare const TinlakeWithActions: {
         eth: import("./services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("./Tinlake").EthConfig;
+        ethersConfig: import("./Tinlake").EthersConfig;
         contractAddresses: import("./Tinlake").ContractAddresses;
         transactionTimeout: number;
         contracts: import("./Tinlake").Contracts;
@@ -228,6 +268,7 @@ export declare const TinlakeWithActions: {
         setProvider: (provider: any, ethOptions?: any) => void;
         setContracts: () => void;
         setEthConfig: (ethConfig: import("./Tinlake").EthConfig) => void;
+        setEthersConfig: (ethersConfig: import("./Tinlake").EthersConfig) => void;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };

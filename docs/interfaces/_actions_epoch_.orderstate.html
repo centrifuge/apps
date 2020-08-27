@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Events | tinlake</title>
+	<title>OrderState | tinlake</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -52,13 +52,13 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_services_ethereum_.html">&quot;services/ethereum&quot;</a>
+					<a href="../modules/_actions_epoch_.html">&quot;actions/epoch&quot;</a>
 				</li>
 				<li>
-					<a href="_services_ethereum_.events.html">Events</a>
+					<a href="_actions_epoch_.orderstate.html">OrderState</a>
 				</li>
 			</ul>
-			<h1>Interface Events</h1>
+			<h1>Interface OrderState</h1>
 		</div>
 	</div>
 </header>
@@ -69,7 +69,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">Events</span>
+						<span class="target">OrderState</span>
 					</li>
 				</ul>
 			</section>
@@ -80,9 +80,10 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_services_ethereum_.events.html#events" class="tsd-kind-icon">events</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_services_ethereum_.events.html#status" class="tsd-kind-icon">status</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_services_ethereum_.events.html#txhash" class="tsd-kind-icon">tx<wbr>Hash</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_actions_epoch_.orderstate.html#dropinvestorder" class="tsd-kind-icon">drop<wbr>Invest<wbr>Order</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_actions_epoch_.orderstate.html#dropredeemorder" class="tsd-kind-icon">drop<wbr>Redeem<wbr>Order</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_actions_epoch_.orderstate.html#tininvestorder" class="tsd-kind-icon">tin<wbr>Invest<wbr>Order</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_actions_epoch_.orderstate.html#tinredeemorder" class="tsd-kind-icon">tin<wbr>Redeem<wbr>Order</a></li>
 							</ul>
 						</section>
 					</div>
@@ -91,32 +92,42 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="events" class="tsd-anchor"></a>
-					<h3>events</h3>
-					<div class="tsd-signature tsd-kind-icon">events<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{ </span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">[]</span></div>
+					<a name="dropinvestorder" class="tsd-anchor"></a>
+					<h3>drop<wbr>Invest<wbr>Order</h3>
+					<div class="tsd-signature tsd-kind-icon">drop<wbr>Invest<wbr>Order<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/8ea6c17/src/services/ethereum.ts#L20">services/ethereum.ts:20</a></li>
+							<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/8ea6c17/src/actions/epoch.ts#L60">actions/epoch.ts:60</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="status" class="tsd-anchor"></a>
-					<h3>status</h3>
-					<div class="tsd-signature tsd-kind-icon">status<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<a name="dropredeemorder" class="tsd-anchor"></a>
+					<h3>drop<wbr>Redeem<wbr>Order</h3>
+					<div class="tsd-signature tsd-kind-icon">drop<wbr>Redeem<wbr>Order<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/8ea6c17/src/services/ethereum.ts#L19">services/ethereum.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/8ea6c17/src/actions/epoch.ts#L58">actions/epoch.ts:58</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="txhash" class="tsd-anchor"></a>
-					<h3>tx<wbr>Hash</h3>
-					<div class="tsd-signature tsd-kind-icon">tx<wbr>Hash<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<a name="tininvestorder" class="tsd-anchor"></a>
+					<h3>tin<wbr>Invest<wbr>Order</h3>
+					<div class="tsd-signature tsd-kind-icon">tin<wbr>Invest<wbr>Order<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/8ea6c17/src/services/ethereum.ts#L18">services/ethereum.ts:18</a></li>
+							<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/8ea6c17/src/actions/epoch.ts#L59">actions/epoch.ts:59</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="tinredeemorder" class="tsd-anchor"></a>
+					<h3>tin<wbr>Redeem<wbr>Order</h3>
+					<div class="tsd-signature tsd-kind-icon">tin<wbr>Redeem<wbr>Order<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/8ea6c17/src/actions/epoch.ts#L57">actions/epoch.ts:57</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -146,7 +157,7 @@
 					<li class=" tsd-kind-module">
 						<a href="../modules/_actions_currency_.html">&quot;actions/currency&quot;</a>
 					</li>
-					<li class=" tsd-kind-module">
+					<li class="current tsd-kind-module">
 						<a href="../modules/_actions_epoch_.html">&quot;actions/epoch&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
@@ -161,7 +172,7 @@
 					<li class=" tsd-kind-module">
 						<a href="../modules/_actions_proxy_.html">&quot;actions/proxy&quot;</a>
 					</li>
-					<li class="current tsd-kind-module">
+					<li class=" tsd-kind-module">
 						<a href="../modules/_services_ethereum_.html">&quot;services/ethereum&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
@@ -207,38 +218,35 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-module">
-						<a href="_services_ethereum_.events.html" class="tsd-kind-icon">Events</a>
+						<a href="_actions_epoch_.orderstate.html" class="tsd-kind-icon">Order<wbr>State</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_services_ethereum_.events.html#events" class="tsd-kind-icon">events</a>
+								<a href="_actions_epoch_.orderstate.html#dropinvestorder" class="tsd-kind-icon">drop<wbr>Invest<wbr>Order</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_services_ethereum_.events.html#status" class="tsd-kind-icon">status</a>
+								<a href="_actions_epoch_.orderstate.html#dropredeemorder" class="tsd-kind-icon">drop<wbr>Redeem<wbr>Order</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_services_ethereum_.events.html#txhash" class="tsd-kind-icon">tx<wbr>Hash</a>
+								<a href="_actions_epoch_.orderstate.html#tininvestorder" class="tsd-kind-icon">tin<wbr>Invest<wbr>Order</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_actions_epoch_.orderstate.html#tinredeemorder" class="tsd-kind-icon">tin<wbr>Redeem<wbr>Order</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="_services_ethereum_.ethi.html" class="tsd-kind-icon">ethI</a>
+						<a href="_actions_epoch_.solversolution.html" class="tsd-kind-icon">Solver<wbr>Solution</a>
 					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-module">
-						<a href="../modules/_services_ethereum_.html#zero_address" class="tsd-kind-icon">ZERO_<wbr>ADDRESS</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="_actions_epoch_.state.html" class="tsd-kind-icon">State</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="../modules/_services_ethereum_.html#executeandretry" class="tsd-kind-icon">execute<wbr>And<wbr>Retry</a>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
+						<a href="../modules/_actions_epoch_.html#iepochactions" class="tsd-kind-icon">IEpoch<wbr>Actions</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="../modules/_services_ethereum_.html#findevent" class="tsd-kind-icon">find<wbr>Event</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="../modules/_services_ethereum_.html#waitandreturnevents" class="tsd-kind-icon">wait<wbr>And<wbr>Return<wbr>Events</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="../modules/_services_ethereum_.html#waitfortransaction" class="tsd-kind-icon">wait<wbr>For<wbr>Transaction</a>
+					<li class=" tsd-kind-function tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="../modules/_actions_epoch_.html#epochactions" class="tsd-kind-icon">Epoch<wbr>Actions</a>
 					</li>
 				</ul>
 			</nav>
