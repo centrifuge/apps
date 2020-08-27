@@ -10832,15 +10832,15 @@ function AdminActions(Base) {
             }); };
             // ------------ admin functions borrower-site -------------
             _this.existsRateGroup = function (ratePerSecond) { return __awaiter(_this, void 0, void 0, function () {
-                var rateGroup, res;
+                var rateGroup, actualRate;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             rateGroup = getRateGroup(ratePerSecond);
-                            return [4 /*yield*/, executeAndRetry(this.contracts['PILE'].rates, [rateGroup])];
+                            return [4 /*yield*/, this.contract('PILE').rates(rateGroup)];
                         case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, !res.ratePerSecond.isZero()];
+                            actualRate = (_a.sent()).toBN();
+                            return [2 /*return*/, !actualRate.isZero()];
                     }
                 });
             }); };
@@ -10901,50 +10901,20 @@ function AdminActions(Base) {
                 });
             }); };
             _this.approveAllowanceJunior = function (user, maxCurrency, maxToken) { return __awaiter(_this, void 0, void 0, function () {
-                var txHash;
+                var juniorOperator;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_OPERATOR'].approve, [
-                                user,
-                                maxCurrency,
-                                maxToken,
-                                this.ethConfig,
-                            ])];
-                        case 1:
-                            txHash = _a.sent();
-                            console.log("[Approve allowance Junior] txHash: " + txHash);
-                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_OPERATOR'].abi, this.transactionTimeout)];
-                    }
+                    juniorOperator = this.contract('JUNIOR_OPERATOR');
+                    return [2 /*return*/, this.pending(juniorOperator.approve(user, maxCurrency, maxToken))];
                 });
             }); };
             _this.approveAllowanceSenior = function (user, maxCurrency, maxToken) { return __awaiter(_this, void 0, void 0, function () {
-                var operatorType, txHash, _a;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
-                        case 0:
-                            operatorType = this.getOperatorType('senior');
-                            _a = operatorType;
-                            switch (_a) {
-                                case 'PROPORTIONAL_OPERATOR': return [3 /*break*/, 1];
-                            }
-                            return [3 /*break*/, 3];
-                        case 1: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [user, maxCurrency, this.ethConfig])];
-                        case 2:
-                            txHash = _b.sent();
-                            return [3 /*break*/, 5];
-                        case 3: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [
-                                user,
-                                maxCurrency,
-                                maxToken,
-                                this.ethConfig,
-                            ])];
-                        case 4:
-                            txHash = _b.sent();
-                            _b.label = 5;
-                        case 5:
-                            console.log("[Approve allowance Senior] txHash: " + txHash);
-                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_OPERATOR'].abi, this.transactionTimeout)];
+                var seniorOperator;
+                return __generator(this, function (_a) {
+                    seniorOperator = this.contract('SENIOR_OPERATOR');
+                    if (this.getOperatorType('senior') === 'PROPERTIONAL_OPERATOR') {
+                        return [2 /*return*/, this.pending(seniorOperator.approve(user, maxCurrency))];
                     }
+                    return [2 /*return*/, this.pending(seniorOperator.approve(user, maxCurrency, maxToken))];
                 });
             }); };
             return _this;
@@ -29433,15 +29403,10 @@ function LenderActions(Base) {
                 });
             }); };
             _this.redeemSenior = function (tokenAmount) { return __awaiter(_this, void 0, void 0, function () {
-                var txHash;
+                var seniorOperator;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].redeem, [tokenAmount, this.ethConfig])];
-                        case 1:
-                            txHash = _a.sent();
-                            console.log("[Redeem] txHash: " + txHash);
-                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_OPERATOR'].abi, this.transactionTimeout)];
-                    }
+                    seniorOperator = this.contract('SENIOR_OPERATOR');
+                    return [2 /*return*/, this.pending(seniorOperator.redeem(tokenAmount))];
                 });
             }); };
             _this.getSeniorTokenAllowance = function (owner) { return __awaiter(_this, void 0, void 0, function () {
@@ -29459,19 +29424,10 @@ function LenderActions(Base) {
                 });
             }); };
             _this.approveSeniorToken = function (tokenAmount) { return __awaiter(_this, void 0, void 0, function () {
-                var txHash;
+                var senior;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_TOKEN'].approve, [
-                                this.contractAddresses['SENIOR'],
-                                tokenAmount,
-                                this.ethConfig,
-                            ])];
-                        case 1:
-                            txHash = _a.sent();
-                            console.log("[Currency.approve] txHash: " + txHash);
-                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_TOKEN'].abi, this.transactionTimeout)];
-                    }
+                    senior = this.contract('SENIOR_TOKEN');
+                    return [2 /*return*/, this.pending(senior.approve(this.contractAddresses['SENIOR'], tokenAmount))];
                 });
             }); };
             // junior tranche functions
@@ -29483,15 +29439,10 @@ function LenderActions(Base) {
                 });
             }); };
             _this.redeemJunior = function (tokenAmount) { return __awaiter(_this, void 0, void 0, function () {
-                var txHash;
+                var juniorOperator;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_OPERATOR'].redeem, [tokenAmount, this.ethConfig])];
-                        case 1:
-                            txHash = _a.sent();
-                            console.log("[Redeem] txHash: " + txHash);
-                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_OPERATOR'].abi, this.transactionTimeout)];
-                    }
+                    juniorOperator = this.contract('JUNIOR_OPERATOR');
+                    return [2 /*return*/, this.pending(juniorOperator.redeem(tokenAmount))];
                 });
             }); };
             _this.getJuniorTokenAllowance = function (owner) { return __awaiter(_this, void 0, void 0, function () {
@@ -29509,19 +29460,10 @@ function LenderActions(Base) {
                 });
             }); };
             _this.approveJuniorToken = function (tokenAmount) { return __awaiter(_this, void 0, void 0, function () {
-                var txHash;
+                var junior;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_TOKEN'].approve, [
-                                this.contractAddresses['JUNIOR'],
-                                tokenAmount,
-                                this.ethConfig,
-                            ])];
-                        case 1:
-                            txHash = _a.sent();
-                            console.log("[Currency.approve] txHash: " + txHash);
-                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_TOKEN'].abi, this.transactionTimeout)];
-                    }
+                    junior = this.contract('JUNIOR_TOKEN');
+                    return [2 /*return*/, this.pending(junior.approve(this.contractAddresses['JUNIOR'], tokenAmount))];
                 });
             }); };
             // general lender functions
@@ -29562,15 +29504,13 @@ function CurrencyActions(Base) {
                 });
             }); };
             _this.getCurrencyAllowance = function (owner, spender) { return __awaiter(_this, void 0, void 0, function () {
-                var currencyContract, allowance;
+                var currencyContract;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             currencyContract = this.contract('TINLAKE_CURRENCY');
                             return [4 /*yield*/, currencyContract.allowance(owner, spender)];
-                        case 1:
-                            allowance = _a.sent();
-                            return [2 /*return*/, allowance.toBN()];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
@@ -29589,30 +29529,18 @@ function CurrencyActions(Base) {
                 });
             }); };
             _this.getCurrencyBalance = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['TINLAKE_CURRENCY'].balanceOf, [user])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0] || new bn(0)];
+                        case 0: return [4 /*yield*/, this.contract('TINLAKE_CURRENCY').balanceOf(user)];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
             _this.approveCurrency = function (usr, currencyAmount) { return __awaiter(_this, void 0, void 0, function () {
-                var currencyContract, tx;
+                var currencyContract;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            currencyContract = this.contract('TINLAKE_CURRENCY');
-                            return [4 /*yield*/, currencyContract.approve(usr, currencyAmount)];
-                        case 1:
-                            tx = _a.sent();
-                            return [2 /*return*/, {
-                                    hash: tx.hash,
-                                    contractKey: 'TINLAKE_CURRENCY',
-                                }];
-                    }
+                    currencyContract = this.contract('TINLAKE_CURRENCY');
+                    return [2 /*return*/, this.pending(currencyContract.approve(usr, currencyAmount))];
                 });
             }); };
             _this.approveSeniorForCurrency = function (currencyAmount) { return __awaiter(_this, void 0, void 0, function () {
@@ -30250,18 +30178,16 @@ function ProxyActions(Base) {
                             return [4 /*yield*/, waitAndReturnEvents(this.eth, txHash, this.contracts['PROXY_REGISTRY'].abi, this.transactionTimeout)];
                         case 2:
                             response = _a.sent();
+                            console.log('create proxy response', response);
                             return [2 /*return*/, response.events[0].data[2].toString()];
                     }
                 });
             }); };
             _this.getProxy = function (accessTokenId) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['PROXY_REGISTRY'].proxies, [accessTokenId, this.ethConfig])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0]];
+                        case 0: return [4 /*yield*/, this.contract('PROXY_REGISTRY').proxies(accessTokenId)];
+                        case 1: return [2 /*return*/, _a.sent()];
                     }
                 });
             }); };
@@ -30273,21 +30199,19 @@ function ProxyActions(Base) {
                             proxy = this.contract('PROXY', proxyAddress);
                             return [4 /*yield*/, proxy.accessToken()];
                         case 1:
-                            accessToken = _a.sent();
+                            accessToken = (_a.sent()).toBN();
                             return [2 /*return*/, accessToken.toNumber()];
                     }
                 });
             }); };
             _this.getProxyOwnerByLoan = function (loanId) { return __awaiter(_this, void 0, void 0, function () {
-                var res, loanOwner, accessToken;
+                var loanOwner, accessToken;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['TITLE'].ownerOf, [loanId])];
-                        case 1:
-                            res = _a.sent();
-                            loanOwner = res[0];
+                        case 0:
+                            loanOwner = this.contract('TITLE').ownerOf(loanId);
                             return [4 /*yield*/, this.getProxyAccessToken(loanOwner)];
-                        case 2:
+                        case 1:
                             accessToken = _a.sent();
                             return [2 /*return*/, this.getProxyAccessTokenOwner(accessToken)];
                     }
@@ -30305,13 +30229,10 @@ function ProxyActions(Base) {
                 });
             }); };
             _this.proxyCount = function () { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, executeAndRetry(this.contracts['PROXY_REGISTRY'].count, [])];
-                        case 1:
-                            res = _a.sent();
-                            return [2 /*return*/, res[0]];
+                        case 0: return [4 /*yield*/, this.contract('PROXY_REGISTRY').count()];
+                        case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
             }); };
@@ -30383,61 +30304,47 @@ function ProxyActions(Base) {
                     return [2 /*return*/, this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))];
                 });
             }); };
-            _this.proxyLockBorrowWithdraw = function (proxyAddr, loanId, amount, usr) { return __awaiter(_this, void 0, void 0, function () {
-                var proxy, encoded, txHash;
+            _this.proxyLockBorrowWithdraw = function (proxyAddress, loanId, amount, usr) { return __awaiter(_this, void 0, void 0, function () {
+                var proxy, encoded;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            proxy = this.eth.contract(this.contractAbis['PROXY']).at(proxyAddr);
-                            encoded = abiCoder$2.encodeFunctionCall({
-                                name: 'lockBorrowWithdraw',
-                                type: 'function',
-                                inputs: [
-                                    { type: 'address', name: 'shelf' },
-                                    { type: 'uint256', name: 'loan' },
-                                    { type: 'uint256', name: 'amount' },
-                                    { type: 'address', name: 'usr' },
-                                ],
-                            }, [this.contracts['SHELF'].address, loanId, amount, usr]);
-                            return [4 /*yield*/, executeAndRetry(proxy.execute, [this.contracts['ACTIONS'].address, encoded, this.ethConfig])];
-                        case 1:
-                            txHash = _a.sent();
-                            console.log("[Proxy Lock Borrow Withdraw] txHash: " + txHash);
-                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contractAbis['PROXY'], this.transactionTimeout)];
-                    }
+                    proxy = this.contract('PROXY', proxyAddress);
+                    encoded = abiCoder$2.encodeFunctionCall({
+                        name: 'lockBorrowWithdraw',
+                        type: 'function',
+                        inputs: [
+                            { type: 'address', name: 'shelf' },
+                            { type: 'uint256', name: 'loan' },
+                            { type: 'uint256', name: 'amount' },
+                            { type: 'address', name: 'usr' },
+                        ],
+                    }, [this.contract('SHELF').address, loanId, amount, usr]);
+                    return [2 /*return*/, this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))];
                 });
             }); };
-            _this.proxyRepayUnlockClose = function (proxyAddr, tokenId, loanId, registry) { return __awaiter(_this, void 0, void 0, function () {
-                var proxy, encoded, txHash;
+            _this.proxyRepayUnlockClose = function (proxyAddress, tokenId, loanId, registry) { return __awaiter(_this, void 0, void 0, function () {
+                var proxy, encoded;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            proxy = this.eth.contract(this.contractAbis['PROXY']).at(proxyAddr);
-                            encoded = abiCoder$2.encodeFunctionCall({
-                                name: 'repayUnlockClose',
-                                type: 'function',
-                                inputs: [
-                                    { type: 'address', name: 'shelf' },
-                                    { type: 'address', name: 'pile' },
-                                    { type: 'address', name: 'registry' },
-                                    { type: 'uint256', name: 'token' },
-                                    { type: 'address', name: 'erc20' },
-                                    { type: 'uint256', name: 'loan' },
-                                ],
-                            }, [
-                                this.contracts['SHELF'].address,
-                                this.contracts['PILE'].address,
-                                registry,
-                                tokenId,
-                                this.contracts['TINLAKE_CURRENCY'].address,
-                                loanId,
-                            ]);
-                            return [4 /*yield*/, executeAndRetry(proxy.execute, [this.contracts['ACTIONS'].address, encoded, this.ethConfig])];
-                        case 1:
-                            txHash = _a.sent();
-                            console.log("[Proxy Repay Unlock Close] txHash: " + txHash);
-                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contractAbis['PROXY'], this.transactionTimeout)];
-                    }
+                    proxy = this.contract('PROXY', proxyAddress);
+                    encoded = abiCoder$2.encodeFunctionCall({
+                        name: 'repayUnlockClose',
+                        type: 'function',
+                        inputs: [
+                            { type: 'address', name: 'shelf' },
+                            { type: 'address', name: 'pile' },
+                            { type: 'address', name: 'registry' },
+                            { type: 'uint256', name: 'token' },
+                            { type: 'address', name: 'erc20' },
+                            { type: 'uint256', name: 'loan' },
+                        ],
+                    }, [
+                        this.contract('SHELF').address,
+                        this.contract('PILE').address,
+                        registry,
+                        tokenId,
+                        this.contract('TINLAKE_CURRENCY').address,
+                        loanId,
+                    ]);
+                    return [2 /*return*/, this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))];
                 });
             }); };
             return _this;

@@ -16,8 +16,8 @@ export declare function AdminActions<ActionsBase extends Constructor<TinlakePara
         changeRate: (loan: string, ratePerSecond: string) => Promise<unknown>;
         setRate: (loan: string, ratePerSecond: string) => Promise<unknown>;
         setMinimumJuniorRatio: (ratio: string) => Promise<PendingTransaction>;
-        approveAllowanceJunior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
-        approveAllowanceSenior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
+        approveAllowanceJunior: (user: string, maxCurrency: string, maxToken: string) => Promise<PendingTransaction>;
+        approveAllowanceSenior: (user: string, maxCurrency: string, maxToken: string) => Promise<PendingTransaction>;
         provider: any;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;

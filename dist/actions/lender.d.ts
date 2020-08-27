@@ -3,13 +3,13 @@ import BN from 'bn.js';
 export declare function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Base: ActionBase): {
     new (...args: any[]): {
         supplySenior: (currencyAmount: string) => Promise<PendingTransaction>;
-        redeemSenior: (tokenAmount: string) => Promise<unknown>;
+        redeemSenior: (tokenAmount: string) => Promise<PendingTransaction>;
         getSeniorTokenAllowance: (owner: string) => Promise<BN>;
-        approveSeniorToken: (tokenAmount: string) => Promise<unknown>;
+        approveSeniorToken: (tokenAmount: string) => Promise<PendingTransaction>;
         supplyJunior: (currencyAmount: string) => Promise<PendingTransaction>;
-        redeemJunior: (tokenAmount: string) => Promise<unknown>;
+        redeemJunior: (tokenAmount: string) => Promise<PendingTransaction>;
         getJuniorTokenAllowance: (owner: string) => Promise<BN>;
-        approveJuniorToken: (tokenAmount: string) => Promise<unknown>;
+        approveJuniorToken: (tokenAmount: string) => Promise<PendingTransaction>;
         balance: () => Promise<unknown>;
         provider: any;
         eth: import("../services/ethereum").ethI;

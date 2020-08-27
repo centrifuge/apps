@@ -91,8 +91,8 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     // ------------ admin functions borrower-site -------------
     existsRateGroup = async (ratePerSecond: string) => {
       const rateGroup = getRateGroup(ratePerSecond)
-      const res: { ratePerSecond: BN } = await executeAndRetry(this.contracts['PILE'].rates, [rateGroup])
-      return !res.ratePerSecond.isZero()
+      const actualRate = (await this.contract('PILE').rates(rateGroup)).toBN()
+      return !actualRate.isZero()
     }
 
     initRate = async (ratePerSecond: string) => {
@@ -129,34 +129,18 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     approveAllowanceJunior = async (user: string, maxCurrency: string, maxToken: string) => {
-      const txHash = await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].approve, [
-        user,
-        maxCurrency,
-        maxToken,
-        this.ethConfig,
-      ])
-      console.log(`[Approve allowance Junior] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_OPERATOR'].abi, this.transactionTimeout)
+      const juniorOperator = this.contract('JUNIOR_OPERATOR')
+      return this.pending(juniorOperator.approve(user, maxCurrency, maxToken))
     }
 
     approveAllowanceSenior = async (user: string, maxCurrency: string, maxToken: string) => {
-      const operatorType = this.getOperatorType('senior')
-      let txHash
-      switch (operatorType) {
-        case 'PROPORTIONAL_OPERATOR':
-          txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [user, maxCurrency, this.ethConfig])
-          break
-        // ALLOWANCE_OPERATOR
-        default:
-          txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [
-            user,
-            maxCurrency,
-            maxToken,
-            this.ethConfig,
-          ])
+      const seniorOperator = this.contract('SENIOR_OPERATOR')
+
+      if (this.getOperatorType('senior') === 'PROPERTIONAL_OPERATOR') {
+        return this.pending(seniorOperator.approve(user, maxCurrency))
+      } else {
+        return this.pending(seniorOperator.approve(user, maxCurrency, maxToken))
       }
-      console.log(`[Approve allowance Senior] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_OPERATOR'].abi, this.transactionTimeout)
     }
   }
 }

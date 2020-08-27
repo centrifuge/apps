@@ -14,8 +14,8 @@ export declare function ProxyActions<ActionsBase extends Constructor<TinlakePara
         proxyCreateNew: (address: string) => Promise<any>;
         proxyIssue: (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => Promise<PendingTransaction>;
         proxyTransferIssue: (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => Promise<PendingTransaction>;
-        proxyLockBorrowWithdraw: (proxyAddr: string, loanId: string, amount: string, usr: string) => Promise<unknown>;
-        proxyRepayUnlockClose: (proxyAddr: string, tokenId: string, loanId: string, registry: string) => Promise<unknown>;
+        proxyLockBorrowWithdraw: (proxyAddress: string, loanId: string, amount: string, usr: string) => Promise<PendingTransaction>;
+        proxyRepayUnlockClose: (proxyAddress: string, tokenId: string, loanId: string, registry: string) => Promise<PendingTransaction>;
         provider: any;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;

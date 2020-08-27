@@ -6,19 +6,10 @@ export declare function CurrencyActions<ActionsBase extends Constructor<TinlakeP
         getCurrencyAllowance: (owner: string, spender: string) => Promise<any>;
         getJuniorForCurrencyAllowance: (owner: string) => Promise<any>;
         getSeniorForCurrencyAllowance: (owner: string) => Promise<any>;
-        getCurrencyBalance: (user: string) => Promise<BN>;
-        approveCurrency: (usr: string, currencyAmount: string) => Promise<{
-            hash: any;
-            contractKey: string;
-        }>;
-        approveSeniorForCurrency: (currencyAmount: string) => Promise<{
-            hash: any;
-            contractKey: string;
-        } | undefined>;
-        approveJuniorForCurrency: (currencyAmount: string) => Promise<{
-            hash: any;
-            contractKey: string;
-        } | undefined>;
+        getCurrencyBalance: (user: string) => Promise<any>;
+        approveCurrency: (usr: string, currencyAmount: string) => Promise<PendingTransaction>;
+        approveSeniorForCurrency: (currencyAmount: string) => Promise<PendingTransaction | undefined>;
+        approveJuniorForCurrency: (currencyAmount: string) => Promise<PendingTransaction | undefined>;
         provider: any;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;
