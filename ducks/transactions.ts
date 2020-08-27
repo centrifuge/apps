@@ -208,7 +208,7 @@ export function processTransaction(
         const pendingTx: Transaction = {
           ...unconfirmedTx,
           status: 'pending',
-          hash: tx.hash
+          hash: tx.hash,
         }
         await dispatch({ id, transaction: pendingTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
 
