@@ -15,8 +15,6 @@ export function initTinlake({
 }: { addresses?: ContractAddresses | null; contractConfig?: any | null } = {}): ITinlake {
   if (tinlake === null) {
     const { transactionTimeout } = config
-    tinlake = new Tinlake({ transactionTimeout, provider: getDefaultHttpProvider() }) as any
-
     if (window && (window as any).ethereum) {
       const web3Provider = new ethers.providers.Web3Provider((window as any).ethereum)
       const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
@@ -26,7 +24,9 @@ export function initTinlake({
         provider: fallbackProvider,
         signer: web3Provider.getSigner(),
       }
-      tinlake!.setEthersConfig(ethersConfig)
+      tinlake = new Tinlake({ transactionTimeout, ethersConfig, provider: getDefaultHttpProvider() }) as any
+    } else {
+      tinlake = new Tinlake({ transactionTimeout, provider: getDefaultHttpProvider() }) as any
     }
   }
 

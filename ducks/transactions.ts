@@ -133,8 +133,6 @@ export default function reducer(
 }
 
 // Action creators
-const SUCCESS_STATUS = '0x1'
-
 export function createTransaction<A extends TransactionAction>(
   description: string,
   actionName: A,
