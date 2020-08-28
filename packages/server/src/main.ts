@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {NestExpressApplication} from '@nestjs/platform-express';
 import * as path from 'path';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import config from './config';
+import {NestExpressApplication} from '@nestjs/platform-express';
 
 // accept self-signed certificate
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';

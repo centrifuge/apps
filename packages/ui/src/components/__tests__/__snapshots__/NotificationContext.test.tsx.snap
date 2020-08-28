@@ -34,28 +34,23 @@ exports[`NotificationContext Should render a default popup 1`] = `
               tabindex="-1"
             />
             <div
-              class="StyledBox-sc-13pk1d4-0 fLFmbb"
+              class="StyledBox-sc-13pk1d4-0 eIqWMY"
             >
               <div
                 class="StyledBox-sc-13pk1d4-0 iuDTIq"
               >
                 <h3
-                  class="StyledHeading-sc-1rdh4aw-0 ldQxwA"
+                  class="StyledHeading-sc-1rdh4aw-0 iEPYku"
                 >
-                  <div
-                    class="Modal__Title-sc-14fi5dq-1 hTYitU"
-                  >
-                    Title
-                  </div>
+                  Title
                 </h3>
                 <button
-                  class="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+                  class="StyledButton-sc-323bzc-0 kPUXNH"
                   type="button"
                 >
                   <svg
                     aria-label="Close"
                     class="StyledIcon-ofa7kd-0 cgOtHq"
-                    style="width: 16px; height: 16px; margin-right: -20px; margin-left: -20px;"
                     viewBox="0 0 24 24"
                   >
                     <path
@@ -107,22 +102,18 @@ exports[`NotificationContext Should render a default popup 1`] = `
           tabIndex="-1"
         />
         <div
-          className="StyledBox-sc-13pk1d4-0 fLFmbb"
+          className="StyledBox-sc-13pk1d4-0 eIqWMY"
         >
           <div
             className="StyledBox-sc-13pk1d4-0 iuDTIq"
           >
             <h3
-              className="StyledHeading-sc-1rdh4aw-0 ldQxwA"
+              className="StyledHeading-sc-1rdh4aw-0 iEPYku"
             >
-              <div
-                className="Modal__Title-sc-14fi5dq-1 hTYitU"
-              >
-                Title
-              </div>
+              Title
             </h3>
             <button
-              className="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+              className="StyledButton-sc-323bzc-0 kPUXNH"
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -133,14 +124,6 @@ exports[`NotificationContext Should render a default popup 1`] = `
               <svg
                 aria-label="Close"
                 className="StyledIcon-ofa7kd-0 cgOtHq"
-                style={
-                  Object {
-                    "height": "16px",
-                    "marginLeft": "-20px",
-                    "marginRight": "-20px",
-                    "width": "16px",
-                  }
-                }
                 viewBox="0 0 24 24"
               >
                 <path
@@ -194,28 +177,23 @@ exports[`NotificationContext Should render a error popup 1`] = `
               tabindex="-1"
             />
             <div
-              class="StyledBox-sc-13pk1d4-0 fLFmbb"
+              class="StyledBox-sc-13pk1d4-0 eIqWMY"
             >
               <div
                 class="StyledBox-sc-13pk1d4-0 iuDTIq"
               >
                 <h3
-                  class="StyledHeading-sc-1rdh4aw-0 dRDcVv"
+                  class="StyledHeading-sc-1rdh4aw-0 bwUBGa"
                 >
-                  <div
-                    class="Modal__Title-sc-14fi5dq-1 hTYitU"
-                  >
-                    Title
-                  </div>
+                  Title
                 </h3>
                 <button
-                  class="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+                  class="StyledButton-sc-323bzc-0 kPUXNH"
                   type="button"
                 >
                   <svg
                     aria-label="Close"
                     class="StyledIcon-ofa7kd-0 cgOtHq"
-                    style="width: 16px; height: 16px; margin-right: -20px; margin-left: -20px;"
                     viewBox="0 0 24 24"
                   >
                     <path
@@ -274,22 +252,18 @@ exports[`NotificationContext Should render a error popup 1`] = `
           tabIndex="-1"
         />
         <div
-          className="StyledBox-sc-13pk1d4-0 fLFmbb"
+          className="StyledBox-sc-13pk1d4-0 eIqWMY"
         >
           <div
             className="StyledBox-sc-13pk1d4-0 iuDTIq"
           >
             <h3
-              className="StyledHeading-sc-1rdh4aw-0 dRDcVv"
+              className="StyledHeading-sc-1rdh4aw-0 bwUBGa"
             >
-              <div
-                className="Modal__Title-sc-14fi5dq-1 hTYitU"
-              >
-                Title
-              </div>
+              Title
             </h3>
             <button
-              className="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+              className="StyledButton-sc-323bzc-0 kPUXNH"
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -300,14 +274,6 @@ exports[`NotificationContext Should render a error popup 1`] = `
               <svg
                 aria-label="Close"
                 className="StyledIcon-ofa7kd-0 cgOtHq"
-                style={
-                  Object {
-                    "height": "16px",
-                    "marginLeft": "-20px",
-                    "marginRight": "-20px",
-                    "width": "16px",
-                  }
-                }
                 viewBox="0 0 24 24"
               >
                 <path
@@ -373,28 +339,23 @@ exports[`NotificationContext Should render a success popup 1`] = `
               tabindex="-1"
             />
             <div
-              class="StyledBox-sc-13pk1d4-0 fLFmbb"
+              class="StyledBox-sc-13pk1d4-0 eIqWMY"
             >
               <div
                 class="StyledBox-sc-13pk1d4-0 iuDTIq"
               >
                 <h3
-                  class="StyledHeading-sc-1rdh4aw-0 jSgPI"
+                  class="StyledHeading-sc-1rdh4aw-0 cvWvQz"
                 >
-                  <div
-                    class="Modal__Title-sc-14fi5dq-1 hTYitU"
-                  >
-                    Title
-                  </div>
+                  Title
                 </h3>
                 <button
-                  class="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+                  class="StyledButton-sc-323bzc-0 kPUXNH"
                   type="button"
                 >
                   <svg
                     aria-label="Close"
                     class="StyledIcon-ofa7kd-0 cgOtHq"
-                    style="width: 16px; height: 16px; margin-right: -20px; margin-left: -20px;"
                     viewBox="0 0 24 24"
                   >
                     <path
@@ -453,22 +414,18 @@ exports[`NotificationContext Should render a success popup 1`] = `
           tabIndex="-1"
         />
         <div
-          className="StyledBox-sc-13pk1d4-0 fLFmbb"
+          className="StyledBox-sc-13pk1d4-0 eIqWMY"
         >
           <div
             className="StyledBox-sc-13pk1d4-0 iuDTIq"
           >
             <h3
-              className="StyledHeading-sc-1rdh4aw-0 jSgPI"
+              className="StyledHeading-sc-1rdh4aw-0 cvWvQz"
             >
-              <div
-                className="Modal__Title-sc-14fi5dq-1 hTYitU"
-              >
-                Title
-              </div>
+              Title
             </h3>
             <button
-              className="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+              className="StyledButton-sc-323bzc-0 kPUXNH"
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -479,14 +436,6 @@ exports[`NotificationContext Should render a success popup 1`] = `
               <svg
                 aria-label="Close"
                 className="StyledIcon-ofa7kd-0 cgOtHq"
-                style={
-                  Object {
-                    "height": "16px",
-                    "marginLeft": "-20px",
-                    "marginRight": "-20px",
-                    "width": "16px",
-                  }
-                }
                 viewBox="0 0 24 24"
               >
                 <path
@@ -552,28 +501,23 @@ exports[`NotificationContext Should render a warning popup 1`] = `
               tabindex="-1"
             />
             <div
-              class="StyledBox-sc-13pk1d4-0 fLFmbb"
+              class="StyledBox-sc-13pk1d4-0 eIqWMY"
             >
               <div
                 class="StyledBox-sc-13pk1d4-0 iuDTIq"
               >
                 <h3
-                  class="StyledHeading-sc-1rdh4aw-0 fqnDwr"
+                  class="StyledHeading-sc-1rdh4aw-0 ijqQPw"
                 >
-                  <div
-                    class="Modal__Title-sc-14fi5dq-1 hTYitU"
-                  >
-                    Title
-                  </div>
+                  Title
                 </h3>
                 <button
-                  class="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+                  class="StyledButton-sc-323bzc-0 kPUXNH"
                   type="button"
                 >
                   <svg
                     aria-label="Close"
                     class="StyledIcon-ofa7kd-0 cgOtHq"
-                    style="width: 16px; height: 16px; margin-right: -20px; margin-left: -20px;"
                     viewBox="0 0 24 24"
                   >
                     <path
@@ -632,22 +576,18 @@ exports[`NotificationContext Should render a warning popup 1`] = `
           tabIndex="-1"
         />
         <div
-          className="StyledBox-sc-13pk1d4-0 fLFmbb"
+          className="StyledBox-sc-13pk1d4-0 eIqWMY"
         >
           <div
             className="StyledBox-sc-13pk1d4-0 iuDTIq"
           >
             <h3
-              className="StyledHeading-sc-1rdh4aw-0 fqnDwr"
+              className="StyledHeading-sc-1rdh4aw-0 ijqQPw"
             >
-              <div
-                className="Modal__Title-sc-14fi5dq-1 hTYitU"
-              >
-                Title
-              </div>
+              Title
             </h3>
             <button
-              className="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+              className="StyledButton-sc-323bzc-0 kPUXNH"
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -658,14 +598,6 @@ exports[`NotificationContext Should render a warning popup 1`] = `
               <svg
                 aria-label="Close"
                 className="StyledIcon-ofa7kd-0 cgOtHq"
-                style={
-                  Object {
-                    "height": "16px",
-                    "marginLeft": "-20px",
-                    "marginRight": "-20px",
-                    "width": "16px",
-                  }
-                }
                 viewBox="0 0 24 24"
               >
                 <path
@@ -731,28 +663,23 @@ exports[`NotificationContext Should set the proper label for the confirm button 
               tabindex="-1"
             />
             <div
-              class="StyledBox-sc-13pk1d4-0 fLFmbb"
+              class="StyledBox-sc-13pk1d4-0 eIqWMY"
             >
               <div
                 class="StyledBox-sc-13pk1d4-0 iuDTIq"
               >
                 <h3
-                  class="StyledHeading-sc-1rdh4aw-0 ldQxwA"
+                  class="StyledHeading-sc-1rdh4aw-0 iEPYku"
                 >
-                  <div
-                    class="Modal__Title-sc-14fi5dq-1 hTYitU"
-                  >
-                    Title
-                  </div>
+                  Title
                 </h3>
                 <button
-                  class="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+                  class="StyledButton-sc-323bzc-0 kPUXNH"
                   type="button"
                 >
                   <svg
                     aria-label="Close"
                     class="StyledIcon-ofa7kd-0 cgOtHq"
-                    style="width: 16px; height: 16px; margin-right: -20px; margin-left: -20px;"
                     viewBox="0 0 24 24"
                   >
                     <path
@@ -804,22 +731,18 @@ exports[`NotificationContext Should set the proper label for the confirm button 
           tabIndex="-1"
         />
         <div
-          className="StyledBox-sc-13pk1d4-0 fLFmbb"
+          className="StyledBox-sc-13pk1d4-0 eIqWMY"
         >
           <div
             className="StyledBox-sc-13pk1d4-0 iuDTIq"
           >
             <h3
-              className="StyledHeading-sc-1rdh4aw-0 ldQxwA"
+              className="StyledHeading-sc-1rdh4aw-0 iEPYku"
             >
-              <div
-                className="Modal__Title-sc-14fi5dq-1 hTYitU"
-              >
-                Title
-              </div>
+              Title
             </h3>
             <button
-              className="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+              className="StyledButton-sc-323bzc-0 kPUXNH"
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -830,14 +753,6 @@ exports[`NotificationContext Should set the proper label for the confirm button 
               <svg
                 aria-label="Close"
                 className="StyledIcon-ofa7kd-0 cgOtHq"
-                style={
-                  Object {
-                    "height": "16px",
-                    "marginLeft": "-20px",
-                    "marginRight": "-20px",
-                    "width": "16px",
-                  }
-                }
                 viewBox="0 0 24 24"
               >
                 <path

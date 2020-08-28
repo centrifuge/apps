@@ -1,6 +1,6 @@
 import { LocalStrategy } from '../local.strategy';
 import { UnauthorizedException } from '@nestjs/common';
-
+import {DatabaseService} from "../../database/database.service";
 import { AuthService } from '../auth.service';
 import { User } from '../../../../lib/models/user';
 import { Test } from '@nestjs/testing';
@@ -23,7 +23,7 @@ describe('LocalStrategy', () => {
       validateUser: jest.fn(() => mockUser),
     };
     const module = await Test.createTestingModule({
-      providers: [AuthService, LocalStrategy],
+      providers: [AuthService, DatabaseService, LocalStrategy],
     })
       .overrideProvider(AuthService)
       .useValue(mockAuthService)
@@ -42,7 +42,7 @@ describe('LocalStrategy', () => {
       validateUser: jest.fn(() => null),
     };
     const module = await Test.createTestingModule({
-      providers: [AuthService, LocalStrategy],
+      providers: [AuthService, DatabaseService, LocalStrategy],
     })
       .overrideProvider(AuthService)
       .useValue(mockAuthService)
