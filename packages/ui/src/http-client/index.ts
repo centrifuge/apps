@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosPromise } from 'axios';
 
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
 import { User } from '@centrifuge/gateway-lib/models/user';
@@ -38,7 +38,7 @@ export const httpClient = {
   schemas: {
     create: async (schema: Schema) => instance.post(ROUTES.SCHEMAS, schema),
     list: async (query = {}) => instance.get(ROUTES.SCHEMAS, { params: { ...query } }),
-    getById: async (id): Promise<Schema> => instance.get(`${ROUTES.SCHEMAS}/${id}`),
+    getById: async (id): Promise<AxiosPromise<Schema>> => instance.get(`${ROUTES.SCHEMAS}/${id}`),
     update: async (schema: Schema) => instance.put(`${ROUTES.SCHEMAS}/${schema._id}`, schema),
     archive: async (id: string) => instance.put(`${ROUTES.SCHEMAS}/${id}/archive`),
     restore: async (id: string) => instance.put(`${ROUTES.SCHEMAS}/${id}/restore`),

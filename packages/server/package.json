@@ -31,10 +31,10 @@
   },
   "dependencies": {
     "@centrifuge/gateway-lib": "file:../lib",
-    "@nestjs/common": "6.2.0",
-    "@nestjs/core": "6.2.0",
+    "@nestjs/common": "6.3.0",
+    "@nestjs/core": "6.3.0",
     "@nestjs/passport": "6.2.0",
-    "@nestjs/platform-express": "^6.2.0",
+    "@nestjs/platform-express": "6.3.0",
     "bcrypt": "5.0.0",
     "bignumber.js": "^9.0.0",
     "cross-env": "7.0.2",
