@@ -236,12 +236,13 @@ export function processTransaction(
         const outcome = receipt.status === 1
         outcomeTx.status = outcome ? 'succeeded' : 'failed'
         outcomeTx.result = receipt
+        outcomeTx.hash = receipt.transactionHash
       } else {
         // Failed or rejected
         hasCompleted = true
         outcomeTx.status = 'failed'
         outcomeTx.failedReason = tx.error?.message || tx.message
-        if (tx.result?.transactionHash) outcomeTx.hash = tx.result.transactionHash
+        if (tx.transactionhash) outcomeTx.hash = tx.transactionhash
       }
     } catch (error) {
       console.error(
