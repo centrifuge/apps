@@ -384,9 +384,6 @@ export async function setAllowance(
   } catch (e) {
     return loggedError(e, `Could not set allowance for ${trancheType}`, address)
   }
-  if (setRes.status !== SUCCESS_STATUS) {
-    return loggedError(null, `Could not set allowance for ${trancheType}`, address)
-  }
 
   return setRes
 }
