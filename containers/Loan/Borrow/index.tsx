@@ -25,8 +25,11 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     setBorrowAmount((props.loan.principal && props.loan.principal.toString()) || '0')
-    loadPool && loadPool(props.tinlake)
-  }, [props])
+  }, [props.loan])
+
+  React.useEffect(() => {
+    props.loadPool && props.loadPool(props.tinlake)
+  }, [])
 
   const [status, , setTxId] = useTransactionState()
 
