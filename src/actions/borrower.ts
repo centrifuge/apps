@@ -35,6 +35,8 @@ export function BorrowerActions<ActionsBase extends Constructor<TinlakeParams>>(
       return waitAndReturnEvents(this.eth, txHash, this.contracts['SHELF'].abi, this.transactionTimeout)
     }
 
+    // REV: add support for partial borrow (probably only requires changes in actions and component in Tinlake UI)
+    // REV: not required for MVP of rev pool UI
     borrow = async (loan: string, currencyAmount: string) => {
       const txHash = await executeAndRetry(this.contracts['SHELF'].borrow, [loan, currencyAmount, this.ethConfig])
       console.log(`[Borrow] txHash: ${txHash}`)
@@ -52,6 +54,8 @@ export function BorrowerActions<ActionsBase extends Constructor<TinlakeParams>>(
       return waitAndReturnEvents(this.eth, txHash, this.contracts['SHELF'].abi, this.transactionTimeout)
     }
 
+    // REV: add support for partial repay (probably only requires changes in actions and component in Tinlake UI)
+    // REV: not required for MVP of rev pool UI
     repay = async (loan: string, currencyAmount: string) => {
       const txHash = await executeAndRetry(this.contracts['SHELF'].repay, [loan, currencyAmount, this.ethConfig])
       console.log(`[Repay] txHash: ${txHash}`)

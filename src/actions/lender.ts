@@ -5,12 +5,14 @@ import BN from 'bn.js'
 export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Base: ActionBase) {
   return class extends Base implements ILenderActions {
     // senior tranch functions
+    // REV: becomes submitSeniorSupplyOrder()
     supplySenior = async (currencyAmount: string) => {
       const txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].supply, [currencyAmount, this.ethConfig])
       console.log(`[Supply] txHash: ${txHash}`)
       return waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_OPERATOR'].abi, this.transactionTimeout)
     }
 
+    // REV: becomes submitSeniorRedeemOrder()
     redeemSenior = async (tokenAmount: string) => {
       const txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].redeem, [tokenAmount, this.ethConfig])
       console.log(`[Redeem] txHash: ${txHash}`)
@@ -36,12 +38,14 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     // junior tranche functions
+    // REV: becomes submitJuniorSupplyOrder()
     supplyJunior = async (currencyAmount: string) => {
       const txHash = await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].supply, [currencyAmount, this.ethConfig])
       console.log(`[Supply] txHash: ${txHash}`)
       return waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_OPERATOR'].abi, this.transactionTimeout)
     }
 
+    // REV: becomes submitJuniorRedeemOrder()
     redeemJunior = async (tokenAmount: string) => {
       const txHash = await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].redeem, [tokenAmount, this.ethConfig])
       console.log(`[Redeem] txHash: ${txHash}`)
@@ -67,11 +71,15 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     // general lender functions
+    // REV: remove
     balance = async () => {
       const txHash = await executeAndRetry(this.contracts['DISTRIBUTOR'].balance, [this.ethConfig])
       console.log(`[Balance] txHash: ${txHash}`)
       return waitAndReturnEvents(this.eth, txHash, this.contracts['DISTRIBUTOR'].abi, this.transactionTimeout)
     }
+
+    // REV: add disperse()
+    // REV: we probably need a method to get the current epoch state (to show in the UI if the investor can call disperse())
   }
 }
 

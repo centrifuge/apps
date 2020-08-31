@@ -29392,6 +29392,8 @@ function BorrowerActions(Base) {
                     }
                 });
             }); };
+            // REV: add support for partial borrow (probably only requires changes in actions and component in Tinlake UI)
+            // REV: not required for MVP of rev pool UI
             _this.borrow = function (loan, currencyAmount) { return __awaiter(_this, void 0, void 0, function () {
                 var txHash;
                 return __generator(this, function (_a) {
@@ -29421,6 +29423,8 @@ function BorrowerActions(Base) {
                     }
                 });
             }); };
+            // REV: add support for partial repay (probably only requires changes in actions and component in Tinlake UI)
+            // REV: not required for MVP of rev pool UI
             _this.repay = function (loan, currencyAmount) { return __awaiter(_this, void 0, void 0, function () {
                 var txHash;
                 return __generator(this, function (_a) {
@@ -29445,6 +29449,7 @@ function LenderActions(Base) {
         function class_1() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             // senior tranch functions
+            // REV: becomes submitSeniorSupplyOrder()
             _this.supplySenior = function (currencyAmount) { return __awaiter(_this, void 0, void 0, function () {
                 var txHash;
                 return __generator(this, function (_a) {
@@ -29457,6 +29462,7 @@ function LenderActions(Base) {
                     }
                 });
             }); };
+            // REV: becomes submitSeniorRedeemOrder()
             _this.redeemSenior = function (tokenAmount) { return __awaiter(_this, void 0, void 0, function () {
                 var txHash;
                 return __generator(this, function (_a) {
@@ -29500,6 +29506,7 @@ function LenderActions(Base) {
                 });
             }); };
             // junior tranche functions
+            // REV: becomes submitJuniorSupplyOrder()
             _this.supplyJunior = function (currencyAmount) { return __awaiter(_this, void 0, void 0, function () {
                 var txHash;
                 return __generator(this, function (_a) {
@@ -29512,6 +29519,7 @@ function LenderActions(Base) {
                     }
                 });
             }); };
+            // REV: becomes submitJuniorRedeemOrder()
             _this.redeemJunior = function (tokenAmount) { return __awaiter(_this, void 0, void 0, function () {
                 var txHash;
                 return __generator(this, function (_a) {
@@ -29555,6 +29563,7 @@ function LenderActions(Base) {
                 });
             }); };
             // general lender functions
+            // REV: remove
             _this.balance = function () { return __awaiter(_this, void 0, void 0, function () {
                 var txHash;
                 return __generator(this, function (_a) {
@@ -29568,6 +29577,8 @@ function LenderActions(Base) {
                 });
             }); };
             return _this;
+            // REV: add disperse()
+            // REV: we probably need a method to get the current epoch state (to show in the UI if the investor can call disperse())
         }
         return class_1;
     }(Base));
