@@ -116,13 +116,9 @@ async function supply(investor: string, currencyAmount: string, tinlake: ITinlak
   // assert investor currency balanace decreased
   assert.equal(initialLenderCurrencyBalance.sub(newLenderCurrencyBalance).toString(), currencyAmount)
   // assert investor received tokens
-<<<<<<< HEAD
-  assert.equal(initialJuniorTokenBalance.add(new BN(currencyAmount)).toString(), newJuniorTokenBalance.toString())
-=======
   if (testConfig.isRealTestnet) {
     assert.ok(newJuniorTokenBalance.gt(initialJuniorTokenBalance));
   } else {
     assert.equal(initialJuniorTokenBalance.add(new BN(currencyAmount)).toString(), newJuniorTokenBalance.toString());
   }
->>>>>>> ee41efa671ce8ff6dd759615060d775dfedde492
 }
