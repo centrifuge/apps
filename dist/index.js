@@ -29821,6 +29821,7 @@ function AnalyticsActions(Base) {
                     }
                 });
             }); };
+            // REV: probably can be removed
             _this.getTotalBalance = function () { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
@@ -29832,6 +29833,7 @@ function AnalyticsActions(Base) {
                     }
                 });
             }); };
+            // REV: replace with NAVFeed contract call
             _this.getPrincipal = function (loanId) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
@@ -30025,9 +30027,10 @@ function AnalyticsActions(Base) {
                             _d.label = 3;
                         case 3:
                             tokenBalanceSenior = (_a) || new bn(0);
-                            return [4 /*yield*/, this.getMaxSupplyAmountJunior(user)];
+                            return [4 /*yield*/, this.getMaxSupplyAmountJunior(user)]; // REV: remove, or return DAI balance of user
                         case 4:
-                            maxSupplyJunior = _d.sent();
+                            maxSupplyJunior = _d.sent() // REV: remove, or return DAI balance of user
+                            ;
                             _b = includeSenior;
                             if (!_b) return [3 /*break*/, 6];
                             return [4 /*yield*/, this.getMaxSupplyAmountSenior(user)];
@@ -30035,10 +30038,12 @@ function AnalyticsActions(Base) {
                             _b = (_d.sent());
                             _d.label = 6;
                         case 6:
-                            maxSupplySenior = (_b) || new bn(0);
-                            return [4 /*yield*/, this.getMaxRedeemAmountJunior(user)];
+                            maxSupplySenior = (_b) || new bn(0) // REV: remove, or return DAI balance of user
+                            ;
+                            return [4 /*yield*/, this.getMaxRedeemAmountJunior(user)]; // REV: remove, or return token balance of user
                         case 7:
-                            maxRedeemJunior = _d.sent();
+                            maxRedeemJunior = _d.sent() // REV: remove, or return token balance of user
+                            ;
                             _c = includeSenior;
                             if (!_c) return [3 /*break*/, 9];
                             return [4 /*yield*/, this.getMaxRedeemAmountSenior(user)];
@@ -30046,7 +30051,8 @@ function AnalyticsActions(Base) {
                             _c = (_d.sent());
                             _d.label = 9;
                         case 9:
-                            maxRedeemSenior = (_c) || new bn(0);
+                            maxRedeemSenior = (_c) || new bn(0) // REV: remove, or return token balance of user
+                            ;
                             return [2 /*return*/, {
                                     junior: {
                                         tokenBalance: tokenBalanceJunior,
@@ -30085,6 +30091,7 @@ function AnalyticsActions(Base) {
                     }
                 });
             }); };
+            // REV: remove
             _this.getMaxSupplyAmountJunior = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
@@ -30096,6 +30103,7 @@ function AnalyticsActions(Base) {
                     }
                 });
             }); };
+            // REV: remove
             _this.getMaxRedeemAmountJunior = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
@@ -30151,6 +30159,7 @@ function AnalyticsActions(Base) {
                     }
                 });
             }); };
+            // REV: remove
             _this.getMaxSupplyAmountSenior = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var operatorType, maxSupply, _a, supplyLimitRes, suppliedRes, res;
                 return __generator(this, function (_b) {
@@ -30187,6 +30196,7 @@ function AnalyticsActions(Base) {
                     }
                 });
             }); };
+            // REV: remove
             _this.getMaxRedeemAmountSenior = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var operatorType, maxRedeem, _a, redeemLimitRes, res;
                 return __generator(this, function (_b) {
@@ -30253,6 +30263,7 @@ function AnalyticsActions(Base) {
                     }
                 });
             }); };
+            // REV: moved to ASSESSOR contract
             _this.getSeniorReserve = function () { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
@@ -30267,6 +30278,7 @@ function AnalyticsActions(Base) {
                     }
                 });
             }); };
+            // REV: remove
             _this.getJuniorReserve = function () { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
@@ -30289,6 +30301,7 @@ function AnalyticsActions(Base) {
                     }
                 });
             }); };
+            // REV: add getMaxJuniorRatio(), getMaxReserve() (accessible through ASSESSOR)
             _this.getCurrentJuniorRatio = function () { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
@@ -30313,6 +30326,7 @@ function AnalyticsActions(Base) {
                     }
                 });
             }); };
+            // REV: moved to ASSESSOR contract
             _this.getSeniorDebt = function () { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
@@ -30327,6 +30341,7 @@ function AnalyticsActions(Base) {
                     }
                 });
             }); };
+            // REV: moved to ASSESSOR contract
             _this.getSeniorInterestRate = function () { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 return __generator(this, function (_a) {
