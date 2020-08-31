@@ -1,6 +1,6 @@
 {
   "name": "@centrifuge/tinlake-js",
-  "version": "0.0.19-develop.3",
+  "version": "0.0.19-develop.1",
   "description": "Centrifuge Tinlake Contracts Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -58,7 +58,7 @@
     "publish:patch": "npm run build && npm version patch && npm publish --access public",
     "publish:minor": "npm run build && npm version minor && npm publish --access public",
     "publish:major": "npm run build && npm version major && npm publish --access public",
-    "publish:develop": "npm run build && npm version prerelease --preid develop && npm publish --tag develop"
+    "publish:develop": "npm run build && npm version prerelease --preid develop && npm publish --access public"
   },
   "husky": {
     "hooks": {
