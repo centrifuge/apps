@@ -1,6 +1,6 @@
 {
-  "name": "tinlake",
-  "version": "0.0.17",
+  "name": "@centrifuge/tinlake-js",
+  "version": "0.0.19-develop.5",
   "description": "Centrifuge Tinlake Contracts Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -54,11 +54,15 @@
     "lint": "tslint --project .",
     "lint-fix": "tslint --fix -c ./tslint.json 'src/**/*{.ts,.tsx}'",
     "format": "prettier --write \"./**/*.{ts,tsx}\"",
-    "check-format": "prettier --check \"./**/*.{ts,tsx}\""
+    "check-format": "prettier --check \"./**/*.{ts,tsx}\"",
+    "publish:patch": "npm run build && npm version patch && npm publish --access public",
+    "publish:minor": "npm run build && npm version minor && npm publish --access public",
+    "publish:major": "npm run build && npm version major && npm publish --access public",
+    "publish:develop": "npm run build && npm version prerelease --preid develop && npm publish --access public"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run generate-docs && npm run lint-fix && npm run build && git add ./dist/* && git add ./docs/*"
+      "pre-commit": "npm run generate-docs && npm run lint-fix && npm run build"
     }
   },
   "repository": {
