@@ -128,7 +128,6 @@ export default class Tinlake {
     this.ethOptions = ethOptions || {}
     this.eth = new Eth(this.provider, this.ethOptions) as ethI
 
-    console.log('set provider', ethersConfig)
     if (ethersConfig) this.ethersConfig = ethersConfig
 
     this.setContracts()
@@ -189,7 +188,6 @@ export default class Tinlake {
   }
 
   contract(abiName: ContractName, address?: string): ethers.Contract {
-    console.log(`Looking up contract ${abiName}`, this.ethersContracts)
     if (address) {
       return new ethers.Contract(address, this.contractAbis[abiName], this.ethersConfig.signer)
     }  if (this.ethersConfig.signer) {

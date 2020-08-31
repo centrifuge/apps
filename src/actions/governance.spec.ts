@@ -5,7 +5,7 @@ import { ITinlake } from '../types/tinlake'
 import { createTinlake, TestProvider } from '../test/utils'
 import testConfig from '../test/config'
 import { Account } from '../test/types'
-import { ContractNames } from '../Tinlake'
+import { ContractName } from '../Tinlake'
 
 // god account = governance address for the tinlake test deployment
 const userAccount = account.generate(randomString.generate(32))
@@ -46,7 +46,7 @@ describe('governance tests', async () => {
   })
 })
 
-async function relyAddress(usr: string, contractName: ContractNames) {
+async function relyAddress(usr: string, contractName: ContractName) {
   const res = await governanceTinlake.relyAddress(usr, testConfig.contractAddresses[contractName])
   const isWard = await governanceTinlake.isWard(usr, contractName)
   assert.equal(isWard, 1)

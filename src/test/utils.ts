@@ -39,7 +39,7 @@ export function createTinlake(usr: Account, testConfig: ProviderConfig): ITinlak
     transactionTimeout,
     provider: createSignerProvider(rpcUrl, usr),
     ethConfig: { gas, gasPrice, from: usr.address },
-    ethersConfig: createEthersConfig(rpcUrl),
+    ethersConfig: createEthersConfig(rpcUrl, usr),
   })
 
   return tinlake
@@ -52,8 +52,8 @@ function createSignerProvider(rpcUrl: string, usr: Account) {
   })
 }
 
-function createEthersConfig(rpcUrl: string) {
+function createEthersConfig(rpcUrl: string, usr: Account) {
   const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
-  const signer = provider.getSigner()
+  const signer = new ethers.Wallet(usr.privateKey).connect(provider)
   return { provider, signer }
 }
