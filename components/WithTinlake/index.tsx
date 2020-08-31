@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { initTinlake } from '../../services/tinlake'
-import { ITinlake } from 'tinlake'
+import { ITinlake } from '@centrifuge/tinlake-js'
 
 interface Props {
   render: (tinlake: any) => React.ReactElement

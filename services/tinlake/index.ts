@@ -1,4 +1,4 @@
-import Tinlake, { ITinlake } from 'tinlake'
+import Tinlake, { ITinlake } from '@centrifuge/tinlake-js'
 import { ContractAddresses } from 'tinlake/dist/Tinlake'
 import Eth from 'ethjs'
 import config from '../../config'

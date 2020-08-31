@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Box } from 'grommet'
-import { baseToDisplay, feeToInterestRate } from 'tinlake'
+import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import NumberDisplay from '../../NumberDisplay'
 import DashboardMetric from '../../DashboardMetric'

@@ -1,6 +1,6 @@
 import { AnyAction, Action } from 'redux'
 import { ThunkAction } from 'redux-thunk'
-import { Loan } from 'tinlake'
+import { Loan } from '@centrifuge/tinlake-js'
 import { getLoan, TinlakeResult } from '../services/tinlake/actions'
 import Apollo from '../services/apollo'
 import Tinlake from 'tinlake/dist/Tinlake'

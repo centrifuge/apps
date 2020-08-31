@@ -1,7 +1,7 @@
 import * as React from 'react'
 import BN from 'bn.js'
 import { connect } from 'react-redux'
-import { baseToDisplay, feeToInterestRate } from 'tinlake'
+import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import { Box, Heading, Table, TableCell, TableRow, TableBody, Button, Anchor } from 'grommet'
 import SecondaryHeader from '../../components/SecondaryHeader'
 import { PoolState, loadPool } from '../../ducks/pool'

@@ -1,5 +1,5 @@
 import { ApolloClient, DefaultOptions } from 'apollo-client'
-import { Loan } from 'tinlake'
+import { Loan } from '@centrifuge/tinlake-js'
 import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory'
 import { createHttpLink } from 'apollo-link-http'
 import config from '../../config'

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Box, FormField, Button, Text } from 'grommet'
 import NumberInput from '../../../components/NumberInput'
-import { baseToDisplay, displayToBase, Loan } from 'tinlake'
+import { baseToDisplay, displayToBase, Loan } from '@centrifuge/tinlake-js'
 import { PoolState, loadPool } from '../../../ducks/pool'
 import { loadLoan } from '../../../ducks/loans'
 import { connect } from 'react-redux'
