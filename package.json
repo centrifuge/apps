@@ -58,7 +58,7 @@
     "publish:patch": "npm run build && npm version patch && npm publish --access public",
     "publish:minor": "npm run build && npm version minor && npm publish --access public",
     "publish:major": "npm run build && npm version major && npm publish --access public",
-    "publish:develop": "npm run build && npm version prerelease --preid develop && npm publish --access public"
+    "publish:develop": "npm run build && npm version prerelease --preid develop && npm publish --tag develop"
   },
   "husky": {
     "hooks": {
