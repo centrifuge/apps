@@ -3,6 +3,7 @@ import { ContractAddresses, ContractAbis } from '../Tinlake';
 declare const testConfig: ProviderConfig;
 export declare type ProviderConfig = {
     rpcUrl: string;
+    isRealTestnet: boolean;
     godAccount: Account;
     gas: string;
     gasPrice: string;
