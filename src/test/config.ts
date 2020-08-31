@@ -12,8 +12,8 @@ const GWEI = 1000 * MWEI
 const MILLI_ETH = 1e15 // 0.001 ETH
 const FAUCET_AMOUNT = 5000 * MILLI_ETH
 
-const GAS_PRICE = 1 * GWEI;
-const GAS = 1000000;
+const GAS_PRICE = 1 * GWEI
+const GAS = 1000000
 
 const testConfig: ProviderConfig = {
   contractAddresses: (process.env.CONTRACTS && JSON.parse(process.env.CONTRACTS)) || contractAddresses,
@@ -34,21 +34,21 @@ const testConfig: ProviderConfig = {
   FAUCET_AMOUNT: `${FAUCET_AMOUNT}`,
 }
 
-testConfig.isRealTestnet = !testConfig.rpcUrl.includes('127.0.0.1') && !testConfig.rpcUrl.includes('localhost');
+testConfig.isRealTestnet = !testConfig.rpcUrl.includes('127.0.0.1') && !testConfig.rpcUrl.includes('localhost')
 
 export type ProviderConfig = {
-  rpcUrl: string;
-  isRealTestnet: boolean;
-  godAccount: Account;
-  gas: string;
-  gasPrice: string;
-  nftRegistry: string;
-  transactionTimeout: number;
-  contractAddresses: ContractAddresses;
-  contractAbis: ContractAbis;
-  SUCCESS_STATUS: '0x1';
-  FAIL_STATUS: '0x0';
-  FAUCET_AMOUNT: string;
-};
+  rpcUrl: string
+  isRealTestnet: boolean
+  godAccount: Account
+  gas: string
+  gasPrice: string
+  nftRegistry: string
+  transactionTimeout: number
+  contractAddresses: ContractAddresses
+  contractAbis: ContractAbis
+  SUCCESS_STATUS: '0x1'
+  FAIL_STATUS: '0x0'
+  FAUCET_AMOUNT: string
+}
 
 export default testConfig
