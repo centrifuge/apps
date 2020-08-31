@@ -96,9 +96,9 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     approveAllowanceSenior = async (user: string, maxCurrency: string, maxToken: string) => {
       if (this.getOperatorType('senior') === 'PROPORTIONAL_OPERATOR') {
         return this.pending(this.contract('SENIOR_OPERATOR').approve(user, maxCurrency))
-      } else {
+      } 
         return this.pending(this.contract('SENIOR_OPERATOR').approve(user, maxCurrency, maxToken))
-      }
+      
       
     }
   }
