@@ -1,7 +1,10 @@
 import Tinlake, { ITinlake } from '@centrifuge/tinlake-js'
-import { ContractAddresses } from 'tinlake/dist/Tinlake'
 import Eth from 'ethjs'
 import config from '../../config'
+
+type ContractAddresses = {
+  [key: string]: string
+}
 
 let tinlake: ITinlake | null = null
 let currentAddresses: null | ContractAddresses = null
