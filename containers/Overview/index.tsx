@@ -185,7 +185,7 @@ class Overview extends React.Component<Props> {
         {loans!.loansState === 'loading' ? (
           <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />
         ) : (
-          <LoanListData loans={latestLoans} userAddress={userAddress}>
+          <LoanListData loans={latestLoans} userAddress={userAddress!}>
             {' '}
           </LoanListData>
         )}
