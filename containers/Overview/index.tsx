@@ -1,7 +1,7 @@
 import * as React from 'react'
 import BN from 'bn.js'
 import { connect } from 'react-redux'
-import { baseToDisplay, feeToInterestRate } from 'tinlake'
+import { ITinlake, baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import { Box, Heading, Table, TableCell, TableRow, TableBody, Button, Anchor } from 'grommet'
 import SecondaryHeader from '../../components/SecondaryHeader'
 import { PoolState, loadPool } from '../../ducks/pool'
@@ -9,7 +9,6 @@ import { LoansState, loadLoans } from '../../ducks/loans'
 import { AuthState } from '../../ducks/auth'
 import { Spinner } from '@centrifuge/axis-spinner'
 import LoanListData from '../../components/Loan/List'
-import Tinlake from 'tinlake/dist/Tinlake'
 import { Pool } from '../../config'
 import { PoolLink } from '../../components/PoolLink'
 import { toPrecision } from '../../utils/toPrecision'
@@ -18,12 +17,12 @@ import InvestAction from '../../components/InvestAction'
 import { withRouter, NextRouter } from 'next/router'
 
 interface Props {
-  tinlake: any
+  tinlake: ITinlake
   loans?: LoansState
-  loadLoans?: (tinlake: Tinlake) => Promise<void>
+  loadLoans?: (tinlake: ITinlake) => Promise<void>
   pool?: PoolState
   auth?: AuthState
-  loadPool?: (tinlake: Tinlake) => Promise<void>
+  loadPool?: (tinlake: ITinlake) => Promise<void>
   selectedPool: Pool
   router: NextRouter
 }
@@ -186,7 +185,7 @@ class Overview extends React.Component<Props> {
         {loans!.loansState === 'loading' ? (
           <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />
         ) : (
-          <LoanListData loans={latestLoans} userAddress={userAddress}>
+          <LoanListData loans={latestLoans} userAddress={userAddress!}>
             {' '}
           </LoanListData>
         )}

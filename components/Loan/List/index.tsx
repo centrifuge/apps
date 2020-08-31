@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { bnToHex, baseToDisplay, feeToInterestRate } from 'tinlake'
+import { bnToHex, baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import { Box, DataTable, Text } from 'grommet'
 import NumberDisplay from '../../../components/NumberDisplay'
 import { DisplayField } from '@centrifuge/axis-display-field'

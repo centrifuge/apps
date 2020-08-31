@@ -4,7 +4,7 @@ import { networkIdToName } from '../utils/networkNameResolver'
 import Apollo from '../services/apollo'
 import { HYDRATE } from 'next-redux-wrapper'
 import { initOnboard, getOnboard } from '../services/onboard'
-import { ITinlake } from 'tinlake'
+import { ITinlake } from '@centrifuge/tinlake-js'
 import { getDefaultHttpProvider, getTinlake } from '../services/tinlake'
 import config from '../config'
 

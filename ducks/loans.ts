@@ -1,9 +1,8 @@
 import { AnyAction, Action } from 'redux'
 import { ThunkAction } from 'redux-thunk'
-import { Loan } from 'tinlake'
+import { Loan } from '@centrifuge/tinlake-js'
 import { getLoan, TinlakeResult } from '../services/tinlake/actions'
 import Apollo from '../services/apollo'
-import Tinlake from 'tinlake/dist/Tinlake'
 import { HYDRATE } from 'next-redux-wrapper'
 
 // SortableLoan adds properties of number type that support sorting in numerical order for grommet DataTable
@@ -55,7 +54,7 @@ export default function reducer(state: LoansState = initialState, action: AnyAct
 }
 
 // hardcoded root just for testing - will be removed in next pr
-export function loadLoans(tinlake: Tinlake): ThunkAction<Promise<void>, LoansState, undefined, Action> {
+export function loadLoans(tinlake: any): ThunkAction<Promise<void>, LoansState, undefined, Action> {
   return async (dispatch) => {
     dispatch({ type: LOAD })
     const root = tinlake.contractAddresses['ROOT_CONTRACT']

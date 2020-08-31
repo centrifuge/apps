@@ -1,5 +1,5 @@
 import BN from 'bn.js'
-import { Loan, NFT, interestRateToFee, ITinlake } from 'tinlake'
+import { Loan, NFT, interestRateToFee, ITinlake } from '@centrifuge/tinlake-js'
 import { maxUint256 } from '../../utils/maxUint256'
 import { PendingTransaction } from 'tinlake/dist/Tinlake'
 

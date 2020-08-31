@@ -1,7 +1,7 @@
 import { AnyAction, Action } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { getPool, TinlakeResult } from '../services/tinlake/actions'
-import { Tranche } from 'tinlake'
+import { Tranche } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { HYDRATE } from 'next-redux-wrapper'
 
