@@ -19,10 +19,9 @@ export declare function AdminActions<ActionsBase extends Constructor<TinlakePara
         approveAllowanceJunior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
         approveAllowanceSenior: (user: string, maxCurrency: string, maxToken: string) => Promise<unknown>;
         provider: any;
-        signer: import("ethers").Signer;
         eth: import("../services/ethereum").ethI;
         ethOptions: any;
-        ethConfig: import("../Tinlake").EthConfig;
+        ethConfig: {} | import("../Tinlake").EthConfig;
         contractAddresses: import("../Tinlake").ContractAddresses;
         transactionTimeout: number;
         contracts: import("../Tinlake").Contracts;
@@ -30,7 +29,8 @@ export declare function AdminActions<ActionsBase extends Constructor<TinlakePara
         contractConfig: any;
         setProvider: (provider: any, ethOptions?: any) => void;
         setContracts: () => void;
-        setEthConfig: (ethConfig: import("../Tinlake").EthConfig) => void;
+        setEthConfig: (ethConfig: {} | import("../Tinlake").EthConfig) => void;
+        setContractAddresses: () => Promise<void>;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };
