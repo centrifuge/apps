@@ -15,6 +15,7 @@ export declare function CollateralActions<ActionsBase extends Constructor<Tinlak
         eth: import("../services/ethereum").ethI;
         ethOptions: any;
         ethConfig: import("../Tinlake").EthConfig;
+        ethersConfig: import("../Tinlake").EthersConfig;
         contractAddresses: import("../Tinlake").ContractAddresses;
         transactionTimeout: number;
         contracts: import("../Tinlake").Contracts;
@@ -23,6 +24,7 @@ export declare function CollateralActions<ActionsBase extends Constructor<Tinlak
         setProvider: (provider: any, ethOptions?: any) => void;
         setContracts: () => void;
         setEthConfig: (ethConfig: import("../Tinlake").EthConfig) => void;
+        setEthersConfig: (ethersConfig: import("../Tinlake").EthersConfig) => void;
         createContract(address: string, abiName: string): void;
         getOperatorType: (tranche: string) => any;
     };

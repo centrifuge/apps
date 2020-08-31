@@ -25,6 +25,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return res[0]
     }
 
+    // REV: can be removed
     canSetInterestRate = async (user: string) => {
       if (!this.contracts['PILE']?.wards) {
         return false
@@ -44,6 +45,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return false
     }
 
+    // REV: can be removed
     canSetRiskScore = async (user: string) => {
       if (!this.contracts['PRICE_POOL']?.wards) {
         return false
@@ -61,6 +63,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return res[0].toNumber() === 1
     }
 
+    // REV: to be replaced by canAddToJuniorMemberList()
     canSetInvestorAllowanceJunior = async (user: string) => {
       if (!this.contracts['JUNIOR_OPERATOR']?.wards) {
         return false
@@ -69,6 +72,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return res[0].toNumber() === 1
     }
 
+    // REV: to be replaced by canAddToSeniorMemberList()
     canSetInvestorAllowanceSenior = async (user: string) => {
       if (!this.contracts['SENIOR_OPERATOR']?.wards) {
         return false
@@ -80,6 +84,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return false
     }
 
+    // REV: not used, but can be left
     canSetLoanPrice = async (user: string) => {
       if (!this.contracts['COLLECTOR']?.wards) {
         return false
@@ -95,6 +100,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return !res.ratePerSecond.isZero()
     }
 
+    // REV: to remove
     initRate = async (ratePerSecond: string) => {
       const rateGroup = getRateGroup(ratePerSecond)
       const txHash = await executeAndRetry(this.contracts['PILE'].file, [
@@ -107,6 +113,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return waitAndReturnEvents(this.eth, txHash, this.contracts['PILE'].abi, this.transactionTimeout)
     }
 
+    // REV: to remove
     changeRate = async (loan: string, ratePerSecond: string) => {
       const rateGroup = getRateGroup(ratePerSecond)
       const txHash = await executeAndRetry(this.contracts['PILE'].changeRate, [loan, rateGroup, this.ethConfig])
@@ -114,6 +121,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return waitAndReturnEvents(this.eth, txHash, this.contracts['PILE'].abi, this.transactionTimeout)
     }
 
+    // REV: to remove
     setRate = async (loan: string, ratePerSecond: string) => {
       const rateGroup = getRateGroup(ratePerSecond)
       const txHash = await executeAndRetry(this.contracts['PILE'].setRate, [loan, rateGroup, this.ethConfig])
@@ -132,6 +140,10 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return waitAndReturnEvents(this.eth, txHash, this.contracts['ASSESSOR'].abi, this.transactionTimeout)
     }
 
+    // REV: add setMaximumJuniorRatio() and setMaxReserve() (accessible through ASSESSOR contract)
+    // REV: add setMaxDays() and setDiscountRate() on NAVFeed contract
+
+    // REV: to remove
     approveAllowanceJunior = async (user: string, maxCurrency: string, maxToken: string) => {
       const txHash = await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].approve, [
         user,
@@ -143,6 +155,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_OPERATOR'].abi, this.transactionTimeout)
     }
 
+    // REV: to remove
     approveAllowanceSenior = async (user: string, maxCurrency: string, maxToken: string) => {
       const operatorType = this.getOperatorType('senior')
       let txHash

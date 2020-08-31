@@ -10713,6 +10713,7 @@ function AdminActions(Base) {
                     }
                 });
             }); };
+            // REV: can be removed
             _this.canSetInterestRate = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 var _a;
@@ -10747,6 +10748,7 @@ function AdminActions(Base) {
                     }
                 });
             }); };
+            // REV: can be removed
             _this.canSetRiskScore = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 var _a;
@@ -10780,6 +10782,7 @@ function AdminActions(Base) {
                     }
                 });
             }); };
+            // REV: to be replaced by canAddToJuniorMemberList()
             _this.canSetInvestorAllowanceJunior = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 var _a;
@@ -10796,6 +10799,7 @@ function AdminActions(Base) {
                     }
                 });
             }); };
+            // REV: to be replaced by canAddToSeniorMemberList()
             _this.canSetInvestorAllowanceSenior = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 var _a;
@@ -10814,6 +10818,7 @@ function AdminActions(Base) {
                     }
                 });
             }); };
+            // REV: not used, but can be left
             _this.canSetLoanPrice = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 var res;
                 var _a;
@@ -10844,6 +10849,7 @@ function AdminActions(Base) {
                     }
                 });
             }); };
+            // REV: to remove
             _this.initRate = function (ratePerSecond) { return __awaiter(_this, void 0, void 0, function () {
                 var rateGroup, txHash;
                 return __generator(this, function (_a) {
@@ -10863,6 +10869,7 @@ function AdminActions(Base) {
                     }
                 });
             }); };
+            // REV: to remove
             _this.changeRate = function (loan, ratePerSecond) { return __awaiter(_this, void 0, void 0, function () {
                 var rateGroup, txHash;
                 return __generator(this, function (_a) {
@@ -10877,6 +10884,7 @@ function AdminActions(Base) {
                     }
                 });
             }); };
+            // REV: to remove
             _this.setRate = function (loan, ratePerSecond) { return __awaiter(_this, void 0, void 0, function () {
                 var rateGroup, txHash;
                 return __generator(this, function (_a) {
@@ -10908,6 +10916,9 @@ function AdminActions(Base) {
                     }
                 });
             }); };
+            // REV: add setMaximumJuniorRatio() and setMaxReserve() (accessible through ASSESSOR contract)
+            // REV: add setMaxDays() and setDiscountRate() on NAVFeed contract
+            // REV: to remove
             _this.approveAllowanceJunior = function (user, maxCurrency, maxToken) { return __awaiter(_this, void 0, void 0, function () {
                 var txHash;
                 return __generator(this, function (_a) {
@@ -10925,6 +10936,7 @@ function AdminActions(Base) {
                     }
                 });
             }); };
+            // REV: to remove
             _this.approveAllowanceSenior = function (user, maxCurrency, maxToken) { return __awaiter(_this, void 0, void 0, function () {
                 var operatorType, txHash, _a;
                 return __generator(this, function (_b) {
