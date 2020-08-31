@@ -12,7 +12,7 @@ const GWEI = 1000 * MWEI;
 const MILLI_ETH = 1e15; // 0.001 ETH
 const FAUCET_AMOUNT = 5000 * MILLI_ETH;
 
-const GAS_PRICE = 5 * GWEI;
+const GAS_PRICE = 1 * GWEI;
 const GAS = 1000000;
 
 const testConfig : ProviderConfig = {
@@ -34,7 +34,7 @@ const testConfig : ProviderConfig = {
   FAUCET_AMOUNT: `${FAUCET_AMOUNT}`,
 };
 
-testConfig.isRealTestnet = !testConfig.rpcUrl.includes('127.0.0.1') && !testConfig.rpcUrl.includes('localhost')
+testConfig.isRealTestnet = !testConfig.rpcUrl.includes('127.0.0.1') && !testConfig.rpcUrl.includes('localhost');
 
 export type ProviderConfig = {
   rpcUrl: string;
