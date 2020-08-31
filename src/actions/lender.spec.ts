@@ -63,25 +63,22 @@ describe('lender functions', async () => {
     // supply currency - receive tokens
     await supply(lenderAccount.address, `${currencyAmount}`, lenderTinlake)
     // approve junior tranche to take tokens
-    await lenderTinlake.approveJuniorToken(tokenAmount)
+    await lenderTinlake.approveJuniorToken(tokenAmount);
 
-    const initialLenderCurrencyBalance: BN = await lenderTinlake.getCurrencyBalance(lenderAccount.address)
-    const initialTrancheCurrencyBalance: BN = await lenderTinlake.getCurrencyBalance(contractAddresses['JUNIOR'])
-    const initialJuniorTokenBalance = await lenderTinlake.getJuniorTokenBalance(lenderAccount.address)
+    const initialLenderCurrencyBalance: BN = await lenderTinlake.getCurrencyBalance(lenderAccount.address);
+    const initialTrancheCurrencyBalance: BN = await lenderTinlake.getCurrencyBalance(contractAddresses['JUNIOR']);
+    const initialJuniorTokenBalance = await lenderTinlake.getJuniorTokenBalance(lenderAccount.address);
 
-    const redeemResult = await lenderTinlake.redeemJunior(tokenAmount)
+    const redeemResult = await lenderTinlake.redeemJunior(tokenAmount);
 
-    const newTrancheCurrencyBalance = await lenderTinlake.getCurrencyBalance(contractAddresses['JUNIOR'])
-    const newLenderCurrencyBalance = await lenderTinlake.getCurrencyBalance(lenderAccount.address)
-    const newJuniorTokenBalance = await lenderTinlake.getJuniorTokenBalance(lenderAccount.address)
-    assert.equal(redeemResult.status, SUCCESS_STATUS)
-    assert.equal(
-      initialTrancheCurrencyBalance.toString(),
-      newTrancheCurrencyBalance.add(new BN(tokenAmount)).toString()
-    )
-    assert.equal(initialLenderCurrencyBalance.add(new BN(tokenAmount)).toString(), newLenderCurrencyBalance.toString())
-    assert.equal(tokenAmount, initialJuniorTokenBalance.sub(newJuniorTokenBalance).toString())
-  })
+    const newTrancheCurrencyBalance = await lenderTinlake.getCurrencyBalance(contractAddresses['JUNIOR']);
+    const newLenderCurrencyBalance = await lenderTinlake.getCurrencyBalance(lenderAccount.address);
+    const newJuniorTokenBalance = await lenderTinlake.getJuniorTokenBalance(lenderAccount.address);
+    assert.equal(redeemResult.status, SUCCESS_STATUS);
+    assert.equal(initialTrancheCurrencyBalance.sub(new BN(tokenAmount)).subn(1).toString(), newTrancheCurrencyBalance.toString());
+    assert.equal(initialLenderCurrencyBalance.add(new BN(tokenAmount)).addn(1).toString(), newLenderCurrencyBalance.toString());
+    assert.equal(tokenAmount, initialJuniorTokenBalance.sub(newJuniorTokenBalance).toString());
+  });
 
   it('fail: redeem junior - no allowance', async () => {
     const currencyAmount = '1000'
@@ -119,5 +116,13 @@ async function supply(investor: string, currencyAmount: string, tinlake: ITinlak
   // assert investor currency balanace decreased
   assert.equal(initialLenderCurrencyBalance.sub(newLenderCurrencyBalance).toString(), currencyAmount)
   // assert investor received tokens
+<<<<<<< HEAD
   assert.equal(initialJuniorTokenBalance.add(new BN(currencyAmount)).toString(), newJuniorTokenBalance.toString())
+=======
+  if (testConfig.isRealTestnet) {
+    assert.ok(newJuniorTokenBalance.gt(initialJuniorTokenBalance));
+  } else {
+    assert.equal(initialJuniorTokenBalance.add(new BN(currencyAmount)).toString(), newJuniorTokenBalance.toString());
+  }
+>>>>>>> ee41efa671ce8ff6dd759615060d775dfedde492
 }

@@ -27,7 +27,7 @@ describe('proxy tests', async () => {
     await testProvider.fundAccountWithETH(borrowerAccount.address, FAUCET_AMOUNT)
   })
 
-  describe.only('proxy registry', async () => {
+  describe('proxy registry', async () => {
     it('success: full loan cycle - open, borrow, lock, withdraw, repay, unlock, close', async () => {
       // create new proxy and mint collateral NFT to borrower
       const proxyAddr = await borrowerTinlake.proxyCreateNew(borrowerAccount.address)
@@ -35,9 +35,9 @@ describe('proxy tests', async () => {
       await governanceTinlake.mintNFT(testConfig.nftRegistry, borrowerAccount.address, tokenId, '234', '345', '456')
       await borrowerTinlake.approveNFT(testConfig.nftRegistry, tokenId, proxyAddr)
       // issue loan from collateral NFT
-      const issueResult = await borrowerTinlake.proxyTransferIssue(testConfig.nftRegistry, proxyAddr, tokenId)
-      assert.equal(issueResult.status, SUCCESS_STATUS)
-      assert.equal(await borrowerTinlake.getNFTOwner(testConfig.nftRegistry, tokenId), proxyAddr)
+      const issueResult = await borrowerTinlake.proxyTransferIssue(proxyAddr, testConfig.nftRegistry, tokenId);
+      assert.equal(issueResult.status, SUCCESS_STATUS);
+      assert.equal(await borrowerTinlake.getNFTOwner(testConfig.nftRegistry, tokenId), proxyAddr);
 
       // TODO: update with v3, ceiling does currently not exist, need to use NFT Feed
       // set loan parameters and fund tranche
