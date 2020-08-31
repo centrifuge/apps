@@ -3,7 +3,7 @@ import { initTinlake } from '../../services/tinlake'
 import { ITinlake } from '@centrifuge/tinlake-js'
 
 interface Props {
-  render: (tinlake: any) => React.ReactElement
+  render: (tinlake: ITinlake) => React.ReactElement
   addresses?: {
     ROOT_CONTRACT: string
     ACTIONS: string

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import BN from 'bn.js'
 import { connect } from 'react-redux'
-import Tinlake, { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
+import { ITinlake, baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import { Box, Heading, Table, TableCell, TableRow, TableBody, Button, Anchor } from 'grommet'
 import SecondaryHeader from '../../components/SecondaryHeader'
 import { PoolState, loadPool } from '../../ducks/pool'
@@ -17,12 +17,12 @@ import InvestAction from '../../components/InvestAction'
 import { withRouter, NextRouter } from 'next/router'
 
 interface Props {
-  tinlake: any
+  tinlake: ITinlake
   loans?: LoansState
-  loadLoans?: (tinlake: typeof Tinlake) => Promise<void>
+  loadLoans?: (tinlake: ITinlake) => Promise<void>
   pool?: PoolState
   auth?: AuthState
-  loadPool?: (tinlake: typeof Tinlake) => Promise<void>
+  loadPool?: (tinlake: ITinlake) => Promise<void>
   selectedPool: Pool
   router: NextRouter
 }
