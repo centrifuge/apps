@@ -118,15 +118,18 @@ export default class Tinlake {
     this.contractConfig = contractConfig || {}
     this.contractAddresses = contractAddresses || {}
     this.transactionTimeout = transactionTimeout
-    this.setProvider(provider, ethOptions)
+    this.setProvider(provider, ethOptions, ethersConfig)
     this.setEthConfig(ethConfig || {})
     this.setEthersConfig(ethersConfig)
   }
 
-  setProvider = (provider: any, ethOptions?: any) => {
+  setProvider = (provider: any, ethOptions?: any, ethersConfig?: EthersConfig) => {
     this.provider = provider
     this.ethOptions = ethOptions || {}
     this.eth = new Eth(this.provider, this.ethOptions) as ethI
+
+    console.log('set provider', ethersConfig)
+    if (ethersConfig) this.ethersConfig = ethersConfig
 
     this.setContracts()
   }
@@ -147,22 +150,18 @@ export default class Tinlake {
         ? this.createEthContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
         : this.createEthContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
 
-      if (this.ethersConfig) {
-        this.ethersContracts['JUNIOR_OPERATOR'] = this.contractConfig['JUNIOR_OPERATOR']
-          ? this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
-          : this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
-      }
+      this.ethersContracts['JUNIOR_OPERATOR'] = this.contractConfig['JUNIOR_OPERATOR']
+        ? this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
+        : this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
     }
     if (this.contractAddresses['SENIOR_OPERATOR']) {
       this.contracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR']
         ? this.createEthContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
         : this.createEthContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
 
-      if (this.ethersConfig) {
-        this.ethersContracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR']
-          ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
-          : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
-      }
+      this.ethersContracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR']
+        ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
+        : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
     }
   }
 
@@ -190,6 +189,7 @@ export default class Tinlake {
   }
 
   contract(abiName: ContractName, address?: string): ethers.Contract {
+    console.log(`Looking up contract ${abiName}`, this.ethersContracts)
     if (address) {
       return new ethers.Contract(address, this.contractAbis[abiName], this.ethersConfig.signer)
     }  if (this.ethersConfig.signer) {

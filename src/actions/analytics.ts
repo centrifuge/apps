@@ -136,11 +136,11 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getMaxSupplyAmountJunior = async (user: string) => {
-      return (await this.contract('JUNIOR_TOKEN').maxCurrency(user)).toBN()
+      return (await this.contract('JUNIOR_OPERATOR').maxCurrency(user)).toBN()
     }
 
     getMaxRedeemAmountJunior = async (user: string) => {
-      return (await this.contract('JUNIOR_TOKEN').maxToken(user)).toBN()
+      return (await this.contract('JUNIOR_OPERATOR').maxToken(user)).toBN()
     }
 
     getTokenPriceJunior = async () => {

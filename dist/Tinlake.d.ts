@@ -54,7 +54,7 @@ export default class Tinlake {
     contractAbis: ContractAbis;
     contractConfig: any;
     constructor(params: TinlakeParams);
-    setProvider: (provider: any, ethOptions?: any) => void;
+    setProvider: (provider: any, ethOptions?: any, ethersConfig?: EthersConfig | undefined) => void;
     setContracts: () => void;
     setEthConfig: (ethConfig: EthConfig) => void;
     setEthersConfig: (ethersConfig: EthersConfig | undefined) => void;

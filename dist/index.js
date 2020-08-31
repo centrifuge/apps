@@ -10695,144 +10695,112 @@ function AdminActions(Base) {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.canQueryPermissions = function () {
                 var _a, _b, _c, _d, _e, _f, _g;
-                return (!!((_a = _this.contracts['PILE']) === null || _a === void 0 ? void 0 : _a.wards) &&
-                    !!((_b = _this.contracts['SENIOR']) === null || _b === void 0 ? void 0 : _b.wards) &&
-                    !!((_c = _this.contracts['PRICE_POOL']) === null || _c === void 0 ? void 0 : _c.wards) &&
-                    !!((_d = _this.contracts['ASSESSOR']) === null || _d === void 0 ? void 0 : _d.wards) &&
-                    !!((_e = _this.contracts['JUNIOR_OPERATOR']) === null || _e === void 0 ? void 0 : _e.wards) &&
-                    !!((_f = _this.contracts['SENIOR_OPERATOR']) === null || _f === void 0 ? void 0 : _f.wards) &&
-                    !!((_g = _this.contracts['COLLECTOR']) === null || _g === void 0 ? void 0 : _g.wards));
+                return (!!((_a = _this.contract('PILE')) === null || _a === void 0 ? void 0 : _a.wards) &&
+                    !!((_b = _this.contract('SENIOR')) === null || _b === void 0 ? void 0 : _b.wards) &&
+                    !!((_c = _this.contract('PRICE_POOL')) === null || _c === void 0 ? void 0 : _c.wards) &&
+                    !!((_d = _this.contract('ASSESSOR')) === null || _d === void 0 ? void 0 : _d.wards) &&
+                    !!((_e = _this.contract('JUNIOR_OPERATOR')) === null || _e === void 0 ? void 0 : _e.wards) &&
+                    !!((_f = _this.contract('SENIOR_OPERATOR')) === null || _f === void 0 ? void 0 : _f.wards) &&
+                    !!((_g = _this.contract('COLLECTOR')) === null || _g === void 0 ? void 0 : _g.wards));
             };
             _this.isWard = function (user, contractName) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 var _a;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
-                            if (!((_a = this.contracts[contractName]) === null || _a === void 0 ? void 0 : _a.wards)) {
+                            if (!((_a = this.contract(contractName)) === null || _a === void 0 ? void 0 : _a.wards))
                                 return [2 /*return*/, new bn(0)];
-                            }
-                            return [4 /*yield*/, executeAndRetry(this.contracts[contractName].wards, [user])];
-                        case 1:
-                            res = _b.sent();
-                            return [2 /*return*/, res[0]];
+                            return [4 /*yield*/, this.contract(contractName).wards(user)];
+                        case 1: return [2 /*return*/, (_b.sent()).toBN()];
                     }
                 });
             }); };
             _this.canSetInterestRate = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 var _a;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
-                            if (!((_a = this.contracts['PILE']) === null || _a === void 0 ? void 0 : _a.wards)) {
+                            if (!((_a = this.contract('PILE')) === null || _a === void 0 ? void 0 : _a.wards))
                                 return [2 /*return*/, false];
-                            }
-                            return [4 /*yield*/, executeAndRetry(this.contracts['PILE'].wards, [user])];
-                        case 1:
-                            res = _b.sent();
-                            return [2 /*return*/, res[0].toNumber() === 1];
+                            return [4 /*yield*/, this.contract('PILE').wards(user)];
+                        case 1: return [2 /*return*/, (_b.sent()).toBN().toNumber() === 1];
                     }
                 });
             }); };
             _this.canSetSeniorTrancheInterest = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 var _a;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
-                            if (!(this.contractAddresses['SENIOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
-                            if (!((_a = this.contracts['SENIOR']) === null || _a === void 0 ? void 0 : _a.wards)) {
+                            if (!(this.contractAddresses['SENIOR'] !== ZERO_ADDRESS))
                                 return [2 /*return*/, false];
-                            }
-                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR'].wards, [user])];
-                        case 1:
-                            res = _b.sent();
-                            return [2 /*return*/, res[0].toNumber() === 1];
-                        case 2: return [2 /*return*/, false];
+                            if (!((_a = this.contract('SENIOR')) === null || _a === void 0 ? void 0 : _a.wards))
+                                return [2 /*return*/, false];
+                            return [4 /*yield*/, this.contract('SENIOR').wards(user)];
+                        case 1: return [2 /*return*/, (_b.sent()).toBN().toNumber() === 1];
                     }
                 });
             }); };
             _this.canSetRiskScore = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 var _a;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
-                            if (!((_a = this.contracts['PRICE_POOL']) === null || _a === void 0 ? void 0 : _a.wards)) {
+                            if (!((_a = this.contract('PRICE_POOL')) === null || _a === void 0 ? void 0 : _a.wards))
                                 return [2 /*return*/, false];
-                            }
-                            return [4 /*yield*/, executeAndRetry(this.contracts['PRICE_POOL'].wards, [user])];
-                        case 1:
-                            res = _b.sent();
-                            return [2 /*return*/, res[0].toNumber() === 1];
+                            return [4 /*yield*/, this.contract('PRICE_POOL').wards(user)];
+                        case 1: return [2 /*return*/, (_b.sent()).toBN().toNumber() === 1];
                     }
                 });
             }); };
             // lender permissions (note: allowance operator for default deployment)
             _this.canSetMinimumJuniorRatio = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 var _a;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
-                            if (!((_a = this.contracts['ASSESSOR']) === null || _a === void 0 ? void 0 : _a.wards)) {
+                            if (!((_a = this.contract('ASSESSOR')) === null || _a === void 0 ? void 0 : _a.wards))
                                 return [2 /*return*/, false];
-                            }
-                            return [4 /*yield*/, executeAndRetry(this.contracts['ASSESSOR'].wards, [user])];
-                        case 1:
-                            res = _b.sent();
-                            return [2 /*return*/, res[0].toNumber() === 1];
+                            return [4 /*yield*/, this.contract('ASSESSOR').wards(user)];
+                        case 1: return [2 /*return*/, (_b.sent()).toBN().toNumber() === 1];
                     }
                 });
             }); };
             _this.canSetInvestorAllowanceJunior = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 var _a;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
-                            if (!((_a = this.contracts['JUNIOR_OPERATOR']) === null || _a === void 0 ? void 0 : _a.wards)) {
+                            if (!((_a = this.contract('JUNIOR_OPERATOR')) === null || _a === void 0 ? void 0 : _a.wards))
                                 return [2 /*return*/, false];
-                            }
-                            return [4 /*yield*/, executeAndRetry(this.contracts['JUNIOR_OPERATOR'].wards, [user])];
-                        case 1:
-                            res = _b.sent();
-                            return [2 /*return*/, res[0].toNumber() === 1];
+                            return [4 /*yield*/, this.contract('JUNIOR_OPERATOR').wards(user)];
+                        case 1: return [2 /*return*/, (_b.sent()).toBN().toNumber() === 1];
                     }
                 });
             }); };
             _this.canSetInvestorAllowanceSenior = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 var _a;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
-                            if (!((_a = this.contracts['SENIOR_OPERATOR']) === null || _a === void 0 ? void 0 : _a.wards)) {
+                            if (!((_a = this.contract('SENIOR_OPERATOR')) === null || _a === void 0 ? void 0 : _a.wards))
                                 return [2 /*return*/, false];
-                            }
-                            if (!(this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS)) return [3 /*break*/, 2];
-                            return [4 /*yield*/, executeAndRetry(this.contracts['SENIOR_OPERATOR'].wards, [user])];
-                        case 1:
-                            res = _b.sent();
-                            return [2 /*return*/, res[0].toNumber() === 1];
-                        case 2: return [2 /*return*/, false];
+                            if (!(this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS))
+                                return [2 /*return*/, false];
+                            return [4 /*yield*/, this.contract('SENIOR_OPERATOR').wards(user)];
+                        case 1: return [2 /*return*/, (_b.sent()).toBN().toNumber() === 1];
                     }
                 });
             }); };
             _this.canSetLoanPrice = function (user) { return __awaiter(_this, void 0, void 0, function () {
-                var res;
                 var _a;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
-                            if (!((_a = this.contracts['COLLECTOR']) === null || _a === void 0 ? void 0 : _a.wards)) {
+                            if (!((_a = this.contract('COLLECTOR')) === null || _a === void 0 ? void 0 : _a.wards))
                                 return [2 /*return*/, false];
-                            }
-                            return [4 /*yield*/, executeAndRetry(this.contracts['COLLECTOR'].wards, [user])];
-                        case 1:
-                            res = _b.sent();
-                            return [2 /*return*/, res[0].toNumber() === 1];
+                            return [4 /*yield*/, this.contract('COLLECTOR').wards(user)];
+                        case 1: return [2 /*return*/, (_b.sent()).toBN().toNumber() === 1];
                     }
                 });
             }); };
@@ -10851,76 +10819,45 @@ function AdminActions(Base) {
                 });
             }); };
             _this.initRate = function (ratePerSecond) { return __awaiter(_this, void 0, void 0, function () {
-                var rateGroup, txHash;
+                var rateGroup;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            rateGroup = getRateGroup(ratePerSecond);
-                            return [4 /*yield*/, executeAndRetry(this.contracts['PILE'].file, [
-                                    web3.fromAscii('rate'),
-                                    rateGroup,
-                                    ratePerSecond,
-                                    this.ethConfig,
-                                ])];
-                        case 1:
-                            txHash = _a.sent();
-                            console.log("[Initialising rate] txHash: " + txHash);
-                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['PILE'].abi, this.transactionTimeout)];
-                    }
+                    rateGroup = getRateGroup(ratePerSecond);
+                    // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
+                    return [2 /*return*/, this.pending(this.contract('PILE').file(web3.fromAscii('rate').padEnd(66, '0'), rateGroup, ratePerSecond))];
                 });
             }); };
             _this.changeRate = function (loan, ratePerSecond) { return __awaiter(_this, void 0, void 0, function () {
-                var rateGroup, txHash;
+                var rateGroup;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            rateGroup = getRateGroup(ratePerSecond);
-                            return [4 /*yield*/, executeAndRetry(this.contracts['PILE'].changeRate, [loan, rateGroup, this.ethConfig])];
-                        case 1:
-                            txHash = _a.sent();
-                            console.log("[Initialising rate] txHash: " + txHash);
-                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['PILE'].abi, this.transactionTimeout)];
-                    }
+                    rateGroup = getRateGroup(ratePerSecond);
+                    return [2 /*return*/, this.pending(this.contract('PILE').changeRate(loan, rateGroup))];
                 });
             }); };
             _this.setRate = function (loan, ratePerSecond) { return __awaiter(_this, void 0, void 0, function () {
-                var rateGroup, txHash;
+                var rateGroup;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            rateGroup = getRateGroup(ratePerSecond);
-                            return [4 /*yield*/, executeAndRetry(this.contracts['PILE'].setRate, [loan, rateGroup, this.ethConfig])];
-                        case 1:
-                            txHash = _a.sent();
-                            console.log("[Setting rate] txHash: " + txHash);
-                            return [2 /*return*/, waitAndReturnEvents(this.eth, txHash, this.contracts['PILE'].abi, this.transactionTimeout)];
-                    }
+                    rateGroup = getRateGroup(ratePerSecond);
+                    return [2 /*return*/, this.pending(this.contract('PILE').setRatet(loan, rateGroup))];
                 });
             }); };
             // ------------ admin functions lender-site -------------
             _this.setMinimumJuniorRatio = function (ratio) { return __awaiter(_this, void 0, void 0, function () {
-                var assessor;
                 return __generator(this, function (_a) {
-                    assessor = this.contract('ASSESSOR');
                     // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
-                    return [2 /*return*/, this.pending(assessor.file(web3.fromAscii('minJuniorRatio').padEnd(66, '0'), ratio))];
+                    return [2 /*return*/, this.pending(this.contract('ASSESSOR').file(web3.fromAscii('minJuniorRatio').padEnd(66, '0'), ratio))];
                 });
             }); };
             _this.approveAllowanceJunior = function (user, maxCurrency, maxToken) { return __awaiter(_this, void 0, void 0, function () {
-                var juniorOperator;
                 return __generator(this, function (_a) {
-                    juniorOperator = this.contract('JUNIOR_OPERATOR');
-                    return [2 /*return*/, this.pending(juniorOperator.approve(user, maxCurrency, maxToken))];
+                    return [2 /*return*/, this.pending(this.contract('JUNIOR_OPERATOR').approve(user, maxCurrency, maxToken))];
                 });
             }); };
             _this.approveAllowanceSenior = function (user, maxCurrency, maxToken) { return __awaiter(_this, void 0, void 0, function () {
-                var seniorOperator;
                 return __generator(this, function (_a) {
-                    seniorOperator = this.contract('SENIOR_OPERATOR');
-                    if (this.getOperatorType('senior') === 'PROPERTIONAL_OPERATOR') {
-                        return [2 /*return*/, this.pending(seniorOperator.approve(user, maxCurrency))];
+                    if (this.getOperatorType('senior') === 'PROPORTIONAL_OPERATOR') {
+                        return [2 /*return*/, this.pending(this.contract('SENIOR_OPERATOR').approve(user, maxCurrency))];
                     }
-                    return [2 /*return*/, this.pending(seniorOperator.approve(user, maxCurrency, maxToken))];
+                    return [2 /*return*/, this.pending(this.contract('SENIOR_OPERATOR').approve(user, maxCurrency, maxToken))];
                 });
             }); };
             return _this;
@@ -29918,7 +29855,7 @@ function AnalyticsActions(Base) {
             _this.getMaxSupplyAmountJunior = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.contract('JUNIOR_TOKEN').maxCurrency(user)];
+                        case 0: return [4 /*yield*/, this.contract('JUNIOR_OPERATOR').maxCurrency(user)];
                         case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
@@ -29926,7 +29863,7 @@ function AnalyticsActions(Base) {
             _this.getMaxRedeemAmountJunior = function (user) { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.contract('JUNIOR_TOKEN').maxToken(user)];
+                        case 0: return [4 /*yield*/, this.contract('JUNIOR_OPERATOR').maxToken(user)];
                         case 1: return [2 /*return*/, (_a.sent()).toBN()];
                     }
                 });
@@ -47238,10 +47175,13 @@ var Tinlake = /** @class */ (function () {
         this.ethersContracts = {};
         this.contractAbis = {};
         this.contractConfig = {};
-        this.setProvider = function (provider, ethOptions) {
+        this.setProvider = function (provider, ethOptions, ethersConfig) {
             _this.provider = provider;
             _this.ethOptions = ethOptions || {};
             _this.eth = new lib$a(_this.provider, _this.ethOptions);
+            console.log('set provider', ethersConfig);
+            if (ethersConfig)
+                _this.ethersConfig = ethersConfig;
             _this.setContracts();
         };
         this.setContracts = function () {
@@ -47258,21 +47198,17 @@ var Tinlake = /** @class */ (function () {
                 _this.contracts['JUNIOR_OPERATOR'] = _this.contractConfig['JUNIOR_OPERATOR']
                     ? _this.createEthContract(_this.contractAddresses['JUNIOR_OPERATOR'], _this.contractConfig['JUNIOR_OPERATOR'])
                     : _this.createEthContract(_this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
-                if (_this.ethersConfig) {
-                    _this.ethersContracts['JUNIOR_OPERATOR'] = _this.contractConfig['JUNIOR_OPERATOR']
-                        ? _this.createContract(_this.contractAddresses['JUNIOR_OPERATOR'], _this.contractConfig['JUNIOR_OPERATOR'])
-                        : _this.createContract(_this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
-                }
+                _this.ethersContracts['JUNIOR_OPERATOR'] = _this.contractConfig['JUNIOR_OPERATOR']
+                    ? _this.createContract(_this.contractAddresses['JUNIOR_OPERATOR'], _this.contractConfig['JUNIOR_OPERATOR'])
+                    : _this.createContract(_this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
             }
             if (_this.contractAddresses['SENIOR_OPERATOR']) {
                 _this.contracts['SENIOR_OPERATOR'] = _this.contractConfig['SENIOR_OPERATOR']
                     ? _this.createEthContract(_this.contractAddresses['SENIOR_OPERATOR'], _this.contractConfig['SENIOR_OPERATOR'])
                     : _this.createEthContract(_this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
-                if (_this.ethersConfig) {
-                    _this.ethersContracts['SENIOR_OPERATOR'] = _this.contractConfig['SENIOR_OPERATOR']
-                        ? _this.createContract(_this.contractAddresses['SENIOR_OPERATOR'], _this.contractConfig['SENIOR_OPERATOR'])
-                        : _this.createContract(_this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
-                }
+                _this.ethersContracts['SENIOR_OPERATOR'] = _this.contractConfig['SENIOR_OPERATOR']
+                    ? _this.createContract(_this.contractAddresses['SENIOR_OPERATOR'], _this.contractConfig['SENIOR_OPERATOR'])
+                    : _this.createContract(_this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR');
             }
         };
         this.setEthConfig = function (ethConfig) {
@@ -47298,7 +47234,7 @@ var Tinlake = /** @class */ (function () {
         this.contractConfig = contractConfig || {};
         this.contractAddresses = contractAddresses || {};
         this.transactionTimeout = transactionTimeout;
-        this.setProvider(provider, ethOptions);
+        this.setProvider(provider, ethOptions, ethersConfig);
         this.setEthConfig(ethConfig || {});
         this.setEthersConfig(ethersConfig);
     }
@@ -47310,6 +47246,7 @@ var Tinlake = /** @class */ (function () {
         return new ethers_2$1.Contract(address, this.contractAbis[abiName], this.ethersConfig.provider);
     };
     Tinlake.prototype.contract = function (abiName, address) {
+        console.log("Looking up contract " + abiName, this.ethersContracts);
         if (address) {
             return new ethers_2$1.Contract(address, this.contractAbis[abiName], this.ethersConfig.signer);
         }

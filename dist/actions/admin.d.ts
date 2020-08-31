@@ -3,7 +3,7 @@ import BN from 'bn.js';
 export declare function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase): {
     new (...args: any[]): {
         canQueryPermissions: () => boolean;
-        isWard: (user: string, contractName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR") => Promise<BN>;
+        isWard: (user: string, contractName: "TINLAKE_CURRENCY" | "JUNIOR_OPERATOR" | "JUNIOR" | "JUNIOR_TOKEN" | "SENIOR" | "SENIOR_TOKEN" | "SENIOR_OPERATOR" | "DISTRIBUTOR" | "ASSESSOR" | "TITLE" | "PILE" | "SHELF" | "CEILING" | "COLLECTOR" | "THRESHOLD" | "PRICE_POOL" | "COLLATERAL_NFT" | "COLLATERAL_NFT_DATA" | "ROOT_CONTRACT" | "PROXY" | "PROXY_REGISTRY" | "ACTIONS" | "BORROWER_DEPLOYER" | "LENDER_DEPLOYER" | "NFT_FEED" | "GOVERNANCE" | "ALLOWANCE_OPERATOR") => Promise<any>;
         canSetInterestRate: (user: string) => Promise<boolean>;
         canSetSeniorTrancheInterest: (user: string) => Promise<boolean>;
         canSetRiskScore: (user: string) => Promise<boolean>;
@@ -12,9 +12,9 @@ export declare function AdminActions<ActionsBase extends Constructor<TinlakePara
         canSetInvestorAllowanceSenior: (user: string) => Promise<boolean>;
         canSetLoanPrice: (user: string) => Promise<boolean>;
         existsRateGroup: (ratePerSecond: string) => Promise<boolean>;
-        initRate: (ratePerSecond: string) => Promise<unknown>;
-        changeRate: (loan: string, ratePerSecond: string) => Promise<unknown>;
-        setRate: (loan: string, ratePerSecond: string) => Promise<unknown>;
+        initRate: (ratePerSecond: string) => Promise<PendingTransaction>;
+        changeRate: (loan: string, ratePerSecond: string) => Promise<PendingTransaction>;
+        setRate: (loan: string, ratePerSecond: string) => Promise<PendingTransaction>;
         setMinimumJuniorRatio: (ratio: string) => Promise<PendingTransaction>;
         approveAllowanceJunior: (user: string, maxCurrency: string, maxToken: string) => Promise<PendingTransaction>;
         approveAllowanceSenior: (user: string, maxCurrency: string, maxToken: string) => Promise<PendingTransaction>;
@@ -29,7 +29,7 @@ export declare function AdminActions<ActionsBase extends Constructor<TinlakePara
         ethersContracts: import("../Tinlake").Contracts;
         contractAbis: import("../Tinlake").ContractAbis;
         contractConfig: any;
-        setProvider: (provider: any, ethOptions?: any) => void;
+        setProvider: (provider: any, ethOptions?: any, ethersConfig?: import("../Tinlake").EthersConfig | undefined) => void;
         setContracts: () => void;
         setEthConfig: (ethConfig: import("../Tinlake").EthConfig) => void;
         setEthersConfig: (ethersConfig: import("../Tinlake").EthersConfig | undefined) => void;
@@ -50,10 +50,10 @@ export declare type IAdminActions = {
     canSetInvestorAllowanceJunior(user: string): Promise<boolean>;
     canSetInvestorAllowanceSenior(user: string): Promise<boolean>;
     canSetLoanPrice(user: string): Promise<boolean>;
-    initRate(rate: string): Promise<any>;
-    setRate(loan: string, rate: string): Promise<any>;
+    initRate(rate: string): Promise<PendingTransaction>;
+    setRate(loan: string, rate: string): Promise<PendingTransaction>;
     setMinimumJuniorRatio(amount: string): Promise<PendingTransaction>;
-    approveAllowanceJunior(user: string, maxCurrency: string, maxToken: string): Promise<any>;
-    approveAllowanceSenior(user: string, maxCurrency: string, maxToken: string): Promise<any>;
+    approveAllowanceJunior(user: string, maxCurrency: string, maxToken: string): Promise<PendingTransaction>;
+    approveAllowanceSenior(user: string, maxCurrency: string, maxToken: string): Promise<PendingTransaction>;
 };
 export default AdminActions;

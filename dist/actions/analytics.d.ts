@@ -45,7 +45,7 @@ export declare function AnalyticsActions<ActionsBase extends Constructor<Tinlake
         ethersContracts: import("../Tinlake").Contracts;
         contractAbis: import("../Tinlake").ContractAbis;
         contractConfig: any;
-        setProvider: (provider: any, ethOptions?: any) => void;
+        setProvider: (provider: any, ethOptions?: any, ethersConfig?: import("../Tinlake").EthersConfig | undefined) => void;
         setContracts: () => void;
         setEthConfig: (ethConfig: import("../Tinlake").EthConfig) => void;
         setEthersConfig: (ethersConfig: import("../Tinlake").EthersConfig | undefined) => void;

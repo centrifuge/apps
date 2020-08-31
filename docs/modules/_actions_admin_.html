@@ -89,7 +89,7 @@
 					<div class="tsd-signature tsd-kind-icon">IAdmin<wbr>Actions<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>approveAllowanceJunior<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>approveAllowanceSenior<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>canSetInterestRate<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>canSetInvestorAllowanceJunior<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>canSetInvestorAllowanceSenior<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>canSetLoanPrice<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>canSetMinimumJuniorRatio<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>canSetRiskScore<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>canSetSeniorTrancheInterest<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>initRate<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>isWard<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>setMinimumJuniorRatio<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>setRate<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/b7fa44c/src/actions/admin.ts#L153">actions/admin.ts:153</a></li>
+							<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/d227b71/src/actions/admin.ts#L112">actions/admin.ts:112</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -98,13 +98,13 @@
 							<li class="tsd-parameter">
 								<h5>approve<wbr>Allowance<wbr>Junior<span class="tsd-signature-symbol">: </span>function</h5>
 								<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal">
-									<li class="tsd-signature tsd-kind-icon">approve<wbr>Allowance<wbr>Junior<span class="tsd-signature-symbol">(</span>user<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, maxCurrency<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, maxToken<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+									<li class="tsd-signature tsd-kind-icon">approve<wbr>Allowance<wbr>Junior<span class="tsd-signature-symbol">(</span>user<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, maxCurrency<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, maxToken<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_tinlake_.html#pendingtransaction" class="tsd-signature-type">PendingTransaction</a><span class="tsd-signature-symbol">&gt;</span></li>
 								</ul>
 								<ul class="tsd-descriptions">
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/b7fa44c/src/actions/admin.ts#L165">actions/admin.ts:165</a></li>
+												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/d227b71/src/actions/admin.ts#L124">actions/admin.ts:124</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -119,20 +119,20 @@
 												<h5>maxToken: <span class="tsd-signature-type">string</span></h5>
 											</li>
 										</ul>
-										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_tinlake_.html#pendingtransaction" class="tsd-signature-type">PendingTransaction</a><span class="tsd-signature-symbol">&gt;</span></h4>
 									</li>
 								</ul>
 							</li>
 							<li class="tsd-parameter">
 								<h5>approve<wbr>Allowance<wbr>Senior<span class="tsd-signature-symbol">: </span>function</h5>
 								<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal">
-									<li class="tsd-signature tsd-kind-icon">approve<wbr>Allowance<wbr>Senior<span class="tsd-signature-symbol">(</span>user<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, maxCurrency<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, maxToken<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+									<li class="tsd-signature tsd-kind-icon">approve<wbr>Allowance<wbr>Senior<span class="tsd-signature-symbol">(</span>user<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, maxCurrency<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, maxToken<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_tinlake_.html#pendingtransaction" class="tsd-signature-type">PendingTransaction</a><span class="tsd-signature-symbol">&gt;</span></li>
 								</ul>
 								<ul class="tsd-descriptions">
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/b7fa44c/src/actions/admin.ts#L166">actions/admin.ts:166</a></li>
+												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/d227b71/src/actions/admin.ts#L125">actions/admin.ts:125</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -147,7 +147,7 @@
 												<h5>maxToken: <span class="tsd-signature-type">string</span></h5>
 											</li>
 										</ul>
-										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_tinlake_.html#pendingtransaction" class="tsd-signature-type">PendingTransaction</a><span class="tsd-signature-symbol">&gt;</span></h4>
 									</li>
 								</ul>
 							</li>
@@ -160,7 +160,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/b7fa44c/src/actions/admin.ts#L155">actions/admin.ts:155</a></li>
+												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/d227b71/src/actions/admin.ts#L114">actions/admin.ts:114</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -182,7 +182,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/b7fa44c/src/actions/admin.ts#L159">actions/admin.ts:159</a></li>
+												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/d227b71/src/actions/admin.ts#L118">actions/admin.ts:118</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -204,7 +204,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/b7fa44c/src/actions/admin.ts#L160">actions/admin.ts:160</a></li>
+												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/d227b71/src/actions/admin.ts#L119">actions/admin.ts:119</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -226,7 +226,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/b7fa44c/src/actions/admin.ts#L161">actions/admin.ts:161</a></li>
+												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/d227b71/src/actions/admin.ts#L120">actions/admin.ts:120</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -248,7 +248,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/b7fa44c/src/actions/admin.ts#L157">actions/admin.ts:157</a></li>
+												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/d227b71/src/actions/admin.ts#L116">actions/admin.ts:116</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -270,7 +270,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/b7fa44c/src/actions/admin.ts#L158">actions/admin.ts:158</a></li>
+												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/d227b71/src/actions/admin.ts#L117">actions/admin.ts:117</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -292,7 +292,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/b7fa44c/src/actions/admin.ts#L156">actions/admin.ts:156</a></li>
+												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/d227b71/src/actions/admin.ts#L115">actions/admin.ts:115</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -308,13 +308,13 @@
 							<li class="tsd-parameter">
 								<h5>init<wbr>Rate<span class="tsd-signature-symbol">: </span>function</h5>
 								<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal">
-									<li class="tsd-signature tsd-kind-icon">init<wbr>Rate<span class="tsd-signature-symbol">(</span>rate<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+									<li class="tsd-signature tsd-kind-icon">init<wbr>Rate<span class="tsd-signature-symbol">(</span>rate<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_tinlake_.html#pendingtransaction" class="tsd-signature-type">PendingTransaction</a><span class="tsd-signature-symbol">&gt;</span></li>
 								</ul>
 								<ul class="tsd-descriptions">
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/b7fa44c/src/actions/admin.ts#L162">actions/admin.ts:162</a></li>
+												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/d227b71/src/actions/admin.ts#L121">actions/admin.ts:121</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -323,7 +323,7 @@
 												<h5>rate: <span class="tsd-signature-type">string</span></h5>
 											</li>
 										</ul>
-										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_tinlake_.html#pendingtransaction" class="tsd-signature-type">PendingTransaction</a><span class="tsd-signature-symbol">&gt;</span></h4>
 									</li>
 								</ul>
 							</li>
@@ -336,7 +336,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/b7fa44c/src/actions/admin.ts#L154">actions/admin.ts:154</a></li>
+												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/d227b71/src/actions/admin.ts#L113">actions/admin.ts:113</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -361,7 +361,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/b7fa44c/src/actions/admin.ts#L164">actions/admin.ts:164</a></li>
+												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/d227b71/src/actions/admin.ts#L123">actions/admin.ts:123</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -377,13 +377,13 @@
 							<li class="tsd-parameter">
 								<h5>set<wbr>Rate<span class="tsd-signature-symbol">: </span>function</h5>
 								<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal">
-									<li class="tsd-signature tsd-kind-icon">set<wbr>Rate<span class="tsd-signature-symbol">(</span>loan<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, rate<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+									<li class="tsd-signature tsd-kind-icon">set<wbr>Rate<span class="tsd-signature-symbol">(</span>loan<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, rate<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_tinlake_.html#pendingtransaction" class="tsd-signature-type">PendingTransaction</a><span class="tsd-signature-symbol">&gt;</span></li>
 								</ul>
 								<ul class="tsd-descriptions">
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/b7fa44c/src/actions/admin.ts#L163">actions/admin.ts:163</a></li>
+												<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/d227b71/src/actions/admin.ts#L122">actions/admin.ts:122</a></li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -395,7 +395,7 @@
 												<h5>rate: <span class="tsd-signature-type">string</span></h5>
 											</li>
 										</ul>
-										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_tinlake_.html#pendingtransaction" class="tsd-signature-type">PendingTransaction</a><span class="tsd-signature-symbol">&gt;</span></h4>
 									</li>
 								</ul>
 							</li>
@@ -415,7 +415,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/b7fa44c/src/actions/admin.ts#L6">actions/admin.ts:6</a></li>
+									<li>Defined in <a href="https://github.com/centrifuge/tinlake.js/blob/d227b71/src/actions/admin.ts#L6">actions/admin.ts:6</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
