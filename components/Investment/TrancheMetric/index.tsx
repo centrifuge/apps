@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Box, Heading } from 'grommet'
-import { Investor } from 'tinlake'
+import { Investor } from '@centrifuge/tinlake-js'
 import { TrancheType } from '../../../services/tinlake/actions'
 import DashboardMetric from '../../DashboardMetric'
 import DAI from '../../../static/dai.json'

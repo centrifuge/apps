@@ -2,7 +2,7 @@ import { FunctionComponent } from 'react'
 import { Decimal } from 'decimal.js-light'
 import { Box, Text } from 'grommet'
 import styled from 'styled-components'
-import { baseToDisplay } from 'tinlake'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { copyToClipboard } from '@centrifuge/axis-utils'
 

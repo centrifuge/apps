@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { displayToBase, baseToDisplay } from 'tinlake'
+import { displayToBase, baseToDisplay } from '@centrifuge/tinlake-js'
 import { Box, FormField, TextInput, Button, Heading, Anchor } from 'grommet'
 import Alert from '../Alert'
 import SecondaryHeader from '../SecondaryHeader'
