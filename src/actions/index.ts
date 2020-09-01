@@ -6,7 +6,7 @@ import Collateral, { ICollateralActions } from './collateral'
 import Analytics, { IAnalyticsActions } from './analytics'
 import Governance, { IGovernanceActions } from './governance'
 import Proxy, { IProxyActions } from './proxy'
-import Epoch, { ICoordinatorActions } from './coordinator'
+import Coordinator, { ICoordinatorActions } from './coordinator'
 
 export default {
   Admin,
@@ -17,7 +17,7 @@ export default {
   Analytics,
   Governance,
   Proxy,
-  Epoch
+  Coordinator
 }
 
 export type TinlakeActions = IAdminActions &

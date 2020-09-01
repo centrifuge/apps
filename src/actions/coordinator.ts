@@ -17,6 +17,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       //   maxTinRatio: 0,
       //   maxReserve: 0,
       // }
+      
       return Promise.resolve({
           tinRedeem: 1,
           dropRedeem: 2,
