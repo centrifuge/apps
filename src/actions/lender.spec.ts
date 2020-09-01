@@ -21,10 +21,13 @@ describe('lender functions', async () => {
   before(async () => {
     adminTinlake = createTinlake(adminAccount, testConfig)
     governanceTinlake = createTinlake(testConfig.godAccount, testConfig)
+
     // fund lender & admin accounts with currency
     await testProvider.fundAccountWithETH(adminAccount.address, FAUCET_AMOUNT)
+
     // rely admin on junior operator
-    await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['JUNIOR_OPERATOR'])
+    const relyTx = await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['JUNIOR_OPERATOR'])
+    await governanceTinlake.getTransactionReceipt(relyTx)
   })
 
   beforeEach(async () => {
@@ -36,47 +39,58 @@ describe('lender functions', async () => {
   it('success: supply junior', async () => {
     const currencyAmount = '100000'
     const tokenAmount = '100'
+
     // whitelist investor
-    await adminTinlake.approveAllowanceJunior(lenderAccount.address, currencyAmount, tokenAmount)
+    const approveTx = await adminTinlake.approveAllowanceJunior(lenderAccount.address, currencyAmount, tokenAmount)
+    await adminTinlake.getTransactionReceipt(approveTx)
+
     await supply(lenderAccount.address, `${currencyAmount}`, lenderTinlake)
   })
 
   it('fail: supply junior - no allowance', async () => {
     const currencyAmount = '1000'
     // approve junior tranche to take currency
-    await lenderTinlake.approveCurrency(contractAddresses['JUNIOR'], currencyAmount)
+    const approveTx = await lenderTinlake.approveCurrency(contractAddresses['JUNIOR'], currencyAmount)
+    const approval = await lenderTinlake.getTransactionReceipt(approveTx)
+    console.log('approval', approval)
+
     // fund investor with tinlake currency
-    await governanceTinlake.mintCurrency(lenderAccount.address, currencyAmount)
+    const mintTx = await governanceTinlake.mintCurrency(lenderAccount.address, currencyAmount)
+    const mint = await governanceTinlake.getTransactionReceipt(mintTx)
+    console.log('mint', mint)
 
     // do not set allowance for lender
     const supplyTx = await lenderTinlake.supplyJunior(currencyAmount)
-    const supplyResult = await lenderTinlake.getTransactionReceipt(supplyTx)
-    console.log('supplyResult', supplyResult)
 
     // assert result successful
-    assert.equal(supplyResult.status, FAIL_STATUS)
+    assert.equal(supplyTx.status, FAIL_STATUS)
   })
 
   it('success: redeem junior', async () => {
     const currencyAmount = '10000'
     const tokenAmount = '100'
     // whitelist investor
-    await adminTinlake.approveAllowanceJunior(lenderAccount.address, currencyAmount, tokenAmount)
+    const approveTx = await adminTinlake.approveAllowanceJunior(lenderAccount.address, currencyAmount, tokenAmount)
+    await adminTinlake.getTransactionReceipt(approveTx)
+
     // supply currency - receive tokens
     await supply(lenderAccount.address, `${currencyAmount}`, lenderTinlake)
+
     // approve junior tranche to take tokens
-    await lenderTinlake.approveJuniorToken(tokenAmount)
+    const lenderApproveTx = await lenderTinlake.approveJuniorToken(tokenAmount)
+    await lenderTinlake.getTransactionReceipt(lenderApproveTx)
 
     const initialLenderCurrencyBalance: BN = await lenderTinlake.getCurrencyBalance(lenderAccount.address)
     const initialTrancheCurrencyBalance: BN = await lenderTinlake.getCurrencyBalance(contractAddresses['JUNIOR'])
     const initialJuniorTokenBalance = await lenderTinlake.getJuniorTokenBalance(lenderAccount.address)
 
-    const redeemResult = await lenderTinlake.redeemJunior(tokenAmount)
-    console.log('redeemResult', redeemResult)
+    const redeemTx = await lenderTinlake.redeemJunior(tokenAmount)
+    const redeemResult = await lenderTinlake.getTransactionReceipt(redeemTx)
 
     const newTrancheCurrencyBalance = await lenderTinlake.getCurrencyBalance(contractAddresses['JUNIOR'])
     const newLenderCurrencyBalance = await lenderTinlake.getCurrencyBalance(lenderAccount.address)
     const newJuniorTokenBalance = await lenderTinlake.getJuniorTokenBalance(lenderAccount.address)
+
     assert.equal(redeemResult.status, SUCCESS_STATUS)
     assert.equal(
       initialTrancheCurrencyBalance.sub(new BN(tokenAmount)).subn(1).toString(),
@@ -94,28 +108,41 @@ describe('lender functions', async () => {
     const tokenAmount = '100'
 
     // whitelist investor with no allowance to redeem
-    await adminTinlake.approveAllowanceJunior(lenderAccount.address, currencyAmount, '0')
+    const approveTx = await adminTinlake.approveAllowanceJunior(lenderAccount.address, currencyAmount, '0')
+    await adminTinlake.getTransactionReceipt(approveTx)
+
     // supply currency - receive tokens
     await supply(lenderAccount.address, `${currencyAmount}`, lenderTinlake)
+
     // approve junior tranche to take tokens
-    await lenderTinlake.approveJuniorToken(tokenAmount)
-    const redeemResult = await lenderTinlake.redeemJunior(tokenAmount)
-    console.log('redeemResult line 102', redeemResult)
-    assert.equal(redeemResult.status, FAIL_STATUS)
+    const lenderApproveTx = await lenderTinlake.approveJuniorToken(tokenAmount)
+    await lenderTinlake.getTransactionReceipt(lenderApproveTx)
+
+    const redeemTx = await lenderTinlake.redeemJunior(tokenAmount)
+    console.log(redeemTx)
+    
+    assert.equal(redeemTx.status, FAIL_STATUS)
   })
 })
 
 async function supply(investor: string, currencyAmount: string, tinlake: ITinlake) {
   // approve junior tranche to take currency
-  await tinlake.approveCurrency(contractAddresses['JUNIOR'], currencyAmount)
+  const approveTx = await tinlake.approveCurrency(contractAddresses['JUNIOR'], currencyAmount)
+  await tinlake.getTransactionReceipt(approveTx)
+
   // fund investor with tinlake currency
-  const res = await governanceTinlake.mintCurrency(investor, currencyAmount)
+  const mintTx = await governanceTinlake.mintCurrency(investor, currencyAmount)
+  await governanceTinlake.getTransactionReceipt(mintTx)
+
   const initialLenderCurrencyBalance = await tinlake.getCurrencyBalance(investor)
   const initialTrancheCurrencyBalance = await tinlake.getCurrencyBalance(contractAddresses['JUNIOR'])
   const initialJuniorTokenBalance = await tinlake.getJuniorTokenBalance(investor)
 
-  const supplyResult = await tinlake.supplyJunior(currencyAmount)
-  console.log('supplyResult line 117', redeemResult)
+  const supplyTx = await tinlake.supplyJunior(currencyAmount)
+  console.log('supplyTx', supplyTx)
+  const supplyResult = await tinlake.getTransactionReceipt(supplyTx)
+  console.log('supplyResult', supplyResult)
+
   const newTrancheCurrencyBalance = await tinlake.getCurrencyBalance(contractAddresses['JUNIOR'])
   const newLenderCurrencyBalance = await tinlake.getCurrencyBalance(investor)
   const newJuniorTokenBalance = await tinlake.getJuniorTokenBalance(investor)

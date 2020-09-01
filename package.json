@@ -48,7 +48,7 @@
   "scripts": {
     "build": "rollup -c",
     "start": "rollup -cw",
-    "test": "ts-mocha -p src/test/tsconfig.json src/**/*.spec.ts src/*.spec.ts --timeout 40000",
+    "test": "ts-mocha -p src/test/tsconfig.json src/**/*.spec.ts --timeout 40000",
     "nodemon": "nodemon node inspect dist/Tinlake.js",
     "generate-docs": "typedoc --out docs --exclude \"./node_modules/**\"  --exclude \"./src/abi/**\" --exclude \"./src/index.ts\" --exclude \"./src/actions/*.spec.ts\" --exclude \"./src/test/**\" --excludeExternals --excludeNotExported --ignoreCompilerErrors ./src",
     "lint": "tslint --project .",

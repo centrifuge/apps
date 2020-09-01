@@ -40,15 +40,20 @@ describe('governance tests', async () => {
       await testProvider.fundAccountWithETH(randomAccount.address, FAUCET_AMOUNT)
 
       const randomTinlake = createTinlake(randomAccount, testConfig)
-      const res = await randomTinlake.relyAddress(userAccount.address, testConfig.contractAddresses['PILE'])
+
+      const tx = await randomTinlake.relyAddress(userAccount.address, testConfig.contractAddresses['PILE'])
+      const res = await randomTinlake.getTransactionReceipt(tx)
       assert.equal(res.status, FAIL_STATUS)
     })
   })
 })
 
 async function relyAddress(usr: string, contractName: ContractName) {
-  const res = await governanceTinlake.relyAddress(usr, testConfig.contractAddresses[contractName])
+  const tx = await governanceTinlake.relyAddress(usr, testConfig.contractAddresses[contractName])
+  const res = await governanceTinlake.getTransactionReceipt(tx)
+
   const isWard = await governanceTinlake.isWard(usr, contractName)
+
   assert.equal(isWard, 1)
   assert.equal(res.status, SUCCESS_STATUS)
 }

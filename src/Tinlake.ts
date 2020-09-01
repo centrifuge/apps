@@ -35,7 +35,9 @@ const contractNames = [
 ] as const
 
 export type PendingTransaction = {
-  hash: string | undefined
+  hash?: string
+  status: number
+  error?: string
   timesOutAt?: number
 }
 
@@ -198,10 +200,19 @@ export default class Tinlake {
   }
 
   async pending(txPromise: Promise<ethers.providers.TransactionResponse>): Promise<PendingTransaction> {
-    const tx = await txPromise
-    return {
-      hash: tx.hash,
-      timesOutAt: Date.now() + this.transactionTimeout * 1000,
+    try {
+      const tx = await txPromise
+      return {
+        status: 1,
+        hash: tx.hash,
+        timesOutAt: Date.now() + this.transactionTimeout * 1000,
+      }
+    } catch(e) {
+      console.error(`Error caught in tinlake.pending(): ${e}`)
+      return {
+        status: 0,
+        error: e.message
+      }
     }
   }
 
@@ -216,9 +227,14 @@ export default class Tinlake {
         }, tx.timesOutAt - Date.now())
       }
 
-      const receipt = await this.ethersConfig.provider!.waitForTransaction(tx.hash)
-      if (timer) clearTimeout(timer)
-      return resolve(receipt)
+      try {
+        const receipt = await this.ethersConfig.provider!.waitForTransaction(tx.hash)
+        if (timer) clearTimeout(timer)
+        return resolve(receipt)
+      } catch (e) {
+        console.error(`Error caught in tinlake.getTransactionReceipt(): ${e}`)
+        return reject()
+      }
     })
   }
 

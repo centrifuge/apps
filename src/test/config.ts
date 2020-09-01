@@ -12,7 +12,7 @@ const GWEI = 1000 * MWEI
 const MILLI_ETH = 1e15 // 0.001 ETH
 const FAUCET_AMOUNT = 5000 * MILLI_ETH
 
-const GAS_PRICE = 100 * GWEI
+const GAS_PRICE = 5 * GWEI
 const GAS = 1000000
 
 const testConfig: ProviderConfig = {
@@ -29,8 +29,8 @@ const testConfig: ProviderConfig = {
   rpcUrl: process.env.RPC_URL || 'http://127.0.0.1:8545',
   isRealTestnet: false,
   contractAbis: abiDefinitions,
-  SUCCESS_STATUS: '0x1',
-  FAIL_STATUS: '0x0',
+  SUCCESS_STATUS: 1,
+  FAIL_STATUS: 0,
   FAUCET_AMOUNT: `${FAUCET_AMOUNT}`,
 }
 
@@ -46,8 +46,8 @@ export type ProviderConfig = {
   transactionTimeout: number
   contractAddresses: ContractAddresses
   contractAbis: ContractAbis
-  SUCCESS_STATUS: '0x1'
-  FAIL_STATUS: '0x0'
+  SUCCESS_STATUS: 1
+  FAIL_STATUS: 0
   FAUCET_AMOUNT: string
 }
 

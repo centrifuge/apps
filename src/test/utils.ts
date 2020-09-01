@@ -28,10 +28,7 @@ export class TestProvider {
     }
 
     const res = await this.wallet.sendTransaction(transaction)
-    console.log('res', res)
-    const receipt = await this.provider.waitForTransaction(res.hash!)
-    console.log('receipt', receipt)
-    return receipt
+    await this.provider.waitForTransaction(res.hash!)
   }
 }
 
