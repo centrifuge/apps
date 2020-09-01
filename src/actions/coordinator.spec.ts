@@ -31,6 +31,10 @@ describe('coordinator tests', async () => {
 
       const result = await tinlake.calculateOptimalSolution(state, orderState)
       
+      console.log()
+      console.log(result.vars)
+      console.log()
+      
       assert.equal(result.vars.dropRedeem, 300)
       assert.equal(result.vars.tinRedeem, 100)
       assert.equal(result.vars.tinInvest, 125)

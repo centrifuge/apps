@@ -83,7 +83,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
               bnds: { type: glpk.GLP_UP, ub: state.maxReserve - state.reserve, lb: 0.0 },
             },
             {
-              name: 'maxDROPRatio',
+              name: 'minTINRatio',
               vars: [
                 { name: 'tinRedeem', coef: -(1 - state.minTinRatio) },
                 { name: 'dropRedeem', coef: state.minTinRatio },
@@ -101,12 +101,12 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
               },
             },
             {
-              name: 'MinDROPRatio',
+              name: 'maxTINRatio',
               vars: [
-                { name: 'tinInvest', coef: -(1 - state.minTinRatio) },
-                { name: 'dropInvest', coef: state.minTinRatio },
+                { name: 'tinInvest', coef: -(1 - state.maxTinRatio) },
+                { name: 'dropInvest', coef: state.maxTinRatio },
                 { name: 'tinRedeem', coef: 1 - state.maxTinRatio },
-                { name: 'dropRedeem', coef: -state.minTinRatio },
+                { name: 'dropRedeem', coef: -state.maxTinRatio },
               ],
               bnds: {
                 type: glpk.GLP_LO,
