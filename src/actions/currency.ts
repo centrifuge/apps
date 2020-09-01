@@ -1,14 +1,11 @@
 import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
-import { executeAndRetry, waitAndReturnEvents } from '../services/ethereum'
 import BN from 'bn.js'
 
 export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICurrencyActions {
     // move out for tests only
     mintCurrency = async (usr: string, amount: string) => {
-      const txHash = await executeAndRetry(this.contracts['TINLAKE_CURRENCY'].mint, [usr, amount, this.ethConfig])
-      console.log(`[Mint currency] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['TINLAKE_CURRENCY'].abi, this.transactionTimeout)
+      return this.pending(this.contract('TINLAKE_CURRENCY').mint(usr, amount))
     }
 
     getCurrencyAllowance = async (owner: string, spender: string) => {
@@ -48,7 +45,7 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
 }
 
 export type ICurrencyActions = {
-  mintCurrency(usr: string, amount: string): Promise<unknown>
+  mintCurrency(usr: string, amount: string): Promise<PendingTransaction>
   getCurrencyBalance(usr: string): Promise<BN>
   getCurrencyAllowance: (owner: string, spender: string) => Promise<BN>
   getJuniorForCurrencyAllowance: (owner: string) => Promise<BN | undefined>

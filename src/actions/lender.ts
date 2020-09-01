@@ -65,11 +65,11 @@ export type ILenderActions = {
   getSeniorTokenAllowance(owner: string): Promise<BN>
   getJuniorTokenAllowance(owner: string): Promise<BN>
   supplyJunior(currencyAmount: string): Promise<PendingTransaction>
-  approveJuniorToken: (tokenAmount: string) => Promise<unknown>
-  approveSeniorToken: (tokenAmount: string) => Promise<unknown>
-  redeemJunior(tokenAmount: string): Promise<any>
+  approveJuniorToken: (tokenAmount: string) => Promise<PendingTransaction>
+  approveSeniorToken: (tokenAmount: string) => Promise<PendingTransaction>
+  redeemJunior(tokenAmount: string): Promise<PendingTransaction>
   supplySenior(currencyAmount: string): Promise<PendingTransaction>
-  redeemSenior(tokenAmount: string): Promise<any>
+  redeemSenior(tokenAmount: string): Promise<PendingTransaction>
   balance(): Promise<any>
 }
 

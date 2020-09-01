@@ -8,14 +8,15 @@ const SignerProvider = require('ethjs-provider-signer')
 const { sign } = require('ethjs-signer')
 
 export class TestProvider {
+  public provider: ethers.providers.Provider
   public wallet: ethers.Wallet
   public ethConfig: EthConfig
   public transactionTimeout: number
 
   constructor(testConfig: ProviderConfig) {
     const { rpcUrl, godAccount, transactionTimeout } = testConfig
-    const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
-    this.wallet = new ethers.Wallet(godAccount.privateKey, provider)
+    this.provider = new ethers.providers.JsonRpcProvider(rpcUrl)
+    this.wallet = new ethers.Wallet(godAccount.privateKey, this.provider)
     this.ethConfig = { from: godAccount.address }
     this.transactionTimeout = transactionTimeout
   }
@@ -27,7 +28,10 @@ export class TestProvider {
     }
 
     const res = await this.wallet.sendTransaction(transaction)
-    await res.wait(1)
+    console.log('res', res)
+    const receipt = await this.provider.waitForTransaction(res.hash!)
+    console.log('receipt', receipt)
+    return receipt
   }
 }
 
