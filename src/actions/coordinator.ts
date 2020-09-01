@@ -27,7 +27,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
     calculateOptimalSolution = async (state: State, orderState: OrderState) => {
       return require('glpk.js').then((glpk: any) => {
-        let lp = {
+        const lp = {
           name: 'LP',
           generals: ['dropRedeem', 'tinRedeem', 'tinInvest', 'dropInvest'],
           objective: {
