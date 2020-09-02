@@ -1,74 +1,53 @@
-import { Constructor, TinlakeParams } from '../Tinlake'
-import { waitAndReturnEvents, executeAndRetry } from '../services/ethereum'
+import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
 import { ethers } from 'ethers'
 
 export function BorrowerActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IBorrowerActions {
     issue = async (registry: string, tokenId: string) => {
-      const txHash = await executeAndRetry(this.contracts['SHELF'].issue, [registry, tokenId, this.ethConfig])
-      console.log(`[Issue Loan] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['SHELF'].abi, this.transactionTimeout)
+      return this.pending(this.contract('SHELF').issue(registry, tokenId))
     }
 
     nftLookup = async (registry: string, tokenId: string) => {
       const nft = ethers.utils.solidityKeccak256(['address', 'uint'], [registry, tokenId])
-      console.log('NFT Look Up]')
-      const res = await executeAndRetry(this.contracts['SHELF'].nftlookup, [nft, this.ethConfig])
-      return res[0].toString()
+      const loanId = await this.contract('SHELF').nftlookup(nft)
+      return loanId
     }
 
     lock = async (loan: string) => {
-      const txHash = await executeAndRetry(this.contracts['SHELF'].lock, [loan, this.ethConfig])
-      console.log(`[Collateral NFT lock] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['SHELF'].abi, this.transactionTimeout)
+      return this.pending(this.contract('SHELF').lock(loan))
     }
 
     unlock = async (loan: string) => {
-      const txHash = await executeAndRetry(this.contracts['SHELF'].unlock, [loan, this.ethConfig])
-      console.log(`[Collateral NFT unlock] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['SHELF'].abi, this.transactionTimeout)
+      return this.pending(this.contract('SHELF').unlock(loan))
     }
 
     close = async (loan: string) => {
-      const txHash = await executeAndRetry(this.contracts['SHELF'].close, [loan, this.ethConfig])
-      console.log(`[Loan close] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['SHELF'].abi, this.transactionTimeout)
+      return this.pending(this.contract('SHELF').close(loan))
     }
 
     borrow = async (loan: string, currencyAmount: string) => {
-      const txHash = await executeAndRetry(this.contracts['SHELF'].borrow, [loan, currencyAmount, this.ethConfig])
-      console.log(`[Borrow] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['SHELF'].abi, this.transactionTimeout)
+      return this.pending(this.contract('SHELF').borrow(loan, currencyAmount))
     }
 
     withdraw = async (loan: string, currencyAmount: string, usr: string) => {
-      const txHash = await executeAndRetry(this.contracts['SHELF'].withdraw, [
-        loan,
-        currencyAmount,
-        usr,
-        this.ethConfig,
-      ])
-      console.log(`[Withdraw] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['SHELF'].abi, this.transactionTimeout)
+      return this.pending(this.contract('SHELF').withdraw(loan, currencyAmount, usr))
     }
 
     repay = async (loan: string, currencyAmount: string) => {
-      const txHash = await executeAndRetry(this.contracts['SHELF'].repay, [loan, currencyAmount, this.ethConfig])
-      console.log(`[Repay] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['SHELF'].abi, this.transactionTimeout)
+      return this.pending(this.contract('SHELF').repay(loan, currencyAmount))
     }
   }
 }
 
 export type IBorrowerActions = {
-  issue(registry: string, tokenId: string): Promise<any>
-  nftLookup(registry: string, tokenId: string): Promise<any>
-  lock(loan: string): Promise<any>
-  unlock(loan: string): Promise<any>
-  close(loan: string): Promise<any>
-  borrow(loan: string, currencyAmount: string): Promise<any>
-  withdraw(loan: string, currencyAmount: string, usr: string): Promise<any>
-  repay(loan: string, currencyAmount: string): Promise<any>
+  issue(registry: string, tokenId: string): Promise<PendingTransaction>
+  nftLookup(registry: string, tokenId: string): Promise<string>
+  lock(loan: string): Promise<PendingTransaction>
+  unlock(loan: string): Promise<PendingTransaction>
+  close(loan: string): Promise<PendingTransaction>
+  borrow(loan: string, currencyAmount: string): Promise<PendingTransaction>
+  withdraw(loan: string, currencyAmount: string, usr: string): Promise<PendingTransaction>
+  repay(loan: string, currencyAmount: string): Promise<PendingTransaction>
 }
 
 export default BorrowerActions

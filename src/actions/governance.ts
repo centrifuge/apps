@@ -10,8 +10,8 @@ function GovernanceActions<ActionsBase extends Constructor<TinlakeParams>>(Base:
       // const result = await waitAndReturnEvents(this.eth, txHash, rootContract.abi, this.transactionTimeout)
       // console.log('ethjs result', result)
 
-      console.log('usr', usr)
-      console.log('contractAddress', contractAddress)
+      // console.log('usr', usr)
+      // console.log('contractAddress', contractAddress)
       const contract = this.contract('ROOT_CONTRACT')
       const tx = contract.relyContract(contractAddress, usr)
       return this.pending(tx)

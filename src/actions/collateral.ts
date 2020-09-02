@@ -53,7 +53,7 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
       return this.contract('COLLATERAL_NFT', nftAddress).data(tokenId)
     }
 
-    getNFTOwner = async (nftAddresss: string, tokenId: string): Promise<BN> => {
+    getNFTOwner = async (nftAddresss: string, tokenId: string): Promise<string> => {
       return this.contract('COLLATERAL_NFT', nftAddresss).ownerOf(tokenId)
     }
 
@@ -81,7 +81,7 @@ export type ICollateralActions = {
   isNFTApprovedForAll(nftAddr: string, owner: string, operator: string): Promise<boolean>
   getNFTCount(nftAddr: string): Promise<BN>
   getNFTData(nftAddr: string, tokenId: string): Promise<any>
-  getNFTOwner(nftAddr: string, tokenId: string): Promise<BN>
+  getNFTOwner(nftAddr: string, tokenId: string): Promise<string>
   transferNFT(nftAddr: string, from: string, to: string, tokenId: string): Promise<any>
 }
 
