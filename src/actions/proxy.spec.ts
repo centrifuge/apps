@@ -3,16 +3,13 @@ const account = require('ethjs-account')
 import assert from 'assert'
 import { createTinlake, TestProvider } from '../test/utils'
 import testConfig from '../test/config'
-import { ethers } from 'ethers'
 import { ITinlake } from '../types/tinlake'
-import { EthConfig } from '../Tinlake'
-import BN from 'bn.js'
 
 const testProvider = new TestProvider(testConfig)
 const borrowerAccount = account.generate(randomString.generate(32))
 const adminAccount = account.generate(randomString.generate(32))
 let borrowerTinlake: ITinlake
-let adminTinlake: ITinlake
+// let adminTinlake: ITinlake
 let governanceTinlake: ITinlake
 
 const { SUCCESS_STATUS, FAIL_STATUS, FAUCET_AMOUNT, contractAddresses } = testConfig
@@ -20,7 +17,7 @@ const { SUCCESS_STATUS, FAIL_STATUS, FAUCET_AMOUNT, contractAddresses } = testCo
 describe('proxy tests', async () => {
   before(async () => {
     borrowerTinlake = createTinlake(borrowerAccount, testConfig)
-    adminTinlake = createTinlake(adminAccount, testConfig)
+    // adminTinlake = createTinlake(adminAccount, testConfig)
     governanceTinlake = createTinlake(testConfig.godAccount, testConfig)
     // fund accounts with ETH
     await testProvider.fundAccountWithETH(adminAccount.address, FAUCET_AMOUNT)
@@ -81,12 +78,13 @@ describe('proxy tests', async () => {
       const tokenId = `${Math.floor(Math.random() * 10e15) + 1}`
 
       const mintTx = await governanceTinlake.mintNFT(testConfig.nftRegistry, borrowerAccount.address, tokenId, '234', '345', '456')
-      console.log('mintTx', mintTx)
       await governanceTinlake.getTransactionReceipt(mintTx)
 
+      // TODO: the next line fails with this error: "Error caught in tinlake.pending(): Error: The execution failed due to an exception."
       const issueTx = await borrowerTinlake.proxyTransferIssue(proxyAddr, testConfig.nftRegistry, tokenId)
       console.log('issueTx', issueTx)
       const issueResult = await borrowerTinlake.getTransactionReceipt(issueTx)
+      
       assert.equal(issueResult.status, FAIL_STATUS)
     })
 
@@ -119,19 +117,19 @@ describe('proxy tests', async () => {
 })
 
 // TODO: move to utils
-async function fundTranche(amount: string) {
-  const lenderAccount = account.generate(randomString.generate(32))
-  const lenderTinlake = createTinlake(lenderAccount, testConfig)
-  // fund lender accoutn with eth
-  await testProvider.fundAccountWithETH(lenderAccount.address, FAUCET_AMOUNT)
-  // make admin adress ward on tranche operator
-  await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['JUNIOR_OPERATOR'])
-  // whitelist lender
-  await adminTinlake.approveAllowanceJunior(lenderAccount.address, amount, amount)
-  // lender approves tranche to take currency
-  await lenderTinlake.approveCurrency(contractAddresses['JUNIOR'], amount)
-  // mint currency for lender
-  await governanceTinlake.mintCurrency(lenderAccount.address, amount)
-  // lender supplies tranche with funds
-  await lenderTinlake.supplyJunior(amount)
-}
+// async function fundTranche(amount: string) {
+//   const lenderAccount = account.generate(randomString.generate(32))
+//   const lenderTinlake = createTinlake(lenderAccount, testConfig)
+//   // fund lender accoutn with eth
+//   await testProvider.fundAccountWithETH(lenderAccount.address, FAUCET_AMOUNT)
+//   // make admin adress ward on tranche operator
+//   await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['JUNIOR_OPERATOR'])
+//   // whitelist lender
+//   await adminTinlake.approveAllowanceJunior(lenderAccount.address, amount, amount)
+//   // lender approves tranche to take currency
+//   await lenderTinlake.approveCurrency(contractAddresses['JUNIOR'], amount)
+//   // mint currency for lender
+//   await governanceTinlake.mintCurrency(lenderAccount.address, amount)
+//   // lender supplies tranche with funds
+//   await lenderTinlake.supplyJunior(amount)
+// }

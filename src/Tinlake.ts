@@ -85,6 +85,9 @@ export type TinlakeParams = {
 }
 
 export type Constructor<T = {}> = new (...args: any[]) => Tinlake
+
+ethers.errors.setLogLevel('error')
+
 ;(ethers.utils.BigNumber as any).prototype.toBN = function () {
   return new BN((this as any).toString())
 }

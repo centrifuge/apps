@@ -64,10 +64,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     proxyCreateNew = async (address: string) => {
       const accessToken = await this.buildProxy(address)
-      console.log('accessToken', accessToken)
-      const proxy = await this.getProxy(accessToken)
-      console.log('new proxy', proxy)
-      return proxy
+      return await this.getProxy(accessToken)
     }
 
     proxyIssue = async (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => {
@@ -156,19 +153,19 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 }
 
 export type IProxyActions = {
-  buildProxy(owner: string): Promise<any>
+  buildProxy(owner: string): Promise<number>
   checkProxyExists(address: string): Promise<string | null>
-  getProxy(accessTokenId: string): Promise<any>
-  proxyCount(): Promise<any>
-  getProxyAccessToken(proxyAddr: string): Promise<any>
-  getProxyAccessTokenOwner(tokenId: string): Promise<any>
-  getProxyOwnerByLoan(loanId: string): Promise<any>
-  getProxyOwnerByAddress(proxyAddr: string): Promise<any>
-  proxyCreateNew(address: string): Promise<any>
+  getProxy(accessTokenId: string): Promise<string>
+  proxyCount(): Promise<BN>
+  getProxyAccessToken(proxyAddr: string): Promise<number>
+  getProxyAccessTokenOwner(tokenId: string): Promise<BN>
+  getProxyOwnerByLoan(loanId: string): Promise<BN>
+  getProxyOwnerByAddress(proxyAddr: string): Promise<BN>
+  proxyCreateNew(address: string): Promise<string>
   proxyIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<PendingTransaction>
   proxyTransferIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<PendingTransaction>
-  proxyLockBorrowWithdraw(proxyAddr: string, loanId: string, amount: string, usr: string): Promise<any>
-  proxyRepayUnlockClose(proxyAddr: string, tokenId: string, loanId: string, registry: string): Promise<any>
+  proxyLockBorrowWithdraw(proxyAddr: string, loanId: string, amount: string, usr: string): Promise<PendingTransaction>
+  proxyRepayUnlockClose(proxyAddr: string, tokenId: string, loanId: string, registry: string): Promise<PendingTransaction>
 }
 
 export default ProxyActions
