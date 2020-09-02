@@ -4,7 +4,6 @@ import { ITinlake } from '../types/tinlake'
 import assert from 'assert'
 import { createTinlake, TestProvider } from '../test/utils'
 import testConfig from '../test/config'
-import { interestRateToFee } from '../utils/interestRateToFee'
 
 const testProvider = new TestProvider(testConfig)
 const adminAccount = account.generate(randomString.generate(32))
@@ -28,19 +27,23 @@ describe('admin tests', async () => {
   describe('operator', async () => {
     it('success: set allowance for junior investor', async () => {
       // rely admin on junior operator
-      await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['JUNIOR_OPERATOR'])
+      const relyTx = await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['JUNIOR_OPERATOR'])
+      await governanceTinlake.getTransactionReceipt(relyTx)
+
       const maxCurrency = '1000'
       const maxToken = '100'
 
       // set allowance for lender address
-      const allowanceResult: any = await adminTinlake.approveAllowanceJunior(
+      const allowanceTx = await adminTinlake.approveAllowanceJunior(
         lenderAccount.address,
         maxCurrency,
         maxToken
       )
+      const allowanceResult = await adminTinlake.getTransactionReceipt(allowanceTx)
 
       const maxSupplyAmount = await adminTinlake.getMaxSupplyAmountJunior(lenderAccount.address)
       const maxRedeemAmount = await adminTinlake.getMaxRedeemAmountJunior(lenderAccount.address)
+
       assert.equal(allowanceResult.status, SUCCESS_STATUS)
       assert.equal(maxRedeemAmount, maxToken)
       assert.equal(maxSupplyAmount, maxCurrency)
