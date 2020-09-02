@@ -2,7 +2,7 @@ import { networkUrlToName } from './utils/networkNameResolver'
 import poolConfigs from 'tinlake-pool-config'
 import * as yup from 'yup'
 
-export interface UpcomingPool {
+interface PoolI {
   name: string
   slug: string
   shortName?: string
@@ -15,7 +15,12 @@ export interface UpcomingPool {
   asset: string
 }
 
-export interface Pool extends UpcomingPool {
+export interface UpcomingPool extends PoolI {
+  isUpcoming: true
+}
+
+export interface Pool extends PoolI {
+  isUpcoming: false
   addresses: {
     ROOT_CONTRACT: string
     ACTIONS: string
@@ -126,12 +131,12 @@ const selectedPoolConfig = yup
   .oneOf(['kovanStaging', 'mainnetStaging', 'mainnetProduction'])
   .validateSync(process.env.NEXT_PUBLIC_POOLS_CONFIG)
 
-const pools = poolsSchema.validateSync(
-  poolConfigs[`${selectedPoolConfig}`].filter((p: Pool) => p.addresses?.ROOT_CONTRACT)
-)
-const upcomingPools = upcomingPoolsSchema.validateSync(
-  poolConfigs[`${selectedPoolConfig}`].filter((p: Pool) => !p.addresses?.ROOT_CONTRACT)
-)
+const pools = poolsSchema
+  .validateSync(poolConfigs[`${selectedPoolConfig}`].filter((p: Pool) => p.addresses?.ROOT_CONTRACT))
+  .map((p) => ({ ...p, isUpcoming: false } as Pool))
+const upcomingPools = upcomingPoolsSchema
+  .validateSync(poolConfigs[`${selectedPoolConfig}`].filter((p: Pool) => !p.addresses?.ROOT_CONTRACT))
+  .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
 
 const config: Config = {
   pools,

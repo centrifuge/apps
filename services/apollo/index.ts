@@ -2,7 +2,7 @@ import { ApolloClient, DefaultOptions } from 'apollo-client'
 import { Loan } from 'tinlake'
 import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory'
 import { createHttpLink } from 'apollo-link-http'
-import config from '../../config'
+import config, { UpcomingPool } from '../../config'
 import fetch from 'node-fetch'
 import gql from 'graphql-tag'
 import BN from 'bn.js'
@@ -58,6 +58,7 @@ class Apollo {
         totalRepaysAggregatedAmount,
         weightedInterestRate,
         seniorInterestRate,
+        isUpcoming: false,
         id: poolId,
         name: configPool.name,
         slug: configPool.slug,
@@ -70,6 +71,24 @@ class Apollo {
       }
     })
     return tinlakePools
+  }
+  injectUpcomingPoolData(upcomingPools: UpcomingPool[]): PoolData[] {
+    return upcomingPools.map((p) => ({
+      isUpcoming: true,
+      totalDebt: new BN('0'),
+      totalRepaysAggregatedAmount: new BN('0'),
+      weightedInterestRate: new BN('0'),
+      seniorInterestRate: new BN('0'),
+      id: p.slug,
+      name: p.name,
+      slug: p.slug,
+      asset: p.asset,
+      ongoingLoans: 0,
+      totalDebtNum: 0,
+      totalRepaysAggregatedAmountNum: 0,
+      weightedInterestRateNum: 0,
+      seniorInterestRateNum: 0,
+    }))
   }
 
   async getPools(): Promise<PoolsData> {
@@ -95,7 +114,9 @@ class Apollo {
       throw new Error(`error occured while fetching assets from apollo ${err}`)
     }
 
-    const pools = !result.data || !result.data.pools ? [] : this.injectPoolData(result.data.pools)
+    const pools = result.data?.pools
+      ? [...this.injectPoolData(result.data.pools), ...this.injectUpcomingPoolData(config.upcomingPools)]
+      : []
 
     return {
       pools,

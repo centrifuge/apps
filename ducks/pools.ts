@@ -12,6 +12,7 @@ export interface PoolData {
   id: string
   name: string
   slug: string
+  isUpcoming: boolean
   asset: string
   ongoingLoans: number
   totalDebt: BN
