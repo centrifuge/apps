@@ -47,7 +47,7 @@ export type EthConfig = {
   gas?: string
 }
 
-export type EthersOverrides = {
+export type Overrides = {
   gasPrice?: number
   gasLimit?: number
 }
@@ -55,7 +55,6 @@ export type EthersOverrides = {
 export type EthersConfig = {
   provider: ethers.providers.Provider
   signer: ethers.Signer
-  overrides?: EthersOverrides
 }
 
 export type ContractName = typeof contractNames[number]
@@ -79,6 +78,7 @@ export type TinlakeParams = {
   contractAbis?: ContractAbis | {}
   ethConfig?: EthConfig
   ethersConfig?: EthersConfig
+  overrides?: Overrides
   ethOptions?: any | {}
   contracts?: Contracts | {}
   contractConfig?: any | {}
@@ -98,6 +98,7 @@ export default class Tinlake {
   public ethOptions: any
   public ethConfig: EthConfig
   public ethersConfig: EthersConfig
+  public overrides: Overrides = {}
   public contractAddresses: ContractAddresses
   public transactionTimeout: number
   public contracts: Contracts = {}
@@ -114,6 +115,7 @@ export default class Tinlake {
       ethOptions,
       ethConfig,
       ethersConfig,
+      overrides,
       contractConfig,
     } = params
     if (!contractAbis) {
@@ -123,6 +125,7 @@ export default class Tinlake {
     this.contractConfig = contractConfig || {}
     this.contractAddresses = contractAddresses || {}
     this.transactionTimeout = transactionTimeout
+    this.overrides = overrides || {}
     this.setProvider(provider, ethOptions, ethersConfig)
     this.setEthConfig(ethConfig || {})
     this.setEthersConfig(ethersConfig)
@@ -195,11 +198,11 @@ export default class Tinlake {
   contract(abiName: ContractName, address?: string): ethers.Contract {
     if (address) {
       return new ethers.Contract(address, this.contractAbis[abiName], this.ethersConfig.signer)
-    }  if (this.ethersConfig.signer) {
+    }
+    if (this.ethersConfig.signer) {
       return this.ethersContracts[abiName].connect(this.ethersConfig.signer)
-    } 
-      return this.ethersContracts[abiName]
-    
+    }
+    return this.ethersContracts[abiName]
   }
 
   async pending(txPromise: Promise<ethers.providers.TransactionResponse>): Promise<PendingTransaction> {
@@ -210,11 +213,11 @@ export default class Tinlake {
         hash: tx.hash,
         timesOutAt: Date.now() + this.transactionTimeout * 1000,
       }
-    } catch(e) {
+    } catch (e) {
       console.error(`Error caught in tinlake.pending(): ${e}`)
       return {
         status: 0,
-        error: e.message
+        error: e.message,
       }
     }
   }

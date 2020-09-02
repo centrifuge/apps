@@ -5,7 +5,7 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
   return class extends Base implements ICurrencyActions {
     // move out for tests only
     mintCurrency = async (usr: string, amount: string) => {
-      return this.pending(this.contract('TINLAKE_CURRENCY').mint(usr, amount))
+      return this.pending(this.contract('TINLAKE_CURRENCY').mint(usr, amount, this.overrides))
     }
 
     getCurrencyAllowance = async (owner: string, spender: string) => {
@@ -29,7 +29,7 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
 
     approveCurrency = async (usr: string, currencyAmount: string) => {
       const currencyContract = this.contract('TINLAKE_CURRENCY')
-      return this.pending(currencyContract.approve(usr, currencyAmount))
+      return this.pending(currencyContract.approve(usr, currencyAmount, this.overrides))
     }
 
     approveSeniorForCurrency = async (currencyAmount: string) => {

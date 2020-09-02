@@ -1,20 +1,19 @@
 import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
-import { waitAndReturnEvents, executeAndRetry } from '../services/ethereum'
 import BN from 'bn.js'
 
 export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICollateralActions {
     mintTitleNFT = async (nftAddr: string, user: string) => {
-      const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr)
-      const txHash = await executeAndRetry(nft.issue, [user, this.ethConfig])
-      console.log(`[Mint NFT] txHash: ${txHash}`)
-      const res: any = await waitAndReturnEvents(
-        this.eth,
-        txHash,
-        this.contractAbis['COLLATERAL_NFT'],
-        this.transactionTimeout
-      )
-      return res.events[0].data[2].toString()
+      // TODO: this is untested right now
+      const tx = await this.contract('COLLATERAL_NFT', nftAddr).issue(user, this.overrides)
+      const receipt = await this.getTransactionReceipt(tx)
+
+      if (!(receipt.logs && receipt.logs[0])) {
+        throw new Error('Event missing in collateralNft.issue(user) receipt')
+      }
+
+      const parsedLog = this.contract('PROXY_REGISTRY').interface.parseLog(receipt.logs[0])
+      return parsedLog.values['2'].toString()
     }
 
     mintNFT = async (
@@ -26,27 +25,25 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
       asset: string
     ) => {
       const nft = this.contract('COLLATERAL_NFT', nftAddress)
-      return this.pending(nft.mint(owner, tokenId, ref, amount, asset))
+      return this.pending(nft.mint(owner, tokenId, ref, amount, asset, this.overrides))
     }
 
     approveNFT = async (nftAddress: string, tokenId: string, to: string) => {
       const nft = this.contract('COLLATERAL_NFT', nftAddress)
-      return this.pending(nft.approve(to, tokenId))
+      return this.pending(nft.approve(to, tokenId, this.overrides))
     }
 
     setNFTApprovalForAll = async (nftAddress: string, to: string, approved: boolean) => {
       const nft = this.contract('COLLATERAL_NFT', nftAddress)
-      return this.pending(nft.setApprovalForAll(to, approved))
+      return this.pending(nft.setApprovalForAll(to, approved, this.overrides))
     }
 
     isNFTApprovedForAll = async (nftAddress: string, owner: string, operator: string) => {
       return this.contract('COLLATERAL_NFT', nftAddress).isApprovedForAll(owner, operator)
     }
 
-    getNFTCount = async (nftAddr: string): Promise<BN> => {
-      const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddr)
-      const res: { 0: BN } = await executeAndRetry(nft.count, [])
-      return res[0]
+    getNFTCount = async (nftAddress: string): Promise<BN> => {
+      return (await this.contract('COLLATERAL_NFT', nftAddress).count()).toBN()
     }
 
     getNFTData = async (nftAddress: string, tokenId: string): Promise<any> => {
@@ -58,16 +55,14 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
     }
 
     transferNFT = async (nftAddress: string, from: string, to: string, tokenId: string) => {
-      const nft: any = this.eth.contract(this.contractAbis['COLLATERAL_NFT']).at(nftAddress)
-      const txHash = await executeAndRetry(nft.transferFrom, [from, to, tokenId, this.ethConfig])
-      console.log(`[NFT Approve] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contractAbis['COLLATERAL_NFT'], this.transactionTimeout)
+      const nft = this.contract('COLLATERAL_NFT', nftAddress)
+      return this.pending(nft.transferFrom(from, to, tokenId, this.overrides))
     }
   }
 }
 
 export type ICollateralActions = {
-  mintTitleNFT(nftAddr: string, usr: string): Promise<any>
+  mintTitleNFT(nftAddr: string, usr: string): Promise<PendingTransaction>
   mintNFT(
     nftAddr: string,
     owner: string,
@@ -82,7 +77,7 @@ export type ICollateralActions = {
   getNFTCount(nftAddr: string): Promise<BN>
   getNFTData(nftAddr: string, tokenId: string): Promise<any>
   getNFTOwner(nftAddr: string, tokenId: string): Promise<string>
-  transferNFT(nftAddr: string, from: string, to: string, tokenId: string): Promise<any>
+  transferNFT(nftAddr: string, from: string, to: string, tokenId: string): Promise<PendingTransaction>
 }
 
 export default CollateralActions

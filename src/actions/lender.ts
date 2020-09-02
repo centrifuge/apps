@@ -5,41 +5,49 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
   return class extends Base implements ILenderActions {
     // senior tranche functions
     supplySenior = async (currencyAmount: string) => {
-      return this.pending(this.contract('SENIOR_OPERATOR').supply(currencyAmount))
+      return this.pending(this.contract('SENIOR_OPERATOR').supply(currencyAmount, this.overrides))
     }
 
     redeemSenior = async (tokenAmount: string) => {
-      return this.pending(this.contract('SENIOR_OPERATOR').redeem(tokenAmount))
+      return this.pending(this.contract('SENIOR_OPERATOR').redeem(tokenAmount, this.overrides))
     }
 
     getSeniorTokenAllowance = async (owner: string) => {
-      return (await this.contract('SENIOR_TOKEN').allowance(owner, this.contractAddresses['SENIOR'])).toBN()
+      return (
+        await this.contract('SENIOR_TOKEN').allowance(owner, this.contractAddresses['SENIOR'], this.overrides)
+      ).toBN()
     }
 
     approveSeniorToken = async (tokenAmount: string) => {
-      return this.pending(this.contract('SENIOR_TOKEN').approve(this.contractAddresses['SENIOR'], tokenAmount))
+      return this.pending(
+        this.contract('SENIOR_TOKEN').approve(this.contractAddresses['SENIOR'], tokenAmount, this.overrides)
+      )
     }
 
     // junior tranche functions
     supplyJunior = async (currencyAmount: string) => {
-      return this.pending(this.contract('JUNIOR_OPERATOR').supply(currencyAmount))
+      return this.pending(this.contract('JUNIOR_OPERATOR').supply(currencyAmount, this.overrides))
     }
 
     redeemJunior = async (tokenAmount: string) => {
-      return this.pending(this.contract('JUNIOR_OPERATOR').redeem(tokenAmount))
+      return this.pending(this.contract('JUNIOR_OPERATOR').redeem(tokenAmount, this.overrides))
     }
 
     getJuniorTokenAllowance = async (owner: string) => {
-      return (await this.contract('JUNIOR_TOKEN').allowance(owner, this.contractAddresses['JUNIOR'])).toBN()
+      return (
+        await this.contract('JUNIOR_TOKEN').allowance(owner, this.contractAddresses['JUNIOR'], this.overrides)
+      ).toBN()
     }
 
     approveJuniorToken = async (tokenAmount: string) => {
-      return this.pending(this.contract('JUNIOR_TOKEN').approve(this.contractAddresses['JUNIOR'], tokenAmount))
+      return this.pending(
+        this.contract('JUNIOR_TOKEN').approve(this.contractAddresses['JUNIOR'], tokenAmount, this.overrides)
+      )
     }
 
     // general lender functions
     balance = async () => {
-      return this.pending(this.contract('DISTRIBUTOR').balance())
+      return this.pending(this.contract('DISTRIBUTOR').balance(this.overrides))
     }
   }
 }

@@ -40,6 +40,7 @@ export function createTinlake(usr: Account, testConfig: ProviderConfig): ITinlak
     transactionTimeout,
     provider: createSignerProvider(rpcUrl, usr),
     ethConfig: { gas, gasPrice, from: usr.address },
+    overrides: testConfig.overrides,
     ethersConfig: createEthersConfig(rpcUrl, usr),
   })
 

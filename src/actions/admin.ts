@@ -70,34 +70,38 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     initRate = async (ratePerSecond: string) => {
       const rateGroup = getRateGroup(ratePerSecond)
       // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
-      return this.pending(this.contract('PILE').file(web3.fromAscii('rate').padEnd(66, '0'), rateGroup, ratePerSecond))
+      return this.pending(
+        this.contract('PILE').file(web3.fromAscii('rate').padEnd(66, '0'), rateGroup, ratePerSecond, this.overrides)
+      )
     }
 
     changeRate = async (loan: string, ratePerSecond: string) => {
       const rateGroup = getRateGroup(ratePerSecond)
-      return this.pending(this.contract('PILE').changeRate(loan, rateGroup))
+      return this.pending(this.contract('PILE').changeRate(loan, rateGroup, this.overrides))
     }
 
     setRate = async (loan: string, ratePerSecond: string) => {
       const rateGroup = getRateGroup(ratePerSecond)
-      return this.pending(this.contract('PILE').setRatet(loan, rateGroup))
+      return this.pending(this.contract('PILE').setRatet(loan, rateGroup, this.overrides))
     }
 
     // ------------ admin functions lender-site -------------
     setMinimumJuniorRatio = async (ratio: string) => {
       // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
-      return this.pending(this.contract('ASSESSOR').file(web3.fromAscii('minJuniorRatio').padEnd(66, '0'), ratio))
+      return this.pending(
+        this.contract('ASSESSOR').file(web3.fromAscii('minJuniorRatio').padEnd(66, '0'), ratio, this.overrides)
+      )
     }
 
     approveAllowanceJunior = async (user: string, maxCurrency: string, maxToken: string) => {
-      return this.pending(this.contract('JUNIOR_OPERATOR').approve(user, maxCurrency, maxToken))
+      return this.pending(this.contract('JUNIOR_OPERATOR').approve(user, maxCurrency, maxToken, this.overrides))
     }
 
     approveAllowanceSenior = async (user: string, maxCurrency: string, maxToken: string) => {
       if (this.getOperatorType('senior') === 'PROPORTIONAL_OPERATOR') {
-        return this.pending(this.contract('SENIOR_OPERATOR').approve(user, maxCurrency))
+        return this.pending(this.contract('SENIOR_OPERATOR').approve(user, maxCurrency, this.overrides))
       } 
-        return this.pending(this.contract('SENIOR_OPERATOR').approve(user, maxCurrency, maxToken))
+        return this.pending(this.contract('SENIOR_OPERATOR').approve(user, maxCurrency, maxToken, this.overrides))
       
       
     }

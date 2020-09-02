@@ -5,7 +5,6 @@ import testConfig from '../test/config'
 import { ITinlake } from '../types/tinlake'
 import { createTinlake, TestProvider } from '../test/utils'
 import { Account } from '../test/types'
-import { ethers } from 'ethers'
 import BN from 'bn.js'
 
 const adminAccount = account.generate(randomString.generate(32))

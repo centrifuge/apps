@@ -10,7 +10,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     buildProxy = async (owner: string) => {
-      const tx = await this.contract('PROXY_REGISTRY')['build(address)'](owner)
+      const tx = await this.contract('PROXY_REGISTRY')['build(address)'](owner, this.overrides)
       const receipt = await this.getTransactionReceipt(tx)
 
       if (!(receipt.logs && receipt.logs[1])) {
@@ -82,7 +82,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         [this.contract('SHELF').address, nftRegistryAddress, tokenId]
       )
 
-      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
     }
 
     proxyTransferIssue = async (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => {
@@ -100,7 +100,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         [this.contract('SHELF').address, nftRegistryAddress, tokenId]
       )
 
-      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
     }
 
     proxyLockBorrowWithdraw = async (proxyAddress: string, loanId: string, amount: string, usr: string) => {
@@ -119,7 +119,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         [this.contract('SHELF').address, loanId, amount, usr]
       )
 
-      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
     }
 
     proxyRepayUnlockClose = async (proxyAddress: string, tokenId: string, loanId: string, registry: string) => {
@@ -147,7 +147,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         ]
       )
 
-      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
     }
   }
 }

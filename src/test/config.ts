@@ -13,7 +13,7 @@ const MILLI_ETH = 1e15 // 0.001 ETH
 const FAUCET_AMOUNT = 5000 * MILLI_ETH
 
 const GAS_PRICE = 10 * GWEI
-const GAS = 1000000
+const GAS_LIMIT = 1000000
 
 const testConfig: ProviderConfig = {
   contractAddresses: (process.env.CONTRACTS && JSON.parse(process.env.CONTRACTS)) || contractAddresses,
@@ -25,7 +25,8 @@ const testConfig: ProviderConfig = {
   nftRegistry: process.env.NFT_REGISTRY || '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24',
   transactionTimeout: 50000,
   gasPrice: `${GAS_PRICE}`,
-  gas: `${GAS}`,
+  gas: `${GAS_LIMIT}`,
+  overrides: { gasLimit: GAS_LIMIT },
   rpcUrl: process.env.RPC_URL || 'http://127.0.0.1:8545',
   isRealTestnet: false,
   contractAbis: abiDefinitions,
@@ -49,6 +50,7 @@ export type ProviderConfig = {
   SUCCESS_STATUS: 1
   FAIL_STATUS: 0
   FAUCET_AMOUNT: string
+  overrides: any
 }
 
 export default testConfig
