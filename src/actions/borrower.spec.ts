@@ -71,14 +71,12 @@ describe('borrower tests', async () => {
     await borrowerTinlake.unlock(loanId)
   })
 
-  // TODO: does not work because NFT feed does not have value this NFT
-  it.skip('success: borrow', async () => {
+  it('success: borrow', async () => {
     const amount = '1000'
     await mintIssueBorrow(borrowerAccount.address, borrowerTinlake, amount)
   })
 
-  // TODO: does not work because NFT feed does not have value this NFT
-  it.skip('success: repay', async () => {
+  it('success: repay', async () => {
     const amount = '1000'
     const { loanId } = await mintIssueBorrow(borrowerAccount.address, borrowerTinlake, amount)
     // wait to secs so that interest can accrue
@@ -119,6 +117,11 @@ async function mintIssue(usr: string, tinlake: ITinlake) {
 
 async function mintIssueBorrow(usr: string, tinlake: ITinlake, amount: string) {
   const { tokenId, loanId } = await mintIssue(usr, tinlake)
+
+  await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['NFT_FEED']);
+  const nftfeedId = await adminTinlake.getNftFeedId(testConfig.nftRegistry, Number(tokenId))
+  await adminTinlake.updateNftFeed(nftfeedId, Number(amount))
+
   // approve shelf to take nft
   await borrowerTinlake.approveNFT(testConfig.nftRegistry, tokenId, contractAddresses['SHELF'])
   // lock nft
