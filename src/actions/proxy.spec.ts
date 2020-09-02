@@ -32,10 +32,17 @@ describe('proxy tests', async () => {
       // create new proxy and mint collateral NFT to borrower
       const proxyAddr = await borrowerTinlake.proxyCreateNew(borrowerAccount.address)
       const tokenId = `${Math.floor(Math.random() * 10e15) + 1}`
-      await governanceTinlake.mintNFT(testConfig.nftRegistry, borrowerAccount.address, tokenId, '234', '345', '456')
-      await borrowerTinlake.approveNFT(testConfig.nftRegistry, tokenId, proxyAddr)
+
+      const mintTx = await governanceTinlake.mintNFT(testConfig.nftRegistry, borrowerAccount.address, tokenId, '234', '345', '456')
+      await governanceTinlake.getTransactionReceipt(mintTx)
+
+      const approveTx = await borrowerTinlake.approveNFT(testConfig.nftRegistry, tokenId, proxyAddr)
+      await borrowerTinlake.getTransactionReceipt(approveTx)
+
       // issue loan from collateral NFT
-      const issueResult = await borrowerTinlake.proxyTransferIssue(proxyAddr, testConfig.nftRegistry, tokenId)
+      const issueTx = await borrowerTinlake.proxyTransferIssue(proxyAddr, testConfig.nftRegistry, tokenId)
+      const issueResult = await borrowerTinlake.getTransactionReceipt(issueTx)
+
       assert.equal(issueResult.status, SUCCESS_STATUS)
       assert.equal(await borrowerTinlake.getNFTOwner(testConfig.nftRegistry, tokenId), proxyAddr)
 
@@ -72,9 +79,15 @@ describe('proxy tests', async () => {
     it('fail: does not succeed if the proxy is not approved to take the NFT', async () => {
       const proxyAddr = await borrowerTinlake.proxyCreateNew(borrowerAccount.address)
       const tokenId = `${Math.floor(Math.random() * 10e15) + 1}`
-      await governanceTinlake.mintNFT(testConfig.nftRegistry, borrowerAccount.address, tokenId, '234', '345', '456')
-      const res = await borrowerTinlake.proxyTransferIssue(testConfig.nftRegistry, proxyAddr, tokenId)
-      assert.equal(res.status, FAIL_STATUS)
+
+      const mintTx = await governanceTinlake.mintNFT(testConfig.nftRegistry, borrowerAccount.address, tokenId, '234', '345', '456')
+      console.log('mintTx', mintTx)
+      await governanceTinlake.getTransactionReceipt(mintTx)
+
+      const issueTx = await borrowerTinlake.proxyTransferIssue(testConfig.nftRegistry, proxyAddr, tokenId)
+      console.log('issueTx', issueTx)
+      const issueResult = await borrowerTinlake.getTransactionReceipt(issueTx)
+      assert.equal(issueResult.status, FAIL_STATUS)
     })
 
     // TODO: update with v3, ceiling does currently not exist, need to use NFT Feed

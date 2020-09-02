@@ -11,7 +11,11 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     buildProxy = async (owner: string) => {
-      // const tx = await this.contract('PROXY_REGISTRY').proxies(accessTokenId)
+      // const tx = await this.contract('PROXY_REGISTRY')['build(address)'](owner, {})
+      // const result = await this.getTransactionReceipt(tx)
+      // console.log(' create proxy new result.topics', result.logs?.map((log: any) => log.topics))
+
+
 
       const txHash = await executeAndRetry(this.contracts['PROXY_REGISTRY'].build, [owner, this.ethConfig])
       console.log(`[Proxy created] txHash: ${txHash}`)
@@ -21,7 +25,8 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         this.contracts['PROXY_REGISTRY'].abi,
         this.transactionTimeout
       )
-      console.log('create proxy response', response)
+      console.log('create proxy response', response.events[0])
+      console.log('create proxy return data', response.events[0].data[2].toString())
       return response.events[0].data[2].toString()
     }
 
@@ -64,7 +69,10 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     proxyCreateNew = async (address: string) => {
       const accessToken = await this.buildProxy(address)
-      return this.getProxy(accessToken)
+      console.log('accessToken', accessToken)
+      const proxy = await this.getProxy(accessToken)
+      console.log('new proxy', proxy)
+      return proxy
     }
 
     proxyIssue = async (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => {

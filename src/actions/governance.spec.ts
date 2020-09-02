@@ -42,7 +42,9 @@ describe('governance tests', async () => {
       const randomTinlake = createTinlake(randomAccount, testConfig)
 
       const tx = await randomTinlake.relyAddress(userAccount.address, testConfig.contractAddresses['PILE'])
+      console.log('tx', tx)
       const res = await randomTinlake.getTransactionReceipt(tx)
+      console.log('res', res)
       assert.equal(res.status, FAIL_STATUS)
     })
   })

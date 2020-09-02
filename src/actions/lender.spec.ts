@@ -69,6 +69,7 @@ describe('lender functions', async () => {
   it('success: redeem junior', async () => {
     const currencyAmount = '10000'
     const tokenAmount = '100'
+    
     // whitelist investor
     const approveTx = await adminTinlake.approveAllowanceJunior(lenderAccount.address, currencyAmount, tokenAmount)
     await adminTinlake.getTransactionReceipt(approveTx)
