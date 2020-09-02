@@ -189,15 +189,10 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       let maxRedeem: BN
       switch (operatorType) {
         case 'PROPORTIONAL_OPERATOR':
-          const redeemLimitRes: { 0: BN } = await executeAndRetry(
-            this.contracts['SENIOR_OPERATOR'].calcMaxRedeemToken,
-            [user]
-          )
-          maxRedeem = redeemLimitRes[0]
+          maxRedeem = (await this.contract('SENIOR_OPERATOR').calcMaxRedeemToken(user)).toBN()
           break
         case 'ALLOWANCE_OPERATOR':
-          const res: { 0: BN } = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].maxToken, [user])
-          maxRedeem = res[0]
+          maxRedeem = (await this.contract('SENIOR_OPERATOR').maxToken(user)).toBN()
           break
         default:
           maxRedeem = new BN(0)
