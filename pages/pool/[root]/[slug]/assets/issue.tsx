@@ -12,6 +12,7 @@ import WithFooter from '../../../../../components/WithFooter'
 import config, { Pool } from '../../../../../config'
 import { GetStaticProps } from 'next'
 import Container from '../../../../../components/Container'
+import Head from 'next/head'
 
 interface Props extends WithRouterProps {
   root: string
@@ -25,6 +26,9 @@ class LoanIssuePage extends React.Component<Props> {
 
     return (
       <WithFooter>
+        <Head>
+          <title>Open Financing: {pool.name} | Tinlake | Centrifuge | Decentralized Asset Financing</title>
+        </Head>
         <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/assets/issue'} menuItems={menuItems} />
         <Container>
           <Box justify="center" direction="row">

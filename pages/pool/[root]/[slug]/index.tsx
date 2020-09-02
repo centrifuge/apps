@@ -10,6 +10,7 @@ import { GetStaticProps } from 'next'
 import WithFooter from '../../../../components/WithFooter'
 import Auth from '../../../../components/Auth'
 import Container from '../../../../components/Container'
+import Head from 'next/head'
 
 interface Props {
   root: string
@@ -23,6 +24,9 @@ class Pool extends React.Component<Props> {
 
     return (
       <WithFooter>
+        <Head>
+          <title>Pool Overview: {pool.name} | Tinlake | Centrifuge | Decentralized Asset Financing</title>
+        </Head>
         <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/'} menuItems={menuItems} />
         <Container>
           <Box justify="center" direction="row">

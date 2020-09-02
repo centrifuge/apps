@@ -10,6 +10,7 @@ import { WithRouterProps } from 'next/dist/client/with-router'
 import { GetStaticProps } from 'next'
 import Auth from '../../../../../components/Auth'
 import Container from '../../../../../components/Container'
+import Head from 'next/head'
 
 interface Props extends WithRouterProps {
   root: string
@@ -22,6 +23,9 @@ class MintNFTPage extends React.Component<Props> {
 
     return (
       <WithFooter>
+        <Head>
+          <title>Mint NFT: {pool.name} | Tinlake | Centrifuge | Decentralized Asset Financing</title>
+        </Head>
         <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/demo/mint-nft'} menuItems={menuItems} />
         <Container>
           <Box justify="center" direction="row">

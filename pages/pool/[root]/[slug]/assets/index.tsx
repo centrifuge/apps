@@ -12,6 +12,7 @@ import { WithRouterProps } from 'next/dist/client/with-router'
 import config, { Pool } from '../../../../../config'
 import { GetStaticProps } from 'next'
 import Container from '../../../../../components/Container'
+import Head from 'next/head'
 
 interface Props extends WithRouterProps {
   root: string
@@ -24,6 +25,9 @@ class LoanListPage extends React.Component<Props> {
 
     return (
       <WithFooter>
+        <Head>
+          <title>Assets: {pool.name} | Tinlake | Centrifuge | Decentralized Asset Financing</title>
+        </Head>
         <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/assets'} menuItems={menuItems} />
         <Container>
           <Box justify="evenly" direction="row">
