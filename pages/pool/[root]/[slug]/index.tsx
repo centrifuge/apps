@@ -44,11 +44,7 @@ class Pool extends React.Component<Props> {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   // We'll pre-render only these paths at build time.
-  const paths = config.pools
-    .filter((pool) => pool.addresses.ROOT_CONTRACT !== undefined)
-    .map((pool) => ({ params: { root: pool.addresses.ROOT_CONTRACT, slug: pool.slug } }))
-
-  console.log('paths', paths)
+  const paths = config.pools.map((pool) => ({ params: { root: pool.addresses.ROOT_CONTRACT, slug: pool.slug } }))
 
   // { fallback: false } means other routes should 404.
   return { paths, fallback: false }
