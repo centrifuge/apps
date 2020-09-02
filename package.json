@@ -30,6 +30,7 @@
     "@types/node": "^13.11.0",
     "@types/web3-eth-abi": "^1.0.0",
     "declaration-bundler-webpack-plugin": "^1.0.3",
+    "glpk.js": "3.1.2",
     "husky": "^4.2.3",
     "nodemon": "^1.19.1",
     "prettier": "2.1.1",
