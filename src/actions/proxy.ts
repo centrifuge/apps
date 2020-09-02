@@ -69,6 +69,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     proxyIssue = async (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
+      // TODO: replace with ethers.js method call
       const encoded = abiCoder.encodeFunctionCall(
         {
           name: 'issue',
@@ -87,6 +88,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     proxyTransferIssue = async (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
+      // TODO: replace with ethers.js method call
       const encoded = abiCoder.encodeFunctionCall(
         {
           name: 'transferIssue',
@@ -105,6 +107,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     proxyLockBorrowWithdraw = async (proxyAddress: string, loanId: string, amount: string, usr: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
+      // TODO: replace with ethers.js method call
       const encoded = abiCoder.encodeFunctionCall(
         {
           name: 'lockBorrowWithdraw',
@@ -124,6 +127,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     proxyRepayUnlockClose = async (proxyAddress: string, tokenId: string, loanId: string, registry: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
+      // TODO: replace with ethers.js method call
       const encoded = abiCoder.encodeFunctionCall(
         {
           name: 'repayUnlockClose',

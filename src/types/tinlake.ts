@@ -1,6 +1,6 @@
 import { TinlakeActions } from '../actions'
 import BN from 'bn.js'
-import Tinlake, { EthConfig, ContractAddresses, ContractAbis, Contracts } from '../Tinlake'
+import Tinlake, { PendingTransaction, ContractAddresses, ContractAbis, Contracts } from '../Tinlake'
 
 export type Loan = {
   loanId: string
@@ -46,3 +46,4 @@ export type Investor = {
 }
 
 export type ITinlake = TinlakeActions & Tinlake
+export { PendingTransaction, ContractAddresses, ContractAbis, Contracts }

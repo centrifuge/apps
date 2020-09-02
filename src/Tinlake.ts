@@ -1,5 +1,3 @@
-import Eth from 'ethjs'
-import { ethI } from './services/ethereum'
 import abiDefinitions from './abi'
 import { ethers } from 'ethers'
 import BN from 'bn.js'
@@ -41,12 +39,6 @@ export type PendingTransaction = {
   timesOutAt?: number
 }
 
-export type EthConfig = {
-  from?: string
-  gasPrice?: string
-  gas?: string
-}
-
 export type Overrides = {
   gasPrice?: number
   gasLimit?: number
@@ -54,7 +46,7 @@ export type Overrides = {
 
 export type EthersConfig = {
   provider: ethers.providers.Provider
-  signer: ethers.Signer
+  signer?: ethers.providers.Web3Provider
 }
 
 export type ContractName = typeof contractNames[number]
@@ -72,12 +64,10 @@ export type ContractAddresses = {
 }
 
 export type TinlakeParams = {
-  provider: any
+  ethersConfig: EthersConfig
   transactionTimeout: number
   contractAddresses?: ContractAddresses | {}
   contractAbis?: ContractAbis | {}
-  ethConfig?: EthConfig
-  ethersConfig?: EthersConfig
   overrides?: Overrides
   ethOptions?: any | {}
   contracts?: Contracts | {}
@@ -94,26 +84,20 @@ ethers.errors.setLogLevel('error')
 
 export default class Tinlake {
   public provider: any
-  public eth: ethI
-  public ethOptions: any
-  public ethConfig: EthConfig
   public ethersConfig: EthersConfig
   public overrides: Overrides = {}
   public contractAddresses: ContractAddresses
   public transactionTimeout: number
   public contracts: Contracts = {}
-  public ethersContracts: Contracts = {}
   public contractAbis: ContractAbis = {}
   public contractConfig: any = {}
 
   constructor(params: TinlakeParams) {
     const {
-      provider,
       contractAddresses,
       transactionTimeout,
       contractAbis,
       ethOptions,
-      ethConfig,
       ethersConfig,
       overrides,
       contractConfig,
@@ -126,18 +110,7 @@ export default class Tinlake {
     this.contractAddresses = contractAddresses || {}
     this.transactionTimeout = transactionTimeout
     this.overrides = overrides || {}
-    this.setProvider(provider, ethOptions, ethersConfig)
-    this.setEthConfig(ethConfig || {})
     this.setEthersConfig(ethersConfig)
-  }
-
-  setProvider = (provider: any, ethOptions?: any, ethersConfig?: EthersConfig) => {
-    this.provider = provider
-    this.ethOptions = ethOptions || {}
-    this.eth = new Eth(this.provider, this.ethOptions) as ethI
-
-    if (ethersConfig) this.ethersConfig = ethersConfig
-
     this.setContracts()
   }
 
@@ -145,50 +118,28 @@ export default class Tinlake {
     // set root & proxy contracts
     contractNames.forEach((name) => {
       if (this.contractAbis[name] && this.contractAddresses[name]) {
-        this.contracts[name] = this.eth.contract(this.contractAbis[name]).at(this.contractAddresses[name])
-
-        if (this.ethersConfig) this.ethersContracts[name] = this.createContract(this.contractAddresses[name]!, name)
+        this.contracts[name] = this.createContract(this.contractAddresses[name]!, name)
       }
     })
 
     // modular contracts
     if (this.contractAddresses['JUNIOR_OPERATOR']) {
       this.contracts['JUNIOR_OPERATOR'] = this.contractConfig['JUNIOR_OPERATOR']
-        ? this.createEthContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
-        : this.createEthContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
-
-      this.ethersContracts['JUNIOR_OPERATOR'] = this.contractConfig['JUNIOR_OPERATOR']
         ? this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
         : this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
     }
     if (this.contractAddresses['SENIOR_OPERATOR']) {
       this.contracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR']
-        ? this.createEthContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
-        : this.createEthContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
-
-      this.ethersContracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR']
         ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
         : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
     }
   }
 
-  setEthConfig = (ethConfig: EthConfig) => {
-    this.ethConfig = {
-      ...this.ethConfig,
-      ...ethConfig,
-    }
-  }
-
-  setEthersConfig = (ethersConfig: EthersConfig | undefined) => {
+  setEthersConfig = (ethersConfig: EthersConfig) => {
     this.ethersConfig = {
       ...this.ethersConfig,
       ...ethersConfig,
     }
-  }
-
-  createEthContract(address: string, abiName: ContractName) {
-    const contract = this.eth.contract(this.contractAbis[abiName]).at(address)
-    return contract
   }
 
   createContract(address: string, abiName: ContractName) {
@@ -196,13 +147,18 @@ export default class Tinlake {
   }
 
   contract(abiName: ContractName, address?: string): ethers.Contract {
+    const signerOrProvider = this.ethersConfig.signer || this.ethersConfig.provider
+    if (!(abiName in this.contracts)) {
+      throw new Error(`Contract ${abiName} not loaded`)
+    }
+
     if (address) {
-      return new ethers.Contract(address, this.contractAbis[abiName], this.ethersConfig.signer)
+      return new ethers.Contract(address, this.contractAbis[abiName], signerOrProvider)
     }
     if (this.ethersConfig.signer) {
-      return this.ethersContracts[abiName].connect(this.ethersConfig.signer)
+      return this.contracts[abiName].connect(signerOrProvider)
     }
-    return this.ethersContracts[abiName]
+    return this.contracts[abiName]
   }
 
   async pending(txPromise: Promise<ethers.providers.TransactionResponse>): Promise<PendingTransaction> {

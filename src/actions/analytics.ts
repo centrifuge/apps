@@ -1,5 +1,5 @@
 import { Constructor, TinlakeParams } from '../Tinlake'
-import { executeAndRetry, ZERO_ADDRESS } from '../services/ethereum'
+import { ZERO_ADDRESS } from '../services/ethereum'
 import { Loan, Investor } from '../types/tinlake'
 import BN from 'bn.js'
 
@@ -42,10 +42,13 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       const riskGroup = await this.contract('NFT_FEED').risk(nftId)
 
       // retrieve rates for this risk group
-      const resEthers = await this.contract('PILE').rates(riskGroup)
-      console.log('getInterestRate res', resEthers)
-      const res = await executeAndRetry(this.contracts['PILE'].rates, [riskGroup])
-      return res ? res[2] : new BN(0)
+      const res = await this.contract('PILE').rates(riskGroup)
+      console.log('getInterestRate res', res)
+      console.log('TODO: return getInterestRate here')
+
+      return res.toBN()
+      // const res = await executeAndRetry(this.contracts['PILE'].rates, [riskGroup])
+      // return res ? res[2] : new BN(0)
     }
 
     getOwnerOfLoan = async (loanId: string): Promise<any> => {
@@ -208,17 +211,10 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       let tokenPrice: BN
       switch (operatorType) {
         case 'PROPORTIONAL_OPERATOR':
-          const customTokenPriceRes: { 0: BN } = await executeAndRetry(
-            this.contracts['SENIOR_OPERATOR'].calcTokenPrice,
-            [user]
-          )
-          tokenPrice = customTokenPriceRes[0]
+          tokenPrice = (await this.contract('SENIOR_OPERATOR').calcTokenPrice(user)).toBN()
           break
         case 'ALLOWANCE_OPERATOR':
-          const res: { 0: BN } = await executeAndRetry(this.contracts['ASSESSOR'].calcTokenPrice, [
-            this.contractAddresses['SENIOR'],
-          ])
-          tokenPrice = res[0]
+          tokenPrice = (await this.contract('ASSESSOR').calcTokenPrice(this.contractAddresses['SENIOR'])).toBN()
           break
         default:
           tokenPrice = new BN(0)
@@ -228,8 +224,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
 
     getSeniorReserve = async () => {
       if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
-        const res: { 0: BN } = await executeAndRetry(this.contracts['SENIOR'].balance, [])
-        return res[0] || new BN(0)
+        return (await this.contract('SENIOR').balance()).toBN()
       }
       return new BN(0)
     }
