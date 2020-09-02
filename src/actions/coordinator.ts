@@ -119,7 +119,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
           ],
         }
 
-        const output = glpk.solve(lp, glpk.GLP_MSG_ALL)
+        const output = glpk.solve(lp, glpk.GLP_MSG_ERR)
         return output.result
       })
     }
