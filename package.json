@@ -30,6 +30,7 @@
     "@types/node": "^13.11.0",
     "@types/web3-eth-abi": "^1.0.0",
     "declaration-bundler-webpack-plugin": "^1.0.3",
+    "glpk.js": "3.1.2",
     "husky": "^4.2.3",
     "nodemon": "^1.19.1",
     "prettier": "2.1.1",
@@ -47,7 +48,7 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "watch": "rollup -cw",
+    "start": "rollup -cw",
     "test": "ts-mocha -p src/test/tsconfig.json src/**/*.spec.ts src/*.spec.ts --timeout 40000",
     "nodemon": "nodemon node inspect dist/Tinlake.js",
     "generate-docs": "typedoc --out docs --exclude \"./node_modules/**\"  --exclude \"./src/abi/**\" --exclude \"./src/index.ts\" --exclude \"./src/actions/*.spec.ts\" --exclude \"./src/test/**\" --excludeExternals --excludeNotExported --ignoreCompilerErrors ./src",
