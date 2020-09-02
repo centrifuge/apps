@@ -1,11 +1,9 @@
 import { Constructor, TinlakeParams } from '../Tinlake'
-import BN from 'bn.js'
 
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
     solveEpoch = async () => {
       // const tinlake = (this as any)
-
       // const reserve = (await tinlake.getJuniorReserve()).add(await tinlake.getSeniorReserve())
 
       // const state = {
