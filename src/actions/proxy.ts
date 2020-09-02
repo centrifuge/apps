@@ -1,5 +1,4 @@
 import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
-import { waitAndReturnEvents, executeAndRetry } from '../services/ethereum'
 const abiCoder = require('web3-eth-abi')
 import BN from 'bn.js'
 import { ethers } from 'ethers'
@@ -11,23 +10,19 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     buildProxy = async (owner: string) => {
-      // const tx = await this.contract('PROXY_REGISTRY')['build(address)'](owner, {})
-      // const result = await this.getTransactionReceipt(tx)
-      // console.log(' create proxy new result.topics', result.logs?.map((log: any) => log.topics))
+      const tx = await this.contract('PROXY_REGISTRY')['build(address)'](owner)
+      const receipt = await this.getTransactionReceipt(tx)
 
+      if (!(receipt.logs && receipt.logs[1])) {
+        throw new Error('Created() event missing in proxyRegistry.build(address) receipt')
+      }
 
+      // Two events are emitted: Transfer() (from the ERC721 contract mint method) and Created() (from the ProxyRegistry contract)
+      // We parse the 4th arg of the Created() event, to grab the access token
+      const parsedLog = this.contract('PROXY_REGISTRY').interface.parseLog(receipt.logs[1])
+      const accessToken = parsedLog.values['3'].toNumber()
 
-      const txHash = await executeAndRetry(this.contracts['PROXY_REGISTRY'].build, [owner, this.ethConfig])
-      console.log(`[Proxy created] txHash: ${txHash}`)
-      const response: any = await waitAndReturnEvents(
-        this.eth,
-        txHash,
-        this.contracts['PROXY_REGISTRY'].abi,
-        this.transactionTimeout
-      )
-      console.log('create proxy response', response.events[0])
-      console.log('create proxy return data', response.events[0].data[2].toString())
-      return response.events[0].data[2].toString()
+      return accessToken
     }
 
     getProxy = async (accessTokenId: string) => {

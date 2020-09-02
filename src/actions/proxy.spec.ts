@@ -84,7 +84,7 @@ describe('proxy tests', async () => {
       console.log('mintTx', mintTx)
       await governanceTinlake.getTransactionReceipt(mintTx)
 
-      const issueTx = await borrowerTinlake.proxyTransferIssue(testConfig.nftRegistry, proxyAddr, tokenId)
+      const issueTx = await borrowerTinlake.proxyTransferIssue(proxyAddr, testConfig.nftRegistry, tokenId)
       console.log('issueTx', issueTx)
       const issueResult = await borrowerTinlake.getTransactionReceipt(issueTx)
       assert.equal(issueResult.status, FAIL_STATUS)
