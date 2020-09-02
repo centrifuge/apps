@@ -30,6 +30,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
           name: 'LP',
           generals: ['dropRedeem', 'tinRedeem', 'tinInvest', 'dropInvest'],
           objective: {
+            // Maximize: dropRedeem > tinRedeem > tinInvest > dropInvest
             direction: glpk.GLP_MAX,
             name: 'obj',
             vars: [
@@ -80,6 +81,14 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
               ],
               bnds: { type: glpk.GLP_UP, ub: state.maxReserve - state.reserve, lb: 0.0 },
             },
+            /**
+             * The next tow constraints were rewritten from the original equations in the epoch model. 
+             * For one, minTINRatio was rewritten as a lower bound, which means both sides were multiplied by -1.
+             * Secondly, all output vars were moved to the left side, while all input vars were moved to the right side.
+             * 
+             * E.g. for dropRedeem, in the epoch model there's both -I4*(1-B7) and +I4.
+             * So: -I4*(1-B7) + I4 = -0.8 I4 + 1.0 I4 = 0.2 I4 = minTinRatio * dropRedeem.
+             */
             {
               name: 'minTINRatio',
               vars: [
