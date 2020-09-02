@@ -2,7 +2,20 @@ import { networkUrlToName } from './utils/networkNameResolver'
 import poolConfigs from 'tinlake-pool-config'
 import * as yup from 'yup'
 
-export type Pool = {
+export interface UpcomingPool {
+  name: string
+  slug: string
+  shortName?: string
+  assetOriginatorName?: string
+  text?: string
+  logo?: string
+  website?: string
+  email?: string
+  details?: any
+  asset: string
+}
+
+export interface Pool extends UpcomingPool {
   addresses: {
     ROOT_CONTRACT: string
     ACTIONS: string
@@ -14,18 +27,8 @@ export type Pool = {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
     SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
   }
-  name: string
-  slug: string
-  shortName?: string
-  assetOriginatorName?: string
   description?: string
-  text?: string
-  logo?: string
-  website?: string
-  email?: string
-  details?: any
   investHtml?: string
-  asset: string
 }
 
 export interface DisplayedField {
@@ -44,6 +47,7 @@ interface Config {
   isDemo: boolean
   network: 'Mainnet' | 'Kovan'
   pools: Pool[]
+  upcomingPools: UpcomingPool[]
   portisApiKey: string
 }
 
@@ -51,18 +55,18 @@ const contractAddressesSchema = yup.object().shape({
   ROOT_CONTRACT: yup
     .string()
     .length(42)
-    .matches(/0x[0-9a-fA-F]{40}/),
-  // .required('contractAddressesSchema.ROOT_CONTRACT is required'),
+    .matches(/0x[0-9a-fA-F]{40}/)
+    .required('contractAddressesSchema.ROOT_CONTRACT is required'),
   ACTIONS: yup
     .string()
     .length(42)
-    .matches(/0x[0-9a-fA-F]{40}/),
-  // .required('contractAddressesSchema.ACTIONS is required'),
+    .matches(/0x[0-9a-fA-F]{40}/)
+    .required('contractAddressesSchema.ACTIONS is required'),
   PROXY_REGISTRY: yup
     .string()
     .length(42)
-    .matches(/0x[0-9a-fA-F]{40}/),
-  // .required('contractAddressesSchema.PROXY_REGISTRY is required'),
+    .matches(/0x[0-9a-fA-F]{40}/)
+    .required('contractAddressesSchema.PROXY_REGISTRY is required'),
   COLLATERAL_NFT: yup
     .string()
     .length(42)
@@ -72,11 +76,11 @@ const contractAddressesSchema = yup.object().shape({
 const contractConfigSchema = yup.object().shape({
   JUNIOR_OPERATOR: yup
     .mixed<'ALLOWANCE_OPERATOR'>()
-    // .required('contractConfigSchema.JUNIOR_OPERATOR is required')
+    .required('contractConfigSchema.JUNIOR_OPERATOR is required')
     .oneOf(['ALLOWANCE_OPERATOR']),
   SENIOR_OPERATOR: yup
     .mixed<'PROPORTIONAL_OPERATOR' | 'ALLOWANCE_OPERATOR'>()
-    // .required('contractConfigSchema.SENIOR_OPERATOR is required')
+    .required('contractConfigSchema.SENIOR_OPERATOR is required')
     .oneOf(['PROPORTIONAL_OPERATOR', 'ALLOWANCE_OPERATOR']),
 })
 
@@ -100,7 +104,21 @@ const poolSchema = yup.object().shape({
   asset: yup.string().required('poolSchema.asset is required'),
 })
 
-const poolsSchema = yup.array().of(poolSchema)
+const upcomingPoolSchema = yup.object().shape({
+  name: yup.string().required('poolSchema.name is required'),
+  slug: yup.string().required('poolSchema.slug is required'),
+  shortName: yup.string(),
+  assetOriginatorName: yup.string(),
+  text: yup.string(),
+  logo: yup.string(),
+  website: yup.string(),
+  email: yup.string(),
+  details: yup.object(),
+  asset: yup.string().required('poolSchema.asset is required'),
+})
+
+const poolsSchema = yup.array(poolSchema)
+const upcomingPoolsSchema = yup.array(upcomingPoolSchema)
 
 const selectedPoolConfig = yup
   .mixed<'kovanStaging' | 'mainnetStaging' | 'mainnetProduction'>()
@@ -108,8 +126,16 @@ const selectedPoolConfig = yup
   .oneOf(['kovanStaging', 'mainnetStaging', 'mainnetProduction'])
   .validateSync(process.env.NEXT_PUBLIC_POOLS_CONFIG)
 
-const pools = poolConfigs[`${selectedPoolConfig}`]
+const pools = poolsSchema.validateSync(
+  poolConfigs[`${selectedPoolConfig}`].filter((p: Pool) => p.addresses?.ROOT_CONTRACT)
+)
+const upcomingPools = upcomingPoolsSchema.validateSync(
+  poolConfigs[`${selectedPoolConfig}`].filter((p: Pool) => !p.addresses?.ROOT_CONTRACT)
+)
+
 const config: Config = {
+  pools,
+  upcomingPools,
   rpcUrl: yup
     .string()
     .required('NEXT_PUBLIC_RPC_URL is required')
@@ -140,7 +166,6 @@ const config: Config = {
     .required('NEXT_PUBLIC_RPC_URL is required')
     .oneOf(['Mainnet', 'Kovan'])
     .validateSync(networkUrlToName(process.env.NEXT_PUBLIC_RPC_URL || '')),
-  pools: poolsSchema.validateSync(pools),
   portisApiKey: yup
     .string()
     .required()
