@@ -1,7 +1,7 @@
 import * as React from 'react'
 import BN from 'bn.js'
 import { Box, FormField, Button, Heading } from 'grommet'
-import { baseToDisplay, displayToBase } from 'tinlake'
+import { baseToDisplay, displayToBase } from '@centrifuge/tinlake-js'
 import NumberInput from '../../../components/NumberInput'
 import { loadPool } from '../../../ducks/pool'
 import { connect } from 'react-redux'

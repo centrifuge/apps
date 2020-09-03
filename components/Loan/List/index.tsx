@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { bnToHex, baseToDisplay, feeToInterestRate } from 'tinlake'
+import { bnToHex, baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import { Box, DataTable, Text } from 'grommet'
 import NumberDisplay from '../../../components/NumberDisplay'
 import { DisplayField } from '@centrifuge/axis-display-field'
@@ -16,11 +16,11 @@ interface Props extends WithRouterProps {
 
 class LoanList extends React.Component<Props> {
   clickRow = ({ datum }: { datum?: SortableLoan; index?: number }) => {
-    const { root } = this.props.router.query
+    const { root, slug } = this.props.router.query
 
     this.props.router.push(
-      `/[root]/assets/asset?assetId=${datum!.loanId}`,
-      `/${root}/assets/asset?assetId=${datum!.loanId}`,
+      `/pool/[root]/[slug]/assets/asset?assetId=${datum!.loanId}`,
+      `/pool/${root}/${slug}/assets/asset?assetId=${datum!.loanId}`,
       { shallow: true }
     )
   }

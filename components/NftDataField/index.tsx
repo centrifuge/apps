@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FormField, TextInput } from 'grommet'
 import NumberInput from '../NumberInput'
-import { baseToDisplay, bnToHex } from 'tinlake'
+import { baseToDisplay, bnToHex } from '@centrifuge/tinlake-js'
 import { convert as convertToTimestamp } from './../../utils/timestampConverter'
 const web3 = require('web3-utils')
 

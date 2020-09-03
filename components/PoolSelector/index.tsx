@@ -51,7 +51,11 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
   }
 
   const navigateToPool = (pool: PoolData) => {
-    router.push('/[root]', `/${pool.id}`)
+    if (pool.isUpcoming) {
+      router.push('/pool/[slug]', `/pool/${pool.slug}`)
+    } else {
+      router.push('/pool/[root]/[slug]', `/pool/${pool.id}/${pool.slug}`)
+    }
     setOpen(false)
   }
 
@@ -86,6 +90,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
         >
           <Wrapper>
             <PoolList>
+              {/* TODO */}
               {pools.data?.pools.length >= 5 && (
                 <SearchField>
                   <TextInput

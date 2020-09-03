@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import Badge from '../Badge'
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { getNFTLink, getAddressLink, hexToInt } from '../../utils/etherscanLinkGenerator'
-import { bnToHex, NFT } from 'tinlake'
+import { bnToHex, NFT } from '@centrifuge/tinlake-js'
 
 interface Props {
   data: NFT
