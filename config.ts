@@ -132,10 +132,10 @@ const selectedPoolConfig = yup
   .validateSync(process.env.NEXT_PUBLIC_POOLS_CONFIG)
 
 const pools = poolsSchema
-  .validateSync(poolConfigs[`${selectedPoolConfig}`].filter((p: Pool) => p.addresses.ROOT_CONTRACT))
+  .validateSync(poolConfigs[`${selectedPoolConfig}`].filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
   .map((p) => ({ ...p, isUpcoming: false } as Pool))
 const upcomingPools = upcomingPoolsSchema
-  .validateSync(poolConfigs[`${selectedPoolConfig}`].filter((p: Pool) => !p.addresses.ROOT_CONTRACT))
+  .validateSync(poolConfigs[`${selectedPoolConfig}`].filter((p: Pool) => !p.addresses || !p.addresses.ROOT_CONTRACT))
   .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
 
 const config: Config = {
