@@ -43,28 +43,28 @@ export const PoolLink: React.FunctionComponent<Props> = ({ href, as, children })
   )
 }
 
-function getHref(root: string | string[], href: string | null | undefined | UrlObject): string {
-  const pool = config.pools.find((p) => root === p.addresses.ROOT_CONTRACT)
+function getHref(rootOrSlug: string | string[], href: string | null | undefined | UrlObject): string {
+  const pool = config.pools.find((p) => rootOrSlug === p.addresses.ROOT_CONTRACT)
   if (pool) {
     return `/pool/[root]/[slug]${href}`
   }
-  const upPool = config.upcomingPools.find((p) => root === p.slug)
+  const upPool = config.upcomingPools.find((p) => rootOrSlug === p.slug)
   if (upPool) {
     return `/pool/[root]${href}`
   }
 
-  throw new Error(`could not find root ${root} for href in pools or upcoming pools`)
+  throw new Error(`could not find root ${rootOrSlug} for href in pools or upcoming pools`)
 }
 
-function getAs(root: string | string[], as: string | null | undefined | UrlObject): string {
-  const pool = config.pools.find((p) => root === p.addresses.ROOT_CONTRACT)
+function getAs(rootOrSlug: string | string[], as: string | null | undefined | UrlObject): string {
+  const pool = config.pools.find((p) => rootOrSlug === p.addresses.ROOT_CONTRACT)
   if (pool) {
-    return `/pool/${root}/${pool.slug}${as}`
+    return `/pool/${rootOrSlug}/${pool.slug}${as}`
   }
-  const upPool = config.upcomingPools.find((p) => root === p.slug)
+  const upPool = config.upcomingPools.find((p) => rootOrSlug === p.slug)
   if (upPool) {
-    return `/pool/${root}${as}`
+    return `/pool/${rootOrSlug}${as}`
   }
 
-  throw new Error(`could not find root ${root} for as in pools or upcoming pools`)
+  throw new Error(`could not find root ${rootOrSlug} for as in pools or upcoming pools`)
 }

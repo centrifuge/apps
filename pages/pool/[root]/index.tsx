@@ -25,7 +25,7 @@ class Pool extends React.Component<Props> {
     return (
       <WithFooter>
         <Head>
-          <title>Pool Overview: {pool.name} | Tinlake | Centrifuge | Decentralized Asset Financing</title>
+          <title>Pool Overview: {pool.name} | Tinlake | Centrifuge</title>
         </Head>
         <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/'} menuItems={menuItems.filter(noDemo)} />
         <Container>

@@ -92,9 +92,9 @@ const contractConfigSchema = yup.object().shape({
 // TODO: text/logo/etc should be required and description/investHtml removed,
 // once we migrate all pool configs to the new format
 const poolSchema = yup.object().shape({
-  addresses: contractAddressesSchema,
+  addresses: contractAddressesSchema.required('poolSchema.addresses is required'),
   graph: yup.string(),
-  contractConfig: contractConfigSchema,
+  contractConfig: contractConfigSchema.required('poolSchema.contractConfig is required'),
   name: yup.string().required('poolSchema.name is required'),
   slug: yup.string().required('poolSchema.slug is required'),
   shortName: yup.string(),

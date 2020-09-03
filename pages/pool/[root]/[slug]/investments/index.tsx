@@ -25,7 +25,7 @@ class InvestmentPage extends React.Component<Props> {
     return (
       <WithFooter>
         <Head>
-          <title>Investments: {pool.name} | Tinlake | Centrifuge | Decentralized Asset Financing</title>
+          <title>Investments: {pool.name} | Tinlake | Centrifuge</title>
         </Head>
         <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/investments'} menuItems={menuItems} />
         <Container>

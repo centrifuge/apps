@@ -27,7 +27,7 @@ class LoanIssuePage extends React.Component<Props> {
     return (
       <WithFooter>
         <Head>
-          <title>Open Financing: {pool.name} | Tinlake | Centrifuge | Decentralized Asset Financing</title>
+          <title>Open Financing: {pool.name} | Tinlake | Centrifuge</title>
         </Head>
         <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/assets/issue'} menuItems={menuItems} />
         <Container>

@@ -25,7 +25,7 @@ class LoanListPage extends React.Component<Props> {
     return (
       <WithFooter>
         <Head>
-          <title>Assets: {pool.name} | Tinlake | Centrifuge | Decentralized Asset Financing</title>
+          <title>Assets: {pool.name} | Tinlake | Centrifuge</title>
         </Head>
         <Header
           poolTitle={pool.shortName || pool.name}
