@@ -53,6 +53,11 @@ const Header: React.FC<Props> = (props: Props) => {
     if (item.inPool) {
       const { root, slug } = props.router.query
       const route = item.route === '/' ? '' : item.route
+
+      if (slug === undefined) {
+        Router.push(`/pool/[root]${route}`, `/pool/${root}${route}`, { shallow: true })
+        return
+      }
       Router.push(`/pool/[root]/[slug]${route}`, `/pool/${root}/${slug}${route}`, { shallow: true })
       return
     }
