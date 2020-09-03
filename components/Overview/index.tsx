@@ -118,7 +118,6 @@ class Overview extends React.Component<Props> {
 
             {(selectedPool.isUpcoming || !selectedPool.description) && (
               <div>
-                {console.log(selectedPool)}
                 <h4>Asset Originator Details</h4>
                 <p>The following information was provided by the Asset Originator.</p>
                 <a href={selectedPool.website} target="_blank">

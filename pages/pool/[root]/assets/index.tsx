@@ -1,18 +1,17 @@
 import * as React from 'react'
-import LoanList from '../../../../containers/Loan/List'
 import WithTinlake from '../../../../components/WithTinlake'
-import { Box, Heading, Button } from 'grommet'
+import { Box, Heading } from 'grommet'
 import Header from '../../../../components/Header'
 import { menuItems } from '../../../../menuItems'
 import SecondaryHeader from '../../../../components/SecondaryHeader'
 import Auth from '../../../../components/Auth'
-import { PoolLink } from '../../../../components/PoolLink'
 import WithFooter from '../../../../components/WithFooter'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import config, { Pool } from '../../../../config'
 import { GetStaticProps } from 'next'
 import Container from '../../../../components/Container'
 import Head from 'next/head'
+import LoanListUpcoming from '../../../../containers/Loan/ListUpcoming'
 
 interface Props extends WithRouterProps {
   root: string
@@ -38,15 +37,12 @@ class LoanListPage extends React.Component<Props> {
                 render={(tinlake) => (
                   <Auth
                     tinlake={tinlake}
-                    render={(auth) => (
+                    render={() => (
                       <Box>
                         <SecondaryHeader>
                           <Heading level="3">Assets</Heading>
-                          <PoolLink href={'/assets/issue'}>
-                            <Button primary label="Open Financing" />
-                          </PoolLink>
                         </SecondaryHeader>
-                        <LoanList tinlake={tinlake} auth={auth} />
+                        <LoanListUpcoming tinlake={tinlake} />
                       </Box>
                     )}
                   />
