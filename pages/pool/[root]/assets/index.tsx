@@ -2,7 +2,7 @@ import * as React from 'react'
 import WithTinlake from '../../../../components/WithTinlake'
 import { Box, Heading } from 'grommet'
 import Header from '../../../../components/Header'
-import { menuItems } from '../../../../menuItems'
+import { menuItems, noDemo } from '../../../../menuItems'
 import SecondaryHeader from '../../../../components/SecondaryHeader'
 import Auth from '../../../../components/Auth'
 import WithFooter from '../../../../components/WithFooter'
@@ -27,7 +27,11 @@ class LoanListPage extends React.Component<Props> {
         <Head>
           <title>Assets: {pool.name} | Tinlake | Centrifuge | Decentralized Asset Financing</title>
         </Head>
-        <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/assets'} menuItems={menuItems} />
+        <Header
+          poolTitle={pool.shortName || pool.name}
+          selectedRoute={'/assets'}
+          menuItems={menuItems.filter(noDemo)}
+        />
         <Container>
           <Box justify="evenly" direction="row">
             <Box width="xlarge" gap="medium">

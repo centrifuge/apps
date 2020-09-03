@@ -3,7 +3,7 @@ import InvestmentsViewUpcoming from '../../../../containers/Investment/ViewUpcom
 import WithTinlake from '../../../../components/WithTinlake'
 import { Box, Heading } from 'grommet'
 import Header from '../../../../components/Header'
-import { menuItems } from '../../../../menuItems'
+import { menuItems, noDemo } from '../../../../menuItems'
 import SecondaryHeader from '../../../../components/SecondaryHeader'
 import Auth from '../../../../components/Auth'
 import WithFooter from '../../../../components/WithFooter'
@@ -27,7 +27,11 @@ class InvestmentPage extends React.Component<Props> {
         <Head>
           <title>Investments: {pool.name} | Tinlake | Centrifuge | Decentralized Asset Financing</title>
         </Head>
-        <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/investments'} menuItems={menuItems} />
+        <Header
+          poolTitle={pool.shortName || pool.name}
+          selectedRoute={'/investments'}
+          menuItems={menuItems.filter(noDemo)}
+        />
         <Container>
           <Box justify="center" direction="row">
             <Box width="xlarge">
@@ -42,7 +46,7 @@ class InvestmentPage extends React.Component<Props> {
                         <SecondaryHeader>
                           <Heading level="3">Investments</Heading>
                         </SecondaryHeader>
-                        <InvestmentsViewUpcoming tinlake={tinlake} auth={auth} />
+                        <InvestmentsViewUpcoming />
                       </Box>
                     )}
                   />

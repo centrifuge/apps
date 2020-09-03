@@ -3,7 +3,7 @@ import { GetStaticPaths } from 'next'
 import * as React from 'react'
 import Header from '../../../components/Header'
 import WithTinlake from '../../../components/WithTinlake'
-import { menuItems } from '../../../menuItems'
+import { menuItems, noDemo } from '../../../menuItems'
 import config, { UpcomingPool } from '../../../config'
 import { GetStaticProps } from 'next'
 import WithFooter from '../../../components/WithFooter'
@@ -27,7 +27,7 @@ class Pool extends React.Component<Props> {
         <Head>
           <title>Pool Overview: {pool.name} | Tinlake | Centrifuge | Decentralized Asset Financing</title>
         </Head>
-        <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/'} menuItems={menuItems} />
+        <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/'} menuItems={menuItems.filter(noDemo)} />
         <Container>
           <Box justify="center" direction="row">
             <Box width="xlarge">

@@ -6,3 +6,5 @@ export const menuItems: MenuItem[] = [
   { label: 'Investments', route: '/investments', inPool: true, env: '' },
   { label: 'Mint NFT', route: '/demo/mint-nft', inPool: true, env: 'demo' },
 ]
+
+export const noDemo = (m: MenuItem) => m.env !== 'demo'
