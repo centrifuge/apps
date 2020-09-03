@@ -13,7 +13,11 @@ interface Props {
 
 class PoolList extends React.Component<Props> {
   clickRow = ({ datum }: { datum?: PoolData; index?: number }) => {
-    Router.push('/[root]', `/${datum!.id}`, { shallow: true })
+    if (datum?.isUpcoming) {
+      Router.push('/pool/[slug]', `/pool/${datum!.slug}`, { shallow: true })
+    } else {
+      Router.push('/pool/[root]/[slug]', `/pool/${datum!.id}/${datum!.slug}`, { shallow: true })
+    }
   }
 
   render() {
@@ -38,22 +42,31 @@ class PoolList extends React.Component<Props> {
               ),
             },
             {
+              header: 'Status',
+              property: 'status',
+              align: 'center',
+              render: (p: PoolData) => (
+                <Box style={{ maxWidth: '200px' }}>
+                  <DisplayField
+                    as={'span'}
+                    value={
+                      p.isUpcoming
+                        ? 'Upcoming'
+                        : p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.gtn(0)
+                        ? 'Closed'
+                        : 'Open'
+                    }
+                  />
+                </Box>
+              ),
+            },
+            {
               header: 'Asset Type',
               property: 'type',
               align: 'center',
               render: (p: PoolData) => (
                 <Box style={{ maxWidth: '150px' }}>
                   <DisplayField as={'span'} value={p.asset} />
-                </Box>
-              ),
-            },
-            {
-              header: 'Active Financings',
-              property: 'ongoingLoans',
-              align: 'center',
-              render: (p: PoolData) => (
-                <Box style={{ maxWidth: '150px' }}>
-                  <DisplayField as={'span'} value={p.ongoingLoans} />
                 </Box>
               ),
             },

@@ -16,11 +16,11 @@ interface Props extends WithRouterProps {
 
 class LoanList extends React.Component<Props> {
   clickRow = ({ datum }: { datum?: SortableLoan; index?: number }) => {
-    const { root } = this.props.router.query
+    const { root, slug } = this.props.router.query
 
     this.props.router.push(
-      `/[root]/assets/asset?assetId=${datum!.loanId}`,
-      `/${root}/assets/asset?assetId=${datum!.loanId}`,
+      `/pool/[root]/[slug]/assets/asset?assetId=${datum!.loanId}`,
+      `/pool/${root}/${slug}/assets/asset?assetId=${datum!.loanId}`,
       { shallow: true }
     )
   }

@@ -1,14 +1,15 @@
 import { Box } from 'grommet'
+import { GetStaticPaths, GetStaticProps } from 'next'
 import * as React from 'react'
-import Header from '../../components/Header'
-import Overview from '../../containers/Overview'
-import WithTinlake from '../../components/WithTinlake'
-import { menuItems } from '../../menuItems'
-import config, { Pool as IPool } from '../../config'
-import { GetStaticProps } from 'next'
-import WithFooter from '../../components/WithFooter'
-import Auth from '../../components/Auth'
-import Container from '../../components/Container'
+import Header from '../../../../components/Header'
+import Overview from '../../../../containers/Overview'
+import WithTinlake from '../../../../components/WithTinlake'
+import { menuItems } from '../../../../menuItems'
+import config, { Pool as IPool } from '../../../../config'
+import WithFooter from '../../../../components/WithFooter'
+import Auth from '../../../../components/Auth'
+import Container from '../../../../components/Container'
+import Head from 'next/head'
 
 interface Props {
   root: string
@@ -22,6 +23,9 @@ class Pool extends React.Component<Props> {
 
     return (
       <WithFooter>
+        <Head>
+          <title>Pool Overview: {pool.name} | Tinlake | Centrifuge</title>
+        </Head>
         <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/'} menuItems={menuItems} />
         <Container>
           <Box justify="center" direction="row">
@@ -41,9 +45,9 @@ class Pool extends React.Component<Props> {
   }
 }
 
-export async function getStaticPaths() {
+export const getStaticPaths: GetStaticPaths = async () => {
   // We'll pre-render only these paths at build time.
-  const paths = config.pools.map((pool) => ({ params: { root: pool.addresses.ROOT_CONTRACT } }))
+  const paths = config.pools.map((pool) => ({ params: { root: pool.addresses.ROOT_CONTRACT, slug: pool.slug } }))
 
   // { fallback: false } means other routes should 404.
   return { paths, fallback: false }
