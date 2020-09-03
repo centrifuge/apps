@@ -5,7 +5,7 @@ import NftData from '../../../components/NftData'
 import { connect } from 'react-redux'
 import LoanView from '../View'
 import { AuthState, loadProxies, ensureAuthed } from '../../../ducks/auth'
-import { NFT } from 'tinlake'
+import { NFT } from '@centrifuge/tinlake-js'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 import { getNFT as getNFTAction } from '../../../services/tinlake/actions'
 

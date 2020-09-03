@@ -41,7 +41,7 @@ class InvestmentPage extends React.Component<Props> {
                 render={(tinlake) => (
                   <Auth
                     tinlake={tinlake}
-                    render={(auth) => (
+                    render={() => (
                       <Box>
                         <SecondaryHeader>
                           <Heading level="3">Investments</Heading>

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Box, FormField, Button, Text } from 'grommet'
 import NumberInput from '../../../components/NumberInput'
-import { baseToDisplay, displayToBase, Loan } from 'tinlake'
+import { baseToDisplay, displayToBase, Loan } from '@centrifuge/tinlake-js'
 import { PoolState, loadPool } from '../../../ducks/pool'
 import { loadLoan } from '../../../ducks/loans'
 import { connect } from 'react-redux'
@@ -25,8 +25,11 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     setBorrowAmount((props.loan.principal && props.loan.principal.toString()) || '0')
-    loadPool && loadPool(props.tinlake)
-  }, [props])
+  }, [props.loan])
+
+  React.useEffect(() => {
+    props.loadPool && props.loadPool(props.tinlake)
+  }, [])
 
   const [status, , setTxId] = useTransactionState()
 

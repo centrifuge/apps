@@ -3,7 +3,7 @@ import { Box } from 'grommet'
 import InvestmentsOverview from '../../../components/Investment/Overview'
 import { PoolData } from '../../../ducks/pool'
 import BN from 'bn.js'
-import { Tranche } from 'tinlake'
+import { Tranche } from '@centrifuge/tinlake-js'
 
 class InvestmentsViewUpcoming extends React.Component {
   render() {

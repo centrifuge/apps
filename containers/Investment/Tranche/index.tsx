@@ -5,7 +5,7 @@ import InvestorSupply from '../Supply'
 import InvestorRedeem from '../Redeem'
 import InvestorAllowance from '../Allowance'
 import TrancheMetric from '../../../components/Investment/TrancheMetric'
-import { Investor } from 'tinlake'
+import { Investor } from '@centrifuge/tinlake-js'
 import { TrancheType } from '../../../services/tinlake/actions'
 
 interface Props {

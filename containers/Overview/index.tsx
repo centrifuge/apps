@@ -3,18 +3,18 @@ import { connect } from 'react-redux'
 import { PoolState, loadPool } from '../../ducks/pool'
 import { LoansState, loadLoans } from '../../ducks/loans'
 import { AuthState } from '../../ducks/auth'
-import Tinlake from 'tinlake/dist/Tinlake'
 import { Pool } from '../../config'
 import { withRouter, NextRouter } from 'next/router'
 import OverviewComp from '../../components/Overview'
+import { ITinlake } from '@centrifuge/tinlake-js'
 
 interface Props {
-  tinlake: any
+  tinlake: ITinlake
   loans?: LoansState
-  loadLoans?: (tinlake: Tinlake) => Promise<void>
+  loadLoans?: (tinlake: ITinlake) => Promise<void>
   pool?: PoolState
   auth?: AuthState
-  loadPool?: (tinlake: Tinlake) => Promise<void>
+  loadPool?: (tinlake: ITinlake) => Promise<void>
   selectedPool: Pool
   router: NextRouter
 }
@@ -41,7 +41,7 @@ class Overview extends React.Component<Props> {
 
     return (
       <OverviewComp
-        userAddress={auth?.address || tinlake.ethConfig.from}
+        userAddress={auth?.address || tinlake.ethConfig.from || ''}
         loans={loans}
         pool={pool}
         selectedPool={selectedPool}

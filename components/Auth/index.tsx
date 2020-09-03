@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { AuthState, load } from '../../ducks/auth'
 import { connect } from 'react-redux'
-import { ITinlake } from 'tinlake'
+import { ITinlake } from '@centrifuge/tinlake-js'
 import config from '../../config'
 import WrongNetwork from '../WrongNetwork'
 

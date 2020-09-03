@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Box, FormField, Button } from 'grommet'
-import { feeToInterestRate, Loan } from 'tinlake'
+import { feeToInterestRate, Loan } from '@centrifuge/tinlake-js'
 import NumberInput from '../../../components/NumberInput'
 import { loadLoan } from '../../../ducks/loans'
 import { connect } from 'react-redux'

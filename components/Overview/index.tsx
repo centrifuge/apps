@@ -1,6 +1,5 @@
 import * as React from 'react'
 import BN from 'bn.js'
-import { baseToDisplay, feeToInterestRate } from 'tinlake'
 import { Box, Heading, Table, TableCell, TableRow, TableBody, Button, Anchor } from 'grommet'
 import SecondaryHeader from '../../components/SecondaryHeader'
 import { PoolState } from '../../ducks/pool'
@@ -12,6 +11,7 @@ import { PoolLink } from '../../components/PoolLink'
 import { toPrecision } from '../../utils/toPrecision'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import InvestAction from '../../components/InvestAction'
+import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 
 interface Props {
   userAddress: string
