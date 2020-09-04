@@ -128,8 +128,8 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
           <InvestmentSteps src="../../static/invest-steps1.svg" alt="Investment steps" />
 
           <Paragraph margin={{ top: 'medium', bottom: 'medium' }}>
-            To invest in this pool please provide your information to go through KYC. Submit your information below to
-            start the KYC and onboarding process. The Issuer will shortly reach out to you.
+            If you want to learn more please leave your contact details and investor profile to start on-boarding.
+            Please note that this is for non-US investors and accredited US investors only.
           </Paragraph>
 
           <FormFieldWithoutBorder error={errors.title} margin={{ bottom: 'medium' }}>
