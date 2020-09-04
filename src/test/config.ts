@@ -6,13 +6,9 @@ import { ethers } from 'ethers'
 
 dotenv.config()
 
-const KWEI = 1000
-const MWEI = 1000 * KWEI
-const GWEI = 1000 * MWEI
 const MILLI_ETH = 1e15 // 0.001 ETH
 const FAUCET_AMOUNT = 5000 * MILLI_ETH
 
-const GAS_PRICE = 10 * GWEI
 const GAS_LIMIT = 1000000
 
 const testConfig: ProviderConfig = {
@@ -22,8 +18,6 @@ const testConfig: ProviderConfig = {
   ),
   nftRegistry: process.env.NFT_REGISTRY || '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24',
   transactionTimeout: 50000,
-  gasPrice: `${GAS_PRICE}`,
-  gas: `${GAS_LIMIT}`,
   overrides: { gasLimit: GAS_LIMIT },
   rpcUrl: process.env.RPC_URL || 'http://127.0.0.1:8545',
   isRealTestnet: false,
@@ -39,8 +33,6 @@ export type ProviderConfig = {
   rpcUrl: string
   isRealTestnet: boolean
   godAccount: ethers.Wallet
-  gas: string
-  gasPrice: string
   nftRegistry: string
   transactionTimeout: number
   contractAddresses: ContractAddresses

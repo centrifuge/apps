@@ -119,11 +119,12 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     getNftFeedId = async (registry: string, tokenId: number) => {
-      return await this.contract('NFT_FEED').nftID(registry, tokenId, this.overrides)
+      console.log('nft funcs', this.contract('NFT_FEED').functions)
+      return await this.contract('NFT_FEED').nftID(registry, tokenId)
     }
 
     getNftFeedValue = async (nftFeedId: string) => {
-      return (await this.contract('NFT_FEED').nftValues(nftFeedId, this.overrides)).toBN()
+      return (await this.contract('NFT_FEED').nftValues(nftFeedId)).toBN()
     }
   }
 }
