@@ -5,6 +5,7 @@ import { LoansState } from '../../ducks/loans'
 import { AuthState } from '../../ducks/auth'
 import { UpcomingPool } from '../../config'
 import OverviewComp from '../../components/Overview'
+import { upcomingPoolToPooldata } from '../../utils/upcomingPoolToPoolData'
 
 interface Props {
   tinlake: any
@@ -16,13 +17,13 @@ interface Props {
 
 class OverviewUpcoming extends React.Component<Props> {
   render() {
-    const { auth, tinlake, loans, pool, selectedPool } = this.props
+    const { auth, tinlake, selectedPool } = this.props
 
     return (
       <OverviewComp
         userAddress={auth?.address || tinlake.ethConfig.from}
-        loans={loans}
-        pool={pool}
+        loans={{ loans: [], loansState: 'found', loan: null, loanState: null }}
+        pool={{ data: upcomingPoolToPooldata(selectedPool), state: 'found' }}
         selectedPool={selectedPool}
       />
     )

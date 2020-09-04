@@ -89,7 +89,7 @@ class Apollo {
       totalDebt: new BN('0'),
       totalRepaysAggregatedAmount: new BN('0'),
       weightedInterestRate: new BN('0'),
-      seniorInterestRate: new BN('0'),
+      seniorInterestRate: new BN(p.seniorInterestRate || 0),
       id: p.slug,
       name: p.name,
       slug: p.slug,
@@ -98,7 +98,7 @@ class Apollo {
       totalDebtNum: 0,
       totalRepaysAggregatedAmountNum: 0,
       weightedInterestRateNum: 0,
-      seniorInterestRateNum: 0,
+      seniorInterestRateNum: parseFloat(new BN(p.seniorInterestRate || 0).toString()),
     }))
   }
 

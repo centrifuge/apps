@@ -159,17 +159,17 @@ class Overview extends React.Component<Props> {
                     )}
                     {selectedPool.additionalContactInfo?.map((ci, i) =>
                       ci.link ? (
-                        <>
+                        <React.Fragment key={ci.label + i}>
                           <br />
-                          <a key={ci.label + i} href={ci.link} target="_blank">
+                          <a href={ci.link} target="_blank">
                             {ci.label}
                           </a>
-                        </>
+                        </React.Fragment>
                       ) : (
-                        <>
+                        <React.Fragment key={ci.label + i}>
                           <br />
-                          <span key={ci.label + i}>{ci.label}</span>
-                        </>
+                          <span>{ci.label}</span>
+                        </React.Fragment>
                       )
                     )}
                   </p>
