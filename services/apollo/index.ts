@@ -125,9 +125,11 @@ class Apollo {
       throw new Error(`error occured while fetching assets from apollo ${err}`)
     }
 
-    const pools = result.data?.pools
+    let pools = result.data?.pools
       ? [...this.injectPoolData(result.data.pools), ...this.injectUpcomingPoolData(config.upcomingPools)]
       : []
+
+    pools = pools.sort((a, b) => a.name.localeCompare(b.name))
 
     return {
       pools,
