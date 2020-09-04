@@ -29,7 +29,7 @@ class PoolList extends React.Component<Props> {
           data={pools}
           sortable
           onClickRow={this.clickRow as any}
-          sort={{ property: 'totalDebtNum', direction: 'desc' }}
+          sort={{ property: 'order', direction: 'desc' }}
           columns={[
             {
               header: 'Pool',
@@ -43,7 +43,7 @@ class PoolList extends React.Component<Props> {
             },
             {
               header: 'Status',
-              property: 'status',
+              property: 'order',
               align: 'center',
               render: (p: PoolData) => (
                 <Box style={{ maxWidth: '200px' }}>

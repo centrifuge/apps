@@ -53,21 +53,31 @@ class Apollo {
       const weightedInterestRate = (pool && new BN(pool.weightedInterestRate)) || new BN('0')
       const seniorInterestRate = (pool && pool.seniorInterestRate && new BN(pool.seniorInterestRate)) || new BN('0')
 
+      const totalDebtNum = parseFloat(totalDebt.toString())
+      const totalRepaysAggregatedAmountNum = parseFloat(totalRepaysAggregatedAmount.toString())
+      const weightedInterestRateNum = parseFloat(weightedInterestRate.toString())
+      const seniorInterestRateNum = parseFloat(seniorInterestRate.toString())
+
+      const ongoingLoans = (pool && pool.ongoingLoans.length) || 0 // TODO add count field to subgraph, inefficient to query all assets
+
       return {
+        ongoingLoans,
         totalDebt,
         totalRepaysAggregatedAmount,
         weightedInterestRate,
         seniorInterestRate,
+        totalDebtNum,
+        totalRepaysAggregatedAmountNum,
+        weightedInterestRateNum,
+        seniorInterestRateNum,
+        order: isPoolClosed({ totalDebt, totalRepaysAggregatedAmount })
+          ? orderSummandPoolClosed + totalDebtNum
+          : orderSummandPoolOpen + totalDebtNum,
         isUpcoming: false,
         id: poolId,
         name: configPool.name,
         slug: configPool.slug,
         asset: configPool?.asset,
-        ongoingLoans: (pool && pool.ongoingLoans.length) || 0, // TODO add count field to subgraph, inefficient to query all assets
-        totalDebtNum: parseFloat(totalDebt.toString()),
-        totalRepaysAggregatedAmountNum: parseFloat(totalRepaysAggregatedAmount.toString()),
-        weightedInterestRateNum: parseFloat(weightedInterestRate.toString()),
-        seniorInterestRateNum: parseFloat(seniorInterestRate.toString()),
       }
     })
     return tinlakePools
@@ -75,6 +85,7 @@ class Apollo {
   injectUpcomingPoolData(upcomingPools: UpcomingPool[]): PoolData[] {
     return upcomingPools.map((p) => ({
       isUpcoming: true,
+      order: orderSummandPoolUpcoming,
       totalDebt: new BN('0'),
       totalRepaysAggregatedAmount: new BN('0'),
       weightedInterestRate: new BN('0'),
@@ -233,3 +244,10 @@ function getLoanStatus(loan: any) {
 }
 
 export default new Apollo()
+
+const isPoolClosed = (p: { totalDebt: BN; totalRepaysAggregatedAmount: BN }) =>
+  p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.gtn(0)
+
+const orderSummandPoolUpcoming = 2e30 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt
+const orderSummandPoolOpen = 1e30 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt
+const orderSummandPoolClosed = 0 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt
