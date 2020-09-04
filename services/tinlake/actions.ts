@@ -183,7 +183,6 @@ export async function getLoan(tinlake: ITinlake, loanId: string): Promise<Tinlak
   return {
     data: loan,
   }
-
 }
 
 async function addProxyDetails(tinlake: ITinlake, loan: Loan) {
@@ -374,11 +373,7 @@ export async function setMinJuniorRatio(tinlake: ITinlake, ratio: string): Promi
   return await tinlake.setMinimumJuniorRatio(ratio)
 }
 
-export async function supply(
-  tinlake: ITinlake,
-  supplyAmount: string,
-  trancheType: TrancheType
-) {
+export async function supply(tinlake: ITinlake, supplyAmount: string, trancheType: TrancheType) {
   const address = await tinlake.ethersConfig.signer?.getAddress()
 
   let allowance = new BN(0)
