@@ -20,6 +20,8 @@ export function initTinlake({
     const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
     tinlake = new Tinlake({ transactionTimeout, ethersConfig: { provider: rpcProvider } })
   }
+  console.log('addresses received', addresses)
+
   let resetContractAddresses = false
   if (!deepEqual(addresses || null, currentAddresses)) {
     currentAddresses = addresses || null

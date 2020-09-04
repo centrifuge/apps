@@ -45,9 +45,7 @@ class Overview extends React.Component<Props> {
   }
 
   render() {
-    const { tinlake, loans, auth, selectedPool, pool } = this.props
-    const userAddress = auth?.address || tinlake.ethersConfig.signer.address
-
+    const { loans, selectedPool, pool } = this.props
     const allLoans = (loans && loans.loans) || []
     const poolData = pool && pool.data
 
@@ -185,7 +183,7 @@ class Overview extends React.Component<Props> {
         {loans!.loansState === 'loading' ? (
           <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />
         ) : (
-          <LoanListData loans={latestLoans} userAddress={userAddress!}>
+          <LoanListData loans={latestLoans} userAddress={this.props.auth?.address!}>
             {' '}
           </LoanListData>
         )}

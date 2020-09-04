@@ -129,13 +129,14 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
       if (networkName !== auth.network && networkName) {
         dispatch(setNetwork(networkName))
       }
-      // TODO: replace
+
       if (tinlake.provider !== wallet.provider && wallet.provider) {
         const web3Provider = new ethers.providers.Web3Provider(wallet.provider)
         const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
         const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
-        tinlake.setEthersConfig({ provider: fallbackProvider, signer: web3Provider })
+        tinlake.setEthersConfig({ provider: fallbackProvider, signer: web3Provider.getSigner() })
       }
+
       if (wallet.name !== auth.providerName) {
         dispatch(setProviderName(wallet.name))
       }
@@ -158,10 +159,15 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
         console.log('new wallet connected', wallet)
         dispatch(setProviderName(wallet.name))
 
-        const web3Provider = new ethers.providers.Web3Provider(wallet.provider)
-        const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
-        const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
-        tinlake.setEthersConfig({ provider: fallbackProvider, signer: web3Provider })
+        if (wallet.provider) {
+          const web3Provider = new ethers.providers.Web3Provider(wallet.provider)
+          const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+          const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
+          tinlake.setEthersConfig({ provider: fallbackProvider, signer: web3Provider.getSigner() })
+        } else {
+          const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+          tinlake.setEthersConfig({ provider: rpcProvider })
+        }
 
         // store the selected wallet name to be retrieved next time the app loads
         window.localStorage.setItem('selectedWallet', wallet.name || '')
@@ -385,11 +391,7 @@ export function clear(): ThunkAction<Promise<void>, { auth: AuthState }, undefin
     const tinlake = getTinlake()
     if (tinlake !== null) {
       const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
-
-      const ethersConfig = {
-        provider: rpcProvider,
-      }
-      tinlake?.setEthersConfig(ethersConfig)
+      tinlake.setEthersConfig({ provider: rpcProvider })
     }
 
     const onboard = getOnboard()
