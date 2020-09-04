@@ -5,8 +5,9 @@ import Apollo from '../services/apollo'
 import { HYDRATE } from 'next-redux-wrapper'
 import { initOnboard, getOnboard } from '../services/onboard'
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { getDefaultHttpProvider, getTinlake } from '../services/tinlake'
+import { getTinlake } from '../services/tinlake'
 import config from '../config'
+import { ethers } from 'ethers'
 
 // Actions
 const CLEAR = 'tinlake-ui/auth/CLEAR'
@@ -128,8 +129,12 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
       if (networkName !== auth.network && networkName) {
         dispatch(setNetwork(networkName))
       }
+      // TODO: replace
       if (tinlake.provider !== wallet.provider && wallet.provider) {
-        tinlake.setProvider(wallet.provider)
+        const web3Provider = new ethers.providers.Web3Provider(wallet.provider)
+        const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+        const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
+        tinlake.setEthersConfig({ provider: fallbackProvider, signer: web3Provider })
       }
       if (wallet.name !== auth.providerName) {
         dispatch(setProviderName(wallet.name))
@@ -149,15 +154,17 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
         const networkName = networkIdToName(network)
         dispatch(setNetwork(networkName))
       },
-      wallet: ({ provider, name }) => {
-        dispatch(setProviderName(name))
+      wallet: (wallet) => {
+        console.log('new wallet connected', wallet)
+        dispatch(setProviderName(wallet.name))
 
-        if (provider) {
-          tinlake.setProvider(provider)
-        }
+        const web3Provider = new ethers.providers.Web3Provider(wallet.provider)
+        const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+        const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
+        tinlake.setEthersConfig({ provider: fallbackProvider, signer: web3Provider })
 
         // store the selected wallet name to be retrieved next time the app loads
-        window.localStorage.setItem('selectedWallet', name || '')
+        window.localStorage.setItem('selectedWallet', wallet.name || '')
       },
     })
 
@@ -263,8 +270,6 @@ export function setAddressAndLoadData(
       return
     }
 
-    tinlake.setEthConfig({ from: address })
-
     dispatch({ address, type: RECEIVE_ADDRESS })
 
     dispatch(loadProxies())
@@ -304,6 +309,9 @@ export function loadProxies(): ThunkAction<Promise<void>, { auth: AuthState }, u
 
 export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
+    // TODO: check if no addresses are loaded (meaning we are not in a pool)
+    if (Object.keys(tinlake.contractAddresses).length === 0) return
+
     const { auth } = getState()
 
     // don't load again if already loading
@@ -376,8 +384,12 @@ export function clear(): ThunkAction<Promise<void>, { auth: AuthState }, undefin
   return async (dispatch) => {
     const tinlake = getTinlake()
     if (tinlake !== null) {
-      tinlake.setProvider(getDefaultHttpProvider())
-      tinlake.setEthConfig({ from: '' })
+      const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+
+      const ethersConfig = {
+        provider: rpcProvider,
+      }
+      tinlake?.setEthersConfig(ethersConfig)
     }
 
     const onboard = getOnboard()

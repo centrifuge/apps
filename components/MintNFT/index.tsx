@@ -42,7 +42,7 @@ const MintNFT: React.FC<Props> = (props: Props) => {
     const txId = await props.createTransaction(`Mint NFT ${referenceId}`, 'mintNFT', [
       props.tinlake,
       registry,
-      props.tinlake.ethConfig.from,
+      props.tinlake.ethersConfig.signer.address,
       tokenId,
       referenceId,
       base,

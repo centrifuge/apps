@@ -1,5 +1,4 @@
 import Tinlake, { ITinlake } from '@centrifuge/tinlake-js'
-import Eth from 'ethjs'
 import { ethers } from 'ethers'
 import config from '../../config'
 
@@ -18,21 +17,9 @@ export function initTinlake({
 }: { addresses?: ContractAddresses | null; contractConfig?: any | null } = {}): ITinlake {
   if (tinlake === null) {
     const { transactionTimeout } = config
-    if (window && (window as any).ethereum) {
-      const web3Provider = new ethers.providers.Web3Provider((window as any).ethereum)
-      const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
-      const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
-
-      const ethersConfig = {
-        provider: fallbackProvider,
-        signer: web3Provider.getSigner(),
-      }
-      tinlake = new Tinlake({ transactionTimeout, ethersConfig, provider: getDefaultHttpProvider() }) as any
-    } else {
-      tinlake = new Tinlake({ transactionTimeout, provider: getDefaultHttpProvider() }) as any
-    }
+    const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+    tinlake = new Tinlake({ transactionTimeout, ethersConfig: { provider: rpcProvider } })
   }
-
   let resetContractAddresses = false
   if (!deepEqual(addresses || null, currentAddresses)) {
     currentAddresses = addresses || null
@@ -55,12 +42,6 @@ export function initTinlake({
 
 export function getTinlake(): ITinlake | null {
   return tinlake
-}
-
-export function getDefaultHttpProvider(): any {
-  const { rpcUrl } = config
-  const httpProvider = new Eth.HttpProvider(rpcUrl)
-  return httpProvider
 }
 
 function deepEqual(a: any, b: any): boolean {
