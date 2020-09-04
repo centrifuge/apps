@@ -139,8 +139,8 @@ const upcomingPoolSchema = yup.object().shape({
       link: yup.string(),
     })
   ),
-  seniorInterestRate: yup.string().test('fee', "value must be a fee such as 1000000003170979198376458650", fee),
-  minimumJuniorRatio: yup.string().test('between-1e23-1e27', "value must between 0 and 1e25", between1e23and1e27),
+  seniorInterestRate: yup.string().test('fee', 'value must be a fee such as 1000000003170979198376458650', fee),
+  minimumJuniorRatio: yup.string().test('between-1e23-1e27', 'value must between 0 and 1e25', between1e23and1e27),
 })
 
 const poolsSchema = yup.array(poolSchema)

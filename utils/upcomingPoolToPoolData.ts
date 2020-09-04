@@ -9,7 +9,7 @@ const emptyTranche: Tranche = {
   type: '',
   token: '',
   totalSupply: new BN(0),
-  interestRate: new BN(0)
+  interestRate: new BN(0),
 }
 
 const emptyPoolData: PoolData = {
@@ -27,6 +27,6 @@ export function upcomingPoolToPooldata(p: UpcomingPool): PoolData {
     senior: {
       ...emptyTranche,
       interestRate: new BN(p.seniorInterestRate || 0),
-    }
+    },
   }
 }
