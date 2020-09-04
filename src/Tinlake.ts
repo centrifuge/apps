@@ -46,7 +46,7 @@ export type Overrides = {
 
 export type EthersConfig = {
   provider: ethers.providers.Provider
-  signer?: ethers.providers.Web3Provider
+  signer?: ethers.Signer
 }
 
 export type ContractName = typeof contractNames[number]
@@ -118,6 +118,7 @@ export default class Tinlake {
     // set root & proxy contracts
     contractNames.forEach((name) => {
       if (this.contractAbis[name] && this.contractAddresses[name]) {
+        console.log(`Creating ${name}`)
         this.contracts[name] = this.createContract(this.contractAddresses[name]!, name)
       }
     })
@@ -148,8 +149,8 @@ export default class Tinlake {
 
   contract(abiName: ContractName, address?: string): ethers.Contract {
     const signerOrProvider = this.ethersConfig.signer || this.ethersConfig.provider
-    if (!(abiName in this.contracts)) {
-      throw new Error(`Contract ${abiName} not loaded`)
+    if (!(abiName in this.contracts) && !(address && abiName in this.contractAbis)) {
+      throw new Error(`Contract ${abiName} not loaded: ${JSON.stringify(Object.keys(this.contracts))}`)
     }
 
     if (address) {

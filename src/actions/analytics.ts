@@ -242,6 +242,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getAssetValueJunior = async () => {
+      console.log(`contract address in getAssetvalueJunior: ${this.contractAddresses['JUNIOR']}`)
       return (await this.contract('ASSESSOR').calcAssetValue(this.contractAddresses['JUNIOR'])).toBN()
     }
 
@@ -272,12 +273,14 @@ export type IAnalyticsActions = {
   getPrincipal(loanId: string): Promise<BN>
   getInterestRate(loanId: string): Promise<BN>
   getOwnerOfLoan(loanId: string): Promise<BN>
-  getOwnerOfCollateral(nftRegistryAddr: string, tokenId: string, loanId: string): Promise<BN>
+  getOwnerOfCollateral(nftRegistryAddr: string, tokenId: string): Promise<BN>
   existsSenior(): boolean
   getJuniorReserve(): Promise<BN>
   getSeniorReserve(): Promise<BN>
   getJuniorTokenBalance(user: string): Promise<BN>
   getSeniorTokenBalance(user: string): Promise<BN>
+  getJuniorTotalSupply(): Promise<BN>
+  getSeniorTotalSupply(): Promise<BN>
   getMaxSupplyAmountJunior(user: string): Promise<BN>
   getMaxRedeemAmountJunior(user: string): Promise<BN>
   getMaxSupplyAmountSenior(user: string): Promise<BN>

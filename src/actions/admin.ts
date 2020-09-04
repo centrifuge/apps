@@ -122,8 +122,10 @@ export type IAdminActions = {
   canSetInvestorAllowanceJunior(user: string): Promise<boolean>
   canSetInvestorAllowanceSenior(user: string): Promise<boolean>
   canSetLoanPrice(user: string): Promise<boolean>
+  existsRateGroup(ratePerSecond: string): Promise<boolean>
   initRate(rate: string): Promise<PendingTransaction>
   setRate(loan: string, rate: string): Promise<PendingTransaction>
+  changeRate(loan: string, ratePerSecond: string): Promise<PendingTransaction>
   setMinimumJuniorRatio(amount: string): Promise<PendingTransaction>
   approveAllowanceJunior(user: string, maxCurrency: string, maxToken: string): Promise<PendingTransaction>
   approveAllowanceSenior(user: string, maxCurrency: string, maxToken: string): Promise<PendingTransaction>
