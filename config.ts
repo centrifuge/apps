@@ -13,6 +13,10 @@ interface PoolI {
   email?: string
   details?: any
   asset: string
+  additionalContactInfo?: {
+    label: string
+    link?: string
+  }[]
 }
 
 export interface UpcomingPool extends PoolI {
@@ -107,6 +111,12 @@ const poolSchema = yup.object().shape({
   description: yup.string(),
   investHtml: yup.string(),
   asset: yup.string().required('poolSchema.asset is required'),
+  additionalContactInfo: yup.array(
+    yup.object().shape({
+      label: yup.string().required('poolSchema.additionalContactInfo[?].label is required'),
+      link: yup.string(),
+    })
+  ),
 })
 
 const upcomingPoolSchema = yup.object().shape({
@@ -120,6 +130,12 @@ const upcomingPoolSchema = yup.object().shape({
   email: yup.string(),
   details: yup.object(),
   asset: yup.string().required('poolSchema.asset is required'),
+  additionalContactInfo: yup.array(
+    yup.object().shape({
+      label: yup.string().required('poolSchema.additionalContactInfo[?].label is required'),
+      link: yup.string(),
+    })
+  ),
 })
 
 const poolsSchema = yup.array(poolSchema)
