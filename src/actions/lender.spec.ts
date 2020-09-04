@@ -1,7 +1,5 @@
 import assert from 'assert'
-const account = require('ethjs-account')
-const randomString = require('randomstring')
-
+import { ethers } from 'ethers'
 import testConfig from '../test/config'
 import { ITinlake } from '../types/tinlake'
 import { createTinlake, TestProvider } from '../test/utils'
@@ -10,7 +8,7 @@ import BN from 'bn.js'
 let lenderAccount
 let lenderTinlake: ITinlake
 
-const adminAccount = account.generate(randomString.generate(32))
+const adminAccount = ethers.Wallet.createRandom()
 let adminTinlake: ITinlake
 let governanceTinlake: ITinlake
 const testProvider = new TestProvider(testConfig)
@@ -31,7 +29,7 @@ describe('lender functions', async () => {
   })
 
   beforeEach(async () => {
-    lenderAccount = account.generate(randomString.generate(32))
+    lenderAccount = ethers.Wallet.createRandom()
     lenderTinlake = createTinlake(lenderAccount, testConfig)
     return await testProvider.fundAccountWithETH(lenderAccount.address, FAUCET_AMOUNT)
   })

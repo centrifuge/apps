@@ -105,6 +105,26 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       
       
     }
+
+    updateNftFeed = async (tokenId: string, value: number, riskGroup?: number) => {
+      let tx;
+
+      if (!riskGroup) {
+        tx = this.contract('NFT_FEED').update(tokenId, value, this.overrides)
+      } else {
+        tx = this.contract('NFT_FEED').update(tokenId, value, riskGroup, this.overrides)
+      }
+
+      return this.pending(tx)
+    }
+
+    getNftFeedId = async (registry: string, tokenId: number) => {
+      return await this.contract('NFT_FEED').nftID(registry, tokenId, this.overrides)
+    }
+
+    getNftFeedValue = async (nftFeedId: string) => {
+      return (await this.contract('NFT_FEED').nftValues(nftFeedId, this.overrides)).toBN()
+    }
   }
 }
 
@@ -129,6 +149,9 @@ export type IAdminActions = {
   setMinimumJuniorRatio(amount: string): Promise<PendingTransaction>
   approveAllowanceJunior(user: string, maxCurrency: string, maxToken: string): Promise<PendingTransaction>
   approveAllowanceSenior(user: string, maxCurrency: string, maxToken: string): Promise<PendingTransaction>
+  updateNftFeed(nftId: string, value: number, riskGroup?: number): Promise<PendingTransaction>
+  getNftFeedId(registry: string, tokenId: number): Promise<any>
+  getNftFeedValue(tokenId: string): Promise<BN>
 }
 
 export default AdminActions

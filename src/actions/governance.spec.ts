@@ -1,14 +1,13 @@
-const randomString = require('randomstring')
-const account = require('ethjs-account')
 import assert from 'assert'
 import { ITinlake } from '../types/tinlake'
 import { createTinlake, TestProvider } from '../test/utils'
 import testConfig from '../test/config'
 import { Account } from '../test/types'
+import { ethers } from 'ethers'
 import { ContractName } from '../Tinlake'
 
 // god account = governance address for the tinlake test deployment
-const userAccount = account.generate(randomString.generate(32))
+const userAccount = ethers.Wallet.createRandom()
 let governanceTinlake: ITinlake
 
 const { SUCCESS_STATUS, FAIL_STATUS, FAUCET_AMOUNT } = testConfig
@@ -35,7 +34,7 @@ describe('governance tests', async () => {
     })
 
     it('fail: account has no governance permissions', async () => {
-      const randomAccount: Account = account.generate(randomString.generate(32))
+      const randomAccount: Account = ethers.Wallet.createRandom()
       const testProvider = new TestProvider(testConfig)
       await testProvider.fundAccountWithETH(randomAccount.address, FAUCET_AMOUNT)
 

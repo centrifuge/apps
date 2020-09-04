@@ -1,14 +1,12 @@
 import assert from 'assert'
-const account = require('ethjs-account')
-const randomString = require('randomstring')
 import testConfig from '../test/config'
 import { ITinlake } from '../types/tinlake'
 import { createTinlake, TestProvider } from '../test/utils'
-import { Account } from '../test/types'
 import BN from 'bn.js'
+import { ethers } from 'ethers'
 
-const adminAccount = account.generate(randomString.generate(32))
-let borrowerAccount: Account
+const adminAccount = ethers.Wallet.createRandom()
+let borrowerAccount: ethers.Wallet
 
 // user with super powers can fund and rely accounts
 let governanceTinlake: ITinlake
@@ -33,7 +31,7 @@ describe('borrower tests', async () => {
   })
 
   beforeEach(async () => {
-    borrowerAccount = account.generate(randomString.generate(32))
+    borrowerAccount = ethers.Wallet.createRandom()
     borrowerTinlake = createTinlake(borrowerAccount, testConfig)
     await testProvider.fundAccountWithETH(borrowerAccount.address, FAUCET_AMOUNT)
   })
@@ -82,14 +80,12 @@ describe('borrower tests', async () => {
     await borrowerTinlake.getTransactionReceipt(unlockTx)
   })
 
-  // TODO: does not work because NFT feed does not have value this NFT
-  it.skip('success: borrow', async () => {
+  it('success: borrow', async () => {
     const amount = '1000'
     await mintIssueBorrow(borrowerAccount.address, borrowerTinlake, amount)
   })
 
-  // TODO: does not work because NFT feed does not have value this NFT
-  it.skip('success: repay', async () => {
+  it('success: repay', async () => {
     const amount = '1000'
     const { loanId } = await mintIssueBorrow(borrowerAccount.address, borrowerTinlake, amount)
 
@@ -144,7 +140,14 @@ async function mintIssue(usr: string, tinlake: ITinlake) {
 
 async function mintIssueBorrow(usr: string, tinlake: ITinlake, amount: string) {
   const { tokenId, loanId } = await mintIssue(usr, tinlake)
-  
+
+  const relyTx = await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['NFT_FEED']);
+  await governanceTinlake.getTransactionReceipt(relyTx)
+
+  const nftfeedId = await adminTinlake.getNftFeedId(testConfig.nftRegistry, Number(tokenId))
+  const updateNftTx = await adminTinlake.updateNftFeed(nftfeedId, Number(amount))
+  await adminTinlake.getTransactionReceipt(updateNftTx)
+
   // approve shelf to take nft
   const approveTx = await borrowerTinlake.approveNFT(testConfig.nftRegistry, tokenId, contractAddresses['SHELF'])
   await borrowerTinlake.getTransactionReceipt(approveTx)
@@ -177,7 +180,7 @@ async function mintIssueBorrow(usr: string, tinlake: ITinlake, amount: string) {
 }
 
 async function fundTranche(amount: string) {
-  const lenderAccount = account.generate(randomString.generate(32))
+  const lenderAccount = ethers.Wallet.createRandom()
   const lenderTinlake = createTinlake(lenderAccount, testConfig)
 
   // fund lender accoutn with eth

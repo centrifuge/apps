@@ -1,14 +1,13 @@
-const randomString = require('randomstring')
-const account = require('ethjs-account')
 import { ITinlake } from '../types/tinlake'
 import assert from 'assert'
 import { createTinlake, TestProvider } from '../test/utils'
 import testConfig from '../test/config'
+import { ethers } from 'ethers'
 
 const testProvider = new TestProvider(testConfig)
-const adminAccount = account.generate(randomString.generate(32))
-const borrowerAccount = account.generate(randomString.generate(32))
-const lenderAccount = account.generate(randomString.generate(32))
+const adminAccount = ethers.Wallet.createRandom()
+const borrowerAccount = ethers.Wallet.createRandom()
+const lenderAccount = ethers.Wallet.createRandom()
 const { SUCCESS_STATUS, FAUCET_AMOUNT, contractAddresses } = testConfig
 let adminTinlake: ITinlake
 let governanceTinlake: ITinlake
