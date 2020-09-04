@@ -198,7 +198,7 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
               <FormField label="Estimated Size of Investment, USD" error={errors.investmentSize}>
                 <Select
                   placeholder="Select Investment Size"
-                  options={['<25,000 USD', '25,000-50,000 USD', '>50,000 USD']}
+                  options={['<10,000 USD', '10,000-24,999 USD', '25,000-50,000 USD', '>50,000 USD']}
                   value={form.investmentSize}
                   onChange={handleOnChangeSelect('investmentSize')}
                 />
