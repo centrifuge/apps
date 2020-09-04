@@ -156,7 +156,6 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
         dispatch(setNetwork(networkName))
       },
       wallet: (wallet) => {
-        console.log('new wallet connected', wallet)
         dispatch(setProviderName(wallet.name))
 
         if (wallet.provider) {
