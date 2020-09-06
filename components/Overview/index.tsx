@@ -149,7 +149,7 @@ class Overview extends React.Component<Props> {
                         </a>
                       </>
                     )}
-                    {selectedPool.website && (
+                    {selectedPool.email && (
                       <>
                         <br />
                         <a href={`mailto:${selectedPool.email}`} target="_blank">
