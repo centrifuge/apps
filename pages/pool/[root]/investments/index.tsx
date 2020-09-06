@@ -1,16 +1,17 @@
 import * as React from 'react'
-import InvestmentsView from '../../../containers/Investment/View'
-import WithTinlake from '../../../components/WithTinlake'
+import InvestmentsViewUpcoming from '../../../../containers/Investment/ViewUpcoming'
+import WithTinlake from '../../../../components/WithTinlake'
 import { Box, Heading } from 'grommet'
-import Header from '../../../components/Header'
-import { menuItems } from '../../../menuItems'
-import SecondaryHeader from '../../../components/SecondaryHeader'
-import Auth from '../../../components/Auth'
-import WithFooter from '../../../components/WithFooter'
+import Header from '../../../../components/Header'
+import { menuItems, noDemo } from '../../../../menuItems'
+import SecondaryHeader from '../../../../components/SecondaryHeader'
+import Auth from '../../../../components/Auth'
+import WithFooter from '../../../../components/WithFooter'
 import { WithRouterProps } from 'next/dist/client/with-router'
-import config, { Pool } from '../../../config'
+import config, { Pool } from '../../../../config'
 import { GetStaticProps } from 'next'
-import Container from '../../../components/Container'
+import Container from '../../../../components/Container'
+import Head from 'next/head'
 
 interface Props extends WithRouterProps {
   root: string
@@ -23,7 +24,14 @@ class InvestmentPage extends React.Component<Props> {
 
     return (
       <WithFooter>
-        <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/investments'} menuItems={menuItems} />
+        <Head>
+          <title>Investments: {pool.name} | Tinlake | Centrifuge</title>
+        </Head>
+        <Header
+          poolTitle={pool.shortName || pool.name}
+          selectedRoute={'/investments'}
+          menuItems={menuItems.filter(noDemo)}
+        />
         <Container>
           <Box justify="center" direction="row">
             <Box width="xlarge">
@@ -33,12 +41,12 @@ class InvestmentPage extends React.Component<Props> {
                 render={(tinlake) => (
                   <Auth
                     tinlake={tinlake}
-                    render={(auth) => (
+                    render={() => (
                       <Box>
                         <SecondaryHeader>
                           <Heading level="3">Investments</Heading>
                         </SecondaryHeader>
-                        <InvestmentsView tinlake={tinlake} auth={auth} />
+                        <InvestmentsViewUpcoming />
                       </Box>
                     )}
                   />
@@ -54,14 +62,14 @@ class InvestmentPage extends React.Component<Props> {
 
 export async function getStaticPaths() {
   // We'll pre-render only these paths at build time.
-  const paths = config.pools.map((pool) => ({ params: { root: pool.addresses.ROOT_CONTRACT } }))
+  const paths = config.upcomingPools.map((pool) => ({ params: { root: pool.slug } }))
 
   // { fallback: false } means other routes should 404.
   return { paths, fallback: false }
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  return { props: { root: params?.root, pool: config.pools.find((p) => p.addresses.ROOT_CONTRACT === params?.root) } }
+  return { props: { root: params?.root, pool: config.upcomingPools.find((p) => p.slug === params?.root) } }
 }
 
 export default InvestmentPage

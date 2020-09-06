@@ -1,17 +1,18 @@
 import * as React from 'react'
-import WithTinlake from '../../../components/WithTinlake'
-import IssueLoan from '../../../containers/Loan/Issue'
+import WithTinlake from '../../../../../components/WithTinlake'
+import IssueLoan from '../../../../../containers/Loan/Issue'
 import { Box, Heading } from 'grommet'
-import Header from '../../../components/Header'
-import SecondaryHeader from '../../../components/SecondaryHeader'
-import { menuItems } from '../../../menuItems'
-import { BackLink } from '../../../components/BackLink'
-import Auth from '../../../components/Auth'
+import Header from '../../../../../components/Header'
+import SecondaryHeader from '../../../../../components/SecondaryHeader'
+import { menuItems } from '../../../../../menuItems'
+import { BackLink } from '../../../../../components/BackLink'
+import Auth from '../../../../../components/Auth'
 import withRouter, { WithRouterProps } from 'next/dist/client/with-router'
-import WithFooter from '../../../components/WithFooter'
-import config, { Pool } from '../../../config'
+import WithFooter from '../../../../../components/WithFooter'
+import config, { Pool } from '../../../../../config'
 import { GetStaticProps } from 'next'
-import Container from '../../../components/Container'
+import Container from '../../../../../components/Container'
+import Head from 'next/head'
 
 interface Props extends WithRouterProps {
   root: string
@@ -25,6 +26,9 @@ class LoanIssuePage extends React.Component<Props> {
 
     return (
       <WithFooter>
+        <Head>
+          <title>Open Financing: {pool.name} | Tinlake | Centrifuge</title>
+        </Head>
         <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/assets/issue'} menuItems={menuItems} />
         <Container>
           <Box justify="center" direction="row">
@@ -59,7 +63,7 @@ class LoanIssuePage extends React.Component<Props> {
 
 export async function getStaticPaths() {
   // We'll pre-render only these paths at build time.
-  const paths = config.pools.map((pool) => ({ params: { root: pool.addresses.ROOT_CONTRACT } }))
+  const paths = config.pools.map((pool) => ({ params: { root: pool.addresses.ROOT_CONTRACT, slug: pool.slug } }))
 
   // { fallback: false } means other routes should 404.
   return { paths, fallback: false }

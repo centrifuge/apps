@@ -51,9 +51,14 @@ const Header: React.FC<Props> = (props: Props) => {
 
   const pushWithPrefixIfInPool = (item: MenuItem) => {
     if (item.inPool) {
-      const { root } = props.router.query
+      const { root, slug } = props.router.query
       const route = item.route === '/' ? '' : item.route
-      Router.push(`/[root]${route}`, `/${root}${route}`, { shallow: true })
+
+      if (slug === undefined) {
+        Router.push(`/pool/[root]${route}`, `/pool/${root}${route}`, { shallow: true })
+        return
+      }
+      Router.push(`/pool/[root]/[slug]${route}`, `/pool/${root}/${slug}${route}`, { shallow: true })
       return
     }
     Router.push(item.route, undefined, { shallow: true })

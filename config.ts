@@ -2,7 +2,25 @@ import { networkUrlToName } from './utils/networkNameResolver'
 import poolConfigs from 'tinlake-pool-config'
 import * as yup from 'yup'
 
-export type Pool = {
+interface PoolI {
+  name: string
+  slug: string
+  shortName?: string
+  assetOriginatorName?: string
+  text?: string
+  logo?: string
+  website?: string
+  email?: string
+  details?: any
+  asset: string
+}
+
+export interface UpcomingPool extends PoolI {
+  isUpcoming: true
+}
+
+export interface Pool extends PoolI {
+  isUpcoming: false
   addresses: {
     ROOT_CONTRACT: string
     ACTIONS: string
@@ -14,17 +32,8 @@ export type Pool = {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
     SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
   }
-  name: string
-  shortName?: string
-  assetOriginatorName?: string
   description?: string
-  text?: string
-  logo?: string
-  website?: string
-  email?: string
-  details?: any
   investHtml?: string
-  asset: string
 }
 
 export interface DisplayedField {
@@ -43,6 +52,7 @@ interface Config {
   isDemo: boolean
   network: 'Mainnet' | 'Kovan'
   pools: Pool[]
+  upcomingPools: UpcomingPool[]
   portisApiKey: string
 }
 
@@ -86,6 +96,7 @@ const poolSchema = yup.object().shape({
   graph: yup.string(),
   contractConfig: contractConfigSchema.required('poolSchema.contractConfig is required'),
   name: yup.string().required('poolSchema.name is required'),
+  slug: yup.string().required('poolSchema.slug is required'),
   shortName: yup.string(),
   assetOriginatorName: yup.string(),
   text: yup.string(),
@@ -98,7 +109,21 @@ const poolSchema = yup.object().shape({
   asset: yup.string().required('poolSchema.asset is required'),
 })
 
-const poolsSchema = yup.array().of(poolSchema)
+const upcomingPoolSchema = yup.object().shape({
+  name: yup.string().required('poolSchema.name is required'),
+  slug: yup.string().required('poolSchema.slug is required'),
+  shortName: yup.string(),
+  assetOriginatorName: yup.string(),
+  text: yup.string(),
+  logo: yup.string(),
+  website: yup.string(),
+  email: yup.string(),
+  details: yup.object(),
+  asset: yup.string().required('poolSchema.asset is required'),
+})
+
+const poolsSchema = yup.array(poolSchema)
+const upcomingPoolsSchema = yup.array(upcomingPoolSchema)
 
 const selectedPoolConfig = yup
   .mixed<'kovanStaging' | 'mainnetStaging' | 'mainnetProduction'>()
@@ -106,8 +131,16 @@ const selectedPoolConfig = yup
   .oneOf(['kovanStaging', 'mainnetStaging', 'mainnetProduction'])
   .validateSync(process.env.NEXT_PUBLIC_POOLS_CONFIG)
 
-const pools = poolConfigs[`${selectedPoolConfig}`]
+const pools = poolsSchema
+  .validateSync(poolConfigs[`${selectedPoolConfig}`].filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
+  .map((p) => ({ ...p, isUpcoming: false } as Pool))
+const upcomingPools = upcomingPoolsSchema
+  .validateSync(poolConfigs[`${selectedPoolConfig}`].filter((p: Pool) => !p.addresses || !p.addresses.ROOT_CONTRACT))
+  .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
+
 const config: Config = {
+  pools,
+  upcomingPools,
   rpcUrl: yup
     .string()
     .required('NEXT_PUBLIC_RPC_URL is required')
@@ -138,7 +171,6 @@ const config: Config = {
     .required('NEXT_PUBLIC_RPC_URL is required')
     .oneOf(['Mainnet', 'Kovan'])
     .validateSync(networkUrlToName(process.env.NEXT_PUBLIC_RPC_URL || '')),
-  pools: poolsSchema.validateSync(pools),
   portisApiKey: yup
     .string()
     .required()
