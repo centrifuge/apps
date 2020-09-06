@@ -31,6 +31,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
        * - only output variables ([dropRedeem,tinRedeem,tinInvest,dropInvest]) can be on the left side of the constraint (the vars key)
        * - variables can have coefficients, but there's no option for brackets or other more advanced equation forms
        *   (e.g. it's limited to a * x_1 + b * x_2 + ..., where [a,b] are coefficients and [x_1,x_2] are variables)
+       * - larger than or equals, less than or equals, and equals constraints are all allowed ([<=,>=,=])
        */
       return require('glpk.js').then((glpk: any) => {
         const lp = {
@@ -89,10 +90,10 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
               bnds: { type: glpk.GLP_UP, ub: state.maxReserve - state.reserve, lb: 0.0 },
             },
             /**
-             * The next tow constraints were rewritten from the original equations in the epoch model. 
+             * The next tow constraints were rewritten from the original equations in the epoch model.
              * For one, minTINRatio was rewritten as a lower bound, which means both sides were multiplied by -1.
              * Secondly, all output vars were moved to the left side, while all input vars were moved to the right side.
-             * 
+             *
              * E.g. for dropRedeem, in the epoch model there's both -I4*(1-B7) and +I4.
              * So: -I4*(1-B7) + I4 = -0.8 I4 + 1.0 I4 = 0.2 I4 = minTinRatio * dropRedeem.
              */
