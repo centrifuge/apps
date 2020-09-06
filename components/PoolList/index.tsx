@@ -20,6 +20,14 @@ class PoolList extends React.Component<Props> {
     }
   }
 
+  getPoolStatus = (pool: PoolData) => {
+    if (pool.isUpcoming) return 'Upcoming'
+    if (pool.totalDebt.eqn(0) && pool.totalRepaysAggregatedAmount.eqn(0)) return 'Active'
+    if (pool.totalDebt.gtn(0)) return 'Deployed'
+    if (pool.totalDebt.eqn(0) && pool.totalRepaysAggregatedAmount.gtn(0)) return 'Closed'
+    return 'Open'
+  }
+
   render() {
     const { pools } = this.props
     return (
@@ -47,16 +55,7 @@ class PoolList extends React.Component<Props> {
               align: 'center',
               render: (p: PoolData) => (
                 <Box style={{ maxWidth: '200px' }}>
-                  <DisplayField
-                    as={'span'}
-                    value={
-                      p.isUpcoming
-                        ? 'Upcoming'
-                        : p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.gtn(0)
-                        ? 'Closed'
-                        : 'Open'
-                    }
-                  />
+                  <DisplayField as={'span'} value={this.getPoolStatus(p)} />
                 </Box>
               ),
             },

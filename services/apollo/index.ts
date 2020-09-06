@@ -42,6 +42,13 @@ class Apollo {
     })
   }
 
+  getPoolOrder = (p: { totalDebt: BN; totalRepaysAggregatedAmount: BN; totalDebtNum: number }) => {
+    if (p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.eqn(0)) return orderSummandPoolActive + p.totalDebtNum
+    if (p.totalDebt.gtn(0)) return orderSummandPoolDeployed + p.totalDebtNum
+    if (p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.gtn(0)) return orderSummandPoolClosed + p.totalDebtNum
+    return 0
+  }
+
   injectPoolData(pools: any[]): PoolData[] {
     const configPools = config.pools
     const tinlakePools = configPools.map((configPool: any) => {
@@ -70,9 +77,7 @@ class Apollo {
         totalRepaysAggregatedAmountNum,
         weightedInterestRateNum,
         seniorInterestRateNum,
-        order: isPoolClosed({ totalDebt, totalRepaysAggregatedAmount })
-          ? orderSummandPoolClosed + totalDebtNum
-          : orderSummandPoolOpen + totalDebtNum,
+        order: this.getPoolOrder({ totalDebt, totalDebtNum, totalRepaysAggregatedAmount }),
         isUpcoming: false,
         id: poolId,
         name: configPool.name,
@@ -247,9 +252,7 @@ function getLoanStatus(loan: any) {
 
 export default new Apollo()
 
-const isPoolClosed = (p: { totalDebt: BN; totalRepaysAggregatedAmount: BN }) =>
-  p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.gtn(0)
-
-const orderSummandPoolUpcoming = 2e30 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt
-const orderSummandPoolOpen = 1e30 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt
+const orderSummandPoolUpcoming = 3e30 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt
+const orderSummandPoolActive = 2e30
+const orderSummandPoolDeployed = 1e30 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt
 const orderSummandPoolClosed = 0 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt

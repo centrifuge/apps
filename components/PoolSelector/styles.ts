@@ -45,7 +45,7 @@ export const Wrapper = styled.div`
   background: #fff;
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
   border-radius: 8px;
-  max-height: 200px;
+  max-height: 300px;
   overflow-y: scroll;
 `
 
