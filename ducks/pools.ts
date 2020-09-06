@@ -23,6 +23,7 @@ export interface PoolData {
   weightedInterestRateNum: number
   seniorInterestRate: BN
   seniorInterestRateNum: number
+  order: number
 }
 
 export interface PoolsData {
