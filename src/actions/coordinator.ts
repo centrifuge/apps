@@ -25,6 +25,13 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
     }
 
     calculateOptimalSolution = async (state: State, orderState: OrderState) => {
+      /**
+       * The limitations are:
+       * - only input variables (those in state or orderState) can be on the right side of the constraint (the bnds key)
+       * - only output variables ([dropRedeem,tinRedeem,tinInvest,dropInvest]) can be on the left side of the constraint (the vars key)
+       * - variables can have coefficients, but there's no option for brackets or other more advanced equation forms
+       *   (e.g. it's limited to a * x_1 + b * x_2 + ..., where [a,b] are coefficients and [x_1,x_2] are variables)
+       */
       return require('glpk.js').then((glpk: any) => {
         const lp = {
           name: 'LP',
