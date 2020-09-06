@@ -42,6 +42,13 @@ class Apollo {
     })
   }
 
+  getPoolOrder = (p: { totalDebt: BN; totalRepaysAggregatedAmount: BN; totalDebtNum: number }) => {
+    if (p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.eqn(0)) return orderSummandPoolActive + p.totalDebtNum
+    if (p.totalDebt.gtn(0)) return orderSummandPoolDeployed + p.totalDebtNum
+    if (p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.gtn(0)) return orderSummandPoolClosed + p.totalDebtNum
+    return 0
+  }
+
   injectPoolData(pools: any[]): PoolData[] {
     const configPools = config.pools
     const tinlakePools = configPools.map((configPool: any) => {
@@ -53,21 +60,29 @@ class Apollo {
       const weightedInterestRate = (pool && new BN(pool.weightedInterestRate)) || new BN('0')
       const seniorInterestRate = (pool && pool.seniorInterestRate && new BN(pool.seniorInterestRate)) || new BN('0')
 
+      const totalDebtNum = parseFloat(totalDebt.toString())
+      const totalRepaysAggregatedAmountNum = parseFloat(totalRepaysAggregatedAmount.toString())
+      const weightedInterestRateNum = parseFloat(weightedInterestRate.toString())
+      const seniorInterestRateNum = parseFloat(seniorInterestRate.toString())
+
+      const ongoingLoans = (pool && pool.ongoingLoans.length) || 0 // TODO add count field to subgraph, inefficient to query all assets
+
       return {
+        ongoingLoans,
         totalDebt,
         totalRepaysAggregatedAmount,
         weightedInterestRate,
         seniorInterestRate,
+        totalDebtNum,
+        totalRepaysAggregatedAmountNum,
+        weightedInterestRateNum,
+        seniorInterestRateNum,
+        order: this.getPoolOrder({ totalDebt, totalDebtNum, totalRepaysAggregatedAmount }),
         isUpcoming: false,
         id: poolId,
         name: configPool.name,
         slug: configPool.slug,
         asset: configPool?.asset,
-        ongoingLoans: (pool && pool.ongoingLoans.length) || 0, // TODO add count field to subgraph, inefficient to query all assets
-        totalDebtNum: parseFloat(totalDebt.toString()),
-        totalRepaysAggregatedAmountNum: parseFloat(totalRepaysAggregatedAmount.toString()),
-        weightedInterestRateNum: parseFloat(weightedInterestRate.toString()),
-        seniorInterestRateNum: parseFloat(seniorInterestRate.toString()),
       }
     })
     return tinlakePools
@@ -75,10 +90,11 @@ class Apollo {
   injectUpcomingPoolData(upcomingPools: UpcomingPool[]): PoolData[] {
     return upcomingPools.map((p) => ({
       isUpcoming: true,
+      order: orderSummandPoolUpcoming,
       totalDebt: new BN('0'),
       totalRepaysAggregatedAmount: new BN('0'),
       weightedInterestRate: new BN('0'),
-      seniorInterestRate: new BN('0'),
+      seniorInterestRate: new BN(p.seniorInterestRate || 0),
       id: p.slug,
       name: p.name,
       slug: p.slug,
@@ -87,7 +103,7 @@ class Apollo {
       totalDebtNum: 0,
       totalRepaysAggregatedAmountNum: 0,
       weightedInterestRateNum: 0,
-      seniorInterestRateNum: 0,
+      seniorInterestRateNum: parseFloat(new BN(p.seniorInterestRate || 0).toString()),
     }))
   }
 
@@ -114,9 +130,11 @@ class Apollo {
       throw new Error(`error occured while fetching assets from apollo ${err}`)
     }
 
-    const pools = result.data?.pools
+    let pools = result.data?.pools
       ? [...this.injectPoolData(result.data.pools), ...this.injectUpcomingPoolData(config.upcomingPools)]
       : []
+
+    pools = pools.sort((a, b) => a.name.localeCompare(b.name))
 
     return {
       pools,
@@ -233,3 +251,8 @@ function getLoanStatus(loan: any) {
 }
 
 export default new Apollo()
+
+const orderSummandPoolUpcoming = 3e30 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt
+const orderSummandPoolActive = 2e30
+const orderSummandPoolDeployed = 1e30 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt
+const orderSummandPoolClosed = 0 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt

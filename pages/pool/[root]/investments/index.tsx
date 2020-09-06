@@ -8,14 +8,14 @@ import SecondaryHeader from '../../../../components/SecondaryHeader'
 import Auth from '../../../../components/Auth'
 import WithFooter from '../../../../components/WithFooter'
 import { WithRouterProps } from 'next/dist/client/with-router'
-import config, { Pool } from '../../../../config'
+import config, { UpcomingPool } from '../../../../config'
 import { GetStaticProps } from 'next'
 import Container from '../../../../components/Container'
 import Head from 'next/head'
 
 interface Props extends WithRouterProps {
   root: string
-  pool: Pool
+  pool: UpcomingPool
 }
 
 class InvestmentPage extends React.Component<Props> {
@@ -36,8 +36,6 @@ class InvestmentPage extends React.Component<Props> {
           <Box justify="center" direction="row">
             <Box width="xlarge">
               <WithTinlake
-                addresses={pool.addresses}
-                contractConfig={pool.contractConfig}
                 render={(tinlake) => (
                   <Auth
                     tinlake={tinlake}
@@ -46,7 +44,7 @@ class InvestmentPage extends React.Component<Props> {
                         <SecondaryHeader>
                           <Heading level="3">Investments</Heading>
                         </SecondaryHeader>
-                        <InvestmentsViewUpcoming />
+                        <InvestmentsViewUpcoming pool={pool} />
                       </Box>
                     )}
                   />
