@@ -9,7 +9,7 @@ export function BorrowerActions<ActionsBase extends Constructor<TinlakeParams>>(
 
     nftLookup = async (registry: string, tokenId: string) => {
       const nft = ethers.utils.solidityKeccak256(['address', 'uint'], [registry, tokenId])
-      const loanId = await this.contract('SHELF').nftlookup(nft, this.overrides)
+      const loanId = await this.contract('SHELF').nftlookup(nft)
       return loanId
     }
 

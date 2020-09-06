@@ -159,18 +159,13 @@ async function mintIssueBorrow(usr: string, tinlake: ITinlake, amount: string) {
   const initialBorrowerCurrencyBalance = await borrowerTinlake.getCurrencyBalance(borrowerAccount.address)
 
   // supply tranche with money
-  console.log({ initialBorrowerCurrencyBalance })
-
   const borrowTx = await borrowerTinlake.borrow(loanId, amount)
   const borrowResult = await borrowerTinlake.getTransactionReceipt(borrowTx)
-  console.log({ borrowResult })
 
   const withdrawTx = await borrowerTinlake.withdraw(loanId, amount, borrowerAccount.address)
   const withdrawResult = await borrowerTinlake.getTransactionReceipt(withdrawTx)
-  console.log({ withdrawResult })
 
   const newBorrowerCurrencyBalance = await borrowerTinlake.getCurrencyBalance(borrowerAccount.address)
-  console.log({ newBorrowerCurrencyBalance })
 
   assert.equal(initialBorrowerCurrencyBalance.add(new BN(amount)).toString(), newBorrowerCurrencyBalance.toString())
   assert.equal(borrowResult.status, SUCCESS_STATUS)

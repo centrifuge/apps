@@ -5,6 +5,9 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
   return class extends Base implements ICollateralActions {
     mintTitleNFT = async (nftAddr: string, user: string) => {
       // TODO: this is untested right now
+      const collateralNft = this.contract('COLLATERAL_NFT', nftAddr)
+      console.log(collateralNft)
+      console.log(this.contract('COLLATERAL_NFT', nftAddr).functions)
       const tx = await this.contract('COLLATERAL_NFT', nftAddr).issue(user, this.overrides)
       const receipt = await this.getTransactionReceipt(tx)
 
@@ -13,7 +16,8 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
       }
 
       const parsedLog = this.contract('PROXY_REGISTRY').interface.parseLog(receipt.logs[0])
-      return parsedLog.values['2'].toString()
+      const nftId = parsedLog.values['2'].toString()
+      return nftId
     }
 
     mintNFT = async (
@@ -62,7 +66,7 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
 }
 
 export type ICollateralActions = {
-  mintTitleNFT(nftAddr: string, usr: string): Promise<PendingTransaction>
+  mintTitleNFT(nftAddr: string, usr: string): Promise<string>
   mintNFT(
     nftAddr: string,
     owner: string,

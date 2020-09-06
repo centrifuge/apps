@@ -3,6 +3,7 @@ import { createTinlake, TestProvider } from '../test/utils'
 import testConfig from '../test/config'
 import { ITinlake } from '../types/tinlake'
 import { ethers } from 'ethers'
+import BN from 'BN.js'
 
 const testProvider = new TestProvider(testConfig)
 const borrowerAccount = ethers.Wallet.createRandom()
@@ -57,28 +58,36 @@ describe('proxy tests', async () => {
       const initialTrancheBalance = await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR']);
 
       // borrow
-      console.log(initialTrancheBalance.toNumber())
-      const borrowResult = await borrowerTinlake.proxyLockBorrowWithdraw(proxyAddr, loanId, amount, borrowerAccount.address);
+      const borrowTx = await borrowerTinlake.proxyLockBorrowWithdraw(proxyAddr, loanId, amount, borrowerAccount.address);
+      const borrowResult = await borrowerTinlake.getTransactionReceipt(borrowTx)
+
       const balance = await borrowerTinlake.getCurrencyBalance(borrowerAccount.address);
       const secondTrancheBalance = await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR']);
+
       assert.equal(borrowResult.status, SUCCESS_STATUS);
       assert.equal(balance.toString(), amount);
       assert.equal(secondTrancheBalance.toString(), initialTrancheBalance.sub(new BN(amount)).toString());
 
       // fuel borrower with extra to cover loan interest, approve borrower proxy to take currency
-      await governanceTinlake.mintCurrency(borrowerAccount.address, amount.toString());
-      await borrowerTinlake.approveCurrency(proxyAddr, amount.toString());
+      const secondMintTx = await governanceTinlake.mintCurrency(borrowerAccount.address, amount.toString());
+      await governanceTinlake.getTransactionReceipt(secondMintTx)
+
+      const secondApproveTx = await borrowerTinlake.approveCurrency(proxyAddr, amount.toString());
+      await borrowerTinlake.getTransactionReceipt(secondApproveTx)
 
       // repay
-      const repayResult = await borrowerTinlake.proxyRepayUnlockClose(proxyAddr, tokenId, loanId, testConfig.nftRegistry);
+      const repayTx = await borrowerTinlake.proxyRepayUnlockClose(proxyAddr, tokenId, loanId, testConfig.nftRegistry);
+      const repayResult = await borrowerTinlake.getTransactionReceipt(repayTx)
       assert.equal(repayResult.status, SUCCESS_STATUS);
 
       // borrower should be owner of collateral NFT again
       // tranche balance should be back to pre-borrow amount
       const owner = await governanceTinlake.getNFTOwner(testConfig.nftRegistry, tokenId);
       assert.equal(ethers.utils.getAddress(owner.toString()), ethers.utils.getAddress(borrowerAccount.address));
+
       await borrowerTinlake.getCurrencyBalance(proxyAddr);
       const finalTrancheBalance = await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR']);
+
       assert.equal(initialTrancheBalance.toString(), finalTrancheBalance.toString());
     })
 
@@ -91,7 +100,6 @@ describe('proxy tests', async () => {
 
       // TODO: the next line fails with this error: "Error caught in tinlake.pending(): Error: The execution failed due to an exception."
       const issueTx = await borrowerTinlake.proxyTransferIssue(proxyAddr, testConfig.nftRegistry, tokenId)
-      console.log('issueTx', issueTx)
       const issueResult = await borrowerTinlake.getTransactionReceipt(issueTx)
       
       assert.equal(issueResult.status, FAIL_STATUS)
@@ -100,26 +108,42 @@ describe('proxy tests', async () => {
     it('fail: does not succeed if the proxy is not approved to transfer currency from the borrower', async () => {
       // create new proxy and mint collateral NFT to borrower
       const proxyAddr = await borrowerTinlake.proxyCreateNew(borrowerAccount.address);
-      const nftId: any = await governanceTinlake.mintTitleNFT(testConfig.nftRegistry, borrowerAccount.address);
-      await borrowerTinlake.approveNFT(testConfig.nftRegistry, nftId, proxyAddr);
+
+      const nftId = await governanceTinlake.mintTitleNFT(testConfig.nftRegistry, borrowerAccount.address);
+      const approveTx = await borrowerTinlake.approveNFT(testConfig.nftRegistry, nftId.toString(), proxyAddr);
+      await borrowerTinlake.getTransactionReceipt(approveTx)
+      
       // issue loan from collateral NFT
-      await borrowerTinlake.proxyTransferIssue(proxyAddr, testConfig.nftRegistry, nftId);
+      const proxyTransferTx = await borrowerTinlake.proxyTransferIssue(proxyAddr, testConfig.nftRegistry, nftId);
+      await borrowerTinlake.getTransactionReceipt(proxyTransferTx)
+      
       // set loan parameters and fund tranche
       const loanId = await borrowerTinlake.nftLookup(testConfig.nftRegistry, nftId);
       const amount = 1000;
-      await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['NFT_FEED']);
+      const relyTx = await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['NFT_FEED']);
+      await governanceTinlake.getTransactionReceipt(relyTx)
+      
       const nftfeedId = await adminTinlake.getNftFeedId(testConfig.nftRegistry, Number(nftId))
-      await adminTinlake.updateNftFeed(nftfeedId, Number(amount))
+      const updateNftTx = await adminTinlake.updateNftFeed(nftfeedId, Number(amount))
+      await adminTinlake.getTransactionReceipt(updateNftTx)
+
       await fundTranche('1000000000');
       await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR']);
+      
       // borrow
-      await borrowerTinlake.proxyLockBorrowWithdraw(proxyAddr, loanId, amount.toString(), borrowerAccount.address);
+      const proxyLockBorrowWithdrawTx = await borrowerTinlake.proxyLockBorrowWithdraw(proxyAddr, loanId, amount.toString(), borrowerAccount.address);
+      await borrowerTinlake.getTransactionReceipt(proxyLockBorrowWithdrawTx)
+
       await borrowerTinlake.getCurrencyBalance(borrowerAccount.address);
       await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR']);
+      
       // does not approve proxy to transfer currency
-      await governanceTinlake.mintCurrency(borrowerAccount.address, amount.toString());
+      const mintTx = await governanceTinlake.mintCurrency(borrowerAccount.address, amount.toString());
+      await governanceTinlake.getTransactionReceipt(mintTx)
+      
       // repay
-      const repayResult = await borrowerTinlake.proxyRepayUnlockClose(proxyAddr, nftId, loanId, testConfig.nftRegistry);
+      const repayTx = await borrowerTinlake.proxyRepayUnlockClose(proxyAddr, nftId, loanId, testConfig.nftRegistry);
+      const repayResult = await borrowerTinlake.getTransactionReceipt(repayTx)
       assert.equal(repayResult.status, FAIL_STATUS);
     })
   })
@@ -129,16 +153,27 @@ describe('proxy tests', async () => {
 async function fundTranche(amount: string) {
   const lenderAccount = ethers.Wallet.createRandom()
   const lenderTinlake = createTinlake(lenderAccount, testConfig)
+
   // fund lender account with eth
   await testProvider.fundAccountWithETH(lenderAccount.address, FAUCET_AMOUNT)
+
   // make admin address ward on tranche operator
-  await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['JUNIOR_OPERATOR'])
+  const fundTx = await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['JUNIOR_OPERATOR'])
+  await governanceTinlake.getTransactionReceipt(fundTx)
+
   // whitelist lender
-  await adminTinlake.approveAllowanceJunior(lenderAccount.address, amount, amount)
+  const approveAllowanceTx = await adminTinlake.approveAllowanceJunior(lenderAccount.address, amount, amount)
+  await adminTinlake.getTransactionReceipt(approveAllowanceTx)
+
   // lender approves tranche to take currency
-  await lenderTinlake.approveCurrency(contractAddresses['JUNIOR'], amount)
+  const approveTx = await lenderTinlake.approveCurrency(contractAddresses['JUNIOR'], amount)
+  await lenderTinlake.getTransactionReceipt(approveTx)
+
   // mint currency for lender
-  await governanceTinlake.mintCurrency(lenderAccount.address, amount)
+  const mintTx = await governanceTinlake.mintCurrency(lenderAccount.address, amount)
+  governanceTinlake.getTransactionReceipt(mintTx)
+
   // lender supplies tranche with funds
-  await lenderTinlake.supplyJunior(amount)
+  const supplyTx = await lenderTinlake.supplyJunior(amount)
+  await lenderTinlake.getTransactionReceipt(supplyTx)
 }

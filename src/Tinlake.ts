@@ -192,10 +192,7 @@ export default class Tinlake {
       try {
         const receipt = await this.ethersConfig.provider!.waitForTransaction(tx.hash)
         if (timer) clearTimeout(timer)
-
-        // TODO: if receipt.status === 0, use this to get the revert reason:
-        // https://gist.github.com/gluk64/fdea559472d957f1138ed93bcbc6f78a#file-reason-js
-
+        
         return resolve(receipt)
       } catch (e) {
         console.error(`Error caught in tinlake.getTransactionReceipt(): ${e}`)

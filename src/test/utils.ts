@@ -41,6 +41,6 @@ export function createTinlake(wallet: Wallet, testConfig: ProviderConfig): ITinl
 
 function createEthersConfig(rpcUrl: string, wallet: Wallet) {
   const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
-  const signer = new ethers.Wallet(wallet.privateKey).connect(provider)
+  const signer = wallet.connect(provider)
   return { provider, signer }
 }
