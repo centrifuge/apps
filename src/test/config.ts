@@ -40,7 +40,7 @@ export type ProviderConfig = {
   SUCCESS_STATUS: 1
   FAIL_STATUS: 0
   FAUCET_AMOUNT: string
-  overrides: any
+  overrides: ethers.providers.TransactionRequest
 }
 
 export default testConfig

@@ -120,7 +120,6 @@ describe('lender functions', async () => {
 
     const redeemTx = await lenderTinlake.redeemJunior(tokenAmount)
     const redeemResult = await lenderTinlake.getTransactionReceipt(redeemTx)
-    // console.log(redeemTx)
     
     assert.equal(redeemResult.status, FAIL_STATUS)
   })
@@ -140,9 +139,7 @@ async function supply(investor: string, currencyAmount: string, tinlake: ITinlak
   const initialJuniorTokenBalance = await tinlake.getJuniorTokenBalance(investor)
 
   const supplyTx = await tinlake.supplyJunior(currencyAmount)
-  // console.log('supplyTx', supplyTx)
   const supplyResult = await tinlake.getTransactionReceipt(supplyTx)
-  // console.log('supplyResult', supplyResult)
 
   const newTrancheCurrencyBalance = await tinlake.getCurrencyBalance(contractAddresses['JUNIOR'])
   const newLenderCurrencyBalance = await tinlake.getCurrencyBalance(investor)
@@ -150,10 +147,13 @@ async function supply(investor: string, currencyAmount: string, tinlake: ITinlak
 
   // assert result successful
   assert.equal(supplyResult.status, SUCCESS_STATUS)
+
   // assert tranche balance increased by currency amount
   assert.equal(newTrancheCurrencyBalance.sub(initialTrancheCurrencyBalance).toString(), currencyAmount)
+
   // assert investor currency balanace decreased
   assert.equal(initialLenderCurrencyBalance.sub(newLenderCurrencyBalance).toString(), currencyAmount)
+  
   // assert investor received tokens
   if (testConfig.isRealTestnet) {
     assert.ok(newJuniorTokenBalance.gt(initialJuniorTokenBalance))

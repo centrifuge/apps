@@ -98,7 +98,6 @@ describe('proxy tests', async () => {
       const mintTx = await governanceTinlake.mintNFT(testConfig.nftRegistry, borrowerAccount.address, tokenId, '234', '345', '456')
       await governanceTinlake.getTransactionReceipt(mintTx)
 
-      // TODO: the next line fails with this error: "Error caught in tinlake.pending(): Error: The execution failed due to an exception."
       const issueTx = await borrowerTinlake.proxyTransferIssue(proxyAddr, testConfig.nftRegistry, tokenId)
       const issueResult = await borrowerTinlake.getTransactionReceipt(issueTx)
       

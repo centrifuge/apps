@@ -39,11 +39,6 @@ export type PendingTransaction = {
   timesOutAt?: number
 }
 
-export type Overrides = {
-  gasPrice?: number
-  gasLimit?: number
-}
-
 export type EthersConfig = {
   provider: ethers.providers.Provider
   signer?: ethers.Signer
@@ -68,7 +63,7 @@ export type TinlakeParams = {
   transactionTimeout: number
   contractAddresses?: ContractAddresses | {}
   contractAbis?: ContractAbis | {}
-  overrides?: Overrides
+  overrides?: ethers.providers.TransactionRequest
   ethOptions?: any | {}
   contracts?: Contracts | {}
   contractConfig?: any | {}
@@ -78,6 +73,7 @@ export type Constructor<T = {}> = new (...args: any[]) => Tinlake
 
 ethers.errors.setLogLevel('error')
 
+// This adds a .toBN() function to all BigNumber instances returned by ethers.js
 ;(ethers.utils.BigNumber as any).prototype.toBN = function () {
   return new BN((this as any).toString())
 }
@@ -85,7 +81,7 @@ ethers.errors.setLogLevel('error')
 export default class Tinlake {
   public provider: any
   public ethersConfig: EthersConfig
-  public overrides: Overrides = {}
+  public overrides: ethers.providers.TransactionRequest = {}
   public contractAddresses: ContractAddresses
   public transactionTimeout: number
   public contracts: Contracts = {}
@@ -192,7 +188,7 @@ export default class Tinlake {
       try {
         const receipt = await this.ethersConfig.provider!.waitForTransaction(tx.hash)
         if (timer) clearTimeout(timer)
-        
+
         return resolve(receipt)
       } catch (e) {
         console.error(`Error caught in tinlake.getTransactionReceipt(): ${e}`)
