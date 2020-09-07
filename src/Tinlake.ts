@@ -20,7 +20,7 @@ const contractNames = [
   'THRESHOLD',
   'PRICE_POOL',
   'COLLATERAL_NFT',
-  'COLLATERAL_NFT_DATA',
+  // 'COLLATERAL_NFT_DATA',
   'ROOT_CONTRACT',
   'PROXY',
   'PROXY_REGISTRY',
@@ -47,11 +47,11 @@ export type EthersConfig = {
 export type ContractName = typeof contractNames[number]
 
 export type Contracts = {
-  [key in ContractName]?: any
+  [key in ContractName]?: ethers.Contract
 }
 
 export type ContractAbis = {
-  [key in ContractName]?: any
+  [key in ContractName]?: (ethers.utils.EventFragment | ethers.utils.FunctionFragment)[]
 }
 
 export type ContractAddresses = {
@@ -88,14 +88,7 @@ export default class Tinlake {
   public contractConfig: any = {}
 
   constructor(params: TinlakeParams) {
-    const {
-      contractAddresses,
-      transactionTimeout,
-      contractAbis,
-      ethersConfig,
-      overrides,
-      contractConfig,
-    } = params
+    const { contractAddresses, transactionTimeout, contractAbis, ethersConfig, overrides, contractConfig } = params
     if (!contractAbis) {
       this.contractAbis = abiDefinitions
     }
@@ -137,22 +130,22 @@ export default class Tinlake {
   }
 
   createContract(address: string, abiName: ContractName) {
-    return new ethers.Contract(address, this.contractAbis[abiName], this.ethersConfig.provider)
+    return new ethers.Contract(address, this.contractAbis[abiName]!, this.ethersConfig.provider)
   }
 
-  contract(abiName: ContractName, address?: string): ethers.Contract {
+  contract(abiName: keyof Tinlake['contracts'] | ContractName, address?: string) {
     const signerOrProvider = this.ethersConfig.signer || this.ethersConfig.provider
     if (!(abiName in this.contracts) && !(address && abiName in this.contractAbis)) {
       throw new Error(`Contract ${abiName} not loaded: ${JSON.stringify(Object.keys(this.contracts))}`)
     }
 
     if (address) {
-      return new ethers.Contract(address, this.contractAbis[abiName], signerOrProvider)
+      return new ethers.Contract(address, this.contractAbis[abiName]!, signerOrProvider)
     }
     if (this.ethersConfig.signer) {
-      return this.contracts[abiName].connect(signerOrProvider)
+      return this.contracts[abiName]!.connect(signerOrProvider)
     }
-    return this.contracts[abiName]
+    return this.contracts[abiName]!
   }
 
   async pending(txPromise: Promise<ethers.providers.TransactionResponse>): Promise<PendingTransaction> {

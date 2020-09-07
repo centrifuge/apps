@@ -43,12 +43,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
 
       // retrieve rates for this risk group
       const res = await this.contract('PILE').rates(riskGroup)
-      console.log('getInterestRate res', res)
-      console.log('TODO: return getInterestRate here')
-
-      return res.toBN()
-      // const res = await executeAndRetry(this.contracts['PILE'].rates, [riskGroup])
-      // return res ? res[2] : new BN(0)
+      return res[2].toBN()
     }
 
     getOwnerOfLoan = async (loanId: string): Promise<any> => {
@@ -62,7 +57,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getStatus = async (nftRegistryAddr: string, tokenId: string, loanId: string): Promise<any> => {
-      if ((await this.getOwnerOfCollateral(nftRegistryAddr, tokenId)) === this.contracts['SHELF'].address) {
+      if ((await this.getOwnerOfCollateral(nftRegistryAddr, tokenId)).toString() === this.contracts['SHELF']!.address) {
         return 'ongoing'
       }
       if ((await this.getOwnerOfLoan(loanId)) === ZERO_ADDRESS) {
