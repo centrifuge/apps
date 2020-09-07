@@ -28,19 +28,15 @@ export class TestProvider {
 
 export function createTinlake(wallet: Wallet, testConfig: ProviderConfig): ITinlake {
   const { rpcUrl, transactionTimeout, contractAddresses } = testConfig
+  const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
 
   const tinlake = new Tinlake({
     contractAddresses,
     transactionTimeout,
+    provider,
+    signer: wallet.connect(provider),
     overrides: testConfig.overrides,
-    ethersConfig: createEthersConfig(rpcUrl, wallet),
   })
 
   return tinlake
-}
-
-function createEthersConfig(rpcUrl: string, wallet: Wallet) {
-  const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
-  const signer = wallet.connect(provider)
-  return { provider, signer }
 }

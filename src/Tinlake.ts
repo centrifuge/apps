@@ -38,11 +38,6 @@ export type PendingTransaction = {
   timesOutAt?: number
 }
 
-export type EthersConfig = {
-  provider: ethers.providers.Provider
-  signer?: ethers.Signer
-}
-
 export type ContractName = typeof contractNames[number]
 
 export type Contracts = {
@@ -58,7 +53,8 @@ export type ContractAddresses = {
 }
 
 export type TinlakeParams = {
-  ethersConfig: EthersConfig
+  provider: ethers.providers.Provider
+  signer?: ethers.Signer
   transactionTimeout: number
   contractAddresses?: ContractAddresses | {}
   contractAbis?: ContractAbis | {}
@@ -77,8 +73,8 @@ ethers.errors.setLogLevel('error')
 }
 
 export default class Tinlake {
-  public provider: any
-  public ethersConfig: EthersConfig
+  public provider: ethers.providers.Provider
+  public signer?: ethers.Signer
   public overrides: ethers.providers.TransactionRequest = {}
   public contractAddresses: ContractAddresses
   public transactionTimeout: number
@@ -87,7 +83,7 @@ export default class Tinlake {
   public contractConfig: any = {}
 
   constructor(params: TinlakeParams) {
-    const { contractAddresses, transactionTimeout, contractAbis, ethersConfig, overrides, contractConfig } = params
+    const { provider, signer, contractAddresses, transactionTimeout, contractAbis, overrides, contractConfig } = params
     if (!contractAbis) {
       this.contractAbis = abiDefinitions
     }
@@ -96,7 +92,7 @@ export default class Tinlake {
     this.contractAddresses = contractAddresses || {}
     this.transactionTimeout = transactionTimeout
     this.overrides = overrides || {}
-    this.setEthersConfig(ethersConfig)
+    this.setProviderAndSigner(provider, signer)
     this.setContracts()
   }
 
@@ -121,19 +117,17 @@ export default class Tinlake {
     }
   }
 
-  setEthersConfig = (ethersConfig: EthersConfig) => {
-    this.ethersConfig = {
-      ...this.ethersConfig,
-      ...ethersConfig,
-    }
+  setProviderAndSigner = (provider: ethers.providers.Provider, signer?: ethers.Signer) => {
+    this.provider = provider
+    this.signer = signer
   }
 
   createContract(address: string, abiName: ContractName) {
-    return new ethers.Contract(address, this.contractAbis[abiName]!, this.ethersConfig.provider)
+    return new ethers.Contract(address, this.contractAbis[abiName]!, this.provider)
   }
 
   contract(abiName: keyof Tinlake['contracts'] | ContractName, address?: string) {
-    const signerOrProvider = this.ethersConfig.signer || this.ethersConfig.provider
+    const signerOrProvider = this.signer || this.provider
     if (!(abiName in this.contracts) && !(address && abiName in this.contractAbis)) {
       throw new Error(`Contract ${abiName} not loaded: ${JSON.stringify(Object.keys(this.contracts))}`)
     }
@@ -141,7 +135,7 @@ export default class Tinlake {
     if (address) {
       return new ethers.Contract(address, this.contractAbis[abiName]!, signerOrProvider)
     }
-    if (this.ethersConfig.signer) {
+    if (this.signer) {
       return this.contracts[abiName]!.connect(signerOrProvider)
     }
     return this.contracts[abiName]!
@@ -176,7 +170,7 @@ export default class Tinlake {
       }
 
       try {
-        const receipt = await this.ethersConfig.provider!.waitForTransaction(tx.hash)
+        const receipt = await this.provider!.waitForTransaction(tx.hash)
         if (timer) clearTimeout(timer)
 
         return resolve(receipt)
