@@ -1,17 +1,20 @@
 import * as React from 'react'
 import { Box } from 'grommet'
 import InvestmentsOverview from '../../../components/Investment/Overview'
-import { PoolData } from '../../../ducks/pool'
-import BN from 'bn.js'
-import { Tranche } from '@centrifuge/tinlake-js'
+import { UpcomingPool } from '../../../config'
+import { upcomingPoolToPooldata } from '../../../utils/upcomingPoolToPoolData'
 
-class InvestmentsViewUpcoming extends React.Component {
+interface Props {
+  pool: UpcomingPool
+}
+
+class InvestmentsViewUpcoming extends React.Component<Props> {
   render() {
     return (
       <Box>
         <Box margin={{ bottom: 'medium' }}>
           {' '}
-          <InvestmentsOverview data={emptyPoolData} />{' '}
+          <InvestmentsOverview data={upcomingPoolToPooldata(this.props.pool)} />{' '}
         </Box>
       </Box>
     )
@@ -19,20 +22,3 @@ class InvestmentsViewUpcoming extends React.Component {
 }
 
 export default InvestmentsViewUpcoming
-
-const emptyTranche: Tranche = {
-  availableFunds: new BN(0),
-  tokenPrice: new BN(0),
-  type: '',
-  token: '',
-  totalSupply: new BN(0),
-  interestRate: new BN(0),
-}
-
-const emptyPoolData: PoolData = {
-  junior: emptyTranche,
-  // senior: emptyTranche,
-  availableFunds: new BN(0),
-  minJuniorRatio: new BN(0),
-  currentJuniorRatio: new BN(0),
-}

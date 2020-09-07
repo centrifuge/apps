@@ -1,6 +1,7 @@
 import { networkUrlToName } from './utils/networkNameResolver'
 import poolConfigs from 'tinlake-pool-config'
 import * as yup from 'yup'
+import BN from 'bn.js'
 
 interface PoolI {
   name: string
@@ -13,10 +14,16 @@ interface PoolI {
   email?: string
   details?: any
   asset: string
+  additionalContactInfo?: {
+    label: string
+    link?: string
+  }[]
 }
 
 export interface UpcomingPool extends PoolI {
   isUpcoming: true
+  seniorInterestRate?: string
+  minimumJuniorRatio?: string
 }
 
 export interface Pool extends PoolI {
@@ -107,6 +114,12 @@ const poolSchema = yup.object().shape({
   description: yup.string(),
   investHtml: yup.string(),
   asset: yup.string().required('poolSchema.asset is required'),
+  additionalContactInfo: yup.array(
+    yup.object().shape({
+      label: yup.string().required('poolSchema.additionalContactInfo[?].label is required'),
+      link: yup.string(),
+    })
+  ),
 })
 
 const upcomingPoolSchema = yup.object().shape({
@@ -120,6 +133,20 @@ const upcomingPoolSchema = yup.object().shape({
   email: yup.string(),
   details: yup.object(),
   asset: yup.string().required('poolSchema.asset is required'),
+  additionalContactInfo: yup.array(
+    yup.object().shape({
+      label: yup.string().required('poolSchema.additionalContactInfo[?].label is required'),
+      link: yup.string(),
+    })
+  ),
+  seniorInterestRate: yup
+    .string()
+    .default('1000000003170979198376458650')
+    .test('fee', 'value must be a fee such as 1000000003170979198376458650', fee),
+  minimumJuniorRatio: yup
+    .string()
+    .default('200000000000000000000000000')
+    .test('between-1e23-1e27', 'value must between 0 and 1e25', between1e23and1e27),
 })
 
 const poolsSchema = yup.array(poolSchema)
@@ -178,3 +205,19 @@ const config: Config = {
 }
 
 export default config
+
+function between1e23and1e27(s: string): boolean {
+  const n = new BN(s)
+  if (n.gte(new BN('100000000000000000000000')) && n.lte(new BN('1000000000000000000000000000'))) {
+    return true
+  }
+  return false
+}
+
+function fee(s: string): boolean {
+  const n = new BN(s)
+  if (n.gte(new BN('1000000000000000000000000000')) && n.lte(new BN('1000000009000000000000000000'))) {
+    return true
+  }
+  return false
+}

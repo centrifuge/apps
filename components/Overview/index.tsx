@@ -136,19 +136,42 @@ class Overview extends React.Component<Props> {
                   ))}
                 </p>
 
-                {selectedPool.website && (
+                {(selectedPool.website ||
+                  selectedPool.email ||
+                  (selectedPool.additionalContactInfo && selectedPool.additionalContactInfo.length > 0)) && (
                   <p>
-                    <strong>Contact the Asset Originator</strong>
-                    <br />
-                    Interested in learning more?
-                    <br />
-                    <a href={selectedPool.website} target="_blank">
-                      {new URL(selectedPool.website).hostname}
-                    </a>
-                    <br />
-                    <a href={`mailto:${selectedPool.email}`} target="_blank">
-                      {selectedPool.email}
-                    </a>
+                    <strong>Interested in investing or want to learn more?</strong>
+                    {selectedPool.website && (
+                      <>
+                        <br />
+                        <a href={selectedPool.website} target="_blank">
+                          {new URL(selectedPool.website).hostname}
+                        </a>
+                      </>
+                    )}
+                    {selectedPool.email && (
+                      <>
+                        <br />
+                        <a href={`mailto:${selectedPool.email}`} target="_blank">
+                          {selectedPool.email}
+                        </a>
+                      </>
+                    )}
+                    {selectedPool.additionalContactInfo?.map((ci, i) =>
+                      ci.link ? (
+                        <React.Fragment key={ci.label + i}>
+                          <br />
+                          <a href={ci.link} target="_blank">
+                            {ci.label}
+                          </a>
+                        </React.Fragment>
+                      ) : (
+                        <React.Fragment key={ci.label + i}>
+                          <br />
+                          <span>{ci.label}</span>
+                        </React.Fragment>
+                      )
+                    )}
                   </p>
                 )}
               </div>
