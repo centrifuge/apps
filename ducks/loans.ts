@@ -1,7 +1,7 @@
 import { AnyAction, Action } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { Loan } from '@centrifuge/tinlake-js'
-import { getLoan, TinlakeResult } from '../services/tinlake/actions'
+import { getLoan } from '../services/tinlake/actions'
 import Apollo from '../services/apollo'
 import { HYDRATE } from 'next-redux-wrapper'
 
@@ -88,11 +88,11 @@ export function loadLoan(
     if (!refresh) {
       dispatch({ type: LOAD_LOAN })
     }
-    const result: TinlakeResult = await getLoan(tinlake, loanId)
-    if (result.errorMsg || !result.data) {
+    const loan = await getLoan(tinlake, loanId)
+    if (!loan) {
       dispatch({ type: LOAN_NOT_FOUND })
       return
     }
-    dispatch({ type: RECEIVE_LOAN, loan: result.data })
+    dispatch({ loan, type: RECEIVE_LOAN })
   }
 }

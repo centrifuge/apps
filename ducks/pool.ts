@@ -1,6 +1,6 @@
 import { AnyAction, Action } from 'redux'
 import { ThunkAction } from 'redux-thunk'
-import { getPool, TinlakeResult } from '../services/tinlake/actions'
+import { getPool } from '../services/tinlake/actions'
 import { Tranche } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { HYDRATE } from 'next-redux-wrapper'
@@ -43,7 +43,7 @@ export default function reducer(state: PoolState = initialState, action: AnyActi
 export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, undefined, Action> {
   return async (dispatch) => {
     dispatch({ type: LOAD_POOL })
-    const PoolData: TinlakeResult = await getPool(tinlake)
-    dispatch({ data: PoolData && PoolData.data, type: RECEIVE_POOL })
+    const poolData = await getPool(tinlake)
+    dispatch({ data: poolData, type: RECEIVE_POOL })
   }
 }

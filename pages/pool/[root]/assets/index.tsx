@@ -46,7 +46,7 @@ class LoanListPage extends React.Component<Props> {
                         <SecondaryHeader>
                           <Heading level="3">Assets</Heading>
                         </SecondaryHeader>
-                        <LoanListUpcoming tinlake={tinlake} />
+                        <LoanListUpcoming />
                       </Box>
                     )}
                   />
