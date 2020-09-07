@@ -64,7 +64,6 @@ export type TinlakeParams = {
   contractAddresses?: ContractAddresses | {}
   contractAbis?: ContractAbis | {}
   overrides?: ethers.providers.TransactionRequest
-  ethOptions?: any | {}
   contracts?: Contracts | {}
   contractConfig?: any | {}
 }
@@ -93,7 +92,6 @@ export default class Tinlake {
       contractAddresses,
       transactionTimeout,
       contractAbis,
-      ethOptions,
       ethersConfig,
       overrides,
       contractConfig,

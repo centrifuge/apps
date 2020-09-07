@@ -105,7 +105,9 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     // lender analytics
-    getInvestor = async (user: string): Promise<Investor> => {
+    getInvestor = async (user: string): Promise<Investor | undefined> => {
+      if (typeof user === 'undefined' || user === '') return undefined
+
       const includeSenior = this.existsSenior()
       const tokenBalanceJunior = await this.getJuniorTokenBalance(user)
       const tokenBalanceSenior = (includeSenior && (await this.getSeniorTokenBalance(user))) || new BN(0)
@@ -242,7 +244,6 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getAssetValueJunior = async () => {
-      console.log(`contract address in getAssetvalueJunior: ${this.contractAddresses['JUNIOR']}`)
       return (await this.contract('ASSESSOR').calcAssetValue(this.contractAddresses['JUNIOR'])).toBN()
     }
 
@@ -292,7 +293,7 @@ export type IAnalyticsActions = {
   getMinJuniorRatio(): Promise<BN>
   getCurrentJuniorRatio(): Promise<BN>
   getAssetValueJunior(): Promise<BN>
-  getInvestor(user: string): Promise<Investor>
+  getInvestor(user: string): Promise<Investor | undefined>
 }
 
 export default AnalyticsActions
