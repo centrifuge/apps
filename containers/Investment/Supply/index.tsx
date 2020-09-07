@@ -43,8 +43,9 @@ const InvestorSupply: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (status === 'succeeded') {
-      loadInvestor && loadInvestor(props.tinlake, props.investor.address)
-      loadPool && loadPool(props.tinlake)
+      console.log('reloading investor and pool data')
+      props.loadInvestor && props.loadInvestor(props.tinlake, props.investor.address)
+      props.loadPool && props.loadPool(props.tinlake)
     }
   }, [status, result])
 

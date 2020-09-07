@@ -43,7 +43,7 @@ const JuniorRatio: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (status === 'succeeded') {
-      loadPool && loadPool(props.tinlake)
+      props.loadPool && props.loadPool(props.tinlake)
     }
   }, [status])
 

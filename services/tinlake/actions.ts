@@ -373,8 +373,6 @@ export async function supply(
     allowance = (await tinlake.getSeniorForCurrencyAllowance(address!)) || new BN(0)
   }
 
-  console.log('allowance', allowance)
-
   // only approve if allowance is smaller than than supplyAmount
   if (allowance.lt(new BN(supplyAmount))) {
     // approve currency

@@ -52,6 +52,12 @@ class InvestorView extends React.Component<Props, State> {
     this.setState({ selectedTab: 0 })
   }
 
+  componentDidUpdate(prevProps: Props) {
+    if (this.props.investorAddress !== prevProps.investorAddress) {
+      this.showInvestor()
+    }
+  }
+
   selectTab(tab: number) {
     this.setState({ selectedTab: tab })
   }
