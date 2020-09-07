@@ -2,27 +2,46 @@ import { Constructor, TinlakeParams } from '../Tinlake'
 
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
-    solveEpoch = async () => {
+
       // const tinlake = (this as any)
       // const reserve = (await tinlake.getJuniorReserve()).add(await tinlake.getSeniorReserve())
 
-      // const state = {
-      //   reserve,
-      //   netAssetValue: 0,
-      //   seniorDebt: await tinlake.getSeniorDebt(),
-      //   seniorBalance: 0,
-      //   minTinRatio: await tinlake.getMinJuniorRatio(),
-      //   maxTinRatio: 0,
-      //   maxReserve: 0,
+    solveEpoch = async () => {
+      // if (!coordinator.submissionPeriod) {
+      //   await coordinator.closeEpoch()
+
+      //   if (!coordinator.submissionPeriod) return
       // }
-      
+
+      // const state = {
+      //   reserve, // coordinator.epochReserve
+      //   netAssetValue: 0, // coordinator.epochNAV
+      //   seniorDebt: await tinlake.getSeniorDebt(), // coordinator.epochSeniorDebt (to be added)
+      //   seniorBalance: 0, // epochSeniorAsset - epochSeniorDebt
+      //   minTinRatio: await tinlake.getMinJuniorRatio(), // 1 - maxSeniorRatio on the assessor
+      //   maxTinRatio: 0, // 1 - mSeniorRatio on the assessor
+      //   maxReserve: 0, // assessor.maxReserve
+      // }
+
+      // const orderState = coordinator.order
+
+      // const solution = calculateOptimalSolution(state, orderState)
+
+      // Call submitSolution(solution)
+
       return Promise.resolve({
-          tinRedeem: 1,
-          dropRedeem: 2,
-          tinInvest: 3,
-          dropInvest: 4
+        tinRedeem: 1,
+        dropRedeem: 2,
+        tinInvest: 3,
+        dropInvest: 4
       })
+
     }
+
+    // executeEpoch = () => void
+
+    // isInChallengePeriod = () => boolean
+    // check coordinator.minChallengePeriodEnd
 
     calculateOptimalSolution = async (state: State, orderState: OrderState) => {
       /**
