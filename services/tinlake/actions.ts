@@ -94,7 +94,11 @@ export const mintNFT = async (
   }
 }
 
-export const issue = async (tinlake: ITinlake, tokenId: string, nftRegistryAddress: string): Promise<PendingTransaction> => {
+export const issue = async (
+  tinlake: ITinlake,
+  tokenId: string,
+  nftRegistryAddress: string
+): Promise<PendingTransaction> => {
   let tokenOwner
   const user = await tinlake.ethersConfig.signer?.getAddress()!
 
@@ -209,7 +213,12 @@ export async function getLoans(tinlake: ITinlake): Promise<TinlakeResult | Pendi
   }
 }
 
-export async function setInterest(tinlake: ITinlake, loanId: string, debt: string, rate: string): Promise<PendingTransaction> {
+export async function setInterest(
+  tinlake: ITinlake,
+  loanId: string,
+  debt: string,
+  rate: string
+): Promise<PendingTransaction> {
   const rateGroup = interestRateToFee(rate)
   const existsRateGroup = await tinlake.existsRateGroup(rateGroup)
 
@@ -339,9 +348,8 @@ export async function setAllowance(
   try {
     if (trancheType === 'junior') {
       return await tinlake.approveAllowanceJunior(address, maxSupplyAmount, maxRedeemAmount)
-    } 
-      return await tinlake.approveAllowanceSenior(address, maxSupplyAmount, maxRedeemAmount)
-    
+    }
+    return await tinlake.approveAllowanceSenior(address, maxSupplyAmount, maxRedeemAmount)
   } catch (e) {
     return loggedError(e, `Could not set allowance for ${trancheType}`, address)
   }
@@ -351,7 +359,11 @@ export async function setMinJuniorRatio(tinlake: ITinlake, ratio: string): Promi
   return await tinlake.setMinimumJuniorRatio(ratio)
 }
 
-export async function supply(tinlake: ITinlake, supplyAmount: string, trancheType: TrancheType): Promise<PendingTransaction> {
+export async function supply(
+  tinlake: ITinlake,
+  supplyAmount: string,
+  trancheType: TrancheType
+): Promise<PendingTransaction> {
   const address = await tinlake.ethersConfig.signer?.getAddress()
 
   let allowance = new BN(0)
@@ -381,15 +393,18 @@ export async function supply(tinlake: ITinlake, supplyAmount: string, trancheTyp
   try {
     if (trancheType === 'junior') {
       return await tinlake.supplyJunior(supplyAmount)
-    } 
-      return await tinlake.supplySenior(supplyAmount)
-    
+    }
+    return await tinlake.supplySenior(supplyAmount)
   } catch (e) {
     return loggedError(e, `Could not supply ${trancheType}`, '')
   }
 }
 
-export async function redeem(tinlake: ITinlake, redeemAmount: string, trancheType: TrancheType): Promise<PendingTransaction> {
+export async function redeem(
+  tinlake: ITinlake,
+  redeemAmount: string,
+  trancheType: TrancheType
+): Promise<PendingTransaction> {
   const address = await tinlake.ethersConfig.signer?.getAddress()
 
   let allowance = new BN(0)
@@ -417,7 +432,8 @@ export async function redeem(tinlake: ITinlake, redeemAmount: string, trancheTyp
   try {
     if (trancheType === 'junior') {
       return await tinlake.redeemJunior(redeemAmount)
-    }  if (trancheType === 'senior') {
+    }
+    if (trancheType === 'senior') {
       return await tinlake.redeemSenior(redeemAmount)
     }
   } catch (e) {
@@ -431,6 +447,6 @@ function loggedError(error: any, message: string, id: string): PendingTransactio
   console.error(`${message} ${id}`, error)
   return {
     status: 0,
-    error: message
+    error: message,
   }
 }
