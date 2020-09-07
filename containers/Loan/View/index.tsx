@@ -26,7 +26,6 @@ class LoanView extends React.Component<Props> {
     const { tinlake, loanId, loadLoan, loadProxies } = this.props
     loanId && loadLoan!(tinlake, loanId)
     loadProxies && loadProxies()
-    console.log(this.props.auth?.permissions)
   }
 
   render() {

@@ -44,7 +44,6 @@ export function loadInvestor(
       dispatch({ type: LOAD_INVESTOR })
     }
     const investor = await getInvestor(tinlake, address)
-    console.log('retrieved new investor', investor)
     if (!investor) {
       dispatch({ type: INVESTOR_NOT_FOUND })
     } else {

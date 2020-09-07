@@ -208,9 +208,11 @@ export function processTransaction(
         }
         await dispatch({ id, transaction: pendingTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
 
-        // Hide pending tx after 10s
-        setTimeout(async () => {
-          if (!hasCompleted) {
+        const pendingTxTimeout = 10000
+        const hidePendingTxCallback = async () => {
+          if (hasCompleted) return
+
+          if (!document.hidden) {
             const hiddenPendingTx: Transaction = {
               ...pendingTx,
               showIfClosed: false,
@@ -221,11 +223,15 @@ export function processTransaction(
               dontChangeUpdatedAt: true,
               type: SET_ACTIVE_TRANSACTION,
             })
+          } else {
+            setTimeout(hidePendingTxCallback, pendingTxTimeout)
           }
-        }, 10000)
+        }
+
+        // Hide pending tx after 10s
+        setTimeout(hidePendingTxCallback, pendingTxTimeout)
 
         const receipt = await tinlake.getTransactionReceipt(tx)
-
         hasCompleted = true
 
         const outcome = receipt.status === 1
@@ -255,15 +261,21 @@ export function processTransaction(
 
     await dispatch({ id, transaction: outcomeTx, type: SET_ACTIVE_TRANSACTION })
 
-    // Hide succeeded/failed tx after 5s
-    setTimeout(async () => {
-      // TODO: this shouldn't update the 'updatedAt' property, since it pushes up transactions which haven't actually changed
-      const hiddenTx: Transaction = {
-        ...outcomeTx,
-        showIfClosed: false,
+    const completedTxTimeout = 5000
+    const hideCompletedTxCallback = async () => {
+      if (!document.hidden) {
+        const hiddenTx: Transaction = {
+          ...outcomeTx,
+          showIfClosed: false,
+        }
+        await dispatch({ id, transaction: hiddenTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
+      } else {
+        setTimeout(hideCompletedTxCallback, completedTxTimeout)
       }
-      await dispatch({ id, transaction: hiddenTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
-    }, 5000)
+    }
+
+    // Hide succeeded/failed tx after 5s
+    setTimeout(hideCompletedTxCallback, completedTxTimeout)
 
     // Process next transaction in queue
     if (Object.keys(getState().transactions.queue).length > 0) {
