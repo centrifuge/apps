@@ -17,11 +17,11 @@ interface Props {
 
 class OverviewUpcoming extends React.Component<Props> {
   render() {
-    const { auth, tinlake, selectedPool } = this.props
+    const { auth, selectedPool } = this.props
 
     return (
       <OverviewComp
-        userAddress={auth?.address || tinlake.ethConfig.from}
+        userAddress={auth?.address || ''}
         loans={{ loans: [], loansState: 'found', loan: null, loanState: null }}
         pool={{ data: upcomingPoolToPooldata(selectedPool), state: 'found' }}
         selectedPool={selectedPool}

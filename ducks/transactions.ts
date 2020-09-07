@@ -142,8 +142,6 @@ export function createTransaction<A extends TransactionAction>(
     // Generate a unique id
     const id: TransactionId = (new Date().getTime() + Math.floor(Math.random() * 1000000)).toString()
 
-    console.log('tinlake signer', args[0].ethersConfig.signer)
-
     /**
      * We store the tinlake config, remove the tinlake service from the state (as it's not serializable and can therefore not be stored in Redux state),
      * and then re-initialize Tinlake.js with the same config when processing the transaction.

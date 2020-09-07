@@ -27,13 +27,7 @@ class LoanList extends React.Component<Props> {
   }
 
   render() {
-    const {
-      loans,
-      pool,
-      tinlake: {
-        ethConfig: { from: ethFrom },
-      },
-    } = this.props
+    const { loans, pool, auth } = this.props
     const availableFunds = (pool && pool.data && pool.data.availableFunds) || '0'
     if (loans!.loansState === 'loading') {
       return <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />
@@ -57,7 +51,7 @@ class LoanList extends React.Component<Props> {
             </DashboardMetric>
           </Box>
         </Box>
-        <LoanListData loans={(loans && loans.loans) || []} userAddress={ethFrom}>
+        <LoanListData loans={(loans && loans.loans) || []} userAddress={auth?.address || ''}>
           {' '}
         </LoanListData>
       </Box>
