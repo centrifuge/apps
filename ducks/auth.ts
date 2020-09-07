@@ -134,7 +134,7 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
         const web3Provider = new ethers.providers.Web3Provider(wallet.provider)
         const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
         const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
-        tinlake.setEthersConfig({ provider: fallbackProvider, signer: web3Provider.getSigner() })
+        tinlake.setProviderAndSigner(fallbackProvider, web3Provider.getSigner())
       }
 
       if (wallet.name !== auth.providerName) {
@@ -162,10 +162,10 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
           const web3Provider = new ethers.providers.Web3Provider(wallet.provider)
           const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
           const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
-          tinlake.setEthersConfig({ provider: fallbackProvider, signer: web3Provider.getSigner() })
+          tinlake.setProviderAndSigner(fallbackProvider, web3Provider.getSigner())
         } else {
           const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
-          tinlake.setEthersConfig({ provider: rpcProvider })
+          tinlake.setProviderAndSigner(rpcProvider)
         }
 
         // store the selected wallet name to be retrieved next time the app loads
@@ -390,7 +390,7 @@ export function clear(): ThunkAction<Promise<void>, { auth: AuthState }, undefin
     const tinlake = getTinlake()
     if (tinlake !== null) {
       const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
-      tinlake.setEthersConfig({ provider: rpcProvider })
+      tinlake.setProviderAndSigner(rpcProvider)
     }
 
     const onboard = getOnboard()

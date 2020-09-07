@@ -64,7 +64,7 @@ class LoanView extends React.Component<Props> {
             )}
           </Box>
         )}
-        {loan && loan.nft && <NftData data={loan.nft} authedAddr={tinlake.ethersConfig.signer.address} />}
+        {loan && loan.nft && <NftData data={loan.nft} authedAddr={tinlake.signer.address} />}
       </Box>
     )
   }

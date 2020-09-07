@@ -38,7 +38,7 @@ const MintNFT: React.FC<Props> = (props: Props) => {
   const mint = async () => {
     await props.ensureAuthed!()
     const base = displayToBase(baseToDisplay(amount, 2), 2)
-    const address = await props.tinlake.ethersConfig.signer.getAddress()
+    const address = await props.tinlake.signer.getAddress()
 
     const txId = await props.createTransaction(`Mint NFT ${referenceId}`, 'mintNFT', [
       props.tinlake,

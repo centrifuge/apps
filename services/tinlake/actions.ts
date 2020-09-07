@@ -100,7 +100,7 @@ export const issue = async (
   nftRegistryAddress: string
 ): Promise<PendingTransaction> => {
   let tokenOwner
-  const user = await tinlake.ethersConfig.signer?.getAddress()!
+  const user = await tinlake.signer?.getAddress()!
 
   try {
     tokenOwner = await tinlake.getNFTOwner(nftRegistryAddress, tokenId)
@@ -246,7 +246,7 @@ export async function setInterest(
 }
 
 export async function getPool(tinlake: ITinlake): Promise<PoolData | null> {
-  const address = await tinlake.ethersConfig.signer?.getAddress()
+  const address = await tinlake.signer?.getAddress()
 
   const juniorReserve = await tinlake.getJuniorReserve()
   const juniorTokenPrice = await tinlake.getTokenPriceJunior()
@@ -288,7 +288,7 @@ export async function getPool(tinlake: ITinlake): Promise<PoolData | null> {
 
 export async function borrow(tinlake: ITinlake, loan: Loan, amount: string): Promise<PendingTransaction> {
   const { loanId } = loan
-  const address = await tinlake.ethersConfig.signer?.getAddress()
+  const address = await tinlake.signer?.getAddress()
   const proxy = loan.ownerOf
 
   // make sure tranche has enough funds
@@ -311,7 +311,7 @@ export async function borrow(tinlake: ITinlake, loan: Loan, amount: string): Pro
 export async function repay(tinlake: ITinlake, loan: Loan): Promise<PendingTransaction> {
   const { loanId } = loan
   const proxy = loan.ownerOf
-  const address = await tinlake.ethersConfig.signer?.getAddress()
+  const address = await tinlake.signer?.getAddress()
 
   // use entire user balance as repay amount to make sure that enough funds are provided to cover the entire debt
   const balance = await tinlake.getCurrencyBalance(address!)
@@ -364,7 +364,7 @@ export async function supply(
   supplyAmount: string,
   trancheType: TrancheType
 ): Promise<PendingTransaction> {
-  const address = await tinlake.ethersConfig.signer?.getAddress()
+  const address = await tinlake.signer?.getAddress()
 
   let allowance = new BN(0)
   if (trancheType === 'junior') {
@@ -403,7 +403,7 @@ export async function redeem(
   redeemAmount: string,
   trancheType: TrancheType
 ): Promise<PendingTransaction> {
-  const address = await tinlake.ethersConfig.signer?.getAddress()
+  const address = await tinlake.signer?.getAddress()
 
   let allowance = new BN(0)
   if (trancheType === 'junior') {
