@@ -19,13 +19,13 @@ class InvestmentsOverview extends React.Component<Props> {
       <Box>
         <Box direction="row">
           <Box basis={'1/3'}>
-            <DashboardMetric label={'Current TIN ratio'}>
+            <DashboardMetric label={'Current TIN Risk Buffer'}>
               <NumberDisplay value={baseToDisplay(currentJuniorRatio, 25)} suffix={' %'} precision={2} />
             </DashboardMetric>
           </Box>
 
           <Box basis={'1/3'}>
-            <DashboardMetric label={'Minimum TIN ratio'}>
+            <DashboardMetric label={'Minimum TIN Risk Buffer'}>
               <NumberDisplay value={baseToDisplay(minJuniorRatio, 25)} suffix={' %'} precision={2} />
             </DashboardMetric>
           </Box>

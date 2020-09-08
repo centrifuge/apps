@@ -42,7 +42,8 @@ class LoanView extends React.Component<Props> {
       )
     }
 
-    const hasBorrowerPermissions = loan && auth?.proxies?.includes(loan.ownerOf.toString())
+    const hasBorrowerPermissions =
+      loan && auth?.proxies?.map((proxy: string) => proxy.toLowerCase()).includes(loan.ownerOf.toString().toLowerCase())
 
     return (
       <Box>
@@ -64,7 +65,9 @@ class LoanView extends React.Component<Props> {
             )}
           </Box>
         )}
-        {loan && loan.nft && <NftData data={loan.nft} authedAddr={tinlake.signer.address} />}
+        {loan && loan.nft && this.props.auth?.address && (
+          <NftData data={loan.nft} authedAddr={this.props.auth.address} />
+        )}
       </Box>
     )
   }

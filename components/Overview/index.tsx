@@ -79,13 +79,13 @@ class Overview extends React.Component<Props> {
               <Table>
                 <TableBody>
                   <TableRow>
-                    <TableCell scope="row">Current TIN ratio</TableCell>
+                    <TableCell scope="row">Current TIN Risk Buffer</TableCell>
                     <TableCell style={{ textAlign: 'end' }}>
                       {addThousandsSeparators(toPrecision(baseToDisplay(currentJuniorRatio, 25), 2))} %
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell scope="row">Minimum TIN ratio</TableCell>
+                    <TableCell scope="row">Minimum TIN Risk Buffer</TableCell>
                     <TableCell style={{ textAlign: 'end' }}>
                       {addThousandsSeparators(toPrecision(baseToDisplay(minJuniorRatio, 25), 2))} %
                     </TableCell>

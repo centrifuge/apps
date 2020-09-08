@@ -99,8 +99,12 @@ export const issue = async (
   tokenId: string,
   nftRegistryAddress: string
 ): Promise<PendingTransaction> => {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const user = await tinlake.signer.getAddress()!
   let tokenOwner
-  const user = await tinlake.signer?.getAddress()!
 
   try {
     tokenOwner = await tinlake.getNFTOwner(nftRegistryAddress, tokenId)
@@ -246,7 +250,11 @@ export async function setInterest(
 }
 
 export async function getPool(tinlake: ITinlake): Promise<PoolData | null> {
-  const address = await tinlake.signer?.getAddress()
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const address = await tinlake.signer.getAddress()
 
   const juniorReserve = await tinlake.getJuniorReserve()
   const juniorTokenPrice = await tinlake.getTokenPriceJunior()
@@ -287,8 +295,12 @@ export async function getPool(tinlake: ITinlake): Promise<PoolData | null> {
 }
 
 export async function borrow(tinlake: ITinlake, loan: Loan, amount: string): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
   const { loanId } = loan
-  const address = await tinlake.signer?.getAddress()
+  const address = await tinlake.signer.getAddress()
   const proxy = loan.ownerOf
 
   // make sure tranche has enough funds
@@ -301,6 +313,7 @@ export async function borrow(tinlake: ITinlake, loan: Loan, amount: string): Pro
 
   // borrow with proxy
   try {
+    // console.log()
     return await tinlake.proxyLockBorrowWithdraw(proxy.toString(), loanId, amount, address!)
   } catch (e) {
     return loggedError(e, 'Could not finance asset.', loanId)
@@ -309,9 +322,13 @@ export async function borrow(tinlake: ITinlake, loan: Loan, amount: string): Pro
 
 // repay full loan debt
 export async function repay(tinlake: ITinlake, loan: Loan): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
   const { loanId } = loan
   const proxy = loan.ownerOf
-  const address = await tinlake.signer?.getAddress()
+  const address = await tinlake.signer.getAddress()
 
   // use entire user balance as repay amount to make sure that enough funds are provided to cover the entire debt
   const balance = await tinlake.getCurrencyBalance(address!)
@@ -364,7 +381,11 @@ export async function supply(
   supplyAmount: string,
   trancheType: TrancheType
 ): Promise<PendingTransaction> {
-  const address = await tinlake.signer?.getAddress()
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const address = await tinlake.signer.getAddress()
 
   let allowance = new BN(0)
   if (trancheType === 'junior') {
@@ -403,7 +424,11 @@ export async function redeem(
   redeemAmount: string,
   trancheType: TrancheType
 ): Promise<PendingTransaction> {
-  const address = await tinlake.signer?.getAddress()
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const address = await tinlake.signer.getAddress()
 
   let allowance = new BN(0)
   if (trancheType === 'junior') {
