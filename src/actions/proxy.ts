@@ -69,87 +69,44 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     proxyIssue = async (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
-      // TODO: replace with ethers.js method call
-      const encoded = abiCoder.encodeFunctionCall(
-        {
-          name: 'issue',
-          type: 'function',
-          inputs: [
-            { type: 'address', name: 'shelf' },
-            { type: 'address', name: 'registry' },
-            { type: 'uint256', name: 'token' },
-          ],
-        },
-        [this.contract('SHELF').address, nftRegistryAddress, tokenId]
-      )
+      const encoded = this.contract('ACTIONS').interface.functions.issue.encode([
+        this.contract('SHELF').address, nftRegistryAddress, tokenId
+      ])
 
       return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
     }
 
     proxyTransferIssue = async (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
-      // TODO: replace with ethers.js method call
-      const encoded = abiCoder.encodeFunctionCall(
-        {
-          name: 'transferIssue',
-          type: 'function',
-          inputs: [
-            { type: 'address', name: 'shelf' },
-            { type: 'address', name: 'registry' },
-            { type: 'uint256', name: 'token' },
-          ],
-        },
-        [this.contract('SHELF').address, nftRegistryAddress, tokenId]
-      )
+      const encoded = this.contract('ACTIONS').interface.functions.transferIssue.encode([
+        this.contract('SHELF').address, nftRegistryAddress, tokenId
+      ])
 
       return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
     }
 
     proxyLockBorrowWithdraw = async (proxyAddress: string, loanId: string, amount: string, usr: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
-      // TODO: replace with ethers.js method call
-      const encoded = abiCoder.encodeFunctionCall(
-        {
-          name: 'lockBorrowWithdraw',
-          type: 'function',
-          inputs: [
-            { type: 'address', name: 'shelf' },
-            { type: 'uint256', name: 'loan' },
-            { type: 'uint256', name: 'amount' },
-            { type: 'address', name: 'usr' },
-          ],
-        },
-        [this.contract('SHELF').address, loanId, amount, usr]
-      )
+      const encoded = this.contract('ACTIONS').interface.functions.lockBorrowWithdraw.encode([
+        this.contract('SHELF').address,
+        loanId,
+        amount,
+        usr,
+      ])
 
-      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))
     }
 
     proxyRepayUnlockClose = async (proxyAddress: string, tokenId: string, loanId: string, registry: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
-      // TODO: replace with ethers.js method call
-      const encoded = abiCoder.encodeFunctionCall(
-        {
-          name: 'repayUnlockClose',
-          type: 'function',
-          inputs: [
-            { type: 'address', name: 'shelf' },
-            { type: 'address', name: 'pile' },
-            { type: 'address', name: 'registry' },
-            { type: 'uint256', name: 'token' },
-            { type: 'address', name: 'erc20' },
-            { type: 'uint256', name: 'loan' },
-          ],
-        },
-        [
-          this.contract('SHELF').address,
-          this.contract('PILE').address,
-          registry,
-          tokenId,
-          this.contract('TINLAKE_CURRENCY').address,
-          loanId,
-        ]
-      )
+      const encoded = this.contract('ACTIONS').interface.functions.repayUnlockClose.encode([
+        this.contract('SHELF').address,
+        this.contract('PILE').address,
+        registry,
+        tokenId,
+        this.contract('TINLAKE_CURRENCY').address,
+        loanId,
+      ])
 
       return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
     }

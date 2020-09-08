@@ -26,7 +26,7 @@ describe('borrower tests', async () => {
     await testProvider.fundAccountWithETH(adminAccount.address, FAUCET_AMOUNT)
 
     // supply tranche with money
-    const amount = '5000'
+    const amount = '50'
     await fundTranche(amount)
   })
 
@@ -98,6 +98,7 @@ describe('borrower tests', async () => {
 
     // repay loan
     const initialDebt = await borrowerTinlake.getDebt(loanId)
+    console.log('initialDebt', initialDebt)
 
     // approve shelf to take currency
     const approveTx = await borrowerTinlake.approveCurrency(contractAddresses['SHELF'], initialDebt.toString())

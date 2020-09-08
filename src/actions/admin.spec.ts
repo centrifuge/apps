@@ -29,8 +29,8 @@ describe('admin tests', async () => {
       const relyTx = await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['JUNIOR_OPERATOR'])
       await governanceTinlake.getTransactionReceipt(relyTx)
 
-      const maxCurrency = '1000'
-      const maxToken = '100'
+      const maxCurrency = '10'
+      const maxToken = '1'
 
       // set allowance for lender address
       const allowanceTx = await adminTinlake.approveAllowanceJunior(

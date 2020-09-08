@@ -35,8 +35,8 @@ describe('lender functions', async () => {
   })
 
   it('success: supply junior', async () => {
-    const currencyAmount = '100000'
-    const tokenAmount = '100'
+    const currencyAmount = '1000'
+    const tokenAmount = '1'
 
     // whitelist investor
     const approveTx = await adminTinlake.approveAllowanceJunior(lenderAccount.address, currencyAmount, tokenAmount)
@@ -46,7 +46,7 @@ describe('lender functions', async () => {
   })
 
   it('fail: supply junior - no allowance', async () => {
-    const currencyAmount = '1000'
+    const currencyAmount = '10'
     // approve junior tranche to take currency
     const approveTx = await lenderTinlake.approveCurrency(contractAddresses['JUNIOR'], currencyAmount)
     const approval = await lenderTinlake.getTransactionReceipt(approveTx)
@@ -104,8 +104,8 @@ describe('lender functions', async () => {
   })
 
   it('fail: redeem junior - no allowance', async () => {
-    const currencyAmount = '1000'
-    const tokenAmount = '100'
+    const currencyAmount = '10'
+    const tokenAmount = '1'
 
     // whitelist investor with no allowance to redeem
     const approveTx = await adminTinlake.approveAllowanceJunior(lenderAccount.address, currencyAmount, '0')

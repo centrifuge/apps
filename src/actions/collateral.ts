@@ -1,24 +1,26 @@
 import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
 import BN from 'bn.js'
+const util = require('util')
 
 export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICollateralActions {
-    mintTitleNFT = async (nftAddr: string, user: string) => {
-      // TODO: this is untested right now
-      const collateralNft = this.contract('COLLATERAL_NFT', nftAddr)
-      console.log(collateralNft)
-      console.log(this.contract('COLLATERAL_NFT', nftAddr).functions)
-      const tx = await this.contract('COLLATERAL_NFT', nftAddr).issue(user, this.overrides)
-      const receipt = await this.getTransactionReceipt(tx)
+    // mintTitleNFT = async (nftAddr: string, user: string) => {
+    //   // TODO: this is untested right now
+    //   const collateralNft = this.contract('COLLATERAL_NFT', nftAddr)
+    //   console.log(collateralNft)
+    //   console.log(this.contract('COLLATERAL_NFT', nftAddr).functions)
+    //   const tx = await collateralNft.issue(user, this.overrides)
+    //   const receipt = await this.getTransactionReceipt(tx)
 
-      if (!(receipt.logs && receipt.logs[0])) {
-        throw new Error('Event missing in collateralNft.issue(user) receipt')
-      }
+    //   if (!(receipt.logs && receipt.logs[0])) {
+    //     console.log(util.inspect(receipt, { showHidden: false, depth: null }))
+    //     throw new Error('Event missing in COLLATERAL_NFT.issue(user) receipt')
+    //   }
 
-      const parsedLog = this.contract('PROXY_REGISTRY').interface.parseLog(receipt.logs[0])
-      const nftId = parsedLog.values['2'].toString()
-      return nftId
-    }
+    //   const parsedLog = this.contract('PROXY_REGISTRY').interface.parseLog(receipt.logs[0])
+    //   const nftId = parsedLog.values['2'].toString()
+    //   return nftId
+    // }
 
     mintNFT = async (
       nftAddress: string,
@@ -66,7 +68,7 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
 }
 
 export type ICollateralActions = {
-  mintTitleNFT(nftAddr: string, usr: string): Promise<string>
+  // mintTitleNFT(nftAddr: string, usr: string): Promise<string>
   mintNFT(
     nftAddr: string,
     owner: string,

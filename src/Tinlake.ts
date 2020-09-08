@@ -150,7 +150,7 @@ export default class Tinlake {
         timesOutAt: Date.now() + this.transactionTimeout * 1000,
       }
     } catch (e) {
-      console.error(`Error caught in tinlake.pending(): ${e}`)
+      console.error(`Error caught in tinlake.pending(): ${JSON.stringify(e)}`)
       return {
         status: 0,
         error: e.message,
@@ -175,7 +175,7 @@ export default class Tinlake {
 
         return resolve(receipt)
       } catch (e) {
-        console.error(`Error caught in tinlake.getTransactionReceipt(): ${e}`)
+        console.error(`Error caught in tinlake.getTransactionReceipt(): ${JSON.stringify(e)}`)
         return reject()
       }
     })

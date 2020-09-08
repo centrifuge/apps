@@ -107,15 +107,11 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     updateNftFeed = async (tokenId: string, value: number, riskGroup?: number) => {
-      let tx;
-
       if (!riskGroup) {
-        tx = this.contract('NFT_FEED')['update(bytes32,uint256)'](tokenId, value, this.overrides)
+        return this.pending(this.contract('NFT_FEED')['update(bytes32,uint256)'](tokenId, value, this.overrides))
       } else {
-        tx = this.contract('NFT_FEED')['update(bytes32,uint256,uint256)'](tokenId, value, riskGroup, this.overrides)
+        return this.pending(this.contract('NFT_FEED')['update(bytes32,uint256,uint256)'](tokenId, value, riskGroup, this.overrides))
       }
-
-      return this.pending(tx)
     }
 
     getNftFeedId = async (registry: string, tokenId: number) => {

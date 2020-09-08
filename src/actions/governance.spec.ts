@@ -34,7 +34,7 @@ describe('governance tests', async () => {
     })
 
     it('fail: account has no governance permissions', async () => {
-      const randomAccount: Account = ethers.Wallet.createRandom()
+      const randomAccount = ethers.Wallet.createRandom()
       const testProvider = new TestProvider(testConfig)
       await testProvider.fundAccountWithETH(randomAccount.address, FAUCET_AMOUNT)
 
