@@ -1,4 +1,4 @@
-import abiDefinitions from './abi'
+import abiDefinitions from './abi/v2'
 import { ethers } from 'ethers'
 import BN from 'bn.js'
 
@@ -29,6 +29,7 @@ const contractNames = [
   'NFT_FEED',
   'GOVERNANCE',
   'ALLOWANCE_OPERATOR',
+  'EPOCH_COORDINATOR',
 ] as const
 
 export type PendingTransaction = {

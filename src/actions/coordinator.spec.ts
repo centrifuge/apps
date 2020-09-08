@@ -15,8 +15,7 @@ describe('coordinator tests', async () => {
       const state = {
         netAssetValue: 800,
         reserve: 200,
-        seniorDebt: 700,
-        seniorBalance: 100,
+        seniorAsset: 800,
         minTinRatio: 0.15,
         maxTinRatio: 0.2,
         maxReserve: 10000,
@@ -44,8 +43,7 @@ describe('coordinator tests', async () => {
       const state = {
         netAssetValue: 800,
         reserve: 200,
-        seniorDebt: 700,
-        seniorBalance: 100,
+        seniorAsset: 800,
         minTinRatio: 0.0,
         maxTinRatio: 1.0,
         maxReserve: 500,
@@ -75,8 +73,7 @@ describe('coordinator tests', async () => {
       const state = {
         netAssetValue: 800,
         reserve: 200,
-        seniorDebt: 700,
-        seniorBalance: 100,
+        seniorAsset: 800,
         minTinRatio: 0.01,
         maxTinRatio: 0.01,
         maxReserve: 500,
@@ -98,8 +95,7 @@ describe('coordinator tests', async () => {
       const state = {
         netAssetValue: 800,
         reserve: 200,
-        seniorDebt: 700,
-        seniorBalance: 100,
+        seniorAsset: 800,
         minTinRatio: 0.01,
         maxTinRatio: 0.01,
         maxReserve: 50000,
