@@ -7,17 +7,18 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       // const reserve = (await tinlake.getJuniorReserve()).add(await tinlake.getSeniorReserve())
 
     solveEpoch = async () => {
-      // if (!coordinator.submissionPeriod) {
-      //   await coordinator.closeEpoch()
+      // const coordinator = this.contract('COORDINATOR')
+      // if (!(await this.contract('COORDINATOR').submissionPeriod)) {
+      //   const closeTx = await coordinator.closeEpoch()
+      //   await this.getTransactionReceipt(closeTx)
 
-      //   if (!coordinator.submissionPeriod) return
+      //   if (!(await this.contract('COORDINATOR').submissionPeriod)) return
       // }
 
       // const state = {
-      //   reserve, // coordinator.epochReserve
-      //   netAssetValue: 0, // coordinator.epochNAV
-      //   seniorDebt: await tinlake.getSeniorDebt(), // coordinator.epochSeniorDebt (to be added)
-      //   seniorBalance: 0, // epochSeniorAsset - epochSeniorDebt
+      //   reserve: await coordinator.epochReserve, // coordinator.epochReserve
+      //   netAssetValue: await coordinator.epochNAV, // coordinator.epochNAV
+      //   seniorAsset: await coordinator.epochSeniorAsset, // coordinator.epochSeniorDebt (to be added)
       //   minTinRatio: await tinlake.getMinJuniorRatio(), // 1 - maxSeniorRatio on the assessor
       //   maxTinRatio: 0, // 1 - mSeniorRatio on the assessor
       //   maxReserve: 0, // assessor.maxReserve
@@ -130,8 +131,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
                 lb:
                   -(1 - state.minTinRatio) * state.netAssetValue -
                   (1 - state.minTinRatio) * state.reserve +
-                  state.seniorBalance +
-                  state.seniorDebt,
+                  state.seniorAsset,
               },
             },
             {
@@ -148,8 +148,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
                 lb:
                   (1 - state.maxTinRatio) * state.netAssetValue +
                   (1 - state.maxTinRatio) * state.reserve -
-                  state.seniorBalance -
-                  state.seniorDebt,
+                  state.seniorAsset,
               },
             },
           ],
@@ -169,18 +168,10 @@ export type ICoordinatorActions = {
 
 export default CoordinatorActions
 
-interface BaseState {
+export interface State {
   netAssetValue: number
   reserve: number
-  seniorDebt: number
-  seniorBalance: number
-}
-
-export interface State extends BaseState {
-  netAssetValue: number
-  reserve: number
-  seniorDebt: number
-  seniorBalance: number
+  seniorAsset: number
   minTinRatio: number
   maxTinRatio: number
   maxReserve: number
