@@ -32,14 +32,20 @@ describe('proxy tests', async () => {
       const tokenId = `${Math.floor(Math.random() * 10e15) + 1}`
 
       const mintTx = await governanceTinlake.mintNFT(testConfig.nftRegistry, borrowerAccount.address, tokenId, '234', '345', '456')
-      await governanceTinlake.getTransactionReceipt(mintTx)
+      const mintResult = await governanceTinlake.getTransactionReceipt(mintTx)
+
+      // console.log('mintResult', mintResult)
 
       const approveTx = await borrowerTinlake.approveNFT(testConfig.nftRegistry, tokenId, proxyAddr)
-      await borrowerTinlake.getTransactionReceipt(approveTx)
+      const approveResult = await borrowerTinlake.getTransactionReceipt(approveTx)
+
+      // console.log('approveResult', approveResult)
 
       // issue loan from collateral NFT
       const issueTx = await borrowerTinlake.proxyTransferIssue(proxyAddr, testConfig.nftRegistry, tokenId)
       const issueResult = await borrowerTinlake.getTransactionReceipt(issueTx)
+
+      // console.log('issueResult', issueResult)
 
       assert.equal(issueResult.status, SUCCESS_STATUS)
       assert.equal(await borrowerTinlake.getNFTOwner(testConfig.nftRegistry, tokenId), proxyAddr)
@@ -48,18 +54,26 @@ describe('proxy tests', async () => {
       const loanId = await borrowerTinlake.nftLookup(testConfig.nftRegistry, tokenId);
       const amount = '10';
       const relyTx = await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['NFT_FEED']);
-      await governanceTinlake.getTransactionReceipt(relyTx)
-      
+      const relyResult = await governanceTinlake.getTransactionReceipt(relyTx)
+
+      // console.log('relyResult', relyResult)
+
       const nftfeedId = await adminTinlake.getNftFeedId(testConfig.nftRegistry, Number(tokenId))
       const updateNftTx = await adminTinlake.updateNftFeed(nftfeedId, Number(amount))
-      await adminTinlake.getTransactionReceipt(updateNftTx)
-      
+      const updateNftResult = await adminTinlake.getTransactionReceipt(updateNftTx)
+
+      // console.log('updateNftResult', updateNftResult)
+
       await fundTranche('100');
       const initialTrancheBalance = await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR']);
 
       // borrow
       const borrowTx = await borrowerTinlake.proxyLockBorrowWithdraw(proxyAddr, loanId, amount, borrowerAccount.address);
+      // console.log('borrowTx', borrowTx)
+
       const borrowResult = await borrowerTinlake.getTransactionReceipt(borrowTx)
+
+      // console.log('borrowResult', borrowResult)
 
       const balance = await borrowerTinlake.getCurrencyBalance(borrowerAccount.address);
       const secondTrancheBalance = await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR']);

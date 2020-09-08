@@ -93,11 +93,11 @@ describe('lender functions', async () => {
 
     assert.equal(redeemResult.status, SUCCESS_STATUS)
     assert.equal(
-      initialTrancheCurrencyBalance.sub(new BN(tokenAmount)).subn(1).toString(),
+      initialTrancheCurrencyBalance.sub(new BN(tokenAmount)).toString(),
       newTrancheCurrencyBalance.toString()
     )
     assert.equal(
-      initialLenderCurrencyBalance.add(new BN(tokenAmount)).addn(1).toString(),
+      initialLenderCurrencyBalance.add(new BN(tokenAmount)).toString(),
       newLenderCurrencyBalance.toString()
     )
     assert.equal(tokenAmount, initialJuniorTokenBalance.sub(newJuniorTokenBalance).toString())
