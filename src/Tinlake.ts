@@ -29,7 +29,7 @@ const contractNames = [
   'NFT_FEED',
   'GOVERNANCE',
   'ALLOWANCE_OPERATOR',
-  'EPOCH_COORDINATOR',
+  'COORDINATOR',
 ] as const
 
 export type PendingTransaction = {
@@ -101,6 +101,7 @@ export default class Tinlake {
     // set root & proxy contracts
     contractNames.forEach((name) => {
       if (this.contractAbis[name] && this.contractAddresses[name]) {
+        console.log(`Loadinng ${name}`)
         this.contracts[name] = this.createContract(this.contractAddresses[name]!, name)
       }
     })

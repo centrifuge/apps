@@ -3,39 +3,45 @@ import { Constructor, TinlakeParams } from '../Tinlake'
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
 
-      // const tinlake = (this as any)
-      // const reserve = (await tinlake.getJuniorReserve()).add(await tinlake.getSeniorReserve())
-
     solveEpoch = async () => {
-      // const coordinator = this.contract('COORDINATOR')
-      // if (!(await this.contract('COORDINATOR').submissionPeriod)) {
-      //   const closeTx = await coordinator.closeEpoch()
-      //   await this.getTransactionReceipt(closeTx)
+      const coordinator = this.contract('COORDINATOR')
+      const assessor = this.contract('ASSESSOR')
 
-      //   if (!(await this.contract('COORDINATOR').submissionPeriod)) return
-      // }
+      if (!(await coordinator.submissionPeriod)) {
+        // The epoch is can be closed, but is not closed yet
+        const closeTx = await coordinator.closeEpoch()
+        await this.getTransactionReceipt(closeTx)
 
-      // const state = {
-      //   reserve: await coordinator.epochReserve, // coordinator.epochReserve
-      //   netAssetValue: await coordinator.epochNAV, // coordinator.epochNAV
-      //   seniorAsset: await coordinator.epochSeniorAsset, // coordinator.epochSeniorDebt (to be added)
-      //   minTinRatio: await tinlake.getMinJuniorRatio(), // 1 - maxSeniorRatio on the assessor
-      //   maxTinRatio: 0, // 1 - mSeniorRatio on the assessor
-      //   maxReserve: 0, // assessor.maxReserve
-      // }
+        // If it's not in a submission period after closing the epoch, then it could immediately be solved and executed
+        // (i.e. all orders could be fulfilled)
+        if (!(await coordinator.submissionPeriod)) return
+      }
 
-      // const orderState = coordinator.order
+      const state = {
+        reserve: await coordinator.epochReserve, // coordinator.epochReserve
+        netAssetValue: await coordinator.epochNAV, // coordinator.epochNAV
+        seniorAsset: await coordinator.epochSeniorAsset,
+        minTinRatio: 1 - (await assessor.maxSeniorRatio), // 1 - maxSeniorRatio on the assessor
+        maxTinRatio: 1 - (await assessor.minSeniorRatio), // 1 - mSeniorRatio on the assessor
+        maxReserve: await assessor.maxReserve, // assessor.maxReserve
+      }
 
-      // const solution = calculateOptimalSolution(state, orderState)
+      const orderState = coordinator.order
 
-      // Call submitSolution(solution)
+      const solution = await this.calculateOptimalSolution(state, orderState)
+      console.log('Solution found', solution)
 
-      return Promise.resolve({
-        tinRedeem: 1,
-        dropRedeem: 2,
-        tinInvest: 3,
-        dropInvest: 4
-      })
+      if (solution.status !== 5) {
+        console.error('Solution could not be found for the current epoch', { state, orderState })
+        return undefined
+      }
+
+      const submitTx = coordinator.submitSolution(...Object.values(solution.vars))
+      const submitResult = await this.getTransactionReceipt(submitTx)
+
+      console.log('Submit solver result', submitResult)
+
+      return solution.vars
 
     }
 
@@ -44,7 +50,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
     // isInChallengePeriod = () => boolean
     // check coordinator.minChallengePeriodEnd
 
-    calculateOptimalSolution = async (state: State, orderState: OrderState) => {
+    calculateOptimalSolution = async (state: State, orderState: OrderState): Promise<SolverResult> => {
       /**
        * The limitations are:
        * - only input variables (those in state or orderState) can be on the right side of the constraint (the bnds key)
@@ -162,7 +168,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 }
 
 export type ICoordinatorActions = {
-  solveEpoch(): Promise<SolverSolution>
+  solveEpoch(): Promise<SolverSolution | undefined>
   calculateOptimalSolution(state: State, orderState: OrderState): Promise<SolverResult>
 }
 

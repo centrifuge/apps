@@ -1,5 +1,5 @@
 import contractAddresses from './addresses.json'
-import abiDefinitions from '../abi/'
+import abiDefinitions from '../abi/v2/'
 import { ContractAddresses, ContractAbis } from '../Tinlake'
 import dotenv from 'dotenv'
 import { ethers } from 'ethers'

@@ -7,10 +7,17 @@ let tinlake: ITinlake
 
 describe('coordinator tests', async () => {
   before(async () => {
+    console.log('create tinlake')
     tinlake = createTinlake(testConfig.godAccount, testConfig)
   })
 
   describe('epoch solver', async () => {
+    it('should be able to communicate to the coordinator', async () => {
+      const coordinator = tinlake.contract('COORDINATOR')
+      const submissionPeriod = await coordinator.submissionPeriod
+      console.log(submissionPeriod)
+    })
+
     it('should return an optimal solution when limited by the max TIN ratio', async () => {
       const state = {
         netAssetValue: 800,

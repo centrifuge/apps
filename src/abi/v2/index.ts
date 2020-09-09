@@ -20,6 +20,9 @@ import contractAbiBorrowerDeployer from './BorrowerDeployer.abi.json'
 import contractAbiLenderDeployer from './LenderDeployer.abi.json'
 import { ContractAbis } from '../../Tinlake'
 
+// TODO: this is temporary, should only be imported in v3/index.ts
+import contractCoordinator from '../v3/EpochCoordinator.abi.json'
+
 export default {
   COLLATERAL_NFT: contractAbiNFT,
   TITLE: contractAbiTitle,
@@ -45,4 +48,5 @@ export default {
   BORROWER_DEPLOYER: contractAbiBorrowerDeployer,
   LENDER_DEPLOYER: contractAbiLenderDeployer,
   NFT_FEED: contractAbiNftFeed,
+  COORDINATOR: contractCoordinator,
 } as ContractAbis
