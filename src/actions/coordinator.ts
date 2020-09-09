@@ -45,10 +45,39 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
     }
 
-    // executeEpoch = () => void
+    executeEpoch = async () => {
+      const coordinator = this.contract('COORDINATOR')
+      const submissionPeriod = await coordinator.submissionPeriod
 
-    // isInChallengePeriod = () => boolean
-    // check coordinator.minChallengePeriodEnd
+      if (!submissionPeriod) throw new Error('Current epoch is not in a submission period')
+      if (await this.isInChallengePeriod()) throw new Error('Current epoch is still in the challenge period')
+
+      return this.pending(coordinator.executeEpoch())
+    }
+
+    // getCurrentEpochState = async () => {
+    //   const coordinator = this.contract('COORDINATOR')
+
+    //   const submissionPeriod = await coordinator.submissionPeriod
+    //   if (!submissionPeriod) return 'active'
+
+    //   const minChallengePeriodEnd = await coordinator.minChallengePeriodEnd
+    //   if (minChallengePeriodEnd >= (new Date).getTime()) return 'challenge-period-ended'
+
+    //   return 'in-challenge-period'
+    // }
+
+    isInChallengePeriod = async () => {
+      const coordinator = this.contract('COORDINATOR')
+
+      const submissionPeriod = await coordinator.submissionPeriod
+      if (!submissionPeriod) throw new Error('Current epoch is not in a submission period')
+
+      const minChallengePeriodEnd = await coordinator.minChallengePeriodEnd
+      if (minChallengePeriodEnd >= (new Date).getTime()) return false // challenge period has ended
+
+      return true // still in challenge period
+    }
 
     calculateOptimalSolution = async (state: State, orderState: OrderState): Promise<SolverResult> => {
       /**
