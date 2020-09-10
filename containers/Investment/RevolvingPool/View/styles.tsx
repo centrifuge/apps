@@ -12,3 +12,10 @@ export const ExplainerCard = styled(Box)`
   color: #555;
   border-radius: 8px;
 `
+
+export const TokenLogo = styled.img`
+  vertical-align: middle;
+  margin: 0 8px 0 0;
+  width: 16px;
+  height: 16px;
+`

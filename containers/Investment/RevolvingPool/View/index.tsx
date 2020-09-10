@@ -15,7 +15,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
       <Heading level="4">Invest/Redeem in {props.pool?.name}</Heading>
 
       <ExplainerCard margin={{ bottom: 'medium' }}>
-        Please place your DROP and TIN invstments and redemptions below. Tinlake pool investments and redemptions are
+        Please place your DROP and TIN investments and redemptions below. Tinlake pool investments and redemptions are
         locked in throughout daily “Epochs” and executed at the end of the Epoch based on available capital and
         considering Reserve and TIN ratios. Please find more detailed information about Epochs, the Epoch Waterfall and
         how to invest and redeem into Tinlake here...
