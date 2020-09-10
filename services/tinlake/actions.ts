@@ -233,9 +233,8 @@ export async function setInterest(
   try {
     if (debt.toString() === '0') {
       return await tinlake.setRate(loanId, rateGroup)
-    } 
-      return await tinlake.changeRate(loanId, rateGroup)
-    
+    }
+    return await tinlake.changeRate(loanId, rateGroup)
   } catch (e) {
     return loggedError(e, 'Could not set rate group', loanId)
   }
