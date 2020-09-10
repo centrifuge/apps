@@ -101,7 +101,6 @@ export default class Tinlake {
     // set root & proxy contracts
     contractNames.forEach((name) => {
       if (this.contractAbis[name] && this.contractAddresses[name]) {
-        console.log(`Loadinng ${name}`)
         this.contracts[name] = this.createContract(this.contractAddresses[name]!, name)
       }
     })
