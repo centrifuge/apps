@@ -1,21 +1,24 @@
 import * as React from 'react'
-import { Box, Heading, Button, Table, TableBody, TableRow, TableCell } from 'grommet'
+import { Box, Button, Table, TableBody, TableRow, TableCell } from 'grommet'
 import { Pool } from '../../../../config'
+
+import InvestCard from './InvestCard'
+import RedeemCard from './RedeemCard'
 
 interface Props {
   pool: Pool
   tranche: 'senior' | 'junior'
 }
 
-type Screen = 'home' | 'invest' | 'redeem' | 'order'
+export type Card = 'home' | 'invest' | 'redeem' | 'order'
 
 const TrancheOverview: React.FC<Props> = (props: Props) => {
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
 
-  const [screen, setScreen] = React.useState<Screen>('home')
+  const [card, setCard] = React.useState<Card>('home')
 
   return (
-    <Box width="medium" pad="medium" background="white" elevation="small" gap="xsmall" margin="small">
+    <Box width="medium" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
       <Table>
         <TableBody>
           <TableRow>
@@ -33,26 +36,15 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         </TableBody>
       </Table>
 
-      {screen === 'home' && (
+      {card === 'home' && (
         <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-          <Button primary label="Redeem" onClick={() => setScreen('redeem')} />
-          <Button primary label="Invest" onClick={() => setScreen('invest')} />
+          <Button primary label="Redeem" onClick={() => setCard('redeem')} />
+          <Button primary label="Invest" onClick={() => setCard('invest')} />
         </Box>
       )}
 
-      {screen === 'invest' && (
-        <Box margin={{ left: 'auto' }}>
-          <Button label="Cancel" onClick={() => setScreen('home')} />
-          <Button primary label="Lock DAI" />
-        </Box>
-      )}
-
-      {screen === 'redeem' && (
-        <Box margin={{ left: 'auto' }}>
-          <Button label="Cancel" onClick={() => setScreen('home')} />
-          <Button primary label={`Lock ${token}`} />
-        </Box>
-      )}
+      {card === 'invest' && <InvestCard {...props} setCard={setCard} />}
+      {card === 'redeem' && <RedeemCard {...props} setCard={setCard} />}
     </Box>
   )
 }
