@@ -10,7 +10,9 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         !!this.contract('FEED')?.wards &&
         !!this.contract('ASSESSOR')?.wards &&
         !!this.contract('JUNIOR_OPERATOR')?.wards &&
-        !!this.contract('SENIOR_OPERATOR')?.wards
+        !!this.contract('SENIOR_OPERATOR')?.wards &&
+        !!this.contract('JUNIOR_MEMBERLIST')?.wards &&
+        !!this.contract('SENIOR_MEMBERLIST')?.wards
       )
     }
 
