@@ -8,13 +8,35 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const assessor = this.contract('ASSESSOR')
 
       const state: State = {
-        reserve: (await coordinator.epochReserve()).toBN().toNumber(),
-        netAssetValue: (await coordinator.epochNAV()).toBN().toNumber(),
-        seniorAsset: (await coordinator.epochSeniorAsset()).toBN().toNumber(),
-        minTinRatio: 1 - (await assessor.maxSeniorRatio()), // TODO: BN(1**27).sub(...)
-        maxTinRatio: 1 - (await assessor.minSeniorRatio()), // TODO: BN(1**27).sub(...)
+        reserve: (await coordinator.epochReserve())
+          .toBN()
+          .div(10 ** 18)
+          .toNumber(),
+        netAssetValue: (await coordinator.epochNAV())
+          .toBN()
+          .div(10 ** 18)
+          .toNumber(),
+        seniorAsset: (await coordinator.epochSeniorAsset())
+          .toBN()
+          .div(10 ** 18)
+          .toNumber(),
+        minTinRatio:
+          1.0 -
+          (await coordinator.maxSeniorRatio())
+            .toBN()
+            .div(10 ** 27)
+            .toNumber(),
+        maxTinRatio:
+          1.0 -
+          (await coordinator.minSeniorRatio())
+            .toBN()
+            .div(10 ** 27)
+            .toNumber(),
         maxReserve: (await assessor.maxReserve()).toBN().toNumber(),
       }
+
+      // If Fixed27, divide by 10**27
+      // If uint, divide by 10**18
 
       return state
     }
@@ -65,13 +87,17 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
     getCurrentEpochState = async () => {
       const coordinator = this.contract('COORDINATOR')
 
-      // TODO: add state 'can-be-closed
-
-      const submissionPeriod = await coordinator.submissionPeriod
+      const lastEpochClosed =  (await coordinator.lastEpochClosed).toBN().toNumber()
+      const minimumEpochTime = (await coordinator.minimumEpochTime).toBN().toNumber()
+      if (((new Date()).getTime() - lastEpochClosed) >= minimumEpochTime) {
+        return 'can-be-closed'
+      }
+      
+      const submissionPeriod = await coordinator.submissionPeriod()
       if (!submissionPeriod) return 'open'
 
       const minChallengePeriodEnd = await coordinator.minChallengePeriodEnd
-      if (minChallengePeriodEnd >= (new Date).getTime()) return 'challenge-period-ended'
+      if (minChallengePeriodEnd < (new Date).getTime()) return 'challenge-period-ended'
 
       return 'in-challenge-period'
     }
@@ -193,7 +219,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
   }
 }
 
-export type EpochState = 'open' | 'in-challenge-period' | 'challenge-period-ended'
+export type EpochState = 'open' | 'can-be-closed' | 'in-challenge-period' | 'challenge-period-ended'
 
 export type ICoordinatorActions = {
   getEpochState(): Promise<State>
