@@ -51,17 +51,17 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     // ------------ admin functions lender-side -------------
     setMinimumJuniorRatio = async (ratio: string) => {
       // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
-      const maxSeniorRatio = (10 ** 27 - Number(ratio)).toString()
+      const maxSeniorRatio = new BN(10).pow(new BN(27)).sub(new BN(ratio))
       return this.pending(
-        this.contract('ASSESSOR').file(web3.fromAscii('maxSeniorRatio').padEnd(66, '0'), maxSeniorRatio, this.overrides)
+        this.contract('ASSESSOR').file(web3.fromAscii('maxSeniorRatio').padEnd(66, '0'), maxSeniorRatio.toString(), this.overrides)
       )
     }
 
     setMaximumJuniorRatio = async (ratio: string) => {
       // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
-      const minSeniorRatio = (10 ** 27 - Number(ratio)).toString()
+      const minSeniorRatio = new BN(10).pow(new BN(27)).sub(new BN(ratio))
       return this.pending(
-        this.contract('ASSESSOR').file(web3.fromAscii('minSeniorRatio').padEnd(66, '0'), minSeniorRatio, this.overrides)
+        this.contract('ASSESSOR').file(web3.fromAscii('minSeniorRatio').padEnd(66, '0'), minSeniorRatio.toString(), this.overrides)
       )
     }
 
@@ -87,6 +87,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     // TODO: setMaturityDate (maybe not needed for MVP)
+    // convert for 27 precision (JS only supports up to 19)
 
     updateJuniorMemberList = async (user: string, validUntil: number) => {
       return this.pending(this.contract('JUNIOR_MEMBERLIST').updateMember(user, validUntil, this.overrides))
