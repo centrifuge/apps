@@ -36,6 +36,7 @@ export type PendingTransaction = {
   status: number
   error?: string
   timesOutAt?: number
+  receipt: () => Promise<ethers.providers.TransactionReceipt>
 }
 
 export type ContractName = typeof contractNames[number]
@@ -55,7 +56,7 @@ export type ContractAddresses = {
 export type TinlakeParams = {
   provider: ethers.providers.Provider
   signer?: ethers.Signer
-  transactionTimeout: number
+  transactionTimeout?: number
   contractAddresses?: ContractAddresses | {}
   contractAbis?: ContractAbis | {}
   overrides?: ethers.providers.TransactionRequest
@@ -84,13 +85,10 @@ export default class Tinlake {
 
   constructor(params: TinlakeParams) {
     const { provider, signer, contractAddresses, transactionTimeout, contractAbis, overrides, contractConfig } = params
-    if (!contractAbis) {
-      this.contractAbis = abiDefinitions
-    }
-
+    this.contractAbis = contractAbis || abiDefinitions
     this.contractConfig = contractConfig || {}
     this.contractAddresses = contractAddresses || {}
-    this.transactionTimeout = transactionTimeout
+    this.transactionTimeout = transactionTimeout || 3600
     this.overrides = overrides || {}
     this.setProviderAndSigner(provider, signer)
     this.setContracts()
@@ -144,28 +142,54 @@ export default class Tinlake {
   async pending(txPromise: Promise<ethers.providers.TransactionResponse>): Promise<PendingTransaction> {
     try {
       const tx = await txPromise
+      const timesOutAt = Date.now() + this.transactionTimeout * 1000
       return {
+        timesOutAt,
         status: 1,
         hash: tx.hash,
-        timesOutAt: Date.now() + this.transactionTimeout * 1000,
+        receipt: async () => {
+          return new Promise(async (resolve, reject) => {
+            if (!tx.hash) return reject(tx)
+
+            let timer: NodeJS.Timer | undefined = undefined
+            if (timesOutAt) {
+              timer = setTimeout(() => {
+                return reject(`Transaction ${tx.hash} timed out at ${timesOutAt}`)
+              }, timesOutAt - Date.now())
+            }
+
+            try {
+              const receipt = await this.provider!.waitForTransaction(tx.hash)
+              if (timer) clearTimeout(timer)
+
+              return resolve(receipt)
+            } catch (e) {
+              console.error(`Error caught in tinlake.getTransactionReceipt(): ${JSON.stringify(e)}`)
+              return reject()
+            }
+          })
+        }
       }
     } catch (e) {
       console.error(`Error caught in tinlake.pending(): ${JSON.stringify(e)}`)
       return {
         status: 0,
         error: e.message,
+        receipt: async () => {
+          return Promise.reject('Error caught in tinlake.pending()')
+        }
       }
     }
   }
 
   async getTransactionReceipt(tx: PendingTransaction): Promise<ethers.providers.TransactionReceipt> {
     return new Promise(async (resolve, reject) => {
-      if (!tx.hash) return reject()
+      if (!tx.hash) return reject(tx)
 
       let timer: NodeJS.Timer | undefined = undefined
       if (tx.timesOutAt) {
         timer = setTimeout(() => {
-          return reject()
+          return reject(`Transaction ${tx.hash} timed out at ${tx.timesOutAt}`)
         }, tx.timesOutAt - Date.now())
       }
 

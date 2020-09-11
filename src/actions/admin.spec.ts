@@ -38,7 +38,7 @@ describe('admin tests', async () => {
         maxCurrency,
         maxToken
       )
-      const allowanceResult = await adminTinlake.getTransactionReceipt(allowanceTx)
+      const allowanceResult = await allowanceTx.receipt()
 
       const maxSupplyAmount = await adminTinlake.getMaxSupplyAmountJunior(lenderAccount.address)
       const maxRedeemAmount = await adminTinlake.getMaxRedeemAmountJunior(lenderAccount.address)
