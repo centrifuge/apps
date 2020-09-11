@@ -12,7 +12,17 @@ describe('coordinator tests', async () => {
     tinlake = createTinlake(testConfig.godAccount, testConfig)
   })
 
-  it('should be able to retrieve the orders and other epoch-related info', async () => {
+  it('should be able to get the epoch state', async () => {
+    const state = await tinlake.getEpochState()
+    assert(state.reserve >= 0)
+    assert(state.netAssetValue >= 0)
+    assert(state.seniorAsset >= 0)
+    assert(state.minTinRatio >= 0 && state.minTinRatio <= 1.0)
+    assert(state.maxTinRatio >= 0 && state.maxTinRatio <= 1.0)
+    assert(state.maxReserve >= 0)
+  })
+
+  it('should be able to get the order state', async () => {
     const coordinator = tinlake.contract('COORDINATOR')
 
     const submissionPeriod = await coordinator.submissionPeriod()
@@ -26,10 +36,5 @@ describe('coordinator tests', async () => {
 
     const epochNAV = await coordinator.epochNAV()
     assert(epochNAV instanceof ethers.utils.BigNumber)
-  })
-
-  it('should be able to get the epoch state', async () => {
-    const state = await tinlake.getEpochState()
-    console.log('epoch state', state)
   })
 })

@@ -47,8 +47,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       }
 
       const state = await this.getEpochState()
-
-      const orderState = coordinator.order()
+      const orderState = await coordinator.order()
 
       const solution = await calculateOptimalSolution(state, orderState)
       console.log('Solution found', solution)
