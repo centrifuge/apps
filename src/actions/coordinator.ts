@@ -1,5 +1,6 @@
 import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
 import { calculateOptimalSolution, State, OrderState, SolverSolution, SolverResult } from '../services/solver'
+import BN from 'BN.js'
 
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
@@ -8,35 +9,28 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const coordinator = this.contract('COORDINATOR')
       const assessor = this.contract('ASSESSOR')
 
-      const state: State = {
-        reserve: (await coordinator.epochReserve())
-          .toBN()
-          .div(10 ** 18)
-          .toNumber(),
-        netAssetValue: (await coordinator.epochNAV())
-          .toBN()
-          .div(10 ** 18)
-          .toNumber(),
-        seniorAsset: (await coordinator.epochSeniorAsset())
-          .toBN()
-          .div(10 ** 18)
-          .toNumber(),
-        minTinRatio:
-          1.0 -
-          (await coordinator.maxSeniorRatio())
-            .toBN()
-            .div(10 ** 27)
-            .toNumber(),
-        maxTinRatio:
-          1.0 -
-          (await coordinator.minSeniorRatio())
-            .toBN()
-            .div(10 ** 27)
-            .toNumber(),
-        maxReserve: (await assessor.maxReserve()).toBN().toNumber(),
-      }
+      const valueBase = new BN(10).pow(new BN(18))
+      const ratioBase = new BN(10).pow(new BN(20))
 
-      return state
+      const reserveBN = (await coordinator.epochReserve()).toBN()
+      const reserve = reserveBN.isZero() ? 0.0 : reserveBN.div(valueBase).toNumber()
+
+      const netAssetValueBN = (await coordinator.epochNAV()).toBN()
+      const netAssetValue = netAssetValueBN.isZero() ? 0.0 : netAssetValueBN.div(valueBase).toNumber()
+
+      const seniorAssetBN = (await coordinator.epochSeniorAsset()).toBN()
+      const seniorAsset = seniorAssetBN.isZero() ? 0.0 : seniorAssetBN.div(valueBase).toNumber()
+
+      const maxDROPRatioBN = (await assessor.maxSeniorRatio()).toBN()
+      const minTinRatio = maxDROPRatioBN.isZero() ? 1.0 : 1.0 - maxDROPRatioBN.div(ratioBase).toNumber() / 10 ** 7
+
+      const minDROPRatioBN = (await assessor.minSeniorRatio()).toBN()
+      const maxTinRatio = minDROPRatioBN.isZero() ? 1.0 : 1.0 - minDROPRatioBN.div(ratioBase).toNumber() / 10 ** 7
+
+      const maxReserveBN = (await assessor.maxReserve()).toBN()
+      const maxReserve = maxReserveBN.isZero() ? 0.0 : maxReserveBN.div(valueBase).toNumber()
+
+      return { reserve, netAssetValue, seniorAsset, minTinRatio, maxTinRatio, maxReserve }
     }
 
     solveEpoch = async () => {
