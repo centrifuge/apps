@@ -43,14 +43,14 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
     solveEpoch = async () => {
       const coordinator = this.contract('COORDINATOR')
 
-      if (!(await coordinator.submissionPeriod())) {
+      if ((await coordinator.submissionPeriod()) === false) {
         // The epoch is can be closed, but is not closed yet
         const closeTx = await coordinator.closeEpoch()
         await this.getTransactionReceipt(closeTx)
 
         // If it's not in a submission period after closing the epoch, then it could immediately be solved and executed
         // (i.e. all orders could be fulfilled)
-        if (!(await coordinator.submissionPeriod())) return
+        if ((await coordinator.submissionPeriod()) === false) return
       }
 
       const state = await this.getEpochState()
