@@ -56,4 +56,4 @@ describe('governance tests', async () => {
 //
 //   assert.equal(isWard, 1)
 //   assert.equal(res.status, SUCCESS_STATUS)
-}
+})

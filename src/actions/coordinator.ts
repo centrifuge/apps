@@ -1,198 +1,116 @@
-import { Constructor, TinlakeParams } from '../Tinlake'
+import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
+import { calculateOptimalSolution, State, OrderState, SolverSolution, SolverResult } from '../services/solver'
+import BN from 'BN.js'
 
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
 
-      // const tinlake = (this as any)
-      // const reserve = (await tinlake.getJuniorReserve()).add(await tinlake.getSeniorReserve())
+    getEpochState = async () => {
+      const coordinator = this.contract('COORDINATOR')
+      const assessor = this.contract('ASSESSOR')
+
+      /**
+       * We divide all uint values by 10**18, in order to convert them to JS numbers. This induces some loss of precision,
+       * but since we are currently using DAI as the ERC20 token, this isn't a big problem. We are also dividing the
+       * ratios by 10**20, then converting them to numbers, and then dividing again by 10**7. This ultimately divides
+       * the ratios by 10**27, which is the precision of these values on contract. However, BN.js doesn't support decimals,
+       * so we basically limit the ratios to 7 decimals here.
+       */
+      const valueBase = new BN(10).pow(new BN(18))
+      const ratioBase = new BN(10).pow(new BN(20))
+
+      const reserveBN = (await coordinator.epochReserve()).toBN()
+      const reserve = reserveBN.isZero() ? 0.0 : reserveBN.div(valueBase).toNumber()
+
+      const netAssetValueBN = (await coordinator.epochNAV()).toBN()
+      const netAssetValue = netAssetValueBN.isZero() ? 0.0 : netAssetValueBN.div(valueBase).toNumber()
+
+      const seniorAssetBN = (await coordinator.epochSeniorAsset()).toBN()
+      const seniorAsset = seniorAssetBN.isZero() ? 0.0 : seniorAssetBN.div(valueBase).toNumber()
+
+      const maxDROPRatioBN = (await assessor.maxSeniorRatio()).toBN()
+      const minTinRatio = maxDROPRatioBN.isZero() ? 1.0 : 1.0 - maxDROPRatioBN.div(ratioBase).toNumber() / 10 ** 7
+
+      const minDROPRatioBN = (await assessor.minSeniorRatio()).toBN()
+      const maxTinRatio = minDROPRatioBN.isZero() ? 1.0 : 1.0 - minDROPRatioBN.div(ratioBase).toNumber() / 10 ** 7
+
+      const maxReserveBN = (await assessor.maxReserve()).toBN()
+      const maxReserve = maxReserveBN.isZero() ? 0.0 : maxReserveBN.div(valueBase).toNumber()
+
+      return { reserve, netAssetValue, seniorAsset, minTinRatio, maxTinRatio, maxReserve }
+    }
 
     solveEpoch = async () => {
-      // const coordinator = this.contract('COORDINATOR')
-      // if (!(await this.contract('COORDINATOR').submissionPeriod)) {
-      //   const closeTx = await coordinator.closeEpoch()
-      //   await this.getTransactionReceipt(closeTx)
+      const coordinator = this.contract('COORDINATOR')
 
-      //   if (!(await this.contract('COORDINATOR').submissionPeriod)) return
-      // }
+      if ((await coordinator.submissionPeriod()) === false) {
+        // The epoch is can be closed, but is not closed yet
+        const closeTx = await coordinator.closeEpoch()
+        await this.getTransactionReceipt(closeTx)
 
-      // const state = {
-      //   reserve: await coordinator.epochReserve, // coordinator.epochReserve
-      //   netAssetValue: await coordinator.epochNAV, // coordinator.epochNAV
-      //   seniorAsset: await coordinator.epochSeniorAsset, // coordinator.epochSeniorDebt (to be added)
-      //   minTinRatio: await tinlake.getMinJuniorRatio(), // 1 - maxSeniorRatio on the assessor
-      //   maxTinRatio: 0, // 1 - mSeniorRatio on the assessor
-      //   maxReserve: 0, // assessor.maxReserve
-      // }
+        // If it's not in a submission period after closing the epoch, then it could immediately be solved and executed
+        // (i.e. all orders could be fulfilled)
+        if ((await coordinator.submissionPeriod()) === false) return
+      }
 
-      // const orderState = coordinator.order
+      const state = await this.getEpochState()
+      const orderState = await coordinator.order()
 
-      // const solution = calculateOptimalSolution(state, orderState)
+      const solution = await calculateOptimalSolution(state, orderState)
+      console.log('Solution found', solution)
 
-      // Call submitSolution(solution)
+      if (solution.status !== 5) {
+        console.error('Solution could not be found for the current epoch', { state, orderState })
+        return undefined
+      }
 
-      return Promise.resolve({
-        tinRedeem: 1,
-        dropRedeem: 2,
-        tinInvest: 3,
-        dropInvest: 4
-      })
+      // TODO: we need to multiply these values by 10**18 and change them to BigInts
+
+      const submitTx = coordinator.submitSolution(...Object.values(solution.vars))
+      const submitResult = await this.getTransactionReceipt(submitTx)
+
+      console.log('Submit solver result', submitResult)
+
+      return solution.vars
 
     }
 
-    // executeEpoch = () => void
+    executeEpoch = async () => {
+      const coordinator = this.contract('COORDINATOR')
+      if ((await this.getCurrentEpochState()) !== 'challenge-period-ended') {
+        throw new Error('Current epoch is still in the challenge period')
+      }
 
-    // isInChallengePeriod = () => boolean
-    // check coordinator.minChallengePeriodEnd
+      return this.pending(coordinator.executeEpoch())
+    }
 
-    calculateOptimalSolution = async (state: State, orderState: OrderState) => {
-      /**
-       * The limitations are:
-       * - only input variables (those in state or orderState) can be on the right side of the constraint (the bnds key)
-       * - only output variables ([dropRedeem,tinRedeem,tinInvest,dropInvest]) can be on the left side of the constraint (the vars key)
-       * - variables can have coefficients, but there's no option for brackets or other more advanced equation forms
-       *   (e.g. it's limited to a * x_1 + b * x_2 + ..., where [a,b] are coefficients and [x_1,x_2] are variables)
-       * - larger than or equals, less than or equals, and equals constraints are all allowed ([<=,>=,=])
-       */
-      return require('glpk.js').then((glpk: any) => {
-        const lp = {
-          name: 'LP',
-          generals: ['dropRedeem', 'tinRedeem', 'tinInvest', 'dropInvest'],
-          objective: {
-            // Maximize: dropRedeem > tinRedeem > tinInvest > dropInvest
-            direction: glpk.GLP_MAX,
-            name: 'obj',
-            vars: [
-              { name: 'dropRedeem', coef: 10000 },
-              { name: 'tinRedeem', coef: 1000 },
-              { name: 'tinInvest', coef: 100 },
-              { name: 'dropInvest', coef: 10 },
-            ],
-          },
-          subjectTo: [
-            {
-              name: 'currencyAvailable',
-              vars: [
-                { name: 'tinInvest', coef: 1.0 },
-                { name: 'dropInvest', coef: 1.0 },
-                { name: 'tinRedeem', coef: -1.0 },
-                { name: 'dropRedeem', coef: -1.0 },
-              ],
-              bnds: { type: glpk.GLP_LO, ub: 0.0, lb: -state.reserve },
-            },
-            {
-              name: 'dropRedeemOrder',
-              vars: [{ name: 'dropRedeem', coef: 1.0 }],
-              bnds: { type: glpk.GLP_UP, ub: orderState.dropRedeemOrder, lb: 0.0 },
-            },
-            {
-              name: 'tinRedeemOrder',
-              vars: [{ name: 'tinRedeem', coef: 1.0 }],
-              bnds: { type: glpk.GLP_UP, ub: orderState.tinRedeemOrder, lb: 0.0 },
-            },
-            {
-              name: 'dropInvestOrder',
-              vars: [{ name: 'dropInvest', coef: 1.0 }],
-              bnds: { type: glpk.GLP_UP, ub: orderState.dropInvestOrder, lb: 0.0 },
-            },
-            {
-              name: 'tinInvestOrder',
-              vars: [{ name: 'tinInvest', coef: 1.0 }],
-              bnds: { type: glpk.GLP_UP, ub: orderState.tinInvestOrder, lb: 0.0 },
-            },
-            {
-              name: 'maxReserve',
-              vars: [
-                { name: 'tinRedeem', coef: -1.0 },
-                { name: 'dropRedeem', coef: -1.0 },
-                { name: 'tinInvest', coef: 1.0 },
-                { name: 'dropInvest', coef: 1.0 },
-              ],
-              bnds: { type: glpk.GLP_UP, ub: state.maxReserve - state.reserve, lb: 0.0 },
-            },
-            /**
-             * The next tow constraints were rewritten from the original equations in the epoch model.
-             * For one, minTINRatio was rewritten as a lower bound, which means both sides were multiplied by -1.
-             * Secondly, all output vars were moved to the left side, while all input vars were moved to the right side.
-             *
-             * E.g. for dropRedeem, in the epoch model there's both -I4*(1-B7) and +I4.
-             * So: -I4*(1-B7) + I4 = -0.8 I4 + 1.0 I4 = 0.2 I4 = minTinRatio * dropRedeem.
-             */
-            {
-              name: 'minTINRatio',
-              vars: [
-                { name: 'tinRedeem', coef: -(1 - state.minTinRatio) },
-                { name: 'dropRedeem', coef: state.minTinRatio },
-                { name: 'tinInvest', coef: 1 - state.minTinRatio },
-                { name: 'dropInvest', coef: -state.minTinRatio },
-              ],
-              bnds: {
-                type: glpk.GLP_LO,
-                ub: 0.0,
-                lb:
-                  -(1 - state.minTinRatio) * state.netAssetValue -
-                  (1 - state.minTinRatio) * state.reserve +
-                  state.seniorAsset,
-              },
-            },
-            {
-              name: 'maxTINRatio',
-              vars: [
-                { name: 'tinInvest', coef: -(1 - state.maxTinRatio) },
-                { name: 'dropInvest', coef: state.maxTinRatio },
-                { name: 'tinRedeem', coef: 1 - state.maxTinRatio },
-                { name: 'dropRedeem', coef: -state.maxTinRatio },
-              ],
-              bnds: {
-                type: glpk.GLP_LO,
-                ub: 0.0,
-                lb:
-                  (1 - state.maxTinRatio) * state.netAssetValue +
-                  (1 - state.maxTinRatio) * state.reserve -
-                  state.seniorAsset,
-              },
-            },
-          ],
-        }
+    getCurrentEpochState = async () => {
+      const coordinator = this.contract('COORDINATOR')
 
-        const output = glpk.solve(lp, glpk.GLP_MSG_ERR)
-        return output.result
-      })
+      const lastEpochClosed =  (await coordinator.lastEpochClosed).toBN().toNumber()
+      const minimumEpochTime = (await coordinator.minimumEpochTime).toBN().toNumber()
+      if (((new Date()).getTime() - lastEpochClosed) >= minimumEpochTime) {
+        return 'can-be-closed'
+      }
+      
+      const submissionPeriod = await coordinator.submissionPeriod()
+      if (!submissionPeriod) return 'open'
+
+      const minChallengePeriodEnd = await coordinator.minChallengePeriodEnd
+      if (minChallengePeriodEnd < (new Date).getTime()) return 'challenge-period-ended'
+
+      return 'in-challenge-period'
     }
   }
 }
 
+export type EpochState = 'open' | 'can-be-closed' | 'in-challenge-period' | 'challenge-period-ended'
+
 export type ICoordinatorActions = {
-  solveEpoch(): Promise<SolverSolution>
-  calculateOptimalSolution(state: State, orderState: OrderState): Promise<SolverResult>
+  getEpochState(): Promise<State>
+  solveEpoch(): Promise<SolverSolution | undefined>
+  executeEpoch(): Promise<PendingTransaction>
+  getCurrentEpochState(): Promise<EpochState>
 }
 
 export default CoordinatorActions
-
-export interface State {
-  netAssetValue: number
-  reserve: number
-  seniorAsset: number
-  minTinRatio: number
-  maxTinRatio: number
-  maxReserve: number
-}
-
-export interface OrderState {
-  tinRedeemOrder: number
-  dropRedeemOrder: number
-  tinInvestOrder: number
-  dropInvestOrder: number
-}
-
-export interface SolverSolution {
-  tinRedeem: number
-  dropRedeem: number
-  tinInvest: number
-  dropInvest: number
-}
-
-export interface SolverResult {
-  z: number
-  status: number
-  vars: SolverSolution
-}
