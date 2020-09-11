@@ -21,14 +21,14 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const [card, setCard] = React.useState<Card>('home')
 
   // TODO: these should be replaced by variables retrieved using tinlake.js
-  const isPendingOrder = true
-  const isPendingCollection = false
+  const hasPendingOrder = false
+  const hasPendingCollection = false
 
   React.useEffect(() => {
-    if (isPendingOrder) setCard('order')
-    else if (isPendingCollection) setCard('collect')
+    if (hasPendingOrder) setCard('order')
+    else if (hasPendingCollection) setCard('collect')
     else setCard('home')
-  }, [isPendingCollection, isPendingOrder])
+  }, [hasPendingCollection, hasPendingOrder])
 
   return (
     <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>

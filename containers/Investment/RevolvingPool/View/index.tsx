@@ -5,12 +5,15 @@ import { Pool } from '../../../../config'
 import { ExplainerCard } from './styles'
 import PoolOverview from './PoolOverview'
 import TrancheOverview from './TrancheOverview'
+import AdminActions from './AdminActions'
 
 interface Props {
   pool: Pool
 }
 
 const InvestmentsView: React.FC<Props> = (props: Props) => {
+  const isAdmin = true
+
   return (
     <Box margin={{ top: 'medium' }}>
       <Heading level="4">Pool Overview {props.pool?.name}</Heading>
@@ -34,6 +37,13 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
 
       <TrancheOverview pool={props.pool} tranche="junior" />
       <TrancheOverview pool={props.pool} tranche="senior" />
+
+      {isAdmin && (
+        <>
+          <Heading level="4">Admin actions for {props.pool?.name}</Heading>
+          <AdminActions pool={props.pool} />
+        </>
+      )}
     </Box>
   )
 }
