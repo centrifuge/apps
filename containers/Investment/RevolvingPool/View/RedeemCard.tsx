@@ -19,12 +19,12 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
   return (
     <Box>
       <Description margin={{ top: 'medium' }}>
-        Please set the amount of DAI you want to invest into {token} on Tinlake. Your DAI will be locked until the end
-        of the epoch, at which point your order will be executed. You can collect your {token} in the next epoch.
+        Please set the amount of {token} you want to redeem from Tinlake. Your {token} will be locked until the end of
+        the epoch, at which point your order will be executed. You can withdraw your DAI in the next epoch.
       </Description>
 
       <TokenInput
-        token="DAI"
+        token={token}
         value={daiValue}
         maxValue="1230000000000000000"
         onChange={(newValue: string) => setDaiValue(newValue)}

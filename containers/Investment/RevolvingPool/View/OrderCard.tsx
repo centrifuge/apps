@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Box, Button, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
 import { Pool } from '../../../../config'
 
-import { Description } from './styles'
+import { Description, Warning } from './styles'
 import { Card } from './TrancheOverview'
 
 interface Props {
@@ -13,6 +13,8 @@ interface Props {
 
 const OrderCard: React.FC<Props> = (props: Props) => {
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
+
+  const [confirmCancellation, setConfirmCancellation] = React.useState(false)
 
   return (
     <Box>
@@ -41,10 +43,29 @@ const OrderCard: React.FC<Props> = (props: Props) => {
         </TableBody>
       </Table>
 
-      <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
-        <Button primary label="Cancel Order" />
-        <Button primary label="Update Order" />
-      </Box>
+      {confirmCancellation && (
+        <>
+          <Warning>
+            <Heading level="6" margin={{ bottom: 'xsmall' }}>
+              Cancel Pending [INVEST/REDEEM] Order for Epoch #NEXT
+            </Heading>
+            Please confirm that you want to cancel your pending order for Epoch #. Your {token} will be unlocked and
+            tranferred back to your wallet.
+          </Warning>
+
+          <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
+            <Button label="Back" onClick={() => setConfirmCancellation(false)} />
+            <Button primary label="Cancel Order" />
+          </Box>
+        </>
+      )}
+
+      {!confirmCancellation && (
+        <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
+          <Button primary label="Cancel Order" onClick={() => setConfirmCancellation(true)} />
+          <Button primary label="Update Order" />
+        </Box>
+      )}
     </Box>
   )
 }

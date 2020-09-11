@@ -21,7 +21,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const [card, setCard] = React.useState<Card>('home')
 
   // TODO: these should be replaced by variables retrieved using tinlake.js
-  const isPendingOrder = false
+  const isPendingOrder = true
   const isPendingCollection = false
 
   React.useEffect(() => {
