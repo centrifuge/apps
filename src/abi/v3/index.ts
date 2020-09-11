@@ -1,19 +1,19 @@
-import contractAbiTitle from './Title.abi'
-import contractAbiCurrency from './RestrictedToken.abi'
-import contractAbiShelf from './Shelf.abi'
-import contractAbiNavFeed from './NAVFeed.abi'
-import contractAbiEpochCoordinator from './EpochCoordinator.abi'
-import contractAbiMemberlist from './Memberlist.abi'
-import contractAbiCollector from './Collector.abi'
-import contractAbiPile from './Pile.abi'
-import contractAbiOperator from './Operator.abi'
-import contractAbiDistributor from './Distributor.abi'
-import contractAbiAssessor from './Assessor.abi'
-import contractAbiRoot from './TinlakeRoot.abi'
-import contractAbiActions from './Actions.abi'
-import contractAbiProxy from './Proxy.abi'
-import contractAbiProxyRegistry from './ProxyRegistry.abi'
-import contractAbiTranche from './Tranche.abi'
+import contractAbiTitle from './Title.abi.json'
+import contractAbiCurrency from './RestrictedToken.abi.json'
+import contractAbiShelf from './Shelf.abi.json'
+import contractAbiNavFeed from './NAVFeed.abi.json'
+import contractAbiEpochCoordinator from './EpochCoordinator.abi.json'
+import contractAbiMemberlist from './Memberlist.abi.json'
+import contractAbiCollector from './Collector.abi.json'
+import contractAbiPile from './Pile.abi.json'
+import contractAbiOperator from './Operator.abi.json'
+import contractAbiDistributor from './Distributor.abi.json'
+import contractAbiAssessor from './Assessor.abi.json'
+import contractAbiRoot from './TinlakeRoot.abi.json'
+import contractAbiActions from './Actions.abi.json'
+import contractAbiProxy from './Proxy.abi.json'
+import contractAbiProxyRegistry from './ProxyRegistry.abi.json'
+import contractAbiTranche from './Tranche.abi.json'
 import contractAbiNFT from '../test/SimpleNFT.abi.json'
 import { ContractAbis } from '../../Tinlake'
 
@@ -23,9 +23,10 @@ export default {
   TINLAKE_CURRENCY: contractAbiCurrency,
   SHELF: contractAbiShelf,
   COLLECTOR: contractAbiCollector,
-  NAV_FEED: contractAbiNavFeed,
+  FEED: contractAbiNavFeed,
   EPOCH_COORDINATOR: contractAbiEpochCoordinator,
-  MEMBER_LIST: contractAbiMemberlist,
+  JUNIOR_MEMBER_LIST: contractAbiMemberlist,
+  SENIOR_MEMBER_LIST: contractAbiMemberlist,
   PILE: contractAbiPile,
   DISTRIBUTOR: contractAbiDistributor,
   ASSESSOR: contractAbiAssessor,

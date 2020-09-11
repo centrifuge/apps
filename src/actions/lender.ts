@@ -3,17 +3,15 @@ import BN from 'bn.js'
 
 export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Base: ActionBase) {
   return class extends Base implements ILenderActions {
-    // senior tranche functions
-    submitSeniorSupplyOrder = async (user: string, supplyAmount: string) => {
-      return this.pending(this.contract('SENIOR_OPERATOR').supplySenior(user, supplyAmount, this.overrides))
+    // senior tranch functions
+    // REV: becomes submitSeniorSupplyOrder()
+    supplySenior = async (currencyAmount: string) => {
+      return this.pending(this.contract('SENIOR_OPERATOR').supply(currencyAmount, this.overrides))
     }
 
-    submitSeniorRedeemOrder = async (user: string, redeemAmount: string) => {
-      return this.pending(this.contract('SENIOR_OPERATOR').redeemSenior(user, redeemAmount, this.overrides))
-    }
-
-    disburseSenior = async (user: string) => {
-      return this.pending(this.contract('SENIOR_OPERATOR')['disburse(address)'](user, this.overrides))
+    // REV: becomes submitSeniorRedeemOrder()
+    redeemSenior = async (tokenAmount: string) => {
+      return this.pending(this.contract('SENIOR_OPERATOR').redeem(tokenAmount, this.overrides))
     }
 
     getSeniorTokenAllowance = async (owner: string) => {
@@ -29,16 +27,14 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     // junior tranche functions
-    submitJuniorSupplyOrder = async (user: string, supplyAmount: string) => {
-      return this.pending(this.contract('JUNIOR_OPERATOR').supplyJunior(user, supplyAmount, this.overrides))
+    // REV: becomes submitJuniorSupplyOrder()
+    supplyJunior = async (currencyAmount: string) => {
+      return this.pending(this.contract('JUNIOR_OPERATOR').supply(currencyAmount, this.overrides))
     }
 
-    submitJuniorRedeemOrder = async (user: string, redeemAmount: string) => {
-      return this.pending(this.contract('JUNIOR_OPERATOR').redeemJunior(user, redeemAmount, this.overrides))
-    }
-
-    disburseJunior = async (user: string) => {
-      return this.pending(this.contract('JUNIOR_OPERATOR')['disburse(address)'](user, this.overrides))
+    // REV: becomes submitJuniorRedeemOrder()
+    redeemJunior = async (tokenAmount: string) => {
+      return this.pending(this.contract('JUNIOR_OPERATOR').redeem(tokenAmount, this.overrides))
     }
 
     getJuniorTokenAllowance = async (owner: string) => {
@@ -52,20 +48,28 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
         this.contract('JUNIOR_TOKEN').approve(this.contractAddresses['JUNIOR'], tokenAmount, this.overrides)
       )
     }
+
+    // general lender functions
+    // REV: remove
+    balance = async () => {
+      return this.pending(this.contract('DISTRIBUTOR').balance(this.overrides))
+    }
+
+    // REV: add disperse()
+    // REV: we probably need a method to get the current epoch state (to show in the UI if the investor can call disperse())
   }
 }
 
 export type ILenderActions = {
   getSeniorTokenAllowance(owner: string): Promise<BN>
   getJuniorTokenAllowance(owner: string): Promise<BN>
+  supplyJunior(currencyAmount: string): Promise<PendingTransaction>
   approveJuniorToken: (tokenAmount: string) => Promise<PendingTransaction>
   approveSeniorToken: (tokenAmount: string) => Promise<PendingTransaction>
-  submitSeniorSupplyOrder(user: string, supplyAmount: string): Promise<PendingTransaction>
-  submitSeniorRedeemOrder(user: string, redeemAmount: string): Promise<PendingTransaction>
-  submitJuniorSupplyOrder(user: string, supplyAmount: string): Promise<PendingTransaction>
-  submitJuniorRedeemOrder(user: string, redeemAmount: string): Promise<PendingTransaction>
-  disburseSenior(user: string): Promise<PendingTransaction>
-  disburseJunior(user: string): Promise<PendingTransaction>
+  redeemJunior(tokenAmount: string): Promise<PendingTransaction>
+  supplySenior(currencyAmount: string): Promise<PendingTransaction>
+  redeemSenior(tokenAmount: string): Promise<PendingTransaction>
+  balance(): Promise<PendingTransaction>
 }
 
 export default LenderActions
