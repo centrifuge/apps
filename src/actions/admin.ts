@@ -87,7 +87,6 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     // TODO: setMaturityDate (maybe not needed for MVP)
-    // convert for 27 precision (JS only supports up to 19)
 
     updateJuniorMemberList = async (user: string, validUntil: number) => {
       return this.pending(this.contract('JUNIOR_MEMBERLIST').updateMember(user, validUntil, this.overrides))
