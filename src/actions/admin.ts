@@ -82,7 +82,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     setRate = async (loan: string, ratePerSecond: string) => {
       const rateGroup = getRateGroup(ratePerSecond)
-      return this.pending(this.contract('PILE').setRatet(loan, rateGroup, this.overrides))
+      return this.pending(this.contract('PILE').setRate(loan, rateGroup, this.overrides))
     }
 
     // ------------ admin functions lender-site -------------

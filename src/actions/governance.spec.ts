@@ -8,7 +8,7 @@ import { ContractName } from '../Tinlake'
 
 // god account = governance address for the tinlake test deployment
 const userAccount = ethers.Wallet.createRandom()
-let governanceTinlake: ITinlake
+// let governanceTinlake: ITinlake
 
 const { SUCCESS_STATUS, FAIL_STATUS, FAUCET_AMOUNT } = testConfig
 
