@@ -87,17 +87,13 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     // TODO: setMaturityDate (maybe not needed for MVP)
-    setMaturityDate = async (ratio: string) => {
-    }
 
     updateJuniorMemberList = async (user: string, validUntil: number) => {
-      return this.pending(this.contract('JUNIOR_MEMBERLIST')['updateMember(address,uint)'](user, validUntil, this.overrides))
-
+      return this.pending(this.contract('JUNIOR_MEMBERLIST').updateMember(user, validUntil, this.overrides))
     }
 
     updateSeniorMemberList = async (user: string, validUntil: number) => {
-      return this.pending(this.contract('SENIOR_MEMBERLIST')['updateMember(address,uint)'](user, validUntil, this.overrides))
-
+      return this.pending(this.contract('SENIOR_MEMBERLIST').updateMember(user, validUntil, this.overrides))
     }
 
     updateNftFeed = async (tokenId: string, value: number, riskGroup?: number) => {
