@@ -114,12 +114,6 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
   }
 }
 
-const ONE: string = '1000000000000000000000000000'
-
-function getRateGroup(ratePerSecond: string) {
-  return ratePerSecond === ONE ? 0 : ratePerSecond
-}
-
 export type IAdminActions = {
   isWard(user: string, contractName: ContractName): Promise<BN>
   canSetSeniorTrancheInterest(user: string): Promise<boolean>
