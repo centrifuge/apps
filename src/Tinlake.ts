@@ -1,35 +1,30 @@
-import abiDefinitions from './abi/v2'
+import abiDefinitions from './abi/v3'
 import { ethers } from 'ethers'
 import BN from 'bn.js'
 
 const contractNames = [
+  'COLLATERAL_NFT',
+  'TITLE',
   'TINLAKE_CURRENCY',
-  'JUNIOR_OPERATOR',
-  'JUNIOR',
-  'JUNIOR_TOKEN',
-  'SENIOR',
-  'SENIOR_TOKEN',
-  'SENIOR_OPERATOR',
+  'SHELF',
+  'COLLECTOR',
+  'FEED',
+  'EPOCH_COORDINATOR',
+  'JUNIOR_MEMBERLIST',
+  'SENIOR_MEMBERLIST',
+  'PILE',
   'DISTRIBUTOR',
   'ASSESSOR',
-  'TITLE',
-  'PILE',
-  'SHELF',
-  'CEILING',
-  'COLLECTOR',
-  'THRESHOLD',
-  'PRICE_POOL',
-  'COLLATERAL_NFT',
   'ROOT_CONTRACT',
+  'JUNIOR_TOKEN',
+  'SENIOR_TOKEN',
   'PROXY',
   'PROXY_REGISTRY',
   'ACTIONS',
-  'BORROWER_DEPLOYER',
-  'LENDER_DEPLOYER',
-  'NFT_FEED',
-  'GOVERNANCE',
-  'ALLOWANCE_OPERATOR',
-  'COORDINATOR',
+  'JUNIOR_OPERATOR',
+  'SENIOR_OPERATOR',
+  'JUNIOR',
+  'SENIOR',
 ] as const
 
 export type PendingTransaction = {
@@ -102,18 +97,6 @@ export default class Tinlake {
         this.contracts[name] = this.createContract(this.contractAddresses[name]!, name)
       }
     })
-
-    // modular contracts
-    if (this.contractAddresses['JUNIOR_OPERATOR']) {
-      this.contracts['JUNIOR_OPERATOR'] = this.contractConfig['JUNIOR_OPERATOR']
-        ? this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
-        : this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
-    }
-    if (this.contractAddresses['SENIOR_OPERATOR']) {
-      this.contracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR']
-        ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
-        : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
-    }
   }
 
   setProviderAndSigner = (provider: ethers.providers.Provider, signer?: ethers.Signer) => {
@@ -206,14 +189,15 @@ export default class Tinlake {
     })
   }
 
+  // TODO: remove this with admin
   getOperatorType = (tranche: string) => {
     switch (tranche) {
       case 'senior':
-        return this.contractConfig['SENIOR_OPERATOR'] || 'ALLOWANCE_OPERATOR'
+        return this.contractConfig['SENIOR_OPERATOR']
       case 'junior':
-        return this.contractConfig['SENIOR_OPERATOR'] || 'ALLOWANCE_OPERATOR'
+        return this.contractConfig['JUNIOR_OPERATOR']
       default:
-        return 'ALLOWANCE_OPERATOR'
+        return '_OPERATOR'
     }
   }
 }
