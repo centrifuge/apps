@@ -39,7 +39,6 @@ export async function getNFT(registry: string, tinlake: ITinlake, tokenId: strin
   try {
     nftData = await tinlake.getNFTData(registry, tokenId)
   } catch (e) {
-    // return loggedError(e, 'Could not get NFT data for NFT ID', tokenId);
     nftData = null
   }
   const replacedTokenId = tokenId.replace(/^0x/, '')
@@ -125,21 +124,19 @@ export const issue = async (
     // approve proxy to take nft if not yet happened
     if (!(await tinlake.isNFTApprovedForAll(nftRegistryAddress, user, proxyAddress))) {
       try {
-        await tinlake.setNFTApprovalForAll(nftRegistryAddress, proxyAddress, true)
+        const approveTx = await tinlake.setNFTApprovalForAll(nftRegistryAddress, proxyAddress, true)
+        await tinlake.getTransactionReceipt(approveTx)
       } catch (e) {
         return loggedError(e, 'Could not approve proxy to take NFT.', tokenId)
       }
     }
 
     // transfer issue
-    let result
     try {
-      result = await tinlake.proxyTransferIssue(proxyAddress, nftRegistryAddress, tokenId)
+      return await tinlake.proxyTransferIssue(proxyAddress, nftRegistryAddress, tokenId)
     } catch (e) {
       return loggedError(e, 'Could not Issue loan.', tokenId)
     }
-
-    return result
   }
 
   let proxyOwner
@@ -151,14 +148,11 @@ export const issue = async (
 
   // case: borrower's proxy is owner of nft
   if (user.toLowerCase() === proxyOwner.toLowerCase()) {
-    let result
     try {
-      result = await tinlake.proxyIssue(tokenOwner.toString(), nftRegistryAddress, tokenId)
+      return await tinlake.proxyIssue(tokenOwner.toString(), nftRegistryAddress, tokenId)
     } catch (e) {
       return loggedError(e, 'Could not Issue loan.', tokenId)
     }
-
-    return result
   }
 
   // case: nft can not be used to open a loan -> borrower/borrower's proxy not nft owner
@@ -229,24 +223,21 @@ export async function setInterest(
   // init rate group
   if (!existsRateGroup) {
     try {
-      await tinlake.initRate(rateGroup)
+      const initRateTx = await tinlake.initRate(rateGroup)
+      await tinlake.getTransactionReceipt(initRateTx)
     } catch (e) {
       return loggedError(e, 'Could not init rate group', loanId)
     }
   }
   // set rate group
-  let setRes
   try {
     if (debt.toString() === '0') {
-      setRes = await tinlake.setRate(loanId, rateGroup)
-    } else {
-      setRes = await tinlake.changeRate(loanId, rateGroup)
+      return await tinlake.setRate(loanId, rateGroup)
     }
+    return await tinlake.changeRate(loanId, rateGroup)
   } catch (e) {
     return loggedError(e, 'Could not set rate group', loanId)
   }
-
-  return setRes
 }
 
 export async function getPool(tinlake: ITinlake): Promise<PoolData | null> {
@@ -313,7 +304,6 @@ export async function borrow(tinlake: ITinlake, loan: Loan, amount: string): Pro
 
   // borrow with proxy
   try {
-    // console.log()
     return await tinlake.proxyLockBorrowWithdraw(proxy.toString(), loanId, amount, address!)
   } catch (e) {
     return loggedError(e, 'Could not finance asset.', loanId)
@@ -337,7 +327,8 @@ export async function repay(tinlake: ITinlake, loan: Loan): Promise<PendingTrans
   // only approve if allowance is smaller than than the current balance
   if (allowance.lt(balance)) {
     try {
-      await tinlake.approveCurrency(proxy.toString(), maxUint256)
+      const approveTx = await tinlake.approveCurrency(proxy.toString(), maxUint256)
+      await tinlake.getTransactionReceipt(approveTx)
     } catch (e) {
       return loggedError(e, 'Could not approve proxy.', loanId)
     }
@@ -387,33 +378,50 @@ export async function supply(
 
   const address = await tinlake.signer.getAddress()
 
+  console.log('supply address', address)
+
   let allowance = new BN(0)
   if (trancheType === 'junior') {
     allowance = (await tinlake.getJuniorForCurrencyAllowance(address!)) || new BN(0)
+    console.log('junior allowance', allowance.toString())
   } else if (trancheType === 'senior') {
     allowance = (await tinlake.getSeniorForCurrencyAllowance(address!)) || new BN(0)
+    console.log('senior allowance', allowance.toString())
   }
+
+  console.log('checking if approval is needed')
 
   // only approve if allowance is smaller than than supplyAmount
   if (allowance.lt(new BN(supplyAmount))) {
+    console.log('requires approval', supplyAmount.toString())
     // approve currency
     try {
       if (trancheType === 'junior') {
-        await tinlake.approveJuniorForCurrency(maxUint256)
+        const approvalTx = await tinlake.approveJuniorForCurrency(maxUint256)
+        const approvalResult = await tinlake.getTransactionReceipt(approvalTx!)
+        console.log('approval junior', approvalResult)
       } else if (trancheType === 'senior') {
-        await tinlake.approveSeniorForCurrency(maxUint256)
+        const approvalTx = await tinlake.approveSeniorForCurrency(maxUint256)
+        const approvalResult = await tinlake.getTransactionReceipt(approvalTx!)
+        console.log('approval senior', approvalResult)
       }
     } catch (e) {
       return loggedError(e, `Could not approve currency for ${trancheType}.`, '')
     }
   }
 
+  console.log('actually supplying')
+
   // supply
   try {
     if (trancheType === 'junior') {
-      return await tinlake.supplyJunior(supplyAmount)
+      const res = await tinlake.supplyJunior(supplyAmount)
+      console.log('supplying junior', res)
+      return res
     }
-    return await tinlake.supplySenior(supplyAmount)
+    const res = await tinlake.supplySenior(supplyAmount)
+    console.log('supplying senior', res)
+    return res
   } catch (e) {
     return loggedError(e, `Could not supply ${trancheType}`, '')
   }
@@ -442,9 +450,11 @@ export async function redeem(
     // approve junior token
     try {
       if (trancheType === 'junior') {
-        await tinlake.approveJuniorToken(maxUint256)
+        const approveTx = await tinlake.approveJuniorToken(maxUint256)
+        await tinlake.getTransactionReceipt(approveTx)
       } else if (trancheType === 'senior') {
-        await tinlake.approveSeniorToken(maxUint256)
+        const approveTx = await tinlake.approveSeniorToken(maxUint256)
+        await tinlake.getTransactionReceipt(approveTx)
       }
     } catch (e) {
       return loggedError(e, `Could not approve ${trancheType} Token.`, '')

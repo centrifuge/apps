@@ -46,8 +46,10 @@ class InvestorView extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const { loadPool, tinlake } = this.props
-    loadPool && loadPool(tinlake)
+    if (this.props.auth.address) {
+      this.props.loadPool && this.props.loadPool(this.props.tinlake)
+    }
+
     this.showInvestor()
     this.setState({ selectedTab: 0 })
   }
@@ -55,6 +57,10 @@ class InvestorView extends React.Component<Props, State> {
   componentDidUpdate(prevProps: Props) {
     if (this.props.investorAddress !== prevProps.investorAddress) {
       this.showInvestor()
+    }
+
+    if (this.props.auth.address !== prevProps.auth.address) {
+      this.props.loadPool && this.props.loadPool(this.props.tinlake)
     }
   }
 
