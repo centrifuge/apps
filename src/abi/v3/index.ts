@@ -35,7 +35,8 @@ export default {
   PROXY: contractAbiProxy,
   PROXY_REGISTRY: contractAbiProxyRegistry,
   ACTIONS: contractAbiActions,
-  OPERATOR: contractAbiOperator,
+  JUNIOR_OPERATOR: contractAbiOperator,
+  SENIOR_OPERATOR: contractAbiOperator,
   JUNIOR: contractAbiTranche,
   SENIOR: contractAbiTranche,
 } as ContractAbis
