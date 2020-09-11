@@ -24,7 +24,7 @@ export default {
   SHELF: contractAbiShelf,
   COLLECTOR: contractAbiCollector,
   FEED: contractAbiNavFeed,
-  EPOCH_COORDINATOR: contractAbiEpochCoordinator,
+  COORDINATOR: contractAbiEpochCoordinator,
   JUNIOR_MEMBER_LIST: contractAbiMemberlist,
   SENIOR_MEMBER_LIST: contractAbiMemberlist,
   PILE: contractAbiPile,

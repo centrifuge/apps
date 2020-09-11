@@ -8,7 +8,6 @@ let tinlake: ITinlake
 
 describe('coordinator tests', async () => {
   before(async () => {
-    console.log('create tinlake')
     tinlake = createTinlake(testConfig.godAccount, testConfig)
   })
 

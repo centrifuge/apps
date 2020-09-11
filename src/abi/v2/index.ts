@@ -8,6 +8,7 @@ import contractAbiPile from './Pile.abi.json'
 import contractAbiAllowanceOperator from './AllowanceOperator.abi.json'
 import contractAbiProportionalOperator from './ProportionalOperator.abi.json'
 import contractAbiDistributor from './DefaultDistributor.abi.json'
+import contractAbiAssessor from './DefaultAssessor.abi.json'
 import contractAbiRoot from './Root.abi.json'
 import contractAbiActions from './Actions.abi.json'
 import contractAbiProxy from './Proxy.abi.json'
@@ -18,10 +19,6 @@ import contractAbiNFT from '../test/SimpleNFT.abi.json'
 import contractAbiBorrowerDeployer from './BorrowerDeployer.abi.json'
 import contractAbiLenderDeployer from './LenderDeployer.abi.json'
 import { ContractAbis } from '../../Tinlake'
-
-// TODO: this is temporary, should only be imported in v3/index.ts
-import contractAbiAssessor from '../v3/Assessor.abi.json'
-import contractAbiCoordinator from '../v3/EpochCoordinator.abi.json'
 
 export default {
   COLLATERAL_NFT: contractAbiNFT,
@@ -48,5 +45,4 @@ export default {
   BORROWER_DEPLOYER: contractAbiBorrowerDeployer,
   LENDER_DEPLOYER: contractAbiLenderDeployer,
   NFT_FEED: contractAbiNftFeed,
-  COORDINATOR: contractAbiCoordinator,
 } as ContractAbis
