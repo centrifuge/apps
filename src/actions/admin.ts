@@ -175,6 +175,29 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       console.log(`[Approve allowance Senior] txHash: ${txHash}`)
       return waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_OPERATOR'].abi, this.transactionTimeout)
     }
+
+    updateNftFeed = async (tokenId: string, value: number, riskGroup?: number) => {
+      let txHash;
+      if (!riskGroup) {
+        txHash = await executeAndRetry(this.contracts['NFT_FEED'].update, [tokenId, value, this.ethConfig]);
+      } else {
+        txHash = await executeAndRetry(this.contracts['NFT_FEED'].update, [tokenId, value, riskGroup, this.ethConfig]);
+      }
+      console.log(`[Updating NFT Feed] txHash: ${txHash}`);
+      return waitAndReturnEvents(this.eth, txHash, this.contracts['NFT_FEED'].abi, this.transactionTimeout)
+    }
+
+    getNftFeedId = async (registry: string, tokenId: number) => {
+      const res = await executeAndRetry(this.contracts['NFT_FEED'].nftID, [registry, tokenId, this.ethConfig]);
+      console.log(`[Getting NFT ID]`);
+      return res[0]
+    }
+
+    getNftFeedValue = async (nftFeedId: string) => {
+      const res = await executeAndRetry(this.contracts['NFT_FEED'].nftValues, [nftFeedId, this.ethConfig]);
+      console.log(`[Getting NFT Value]`);
+      return res[0]
+    }
   }
 }
 
@@ -197,6 +220,9 @@ export type IAdminActions = {
   setMinimumJuniorRatio(amount: string): Promise<any>
   approveAllowanceJunior(user: string, maxCurrency: string, maxToken: string): Promise<any>
   approveAllowanceSenior(user: string, maxCurrency: string, maxToken: string): Promise<any>
+  updateNftFeed(nftId: string, value: number, riskGroup?: number): Promise<any>
+  getNftFeedId(registry: string, tokenId: number): Promise<any>
+  getNftFeedValue(tokenId: string): Promise<BN>
 }
 
 export default AdminActions

@@ -60,8 +60,8 @@ typings/
 # dotenv environment variables file
 .env
 
-# next.js build output
-.next
+# build output
+dist
 
 # Rollup Plugin Typescript 2 cache
 .rpt2_cache
@@ -71,3 +71,5 @@ typings/
 .idea/
 src/.DS_Store
 
+# Documentation
+docs
