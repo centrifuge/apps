@@ -9,6 +9,13 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const coordinator = this.contract('COORDINATOR')
       const assessor = this.contract('ASSESSOR')
 
+      /**
+       * We divide all uint values by 10**18, in order to convert them to JS numbers. This induces some loss of precision,
+       * but since we are currently using DAI as the ERC20 token, this isn't a big problem. We are also dividing the
+       * ratios by 10**20, then converting them to numbers, and then dividing again by 10**7. This ultimately divides
+       * the ratios by 10**27, which is the precision of these values on contract. However, BN.js doesn't support decimals,
+       * so we basically limit the ratios to 7 decimals here.
+       */
       const valueBase = new BN(10).pow(new BN(18))
       const ratioBase = new BN(10).pow(new BN(20))
 
