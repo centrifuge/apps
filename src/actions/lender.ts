@@ -3,11 +3,13 @@ import BN from 'bn.js'
 
 export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Base: ActionBase) {
   return class extends Base implements ILenderActions {
-    // senior tranche functions
+    // senior tranch functions
+    // REV: becomes submitSeniorSupplyOrder()
     supplySenior = async (currencyAmount: string) => {
       return this.pending(this.contract('SENIOR_OPERATOR').supply(currencyAmount, this.overrides))
     }
 
+    // REV: becomes submitSeniorRedeemOrder()
     redeemSenior = async (tokenAmount: string) => {
       return this.pending(this.contract('SENIOR_OPERATOR').redeem(tokenAmount, this.overrides))
     }
@@ -25,10 +27,12 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     // junior tranche functions
+    // REV: becomes submitJuniorSupplyOrder()
     supplyJunior = async (currencyAmount: string) => {
       return this.pending(this.contract('JUNIOR_OPERATOR').supply(currencyAmount, this.overrides))
     }
 
+    // REV: becomes submitJuniorRedeemOrder()
     redeemJunior = async (tokenAmount: string) => {
       return this.pending(this.contract('JUNIOR_OPERATOR').redeem(tokenAmount, this.overrides))
     }
@@ -46,9 +50,13 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     // general lender functions
+    // REV: remove
     balance = async () => {
       return this.pending(this.contract('DISTRIBUTOR').balance(this.overrides))
     }
+
+    // REV: add disperse()
+    // REV: we probably need a method to get the current epoch state (to show in the UI if the investor can call disperse())
   }
 }
 
