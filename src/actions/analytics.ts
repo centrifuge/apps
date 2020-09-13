@@ -239,7 +239,8 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getMinJuniorRatio = async () => {
-      return (await this.contract('ASSESSOR').minJuniorRatio()).toBN()
+      const maxSeniorRatio = (await this.contract('ASSESSOR').maxSeniorRatio()).toBN()
+      return new BN(10).pow(new BN(27)).sub(maxSeniorRatio)
     }
 
     // REV: add getMaxJuniorRatio(), getMaxReserve() (accessible through ASSESSOR)
