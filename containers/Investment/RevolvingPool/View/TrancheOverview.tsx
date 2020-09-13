@@ -13,7 +13,7 @@ interface Props {
   tranche: 'senior' | 'junior'
 }
 
-export type Card = 'home' | 'collect' | 'order' | 'invest' | 'redeem' | 'order'
+export type Card = 'home' | 'collect' | 'order' | 'invest' | 'redeem'
 
 const TrancheOverview: React.FC<Props> = (props: Props) => {
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
