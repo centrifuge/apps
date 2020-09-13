@@ -4,7 +4,6 @@ import BN from 'BN.js'
 
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
-
     getEpochState = async () => {
       const coordinator = this.contract('COORDINATOR')
       const assessor = this.contract('ASSESSOR')
@@ -50,7 +49,9 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
         // If it's not in a submission period after closing the epoch, then it could immediately be solved and executed
         // (i.e. all orders could be fulfilled)
-        if ((await coordinator.submissionPeriod()) === false) return
+        if ((await coordinator.submissionPeriod()) === false) {
+          throw new Error('Epoch was immediately executed')
+        }
       }
 
       const state = await this.getEpochState()
@@ -60,19 +61,12 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       console.log('Solution found', solution)
 
       if (solution.status !== 5) {
-        console.error('Solution could not be found for the current epoch', { state, orderState })
-        return undefined
+        throw new Error('Solution could not be found for the current epoch')
       }
 
       // TODO: we need to multiply these values by 10**18 and change them to BigInts
 
-      const submitTx = coordinator.submitSolution(...Object.values(solution.vars))
-      const submitResult = await this.getTransactionReceipt(submitTx)
-
-      console.log('Submit solver result', submitResult)
-
-      return solution.vars
-
+      return this.pending(coordinator.submitSolution(...Object.values(solution.vars)))
     }
 
     executeEpoch = async () => {
@@ -84,20 +78,25 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return this.pending(coordinator.executeEpoch())
     }
 
+    getCurrentEpochId = async () => {
+      const coordinator = this.contract('COORDINATOR')
+      return (await coordinator.currentEpoch()).toBN().toNumber()
+    }
+
     getCurrentEpochState = async () => {
       const coordinator = this.contract('COORDINATOR')
 
-      const lastEpochClosed =  (await coordinator.lastEpochClosed).toBN().toNumber()
-      const minimumEpochTime = (await coordinator.minimumEpochTime).toBN().toNumber()
-      if (((new Date()).getTime() - lastEpochClosed) >= minimumEpochTime) {
+      const lastEpochClosed = (await coordinator.lastEpochClosed()).toBN().toNumber()
+      const minimumEpochTime = (await coordinator.minimumEpochTime()).toBN().toNumber()
+      if (new Date().getTime() - lastEpochClosed >= minimumEpochTime) {
         return 'can-be-closed'
       }
-      
+
       const submissionPeriod = await coordinator.submissionPeriod()
       if (!submissionPeriod) return 'open'
 
-      const minChallengePeriodEnd = await coordinator.minChallengePeriodEnd
-      if (minChallengePeriodEnd < (new Date).getTime()) return 'challenge-period-ended'
+      const minChallengePeriodEnd = await coordinator.minChallengePeriodEnd()
+      if (minChallengePeriodEnd < new Date().getTime()) return 'challenge-period-ended'
 
       return 'in-challenge-period'
     }
@@ -108,8 +107,9 @@ export type EpochState = 'open' | 'can-be-closed' | 'in-challenge-period' | 'cha
 
 export type ICoordinatorActions = {
   getEpochState(): Promise<State>
-  solveEpoch(): Promise<SolverSolution | undefined>
+  solveEpoch(): Promise<PendingTransaction>
   executeEpoch(): Promise<PendingTransaction>
+  getCurrentEpochId(): Promise<number>
   getCurrentEpochState(): Promise<EpochState>
 }
 

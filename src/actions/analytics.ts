@@ -246,7 +246,8 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     // REV: add getMaxJuniorRatio(), getMaxReserve() (accessible through ASSESSOR)
 
     getCurrentJuniorRatio = async () => {
-      return (await this.contract('ASSESSOR').currentJuniorRatio()).toBN()
+      const seniorRatio = (await this.contract('ASSESSOR').seniorRatio()).toBN()
+      return new BN(10).pow(new BN(27)).sub(seniorRatio)
     }
 
     getAssetValueJunior = async () => {
@@ -295,7 +296,7 @@ export type IAnalyticsActions = {
   getMaxSupplyAmountSenior(user: string): Promise<BN>
   getMaxRedeemAmountSenior(user: string): Promise<BN>
   getTokenPriceJunior(): Promise<BN>
-  getTokenPriceSenior(user: string): Promise<BN>
+  getTokenPriceSenior(user?: string): Promise<BN>
   getSeniorDebt(): Promise<BN>
   getSeniorInterestRate(): Promise<BN>
   getMinJuniorRatio(): Promise<BN>

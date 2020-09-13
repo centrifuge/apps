@@ -5,11 +5,12 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
   return class extends Base implements ILenderActions {
     // senior tranche functions
     submitSeniorSupplyOrder = async (user: string, supplyAmount: string) => {
-      return this.pending(this.contract('SENIOR_OPERATOR').supplySenior(user, supplyAmount, this.overrides))
+      console.log(this.contract('SENIOR_OPERATOR').functions)
+      return this.pending(this.contract('SENIOR_OPERATOR').supplyOrder(supplyAmount, this.overrides))
     }
 
     submitSeniorRedeemOrder = async (user: string, redeemAmount: string) => {
-      return this.pending(this.contract('SENIOR_OPERATOR').redeemSenior(user, redeemAmount, this.overrides))
+      return this.pending(this.contract('SENIOR_OPERATOR').redeemOrder(redeemAmount, this.overrides))
     }
 
     disburseSenior = async (user: string) => {
@@ -30,11 +31,11 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
 
     // junior tranche functions
     submitJuniorSupplyOrder = async (user: string, supplyAmount: string) => {
-      return this.pending(this.contract('JUNIOR_OPERATOR').supplyJunior(user, supplyAmount, this.overrides))
+      return this.pending(this.contract('JUNIOR_OPERATOR').supplyOrder(supplyAmount, this.overrides))
     }
 
     submitJuniorRedeemOrder = async (user: string, redeemAmount: string) => {
-      return this.pending(this.contract('JUNIOR_OPERATOR').redeemJunior(user, redeemAmount, this.overrides))
+      return this.pending(this.contract('JUNIOR_OPERATOR').redeemOrder(redeemAmount, this.overrides))
     }
 
     disburseJunior = async (user: string) => {
