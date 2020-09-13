@@ -262,7 +262,12 @@ export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData 
   const juniorAssetValue = version === 2 ? await tinlake.getAssetValueJunior() : new BN(0)
   const juniorTokenSupply = version === 2 ? await tinlake.getJuniorTotalSupply() : new BN(0)
   // temp fix: until solved on contract level
-  const currentJuniorRatio = version === 2 ? (juniorAssetValue.toString() === '0' ? new BN(0) : await tinlake.getCurrentJuniorRatio()) : new BN(0)
+  const currentJuniorRatio =
+    version === 2
+      ? juniorAssetValue.toString() === '0'
+        ? new BN(0)
+        : await tinlake.getCurrentJuniorRatio()
+      : new BN(0)
 
   try {
     return {

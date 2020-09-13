@@ -16,7 +16,7 @@ export function initTinlake({
   version,
   addresses,
   contractConfig,
-}: { version?: 2 | 3, addresses?: ContractAddresses | null; contractConfig?: any | null } = {}): ITinlake | ITinlakeV3 {
+}: { version?: 2 | 3; addresses?: ContractAddresses | null; contractConfig?: any | null } = {}): ITinlake | ITinlakeV3 {
   console.log(`load tinlake version ${version}`)
   if (tinlake === null) {
     const { transactionTimeout } = config

@@ -131,7 +131,9 @@ export default function reducer(state: AuthState = initialState, action: AnyActi
 // navigation event between pages, which discards the redux state, but does not discard onboard. Putting onboard into
 // the state would work, but it would lead to two sources of truth. Consequently, we keep onboard as an external
 // stateful API here and manually sync values over on load.
-export function load(tinlake: ITinlake | ITinlakeV3): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+export function load(
+  tinlake: ITinlake | ITinlakeV3
+): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     console.trace('load() in ducks/auth', 'version' in tinlake ? tinlake.version : 2)
     const { auth } = getState()
@@ -353,11 +355,7 @@ export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth
     dispatch({ type: LOAD_PERMISSIONS })
 
     if ('version' in tinlake && tinlake.version === 3) {
-      const [
-        interestRatePermission,
-        loanPricePermission,
-        equityRatioPermission
-      ] = await Promise.all([
+      const [interestRatePermission, loanPricePermission, equityRatioPermission] = await Promise.all([
         tinlake.canSetSeniorTrancheInterest(auth.address),
         tinlake.canSetLoanPrice(auth.address),
         tinlake.canSetMinimumJuniorRatio(auth.address),
