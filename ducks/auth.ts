@@ -135,7 +135,6 @@ export function load(
   tinlake: ITinlake | ITinlakeV3
 ): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
-    console.trace('load() in ducks/auth', 'version' in tinlake ? tinlake.version : 2)
     const { auth } = getState()
     let onboard = getOnboard()
 

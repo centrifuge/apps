@@ -43,6 +43,7 @@ class LoanPage extends React.Component<Props> {
                 </Box>
               </SecondaryHeader>
               <WithTinlake
+                version={pool.version}
                 addresses={pool.addresses}
                 contractConfig={pool.contractConfig}
                 render={(tinlake) => (

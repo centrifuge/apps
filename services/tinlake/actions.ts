@@ -242,20 +242,15 @@ export async function setInterest(
 }
 
 export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData | null> {
-  if (!tinlake.signer) {
-    throw new Error('Missing tinlake signer')
-  }
-
   const version = 'version' in tinlake ? tinlake.version : 2
   console.log('loading pool', version)
-
-  const address = await tinlake.signer.getAddress()
 
   // V3 TODO
   const juniorReserve = version === 2 ? await tinlake.getJuniorReserve() : new BN(0)
   const juniorTokenPrice = version === 2 ? await tinlake.getTokenPriceJunior() : new BN(0)
   const seniorReserve = version === 2 ? await tinlake.getSeniorReserve() : new BN(0)
-  const seniorTokenPrice = version === 2 ? await tinlake.getTokenPriceSenior(address!) : new BN(0)
+  const seniorTokenPrice =
+    version === 2 && tinlake.signer ? await tinlake.getTokenPriceSenior(await tinlake.signer.getAddress()) : new BN(0)
   const seniorInterestRate = version === 2 ? await tinlake.getSeniorInterestRate() : new BN(0)
   const seniorTokenSupply = version === 2 ? await tinlake.getSeniorTotalSupply() : new BN(0)
   const minJuniorRatio = await tinlake.getMinJuniorRatio()
@@ -267,7 +262,7 @@ export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData 
       ? juniorAssetValue.toString() === '0'
         ? new BN(0)
         : await tinlake.getCurrentJuniorRatio()
-      : new BN(0)
+      : await tinlake.getCurrentJuniorRatio()
 
   try {
     return {
@@ -373,7 +368,7 @@ export async function setAllowance(
   }
 }
 
-export async function setMinJuniorRatio(tinlake: ITinlake, ratio: string): Promise<PendingTransaction> {
+export async function setMinJuniorRatio(tinlake: ITinlake | ITinlakeV3, ratio: string): Promise<PendingTransaction> {
   return await tinlake.setMinimumJuniorRatio(ratio)
 }
 
