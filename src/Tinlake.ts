@@ -82,6 +82,7 @@ export default class Tinlake {
   public contracts: Contracts = {}
   public contractAbis: ContractAbis = {}
   public contractConfig: any = {}
+  public version: number = 2
 
   constructor(params: TinlakeParams) {
     const { provider, signer, contractAddresses, transactionTimeout, contractAbis, overrides, contractConfig } = params
@@ -168,7 +169,7 @@ export default class Tinlake {
               return reject()
             }
           })
-        }
+        },
       }
     } catch (e) {
       console.error(`Error caught in tinlake.pending(): ${JSON.stringify(e)}`)
@@ -177,7 +178,7 @@ export default class Tinlake {
         error: e.message,
         receipt: async () => {
           return Promise.reject('Error caught in tinlake.pending()')
-        }
+        },
       }
     }
   }
