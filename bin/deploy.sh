@@ -1,3 +1,5 @@
+#! /usr/bin/env bash
+
 # Run testnet with dapp testnet
 # NOTE: SENIOR_TRANCHE must be set to true in the environmental variables for a senior tranche to be deployed
 
@@ -20,9 +22,9 @@ export GOVERNANCE=$GOD_ADDRESS
 source ./bin/test/local_env.sh
 
 #create address folder
-mkdir ./tinlake-deploy/deployments
-mkdir ./tinlake-proxy/deployments
-mkdir ./tinlake-actions/deployments
+mkdir -p ./tinlake-deploy/deployments
+mkdir -p ./tinlake-proxy/deployments
+mkdir -p ./tinlake-actions/deployments
 
 # deploy tinlake contracts
 ./tinlake-deploy/bin/util/build_contracts.sh
@@ -32,6 +34,7 @@ mkdir ./tinlake-actions/deployments
 ./tinlake-deploy/bin/test/deploy_collateral_nft.sh
 
 # copy the addresses of deployed contracts from tinlake folder to tinlake.js test folder
+mkdir -p ./test
 touch ./test/addresses.json
 cat ./tinlake-deploy/deployments/addresses_unknown.json > ./test/addresses.json
 

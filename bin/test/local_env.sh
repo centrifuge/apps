@@ -1,3 +1,5 @@
+#! /usr/bin/env bash
+
 # Define ENV
 GETH_DIR=$HOME/.dapp/testnet/8545
 
