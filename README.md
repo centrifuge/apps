@@ -35,10 +35,11 @@ Install dependencies with `npm install`.
 docker build -t centrifugeio/tinlake-in-a-box:latest .
 ```
 
-**2. To get the data from the container, run**
+**2. To get the contract addresses from the container, run**
 
-1. Contracts: `docker run -it --rm centrifugeio/tinlake-in-a-box:latest cat /app/deployments/addresses_unknown.json`
-
+```bash
+docker run -it --rm centrifugeio/tinlake-in-a-box:latest cat /app/test/addresses.json > ./test/addresses.json
+```
 
 **2. Run a docker container**
 
