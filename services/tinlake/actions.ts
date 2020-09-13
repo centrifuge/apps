@@ -242,10 +242,7 @@ export async function setInterest(
   }
 }
 
-export async function submitSeniorSupplyOrder(
-  tinlake: ITinlakeV3,
-  amount: string
-): Promise<PendingTransaction> {
+export async function submitSeniorSupplyOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
