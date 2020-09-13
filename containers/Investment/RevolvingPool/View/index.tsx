@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Box, Heading } from 'grommet'
 import { Pool } from '../../../../config'
+import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 
 import { ExplainerCard } from './styles'
 import PoolOverview from './PoolOverview'
@@ -9,6 +10,7 @@ import AdminActions from './AdminActions'
 
 interface Props {
   pool: Pool
+  tinlake: ITinlakeV3
 }
 
 const InvestmentsView: React.FC<Props> = (props: Props) => {
@@ -41,7 +43,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
       {isAdmin && (
         <>
           <Heading level="4">Admin actions for {props.pool?.name}</Heading>
-          <AdminActions pool={props.pool} />
+          <AdminActions pool={props.pool} tinlake={props.tinlake} />
         </>
       )}
     </Box>
