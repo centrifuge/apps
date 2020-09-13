@@ -1,5 +1,6 @@
 import BN from 'bn.js'
 import { Loan, NFT, interestRateToFee, ITinlake, PendingTransaction } from '@centrifuge/tinlake-js'
+import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { maxUint256 } from '../../utils/maxUint256'
 import { PoolData } from '../../ducks/pool'
 
@@ -240,24 +241,28 @@ export async function setInterest(
   }
 }
 
-export async function getPool(tinlake: ITinlake): Promise<PoolData | null> {
+export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData | null> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
 
+  const version = 'version' in tinlake ? tinlake.version : 2
+  console.log('loading pool', version)
+
   const address = await tinlake.signer.getAddress()
 
-  const juniorReserve = await tinlake.getJuniorReserve()
-  const juniorTokenPrice = await tinlake.getTokenPriceJunior()
-  const seniorReserve = await tinlake.getSeniorReserve()
-  const seniorTokenPrice = await tinlake.getTokenPriceSenior(address!)
-  const seniorInterestRate = await tinlake.getSeniorInterestRate()
-  const seniorTokenSupply = await tinlake.getSeniorTotalSupply()
+  // V3 TODO
+  const juniorReserve = version === 2 ? await tinlake.getJuniorReserve() : new BN(0)
+  const juniorTokenPrice = version === 2 ? await tinlake.getTokenPriceJunior() : new BN(0)
+  const seniorReserve = version === 2 ? await tinlake.getSeniorReserve() : new BN(0)
+  const seniorTokenPrice = version === 2 ? await tinlake.getTokenPriceSenior(address!) : new BN(0)
+  const seniorInterestRate = version === 2 ? await tinlake.getSeniorInterestRate() : new BN(0)
+  const seniorTokenSupply = version === 2 ? await tinlake.getSeniorTotalSupply() : new BN(0)
   const minJuniorRatio = await tinlake.getMinJuniorRatio()
-  const juniorAssetValue = await tinlake.getAssetValueJunior()
-  const juniorTokenSupply = await tinlake.getJuniorTotalSupply()
+  const juniorAssetValue = version === 2 ? await tinlake.getAssetValueJunior() : new BN(0)
+  const juniorTokenSupply = version === 2 ? await tinlake.getJuniorTotalSupply() : new BN(0)
   // temp fix: until solved on contract level
-  const currentJuniorRatio = juniorAssetValue.toString() === '0' ? new BN(0) : await tinlake.getCurrentJuniorRatio()
+  const currentJuniorRatio = version === 2 ? (juniorAssetValue.toString() === '0' ? new BN(0) : await tinlake.getCurrentJuniorRatio()) : new BN(0)
 
   try {
     return {

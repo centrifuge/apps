@@ -1,9 +1,11 @@
 import * as React from 'react'
 import { initTinlake } from '../../services/tinlake'
 import { ITinlake } from '@centrifuge/tinlake-js'
+import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 
 interface Props {
-  render: (tinlake: ITinlake) => React.ReactElement
+  render: (tinlake: ITinlake | ITinlakeV3) => React.ReactElement
+  version?: 2 | 3
   addresses?: {
     ROOT_CONTRACT: string
     ACTIONS: string
@@ -22,7 +24,7 @@ interface State {
 
 class WithTinlake extends React.Component<Props, State> {
   state: State = { loading: true }
-  tinlake: ITinlake | null = null
+  tinlake: ITinlake | ITinlakeV3 | null = null
   isMounted = false
   componentDidMount() {
     this.isMounted = true
@@ -34,9 +36,9 @@ class WithTinlake extends React.Component<Props, State> {
   }
 
   init = async () => {
-    const { addresses, contractConfig } = this.props
+    const { version, addresses, contractConfig } = this.props
 
-    this.tinlake = initTinlake({ addresses, contractConfig })
+    this.tinlake = initTinlake({ version, addresses, contractConfig })
     if (this.isMounted) {
       this.setState({ loading: false })
     }
