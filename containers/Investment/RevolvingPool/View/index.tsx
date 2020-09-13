@@ -6,6 +6,7 @@ import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { ExplainerCard } from './styles'
 import PoolOverview from './PoolOverview'
 import TrancheOverview from './TrancheOverview'
+import EpochOverview from './EpochOverview'
 import AdminActions from './AdminActions'
 
 interface Props {
@@ -37,8 +38,16 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
         how to invest and redeem into Tinlake here...
       </ExplainerCard>
 
-      <TrancheOverview pool={props.pool} tinlake={props.tinlake} tranche="junior" />
-      <TrancheOverview pool={props.pool} tinlake={props.tinlake} tranche="senior" />
+      <Box direction="row" justify="between">
+        <Box>
+          <TrancheOverview pool={props.pool} tinlake={props.tinlake} tranche="junior" />
+          <TrancheOverview pool={props.pool} tinlake={props.tinlake} tranche="senior" />
+        </Box>
+
+        <Box>
+          <EpochOverview tinlake={props.tinlake} />
+        </Box>
+      </Box>
 
       {isAdmin && (
         <>

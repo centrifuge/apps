@@ -251,6 +251,10 @@ export async function submitSeniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
   return tinlake.submitSeniorSupplyOrder(user, amount)
 }
 
+export async function solveEpoch(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  return tinlake.solveEpoch()
+}
+
 export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData | null> {
   const version = 'version' in tinlake ? tinlake.version : 2
 
