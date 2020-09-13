@@ -19,7 +19,7 @@ export interface WalletTransaction {
 
 // This refers to any function in ../services/tinlake/actions which aligns to the TinlakeAction type
 export type TransactionAction = {
-  [P in keyof typeof actions]: typeof actions[P] extends actions.TinlakeAction ? P : never
+  [P in keyof typeof actions]: typeof actions[P] extends actions.TinlakeAction | actions.TinlakeV3Action ? P : never
 }[keyof typeof actions]
 
 // Can be extended by components which create and subscribe to transactions

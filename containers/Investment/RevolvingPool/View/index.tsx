@@ -37,8 +37,8 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
         how to invest and redeem into Tinlake here...
       </ExplainerCard>
 
-      <TrancheOverview pool={props.pool} tranche="junior" />
-      <TrancheOverview pool={props.pool} tranche="senior" />
+      <TrancheOverview pool={props.pool} tinlake={props.tinlake} tranche="junior" />
+      <TrancheOverview pool={props.pool} tinlake={props.tinlake} tranche="senior" />
 
       {isAdmin && (
         <>

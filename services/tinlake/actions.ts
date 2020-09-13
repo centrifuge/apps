@@ -22,6 +22,7 @@ type SerializableArray = (SerializableScalar & SerializableObject & Serializable
 type Serializable = SerializableScalar & SerializableObject & SerializableArray
 
 export type TinlakeAction = (tinlake: ITinlake, ...args: Serializable[]) => Promise<PendingTransaction>
+export type TinlakeV3Action = (tinlake: ITinlakeV3, ...args: Serializable[]) => Promise<PendingTransaction>
 
 export async function getNFT(registry: string, tinlake: ITinlake, tokenId: string) {
   let nftOwner: string
@@ -241,9 +242,20 @@ export async function setInterest(
   }
 }
 
+export async function submitSeniorSupplyOrder(
+  tinlake: ITinlakeV3,
+  amount: string
+): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const user = await tinlake.signer.getAddress()!
+  return tinlake.submitSeniorSupplyOrder(user, amount)
+}
+
 export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData | null> {
   const version = 'version' in tinlake ? tinlake.version : 2
-  console.log('loading pool', version)
 
   // V3 TODO
   const juniorReserve = version === 2 ? await tinlake.getJuniorReserve() : new BN(0)

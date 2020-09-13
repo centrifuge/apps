@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Box, Button, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
 import { Pool } from '../../../../config'
+import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 
 import InvestCard from './InvestCard'
 import RedeemCard from './RedeemCard'
@@ -11,6 +12,7 @@ import { TokenLogo } from './styles'
 interface Props {
   pool: Pool
   tranche: 'senior' | 'junior'
+  tinlake: ITinlakeV3
 }
 
 export type Card = 'home' | 'collect' | 'order' | 'invest' | 'redeem'
