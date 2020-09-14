@@ -247,6 +247,14 @@ export async function submitSeniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
     throw new Error('Missing tinlake signer')
   }
 
+  try {
+    const approvalTx = await tinlake.approveSeniorForCurrency(maxUint256)
+    const approvalResult = await tinlake.getTransactionReceipt(approvalTx!)
+    console.log('approval senior', approvalResult)
+  } catch (e) {
+    return loggedError(e, `Could not approve currency for senior`, '')
+  }
+
   const user = await tinlake.signer.getAddress()!
   return tinlake.submitSeniorSupplyOrder(user, amount)
 }

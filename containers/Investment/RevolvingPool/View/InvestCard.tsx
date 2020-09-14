@@ -27,7 +27,6 @@ const InvestCard: React.FC<Props> = (props: Props) => {
       const user = await props.tinlake.signer?.getAddress()
       if (user) {
         const balance = await props.tinlake.getCurrencyBalance(user)
-        console.log('balance', balance.toString())
         setLimit(balance.toString())
       }
     }

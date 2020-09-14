@@ -1,6 +1,9 @@
 import * as React from 'react'
 import { Box, Button, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
 import { Pool } from '../../../../config'
+import { toPrecision } from '../../../../utils/toPrecision'
+import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 
 import { Description, Warning } from './styles'
 import { Card } from './TrancheOverview'
@@ -9,6 +12,7 @@ interface Props {
   pool: Pool
   tranche: 'senior' | 'junior'
   setCard: (card: Card) => void
+  disbursements: any
 }
 
 const OrderCard: React.FC<Props> = (props: Props) => {
@@ -34,7 +38,9 @@ const OrderCard: React.FC<Props> = (props: Props) => {
           </TableRow>
           <TableRow>
             <TableCell scope="row">Amount {token} locked</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>12.333,00</TableCell>
+            <TableCell style={{ textAlign: 'end' }}>
+              {addThousandsSeparators(toPrecision(baseToDisplay(props.disbursements.remainingSupplyCurrency, 18), 2))}
+            </TableCell>
           </TableRow>
           <TableRow>
             <TableCell scope="row">Locked value at current token price</TableCell>
