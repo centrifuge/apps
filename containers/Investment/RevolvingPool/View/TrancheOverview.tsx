@@ -36,9 +36,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             : await props.tinlake.calcJuniorDisburse(address)
         setDisbursements(disbursements)
         setHasPendingOrder(!!disbursements.payoutCurrencyAmount.add(disbursements.payoutTokenAmount).isZero())
-        setHasPendingCollection(
-          !disbursements.remainingSupplyCurrency.add(disbursements.remainingRedeemToken).isZero()
-        )
+        setHasPendingCollection(!disbursements.remainingSupplyCurrency.add(disbursements.remainingRedeemToken).isZero())
       }
     }
 
