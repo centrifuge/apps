@@ -148,7 +148,7 @@ export function createTransaction<A extends TransactionAction>(
      * and then re-initialize Tinlake.js with the same config when processing the transaction.
      * */
     const tinlakeConfig = {
-      version: 'version' in args[0] ? (args[0].version as 2 | 3) : 2,
+      version: args[0].version as 2 | 3,
       addresses: args[0].contractAddresses,
       contractConfig: args[0].contractConfig,
     }

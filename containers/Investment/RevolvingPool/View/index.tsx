@@ -4,7 +4,7 @@ import { Pool } from '../../../../config'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 
 import { ExplainerCard } from './styles'
-import PoolOverview from './PoolOverview'
+// import PoolOverview from './PoolOverview'
 import TrancheOverview from './TrancheOverview'
 import EpochOverview from './EpochOverview'
 import AdminActions from './AdminActions'
@@ -19,7 +19,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
 
   return (
     <Box margin={{ top: 'medium' }}>
-      <Heading level="4">Pool Overview {props.pool?.name}</Heading>
+      {/* <Heading level="4">Pool Overview {props.pool?.name}</Heading>
       <ExplainerCard margin={{ bottom: 'medium' }}>
         Investors can invest into this Tinlake pool through two tokens that are backed by collateral locked by the Asset
         Originator: TIN and DROP. Both tokens represent the liquidity deposited into Tinlake and accrue interest over
@@ -28,7 +28,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
         lower) returns at the DROP rate.
       </ExplainerCard>
 
-      <PoolOverview pool={props.pool} />
+      <PoolOverview pool={props.pool} /> */}
 
       <Heading level="4">Invest/Redeem in {props.pool?.name}</Heading>
       <ExplainerCard margin={{ bottom: 'medium' }}>
@@ -38,21 +38,16 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
         how to invest and redeem into Tinlake here...
       </ExplainerCard>
 
-      <Box direction="row" justify="between">
-        <Box>
-          <TrancheOverview pool={props.pool} tinlake={props.tinlake} tranche="junior" />
-          <TrancheOverview pool={props.pool} tinlake={props.tinlake} tranche="senior" />
-        </Box>
-
-        <Box>
-          <EpochOverview tinlake={props.tinlake} />
-        </Box>
+      <Box direction="row" justify="start" gap="medium">
+        <TrancheOverview pool={props.pool} tinlake={props.tinlake} tranche="junior" />
+        <TrancheOverview pool={props.pool} tinlake={props.tinlake} tranche="senior" />
       </Box>
 
       {isAdmin && (
         <>
           <Heading level="4">Admin actions for {props.pool?.name}</Heading>
           <AdminActions pool={props.pool} tinlake={props.tinlake} />
+          <EpochOverview tinlake={props.tinlake} />
         </>
       )}
     </Box>
