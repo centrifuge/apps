@@ -20,6 +20,20 @@ const InvestCard: React.FC<Props> = (props: Props) => {
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
   const [daiValue, setDaiValue] = React.useState('0')
 
+  const [limit, setLimit] = React.useState<string | undefined>(undefined)
+
+  React.useEffect(() => {
+    async function getLimit() {
+      const user = await props.tinlake.signer?.getAddress()
+      if (user) {
+        const balance = await props.tinlake.getCurrencyBalance(user)
+        console.log('balance', balance.toString())
+        setLimit(balance.toString())
+      }
+    }
+    getLimit()
+  }, [props.tinlake])
+
   const [status, result, setTxId] = useTransactionState()
 
   const submit = async () => {
@@ -42,7 +56,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
       <TokenInput
         token="DAI"
         value={daiValue}
-        maxValue="1230000000000000000"
+        maxValue={limit}
         onChange={(newValue: string) => setDaiValue(newValue)}
       />
 

@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Box, Button, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
 import { Pool } from '../../../../config'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
+import BN from 'bn.js'
 
 import InvestCard from './InvestCard'
 import RedeemCard from './RedeemCard'
@@ -23,8 +24,21 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const [card, setCard] = React.useState<Card>('home')
 
   // TODO: these should be replaced by variables retrieved using tinlake.js
-  const hasPendingOrder = false
-  const hasPendingCollection = false
+  const [hasPendingOrder, setHasPendingOrder] = React.useState(false)
+  const [hasPendingCollection, setHasPendingCollection] = React.useState(true)
+
+  React.useEffect(() => {
+    async function getState() {
+      const disbursements =
+        props.tranche === 'senior' ? await props.tinlake.calcSeniorDisburse() : await props.tinlake.calcJuniorDisburse()
+      setHasPendingOrder(!disbursements.payoutCurrencyAmount.add(disbursements.payoutTokenAmount).isZero())
+      setHasPendingCollection(
+        disbursements.remainingSupplyCurrency.add(disbursements.remainingRedeemToken).toNumber() > 0
+      )
+    }
+
+    getState()
+  }, [])
 
   React.useEffect(() => {
     if (hasPendingOrder) setCard('order')

@@ -8,7 +8,6 @@ import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
-import { Decimal } from 'decimal.js-light'
 import { connect, useSelector } from 'react-redux'
 
 interface Props extends TransactionProps {
@@ -21,10 +20,14 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   const pool = useSelector((state: any) => state.pool)
 
   const [minJuniorRatio, setMinJuniorRatio] = React.useState('0')
+  const [maxJuniorRatio, setMaxJuniorRatio] = React.useState('0')
+  const [maxReserve, setMaxReserve] = React.useState('0')
 
   React.useEffect(() => {
     if (pool && pool.data) {
       setMinJuniorRatio(pool.data.minJuniorRatio.toString())
+      setMaxJuniorRatio(pool.data.maxJuniorRatio.toString())
+      setMaxReserve(pool.data.maxReserve.toString())
     }
   }, [pool])
 
@@ -58,7 +61,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 Min TIN risk buffer
               </Heading>
               <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(pool.data.minJuniorRatio, 25), 0))}%
+                {addThousandsSeparators(toPrecision(baseToDisplay(pool.data.minJuniorRatio, 25), 2))}%
               </Heading>
             </Box>
 
@@ -88,15 +91,15 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 Max TIN risk buffer
               </Heading>
               <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(pool.data.minJuniorRatio, 25), 2))}%
+                {addThousandsSeparators(toPrecision(baseToDisplay(pool.data.maxJuniorRatio, 25), 2))}%
               </Heading>
             </Box>
 
             <FormField label="Set maximum TIN risk buffer">
               <NumberInput
-                value={baseToDisplay('0500000000000000000000000000', 27)}
+                value={baseToDisplay(maxJuniorRatio, 25)}
                 precision={2}
-                onValueChange={({ value }) => console.log(displayToBase(value, 27))}
+                onValueChange={({ value }) => setMinJuniorRatio(displayToBase(value, 25))}
               />
             </FormField>
 
@@ -111,15 +114,15 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 Max reserve
               </Heading>
               <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                50%
+                {addThousandsSeparators(toPrecision(baseToDisplay(pool.data.maxReserve, 18), 2))}
               </Heading>
             </Box>
 
             <FormField label="Set maximum reserve">
               <NumberInput
-                value={baseToDisplay('0100000000000000000000000000', 27)}
+                value={baseToDisplay(maxReserve, 18)}
                 precision={2}
-                onValueChange={({ value }) => console.log(displayToBase(value, 27))}
+                onValueChange={({ value }) => console.log(displayToBase(value, 18))}
               />
             </FormField>
 

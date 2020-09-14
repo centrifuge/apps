@@ -14,7 +14,9 @@ export interface PoolData {
   senior?: Tranche
   availableFunds: BN
   minJuniorRatio: BN
+  maxJuniorRatio: BN
   currentJuniorRatio: BN
+  maxReserve: BN
 }
 
 export interface PoolState {

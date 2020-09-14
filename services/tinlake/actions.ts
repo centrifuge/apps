@@ -267,6 +267,8 @@ export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData 
   const seniorInterestRate = version === 2 ? await tinlake.getSeniorInterestRate() : new BN(0)
   const seniorTokenSupply = version === 2 ? await tinlake.getSeniorTotalSupply() : new BN(0)
   const minJuniorRatio = await tinlake.getMinJuniorRatio()
+  const maxJuniorRatio = version === 3 ? await (tinlake as ITinlakeV3).getMaxJuniorRatio() : new BN(0)
+  const maxReserve = version === 3 ? await (tinlake as ITinlakeV3).getMaxReserve() : new BN(0)
   const juniorAssetValue = version === 2 ? await tinlake.getAssetValueJunior() : new BN(0)
   const juniorTokenSupply = version === 2 ? await tinlake.getJuniorTotalSupply() : new BN(0)
   // temp fix: until solved on contract level
@@ -280,7 +282,9 @@ export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData 
   try {
     return {
       minJuniorRatio,
+      maxJuniorRatio,
       currentJuniorRatio,
+      maxReserve,
       junior: {
         type: 'junior',
         availableFunds: juniorReserve,
