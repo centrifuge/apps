@@ -24,7 +24,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (pool && pool.data) {
-      setMinJuniorRatio(pool.data.minJuniorRatio)
+      setMinJuniorRatio(pool.data.minJuniorRatio.toString())
     }
   }, [pool])
 
@@ -35,11 +35,9 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   const [status, , setTxId] = useTransactionState()
 
   const saveMinJuniorRatio = async () => {
-    const normalizedRatio = new Decimal(minJuniorRatio).div(100).toString()
-
     const txId = await props.createTransaction(`Set min TIN risk buffer`, 'setMinJuniorRatio', [
       props.tinlake,
-      normalizedRatio,
+      minJuniorRatio.toString(),
     ])
     setTxId(txId)
   }
@@ -60,15 +58,15 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 Min TIN risk buffer
               </Heading>
               <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(pool.data.minJuniorRatio, 27), 2))} %
+                {addThousandsSeparators(toPrecision(baseToDisplay(pool.data.minJuniorRatio, 25), 0))}%
               </Heading>
             </Box>
 
             <FormField label="Set minimum TIN risk buffer">
               <NumberInput
-                value={baseToDisplay(minJuniorRatio, 27)}
+                value={baseToDisplay(minJuniorRatio, 25)}
                 precision={2}
-                onValueChange={({ value }) => setMinJuniorRatio(displayToBase(value, 27))}
+                onValueChange={({ value }) => setMinJuniorRatio(displayToBase(value, 25))}
               />
             </FormField>
 

@@ -353,7 +353,7 @@ export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth
 
     dispatch({ type: LOAD_PERMISSIONS })
 
-    if ('version' in tinlake && tinlake.version === 3) {
+    if (tinlake.version === 3) {
       const [interestRatePermission, loanPricePermission, equityRatioPermission] = await Promise.all([
         tinlake.canSetSeniorTrancheInterest(auth.address),
         tinlake.canSetLoanPrice(auth.address),
