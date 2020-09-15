@@ -10,7 +10,6 @@ import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 
 import { Description, Warning } from './styles'
 import { Card } from './TrancheOverview'
-import BN from 'bn.js'
 
 interface Props extends TransactionProps {
   pool: Pool
@@ -38,10 +37,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
   // const [status, result, setTxId] = useTransactionState()
 
   const cancel = async () => {
-    const txId = await props.createTransaction(`Cancel ${type.toLowerCase()} order`, 'submitSeniorSupplyOrder', [
-      props.tinlake,
-      '0',
-    ])
+    await props.createTransaction(`Cancel ${type.toLowerCase()} order`, 'submitSeniorSupplyOrder', [props.tinlake, '0'])
     // setTxId(txId)
   }
 

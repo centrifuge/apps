@@ -522,7 +522,7 @@ export async function redeem(
     return loggedError(e, `Could not redeem ${trancheType}.`, '')
   }
 
-  return { status: 0 }
+  return { status: 0 } as any
 }
 
 function loggedError(error: any, message: string, id: string): PendingTransaction {
@@ -530,5 +530,5 @@ function loggedError(error: any, message: string, id: string): PendingTransactio
   return {
     status: 0,
     error: message,
-  }
+  } as any
 }

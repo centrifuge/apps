@@ -26,7 +26,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   const [card, setCard] = React.useState<Card>('home')
 
-  const [isInMemberlist, setIsInMemberlist] = React.useState<boolean | undefined>(true)
+  const [isInMemberlist] = React.useState<boolean | undefined>(true)
 
   const [balance, setBalance] = React.useState('0')
   const [tokenPrice, setTokenPrice] = React.useState('0')

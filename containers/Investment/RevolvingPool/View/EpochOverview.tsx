@@ -10,7 +10,7 @@ interface Props extends TransactionProps {
 
 const EpochOverview: React.FC<Props> = (props: Props) => {
   const [epochId, setEpochId] = React.useState(0)
-  const [epochMinimumTimeEnd, setEpochMinimumTimeEnd] = React.useState(0)
+  // const [epochMinimumTimeEnd, setEpochMinimumTimeEnd] = React.useState(0)
   const [epochState, setEpochState] = React.useState('')
 
   // const endHoursFromNow = Math.floor((epochMinimumTimeEnd - new Date().getTime()) / 1000 / 60 / 60)
@@ -18,7 +18,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     async function getState() {
       setEpochId(await props.tinlake.getCurrentEpochId())
-      setEpochMinimumTimeEnd(await props.tinlake.getCurrentEpochMinimumTimeEnd())
+      // setEpochMinimumTimeEnd(await props.tinlake.getCurrentEpochMinimumTimeEnd())
       setEpochState(await props.tinlake.getCurrentEpochState())
     }
 

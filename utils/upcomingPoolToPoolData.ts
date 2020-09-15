@@ -17,7 +17,9 @@ const emptyPoolData: PoolData = {
   // senior: emptyTranche,
   availableFunds: new BN(0),
   minJuniorRatio: new BN(0),
+  maxJuniorRatio: new BN(0),
   currentJuniorRatio: new BN(0),
+  maxReserve: new BN(0)
 }
 
 export function upcomingPoolToPooldata(p: UpcomingPool): PoolData {
