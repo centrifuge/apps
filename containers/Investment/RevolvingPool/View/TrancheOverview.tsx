@@ -103,7 +103,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           <TableRow>
             <TableCell scope="row">Your {token} Value</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              DAI {addThousandsSeparators(toPrecision(baseToDisplay(value, 18), 2))}{' '}
+              DAI {addThousandsSeparators(toPrecision(baseToDisplay(value, 27), 2))}{' '}
             </TableCell>
           </TableRow>
         </TableBody>
@@ -126,7 +126,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               tokenPrice={tokenPrice}
             />
           )}
-          {card === 'collect' && <CollectCard {...props} setCard={setCard} />}
+          {card === 'collect' && <CollectCard {...props} setCard={setCard} disbursements={disbursements} />}
           {card === 'invest' && <InvestCard {...props} setCard={setCard} />}
           {card === 'redeem' && <RedeemCard {...props} setCard={setCard} />}
         </>

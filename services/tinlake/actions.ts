@@ -272,6 +272,14 @@ export async function submitJuniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
   return tinlake.submitJuniorSupplyOrder(amount)
 }
 
+export async function disburseSenior(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  return tinlake.disburseSenior()
+}
+
+export async function disburseJunior(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  return tinlake.disburseJunior()
+}
+
 export async function solveEpoch(tinlake: ITinlakeV3): Promise<PendingTransaction> {
   return tinlake.solveEpoch()
 }
