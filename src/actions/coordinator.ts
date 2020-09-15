@@ -101,7 +101,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const minChallengePeriodEnd = await coordinator.minChallengePeriodEnd()
       if (minChallengePeriodEnd !== 0) {
         if (minChallengePeriodEnd < new Date().getTime()) return 'challenge-period-ended'
-        else return 'in-challenge-period'
+         return 'in-challenge-period'
       }
 
       const lastEpochClosed = (await coordinator.lastEpochClosed()).toBN().toNumber()
