@@ -28,6 +28,10 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
       )
     }
 
+    calcSeniorDisburse = async (user: string) => {
+      return await this.contract('SENIOR_TRANCHE')['calcDisburse(address)'](user)
+    }
+
     // junior tranche functions
     submitJuniorSupplyOrder = async (user: string, supplyAmount: string) => {
       return this.pending(this.contract('JUNIOR_OPERATOR').supplyOrder(supplyAmount, this.overrides))
@@ -52,7 +56,18 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
         this.contract('JUNIOR_TOKEN').approve(this.contractAddresses['JUNIOR'], tokenAmount, this.overrides)
       )
     }
+
+    calcJuniorDisburse = async (user: string) => {
+      return await this.contract('JUNIOR_TRANCHE')['calcDisburse(address)'](user)
+    }
   }
+}
+
+export type CalcDisburseResult = {
+  payoutCurrencyAmount: BN
+  payoutTokenAmount: BN
+  remainingSupplyCurrency: BN
+  remainingRedeemToken: BN
 }
 
 export type ILenderActions = {
@@ -66,6 +81,8 @@ export type ILenderActions = {
   submitJuniorRedeemOrder(user: string, redeemAmount: string): Promise<PendingTransaction>
   disburseSenior(user: string): Promise<PendingTransaction>
   disburseJunior(user: string): Promise<PendingTransaction>
+  calcJuniorDisburse(user: string): Promise<CalcDisburseResult>
+  calcSeniorDisburse(user: string): Promise<CalcDisburseResult>
 }
 
 export default LenderActions
