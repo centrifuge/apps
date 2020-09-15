@@ -23,11 +23,17 @@ RUN nix-env -iA dapp hevm seth solc -if https://github.com/dapphub/dapptools/tar
 # install dapp tools
 RUN curl https://dapp.tools/install | sh
 
-# env variables that can be used by the user
+# env variables needed by tinlake deployment
 ENV ETH_RPC_URL="http://127.0.0.1:8545"
 ENV ETH_GAS_PRICE="7000000"
 ENV ETH_KEYSTORE="/home/app/.dapp/testnet/8545/keystore"
 ENV ETH_PASSWORD="/home/app/.dapp/testnet/8545/.empty-password"
+ENV SENIOR_INTEREST_RATE="1000000003593629043335673583"
+ENV MAX_RESERVE="100000000000000000000"
+ENV MAX_SENIOR_RATIO="850000000000000000000000000"
+ENV MIN_SENIOR_RATIO="750000000000000000000000000"
+ENV CHALLENGE_TIME="3600"
+ENV DISCOUNT_RATE="1000000001585489599188229325"
 
 # copy repository into /app, set rights
 WORKDIR /app
