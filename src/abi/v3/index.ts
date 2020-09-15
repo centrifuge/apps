@@ -38,6 +38,6 @@ export default {
   ACTIONS: contractAbiActions,
   JUNIOR_OPERATOR: contractAbiOperator,
   SENIOR_OPERATOR: contractAbiOperator,
-  JUNIOR: contractAbiTranche,
-  SENIOR: contractAbiTranche,
+  JUNIOR_TRANCHE: contractAbiTranche,
+  SENIOR_TRANCHE: contractAbiTranche,
 } as ContractAbis

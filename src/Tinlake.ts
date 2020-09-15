@@ -25,7 +25,9 @@ const contractNames = [
   'SENIOR_OPERATOR',
   'JUNIOR',
   'SENIOR',
-  'COORDINATOR'
+  'JUNIOR_TRANCHE',
+  'SENIOR_TRANCHE',
+  'COORDINATOR',
 ] as const
 
 export type PendingTransaction = {
@@ -79,6 +81,7 @@ export default class Tinlake {
   public contracts: Contracts = {}
   public contractAbis: ContractAbis = {}
   public contractConfig: any = {}
+  public version: number = 3
 
   constructor(params: TinlakeParams) {
     const { provider, signer, contractAddresses, transactionTimeout, contractAbis, overrides, contractConfig } = params

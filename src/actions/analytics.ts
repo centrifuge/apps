@@ -148,7 +148,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getTokenPriceJunior = async () => {
-      return (await this.contract('ASSESSOR').calcTokenPrice(this.contractAddresses['JUNIOR'])).toBN()
+      return (await this.contract('ASSESSOR')['calcJuniorTokenPrice()']()).toBN()
     }
 
     existsSenior = () => {
@@ -206,23 +206,8 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return maxRedeem
     }
 
-    getTokenPriceSenior = async (user?: string) => {
-      if (this.contractAddresses['SENIOR_OPERATOR'] === ZERO_ADDRESS) return new BN(0)
-
-      // if no user address is passed always use price from asessor
-      const operatorType = user ? this.getOperatorType('senior') : 'ALLOWANCE_OPERATOR'
-      let tokenPrice: BN
-      switch (operatorType) {
-        case 'PROPORTIONAL_OPERATOR':
-          tokenPrice = (await this.contract('SENIOR_OPERATOR').calcTokenPrice(user)).toBN()
-          break
-        case 'ALLOWANCE_OPERATOR':
-          tokenPrice = (await this.contract('ASSESSOR').calcTokenPrice(this.contractAddresses['SENIOR'])).toBN()
-          break
-        default:
-          tokenPrice = new BN(0)
-      }
-      return tokenPrice
+    getTokenPriceSenior = async () => {
+      return (await this.contract('ASSESSOR')['calcSeniorTokenPrice()']()).toBN()
     }
 
     // REV: moved to ASSESSOR contract
@@ -239,13 +224,24 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getMinJuniorRatio = async () => {
-      return (await this.contract('ASSESSOR').minJuniorRatio()).toBN()
+      const maxSeniorRatio = (await this.contract('ASSESSOR').maxSeniorRatio()).toBN()
+      return new BN(10).pow(new BN(27)).sub(maxSeniorRatio)
+    }
+
+    getMaxJuniorRatio = async () => {
+      const minSeniorRatio = (await this.contract('ASSESSOR').minSeniorRatio()).toBN()
+      return new BN(10).pow(new BN(27)).sub(minSeniorRatio)
+    }
+
+    getMaxReserve = async () => {
+      return (await this.contract('ASSESSOR').maxReserve()).toBN()
     }
 
     // REV: add getMaxJuniorRatio(), getMaxReserve() (accessible through ASSESSOR)
 
     getCurrentJuniorRatio = async () => {
-      return (await this.contract('ASSESSOR').currentJuniorRatio()).toBN()
+      const seniorRatio = (await this.contract('ASSESSOR').seniorRatio()).toBN()
+      return new BN(10).pow(new BN(27)).sub(seniorRatio)
     }
 
     getAssetValueJunior = async () => {
@@ -294,10 +290,12 @@ export type IAnalyticsActions = {
   getMaxSupplyAmountSenior(user: string): Promise<BN>
   getMaxRedeemAmountSenior(user: string): Promise<BN>
   getTokenPriceJunior(): Promise<BN>
-  getTokenPriceSenior(user: string): Promise<BN>
+  getTokenPriceSenior(): Promise<BN>
   getSeniorDebt(): Promise<BN>
   getSeniorInterestRate(): Promise<BN>
   getMinJuniorRatio(): Promise<BN>
+  getMaxJuniorRatio(): Promise<BN>
+  getMaxReserve(): Promise<BN>
   getCurrentJuniorRatio(): Promise<BN>
   getAssetValueJunior(): Promise<BN>
   getInvestor(user: string): Promise<Investor | undefined>
