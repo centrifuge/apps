@@ -156,17 +156,17 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return (await this.contract('ASSESSOR')['calcSeniorTokenPrice()']()).toBN()
     }
 
-    // REV: moved to ASSESSOR contract
     getSeniorReserve = async () => {
       if (this.contractAddresses['SENIOR_TRANCHE'] !== ZERO_ADDRESS) {
-        return (await this.contract('SENIOR_TRANCHE').balance()).toBN()
+        return (await this.contract('ASSESSOR').seniorBalance_()).toBN()
       }
       return new BN(0)
     }
 
-    // REV: move to ASSESSOR contract
     getJuniorReserve = async () => {
-      return (await this.contract('JUNIOR_TRANCHE').balance()).toBN()
+      const seniorBalance = await this.getSeniorReserve()
+      const totalBalance = (await this.contract('ASSESSOR').maxReserve()).toBN()
+      return totalBalance.sub(seniorBalance)
     }
 
     getMinJuniorRatio = async () => {
