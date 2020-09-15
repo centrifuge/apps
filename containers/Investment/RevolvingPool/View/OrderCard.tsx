@@ -4,37 +4,54 @@ import { Pool } from '../../../../config'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
+import { createTransaction, TransactionProps } from '../../../../ducks/transactions'
+import { connect } from 'react-redux'
+import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 
 import { Description, Warning } from './styles'
 import { Card } from './TrancheOverview'
 
-interface Props {
+interface Props extends TransactionProps {
   pool: Pool
   tranche: 'senior' | 'junior'
   setCard: (card: Card) => void
   disbursements: any
+  tinlake: ITinlakeV3
 }
 
 const OrderCard: React.FC<Props> = (props: Props) => {
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
 
+  const type = props.disbursements.remainingSupplyCurrency.isZero() ? 'Redeem' : 'Invest'
+
   const [confirmCancellation, setConfirmCancellation] = React.useState(false)
+
+  // const [status, result, setTxId] = useTransactionState()
+
+  const cancel = async () => {
+    const txId = await props.createTransaction(`Cancel ${type.toLowerCase()} order`, 'submitSeniorSupplyOrder', [
+      props.tinlake,
+      '0',
+    ])
+    // setTxId(txId)
+  }
 
   return (
     <Box>
       <Heading level="6" margin={{ bottom: 'xsmall' }}>
-        Pending [INVEST/REDEEM] Order for Epoch #NEXT
+        Pending {type} Order for Epoch #NEXT
       </Heading>
       <Description>
-        You have locked [TOKEN/DAI] to [INVEST/REDEEM] [into/from] Tinlake for the next epoch. You can cancel or update
-        this order until the end of the current epoch.
+        You have locked {type === 'Invest' ? token : 'DAI'} to {type.toLowerCase()}{' '}
+        {type === 'Invest' ? 'into' : 'from'} Tinlake for the next epoch. You can cancel or update this order until the
+        end of the current epoch.
       </Description>
 
       <Table margin={{ top: 'medium' }}>
         <TableBody>
           <TableRow>
             <TableCell scope="row">Type of transaction</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>[Invest/Redeem]</TableCell>
+            <TableCell style={{ textAlign: 'end' }}>{type}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell scope="row">Amount {token} locked</TableCell>
@@ -53,7 +70,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
         <>
           <Warning>
             <Heading level="6" margin={{ bottom: 'xsmall' }}>
-              Cancel Pending [INVEST/REDEEM] Order for Epoch #NEXT
+              Cancel Pending {type} Order for Epoch #NEXT
             </Heading>
             Please confirm that you want to cancel your pending order for Epoch #. Your {token} will be unlocked and
             tranferred back to your wallet.
@@ -61,7 +78,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
 
           <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
             <Button label="Back" onClick={() => setConfirmCancellation(false)} />
-            <Button primary label="Cancel Order" />
+            <Button primary label="Cancel Order" onClick={() => cancel()} />
           </Box>
         </>
       )}
@@ -76,4 +93,4 @@ const OrderCard: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default OrderCard
+export default connect((state) => state, { createTransaction })(OrderCard)
