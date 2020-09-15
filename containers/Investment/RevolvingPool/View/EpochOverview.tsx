@@ -32,6 +32,10 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
     setTxId(txId)
   }
 
+  const execute = async () => {
+    await props.createTransaction(`Execute epoch`, 'executeEpoch', [props.tinlake])
+  }
+
   React.useEffect(() => {
     console.log(status)
     console.log(result)
@@ -51,16 +55,16 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
             <TableCell scope="row">Epoch #</TableCell>
             <TableCell style={{ textAlign: 'end' }}>{epochId}</TableCell>
           </TableRow>
-          {/* <TableRow>
-            <TableCell scope="row">Epoch ends in</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>{endHoursFromNow}</TableCell>
-          </TableRow> */}
+          <TableRow>
+            <TableCell scope="row">Epoch state</TableCell>
+            <TableCell style={{ textAlign: 'end' }}>{epochState}</TableCell>
+          </TableRow>
         </TableBody>
       </Table>
 
       <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
         {epochState === 'can-be-closed' && <Button label="Close &amp; Solve Epoch" onClick={() => solve()} />}
-        {epochState === 'challenge-period-ended' && <Button label="Execute orders" />}
+        {epochState === 'challenge-period-ended' && <Button label="Execute orders" onClick={() => execute()} />}
       </Box>
     </Box>
   )

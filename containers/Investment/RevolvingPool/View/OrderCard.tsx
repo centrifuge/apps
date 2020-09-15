@@ -10,12 +10,14 @@ import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 
 import { Description, Warning } from './styles'
 import { Card } from './TrancheOverview'
+import BN from 'bn.js'
 
 interface Props extends TransactionProps {
   pool: Pool
   tranche: 'senior' | 'junior'
   setCard: (card: Card) => void
   disbursements: any
+  tokenPrice: string
   tinlake: ITinlakeV3
 }
 
@@ -25,6 +27,13 @@ const OrderCard: React.FC<Props> = (props: Props) => {
   const type = props.disbursements.remainingSupplyCurrency.isZero() ? 'Redeem' : 'Invest'
 
   const [confirmCancellation, setConfirmCancellation] = React.useState(false)
+
+  // const lockedValue =
+  //   props.disbursements && !props.disbursements.remainingSupplyCurrency.isZero()
+  //     ? props.disbursements.remainingSupplyCurrency
+  //         .mul(new BN(props.tokenPrice).div(new BN(10).pow(new BN(7))))
+  //         .toString()
+  //     : new BN(0)
 
   // const [status, result, setTxId] = useTransactionState()
 
@@ -42,7 +51,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
         Pending {type} Order for Epoch #NEXT
       </Heading>
       <Description>
-        You have locked {type === 'Invest' ? token : 'DAI'} to {type.toLowerCase()}{' '}
+        You have locked {type === 'Invest' ? 'DAI' : token} to {type.toLowerCase()}{' '}
         {type === 'Invest' ? 'into' : 'from'} Tinlake for the next epoch. You can cancel or update this order until the
         end of the current epoch.
       </Description>
@@ -54,14 +63,14 @@ const OrderCard: React.FC<Props> = (props: Props) => {
             <TableCell style={{ textAlign: 'end' }}>{type}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell scope="row">Amount {token} locked</TableCell>
+            <TableCell scope="row">Amount {type === 'Invest' ? 'DAI' : token} locked</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
               {addThousandsSeparators(toPrecision(baseToDisplay(props.disbursements.remainingSupplyCurrency, 18), 2))}
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell scope="row">Locked value at current token price</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>1321,523.00 DAI</TableCell>
+            <TableCell style={{ textAlign: 'end' }}>0 DAI</TableCell>
           </TableRow>
         </TableBody>
       </Table>

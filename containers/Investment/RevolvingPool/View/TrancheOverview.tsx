@@ -4,12 +4,14 @@ import { Pool } from '../../../../config'
 import { baseToDisplay, ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
+import BN from 'bn.js'
 
 import InvestCard from './InvestCard'
 import RedeemCard from './RedeemCard'
 import OrderCard from './OrderCard'
 import CollectCard from './CollectCard'
-import { TokenLogo } from './styles'
+import { TokenLogo, Warning } from './styles'
+import InvestAction from '../../../../components/InvestAction'
 
 interface Props {
   pool: Pool
@@ -24,8 +26,11 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   const [card, setCard] = React.useState<Card>('home')
 
+  const [isInMemberlist, setIsInMemberlist] = React.useState<boolean | undefined>(true)
+
   const [balance, setBalance] = React.useState('0')
   const [tokenPrice, setTokenPrice] = React.useState('0')
+  const value = new BN(balance).mul(new BN(tokenPrice).div(new BN(10).pow(new BN(7)))).toString()
 
   const [disbursements, setDisbursements] = React.useState<any>(undefined)
   const [hasPendingOrder, setHasPendingOrder] = React.useState(false)
@@ -35,25 +40,30 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
     async function getState() {
       const address = await props.tinlake.signer?.getAddress()
       if (address) {
+        // const isInMemberlist =
+        //   props.tranche === 'senior'
+        //     ? await props.tinlake.checkSeniorTokenMemberlist(address)
+        //     : await props.tinlake.checkJuniorTokenMemberlist(address)
+        // setIsInMemberlist(true)
+
         const balance =
           props.tranche === 'senior'
             ? await props.tinlake.getSeniorTokenBalance(address)
             : await props.tinlake.getJuniorTokenBalance(address)
         setBalance(balance.toString())
 
-        console.log('balance', balance.toString())
-
         const tokenPrice =
           props.tranche === 'senior'
-            ? await props.tinlake.getSeniorTokenPrice()
-            : await props.tinlake.getJuniorTokenPrice()
-        setBalance(tokenPrice.toString())
+            ? await props.tinlake.getTokenPriceSenior()
+            : await props.tinlake.getTokenPriceJunior()
+        console.log('tokenPrice', tokenPrice.toString())
+        setTokenPrice(tokenPrice.toString())
 
         const disbursements =
           props.tranche === 'senior'
             ? await props.tinlake.calcSeniorDisburse(address)
             : await props.tinlake.calcJuniorDisburse(address)
-        console.log(`disbursements ${props.tranche}`, disbursements)
+        console.log(`${props.tranche} disbursements`, disbursements)
         setDisbursements(disbursements)
         setHasPendingOrder(!disbursements.remainingSupplyCurrency.add(disbursements.remainingRedeemToken).isZero())
         setHasPendingCollection(!disbursements.payoutCurrencyAmount.add(disbursements.payoutTokenAmount).isZero())
@@ -61,7 +71,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
     }
 
     getState()
-  }, [props.tinlake])
+  }, [])
 
   React.useEffect(() => {
     if (hasPendingOrder) setCard('order')
@@ -87,28 +97,52 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             <TableCell scope="row">Current Price</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
               {' '}
-              {addThousandsSeparators(toPrecision(baseToDisplay(tokenPrice, 18), 2))}{' '}
+              {addThousandsSeparators(toPrecision(baseToDisplay(tokenPrice, 27), 2))}{' '}
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell scope="row">Your {token} Value</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>DAI 1321,523.00</TableCell>
+            <TableCell style={{ textAlign: 'end' }}>
+              DAI {addThousandsSeparators(toPrecision(baseToDisplay(value, 18), 2))}{' '}
+            </TableCell>
           </TableRow>
         </TableBody>
       </Table>
 
-      {card === 'home' && (
-        <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-          <Button primary label="Redeem" onClick={() => setCard('redeem')} />
-          <Button primary label="Invest" onClick={() => setCard('invest')} />
-        </Box>
+      {isInMemberlist && (
+        <>
+          {card === 'home' && (
+            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+              <Button primary label="Redeem" onClick={() => setCard('redeem')} />
+              <Button primary label="Invest" onClick={() => setCard('invest')} />
+            </Box>
+          )}
+          {card === 'order' && (
+            <OrderCard
+              {...props}
+              tinlake={props.tinlake}
+              setCard={setCard}
+              disbursements={disbursements}
+              tokenPrice={tokenPrice}
+            />
+          )}
+          {card === 'collect' && <CollectCard {...props} setCard={setCard} />}
+          {card === 'invest' && <InvestCard {...props} setCard={setCard} />}
+          {card === 'redeem' && <RedeemCard {...props} setCard={setCard} />}
+        </>
       )}
-      {card === 'order' && (
-        <OrderCard {...props} tinlake={props.tinlake} setCard={setCard} disbursements={disbursements} />
+
+      {!isInMemberlist && (
+        <Warning>
+          <Heading level="6" margin={{ bottom: 'xsmall' }}>
+            Not allowed
+          </Heading>
+          You are not allowed to invest in the {props.tranche} tranche of {props.pool.name}.
+          <Box justify="end" margin={{ top: 'small' }}>
+            <InvestAction poolName={props.pool.name} />
+          </Box>
+        </Warning>
       )}
-      {card === 'collect' && <CollectCard {...props} setCard={setCard} />}
-      {card === 'invest' && <InvestCard {...props} setCard={setCard} />}
-      {card === 'redeem' && <RedeemCard {...props} setCard={setCard} />}
     </Box>
   )
 }

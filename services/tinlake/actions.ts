@@ -249,18 +249,35 @@ export async function submitSeniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
 
   try {
     const approvalTx = await tinlake.approveSeniorForCurrency(maxUint256)
-    const approvalResult = await tinlake.getTransactionReceipt(approvalTx!)
-    console.log('approval senior', approvalResult)
+    await tinlake.getTransactionReceipt(approvalTx!)
   } catch (e) {
     return loggedError(e, `Could not approve currency for senior`, '')
   }
 
-  const user = await tinlake.signer.getAddress()!
-  return tinlake.submitSeniorSupplyOrder(user, amount)
+  return tinlake.submitSeniorSupplyOrder(amount)
+}
+
+export async function submitJuniorSupplyOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  try {
+    const approvalTx = await tinlake.approveJuniorForCurrency(maxUint256)
+    await tinlake.getTransactionReceipt(approvalTx!)
+  } catch (e) {
+    return loggedError(e, `Could not approve currency for junior`, '')
+  }
+
+  return tinlake.submitJuniorSupplyOrder(amount)
 }
 
 export async function solveEpoch(tinlake: ITinlakeV3): Promise<PendingTransaction> {
   return tinlake.solveEpoch()
+}
+
+export async function executeEpoch(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  return tinlake.executeEpoch()
 }
 
 export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData | null> {
@@ -268,10 +285,10 @@ export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData 
 
   // V3 TODO
   const juniorReserve = version === 2 ? await tinlake.getJuniorReserve() : new BN(0)
-  const juniorTokenPrice = version === 2 ? await tinlake.getTokenPriceJunior() : new BN(0)
+  const juniorTokenPrice = await tinlake.getTokenPriceJunior()
   const seniorReserve = version === 2 ? await tinlake.getSeniorReserve() : new BN(0)
   const seniorTokenPrice =
-    version === 2 && tinlake.signer ? await tinlake.getTokenPriceSenior(await tinlake.signer.getAddress()) : new BN(0)
+    version === 2 && tinlake.signer ? await tinlake.getTokenPriceSenior(await tinlake.signer.getAddress()) : await (tinlake as ITinlakeV3).getTokenPriceSenior()
   const seniorInterestRate = version === 2 ? await tinlake.getSeniorInterestRate() : new BN(0)
   const seniorTokenSupply = version === 2 ? await tinlake.getSeniorTotalSupply() : new BN(0)
   const minJuniorRatio = await tinlake.getMinJuniorRatio()
