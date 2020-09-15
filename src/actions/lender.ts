@@ -5,7 +5,6 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
   return class extends Base implements ILenderActions {
     // senior tranche functions
     submitSeniorSupplyOrder = async (user: string, supplyAmount: string) => {
-      console.log(this.contract('SENIOR_OPERATOR').functions)
       return this.pending(this.contract('SENIOR_OPERATOR').supplyOrder(supplyAmount, this.overrides))
     }
 
