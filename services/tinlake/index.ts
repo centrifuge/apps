@@ -23,7 +23,7 @@ export function initTinlake({
     const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
 
     if (version === 2) tinlake = new Tinlake({ transactionTimeout, provider: rpcProvider })
-    else tinlake = new TinlakeV3({ transactionTimeout, provider: rpcProvider }) as unknown as ITinlakeV3
+    else tinlake = (new TinlakeV3({ transactionTimeout, provider: rpcProvider }) as unknown) as ITinlakeV3
   }
 
   let resetContractAddresses = false
