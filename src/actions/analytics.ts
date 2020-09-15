@@ -206,7 +206,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return maxRedeem
     }
 
-    getTokenPriceSenior = async (user?: string) => {
+    getTokenPriceSenior = async () => {
       return (await this.contract('ASSESSOR')['calcSeniorTokenPrice()']()).toBN()
     }
 
