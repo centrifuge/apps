@@ -129,6 +129,10 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       }
     }
 
+    getJuniorTokenPrice = async () => {
+      return (await this.contract('ASSESSOR')['calcJuniorTokenPrice()']()).toBN()
+    }
+
     getJuniorTokenBalance = async (user: string) => {
       return (await this.contract('JUNIOR_TOKEN').balanceOf(user)).toBN()
     }
@@ -206,6 +210,10 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return maxRedeem
     }
 
+    getSeniorTokenPrice = async () => {
+      return (await this.contract('ASSESSOR')['calcJuniorTokenPrice()']()).toBN()
+    }
+
     getTokenPriceSenior = async (user?: string) => {
       if (this.contractAddresses['SENIOR_OPERATOR'] === ZERO_ADDRESS) return new BN(0)
 
@@ -241,6 +249,15 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     getMinJuniorRatio = async () => {
       const maxSeniorRatio = (await this.contract('ASSESSOR').maxSeniorRatio()).toBN()
       return new BN(10).pow(new BN(27)).sub(maxSeniorRatio)
+    }
+
+    getMaxJuniorRatio = async () => {
+      const minSeniorRatio = (await this.contract('ASSESSOR').minSeniorRatio()).toBN()
+      return new BN(10).pow(new BN(27)).sub(minSeniorRatio)
+    }
+
+    getMaxReserve = async () => {
+      return (await this.contract('ASSESSOR').maxReserve()).toBN()
     }
 
     // REV: add getMaxJuniorRatio(), getMaxReserve() (accessible through ASSESSOR)
@@ -297,9 +314,13 @@ export type IAnalyticsActions = {
   getMaxRedeemAmountSenior(user: string): Promise<BN>
   getTokenPriceJunior(): Promise<BN>
   getTokenPriceSenior(user?: string): Promise<BN>
+  getJuniorTokenPrice(): Promise<BN>
+  getSeniorTokenPrice(): Promise<BN>
   getSeniorDebt(): Promise<BN>
   getSeniorInterestRate(): Promise<BN>
   getMinJuniorRatio(): Promise<BN>
+  getMaxJuniorRatio(): Promise<BN>
+  getMaxReserve(): Promise<BN>
   getCurrentJuniorRatio(): Promise<BN>
   getAssetValueJunior(): Promise<BN>
   getInvestor(user: string): Promise<Investor | undefined>

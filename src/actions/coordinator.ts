@@ -83,6 +83,15 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return (await coordinator.currentEpoch()).toBN().toNumber()
     }
 
+    getCurrentEpochMinimumTimeEnd = async () => {
+      const coordinator = this.contract('COORDINATOR')
+
+      const lastEpochClosed = (await coordinator.lastEpochClosed()).toBN().toNumber()
+      const minimumEpochTime = (await coordinator.minimumEpochTime()).toBN().toNumber()
+
+      return lastEpochClosed + minimumEpochTime
+    }
+
     getCurrentEpochState = async () => {
       const coordinator = this.contract('COORDINATOR')
 
@@ -100,17 +109,36 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
       return 'in-challenge-period'
     }
+
+    // V3 TODO: this should probably be a in a different file
+    calcJuniorDisburse = async (user: string) => {
+      return await this.contract('JUNIOR_TRANCHE')['calcDisburse(address)'](user)
+    }
+
+    calcSeniorDisburse = async (user: string) => {
+      return await this.contract('SENIOR_TRANCHE')['calcDisburse(address)'](user)
+    }
   }
 }
 
 export type EpochState = 'open' | 'can-be-closed' | 'in-challenge-period' | 'challenge-period-ended'
+
+export type CalcDisburseResult = {
+  payoutCurrencyAmount: BN
+  payoutTokenAmount: BN
+  remainingSupplyCurrency: BN
+  remainingRedeemToken: BN
+}
 
 export type ICoordinatorActions = {
   getEpochState(): Promise<State>
   solveEpoch(): Promise<PendingTransaction>
   executeEpoch(): Promise<PendingTransaction>
   getCurrentEpochId(): Promise<number>
+  getCurrentEpochMinimumTimeEnd(): Promise<number>
   getCurrentEpochState(): Promise<EpochState>
+  calcJuniorDisburse(user: string): Promise<CalcDisburseResult>
+  calcSeniorDisburse(user: string): Promise<CalcDisburseResult>
 }
 
 export default CoordinatorActions

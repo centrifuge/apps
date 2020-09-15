@@ -25,7 +25,9 @@ const contractNames = [
   'SENIOR_OPERATOR',
   'JUNIOR',
   'SENIOR',
-  'COORDINATOR'
+  'JUNIOR_TRANCHE',
+  'SENIOR_TRANCHE',
+  'COORDINATOR',
 ] as const
 
 export type PendingTransaction = {
