@@ -288,7 +288,9 @@ export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData 
   const juniorTokenPrice = await tinlake.getTokenPriceJunior()
   const seniorReserve = version === 2 ? await tinlake.getSeniorReserve() : new BN(0)
   const seniorTokenPrice =
-    version === 2 && tinlake.signer ? await tinlake.getTokenPriceSenior(await tinlake.signer.getAddress()) : await (tinlake as ITinlakeV3).getTokenPriceSenior()
+    version === 2 && tinlake.signer
+      ? await tinlake.getTokenPriceSenior(await tinlake.signer.getAddress())
+      : await (tinlake as ITinlakeV3).getTokenPriceSenior()
   const seniorInterestRate = version === 2 ? await tinlake.getSeniorInterestRate() : new BN(0)
   const seniorTokenSupply = version === 2 ? await tinlake.getSeniorTotalSupply() : new BN(0)
   const minJuniorRatio = await tinlake.getMinJuniorRatio()
