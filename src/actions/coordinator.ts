@@ -95,19 +95,22 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
     getCurrentEpochState = async () => {
       const coordinator = this.contract('COORDINATOR')
 
+      const submissionPeriod = await coordinator.submissionPeriod()
+      if (!submissionPeriod) return 'open'
+
+      const minChallengePeriodEnd = await coordinator.minChallengePeriodEnd()
+      if (minChallengePeriodEnd !== 0) {
+        if (minChallengePeriodEnd < new Date().getTime()) return 'challenge-period-ended'
+        else return 'in-challenge-period'
+      }
+
       const lastEpochClosed = (await coordinator.lastEpochClosed()).toBN().toNumber()
       const minimumEpochTime = (await coordinator.minimumEpochTime()).toBN().toNumber()
       if (new Date().getTime() - lastEpochClosed >= minimumEpochTime) {
         return 'can-be-closed'
       }
 
-      const submissionPeriod = await coordinator.submissionPeriod()
-      if (!submissionPeriod) return 'open'
-
-      const minChallengePeriodEnd = await coordinator.minChallengePeriodEnd()
-      if (minChallengePeriodEnd < new Date().getTime()) return 'challenge-period-ended'
-
-      return 'in-challenge-period'
+      throw new Error('Arrived at impossible current epoch state')
     }
   }
 }

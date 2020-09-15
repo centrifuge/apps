@@ -129,10 +129,6 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       }
     }
 
-    getJuniorTokenPrice = async () => {
-      return (await this.contract('ASSESSOR')['calcJuniorTokenPrice()']()).toBN()
-    }
-
     getJuniorTokenBalance = async (user: string) => {
       return (await this.contract('JUNIOR_TOKEN').balanceOf(user)).toBN()
     }
@@ -152,7 +148,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getTokenPriceJunior = async () => {
-      return (await this.contract('ASSESSOR').calcTokenPrice(this.contractAddresses['JUNIOR'])).toBN()
+      return (await this.contract('ASSESSOR')['calcJuniorTokenPrice()']()).toBN()
     }
 
     existsSenior = () => {
@@ -210,27 +206,8 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return maxRedeem
     }
 
-    getSeniorTokenPrice = async () => {
-      return (await this.contract('ASSESSOR')['calcJuniorTokenPrice()']()).toBN()
-    }
-
     getTokenPriceSenior = async (user?: string) => {
-      if (this.contractAddresses['SENIOR_OPERATOR'] === ZERO_ADDRESS) return new BN(0)
-
-      // if no user address is passed always use price from asessor
-      const operatorType = user ? this.getOperatorType('senior') : 'ALLOWANCE_OPERATOR'
-      let tokenPrice: BN
-      switch (operatorType) {
-        case 'PROPORTIONAL_OPERATOR':
-          tokenPrice = (await this.contract('SENIOR_OPERATOR').calcTokenPrice(user)).toBN()
-          break
-        case 'ALLOWANCE_OPERATOR':
-          tokenPrice = (await this.contract('ASSESSOR').calcTokenPrice(this.contractAddresses['SENIOR'])).toBN()
-          break
-        default:
-          tokenPrice = new BN(0)
-      }
-      return tokenPrice
+      return (await this.contract('ASSESSOR')['calcSeniorTokenPrice()']()).toBN()
     }
 
     // REV: moved to ASSESSOR contract
@@ -313,9 +290,7 @@ export type IAnalyticsActions = {
   getMaxSupplyAmountSenior(user: string): Promise<BN>
   getMaxRedeemAmountSenior(user: string): Promise<BN>
   getTokenPriceJunior(): Promise<BN>
-  getTokenPriceSenior(user?: string): Promise<BN>
-  getJuniorTokenPrice(): Promise<BN>
-  getSeniorTokenPrice(): Promise<BN>
+  getTokenPriceSenior(): Promise<BN>
   getSeniorDebt(): Promise<BN>
   getSeniorInterestRate(): Promise<BN>
   getMinJuniorRatio(): Promise<BN>
