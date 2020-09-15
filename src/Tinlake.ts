@@ -23,8 +23,6 @@ const contractNames = [
   'ACTIONS',
   'JUNIOR_OPERATOR',
   'SENIOR_OPERATOR',
-  'JUNIOR',
-  'SENIOR',
   'JUNIOR_TRANCHE',
   'SENIOR_TRANCHE',
   'COORDINATOR',
