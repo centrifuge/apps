@@ -224,24 +224,19 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getMinJuniorRatio = async () => {
-      const maxSeniorRatio = (await this.contract('ASSESSOR').maxSeniorRatio()).toBN()
-      return new BN(10).pow(new BN(27)).sub(maxSeniorRatio)
+      return seniorToJuniorRatio((await this.contract('ASSESSOR').maxSeniorRatio()).toBN())
     }
 
     getMaxJuniorRatio = async () => {
-      const minSeniorRatio = (await this.contract('ASSESSOR').minSeniorRatio()).toBN()
-      return new BN(10).pow(new BN(27)).sub(minSeniorRatio)
+      return seniorToJuniorRatio((await this.contract('ASSESSOR').minSeniorRatio()).toBN())
     }
 
     getMaxReserve = async () => {
       return (await this.contract('ASSESSOR').maxReserve()).toBN()
     }
 
-    // REV: add getMaxJuniorRatio(), getMaxReserve() (accessible through ASSESSOR)
-
     getCurrentJuniorRatio = async () => {
-      const seniorRatio = (await this.contract('ASSESSOR').seniorRatio()).toBN()
-      return new BN(10).pow(new BN(27)).sub(seniorRatio)
+      return seniorToJuniorRatio((await this.contract('ASSESSOR').seniorRatio()).toBN())
     }
 
     getAssetValueJunior = async () => {
@@ -264,6 +259,10 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return new BN(0)
     }
   }
+}
+
+const seniorToJuniorRatio = (seniorRatio: BN) => {
+  return new BN(10).pow(new BN(27)).sub(seniorRatio)
 }
 
 export type IAnalyticsActions = {

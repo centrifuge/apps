@@ -39,6 +39,28 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return { reserve, netAssetValue, seniorAsset, minTinRatio, maxTinRatio, maxReserve }
     }
 
+    getOrderState = async () => {
+      const coordinator = this.contract('COORDINATOR')
+      const orderState = await coordinator.order()
+
+      const valueBase = new BN(10).pow(new BN(18))
+    
+      return {
+        dropRedeemOrder: orderState.seniorRedeem.toBN().isZero()
+          ? 0.0
+          : orderState.seniorRedeem.toBN().div(valueBase).toNumber(),
+        tinRedeemOrder: orderState.juniorRedeem.toBN().isZero()
+          ? 0.0
+          : orderState.juniorRedeem.toBN().div(valueBase).toNumber(),
+        tinInvestOrder: orderState.juniorSupply.toBN().isZero()
+          ? 0.0
+          : orderState.juniorSupply.toBN().div(valueBase).toNumber(),
+        dropInvestOrder: orderState.seniorSupply.toBN().isZero()
+          ? 0.0
+          : orderState.seniorSupply.toBN().div(valueBase).toNumber(),
+      }
+    }
+
     solveEpoch = async () => {
       const coordinator = this.contract('COORDINATOR')
 
@@ -59,7 +81,10 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       }
 
       const state = await this.getEpochState()
-      const orderState = await coordinator.order()
+      const orderState = await this.getOrderState()
+
+      console.log(state)
+      console.log(orderState)
 
       const solution = await calculateOptimalSolution(state, orderState)
       console.log('Solution found', solution)
@@ -101,6 +126,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const coordinator = this.contract('COORDINATOR')
 
       const minChallengePeriodEnd = (await coordinator.minChallengePeriodEnd()).toBN().toNumber()
+      console.log('minChallengePeriodEnd', minChallengePeriodEnd)
       if (minChallengePeriodEnd !== 0) {
         if (minChallengePeriodEnd < new Date().getTime()) return 'challenge-period-ended'
         return 'in-challenge-period'
@@ -109,18 +135,16 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const lastEpochClosed = (await coordinator.lastEpochClosed()).toBN().toNumber()
       const minimumEpochTime = (await coordinator.minimumEpochTime()).toBN().toNumber()
       const currentTimestampInSeconds = new Date().getTime() / 1000
+      console.log('lastEpochClosed', lastEpochClosed)
+      console.log('minimumEpochTime', minimumEpochTime)
+      console.log('currentTimestampInSeconds', currentTimestampInSeconds)
       if (lastEpochClosed + minimumEpochTime < currentTimestampInSeconds) {
         return 'can-be-closed'
       }
 
       const submissionPeriod = await coordinator.submissionPeriod()
-      if (!submissionPeriod) return 'open'
-      
-      console.log('minChallengePeriodEnd', minChallengePeriodEnd)
-      console.log('lastEpochClosed', lastEpochClosed)
-      console.log('minimumEpochTime', minimumEpochTime)
-      console.log('currentTimestampInSeconds', currentTimestampInSeconds)
       console.log('submissionPeriod', submissionPeriod)
+      if (!submissionPeriod) return 'open'
 
       throw new Error('Arrived at impossible current epoch state')
     }
@@ -131,6 +155,7 @@ export type EpochState = 'open' | 'can-be-closed' | 'in-challenge-period' | 'cha
 
 export type ICoordinatorActions = {
   getEpochState(): Promise<State>
+  getOrderState(): Promise<OrderState>
   solveEpoch(): Promise<PendingTransaction>
   executeEpoch(): Promise<PendingTransaction>
   getCurrentEpochId(): Promise<number>

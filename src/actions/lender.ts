@@ -12,8 +12,9 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
       return this.pending(this.contract('SENIOR_OPERATOR').redeemOrder(redeemAmount, this.overrides))
     }
 
-    disburseSenior = async (user: string) => {
-      return this.pending(this.contract('SENIOR_OPERATOR')['disburse(address)'](user, this.overrides))
+    disburseSenior = async () => {
+      console.log(this.contract('SENIOR_OPERATOR').functions)
+      return this.pending(this.contract('SENIOR_OPERATOR')['disburse()'](this.overrides))
     }
 
     getSeniorTokenAllowance = async (owner: string) => {
@@ -45,8 +46,8 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
       return this.pending(this.contract('JUNIOR_OPERATOR').redeemOrder(redeemAmount, this.overrides))
     }
 
-    disburseJunior = async (user: string) => {
-      return this.pending(this.contract('JUNIOR_OPERATOR')['disburse(address)'](user, this.overrides))
+    disburseJunior = async () => {
+      return this.pending(this.contract('JUNIOR_OPERATOR')['disburse()'](this.overrides))
     }
 
     getJuniorTokenAllowance = async (owner: string) => {
@@ -87,8 +88,8 @@ export type ILenderActions = {
   submitSeniorRedeemOrder(redeemAmount: string): Promise<PendingTransaction>
   submitJuniorSupplyOrder(supplyAmount: string): Promise<PendingTransaction>
   submitJuniorRedeemOrder(redeemAmount: string): Promise<PendingTransaction>
-  disburseSenior(user: string): Promise<PendingTransaction>
-  disburseJunior(user: string): Promise<PendingTransaction>
+  disburseSenior(): Promise<PendingTransaction>
+  disburseJunior(): Promise<PendingTransaction>
   calcJuniorDisburse(user: string): Promise<CalcDisburseResult>
   calcSeniorDisburse(user: string): Promise<CalcDisburseResult>
   checkJuniorTokenMemberlist(user: string): Promise<boolean>
