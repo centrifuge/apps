@@ -76,7 +76,8 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         // If it's not in a submission period after closing the epoch, then it could immediately be solved and executed
         // (i.e. all orders could be fulfilled)
         if ((await coordinator.submissionPeriod()) === false) {
-          throw new Error('Epoch was immediately executed')
+          console.log('Epoch was immediately executed')
+          return { status: 1 } as any
         }
       }
 
@@ -96,7 +97,8 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
       // TODO: we need to multiply these values by 10**18 and change them to BigInts
 
-      return this.pending(coordinator.submitSolution(...Object.values(solution.vars)))
+      throw new Error('to be completed')
+      // return this.pending(coordinator.submitSolution(...Object.values(solution.vars)))
     }
 
     executeEpoch = async () => {
@@ -140,12 +142,12 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       console.log('lastEpochClosed', lastEpochClosed)
       console.log('minimumEpochTime', minimumEpochTime)
       console.log('currentTimestampInSeconds', currentTimestampInSeconds)
+      const submissionPeriod = await coordinator.submissionPeriod()
+      console.log('submissionPeriod', submissionPeriod)
       if (lastEpochClosed + minimumEpochTime < latestBlockTimestamp) {
         return 'can-be-closed'
       }
 
-      const submissionPeriod = await coordinator.submissionPeriod()
-      console.log('submissionPeriod', submissionPeriod)
       if (!submissionPeriod) return 'open'
 
       throw new Error('Arrived at impossible current epoch state')

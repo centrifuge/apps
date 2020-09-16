@@ -24,7 +24,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     checkSeniorTokenMemberlist = async (user: string) => {
-      return await this.contract('SENIOR_TOKEN').hasMember(user)
+      return await this.contract('SENIOR_MEMBERLIST').hasMember(user)
     }
 
     approveSeniorToken = async (tokenAmount: string) => {
@@ -34,7 +34,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     calcSeniorDisburse = async (user: string) => {
-      return await this.contract('SENIOR_TRANCHE')['calcDisburse(address)'](user)
+      return disburseToBN(await this.contract('SENIOR_TRANCHE')['calcDisburse(address)'](user))
     }
 
     // junior tranche functions
@@ -67,8 +67,17 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     calcJuniorDisburse = async (user: string) => {
-      return await this.contract('JUNIOR_TRANCHE')['calcDisburse(address)'](user)
+      return disburseToBN(await this.contract('JUNIOR_TRANCHE')['calcDisburse(address)'](user))
     }
+  }
+}
+
+const disburseToBN = (disburse: any): CalcDisburseResult => {
+  return {
+    payoutCurrencyAmount: disburse.payoutCurrencyAmount.toBN(),
+    payoutTokenAmount: disburse.payoutTokenAmount.toBN(),
+    remainingSupplyCurrency: disburse.remainingSupplyCurrency.toBN(),
+    remainingRedeemToken: disburse.remainingRedeemToken.toBN(),
   }
 }
 
