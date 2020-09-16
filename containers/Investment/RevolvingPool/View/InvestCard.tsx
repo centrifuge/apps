@@ -14,6 +14,7 @@ interface Props extends TransactionProps {
   tranche: 'senior' | 'junior'
   setCard: (card: Card) => void
   tinlake: ITinlakeV3
+  updateTrancheData: () => void
 }
 
 const InvestCard: React.FC<Props> = (props: Props) => {
@@ -33,18 +34,22 @@ const InvestCard: React.FC<Props> = (props: Props) => {
     getLimit()
   }, [props.tinlake])
 
-  const [status, result, setTxId] = useTransactionState()
+  const [status, , setTxId] = useTransactionState()
 
   const submit = async () => {
+    console.log('daiValue', daiValue)
     const method = props.tranche === 'senior' ? 'submitSeniorSupplyOrder' : 'submitJuniorSupplyOrder'
     const txId = await props.createTransaction(`${token} Invest`, method, [props.tinlake, daiValue])
     setTxId(txId)
   }
 
   React.useEffect(() => {
-    console.log(status)
-    console.log(result)
+    if (status === 'succeeded') {
+      props.updateTrancheData()
+    }
   }, [status])
+
+  const disabled = status === 'unconfirmed' || status === 'pending'
 
   return (
     <Box>
@@ -58,11 +63,12 @@ const InvestCard: React.FC<Props> = (props: Props) => {
         value={daiValue}
         maxValue={limit}
         onChange={(newValue: string) => setDaiValue(newValue)}
+        disabled={disabled}
       />
 
       <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
-        <Button label="Cancel" onClick={() => props.setCard('home')} />
-        <Button primary label="Lock DAI" onClick={() => submit()} />
+        <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
+        <Button primary label="Lock DAI" onClick={() => submit()} disabled={disabled} />
       </Box>
     </Box>
   )

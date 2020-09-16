@@ -4,7 +4,7 @@ import { Pool } from '../../../../config'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
-import { createTransaction, TransactionProps } from '../../../../ducks/transactions'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
 import { connect } from 'react-redux'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 
@@ -18,6 +18,7 @@ interface Props extends TransactionProps {
   disbursements: any
   tokenPrice: string
   tinlake: ITinlakeV3
+  updateTrancheData: () => void
 }
 
 const OrderCard: React.FC<Props> = (props: Props) => {
@@ -34,12 +35,19 @@ const OrderCard: React.FC<Props> = (props: Props) => {
   //         .toString()
   //     : new BN(0)
 
-  // const [status, result, setTxId] = useTransactionState()
+  const [status, , setTxId] = useTransactionState()
 
   const cancel = async () => {
-    await props.createTransaction(`Cancel ${type.toLowerCase()} order`, 'submitSeniorSupplyOrder', [props.tinlake, '0'])
-    // setTxId(txId)
+    const method = props.tranche === 'senior' ? 'cancelSeniorSupplyOrder' : 'cancelJuniorSupplyOrder'
+    const txId = await props.createTransaction(`Cancel ${type.toLowerCase()} order`, method, [props.tinlake])
+    setTxId(txId)
   }
+
+  React.useEffect(() => {
+    if (status === 'succeeded') {
+      props.updateTrancheData()
+    }
+  }, [status])
 
   return (
     <Box>
@@ -91,7 +99,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
       {!confirmCancellation && (
         <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
           <Button primary label="Cancel Order" onClick={() => setConfirmCancellation(true)} />
-          <Button primary label="Update Order" />
+          {/* <Button primary label="Update Order" /> */}
         </Box>
       )}
     </Box>

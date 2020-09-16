@@ -257,6 +257,10 @@ export async function submitSeniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
   return tinlake.submitSeniorSupplyOrder(amount)
 }
 
+export async function cancelSeniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  return tinlake.submitSeniorSupplyOrder('0')
+}
+
 export async function submitJuniorSupplyOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
@@ -270,6 +274,10 @@ export async function submitJuniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
   }
 
   return tinlake.submitJuniorSupplyOrder(amount)
+}
+
+export async function cancelJuniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  return tinlake.submitJuniorSupplyOrder('0')
 }
 
 export async function disburseSenior(tinlake: ITinlakeV3): Promise<PendingTransaction> {

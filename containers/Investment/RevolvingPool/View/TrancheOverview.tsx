@@ -12,6 +12,7 @@ import OrderCard from './OrderCard'
 import CollectCard from './CollectCard'
 import { TokenLogo, Warning } from './styles'
 import InvestAction from '../../../../components/InvestAction'
+import { useInterval } from '../../../../utils/hooks'
 
 interface Props {
   pool: Pool
@@ -39,46 +40,50 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const [hasPendingOrder, setHasPendingOrder] = React.useState(false)
   const [hasPendingCollection, setHasPendingCollection] = React.useState(false)
 
-  React.useEffect(() => {
-    async function getState() {
-      const address = await props.tinlake.signer?.getAddress()
-      if (address) {
-        // const isInMemberlist =
-        //   props.tranche === 'senior'
-        //     ? await props.tinlake.checkSeniorTokenMemberlist(address)
-        //     : await props.tinlake.checkJuniorTokenMemberlist(address)
-        // setIsInMemberlist(true)
+  // V3 TODO: this should probably move to actions and expose a single TrancheData object (or to a duck?)
+  const updateTrancheData = async () => {
+    const address = await props.tinlake.signer?.getAddress()
+    if (address) {
+      // const isInMemberlist =
+      //   props.tranche === 'senior'
+      //     ? await props.tinlake.checkSeniorTokenMemberlist(address)
+      //     : await props.tinlake.checkJuniorTokenMemberlist(address)
+      // setIsInMemberlist(true)
 
-        const balance =
-          props.tranche === 'senior'
-            ? await props.tinlake.getSeniorTokenBalance(address)
-            : await props.tinlake.getJuniorTokenBalance(address)
-        setBalance(balance.toString())
+      const balance =
+        props.tranche === 'senior'
+          ? await props.tinlake.getSeniorTokenBalance(address)
+          : await props.tinlake.getJuniorTokenBalance(address)
+      setBalance(balance.toString())
 
-        const tokenPrice =
-          props.tranche === 'senior'
-            ? await props.tinlake.getTokenPriceSenior()
-            : await props.tinlake.getTokenPriceJunior()
-        console.log('tokenPrice', tokenPrice.toString())
-        setTokenPrice(tokenPrice.toString())
+      const tokenPrice =
+        props.tranche === 'senior'
+          ? await props.tinlake.getTokenPriceSenior()
+          : await props.tinlake.getTokenPriceJunior()
+      setTokenPrice(tokenPrice.toString())
 
-        const disbursements =
-          props.tranche === 'senior'
-            ? await props.tinlake.calcSeniorDisburse(address)
-            : await props.tinlake.calcJuniorDisburse(address)
-        console.log(`${props.tranche} disbursements`, disbursements)
-        setDisbursements(disbursements)
-        setHasPendingOrder(!disbursements.remainingSupplyCurrency.add(disbursements.remainingRedeemToken).isZero())
-        setHasPendingCollection(!disbursements.payoutCurrencyAmount.add(disbursements.payoutTokenAmount).isZero())
-      }
+      const disbursements =
+        props.tranche === 'senior'
+          ? await props.tinlake.calcSeniorDisburse(address)
+          : await props.tinlake.calcJuniorDisburse(address)
+      setDisbursements(disbursements)
+      // console.log(disbursements)
+      setHasPendingOrder(!disbursements.remainingSupplyCurrency.add(disbursements.remainingRedeemToken).isZero())
+      setHasPendingCollection(!disbursements.payoutCurrencyAmount.add(disbursements.payoutTokenAmount).isZero())
     }
+  }
 
-    getState()
+  useInterval(() => {
+    updateTrancheData()
+  }, 10000)
+
+  React.useEffect(() => {
+    updateTrancheData()
   }, [])
 
   React.useEffect(() => {
-    if (hasPendingOrder) setCard('order')
-    else if (hasPendingCollection) setCard('collect')
+    if (hasPendingCollection) setCard('collect')
+    else if (hasPendingOrder) setCard('order')
     else setCard('home')
   }, [hasPendingCollection, hasPendingOrder])
 
@@ -114,7 +119,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         <>
           {card === 'home' && (
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button primary label="Redeem" onClick={() => setCard('redeem')} />
+              <Button primary label="Redeem" onClick={() => setCard('redeem')} disabled={balance === '0'} />
               <Button primary label="Invest" onClick={() => setCard('invest')} />
             </Box>
           )}
@@ -125,10 +130,11 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               setCard={setCard}
               disbursements={disbursements}
               tokenPrice={tokenPrice}
+              updateTrancheData={updateTrancheData}
             />
           )}
           {card === 'collect' && <CollectCard {...props} setCard={setCard} disbursements={disbursements} />}
-          {card === 'invest' && <InvestCard {...props} setCard={setCard} />}
+          {card === 'invest' && <InvestCard {...props} setCard={setCard} updateTrancheData={updateTrancheData} />}
           {card === 'redeem' && <RedeemCard {...props} setCard={setCard} />}
         </>
       )}
