@@ -5,6 +5,7 @@ import { baseToDisplay, ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import BN from 'bn.js'
+import { EpochData } from './index'
 
 import InvestCard from './InvestCard'
 import RedeemCard from './RedeemCard'
@@ -16,6 +17,7 @@ import { useInterval } from '../../../../utils/hooks'
 
 interface Props {
   pool: Pool
+  epochData: EpochData | undefined
   tranche: 'senior' | 'junior'
   tinlake: ITinlakeV3
 }
@@ -67,7 +69,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           ? await props.tinlake.calcSeniorDisburse(address)
           : await props.tinlake.calcJuniorDisburse(address)
       setDisbursements(disbursements)
-      // console.log(disbursements)
       setHasPendingOrder(!disbursements.remainingSupplyCurrency.add(disbursements.remainingRedeemToken).isZero())
       setHasPendingCollection(!disbursements.payoutCurrencyAmount.add(disbursements.payoutTokenAmount).isZero())
     }
@@ -135,6 +136,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               disbursements={disbursements}
               tokenPrice={tokenPrice}
               updateTrancheData={updateTrancheData}
+              epochData={props.epochData}
             />
           )}
           {card === 'collect' && (
@@ -146,7 +148,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             />
           )}
           {card === 'invest' && <InvestCard {...props} setCard={setCard} updateTrancheData={updateTrancheData} />}
-          {card === 'redeem' && <RedeemCard {...props} setCard={setCard} />}
+          {card === 'redeem' && <RedeemCard {...props} setCard={setCard} updateTrancheData={updateTrancheData} />}
         </>
       )}
 

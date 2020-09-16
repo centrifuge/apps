@@ -8,6 +8,7 @@ import { createTransaction, useTransactionState, TransactionProps } from '../../
 import { connect } from 'react-redux'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import BN from 'bn.js'
+import { EpochData } from './index'
 
 import { Description, Warning } from './styles'
 import { Card } from './TrancheOverview'
@@ -20,6 +21,7 @@ interface Props extends TransactionProps {
   tokenPrice: string
   tinlake: ITinlakeV3
   updateTrancheData: () => void
+  epochData: EpochData | undefined
 }
 
 const OrderCard: React.FC<Props> = (props: Props) => {
@@ -41,7 +43,14 @@ const OrderCard: React.FC<Props> = (props: Props) => {
 
   const cancel = async () => {
     // V3 TODO: handle cancelling redeem orders
-    const method = props.tranche === 'senior' ? 'cancelSeniorSupplyOrder' : 'cancelJuniorSupplyOrder'
+    const method =
+      type === 'Invest'
+        ? props.tranche === 'senior'
+          ? 'cancelSeniorSupplyOrder'
+          : 'cancelJuniorSupplyOrder'
+        : props.tranche === 'senior'
+        ? 'cancelSeniorRedeemOrder'
+        : 'cancelJuniorRedeemOrder'
     const txId = await props.createTransaction(`Cancel ${type.toLowerCase()} order`, method, [props.tinlake])
     setTxId(txId)
   }
@@ -72,7 +81,17 @@ const OrderCard: React.FC<Props> = (props: Props) => {
           <TableRow>
             <TableCell scope="row">Amount {type === 'Invest' ? 'DAI' : token} locked</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(props.disbursements.remainingSupplyCurrency, 18), 2))}
+              {addThousandsSeparators(
+                toPrecision(
+                  baseToDisplay(
+                    props.disbursements.remainingRedeemToken.isZero()
+                      ? props.disbursements.remainingSupplyCurrency
+                      : props.disbursements.remainingRedeemToken,
+                    18
+                  ),
+                  2
+                )
+              )}
             </TableCell>
           </TableRow>
           <TableRow>
@@ -84,6 +103,15 @@ const OrderCard: React.FC<Props> = (props: Props) => {
         </TableBody>
       </Table>
 
+      {(props.epochData?.state === 'in-challenge-period' || props.epochData?.state === 'challenge-period-ended') && (
+        <Warning>
+          <Heading level="6" margin={{ bottom: 'xsmall' }}>
+            Not cancellable
+          </Heading>
+          Lorem ipsum
+        </Warning>
+      )}
+
       {confirmCancellation && (
         <>
           <Warning>
@@ -94,16 +122,32 @@ const OrderCard: React.FC<Props> = (props: Props) => {
             back to your wallet.
           </Warning>
 
+          {props.epochData?.state}
+
           <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
             <Button label="Back" onClick={() => setConfirmCancellation(false)} />
-            <Button primary label="Cancel Order" onClick={cancel} />
+            <Button
+              primary
+              label="Cancel Order"
+              onClick={cancel}
+              disabled={
+                props.epochData?.state === 'in-challenge-period' || props.epochData?.state === 'challenge-period-ended'
+              }
+            />
           </Box>
         </>
       )}
 
       {!confirmCancellation && (
         <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
-          <Button primary label="Cancel Order" onClick={() => setConfirmCancellation(true)} />
+          <Button
+            primary
+            label="Cancel Order"
+            onClick={() => setConfirmCancellation(true)}
+            disabled={
+              props.epochData?.state === 'in-challenge-period' || props.epochData?.state === 'challenge-period-ended'
+            }
+          />
           {/* <Button primary label="Update Order" /> */}
         </Box>
       )}

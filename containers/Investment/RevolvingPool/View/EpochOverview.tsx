@@ -3,28 +3,14 @@ import { Box, Button, Heading, Table, TableBody, TableRow, TableCell } from 'gro
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
 import { connect } from 'react-redux'
+import { EpochData } from './index'
 
 interface Props extends TransactionProps {
+  epochData: EpochData
   tinlake: ITinlakeV3
 }
 
 const EpochOverview: React.FC<Props> = (props: Props) => {
-  const [epochId, setEpochId] = React.useState(0)
-  // const [epochMinimumTimeEnd, setEpochMinimumTimeEnd] = React.useState(0)
-  const [epochState, setEpochState] = React.useState('')
-
-  // const endHoursFromNow = Math.floor((epochMinimumTimeEnd - new Date().getTime()) / 1000 / 60 / 60)
-
-  React.useEffect(() => {
-    async function getState() {
-      setEpochId(await props.tinlake.getCurrentEpochId())
-      // setEpochMinimumTimeEnd(await props.tinlake.getCurrentEpochMinimumTimeEnd())
-      setEpochState(await props.tinlake.getCurrentEpochState())
-    }
-
-    getState()
-  }, [])
-
   const [status, , setTxId] = useTransactionState()
 
   const solve = async () => {
@@ -51,20 +37,20 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         <TableBody>
           <TableRow>
             <TableCell scope="row">Epoch #</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>{epochId}</TableCell>
+            <TableCell style={{ textAlign: 'end' }}>{props.epochData.id}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell scope="row">Epoch state</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>{epochState}</TableCell>
+            <TableCell style={{ textAlign: 'end' }}>{props.epochData.state}</TableCell>
           </TableRow>
         </TableBody>
       </Table>
 
       <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-        {epochState === 'can-be-closed' && (
+        {props.epochData.state === 'can-be-closed' && (
           <Button label="Close &amp; Solve Epoch" onClick={solve} disabled={disabled} />
         )}
-        {epochState === 'challenge-period-ended' && (
+        {props.epochData.state === 'challenge-period-ended' && (
           <Button label="Execute orders" onClick={execute} disabled={disabled} />
         )}
       </Box>

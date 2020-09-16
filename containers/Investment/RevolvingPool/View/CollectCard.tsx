@@ -20,9 +20,8 @@ interface Props extends TransactionProps {
 }
 
 const CollectCard: React.FC<Props> = (props: Props) => {
-  const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
-
   const type = props.disbursements.payoutCurrencyAmount.isZero() ? 'Invest' : 'Redeem'
+  const token = type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'
 
   const [status, , setTxId] = useTransactionState()
 
@@ -46,7 +45,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
         {token} available for collection
       </Heading>
       <Description>
-        Your {token} {type} order has been executed.
+        Your {token} {type.toLowerCase()} order has been executed.
       </Description>
 
       <Table margin={{ top: 'medium' }}>

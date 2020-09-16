@@ -14,8 +14,30 @@ interface Props {
   tinlake: ITinlakeV3
 }
 
+export type EpochData = {
+  id: number
+  state: 'open' | 'can-be-closed' | 'in-challenge-period' | 'challenge-period-ended'
+}
+
 const InvestmentsView: React.FC<Props> = (props: Props) => {
   const isAdmin = true
+
+  const [epochData, setEpochData] = React.useState<EpochData | undefined>(undefined)
+
+  const updateEpochData = async () => {
+    setEpochData({
+      id: await props.tinlake.getCurrentEpochId(),
+      state: await props.tinlake.getCurrentEpochState(),
+    })
+  }
+
+  React.useEffect(() => {
+    updateEpochData()
+  }, [])
+
+  React.useEffect(() => {
+    updateEpochData()
+  }, [props.tinlake])
 
   return (
     <Box margin={{ top: 'medium' }}>
@@ -39,15 +61,15 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
       </ExplainerCard>
 
       <Box direction="row" justify="start" gap="medium">
-        <TrancheOverview pool={props.pool} tinlake={props.tinlake} tranche="junior" />
-        <TrancheOverview pool={props.pool} tinlake={props.tinlake} tranche="senior" />
+        <TrancheOverview epochData={epochData} pool={props.pool} tinlake={props.tinlake} tranche="junior" />
+        <TrancheOverview epochData={epochData} pool={props.pool} tinlake={props.tinlake} tranche="senior" />
       </Box>
 
       {isAdmin && (
         <>
           <Heading level="4">Admin actions for {props.pool?.name}</Heading>
           <AdminActions pool={props.pool} tinlake={props.tinlake} />
-          <EpochOverview tinlake={props.tinlake} />
+          {epochData && <EpochOverview epochData={epochData} tinlake={props.tinlake} />}
         </>
       )}
     </Box>

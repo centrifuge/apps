@@ -42,9 +42,9 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
 
   const submit = async () => {
     console.log('tokenValue', tokenValue)
-    // const method = props.tranche === 'senior' ? 'submitSeniorSupplyOrder' : 'submitJuniorSupplyOrder'
-    // const txId = await props.createTransaction(`${token} Invest`, method, [props.tinlake, tokenValue])
-    // setTxId(txId)
+    const method = props.tranche === 'senior' ? 'submitSeniorRedeemOrder' : 'submitJuniorRedeemOrder'
+    const txId = await props.createTransaction(`${token} Redeem`, method, [props.tinlake, tokenValue])
+    setTxId(txId)
   }
 
   React.useEffect(() => {
