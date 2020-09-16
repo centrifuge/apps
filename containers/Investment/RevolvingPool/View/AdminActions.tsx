@@ -29,7 +29,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
       setMaxJuniorRatio(pool.data.maxJuniorRatio.toString())
       setMaxReserve(pool.data.maxReserve.toString())
     }
-  }, [pool])
+  }, [pool?.data])
 
   React.useEffect(() => {
     props.loadPool && props.loadPool(props.tinlake)
