@@ -247,11 +247,16 @@ export async function submitSeniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
     throw new Error('Missing tinlake signer')
   }
 
-  try {
-    const approvalTx = await tinlake.approveSeniorForCurrency(maxUint256)
-    await tinlake.getTransactionReceipt(approvalTx!)
-  } catch (e) {
-    return loggedError(e, `Could not approve currency for senior`, '')
+  const address = await tinlake.signer?.getAddress()
+  const allowance = (await tinlake.getSeniorForCurrencyAllowance(address)) || new BN(0)
+
+  if (allowance.lt(new BN(amount))) {
+    try {
+      const approvalTx = await tinlake.approveSeniorForCurrency(maxUint256)
+      await tinlake.getTransactionReceipt(approvalTx!)
+    } catch (e) {
+      return loggedError(e, `Could not approve currency for senior`, '')
+    }
   }
 
   return tinlake.submitSeniorSupplyOrder(amount)
@@ -266,11 +271,16 @@ export async function submitJuniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
     throw new Error('Missing tinlake signer')
   }
 
-  try {
-    const approvalTx = await tinlake.approveJuniorForCurrency(maxUint256)
-    await tinlake.getTransactionReceipt(approvalTx!)
-  } catch (e) {
-    return loggedError(e, `Could not approve currency for junior`, '')
+  const address = await tinlake.signer?.getAddress()
+  const allowance = (await tinlake.getJuniorForCurrencyAllowance(address)) || new BN(0)
+
+  if (allowance.lt(new BN(amount))) {
+    try {
+      const approvalTx = await tinlake.approveJuniorForCurrency(maxUint256)
+      await tinlake.getTransactionReceipt(approvalTx!)
+    } catch (e) {
+      return loggedError(e, `Could not approve currency for junior`, '')
+    }
   }
 
   return tinlake.submitJuniorSupplyOrder(amount)

@@ -28,6 +28,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
       setMinJuniorRatio(pool.data.minJuniorRatio.toString())
       setMaxJuniorRatio(pool.data.maxJuniorRatio.toString())
       setMaxReserve(pool.data.maxReserve.toString())
+      console.log('mr', pool.data.maxReserve.toString())
     }
   }, [pool?.data])
 
@@ -48,15 +49,16 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   const saveMaxJuniorRatio = async () => {
     const txId = await props.createTransaction(`Set max TIN risk buffer`, 'setMaxJuniorRatio', [
       props.tinlake,
-      minJuniorRatio.toString(),
+      maxJuniorRatio.toString(),
     ])
     setTxId(txId)
   }
 
   const saveMaxReserve = async () => {
+    console.log('new mr', maxReserve.toString())
     const txId = await props.createTransaction(`Set max reserve`, 'setMaxReserve', [
       props.tinlake,
-      minJuniorRatio.toString(),
+      maxReserve.toString(),
     ])
     setTxId(txId)
   }
