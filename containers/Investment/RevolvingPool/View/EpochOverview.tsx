@@ -25,7 +25,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
     getState()
   }, [])
 
-  const [status, result, setTxId] = useTransactionState()
+  const [status, , setTxId] = useTransactionState()
 
   const solve = async () => {
     const txId = await props.createTransaction(`Run solver`, 'solveEpoch', [props.tinlake])
@@ -36,10 +36,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
     await props.createTransaction(`Execute epoch`, 'executeEpoch', [props.tinlake])
   }
 
-  React.useEffect(() => {
-    console.log(status)
-    console.log(result)
-  }, [status])
+  const disabled = status === 'unconfirmed' || status === 'pending'
 
   return (
     <Box width="420px" pad="medium" margin={{ bottom: 'medium' }}>
@@ -63,8 +60,12 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
       </Table>
 
       <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-        {epochState === 'can-be-closed' && <Button label="Close &amp; Solve Epoch" onClick={() => solve()} />}
-        {epochState === 'challenge-period-ended' && <Button label="Execute orders" onClick={() => execute()} />}
+        {epochState === 'can-be-closed' && (
+          <Button label="Close &amp; Solve Epoch" onClick={() => solve()} disabled={disabled} />
+        )}
+        {epochState === 'challenge-period-ended' && (
+          <Button label="Execute orders" onClick={() => execute()} disabled={disabled} />
+        )}
       </Box>
     </Box>
   )

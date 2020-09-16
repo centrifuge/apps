@@ -7,6 +7,7 @@ import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
 import { connect } from 'react-redux'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
+import BN from 'bn.js'
 
 import { Description, Warning } from './styles'
 import { Card } from './TrancheOverview'
@@ -28,16 +29,18 @@ const OrderCard: React.FC<Props> = (props: Props) => {
 
   const [confirmCancellation, setConfirmCancellation] = React.useState(false)
 
-  // const lockedValue =
-  //   props.disbursements && !props.disbursements.remainingSupplyCurrency.isZero()
-  //     ? props.disbursements.remainingSupplyCurrency
-  //         .mul(new BN(props.tokenPrice).div(new BN(10).pow(new BN(7))))
-  //         .toString()
-  //     : new BN(0)
+  const lockedValue =
+    props.disbursements && !props.disbursements.remainingSupplyCurrency.isZero()
+      ? props.disbursements.remainingSupplyCurrency
+          .div(new BN(10).pow(new BN(18)))
+          .mul(new BN(props.tokenPrice).div(new BN(10).pow(new BN(27))))
+          .toString()
+      : '0'
 
   const [status, , setTxId] = useTransactionState()
 
   const cancel = async () => {
+    // V3 TODO: handle cancelling redeem orders
     const method = props.tranche === 'senior' ? 'cancelSeniorSupplyOrder' : 'cancelJuniorSupplyOrder'
     const txId = await props.createTransaction(`Cancel ${type.toLowerCase()} order`, method, [props.tinlake])
     setTxId(txId)
@@ -52,7 +55,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
   return (
     <Box>
       <Heading level="6" margin={{ bottom: 'xsmall' }}>
-        Pending {type} Order for Epoch #NEXT
+        Pending {type} Order
       </Heading>
       <Description>
         You have locked {type === 'Invest' ? 'DAI' : token} to {type.toLowerCase()}{' '}
@@ -74,7 +77,9 @@ const OrderCard: React.FC<Props> = (props: Props) => {
           </TableRow>
           <TableRow>
             <TableCell scope="row">Locked value at current token price</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>0 DAI</TableCell>
+            <TableCell style={{ textAlign: 'end' }}>
+              {addThousandsSeparators(toPrecision(lockedValue, 2))} DAI
+            </TableCell>
           </TableRow>
         </TableBody>
       </Table>
@@ -83,10 +88,10 @@ const OrderCard: React.FC<Props> = (props: Props) => {
         <>
           <Warning>
             <Heading level="6" margin={{ bottom: 'xsmall' }}>
-              Cancel Pending {type} Order for Epoch #NEXT
+              Cancel Pending {type} Order
             </Heading>
-            Please confirm that you want to cancel your pending order for Epoch #. Your {token} will be unlocked and
-            tranferred back to your wallet.
+            Please confirm that you want to cancel your pending order. Your {token} will be unlocked and transferred
+            back to your wallet.
           </Warning>
 
           <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>

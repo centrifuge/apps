@@ -82,6 +82,10 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   }, [])
 
   React.useEffect(() => {
+    updateTrancheData()
+  }, [props.tinlake])
+
+  React.useEffect(() => {
     if (hasPendingCollection) setCard('collect')
     else if (hasPendingOrder) setCard('order')
     else setCard('home')
@@ -133,7 +137,14 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               updateTrancheData={updateTrancheData}
             />
           )}
-          {card === 'collect' && <CollectCard {...props} setCard={setCard} disbursements={disbursements} />}
+          {card === 'collect' && (
+            <CollectCard
+              {...props}
+              setCard={setCard}
+              disbursements={disbursements}
+              updateTrancheData={updateTrancheData}
+            />
+          )}
           {card === 'invest' && <InvestCard {...props} setCard={setCard} updateTrancheData={updateTrancheData} />}
           {card === 'redeem' && <RedeemCard {...props} setCard={setCard} />}
         </>

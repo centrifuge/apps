@@ -4,7 +4,7 @@ import { Pool } from '../../../../config'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
-import { createTransaction, TransactionProps } from '../../../../ducks/transactions'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
 import { connect } from 'react-redux'
 
 import { Description } from './styles'
@@ -16,6 +16,7 @@ interface Props extends TransactionProps {
   setCard: (card: Card) => void
   disbursements: any
   tinlake: any
+  updateTrancheData: () => void
 }
 
 const CollectCard: React.FC<Props> = (props: Props) => {
@@ -23,10 +24,21 @@ const CollectCard: React.FC<Props> = (props: Props) => {
 
   const type = props.disbursements.payoutCurrencyAmount.isZero() ? 'Redeem' : 'Invest'
 
+  const [status, , setTxId] = useTransactionState()
+
   const collect = async () => {
     const method = props.tranche === 'senior' ? 'disburseSenior' : 'disburseJunior'
-    await props.createTransaction(`Collect ${token}`, method, [props.tinlake])
+    const txId = await props.createTransaction(`Collect ${token}`, method, [props.tinlake])
+    setTxId(txId)
   }
+
+  React.useEffect(() => {
+    if (status === 'succeeded') {
+      props.updateTrancheData()
+    }
+  }, [status])
+
+  const disabled = status === 'unconfirmed' || status === 'pending'
 
   return (
     <Box>
@@ -34,7 +46,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
         {token} available for collection
       </Heading>
       <Description>
-        Your {token} {type} order has been executed in Epoch #.
+        Your {token} {type} order has been executed.
       </Description>
 
       <Table margin={{ top: 'medium' }}>
@@ -77,7 +89,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
       </Table>
 
       <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
-        <Button primary label="Collect" onClick={() => collect()} />
+        <Button primary label="Collect" onClick={() => collect()} disabled={disabled} />
       </Box>
     </Box>
   )
