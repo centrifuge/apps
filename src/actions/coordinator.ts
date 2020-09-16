@@ -126,9 +126,11 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const coordinator = this.contract('COORDINATOR')
 
       const minChallengePeriodEnd = (await coordinator.minChallengePeriodEnd()).toBN().toNumber()
+      const latestBlockTimestamp = (await this.provider.getBlock(await this.provider.getBlockNumber())).timestamp
+      console.log('latestBlockTime', latestBlockTimestamp)
       console.log('minChallengePeriodEnd', minChallengePeriodEnd)
       if (minChallengePeriodEnd !== 0) {
-        if (minChallengePeriodEnd < new Date().getTime()) return 'challenge-period-ended'
+        if (minChallengePeriodEnd < latestBlockTimestamp) return 'challenge-period-ended'
         return 'in-challenge-period'
       }
 
@@ -138,7 +140,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       console.log('lastEpochClosed', lastEpochClosed)
       console.log('minimumEpochTime', minimumEpochTime)
       console.log('currentTimestampInSeconds', currentTimestampInSeconds)
-      if (lastEpochClosed + minimumEpochTime < currentTimestampInSeconds) {
+      if (lastEpochClosed + minimumEpochTime < latestBlockTimestamp) {
         return 'can-be-closed'
       }
 
