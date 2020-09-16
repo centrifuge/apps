@@ -11,7 +11,7 @@ import InvestCard from './InvestCard'
 import RedeemCard from './RedeemCard'
 import OrderCard from './OrderCard'
 import CollectCard from './CollectCard'
-import { TokenLogo, Warning } from './styles'
+import { TokenLogo, Info } from './styles'
 import InvestAction from '../../../../components/InvestAction'
 import { useInterval } from '../../../../utils/hooks'
 
@@ -29,7 +29,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   const [card, setCard] = React.useState<Card>('home')
 
-  const [isInMemberlist] = React.useState<boolean | undefined>(true)
+  const [isInMemberlist, setIsInMemberlist] = React.useState<boolean | undefined>(undefined)
 
   const [balance, setBalance] = React.useState('0')
   const [tokenPrice, setTokenPrice] = React.useState('0')
@@ -46,11 +46,11 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const updateTrancheData = async () => {
     const address = await props.tinlake.signer?.getAddress()
     if (address) {
-      // const isInMemberlist =
-      //   props.tranche === 'senior'
-      //     ? await props.tinlake.checkSeniorTokenMemberlist(address)
-      //     : await props.tinlake.checkJuniorTokenMemberlist(address)
-      // setIsInMemberlist(true)
+      const isInMemberlist =
+        props.tranche === 'senior'
+          ? await props.tinlake.checkSeniorTokenMemberlist(address)
+          : await props.tinlake.checkJuniorTokenMemberlist(address)
+      setIsInMemberlist(isInMemberlist)
 
       const balance =
         props.tranche === 'senior'
@@ -76,7 +76,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   useInterval(() => {
     updateTrancheData()
-  }, 10000)
+  }, 30000)
 
   React.useEffect(() => {
     updateTrancheData()
@@ -153,7 +153,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       )}
 
       {!isInMemberlist && (
-        <Warning>
+        <Info>
           <Heading level="6" margin={{ bottom: 'xsmall' }}>
             Not allowed
           </Heading>
@@ -161,7 +161,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           <Box justify="end" margin={{ top: 'small' }}>
             <InvestAction poolName={props.pool.name} />
           </Box>
-        </Warning>
+        </Info>
       )}
     </Box>
   )

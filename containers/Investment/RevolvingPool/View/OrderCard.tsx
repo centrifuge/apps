@@ -10,7 +10,7 @@ import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import BN from 'bn.js'
 import { EpochData } from './index'
 
-import { Description, Warning } from './styles'
+import { Description, Warning, Info } from './styles'
 import { Card } from './TrancheOverview'
 
 interface Props extends TransactionProps {
@@ -25,12 +25,12 @@ interface Props extends TransactionProps {
 }
 
 const OrderCard: React.FC<Props> = (props: Props) => {
-  const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
-
   const type = props.disbursements.remainingSupplyCurrency.isZero() ? 'Redeem' : 'Invest'
+  const token = type === 'Invest' ? 'DAI' : props.tranche === 'senior' ? 'DROP' : 'TIN'
 
   const [confirmCancellation, setConfirmCancellation] = React.useState(false)
 
+  // V3 TODO: handle redeem
   const lockedValue =
     props.disbursements && !props.disbursements.remainingSupplyCurrency.isZero()
       ? props.disbursements.remainingSupplyCurrency
@@ -42,7 +42,6 @@ const OrderCard: React.FC<Props> = (props: Props) => {
   const [status, , setTxId] = useTransactionState()
 
   const cancel = async () => {
-    // V3 TODO: handle cancelling redeem orders
     const method =
       type === 'Invest'
         ? props.tranche === 'senior'
@@ -61,15 +60,20 @@ const OrderCard: React.FC<Props> = (props: Props) => {
     }
   }, [status])
 
+  const disabled =
+    status === 'pending' ||
+    status === 'unconfirmed' ||
+    props.epochData?.state === 'in-challenge-period' ||
+    props.epochData?.state === 'challenge-period-ended'
+
   return (
     <Box>
       <Heading level="6" margin={{ bottom: 'xsmall' }}>
         Pending {type} Order
       </Heading>
       <Description>
-        You have locked {type === 'Invest' ? 'DAI' : token} to {type.toLowerCase()}{' '}
-        {type === 'Invest' ? 'into' : 'from'} Tinlake for the next epoch. You can cancel or update this order until the
-        end of the current epoch.
+        You have locked {token} to {type.toLowerCase()} {type === 'Invest' ? 'into' : 'from'} Tinlake for the next
+        epoch. You can cancel or update this order until the end of the current epoch.
       </Description>
 
       <Table margin={{ top: 'medium' }}>
@@ -79,7 +83,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
             <TableCell style={{ textAlign: 'end' }}>{type}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell scope="row">Amount {type === 'Invest' ? 'DAI' : token} locked</TableCell>
+            <TableCell scope="row">Amount {token} locked</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
               {addThousandsSeparators(
                 toPrecision(
@@ -97,19 +101,19 @@ const OrderCard: React.FC<Props> = (props: Props) => {
           <TableRow>
             <TableCell scope="row">Locked value at current token price</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(lockedValue, 2))} DAI
+              {addThousandsSeparators(toPrecision(lockedValue, 2))} {token}
             </TableCell>
           </TableRow>
         </TableBody>
       </Table>
 
       {(props.epochData?.state === 'in-challenge-period' || props.epochData?.state === 'challenge-period-ended') && (
-        <Warning>
+        <Info>
           <Heading level="6" margin={{ bottom: 'xsmall' }}>
             Not cancellable
           </Heading>
-          Lorem ipsum
-        </Warning>
+          In challenge period
+        </Info>
       )}
 
       {confirmCancellation && (
@@ -122,32 +126,16 @@ const OrderCard: React.FC<Props> = (props: Props) => {
             back to your wallet.
           </Warning>
 
-          {props.epochData?.state}
-
           <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
             <Button label="Back" onClick={() => setConfirmCancellation(false)} />
-            <Button
-              primary
-              label="Cancel Order"
-              onClick={cancel}
-              disabled={
-                props.epochData?.state === 'in-challenge-period' || props.epochData?.state === 'challenge-period-ended'
-              }
-            />
+            <Button primary label="Cancel Order" onClick={cancel} disabled={disabled} />
           </Box>
         </>
       )}
 
       {!confirmCancellation && (
         <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
-          <Button
-            primary
-            label="Cancel Order"
-            onClick={() => setConfirmCancellation(true)}
-            disabled={
-              props.epochData?.state === 'in-challenge-period' || props.epochData?.state === 'challenge-period-ended'
-            }
-          />
+          <Button primary label="Cancel Order" onClick={() => setConfirmCancellation(true)} disabled={disabled} />
           {/* <Button primary label="Update Order" /> */}
         </Box>
       )}
