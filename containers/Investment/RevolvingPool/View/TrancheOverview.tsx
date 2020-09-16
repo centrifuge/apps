@@ -30,7 +30,10 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   const [balance, setBalance] = React.useState('0')
   const [tokenPrice, setTokenPrice] = React.useState('0')
-  const value = new BN(balance).mul(new BN(tokenPrice).div(new BN(10).pow(new BN(7)))).toString()
+  const value = new BN(balance)
+    .div(new BN(10).pow(new BN(18)))
+    .mul(new BN(tokenPrice).div(new BN(10).pow(new BN(27))))
+    .toString()
 
   const [disbursements, setDisbursements] = React.useState<any>(undefined)
   const [hasPendingOrder, setHasPendingOrder] = React.useState(false)
@@ -102,9 +105,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           </TableRow>
           <TableRow>
             <TableCell scope="row">Your {token} Value</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>
-              DAI {addThousandsSeparators(toPrecision(baseToDisplay(value, 27), 2))}{' '}
-            </TableCell>
+            <TableCell style={{ textAlign: 'end' }}>DAI {addThousandsSeparators(toPrecision(value, 2))} </TableCell>
           </TableRow>
         </TableBody>
       </Table>
