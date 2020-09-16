@@ -45,11 +45,29 @@ const AdminActions: React.FC<Props> = (props: Props) => {
     setTxId(txId)
   }
 
+  const saveMaxJuniorRatio = async () => {
+    const txId = await props.createTransaction(`Set max TIN risk buffer`, 'setMaxJuniorRatio', [
+      props.tinlake,
+      minJuniorRatio.toString(),
+    ])
+    setTxId(txId)
+  }
+
+  const saveMaxReserve = async () => {
+    const txId = await props.createTransaction(`Set max reserve`, 'setMaxReserve', [
+      props.tinlake,
+      minJuniorRatio.toString(),
+    ])
+    setTxId(txId)
+  }
+
   React.useEffect(() => {
     if (status === 'succeeded') {
       props.loadPool && props.loadPool(props.tinlake)
     }
   }, [status])
+
+  const disabled = status === 'unconfirmed' || status === 'pending'
 
   return (
     <>
@@ -70,6 +88,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 value={baseToDisplay(minJuniorRatio, 25)}
                 precision={2}
                 onValueChange={({ value }) => setMinJuniorRatio(displayToBase(value, 25))}
+                disabled={disabled}
               />
             </FormField>
 
@@ -77,10 +96,8 @@ const AdminActions: React.FC<Props> = (props: Props) => {
               <Button
                 primary
                 label="Apply"
-                onClick={() => saveMinJuniorRatio()}
-                disabled={
-                  status === 'unconfirmed' || status === 'pending' || minJuniorRatio === pool.data.minJuniorRatio
-                }
+                onClick={saveMinJuniorRatio}
+                disabled={disabled || minJuniorRatio === pool.data.minJuniorRatio}
               />
             </Box>
           </Box>
@@ -99,12 +116,13 @@ const AdminActions: React.FC<Props> = (props: Props) => {
               <NumberInput
                 value={baseToDisplay(maxJuniorRatio, 25)}
                 precision={2}
-                onValueChange={({ value }) => setMinJuniorRatio(displayToBase(value, 25))}
+                onValueChange={({ value }) => setMaxJuniorRatio(displayToBase(value, 25))}
+                disabled={disabled}
               />
             </FormField>
 
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button primary label="Apply" />
+              <Button primary label="Apply" onClick={saveMaxJuniorRatio} disabled={disabled} />
             </Box>
           </Box>
 
@@ -122,12 +140,13 @@ const AdminActions: React.FC<Props> = (props: Props) => {
               <NumberInput
                 value={baseToDisplay(maxReserve, 18)}
                 precision={2}
-                onValueChange={({ value }) => console.log(displayToBase(value, 18))}
+                onValueChange={({ value }) => setMaxReserve(displayToBase(value, 18))}
+                disabled={disabled}
               />
             </FormField>
 
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button primary label="Apply" />
+              <Button primary label="Apply" onClick={saveMaxReserve} disabled={disabled} />
             </Box>
           </Box>
         </Box>

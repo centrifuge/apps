@@ -68,7 +68,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
 
       <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
-        <Button primary label="Lock DAI" onClick={() => submit()} disabled={disabled} />
+        <Button primary label="Lock DAI" onClick={submit} disabled={disabled} />
       </Box>
     </Box>
   )

@@ -432,6 +432,14 @@ export async function setMinJuniorRatio(tinlake: ITinlake | ITinlakeV3, ratio: s
   return await tinlake.setMinimumJuniorRatio(ratio)
 }
 
+export async function setMaxJuniorRatio(tinlake: ITinlakeV3, ratio: string): Promise<PendingTransaction> {
+  return await tinlake.setMaximumJuniorRatio(ratio)
+}
+
+export async function setMaxReserve(tinlake: ITinlakeV3, ratio: string): Promise<PendingTransaction> {
+  return await tinlake.setMaximumReserve(ratio)
+}
+
 export async function supply(
   tinlake: ITinlake,
   supplyAmount: string,
@@ -538,11 +546,13 @@ export async function redeem(
     return loggedError(e, `Could not redeem ${trancheType}.`, '')
   }
 
+  // TODO: the PendingTransaction type contains a .receipt() required parameter. This should change to an optional parameter (or be removed), but that means we need to publish a new version of Tinlake.js v2 and v3 to npm. So that first needs to be done before this any cast can be removed.
   return { status: 0 } as any
 }
 
 function loggedError(error: any, message: string, id: string): PendingTransaction {
   console.error(`${message} ${id}`, error)
+  // TODO: same as line 549
   return {
     status: 0,
     error: message,

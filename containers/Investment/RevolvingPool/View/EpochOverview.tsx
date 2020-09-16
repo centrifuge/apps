@@ -33,7 +33,8 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   }
 
   const execute = async () => {
-    await props.createTransaction(`Execute epoch`, 'executeEpoch', [props.tinlake])
+    const txId = await props.createTransaction(`Execute epoch`, 'executeEpoch', [props.tinlake])
+    setTxId(txId)
   }
 
   const disabled = status === 'unconfirmed' || status === 'pending'
@@ -61,10 +62,10 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
 
       <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
         {epochState === 'can-be-closed' && (
-          <Button label="Close &amp; Solve Epoch" onClick={() => solve()} disabled={disabled} />
+          <Button label="Close &amp; Solve Epoch" onClick={solve} disabled={disabled} />
         )}
         {epochState === 'challenge-period-ended' && (
-          <Button label="Execute orders" onClick={() => execute()} disabled={disabled} />
+          <Button label="Execute orders" onClick={execute} disabled={disabled} />
         )}
       </Box>
     </Box>

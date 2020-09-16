@@ -22,7 +22,7 @@ interface Props extends TransactionProps {
 const CollectCard: React.FC<Props> = (props: Props) => {
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
 
-  const type = props.disbursements.payoutCurrencyAmount.isZero() ? 'Redeem' : 'Invest'
+  const type = props.disbursements.payoutCurrencyAmount.isZero() ? 'Invest' : 'Redeem'
 
   const [status, , setTxId] = useTransactionState()
 
@@ -89,7 +89,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
       </Table>
 
       <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
-        <Button primary label="Collect" onClick={() => collect()} disabled={disabled} />
+        <Button primary label="Collect" onClick={collect} disabled={disabled} />
       </Box>
     </Box>
   )
