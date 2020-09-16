@@ -10,16 +10,9 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return (await this.contract('PILE').total()).toBN()
     }
 
-    // REV: probably can be removed
-    getTotalBalance = async (): Promise<BN> => {
-      return (await this.contract('SHELF').balance()).toBN()
-    }
-
-    // TODO: REV: replace with NAVFeed contract call -- placeholder return for now
     getPrincipal = async (loanId: string): Promise<BN> => {
-      return (await this.contract('SHELF').balance()).toBN()
+      return (await this.contract('FEED').ceiling(loanId)).toBN()
     }
-
     getDebt = async (loanId: string): Promise<BN> => {
       return (await this.contract('PILE').debt(loanId)).toBN()
     }
@@ -109,21 +102,16 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       const tokenBalanceJunior = await this.getJuniorTokenBalance(user)
       const tokenBalanceSenior = (includeSenior && (await this.getSeniorTokenBalance(user))) || new BN(0)
       const maxSupplyJunior = await this.getMaxSupplyAmountJunior(user) // REV: remove, or return DAI balance of user
-
       const maxSupplySenior = (includeSenior && (await this.getMaxSupplyAmountSenior(user))) || new BN(0) // REV: remove, or return DAI balance of user
-      const maxRedeemJunior = await this.getMaxRedeemAmountJunior(user) // REV: remove, or return token balance of user
-      const maxRedeemSenior = (includeSenior && (await this.getMaxRedeemAmountSenior(user))) || new BN(0) // REV: remove, or return token balance of user
 
       return {
         junior: {
           tokenBalance: tokenBalanceJunior,
           maxSupply: maxSupplyJunior,
-          maxRedeem: maxRedeemJunior,
         },
         senior: {
           tokenBalance: tokenBalanceSenior || new BN(0),
           maxSupply: maxSupplySenior || new BN(0),
-          maxRedeem: maxRedeemSenior || new BN(0),
         },
         address: user,
       }
@@ -137,14 +125,8 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return (await this.contract('JUNIOR_TOKEN').totalSupply()).toBN()
     }
 
-    // REV: remove
     getMaxSupplyAmountJunior = async (user: string) => {
-      return (await this.contract('JUNIOR_OPERATOR').maxCurrency(user)).toBN()
-    }
-
-    // REV: remove
-    getMaxRedeemAmountJunior = async (user: string) => {
-      return (await this.contract('JUNIOR_OPERATOR').maxToken(user)).toBN()
+      return (await this.contract('TINLAKE_CURRENCY').balanceOf(user)).toBN()
     }
 
     getTokenPriceJunior = async () => {
@@ -165,62 +147,26 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return (await this.contract('SENIOR_TOKEN').totalSupply()).toBN()
     }
 
-    // REV: remove
     getMaxSupplyAmountSenior = async (user: string) => {
-      if (this.contractAddresses['SENIOR_OPERATOR'] === ZERO_ADDRESS) return new BN(0)
-
-      const operatorType = this.getOperatorType('senior')
-      let maxSupply: BN
-      switch (operatorType) {
-        case 'PROPORTIONAL_OPERATOR':
-          const supplyLimit = (await this.contract('SENIOR_OPERATOR').supplyMaximum(user)).toBN()
-          const supplied = (await this.contract('SENIOR_OPERATOR').tokenReceived(user)).toBN()
-          maxSupply = supplyLimit.sub(supplied)
-          break
-
-        case 'ALLOWANCE_OPERATOR':
-          maxSupply = (await this.contract('SENIOR_OPERATOR').maxCurrency(user)).toBN()
-          break
-        default:
-          maxSupply = new BN(0)
-      }
-      return maxSupply
-    }
-
-    // REV: remove
-    getMaxRedeemAmountSenior = async (user: string) => {
-      if (this.contractAddresses['SENIOR_OPERATOR'] === ZERO_ADDRESS) return new BN(0)
-
-      const operatorType = this.getOperatorType('senior')
-      let maxRedeem: BN
-      switch (operatorType) {
-        case 'PROPORTIONAL_OPERATOR':
-          maxRedeem = (await this.contract('SENIOR_OPERATOR').calcMaxRedeemToken(user)).toBN()
-          break
-        case 'ALLOWANCE_OPERATOR':
-          maxRedeem = (await this.contract('SENIOR_OPERATOR').maxToken(user)).toBN()
-          break
-        default:
-          maxRedeem = new BN(0)
-      }
-      return maxRedeem
+      if (!this.existsSenior()) return new BN(0)
+      return (await this.contract('TINLAKE_CURRENCY').balanceOf(user)).toBN()
     }
 
     getTokenPriceSenior = async () => {
       return (await this.contract('ASSESSOR')['calcSeniorTokenPrice()']()).toBN()
     }
 
-    // REV: moved to ASSESSOR contract
     getSeniorReserve = async () => {
-      if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
-        return (await this.contract('SENIOR').balance()).toBN()
+      if (this.contractAddresses['SENIOR_TRANCHE'] !== ZERO_ADDRESS) {
+        return (await this.contract('ASSESSOR').seniorBalance_()).toBN()
       }
       return new BN(0)
     }
 
-    // REV: remove
     getJuniorReserve = async () => {
-      return (await this.contract('JUNIOR').balance()).toBN()
+      const seniorBalance = await this.getSeniorReserve()
+      const totalBalance = (await this.contract('ASSESSOR').maxReserve()).toBN()
+      return totalBalance.sub(seniorBalance)
     }
 
     getMinJuniorRatio = async () => {
@@ -240,21 +186,19 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getAssetValueJunior = async () => {
-      return (await this.contract('ASSESSOR').calcAssetValue(this.contractAddresses['JUNIOR'])).toBN()
+      return (await this.contract('ASSESSOR').calcAssetValue(this.contractAddresses['JUNIOR_TRANCHE'])).toBN()
     }
 
-    // REV: moved to ASSESSOR contract
     getSeniorDebt = async () => {
-      if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
-        return (await this.contract('SENIOR').debt()).toBN()
+      if (this.contractAddresses['SENIOR_TRANCHE'] !== ZERO_ADDRESS) {
+        return (await this.contract('ASSESSOR').seniorDebt_()).toBN()
       }
       return new BN(0)
     }
 
-    // REV: moved to ASSESSOR contract
     getSeniorInterestRate = async () => {
-      if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
-        return (await this.contract('SENIOR').ratePerSecond()).toBN()
+      if (this.contractAddresses['SENIOR_TRANCHE'] !== ZERO_ADDRESS) {
+        return (await this.contract('ASSESSOR').seniorInterestRate()).toBN()
       }
       return new BN(0)
     }
@@ -267,7 +211,6 @@ const seniorToJuniorRatio = (seniorRatio: BN) => {
 
 export type IAnalyticsActions = {
   getTotalDebt(): Promise<BN>
-  getTotalBalance(): Promise<BN>
   getDebt(loanId: string): Promise<BN>
   loanCount(): Promise<BN>
   getLoanList(): Promise<Loan[]>
@@ -285,9 +228,7 @@ export type IAnalyticsActions = {
   getJuniorTotalSupply(): Promise<BN>
   getSeniorTotalSupply(): Promise<BN>
   getMaxSupplyAmountJunior(user: string): Promise<BN>
-  getMaxRedeemAmountJunior(user: string): Promise<BN>
   getMaxSupplyAmountSenior(user: string): Promise<BN>
-  getMaxRedeemAmountSenior(user: string): Promise<BN>
   getTokenPriceJunior(): Promise<BN>
   getTokenPriceSenior(): Promise<BN>
   getSeniorDebt(): Promise<BN>
