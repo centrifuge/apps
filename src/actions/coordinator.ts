@@ -66,12 +66,16 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
       if ((await coordinator.submissionPeriod()) === false) {
         // The epoch is can be closed, but is not closed yet
-        console.log('calling close epoch')
         const closeTx = await coordinator.closeEpoch()
         console.log(closeTx)
-        await this.getTransactionReceipt(closeTx)
+        const closeResult = await this.getTransactionReceipt(closeTx)
 
-        console.log('close epoch done')
+        console.log('close epoch done', closeResult)
+
+        if (closeResult.status === 0) {
+          console.log('Failed to close the epoch')
+          return { status: 0, error: 'Unable to close the epoch' } as any
+        }
 
         // If it's not in a submission period after closing the epoch, then it could immediately be solved and executed
         // (i.e. all orders could be fulfilled)
@@ -129,8 +133,6 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
       const minChallengePeriodEnd = (await coordinator.minChallengePeriodEnd()).toBN().toNumber()
       const latestBlockTimestamp = (await this.provider.getBlock(await this.provider.getBlockNumber())).timestamp
-      console.log('latestBlockTime', latestBlockTimestamp)
-      console.log('minChallengePeriodEnd', minChallengePeriodEnd)
       if (minChallengePeriodEnd !== 0) {
         if (minChallengePeriodEnd < latestBlockTimestamp) return 'challenge-period-ended'
         return 'in-challenge-period'
@@ -138,16 +140,11 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
       const lastEpochClosed = (await coordinator.lastEpochClosed()).toBN().toNumber()
       const minimumEpochTime = (await coordinator.minimumEpochTime()).toBN().toNumber()
-      const currentTimestampInSeconds = new Date().getTime() / 1000
-      console.log('lastEpochClosed', lastEpochClosed)
-      console.log('minimumEpochTime', minimumEpochTime)
-      console.log('currentTimestampInSeconds', currentTimestampInSeconds)
-      const submissionPeriod = await coordinator.submissionPeriod()
-      console.log('submissionPeriod', submissionPeriod)
       if (lastEpochClosed + minimumEpochTime < latestBlockTimestamp) {
         return 'can-be-closed'
       }
-
+      
+      const submissionPeriod = await coordinator.submissionPeriod()
       if (!submissionPeriod) return 'open'
 
       throw new Error('Arrived at impossible current epoch state')
