@@ -532,7 +532,6 @@ export async function supply(
     }
   }
 
-
   // supply
   try {
     if (trancheType === 'junior') {
