@@ -37,7 +37,6 @@ const InvestCard: React.FC<Props> = (props: Props) => {
   const [status, , setTxId] = useTransactionState()
 
   const submit = async () => {
-    console.log('daiValue', daiValue)
     const method = props.tranche === 'senior' ? 'submitSeniorSupplyOrder' : 'submitJuniorSupplyOrder'
     const txId = await props.createTransaction(`${token} Invest`, method, [props.tinlake, daiValue])
     setTxId(txId)

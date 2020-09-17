@@ -36,7 +36,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
     !(props.disbursements.remainingSupplyCurrency.isZero() && props.disbursements.remainingRedeemToken.isZero())
       ? (props.disbursements.remainingSupplyCurrency.isZero()
           ? props.disbursements.remainingRedeemToken
-          : props.disbursements.remainingCurrencyToken
+          : props.disbursements.remainingSupplyCurrency
         )
           .div(new BN(10).pow(new BN(18)))
           .mul(new BN(props.tokenPrice).div(new BN(10).pow(new BN(27))))
