@@ -44,7 +44,7 @@ class InvestmentPage extends React.Component<Props> {
                     render={(auth) => (
                       <Box>
                         {tinlake.version === 3 && (
-                          <RevolvingPoolInvestmentsView pool={pool} tinlake={tinlake as ITinlakeV3} />
+                          <RevolvingPoolInvestmentsView activePool={pool} tinlake={tinlake as ITinlakeV3} />
                         )}
                         {tinlake.version === 2 && (
                           <>
