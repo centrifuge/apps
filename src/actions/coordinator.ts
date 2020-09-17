@@ -39,34 +39,70 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return { reserve, netAssetValue, seniorAsset, minTinRatio, maxTinRatio, maxReserve }
     }
 
+    getOrderState = async () => {
+      const coordinator = this.contract('COORDINATOR')
+      const orderState = await coordinator.order()
+
+      const valueBase = new BN(10).pow(new BN(18))
+    
+      return {
+        dropRedeemOrder: orderState.seniorRedeem.toBN().isZero()
+          ? 0.0
+          : orderState.seniorRedeem.toBN().div(valueBase).toNumber(),
+        tinRedeemOrder: orderState.juniorRedeem.toBN().isZero()
+          ? 0.0
+          : orderState.juniorRedeem.toBN().div(valueBase).toNumber(),
+        tinInvestOrder: orderState.juniorSupply.toBN().isZero()
+          ? 0.0
+          : orderState.juniorSupply.toBN().div(valueBase).toNumber(),
+        dropInvestOrder: orderState.seniorSupply.toBN().isZero()
+          ? 0.0
+          : orderState.seniorSupply.toBN().div(valueBase).toNumber(),
+      }
+    }
+
     solveEpoch = async () => {
       const coordinator = this.contract('COORDINATOR')
 
       if ((await coordinator.submissionPeriod()) === false) {
         // The epoch is can be closed, but is not closed yet
         const closeTx = await coordinator.closeEpoch()
-        await this.getTransactionReceipt(closeTx)
+        console.log(closeTx)
+        const closeResult = await this.getTransactionReceipt(closeTx)
+
+        console.log('close epoch done', closeResult)
+
+        if (closeResult.status === 0) {
+          console.log('Failed to close the epoch')
+          return { status: 0, error: 'Unable to close the epoch' } as any
+        }
 
         // If it's not in a submission period after closing the epoch, then it could immediately be solved and executed
         // (i.e. all orders could be fulfilled)
         if ((await coordinator.submissionPeriod()) === false) {
-          throw new Error('Epoch was immediately executed')
+          console.log('Epoch was immediately executed')
+          return { status: 1 } as any
         }
       }
 
       const state = await this.getEpochState()
-      const orderState = await coordinator.order()
+      const orderState = await this.getOrderState()
+
+      console.log(state)
+      console.log(orderState)
 
       const solution = await calculateOptimalSolution(state, orderState)
       console.log('Solution found', solution)
 
       if (solution.status !== 5) {
+        // TODO: rather than throw an error, we should return some kind of success message here
         throw new Error('Solution could not be found for the current epoch')
       }
 
       // TODO: we need to multiply these values by 10**18 and change them to BigInts
 
-      return this.pending(coordinator.submitSolution(...Object.values(solution.vars)))
+      throw new Error('to be completed')
+      // return this.pending(coordinator.submitSolution(...Object.values(solution.vars)))
     }
 
     executeEpoch = async () => {
@@ -95,20 +131,21 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
     getCurrentEpochState = async () => {
       const coordinator = this.contract('COORDINATOR')
 
-      const submissionPeriod = await coordinator.submissionPeriod()
-      if (!submissionPeriod) return 'open'
-
-      const minChallengePeriodEnd = await coordinator.minChallengePeriodEnd()
+      const minChallengePeriodEnd = (await coordinator.minChallengePeriodEnd()).toBN().toNumber()
+      const latestBlockTimestamp = (await this.provider.getBlock(await this.provider.getBlockNumber())).timestamp
       if (minChallengePeriodEnd !== 0) {
-        if (minChallengePeriodEnd < new Date().getTime()) return 'challenge-period-ended'
-         return 'in-challenge-period'
+        if (minChallengePeriodEnd < latestBlockTimestamp) return 'challenge-period-ended'
+        return 'in-challenge-period'
       }
 
       const lastEpochClosed = (await coordinator.lastEpochClosed()).toBN().toNumber()
       const minimumEpochTime = (await coordinator.minimumEpochTime()).toBN().toNumber()
-      if (new Date().getTime() - lastEpochClosed >= minimumEpochTime) {
+      if (lastEpochClosed + minimumEpochTime < latestBlockTimestamp) {
         return 'can-be-closed'
       }
+      
+      const submissionPeriod = await coordinator.submissionPeriod()
+      if (!submissionPeriod) return 'open'
 
       throw new Error('Arrived at impossible current epoch state')
     }
@@ -119,6 +156,7 @@ export type EpochState = 'open' | 'can-be-closed' | 'in-challenge-period' | 'cha
 
 export type ICoordinatorActions = {
   getEpochState(): Promise<State>
+  getOrderState(): Promise<OrderState>
   solveEpoch(): Promise<PendingTransaction>
   executeEpoch(): Promise<PendingTransaction>
   getCurrentEpochId(): Promise<number>
