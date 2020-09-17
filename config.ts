@@ -18,6 +18,7 @@ interface PoolI {
     label: string
     link?: string
   }[]
+  version: 2 | 3
 }
 
 export interface UpcomingPool extends PoolI {
