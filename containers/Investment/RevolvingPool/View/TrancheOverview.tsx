@@ -76,15 +76,11 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   useInterval(() => {
     updateTrancheData()
-  }, 30000)
+  }, 10000)
 
   React.useEffect(() => {
     updateTrancheData()
-  }, [])
-
-  React.useEffect(() => {
-    updateTrancheData()
-  }, [props.tinlake])
+  }, [props.tinlake.signer])
 
   React.useEffect(() => {
     if (hasPendingCollection) setCard('collect')
@@ -120,7 +116,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         </TableBody>
       </Table>
 
-      {isInMemberlist && (
+      {isInMemberlist === true && (
         <>
           {card === 'home' && (
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
@@ -152,7 +148,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         </>
       )}
 
-      {!isInMemberlist && (
+      {isInMemberlist === false && (
         <Info>
           <Heading level="6" margin={{ bottom: 'xsmall' }}>
             Not allowed

@@ -8,6 +8,7 @@ import { ExplainerCard } from './styles'
 import TrancheOverview from './TrancheOverview'
 import EpochOverview from './EpochOverview'
 import AdminActions from './AdminActions'
+import { useInterval } from '../../../../utils/hooks'
 
 interface Props {
   pool: Pool
@@ -31,13 +32,13 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
     })
   }
 
-  React.useEffect(() => {
+  useInterval(() => {
     updateEpochData()
-  }, [])
+  }, 60000)
 
   React.useEffect(() => {
     updateEpochData()
-  }, [props.tinlake])
+  }, [props.tinlake.signer])
 
   return (
     <Box margin={{ top: 'medium' }}>

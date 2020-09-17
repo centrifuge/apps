@@ -240,11 +240,15 @@ export function processTransaction(
         outcomeTx.status = outcome ? 'succeeded' : 'failed'
         outcomeTx.result = receipt
         outcomeTx.hash = receipt.transactionHash
+      } else if (tx.status === 1) {
+        // Succeeded immediately
+        hasCompleted = true
+        outcomeTx.status = 'succeeded'
       } else {
         // Failed or rejected
         hasCompleted = true
         outcomeTx.status = 'failed'
-        outcomeTx.failedReason = tx.error?.message || tx.message
+        outcomeTx.failedReason = tx.error
         if (tx.transactionhash) outcomeTx.hash = tx.transactionhash
       }
     } catch (error) {

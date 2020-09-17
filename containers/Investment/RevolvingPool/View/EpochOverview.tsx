@@ -14,7 +14,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   const [status, , setTxId] = useTransactionState()
 
   const solve = async () => {
-    const txId = await props.createTransaction(`Run solver`, 'solveEpoch', [props.tinlake])
+    const txId = await props.createTransaction(`Close epoch`, 'solveEpoch', [props.tinlake])
     setTxId(txId)
   }
 
@@ -39,16 +39,12 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
             <TableCell scope="row">Epoch #</TableCell>
             <TableCell style={{ textAlign: 'end' }}>{props.epochData.id}</TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell scope="row">Epoch state</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>{props.epochData.state}</TableCell>
-          </TableRow>
         </TableBody>
       </Table>
 
       <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
         {props.epochData.state === 'can-be-closed' && (
-          <Button label="Close &amp; Solve Epoch" onClick={solve} disabled={disabled} />
+          <Button label="Close epoch" onClick={solve} disabled={disabled} />
         )}
         {props.epochData.state === 'challenge-period-ended' && (
           <Button label="Execute orders" onClick={execute} disabled={disabled} />
