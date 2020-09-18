@@ -101,15 +101,15 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return this.pending(this.contract('SENIOR_MEMBERLIST').updateMember(user, validUntil, this.overrides))
     }
 
-    updateNftFeed = async (tokenId: string, value: number, riskGroup?: number) => {
+    updateNftFeed = async (nftId: string, value: string, riskGroup?: string) => {
       if (!riskGroup) {
-        return this.pending(this.contract('FEED')['update(bytes32,uint256)'](tokenId, value, this.overrides))
+        return this.pending(this.contract('FEED')['update(bytes32,uint256)'](nftId, value, this.overrides))
       }
-        return this.pending(this.contract('FEED')['update(bytes32,uint256,uint256)'](tokenId, value, riskGroup, this.overrides))
+        return this.pending(this.contract('FEED')['update(bytes32,uint256,uint256)'](nftId, value, riskGroup, this.overrides))
 
     }
 
-    getNftFeedId = async (registry: string, tokenId: number) => {
+    getNftFeedId = async (registry: string, tokenId: string) => {
       return await this.contract('FEED')['nftID(address,uint256)'](registry, tokenId)
     }
 
@@ -134,8 +134,8 @@ export type IAdminActions = {
   setMaximumReserve(amount: string): Promise<PendingTransaction>
   setSeniorTrancheInterest(amount: string): Promise<PendingTransaction>
   setDiscountRate(amount: string): Promise<PendingTransaction>
-  updateNftFeed(nftId: string, value: number, riskGroup?: number): Promise<PendingTransaction>
-  getNftFeedId(registry: string, tokenId: number): Promise<any>
+  updateNftFeed(nftId: string, value: string, riskGroup?: string): Promise<PendingTransaction>
+  getNftFeedId(registry: string, tokenId: string): Promise<string>
   getNftFeedValue(tokenId: string): Promise<BN>
 }
 
