@@ -54,6 +54,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   }
 
   const saveMaxReserve = async () => {
+    console.log(maxReserve.toString())
     const txId = await props.createTransaction(`Set max reserve`, 'setMaxReserve', [
       props.tinlake,
       maxReserve.toString(),

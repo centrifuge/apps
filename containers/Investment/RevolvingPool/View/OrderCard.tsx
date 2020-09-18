@@ -38,8 +38,8 @@ const OrderCard: React.FC<Props> = (props: Props) => {
           ? props.disbursements.remainingRedeemToken
           : props.disbursements.remainingSupplyCurrency
         )
-          .div(new BN(10).pow(new BN(18)))
-          .mul(new BN(props.tokenPrice).div(new BN(10).pow(new BN(27))))
+          .mul(new BN(props.tokenPrice))
+          .div(new BN(10).pow(new BN(27)))
           .toString()
       : '0'
 
@@ -105,7 +105,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
           <TableRow>
             <TableCell scope="row">Locked value at current token price</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(lockedValue, 2))} {token}
+              {addThousandsSeparators(toPrecision(baseToDisplay(lockedValue, 18), 2))} {token}
             </TableCell>
           </TableRow>
         </TableBody>
@@ -114,9 +114,10 @@ const OrderCard: React.FC<Props> = (props: Props) => {
       {(props.epochData?.state === 'in-challenge-period' || props.epochData?.state === 'challenge-period-ended') && (
         <Info>
           <Heading level="6" margin={{ bottom: 'xsmall' }}>
-            Not cancellable
+            Computing orders
           </Heading>
-          In challenge period
+          The Epoch has just been closed and the order executions are currently being computed. Your executed order will
+          be available for collection soon.
         </Info>
       )}
 

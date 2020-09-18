@@ -34,8 +34,8 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const [balance, setBalance] = React.useState('0')
   const [tokenPrice, setTokenPrice] = React.useState('0')
   const value = new BN(balance)
-    .div(new BN(10).pow(new BN(18)))
-    .mul(new BN(tokenPrice).div(new BN(10).pow(new BN(27))))
+    .mul(new BN(tokenPrice))
+    .div(new BN(10).pow(new BN(27)))
     .toString()
 
   const [disbursements, setDisbursements] = React.useState<any>(undefined)
@@ -106,12 +106,14 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             <TableCell scope="row">Current Price</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
               {' '}
-              {addThousandsSeparators(toPrecision(baseToDisplay(tokenPrice, 27), 2))}{' '}
+              {addThousandsSeparators(toPrecision(baseToDisplay(tokenPrice, 27), 2))}
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell scope="row">Your {token} Value</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>DAI {addThousandsSeparators(toPrecision(value, 2))} </TableCell>
+            <TableCell style={{ textAlign: 'end' }}>
+              DAI {addThousandsSeparators(toPrecision(baseToDisplay(value, 18), 2))}{' '}
+            </TableCell>
           </TableRow>
         </TableBody>
       </Table>
@@ -151,9 +153,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       {isInMemberlist === false && (
         <Info>
           <Heading level="6" margin={{ bottom: 'xsmall' }}>
-            Not allowed
+            Interested in investing?
           </Heading>
-          You are not allowed to invest in the {props.tranche} tranche of {props.pool.name}.
+          If you want to learn more get started with your onboarding process.
           <Box justify="end" margin={{ top: 'small' }}>
             <InvestAction poolName={props.pool.name} />
           </Box>
