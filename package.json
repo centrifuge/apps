@@ -1,5 +1,5 @@
 {
-  "name": "@centrifuge/tinlake-js-v3",
+  "name": "@centrifuge/tinlake-js",
   "version": "3.0.0-develop.1",
   "description": "Centrifuge Tinlake Contracts Client",
   "main": "dist/index.js",
