@@ -20,6 +20,20 @@ export const TokenLogo = styled.img`
   height: 16px;
 `
 
+export const Info = styled.div`
+  margin-top: 16px;
+  background: #f5f5f5;
+  position: relative;
+  left: -24px;
+  width: calc(100% + 48px);
+  padding: 24px;
+
+  h6 {
+    margin-top: 0;
+    color: #000;
+  }
+`
+
 export const Warning = styled.div`
   margin-top: 16px;
   background: #fff5da;

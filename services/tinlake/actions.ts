@@ -1,5 +1,6 @@
 import BN from 'bn.js'
 import { Loan, NFT, interestRateToFee, ITinlake, PendingTransaction } from '@centrifuge/tinlake-js'
+import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { maxUint256 } from '../../utils/maxUint256'
 import { PoolData } from '../../ducks/pool'
 
@@ -21,6 +22,7 @@ type SerializableArray = (SerializableScalar & SerializableObject & Serializable
 type Serializable = SerializableScalar & SerializableObject & SerializableArray
 
 export type TinlakeAction = (tinlake: ITinlake, ...args: Serializable[]) => Promise<PendingTransaction>
+export type TinlakeV3Action = (tinlake: ITinlakeV3, ...args: Serializable[]) => Promise<PendingTransaction>
 
 export async function getNFT(registry: string, tinlake: ITinlake, tokenId: string) {
   let nftOwner: string
@@ -240,29 +242,150 @@ export async function setInterest(
   }
 }
 
-export async function getPool(tinlake: ITinlake): Promise<PoolData | null> {
+export async function submitSeniorSupplyOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
 
-  const address = await tinlake.signer.getAddress()
+  const address = await tinlake.signer?.getAddress()
+  const allowance = (await tinlake.getSeniorForCurrencyAllowance(address)) || new BN(0)
 
-  const juniorReserve = await tinlake.getJuniorReserve()
+  if (allowance.lt(new BN(amount))) {
+    try {
+      const approvalTx = await tinlake.approveSeniorForCurrency(maxUint256)
+      await tinlake.getTransactionReceipt(approvalTx!)
+    } catch (e) {
+      return loggedError(e, `Could not approve currency for senior`, '')
+    }
+  }
+
+  return tinlake.submitSeniorSupplyOrder(amount)
+}
+
+export async function cancelSeniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  return tinlake.submitSeniorSupplyOrder('0')
+}
+
+export async function submitJuniorSupplyOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const address = await tinlake.signer?.getAddress()
+  const allowance = (await tinlake.getJuniorForCurrencyAllowance(address)) || new BN(0)
+
+  if (allowance.lt(new BN(amount))) {
+    try {
+      const approvalTx = await tinlake.approveJuniorForCurrency(maxUint256)
+      await tinlake.getTransactionReceipt(approvalTx!)
+    } catch (e) {
+      return loggedError(e, `Could not approve currency for junior`, '')
+    }
+  }
+
+  return tinlake.submitJuniorSupplyOrder(amount)
+}
+
+export async function cancelJuniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  return tinlake.submitJuniorSupplyOrder('0')
+}
+
+export async function submitSeniorRedeemOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const address = await tinlake.signer?.getAddress()
+  const allowance = (await tinlake.getSeniorTokenAllowance(address)) || new BN(0)
+
+  if (allowance.lt(new BN(amount))) {
+    try {
+      const approvalTx = await tinlake.approveSeniorToken(maxUint256)
+      await tinlake.getTransactionReceipt(approvalTx!)
+    } catch (e) {
+      return loggedError(e, `Could not approve token for senior`, '')
+    }
+  }
+
+  return tinlake.submitSeniorRedeemOrder(amount)
+}
+
+export async function cancelSeniorRedeemOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  return tinlake.submitSeniorRedeemOrder('0')
+}
+
+export async function submitJuniorRedeemOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const address = await tinlake.signer?.getAddress()
+  const allowance = (await tinlake.getJuniorTokenAllowance(address)) || new BN(0)
+
+  if (allowance.lt(new BN(amount))) {
+    try {
+      const approvalTx = await tinlake.approveJuniorToken(maxUint256)
+      await tinlake.getTransactionReceipt(approvalTx!)
+    } catch (e) {
+      return loggedError(e, `Could not approve currency for junior`, '')
+    }
+  }
+
+  return tinlake.submitJuniorRedeemOrder(amount)
+}
+
+export async function cancelJuniorRedeemOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  return tinlake.submitJuniorRedeemOrder('0')
+}
+
+export async function disburseSenior(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  return tinlake.disburseSenior()
+}
+
+export async function disburseJunior(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  return tinlake.disburseJunior()
+}
+
+export async function solveEpoch(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  return tinlake.solveEpoch()
+}
+
+export async function executeEpoch(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  return tinlake.executeEpoch()
+}
+
+export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData | null> {
+  const version = 'version' in tinlake ? tinlake.version : 2
+
+  // V3 TODO
+  const juniorReserve = version === 2 ? await tinlake.getJuniorReserve() : new BN(0)
   const juniorTokenPrice = await tinlake.getTokenPriceJunior()
-  const seniorReserve = await tinlake.getSeniorReserve()
-  const seniorTokenPrice = await tinlake.getTokenPriceSenior(address!)
-  const seniorInterestRate = await tinlake.getSeniorInterestRate()
-  const seniorTokenSupply = await tinlake.getSeniorTotalSupply()
+  const seniorReserve = version === 2 ? await tinlake.getSeniorReserve() : new BN(0)
+  const seniorTokenPrice =
+    version === 2 && tinlake.signer
+      ? await tinlake.getTokenPriceSenior(await tinlake.signer.getAddress())
+      : await (tinlake as ITinlakeV3).getTokenPriceSenior()
+  const seniorInterestRate = version === 2 ? await tinlake.getSeniorInterestRate() : new BN(0)
+  const seniorTokenSupply = version === 2 ? await tinlake.getSeniorTotalSupply() : new BN(0)
   const minJuniorRatio = await tinlake.getMinJuniorRatio()
-  const juniorAssetValue = await tinlake.getAssetValueJunior()
-  const juniorTokenSupply = await tinlake.getJuniorTotalSupply()
+  const maxJuniorRatio = version === 3 ? await (tinlake as ITinlakeV3).getMaxJuniorRatio() : new BN(0)
+  const maxReserve = version === 3 ? await (tinlake as ITinlakeV3).getMaxReserve() : new BN(0)
+  const juniorAssetValue = version === 2 ? await tinlake.getAssetValueJunior() : new BN(0)
+  const juniorTokenSupply = version === 2 ? await tinlake.getJuniorTotalSupply() : new BN(0)
   // temp fix: until solved on contract level
-  const currentJuniorRatio = juniorAssetValue.toString() === '0' ? new BN(0) : await tinlake.getCurrentJuniorRatio()
+  const currentJuniorRatio =
+    version === 2
+      ? juniorAssetValue.toString() === '0'
+        ? new BN(0)
+        : await tinlake.getCurrentJuniorRatio()
+      : await tinlake.getCurrentJuniorRatio()
 
   try {
     return {
       minJuniorRatio,
+      maxJuniorRatio,
       currentJuniorRatio,
+      maxReserve,
       junior: {
         type: 'junior',
         availableFunds: juniorReserve,
@@ -363,8 +486,16 @@ export async function setAllowance(
   }
 }
 
-export async function setMinJuniorRatio(tinlake: ITinlake, ratio: string): Promise<PendingTransaction> {
+export async function setMinJuniorRatio(tinlake: ITinlake | ITinlakeV3, ratio: string): Promise<PendingTransaction> {
   return await tinlake.setMinimumJuniorRatio(ratio)
+}
+
+export async function setMaxJuniorRatio(tinlake: ITinlakeV3, ratio: string): Promise<PendingTransaction> {
+  return await tinlake.setMaximumJuniorRatio(ratio)
+}
+
+export async function setMaxReserve(tinlake: ITinlakeV3, ratio: string): Promise<PendingTransaction> {
+  return await tinlake.setMaximumReserve(ratio)
 }
 
 export async function supply(
@@ -378,49 +509,36 @@ export async function supply(
 
   const address = await tinlake.signer.getAddress()
 
-  console.log('supply address', address)
-
   let allowance = new BN(0)
   if (trancheType === 'junior') {
     allowance = (await tinlake.getJuniorForCurrencyAllowance(address!)) || new BN(0)
-    console.log('junior allowance', allowance.toString())
   } else if (trancheType === 'senior') {
     allowance = (await tinlake.getSeniorForCurrencyAllowance(address!)) || new BN(0)
-    console.log('senior allowance', allowance.toString())
   }
-
-  console.log('checking if approval is needed')
 
   // only approve if allowance is smaller than than supplyAmount
   if (allowance.lt(new BN(supplyAmount))) {
-    console.log('requires approval', supplyAmount.toString())
     // approve currency
     try {
       if (trancheType === 'junior') {
         const approvalTx = await tinlake.approveJuniorForCurrency(maxUint256)
-        const approvalResult = await tinlake.getTransactionReceipt(approvalTx!)
-        console.log('approval junior', approvalResult)
+        await tinlake.getTransactionReceipt(approvalTx!)
       } else if (trancheType === 'senior') {
         const approvalTx = await tinlake.approveSeniorForCurrency(maxUint256)
-        const approvalResult = await tinlake.getTransactionReceipt(approvalTx!)
-        console.log('approval senior', approvalResult)
+        await tinlake.getTransactionReceipt(approvalTx!)
       }
     } catch (e) {
       return loggedError(e, `Could not approve currency for ${trancheType}.`, '')
     }
   }
 
-  console.log('actually supplying')
-
   // supply
   try {
     if (trancheType === 'junior') {
       const res = await tinlake.supplyJunior(supplyAmount)
-      console.log('supplying junior', res)
       return res
     }
     const res = await tinlake.supplySenior(supplyAmount)
-    console.log('supplying senior', res)
     return res
   } catch (e) {
     return loggedError(e, `Could not supply ${trancheType}`, '')
@@ -473,13 +591,15 @@ export async function redeem(
     return loggedError(e, `Could not redeem ${trancheType}.`, '')
   }
 
-  return { status: 0 }
+  // TODO: the PendingTransaction type contains a .receipt() required parameter. This should change to an optional parameter (or be removed), but that means we need to publish a new version of Tinlake.js v2 and v3 to npm. So that first needs to be done before this any cast can be removed.
+  return { status: 0 } as any
 }
 
 function loggedError(error: any, message: string, id: string): PendingTransaction {
   console.error(`${message} ${id}`, error)
+  // TODO: same as line 549
   return {
     status: 0,
     error: message,
-  }
+  } as any
 }

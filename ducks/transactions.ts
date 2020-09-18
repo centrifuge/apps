@@ -19,7 +19,7 @@ export interface WalletTransaction {
 
 // This refers to any function in ../services/tinlake/actions which aligns to the TinlakeAction type
 export type TransactionAction = {
-  [P in keyof typeof actions]: typeof actions[P] extends actions.TinlakeAction ? P : never
+  [P in keyof typeof actions]: typeof actions[P] extends actions.TinlakeAction | actions.TinlakeV3Action ? P : never
 }[keyof typeof actions]
 
 // Can be extended by components which create and subscribe to transactions
@@ -42,6 +42,7 @@ export type TransactionId = string
 export type TransactionStatus = 'unconfirmed' | 'pending' | 'succeeded' | 'failed'
 
 interface TinlakeConfig {
+  version?: 2 | 3
   addresses?: any
   contractConfig?: {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
@@ -147,6 +148,7 @@ export function createTransaction<A extends TransactionAction>(
      * and then re-initialize Tinlake.js with the same config when processing the transaction.
      * */
     const tinlakeConfig = {
+      version: args[0].version as 2 | 3,
       addresses: args[0].contractAddresses,
       contractConfig: args[0].contractConfig,
     }
@@ -238,11 +240,15 @@ export function processTransaction(
         outcomeTx.status = outcome ? 'succeeded' : 'failed'
         outcomeTx.result = receipt
         outcomeTx.hash = receipt.transactionHash
+      } else if (tx.status === 1) {
+        // Succeeded immediately
+        hasCompleted = true
+        outcomeTx.status = 'succeeded'
       } else {
         // Failed or rejected
         hasCompleted = true
         outcomeTx.status = 'failed'
-        outcomeTx.failedReason = tx.error?.message || tx.message
+        outcomeTx.failedReason = tx.error
         if (tx.transactionhash) outcomeTx.hash = tx.transactionhash
       }
     } catch (error) {

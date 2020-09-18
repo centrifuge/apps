@@ -47,7 +47,7 @@ class Overview extends React.Component<Props> {
         </SecondaryHeader>
 
         <Box direction="row" margin={{ bottom: 'large' }}>
-          <Box basis={'1/2'}>
+          <Box basis={'1/3'}>
             <Box>
               <Heading level="4" margin={{ top: 'small', bottom: 'small' }}>
                 Assets
@@ -108,10 +108,12 @@ class Overview extends React.Component<Props> {
                   </TableRow>
                 </TableBody>
               </Table>
-              <InvestAction poolName={selectedPool.name} />
+              <Box margin={{ vertical: 'large' }}>
+                <InvestAction poolName={selectedPool.name} />
+              </Box>
             </Box>
           </Box>
-          <Box basis={'1/2'} margin={{ left: 'large' }}>
+          <Box basis={'2/3'} margin={{ left: 'large' }}>
             {!selectedPool.isUpcoming && selectedPool.description && (
               <div dangerouslySetInnerHTML={{ __html: selectedPool.description }} />
             )}

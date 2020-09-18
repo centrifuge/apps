@@ -13,6 +13,8 @@ import config, { Pool } from '../../../../../config'
 import { GetStaticProps } from 'next'
 import Container from '../../../../../components/Container'
 import Head from 'next/head'
+import { ITinlake } from '@centrifuge/tinlake-js'
+import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 
 interface Props extends WithRouterProps {
   root: string
@@ -33,6 +35,7 @@ class InvestmentPage extends React.Component<Props> {
           <Box justify="center" direction="row">
             <Box width="xlarge">
               <WithTinlake
+                version={pool.version}
                 addresses={pool.addresses}
                 contractConfig={pool.contractConfig}
                 render={(tinlake) => (
@@ -40,13 +43,15 @@ class InvestmentPage extends React.Component<Props> {
                     tinlake={tinlake}
                     render={(auth) => (
                       <Box>
-                        {pool.version !== 2 && <RevolvingPoolInvestmentsView pool={pool} />}
-                        {pool.version === 2 && (
+                        {tinlake.version === 3 && (
+                          <RevolvingPoolInvestmentsView activePool={pool} tinlake={tinlake as ITinlakeV3} />
+                        )}
+                        {tinlake.version === 2 && (
                           <>
                             <SecondaryHeader>
                               <Heading level="3">Investments</Heading>
                             </SecondaryHeader>
-                            <InvestmentsView tinlake={tinlake} auth={auth} />
+                            <InvestmentsView tinlake={tinlake as ITinlake} auth={auth} />
                           </>
                         )}
                       </Box>

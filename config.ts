@@ -104,6 +104,10 @@ const poolSchema = yup.object().shape({
   graph: yup.string(),
   contractConfig: contractConfigSchema.required('poolSchema.contractConfig is required'),
   name: yup.string().required('poolSchema.name is required'),
+  version: yup
+    .number()
+    .oneOf([2, 3])
+    .required('poolSchema.version is required'),
   slug: yup.string().required('poolSchema.slug is required'),
   shortName: yup.string(),
   assetOriginatorName: yup.string(),
@@ -125,6 +129,10 @@ const poolSchema = yup.object().shape({
 
 const upcomingPoolSchema = yup.object().shape({
   name: yup.string().required('poolSchema.name is required'),
+  version: yup
+    .number()
+    .oneOf([2, 3])
+    .required('poolSchema.version is required'),
   slug: yup.string().required('poolSchema.slug is required'),
   shortName: yup.string(),
   assetOriginatorName: yup.string(),

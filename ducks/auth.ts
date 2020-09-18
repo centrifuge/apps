@@ -5,6 +5,7 @@ import Apollo from '../services/apollo'
 import { HYDRATE } from 'next-redux-wrapper'
 import { initOnboard, getOnboard } from '../services/onboard'
 import { ITinlake } from '@centrifuge/tinlake-js'
+import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { getTinlake } from '../services/tinlake'
 import config from '../config'
 import { ethers } from 'ethers'
@@ -41,6 +42,22 @@ export interface Permissions {
   canActAsKeeper: boolean
 }
 
+export interface PermissionsV3 {
+  // asset admin permissions
+  canIssueLoan: boolean
+  canSetInterestRate: boolean
+  // tranche admin permissions
+  canSetMinimumJuniorRatio: boolean
+  canSetRiskScore: boolean
+  canSetSeniorTrancheInterestRate: boolean
+  // lender admin permissions
+  canSetInvestorAllowanceJunior: boolean
+  canSetInvestorAllowanceSenior: boolean
+  // collector permissions
+  canSetLoanPrice: boolean
+  canActAsKeeper: boolean
+}
+
 // Proxies depend on both the address and the selected pool/registry.
 export type Proxies = string[]
 
@@ -48,7 +65,7 @@ export interface AuthState {
   address: null | Address
   authState: null | 'authing' | 'aborted' | 'authed'
   permissionsState: null | 'loading' | 'loaded'
-  permissions: null | Permissions
+  permissions: null | Permissions | PermissionsV3
   proxiesState: null | 'loading' | 'loaded'
   proxies: null | Proxies
   network: string
@@ -114,7 +131,9 @@ export default function reducer(state: AuthState = initialState, action: AnyActi
 // navigation event between pages, which discards the redux state, but does not discard onboard. Putting onboard into
 // the state would work, but it would lead to two sources of truth. Consequently, we keep onboard as an external
 // stateful API here and manually sync values over on load.
-export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+export function load(
+  tinlake: ITinlake | ITinlakeV3
+): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     const { auth } = getState()
     let onboard = getOnboard()
@@ -265,7 +284,7 @@ export function ensureAuthed(): ThunkAction<Promise<void>, { auth: AuthState }, 
 }
 
 export function setAddressAndLoadData(
-  tinlake: ITinlake,
+  tinlake: ITinlake | ITinlakeV3,
   address: string
 ): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch) => {
@@ -334,32 +353,51 @@ export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth
 
     dispatch({ type: LOAD_PERMISSIONS })
 
-    const [
-      interestRatePermission,
-      loanPricePermission,
-      equityRatioPermission,
-      riskScorePermission,
-      investorAllowancePermissionJunior,
-      investorAllowancePermissionSenior,
-    ] = await Promise.all([
-      tinlake.canSetInterestRate(auth.address),
-      tinlake.canSetLoanPrice(auth.address),
-      tinlake.canSetMinimumJuniorRatio(auth.address),
-      tinlake.canSetRiskScore(auth.address),
-      tinlake.canSetInvestorAllowanceJunior(auth.address),
-      tinlake.canSetInvestorAllowanceSenior(auth.address),
-    ])
+    if (tinlake.version === 3) {
+      const [interestRatePermission, loanPricePermission, equityRatioPermission] = await Promise.all([
+        tinlake.canSetSeniorTrancheInterest(auth.address),
+        tinlake.canSetLoanPrice(auth.address),
+        tinlake.canSetMinimumJuniorRatio(auth.address),
+      ])
 
-    const permissions = {
-      canSetInterestRate: interestRatePermission,
-      canSetLoanPrice: loanPricePermission,
-      canSetMinimumJuniorRatio: equityRatioPermission,
-      canSetRiskScore: riskScorePermission,
-      canSetInvestorAllowanceJunior: investorAllowancePermissionJunior,
-      canSetInvestorAllowanceSenior: investorAllowancePermissionSenior,
+      const permissions = {
+        canSetInterestRate: interestRatePermission,
+        canSetLoanPrice: loanPricePermission,
+        canSetMinimumJuniorRatio: equityRatioPermission,
+        canSetRiskScore: false, // V3 TODO: do we need to replace this with anything?
+        canSetInvestorAllowanceJunior: false, // V3 TODO: do we need to replace this with anything?
+        canSetInvestorAllowanceSenior: false, // V3 TODO: do we need to replace this with anything?
+      }
+
+      dispatch({ permissions, type: RECEIVE_PERMISSIONS })
+    } else {
+      const [
+        interestRatePermission,
+        loanPricePermission,
+        equityRatioPermission,
+        riskScorePermission,
+        investorAllowancePermissionJunior,
+        investorAllowancePermissionSenior,
+      ] = await Promise.all([
+        tinlake.canSetInterestRate(auth.address),
+        tinlake.canSetLoanPrice(auth.address),
+        tinlake.canSetMinimumJuniorRatio(auth.address),
+        tinlake.canSetRiskScore(auth.address),
+        tinlake.canSetInvestorAllowanceJunior(auth.address),
+        tinlake.canSetInvestorAllowanceSenior(auth.address),
+      ])
+
+      const permissions = {
+        canSetInterestRate: interestRatePermission,
+        canSetLoanPrice: loanPricePermission,
+        canSetMinimumJuniorRatio: equityRatioPermission,
+        canSetRiskScore: riskScorePermission,
+        canSetInvestorAllowanceJunior: investorAllowancePermissionJunior,
+        canSetInvestorAllowanceSenior: investorAllowancePermissionSenior,
+      }
+
+      dispatch({ permissions, type: RECEIVE_PERMISSIONS })
     }
-
-    dispatch({ permissions, type: RECEIVE_PERMISSIONS })
   }
 }
 
