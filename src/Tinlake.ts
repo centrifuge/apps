@@ -9,7 +9,6 @@ const contractNames = [
   'SHELF',
   'COLLECTOR',
   'FEED',
-  'EPOCH_COORDINATOR',
   'JUNIOR_MEMBERLIST',
   'SENIOR_MEMBERLIST',
   'PILE',

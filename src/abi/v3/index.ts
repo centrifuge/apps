@@ -18,7 +18,7 @@ import contractAbiNFT from '../test/SimpleNFT.abi.json'
 import { ContractAbis } from '../../Tinlake'
 
 export default {
-  COLLATERAL_NFT: contractAbiNFT,
+  COLLATERAL_NFT: contractAbiTitle,
   TITLE: contractAbiTitle,
   TINLAKE_CURRENCY: contractAbiCurrency,
   SHELF: contractAbiShelf,

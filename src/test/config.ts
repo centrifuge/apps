@@ -9,7 +9,7 @@ dotenv.config()
 const MILLI_ETH = 1e15 // 0.001 ETH
 const FAUCET_AMOUNT = 5000 * MILLI_ETH
 
-const GAS_LIMIT = 1000000
+const GAS_LIMIT = 10000000
 
 const testConfig: ProviderConfig = {
   contractAddresses: (process.env.CONTRACTS && JSON.parse(process.env.CONTRACTS)) || contractAddresses,
