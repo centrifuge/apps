@@ -21,6 +21,11 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return (await this.contract(contractName).wards(user)).toBN()
     }
 
+    canUpdateNftFeed = async (user: string) => {
+      if (!this.contract('FEED')?.wards) return false
+      return (await this.contract('FEED').wards(user)).toBN().toNumber() === 1
+    }
+
     canSetSeniorTrancheInterest = async (user: string) => {
       if (!this.contract('ASSESSOR')?.wards) return false
       return (await this.contract('ASSESSOR').wards(user)).toBN().toNumber() === 1
@@ -99,9 +104,9 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     updateNftFeed = async (tokenId: string, value: number, riskGroup?: number) => {
       if (!riskGroup) {
         return this.pending(this.contract('FEED')['update(bytes32,uint256)'](tokenId, value, this.overrides))
-      } 
+      }
         return this.pending(this.contract('FEED')['update(bytes32,uint256,uint256)'](tokenId, value, riskGroup, this.overrides))
-      
+
     }
 
     getNftFeedId = async (registry: string, tokenId: number) => {
@@ -116,6 +121,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
 export type IAdminActions = {
   isWard(user: string, contractName: ContractName): Promise<BN>
+  canUpdateNftFeed(user: string): Promise<boolean>
   canSetSeniorTrancheInterest(user: string): Promise<boolean>
   canSetMinimumJuniorRatio(user: string): Promise<boolean>
   canAddToJuniorMemberList(user: string): Promise<boolean>
