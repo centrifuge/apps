@@ -1,9 +1,8 @@
 import * as React from 'react'
 import { Box, Button, Heading, FormField } from 'grommet'
-import { Pool } from '../../../../config'
 import { baseToDisplay, displayToBase } from '@centrifuge/tinlake-js'
 import NumberInput from '../../../../components/NumberInput'
-import { loadPool } from '../../../../ducks/pool'
+import { loadPool, PoolDataV3, PoolState } from '../../../../ducks/pool'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
@@ -12,12 +11,12 @@ import { connect, useSelector } from 'react-redux'
 
 interface Props extends TransactionProps {
   tinlake: ITinlakeV3
-  pool: Pool
+  pool: PoolState
   loadPool?: (tinlake: any) => Promise<void>
 }
 
 const AdminActions: React.FC<Props> = (props: Props) => {
-  const pool = useSelector((state: any) => state.pool)
+  const pool = useSelector<any, PoolState>((state) => state.pool)
 
   const [minJuniorRatio, setMinJuniorRatio] = React.useState('0')
   const [maxJuniorRatio, setMaxJuniorRatio] = React.useState('0')
@@ -26,8 +25,8 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     if (pool && pool.data) {
       setMinJuniorRatio(pool.data.minJuniorRatio.toString())
-      setMaxJuniorRatio(pool.data.maxJuniorRatio.toString())
-      setMaxReserve(pool.data.maxReserve.toString())
+      setMaxJuniorRatio((pool.data as PoolDataV3).maxJuniorRatio.toString())
+      setMaxReserve((pool.data as PoolDataV3).maxReserve.toString())
     }
   }, [pool?.data])
 
@@ -97,7 +96,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 primary
                 label="Apply"
                 onClick={saveMinJuniorRatio}
-                disabled={disabled || minJuniorRatio === pool.data.minJuniorRatio}
+                disabled={disabled || minJuniorRatio === pool.data.minJuniorRatio.toString()}
               />
             </Box>
           </Box>
@@ -108,7 +107,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 Max TIN risk buffer
               </Heading>
               <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(pool.data.maxJuniorRatio, 25), 2))}%
+                {addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).maxJuniorRatio, 25), 2))}%
               </Heading>
             </Box>
 
@@ -132,7 +131,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 Max reserve
               </Heading>
               <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(pool.data.maxReserve, 18), 2))}
+                {addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).maxReserve, 18), 2))}
               </Heading>
             </Box>
 

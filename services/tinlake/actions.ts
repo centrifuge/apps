@@ -2,7 +2,7 @@ import BN from 'bn.js'
 import { Loan, NFT, interestRateToFee, ITinlake, PendingTransaction } from '@centrifuge/tinlake-js'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { maxUint256 } from '../../utils/maxUint256'
-import { PoolData } from '../../ducks/pool'
+import { PoolData, PoolDataV3 } from '../../ducks/pool'
 
 export type TrancheType = 'junior' | 'senior'
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -354,57 +354,83 @@ export async function executeEpoch(tinlake: ITinlakeV3): Promise<PendingTransact
   return tinlake.executeEpoch()
 }
 
-export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData | null> {
-  const version = 'version' in tinlake ? tinlake.version : 2
+export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData | PoolDataV3 | null> {
+  if (tinlake.version === 3) {
+    return getPoolV3(tinlake as ITinlakeV3)
+  }
+  return getPoolV2(tinlake as ITinlake)
+}
 
-  // V3 TODO
-  const juniorReserve = version === 2 ? await tinlake.getJuniorReserve() : new BN(0)
+export async function getPoolV2(tinlake: ITinlake): Promise<PoolData | null> {
+  const juniorReserve = await tinlake.getJuniorReserve()
   const juniorTokenPrice = await tinlake.getTokenPriceJunior()
-  const seniorReserve = version === 2 ? await tinlake.getSeniorReserve() : new BN(0)
-  const seniorTokenPrice =
-    version === 2 && tinlake.signer
-      ? await tinlake.getTokenPriceSenior(await tinlake.signer.getAddress())
-      : await (tinlake as ITinlakeV3).getTokenPriceSenior()
-  const seniorInterestRate = version === 2 ? await tinlake.getSeniorInterestRate() : new BN(0)
-  const seniorTokenSupply = version === 2 ? await tinlake.getSeniorTotalSupply() : new BN(0)
+  const seniorReserve = await tinlake.getSeniorReserve()
+  const seniorTokenPrice = tinlake.signer ? await tinlake.getTokenPriceSenior(await tinlake.signer.getAddress()) : new BN(0)
+  const seniorInterestRate = await tinlake.getSeniorInterestRate()
+  const seniorTokenSupply = await tinlake.getSeniorTotalSupply()
   const minJuniorRatio = await tinlake.getMinJuniorRatio()
-  const maxJuniorRatio = version === 3 ? await (tinlake as ITinlakeV3).getMaxJuniorRatio() : new BN(0)
-  const maxReserve = version === 3 ? await (tinlake as ITinlakeV3).getMaxReserve() : new BN(0)
-  const juniorAssetValue = version === 2 ? await tinlake.getAssetValueJunior() : new BN(0)
-  const juniorTokenSupply = version === 2 ? await tinlake.getJuniorTotalSupply() : new BN(0)
+  const juniorAssetValue = await tinlake.getAssetValueJunior()
+  const juniorTokenSupply = await tinlake.getJuniorTotalSupply()
   // temp fix: until solved on contract level
-  const currentJuniorRatio =
-    version === 2
-      ? juniorAssetValue.toString() === '0'
-        ? new BN(0)
-        : await tinlake.getCurrentJuniorRatio()
-      : await tinlake.getCurrentJuniorRatio()
+  const currentJuniorRatio = juniorAssetValue.toString() === '0' ? new BN(0) : await tinlake.getCurrentJuniorRatio()
 
-  try {
-    return {
-      minJuniorRatio,
-      maxJuniorRatio,
-      currentJuniorRatio,
-      maxReserve,
-      junior: {
-        type: 'junior',
-        availableFunds: juniorReserve,
-        tokenPrice: juniorTokenPrice,
-        totalSupply: juniorTokenSupply,
-        token: 'TIN',
-      },
-      senior: {
-        type: 'senior',
-        availableFunds: seniorReserve,
-        tokenPrice: seniorTokenPrice,
-        totalSupply: seniorTokenSupply,
-        token: 'DROP',
-        interestRate: seniorInterestRate,
-      },
-      availableFunds: juniorReserve.add(seniorReserve),
-    }
-  } catch (e) {
-    return null
+  return {
+    minJuniorRatio,
+    currentJuniorRatio,
+    junior: {
+      type: 'junior',
+      availableFunds: juniorReserve,
+      tokenPrice: juniorTokenPrice,
+      totalSupply: juniorTokenSupply,
+      token: 'TIN',
+    },
+    senior: {
+      type: 'senior',
+      availableFunds: seniorReserve,
+      tokenPrice: seniorTokenPrice,
+      totalSupply: seniorTokenSupply,
+      token: 'DROP',
+      interestRate: seniorInterestRate,
+    },
+    availableFunds: juniorReserve.add(seniorReserve),
+  }
+}
+
+export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null> {
+  // V3 TODO
+  const juniorReserve = await tinlake.getJuniorReserve()
+  const juniorTokenPrice = await tinlake.getTokenPriceJunior()
+  const seniorReserve = await tinlake.getSeniorReserve()
+  const seniorTokenPrice = await tinlake.getTokenPriceSenior()
+  const seniorInterestRate = await tinlake.getSeniorInterestRate()
+  const seniorTokenSupply = await tinlake.getSeniorTotalSupply()
+  const minJuniorRatio = await tinlake.getMinJuniorRatio()
+  const maxJuniorRatio = await tinlake.getMaxJuniorRatio()
+  const maxReserve = await tinlake.getMaxReserve()
+  const juniorTokenSupply = await tinlake.getJuniorTotalSupply()
+  const currentJuniorRatio = await tinlake.getCurrentJuniorRatio()
+
+  return {
+    minJuniorRatio,
+    maxJuniorRatio,
+    currentJuniorRatio,
+    maxReserve,
+    junior: {
+      type: 'junior',
+      availableFunds: juniorReserve,
+      tokenPrice: juniorTokenPrice,
+      totalSupply: juniorTokenSupply,
+      token: 'TIN',
+    },
+    senior: {
+      type: 'senior',
+      availableFunds: seniorReserve,
+      tokenPrice: seniorTokenPrice,
+      totalSupply: seniorTokenSupply,
+      token: 'DROP',
+      interestRate: seniorInterestRate,
+    },
+    availableFunds: juniorReserve.add(seniorReserve),
   }
 }
 
