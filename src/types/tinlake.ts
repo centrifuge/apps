@@ -35,12 +35,10 @@ export type Investor = {
   junior: {
     maxSupply: BN
     tokenBalance: BN
-    maxRedeem: BN
   }
   senior: {
     maxSupply?: BN
     tokenBalance?: BN
-    maxRedeem?: BN
   }
   address: string
 }

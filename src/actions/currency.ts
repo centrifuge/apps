@@ -14,13 +14,13 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
     }
 
     getJuniorForCurrencyAllowance = async (owner: string) => {
-      if (!this.contractAddresses['JUNIOR']) return
-      return this.getCurrencyAllowance(owner, this.contractAddresses['JUNIOR'])
+      if (!this.contractAddresses['JUNIOR_TRANCHE']) return
+      return this.getCurrencyAllowance(owner, this.contractAddresses['JUNIOR_TRANCHE'])
     }
 
     getSeniorForCurrencyAllowance = async (owner: string) => {
-      if (!this.contractAddresses['SENIOR']) return
-      return this.getCurrencyAllowance(owner, this.contractAddresses['SENIOR'])
+      if (!this.contractAddresses['SENIOR_TRANCHE']) return
+      return this.getCurrencyAllowance(owner, this.contractAddresses['SENIOR_TRANCHE'])
     }
 
     getCurrencyBalance = async (user: string) => {
@@ -33,13 +33,13 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
     }
 
     approveSeniorForCurrency = async (currencyAmount: string) => {
-      if (!this.contractAddresses['SENIOR']) return
-      return this.approveCurrency(this.contractAddresses['SENIOR'], currencyAmount)
+      if (!this.contractAddresses['SENIOR_TRANCHE']) return
+      return this.approveCurrency(this.contractAddresses['SENIOR_TRANCHE'], currencyAmount)
     }
 
     approveJuniorForCurrency = async (currencyAmount: string) => {
-      if (!this.contractAddresses['JUNIOR']) return
-      return this.approveCurrency(this.contractAddresses['JUNIOR'], currencyAmount)
+      if (!this.contractAddresses['JUNIOR_TRANCHE']) return
+      return this.approveCurrency(this.contractAddresses['JUNIOR_TRANCHE'], currencyAmount)
     }
   }
 }
