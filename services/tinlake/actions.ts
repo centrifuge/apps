@@ -95,6 +95,19 @@ export const mintNFT = async (
   }
 }
 
+export const updateNftFeed = async (
+  tinlake: ITinlake,
+  nftFeedId: string,
+  value: string,
+  riskGroup: string
+): Promise<PendingTransaction> => {
+  try {
+    return await tinlake.updateNftFeed(nftFeedId, value, riskGroup)
+  } catch (e) {
+    return loggedError(e, 'Could not value NFT.', nftFeedId)
+  }
+}
+
 export const issue = async (
   tinlake: ITinlake,
   tokenId: string,
@@ -365,7 +378,9 @@ export async function getPoolV2(tinlake: ITinlake): Promise<PoolData | null> {
   const juniorReserve = await tinlake.getJuniorReserve()
   const juniorTokenPrice = await tinlake.getTokenPriceJunior()
   const seniorReserve = await tinlake.getSeniorReserve()
-  const seniorTokenPrice = tinlake.signer ? await tinlake.getTokenPriceSenior(await tinlake.signer.getAddress()) : new BN(0)
+  const seniorTokenPrice = tinlake.signer
+    ? await tinlake.getTokenPriceSenior(await tinlake.signer.getAddress())
+    : new BN(0)
   const seniorInterestRate = await tinlake.getSeniorInterestRate()
   const seniorTokenSupply = await tinlake.getSeniorTotalSupply()
   const minJuniorRatio = await tinlake.getMinJuniorRatio()

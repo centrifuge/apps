@@ -72,8 +72,13 @@ const MintNFT: React.FC<Props> = (props: Props) => {
             <Alert pad={{ horizontal: 'medium' }} type="success">
               Successfully minted NFT for Token ID {tokenId}
               <p>
+                Please
+                <PoolLink href={{ pathname: '/demo/value-nft', query: { tokenId, registry } }}>
+                  <Anchor>proceed to value the NFT</Anchor>
+                </PoolLink>
+                {' or '}
                 <PoolLink href={{ pathname: '/assets/issue', query: { tokenId, registry } }}>
-                  <Anchor>Please proceed to asset financing</Anchor>
+                  <Anchor>proceed to asset financing</Anchor>
                 </PoolLink>{' '}
                 your NFT.
               </p>
@@ -102,13 +107,17 @@ const MintNFT: React.FC<Props> = (props: Props) => {
               </p>
               <p>
                 If you already have a token ID,{' '}
+                <PoolLink href={'/demo/value-nft'}>
+                  <Anchor>please proceed to value the NFT</Anchor>
+                </PoolLink>{' '}
+                or{' '}
                 <PoolLink href={'/assets/issue'}>
-                  <Anchor>please proceed to open a financing</Anchor>
+                  <Anchor>proceed to open a financing</Anchor>
                 </PoolLink>
                 .
               </p>
               <p>
-                Note that this functionality is only available on Kovan Testnet. On Mainnet NFTs are minted using
+                Note that this functionality is only available on Kovan Testnet. On Mainnet, NFTs are minted using
                 Centrifuge’s P2P Protocol.
               </p>
             </Alert>

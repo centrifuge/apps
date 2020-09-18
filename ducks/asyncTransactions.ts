@@ -297,7 +297,7 @@ export function getTransaction(state?: TransactionState, txId?: TransactionId): 
 export const useTransactionState = (): [TransactionStatus | undefined, any, (txId: TransactionId) => void] => {
   const [txId, setTxId] = React.useState<TransactionId | undefined>(undefined)
 
-  const tx = useSelector<{ transactions: TransactionState }, Transaction|undefined>((state) =>
+  const tx = useSelector<{ transactions: TransactionState }, Transaction | undefined>((state) =>
     txId ? state.transactions.active[txId] : undefined
   )
   return [tx?.status, tx?.result, setTxId]
