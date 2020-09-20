@@ -1,6 +1,8 @@
 import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
 import { calculateOptimalSolution, State, OrderState, SolverSolution, SolverResult } from '../services/solver'
 import BN from 'BN.js'
+const web3 = require('web3-utils')
+
 
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
@@ -39,6 +41,10 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return { reserve, netAssetValue, seniorAsset, minTinRatio, maxTinRatio, maxReserve }
     }
 
+    setMinimumEpochTime = async (minEpochTime: string) => {
+      return this.pending(this.contract('COORDINATOR').file(web3.fromAscii('minimumEpochTime').padEnd(66, '0'), minEpochTime, this.overrides))
+    }
+
     getOrderState = async () => {
       const coordinator = this.contract('COORDINATOR')
       const orderState = await coordinator.order()
@@ -67,9 +73,8 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       if ((await coordinator.submissionPeriod()) === false) {
         // The epoch is can be closed, but is not closed yet
         const closeTx = await coordinator.closeEpoch()
-        console.log(closeTx)
+        console.log( 'ASFADF', closeTx)
         const closeResult = await this.getTransactionReceipt(closeTx)
-
         console.log('close epoch done', closeResult)
 
         if (closeResult.status === 0) {
@@ -162,6 +167,7 @@ export type ICoordinatorActions = {
   getCurrentEpochId(): Promise<number>
   getCurrentEpochMinimumTimeEnd(): Promise<number>
   getCurrentEpochState(): Promise<EpochState>
+  setMinimumEpochTime(minEpochTime:string): Promise<PendingTransaction>
 }
 
 export default CoordinatorActions
