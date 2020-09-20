@@ -45,6 +45,10 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return this.pending(this.contract('COORDINATOR').file(web3.fromAscii('minimumEpochTime').padEnd(66, '0'), minEpochTime, this.overrides))
     }
 
+    setMinimumChallengeTime = async (challengeTime: string) => {
+      return this.pending(this.contract('COORDINATOR').file(web3.fromAscii('challengeTime').padEnd(66, '0'), challengeTime, this.overrides))
+    }
+
     getOrderState = async () => {
       const coordinator = this.contract('COORDINATOR')
       const orderState = await coordinator.order()
@@ -73,7 +77,6 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       if ((await coordinator.submissionPeriod()) === false) {
         // The epoch is can be closed, but is not closed yet
         const closeTx = await coordinator.closeEpoch()
-        console.log( 'ASFADF', closeTx)
         const closeResult = await this.getTransactionReceipt(closeTx)
         console.log('close epoch done', closeResult)
 
@@ -168,6 +171,7 @@ export type ICoordinatorActions = {
   getCurrentEpochMinimumTimeEnd(): Promise<number>
   getCurrentEpochState(): Promise<EpochState>
   setMinimumEpochTime(minEpochTime:string): Promise<PendingTransaction>
+  setMinimumChallengeTime(minChallengeTime:string): Promise<PendingTransaction>
 }
 
 export default CoordinatorActions
