@@ -12,7 +12,7 @@ import { PoolLink } from '../PoolLink'
 import NumberInput from '../NumberInput'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import styled from 'styled-components'
-import { isTinlakeV3 } from '../../utils/tinlakeVersion'
+import { isTinlakeV2, isTinlakeV3 } from '../../utils/tinlakeVersion'
 
 interface Props extends TransactionProps {
   tinlake: ITinlakeV3 | ITinlake
@@ -87,11 +87,11 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
   }
 
   const updateMaturityDate = async () => {
+    if (isTinlakeV2(props.tinlake)) throw Error('Tinlake V2 does not have maturity date')
+
     await props.ensureAuthed!()
 
-    const nftFeedId = isTinlakeV3(props.tinlake)
-      ? await props.tinlake.getNftFeedId(registry, tokenId)
-      : await props.tinlake.getNftFeedId(registry, Number(tokenId))
+    const nftFeedId = await props.tinlake.getNftFeedId(registry, tokenId)
 
     const txId = await props.createTransaction(
       `Set maturity date for NFT ${tokenId.slice(0, 4)}...`,

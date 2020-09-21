@@ -93,7 +93,7 @@ export const mintNFT = async (
 }
 
 export const updateNftFeed = async (
-  tinlake: ITinlakeV3,
+  tinlake: ITinlake | ITinlakeV3,
   nftFeedId: string,
   value: string,
   riskGroup: string
@@ -220,7 +220,7 @@ export async function getLoans(tinlake: ITinlake): Promise<TinlakeResult | Pendi
 }
 
 export async function setInterest(
-  tinlake: ITinlake | ITinlakeV3,
+  tinlake: ITinlake,
   loanId: string,
   debt: string,
   rate: string
@@ -492,7 +492,7 @@ export async function getInvestor(tinlake: ITinlake | ITinlakeV3, address: strin
 }
 
 export async function setAllowance(
-  tinlake: ITinlake | ITinlakeV3,
+  tinlake: ITinlake,
   address: string,
   maxSupplyAmount: string,
   maxRedeemAmount: string,
@@ -517,7 +517,7 @@ export async function setMaxReserve(tinlake: ITinlakeV3, ratio: string): Promise
 }
 
 export async function supply(
-  tinlake: ITinlake | ITinlakeV3,
+  tinlake: ITinlake,
   supplyAmount: string,
   trancheType: TrancheType
 ): Promise<PendingTransaction> {
@@ -564,7 +564,7 @@ export async function supply(
 }
 
 export async function redeem(
-  tinlake: ITinlake | ITinlakeV3,
+  tinlake: ITinlake,
   redeemAmount: string,
   trancheType: TrancheType
 ): Promise<PendingTransaction> {
