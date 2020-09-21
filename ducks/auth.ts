@@ -9,6 +9,7 @@ import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { getTinlake } from '../services/tinlake'
 import config from '../config'
 import { ethers } from 'ethers'
+import { isTinlakeV3 } from '../utils/tinlakeVersion'
 
 // Actions
 const CLEAR = 'tinlake-ui/auth/CLEAR'
@@ -353,7 +354,7 @@ export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth
 
     dispatch({ type: LOAD_PERMISSIONS })
 
-    if (tinlake.version === 3) {
+    if (isTinlakeV3(tinlake)) {
       const [interestRatePermission, loanPricePermission, equityRatioPermission] = await Promise.all([
         tinlake.canSetSeniorTrancheInterest(auth.address),
         tinlake.canSetLoanPrice(auth.address),

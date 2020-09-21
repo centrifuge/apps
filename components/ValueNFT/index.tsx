@@ -12,6 +12,7 @@ import { PoolLink } from '../PoolLink'
 import NumberInput from '../NumberInput'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import styled from 'styled-components'
+import { isTinlakeV3 } from '../../utils/tinlakeVersion'
 
 interface Props extends TransactionProps {
   tinlake: ITinlakeV3 | ITinlake
@@ -53,7 +54,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
 
   const getNFT = async (currentRegistry: string, currentTokenId: string) => {
     if (currentTokenId && currentTokenId.length > 0) {
-      const result = await getNFTAction(currentRegistry, props.tinlake as ITinlake, currentTokenId)
+      const result = await getNFTAction(currentRegistry, props.tinlake, currentTokenId)
       const { tokenId, nft, errorMessage } = result as Partial<{ tokenId: string; nft: NFT; errorMessage: string }>
       if (tokenId !== currentTokenId) {
         return
@@ -72,13 +73,12 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
   const valueNFT = async () => {
     await props.ensureAuthed!()
 
-    const nftFeedId =
-      props.tinlake.version === 2
-        ? await (props.tinlake as ITinlake).getNftFeedId(registry, Number(tokenId))
-        : await (props.tinlake as ITinlakeV3).getNftFeedId(registry, tokenId)
+    const nftFeedId = isTinlakeV3(props.tinlake)
+      ? await props.tinlake.getNftFeedId(registry, tokenId)
+      : await props.tinlake.getNftFeedId(registry, Number(tokenId))
 
     const txId = await props.createTransaction(`Value NFT ${tokenId.slice(0, 4)}...`, 'updateNftFeed', [
-      props.tinlake as ITinlakeV3,
+      props.tinlake,
       nftFeedId,
       value,
       riskGroup,
@@ -89,15 +89,14 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
   const updateMaturityDate = async () => {
     await props.ensureAuthed!()
 
-    const nftFeedId =
-      props.tinlake.version === 2
-        ? await (props.tinlake as ITinlake).getNftFeedId(registry, Number(tokenId))
-        : await (props.tinlake as ITinlakeV3).getNftFeedId(registry, tokenId)
+    const nftFeedId = isTinlakeV3(props.tinlake)
+      ? await props.tinlake.getNftFeedId(registry, tokenId)
+      : await props.tinlake.getNftFeedId(registry, Number(tokenId))
 
     const txId = await props.createTransaction(
       `Set maturity date for NFT ${tokenId.slice(0, 4)}...`,
       'setMaturityDate',
-      [props.tinlake as ITinlakeV3, nftFeedId, Math.floor(new Date(maturityDate).getTime() / 1000)]
+      [props.tinlake, nftFeedId, Math.floor(new Date(maturityDate).getTime() / 1000)]
     )
     setTxIdSetMat(txId)
   }
