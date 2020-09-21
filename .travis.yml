@@ -10,6 +10,9 @@ cache:
 #   - curl https://dapp.tools/install | sh
 #   - . $HOME/.nix-profile/etc/profile.d/nix.sh -iA dapp solc
 
+install:
+  - npm install
+
 jobs:
   include:
   - stage: lint
