@@ -91,7 +91,11 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       )
     }
 
-    // TODO: setMaturityDate (maybe not needed for MVP)
+    setMaturityDate = async (nftId: string, timestampSecs: number) => {
+      return this.pending(
+        this.contract('FEED').file(web3.fromAscii('maturityDate').padEnd(66, '0'), nftId, timestampSecs)
+      )
+    }
 
     updateJuniorMemberList = async (user: string, validUntil: number) => {
       return this.pending(this.contract('JUNIOR_MEMBERLIST').updateMember(user, validUntil, this.overrides))
@@ -134,6 +138,7 @@ export type IAdminActions = {
   setMaximumReserve(amount: string): Promise<PendingTransaction>
   setSeniorTrancheInterest(amount: string): Promise<PendingTransaction>
   setDiscountRate(amount: string): Promise<PendingTransaction>
+  setMaturityDate(nftId: string, timestampSecs: number): Promise<PendingTransaction>
   updateNftFeed(nftId: string, value: string, riskGroup?: string): Promise<PendingTransaction>
   getNftFeedId(registry: string, tokenId: string): Promise<string>
   getNftFeedValue(tokenId: string): Promise<BN>
