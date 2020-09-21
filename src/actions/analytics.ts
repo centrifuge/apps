@@ -6,6 +6,10 @@ import BN from 'bn.js'
 export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IAnalyticsActions {
     // borrower analytics
+    getNetAssetValue = async (): Promise<BN> => {
+      return (await this.contract('FEED').currentNAV()).toBN()
+    }
+
     getTotalDebt = async (): Promise<BN> => {
       return (await this.contract('PILE').total()).toBN()
     }
@@ -165,7 +169,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
 
     getJuniorReserve = async () => {
       const seniorBalance = await this.getSeniorReserve()
-      const totalBalance = (await this.contract('ASSESSOR').maxReserve()).toBN()
+      const totalBalance = (await this.contract('RESERVE').totalBalance()).toBN()
       return totalBalance.sub(seniorBalance)
     }
 
@@ -210,6 +214,7 @@ const seniorToJuniorRatio = (seniorRatio: BN) => {
 }
 
 export type IAnalyticsActions = {
+  getNetAssetValue(): Promise<BN>
   getTotalDebt(): Promise<BN>
   getDebt(loanId: string): Promise<BN>
   loanCount(): Promise<BN>
