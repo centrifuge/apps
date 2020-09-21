@@ -11,7 +11,6 @@ import { connect, useSelector } from 'react-redux'
 
 interface Props extends TransactionProps {
   tinlake: ITinlakeV3
-  pool: PoolState
   loadPool?: (tinlake: any) => Promise<void>
 }
 

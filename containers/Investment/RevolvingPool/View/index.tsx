@@ -14,7 +14,7 @@ import { AuthState } from '../../../../ducks/auth'
 interface Props {
   activePool: Pool
   tinlake: ITinlakeV3
-  auth: AuthState
+  auth?: AuthState
 }
 
 export type EpochData = {
@@ -23,7 +23,7 @@ export type EpochData = {
 }
 
 const InvestmentsView: React.FC<Props> = (props: Props) => {
-  const isAdmin = props.auth.permissions?.canSetMinimumJuniorRatio
+  const isAdmin = props.auth?.permissions?.canSetMinimumJuniorRatio
 
   const [epochData, setEpochData] = React.useState<EpochData | undefined>(undefined)
 
@@ -72,7 +72,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
       {isAdmin && (
         <>
           <Heading level="4">Admin actions for {props.activePool?.name}</Heading>
-          <AdminActions pool={props.activePool} tinlake={props.tinlake} />
+          <AdminActions tinlake={props.tinlake} />
           {epochData && <EpochOverview epochData={epochData} tinlake={props.tinlake} />}
         </>
       )}

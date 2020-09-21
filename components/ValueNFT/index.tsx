@@ -11,7 +11,6 @@ import { Spinner } from '@centrifuge/axis-spinner'
 import { PoolLink } from '../PoolLink'
 import NumberInput from '../NumberInput'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
-import BN from 'bn.js'
 import styled from 'styled-components'
 
 interface Props extends TransactionProps {
@@ -73,10 +72,13 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
   const valueNFT = async () => {
     await props.ensureAuthed!()
 
-    const nftFeedId = await props.tinlake.getNftFeedId(registry, tokenId)
+    const nftFeedId =
+      props.tinlake.version === 2
+        ? await (props.tinlake as ITinlake).getNftFeedId(registry, Number(tokenId))
+        : await (props.tinlake as ITinlakeV3).getNftFeedId(registry, tokenId)
 
     const txId = await props.createTransaction(`Value NFT ${tokenId.slice(0, 4)}...`, 'updateNftFeed', [
-      props.tinlake as ITinlake,
+      props.tinlake as ITinlakeV3,
       nftFeedId,
       value,
       riskGroup,
@@ -87,12 +89,15 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
   const updateMaturityDate = async () => {
     await props.ensureAuthed!()
 
-    const nftFeedId = await props.tinlake.getNftFeedId(registry, tokenId)
+    const nftFeedId =
+      props.tinlake.version === 2
+        ? await (props.tinlake as ITinlake).getNftFeedId(registry, Number(tokenId))
+        : await (props.tinlake as ITinlakeV3).getNftFeedId(registry, tokenId)
 
     const txId = await props.createTransaction(
       `Set maturity date for NFT ${tokenId.slice(0, 4)}...`,
       'setMaturityDate',
-      [props.tinlake as ITinlake, nftFeedId, Math.floor(new Date(maturityDate).getTime() / 1000)]
+      [props.tinlake as ITinlakeV3, nftFeedId, Math.floor(new Date(maturityDate).getTime() / 1000)]
     )
     setTxIdSetMat(txId)
   }
@@ -203,9 +208,8 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
             <DateInput
               value={maturityDate}
               format="YYYY-MM-DD"
-              onChange={({ value }) => {
-                console.log({ value })
-                setMaturityDate(value)
+              onChange={(event: any) => {
+                setMaturityDate(event.value)
               }}
               // disabled={status === 'unconfirmed' || status === 'pending'}
             />

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Drop, TextInput } from 'grommet'
 import { useSelector, useDispatch } from 'react-redux'
-import { loadPools, PoolData, PoolsData, PoolsState } from '../../ducks/pools'
+import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
 import { useRouter } from 'next/router'
 import { FormDown, FormSearch } from 'grommet-icons'
 
