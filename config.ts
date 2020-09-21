@@ -62,6 +62,7 @@ interface Config {
   pools: Pool[]
   upcomingPools: UpcomingPool[]
   portisApiKey: string
+  gasLimit: number
 }
 
 const contractAddressesSchema = yup.object().shape({
@@ -211,6 +212,10 @@ const config: Config = {
     .string()
     .required()
     .validateSync(process.env.NEXT_PUBLIC_PORTIS_KEY),
+  gasLimit: yup
+    .number()
+    .required('gasLimit is required')
+    .validateSync('1000000'),
 }
 
 export default config
