@@ -2,29 +2,54 @@ import { Constructor, TinlakeParams } from '../Tinlake'
 
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
+    // const tinlake = (this as any)
+    // const reserve = (await tinlake.getJuniorReserve()).add(await tinlake.getSeniorReserve())
+
     solveEpoch = async () => {
-      // const tinlake = (this as any)
-      // const reserve = (await tinlake.getJuniorReserve()).add(await tinlake.getSeniorReserve())
+      // if (!coordinator.submissionPeriod) {
+      //   await coordinator.closeEpoch()
+
+      //   if (!coordinator.submissionPeriod) return
+      // }
 
       // const state = {
-      //   reserve,
-      //   netAssetValue: 0,
-      //   seniorDebt: await tinlake.getSeniorDebt(),
-      //   seniorBalance: 0,
-      //   minTinRatio: await tinlake.getMinJuniorRatio(),
-      //   maxTinRatio: 0,
-      //   maxReserve: 0,
+      //   reserve, // coordinator.epochReserve
+      //   netAssetValue: 0, // coordinator.epochNAV
+      //   seniorDebt: await tinlake.getSeniorDebt(), // coordinator.epochSeniorDebt (to be added)
+      //   seniorBalance: 0, // epochSeniorAsset - epochSeniorDebt
+      //   minTinRatio: await tinlake.getMinJuniorRatio(), // 1 - maxSeniorRatio on the assessor
+      //   maxTinRatio: 0, // 1 - mSeniorRatio on the assessor
+      //   maxReserve: 0, // assessor.maxReserve
       // }
-      
+
+      // const orderState = coordinator.order
+
+      // const solution = calculateOptimalSolution(state, orderState)
+
+      // Call submitSolution(solution)
+
       return Promise.resolve({
-          tinRedeem: 1,
-          dropRedeem: 2,
-          tinInvest: 3,
-          dropInvest: 4
+        tinRedeem: 1,
+        dropRedeem: 2,
+        tinInvest: 3,
+        dropInvest: 4,
       })
     }
 
+    // executeEpoch = () => void
+
+    // isInChallengePeriod = () => boolean
+    // check coordinator.minChallengePeriodEnd
+
     calculateOptimalSolution = async (state: State, orderState: OrderState) => {
+      /**
+       * The limitations are:
+       * - only input variables (those in state or orderState) can be on the right side of the constraint (the bnds key)
+       * - only output variables ([dropRedeem,tinRedeem,tinInvest,dropInvest]) can be on the left side of the constraint (the vars key)
+       * - variables can have coefficients, but there's no option for brackets or other more advanced equation forms
+       *   (e.g. it's limited to a * x_1 + b * x_2 + ..., where [a,b] are coefficients and [x_1,x_2] are variables)
+       * - larger than or equals, less than or equals, and equals constraints are all allowed ([<=,>=,=])
+       */
       return require('glpk.js').then((glpk: any) => {
         const lp = {
           name: 'LP',
@@ -82,10 +107,10 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
               bnds: { type: glpk.GLP_UP, ub: state.maxReserve - state.reserve, lb: 0.0 },
             },
             /**
-             * The next tow constraints were rewritten from the original equations in the epoch model. 
+             * The next tow constraints were rewritten from the original equations in the epoch model.
              * For one, minTINRatio was rewritten as a lower bound, which means both sides were multiplied by -1.
              * Secondly, all output vars were moved to the left side, while all input vars were moved to the right side.
-             * 
+             *
              * E.g. for dropRedeem, in the epoch model there's both -I4*(1-B7) and +I4.
              * So: -I4*(1-B7) + I4 = -0.8 I4 + 1.0 I4 = 0.2 I4 = minTinRatio * dropRedeem.
              */

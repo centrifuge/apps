@@ -1,5 +1,5 @@
-import { ContractNames, Constructor, TinlakeParams } from '../Tinlake'
-import { waitAndReturnEvents, executeAndRetry, ZERO_ADDRESS } from '../services/ethereum'
+import { ContractName, Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
+import { ZERO_ADDRESS } from '../services/ethereum'
 import BN from 'bn.js'
 const web3 = require('web3-utils')
 
@@ -7,183 +7,118 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
   return class extends Base implements IAdminActions {
     canQueryPermissions = () => {
       return (
-        !!this.contracts['PILE']?.wards &&
-        !!this.contracts['SENIOR']?.wards &&
-        !!this.contracts['PRICE_POOL']?.wards &&
-        !!this.contracts['ASSESSOR']?.wards &&
-        !!this.contracts['JUNIOR_OPERATOR']?.wards &&
-        !!this.contracts['SENIOR_OPERATOR']?.wards &&
-        !!this.contracts['COLLECTOR']?.wards
+        !!this.contract('PILE')?.wards &&
+        !!this.contract('SENIOR_TRANCHE')?.wards &&
+        !!this.contract('PRICE_POOL')?.wards &&
+        !!this.contract('ASSESSOR')?.wards &&
+        !!this.contract('JUNIOR_OPERATOR')?.wards &&
+        !!this.contract('SENIOR_OPERATOR')?.wards &&
+        !!this.contract('COLLECTOR')?.wards
       )
     }
 
-    isWard = async (user: string, contractName: ContractNames) => {
-      if (!this.contracts[contractName]?.wards) {
-        return new BN(0)
-      }
-      const res: { 0: BN } = await executeAndRetry(this.contracts[contractName].wards, [user])
-      return res[0]
+    isWard = async (user: string, contractName: ContractName) => {
+      if (!this.contract(contractName)?.wards) return new BN(0)
+      return (await this.contract(contractName).wards(user)).toBN()
     }
 
     canSetInterestRate = async (user: string) => {
-      if (!this.contracts['PILE']?.wards) {
-        return false
-      }
-      const res: { 0: BN } = await executeAndRetry(this.contracts['PILE'].wards, [user])
-      return res[0].toNumber() === 1
+      if (!this.contract('PILE')?.wards) return false
+      return (await this.contract('PILE').wards(user)).toBN().toNumber() === 1
     }
 
     canSetSeniorTrancheInterest = async (user: string) => {
-      if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
-        if (!this.contracts['SENIOR']?.wards) {
-          return false
-        }
-        const res: { 0: BN } = await executeAndRetry(this.contracts['SENIOR'].wards, [user])
-        return res[0].toNumber() === 1
-      }
-      return false
+      if (!(this.contractAddresses['SENIOR_TRANCHE'] !== ZERO_ADDRESS)) return false
+      if (!this.contract('SENIOR_TRANCHE')?.wards) return false
+      return (await this.contract('SENIOR_TRANCHE').wards(user)).toBN().toNumber() === 1
     }
 
     canSetRiskScore = async (user: string) => {
-      if (!this.contracts['PRICE_POOL']?.wards) {
-        return false
-      }
-      const res: { 0: BN } = await executeAndRetry(this.contracts['PRICE_POOL'].wards, [user])
-      return res[0].toNumber() === 1
+      if (!this.contract('PRICE_POOL')?.wards) return false
+      return (await this.contract('PRICE_POOL').wards(user)).toBN().toNumber() === 1
     }
 
     // lender permissions (note: allowance operator for default deployment)
     canSetMinimumJuniorRatio = async (user: string) => {
-      if (!this.contracts['ASSESSOR']?.wards) {
-        return false
-      }
-      const res: { 0: BN } = await executeAndRetry(this.contracts['ASSESSOR'].wards, [user])
-      return res[0].toNumber() === 1
+      if (!this.contract('ASSESSOR')?.wards) return false
+      return (await this.contract('ASSESSOR').wards(user)).toBN().toNumber() === 1
     }
 
     canSetInvestorAllowanceJunior = async (user: string) => {
-      if (!this.contracts['JUNIOR_OPERATOR']?.wards) {
-        return false
-      }
-      const res: { 0: BN } = await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].wards, [user])
-      return res[0].toNumber() === 1
+      if (!this.contract('JUNIOR_OPERATOR')?.wards) return false
+      return (await this.contract('JUNIOR_OPERATOR').wards(user)).toBN().toNumber() === 1
     }
 
     canSetInvestorAllowanceSenior = async (user: string) => {
-      if (!this.contracts['SENIOR_OPERATOR']?.wards) {
-        return false
-      }
-      if (this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS) {
-        const res: { 0: BN } = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].wards, [user])
-        return res[0].toNumber() === 1
-      }
-      return false
+      if (!this.contract('SENIOR_OPERATOR')?.wards) return false
+      if (!(this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS)) return false
+      return (await this.contract('SENIOR_OPERATOR').wards(user)).toBN().toNumber() === 1
     }
 
     canSetLoanPrice = async (user: string) => {
-      if (!this.contracts['COLLECTOR']?.wards) {
-        return false
-      }
-      const res: { 0: BN } = await executeAndRetry(this.contracts['COLLECTOR'].wards, [user])
-      return res[0].toNumber() === 1
+      if (!this.contract('COLLECTOR')?.wards) return false
+      return (await this.contract('COLLECTOR').wards(user)).toBN().toNumber() === 1
     }
 
     // ------------ admin functions borrower-site -------------
     existsRateGroup = async (ratePerSecond: string) => {
       const rateGroup = getRateGroup(ratePerSecond)
-      const res: { ratePerSecond: BN } = await executeAndRetry(this.contracts['PILE'].rates, [rateGroup])
-      return !res.ratePerSecond.isZero()
+      const actualRate = (await this.contract('PILE').rates(rateGroup)).toBN()
+      return !actualRate.isZero()
     }
 
     initRate = async (ratePerSecond: string) => {
       const rateGroup = getRateGroup(ratePerSecond)
-      const txHash = await executeAndRetry(this.contracts['PILE'].file, [
-        web3.fromAscii('rate'),
-        rateGroup,
-        ratePerSecond,
-        this.ethConfig,
-      ])
-      console.log(`[Initialising rate] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['PILE'].abi, this.transactionTimeout)
+      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
+      return this.pending(
+        this.contract('PILE').file(web3.fromAscii('rate').padEnd(66, '0'), rateGroup, ratePerSecond, this.overrides)
+      )
     }
 
     changeRate = async (loan: string, ratePerSecond: string) => {
       const rateGroup = getRateGroup(ratePerSecond)
-      const txHash = await executeAndRetry(this.contracts['PILE'].changeRate, [loan, rateGroup, this.ethConfig])
-      console.log(`[Initialising rate] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['PILE'].abi, this.transactionTimeout)
+      return this.pending(this.contract('PILE').changeRate(loan, rateGroup, this.overrides))
     }
 
     setRate = async (loan: string, ratePerSecond: string) => {
       const rateGroup = getRateGroup(ratePerSecond)
-      const txHash = await executeAndRetry(this.contracts['PILE'].setRate, [loan, rateGroup, this.ethConfig])
-      console.log(`[Setting rate] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['PILE'].abi, this.transactionTimeout)
+      return this.pending(this.contract('PILE').setRate(loan, rateGroup, this.overrides))
     }
 
     // ------------ admin functions lender-site -------------
     setMinimumJuniorRatio = async (ratio: string) => {
-      const txHash = await executeAndRetry(this.contracts['ASSESSOR'].file, [
-        web3.fromAscii('minJuniorRatio'),
-        ratio,
-        this.ethConfig,
-      ])
-      console.log(`[Assessor file] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['ASSESSOR'].abi, this.transactionTimeout)
+      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
+      return this.pending(
+        this.contract('ASSESSOR').file(web3.fromAscii('minJuniorRatio').padEnd(66, '0'), ratio, this.overrides)
+      )
     }
 
     approveAllowanceJunior = async (user: string, maxCurrency: string, maxToken: string) => {
-      const txHash = await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].approve, [
-        user,
-        maxCurrency,
-        maxToken,
-        this.ethConfig,
-      ])
-      console.log(`[Approve allowance Junior] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_OPERATOR'].abi, this.transactionTimeout)
+      return this.pending(this.contract('JUNIOR_OPERATOR').approve(user, maxCurrency, maxToken, this.overrides))
     }
 
     approveAllowanceSenior = async (user: string, maxCurrency: string, maxToken: string) => {
-      const operatorType = this.getOperatorType('senior')
-      let txHash
-      switch (operatorType) {
-        case 'PROPORTIONAL_OPERATOR':
-          txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [user, maxCurrency, this.ethConfig])
-          break
-        // ALLOWANCE_OPERATOR
-        default:
-          txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].approve, [
-            user,
-            maxCurrency,
-            maxToken,
-            this.ethConfig,
-          ])
+      if (this.getOperatorType('senior') === 'PROPORTIONAL_OPERATOR') {
+        return this.pending(this.contract('SENIOR_OPERATOR').approve(user, maxCurrency, this.overrides))
       }
-      console.log(`[Approve allowance Senior] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_OPERATOR'].abi, this.transactionTimeout)
+      return this.pending(this.contract('SENIOR_OPERATOR').approve(user, maxCurrency, maxToken, this.overrides))
     }
 
     updateNftFeed = async (tokenId: string, value: number, riskGroup?: number) => {
-      let txHash;
       if (!riskGroup) {
-        txHash = await executeAndRetry(this.contracts['NFT_FEED'].update, [tokenId, value, this.ethConfig]);
-      } else {
-        txHash = await executeAndRetry(this.contracts['NFT_FEED'].update, [tokenId, value, riskGroup, this.ethConfig]);
+        return this.pending(this.contract('NFT_FEED')['update(bytes32,uint256)'](tokenId, value, this.overrides))
       }
-      console.log(`[Updating NFT Feed] txHash: ${txHash}`);
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['NFT_FEED'].abi, this.transactionTimeout)
+      return this.pending(
+        this.contract('NFT_FEED')['update(bytes32,uint256,uint256)'](tokenId, value, riskGroup, this.overrides)
+      )
     }
 
     getNftFeedId = async (registry: string, tokenId: number) => {
-      const res = await executeAndRetry(this.contracts['NFT_FEED'].nftID, [registry, tokenId, this.ethConfig]);
-      console.log(`[Getting NFT ID]`);
-      return res[0]
+      return await this.contract('NFT_FEED')['nftID(address,uint256)'](registry, tokenId)
     }
 
     getNftFeedValue = async (nftFeedId: string) => {
-      const res = await executeAndRetry(this.contracts['NFT_FEED'].nftValues, [nftFeedId, this.ethConfig]);
-      console.log(`[Getting NFT Value]`);
-      return res[0]
+      return (await this.contract('NFT_FEED').nftValues(nftFeedId)).toBN()
     }
   }
 }
@@ -194,7 +129,7 @@ function getRateGroup(ratePerSecond: string) {
 }
 
 export type IAdminActions = {
-  isWard(user: string, contractName: ContractNames): Promise<BN>
+  isWard(user: string, contractName: ContractName): Promise<BN>
   canSetInterestRate(user: string): Promise<boolean>
   canSetSeniorTrancheInterest(user: string): Promise<boolean>
   canSetMinimumJuniorRatio(user: string): Promise<boolean>
@@ -202,12 +137,14 @@ export type IAdminActions = {
   canSetInvestorAllowanceJunior(user: string): Promise<boolean>
   canSetInvestorAllowanceSenior(user: string): Promise<boolean>
   canSetLoanPrice(user: string): Promise<boolean>
-  initRate(rate: string): Promise<any>
-  setRate(loan: string, rate: string): Promise<any>
-  setMinimumJuniorRatio(amount: string): Promise<any>
-  approveAllowanceJunior(user: string, maxCurrency: string, maxToken: string): Promise<any>
-  approveAllowanceSenior(user: string, maxCurrency: string, maxToken: string): Promise<any>
-  updateNftFeed(nftId: string, value: number, riskGroup?: number): Promise<any>
+  existsRateGroup(ratePerSecond: string): Promise<boolean>
+  initRate(rate: string): Promise<PendingTransaction>
+  setRate(loan: string, rate: string): Promise<PendingTransaction>
+  changeRate(loan: string, ratePerSecond: string): Promise<PendingTransaction>
+  setMinimumJuniorRatio(amount: string): Promise<PendingTransaction>
+  approveAllowanceJunior(user: string, maxCurrency: string, maxToken: string): Promise<PendingTransaction>
+  approveAllowanceSenior(user: string, maxCurrency: string, maxToken: string): Promise<PendingTransaction>
+  updateNftFeed(nftId: string, value: number, riskGroup?: number): Promise<PendingTransaction>
   getNftFeedId(registry: string, tokenId: number): Promise<any>
   getNftFeedValue(tokenId: string): Promise<BN>
 }

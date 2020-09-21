@@ -1,5 +1,4 @@
-import { Constructor, TinlakeParams } from '../Tinlake'
-import { waitAndReturnEvents, executeAndRetry } from '../services/ethereum'
+import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
 const abiCoder = require('web3-eth-abi')
 import BN from 'bn.js'
 import { ethers } from 'ethers'
@@ -7,36 +6,37 @@ import { ethers } from 'ethers'
 export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IProxyActions {
     getProxyAccessTokenOwner = async (tokenId: string): Promise<BN> => {
-      const res: { 0: BN } = await executeAndRetry(this.contracts['PROXY_REGISTRY'].ownerOf, [tokenId])
-      return res[0]
+      return this.contract('PROXY_REGISTRY').ownerOf(tokenId)
     }
 
     buildProxy = async (owner: string) => {
-      const txHash = await executeAndRetry(this.contracts['PROXY_REGISTRY'].build, [owner, this.ethConfig])
-      console.log(`[Proxy created] txHash: ${txHash}`)
-      const response: any = await waitAndReturnEvents(
-        this.eth,
-        txHash,
-        this.contracts['PROXY_REGISTRY'].abi,
-        this.transactionTimeout
-      )
-      return response.events[0].data[2].toString()
+      const tx = await this.contract('PROXY_REGISTRY')['build(address)'](owner, this.overrides)
+      const receipt = await this.getTransactionReceipt(tx)
+
+      if (!(receipt.logs && receipt.logs[1])) {
+        throw new Error('Created() event missing in proxyRegistry.build(address) receipt')
+      }
+
+      // Two events are emitted: Transfer() (from the ERC721 contract mint method) and Created() (from the ProxyRegistry contract)
+      // We parse the 4th arg of the Created() event, to grab the access token
+      const parsedLog = this.contract('PROXY_REGISTRY').interface.parseLog(receipt.logs[1])
+      const accessToken = parsedLog.values['3'].toNumber()
+
+      return accessToken
     }
 
     getProxy = async (accessTokenId: string) => {
-      const res = await executeAndRetry(this.contracts['PROXY_REGISTRY'].proxies, [accessTokenId, this.ethConfig])
-      return res[0]
+      return await this.contract('PROXY_REGISTRY').proxies(accessTokenId)
     }
 
-    getProxyAccessToken = async (proxyAddr: string) => {
-      const proxy: any = this.eth.contract(this.contractAbis['PROXY']).at(proxyAddr)
-      const res = await executeAndRetry(proxy.accessToken, [])
-      return res[0].toNumber()
+    getProxyAccessToken = async (proxyAddress: string) => {
+      const proxy = this.contract('PROXY', proxyAddress)
+      const accessToken = (await proxy.accessToken()).toBN()
+      return accessToken.toNumber()
     }
 
     getProxyOwnerByLoan = async (loanId: string) => {
-      const res = await executeAndRetry(this.contracts['TITLE'].ownerOf, [loanId])
-      const loanOwner = res[0]
+      const loanOwner = this.contract('TITLE').ownerOf(loanId)
       const accessToken = await this.getProxyAccessToken(loanOwner)
       return this.getProxyAccessTokenOwner(accessToken)
     }
@@ -47,8 +47,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     proxyCount = async (): Promise<BN> => {
-      const res: { 0: BN } = await executeAndRetry(this.contracts['PROXY_REGISTRY'].count, [])
-      return res[0]
+      return (await this.contract('PROXY_REGISTRY').count()).toBN()
     }
 
     checkProxyExists = async (address: string): Promise<string | null> => {
@@ -65,116 +64,78 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     proxyCreateNew = async (address: string) => {
       const accessToken = await this.buildProxy(address)
-      return this.getProxy(accessToken)
+      return await this.getProxy(accessToken)
     }
 
-    proxyIssue = async (proxyAddr: string, nftRegistryAddr: string, tokenId: string) => {
-      const proxy: any = this.eth.contract(this.contractAbis['PROXY']).at(proxyAddr)
+    proxyIssue = async (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => {
+      const proxy = this.contract('PROXY', proxyAddress)
+      const encoded = this.contract('ACTIONS').interface.functions.issue.encode([
+        this.contract('SHELF').address,
+        nftRegistryAddress,
+        tokenId,
+      ])
 
-      const encoded = abiCoder.encodeFunctionCall(
-        {
-          name: 'issue',
-          type: 'function',
-          inputs: [
-            { type: 'address', name: 'shelf' },
-            { type: 'address', name: 'registry' },
-            { type: 'uint256', name: 'token' },
-          ],
-        },
-        [this.contracts['SHELF'].address, nftRegistryAddr, tokenId]
-      )
-
-      const txHash = await executeAndRetry(proxy.execute, [this.contracts['ACTIONS'].address, encoded, this.ethConfig])
-      console.log(`[Proxy Issue Loan] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contractAbis['PROXY'], this.transactionTimeout)
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
     }
 
-    proxyTransferIssue = async (proxyAddr: string, nftRegistryAddr: string, tokenId: string) => {
-      const proxy: any = this.eth.contract(this.contractAbis['PROXY']).at(proxyAddr)
+    proxyTransferIssue = async (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => {
+      const proxy = this.contract('PROXY', proxyAddress)
+      const encoded = this.contract('ACTIONS').interface.functions.transferIssue.encode([
+        this.contract('SHELF').address,
+        nftRegistryAddress,
+        tokenId,
+      ])
 
-      const encoded = abiCoder.encodeFunctionCall(
-        {
-          name: 'transferIssue',
-          type: 'function',
-          inputs: [
-            { type: 'address', name: 'shelf' },
-            { type: 'address', name: 'registry' },
-            { type: 'uint256', name: 'token' },
-          ],
-        },
-        [this.contracts['SHELF'].address, nftRegistryAddr, tokenId]
-      )
-
-      const txHash = await executeAndRetry(proxy.execute, [this.contracts['ACTIONS'].address, encoded, this.ethConfig])
-      console.log(`[Proxy Transfer Issue Loan] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contractAbis['PROXY'], this.transactionTimeout)
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
     }
 
-    proxyLockBorrowWithdraw = async (proxyAddr: string, loanId: string, amount: string, usr: string) => {
-      const proxy: any = this.eth.contract(this.contractAbis['PROXY']).at(proxyAddr)
-      const encoded = abiCoder.encodeFunctionCall(
-        {
-          name: 'lockBorrowWithdraw',
-          type: 'function',
-          inputs: [
-            { type: 'address', name: 'shelf' },
-            { type: 'uint256', name: 'loan' },
-            { type: 'uint256', name: 'amount' },
-            { type: 'address', name: 'usr' },
-          ],
-        },
-        [this.contracts['SHELF'].address, loanId, amount, usr]
-      )
-      const txHash = await executeAndRetry(proxy.execute, [this.contracts['ACTIONS'].address, encoded, this.ethConfig])
-      console.log(`[Proxy Lock Borrow Withdraw] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contractAbis['PROXY'], this.transactionTimeout)
+    proxyLockBorrowWithdraw = async (proxyAddress: string, loanId: string, amount: string, usr: string) => {
+      const proxy = this.contract('PROXY', proxyAddress)
+      const encoded = this.contract('ACTIONS').interface.functions.lockBorrowWithdraw.encode([
+        this.contract('SHELF').address,
+        loanId,
+        amount,
+        usr,
+      ])
+
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))
     }
 
-    proxyRepayUnlockClose = async (proxyAddr: string, tokenId: string, loanId: string, registry: string) => {
-      const proxy: any = this.eth.contract(this.contractAbis['PROXY']).at(proxyAddr)
-      const encoded = abiCoder.encodeFunctionCall(
-        {
-          name: 'repayUnlockClose',
-          type: 'function',
-          inputs: [
-            { type: 'address', name: 'shelf' },
-            { type: 'address', name: 'pile' },
-            { type: 'address', name: 'registry' },
-            { type: 'uint256', name: 'token' },
-            { type: 'address', name: 'erc20' },
-            { type: 'uint256', name: 'loan' },
-          ],
-        },
-        [
-          this.contracts['SHELF'].address,
-          this.contracts['PILE'].address,
-          registry,
-          tokenId,
-          this.contracts['TINLAKE_CURRENCY'].address,
-          loanId,
-        ]
-      )
-      const txHash = await executeAndRetry(proxy.execute, [this.contracts['ACTIONS'].address, encoded, this.ethConfig])
-      console.log(`[Proxy Repay Unlock Close] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contractAbis['PROXY'], this.transactionTimeout)
+    proxyRepayUnlockClose = async (proxyAddress: string, tokenId: string, loanId: string, registry: string) => {
+      const proxy = this.contract('PROXY', proxyAddress)
+      const encoded = this.contract('ACTIONS').interface.functions.repayUnlockClose.encode([
+        this.contract('SHELF').address,
+        this.contract('PILE').address,
+        registry,
+        tokenId,
+        this.contract('TINLAKE_CURRENCY').address,
+        loanId,
+      ])
+
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
     }
   }
 }
 
 export type IProxyActions = {
-  buildProxy(owner: string): Promise<any>
+  buildProxy(owner: string): Promise<number>
   checkProxyExists(address: string): Promise<string | null>
-  getProxy(accessTokenId: string): Promise<any>
-  proxyCount(): Promise<any>
-  getProxyAccessToken(proxyAddr: string): Promise<any>
-  getProxyAccessTokenOwner(tokenId: string): Promise<any>
-  getProxyOwnerByLoan(loanId: string): Promise<any>
-  getProxyOwnerByAddress(proxyAddr: string): Promise<any>
-  proxyCreateNew(address: string): Promise<any>
-  proxyIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<any>
-  proxyTransferIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<any>
-  proxyLockBorrowWithdraw(proxyAddr: string, loanId: string, amount: string, usr: string): Promise<any>
-  proxyRepayUnlockClose(proxyAddr: string, tokenId: string, loanId: string, registry: string): Promise<any>
+  getProxy(accessTokenId: string): Promise<string>
+  proxyCount(): Promise<BN>
+  getProxyAccessToken(proxyAddr: string): Promise<number>
+  getProxyAccessTokenOwner(tokenId: string): Promise<BN>
+  getProxyOwnerByLoan(loanId: string): Promise<BN>
+  getProxyOwnerByAddress(proxyAddr: string): Promise<BN>
+  proxyCreateNew(address: string): Promise<string>
+  proxyIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<PendingTransaction>
+  proxyTransferIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<PendingTransaction>
+  proxyLockBorrowWithdraw(proxyAddr: string, loanId: string, amount: string, usr: string): Promise<PendingTransaction>
+  proxyRepayUnlockClose(
+    proxyAddr: string,
+    tokenId: string,
+    loanId: string,
+    registry: string
+  ): Promise<PendingTransaction>
 }
 
 export default ProxyActions

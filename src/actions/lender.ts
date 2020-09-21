@@ -1,76 +1,53 @@
-import { Constructor, TinlakeParams } from '../Tinlake'
-import { executeAndRetry, waitAndReturnEvents } from '../services/ethereum'
+import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
 import BN from 'bn.js'
 
 export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Base: ActionBase) {
   return class extends Base implements ILenderActions {
-    // senior tranch functions
+    // senior tranche functions
     supplySenior = async (currencyAmount: string) => {
-      const txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].supply, [currencyAmount, this.ethConfig])
-      console.log(`[Supply] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_OPERATOR'].abi, this.transactionTimeout)
+      return this.pending(this.contract('SENIOR_OPERATOR').supply(currencyAmount, this.overrides))
     }
 
     redeemSenior = async (tokenAmount: string) => {
-      const txHash = await executeAndRetry(this.contracts['SENIOR_OPERATOR'].redeem, [tokenAmount, this.ethConfig])
-      console.log(`[Redeem] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_OPERATOR'].abi, this.transactionTimeout)
+      return this.pending(this.contract('SENIOR_OPERATOR').redeem(tokenAmount, this.overrides))
     }
 
     getSeniorTokenAllowance = async (owner: string) => {
-      const res: { 0: BN } = await executeAndRetry(this.contracts['SENIOR_TOKEN'].allowance, [
-        owner,
-        this.contractAddresses['SENIOR'],
-      ])
-      return res[0] || new BN(0)
+      return (
+        await this.contract('SENIOR_TOKEN').allowance(owner, this.contractAddresses['SENIOR_TRANCHE'], this.overrides)
+      ).toBN()
     }
 
     approveSeniorToken = async (tokenAmount: string) => {
-      const txHash = await executeAndRetry(this.contracts['SENIOR_TOKEN'].approve, [
-        this.contractAddresses['SENIOR'],
-        tokenAmount,
-        this.ethConfig,
-      ])
-      console.log(`[Currency.approve] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['SENIOR_TOKEN'].abi, this.transactionTimeout)
+      return this.pending(
+        this.contract('SENIOR_TOKEN').approve(this.contractAddresses['SENIOR_TRANCHE'], tokenAmount, this.overrides)
+      )
     }
 
     // junior tranche functions
     supplyJunior = async (currencyAmount: string) => {
-      const txHash = await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].supply, [currencyAmount, this.ethConfig])
-      console.log(`[Supply] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_OPERATOR'].abi, this.transactionTimeout)
+      return this.pending(this.contract('JUNIOR_OPERATOR').supply(currencyAmount, this.overrides))
     }
 
     redeemJunior = async (tokenAmount: string) => {
-      const txHash = await executeAndRetry(this.contracts['JUNIOR_OPERATOR'].redeem, [tokenAmount, this.ethConfig])
-      console.log(`[Redeem] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_OPERATOR'].abi, this.transactionTimeout)
+      return this.pending(this.contract('JUNIOR_OPERATOR').redeem(tokenAmount, this.overrides))
     }
 
     getJuniorTokenAllowance = async (owner: string) => {
-      const res: { 0: BN } = await executeAndRetry(this.contracts['JUNIOR_TOKEN'].allowance, [
-        owner,
-        this.contractAddresses['JUNIOR'],
-      ])
-      return res[0] || new BN(0)
+      return (
+        await this.contract('JUNIOR_TOKEN').allowance(owner, this.contractAddresses['JUNIOR_TRANCHE'], this.overrides)
+      ).toBN()
     }
 
     approveJuniorToken = async (tokenAmount: string) => {
-      const txHash = await executeAndRetry(this.contracts['JUNIOR_TOKEN'].approve, [
-        this.contractAddresses['JUNIOR'],
-        tokenAmount,
-        this.ethConfig,
-      ])
-      console.log(`[Currency.approve] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['JUNIOR_TOKEN'].abi, this.transactionTimeout)
+      return this.pending(
+        this.contract('JUNIOR_TOKEN').approve(this.contractAddresses['JUNIOR_TRANCHE'], tokenAmount, this.overrides)
+      )
     }
 
     // general lender functions
     balance = async () => {
-      const txHash = await executeAndRetry(this.contracts['DISTRIBUTOR'].balance, [this.ethConfig])
-      console.log(`[Balance] txHash: ${txHash}`)
-      return waitAndReturnEvents(this.eth, txHash, this.contracts['DISTRIBUTOR'].abi, this.transactionTimeout)
+      return this.pending(this.contract('DISTRIBUTOR').balance(this.overrides))
     }
   }
 }
@@ -78,13 +55,13 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
 export type ILenderActions = {
   getSeniorTokenAllowance(owner: string): Promise<BN>
   getJuniorTokenAllowance(owner: string): Promise<BN>
-  supplyJunior(currencyAmount: string): Promise<any>
-  approveJuniorToken: (tokenAmount: string) => Promise<unknown>
-  approveSeniorToken: (tokenAmount: string) => Promise<unknown>
-  redeemJunior(tokenAmount: string): Promise<any>
-  supplySenior(currencyAmount: string): Promise<any>
-  redeemSenior(tokenAmount: string): Promise<any>
-  balance(): Promise<any>
+  supplyJunior(currencyAmount: string): Promise<PendingTransaction>
+  approveJuniorToken: (tokenAmount: string) => Promise<PendingTransaction>
+  approveSeniorToken: (tokenAmount: string) => Promise<PendingTransaction>
+  redeemJunior(tokenAmount: string): Promise<PendingTransaction>
+  supplySenior(currencyAmount: string): Promise<PendingTransaction>
+  redeemSenior(tokenAmount: string): Promise<PendingTransaction>
+  balance(): Promise<PendingTransaction>
 }
 
 export default LenderActions
