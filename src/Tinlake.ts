@@ -132,11 +132,16 @@ export default class Tinlake {
     }
 
     if (address) {
+      // If an address was passed, return a contract at that specific address
       return new ethers.Contract(address, this.contractAbis[abiName]!, signerOrProvider)
     }
+
     if (this.signer) {
+      // Return the prespecified contract for that name, and connect it to the signer so that transactions can be initiated
       return this.contracts[abiName]!.connect(signerOrProvider)
     }
+
+    // Return the prespecified contract for that name, without a signer, which means that you can only retrieve information, not initiate transactions
     return this.contracts[abiName]!
   }
 
@@ -165,6 +170,7 @@ export default class Tinlake {
 
               return resolve(receipt)
             } catch (e) {
+              if (timer) clearTimeout(timer)
               console.error(`Error caught in tinlake.getTransactionReceipt(): ${JSON.stringify(e)}`)
               return reject()
             }
