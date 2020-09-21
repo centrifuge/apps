@@ -1,6 +1,6 @@
 import { AnyAction, Action } from 'redux'
 import { ThunkAction } from 'redux-thunk'
-import { getInvestor, TinlakeResult } from '../services/tinlake/actions'
+import { getInvestor } from '../services/tinlake/actions'
 import { HYDRATE } from 'next-redux-wrapper'
 
 // Actions
@@ -43,10 +43,11 @@ export function loadInvestor(
     if (!refresh) {
       dispatch({ type: LOAD_INVESTOR })
     }
-    const result: TinlakeResult = await getInvestor(tinlake, address)
-    if (result.errorMsg) {
+    const investor = await getInvestor(tinlake, address)
+    if (!investor) {
       dispatch({ type: INVESTOR_NOT_FOUND })
+    } else {
+      dispatch({ investor, type: RECEIVE_INVESTOR })
     }
-    dispatch({ type: RECEIVE_INVESTOR, investor: result.data })
   }
 }

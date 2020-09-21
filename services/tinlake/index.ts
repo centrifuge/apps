@@ -1,5 +1,5 @@
 import Tinlake, { ITinlake } from '@centrifuge/tinlake-js'
-import Eth from 'ethjs'
+import { ethers } from 'ethers'
 import config from '../../config'
 
 type ContractAddresses = {
@@ -17,7 +17,9 @@ export function initTinlake({
 }: { addresses?: ContractAddresses | null; contractConfig?: any | null } = {}): ITinlake {
   if (tinlake === null) {
     const { transactionTimeout } = config
-    tinlake = new Tinlake({ transactionTimeout, provider: getDefaultHttpProvider() }) as any
+    const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+    const overrides = config.network === 'Kovan' ? { gasLimit: config.gasLimit } : {}
+    tinlake = new Tinlake({ transactionTimeout, overrides, provider: rpcProvider })
   }
 
   let resetContractAddresses = false
@@ -42,12 +44,6 @@ export function initTinlake({
 
 export function getTinlake(): ITinlake | null {
   return tinlake
-}
-
-export function getDefaultHttpProvider(): any {
-  const { rpcUrl } = config
-  const httpProvider = new Eth.HttpProvider(rpcUrl)
-  return httpProvider
 }
 
 function deepEqual(a: any, b: any): boolean {

@@ -37,16 +37,9 @@ class Overview extends React.Component<Props> {
   }
 
   render() {
-    const { auth, tinlake, loans, pool, selectedPool } = this.props
+    const { auth, loans, pool, selectedPool } = this.props
 
-    return (
-      <OverviewComp
-        userAddress={auth?.address || tinlake.ethConfig.from || ''}
-        loans={loans}
-        pool={pool}
-        selectedPool={selectedPool}
-      />
-    )
+    return <OverviewComp userAddress={auth?.address || ''} loans={loans} pool={pool} selectedPool={selectedPool} />
   }
 }
 

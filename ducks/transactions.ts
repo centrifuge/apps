@@ -54,6 +54,7 @@ export interface Transaction {
   description: string
   actionName: TransactionAction
   actionArgs: any[]
+  hash?: string
   status: TransactionStatus
   result?: any
   tinlakeConfig: TinlakeConfig
@@ -132,8 +133,6 @@ export default function reducer(
 }
 
 // Action creators
-const SUCCESS_STATUS = '0x1'
-
 export function createTransaction<A extends TransactionAction>(
   description: string,
   actionName: A,
@@ -160,7 +159,7 @@ export function createTransaction<A extends TransactionAction>(
       actionName,
       actionArgs,
       tinlakeConfig,
-      status: 'pending',
+      status: 'unconfirmed',
       showIfClosed: true,
     }
     dispatch({ id, transaction: unconfirmedTx, type: QUEUE_TRANSACTION })
@@ -185,17 +184,6 @@ export function processTransaction(
     dispatch({ id, transaction: unconfirmedTx, type: SET_ACTIVE_TRANSACTION })
     let hasCompleted = false
 
-    // Hide pending tx after 10s
-    setTimeout(async () => {
-      if (!hasCompleted) {
-        const hiddenPendingTx: Transaction = {
-          ...unconfirmedTx,
-          showIfClosed: false,
-        }
-        await dispatch({ id, transaction: hiddenPendingTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
-      }
-    }, 10000)
-
     // Start transaction
     const tinlake = initTinlake(unconfirmedTx.tinlakeConfig)
 
@@ -209,19 +197,53 @@ export function processTransaction(
 
     try {
       const actionCall = actions[unconfirmedTx.actionName as keyof typeof actions]
-      const response = await (actionCall as any)(tinlake, ...unconfirmedTx.actionArgs)
-      hasCompleted = true
+      const tx = await (actionCall as any)(tinlake, ...unconfirmedTx.actionArgs)
 
-      const outcome = (response as any).status === SUCCESS_STATUS
-      console.log(outcome)
-      outcomeTx.status = outcome ? 'succeeded' : 'failed'
-      outcomeTx.result = response
+      if (tx.hash) {
+        // Confirmed
+        const pendingTx: Transaction = {
+          ...unconfirmedTx,
+          status: 'pending',
+          hash: tx.hash,
+        }
+        await dispatch({ id, transaction: pendingTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
 
-      if (errorMessageRegex.test(response.error)) {
-        const matches = response.error.toString().match(errorMessageRegex)
-        if (matches) outcomeTx.failedReason = matches[1]
-      } else if (outcomeTx.status === 'failed' && outcomeTx.result.message) {
-        outcomeTx.failedReason = outcomeTx.result.message
+        const pendingTxTimeout = 10000
+        const hidePendingTxCallback = async () => {
+          if (hasCompleted) return
+
+          if (!document.hidden) {
+            const hiddenPendingTx: Transaction = {
+              ...pendingTx,
+              showIfClosed: false,
+            }
+            await dispatch({
+              id,
+              transaction: hiddenPendingTx,
+              dontChangeUpdatedAt: true,
+              type: SET_ACTIVE_TRANSACTION,
+            })
+          } else {
+            setTimeout(hidePendingTxCallback, pendingTxTimeout)
+          }
+        }
+
+        // Hide pending tx after 10s
+        setTimeout(hidePendingTxCallback, pendingTxTimeout)
+
+        const receipt = await tinlake.getTransactionReceipt(tx)
+        hasCompleted = true
+
+        const outcome = receipt.status === 1
+        outcomeTx.status = outcome ? 'succeeded' : 'failed'
+        outcomeTx.result = receipt
+        outcomeTx.hash = receipt.transactionHash
+      } else {
+        // Failed or rejected
+        hasCompleted = true
+        outcomeTx.status = 'failed'
+        outcomeTx.failedReason = tx.error?.message || tx.message
+        if (tx.transactionhash) outcomeTx.hash = tx.transactionhash
       }
     } catch (error) {
       console.error(
@@ -234,21 +256,26 @@ export function processTransaction(
       if (errorMessageRegex.test(error.toString())) {
         const matches = error.toString().match(errorMessageRegex)
         if (matches) outcomeTx.failedReason = matches[1]
-      } else {
       }
     }
 
     await dispatch({ id, transaction: outcomeTx, type: SET_ACTIVE_TRANSACTION })
 
-    // Hide succeeded/failed tx after 5s
-    setTimeout(async () => {
-      // TODO: this shouldn't update the 'updatedAt' property, since it pushes up transactions which haven't actually changed
-      const hiddenTx: Transaction = {
-        ...outcomeTx,
-        showIfClosed: false,
+    const completedTxTimeout = 5000
+    const hideCompletedTxCallback = async () => {
+      if (!document.hidden) {
+        const hiddenTx: Transaction = {
+          ...outcomeTx,
+          showIfClosed: false,
+        }
+        await dispatch({ id, transaction: hiddenTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
+      } else {
+        setTimeout(hideCompletedTxCallback, completedTxTimeout)
       }
-      await dispatch({ id, transaction: hiddenTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
-    }, 5000)
+    }
+
+    // Hide succeeded/failed tx after 5s
+    setTimeout(hideCompletedTxCallback, completedTxTimeout)
 
     // Process next transaction in queue
     if (Object.keys(getState().transactions.queue).length > 0) {
@@ -273,8 +300,8 @@ export function selectWalletTransactions(state?: TransactionState): WalletTransa
     .map((id: string) => state.active[id])
     .sort(sortByMostRecent)
     .map((tx: Transaction) => {
-      const externalLink = tx.result?.txHash
-        ? `https://${config.network === 'Kovan' ? 'kovan.' : ''}etherscan.io/tx/${tx.result.txHash}`
+      const externalLink = tx.hash
+        ? `https://${config.network === 'Kovan' ? 'kovan.' : ''}etherscan.io/tx/${tx.hash}`
         : undefined
 
       return {
