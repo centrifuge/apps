@@ -5,6 +5,7 @@ import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { connect } from 'react-redux'
 
 import { ExplainerCard } from './styles'
+import PoolOverview from './PoolOverview'
 import TrancheOverview from './TrancheOverview'
 import EpochOverview from './EpochOverview'
 import AdminActions from './AdminActions'
@@ -44,7 +45,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
 
   return (
     <Box margin={{ top: 'medium' }}>
-      {/* <Heading level="4">Pool Overview {props.activePool?.name}</Heading>
+      <Heading level="4">Pool Overview {props.activePool?.name}</Heading>
       <ExplainerCard margin={{ bottom: 'medium' }}>
         Investors can invest into this Tinlake pool through two tokens that are backed by collateral locked by the Asset
         Originator: TIN and DROP. Both tokens represent the liquidity deposited into Tinlake and accrue interest over
@@ -53,7 +54,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
         lower) returns at the DROP rate.
       </ExplainerCard>
 
-      <PoolOverview pool={props.activePool} /> */}
+      <PoolOverview />
 
       <Heading level="4">Invest/Redeem in {props.activePool?.name}</Heading>
       <ExplainerCard margin={{ bottom: 'medium' }}>
