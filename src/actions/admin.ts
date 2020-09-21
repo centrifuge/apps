@@ -8,7 +8,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     canQueryPermissions = () => {
       return (
         !!this.contract('PILE')?.wards &&
-        !!this.contract('SENIOR')?.wards &&
+        !!this.contract('SENIOR_TRANCHE')?.wards &&
         !!this.contract('PRICE_POOL')?.wards &&
         !!this.contract('ASSESSOR')?.wards &&
         !!this.contract('JUNIOR_OPERATOR')?.wards &&
@@ -28,9 +28,9 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     canSetSeniorTrancheInterest = async (user: string) => {
-      if (!(this.contractAddresses['SENIOR'] !== ZERO_ADDRESS)) return false
-      if (!this.contract('SENIOR')?.wards) return false
-      return (await this.contract('SENIOR').wards(user)).toBN().toNumber() === 1
+      if (!(this.contractAddresses['SENIOR_TRANCHE'] !== ZERO_ADDRESS)) return false
+      if (!this.contract('SENIOR_TRANCHE')?.wards) return false
+      return (await this.contract('SENIOR_TRANCHE').wards(user)).toBN().toNumber() === 1
     }
 
     canSetRiskScore = async (user: string) => {

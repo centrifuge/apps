@@ -5,9 +5,9 @@ import BN from 'bn.js'
 const contractNames = [
   'TINLAKE_CURRENCY',
   'JUNIOR_OPERATOR',
-  'JUNIOR',
+  'JUNIOR_TRANCHE',
   'JUNIOR_TOKEN',
-  'SENIOR',
+  'SENIOR_TRANCHE',
   'SENIOR_TOKEN',
   'SENIOR_OPERATOR',
   'DISTRIBUTOR',

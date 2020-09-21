@@ -190,7 +190,7 @@ async function fundTranche(amount: string) {
   await adminTinlake.getTransactionReceipt(approveAllowanceTx)
 
   // lender approves tranche to take currency
-  const approveCurrencyTx = await lenderTinlake.approveCurrency(contractAddresses['JUNIOR'], amount)
+  const approveCurrencyTx = await lenderTinlake.approveCurrency(contractAddresses['JUNIOR_TRANCHE'], amount)
   await lenderTinlake.getTransactionReceipt(approveCurrencyTx)
 
   // mint currency for lender

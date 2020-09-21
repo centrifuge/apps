@@ -144,7 +144,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getTokenPriceJunior = async () => {
-      return (await this.contract('ASSESSOR').calcTokenPrice(this.contractAddresses['JUNIOR'])).toBN()
+      return (await this.contract('ASSESSOR').calcTokenPrice(this.contractAddresses['JUNIOR_TRANCHE'])).toBN()
     }
 
     existsSenior = () => {
@@ -211,7 +211,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
           tokenPrice = (await this.contract('SENIOR_OPERATOR').calcTokenPrice(user)).toBN()
           break
         case 'ALLOWANCE_OPERATOR':
-          tokenPrice = (await this.contract('ASSESSOR').calcTokenPrice(this.contractAddresses['SENIOR'])).toBN()
+          tokenPrice = (await this.contract('ASSESSOR').calcTokenPrice(this.contractAddresses['SENIOR_TRANCHE'])).toBN()
           break
         default:
           tokenPrice = new BN(0)
@@ -220,14 +220,14 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getSeniorReserve = async () => {
-      if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
-        return (await this.contract('SENIOR').balance()).toBN()
+      if (this.contractAddresses['SENIOR_TRANCHE'] !== ZERO_ADDRESS) {
+        return (await this.contract('SENIOR_TRANCHE').balance()).toBN()
       }
       return new BN(0)
     }
 
     getJuniorReserve = async () => {
-      return (await this.contract('JUNIOR').balance()).toBN()
+      return (await this.contract('JUNIOR_TRANCHE').balance()).toBN()
     }
 
     getMinJuniorRatio = async () => {
@@ -239,19 +239,19 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getAssetValueJunior = async () => {
-      return (await this.contract('ASSESSOR').calcAssetValue(this.contractAddresses['JUNIOR'])).toBN()
+      return (await this.contract('ASSESSOR').calcAssetValue(this.contractAddresses['JUNIOR_TRANCHE'])).toBN()
     }
 
     getSeniorDebt = async () => {
-      if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
-        return (await this.contract('SENIOR').debt()).toBN()
+      if (this.contractAddresses['SENIOR_TRANCHE'] !== ZERO_ADDRESS) {
+        return (await this.contract('SENIOR_TRANCHE').debt()).toBN()
       }
       return new BN(0)
     }
 
     getSeniorInterestRate = async () => {
-      if (this.contractAddresses['SENIOR'] !== ZERO_ADDRESS) {
-        return (await this.contract('SENIOR').ratePerSecond()).toBN()
+      if (this.contractAddresses['SENIOR_TRANCHE'] !== ZERO_ADDRESS) {
+        return (await this.contract('SENIOR_TRANCHE').ratePerSecond()).toBN()
       }
       return new BN(0)
     }

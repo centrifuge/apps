@@ -72,7 +72,7 @@ describe('proxy tests', async () => {
       // console.log('updateNftResult', updateNftResult)
 
       await fundTranche('100')
-      const initialTrancheBalance = await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR'])
+      const initialTrancheBalance = await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR_TRANCHE'])
 
       // borrow
       const borrowTx = await borrowerTinlake.proxyLockBorrowWithdraw(proxyAddr, loanId, amount, borrowerAccount.address)
@@ -83,7 +83,7 @@ describe('proxy tests', async () => {
       // console.log('borrowResult', borrowResult)
 
       const balance = await borrowerTinlake.getCurrencyBalance(borrowerAccount.address)
-      const secondTrancheBalance = await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR'])
+      const secondTrancheBalance = await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR_TRANCHE'])
 
       assert.equal(borrowResult.status, SUCCESS_STATUS)
       assert.equal(balance.toString(), amount)
@@ -107,7 +107,7 @@ describe('proxy tests', async () => {
       assert.equal(ethers.utils.getAddress(owner.toString()), ethers.utils.getAddress(borrowerAccount.address))
 
       await borrowerTinlake.getCurrencyBalance(proxyAddr)
-      const finalTrancheBalance = await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR'])
+      const finalTrancheBalance = await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR_TRANCHE'])
 
       assert.equal(initialTrancheBalance.toString(), finalTrancheBalance.toString())
     })
@@ -155,14 +155,14 @@ describe('proxy tests', async () => {
     //   await adminTinlake.getTransactionReceipt(updateNftTx)
 
     //   await fundTranche('10000000');
-    //   await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR']);
+    //   await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR_TRANCHE']);
 
     //   // borrow
     //   const proxyLockBorrowWithdrawTx = await borrowerTinlake.proxyLockBorrowWithdraw(proxyAddr, loanId, amount.toString(), borrowerAccount.address);
     //   await borrowerTinlake.getTransactionReceipt(proxyLockBorrowWithdrawTx)
 
     //   await borrowerTinlake.getCurrencyBalance(borrowerAccount.address);
-    //   await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR']);
+    //   await borrowerTinlake.getCurrencyBalance(contractAddresses['JUNIOR_TRANCHE']);
 
     //   // does not approve proxy to transfer currency
     //   const mintTx = await governanceTinlake.mintCurrency(borrowerAccount.address, amount.toString());
@@ -193,7 +193,7 @@ async function fundTranche(amount: string) {
   await adminTinlake.getTransactionReceipt(approveAllowanceTx)
 
   // lender approves tranche to take currency
-  const approveTx = await lenderTinlake.approveCurrency(contractAddresses['JUNIOR'], amount)
+  const approveTx = await lenderTinlake.approveCurrency(contractAddresses['JUNIOR_TRANCHE'], amount)
   await lenderTinlake.getTransactionReceipt(approveTx)
 
   // mint currency for lender
