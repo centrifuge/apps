@@ -14,14 +14,17 @@ export interface PoolData {
   senior?: Tranche
   availableFunds: BN
   minJuniorRatio: BN
-  maxJuniorRatio: BN
   currentJuniorRatio: BN
+}
+
+export interface PoolDataV3 extends PoolData {
+  maxJuniorRatio: BN
   maxReserve: BN
 }
 
 export interface PoolState {
   state: null | 'loading' | 'found'
-  data: null | PoolData
+  data: null | PoolData | PoolDataV3
 }
 
 const initialState: PoolState = {

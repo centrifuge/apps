@@ -2,7 +2,7 @@ import BN from 'bn.js'
 import { Loan, NFT, interestRateToFee, ITinlake, PendingTransaction } from '@centrifuge/tinlake-js'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { maxUint256 } from '../../utils/maxUint256'
-import { PoolData } from '../../ducks/pool'
+import { PoolData, PoolDataV3 } from '../../ducks/pool'
 
 export type TrancheType = 'junior' | 'senior'
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -88,11 +88,24 @@ export const mintNFT = async (
   amount: string,
   asset: string
 ): Promise<PendingTransaction> => {
-  try {
-    return await tinlake.mintNFT(nftAddr, owner, tokenId, ref, amount, asset)
-  } catch (e) {
-    return loggedError(e, 'Could not mint NFT.', tokenId)
-  }
+  return tinlake.mintNFT(nftAddr, owner, tokenId, ref, amount, asset)
+}
+
+export const updateNftFeed = async (
+  tinlake: ITinlakeV3,
+  nftFeedId: string,
+  value: string,
+  riskGroup: string
+): Promise<PendingTransaction> => {
+  return tinlake.updateNftFeed(nftFeedId, value, riskGroup)
+}
+
+export const setMaturityDate = async (
+  tinlake: ITinlakeV3,
+  nftFeedId: string,
+  timestampSecs: number
+): Promise<PendingTransaction> => {
+  return tinlake.setMaturityDate(nftFeedId, timestampSecs)
 }
 
 export const issue = async (
@@ -134,11 +147,7 @@ export const issue = async (
     }
 
     // transfer issue
-    try {
-      return await tinlake.proxyTransferIssue(proxyAddress, nftRegistryAddress, tokenId)
-    } catch (e) {
-      return loggedError(e, 'Could not Issue loan.', tokenId)
-    }
+    return tinlake.proxyTransferIssue(proxyAddress, nftRegistryAddress, tokenId)
   }
 
   let proxyOwner
@@ -150,11 +159,7 @@ export const issue = async (
 
   // case: borrower's proxy is owner of nft
   if (user.toLowerCase() === proxyOwner.toLowerCase()) {
-    try {
-      return await tinlake.proxyIssue(tokenOwner.toString(), nftRegistryAddress, tokenId)
-    } catch (e) {
-      return loggedError(e, 'Could not Issue loan.', tokenId)
-    }
+    return tinlake.proxyIssue(tokenOwner.toString(), nftRegistryAddress, tokenId)
   }
 
   // case: nft can not be used to open a loan -> borrower/borrower's proxy not nft owner
@@ -232,14 +237,10 @@ export async function setInterest(
     }
   }
   // set rate group
-  try {
-    if (debt.toString() === '0') {
-      return await tinlake.setRate(loanId, rateGroup)
-    }
-    return await tinlake.changeRate(loanId, rateGroup)
-  } catch (e) {
-    return loggedError(e, 'Could not set rate group', loanId)
+  if (debt.toString() === '0') {
+    return tinlake.setRate(loanId, rateGroup)
   }
+  return tinlake.changeRate(loanId, rateGroup)
 }
 
 export async function submitSeniorSupplyOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
@@ -354,57 +355,85 @@ export async function executeEpoch(tinlake: ITinlakeV3): Promise<PendingTransact
   return tinlake.executeEpoch()
 }
 
-export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData | null> {
-  const version = 'version' in tinlake ? tinlake.version : 2
+export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData | PoolDataV3 | null> {
+  if (tinlake.version === 3) {
+    return getPoolV3(tinlake as ITinlakeV3)
+  }
+  return getPoolV2(tinlake as ITinlake)
+}
 
-  // V3 TODO
-  const juniorReserve = version === 2 ? await tinlake.getJuniorReserve() : new BN(0)
+export async function getPoolV2(tinlake: ITinlake): Promise<PoolData | null> {
+  const juniorReserve = await tinlake.getJuniorReserve()
   const juniorTokenPrice = await tinlake.getTokenPriceJunior()
-  const seniorReserve = version === 2 ? await tinlake.getSeniorReserve() : new BN(0)
-  const seniorTokenPrice =
-    version === 2 && tinlake.signer
-      ? await tinlake.getTokenPriceSenior(await tinlake.signer.getAddress())
-      : await (tinlake as ITinlakeV3).getTokenPriceSenior()
-  const seniorInterestRate = version === 2 ? await tinlake.getSeniorInterestRate() : new BN(0)
-  const seniorTokenSupply = version === 2 ? await tinlake.getSeniorTotalSupply() : new BN(0)
+  const seniorReserve = await tinlake.getSeniorReserve()
+  const seniorTokenPrice = tinlake.signer
+    ? await tinlake.getTokenPriceSenior(await tinlake.signer.getAddress())
+    : new BN(0)
+  const seniorInterestRate = await tinlake.getSeniorInterestRate()
+  const seniorTokenSupply = await tinlake.getSeniorTotalSupply()
   const minJuniorRatio = await tinlake.getMinJuniorRatio()
-  const maxJuniorRatio = version === 3 ? await (tinlake as ITinlakeV3).getMaxJuniorRatio() : new BN(0)
-  const maxReserve = version === 3 ? await (tinlake as ITinlakeV3).getMaxReserve() : new BN(0)
-  const juniorAssetValue = version === 2 ? await tinlake.getAssetValueJunior() : new BN(0)
-  const juniorTokenSupply = version === 2 ? await tinlake.getJuniorTotalSupply() : new BN(0)
+  const juniorAssetValue = await tinlake.getAssetValueJunior()
+  const juniorTokenSupply = await tinlake.getJuniorTotalSupply()
   // temp fix: until solved on contract level
-  const currentJuniorRatio =
-    version === 2
-      ? juniorAssetValue.toString() === '0'
-        ? new BN(0)
-        : await tinlake.getCurrentJuniorRatio()
-      : await tinlake.getCurrentJuniorRatio()
+  const currentJuniorRatio = juniorAssetValue.toString() === '0' ? new BN(0) : await tinlake.getCurrentJuniorRatio()
 
-  try {
-    return {
-      minJuniorRatio,
-      maxJuniorRatio,
-      currentJuniorRatio,
-      maxReserve,
-      junior: {
-        type: 'junior',
-        availableFunds: juniorReserve,
-        tokenPrice: juniorTokenPrice,
-        totalSupply: juniorTokenSupply,
-        token: 'TIN',
-      },
-      senior: {
-        type: 'senior',
-        availableFunds: seniorReserve,
-        tokenPrice: seniorTokenPrice,
-        totalSupply: seniorTokenSupply,
-        token: 'DROP',
-        interestRate: seniorInterestRate,
-      },
-      availableFunds: juniorReserve.add(seniorReserve),
-    }
-  } catch (e) {
-    return null
+  return {
+    minJuniorRatio,
+    currentJuniorRatio,
+    junior: {
+      type: 'junior',
+      availableFunds: juniorReserve,
+      tokenPrice: juniorTokenPrice,
+      totalSupply: juniorTokenSupply,
+      token: 'TIN',
+    },
+    senior: {
+      type: 'senior',
+      availableFunds: seniorReserve,
+      tokenPrice: seniorTokenPrice,
+      totalSupply: seniorTokenSupply,
+      token: 'DROP',
+      interestRate: seniorInterestRate,
+    },
+    availableFunds: juniorReserve.add(seniorReserve),
+  }
+}
+
+export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null> {
+  // V3 TODO
+  const juniorReserve = await tinlake.getJuniorReserve()
+  const juniorTokenPrice = await tinlake.getTokenPriceJunior()
+  const seniorReserve = await tinlake.getSeniorReserve()
+  const seniorTokenPrice = await tinlake.getTokenPriceSenior()
+  const seniorInterestRate = await tinlake.getSeniorInterestRate()
+  const seniorTokenSupply = await tinlake.getSeniorTotalSupply()
+  const minJuniorRatio = await tinlake.getMinJuniorRatio()
+  const maxJuniorRatio = await tinlake.getMaxJuniorRatio()
+  const maxReserve = await tinlake.getMaxReserve()
+  const juniorTokenSupply = await tinlake.getJuniorTotalSupply()
+  const currentJuniorRatio = await tinlake.getCurrentJuniorRatio()
+
+  return {
+    minJuniorRatio,
+    maxJuniorRatio,
+    currentJuniorRatio,
+    maxReserve,
+    junior: {
+      type: 'junior',
+      availableFunds: juniorReserve,
+      tokenPrice: juniorTokenPrice,
+      totalSupply: juniorTokenSupply,
+      token: 'TIN',
+    },
+    senior: {
+      type: 'senior',
+      availableFunds: seniorReserve,
+      tokenPrice: seniorTokenPrice,
+      totalSupply: seniorTokenSupply,
+      token: 'DROP',
+      interestRate: seniorInterestRate,
+    },
+    availableFunds: juniorReserve.add(seniorReserve),
   }
 }
 
@@ -426,11 +455,7 @@ export async function borrow(tinlake: ITinlake, loan: Loan, amount: string): Pro
   }
 
   // borrow with proxy
-  try {
-    return await tinlake.proxyLockBorrowWithdraw(proxy.toString(), loanId, amount, address!)
-  } catch (e) {
-    return loggedError(e, 'Could not finance asset.', loanId)
-  }
+  return tinlake.proxyLockBorrowWithdraw(proxy.toString(), loanId, amount, address!)
 }
 
 // repay full loan debt
@@ -458,15 +483,11 @@ export async function repay(tinlake: ITinlake, loan: Loan): Promise<PendingTrans
   }
 
   // repay
-  try {
-    return await tinlake.proxyRepayUnlockClose(proxy.toString(), loan.tokenId.toString(), loanId, loan.registry)
-  } catch (e) {
-    return loggedError(e, 'Could not repay.', loanId)
-  }
+  return tinlake.proxyRepayUnlockClose(proxy.toString(), loan.tokenId.toString(), loanId, loan.registry)
 }
 
 export async function getInvestor(tinlake: ITinlake, address: string) {
-  return await tinlake.getInvestor(address)
+  return tinlake.getInvestor(address)
 }
 
 export async function setAllowance(
@@ -476,26 +497,22 @@ export async function setAllowance(
   maxRedeemAmount: string,
   trancheType: TrancheType
 ): Promise<PendingTransaction> {
-  try {
-    if (trancheType === 'junior') {
-      return await tinlake.approveAllowanceJunior(address, maxSupplyAmount, maxRedeemAmount)
-    }
-    return await tinlake.approveAllowanceSenior(address, maxSupplyAmount, maxRedeemAmount)
-  } catch (e) {
-    return loggedError(e, `Could not set allowance for ${trancheType}`, address)
+  if (trancheType === 'junior') {
+    return tinlake.approveAllowanceJunior(address, maxSupplyAmount, maxRedeemAmount)
   }
+  return tinlake.approveAllowanceSenior(address, maxSupplyAmount, maxRedeemAmount)
 }
 
 export async function setMinJuniorRatio(tinlake: ITinlake | ITinlakeV3, ratio: string): Promise<PendingTransaction> {
-  return await tinlake.setMinimumJuniorRatio(ratio)
+  return tinlake.setMinimumJuniorRatio(ratio)
 }
 
 export async function setMaxJuniorRatio(tinlake: ITinlakeV3, ratio: string): Promise<PendingTransaction> {
-  return await tinlake.setMaximumJuniorRatio(ratio)
+  return tinlake.setMaximumJuniorRatio(ratio)
 }
 
 export async function setMaxReserve(tinlake: ITinlakeV3, ratio: string): Promise<PendingTransaction> {
-  return await tinlake.setMaximumReserve(ratio)
+  return tinlake.setMaximumReserve(ratio)
 }
 
 export async function supply(
@@ -582,10 +599,10 @@ export async function redeem(
   // repay
   try {
     if (trancheType === 'junior') {
-      return await tinlake.redeemJunior(redeemAmount)
+      return tinlake.redeemJunior(redeemAmount)
     }
     if (trancheType === 'senior') {
-      return await tinlake.redeemSenior(redeemAmount)
+      return tinlake.redeemSenior(redeemAmount)
     }
   } catch (e) {
     return loggedError(e, `Could not redeem ${trancheType}.`, '')

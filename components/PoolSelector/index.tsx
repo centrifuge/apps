@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Drop, TextInput } from 'grommet'
 import { useSelector, useDispatch } from 'react-redux'
-import { loadPools, PoolData } from '../../ducks/pools'
+import { loadPools, PoolData, PoolsData, PoolsState } from '../../ducks/pools'
 import { useRouter } from 'next/router'
 import { FormDown, FormSearch } from 'grommet-icons'
 
@@ -14,7 +14,7 @@ interface Props {
 export const PoolSelector: React.FC<Props> = (props: Props) => {
   const router = useRouter()
 
-  const pools = useSelector((state: any) => state.pools)
+  const pools = useSelector<any, PoolsState>((state: any) => state.pools)
   const dispatch = useDispatch()
 
   const poolRef = React.useRef<HTMLDivElement>(null)
@@ -91,7 +91,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
           <Wrapper>
             <PoolList>
               {/* TODO */}
-              {pools.data?.pools.length >= 5 && (
+              {pools.data?.pools && pools.data?.pools.length >= 5 && (
                 <SearchField>
                   <TextInput
                     placeholder="Search"
