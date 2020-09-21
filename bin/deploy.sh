@@ -1,12 +1,7 @@
+#! /usr/bin/env bash
+
 # Run testnet with dapp testnet
 # NOTE: SENIOR_TRANCHE must be set to true in the environmental variables for a senior tranche to be deployed
-
-# remove submodules and install newest dependencies
-[ -d ./tinlake-proxy ] && rm -rf ./tinlake-proxy
-[ -d ./tinlake-actions ] && rm -rf ./tinlake-actions
-[ -d ./tinlake-deploy ] && rm -rf ./tinlake-deploy
-git submodule update --init --recursive
-git submodule update --recursive --remote --merge
 
 # superpower user for tinlake.js tests
 GOD_ADDRESS=0xf6fa8a3f3199cdd85749ec749fb8f9c2551f9928
@@ -15,23 +10,26 @@ GOD_ADDRESS=0xf6fa8a3f3199cdd85749ec749fb8f9c2551f9928
 # be sure to use the same address in tinlake.js test config
 export GOVERNANCE=$GOD_ADDRESS
 
+# build contracts
+./tinlake-deploy/bin/util/build_contracts.sh
+
 # setup local config
 ./bin/test/setup_local_config.sh
 source ./bin/test/local_env.sh
 
 #create address folder
-mkdir ./tinlake-deploy/deployments
-mkdir ./tinlake-proxy/deployments
-mkdir ./tinlake-actions/deployments
+mkdir -p ./tinlake-deploy/deployments
+mkdir -p ./tinlake-proxy/deployments
+mkdir -p ./tinlake-actions/deployments
 
 # deploy tinlake contracts
-./tinlake-deploy/bin/util/build_contracts.sh
 ./tinlake-deploy/bin/deploy.sh
 
- # deploy nft
+# deploy nft
 ./tinlake-deploy/bin/test/deploy_collateral_nft.sh
 
 # copy the addresses of deployed contracts from tinlake folder to tinlake.js test folder
+mkdir -p ./test
 touch ./test/addresses.json
 cat ./tinlake-deploy/deployments/addresses_unknown.json > ./test/addresses.json
 

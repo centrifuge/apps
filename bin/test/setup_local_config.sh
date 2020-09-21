@@ -1,7 +1,9 @@
+#! /usr/bin/env bash
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 BIN_DIR=${BIN_DIR:-$(cd "${0%/*}"&&pwd)}
 cd $BIN_DIR
-CONTRACT_BIN=$BIN_DIR/../../../tinlake-deploy/lib/tinlake/out
+CONTRACT_BIN=$BIN_DIR/../../tinlake-deploy/lib/tinlake/out
 
 source $BIN_DIR/../../tinlake-deploy/bin/util/util.sh
 
@@ -16,7 +18,8 @@ test -z "$CURRENCY_CHAINID" && CURRENCY_CHAINID=1
 
 # Deploy Default Currency
 message create ERC20 Tinlake currency
-TINLAKE_CURRENCY=$(seth send --create $CONTRACT_BIN/SimpleToken.bin 'SimpleToken(string memory,string memory,string memory, uint)' "$CURRENCY_SYMBOL" "$CURRENCY_NAME" "$CURRENCY_VERSION" $(seth --to-uint256 $CURRENCY_CHAINID))
+
+TINLAKE_CURRENCY=$(seth send --create $CONTRACT_BIN/SimpleToken.bin 'SimpleToken(string memory,string memory,string memory, uint)' '"$CURRENCY_SYMBOL"' '"$CURRENCY_NAME"' '"$CURRENCY_VERSION"' $(seth --to-uint256 $CURRENCY_CHAINID))
 
 message create Main Deployer
 MAIN_DEPLOYER=$(seth send --create $CONTRACT_BIN/../../../out/MainDeployer.bin 'MainDeployer()')
