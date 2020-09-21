@@ -3,6 +3,7 @@ import { Loan, NFT, interestRateToFee, ITinlake, PendingTransaction } from '@cen
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { maxUint256 } from '../../utils/maxUint256'
 import { PoolData, PoolDataV3 } from '../../ducks/pool'
+import { isTinlakeV3 } from '../../utils/tinlakeVersion'
 
 export type TrancheType = 'junior' | 'senior'
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -24,7 +25,7 @@ type Serializable = SerializableScalar & SerializableObject & SerializableArray
 export type TinlakeAction = (tinlake: ITinlake, ...args: Serializable[]) => Promise<PendingTransaction>
 export type TinlakeV3Action = (tinlake: ITinlakeV3, ...args: Serializable[]) => Promise<PendingTransaction>
 
-export async function getNFT(registry: string, tinlake: ITinlake, tokenId: string) {
+export async function getNFT(registry: string, tinlake: ITinlake | ITinlakeV3, tokenId: string) {
   let nftOwner: string
   let nftData: any
 
@@ -59,7 +60,7 @@ export async function getNFT(registry: string, tinlake: ITinlake, tokenId: strin
   }
 }
 
-async function getOrCreateProxy(tinlake: ITinlake, address: string) {
+async function getOrCreateProxy(tinlake: ITinlake | ITinlakeV3, address: string) {
   let proxyAddress
   // check if user already has a proxy address
   try {
@@ -80,7 +81,7 @@ async function getOrCreateProxy(tinlake: ITinlake, address: string) {
 }
 
 export const mintNFT = async (
-  tinlake: ITinlake,
+  tinlake: ITinlake | ITinlakeV3,
   nftAddr: string,
   owner: string,
   tokenId: string,
@@ -92,12 +93,15 @@ export const mintNFT = async (
 }
 
 export const updateNftFeed = async (
-  tinlake: ITinlakeV3,
+  tinlake: ITinlake | ITinlakeV3,
   nftFeedId: string,
   value: string,
   riskGroup: string
 ): Promise<PendingTransaction> => {
-  return tinlake.updateNftFeed(nftFeedId, value, riskGroup)
+  if (isTinlakeV3(tinlake)) {
+    return tinlake.updateNftFeed(nftFeedId, value, riskGroup)
+  }
+  return tinlake.updateNftFeed(nftFeedId, Number(value), Number(riskGroup))
 }
 
 export const setMaturityDate = async (
@@ -109,7 +113,7 @@ export const setMaturityDate = async (
 }
 
 export const issue = async (
-  tinlake: ITinlake,
+  tinlake: ITinlake | ITinlakeV3,
   tokenId: string,
   nftRegistryAddress: string
 ): Promise<PendingTransaction> => {
@@ -140,7 +144,7 @@ export const issue = async (
     if (!(await tinlake.isNFTApprovedForAll(nftRegistryAddress, user, proxyAddress))) {
       try {
         const approveTx = await tinlake.setNFTApprovalForAll(nftRegistryAddress, proxyAddress, true)
-        await tinlake.getTransactionReceipt(approveTx)
+        await tinlake.getTransactionReceipt(approveTx as any)
       } catch (e) {
         return loggedError(e, 'Could not approve proxy to take NFT.', tokenId)
       }
@@ -167,7 +171,7 @@ export const issue = async (
   return loggedError({}, 'Borrower is not nft owner.', tokenId)
 }
 
-export async function getProxyOwner(tinlake: ITinlake, loanId: string): Promise<TinlakeResult> {
+export async function getProxyOwner(tinlake: ITinlake | ITinlakeV3, loanId: string): Promise<TinlakeResult> {
   let owner = ZERO_ADDRESS
   try {
     owner = (await tinlake.getProxyOwnerByLoan(loanId)).toString()
@@ -175,7 +179,7 @@ export async function getProxyOwner(tinlake: ITinlake, loanId: string): Promise<
   return { data: owner }
 }
 
-export async function getLoan(tinlake: ITinlake, loanId: string): Promise<Loan | null> {
+export async function getLoan(tinlake: ITinlake | ITinlakeV3, loanId: string): Promise<Loan | null> {
   let loan
   const count = await tinlake.loanCount()
 
@@ -193,7 +197,7 @@ export async function getLoan(tinlake: ITinlake, loanId: string): Promise<Loan |
   return loan
 }
 
-async function addProxyDetails(tinlake: ITinlake, loan: Loan) {
+async function addProxyDetails(tinlake: ITinlake | ITinlakeV3, loan: Loan) {
   try {
     loan.proxyOwner = (await tinlake.getProxyOwnerByLoan(loan.loanId)).toString()
   } catch (e) {}
@@ -356,10 +360,10 @@ export async function executeEpoch(tinlake: ITinlakeV3): Promise<PendingTransact
 }
 
 export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData | PoolDataV3 | null> {
-  if (tinlake.version === 3) {
-    return getPoolV3(tinlake as ITinlakeV3)
+  if (isTinlakeV3(tinlake)) {
+    return getPoolV3(tinlake)
   }
-  return getPoolV2(tinlake as ITinlake)
+  return getPoolV2(tinlake)
 }
 
 export async function getPoolV2(tinlake: ITinlake): Promise<PoolData | null> {
@@ -437,7 +441,7 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
   }
 }
 
-export async function borrow(tinlake: ITinlake, loan: Loan, amount: string): Promise<PendingTransaction> {
+export async function borrow(tinlake: ITinlake | ITinlakeV3, loan: Loan, amount: string): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -459,7 +463,7 @@ export async function borrow(tinlake: ITinlake, loan: Loan, amount: string): Pro
 }
 
 // repay full loan debt
-export async function repay(tinlake: ITinlake, loan: Loan): Promise<PendingTransaction> {
+export async function repay(tinlake: ITinlake | ITinlakeV3, loan: Loan): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -476,7 +480,7 @@ export async function repay(tinlake: ITinlake, loan: Loan): Promise<PendingTrans
   if (allowance.lt(balance)) {
     try {
       const approveTx = await tinlake.approveCurrency(proxy.toString(), maxUint256)
-      await tinlake.getTransactionReceipt(approveTx)
+      await tinlake.getTransactionReceipt(approveTx as any)
     } catch (e) {
       return loggedError(e, 'Could not approve proxy.', loanId)
     }
@@ -486,7 +490,7 @@ export async function repay(tinlake: ITinlake, loan: Loan): Promise<PendingTrans
   return tinlake.proxyRepayUnlockClose(proxy.toString(), loan.tokenId.toString(), loanId, loan.registry)
 }
 
-export async function getInvestor(tinlake: ITinlake, address: string) {
+export async function getInvestor(tinlake: ITinlake | ITinlakeV3, address: string) {
   return tinlake.getInvestor(address)
 }
 
