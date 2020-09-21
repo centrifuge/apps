@@ -244,7 +244,9 @@ export async function getPool(tinlake: ITinlake): Promise<PoolData | null> {
   const juniorReserve = await tinlake.getJuniorReserve()
   const juniorTokenPrice = await tinlake.getTokenPriceJunior()
   const seniorReserve = await tinlake.getSeniorReserve()
-  const seniorTokenPrice = tinlake.signer ? await tinlake.getTokenPriceSenior(await tinlake.signer.getAddress()) : new BN(0)
+  const seniorTokenPrice = tinlake.signer
+    ? await tinlake.getTokenPriceSenior(await tinlake.signer.getAddress())
+    : new BN(0)
   const seniorInterestRate = await tinlake.getSeniorInterestRate()
   const seniorTokenSupply = await tinlake.getSeniorTotalSupply()
   const minJuniorRatio = await tinlake.getMinJuniorRatio()
@@ -378,7 +380,6 @@ export async function supply(
   } else if (trancheType === 'senior') {
     allowance = (await tinlake.getSeniorForCurrencyAllowance(address!)) || new BN(0)
   }
-
 
   // only approve if allowance is smaller than than supplyAmount
   if (allowance.lt(new BN(supplyAmount))) {
