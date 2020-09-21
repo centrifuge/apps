@@ -22,7 +22,7 @@ type SerializableObject = { [key: string]: SerializableScalar & SerializableObje
 type SerializableArray = (SerializableScalar & SerializableObject & SerializableArray)[]
 type Serializable = SerializableScalar & SerializableObject & SerializableArray
 
-export type TinlakeAction = (tinlake: ITinlake | ITinlakeV3, ...args: Serializable[]) => Promise<PendingTransaction>
+export type TinlakeAction = (tinlake: ITinlake, ...args: Serializable[]) => Promise<PendingTransaction>
 export type TinlakeV3Action = (tinlake: ITinlakeV3, ...args: Serializable[]) => Promise<PendingTransaction>
 
 export async function getNFT(registry: string, tinlake: ITinlake | ITinlakeV3, tokenId: string) {
@@ -98,7 +98,10 @@ export const updateNftFeed = async (
   value: string,
   riskGroup: string
 ): Promise<PendingTransaction> => {
-  return tinlake.updateNftFeed(nftFeedId, value, riskGroup)
+  if (isTinlakeV3(tinlake)) {
+    return tinlake.updateNftFeed(nftFeedId, value, riskGroup)
+  }
+  return tinlake.updateNftFeed(nftFeedId, Number(value), Number(riskGroup))
 }
 
 export const setMaturityDate = async (
@@ -141,7 +144,7 @@ export const issue = async (
     if (!(await tinlake.isNFTApprovedForAll(nftRegistryAddress, user, proxyAddress))) {
       try {
         const approveTx = await tinlake.setNFTApprovalForAll(nftRegistryAddress, proxyAddress, true)
-        await tinlake.getTransactionReceipt(approveTx)
+        await tinlake.getTransactionReceipt(approveTx as any)
       } catch (e) {
         return loggedError(e, 'Could not approve proxy to take NFT.', tokenId)
       }
@@ -477,7 +480,7 @@ export async function repay(tinlake: ITinlake | ITinlakeV3, loan: Loan): Promise
   if (allowance.lt(balance)) {
     try {
       const approveTx = await tinlake.approveCurrency(proxy.toString(), maxUint256)
-      await tinlake.getTransactionReceipt(approveTx)
+      await tinlake.getTransactionReceipt(approveTx as any)
     } catch (e) {
       return loggedError(e, 'Could not approve proxy.', loanId)
     }

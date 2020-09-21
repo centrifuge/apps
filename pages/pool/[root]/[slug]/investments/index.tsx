@@ -13,8 +13,6 @@ import config, { Pool } from '../../../../../config'
 import { GetStaticProps } from 'next'
 import Container from '../../../../../components/Container'
 import Head from 'next/head'
-import { ITinlake } from '@centrifuge/tinlake-js'
-import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { isTinlakeV2, isTinlakeV3 } from '../../../../../utils/tinlakeVersion'
 
 interface Props extends WithRouterProps {
