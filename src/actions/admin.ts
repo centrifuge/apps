@@ -84,19 +84,6 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       )
     }
 
-    setDiscountRate = async (rate: string) => {
-      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
-      return this.pending(
-        this.contract('FEED').file(web3.fromAscii('discountRate').padEnd(66, '0'), rate, this.overrides)
-      )
-    }
-
-    setMaturityDate = async (nftId: string, timestampSecs: number) => {
-      return this.pending(
-        this.contract('FEED').file(web3.fromAscii('maturityDate').padEnd(66, '0'), nftId, timestampSecs)
-      )
-    }
-
     updateJuniorMemberList = async (user: string, validUntil: number) => {
       return this.pending(this.contract('JUNIOR_MEMBERLIST').updateMember(user, validUntil, this.overrides))
     }
@@ -105,20 +92,37 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return this.pending(this.contract('SENIOR_MEMBERLIST').updateMember(user, validUntil, this.overrides))
     }
 
-    updateNftFeed = async (nftId: string, value: string, riskGroup?: string) => {
-      if (!riskGroup) {
-        return this.pending(this.contract('FEED')['update(bytes32,uint256)'](nftId, value, this.overrides))
-      }
-        return this.pending(this.contract('FEED')['update(bytes32,uint256,uint256)'](nftId, value, riskGroup, this.overrides))
-
-    }
+    // ------------ admin functions lender-side -------------
 
     getNftFeedId = async (registry: string, tokenId: string) => {
       return await this.contract('FEED')['nftID(address,uint256)'](registry, tokenId)
     }
 
-    getNftFeedValue = async (nftFeedId: string) => {
-      return (await this.contract('FEED').nftValues(nftFeedId)).toBN()
+    getNftFeedValue = async (nftId: string) => {
+      return (await this.contract('FEED').nftValues(nftId)).toBN()
+    }
+
+    getNftMaturityDate = async (nftId: string) => {
+      return (await this.contract('FEED').maturityDate(nftId)).toBN()
+    }
+
+    setDiscountRate = async (rate: string) => {
+      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
+      return this.pending(
+        this.contract('FEED').file(web3.fromAscii('discountRate').padEnd(66, '0'), rate, this.overrides)
+      )
+    }
+
+    updateNftFeed = async (nftId: string, value: string, riskGroup?: string) => {
+      if (!riskGroup) {
+        return this.pending(this.contract('FEED')['update(bytes32,uint256)'](nftId, value, this.overrides))
+      }
+      return this.pending(this.contract('FEED')['update(bytes32,uint256,uint256)'](nftId, value, riskGroup, this.overrides))
+    }
+    setMaturityDate = async (nftId: string, timestampSecs: number) => {
+      return this.pending(
+        this.contract('FEED').file(web3.fromAscii('maturityDate').padEnd(66, '0'), nftId, timestampSecs)
+      )
     }
   }
 }
