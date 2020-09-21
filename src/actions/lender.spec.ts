@@ -81,7 +81,9 @@ describe('lender functions', async () => {
     await lenderTinlake.getTransactionReceipt(lenderApproveTx)
 
     const initialLenderCurrencyBalance: BN = await lenderTinlake.getCurrencyBalance(lenderAccount.address)
-    const initialTrancheCurrencyBalance: BN = await lenderTinlake.getCurrencyBalance(contractAddresses['JUNIOR_TRANCHE'])
+    const initialTrancheCurrencyBalance: BN = await lenderTinlake.getCurrencyBalance(
+      contractAddresses['JUNIOR_TRANCHE']
+    )
     const initialJuniorTokenBalance = await lenderTinlake.getJuniorTokenBalance(lenderAccount.address)
 
     const redeemTx = await lenderTinlake.redeemJunior(tokenAmount)
