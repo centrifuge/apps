@@ -10,6 +10,9 @@ cache:
 #   - curl https://dapp.tools/install | sh
 #   - . $HOME/.nix-profile/etc/profile.d/nix.sh -iA dapp solc
 
+install:
+  - npm ci
+
 jobs:
   include:
   - stage: lint
@@ -26,6 +29,11 @@ jobs:
   - stage: Publish patch
     if: "(NOT type IN (pull_request)) AND (branch = master)"
     script:
-      - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" >> $HOME/.npmrc 2> /dev/null
+      - npm set //registry.npmjs.org/:_authToken $NPM_TOKEN
+      - npm run publish:develop
+  - stage: Publish v3 patch
+    if: "(NOT type IN (pull_request)) AND (branch = v3)"
+    script:
+      - npm set //registry.npmjs.org/:_authToken $NPM_TOKEN
       - npm run publish:develop
 

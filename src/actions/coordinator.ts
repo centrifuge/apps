@@ -54,7 +54,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const orderState = await coordinator.order()
 
       const valueBase = new BN(10).pow(new BN(18))
-    
+
       return {
         dropRedeemOrder: orderState.seniorRedeem.toBN().isZero()
           ? 0.0
@@ -76,20 +76,20 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
       if ((await coordinator.submissionPeriod()) === false) {
         // The epoch is can be closed, but is not closed yet
-        const closeTx = await coordinator.closeEpoch()
+        const closeTx = await coordinator.closeEpoch(this.overrides)
         const closeResult = await this.getTransactionReceipt(closeTx)
         console.log('close epoch done', closeResult)
 
         if (closeResult.status === 0) {
           console.log('Failed to close the epoch')
-          return { status: 0, error: 'Unable to close the epoch' } as any
+          return { status: 0, error: 'Unable to close the epoch', hash: closeResult.transactionHash } as any
         }
 
         // If it's not in a submission period after closing the epoch, then it could immediately be solved and executed
         // (i.e. all orders could be fulfilled)
         if ((await coordinator.submissionPeriod()) === false) {
           console.log('Epoch was immediately executed')
-          return { status: 1 } as any
+          return { status: 1, hash: closeResult.transactionHash } as any
         }
       }
 
@@ -110,7 +110,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       // TODO: we need to multiply these values by 10**18 and change them to BigInts
 
       throw new Error('to be completed')
-      // return this.pending(coordinator.submitSolution(...Object.values(solution.vars)))
+      // return this.pending(coordinator.submitSolution(...Object.values(solution.vars), this.overrides))
     }
 
     executeEpoch = async () => {
@@ -151,7 +151,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       if (lastEpochClosed + minimumEpochTime < latestBlockTimestamp) {
         return 'can-be-closed'
       }
-      
+
       const submissionPeriod = await coordinator.submissionPeriod()
       if (!submissionPeriod) return 'open'
 

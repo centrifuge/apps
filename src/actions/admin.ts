@@ -31,6 +31,10 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return (await this.contract('ASSESSOR').wards(user)).toBN().toNumber() === 1
     }
 
+    canSetRiskScore = async (user: string) => {
+      if (!this.contract('FEED')?.wards) return false
+      return (await this.contract('FEED').wards(user)).toBN().toNumber() === 1
+    }
     canSetMinimumJuniorRatio = async (user: string) => {
       if (!this.contract('ASSESSOR')?.wards) return false
       return (await this.contract('ASSESSOR').wards(user)).toBN().toNumber() === 1
