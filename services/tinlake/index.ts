@@ -18,7 +18,7 @@ export function initTinlake({
   if (tinlake === null) {
     const { transactionTimeout } = config
     const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
-    const overrides = config.network === 'Kovan' ? { gasLimit: 7000000 } : {}
+    const overrides = config.network === 'Kovan' ? { gasLimit: config.gasLimit } : {}
     tinlake = new Tinlake({ transactionTimeout, overrides, provider: rpcProvider })
   }
 
