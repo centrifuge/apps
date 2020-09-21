@@ -11,7 +11,7 @@ cache:
 #   - . $HOME/.nix-profile/etc/profile.d/nix.sh -iA dapp solc
 
 install:
-  - npm install
+  - npm ci
 
 jobs:
   include:
