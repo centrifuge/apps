@@ -108,6 +108,18 @@ export const updateNftFeed = async (
   }
 }
 
+export const setMaturityDate = async (
+  tinlake: ITinlake,
+  nftFeedId: string,
+  timestampSecs: number
+): Promise<PendingTransaction> => {
+  try {
+    return await tinlake.setMaturityDate(nftFeedId, timestampSecs)
+  } catch (e) {
+    return loggedError(e, 'Could not set maturity date for NFT.', nftFeedId)
+  }
+}
+
 export const issue = async (
   tinlake: ITinlake,
   tokenId: string,
