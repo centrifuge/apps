@@ -87,7 +87,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
   }
 
   const updateMaturityDate = async () => {
-    if (isTinlakeV2(props.tinlake)) throw Error('Tinlake V2 does not have maturity date')
+    if (isTinlakeV2(props.tinlake)) throw new Error('Tinlake V2 does not have maturity date')
 
     await props.ensureAuthed!()
 
