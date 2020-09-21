@@ -92,7 +92,7 @@ export const mintNFT = async (
 }
 
 export const updateNftFeed = async (
-  tinlake: ITinlake,
+  tinlake: ITinlakeV3,
   nftFeedId: string,
   value: string,
   riskGroup: string
@@ -101,7 +101,7 @@ export const updateNftFeed = async (
 }
 
 export const setMaturityDate = async (
-  tinlake: ITinlake,
+  tinlake: ITinlakeV3,
   nftFeedId: string,
   timestampSecs: number
 ): Promise<PendingTransaction> => {
