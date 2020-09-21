@@ -5,7 +5,7 @@ import { loadPool, PoolDataV3, PoolState } from '../../../../ducks/pool'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
-
+import { TINRatioBar } from '../../../../components/TINRatioBar/index'
 import { TokenLogo } from './styles'
 import BN from 'bn.js'
 
@@ -23,10 +23,17 @@ const PoolOverview: React.FC<Props> = () => {
   const dropRate = (pool.data && pool.data.senior && pool.data.senior.interestRate) || '0'
 
   const dropTotalValue =
-    pool.data && (pool.data as PoolDataV3).senior.totalSupply.mul((pool.data as PoolDataV3).senior.tokenPrice)
+    pool.data &&
+    (pool.data as PoolDataV3).senior &&
+    (pool.data as PoolDataV3).senior!.totalSupply.mul((pool.data as PoolDataV3).senior!.tokenPrice)
 
   const tinTotalValue =
     pool.data && (pool.data as PoolDataV3).junior.totalSupply.mul((pool.data as PoolDataV3).junior.tokenPrice)
+
+  const ratioBase = new BN(10).pow(new BN(20))
+  const currentJuniorRatio = pool.data ? pool.data.currentJuniorRatio.div(ratioBase).toNumber() / 10 ** 7 : 0
+  const minJuniorRatio = pool.data ? pool.data.minJuniorRatio.div(ratioBase).toNumber() / 10 ** 7 : 0
+  const maxJuniorRatio = pool.data ? (pool.data as PoolDataV3).maxJuniorRatio.div(ratioBase).toNumber() / 10 ** 7 : 0
 
   return (
     pool &&
@@ -118,6 +125,10 @@ const PoolOverview: React.FC<Props> = () => {
                 </span>
               </Box>
             </Box>
+          </Box>
+
+          <Box margin={{ top: 'medium', bottom: 'large' }}>
+            <TINRatioBar current={currentJuniorRatio} min={minJuniorRatio} max={maxJuniorRatio} />
           </Box>
 
           <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
