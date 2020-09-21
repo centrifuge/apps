@@ -23,7 +23,7 @@ export function initTinlake({
     const overrides = config.network === 'Kovan' ? { gasLimit: config.gasLimit } : {}
 
     if (version === 2) tinlake = new Tinlake({ transactionTimeout, overrides, provider: rpcProvider })
-    else tinlake = (new TinlakeV3({ transactionTimeout, overrides, provider: rpcProvider }) as unknown) as ITinlakeV3
+    else tinlake = new TinlakeV3({ transactionTimeout, overrides, provider: rpcProvider })
   }
 
   let resetContractAddresses = false
