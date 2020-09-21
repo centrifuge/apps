@@ -157,29 +157,29 @@ export default class Tinlake {
         timesOutAt,
         status: 1,
         hash: tx.hash,
-      //   receipt: async () => {
-      //     return new Promise(async (resolve, reject) => {
-      //       if (!tx.hash) return reject(tx)
+        //   receipt: async () => {
+        //     return new Promise(async (resolve, reject) => {
+        //       if (!tx.hash) return reject(tx)
 
-      //       let timer: NodeJS.Timer | undefined = undefined
-      //       if (timesOutAt) {
-      //         timer = setTimeout(() => {
-      //           return reject(`Transaction ${tx.hash} timed out at ${timesOutAt}`)
-      //         }, timesOutAt - Date.now())
-      //       }
+        //       let timer: NodeJS.Timer | undefined = undefined
+        //       if (timesOutAt) {
+        //         timer = setTimeout(() => {
+        //           return reject(`Transaction ${tx.hash} timed out at ${timesOutAt}`)
+        //         }, timesOutAt - Date.now())
+        //       }
 
-      //       try {
-      //         const receipt = await this.provider!.waitForTransaction(tx.hash)
-      //         if (timer) clearTimeout(timer)
+        //       try {
+        //         const receipt = await this.provider!.waitForTransaction(tx.hash)
+        //         if (timer) clearTimeout(timer)
 
-      //         return resolve(receipt)
-      //       } catch (e) {
-      //         if (timer) clearTimeout(timer)
-      //         console.error(`Error caught in tinlake.getTransactionReceipt(): ${JSON.stringify(e)}`)
-      //         return reject()
-      //       }
-      //     })
-      //   },
+        //         return resolve(receipt)
+        //       } catch (e) {
+        //         if (timer) clearTimeout(timer)
+        //         console.error(`Error caught in tinlake.getTransactionReceipt(): ${JSON.stringify(e)}`)
+        //         return reject()
+        //       }
+        //     })
+        //   },
       }
     } catch (e) {
       console.error(`Error caught in tinlake.pending(): ${JSON.stringify(e)}`)
