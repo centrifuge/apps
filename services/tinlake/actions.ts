@@ -241,16 +241,10 @@ export async function setInterest(
 }
 
 export async function getPool(tinlake: ITinlake): Promise<PoolData | null> {
-  if (!tinlake.signer) {
-    throw new Error('Missing tinlake signer')
-  }
-
-  const address = await tinlake.signer.getAddress()
-
   const juniorReserve = await tinlake.getJuniorReserve()
   const juniorTokenPrice = await tinlake.getTokenPriceJunior()
   const seniorReserve = await tinlake.getSeniorReserve()
-  const seniorTokenPrice = await tinlake.getTokenPriceSenior(address!)
+  const seniorTokenPrice = tinlake.signer ? await tinlake.getTokenPriceSenior(await tinlake.signer.getAddress()) : new BN(0)
   const seniorInterestRate = await tinlake.getSeniorInterestRate()
   const seniorTokenSupply = await tinlake.getSeniorTotalSupply()
   const minJuniorRatio = await tinlake.getMinJuniorRatio()
@@ -378,49 +372,37 @@ export async function supply(
 
   const address = await tinlake.signer.getAddress()
 
-  console.log('supply address', address)
-
   let allowance = new BN(0)
   if (trancheType === 'junior') {
     allowance = (await tinlake.getJuniorForCurrencyAllowance(address!)) || new BN(0)
-    console.log('junior allowance', allowance.toString())
   } else if (trancheType === 'senior') {
     allowance = (await tinlake.getSeniorForCurrencyAllowance(address!)) || new BN(0)
-    console.log('senior allowance', allowance.toString())
   }
 
-  console.log('checking if approval is needed')
 
   // only approve if allowance is smaller than than supplyAmount
   if (allowance.lt(new BN(supplyAmount))) {
-    console.log('requires approval', supplyAmount.toString())
     // approve currency
     try {
       if (trancheType === 'junior') {
         const approvalTx = await tinlake.approveJuniorForCurrency(maxUint256)
-        const approvalResult = await tinlake.getTransactionReceipt(approvalTx!)
-        console.log('approval junior', approvalResult)
+        await tinlake.getTransactionReceipt(approvalTx!)
       } else if (trancheType === 'senior') {
         const approvalTx = await tinlake.approveSeniorForCurrency(maxUint256)
-        const approvalResult = await tinlake.getTransactionReceipt(approvalTx!)
-        console.log('approval senior', approvalResult)
+        await tinlake.getTransactionReceipt(approvalTx!)
       }
     } catch (e) {
       return loggedError(e, `Could not approve currency for ${trancheType}.`, '')
     }
   }
 
-  console.log('actually supplying')
-
   // supply
   try {
     if (trancheType === 'junior') {
       const res = await tinlake.supplyJunior(supplyAmount)
-      console.log('supplying junior', res)
       return res
     }
     const res = await tinlake.supplySenior(supplyAmount)
-    console.log('supplying senior', res)
     return res
   } catch (e) {
     return loggedError(e, `Could not supply ${trancheType}`, '')
