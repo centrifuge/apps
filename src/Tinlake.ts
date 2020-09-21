@@ -145,6 +145,10 @@ export default class Tinlake {
     return this.contracts[abiName]!
   }
 
+  /**
+   * Handle timeout and wait for transaction success/failure
+   * @param txPromise 
+   */
   async pending(txPromise: Promise<ethers.providers.TransactionResponse>): Promise<PendingTransaction> {
     try {
       const tx = await txPromise
