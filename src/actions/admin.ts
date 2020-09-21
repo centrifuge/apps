@@ -21,6 +21,11 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return (await this.contract(contractName).wards(user)).toBN()
     }
 
+    canUpdateNftFeed = async (user: string) => {
+      if (!this.contract('FEED')?.wards) return false
+      return (await this.contract('FEED').wards(user)).toBN().toNumber() === 1
+    }
+
     canSetSeniorTrancheInterest = async (user: string) => {
       if (!this.contract('ASSESSOR')?.wards) return false
       return (await this.contract('ASSESSOR').wards(user)).toBN().toNumber() === 1
@@ -79,15 +84,6 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       )
     }
 
-    setDiscountRate = async (rate: string) => {
-      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
-      return this.pending(
-        this.contract('FEED').file(web3.fromAscii('discountRate').padEnd(66, '0'), rate, this.overrides)
-      )
-    }
-
-    // TODO: setMaturityDate (maybe not needed for MVP)
-
     updateJuniorMemberList = async (user: string, validUntil: number) => {
       return this.pending(this.contract('JUNIOR_MEMBERLIST').updateMember(user, validUntil, this.overrides))
     }
@@ -96,26 +92,44 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return this.pending(this.contract('SENIOR_MEMBERLIST').updateMember(user, validUntil, this.overrides))
     }
 
-    updateNftFeed = async (tokenId: string, value: number, riskGroup?: number) => {
-      if (!riskGroup) {
-        return this.pending(this.contract('FEED')['update(bytes32,uint256)'](tokenId, value, this.overrides))
-      } 
-        return this.pending(this.contract('FEED')['update(bytes32,uint256,uint256)'](tokenId, value, riskGroup, this.overrides))
-      
-    }
+    // ------------ admin functions lender-side -------------
 
-    getNftFeedId = async (registry: string, tokenId: number) => {
+    getNftFeedId = async (registry: string, tokenId: string) => {
       return await this.contract('FEED')['nftID(address,uint256)'](registry, tokenId)
     }
 
-    getNftFeedValue = async (nftFeedId: string) => {
-      return (await this.contract('FEED').nftValues(nftFeedId)).toBN()
+    getNftFeedValue = async (nftId: string) => {
+      return (await this.contract('FEED').nftValues(nftId)).toBN()
+    }
+
+    getNftMaturityDate = async (nftId: string) => {
+      return (await this.contract('FEED').maturityDate(nftId)).toBN()
+    }
+
+    setDiscountRate = async (rate: string) => {
+      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
+      return this.pending(
+        this.contract('FEED').file(web3.fromAscii('discountRate').padEnd(66, '0'), rate, this.overrides)
+      )
+    }
+
+    updateNftFeed = async (nftId: string, value: string, riskGroup?: string) => {
+      if (!riskGroup) {
+        return this.pending(this.contract('FEED')['update(bytes32,uint256)'](nftId, value, this.overrides))
+      }
+      return this.pending(this.contract('FEED')['update(bytes32,uint256,uint256)'](nftId, value, riskGroup, this.overrides))
+    }
+    setMaturityDate = async (nftId: string, timestampSecs: number) => {
+      return this.pending(
+        this.contract('FEED').file(web3.fromAscii('maturityDate').padEnd(66, '0'), nftId, timestampSecs)
+      )
     }
   }
 }
 
 export type IAdminActions = {
   isWard(user: string, contractName: ContractName): Promise<BN>
+  canUpdateNftFeed(user: string): Promise<boolean>
   canSetSeniorTrancheInterest(user: string): Promise<boolean>
   canSetMinimumJuniorRatio(user: string): Promise<boolean>
   canAddToJuniorMemberList(user: string): Promise<boolean>
@@ -128,8 +142,9 @@ export type IAdminActions = {
   setMaximumReserve(amount: string): Promise<PendingTransaction>
   setSeniorTrancheInterest(amount: string): Promise<PendingTransaction>
   setDiscountRate(amount: string): Promise<PendingTransaction>
-  updateNftFeed(nftId: string, value: number, riskGroup?: number): Promise<PendingTransaction>
-  getNftFeedId(registry: string, tokenId: number): Promise<any>
+  setMaturityDate(nftId: string, timestampSecs: number): Promise<PendingTransaction>
+  updateNftFeed(nftId: string, value: string, riskGroup?: string): Promise<PendingTransaction>
+  getNftFeedId(registry: string, tokenId: string): Promise<string>
   getNftFeedValue(tokenId: string): Promise<BN>
 }
 
