@@ -33,7 +33,7 @@ export type PendingTransaction = {
   status: number
   error?: string
   timesOutAt?: number
-  receipt: () => Promise<ethers.providers.TransactionReceipt>
+  // receipt: () => Promise<ethers.providers.TransactionReceipt>
 }
 
 export type ContractName = typeof contractNames[number]
@@ -79,7 +79,7 @@ export default class Tinlake {
   public contracts: Contracts = {}
   public contractAbis: ContractAbis = {}
   public contractConfig: any = {}
-  public version: number = 3
+  public readonly version: number = 3
 
   constructor(params: TinlakeParams) {
     const { provider, signer, contractAddresses, transactionTimeout, contractAbis, overrides, contractConfig } = params
@@ -117,14 +117,23 @@ export default class Tinlake {
     }
 
     if (address) {
+      // If an address was passed, return a contract at that specific address
       return new ethers.Contract(address, this.contractAbis[abiName]!, signerOrProvider)
     }
+
     if (this.signer) {
+      // Return the prespecified contract for that name, and connect it to the signer so that transactions can be initiated
       return this.contracts[abiName]!.connect(signerOrProvider)
     }
+
+    // Return the prespecified contract for that name, without a signer, which means that you can only retrieve information, not initiate transactions
     return this.contracts[abiName]!
   }
 
+  /**
+   * Handle timeout and wait for transaction success/failure
+   * @param txPromise
+   */
   async pending(txPromise: Promise<ethers.providers.TransactionResponse>): Promise<PendingTransaction> {
     try {
       const tx = await txPromise
@@ -133,37 +142,38 @@ export default class Tinlake {
         timesOutAt,
         status: 1,
         hash: tx.hash,
-        receipt: async () => {
-          return new Promise(async (resolve, reject) => {
-            if (!tx.hash) return reject(tx)
+        //   receipt: async () => {
+        //     return new Promise(async (resolve, reject) => {
+        //       if (!tx.hash) return reject(tx)
 
-            let timer: NodeJS.Timer | undefined = undefined
-            if (timesOutAt) {
-              timer = setTimeout(() => {
-                return reject(`Transaction ${tx.hash} timed out at ${timesOutAt}`)
-              }, timesOutAt - Date.now())
-            }
+        //       let timer: NodeJS.Timer | undefined = undefined
+        //       if (timesOutAt) {
+        //         timer = setTimeout(() => {
+        //           return reject(`Transaction ${tx.hash} timed out at ${timesOutAt}`)
+        //         }, timesOutAt - Date.now())
+        //       }
 
-            try {
-              const receipt = await this.provider!.waitForTransaction(tx.hash)
-              if (timer) clearTimeout(timer)
+        //       try {
+        //         const receipt = await this.provider!.waitForTransaction(tx.hash)
+        //         if (timer) clearTimeout(timer)
 
-              return resolve(receipt)
-            } catch (e) {
-              console.error(`Error caught in tinlake.getTransactionReceipt(): ${JSON.stringify(e)}`)
-              return reject()
-            }
-          })
-        }
+        //         return resolve(receipt)
+        //       } catch (e) {
+        //         if (timer) clearTimeout(timer)
+        //         console.error(`Error caught in tinlake.getTransactionReceipt(): ${JSON.stringify(e)}`)
+        //         return reject()
+        //       }
+        //     })
+        //   },
       }
     } catch (e) {
       console.error(`Error caught in tinlake.pending(): ${JSON.stringify(e)}`)
       return {
         status: 0,
         error: e.message,
-        receipt: async () => {
-          return Promise.reject('Error caught in tinlake.pending()')
-        }
+        // receipt: async () => {
+        //   return Promise.reject('Error caught in tinlake.pending()')
+        // },
       }
     }
   }
