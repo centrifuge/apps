@@ -132,11 +132,7 @@ export const issue = async (
     }
 
     // transfer issue
-    try {
-      return await tinlake.proxyTransferIssue(proxyAddress, nftRegistryAddress, tokenId)
-    } catch (e) {
-      return loggedError(e, 'Could not Issue loan.', tokenId)
-    }
+    return await tinlake.proxyTransferIssue(proxyAddress, nftRegistryAddress, tokenId)
   }
 
   let proxyOwner
@@ -456,7 +452,7 @@ export async function redeem(
     return loggedError(e, `Could not redeem ${trancheType}.`, '')
   }
 
-  return { status: 0 } as any
+  return { status: 0 }
 }
 
 function loggedError(error: any, message: string, id: string): PendingTransaction {
@@ -464,5 +460,5 @@ function loggedError(error: any, message: string, id: string): PendingTransactio
   return {
     status: 0,
     error: message,
-  } as any
+  }
 }
