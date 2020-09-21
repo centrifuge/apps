@@ -1,6 +1,6 @@
 import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
 import { calculateOptimalSolution, State, OrderState, SolverSolution, SolverResult } from '../services/solver'
-import BN from 'BN.js'
+import BN from 'bn.js'
 
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
@@ -44,7 +44,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const orderState = await coordinator.order()
 
       const valueBase = new BN(10).pow(new BN(18))
-    
+
       return {
         dropRedeemOrder: orderState.seniorRedeem.toBN().isZero()
           ? 0.0
@@ -143,7 +143,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       if (lastEpochClosed + minimumEpochTime < latestBlockTimestamp) {
         return 'can-be-closed'
       }
-      
+
       const submissionPeriod = await coordinator.submissionPeriod()
       if (!submissionPeriod) return 'open'
 
