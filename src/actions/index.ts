@@ -17,7 +17,7 @@ export default {
   Analytics,
   Governance,
   Proxy,
-  Coordinator
+  Coordinator,
 }
 
 export type TinlakeActions = IAdminActions &

@@ -70,7 +70,9 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     proxyIssue = async (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
       const encoded = this.contract('ACTIONS').interface.functions.issue.encode([
-        this.contract('SHELF').address, nftRegistryAddress, tokenId
+        this.contract('SHELF').address,
+        nftRegistryAddress,
+        tokenId,
       ])
 
       return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
@@ -79,7 +81,9 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     proxyTransferIssue = async (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
       const encoded = this.contract('ACTIONS').interface.functions.transferIssue.encode([
-        this.contract('SHELF').address, nftRegistryAddress, tokenId
+        this.contract('SHELF').address,
+        nftRegistryAddress,
+        tokenId,
       ])
 
       return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
@@ -126,7 +130,12 @@ export type IProxyActions = {
   proxyIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<PendingTransaction>
   proxyTransferIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<PendingTransaction>
   proxyLockBorrowWithdraw(proxyAddr: string, loanId: string, amount: string, usr: string): Promise<PendingTransaction>
-  proxyRepayUnlockClose(proxyAddr: string, tokenId: string, loanId: string, registry: string): Promise<PendingTransaction>
+  proxyRepayUnlockClose(
+    proxyAddr: string,
+    tokenId: string,
+    loanId: string,
+    registry: string
+  ): Promise<PendingTransaction>
 }
 
 export default ProxyActions

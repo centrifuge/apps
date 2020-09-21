@@ -68,7 +68,7 @@ describe('lender functions', async () => {
   it('success: redeem junior', async () => {
     const currencyAmount = '10000'
     const tokenAmount = '100'
-    
+
     // whitelist investor
     const approveTx = await adminTinlake.approveAllowanceJunior(lenderAccount.address, currencyAmount, tokenAmount)
     await adminTinlake.getTransactionReceipt(approveTx)
@@ -96,10 +96,7 @@ describe('lender functions', async () => {
       initialTrancheCurrencyBalance.sub(new BN(tokenAmount)).toString(),
       newTrancheCurrencyBalance.toString()
     )
-    assert.equal(
-      initialLenderCurrencyBalance.add(new BN(tokenAmount)).toString(),
-      newLenderCurrencyBalance.toString()
-    )
+    assert.equal(initialLenderCurrencyBalance.add(new BN(tokenAmount)).toString(), newLenderCurrencyBalance.toString())
     assert.equal(tokenAmount, initialJuniorTokenBalance.sub(newJuniorTokenBalance).toString())
   })
 
@@ -120,7 +117,7 @@ describe('lender functions', async () => {
 
     const redeemTx = await lenderTinlake.redeemJunior(tokenAmount)
     const redeemResult = await lenderTinlake.getTransactionReceipt(redeemTx)
-    
+
     assert.equal(redeemResult.status, FAIL_STATUS)
   })
 })
@@ -153,7 +150,7 @@ async function supply(investor: string, currencyAmount: string, tinlake: ITinlak
 
   // assert investor currency balanace decreased
   assert.equal(initialLenderCurrencyBalance.sub(newLenderCurrencyBalance).toString(), currencyAmount)
-  
+
   // assert investor received tokens
   if (testConfig.isRealTestnet) {
     assert.ok(newJuniorTokenBalance.gt(initialJuniorTokenBalance))

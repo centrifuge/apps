@@ -100,18 +100,17 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     approveAllowanceSenior = async (user: string, maxCurrency: string, maxToken: string) => {
       if (this.getOperatorType('senior') === 'PROPORTIONAL_OPERATOR') {
         return this.pending(this.contract('SENIOR_OPERATOR').approve(user, maxCurrency, this.overrides))
-      } 
-        return this.pending(this.contract('SENIOR_OPERATOR').approve(user, maxCurrency, maxToken, this.overrides))
-      
-      
+      }
+      return this.pending(this.contract('SENIOR_OPERATOR').approve(user, maxCurrency, maxToken, this.overrides))
     }
 
     updateNftFeed = async (tokenId: string, value: number, riskGroup?: number) => {
       if (!riskGroup) {
         return this.pending(this.contract('NFT_FEED')['update(bytes32,uint256)'](tokenId, value, this.overrides))
-      } 
-        return this.pending(this.contract('NFT_FEED')['update(bytes32,uint256,uint256)'](tokenId, value, riskGroup, this.overrides))
-      
+      }
+      return this.pending(
+        this.contract('NFT_FEED')['update(bytes32,uint256,uint256)'](tokenId, value, riskGroup, this.overrides)
+      )
     }
 
     getNftFeedId = async (registry: string, tokenId: number) => {

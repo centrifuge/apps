@@ -2,9 +2,8 @@ import { Constructor, TinlakeParams } from '../Tinlake'
 
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
-
-      // const tinlake = (this as any)
-      // const reserve = (await tinlake.getJuniorReserve()).add(await tinlake.getSeniorReserve())
+    // const tinlake = (this as any)
+    // const reserve = (await tinlake.getJuniorReserve()).add(await tinlake.getSeniorReserve())
 
     solveEpoch = async () => {
       // if (!coordinator.submissionPeriod) {
@@ -33,9 +32,8 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         tinRedeem: 1,
         dropRedeem: 2,
         tinInvest: 3,
-        dropInvest: 4
+        dropInvest: 4,
       })
-
     }
 
     // executeEpoch = () => void

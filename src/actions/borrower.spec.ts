@@ -142,7 +142,7 @@ async function mintIssue(usr: string, tinlake: ITinlake) {
 async function mintIssueBorrow(usr: string, tinlake: ITinlake, amount: string) {
   const { tokenId, loanId } = await mintIssue(usr, tinlake)
 
-  const relyTx = await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['NFT_FEED']);
+  const relyTx = await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['NFT_FEED'])
   await governanceTinlake.getTransactionReceipt(relyTx)
 
   const nftfeedId = await adminTinlake.getNftFeedId(testConfig.nftRegistry, Number(tokenId))
