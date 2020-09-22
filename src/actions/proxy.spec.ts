@@ -21,7 +21,7 @@ const seniorAmount = '100'
 const amount = '100';
 
 // valid until Sunday, 21 December 2025
-const validityTimestamp = 1766327170
+const validityTimestamp = Date.now() + 30 * 24 * 60 * 60 * 1000
 
 describe('proxy tests', async () => {
   before(async () => {
