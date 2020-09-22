@@ -6,6 +6,8 @@ import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import BN from 'bn.js'
 import { EpochData } from './index'
+import { useDispatch } from 'react-redux'
+import { loadPools } from '../../../../ducks/pools'
 
 import InvestCard from './InvestCard'
 import RedeemCard from './RedeemCard'
@@ -42,8 +44,12 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const [hasPendingOrder, setHasPendingOrder] = React.useState(false)
   const [hasPendingCollection, setHasPendingCollection] = React.useState(false)
 
+  const dispatch = useDispatch()
+
   // V3 TODO: this should probably move to actions and expose a single TrancheData object (or to a duck?)
   const updateTrancheData = async () => {
+    dispatch(loadPools())
+
     const address = await props.tinlake.signer?.getAddress()
     if (address) {
       const isInMemberlist =

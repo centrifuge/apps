@@ -12,10 +12,6 @@ export const TINRatioBar: React.FC<Props> = (props: Props) => {
   const [segments, setSegments] = React.useState<any>(undefined)
 
   React.useEffect(() => {
-    console.log('max', 100 - props.max * 100)
-    console.log('current', props.current * 100 - (100 - props.max * 100))
-    console.log('min', 100 - props.min * 100 - props.current * 100 - (100 - props.max * 100))
-
     setSegments([
       {
         width: 100 - props.max * 100,

@@ -6,7 +6,13 @@ import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import { TINRatioBar } from '../../../../components/TINRatioBar/index'
-import { TokenLogo } from './styles'
+import {
+  TokenLogo,
+  BalanceSheetDiagram,
+  BalanceSheetDiagramLeft,
+  BalanceSheetMidLine,
+  BalanceSheetDiagramRight,
+} from './styles'
 import BN from 'bn.js'
 
 interface Props {}
@@ -100,7 +106,14 @@ const PoolOverview: React.FC<Props> = () => {
           </Table>
         </Box>
 
-        <Box>
+        <BalanceSheetDiagram direction="row">
+          <BalanceSheetDiagramLeft>
+            <BalanceSheetMidLine>&nbsp;</BalanceSheetMidLine>
+          </BalanceSheetDiagramLeft>
+          <BalanceSheetDiagramRight>&nbsp;</BalanceSheetDiagramRight>
+        </BalanceSheetDiagram>
+
+        <Box direction="column" justify="between">
           <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>

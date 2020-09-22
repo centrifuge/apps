@@ -416,6 +416,11 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
   const reserve = juniorReserve.add(seniorReserve)
   const outstandingVolume = await tinlake.getTotalDebt()
 
+  const seniorPendingInvestments = await tinlake.getSeniorPendingInvestments()
+  const seniorPendingRedemptions = await tinlake.getSeniorPendingRedemptions()
+  const juniorPendingInvestments = await tinlake.getJuniorPendingInvestments()
+  const juniorPendingRedemptions = await tinlake.getJuniorPendingRedemptions()
+
   return {
     minJuniorRatio,
     maxJuniorRatio,
@@ -430,6 +435,8 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
       tokenPrice: juniorTokenPrice,
       totalSupply: juniorTokenSupply,
       token: 'TIN',
+      pendingInvestments: juniorPendingInvestments,
+      pendingRedemptions: juniorPendingRedemptions,
     },
     senior: {
       type: 'senior',
@@ -438,6 +445,8 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
       totalSupply: seniorTokenSupply,
       token: 'DROP',
       interestRate: seniorInterestRate,
+      pendingInvestments: seniorPendingInvestments,
+      pendingRedemptions: seniorPendingRedemptions,
     },
     availableFunds: juniorReserve.add(seniorReserve),
   }

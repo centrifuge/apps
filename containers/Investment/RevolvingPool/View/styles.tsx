@@ -47,3 +47,27 @@ export const Warning = styled.div`
     color: #fcba59;
   }
 `
+
+export const BalanceSheetDiagram = styled(Box)`
+  flex: 1;
+`
+
+export const BalanceSheetDiagramLeft = styled(Box)`
+  width: 50%;
+`
+
+export const BalanceSheetMidLine = styled.div`
+  border-top: 1px solid #d8d8d8;
+  margin-top: 120%;
+`
+
+export const BalanceSheetDiagramRight = styled(Box)`
+  border-bottom: 1px solid #d8d8d8;
+  border-left: 1px solid #d8d8d8;
+  border-bottom-left-radius: 12px;
+  border-top-left-radius: 12px;
+  border-top: 1px solid #d8d8d8;
+  width: 50%;
+  height: 70%;
+  margin-top: 15%;
+`
