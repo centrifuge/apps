@@ -6,7 +6,7 @@ import BN from 'bn.js'
 export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IAnalyticsActions {
     // borrower analytics
-    getNetAssetValue = async (): Promise<BN> => {
+    getCurrentNAV = async (): Promise<BN> => {
       return (await this.contract('FEED').currentNAV()).toBN()
     }
 
