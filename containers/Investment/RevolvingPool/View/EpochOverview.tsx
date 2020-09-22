@@ -11,6 +11,7 @@ import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { SignIcon } from './styles'
 import { useInterval } from '../../../../utils/hooks'
+import BN from 'bn.js'
 
 interface Props extends TransactionProps {
   epochData: EpochData
@@ -49,6 +50,11 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   useInterval(() => {
     setTimePassed(new Date().getTime() / 1000 - props.epochData.lastEpochClosed)
   }, 1000)
+
+  const totalPendingInvestments =
+    pool.data && (pool.data as PoolDataV3).senior
+      ? (pool.data as PoolDataV3).junior?.pendingInvestments!.add((pool.data as PoolDataV3).senior?.pendingInvestments!)
+      : new BN(0)
 
   return (
     <Box direction="column">
@@ -132,6 +138,14 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                   DAI
                 </TableCell>
               </TableRow>
+              {/* <TableRow>
+                <TableCell scope="row">
+                  <Box direction="row">Total Pending Investments</Box>
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(totalPendingInvestments, 18), 2))} DAI
+                </TableCell>
+              </TableRow> */}
             </TableBody>
           </Table>
           <br />

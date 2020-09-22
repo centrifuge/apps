@@ -85,18 +85,22 @@ const CollectCard: React.FC<Props> = (props: Props) => {
               {addThousandsSeparators(toPrecision(baseToDisplay(settledAmount, 18), 2))}
             </TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell scope="row">Settled token price</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(props.tokenPrice, 27), 2))}
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell scope="row">Transaction value</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(transactionValue, 27), 2))} DAI
-            </TableCell>
-          </TableRow>
+          {type === 'Invest' && (
+            <>
+              <TableRow>
+                <TableCell scope="row">Settled token price</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(props.tokenPrice, 27), 2))}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell scope="row">Transaction value</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(transactionValue, 27), 2))} DAI
+                </TableCell>
+              </TableRow>
+            </>
+          )}
         </TableBody>
       </Table>
 
