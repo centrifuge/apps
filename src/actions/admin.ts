@@ -150,6 +150,7 @@ export type IAdminActions = {
   updateNftFeed(nftId: string, value: string, riskGroup?: string): Promise<PendingTransaction>
   getNftFeedId(registry: string, tokenId: string): Promise<string>
   getNftFeedValue(tokenId: string): Promise<BN>
+  getNftMaturityDate(tokenId: string): Promise<BN>
 }
 
 export default AdminActions

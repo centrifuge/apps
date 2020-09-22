@@ -27,6 +27,13 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
       return (await this.contract('TINLAKE_CURRENCY').balanceOf(user)).toBN()
     }
 
+    getJuniorTokenBalance = async (user: string) => {
+      return (await this.contract('JUNIOR_TOKEN').balanceOf(user)).toBN()
+    }
+    getSeniorTokenBalance = async (user: string) => {
+      return (await this.contract('SENIOR_TOKEN').balanceOf(user)).toBN()
+    }
+
     approveCurrency = async (usr: string, currencyAmount: string) => {
       const currencyContract = this.contract('TINLAKE_CURRENCY')
       return this.pending(currencyContract.approve(usr, currencyAmount, this.overrides))
@@ -41,6 +48,16 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
       if (!this.contractAddresses['JUNIOR_TRANCHE']) return
       return this.approveCurrency(this.contractAddresses['JUNIOR_TRANCHE'], currencyAmount)
     }
+
+    approveJuniorForToken = async (tokenAmount: string) => {
+      const tokenContract = this.contract('JUNIOR_TOKEN')
+      return this.pending(tokenContract.approve(this.contractAddresses['JUNIOR_TRANCHE'], tokenAmount, this.overrides))
+    }
+
+    approveSeniorForToken = async (tokenAmount: string) => {
+      const tokenContract = this.contract('SENIOR_TOKEN')
+      return this.pending(tokenContract.approve(this.contractAddresses['SENIOR_TRANCHE'], tokenAmount, this.overrides))
+    }
   }
 }
 
@@ -53,6 +70,8 @@ export type ICurrencyActions = {
   approveCurrency(usr: string, amount: string): Promise<PendingTransaction>
   approveSeniorForCurrency: (currencyAmount: string) => Promise<PendingTransaction | undefined>
   approveJuniorForCurrency: (currencyAmount: string) => Promise<PendingTransaction | undefined>
+  approveSeniorForToken: (tokenAmount: string) => Promise<PendingTransaction>
+  approveJuniorForToken: (tokenAmount: string) => Promise<PendingTransaction>
 }
 
 export default CurrencyActions

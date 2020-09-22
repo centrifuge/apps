@@ -1,6 +1,8 @@
 import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
 import { calculateOptimalSolution, State, OrderState, SolverSolution, SolverResult } from '../services/solver'
 import BN from 'bn.js'
+const web3 = require('web3-utils')
+
 
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
@@ -37,6 +39,14 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const maxReserve = maxReserveBN.isZero() ? 0.0 : maxReserveBN.div(valueBase).toNumber()
 
       return { reserve, netAssetValue, seniorAsset, minTinRatio, maxTinRatio, maxReserve }
+    }
+
+    setMinimumEpochTime = async (minEpochTime: string) => {
+      return this.pending(this.contract('COORDINATOR').file(web3.fromAscii('minimumEpochTime').padEnd(66, '0'), minEpochTime, this.overrides))
+    }
+
+    setMinimumChallengeTime = async (challengeTime: string) => {
+      return this.pending(this.contract('COORDINATOR').file(web3.fromAscii('challengeTime').padEnd(66, '0'), challengeTime, this.overrides))
     }
 
     getOrderState = async () => {
@@ -85,9 +95,6 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const state = await this.getEpochState()
       const orderState = await this.getOrderState()
 
-      console.log(state)
-      console.log(orderState)
-
       const solution = await calculateOptimalSolution(state, orderState)
       console.log('Solution found', solution)
 
@@ -130,6 +137,14 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return (await coordinator.minimumEpochTime()).toBN().toNumber()
     }
 
+    getSubmissionPeriod = async () => {
+      return (await this.contract('COORDINATOR').submissionPeriod())
+    }
+
+    getChallengeTime = async () => {
+      return (await this.contract('COORDINATOR').challengeTime()).toBN()
+    }
+
     getCurrentEpochState = async () => {
       const coordinator = this.contract('COORDINATOR')
 
@@ -165,7 +180,11 @@ export type ICoordinatorActions = {
   getLatestBlockTimestamp(): Promise<number>
   getLastEpochClosed(): Promise<number>
   getMinimumEpochTime(): Promise<number>
+  getSubmissionPeriod(): Promise<boolean>
+  getChallengeTime(): Promise<BN>
   getCurrentEpochState(): Promise<EpochState>
+  setMinimumEpochTime(minEpochTime:string): Promise<PendingTransaction>
+  setMinimumChallengeTime(minChallengeTime:string): Promise<PendingTransaction>
 }
 
 export default CoordinatorActions

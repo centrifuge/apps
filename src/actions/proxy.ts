@@ -1,5 +1,4 @@
 import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
-const abiCoder = require('web3-eth-abi')
 import BN from 'bn.js'
 import { ethers } from 'ethers'
 
@@ -101,6 +100,22 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))
     }
 
+    proxyLock = async (proxyAddress: string, loanId: string) => {
+      const proxy = this.contract('PROXY', proxyAddress)
+      const encoded = this.contract('ACTIONS').interface.functions.lock.encode([
+      this.contract('SHELF').address, loanId])
+
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))
+    }
+
+    proxyBorrowWithdraw = async (proxyAddress: string, loanId: string, amount: string, usr: string) => {
+      const proxy = this.contract('PROXY', proxyAddress)
+      const encoded = this.contract('ACTIONS').interface.functions.borrowWithdraw.encode([
+        this.contract('SHELF').address, loanId, amount, usr])
+
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))
+    }
+
     proxyRepayUnlockClose = async (proxyAddress: string, tokenId: string, loanId: string, registry: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
       const encoded = this.contract('ACTIONS').interface.functions.repayUnlockClose.encode([
@@ -136,6 +151,8 @@ export type IProxyActions = {
     loanId: string,
     registry: string
   ): Promise<PendingTransaction>
+  proxyLock(proxyAddr: string, loanId: string): Promise<PendingTransaction>
+  proxyBorrowWithdraw(proxyAddr: string, loanId: string, amount:string, usr: string): Promise<PendingTransaction>
 }
 
 export default ProxyActions
