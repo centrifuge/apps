@@ -11,7 +11,6 @@ import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { SignIcon } from './styles'
 import { useInterval } from '../../../../utils/hooks'
-import BN from 'bn.js'
 
 interface Props extends TransactionProps {
   epochData: EpochData
@@ -21,7 +20,6 @@ interface Props extends TransactionProps {
 const secondsToHms = (d: number) => {
   const h = Math.floor(d / 3600)
   const m = Math.floor((d % 3600) / 60)
-  const s = Math.floor((d % 3600) % 60)
 
   const hDisplay = h > 0 ? h + (h == 1 ? ' hr' : ' hrs') : ''
   const mDisplay = m > 0 ? m + (m == 1 ? ' min' : ' mins') : ''
@@ -51,10 +49,10 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
     setTimePassed(new Date().getTime() / 1000 - props.epochData.lastEpochClosed)
   }, 1000)
 
-  const totalPendingInvestments =
-    pool.data && (pool.data as PoolDataV3).senior
-      ? (pool.data as PoolDataV3).junior?.pendingInvestments!.add((pool.data as PoolDataV3).senior?.pendingInvestments!)
-      : new BN(0)
+  // const totalPendingInvestments =
+  //   pool.data && (pool.data as PoolDataV3).senior
+  //     ? (pool.data as PoolDataV3).junior?.pendingInvestments!.add((pool.data as PoolDataV3).senior?.pendingInvestments!)
+  //     : new BN(0)
 
   return (
     <Box direction="column">
