@@ -9,6 +9,7 @@ import { PoolDataV3, PoolState } from '../../../../ducks/pool'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
+import { SignIcon } from './styles'
 
 interface Props extends TransactionProps {
   epochData: EpochData
@@ -58,9 +59,9 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
             <TableRow>
               <TableCell scope="row">Pool Reserve current</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                DAI{' '}
                 {pool.data &&
-                  addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).reserve, 18), 2))}
+                  addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).reserve, 18), 2))}{' '}
+                DAI
               </TableCell>
             </TableRow>
           </TableBody>
@@ -80,28 +81,38 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         <Box width="420px" margin={{ bottom: 'medium' }}>
           <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
             <Heading level="5" margin={'0'}>
-              Pending Orders
+              Total Locked Orders
             </Heading>
           </Box>
 
           <Table>
             <TableBody>
               <TableRow>
-                <TableCell scope="row">Investments TIN Tranche</TableCell>
+                <TableCell scope="row">
+                  <Box direction="row">
+                    <SignIcon src={`../../../../static/plus.svg`} />
+                    Investments DROP Tranche
+                  </Box>
+                </TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  DAI{' '}
                   {addThousandsSeparators(
-                    toPrecision(baseToDisplay((pool.data as PoolDataV3).junior?.pendingInvestments!, 18), 2)
-                  )}
+                    toPrecision(baseToDisplay((pool.data as PoolDataV3).senior?.pendingInvestments!, 18), 2)
+                  )}{' '}
+                  DAI
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell scope="row">Investments DROP Tranche</TableCell>
+                <TableCell scope="row">
+                  <Box direction="row">
+                    <SignIcon src={`../../../../static/plus.svg`} />
+                    Investments TIN Tranche
+                  </Box>
+                </TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  DAI{' '}
                   {addThousandsSeparators(
-                    toPrecision(baseToDisplay((pool.data as PoolDataV3).senior?.pendingInvestments!, 18), 2)
-                  )}
+                    toPrecision(baseToDisplay((pool.data as PoolDataV3).junior?.pendingInvestments!, 18), 2)
+                  )}{' '}
+                  DAI
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -111,21 +122,31 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
           <Table>
             <TableBody>
               <TableRow>
-                <TableCell scope="row">Redemptions TIN Tranche</TableCell>
+                <TableCell scope="row">
+                  <Box direction="row">
+                    <SignIcon src={`../../../../static/min.svg`} />
+                    Redemptions DROP Tranche
+                  </Box>
+                </TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  DAI{' '}
                   {addThousandsSeparators(
-                    toPrecision(baseToDisplay((pool.data as PoolDataV3).junior?.pendingRedemptions!, 18), 2)
-                  )}
+                    toPrecision(baseToDisplay((pool.data as PoolDataV3).senior?.pendingRedemptions!, 18), 2)
+                  )}{' '}
+                  DROP
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell scope="row">Redemptions DROP Tranche</TableCell>
+                <TableCell scope="row">
+                  <Box direction="row">
+                    <SignIcon src={`../../../../static/min.svg`} />
+                    Redemptions TIN Tranche
+                  </Box>
+                </TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  DAI{' '}
                   {addThousandsSeparators(
-                    toPrecision(baseToDisplay((pool.data as PoolDataV3).senior?.pendingRedemptions!, 18), 2)
-                  )}
+                    toPrecision(baseToDisplay((pool.data as PoolDataV3).junior?.pendingRedemptions!, 18), 2)
+                  )}{' '}
+                  TIN
                 </TableCell>
               </TableRow>
             </TableBody>

@@ -20,6 +20,15 @@ export const TokenLogo = styled.img`
   height: 16px;
 `
 
+export const SignIcon = styled.img`
+  vertical-align: middle;
+  margin: 0 8px 0 0;
+  width: 24px;
+  height: 24px;
+  position: relative;
+  top: -2px;
+`
+
 export const Info = styled.div`
   margin-top: 16px;
   background: #f5f5f5;

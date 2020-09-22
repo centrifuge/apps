@@ -54,7 +54,7 @@ const PoolOverview: React.FC<Props> = () => {
               Pool Value
             </Heading>
             <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-              DAI {addThousandsSeparators(toPrecision(baseToDisplay(poolValue, 18), 2))}
+              {addThousandsSeparators(toPrecision(baseToDisplay(poolValue, 18), 2))} DAI
             </Heading>
           </Box>
 
@@ -63,20 +63,20 @@ const PoolOverview: React.FC<Props> = () => {
               <TableRow>
                 <TableCell scope="row">Current NAV</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  DAI{' '}
-                  {addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).netAssetValue, 18), 2))}
+                  {addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).netAssetValue, 18), 2))}{' '}
+                  DAI
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell scope="row">Current Reserve</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  DAI {addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).reserve, 18), 2))}
+                  {addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).reserve, 18), 2))} DAI
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell scope="row">Maximum Reserve Amount</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  DAI {addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).maxReserve, 18), 2))}
+                  {addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).maxReserve, 18), 2))} DAI
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -90,10 +90,10 @@ const PoolOverview: React.FC<Props> = () => {
               <TableRow>
                 <TableCell scope="row">Outstanding Volume</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  DAI{' '}
                   {addThousandsSeparators(
                     toPrecision(baseToDisplay((pool.data as PoolDataV3).outstandingVolume, 18), 2)
-                  )}
+                  )}{' '}
+                  DAI
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -125,7 +125,7 @@ const PoolOverview: React.FC<Props> = () => {
               </Heading>
               <Box margin={{ left: 'auto' }}>
                 <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                  DAI {dropTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(dropTotalValue, 27 + 18), 2))}
+                  {dropTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(dropTotalValue, 27 + 18), 2))} DAI
                 </Heading>
                 <span>
                   {(pool.data as PoolDataV3).senior &&
@@ -151,7 +151,9 @@ const PoolOverview: React.FC<Props> = () => {
             <Heading level="5" margin={{ top: 'none', bottom: '28px', left: 'auto', right: 'auto' }}>
               TIN Risk Buffer
             </Heading>
-            <TINRatioBar current={currentJuniorRatio} min={minJuniorRatio} max={maxJuniorRatio} />
+            <Box margin={{ horizontal: '20px' }}>
+              <TINRatioBar current={currentJuniorRatio} min={minJuniorRatio} max={maxJuniorRatio} />
+            </Box>
           </Box>
 
           <DividerBottom>

@@ -6,7 +6,7 @@ import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import BN from 'bn.js'
 import { EpochData } from './index'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { loadPools } from '../../../../ducks/pools'
 
 import InvestCard from './InvestCard'
@@ -27,6 +27,8 @@ interface Props {
 export type Card = 'home' | 'collect' | 'order' | 'invest' | 'redeem'
 
 const TrancheOverview: React.FC<Props> = (props: Props) => {
+  const address = useSelector<any, string | null>((state) => state.auth.address)
+
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
 
   const [card, setCard] = React.useState<Card>('home')
@@ -50,7 +52,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const updateTrancheData = async () => {
     dispatch(loadPools())
 
-    const address = await props.tinlake.signer?.getAddress()
     if (address) {
       const isInMemberlist =
         props.tranche === 'senior'
@@ -86,7 +87,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     updateTrancheData()
-  }, [props.tinlake.signer])
+  }, [props.tinlake.signer, address])
 
   React.useEffect(() => {
     if (hasPendingCollection) setCard('collect')
@@ -111,14 +112,13 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           <TableRow>
             <TableCell scope="row">Current Price</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              {' '}
               {addThousandsSeparators(toPrecision(baseToDisplay(tokenPrice, 27), 2))}
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell scope="row">Your {token} Value</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              DAI {addThousandsSeparators(toPrecision(baseToDisplay(value, 18), 2))}{' '}
+              {addThousandsSeparators(toPrecision(baseToDisplay(value, 18), 2))} DAI
             </TableCell>
           </TableRow>
         </TableBody>
