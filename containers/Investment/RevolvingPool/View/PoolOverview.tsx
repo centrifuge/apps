@@ -12,6 +12,9 @@ import {
   BalanceSheetDiagramLeft,
   BalanceSheetMidLine,
   BalanceSheetDiagramRight,
+  DividerTop,
+  DividerBottom,
+  DividerInner,
 } from './styles'
 import BN from 'bn.js'
 
@@ -114,7 +117,7 @@ const PoolOverview: React.FC<Props> = () => {
         </BalanceSheetDiagram>
 
         <Box direction="column" justify="between">
-          <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
+          <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'small' }}>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
                 <TokenLogo src={`../../../../static/DROP_final.svg`} />
@@ -140,9 +143,20 @@ const PoolOverview: React.FC<Props> = () => {
             </Box>
           </Box>
 
-          <Box margin={{ top: 'medium', bottom: 'large' }}>
+          <DividerTop>
+            <DividerInner>&nbsp;</DividerInner>
+          </DividerTop>
+
+          <Box margin={{ top: 'small', bottom: 'large' }}>
+            <Heading level="5" margin={{ top: 'none', bottom: '28px', left: 'auto', right: 'auto' }}>
+              TIN Risk Buffer
+            </Heading>
             <TINRatioBar current={currentJuniorRatio} min={minJuniorRatio} max={maxJuniorRatio} />
           </Box>
+
+          <DividerBottom>
+            <DividerInner>&nbsp;</DividerInner>
+          </DividerBottom>
 
           <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>

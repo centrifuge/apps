@@ -58,7 +58,9 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
             <TableRow>
               <TableCell scope="row">Pool Reserve current</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                DAI {addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).reserve, 18), 2))}
+                DAI{' '}
+                {pool.data &&
+                  addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).reserve, 18), 2))}
               </TableCell>
             </TableRow>
           </TableBody>
