@@ -2,6 +2,7 @@ import Tinlake from '..'
 import { ITinlake } from '../types/tinlake'
 import { ProviderConfig } from './config'
 import { ethers } from 'ethers'
+import assert from "assert";
 
 export class TestProvider {
   public provider: ethers.providers.Provider

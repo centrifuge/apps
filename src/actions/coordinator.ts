@@ -78,7 +78,6 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         // The epoch is can be closed, but is not closed yet
         const closeTx = await coordinator.closeEpoch(this.overrides)
         const closeResult = await this.getTransactionReceipt(closeTx)
-        console.log('close epoch done', closeResult)
 
         if (closeResult.status === 0) {
           console.log('Failed to close the epoch')
@@ -95,9 +94,6 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
       const state = await this.getEpochState()
       const orderState = await this.getOrderState()
-
-      console.log(state)
-      console.log(orderState)
 
       const solution = await calculateOptimalSolution(state, orderState)
       console.log('Solution found', solution)
