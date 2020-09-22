@@ -3,13 +3,6 @@
 # Run testnet with dapp testnet
 # NOTE: SENIOR_TRANCHE must be set to true in the environmental variables for a senior tranche to be deployed
 
-# remove submodules and install newest dependencies
-[ -d ./tinlake-proxy ] && rm -rf ./tinlake-proxy
-[ -d ./tinlake-actions ] && rm -rf ./tinlake-actions
-[ -d ./tinlake-deploy ] && rm -rf ./tinlake-deploy
-git submodule update --init --recursive
-git submodule update --recursive --remote --merge
-
 # superpower user for tinlake.js tests
 GOD_ADDRESS=0xf6fa8a3f3199cdd85749ec749fb8f9c2551f9928
 

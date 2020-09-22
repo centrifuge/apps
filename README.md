@@ -21,6 +21,9 @@ Install dependencies with `npm install`.
 `--save=name` after finishing, save snapshot
 `--load=name` start from a previously saved snapshot
 
+#### Update dependencies/submodules
+`./bin/update.sh`
+
 #### Deploy Tinlake Contracts for Tests
 `./bin/deploy.sh`
 
@@ -41,10 +44,16 @@ docker build -t centrifugeio/tinlake-in-a-box:latest .
 docker run -it --rm centrifugeio/tinlake-in-a-box:latest cat /app/test/addresses.json > ./test/addresses.json
 ```
 
-**2. Run a docker container**
+**3. Run a docker container**
 
 ```bash
 docker run --rm -p 8545:8545 centrifugeio/tinlake-in-a-box:latest
+```
+
+## Use the docker container to interact with the chain
+
+```bash
+docker run -it --rm centrifugeio/tinlake-in-a-box:latest seth help
 ```
 
 
