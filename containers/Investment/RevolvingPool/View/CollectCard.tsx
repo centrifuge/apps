@@ -32,8 +32,8 @@ const CollectCard: React.FC<Props> = (props: Props) => {
     type === 'Invest'
       ? props.disbursements.payoutTokenAmount
       : new BN(props.disbursements.payoutCurrencyAmount)
-          // .div(new BN(props.tokenPrice))
-          // .div(new BN(10).pow(new BN(18)))
+          .div(new BN(props.tokenPrice).div(new BN(10).pow(new BN(9))))
+          .mul(new BN(10).pow(new BN(18)))
           .toString()
 
   const transactionValue = new BN(
@@ -82,25 +82,22 @@ const CollectCard: React.FC<Props> = (props: Props) => {
           <TableRow>
             <TableCell scope="row">Settled amount</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(settledAmount, 18), 2))}
+              {addThousandsSeparators(toPrecision(baseToDisplay(settledAmount, 18), 2))}{' '}
+              {props.tranche === 'senior' ? 'DROP' : 'TIN'}
             </TableCell>
           </TableRow>
-          {type === 'Invest' && (
-            <>
-              <TableRow>
-                <TableCell scope="row">Settled token price</TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(props.tokenPrice, 27), 2))}
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell scope="row">Transaction value</TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(transactionValue, 27), 2))} DAI
-                </TableCell>
-              </TableRow>
-            </>
-          )}
+          <TableRow>
+            <TableCell scope="row">Settled token price</TableCell>
+            <TableCell style={{ textAlign: 'end' }}>
+              {addThousandsSeparators(toPrecision(baseToDisplay(props.tokenPrice, 27), 2))}
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell scope="row">Transaction value</TableCell>
+            <TableCell style={{ textAlign: 'end' }}>
+              {addThousandsSeparators(toPrecision(baseToDisplay(transactionValue, 27), 2))} DAI
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
 

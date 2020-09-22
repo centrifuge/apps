@@ -412,7 +412,7 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
   const juniorTokenSupply = await tinlake.getJuniorTotalSupply()
   const currentJuniorRatio = await tinlake.getCurrentJuniorRatio()
 
-  const netAssetValue = await tinlake.getNetAssetValue()
+  const netAssetValue = await tinlake.getCurrentNAV()
   const reserve = juniorReserve.add(seniorReserve)
   const outstandingVolume = await tinlake.getTotalDebt()
 

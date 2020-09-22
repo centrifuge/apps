@@ -168,7 +168,7 @@ const PoolOverview: React.FC<Props> = () => {
               </Heading>
               <Box margin={{ left: 'auto' }}>
                 <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                  DAI {tinTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 2))}
+                  {tinTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 2))} DAI
                 </Heading>
                 <span>
                   {addThousandsSeparators(
