@@ -21,6 +21,11 @@ import BN from 'bn.js'
 
 interface Props {}
 
+const parseRatio = (num: BN): number => {
+  const base = new BN(10).pow(new BN(20))
+  return num.div(base).toNumber() / 10 ** 7
+}
+
 const PoolOverview: React.FC<Props> = () => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolDataV3 | undefined
@@ -32,11 +37,9 @@ const PoolOverview: React.FC<Props> = () => {
   const dropTotalValue = poolData?.senior && poolData?.senior.totalSupply.mul(poolData.senior!.tokenPrice)
 
   const tinTotalValue = poolData && poolData.junior.totalSupply.mul(poolData?.junior.tokenPrice)
-
-  const ratioBase = new BN(10).pow(new BN(20))
-  const currentJuniorRatio = poolData ? poolData.currentJuniorRatio.div(ratioBase).toNumber() / 10 ** 7 : 0
-  const minJuniorRatio = poolData ? poolData.minJuniorRatio.div(ratioBase).toNumber() / 10 ** 7 : 0
-  const maxJuniorRatio = poolData ? poolData.maxJuniorRatio.div(ratioBase).toNumber() / 10 ** 7 : 0
+  const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : 0
+  const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : 0
+  const maxJuniorRatio = poolData ? parseRatio(poolData.maxJuniorRatio) : 0
 
   return poolData ? (
     <Box direction="row" justify="between">
