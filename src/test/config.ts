@@ -8,7 +8,7 @@ dotenv.config()
 
 const MILLI_ETH = 1e15 // 0.001 ETH
 const FAUCET_AMOUNT = 5000 * MILLI_ETH
-const GAS_LIMIT = 20000000
+const GAS_LIMIT = 2000000
 
 const testConfig: ProviderConfig = {
   contractAddresses: (process.env.CONTRACTS && JSON.parse(process.env.CONTRACTS)) || contractAddresses,
@@ -16,7 +16,7 @@ const testConfig: ProviderConfig = {
     process.env.GOD_PRIV_KEY || '0xb2e0c8e791c37df214808cdadc187f0cba0e36160f1a38b321a25c9a0cea8c11'
   ),
   nftRegistry: process.env.NFT_REGISTRY || '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24',
-  transactionTimeout: 80000,
+  transactionTimeout: 50000,
   overrides: { gasLimit: GAS_LIMIT },
   rpcUrl: process.env.RPC_URL || 'http://127.0.0.1:8545',
   isRealTestnet: false,
