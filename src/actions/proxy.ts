@@ -102,8 +102,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     proxyLock = async (proxyAddress: string, loanId: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
-      const encoded = this.contract('ACTIONS').interface.functions.lock.encode([
-      this.contract('SHELF').address, loanId])
+      const encoded = this.contract('ACTIONS').interface.functions.lock.encode([this.contract('SHELF').address, loanId])
 
       return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))
     }
@@ -111,7 +110,11 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     proxyBorrowWithdraw = async (proxyAddress: string, loanId: string, amount: string, usr: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
       const encoded = this.contract('ACTIONS').interface.functions.borrowWithdraw.encode([
-        this.contract('SHELF').address, loanId, amount, usr])
+        this.contract('SHELF').address,
+        loanId,
+        amount,
+        usr,
+      ])
 
       return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))
     }
@@ -152,7 +155,7 @@ export type IProxyActions = {
     registry: string
   ): Promise<PendingTransaction>
   proxyLock(proxyAddr: string, loanId: string): Promise<PendingTransaction>
-  proxyBorrowWithdraw(proxyAddr: string, loanId: string, amount:string, usr: string): Promise<PendingTransaction>
+  proxyBorrowWithdraw(proxyAddr: string, loanId: string, amount: string, usr: string): Promise<PendingTransaction>
 }
 
 export default ProxyActions
