@@ -11,6 +11,7 @@ import {
   BalanceSheetDiagram,
   BalanceSheetDiagramLeft,
   BalanceSheetMidLine,
+  BalanceSheetFiller,
   BalanceSheetDiagramRight,
   DividerTop,
   DividerBottom,
@@ -29,7 +30,7 @@ const PoolOverview: React.FC<Props> = () => {
       (pool.data as PoolDataV3).reserve &&
       (pool.data as PoolDataV3).netAssetValue.add((pool.data as PoolDataV3).reserve)) ||
     '0'
-  const dropRate = (pool.data?.senior?.interestRate) || '0'
+  const dropRate = pool.data?.senior?.interestRate || '0'
 
   const dropTotalValue =
     pool.data &&
@@ -112,6 +113,7 @@ const PoolOverview: React.FC<Props> = () => {
         <BalanceSheetDiagram direction="row">
           <BalanceSheetDiagramLeft>
             <BalanceSheetMidLine>&nbsp;</BalanceSheetMidLine>
+            <BalanceSheetFiller>&nbsp;</BalanceSheetFiller>
           </BalanceSheetDiagramLeft>
           <BalanceSheetDiagramRight>&nbsp;</BalanceSheetDiagramRight>
         </BalanceSheetDiagram>
@@ -151,7 +153,7 @@ const PoolOverview: React.FC<Props> = () => {
             <Heading level="5" margin={{ top: 'none', bottom: '28px', left: 'auto', right: 'auto' }}>
               TIN Risk Buffer
             </Heading>
-            <Box margin={{ horizontal: '20px' }}>
+            <Box margin={{ left: '20px' }}>
               <TINRatioBar current={currentJuniorRatio} min={minJuniorRatio} max={maxJuniorRatio} />
             </Box>
           </Box>

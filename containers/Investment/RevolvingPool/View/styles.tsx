@@ -63,11 +63,17 @@ export const BalanceSheetDiagram = styled(Box)`
 
 export const BalanceSheetDiagramLeft = styled(Box)`
   width: 50%;
+  display: flex;
+  flex-direction: column;
 `
 
 export const BalanceSheetMidLine = styled.div`
-  border-top: 1px solid #d8d8d8;
-  margin-top: 120%;
+  border-bottom: 1px solid #d8d8d8;
+  flex: 1;
+`
+
+export const BalanceSheetFiller = styled.div`
+  flex: 1;
 `
 
 export const BalanceSheetDiagramRight = styled(Box)`
@@ -78,7 +84,8 @@ export const BalanceSheetDiagramRight = styled(Box)`
   border-top: 1px solid #d8d8d8;
   width: 50%;
   height: 70%;
-  margin-top: 15%;
+  position: relative;
+  top: 15%;
 `
 
 export const DividerTop = styled.div`
