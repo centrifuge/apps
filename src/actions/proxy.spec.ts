@@ -39,8 +39,8 @@ describe('proxy tests', async () => {
     it('success: full loan cycle', async () => {
 
       await governanceTinlake.setMinimumJuniorRatio('0')
-      const ratio = await governanceTinlake.getMaxJuniorRatio()
-      assert.equal(ratio, 1000000000000000000000000000)
+      const ratio = await governanceTinlake.getMinJuniorRatio()
+      assert.equal(ratio.toString(), '0')
 
       await governanceTinlake.setMinimumEpochTime('1')
       const minimumEpochTime = await governanceTinlake.getMinimumEpochTime()
