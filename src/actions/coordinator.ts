@@ -1,6 +1,6 @@
 import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
 import { calculateOptimalSolution, State, OrderState, SolverSolution, SolverResult } from '../services/solver'
-import BN from 'BN.js'
+import BN from 'bn.js'
 const web3 = require('web3-utils')
 
 
