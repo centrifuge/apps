@@ -6,6 +6,10 @@ import BN from 'bn.js'
 export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IAnalyticsActions {
     // borrower analytics
+    getCurrentNAV = async (): Promise<BN> => {
+      return (await this.contract('FEED').currentNAV()).toBN()
+    }
+
     getTotalDebt = async (): Promise<BN> => {
       return (await this.contract('PILE').total()).toBN()
     }
@@ -147,6 +151,24 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return (await this.contract('SENIOR_TOKEN').totalSupply()).toBN()
     }
 
+    getSeniorPendingInvestments = async () => {
+      if (!this.existsSenior()) return new BN(0)
+      return (await this.contract('SENIOR_TRANCHE').totalSupply()).toBN()
+    }
+
+    getSeniorPendingRedemptions = async () => {
+      if (!this.existsSenior()) return new BN(0)
+      return (await this.contract('SENIOR_TRANCHE').totalRedeem()).toBN()
+    }
+
+    getJuniorPendingInvestments = async () => {
+      return (await this.contract('JUNIOR_TRANCHE').totalSupply()).toBN()
+    }
+
+    getJuniorPendingRedemptions = async () => {
+      return (await this.contract('JUNIOR_TRANCHE').totalRedeem()).toBN()
+    }
+
     getMaxSupplyAmountSenior = async (user: string) => {
       if (!this.existsSenior()) return new BN(0)
       return (await this.contract('TINLAKE_CURRENCY').balanceOf(user)).toBN()
@@ -165,7 +187,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
 
     getJuniorReserve = async () => {
       const seniorBalance = await this.getSeniorReserve()
-      const totalBalance = (await this.contract('ASSESSOR').maxReserve()).toBN()
+      const totalBalance = (await this.contract('RESERVE').totalBalance()).toBN()
       return totalBalance.sub(seniorBalance)
     }
 
@@ -210,6 +232,7 @@ const seniorToJuniorRatio = (seniorRatio: BN) => {
 }
 
 export type IAnalyticsActions = {
+  getNetAssetValue(): Promise<BN>
   getTotalDebt(): Promise<BN>
   getDebt(loanId: string): Promise<BN>
   loanCount(): Promise<BN>
@@ -239,6 +262,10 @@ export type IAnalyticsActions = {
   getCurrentJuniorRatio(): Promise<BN>
   getAssetValueJunior(): Promise<BN>
   getInvestor(user: string): Promise<Investor | undefined>
+  getSeniorPendingInvestments(): Promise<BN>
+  getSeniorPendingRedemptions(): Promise<BN>
+  getJuniorPendingInvestments(): Promise<BN>
+  getJuniorPendingRedemptions(): Promise<BN>
 }
 
 export default AnalyticsActions

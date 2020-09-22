@@ -14,6 +14,7 @@ import contractAbiActions from './Actions.abi.json'
 import contractAbiProxy from './Proxy.abi.json'
 import contractAbiProxyRegistry from './ProxyRegistry.abi.json'
 import contractAbiTranche from './Tranche.abi.json'
+import contractAbiReserve from './Reserve.abi.json'
 import contractAbiNFT from '../test/SimpleNFT.abi.json'
 import { ContractAbis } from '../../Tinlake'
 
@@ -36,6 +37,7 @@ export default {
   PROXY: contractAbiProxy,
   PROXY_REGISTRY: contractAbiProxyRegistry,
   ACTIONS: contractAbiActions,
+  RESERVE: contractAbiReserve,
   JUNIOR_OPERATOR: contractAbiOperator,
   SENIOR_OPERATOR: contractAbiOperator,
   JUNIOR_TRANCHE: contractAbiTranche,

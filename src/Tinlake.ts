@@ -18,6 +18,7 @@ const contractNames = [
   'ROOT_CONTRACT',
   'JUNIOR_TOKEN',
   'SENIOR_TOKEN',
+  'RESERVE',
   'PROXY',
   'PROXY_REGISTRY',
   'ACTIONS',
