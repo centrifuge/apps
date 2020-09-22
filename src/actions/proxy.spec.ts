@@ -43,12 +43,12 @@ describe('proxy tests', async () => {
       assert.equal(ratio, 1000000000000000000000000000)
 
       await governanceTinlake.setMinimumEpochTime('1')
-      const epoch = await governanceTinlake.getMinimumEpochTime()
-      assert.equal(epoch.toString(), '1')
+      const minimumEpochTime = await governanceTinlake.getMinimumEpochTime()
+      assert.equal(minimumEpochTime.toString(), '1')
 
       await governanceTinlake.setMinimumChallengeTime('1')
-      const challenge = await governanceTinlake.getChallengeTime()
-      assert.equal(challenge.toString(), '1')
+      const challengeTime = await governanceTinlake.getChallengeTime()
+      assert.equal(challengeTime.toString(), '1')
 
       // add governance address to memberlists
       await governanceTinlake.updateJuniorMemberList(contractAddresses['GOVERNANCE'], validityTimestamp)
@@ -180,7 +180,7 @@ async function redeemTranche(amount: string, tranche: string){
   }
 }
 
-async function fundTranche(amount: string, tranche: string) {
+async function fundTranche(amount: string, tranche: 'senior' | 'junior') {
 
   if (tranche === JUNIOR) {
     // make admin address ward on memberlist & whitelist lender address for tranche

@@ -137,6 +137,14 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return (await coordinator.minimumEpochTime()).toBN().toNumber()
     }
 
+    getSubmissionPeriod = async () => {
+      return (await this.contract('COORDINATOR').submissionPeriod())
+    }
+
+    getChallengeTime = async () => {
+      return (await this.contract('COORDINATOR').challengeTime()).toBN()
+    }
+
     getCurrentEpochState = async () => {
       const coordinator = this.contract('COORDINATOR')
 
@@ -172,6 +180,8 @@ export type ICoordinatorActions = {
   getLatestBlockTimestamp(): Promise<number>
   getLastEpochClosed(): Promise<number>
   getMinimumEpochTime(): Promise<number>
+  getSubmissionPeriod(): Promise<boolean>
+  getChallengeTime(): Promise<BN>
   getCurrentEpochState(): Promise<EpochState>
   setMinimumEpochTime(minEpochTime:string): Promise<PendingTransaction>
   setMinimumChallengeTime(minChallengeTime:string): Promise<PendingTransaction>

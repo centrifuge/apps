@@ -128,18 +128,6 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         this.contract('FEED').file(web3.fromAscii('maturityDate').padEnd(66, '0'), nftId, timestampSecs)
       )
     }
-
-    getSubmissionPeriod = async () => {
-      return (await this.contract('COORDINATOR').submissionPeriod())
-    }
-
-    getChallengeTime = async () => {
-      return (await this.contract('COORDINATOR').challengeTime()).toBN()
-    }
-
-    getMinimumEpochTime = async () => {
-      return (await this.contract('COORDINATOR').minimumEpochTime()).toBN()
-    }
   }
 }
 
@@ -163,9 +151,6 @@ export type IAdminActions = {
   getNftFeedId(registry: string, tokenId: string): Promise<string>
   getNftFeedValue(tokenId: string): Promise<BN>
   getNftMaturityDate(tokenId: string): Promise<BN>
-  getSubmissionPeriod(): Promise<boolean>
-  getChallengeTime(): Promise<BN>
-  getMinimumEpochTime(): Promise<BN>
 }
 
 export default AdminActions
