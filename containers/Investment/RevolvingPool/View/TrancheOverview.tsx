@@ -148,6 +148,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               {...props}
               setCard={setCard}
               disbursements={disbursements}
+              tokenPrice={tokenPrice}
               updateTrancheData={updateTrancheData}
             />
           )}

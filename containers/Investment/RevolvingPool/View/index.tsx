@@ -21,6 +21,9 @@ interface Props {
 export type EpochData = {
   id: number
   state: 'open' | 'can-be-closed' | 'in-challenge-period' | 'challenge-period-ended'
+  minimumEpochTime: number
+  lastEpochClosed: number
+  latestBlockTimestamp: number
 }
 
 const InvestmentsView: React.FC<Props> = (props: Props) => {
@@ -32,6 +35,9 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
     setEpochData({
       id: await props.tinlake.getCurrentEpochId(),
       state: await props.tinlake.getCurrentEpochState(),
+      minimumEpochTime: await props.tinlake.getMinimumEpochTime(),
+      lastEpochClosed: await props.tinlake.getLastEpochClosed(),
+      latestBlockTimestamp: await props.tinlake.getLatestBlockTimestamp(),
     })
   }
 

@@ -10,10 +10,21 @@ import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { SignIcon } from './styles'
+import { useInterval } from '../../../../utils/hooks'
 
 interface Props extends TransactionProps {
   epochData: EpochData
   tinlake: ITinlakeV3
+}
+
+const secondsToHms = (d: number) => {
+  const h = Math.floor(d / 3600)
+  const m = Math.floor((d % 3600) / 60)
+  const s = Math.floor((d % 3600) % 60)
+
+  const hDisplay = h > 0 ? h + (h == 1 ? ' hr' : ' hrs') : ''
+  const mDisplay = m > 0 ? m + (m == 1 ? ' min' : ' mins') : ''
+  return hDisplay + (hDisplay.length > 0 && mDisplay.length > 0 ? ', ' : '') + mDisplay
 }
 
 const EpochOverview: React.FC<Props> = (props: Props) => {
@@ -33,6 +44,12 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
 
   const disabled = status === 'unconfirmed' || status === 'pending'
 
+  const [timePassed, setTimePassed] = React.useState(0)
+
+  useInterval(() => {
+    setTimePassed(new Date().getTime() / 1000 - props.epochData.lastEpochClosed)
+  }, 1000)
+
   return (
     <Box direction="column">
       <Box width="420px" margin={{ top: 'small', bottom: 'medium' }}>
@@ -50,11 +67,11 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
             </TableRow>
             <TableRow>
               <TableCell scope="row">Time passed since start of current epoch</TableCell>
-              <TableCell style={{ textAlign: 'end' }}>5 hrs</TableCell>
+              <TableCell style={{ textAlign: 'end' }}>{secondsToHms(timePassed)}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell scope="row">Minimum epoch duration</TableCell>
-              <TableCell style={{ textAlign: 'end' }}>24 hrs</TableCell>
+              <TableCell style={{ textAlign: 'end' }}>{secondsToHms(props.epochData.minimumEpochTime)}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell scope="row">Pool Reserve current</TableCell>

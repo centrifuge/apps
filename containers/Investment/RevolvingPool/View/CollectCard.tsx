@@ -6,6 +6,7 @@ import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
 import { connect } from 'react-redux'
+import BN from 'bn.js'
 
 import { Description } from './styles'
 import { Card } from './TrancheOverview'
@@ -15,6 +16,7 @@ interface Props extends TransactionProps {
   tranche: 'senior' | 'junior'
   setCard: (card: Card) => void
   disbursements: any
+  tokenPrice: string
   tinlake: any
   updateTrancheData: () => void
 }
@@ -24,6 +26,22 @@ const CollectCard: React.FC<Props> = (props: Props) => {
   const token = type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'
 
   const [status, , setTxId] = useTransactionState()
+
+  // If it's a redeem order, then convert amount back into DROP/TIN
+  const settledAmount =
+    type === 'Invest'
+      ? props.disbursements.payoutTokenAmount
+      : new BN(props.disbursements.payoutCurrencyAmount)
+          // .div(new BN(props.tokenPrice))
+          // .div(new BN(10).pow(new BN(18)))
+          .toString()
+
+  const transactionValue = new BN(
+    type === 'Invest' ? props.disbursements.payoutTokenAmount : props.disbursements.payoutCurrencyAmount
+  )
+    .mul(new BN(props.tokenPrice))
+    .div(new BN(10).pow(new BN(18)))
+    .toString()
 
   const collect = async () => {
     const method = props.tranche === 'senior' ? 'disburseSenior' : 'disburseJunior'
@@ -45,7 +63,8 @@ const CollectCard: React.FC<Props> = (props: Props) => {
         {token} available for collection
       </Heading>
       <Description>
-        Your {token} {type.toLowerCase()} order has been executed.
+        Your {props.tranche === 'senior' ? 'DROP' : 'TIN'} {type.toLowerCase()} order has been executed. You need to
+        collect your tokens before you can submit new invest or redeem orders.
       </Description>
 
       <Table margin={{ top: 'medium' }}>
@@ -53,7 +72,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
           <TableRow>
             <TableCell scope="row">Type of transaction</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              {type} {token}
+              {type} {props.tranche === 'senior' ? 'DROP' : 'TIN'}
             </TableCell>
           </TableRow>
           {/* <TableRow>
@@ -63,27 +82,21 @@ const CollectCard: React.FC<Props> = (props: Props) => {
           <TableRow>
             <TableCell scope="row">Settled amount</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(
-                toPrecision(
-                  baseToDisplay(
-                    props.disbursements.payoutTokenAmount.isZero()
-                      ? props.disbursements.payoutCurrencyAmount
-                      : props.disbursements.payoutTokenAmount,
-                    18
-                  ),
-                  2
-                )
-              )}
+              {addThousandsSeparators(toPrecision(baseToDisplay(settledAmount, 18), 2))}
             </TableCell>
           </TableRow>
-          {/* <TableRow>
+          <TableRow>
             <TableCell scope="row">Settled token price</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>1.232</TableCell>
+            <TableCell style={{ textAlign: 'end' }}>
+              {addThousandsSeparators(toPrecision(baseToDisplay(props.tokenPrice, 27), 2))}
+            </TableCell>
           </TableRow>
           <TableRow>
             <TableCell scope="row">Transaction value</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>1321,523.00 DAI</TableCell>
-          </TableRow> */}
+            <TableCell style={{ textAlign: 'end' }}>
+              {addThousandsSeparators(toPrecision(baseToDisplay(transactionValue, 27), 2))} DAI
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
 
