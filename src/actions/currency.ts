@@ -72,6 +72,8 @@ export type ICurrencyActions = {
   approveJuniorForCurrency: (currencyAmount: string) => Promise<PendingTransaction | undefined>
   approveSeniorForToken: (tokenAmount: string) => Promise<PendingTransaction>
   approveJuniorForToken: (tokenAmount: string) => Promise<PendingTransaction>
+  getJuniorTokenBalance(usr: string): Promise<BN>
+  getSeniorTokenBalance(usr: string): Promise<BN>
 }
 
 export default CurrencyActions
