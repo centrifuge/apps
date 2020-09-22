@@ -29,7 +29,7 @@ const PoolOverview: React.FC<Props> = () => {
       (pool.data as PoolDataV3).reserve &&
       (pool.data as PoolDataV3).netAssetValue.add((pool.data as PoolDataV3).reserve)) ||
     '0'
-  const dropRate = (pool.data && pool.data.senior && pool.data.senior.interestRate) || '0'
+  const dropRate = (pool.data?.senior?.interestRate) || '0'
 
   const dropTotalValue =
     pool.data &&
