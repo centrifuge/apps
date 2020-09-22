@@ -123,13 +123,18 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return (await coordinator.currentEpoch()).toBN().toNumber()
     }
 
-    getCurrentEpochMinimumTimeEnd = async () => {
+    getLatestBlockTimestamp = async () => {
+      return (await this.provider.getBlock(await this.provider.getBlockNumber())).timestamp
+    }
+
+    getLastEpochClosed = async () => {
       const coordinator = this.contract('COORDINATOR')
+      return (await coordinator.lastEpochClosed()).toBN().toNumber()
+    }
 
-      const lastEpochClosed = (await coordinator.lastEpochClosed()).toBN().toNumber()
-      const minimumEpochTime = (await coordinator.minimumEpochTime()).toBN().toNumber()
-
-      return lastEpochClosed + minimumEpochTime
+    getMinimumEpochTime = async () => {
+      const coordinator = this.contract('COORDINATOR')
+      return (await coordinator.minimumEpochTime()).toBN().toNumber()
     }
 
     getCurrentEpochState = async () => {
@@ -164,7 +169,9 @@ export type ICoordinatorActions = {
   solveEpoch(): Promise<PendingTransaction>
   executeEpoch(): Promise<PendingTransaction>
   getCurrentEpochId(): Promise<number>
-  getCurrentEpochMinimumTimeEnd(): Promise<number>
+  getLatestBlockTimestamp(): Promise<number>
+  getLastEpochClosed(): Promise<number>
+  getMinimumEpochTime(): Promise<number>
   getCurrentEpochState(): Promise<EpochState>
   setMinimumEpochTime(minEpochTime:string): Promise<PendingTransaction>
   setMinimumChallengeTime(minChallengeTime:string): Promise<PendingTransaction>
