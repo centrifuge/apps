@@ -232,7 +232,7 @@ const seniorToJuniorRatio = (seniorRatio: BN) => {
 }
 
 export type IAnalyticsActions = {
-  getNetAssetValue(): Promise<BN>
+  getCurrentNAV(): Promise<BN>
   getTotalDebt(): Promise<BN>
   getDebt(loanId: string): Promise<BN>
   loanCount(): Promise<BN>
