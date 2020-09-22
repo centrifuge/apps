@@ -3,7 +3,6 @@ import { calculateOptimalSolution, State, OrderState, SolverSolution, SolverResu
 import BN from 'bn.js'
 const web3 = require('web3-utils')
 
-
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
     getEpochState = async () => {
@@ -42,11 +41,23 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
     }
 
     setMinimumEpochTime = async (minEpochTime: string) => {
-      return this.pending(this.contract('COORDINATOR').file(web3.fromAscii('minimumEpochTime').padEnd(66, '0'), minEpochTime, this.overrides))
+      return this.pending(
+        this.contract('COORDINATOR').file(
+          web3.fromAscii('minimumEpochTime').padEnd(66, '0'),
+          minEpochTime,
+          this.overrides
+        )
+      )
     }
 
     setMinimumChallengeTime = async (challengeTime: string) => {
-      return this.pending(this.contract('COORDINATOR').file(web3.fromAscii('challengeTime').padEnd(66, '0'), challengeTime, this.overrides))
+      return this.pending(
+        this.contract('COORDINATOR').file(
+          web3.fromAscii('challengeTime').padEnd(66, '0'),
+          challengeTime,
+          this.overrides
+        )
+      )
     }
 
     getOrderState = async () => {
@@ -138,7 +149,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
     }
 
     getSubmissionPeriod = async () => {
-      return (await this.contract('COORDINATOR').submissionPeriod())
+      return await this.contract('COORDINATOR').submissionPeriod()
     }
 
     getChallengeTime = async () => {
@@ -183,8 +194,8 @@ export type ICoordinatorActions = {
   getSubmissionPeriod(): Promise<boolean>
   getChallengeTime(): Promise<BN>
   getCurrentEpochState(): Promise<EpochState>
-  setMinimumEpochTime(minEpochTime:string): Promise<PendingTransaction>
-  setMinimumChallengeTime(minChallengeTime:string): Promise<PendingTransaction>
+  setMinimumEpochTime(minEpochTime: string): Promise<PendingTransaction>
+  setMinimumChallengeTime(minChallengeTime: string): Promise<PendingTransaction>
 }
 
 export default CoordinatorActions

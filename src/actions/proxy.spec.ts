@@ -18,7 +18,7 @@ const JUNIOR = 'junior'
 
 const juniorAmount = '300'
 const seniorAmount = '100'
-const amount = '100';
+const amount = '100'
 
 // valid until Sunday, 21 December 2025
 const validityTimestamp = Date.now() + 30 * 24 * 60 * 60 * 1000
@@ -37,7 +37,6 @@ describe('proxy tests', async () => {
 
   describe('borrow - lend - repay - redeem flow', async () => {
     it('success: full loan cycle', async () => {
-
       await governanceTinlake.setMinimumJuniorRatio('0')
       const ratio = await governanceTinlake.getMinJuniorRatio()
       assert.equal(ratio.toString(), '0')
@@ -66,15 +65,15 @@ describe('proxy tests', async () => {
       assert.equal(await borrowerTinlake.getNFTOwner(testConfig.nftRegistry, tokenId), proxyAddr)
 
       // set loan parameters and fund tranche
-      const loanId = await borrowerTinlake.nftLookup(testConfig.nftRegistry, tokenId);
+      const loanId = await borrowerTinlake.nftLookup(testConfig.nftRegistry, tokenId)
       const nftfeedId = await governanceTinlake.getNftFeedId(testConfig.nftRegistry, tokenId)
       await governanceTinlake.updateNftFeed(nftfeedId, amount)
       const nftValue = await governanceTinlake.getNftFeedValue(nftfeedId)
       assert.equal(nftValue.toString(), amount)
-      await governanceTinlake.setMaturityDate(nftfeedId,validityTimestamp)
+      await governanceTinlake.setMaturityDate(nftfeedId, validityTimestamp)
 
-      await fundTranche(juniorAmount, JUNIOR);
-      await fundTranche(seniorAmount, SENIOR);
+      await fundTranche(juniorAmount, JUNIOR)
+      await fundTranche(seniorAmount, SENIOR)
       const state = await governanceTinlake.getCurrentEpochState()
       assert.equal(state, 'can-be-closed')
 
@@ -87,10 +86,10 @@ describe('proxy tests', async () => {
       const principal = await borrowerTinlake.getPrincipal(loanId.toString())
       assert.equal(principal.toString(), amount)
 
-      const lockTx = await borrowerTinlake.proxyLock(proxyAddr, loanId);
+      const lockTx = await borrowerTinlake.proxyLock(proxyAddr, loanId)
       await verifyTransactionSuccess(lockTx)
 
-      const borrowTx = await borrowerTinlake.proxyBorrowWithdraw(proxyAddr, loanId, amount, borrowerAccount.address);
+      const borrowTx = await borrowerTinlake.proxyBorrowWithdraw(proxyAddr, loanId, amount, borrowerAccount.address)
       await verifyTransactionSuccess(borrowTx)
 
       const borrowerValue = await governanceTinlake.getCurrencyBalance(borrowerAccount.address)
@@ -99,23 +98,23 @@ describe('proxy tests', async () => {
       assert.equal(newReserveValue.toString(), initialReserveValue.sub(principal).toString());
 
       // fuel borrower with extra to cover loan interest, approve borrower proxy to take currency
-      const secondMintTx = await governanceTinlake.mintCurrency(borrowerAccount.address, amount);
+      const secondMintTx = await governanceTinlake.mintCurrency(borrowerAccount.address, amount)
       await governanceTinlake.getTransactionReceipt(secondMintTx)
 
-      const secondApproveTx = await borrowerTinlake.approveCurrency(proxyAddr, amount);
+      const secondApproveTx = await borrowerTinlake.approveCurrency(proxyAddr, amount)
       await borrowerTinlake.getTransactionReceipt(secondApproveTx)
 
       // repay
-      const repayTx = await borrowerTinlake.proxyRepayUnlockClose(proxyAddr, tokenId, loanId, testConfig.nftRegistry);
+      const repayTx = await borrowerTinlake.proxyRepayUnlockClose(proxyAddr, tokenId, loanId, testConfig.nftRegistry)
       await verifyTransactionSuccess(repayTx)
 
       // borrower should be owner of collateral NFT again
       // reserve balance should be back to pre-borrow amount
-      const owner = await governanceTinlake.getNFTOwner(testConfig.nftRegistry, tokenId);
-      assert.equal(ethers.utils.getAddress(owner.toString()), ethers.utils.getAddress(borrowerAccount.address));
+      const owner = await governanceTinlake.getNFTOwner(testConfig.nftRegistry, tokenId)
+      assert.equal(ethers.utils.getAddress(owner.toString()), ethers.utils.getAddress(borrowerAccount.address))
 
-      const finalReserveValue = await borrowerTinlake.getCurrencyBalance(contractAddresses['RESERVE']);
-      assert.equal(initialReserveValue.toString(), finalReserveValue.toString());
+      const finalReserveValue = await borrowerTinlake.getCurrencyBalance(contractAddresses['RESERVE'])
+      assert.equal(initialReserveValue.toString(), finalReserveValue.toString())
 
       await redeemTranche(seniorAmount, SENIOR)
     })
@@ -128,14 +127,14 @@ async function verifyTransactionSuccess(transaction: any) {
   assert.equal(transactionResult.status, SUCCESS_STATUS)
 }
 
-async function redeemTranche(amount: string, tranche: string){
+async function redeemTranche(amount: string, tranche: string) {
   if (tranche === JUNIOR) {
     // first call disburse in case there are outstanding orders
     const jrDisburseTx = await lenderTinlake.disburseJunior()
     await verifyTransactionSuccess(jrDisburseTx)
 
     // approve tranche to take investment tokens
-    const transferTx = await lenderTinlake.approveJuniorForToken(juniorAmount);
+    const transferTx = await lenderTinlake.approveJuniorForToken(juniorAmount)
     await verifyTransactionSuccess(transferTx)
 
     const redeemJunior = await lenderTinlake.submitJuniorRedeemOrder(juniorAmount)
@@ -150,7 +149,6 @@ async function redeemTranche(amount: string, tranche: string){
     assert.equal(jrCalc2.payoutTokenAmount, 0)
     const juniorTokenBalance2 = await governanceTinlake.getJuniorTokenBalance(lenderAccount.address)
     assert.equal(juniorTokenBalance2, 0)
-
   } else if (tranche === SENIOR) {
     // first call disburse in case there are outstanding orders
     const srCalc = await governanceTinlake.calcSeniorDisburse(lenderAccount.address)
@@ -162,7 +160,7 @@ async function redeemTranche(amount: string, tranche: string){
     assert.equal(seniorTokenBalance.toString(), seniorAmount)
 
     // approve tranche to take investment tokens
-    const transferTx = await lenderTinlake.approveSeniorForToken(seniorAmount);
+    const transferTx = await lenderTinlake.approveSeniorForToken(seniorAmount)
     await verifyTransactionSuccess(transferTx)
 
     const redeemSenior = await lenderTinlake.submitSeniorRedeemOrder(seniorAmount)
@@ -181,7 +179,6 @@ async function redeemTranche(amount: string, tranche: string){
 }
 
 async function fundTranche(amount: string, tranche: 'senior' | 'junior') {
-
   if (tranche === JUNIOR) {
     // make admin address ward on memberlist & whitelist lender address for tranche
     const whitelistTx = await governanceTinlake.updateJuniorMemberList(lenderAccount.address, validityTimestamp)
@@ -197,9 +194,7 @@ async function fundTranche(amount: string, tranche: 'senior' | 'junior') {
     // lender supplies tranche with funds
     const supplyTx = await lenderTinlake.submitJuniorSupplyOrder(amount)
     await verifyTransactionSuccess(supplyTx)
-
   } else if (tranche === SENIOR) {
-
     // make admin address ward on memberlist & whitelist lender address for tranche
     const whitelistTx = await governanceTinlake.updateSeniorMemberList(lenderAccount.address, validityTimestamp)
     await verifyTransactionSuccess(whitelistTx)
