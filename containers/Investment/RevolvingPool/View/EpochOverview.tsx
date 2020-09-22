@@ -111,7 +111,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               <TableRow>
                 <TableCell scope="row">
                   <Box direction="row">
-                    <SignIcon src={`../../../../static/plus.svg`} />
+                    <SignIcon src={`/static/plus.svg`} />
                     Investments DROP Tranche
                   </Box>
                 </TableCell>
@@ -125,7 +125,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               <TableRow>
                 <TableCell scope="row">
                   <Box direction="row">
-                    <SignIcon src={`../../../../static/plus.svg`} />
+                    <SignIcon src={`/static/plus.svg`} />
                     Investments TIN Tranche
                   </Box>
                 </TableCell>
@@ -153,7 +153,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               <TableRow>
                 <TableCell scope="row">
                   <Box direction="row">
-                    <SignIcon src={`../../../../static/min.svg`} />
+                    <SignIcon src={`/static/min.svg`} />
                     Redemptions DROP Tranche
                   </Box>
                 </TableCell>
@@ -167,7 +167,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               <TableRow>
                 <TableCell scope="row">
                   <Box direction="row">
-                    <SignIcon src={`../../../../static/min.svg`} />
+                    <SignIcon src={`/static/min.svg`} />
                     Redemptions TIN Tranche
                   </Box>
                 </TableCell>

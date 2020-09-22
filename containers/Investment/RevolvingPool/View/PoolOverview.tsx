@@ -99,7 +99,7 @@ const PoolOverview: React.FC<Props> = () => {
               <TableRow>
                 <TableCell scope="row">
                   <span>
-                    <TokenLogo src={`../../../../static/DROP_final.svg`} />
+                    <TokenLogo src={`/static/DROP_final.svg`} />
                     DROP APR
                   </span>
                 </TableCell>
@@ -120,7 +120,7 @@ const PoolOverview: React.FC<Props> = () => {
           <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'small' }}>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
-                <TokenLogo src={`../../../../static/DROP_final.svg`} />
+                <TokenLogo src={`/static/DROP_final.svg`} />
                 DROP Value
               </Heading>
               <Box margin={{ left: 'auto' }}>
@@ -163,7 +163,7 @@ const PoolOverview: React.FC<Props> = () => {
           <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
-                <TokenLogo src={`../../../../static/TIN_final.svg`} />
+                <TokenLogo src={`/static/TIN_final.svg`} />
                 TIN Value
               </Heading>
               <Box margin={{ left: 'auto' }}>

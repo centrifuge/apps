@@ -99,7 +99,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
     <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
       <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
         <Heading level="5" margin={'0'}>
-          <TokenLogo src={`../../../../static/${token}_final.svg`} />
+          <TokenLogo src={`/static/${token}_final.svg`} />
           {token} Balance
         </Heading>
         <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
