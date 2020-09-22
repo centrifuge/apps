@@ -21,7 +21,7 @@ const seniorAmount = '100'
 const amount = '100'
 
 // valid until Sunday, 21 December 2025
-const validityTimestamp = 1766327170
+const validityTimestamp = Date.now() + 30 * 24 * 60 * 60 * 1000
 
 describe('proxy tests', async () => {
   before(async () => {
@@ -38,8 +38,8 @@ describe('proxy tests', async () => {
   describe('borrow - lend - repay - redeem flow', async () => {
     it('success: full loan cycle', async () => {
       await governanceTinlake.setMinimumJuniorRatio('0')
-      const ratio = await governanceTinlake.getMaxJuniorRatio()
-      assert.equal(ratio, 1000000000000000000000000000)
+      const ratio = await governanceTinlake.getMinJuniorRatio()
+      assert.equal(ratio.toString(), '0')
 
       await governanceTinlake.setMinimumEpochTime('1')
       const minimumEpochTime = await governanceTinlake.getMinimumEpochTime()
@@ -94,8 +94,8 @@ describe('proxy tests', async () => {
 
       const borrowerValue = await governanceTinlake.getCurrencyBalance(borrowerAccount.address)
       const newReserveValue = await governanceTinlake.getCurrencyBalance(contractAddresses['RESERVE'])
-      // assert.equal(borrowerValue.toString(), principal.toString())
-      // assert.equal(newReserveValue.toString(), initialReserveValue.sub(principal).toString());
+      assert.equal(borrowerValue.toString(), principal.toString())
+      assert.equal(newReserveValue.toString(), initialReserveValue.sub(principal).toString());
 
       // fuel borrower with extra to cover loan interest, approve borrower proxy to take currency
       const secondMintTx = await governanceTinlake.mintCurrency(borrowerAccount.address, amount)
