@@ -3,8 +3,10 @@ import { Box, Button } from 'grommet'
 import { TokenInput } from '@centrifuge/axis-token-input'
 import { Pool } from '../../../../config'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
-import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
+import { ITinlake as ITinlakeV3, baseToDisplay } from '@centrifuge/tinlake-js-v3'
 import { connect } from 'react-redux'
+import { Decimal } from 'decimal.js-light'
+import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 
 import { Description } from './styles'
 import { Card } from './TrancheOverview'
@@ -37,8 +39,11 @@ const InvestCard: React.FC<Props> = (props: Props) => {
   const [status, , setTxId] = useTransactionState()
 
   const submit = async () => {
+    const valueToDecimal = new Decimal(baseToDisplay(daiValue, 18)).toFixed(2)
+    const formatted = addThousandsSeparators(valueToDecimal.toString())
+
     const method = props.tranche === 'senior' ? 'submitSeniorSupplyOrder' : 'submitJuniorSupplyOrder'
-    const txId = await props.createTransaction(`${token} Invest`, method, [props.tinlake, daiValue])
+    const txId = await props.createTransaction(`${token} Invest ${formatted} DAI`, method, [props.tinlake, daiValue])
     setTxId(txId)
   }
 
