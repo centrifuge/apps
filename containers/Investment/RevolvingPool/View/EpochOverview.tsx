@@ -122,13 +122,13 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
           <Table>
             <TableBody>
               <TableRow>
-                <TableCell scope="row">
+                <TableCell scope="row" border={{ color: 'transparent' }}>
                   <Box direction="row">
                     <SignIcon src={`/static/plus.svg`} />
                     Investments DROP Tranche
                   </Box>
                 </TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
+                <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior?.pendingInvestments!, 18), 2))} DAI
                 </TableCell>
               </TableRow>
@@ -158,13 +158,13 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
           <Table>
             <TableBody>
               <TableRow>
-                <TableCell scope="row">
+                <TableCell scope="row" border={{ color: 'transparent' }}>
                   <Box direction="row">
                     <SignIcon src={`/static/min.svg`} />
                     Redemptions DROP Tranche
                   </Box>
                 </TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
+                <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior?.pendingRedemptions!, 18), 2))}{' '}
                   DROP
                 </TableCell>

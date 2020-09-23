@@ -116,8 +116,10 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell scope="row">Your {token} Value</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>
+            <TableCell scope="row" border={{ color: 'transparent' }}>
+              Your {token} Value
+            </TableCell>
+            <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
               {addThousandsSeparators(toPrecision(baseToDisplay(value, 18), 2))} DAI
             </TableCell>
           </TableRow>

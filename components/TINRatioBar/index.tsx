@@ -20,7 +20,7 @@ export const TINRatioBar: React.FC<Props> = (props: Props) => {
       },
     },
     {
-      width: props.current * 100 - (100 - props.max * 100),
+      width: 100 - props.current * 100 - (100 - props.max * 100),
       backgroundColor: '#0828BE',
       separator: {
         text: `Current: ${Math.round(props.current * 100)}%`,
@@ -29,7 +29,7 @@ export const TINRatioBar: React.FC<Props> = (props: Props) => {
       },
     },
     {
-      width: 100 - props.min * 100 - props.current * 100 - (100 - props.max * 100),
+      width: 100 - props.min * 100 - (100 - props.current * 100) - (100 - props.max * 100),
       backgroundColor: '#D8D8D8',
       separator: {
         text: `Min: ${Math.round(props.min * 100)}%`,

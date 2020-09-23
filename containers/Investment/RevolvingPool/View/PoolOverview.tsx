@@ -88,13 +88,15 @@ const PoolOverview: React.FC<Props> = () => {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell scope="row">
+              <TableCell scope="row" border={{ color: 'transparent' }}>
                 <span>
                   <TokenLogo src={`/static/DROP_final.svg`} />
                   DROP APR
                 </span>
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }}>{toPrecision(feeToInterestRate(dropRate), 2)} %</TableCell>
+              <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+                {toPrecision(feeToInterestRate(dropRate), 2)} %
+              </TableCell>
             </TableRow>
           </TableBody>
         </Table>
