@@ -8,8 +8,10 @@ import { ensureAuthed } from '../../../ducks/auth'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 import { Decimal } from 'decimal.js-light'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { Pool } from '../../../config'
 
 interface Props extends TransactionProps {
+  pool: Pool
   loan: Loan
   tinlake: any
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>
@@ -55,7 +57,7 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
             suffix=" DAI"
             precision={18}
             onValueChange={({ value }) => setRepayAmount(displayToBase(value, 18))}
-            disabled
+            disabled={!props.pool.partialRepay}
           />
         </FormField>
       </Box>
