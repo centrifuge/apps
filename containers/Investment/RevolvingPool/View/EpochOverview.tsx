@@ -16,6 +16,7 @@ import BN from 'bn.js'
 interface Props extends TransactionProps {
   epochData: EpochData
   tinlake: ITinlakeV3
+  auth?: AuthState
 }
 
 const secondsToHms = (d: number) => {
@@ -34,12 +35,12 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   const [status, , setTxId] = useTransactionState()
 
   const solve = async () => {
-    const txId = await props.createTransaction(`Close epoch`, 'solveEpoch', [props.tinlake])
+    const txId = await props.createTransaction(`Close epoch ${props.epochData.id}`, 'solveEpoch', [props.tinlake])
     setTxId(txId)
   }
 
   const execute = async () => {
-    const txId = await props.createTransaction(`Execute epoch`, 'executeEpoch', [props.tinlake])
+    const txId = await props.createTransaction(`Execute epoch ${props.epochData.id}`, 'executeEpoch', [props.tinlake])
     setTxId(txId)
   }
 
@@ -68,6 +69,8 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
     : new BN(0)
 
   const totalRedemptionsCurrency = juniorRedemptionsCurrency.add(seniorRedemptionsCurrency)
+
+  const isAdmin = props.auth?.permissions?.canSetMinimumJuniorRatio
 
   return (
     <Box direction="column">
@@ -101,18 +104,20 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
           </TableBody>
         </Table>
 
-        <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-          {props.epochData.state === 'can-be-closed' && (
-            <Button label="Close epoch" primary onClick={solve} disabled={disabled} />
-          )}
-          {props.epochData.state === 'challenge-period-ended' && (
-            <Button label="Execute orders" primary onClick={execute} disabled={disabled} />
-          )}
-        </Box>
+        {isAdmin && (
+          <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+            {props.epochData.state === 'can-be-closed' && (
+              <Button label={`Close epoch ${props.epochData.id}`} primary onClick={solve} disabled={disabled} />
+            )}
+            {props.epochData.state === 'challenge-period-ended' && (
+              <Button label={`Execute epoch ${props.epochData.id}`} primary onClick={execute} disabled={disabled} />
+            )}
+          </Box>
+        )}
       </Box>
 
       {poolData?.senior && (
-        <Box width="420px" margin={{ bottom: 'medium' }}>
+        <Box width="420px" margin={{ top: 'medium', bottom: 'medium' }}>
           <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
             <Heading level="5" margin={'0'}>
               Total Locked Orders
