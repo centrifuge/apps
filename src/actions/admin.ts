@@ -144,6 +144,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 export type IAdminActions = {
   isWard(user: string, contractName: ContractName): Promise<BN>
   canUpdateNftFeed(user: string): Promise<boolean>
+  canSetRiskScore(user: string): Promise<boolean>
   canSetSeniorTrancheInterest(user: string): Promise<boolean>
   canSetMinimumJuniorRatio(user: string): Promise<boolean>
   canAddToJuniorMemberList(user: string): Promise<boolean>
