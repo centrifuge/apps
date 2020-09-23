@@ -95,7 +95,7 @@ describe('proxy tests', async () => {
       const borrowerValue = await governanceTinlake.getCurrencyBalance(borrowerAccount.address)
       const newReserveValue = await governanceTinlake.getCurrencyBalance(contractAddresses['RESERVE'])
       assert.equal(borrowerValue.toString(), principal.toString())
-      assert.equal(newReserveValue.toString(), initialReserveValue.sub(principal).toString());
+      assert.equal(newReserveValue.toString(), initialReserveValue.sub(principal).toString())
 
       // fuel borrower with extra to cover loan interest, approve borrower proxy to take currency
       const secondMintTx = await governanceTinlake.mintCurrency(borrowerAccount.address, amount)

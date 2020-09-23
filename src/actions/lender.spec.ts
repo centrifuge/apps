@@ -1,5 +1,5 @@
 import assert from 'assert'
-import {ethers, Wallet} from 'ethers';
+import { ethers, Wallet } from 'ethers'
 import testConfig from '../test/config'
 import { ITinlake } from '../types/tinlake'
 import { createTinlake, TestProvider } from '../test/utils'
@@ -96,10 +96,7 @@ describe.skip('lender functions', async () => {
       initialTrancheCurrencyBalance.sub(new BN(tokenAmount)).toString(),
       newTrancheCurrencyBalance.toString()
     )
-    assert.equal(
-      initialLenderCurrencyBalance.add(new BN(tokenAmount)).toString(),
-      newLenderCurrencyBalance.toString()
-    )
+    assert.equal(initialLenderCurrencyBalance.add(new BN(tokenAmount)).toString(), newLenderCurrencyBalance.toString())
     assert.equal(tokenAmount, initialJuniorTokenBalance.sub(newJuniorTokenBalance).toString())
   })
 

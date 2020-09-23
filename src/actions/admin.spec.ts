@@ -33,11 +33,7 @@ describe.skip('admin tests', async () => {
       const maxToken = '1'
 
       // set allowance for lender address
-      const allowanceTx = await adminTinlake.approveAllowanceJunior(
-        lenderAccount.address,
-        maxCurrency,
-        maxToken
-      )
+      const allowanceTx = await adminTinlake.approveAllowanceJunior(lenderAccount.address, maxCurrency, maxToken)
       const allowanceResult = await allowanceTx.receipt()
 
       const maxSupplyAmount = await adminTinlake.getMaxSupplyAmountJunior(lenderAccount.address)
