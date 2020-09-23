@@ -48,7 +48,7 @@
     "@centrifuge/axis-token-input": "0.4.1-develop.131",
     "@centrifuge/axis-utils": "0.4.2-develop.109",
     "@centrifuge/axis-web3-wallet": "0.0.3-develop.121",
-    "@centrifuge/tinlake-js": "0.0.19-develop.20",
+    "@centrifuge/tinlake-js": "0.0.19-develop.21",
     "@centrifuge/tinlake-js-v3": "npm:@centrifuge/tinlake-js@3.0.0-develop.5",
     "@sendgrid/mail": "7.1.1",
     "@types/node-fetch": "2.5.7",
@@ -74,7 +74,7 @@
     "redux": "4.0.5",
     "redux-thunk": "2.3.0",
     "styled-components": "5.1.1",
-    "tinlake-pool-config": "github:centrifuge/tinlake-pool-config#e6c5c2118afce01627cdfba0370bae5351d1f464",
+    "tinlake-pool-config": "github:centrifuge/tinlake-pool-config#4502a89e1732bb36c0e4ac453ae937c04d89b0e2",
     "web3-utils": "1.2.7",
     "yup": "0.28.5"
   },
