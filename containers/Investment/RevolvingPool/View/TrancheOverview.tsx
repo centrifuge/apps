@@ -7,7 +7,7 @@ import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators
 import BN from 'bn.js'
 import { EpochData } from './index'
 import { useDispatch, useSelector } from 'react-redux'
-import { loadPools } from '../../../../ducks/pools'
+import { loadPool } from '../../../../ducks/pool'
 
 import InvestCard from './InvestCard'
 import RedeemCard from './RedeemCard'
@@ -50,7 +50,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   // V3 TODO: this should probably move to actions and expose a single TrancheData object (or to a duck?)
   const updateTrancheData = async () => {
-    dispatch(loadPools())
+    dispatch(loadPool(props.tinlake))
 
     if (address) {
       const isInMemberlist =

@@ -11,6 +11,7 @@ import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { SignIcon } from './styles'
 import { useInterval } from '../../../../utils/hooks'
+import BN from 'bn.js'
 
 interface Props extends TransactionProps {
   epochData: EpochData
@@ -28,6 +29,7 @@ const secondsToHms = (d: number) => {
 
 const EpochOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
+  const poolData = pool?.data as PoolDataV3 | undefined
 
   const [status, , setTxId] = useTransactionState()
 
@@ -49,10 +51,23 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
     setTimePassed(new Date().getTime() / 1000 - props.epochData.lastEpochClosed)
   }, 1000)
 
-  // const totalPendingInvestments =
-  //   pool.data && (pool.data as PoolDataV3).senior
-  //     ? (pool.data as PoolDataV3).junior?.pendingInvestments!.add((pool.data as PoolDataV3).senior?.pendingInvestments!)
-  //     : new BN(0)
+  const totalPendingInvestments = poolData?.senior
+    ? poolData?.junior?.pendingInvestments!.add(poolData?.senior?.pendingInvestments!)
+    : new BN(0)
+
+  const juniorRedemptionsCurrency = poolData?.junior?.tokenPrice
+    ? new BN(poolData.junior.pendingRedemptions || 0)
+        .mul(new BN(poolData.junior.tokenPrice))
+        .div(new BN(10).pow(new BN(27)))
+    : new BN(0)
+
+  const seniorRedemptionsCurrency = poolData?.senior?.tokenPrice
+    ? new BN(poolData.senior.pendingRedemptions || 0)
+        .mul(new BN(poolData.senior.tokenPrice))
+        .div(new BN(10).pow(new BN(27)))
+    : new BN(0)
+
+  const totalRedemptionsCurrency = juniorRedemptionsCurrency.add(seniorRedemptionsCurrency)
 
   return (
     <Box direction="column">
@@ -80,9 +95,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
             <TableRow>
               <TableCell scope="row">Pool Reserve current</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                {pool.data &&
-                  addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).reserve, 18), 2))}{' '}
-                DAI
+                {poolData && addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve, 18), 2))} DAI
               </TableCell>
             </TableRow>
           </TableBody>
@@ -98,7 +111,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         </Box>
       </Box>
 
-      {pool.data && (pool.data as PoolDataV3).senior && (
+      {poolData?.senior && (
         <Box width="420px" margin={{ bottom: 'medium' }}>
           <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
             <Heading level="5" margin={'0'}>
@@ -116,10 +129,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                   </Box>
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  {addThousandsSeparators(
-                    toPrecision(baseToDisplay((pool.data as PoolDataV3).senior?.pendingInvestments!, 18), 2)
-                  )}{' '}
-                  DAI
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior?.pendingInvestments!, 18), 2))} DAI
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -130,20 +140,17 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                   </Box>
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  {addThousandsSeparators(
-                    toPrecision(baseToDisplay((pool.data as PoolDataV3).junior?.pendingInvestments!, 18), 2)
-                  )}{' '}
-                  DAI
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior?.pendingInvestments!, 18), 2))} DAI
                 </TableCell>
               </TableRow>
-              {/* <TableRow>
+              <TableRow>
                 <TableCell scope="row">
                   <Box direction="row">Total Pending Investments</Box>
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(totalPendingInvestments, 18), 2))} DAI
                 </TableCell>
-              </TableRow> */}
+              </TableRow>
             </TableBody>
           </Table>
           <br />
@@ -158,9 +165,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                   </Box>
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  {addThousandsSeparators(
-                    toPrecision(baseToDisplay((pool.data as PoolDataV3).senior?.pendingRedemptions!, 18), 2)
-                  )}{' '}
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior?.pendingRedemptions!, 18), 2))}{' '}
                   DROP
                 </TableCell>
               </TableRow>
@@ -172,10 +177,15 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                   </Box>
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  {addThousandsSeparators(
-                    toPrecision(baseToDisplay((pool.data as PoolDataV3).junior?.pendingRedemptions!, 18), 2)
-                  )}{' '}
-                  TIN
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior?.pendingRedemptions!, 18), 2))} TIN
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell scope="row">
+                  <Box direction="row">Estimated Total Pending Redemptions in DAI</Box>
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(totalRedemptionsCurrency, 18), 2))} DAI
                 </TableCell>
               </TableRow>
             </TableBody>

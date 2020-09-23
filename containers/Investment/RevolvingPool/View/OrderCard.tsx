@@ -30,7 +30,6 @@ const OrderCard: React.FC<Props> = (props: Props) => {
 
   const [confirmCancellation, setConfirmCancellation] = React.useState(false)
 
-  // V3 TODO: handle redeem
   const lockedValue =
     props.disbursements &&
     !(props.disbursements.remainingSupplyCurrency.isZero() && props.disbursements.remainingRedeemToken.isZero())
