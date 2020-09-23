@@ -8,9 +8,11 @@ import { AuthState, loadProxies, ensureAuthed } from '../../../ducks/auth'
 import { NFT } from '@centrifuge/tinlake-js'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 import { getNFT as getNFTAction } from '../../../services/tinlake/actions'
+import { Pool } from '../../../config'
 
 interface Props extends TransactionProps {
   tinlake: any
+  pool: Pool
   tokenId: string
   registry: string
   auth: AuthState
@@ -130,7 +132,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
         {loanId ? (
           <Box margin={{ bottom: 'medium', top: 'large' }}>
             {' '}
-            <LoanView tinlake={props.tinlake} loanId={loanId} />
+            <LoanView tinlake={props.tinlake} pool={props.pool} loanId={loanId} />
           </Box>
         ) : (
           <Box>

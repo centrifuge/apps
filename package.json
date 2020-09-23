@@ -74,7 +74,7 @@
     "redux": "4.0.5",
     "redux-thunk": "2.3.0",
     "styled-components": "5.1.1",
-    "tinlake-pool-config": "github:centrifuge/tinlake-pool-config#3170151e6256e4883f508e0a5281ab3b3f3d8e74",
+    "tinlake-pool-config": "github:centrifuge/tinlake-pool-config#e6c5c2118afce01627cdfba0370bae5351d1f464",
     "web3-utils": "1.2.7",
     "yup": "0.28.5"
   },

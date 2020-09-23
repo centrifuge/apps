@@ -42,6 +42,7 @@ export interface Pool extends PoolI {
   }
   description?: string
   investHtml?: string
+  partialRepay?: boolean
 }
 
 export interface DisplayedField {
@@ -126,6 +127,7 @@ const poolSchema = yup.object().shape({
       link: yup.string(),
     })
   ),
+  partialRepay: yup.bool(),
 })
 
 const upcomingPoolSchema = yup.object().shape({
