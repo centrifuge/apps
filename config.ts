@@ -206,7 +206,7 @@ const config: Config = {
   gasLimit: yup
     .number()
     .required('gasLimit is required')
-    .validateSync('2000000'),
+    .validateSync('7000000'),
 }
 
 export default config
