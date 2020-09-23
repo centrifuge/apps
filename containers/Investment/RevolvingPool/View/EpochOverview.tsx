@@ -5,6 +5,7 @@ import { createTransaction, useTransactionState, TransactionProps } from '../../
 import { connect } from 'react-redux'
 import { EpochData } from './index'
 import { useSelector } from 'react-redux'
+import { AuthState } from '../../../../ducks/auth'
 import { PoolDataV3, PoolState } from '../../../../ducks/pool'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
