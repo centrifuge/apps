@@ -14,7 +14,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
 
     getSeniorTokenAllowance = async (owner: string) => {
       return (
-        await this.contract('SENIOR_TOKEN').allowance(owner, this.contractAddresses['SENIOR_TRANCHE'], this.overrides)
+        await this.contract('SENIOR_TOKEN').allowance(owner, this.contractAddresses['SENIOR_TRANCHE'])
       ).toBN()
     }
 
@@ -35,7 +35,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
 
     getJuniorTokenAllowance = async (owner: string) => {
       return (
-        await this.contract('JUNIOR_TOKEN').allowance(owner, this.contractAddresses['JUNIOR_TRANCHE'], this.overrides)
+        await this.contract('JUNIOR_TOKEN').allowance(owner, this.contractAddresses['JUNIOR_TRANCHE'])
       ).toBN()
     }
 
