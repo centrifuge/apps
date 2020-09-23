@@ -119,6 +119,18 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))
     }
 
+    proxyRepay = async (proxyAddress: string, loanId: string, amount: string) => {
+      const proxy = this.contract('PROXY', proxyAddress)
+      const encoded = this.contract('ACTIONS').interface.functions.repay.encode([
+        this.contract('SHELF').address,
+        this.contract('TINLAKE_CURRENCY').address,
+        loanId,
+        amount
+      ])
+
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
+    }
+
     proxyRepayUnlockClose = async (proxyAddress: string, tokenId: string, loanId: string, registry: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
       const encoded = this.contract('ACTIONS').interface.functions.repayUnlockClose.encode([
