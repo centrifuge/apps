@@ -15,7 +15,7 @@ interface Props {
   tinlake: any
   loanId?: string
   loans?: LoansState
-  pool: Pool
+  poolConfig: Pool
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>
   auth?: AuthState
   transactions?: TransactionState
@@ -31,7 +31,7 @@ class LoanView extends React.Component<Props> {
   }
 
   render() {
-    const { pool, loans, loanId, tinlake, auth } = this.props
+    const { poolConfig, loans, loanId, tinlake, auth } = this.props
     const { loan, loanState } = loans!
     if (loanState === null || loanState === 'loading') {
       return null
@@ -61,7 +61,7 @@ class LoanView extends React.Component<Props> {
                 </Box>
                 <Box direction="row">
                   <LoanBorrow loan={loan!} tinlake={tinlake} />
-                  <LoanRepay pool={pool} loan={loan!} tinlake={tinlake} />
+                  <LoanRepay poolConfig={poolConfig} loan={loan!} tinlake={tinlake} />
                 </Box>
               </Box>
             )}

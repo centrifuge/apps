@@ -17,13 +17,14 @@ export function initTinlake({
   addresses,
   contractConfig,
 }: { version?: 2 | 3; addresses?: ContractAddresses | null; contractConfig?: any | null } = {}): ITinlake | ITinlakeV3 {
-  if (tinlake === null || version != tinlake.version) {
+  if (tinlake === null || version !== tinlake.version) {
     const { transactionTimeout } = config
     const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
     const overrides = config.network === 'Kovan' ? { gasLimit: config.gasLimit } : {}
 
-    if (version === 2) tinlake = (new Tinlake({ transactionTimeout, overrides, provider: rpcProvider }) as unknown) as ITinlake
-    else tinlake = new TinlakeV3({ transactionTimeout, overrides, provider: rpcProvider })
+    if (version === 2) {
+      tinlake = (new Tinlake({ transactionTimeout, overrides, provider: rpcProvider }) as unknown) as ITinlake
+    } else tinlake = new TinlakeV3({ transactionTimeout, overrides, provider: rpcProvider })
   }
 
   let resetContractAddresses = false
