@@ -25,7 +25,7 @@ const secondsToHms = (d: number) => {
   const m = Math.floor((d % 3600) / 60)
 
   const hDisplay = h > 0 ? h + (h == 1 ? ' hr' : ' hrs') : ''
-  const mDisplay = m > 0 ? m + (m == 1 ? ' min' : ' mins') : ''
+  const mDisplay = m > 0 ? m + (m == 1 ? ' min' : ' mins') : h > 0 ? '' : '0 min'
   return hDisplay + (hDisplay.length > 0 && mDisplay.length > 0 ? ', ' : '') + mDisplay
 }
 
@@ -97,9 +97,15 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               <TableCell style={{ textAlign: 'end' }}>{secondsToHms(props.epochData.minimumEpochTime)}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell scope="row">Pool Reserve current</TableCell>
+              <TableCell scope="row">Current Reserve</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                {poolData && addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve, 18), 2))} DAI
+                {poolData && addThousandsSeparators(toPrecision(baseToDisplay(poolData.reserve, 18), 2))} DAI
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell scope="row">Maximum Reserve Amount</TableCell>
+              <TableCell style={{ textAlign: 'end' }}>
+                {poolData && addThousandsSeparators(toPrecision(baseToDisplay(poolData.maxReserve, 18), 2))} DAI
               </TableCell>
             </TableRow>
           </TableBody>
