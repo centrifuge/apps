@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Box, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
-import { connect, useSelector } from 'react-redux'
-import { loadPool, PoolDataV3, PoolState } from '../../../../ducks/pool'
+import { useSelector } from 'react-redux'
+import { PoolDataV3, PoolState } from '../../../../ducks/pool'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
@@ -170,4 +170,4 @@ const PoolOverview: React.FC<Props> = () => {
   ) : null
 }
 
-export default connect((state) => state, { loadPool })(PoolOverview)
+export default PoolOverview

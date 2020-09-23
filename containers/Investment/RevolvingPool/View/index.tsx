@@ -2,7 +2,8 @@ import * as React from 'react'
 import { Box, Heading } from 'grommet'
 import { Pool } from '../../../../config'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
-import { connect } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
+import { loadPool } from '../../../../ducks/pool'
 
 import { ExplainerCard } from './styles'
 import PoolOverview from './PoolOverview'
@@ -45,9 +46,13 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
     updateEpochData()
   }, 60000)
 
+  const dispatch = useDispatch()
+  const address = useSelector<any, string | null>((state) => state.auth.address)
+
   React.useEffect(() => {
+    dispatch(loadPool(props.tinlake))
     updateEpochData()
-  }, [props.tinlake.signer])
+  }, [address])
 
   return (
     <Box margin={{ top: 'medium' }}>
