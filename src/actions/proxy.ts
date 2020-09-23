@@ -160,6 +160,7 @@ export type IProxyActions = {
   proxyIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<PendingTransaction>
   proxyTransferIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<PendingTransaction>
   proxyLockBorrowWithdraw(proxyAddr: string, loanId: string, amount: string, usr: string): Promise<PendingTransaction>
+  proxyRepay(proxyAddress: string, loanId: string, amount: string): Promise<PendingTransaction>
   proxyRepayUnlockClose(
     proxyAddr: string,
     tokenId: string,
