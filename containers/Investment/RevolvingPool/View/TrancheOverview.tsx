@@ -6,6 +6,8 @@ import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import BN from 'bn.js'
 import { EpochData } from './index'
+import { useDispatch, useSelector } from 'react-redux'
+import { loadPool } from '../../../../ducks/pool'
 
 import InvestCard from './InvestCard'
 import RedeemCard from './RedeemCard'
@@ -25,6 +27,8 @@ interface Props {
 export type Card = 'home' | 'collect' | 'order' | 'invest' | 'redeem'
 
 const TrancheOverview: React.FC<Props> = (props: Props) => {
+  const address = useSelector<any, string | null>((state) => state.auth.address)
+
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
 
   const [card, setCard] = React.useState<Card>('home')
@@ -42,9 +46,12 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const [hasPendingOrder, setHasPendingOrder] = React.useState(false)
   const [hasPendingCollection, setHasPendingCollection] = React.useState(false)
 
+  const dispatch = useDispatch()
+
   // V3 TODO: this should probably move to actions and expose a single TrancheData object (or to a duck?)
   const updateTrancheData = async () => {
-    const address = await props.tinlake.signer?.getAddress()
+    dispatch(loadPool(props.tinlake))
+
     if (address) {
       const isInMemberlist =
         props.tranche === 'senior'
@@ -80,7 +87,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     updateTrancheData()
-  }, [props.tinlake.signer])
+  }, [props.tinlake.signer, address])
 
   React.useEffect(() => {
     if (hasPendingCollection) setCard('collect')
@@ -92,7 +99,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
     <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
       <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
         <Heading level="5" margin={'0'}>
-          <TokenLogo src={`../../../../static/${token}_final.svg`} />
+          <TokenLogo src={`/static/${token}_final.svg`} />
           {token} Balance
         </Heading>
         <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
@@ -105,14 +112,15 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           <TableRow>
             <TableCell scope="row">Current Price</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              {' '}
               {addThousandsSeparators(toPrecision(baseToDisplay(tokenPrice, 27), 2))}
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell scope="row">Your {token} Value</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>
-              DAI {addThousandsSeparators(toPrecision(baseToDisplay(value, 18), 2))}{' '}
+            <TableCell scope="row" border={{ color: 'transparent' }}>
+              Your {token} Value
+            </TableCell>
+            <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+              {addThousandsSeparators(toPrecision(baseToDisplay(value, 18), 2))} DAI
             </TableCell>
           </TableRow>
         </TableBody>
@@ -142,6 +150,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               {...props}
               setCard={setCard}
               disbursements={disbursements}
+              tokenPrice={tokenPrice}
               updateTrancheData={updateTrancheData}
             />
           )}

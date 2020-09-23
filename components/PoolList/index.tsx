@@ -38,6 +38,7 @@ class PoolList extends React.Component<Props> {
           sortable
           onClickRow={this.clickRow as any}
           sort={{ property: 'order', direction: 'desc' }}
+          pad="xsmall"
           columns={[
             {
               header: 'Pool',

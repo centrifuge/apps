@@ -121,7 +121,12 @@ const AdminActions: React.FC<Props> = (props: Props) => {
             </FormField>
 
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button primary label="Apply" onClick={saveMaxJuniorRatio} disabled={disabled} />
+              <Button
+                primary
+                label="Apply"
+                onClick={saveMaxJuniorRatio}
+                disabled={disabled || maxJuniorRatio === (pool.data as PoolDataV3).maxJuniorRatio.toString()}
+              />
             </Box>
           </Box>
 
@@ -145,7 +150,12 @@ const AdminActions: React.FC<Props> = (props: Props) => {
             </FormField>
 
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button primary label="Apply" onClick={saveMaxReserve} disabled={disabled} />
+              <Button
+                primary
+                label="Apply"
+                onClick={saveMaxReserve}
+                disabled={disabled || maxReserve === (pool.data as PoolDataV3).maxReserve.toString()}
+              />
             </Box>
           </Box>
         </Box>

@@ -20,6 +20,15 @@ export const TokenLogo = styled.img`
   height: 16px;
 `
 
+export const SignIcon = styled.img`
+  vertical-align: middle;
+  margin: 0 8px 0 0;
+  width: 24px;
+  height: 24px;
+  position: relative;
+  top: -2px;
+`
+
 export const Info = styled.div`
   margin-top: 16px;
   background: #f5f5f5;
@@ -46,4 +55,52 @@ export const Warning = styled.div`
     margin-top: 0;
     color: #fcba59;
   }
+`
+
+export const BalanceSheetDiagram = styled(Box)`
+  flex: 1;
+`
+
+export const BalanceSheetDiagramLeft = styled(Box)`
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+`
+
+export const BalanceSheetMidLine = styled.div`
+  border-bottom: 1px solid #d8d8d8;
+  flex: 1;
+`
+
+export const BalanceSheetFiller = styled.div`
+  flex: 1;
+`
+
+export const BalanceSheetDiagramRight = styled(Box)`
+  border-bottom: 1px solid #d8d8d8;
+  border-left: 1px solid #d8d8d8;
+  border-bottom-left-radius: 12px;
+  border-top-left-radius: 12px;
+  border-top: 1px solid #d8d8d8;
+  width: 50%;
+  height: 70%;
+  position: relative;
+  top: 15%;
+`
+
+export const DividerTop = styled.div`
+  border-bottom: 1px solid #d8d8d8;
+  max-width: 80%;
+  margin: 0 0 12px 10%;
+`
+
+export const DividerBottom = styled.div`
+  border-top: 1px solid #d8d8d8;
+  max-width: 80%;
+  margin: 0 0 12px 10%;
+`
+
+export const DividerInner = styled.div`
+  border-right: 1px solid #d8d8d8;
+  width: 50%;
 `

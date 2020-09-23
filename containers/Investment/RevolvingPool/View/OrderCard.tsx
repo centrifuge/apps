@@ -30,7 +30,6 @@ const OrderCard: React.FC<Props> = (props: Props) => {
 
   const [confirmCancellation, setConfirmCancellation] = React.useState(false)
 
-  // V3 TODO: handle redeem
   const lockedValue =
     props.disbursements &&
     !(props.disbursements.remainingSupplyCurrency.isZero() && props.disbursements.remainingRedeemToken.isZero())
@@ -87,7 +86,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
             <TableCell style={{ textAlign: 'end' }}>{type}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell scope="row">Amount {token} locked</TableCell>
+            <TableCell scope="row">Amount locked</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
               {addThousandsSeparators(
                 toPrecision(
@@ -99,13 +98,17 @@ const OrderCard: React.FC<Props> = (props: Props) => {
                   ),
                   2
                 )
-              )}
+              )}{' '}
+              {token}
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell scope="row">Locked value at current token price</TableCell>
+            <TableCell scope="row">
+              {type === 'Redeem' ? 'Locked value at current token price' : `Token amount at current token price`}
+            </TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(lockedValue, 18), 2))} {token}
+              {addThousandsSeparators(toPrecision(baseToDisplay(lockedValue, 18), 2))}{' '}
+              {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'}
             </TableCell>
           </TableRow>
         </TableBody>

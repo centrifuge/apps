@@ -18,8 +18,11 @@ export interface PoolData {
 }
 
 export interface PoolDataV3 extends PoolData {
+  netAssetValue: BN
+  reserve: BN
   maxJuniorRatio: BN
   maxReserve: BN
+  outstandingVolume: BN
 }
 
 export interface PoolState {
