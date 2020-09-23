@@ -17,7 +17,7 @@ export function initTinlake({
   addresses,
   contractConfig,
 }: { version?: 2 | 3; addresses?: ContractAddresses | null; contractConfig?: any | null } = {}): ITinlake | ITinlakeV3 {
-  if (tinlake === null) {
+  if (tinlake === null || version != tinlake.version) {
     const { transactionTimeout } = config
     const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
     const overrides = config.network === 'Kovan' ? { gasLimit: config.gasLimit } : {}
