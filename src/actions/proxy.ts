@@ -98,7 +98,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         usr,
       ])
 
-      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
     }
 
     proxyRepayUnlockClose = async (proxyAddress: string, tokenId: string, loanId: string, registry: string) => {
