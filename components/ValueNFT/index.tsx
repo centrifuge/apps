@@ -126,119 +126,127 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
         </p>
       </Alert>
 
-      <Box direction="row" gap="large" margin={{ vertical: 'large' }}>
-        <b>Please paste your Token ID and corresponding registry address below to value an NFT:</b>
-      </Box>
-
-      <Box direction="row" gap="large" margin={{ vertical: 'large' }} align="center">
-        <Col>
-          <FormField label="Collateral Token Registry Address">
-            <TextInput
-              value={registry || ''}
-              onChange={onRegistryAddressValueChange}
-              // disabled={status === 'unconfirmed' || status === 'pending'}
-            />
-          </FormField>
-        </Col>
-
-        <Col>
-          <FormField label="Token ID">
-            <TextInput
-              value={tokenId}
-              onChange={onTokenIdValueChange}
-              // disabled={status === 'unconfirmed' || status === 'pending'}
-            />
-          </FormField>
-        </Col>
-
-        <Col />
-      </Box>
-
-      <Box direction="row" gap="large" margin={{ vertical: 'large' }} align="center">
-        <Col>
-          <FormField label="Value">
-            <NumberInput
-              value={baseToDisplay(value, 18)}
-              precision={18}
-              onValueChange={({ value }) => setValue(displayToBase(value, 18))}
-              // disabled={status === 'unconfirmed' || status === 'pending'}
-            />
-          </FormField>
-        </Col>
-
-        <Col>
-          <FormField label="Risk Group">
-            <NumberInput
-              value={riskGroup}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRiskGroup(e.currentTarget.value)}
-              precision={0}
-              // disabled={status === 'unconfirmed' || status === 'pending'}
-            />
-          </FormField>
-        </Col>
-
-        <Col>
-          <Button
-            onClick={valueNFT}
-            primary
-            label="Value NFT"
-            // disabled={!nft || status === 'unconfirmed' || status === 'pending'}
-          />
-        </Col>
-      </Box>
-
-      {statusValNFT === 'succeeded' && (
-        <Alert pad={{ horizontal: 'medium' }} type="success">
-          Successfully valued NFT for Token ID {tokenId}
-          <p>
-            Please set the maturity date or{' '}
-            <PoolLink href={{ pathname: '/assets/issue', query: { tokenId, registry } }}>
-              <Anchor>proceed to asset financing</Anchor>
-            </PoolLink>{' '}
-            your NFT.
-          </p>
-          <p> Your NFT ID will automatically be pasted in the respective field.</p>
+      {!props.auth.permissions?.canSetRiskScore ? (
+        <Alert margin={{ top: 'medium' }} pad={{ horizontal: 'medium' }} type="error">
+          <p>You need to be an admin to value NFTs.</p>
         </Alert>
-      )}
+      ) : (
+        <>
+          <Box direction="row" gap="large" margin={{ vertical: 'large' }}>
+            <b>Please paste your Token ID and corresponding registry address below to value an NFT:</b>
+          </Box>
 
-      <Box direction="row" gap="large" margin={{ vertical: 'large' }} align="center">
-        <Col>
-          <FormField label="Maturity Date">
-            <DateInput
-              value={maturityDate}
-              format="YYYY-MM-DD"
-              onChange={(event: any) => {
-                setMaturityDate(event.value)
-              }}
-              // disabled={status === 'unconfirmed' || status === 'pending'}
-            />
-          </FormField>
-        </Col>
+          <Box direction="row" gap="large" margin={{ vertical: 'large' }} align="center">
+            <Col>
+              <FormField label="Collateral Token Registry Address">
+                <TextInput
+                  value={registry || ''}
+                  onChange={onRegistryAddressValueChange}
+                  // disabled={status === 'unconfirmed' || status === 'pending'}
+                />
+              </FormField>
+            </Col>
 
-        <Col />
+            <Col>
+              <FormField label="Token ID">
+                <TextInput
+                  value={tokenId}
+                  onChange={onTokenIdValueChange}
+                  // disabled={status === 'unconfirmed' || status === 'pending'}
+                />
+              </FormField>
+            </Col>
 
-        <Col>
-          <Button
-            onClick={updateMaturityDate}
-            primary
-            label="Set Maturity Date"
-            // disabled={!nft || status === 'unconfirmed' || status === 'pending'}
-          />
-        </Col>
-      </Box>
+            <Col />
+          </Box>
 
-      {statusSetMat === 'succeeded' && (
-        <Alert pad={{ horizontal: 'medium' }} type="success">
-          Successfully set maturity date for NFT for Token ID {tokenId}
-          <p>
-            Please value the NFT or{' '}
-            <PoolLink href={{ pathname: '/assets/issue', query: { tokenId, registry } }}>
-              <Anchor>proceed to asset financing</Anchor>
-            </PoolLink>{' '}
-            your NFT.
-          </p>
-          <p> Your NFT ID will automatically be pasted in the respective field.</p>
-        </Alert>
+          <Box direction="row" gap="large" margin={{ vertical: 'large' }} align="center">
+            <Col>
+              <FormField label="Value">
+                <NumberInput
+                  value={baseToDisplay(value, 18)}
+                  precision={18}
+                  onValueChange={({ value }) => setValue(displayToBase(value, 18))}
+                  // disabled={status === 'unconfirmed' || status === 'pending'}
+                />
+              </FormField>
+            </Col>
+
+            <Col>
+              <FormField label="Risk Group">
+                <NumberInput
+                  value={riskGroup}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRiskGroup(e.currentTarget.value)}
+                  precision={0}
+                  // disabled={status === 'unconfirmed' || status === 'pending'}
+                />
+              </FormField>
+            </Col>
+
+            <Col>
+              <Button
+                onClick={valueNFT}
+                primary
+                label="Value NFT"
+                // disabled={!nft || status === 'unconfirmed' || status === 'pending'}
+              />
+            </Col>
+          </Box>
+
+          {statusValNFT === 'succeeded' && (
+            <Alert pad={{ horizontal: 'medium' }} type="success">
+              Successfully valued NFT for Token ID {tokenId}
+              <p>
+                Please set the maturity date or{' '}
+                <PoolLink href={{ pathname: '/assets/issue', query: { tokenId, registry } }}>
+                  <Anchor>proceed to asset financing</Anchor>
+                </PoolLink>{' '}
+                your NFT.
+              </p>
+              <p> Your NFT ID will automatically be pasted in the respective field.</p>
+            </Alert>
+          )}
+
+          <Box direction="row" gap="large" margin={{ vertical: 'large' }} align="center">
+            <Col>
+              <FormField label="Maturity Date">
+                <DateInput
+                  value={maturityDate}
+                  format="YYYY-MM-DD"
+                  onChange={(event: any) => {
+                    setMaturityDate(event.value)
+                  }}
+                  // disabled={status === 'unconfirmed' || status === 'pending'}
+                />
+              </FormField>
+            </Col>
+
+            <Col />
+
+            <Col>
+              <Button
+                onClick={updateMaturityDate}
+                primary
+                label="Set Maturity Date"
+                // disabled={!nft || status === 'unconfirmed' || status === 'pending'}
+              />
+            </Col>
+          </Box>
+
+          {statusSetMat === 'succeeded' && (
+            <Alert pad={{ horizontal: 'medium' }} type="success">
+              Successfully set maturity date for NFT for Token ID {tokenId}
+              <p>
+                Please value the NFT or{' '}
+                <PoolLink href={{ pathname: '/assets/issue', query: { tokenId, registry } }}>
+                  <Anchor>proceed to asset financing</Anchor>
+                </PoolLink>{' '}
+                your NFT.
+              </p>
+              <p> Your NFT ID will automatically be pasted in the respective field.</p>
+            </Alert>
+          )}
+        </>
       )}
 
       <Box>

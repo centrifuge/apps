@@ -11,7 +11,7 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { Pool } from '../../../config'
 
 interface Props extends TransactionProps {
-  pool: Pool
+  poolConfig: Pool
   loan: Loan
   tinlake: any
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>
@@ -20,10 +20,11 @@ interface Props extends TransactionProps {
 
 const LoanRepay: React.FC<Props> = (props: Props) => {
   const [repayAmount, setRepayAmount] = React.useState('0')
+  const debt = props.loan.debt?.toString() || '0'
 
   React.useEffect(() => {
-    setRepayAmount((props.loan.debt && props.loan.debt.toString()) || '0')
-  }, [props])
+    setRepayAmount(debt)
+  }, [debt])
 
   const [status, , setTxId] = useTransactionState()
 
@@ -33,10 +34,22 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
     const valueToDecimal = new Decimal(baseToDisplay(repayAmount, 18)).toFixed(2)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
-    const txId = await props.createTransaction(`Repay Asset ${props.loan.loanId} (${formatted} DAI)`, 'repay', [
-      props.tinlake,
-      props.loan,
-    ])
+    let txId: string
+    if (repayAmount === debt) {
+      // full repay
+      txId = await props.createTransaction(`Repay Asset ${props.loan.loanId} (${formatted} DAI)`, 'repayFull', [
+        props.tinlake,
+        props.loan,
+      ])
+    } else {
+      // partial repay
+      txId = await props.createTransaction(`Repay Asset ${props.loan.loanId} (${formatted} DAI)`, 'repay', [
+        props.tinlake,
+        props.loan,
+        repayAmount,
+      ])
+    }
+
     setTxId(txId)
   }
 
@@ -46,7 +59,7 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
     }
   }, [status])
 
-  const hasDebt = props.loan.debt.toString() !== '0'
+  const hasDebt = debt !== '0'
 
   return (
     <Box basis={'1/4'} gap="medium" margin={{ right: 'large' }}>
@@ -57,7 +70,7 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
             suffix=" DAI"
             precision={18}
             onValueChange={({ value }) => setRepayAmount(displayToBase(value, 18))}
-            disabled={!props.pool.partialRepay}
+            disabled={!props.poolConfig.partialRepay}
           />
         </FormField>
       </Box>

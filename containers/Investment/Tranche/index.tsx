@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AuthState } from '../../../ducks/auth'
+import { AuthState, Permissions } from '../../../ducks/auth'
 import { Box, Heading } from 'grommet'
 import InvestorSupply from '../Supply'
 import InvestorRedeem from '../Redeem'
@@ -7,6 +7,7 @@ import InvestorAllowance from '../Allowance'
 import TrancheMetric from '../../../components/Investment/TrancheMetric'
 import { Investor } from '@centrifuge/tinlake-js'
 import { TrancheType } from '../../../services/tinlake/actions'
+import { isTinlakeV2 } from '../../../utils/tinlakeVersion'
 
 interface Props {
   tinlake: any
@@ -17,9 +18,12 @@ interface Props {
 }
 
 const TrancheView: React.FC<Props> = (props: Props) => {
+  const permissions = props.auth.permissions as Permissions | null
+
   const isAdmin =
-    (props.tranche.type === 'junior' && props.auth.permissions?.canSetInvestorAllowanceJunior) ||
-    (props.tranche.type === 'senior' && props.auth.permissions?.canSetInvestorAllowanceSenior)
+    isTinlakeV2(props.tinlake) &&
+    ((props.tranche.type === 'junior' && permissions?.canSetInvestorAllowanceJunior) ||
+      (props.tranche.type === 'senior' && permissions?.canSetInvestorAllowanceSenior))
   const isInvestor = props.investor && props.auth.address?.toLowerCase() === props.investor.address.toLowerCase()
 
   return (
