@@ -12,7 +12,7 @@ import { Pool } from '../../../config'
 
 interface Props extends TransactionProps {
   tinlake: any
-  pool: Pool
+  poolConfig: Pool
   tokenId: string
   registry: string
   auth: AuthState
@@ -132,7 +132,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
         {loanId ? (
           <Box margin={{ bottom: 'medium', top: 'large' }}>
             {' '}
-            <LoanView tinlake={props.tinlake} pool={props.pool} loanId={loanId} />
+            <LoanView tinlake={props.tinlake} poolConfig={props.poolConfig} loanId={loanId} />
           </Box>
         ) : (
           <Box>

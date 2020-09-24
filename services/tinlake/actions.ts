@@ -477,8 +477,35 @@ export async function borrow(tinlake: ITinlake | ITinlakeV3, loan: Loan, amount:
   return tinlake.proxyLockBorrowWithdraw(proxy.toString(), loanId, amount, address!)
 }
 
+// repay partial loan debt
+export async function repay(tinlake: ITinlake | ITinlakeV3, loan: Loan, amount: string): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const { loanId } = loan
+  const proxy = loan.ownerOf
+  const address = await tinlake.signer.getAddress()
+
+  // make sure that enough funds are provided to cover the repay amount
+  const allowance = await tinlake.getCurrencyAllowance(address!, proxy.toString())
+
+  // only approve if allowance is smaller than than the current balance
+  if (allowance.lt(new BN(amount))) {
+    try {
+      const approveTx = await tinlake.approveCurrency(proxy.toString(), maxUint256)
+      await tinlake.getTransactionReceipt(approveTx as any)
+    } catch (e) {
+      return loggedError(e, 'Could not approve proxy.', loanId)
+    }
+  }
+
+  // repay
+  return tinlake.proxyRepay(proxy.toString(), loanId, amount)
+}
+
 // repay full loan debt
-export async function repay(tinlake: ITinlake | ITinlakeV3, loan: Loan): Promise<PendingTransaction> {
+export async function repayFull(tinlake: ITinlake | ITinlakeV3, loan: Loan): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }

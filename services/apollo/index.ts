@@ -50,9 +50,9 @@ class Apollo {
   }
 
   injectPoolData(pools: any[]): PoolData[] {
-    const configPools = config.pools
-    const tinlakePools = configPools.map((configPool: any) => {
-      const poolId = configPool.addresses.ROOT_CONTRACT
+    const poolConfigs = config.pools
+    const tinlakePools = poolConfigs.map((poolConfig: any) => {
+      const poolId = poolConfig.addresses.ROOT_CONTRACT
       const pool = pools.find((p) => p.id === poolId)
 
       const totalDebt = (pool && new BN(pool.totalDebt)) || new BN('0')
@@ -80,9 +80,9 @@ class Apollo {
         order: this.getPoolOrder({ totalDebt, totalDebtNum, totalRepaysAggregatedAmount }),
         isUpcoming: false,
         id: poolId,
-        name: configPool.name,
-        slug: configPool.slug,
-        asset: configPool?.asset,
+        name: poolConfig.name,
+        slug: poolConfig.slug,
+        asset: poolConfig?.asset,
       }
     })
     return tinlakePools

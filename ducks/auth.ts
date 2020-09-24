@@ -29,34 +29,25 @@ export type Address = string
 // Permissions depend on both the address and the selected pool/registry.
 export interface Permissions {
   // asset admin permissions
-  canIssueLoan: boolean
   canSetInterestRate: boolean
   // tranche admin permissions
   canSetMinimumJuniorRatio: boolean
   canSetRiskScore: boolean
-  canSetSeniorTrancheInterestRate: boolean
   // lender admin permissions
   canSetInvestorAllowanceJunior: boolean
   canSetInvestorAllowanceSenior: boolean
   // collector permissions
   canSetLoanPrice: boolean
-  canActAsKeeper: boolean
 }
 
 export interface PermissionsV3 {
   // asset admin permissions
-  canIssueLoan: boolean
   canSetInterestRate: boolean
   // tranche admin permissions
   canSetMinimumJuniorRatio: boolean
   canSetRiskScore: boolean
-  canSetSeniorTrancheInterestRate: boolean
-  // lender admin permissions
-  canSetInvestorAllowanceJunior: boolean
-  canSetInvestorAllowanceSenior: boolean
   // collector permissions
   canSetLoanPrice: boolean
-  canActAsKeeper: boolean
 }
 
 // Proxies depend on both the address and the selected pool/registry.
@@ -355,19 +346,23 @@ export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth
     dispatch({ type: LOAD_PERMISSIONS })
 
     if (isTinlakeV3(tinlake)) {
-      const [interestRatePermission, loanPricePermission, equityRatioPermission] = await Promise.all([
+      const [
+        interestRatePermission,
+        loanPricePermission,
+        equityRatioPermission,
+        riskScorePermission,
+      ] = await Promise.all([
         tinlake.canSetSeniorTrancheInterest(auth.address),
         tinlake.canSetLoanPrice(auth.address),
         tinlake.canSetMinimumJuniorRatio(auth.address),
+        tinlake.canSetRiskScore(auth.address),
       ])
 
       const permissions = {
         canSetInterestRate: interestRatePermission,
         canSetLoanPrice: loanPricePermission,
         canSetMinimumJuniorRatio: equityRatioPermission,
-        canSetRiskScore: false, // V3 TODO: do we need to replace this with anything?
-        canSetInvestorAllowanceJunior: false, // V3 TODO: do we need to replace this with anything?
-        canSetInvestorAllowanceSenior: false, // V3 TODO: do we need to replace this with anything?
+        canSetRiskScore: riskScorePermission,
       }
 
       dispatch({ permissions, type: RECEIVE_PERMISSIONS })

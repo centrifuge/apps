@@ -48,7 +48,13 @@ class LoanIssuePage extends React.Component<Props> {
                             <Heading level="3">Open Financing</Heading>
                           </Box>
                         </SecondaryHeader>
-                        <IssueLoan tinlake={tinlake} pool={pool} auth={auth} tokenId={tokenId} registry={registry} />
+                        <IssueLoan
+                          tinlake={tinlake}
+                          poolConfig={pool}
+                          auth={auth}
+                          tokenId={tokenId}
+                          registry={registry}
+                        />
                       </Box>
                     )}
                   />
