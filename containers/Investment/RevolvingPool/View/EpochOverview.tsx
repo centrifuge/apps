@@ -9,7 +9,7 @@ import { PoolDataV3, PoolState } from '../../../../ducks/pool'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
-import { SignIcon } from './styles'
+import { SignIcon, Warning } from './styles'
 import { useInterval } from '../../../../utils/hooks'
 import BN from 'bn.js'
 
@@ -113,7 +113,13 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         {isAdmin && (
           <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
             {props.epochData.state === 'can-be-closed' && (
-              <Button label={`Close epoch ${props.epochData.id}`} primary onClick={solve} disabled={disabled} />
+              <Button label={`Close epoch`} primary onClick={solve} disabled={disabled} />
+            )}
+            {props.epochData.state === 'in-submission-period' && (
+              <Button label={`Run solver`} primary disabled={true} />
+            )}
+            {props.epochData.state === 'in-challenge-period' && (
+              <Button label={`Execute epoch ${props.epochData.id}`} primary disabled={true} />
             )}
             {props.epochData.state === 'challenge-period-ended' && (
               <Button label={`Execute epoch ${props.epochData.id}`} primary onClick={execute} disabled={disabled} />
