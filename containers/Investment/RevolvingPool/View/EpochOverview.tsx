@@ -2,9 +2,8 @@ import * as React from 'react'
 import { Box, Button, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
-import { connect } from 'react-redux'
+import { connect, useSelector } from 'react-redux'
 import { EpochData } from './index'
-import { useSelector } from 'react-redux'
 import { AuthState } from '../../../../ducks/auth'
 import { PoolDataV3, PoolState } from '../../../../ducks/pool'
 import { toPrecision } from '../../../../utils/toPrecision'
@@ -24,8 +23,8 @@ const secondsToHms = (d: number) => {
   const h = Math.floor(d / 3600)
   const m = Math.floor((d % 3600) / 60)
 
-  const hDisplay = h > 0 ? h + (h == 1 ? ' hr' : ' hrs') : ''
-  const mDisplay = m > 0 ? m + (m == 1 ? ' min' : ' mins') : h > 0 ? '' : '0 min'
+  const hDisplay = h > 0 ? h + (h === 1 ? ' hr' : ' hrs') : ''
+  const mDisplay = m > 0 ? m + (m === 1 ? ' min' : ' mins') : h > 0 ? '' : '0 min'
   return hDisplay + (hDisplay.length > 0 && mDisplay.length > 0 ? ', ' : '') + mDisplay
 }
 
