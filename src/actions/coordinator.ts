@@ -117,7 +117,9 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         throw new Error('Solution could not be found for the current epoch')
       }
 
-      const toUintValue = (num: number): string => { return new BN(num).mul(new BN(10).pow(new BN(18))).toString() }
+      const toUintValue = (num: number): string => {
+        return new BN(num).mul(new BN(10).pow(new BN(18))).toString()
+      }
 
       const submissionTx = coordinator.submitSolution(
         toUintValue(solution.vars.dropRedeem),
@@ -175,26 +177,30 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         if (minChallengePeriodEnd < latestBlockTimestamp) return 'challenge-period-ended'
         return 'in-challenge-period'
       }
-      
+
       const submissionPeriod = await coordinator.submissionPeriod()
       if (submissionPeriod === true) {
         return 'in-submission-period'
       }
-      
+
       const lastEpochClosed = (await coordinator.lastEpochClosed()).toBN().toNumber()
       const minimumEpochTime = (await coordinator.minimumEpochTime()).toBN().toNumber()
       if (submissionPeriod === false) {
         if (lastEpochClosed + minimumEpochTime < latestBlockTimestamp) return 'can-be-closed'
-         return 'open'
+        return 'open'
       }
-
 
       throw new Error('Arrived at impossible current epoch state')
     }
   }
 }
 
-export type EpochState = 'open' | 'can-be-closed' | 'in-submission-period' | 'in-challenge-period' | 'challenge-period-ended'
+export type EpochState =
+  | 'open'
+  | 'can-be-closed'
+  | 'in-submission-period'
+  | 'in-challenge-period'
+  | 'challenge-period-ended'
 
 export type ICoordinatorActions = {
   getEpochState(): Promise<State>
