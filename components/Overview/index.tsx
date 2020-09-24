@@ -61,13 +61,13 @@ class Overview extends React.Component<Props> {
                   <TableRow>
                     <TableCell scope="row">Outstanding Volume</TableCell>
                     <TableCell style={{ textAlign: 'end' }}>
-                      DAI {addThousandsSeparators(toPrecision(baseToDisplay(outstandingDebt, 18), 2))}
+                      {addThousandsSeparators(toPrecision(baseToDisplay(outstandingDebt, 18), 2))} DAI
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell scope="row">Pool Reserve</TableCell>
                     <TableCell style={{ textAlign: 'end' }}>
-                      DAI {addThousandsSeparators(toPrecision(baseToDisplay(availableFunds, 18), 2))}
+                      {addThousandsSeparators(toPrecision(baseToDisplay(availableFunds, 18), 2))} DAI
                     </TableCell>
                   </TableRow>
                 </TableBody>
@@ -97,13 +97,13 @@ class Overview extends React.Component<Props> {
                   <TableRow>
                     <TableCell scope="row">DROP Supply</TableCell>
                     <TableCell style={{ textAlign: 'end' }}>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(seniorTokenSupply, 18), 2))}
+                      {addThousandsSeparators(toPrecision(baseToDisplay(seniorTokenSupply, 18), 2))} DROP
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell scope="row">TIN Supply</TableCell>
                     <TableCell style={{ textAlign: 'end' }}>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(juniorTokenSupply, 18), 2))}
+                      {addThousandsSeparators(toPrecision(baseToDisplay(juniorTokenSupply, 18), 2))} TIN
                     </TableCell>
                   </TableRow>
                 </TableBody>

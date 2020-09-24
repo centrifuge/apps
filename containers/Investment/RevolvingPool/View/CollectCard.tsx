@@ -2,11 +2,12 @@ import * as React from 'react'
 import { Box, Button, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
 import { Pool } from '../../../../config'
 import { toPrecision } from '../../../../utils/toPrecision'
-import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
 import { connect } from 'react-redux'
 import BN from 'bn.js'
+import { Decimal } from 'decimal.js-light'
+import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 
 import { Description } from './styles'
 import { Card } from './TrancheOverview'
@@ -44,8 +45,16 @@ const CollectCard: React.FC<Props> = (props: Props) => {
     .toString()
 
   const collect = async () => {
+    const valueToDecimal = new Decimal(
+      baseToDisplay(
+        type === 'Invest' ? props.disbursements.payoutTokenAmount : props.disbursements.payoutCurrencyAmount,
+        18
+      )
+    ).toFixed(2)
+    const formatted = addThousandsSeparators(valueToDecimal.toString())
+
     const method = props.tranche === 'senior' ? 'disburseSenior' : 'disburseJunior'
-    const txId = await props.createTransaction(`Collect ${token}`, method, [props.tinlake])
+    const txId = await props.createTransaction(`Collect ${formatted} ${token}`, method, [props.tinlake])
     setTxId(txId)
   }
 

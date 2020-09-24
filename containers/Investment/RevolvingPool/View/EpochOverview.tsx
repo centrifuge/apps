@@ -5,6 +5,7 @@ import { createTransaction, useTransactionState, TransactionProps } from '../../
 import { connect } from 'react-redux'
 import { EpochData } from './index'
 import { useSelector } from 'react-redux'
+import { AuthState } from '../../../../ducks/auth'
 import { PoolDataV3, PoolState } from '../../../../ducks/pool'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
@@ -16,6 +17,7 @@ import BN from 'bn.js'
 interface Props extends TransactionProps {
   epochData: EpochData
   tinlake: ITinlakeV3
+  auth?: AuthState
 }
 
 const secondsToHms = (d: number) => {
@@ -23,7 +25,7 @@ const secondsToHms = (d: number) => {
   const m = Math.floor((d % 3600) / 60)
 
   const hDisplay = h > 0 ? h + (h == 1 ? ' hr' : ' hrs') : ''
-  const mDisplay = m > 0 ? m + (m == 1 ? ' min' : ' mins') : ''
+  const mDisplay = m > 0 ? m + (m == 1 ? ' min' : ' mins') : h > 0 ? '' : '0 min'
   return hDisplay + (hDisplay.length > 0 && mDisplay.length > 0 ? ', ' : '') + mDisplay
 }
 
@@ -34,12 +36,12 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   const [status, , setTxId] = useTransactionState()
 
   const solve = async () => {
-    const txId = await props.createTransaction(`Close epoch`, 'solveEpoch', [props.tinlake])
+    const txId = await props.createTransaction(`Close epoch ${props.epochData.id}`, 'solveEpoch', [props.tinlake])
     setTxId(txId)
   }
 
   const execute = async () => {
-    const txId = await props.createTransaction(`Execute epoch`, 'executeEpoch', [props.tinlake])
+    const txId = await props.createTransaction(`Execute epoch ${props.epochData.id}`, 'executeEpoch', [props.tinlake])
     setTxId(txId)
   }
 
@@ -69,6 +71,8 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
 
   const totalRedemptionsCurrency = juniorRedemptionsCurrency.add(seniorRedemptionsCurrency)
 
+  const isAdmin = props.auth?.permissions?.canSetMinimumJuniorRatio
+
   return (
     <Box direction="column">
       <Box width="420px" margin={{ top: 'small', bottom: 'medium' }}>
@@ -93,26 +97,34 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               <TableCell style={{ textAlign: 'end' }}>{secondsToHms(props.epochData.minimumEpochTime)}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell scope="row">Pool Reserve current</TableCell>
+              <TableCell scope="row">Current Reserve</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                {poolData && addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve, 18), 2))} DAI
+                {poolData && addThousandsSeparators(toPrecision(baseToDisplay(poolData.reserve, 18), 2))} DAI
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell scope="row">Maximum Reserve Amount</TableCell>
+              <TableCell style={{ textAlign: 'end' }}>
+                {poolData && addThousandsSeparators(toPrecision(baseToDisplay(poolData.maxReserve, 18), 2))} DAI
               </TableCell>
             </TableRow>
           </TableBody>
         </Table>
 
-        <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-          {props.epochData.state === 'can-be-closed' && (
-            <Button label="Close epoch" primary onClick={solve} disabled={disabled} />
-          )}
-          {props.epochData.state === 'challenge-period-ended' && (
-            <Button label="Execute orders" primary onClick={execute} disabled={disabled} />
-          )}
-        </Box>
+        {isAdmin && (
+          <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+            {props.epochData.state === 'can-be-closed' && (
+              <Button label={`Close epoch ${props.epochData.id}`} primary onClick={solve} disabled={disabled} />
+            )}
+            {props.epochData.state === 'challenge-period-ended' && (
+              <Button label={`Execute epoch ${props.epochData.id}`} primary onClick={execute} disabled={disabled} />
+            )}
+          </Box>
+        )}
       </Box>
 
       {poolData?.senior && (
-        <Box width="420px" margin={{ bottom: 'medium' }}>
+        <Box width="420px" margin={{ top: 'medium', bottom: 'medium' }}>
           <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
             <Heading level="5" margin={'0'}>
               Total Locked Orders

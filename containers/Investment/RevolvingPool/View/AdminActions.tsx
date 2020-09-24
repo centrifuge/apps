@@ -33,39 +33,53 @@ const AdminActions: React.FC<Props> = (props: Props) => {
     props.loadPool && props.loadPool(props.tinlake)
   }, [props.tinlake])
 
-  const [status, , setTxId] = useTransactionState()
+  const [minRatioStatus, , setMinRatioTxId] = useTransactionState()
 
   const saveMinJuniorRatio = async () => {
     const txId = await props.createTransaction(`Set min TIN risk buffer`, 'setMinJuniorRatio', [
       props.tinlake,
       minJuniorRatio.toString(),
     ])
-    setTxId(txId)
+    setMinRatioTxId(txId)
   }
+
+  const [maxRatioStatus, , setMaxRatioTxId] = useTransactionState()
 
   const saveMaxJuniorRatio = async () => {
     const txId = await props.createTransaction(`Set max TIN risk buffer`, 'setMaxJuniorRatio', [
       props.tinlake,
       maxJuniorRatio.toString(),
     ])
-    setTxId(txId)
+    setMaxRatioTxId(txId)
   }
+
+  const [maxReserveStatus, , setMaxReserveTxId] = useTransactionState()
 
   const saveMaxReserve = async () => {
     const txId = await props.createTransaction(`Set max reserve`, 'setMaxReserve', [
       props.tinlake,
       maxReserve.toString(),
     ])
-    setTxId(txId)
+    setMaxReserveTxId(txId)
   }
 
   React.useEffect(() => {
-    if (status === 'succeeded') {
+    if (minRatioStatus === 'succeeded') {
       props.loadPool && props.loadPool(props.tinlake)
     }
-  }, [status])
+  }, [minRatioStatus])
 
-  const disabled = status === 'unconfirmed' || status === 'pending'
+  React.useEffect(() => {
+    if (maxRatioStatus === 'succeeded') {
+      props.loadPool && props.loadPool(props.tinlake)
+    }
+  }, [maxRatioStatus])
+
+  React.useEffect(() => {
+    if (maxReserveStatus === 'succeeded') {
+      props.loadPool && props.loadPool(props.tinlake)
+    }
+  }, [maxReserveStatus])
 
   return (
     <>
@@ -86,7 +100,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 value={baseToDisplay(minJuniorRatio, 25)}
                 precision={2}
                 onValueChange={({ value }) => setMinJuniorRatio(displayToBase(value, 25))}
-                disabled={disabled}
+                disabled={minRatioStatus === 'unconfirmed' || minRatioStatus === 'pending'}
               />
             </FormField>
 
@@ -95,7 +109,11 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 primary
                 label="Apply"
                 onClick={saveMinJuniorRatio}
-                disabled={disabled || minJuniorRatio === pool.data.minJuniorRatio.toString()}
+                disabled={
+                  minRatioStatus === 'unconfirmed' ||
+                  minRatioStatus === 'pending' ||
+                  minJuniorRatio === pool.data.minJuniorRatio.toString()
+                }
               />
             </Box>
           </Box>
@@ -115,7 +133,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 value={baseToDisplay(maxJuniorRatio, 25)}
                 precision={2}
                 onValueChange={({ value }) => setMaxJuniorRatio(displayToBase(value, 25))}
-                disabled={disabled}
+                disabled={maxRatioStatus === 'unconfirmed' || maxRatioStatus === 'pending'}
               />
             </FormField>
 
@@ -124,7 +142,11 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 primary
                 label="Apply"
                 onClick={saveMaxJuniorRatio}
-                disabled={disabled || maxJuniorRatio === (pool.data as PoolDataV3).maxJuniorRatio.toString()}
+                disabled={
+                  maxRatioStatus === 'unconfirmed' ||
+                  maxRatioStatus === 'pending' ||
+                  maxJuniorRatio === (pool.data as PoolDataV3).maxJuniorRatio.toString()
+                }
               />
             </Box>
           </Box>
@@ -144,7 +166,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 value={baseToDisplay(maxReserve, 18)}
                 precision={2}
                 onValueChange={({ value }) => setMaxReserve(displayToBase(value, 18))}
-                disabled={disabled}
+                disabled={maxReserveStatus === 'unconfirmed' || maxReserveStatus === 'pending'}
               />
             </FormField>
 
@@ -153,7 +175,11 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 primary
                 label="Apply"
                 onClick={saveMaxReserve}
-                disabled={disabled || maxReserve === (pool.data as PoolDataV3).maxReserve.toString()}
+                disabled={
+                  maxReserveStatus === 'unconfirmed' ||
+                  maxReserveStatus === 'pending' ||
+                  maxReserve === (pool.data as PoolDataV3).maxReserve.toString()
+                }
               />
             </Box>
           </Box>

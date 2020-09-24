@@ -35,8 +35,6 @@ export interface TransactionProps {
 const START_PROCESSING = 'tinlake-ui/transactions/START_PROCESSING'
 const STOP_PROCESSING = 'tinlake-ui/transactions/STOP_PROCESSING'
 const SET_ACTIVE_TRANSACTION = 'tinlake-ui/transactions/SET_ACTIVE_TRANSACTION'
-const QUEUE_TRANSACTION = 'tinlake-ui/transactions/QUEUE_TRANSACTION'
-const DEQUEUE_TRANSACTION = 'tinlake-ui/transactions/DEQUEUE_TRANSACTION'
 
 export type TransactionId = string
 export type TransactionStatus = 'unconfirmed' | 'pending' | 'succeeded' | 'failed'
@@ -67,13 +65,11 @@ export interface Transaction {
 export interface TransactionState {
   processing: boolean
   active: { [key: string]: Transaction }
-  queue: { [key: string]: Transaction }
 }
 
 const initialState: TransactionState = {
   processing: false,
   active: {},
-  queue: {},
 }
 
 // Reducer
@@ -106,28 +102,6 @@ export default function reducer(
           },
         },
       }
-    case QUEUE_TRANSACTION:
-      return {
-        ...state,
-        queue: {
-          ...state.queue,
-          [action.id]: {
-            ...action.transaction,
-            updatedAt: new Date().getTime(),
-          },
-        },
-      }
-    case DEQUEUE_TRANSACTION:
-      const newQueue = state.queue
-
-      if (action.id in state.queue) {
-        delete newQueue[action.id]
-      }
-
-      return {
-        ...state,
-        queue: newQueue,
-      }
     default:
       return state
   }
@@ -139,7 +113,7 @@ export function createTransaction<A extends TransactionAction>(
   actionName: A,
   args: Parameters<typeof actions[A]>
 ): ThunkAction<Promise<string>, { transactions: TransactionState }, undefined, Action> {
-  return async (dispatch, getState) => {
+  return async (dispatch) => {
     // Generate a unique id
     const id: TransactionId = (new Date().getTime() + Math.floor(Math.random() * 1000000)).toString()
 
@@ -164,13 +138,8 @@ export function createTransaction<A extends TransactionAction>(
       status: 'unconfirmed',
       showIfClosed: true,
     }
-    dispatch({ id, transaction: unconfirmedTx, type: QUEUE_TRANSACTION })
 
-    // Start processing this transaction if no transaction is currently being processed
-    if (!getState().transactions.processing) {
-      dispatch({ type: START_PROCESSING })
-      dispatch(processTransaction(unconfirmedTx))
-    }
+    dispatch(processTransaction(unconfirmedTx))
 
     return id
   }
@@ -179,10 +148,8 @@ export function createTransaction<A extends TransactionAction>(
 export function processTransaction(
   unconfirmedTx: Transaction
 ): ThunkAction<Promise<void>, { transactions: TransactionState }, undefined, Action> {
-  return async (dispatch, getState) => {
-    // Dequeue
+  return async (dispatch) => {
     const id = unconfirmedTx.id
-    dispatch({ id, transaction: unconfirmedTx, type: DEQUEUE_TRANSACTION })
     dispatch({ id, transaction: unconfirmedTx, type: SET_ACTIVE_TRANSACTION })
     let hasCompleted = false
 
@@ -282,15 +249,6 @@ export function processTransaction(
 
     // Hide succeeded/failed tx after 5s
     setTimeout(hideCompletedTxCallback, completedTxTimeout)
-
-    // Process next transaction in queue
-    if (Object.keys(getState().transactions.queue).length > 0) {
-      const nextTransactionId = Object.keys(getState().transactions.queue)[0]
-      const nextTransaction = getState().transactions.queue[nextTransactionId]
-      dispatch(processTransaction(nextTransaction))
-    } else {
-      dispatch({ type: STOP_PROCESSING })
-    }
   }
 }
 
