@@ -100,23 +100,11 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
     }
 
-    proxyRepay = async (proxyAddress: string, loanId: string, amount: string) => {
-      const proxy = this.contract('PROXY', proxyAddress)
-      const encoded = this.contract('ACTIONS').interface.functions.repay.encode([
-        this.contract('SHELF').address,
-        this.contract('TINLAKE_CURRENCY').address,
-        loanId,
-        amount
-      ])
-
-      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
-    }
-
     proxyLock = async (proxyAddress: string, loanId: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
       const encoded = this.contract('ACTIONS').interface.functions.lock.encode([this.contract('SHELF').address, loanId])
 
-      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
     }
 
     proxyBorrowWithdraw = async (proxyAddress: string, loanId: string, amount: string, usr: string) => {
@@ -128,7 +116,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         usr,
       ])
 
-      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded))
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
     }
 
     proxyRepay = async (proxyAddress: string, loanId: string, amount: string) => {
