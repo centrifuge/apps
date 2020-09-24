@@ -120,8 +120,10 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   return (
-    <Box>
-      <Button primary label="Get started" margin={{ left: 'auto', vertical: 'large' }} onClick={onOpen} />
+    <>
+      <Box margin={{ left: 'auto' }}>
+        <Button primary label="Get started" fill={false} onClick={onOpen} />
+      </Box>
 
       <FormModal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose}>
         <Form onSubmit={onSubmit}>
@@ -254,7 +256,7 @@ const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
       </FormModal>
 
       <InvestActionSuccessModal open={successModalIsOpen} onClose={() => setSuccessModalIsOpen(false)} />
-    </Box>
+    </>
   )
 }
 

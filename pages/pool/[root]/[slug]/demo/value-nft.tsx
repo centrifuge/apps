@@ -1,37 +1,38 @@
 import * as React from 'react'
-import LoanList from '../../../../../containers/Loan/List'
 import WithTinlake from '../../../../../components/WithTinlake'
-import { Box, Heading, Button } from 'grommet'
+import { Box, Heading } from 'grommet'
+import ValueNFT from '../../../../../components/ValueNFT'
 import Header from '../../../../../components/Header'
 import { menuItems } from '../../../../../menuItems'
-import SecondaryHeader from '../../../../../components/SecondaryHeader'
-import Auth from '../../../../../components/Auth'
-import { PoolLink } from '../../../../../components/PoolLink'
 import WithFooter from '../../../../../components/WithFooter'
-import { WithRouterProps } from 'next/dist/client/with-router'
 import config, { Pool } from '../../../../../config'
+import withRouter, { WithRouterProps } from 'next/dist/client/with-router'
 import { GetStaticProps } from 'next'
+import Auth from '../../../../../components/Auth'
 import Container from '../../../../../components/Container'
 import Head from 'next/head'
+import { BackLink } from '../../../../../components/BackLink'
+import SecondaryHeader from '../../../../../components/SecondaryHeader'
 
 interface Props extends WithRouterProps {
   root: string
   pool: Pool
 }
 
-class LoanListPage extends React.Component<Props> {
+class ValueNFTPage extends React.Component<Props> {
   render() {
     const { pool } = this.props
+    const { tokenId, registry }: { tokenId: string; registry: string } = this.props.router.query as any
 
     return (
       <WithFooter>
         <Head>
-          <title>Assets: {pool.name} | Tinlake | Centrifuge</title>
+          <title>Value NFT: {pool.name} | Tinlake | Centrifuge</title>
         </Head>
-        <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/assets'} menuItems={menuItems} />
+        <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/demo/value-nft'} menuItems={menuItems} />
         <Container>
-          <Box justify="evenly" direction="row">
-            <Box width="xlarge" gap="medium">
+          <Box justify="center" direction="row">
+            <Box width="xlarge">
               <WithTinlake
                 version={pool.version}
                 addresses={pool.addresses}
@@ -42,12 +43,12 @@ class LoanListPage extends React.Component<Props> {
                     render={(auth) => (
                       <Box>
                         <SecondaryHeader>
-                          <Heading level="3">Assets</Heading>
-                          <PoolLink href={'/assets/issue'}>
-                            <Button primary label="Open Financing" />
-                          </PoolLink>
+                          <Box direction="row" gap="small" align="center">
+                            <BackLink href={'/assets'} />
+                            <Heading level="3">Value NFT</Heading>
+                          </Box>
                         </SecondaryHeader>
-                        <LoanList tinlake={tinlake} auth={auth} />
+                        <ValueNFT tinlake={tinlake} auth={auth} tokenId={tokenId} registry={registry} />
                       </Box>
                     )}
                   />
@@ -73,4 +74,4 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   return { props: { root: params?.root, pool: config.pools.find((p) => p.addresses.ROOT_CONTRACT === params?.root) } }
 }
 
-export default LoanListPage
+export default withRouter(ValueNFTPage)

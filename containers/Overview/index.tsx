@@ -7,14 +7,15 @@ import { Pool } from '../../config'
 import { withRouter, NextRouter } from 'next/router'
 import OverviewComp from '../../components/Overview'
 import { ITinlake } from '@centrifuge/tinlake-js'
+import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 
 interface Props {
-  tinlake: ITinlake
+  tinlake: ITinlake | ITinlakeV3
   loans?: LoansState
-  loadLoans?: (tinlake: ITinlake) => Promise<void>
+  loadLoans?: (tinlake: ITinlake | ITinlakeV3) => Promise<void>
   pool?: PoolState
   auth?: AuthState
-  loadPool?: (tinlake: ITinlake) => Promise<void>
+  loadPool?: (tinlake: ITinlake | ITinlakeV3) => Promise<void>
   selectedPool: Pool
   router: NextRouter
 }

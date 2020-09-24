@@ -1,4 +1,5 @@
 import Tinlake, { ITinlake } from '@centrifuge/tinlake-js'
+import { default as TinlakeV3, ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { ethers } from 'ethers'
 import config from '../../config'
 
@@ -6,20 +7,24 @@ type ContractAddresses = {
   [key: string]: string
 }
 
-let tinlake: ITinlake | null = null
+let tinlake: ITinlake | ITinlakeV3 | null = null
 let currentAddresses: null | ContractAddresses = null
 let currentContractConfig: null | any = null
 
 // initTinlake returns a singleton tinlake. Tinlake is re-intialized if addresses or contractConfig has been changed.
 export function initTinlake({
+  version,
   addresses,
   contractConfig,
-}: { addresses?: ContractAddresses | null; contractConfig?: any | null } = {}): ITinlake {
-  if (tinlake === null) {
+}: { version?: 2 | 3; addresses?: ContractAddresses | null; contractConfig?: any | null } = {}): ITinlake | ITinlakeV3 {
+  if (tinlake === null || version != tinlake.version) {
     const { transactionTimeout } = config
     const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
     const overrides = config.network === 'Kovan' ? { gasLimit: config.gasLimit } : {}
-    tinlake = new Tinlake({ transactionTimeout, overrides, provider: rpcProvider })
+
+    if (version === 2)
+      tinlake = (new Tinlake({ transactionTimeout, overrides, provider: rpcProvider }) as unknown) as ITinlake
+    else tinlake = new TinlakeV3({ transactionTimeout, overrides, provider: rpcProvider })
   }
 
   let resetContractAddresses = false
@@ -42,7 +47,7 @@ export function initTinlake({
   return tinlake!
 }
 
-export function getTinlake(): ITinlake | null {
+export function getTinlake(): ITinlake | ITinlakeV3 | null {
   return tinlake
 }
 

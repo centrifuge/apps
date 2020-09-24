@@ -9,17 +9,30 @@ import { HYDRATE } from 'next-redux-wrapper'
 const LOAD_POOL = 'tinlake-ui/pool/LOAD_POOL'
 const RECEIVE_POOL = 'tinlake-ui/pool/RECEIVE_POOL'
 
+export interface PoolTranche extends Tranche {
+  pendingInvestments?: BN
+  pendingRedemptions?: BN
+}
+
 export interface PoolData {
-  junior: Tranche
-  senior?: Tranche
+  junior: PoolTranche
+  senior?: PoolTranche
   availableFunds: BN
   minJuniorRatio: BN
   currentJuniorRatio: BN
 }
 
+export interface PoolDataV3 extends PoolData {
+  netAssetValue: BN
+  reserve: BN
+  maxJuniorRatio: BN
+  maxReserve: BN
+  outstandingVolume: BN
+}
+
 export interface PoolState {
   state: null | 'loading' | 'found'
-  data: null | PoolData
+  data: null | PoolData | PoolDataV3
 }
 
 const initialState: PoolState = {
