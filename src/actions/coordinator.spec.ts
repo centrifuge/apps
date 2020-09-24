@@ -23,7 +23,7 @@ describe('coordinator tests', async () => {
     assert(state.maxReserve >= 0)
   })
 
-  // it('should be able to close the epoch', async () => {
+  // it('should be able to run the solver', async () => {
   //   const solveTx = await tinlake.solveEpoch()
   //   const solveResult = await tinlake.getTransactionReceipt(solveTx)
   //   assert.equal(solveResult.status, SUCCESS_STATUS)
