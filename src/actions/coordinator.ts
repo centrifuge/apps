@@ -114,10 +114,17 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         throw new Error('Solution could not be found for the current epoch')
       }
 
-      // TODO: we need to multiply these values by 10**18 and change them to BigInts
+      const toUintValue = (num: number): string => { return new BN(num).mul(new BN(10).pow(new BN(18))).toString() }
 
-      throw new Error('to be completed')
-      // return this.pending(coordinator.submitSolution(...Object.values(solution.vars), this.overrides))
+      const submissionTx = coordinator.submitSolution(
+        toUintValue(solution.vars.dropRedeem),
+        toUintValue(solution.vars.tinRedeem),
+        toUintValue(solution.vars.tinInvest),
+        toUintValue(solution.vars.dropInvest),
+        this.overrides
+      )
+
+      return this.pending(submissionTx)
     }
 
     executeEpoch = async () => {
@@ -126,7 +133,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         throw new Error('Current epoch is still in the challenge period')
       }
 
-      return this.pending(coordinator.executeEpoch())
+      return this.pending(coordinator.executeEpoch(this.overrides))
     }
 
     getCurrentEpochId = async () => {
