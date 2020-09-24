@@ -113,7 +113,13 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         {isAdmin && (
           <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
             {props.epochData.state === 'can-be-closed' && (
-              <Button label={`Close epoch ${props.epochData.id}`} primary onClick={solve} disabled={disabled} />
+              <Button label={`Close epoch`} primary onClick={solve} disabled={disabled} />
+            )}
+            {props.epochData.state === 'in-submission-period' && (
+              <Button label={`Run solver`} primary disabled={true} />
+            )}
+            {props.epochData.state === 'in-challenge-period' && (
+              <Button label={`Execute epoch ${props.epochData.id}`} primary disabled={true} />
             )}
             {props.epochData.state === 'challenge-period-ended' && (
               <Button label={`Execute epoch ${props.epochData.id}`} primary onClick={execute} disabled={disabled} />

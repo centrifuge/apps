@@ -21,7 +21,7 @@ interface Props {
 
 export type EpochData = {
   id: number
-  state: 'open' | 'can-be-closed' | 'in-challenge-period' | 'challenge-period-ended'
+  state: 'open' | 'can-be-closed' | 'in-submission-period' | 'in-challenge-period' | 'challenge-period-ended'
   minimumEpochTime: number
   lastEpochClosed: number
   latestBlockTimestamp: number

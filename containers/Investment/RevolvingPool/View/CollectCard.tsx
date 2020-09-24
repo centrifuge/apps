@@ -28,6 +28,14 @@ const CollectCard: React.FC<Props> = (props: Props) => {
 
   const [status, , setTxId] = useTransactionState()
 
+  // const orderedAmount =
+  //   type === 'Invest'
+  //     ? props.disbursements.remainingSupplyCurrency
+  //         .div(new BN(props.tokenPrice).div(new BN(10).pow(new BN(9))))
+  //         .mul(new BN(10).pow(new BN(18)))
+  //         .toString()
+  //     : new BN(0)
+
   // If it's a redeem order, then convert amount back into DROP/TIN
   const settledAmount =
     type === 'Invest'
@@ -86,7 +94,10 @@ const CollectCard: React.FC<Props> = (props: Props) => {
           </TableRow>
           {/* <TableRow>
             <TableCell scope="row">Order amount</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>12.333,00</TableCell>
+            <TableCell style={{ textAlign: 'end' }}>
+              {addThousandsSeparators(toPrecision(baseToDisplay(orderedAmount, 18), 2))}{' '}
+              {props.tranche === 'senior' ? 'DROP' : 'TIN'}
+            </TableCell>
           </TableRow> */}
           <TableRow>
             <TableCell scope="row">Settled amount</TableCell>
