@@ -23,12 +23,11 @@ describe('coordinator tests', async () => {
     assert(state.maxReserve >= 0)
   })
 
-  it('should be able to close the epoch', async () => {
-    const epochState = await tinlake.getCurrentEpochState()
-    // const solveTx = await tinlake.solveEpoch()
-    // const closeResult = await tinlake.getTransactionReceipt(solveTx)
-    // assert.equal(closeResult, SUCCESS_STATUS)
-  })
+  // it('should be able to run the solver', async () => {
+  //   const solveTx = await tinlake.solveEpoch()
+  //   const solveResult = await tinlake.getTransactionReceipt(solveTx)
+  //   assert.equal(solveResult.status, SUCCESS_STATUS)
+  // })
 
   it('should be able to get the order state', async () => {
     const coordinator = tinlake.contract('COORDINATOR')
