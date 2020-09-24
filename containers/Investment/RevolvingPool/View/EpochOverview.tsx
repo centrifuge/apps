@@ -9,7 +9,7 @@ import { PoolDataV3, PoolState } from '../../../../ducks/pool'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
-import { SignIcon, Warning } from './styles'
+import { SignIcon } from './styles'
 import { useInterval } from '../../../../utils/hooks'
 import BN from 'bn.js'
 
