@@ -70,6 +70,8 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
 
   const totalRedemptionsCurrency = juniorRedemptionsCurrency.add(seniorRedemptionsCurrency)
 
+  const investmentCapacity = poolData ? poolData.maxReserve.sub(poolData.reserve) : new BN(0)
+
   const isAdmin = props.auth?.permissions?.canSetMinimumJuniorRatio
 
   return (
@@ -96,15 +98,9 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               <TableCell style={{ textAlign: 'end' }}>{secondsToHms(props.epochData.minimumEpochTime)}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell scope="row">Current Reserve</TableCell>
+              <TableCell scope="row">Total epoch investment capacity</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                {poolData && addThousandsSeparators(toPrecision(baseToDisplay(poolData.reserve, 18), 2))} DAI
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell scope="row">Maximum Reserve Amount</TableCell>
-              <TableCell style={{ textAlign: 'end' }}>
-                {poolData && addThousandsSeparators(toPrecision(baseToDisplay(poolData.maxReserve, 18), 2))} DAI
+                {addThousandsSeparators(toPrecision(baseToDisplay(investmentCapacity, 18), 2))} DAI
               </TableCell>
             </TableRow>
           </TableBody>
@@ -113,7 +109,15 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         {isAdmin && (
           <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
             {props.epochData.state === 'can-be-closed' && (
-              <Button label={`Close epoch`} primary onClick={solve} disabled={disabled} />
+              <Button
+                label={`Close epoch`}
+                primary
+                onClick={solve}
+                disabled={
+                  disabled ||
+                  props.epochData?.lastEpochClosed + props.epochData?.minimumEpochTime >= new Date().getTime() / 1000
+                }
+              />
             )}
             {props.epochData.state === 'in-submission-period' && (
               <Button label={`Run solver`} primary disabled={true} />

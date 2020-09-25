@@ -66,6 +66,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
         token="DAI"
         value={daiValue}
         maxValue={limit}
+        limitLabel="Your balance"
         onChange={(newValue: string) => setDaiValue(newValue)}
         disabled={disabled}
       />

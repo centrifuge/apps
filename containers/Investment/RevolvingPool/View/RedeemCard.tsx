@@ -70,6 +70,7 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
         token={token}
         value={tokenValue}
         maxValue={limit}
+        limitLabel="Your balance"
         onChange={(newValue: string) => setTokenValue(newValue)}
         disabled={disabled}
       />

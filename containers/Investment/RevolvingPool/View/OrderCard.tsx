@@ -63,12 +63,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
     }
   }, [status])
 
-  const disabled =
-    status === 'pending' ||
-    status === 'unconfirmed' ||
-    props.epochData?.state === 'in-submission-period' ||
-    props.epochData?.state === 'in-challenge-period' ||
-    props.epochData?.state === 'challenge-period-ended'
+  const disabled = status === 'pending' || status === 'unconfirmed' || props.epochData?.isBlockedState
 
   return (
     <Box>
@@ -115,9 +110,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
         </TableBody>
       </Table>
 
-      {(props.epochData?.state === 'in-submission-period' ||
-        props.epochData?.state === 'in-challenge-period' ||
-        props.epochData?.state === 'challenge-period-ended') && (
+      {props.epochData?.isBlockedState && (
         <Info>
           <Heading level="6" margin={{ bottom: 'xsmall' }}>
             Computing orders
