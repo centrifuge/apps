@@ -160,6 +160,9 @@ export function load(
     // onboard not yet initialized, initialize now
     onboard = initOnboard({
       address: (address) => {
+        // TODO: when you switch your account in Metamask, this address hook get called, but the wallet subscription
+        // is not always being called. We should investigate whether this is an issue with the bnc-onboard library or
+        // our usage/implementation of the library.
         dispatch(setAddressAndLoadData(tinlake, address))
       },
       network: (network) => {

@@ -129,10 +129,32 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       {isInMemberlist === true && (
         <>
           {card === 'home' && (
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button primary label="Redeem" onClick={() => setCard('redeem')} disabled={balance === '0'} />
-              <Button primary label="Invest" onClick={() => setCard('invest')} />
-            </Box>
+            <>
+              {props.epochData?.isBlockedState && (
+                <Info>
+                  <Heading level="6" margin={{ bottom: 'xsmall' }}>
+                    Computing orders
+                  </Heading>
+                  The Epoch has just been closed and the order executions are currently being computed. Until the next
+                  Epoch opens, you cannot submit new orders.
+                </Info>
+              )}
+
+              <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                <Button
+                  primary
+                  label="Redeem"
+                  onClick={() => setCard('redeem')}
+                  disabled={balance === '0' || props.epochData?.isBlockedState}
+                />
+                <Button
+                  primary
+                  label="Invest"
+                  onClick={() => setCard('invest')}
+                  disabled={props.epochData?.isBlockedState}
+                />
+              </Box>
+            </>
           )}
           {card === 'order' && (
             <OrderCard
