@@ -32,7 +32,14 @@ export default class UserForm extends React.Component<InviteProps> {
         .required('This field is required'),
       email: Yup.string()
         .email('Please enter a valid email')
-        .required('This field is required'),
+        .required('This field is required')
+        .test({
+          name:'lowercase_string',
+          test: (function(this, value) {
+            return value === value.toLocaleLowerCase();
+          }),
+          message: 'Only lowercase letters',
+        }),
       permissions: Yup.array()
         .required('This field is required'),
       schemas: Yup.array()

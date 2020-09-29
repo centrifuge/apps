@@ -19,14 +19,14 @@ exports[`NotificationContext Should render a default popup 1`] = `
         aria-hidden="false"
       >
         <div
-          class="StyledLayer-rmtehz-0 iOadC"
+          class="StyledLayer-rmtehz-0 cfjZVQ"
           tabindex="-1"
         >
           <div
-            class="StyledLayer__StyledOverlay-rmtehz-1 kCkDcC"
+            class="StyledLayer__StyledOverlay-rmtehz-1 bYEbar"
           />
           <div
-            class="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
+            class="StyledLayer__StyledContainer-rmtehz-2 ijiFTe"
           >
             <a
               aria-hidden="true"
@@ -34,13 +34,13 @@ exports[`NotificationContext Should render a default popup 1`] = `
               tabindex="-1"
             />
             <div
-              class="StyledBox-sc-13pk1d4-0 fLFmbb"
+              class="StyledBox-sc-13pk1d4-0 bvFSOw"
             >
               <div
-                class="StyledBox-sc-13pk1d4-0 iuDTIq"
+                class="StyledBox-sc-13pk1d4-0 fVYJBt"
               >
                 <h3
-                  class="StyledHeading-sc-1rdh4aw-0 ldQxwA"
+                  class="StyledHeading-sc-1rdh4aw-0 cutvkF"
                 >
                   <div
                     class="Modal__Title-sc-14fi5dq-1 hTYitU"
@@ -49,7 +49,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
                   </div>
                 </h3>
                 <button
-                  class="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+                  class="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 dmNIDB"
                   type="button"
                 >
                   <svg
@@ -68,7 +68,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
                 </button>
               </div>
               <div
-                class="StyledBox-sc-13pk1d4-0 fWrrBh"
+                class="StyledBox-sc-13pk1d4-0 faQrIe"
               >
                 <p
                   class="StyledParagraph-tbetod-0 dIDtVY"
@@ -77,7 +77,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
                 </p>
               </div>
               <div
-                class="StyledBox-sc-13pk1d4-0 kPYZDW"
+                class="StyledBox-sc-13pk1d4-0 cvDtre"
               />
             </div>
           </div>
@@ -90,16 +90,16 @@ exports[`NotificationContext Should render a default popup 1`] = `
     aria-hidden={false}
   >
     <div
-      className="StyledLayer-rmtehz-0 iOadC"
+      className="StyledLayer-rmtehz-0 cfjZVQ"
       onKeyDown={[Function]}
       tabIndex="-1"
     >
       <div
-        className="StyledLayer__StyledOverlay-rmtehz-1 kCkDcC"
+        className="StyledLayer__StyledOverlay-rmtehz-1 bYEbar"
         onMouseDown={[Function]}
       />
       <div
-        className="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
+        className="StyledLayer__StyledContainer-rmtehz-2 ijiFTe"
       >
         <a
           aria-hidden="true"
@@ -107,13 +107,13 @@ exports[`NotificationContext Should render a default popup 1`] = `
           tabIndex="-1"
         />
         <div
-          className="StyledBox-sc-13pk1d4-0 fLFmbb"
+          className="StyledBox-sc-13pk1d4-0 bvFSOw"
         >
           <div
-            className="StyledBox-sc-13pk1d4-0 iuDTIq"
+            className="StyledBox-sc-13pk1d4-0 fVYJBt"
           >
             <h3
-              className="StyledHeading-sc-1rdh4aw-0 ldQxwA"
+              className="StyledHeading-sc-1rdh4aw-0 cutvkF"
             >
               <div
                 className="Modal__Title-sc-14fi5dq-1 hTYitU"
@@ -122,7 +122,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
               </div>
             </h3>
             <button
-              className="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+              className="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 dmNIDB"
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -153,7 +153,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
             </button>
           </div>
           <div
-            className="StyledBox-sc-13pk1d4-0 fWrrBh"
+            className="StyledBox-sc-13pk1d4-0 faQrIe"
           >
             <p
               className="StyledParagraph-tbetod-0 dIDtVY"
@@ -162,7 +162,7 @@ exports[`NotificationContext Should render a default popup 1`] = `
             </p>
           </div>
           <div
-            className="StyledBox-sc-13pk1d4-0 kPYZDW"
+            className="StyledBox-sc-13pk1d4-0 cvDtre"
           />
         </div>
       </div>
@@ -179,14 +179,14 @@ exports[`NotificationContext Should render a error popup 1`] = `
         aria-hidden="false"
       >
         <div
-          class="StyledLayer-rmtehz-0 iOadC"
+          class="StyledLayer-rmtehz-0 cfjZVQ"
           tabindex="-1"
         >
           <div
-            class="StyledLayer__StyledOverlay-rmtehz-1 kCkDcC"
+            class="StyledLayer__StyledOverlay-rmtehz-1 bYEbar"
           />
           <div
-            class="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
+            class="StyledLayer__StyledContainer-rmtehz-2 ijiFTe"
           >
             <a
               aria-hidden="true"
@@ -194,13 +194,13 @@ exports[`NotificationContext Should render a error popup 1`] = `
               tabindex="-1"
             />
             <div
-              class="StyledBox-sc-13pk1d4-0 fLFmbb"
+              class="StyledBox-sc-13pk1d4-0 bvFSOw"
             >
               <div
-                class="StyledBox-sc-13pk1d4-0 iuDTIq"
+                class="StyledBox-sc-13pk1d4-0 fVYJBt"
               >
                 <h3
-                  class="StyledHeading-sc-1rdh4aw-0 dRDcVv"
+                  class="StyledHeading-sc-1rdh4aw-0 knbKGX"
                 >
                   <div
                     class="Modal__Title-sc-14fi5dq-1 hTYitU"
@@ -209,7 +209,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
                   </div>
                 </h3>
                 <button
-                  class="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+                  class="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 dmNIDB"
                   type="button"
                 >
                   <svg
@@ -228,7 +228,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
                 </button>
               </div>
               <div
-                class="StyledBox-sc-13pk1d4-0 fWrrBh"
+                class="StyledBox-sc-13pk1d4-0 faQrIe"
               >
                 <p
                   class="StyledParagraph-tbetod-0 dIDtVY"
@@ -237,10 +237,10 @@ exports[`NotificationContext Should render a error popup 1`] = `
                 </p>
               </div>
               <div
-                class="StyledBox-sc-13pk1d4-0 kPYZDW"
+                class="StyledBox-sc-13pk1d4-0 cvDtre"
               >
                 <button
-                  class="StyledButton-sc-323bzc-0 gvItKj"
+                  class="StyledButton-sc-323bzc-0 flUQlI"
                   type="button"
                 >
                   OK
@@ -257,16 +257,16 @@ exports[`NotificationContext Should render a error popup 1`] = `
     aria-hidden={false}
   >
     <div
-      className="StyledLayer-rmtehz-0 iOadC"
+      className="StyledLayer-rmtehz-0 cfjZVQ"
       onKeyDown={[Function]}
       tabIndex="-1"
     >
       <div
-        className="StyledLayer__StyledOverlay-rmtehz-1 kCkDcC"
+        className="StyledLayer__StyledOverlay-rmtehz-1 bYEbar"
         onMouseDown={[Function]}
       />
       <div
-        className="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
+        className="StyledLayer__StyledContainer-rmtehz-2 ijiFTe"
       >
         <a
           aria-hidden="true"
@@ -274,13 +274,13 @@ exports[`NotificationContext Should render a error popup 1`] = `
           tabIndex="-1"
         />
         <div
-          className="StyledBox-sc-13pk1d4-0 fLFmbb"
+          className="StyledBox-sc-13pk1d4-0 bvFSOw"
         >
           <div
-            className="StyledBox-sc-13pk1d4-0 iuDTIq"
+            className="StyledBox-sc-13pk1d4-0 fVYJBt"
           >
             <h3
-              className="StyledHeading-sc-1rdh4aw-0 dRDcVv"
+              className="StyledHeading-sc-1rdh4aw-0 knbKGX"
             >
               <div
                 className="Modal__Title-sc-14fi5dq-1 hTYitU"
@@ -289,7 +289,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
               </div>
             </h3>
             <button
-              className="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+              className="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 dmNIDB"
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -320,7 +320,7 @@ exports[`NotificationContext Should render a error popup 1`] = `
             </button>
           </div>
           <div
-            className="StyledBox-sc-13pk1d4-0 fWrrBh"
+            className="StyledBox-sc-13pk1d4-0 faQrIe"
           >
             <p
               className="StyledParagraph-tbetod-0 dIDtVY"
@@ -329,10 +329,10 @@ exports[`NotificationContext Should render a error popup 1`] = `
             </p>
           </div>
           <div
-            className="StyledBox-sc-13pk1d4-0 kPYZDW"
+            className="StyledBox-sc-13pk1d4-0 cvDtre"
           >
             <button
-              className="StyledButton-sc-323bzc-0 gvItKj"
+              className="StyledButton-sc-323bzc-0 flUQlI"
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -358,14 +358,14 @@ exports[`NotificationContext Should render a success popup 1`] = `
         aria-hidden="false"
       >
         <div
-          class="StyledLayer-rmtehz-0 iOadC"
+          class="StyledLayer-rmtehz-0 cfjZVQ"
           tabindex="-1"
         >
           <div
-            class="StyledLayer__StyledOverlay-rmtehz-1 kCkDcC"
+            class="StyledLayer__StyledOverlay-rmtehz-1 bYEbar"
           />
           <div
-            class="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
+            class="StyledLayer__StyledContainer-rmtehz-2 ijiFTe"
           >
             <a
               aria-hidden="true"
@@ -373,13 +373,13 @@ exports[`NotificationContext Should render a success popup 1`] = `
               tabindex="-1"
             />
             <div
-              class="StyledBox-sc-13pk1d4-0 fLFmbb"
+              class="StyledBox-sc-13pk1d4-0 bvFSOw"
             >
               <div
-                class="StyledBox-sc-13pk1d4-0 iuDTIq"
+                class="StyledBox-sc-13pk1d4-0 fVYJBt"
               >
                 <h3
-                  class="StyledHeading-sc-1rdh4aw-0 jSgPI"
+                  class="StyledHeading-sc-1rdh4aw-0 jXJQdf"
                 >
                   <div
                     class="Modal__Title-sc-14fi5dq-1 hTYitU"
@@ -388,7 +388,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
                   </div>
                 </h3>
                 <button
-                  class="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+                  class="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 dmNIDB"
                   type="button"
                 >
                   <svg
@@ -407,7 +407,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
                 </button>
               </div>
               <div
-                class="StyledBox-sc-13pk1d4-0 fWrrBh"
+                class="StyledBox-sc-13pk1d4-0 faQrIe"
               >
                 <p
                   class="StyledParagraph-tbetod-0 dIDtVY"
@@ -416,10 +416,10 @@ exports[`NotificationContext Should render a success popup 1`] = `
                 </p>
               </div>
               <div
-                class="StyledBox-sc-13pk1d4-0 kPYZDW"
+                class="StyledBox-sc-13pk1d4-0 cvDtre"
               >
                 <button
-                  class="StyledButton-sc-323bzc-0 gvItKj"
+                  class="StyledButton-sc-323bzc-0 flUQlI"
                   type="button"
                 >
                   OK
@@ -436,16 +436,16 @@ exports[`NotificationContext Should render a success popup 1`] = `
     aria-hidden={false}
   >
     <div
-      className="StyledLayer-rmtehz-0 iOadC"
+      className="StyledLayer-rmtehz-0 cfjZVQ"
       onKeyDown={[Function]}
       tabIndex="-1"
     >
       <div
-        className="StyledLayer__StyledOverlay-rmtehz-1 kCkDcC"
+        className="StyledLayer__StyledOverlay-rmtehz-1 bYEbar"
         onMouseDown={[Function]}
       />
       <div
-        className="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
+        className="StyledLayer__StyledContainer-rmtehz-2 ijiFTe"
       >
         <a
           aria-hidden="true"
@@ -453,13 +453,13 @@ exports[`NotificationContext Should render a success popup 1`] = `
           tabIndex="-1"
         />
         <div
-          className="StyledBox-sc-13pk1d4-0 fLFmbb"
+          className="StyledBox-sc-13pk1d4-0 bvFSOw"
         >
           <div
-            className="StyledBox-sc-13pk1d4-0 iuDTIq"
+            className="StyledBox-sc-13pk1d4-0 fVYJBt"
           >
             <h3
-              className="StyledHeading-sc-1rdh4aw-0 jSgPI"
+              className="StyledHeading-sc-1rdh4aw-0 jXJQdf"
             >
               <div
                 className="Modal__Title-sc-14fi5dq-1 hTYitU"
@@ -468,7 +468,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
               </div>
             </h3>
             <button
-              className="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+              className="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 dmNIDB"
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -499,7 +499,7 @@ exports[`NotificationContext Should render a success popup 1`] = `
             </button>
           </div>
           <div
-            className="StyledBox-sc-13pk1d4-0 fWrrBh"
+            className="StyledBox-sc-13pk1d4-0 faQrIe"
           >
             <p
               className="StyledParagraph-tbetod-0 dIDtVY"
@@ -508,10 +508,10 @@ exports[`NotificationContext Should render a success popup 1`] = `
             </p>
           </div>
           <div
-            className="StyledBox-sc-13pk1d4-0 kPYZDW"
+            className="StyledBox-sc-13pk1d4-0 cvDtre"
           >
             <button
-              className="StyledButton-sc-323bzc-0 gvItKj"
+              className="StyledButton-sc-323bzc-0 flUQlI"
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -537,14 +537,14 @@ exports[`NotificationContext Should render a warning popup 1`] = `
         aria-hidden="false"
       >
         <div
-          class="StyledLayer-rmtehz-0 iOadC"
+          class="StyledLayer-rmtehz-0 cfjZVQ"
           tabindex="-1"
         >
           <div
-            class="StyledLayer__StyledOverlay-rmtehz-1 kCkDcC"
+            class="StyledLayer__StyledOverlay-rmtehz-1 bYEbar"
           />
           <div
-            class="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
+            class="StyledLayer__StyledContainer-rmtehz-2 ijiFTe"
           >
             <a
               aria-hidden="true"
@@ -552,13 +552,13 @@ exports[`NotificationContext Should render a warning popup 1`] = `
               tabindex="-1"
             />
             <div
-              class="StyledBox-sc-13pk1d4-0 fLFmbb"
+              class="StyledBox-sc-13pk1d4-0 bvFSOw"
             >
               <div
-                class="StyledBox-sc-13pk1d4-0 iuDTIq"
+                class="StyledBox-sc-13pk1d4-0 fVYJBt"
               >
                 <h3
-                  class="StyledHeading-sc-1rdh4aw-0 fqnDwr"
+                  class="StyledHeading-sc-1rdh4aw-0 cTVBxu"
                 >
                   <div
                     class="Modal__Title-sc-14fi5dq-1 hTYitU"
@@ -567,7 +567,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                   </div>
                 </h3>
                 <button
-                  class="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+                  class="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 dmNIDB"
                   type="button"
                 >
                   <svg
@@ -586,7 +586,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                 </button>
               </div>
               <div
-                class="StyledBox-sc-13pk1d4-0 fWrrBh"
+                class="StyledBox-sc-13pk1d4-0 faQrIe"
               >
                 <p
                   class="StyledParagraph-tbetod-0 dIDtVY"
@@ -595,10 +595,10 @@ exports[`NotificationContext Should render a warning popup 1`] = `
                 </p>
               </div>
               <div
-                class="StyledBox-sc-13pk1d4-0 kPYZDW"
+                class="StyledBox-sc-13pk1d4-0 cvDtre"
               >
                 <button
-                  class="StyledButton-sc-323bzc-0 gvItKj"
+                  class="StyledButton-sc-323bzc-0 flUQlI"
                   type="button"
                 >
                   OK
@@ -615,16 +615,16 @@ exports[`NotificationContext Should render a warning popup 1`] = `
     aria-hidden={false}
   >
     <div
-      className="StyledLayer-rmtehz-0 iOadC"
+      className="StyledLayer-rmtehz-0 cfjZVQ"
       onKeyDown={[Function]}
       tabIndex="-1"
     >
       <div
-        className="StyledLayer__StyledOverlay-rmtehz-1 kCkDcC"
+        className="StyledLayer__StyledOverlay-rmtehz-1 bYEbar"
         onMouseDown={[Function]}
       />
       <div
-        className="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
+        className="StyledLayer__StyledContainer-rmtehz-2 ijiFTe"
       >
         <a
           aria-hidden="true"
@@ -632,13 +632,13 @@ exports[`NotificationContext Should render a warning popup 1`] = `
           tabIndex="-1"
         />
         <div
-          className="StyledBox-sc-13pk1d4-0 fLFmbb"
+          className="StyledBox-sc-13pk1d4-0 bvFSOw"
         >
           <div
-            className="StyledBox-sc-13pk1d4-0 iuDTIq"
+            className="StyledBox-sc-13pk1d4-0 fVYJBt"
           >
             <h3
-              className="StyledHeading-sc-1rdh4aw-0 fqnDwr"
+              className="StyledHeading-sc-1rdh4aw-0 cTVBxu"
             >
               <div
                 className="Modal__Title-sc-14fi5dq-1 hTYitU"
@@ -647,7 +647,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
               </div>
             </h3>
             <button
-              className="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+              className="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 dmNIDB"
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -678,7 +678,7 @@ exports[`NotificationContext Should render a warning popup 1`] = `
             </button>
           </div>
           <div
-            className="StyledBox-sc-13pk1d4-0 fWrrBh"
+            className="StyledBox-sc-13pk1d4-0 faQrIe"
           >
             <p
               className="StyledParagraph-tbetod-0 dIDtVY"
@@ -687,10 +687,10 @@ exports[`NotificationContext Should render a warning popup 1`] = `
             </p>
           </div>
           <div
-            className="StyledBox-sc-13pk1d4-0 kPYZDW"
+            className="StyledBox-sc-13pk1d4-0 cvDtre"
           >
             <button
-              className="StyledButton-sc-323bzc-0 gvItKj"
+              className="StyledButton-sc-323bzc-0 flUQlI"
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -716,14 +716,14 @@ exports[`NotificationContext Should set the proper label for the confirm button 
         aria-hidden="false"
       >
         <div
-          class="StyledLayer-rmtehz-0 iOadC"
+          class="StyledLayer-rmtehz-0 cfjZVQ"
           tabindex="-1"
         >
           <div
-            class="StyledLayer__StyledOverlay-rmtehz-1 kCkDcC"
+            class="StyledLayer__StyledOverlay-rmtehz-1 bYEbar"
           />
           <div
-            class="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
+            class="StyledLayer__StyledContainer-rmtehz-2 ijiFTe"
           >
             <a
               aria-hidden="true"
@@ -731,13 +731,13 @@ exports[`NotificationContext Should set the proper label for the confirm button 
               tabindex="-1"
             />
             <div
-              class="StyledBox-sc-13pk1d4-0 fLFmbb"
+              class="StyledBox-sc-13pk1d4-0 bvFSOw"
             >
               <div
-                class="StyledBox-sc-13pk1d4-0 iuDTIq"
+                class="StyledBox-sc-13pk1d4-0 fVYJBt"
               >
                 <h3
-                  class="StyledHeading-sc-1rdh4aw-0 ldQxwA"
+                  class="StyledHeading-sc-1rdh4aw-0 cutvkF"
                 >
                   <div
                     class="Modal__Title-sc-14fi5dq-1 hTYitU"
@@ -746,7 +746,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                   </div>
                 </h3>
                 <button
-                  class="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+                  class="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 dmNIDB"
                   type="button"
                 >
                   <svg
@@ -765,7 +765,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                 </button>
               </div>
               <div
-                class="StyledBox-sc-13pk1d4-0 fWrrBh"
+                class="StyledBox-sc-13pk1d4-0 faQrIe"
               >
                 <p
                   class="StyledParagraph-tbetod-0 dIDtVY"
@@ -774,7 +774,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
                 </p>
               </div>
               <div
-                class="StyledBox-sc-13pk1d4-0 kPYZDW"
+                class="StyledBox-sc-13pk1d4-0 cvDtre"
               />
             </div>
           </div>
@@ -787,16 +787,16 @@ exports[`NotificationContext Should set the proper label for the confirm button 
     aria-hidden={false}
   >
     <div
-      className="StyledLayer-rmtehz-0 iOadC"
+      className="StyledLayer-rmtehz-0 cfjZVQ"
       onKeyDown={[Function]}
       tabIndex="-1"
     >
       <div
-        className="StyledLayer__StyledOverlay-rmtehz-1 kCkDcC"
+        className="StyledLayer__StyledOverlay-rmtehz-1 bYEbar"
         onMouseDown={[Function]}
       />
       <div
-        className="StyledLayer__StyledContainer-rmtehz-2 eSmPYz"
+        className="StyledLayer__StyledContainer-rmtehz-2 ijiFTe"
       >
         <a
           aria-hidden="true"
@@ -804,13 +804,13 @@ exports[`NotificationContext Should set the proper label for the confirm button 
           tabIndex="-1"
         />
         <div
-          className="StyledBox-sc-13pk1d4-0 fLFmbb"
+          className="StyledBox-sc-13pk1d4-0 bvFSOw"
         >
           <div
-            className="StyledBox-sc-13pk1d4-0 iuDTIq"
+            className="StyledBox-sc-13pk1d4-0 fVYJBt"
           >
             <h3
-              className="StyledHeading-sc-1rdh4aw-0 ldQxwA"
+              className="StyledHeading-sc-1rdh4aw-0 cutvkF"
             >
               <div
                 className="Modal__Title-sc-14fi5dq-1 hTYitU"
@@ -819,7 +819,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
               </div>
             </h3>
             <button
-              className="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 kPUXNH"
+              className="Modal__CloseButton-sc-14fi5dq-2 bdvYji StyledButton-sc-323bzc-0 dmNIDB"
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -850,7 +850,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
             </button>
           </div>
           <div
-            className="StyledBox-sc-13pk1d4-0 fWrrBh"
+            className="StyledBox-sc-13pk1d4-0 faQrIe"
           >
             <p
               className="StyledParagraph-tbetod-0 dIDtVY"
@@ -859,7 +859,7 @@ exports[`NotificationContext Should set the proper label for the confirm button 
             </p>
           </div>
           <div
-            className="StyledBox-sc-13pk1d4-0 kPYZDW"
+            className="StyledBox-sc-13pk1d4-0 cvDtre"
           />
         </div>
       </div>

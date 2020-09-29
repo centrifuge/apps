@@ -136,6 +136,8 @@ describe('Schema List', () => {
       const rows = dataTable.find('tbody tr');
       const actions = rows.at(0).find(Anchor);
       actions.at(0).simulate('click');
+      await new Promise(r => setTimeout(r, 0));
+      component.update()
       const modal = component.find(SchemaForm);
       expect(modal.prop('readonly')).toBe(true);
       expect(modal.prop('submitLabel')).toBe('');
@@ -161,6 +163,8 @@ describe('Schema List', () => {
       const rows = dataTable.find('tbody tr');
       const actions = rows.at(0).find(Anchor);
       actions.at(1).simulate('click');
+      await new Promise(r => setTimeout(r, 0));
+      component.update()
       const modal = component.find(SchemaForm);
       expect(modal.prop('readonly')).toBe(false);
       expect(modal.prop('submitLabel')).toBe('Update');
@@ -184,6 +188,8 @@ describe('Schema List', () => {
 
       const create = component.find({ label: 'Create Schema' }).find('button');
       create.simulate('click');
+      await new Promise(r => setTimeout(r, 0));
+      component.update()
       const modal = component.find(SchemaForm);
       expect(modal.prop('readonly')).toBe(false);
       expect(modal.prop('submitLabel')).toBe('Create');

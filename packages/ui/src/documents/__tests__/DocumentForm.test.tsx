@@ -7,7 +7,7 @@ import { SearchSelect } from '@centrifuge/axis-search-select';
 import { Section } from '../../components/Section';
 import Attributes from '../Attributes';
 import { ViewModeFormContainer } from '../../components/ViewModeFormContainer';
-import { SelectOption } from 'grommet/components/Select/SelectOption';
+import { SelectContainer } from 'grommet/components/Select/SelectContainer';
 import Comments from '../Comments';
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers';
 import { defaultSchemas } from '../../test-utilities/default-data';
@@ -229,7 +229,7 @@ describe('DocumentForm', () => {
     );
     expect(documentForm.find(Attributes).length).toEqual(0);
     documentForm.find(Section).first().find(SearchSelect).simulate('click');
-    documentForm.find(SelectOption).first().find('button').first().simulate('click');
+    documentForm.find(SelectContainer).first().find('button').first().simulate('click');
     expect(documentForm.find(Attributes).length).toEqual(1);
 
   });

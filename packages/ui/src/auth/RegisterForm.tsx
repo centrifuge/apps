@@ -5,6 +5,7 @@ import { User } from '@centrifuge/gateway-lib/models/user';
 import routes from './routes';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators';
 
 interface RegisterProps {
   onSubmit: (values: any) => void;
@@ -31,7 +32,15 @@ class RegisterForm extends React.Component<RegisterProps> {
       email: Yup.string()
         .email('Please enter a valid email')
         .required('This field is required'),
-      password: Yup.string().required('Password is required'),
+      password: Yup.string()
+        .required('Password is required')
+        .test({
+        name: 'password_format',
+        test: (function(this, value) {
+          return isPasswordValid(value);
+        }),
+        message: 'Password format not valid',
+      }),
       passwordConfirm: Yup.string()
         .oneOf([Yup.ref('password')], 'Password does not match')
         .required('Password confirm is required'),
@@ -92,6 +101,7 @@ class RegisterForm extends React.Component<RegisterProps> {
                     <FormField
                       label="Password"
                       error={errors.password}
+                      info={'Must have at least eight characters, one uppercase letter, one lowercase letter, one number and one special character'}
                     >
                       <TextInput
                         type="password"

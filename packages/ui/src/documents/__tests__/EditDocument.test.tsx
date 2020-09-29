@@ -322,6 +322,7 @@ describe('Edit Document', () => {
       await documentForm.prop('onSubmit')({
         document,
       });
+      await new Promise(r => setTimeout(r, 0));
       component.update();
       const alert = component.find(Modal);
       expect(alert.find(Heading).text()).toBe('Failed to update document');
