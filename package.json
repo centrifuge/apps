@@ -2,23 +2,16 @@
   "name": "centrifuge-gateway",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "@centrifuge/gateway-lib": "file:packages/lib",
-    "@centrifuge/gateway-server": "file:packages/server",
-    "@centrifuge/gateway-ui": "file:packages/ui"
-  },
   "scripts": {
     "start:prod": "nodemon",
-    "bootstrap": "lerna bootstrap --hoist",
-    "pretest": "lerna run build --scope @centrifuge/gateway-lib",
-    "test": "cross-env CI=true lerna run test --parallel",
-    "start": "cross-env  lerna run start --parallel",
-    "build": "lerna run build --stream",
-    "postbuild": "npm run move:ui",
-    "build:series": "lerna run build",
+    "pretest": "yarn workspace @centrifuge/gateway-lib run build ",
+    "test": "cross-env CI=true yarn workspaces run test ",
+    "start": "yarn workspace @centrifuge/gateway-lib run start & yarn workspace @centrifuge/gateway-server run start & yarn workspace @centrifuge/gateway-ui run start",
+    "build": "yarn workspaces run build",
+    "postbuild": "yarn run move:ui",
+    "build:series": "yarn workspaces run build",
     "postbuild:series": "npm run move:ui",
-    "move:ui": "rm -rf ./build && mv packages/ui/build .",
-    "postinstall": "npm run bootstrap"
+    "move:ui": "rm -rf ./build && mv packages/ui/build ."
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -29,33 +22,11 @@
     "not ie <= 11",
     "not op_mini all"
   ],
-  "devDependencies": {
-    "@nestjs/testing": "6.2.2",
-    "@types/express": "^4.17.7",
-    "@types/express-session": "^1.17.0",
-    "@types/jest": "^24.9.1",
-    "@types/nedb": "1.8.6",
-    "@types/node": "^10.17.28",
-    "@types/passport-http": "^0.3.6",
-    "@types/react-redux": "^6.0.10",
-    "@types/react-router": "^4.3.1",
-    "@types/supertest": "^2.0.10",
-    "enzyme": "^3.11.0",
-    "enzyme-adapter-react-16": "^1.15.3",
-    "enzyme-to-json": "^3.5.0",
-    "lerna": "^3.22.1",
-    "nodemon": "^1.19.4",
-    "prettier": "^1.19.1",
-    "prop-types": "^15.7.2",
-    "react-test-renderer": "^16.13.1",
-    "supertest": "^3.1.0",
-    "ts-jest": "^24.3.0",
-    "ts-loader": "^4.4.2",
-    "ts-node": "^7.0.1",
-    "tsconfig-paths": "^3.5.0",
-    "tslint": "5.11.0",
-    "typescript": "3.2.2"
-  },
+  "workspaces": [
+    "packages/lib",
+    "packages/server",
+    "packages/ui"
+  ],
   "jest": {
     "snapshotSerializers": [
       "enzyme-to-json/serializer"

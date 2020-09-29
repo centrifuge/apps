@@ -144,6 +144,7 @@ export class UsersController {
           // @ts-ignore
           config.admin.chain,
       );
+      // @ts-ignore
       user.account = account.identity_id.toLowerCase();
     }
 

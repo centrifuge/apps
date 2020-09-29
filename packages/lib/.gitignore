@@ -60,15 +60,15 @@ typings/
 # next.js build output
 .next
 
-# build files
+#  build files
 models
 centrifuge-node-client
 utils
 !src/centrifuge-node-client
 !src/models
 !src/utils
+build
+dist
 
 # IntelliJ config files
 .idea
-
-

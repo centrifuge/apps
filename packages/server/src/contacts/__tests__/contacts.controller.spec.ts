@@ -95,7 +95,7 @@ describe('ContactsController', () => {
           name: 'Joe',
         } as Contact);
       } catch (err) {
-        expect(err.message.message).toEqual('Contact address must have ETH format');
+        expect(err.message.message).toEqual('This method only supports 0x-prefixed hex strings but input was: undefined');
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }

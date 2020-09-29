@@ -125,7 +125,7 @@ describe('Schema validations', () => {
           name: 'test',
           label: 'test',
           type: AttrTypes.STRING,
-          fieldWriteAccess: 'test',
+          fieldWriteAccess: '0x33',
         } as any]);
       }).toThrow(AttributesErrors.FIELD_WRITE_ACCESS_FORMAT);
     });
@@ -253,7 +253,7 @@ describe('Schema validations', () => {
 
     it('should fail when collaborators is invalid', () => {
       expect(() => {
-        Schema.validateCollaborators([{ address: '0xInvalid' } as any]);
+        Schema.validateCollaborators([{ address: '0x33' } as any]);
       }).toThrow(CollaboratorErrors.ADDRESS_FORMAT);
     });
 
