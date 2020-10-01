@@ -1,7 +1,6 @@
 import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
 import BN from 'bn.js'
 import { signDaiPermit, signERC2612Permit } from 'eth-permit'
-import {Provider} from 'ethers/providers';
 
 export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Base: ActionBase) {
   return class extends Base implements ILenderActions {
@@ -10,14 +9,12 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
       return this.pending(this.contract('SENIOR_OPERATOR').supplyOrder(supplyAmount, this.overrides))
     }
 
-    submitSeniorSupplyOrderWithDaiPermit = async(amount: string, senderAddress: string) => {
-      if (!this.contractAddresses['TINLAKE_CURRENCY'] || !this.contractAddresses['SENIOR_TRANCHE']) {return}
-      const result = await signDaiPermit(this.provider, this.contractAddresses['TINLAKE_CURRENCY'], senderAddress, this.contractAddresses['SENIOR_TRANCHE']);
-      return this.pending(this.contract('SENIOR_OPERATOR').supplyOrderWithDaiPermit(amount, result.nonce, result.expiry, result.v, result.r, result.s, this.overrides))
-    }
-
     submitSeniorSupplyOrderWithPermit = async(amount: string, senderAddress: string) => {
-      if (!this.contractAddresses['SENIOR_TOKEN'] || !this.contractAddresses['SENIOR_TRANCHE']) {return}
+      if (!this.contractAddresses['SENIOR_TOKEN'] || !this.contractAddresses['SENIOR_TRANCHE'] || !this.contractAddresses['TINLAKE_CURRENCY']) {return}
+      if (this.contractConfig.currency_type === 'DAI') {
+        const result = await signDaiPermit(this.provider, this.contractAddresses['TINLAKE_CURRENCY'], senderAddress, this.contractAddresses['SENIOR_TRANCHE']);
+        return this.pending(this.contract('SENIOR_OPERATOR').supplyOrderWithDaiPermit(amount, result.nonce, result.expiry, result.v, result.r, result.s, this.overrides))
+      }
       const result = await signERC2612Permit(this.provider, this.contractAddresses['SENIOR_TOKEN'], senderAddress, this.contractAddresses['SENIOR_TRANCHE'], amount);
       return this.pending(this.contract('SENIOR_OPERATOR').supplyOrderWithPermit(amount, amount, result.deadline, result.v, result.r, result.s, this.overrides))
     }
@@ -122,7 +119,6 @@ export type ILenderActions = {
   approveSeniorToken: (tokenAmount: string) => Promise<PendingTransaction>
   submitSeniorSupplyOrder(supplyAmount: string): Promise<PendingTransaction>
   submitSeniorSupplyOrderWithPermit(amount: string, senderAddress: string): Promise<PendingTransaction | undefined>
-  submitSeniorSupplyOrderWithDaiPermit(amount: string, senderAddress: string): Promise<PendingTransaction | undefined>
   submitSeniorRedeemOrder(redeemAmount: string): Promise<PendingTransaction>
   submitSeniorRedeemOrderWithPermit(amount: string, senderAddress: string): Promise<PendingTransaction | undefined>
   submitJuniorSupplyOrder(supplyAmount: string): Promise<PendingTransaction>
