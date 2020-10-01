@@ -52,8 +52,7 @@ const config = {
 ```
 
 ```javascript
-npx lerna bootstrap
-npm run start
+yarn start
 ```
  
 ## Using `Centrifuge Gateway`
@@ -104,7 +103,7 @@ Centrifuge Gateway, Centrifuge Protocol and all its components are in an early s
 ## Build locally
 Required Node Version: 12.16.1
 ```bash
-npm install
-npm run test
-npm run build
+yarn install
+yarn run test
+yarn run build
 ```
