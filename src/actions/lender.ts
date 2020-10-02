@@ -57,7 +57,11 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     submitJuniorSupplyOrderWithPermit = async(amount: string, senderAddress: string) => {
-      if (!this.contractAddresses['JUNIOR_TOKEN'] || !this.contractAddresses['JUNIOR_TRANCHE']) {return}
+      if (!this.contractAddresses['JUNIOR_TOKEN'] || !this.contractAddresses['JUNIOR_TRANCHE'] || !this.contractAddresses['TINLAKE_CURRENCY']) {return}
+      if (this.contractConfig.currency_type === 'DAI') {
+        const result = await signDaiPermit(this.provider, this.contractAddresses['TINLAKE_CURRENCY'], senderAddress, this.contractAddresses['JUNIOR_TRANCHE']);
+        return this.pending(this.contract('JUNIOR_OPERATOR').supplyOrderWithDaiPermit(amount, result.nonce, result.expiry, result.v, result.r, result.s, this.overrides))
+      }
       const result = await signERC2612Permit(this.provider, this.contractAddresses['JUNIOR_TOKEN'], senderAddress, this.contractAddresses['JUNIOR_TRANCHE'], amount);
       return this.pending(this.contract('JUNIOR_OPERATOR').supplyOrderWithPermit(amount, amount, result.deadline, result.v, result.r, result.s, this.overrides))
     }
