@@ -49,7 +49,7 @@
     "@centrifuge/axis-utils": "0.4.2-develop.109",
     "@centrifuge/axis-web3-wallet": "0.0.3-develop.121",
     "@centrifuge/tinlake-js": "0.0.19-develop.22",
-    "@centrifuge/tinlake-js-v3": "npm:@centrifuge/tinlake-js@3.0.0-develop.14",
+    "@centrifuge/tinlake-js-v3": "npm:@centrifuge/tinlake-js@3.0.0-develop.15",
     "@sendgrid/mail": "7.1.1",
     "@types/node-fetch": "2.5.7",
     "apollo-cache-inmemory": "1.6.5",
