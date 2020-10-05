@@ -6,7 +6,11 @@
  *   (e.g. it's limited to a * x_1 + b * x_2 + ..., where [a,b] are coefficients and [x_1,x_2] are variables)
  * - larger than or equals, less than or equals, and equals constraints are all allowed ([<=,>=,=])
  */
-export const calculateOptimalSolution = async (state: State, orderState: OrderState, weights: SolverWeights): Promise<SolverResult> => {
+export const calculateOptimalSolution = async (
+  state: State,
+  orderState: OrderState,
+  weights: SolverWeights
+): Promise<SolverResult> => {
   return require('glpk.js').then((glpk: any) => {
     const lp = {
       name: 'LP',
