@@ -7,13 +7,13 @@ import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators
 import BN from 'bn.js'
 import { EpochData } from './index'
 import { useDispatch, useSelector } from 'react-redux'
-import { loadPool } from '../../../../ducks/pool'
+import { loadPool, PoolState } from '../../../../ducks/pool'
 
 import InvestCard from './InvestCard'
 import RedeemCard from './RedeemCard'
 import OrderCard from './OrderCard'
 import CollectCard from './CollectCard'
-import { TokenLogo, Info } from './styles'
+import { TokenLogo, Info, AddWalletLink } from './styles'
 import InvestAction from '../../../../components/InvestAction'
 import { useInterval } from '../../../../utils/hooks'
 
@@ -27,6 +27,9 @@ interface Props {
 export type Card = 'home' | 'collect' | 'order' | 'invest' | 'redeem'
 
 const TrancheOverview: React.FC<Props> = (props: Props) => {
+  const pool = useSelector<any, PoolState>((state) => state.pool)
+  const trancheData = props.tranche === 'senior' ? pool?.data?.senior : pool?.data?.junior
+
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
@@ -78,6 +81,27 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       setDisbursements(disbursements)
       setHasPendingOrder(!disbursements.remainingSupplyCurrency.add(disbursements.remainingRedeemToken).isZero())
       setHasPendingCollection(!disbursements.payoutCurrencyAmount.add(disbursements.payoutTokenAmount).isZero())
+    }
+  }
+
+  const addToWallet = async () => {
+    if (!trancheData || !trancheData.address || !trancheData.token || !trancheData.decimals) return
+
+    try {
+      await (window as any).ethereum.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: {
+            address: trancheData.address,
+            symbol: trancheData.token,
+            decimals: trancheData.decimals,
+            image: `https://tinlake.centrifuge.io/static/${token}_final.svg`,
+          },
+        },
+      })
+    } catch (error) {
+      console.log(error)
     }
   }
 
@@ -154,6 +178,8 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                   disabled={props.epochData?.isBlockedState}
                 />
               </Box>
+
+              <AddWalletLink onClick={addToWallet}>Add {trancheData?.token} to wallet</AddWalletLink>
             </>
           )}
           {card === 'order' && (

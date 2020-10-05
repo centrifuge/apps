@@ -104,3 +104,17 @@ export const DividerInner = styled.div`
   border-right: 1px solid #d8d8d8;
   width: 50%;
 `
+
+export const AddWalletLink = styled.a`
+  color: #333;
+  text-decoration: underline;
+  margin-top: 16px;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: right;
+
+  &:hover,
+  &:focus {
+    color: #000;
+  }
+`

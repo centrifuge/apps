@@ -132,7 +132,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
 
           <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
             <Button label="Back" onClick={() => setConfirmCancellation(false)} />
-            <Button primary label="Cancel Order" onClick={cancel} disabled={disabled} />
+            <Button primary label="Confirm Cancellation" onClick={cancel} disabled={disabled} />
           </Box>
         </>
       )}

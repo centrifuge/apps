@@ -12,6 +12,8 @@ const RECEIVE_POOL = 'tinlake-ui/pool/RECEIVE_POOL'
 export interface PoolTranche extends Tranche {
   pendingInvestments?: BN
   pendingRedemptions?: BN
+  decimals?: number
+  address?: string
 }
 
 export interface PoolData {

@@ -81,12 +81,12 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
       </ExplainerCard>
 
       <Box direction="row" justify="between" gap="medium">
+        {epochData ? <EpochOverview epochData={epochData} tinlake={props.tinlake} /> : <div>&nbsp;</div>}
+
         <Box>
           <TrancheOverview epochData={epochData} pool={props.activePool} tinlake={props.tinlake} tranche="senior" />
           <TrancheOverview epochData={epochData} pool={props.activePool} tinlake={props.tinlake} tranche="junior" />
         </Box>
-
-        {epochData && <EpochOverview epochData={epochData} tinlake={props.tinlake} />}
       </Box>
 
       {isAdmin && (
