@@ -1,6 +1,13 @@
 import assert from 'assert'
 import { calculateOptimalSolution } from './solver'
 
+const weights = {
+  seniorRedeem: 1000000,
+  juniorRedeem: 100000,
+  juniorSupply: 10000,
+  seniorSupply: 1000,
+}
+
 describe('solver tests', async () => {
   describe('solver', async () => {
     it('should return an optimal solution when limited by the max TIN ratio', async () => {
@@ -20,7 +27,7 @@ describe('solver tests', async () => {
         dropInvestOrder: 400,
       }
 
-      const result = await calculateOptimalSolution(state, orderState)
+      const result = await calculateOptimalSolution(state, orderState, weights)
 
       assert.equal(result.status, 5)
       assert.equal(result.z > 0, true)
@@ -49,7 +56,7 @@ describe('solver tests', async () => {
         dropInvestOrder: 200,
       }
 
-      const result = await calculateOptimalSolution(state, orderState)
+      const result = await calculateOptimalSolution(state, orderState, weights)
 
       // The full redeem is possible, while only 350/400 of total invest orders are possible.
       // TIN investments have preference over DROP investments, so the full TIN invest order is fulfilled, while the tin invest order is limited by 150.
@@ -78,7 +85,7 @@ describe('solver tests', async () => {
         dropInvestOrder: 400,
       }
 
-      const result = await calculateOptimalSolution(state, orderState)
+      const result = await calculateOptimalSolution(state, orderState, weights)
       assert.equal(result.status, 4)
       assert.equal(result.z, 0)
     })
@@ -100,7 +107,7 @@ describe('solver tests', async () => {
         dropInvestOrder: 10000,
       }
 
-      const result = await calculateOptimalSolution(state, orderState)
+      const result = await calculateOptimalSolution(state, orderState, weights)
 
       assert.equal(result.status, 5)
       assert.equal(result.z > 0, true)

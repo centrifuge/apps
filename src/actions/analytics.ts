@@ -164,7 +164,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       const symbol = await this.contract('SENIOR_TOKEN').symbol()
 
       if (!symbol || symbol.length === 0) {
-        return `${this.contractAddresses['SENIOR_TOKEN']?.substr(2, 2).toUpperCase()}DROP`
+        return `${this.contractAddresses['SENIOR_TOKEN']?.substr(2, 2).toUpperCase()}DRP`
       }
       return symbol
     }

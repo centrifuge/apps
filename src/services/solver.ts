@@ -6,7 +6,7 @@
  *   (e.g. it's limited to a * x_1 + b * x_2 + ..., where [a,b] are coefficients and [x_1,x_2] are variables)
  * - larger than or equals, less than or equals, and equals constraints are all allowed ([<=,>=,=])
  */
-export const calculateOptimalSolution = async (state: State, orderState: OrderState): Promise<SolverResult> => {
+export const calculateOptimalSolution = async (state: State, orderState: OrderState, weights: SolverWeights): Promise<SolverResult> => {
   return require('glpk.js').then((glpk: any) => {
     const lp = {
       name: 'LP',
@@ -16,10 +16,10 @@ export const calculateOptimalSolution = async (state: State, orderState: OrderSt
         direction: glpk.GLP_MAX,
         name: 'obj',
         vars: [
-          { name: 'dropRedeem', coef: 10000 },
-          { name: 'tinRedeem', coef: 1000 },
-          { name: 'tinInvest', coef: 100 },
-          { name: 'dropInvest', coef: 10 },
+          { name: 'dropRedeem', coef: weights.seniorRedeem },
+          { name: 'tinRedeem', coef: weights.juniorRedeem },
+          { name: 'tinInvest', coef: weights.juniorSupply },
+          { name: 'dropInvest', coef: weights.seniorSupply },
         ],
       },
       subjectTo: [
@@ -127,6 +127,13 @@ export interface OrderState {
   dropRedeemOrder: number
   tinInvestOrder: number
   dropInvestOrder: number
+}
+
+export interface SolverWeights {
+  seniorRedeem: number
+  juniorRedeem: number
+  juniorSupply: number
+  seniorSupply: number
 }
 
 export interface SolverSolution {
