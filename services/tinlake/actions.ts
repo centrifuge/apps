@@ -267,8 +267,7 @@ export async function submitSeniorSupplyOrder(
     }
   }
 
-  // return tinlake.submitSeniorSupplyOrderWithPermit(amount, address)
-  return tinlake.submitSeniorSupplyOrder(amount)
+  return tinlake.submitSeniorSupplyOrderWithPermit(amount, address)
 }
 
 export async function cancelSeniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
@@ -295,8 +294,7 @@ export async function submitJuniorSupplyOrder(
     }
   }
 
-  // return tinlake.submitJuniorSupplyOrderWithPermit(amount, address)
-  return tinlake.submitJuniorSupplyOrder(amount)
+  return tinlake.submitJuniorSupplyOrderWithPermit(amount, address)
 }
 
 export async function cancelJuniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
@@ -323,8 +321,7 @@ export async function submitSeniorRedeemOrder(
     }
   }
 
-  // return tinlake.submitSeniorRedeemOrderWithPermit(amount, address)
-  return tinlake.submitSeniorRedeemOrder(amount)
+  return tinlake.submitSeniorRedeemOrderWithPermit(amount, address)
 }
 
 export async function cancelSeniorRedeemOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
@@ -351,8 +348,7 @@ export async function submitJuniorRedeemOrder(
     }
   }
 
-  // return tinlake.submitJuniorRedeemOrderWithPermit(amount, address)
-  return tinlake.submitJuniorRedeemOrder(amount)
+  return tinlake.submitJuniorRedeemOrderWithPermit(amount, address)
 }
 
 export async function cancelJuniorRedeemOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
