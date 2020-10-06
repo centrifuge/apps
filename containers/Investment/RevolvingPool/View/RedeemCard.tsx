@@ -47,6 +47,7 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
     const method = props.tranche === 'senior' ? 'submitSeniorRedeemOrder' : 'submitJuniorRedeemOrder'
+    // @ts-ignore
     const txId = await props.createTransaction(`Redeem ${formatted} ${token}`, method, [props.tinlake, tokenValue])
     setTxId(txId)
   }
