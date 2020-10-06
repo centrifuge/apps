@@ -53,6 +53,7 @@ export type ContractAddresses = {
 export type TinlakeParams = {
   provider: ethers.providers.Provider
   signer?: ethers.Signer
+  legacyWeb3Provider?: ethers.providers.AsyncSendable
   transactionTimeout?: number
   contractAddresses?: ContractAddresses | {}
   contractAbis?: ContractAbis | {}
@@ -73,6 +74,7 @@ ethers.errors.setLogLevel('error')
 export default class Tinlake {
   public provider: ethers.providers.Provider
   public signer?: ethers.Signer
+  public legacyWeb3Provider?: ethers.providers.AsyncSendable
   public overrides: ethers.providers.TransactionRequest = {}
   public contractAddresses: ContractAddresses
   public transactionTimeout: number
@@ -82,13 +84,13 @@ export default class Tinlake {
   public readonly version: number = 3
 
   constructor(params: TinlakeParams) {
-    const { provider, signer, contractAddresses, transactionTimeout, contractAbis, overrides, contractConfig } = params
+    const { provider, signer, legacyWeb3Provider, contractAddresses, transactionTimeout, contractAbis, overrides, contractConfig } = params
     this.contractAbis = contractAbis || abiDefinitions
     this.contractConfig = contractConfig || {}
     this.contractAddresses = contractAddresses || {}
     this.transactionTimeout = transactionTimeout || 3600
     this.overrides = overrides || {}
-    this.setProviderAndSigner(provider, signer)
+    this.setProviderAndSigner(provider, signer, legacyWeb3Provider)
     this.setContracts()
   }
 
@@ -101,9 +103,14 @@ export default class Tinlake {
     })
   }
 
-  setProviderAndSigner = (provider: ethers.providers.Provider, signer?: ethers.Signer) => {
+  setProviderAndSigner = (
+    provider: ethers.providers.Provider,
+    signer?: ethers.Signer,
+    legacyWeb3Provider?: ethers.providers.AsyncSendable
+  ) => {
     this.provider = provider
     this.signer = signer
+    this.legacyWeb3Provider = legacyWeb3Provider
   }
 
   createContract(address: string, abiName: ContractName) {

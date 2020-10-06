@@ -10,9 +10,13 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     submitSeniorSupplyOrderWithPermit = async (amount: string, senderAddress: string) => {
+      if (!this.legacyWeb3Provider) {
+        throw new Error('You need to set legacyWeb3Provider')
+      }
+      
       if (this.contractConfig.currency_type === 'DAI') {
         const result = await signDaiPermit(
-          this.provider,
+          this.legacyWeb3Provider,
           this.contract('TINLAKE_CURRENCY').address,
           senderAddress,
           this.contract('SENIOR_TRANCHE').address
@@ -30,7 +34,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
         )
       }
       const result = await signERC2612Permit(
-        this.provider,
+        this.legacyWeb3Provider,
         this.contract('SENIOR_TOKEN').address,
         senderAddress,
         this.contract('SENIOR_TRANCHE').address,
@@ -50,8 +54,12 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     submitSeniorRedeemOrderWithPermit = async (amount: string, senderAddress: string) => {
+      if (!this.legacyWeb3Provider) {
+        throw new Error('You need to set legacyWeb3Provider')
+      }
+
       const result = await signERC2612Permit(
-        this.provider,
+        this.legacyWeb3Provider,
         this.contract('SENIOR_TOKEN').address,
         senderAddress,
         this.contract('SENIOR_TRANCHE').address,
@@ -102,9 +110,13 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     submitJuniorSupplyOrderWithPermit = async (amount: string, senderAddress: string) => {
+      if (!this.legacyWeb3Provider) {
+        throw new Error('You need to set legacyWeb3Provider')
+      }
+
       if (this.contractConfig.currency_type === 'DAI') {
         const result = await signDaiPermit(
-          this.provider,
+          this.legacyWeb3Provider,
           this.contract('TINLAKE_CURRENCY').address,
           senderAddress,
           this.contract('JUNIOR_TRANCHE').address
@@ -122,7 +134,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
         )
       }
       const result = await signERC2612Permit(
-        this.provider,
+        this.legacyWeb3Provider,
         this.contract('JUNIOR_TOKEN').address,
         senderAddress,
         this.contract('JUNIOR_TRANCHE').address,
@@ -142,8 +154,12 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     submitJuniorRedeemOrderWithPermit = async (amount: string, senderAddress: string) => {
+      if (!this.legacyWeb3Provider) {
+        throw new Error('You need to set legacyWeb3Provider')
+      }
+
       const result = await signERC2612Permit(
-        this.provider,
+        this.legacyWeb3Provider,
         this.contract('JUNIOR_TOKEN').address,
         senderAddress,
         this.contract('JUNIOR_TRANCHE').address,
