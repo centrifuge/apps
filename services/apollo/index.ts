@@ -151,7 +151,7 @@ class Apollo {
       result = await this.client.query({
         query: gql`
         {
-          pools (where : {id: "${root}"}){
+          pools (where : {id: "${root.toLowerCase()}"}){
             id
             loans {
               id
