@@ -1,6 +1,6 @@
 {
   "name": "@centrifuge/tinlake-js",
-  "version": "3.0.0-develop.18",
+  "version": "3.0.0-develop.19",
   "description": "Centrifuge Tinlake Contracts Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
