@@ -147,12 +147,13 @@ export function load(
         const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
 
         if (tinlake.version === 2) tinlake.setProviderAndSigner(rpcProvider, web3Provider.getSigner())
-        else
-          (tinlake as ITinlakeV3).setProviderAndSigner(
+        else {
+          ;(tinlake as ITinlakeV3).setProviderAndSigner(
             fallbackProvider,
             web3Provider.getSigner(),
             web3Provider._web3Provider
           )
+        }
       }
 
       if (wallet.name !== auth.providerName) {
@@ -185,12 +186,13 @@ export function load(
           const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
 
           if (tinlake.version === 2) tinlake.setProviderAndSigner(rpcProvider, web3Provider.getSigner())
-          else
-            (tinlake as ITinlakeV3).setProviderAndSigner(
+          else {
+            ;(tinlake as ITinlakeV3).setProviderAndSigner(
               fallbackProvider,
               web3Provider.getSigner(),
               web3Provider._web3Provider
             )
+          }
         } else {
           const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
           tinlake.setProviderAndSigner(rpcProvider)
