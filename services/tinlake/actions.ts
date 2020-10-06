@@ -250,7 +250,7 @@ export async function setInterest(
 export async function submitSeniorSupplyOrder(
   tinlake: ITinlakeV3,
   amount: string
-): Promise<PendingTransaction | undefined> {
+): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -277,7 +277,7 @@ export async function cancelSeniorSupplyOrder(tinlake: ITinlakeV3): Promise<Pend
 export async function submitJuniorSupplyOrder(
   tinlake: ITinlakeV3,
   amount: string
-): Promise<PendingTransaction | undefined> {
+): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -304,7 +304,7 @@ export async function cancelJuniorSupplyOrder(tinlake: ITinlakeV3): Promise<Pend
 export async function submitSeniorRedeemOrder(
   tinlake: ITinlakeV3,
   amount: string
-): Promise<PendingTransaction | undefined> {
+): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -331,7 +331,7 @@ export async function cancelSeniorRedeemOrder(tinlake: ITinlakeV3): Promise<Pend
 export async function submitJuniorRedeemOrder(
   tinlake: ITinlakeV3,
   amount: string
-): Promise<PendingTransaction | undefined> {
+): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }

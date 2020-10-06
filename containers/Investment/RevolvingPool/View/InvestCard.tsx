@@ -60,7 +60,6 @@ const InvestCard: React.FC<Props> = (props: Props) => {
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
     const method = props.tranche === 'senior' ? 'submitSeniorSupplyOrder' : 'submitJuniorSupplyOrder'
-    // @ts-ignore
     const txId = await props.createTransaction(`${token} Invest ${formatted} DAI`, method, [props.tinlake, daiValue])
     setTxId(txId)
   }
