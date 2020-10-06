@@ -1,5 +1,5 @@
 import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
-import { calculateOptimalSolution, State, OrderState, SolverSolution, SolverResult } from '../services/solver'
+import { calculateOptimalSolution, State, OrderState, SolverWeights } from '../services/solver'
 import BN from 'bn.js'
 const web3 = require('web3-utils')
 
@@ -40,26 +40,6 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return { reserve, netAssetValue, seniorAsset, minTinRatio, maxTinRatio, maxReserve }
     }
 
-    setMinimumEpochTime = async (minEpochTime: string) => {
-      return this.pending(
-        this.contract('COORDINATOR').file(
-          web3.fromAscii('minimumEpochTime').padEnd(66, '0'),
-          minEpochTime,
-          this.overrides
-        )
-      )
-    }
-
-    setMinimumChallengeTime = async (challengeTime: string) => {
-      return this.pending(
-        this.contract('COORDINATOR').file(
-          web3.fromAscii('challengeTime').padEnd(66, '0'),
-          challengeTime,
-          this.overrides
-        )
-      )
-    }
-
     getOrderState = async () => {
       const coordinator = this.contract('COORDINATOR')
       const orderState = await coordinator.order()
@@ -79,6 +59,17 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         dropInvestOrder: orderState.seniorSupply.toBN().isZero()
           ? 0.0
           : orderState.seniorSupply.toBN().div(valueBase).toNumber(),
+      }
+    }
+
+    getSolverWeights = async () => {
+      const coordinator = this.contract('COORDINATOR')
+
+      return {
+        seniorRedeem: (await coordinator.weightSeniorRedeem()).toBN().toNumber(),
+        juniorRedeem: (await coordinator.weightJuniorRedeem()).toBN().toNumber(),
+        juniorSupply: (await coordinator.weightsJuniorSupply()).toBN().toNumber(),
+        seniorSupply: (await coordinator.weightsSeniorSupply()).toBN().toNumber(),
       }
     }
 
@@ -105,15 +96,17 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
       const state = await this.getEpochState()
       const orderState = await this.getOrderState()
+      const weights = await this.getSolverWeights()
 
       console.log('State', state)
       console.log('Order State', orderState)
+      console.log('Solver Weights', weights)
 
-      const solution = await calculateOptimalSolution(state, orderState)
+      const solution = await calculateOptimalSolution(state, orderState, weights)
       console.log('Solution found', solution)
 
-      if (solution.status !== 5) {
-        // TODO: rather than throw an error, we should return some kind of success message here
+      // Status 4 is a solution with all zeros, status 5 is a non-zero solution
+      if (solution.status !== 4 && solution.status !== 5) {
         throw new Error('Solution could not be found for the current epoch')
       }
 
@@ -197,6 +190,26 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
       throw new Error('Arrived at impossible current epoch state')
     }
+
+    setMinimumEpochTime = async (minEpochTime: string) => {
+      return this.pending(
+        this.contract('COORDINATOR').file(
+          web3.fromAscii('minimumEpochTime').padEnd(66, '0'),
+          minEpochTime,
+          this.overrides
+        )
+      )
+    }
+
+    setMinimumChallengeTime = async (challengeTime: string) => {
+      return this.pending(
+        this.contract('COORDINATOR').file(
+          web3.fromAscii('challengeTime').padEnd(66, '0'),
+          challengeTime,
+          this.overrides
+        )
+      )
+    }
   }
 }
 
@@ -210,6 +223,7 @@ export type EpochState =
 export type ICoordinatorActions = {
   getEpochState(): Promise<State>
   getOrderState(): Promise<OrderState>
+  getSolverWeights(): Promise<SolverWeights>
   solveEpoch(): Promise<PendingTransaction>
   executeEpoch(): Promise<PendingTransaction>
   getCurrentEpochId(): Promise<number>
