@@ -9,6 +9,7 @@ import { Decimal } from 'decimal.js-light'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import BN from 'bn.js'
 
+import config from '../../../../config'
 import { Description } from './styles'
 import { Card } from './TrancheOverview'
 
@@ -20,7 +21,7 @@ interface Props extends TransactionProps {
   updateTrancheData: () => void
 }
 
-const MinInvestment = new BN(10000).mul(new BN(10).pow(new BN(18))) // 10k DAI
+const MinInvestment = new BN(config.network === 'Mainnet' ? 10000 : 10).mul(new BN(10).pow(new BN(18))) // 10k DAI
 
 const InvestCard: React.FC<Props> = (props: Props) => {
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
@@ -42,9 +43,8 @@ const InvestCard: React.FC<Props> = (props: Props) => {
   }
 
   const getLimit = async () => {
-    const user = await props.tinlake.signer?.getAddress()
-    if (user) {
-      const balance = await props.tinlake.getCurrencyBalance(user)
+    if (address) {
+      const balance = await props.tinlake.getCurrencyBalance(address)
       setLimit(balance.toString())
     }
   }
@@ -79,7 +79,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
   const onChange = (newValue: string) => {
     setDaiValue(newValue)
     if (hasInvested === false && new BN(newValue).lt(MinInvestment)) {
-      setError('Minimum investment: 10.000 DAI')
+      setError(`Minimum investment: ${config.network === 'Mainnet' ? '10.000' : '10'} DAI`)
     } else if (limit && new BN(newValue).gt(new BN(limit))) {
       setError('Amount larger than balance')
     } else if (new BN(newValue).isZero()) {
@@ -95,7 +95,6 @@ const InvestCard: React.FC<Props> = (props: Props) => {
         Please set the amount of DAI you want to invest into {token} on Tinlake. Your DAI will be locked until the end
         of the epoch, at which point your order will be executed. You can collect your {token} in the next epoch.
       </Description>
-      Has invested: {hasInvested ? 'true' : 'false'}
       <TokenInput
         token="DAI"
         value={daiValue}

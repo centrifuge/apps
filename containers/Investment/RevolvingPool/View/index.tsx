@@ -24,6 +24,7 @@ export type EpochData = {
   state: 'open' | 'can-be-closed' | 'in-submission-period' | 'in-challenge-period' | 'challenge-period-ended'
   isBlockedState: boolean
   minimumEpochTime: number
+  minChallengePeriodEnd: number
   lastEpochClosed: number
   latestBlockTimestamp: number
 }
@@ -41,6 +42,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
       isBlockedState:
         state === 'in-submission-period' || state === 'in-challenge-period' || state === 'challenge-period-ended',
       minimumEpochTime: await props.tinlake.getMinimumEpochTime(),
+      minChallengePeriodEnd: await props.tinlake.getMinChallengePeriodEnd(),
       lastEpochClosed: await props.tinlake.getLastEpochClosed(),
       latestBlockTimestamp: await props.tinlake.getLatestBlockTimestamp(),
     })

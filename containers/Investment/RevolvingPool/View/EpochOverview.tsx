@@ -12,20 +12,12 @@ import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { SignIcon } from './styles'
 import { useInterval } from '../../../../utils/hooks'
 import BN from 'bn.js'
+import { secondsToHms } from '../../../../utils/time'
 
 interface Props extends TransactionProps {
   epochData: EpochData
   tinlake: ITinlakeV3
   auth?: AuthState
-}
-
-const secondsToHms = (d: number) => {
-  const h = Math.floor(d / 3600)
-  const m = Math.floor((d % 3600) / 60)
-
-  const hDisplay = h > 0 ? h + (h === 1 ? ' hr' : ' hrs') : ''
-  const mDisplay = m > 0 ? m + (m === 1 ? ' min' : ' mins') : h > 0 ? '' : '0 min'
-  return hDisplay + (hDisplay.length > 0 && mDisplay.length > 0 ? ', ' : '') + mDisplay
 }
 
 const EpochOverview: React.FC<Props> = (props: Props) => {
@@ -89,6 +81,12 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               <TableCell scope="row">Epoch #</TableCell>
               <TableCell style={{ textAlign: 'end' }}>{props.epochData.id}</TableCell>
             </TableRow>
+            {isAdmin && (
+              <TableRow>
+                <TableCell scope="row">Epoch state</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>{props.epochData.state}</TableCell>
+              </TableRow>
+            )}
             <TableRow>
               <TableCell scope="row">Time passed since start of current epoch</TableCell>
               <TableCell style={{ textAlign: 'end' }}>{secondsToHms(timePassed)}</TableCell>

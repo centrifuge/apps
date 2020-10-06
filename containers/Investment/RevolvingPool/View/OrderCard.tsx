@@ -9,8 +9,9 @@ import { connect } from 'react-redux'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import BN from 'bn.js'
 import { EpochData } from './index'
+import { secondsToHms } from '../../../../utils/time'
 
-import { Description, Warning, Info } from './styles'
+import { Description, Warning, Info, MinTimeRemaining } from './styles'
 import { Card } from './TrancheOverview'
 
 interface Props extends TransactionProps {
@@ -117,6 +118,12 @@ const OrderCard: React.FC<Props> = (props: Props) => {
           </Heading>
           The Epoch has just been closed and the order executions are currently being computed. Your executed order will
           be available for collection soon.
+          {props.epochData?.minChallengePeriodEnd !== 0 && (
+            <MinTimeRemaining>
+              Minimum time remaining:{' '}
+              {secondsToHms(props.epochData.minChallengePeriodEnd - new Date().getTime() / 1000)}
+            </MinTimeRemaining>
+          )}
         </Info>
       )}
 
@@ -137,7 +144,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
         </>
       )}
 
-      {!confirmCancellation && (
+      {!props.epochData?.isBlockedState && !confirmCancellation && (
         <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
           <Button primary label="Cancel Order" onClick={() => setConfirmCancellation(true)} disabled={disabled} />
           {/* <Button primary label="Update Order" /> */}

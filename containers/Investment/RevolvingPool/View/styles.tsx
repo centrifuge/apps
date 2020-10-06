@@ -118,3 +118,7 @@ export const AddWalletLink = styled.a`
     color: #000;
   }
 `
+
+export const MinTimeRemaining = styled.div`
+  margin-top: 12px;
+`
