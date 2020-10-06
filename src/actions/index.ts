@@ -22,7 +22,6 @@ export default {
 
 export type TinlakeActions = IAdminActions &
   IBorrowerActions &
-  ILenderActions &
   ICurrencyActions &
   ILenderActions &
   IAnalyticsActions &

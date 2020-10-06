@@ -40,13 +40,11 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
     }
 
     approveSeniorForCurrency = async (currencyAmount: string) => {
-      if (!this.contractAddresses['SENIOR_TRANCHE']) return
-      return this.approveCurrency(this.contractAddresses['SENIOR_TRANCHE'], currencyAmount)
+      return this.approveCurrency(this.contract('SENIOR_TRANCHE').address, currencyAmount)
     }
 
     approveJuniorForCurrency = async (currencyAmount: string) => {
-      if (!this.contractAddresses['JUNIOR_TRANCHE']) return
-      return this.approveCurrency(this.contractAddresses['JUNIOR_TRANCHE'], currencyAmount)
+      return this.approveCurrency(this.contract('JUNIOR_TRANCHE').address, currencyAmount)
     }
 
     approveJuniorForToken = async (tokenAmount: string) => {
@@ -68,8 +66,8 @@ export type ICurrencyActions = {
   getJuniorForCurrencyAllowance: (owner: string) => Promise<BN | undefined>
   getSeniorForCurrencyAllowance: (owner: string) => Promise<BN | undefined>
   approveCurrency(usr: string, amount: string): Promise<PendingTransaction>
-  approveSeniorForCurrency: (currencyAmount: string) => Promise<PendingTransaction | undefined>
-  approveJuniorForCurrency: (currencyAmount: string) => Promise<PendingTransaction | undefined>
+  approveSeniorForCurrency: (currencyAmount: string) => Promise<PendingTransaction>
+  approveJuniorForCurrency: (currencyAmount: string) => Promise<PendingTransaction>
   approveSeniorForToken: (tokenAmount: string) => Promise<PendingTransaction>
   approveJuniorForToken: (tokenAmount: string) => Promise<PendingTransaction>
   getJuniorTokenBalance(usr: string): Promise<BN>

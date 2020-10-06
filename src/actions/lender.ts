@@ -10,18 +10,16 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     submitSeniorSupplyOrderWithPermit = async(amount: string, senderAddress: string) => {
-      if (!this.contractAddresses['SENIOR_TOKEN'] || !this.contractAddresses['SENIOR_TRANCHE'] || !this.contractAddresses['TINLAKE_CURRENCY']) {return}
       if (this.contractConfig.currency_type === 'DAI') {
-        const result = await signDaiPermit(this.provider, this.contractAddresses['TINLAKE_CURRENCY'], senderAddress, this.contractAddresses['SENIOR_TRANCHE']);
+        const result = await signDaiPermit(this.provider, this.contract('TINLAKE_CURRENCY').address, senderAddress, this.contract('SENIOR_TRANCHE').address);
         return this.pending(this.contract('SENIOR_OPERATOR').supplyOrderWithDaiPermit(amount, result.nonce, result.expiry, result.v, result.r, result.s, this.overrides))
       }
-      const result = await signERC2612Permit(this.provider, this.contractAddresses['SENIOR_TOKEN'], senderAddress, this.contractAddresses['SENIOR_TRANCHE'], amount);
+      const result = await signERC2612Permit(this.provider, this.contract('SENIOR_TOKEN').address, senderAddress, this.contract('SENIOR_TRANCHE').address, amount);
       return this.pending(this.contract('SENIOR_OPERATOR').supplyOrderWithPermit(amount, amount, result.deadline, result.v, result.r, result.s, this.overrides))
     }
 
     submitSeniorRedeemOrderWithPermit = async(amount: string, senderAddress: string) => {
-      if (!this.contractAddresses['SENIOR_TOKEN'] || !this.contractAddresses['SENIOR_TRANCHE']) {return}
-      const result = await signERC2612Permit(this.provider, this.contractAddresses['SENIOR_TOKEN'], senderAddress, this.contractAddresses['SENIOR_TRANCHE'], amount);
+      const result = await signERC2612Permit(this.provider, this.contract('SENIOR_TOKEN').address, senderAddress, this.contract('SENIOR_TRANCHE').address, amount);
       return this.pending(this.contract('SENIOR_OPERATOR').redeemOrderWithPermit(amount, amount, result.deadline, result.v, result.r, result.s, this.overrides))
     }
 
@@ -57,18 +55,16 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     submitJuniorSupplyOrderWithPermit = async(amount: string, senderAddress: string) => {
-      if (!this.contractAddresses['JUNIOR_TOKEN'] || !this.contractAddresses['JUNIOR_TRANCHE'] || !this.contractAddresses['TINLAKE_CURRENCY']) {return}
       if (this.contractConfig.currency_type === 'DAI') {
-        const result = await signDaiPermit(this.provider, this.contractAddresses['TINLAKE_CURRENCY'], senderAddress, this.contractAddresses['JUNIOR_TRANCHE']);
+        const result = await signDaiPermit(this.provider, this.contract('TINLAKE_CURRENCY').address, senderAddress, this.contract('JUNIOR_TRANCHE').address);
         return this.pending(this.contract('JUNIOR_OPERATOR').supplyOrderWithDaiPermit(amount, result.nonce, result.expiry, result.v, result.r, result.s, this.overrides))
       }
-      const result = await signERC2612Permit(this.provider, this.contractAddresses['JUNIOR_TOKEN'], senderAddress, this.contractAddresses['JUNIOR_TRANCHE'], amount);
-      return this.pending(this.contract('JUNIOR_OPERATOR').supplyOrderWithPermit(amount, amount, result.deadline, result.v, result.r, result.s, this.overrides))
+      const result = await signERC2612Permit(this.provider, this.contract('JUNIOR_TOKEN').address, senderAddress, this.contract('JUNIOR_TRANCHE').address, amount);
+      return this.pending(this.contract('JUNIOR_OPERATOR').supplyOrderWithPermit(amount, amount, result.deadline && result.deadline, result.v, result.r, result.s, this.overrides))
     }
 
     submitJuniorRedeemOrderWithPermit = async(amount: string, senderAddress: string) => {
-      if (!this.contractAddresses['JUNIOR_TOKEN'] || !this.contractAddresses['JUNIOR_TRANCHE']) {return}
-      const result = await signERC2612Permit(this.provider, this.contractAddresses['JUNIOR_TOKEN'], senderAddress, this.contractAddresses['JUNIOR_TRANCHE'], amount);
+      const result = await signERC2612Permit(this.provider, this.contract('JUNIOR_TOKEN').address, senderAddress, this.contract('JUNIOR_TRANCHE').address, amount);
       return this.pending(this.contract('JUNIOR_OPERATOR').redeemOrderWithPermit(amount, amount, result.deadline, result.v, result.r, result.s, this.overrides))
     }
 
@@ -122,13 +118,13 @@ export type ILenderActions = {
   approveJuniorToken: (tokenAmount: string) => Promise<PendingTransaction>
   approveSeniorToken: (tokenAmount: string) => Promise<PendingTransaction>
   submitSeniorSupplyOrder(supplyAmount: string): Promise<PendingTransaction>
-  submitSeniorSupplyOrderWithPermit(amount: string, senderAddress: string): Promise<PendingTransaction | undefined>
+  submitSeniorSupplyOrderWithPermit(amount: string, senderAddress: string): Promise<PendingTransaction>
   submitSeniorRedeemOrder(redeemAmount: string): Promise<PendingTransaction>
-  submitSeniorRedeemOrderWithPermit(amount: string, senderAddress: string): Promise<PendingTransaction | undefined>
+  submitSeniorRedeemOrderWithPermit(amount: string, senderAddress: string): Promise<PendingTransaction>
   submitJuniorSupplyOrder(supplyAmount: string): Promise<PendingTransaction>
-  submitJuniorSupplyOrderWithPermit(amount: string, senderAddress: string): Promise<PendingTransaction | undefined>
+  submitJuniorSupplyOrderWithPermit(amount: string, senderAddress: string): Promise<PendingTransaction>
   submitJuniorRedeemOrder(redeemAmount: string): Promise<PendingTransaction>
-  submitJuniorRedeemOrderWithPermit(amount: string, senderAddress: string): Promise<PendingTransaction | undefined>
+  submitJuniorRedeemOrderWithPermit(amount: string, senderAddress: string): Promise<PendingTransaction>
   disburseSenior(): Promise<PendingTransaction>
   disburseJunior(): Promise<PendingTransaction>
   calcJuniorDisburse(user: string): Promise<CalcDisburseResult>
