@@ -247,7 +247,10 @@ export async function setInterest(
   return tinlake.changeRate(loanId, rateGroup)
 }
 
-export async function submitSeniorSupplyOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
+export async function submitSeniorSupplyOrder(
+  tinlake: ITinlakeV3,
+  amount: string
+): Promise<PendingTransaction | undefined> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -264,14 +267,17 @@ export async function submitSeniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
     }
   }
 
-  return tinlake.submitSeniorSupplyOrder(amount)
+  return tinlake.submitSeniorSupplyOrderWithPermit(amount, address)
 }
 
 export async function cancelSeniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
   return tinlake.submitSeniorSupplyOrder('0')
 }
 
-export async function submitJuniorSupplyOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
+export async function submitJuniorSupplyOrder(
+  tinlake: ITinlakeV3,
+  amount: string
+): Promise<PendingTransaction | undefined> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -288,14 +294,17 @@ export async function submitJuniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
     }
   }
 
-  return tinlake.submitJuniorSupplyOrder(amount)
+  return tinlake.submitJuniorSupplyOrderWithPermit(amount, address)
 }
 
 export async function cancelJuniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
   return tinlake.submitJuniorSupplyOrder('0')
 }
 
-export async function submitSeniorRedeemOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
+export async function submitSeniorRedeemOrder(
+  tinlake: ITinlakeV3,
+  amount: string
+): Promise<PendingTransaction | undefined> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -312,14 +321,17 @@ export async function submitSeniorRedeemOrder(tinlake: ITinlakeV3, amount: strin
     }
   }
 
-  return tinlake.submitSeniorRedeemOrder(amount)
+  return tinlake.submitSeniorRedeemOrderWithPermit(amount, address)
 }
 
 export async function cancelSeniorRedeemOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
   return tinlake.submitSeniorRedeemOrder('0')
 }
 
-export async function submitJuniorRedeemOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
+export async function submitJuniorRedeemOrder(
+  tinlake: ITinlakeV3,
+  amount: string
+): Promise<PendingTransaction | undefined> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -336,7 +348,7 @@ export async function submitJuniorRedeemOrder(tinlake: ITinlakeV3, amount: strin
     }
   }
 
-  return tinlake.submitJuniorRedeemOrder(amount)
+  return tinlake.submitJuniorRedeemOrderWithPermit(amount, address)
 }
 
 export async function cancelJuniorRedeemOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
