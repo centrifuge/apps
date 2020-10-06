@@ -125,6 +125,26 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return (await this.contract('JUNIOR_TOKEN').balanceOf(user)).toBN()
     }
 
+    checkHasInvestedInJunior = async (user: string) => {
+      const userOrder = await this.contract('JUNIOR_TRANCHE').users(user)
+
+      if (!userOrder) return false
+      return !userOrder.orderedInEpoch.toBN().isZero()
+    }
+
+    getJuniorTokenSymbol = async () => {
+      const symbol = await this.contract('JUNIOR_TOKEN').symbol()
+
+      if (!symbol || symbol.length === 0) {
+        return `${this.contractAddresses['JUNIOR_TOKEN']?.substr(2, 2).toUpperCase()}TIN`
+      }
+      return symbol
+    }
+
+    getJuniorTokenDecimals = async () => {
+      return await this.contract('JUNIOR_TOKEN').decimals()
+    }
+
     getJuniorTotalSupply = async () => {
       return (await this.contract('JUNIOR_TOKEN').totalSupply()).toBN()
     }
@@ -144,6 +164,29 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     getSeniorTokenBalance = async (user: string) => {
       if (!this.existsSenior()) return new BN(0)
       return (await this.contract('SENIOR_TOKEN').balanceOf(user)).toBN()
+    }
+
+    checkHasInvestedInSenior = async (user: string) => {
+      if (!this.existsSenior()) return false
+      const userOrder = await this.contract('SENIOR_TRANCHE').users(user)
+
+      if (!userOrder) return false
+      return !userOrder.orderedInEpoch.toBN().isZero()
+    }
+
+    getSeniorTokenSymbol = async () => {
+      if (!this.existsSenior()) return undefined
+      const symbol = await this.contract('SENIOR_TOKEN').symbol()
+
+      if (!symbol || symbol.length === 0) {
+        return `${this.contractAddresses['SENIOR_TOKEN']?.substr(2, 2).toUpperCase()}DRP`
+      }
+      return symbol
+    }
+
+    getSeniorTokenDecimals = async () => {
+      if (!this.existsSenior()) return undefined
+      return await this.contract('SENIOR_TOKEN').decimals()
     }
 
     getSeniorTotalSupply = async () => {
@@ -266,6 +309,12 @@ export type IAnalyticsActions = {
   getSeniorPendingRedemptions(): Promise<BN>
   getJuniorPendingInvestments(): Promise<BN>
   getJuniorPendingRedemptions(): Promise<BN>
+  getJuniorTokenSymbol(): Promise<string>
+  getSeniorTokenSymbol(): Promise<string>
+  getJuniorTokenDecimals(): Promise<number>
+  getSeniorTokenDecimals(): Promise<number>
+  checkHasInvestedInSenior(user: string): Promise<boolean>
+  checkHasInvestedInJunior(usr: string): Promise<boolean>
 }
 
 export default AnalyticsActions
