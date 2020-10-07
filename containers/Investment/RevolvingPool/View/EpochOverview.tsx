@@ -38,10 +38,10 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
 
   const disabled = status === 'unconfirmed' || status === 'pending'
 
-  const [timePassed, setTimePassed] = React.useState(0)
+  const [timeLeft, setTimeLeft] = React.useState(0)
 
   useInterval(() => {
-    setTimePassed(new Date().getTime() / 1000 - props.epochData.lastEpochClosed)
+    setTimeLeft(props.epochData.lastEpochClosed + props.epochData.minimumEpochTime - new Date().getTime() / 1000)
   }, 1000)
 
   const totalPendingInvestments = poolData?.senior
@@ -88,12 +88,12 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               </TableRow>
             )}
             <TableRow>
-              <TableCell scope="row">Time passed since start of current epoch</TableCell>
-              <TableCell style={{ textAlign: 'end' }}>{secondsToHms(timePassed)}</TableCell>
-            </TableRow>
-            <TableRow>
               <TableCell scope="row">Minimum epoch duration</TableCell>
               <TableCell style={{ textAlign: 'end' }}>{secondsToHms(props.epochData.minimumEpochTime)}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell scope="row">Minimum time left in current epoch</TableCell>
+              <TableCell style={{ textAlign: 'end' }}>{secondsToHms(timeLeft)}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell scope="row">Total epoch investment capacity</TableCell>

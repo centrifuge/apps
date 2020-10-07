@@ -8,12 +8,13 @@ import BN from 'bn.js'
 import { EpochData } from './index'
 import { useDispatch, useSelector } from 'react-redux'
 import { loadPool, PoolState } from '../../../../ducks/pool'
+import { secondsToHms } from '../../../../utils/time'
 
 import InvestCard from './InvestCard'
 import RedeemCard from './RedeemCard'
 import OrderCard from './OrderCard'
 import CollectCard from './CollectCard'
-import { TokenLogo, Info, AddWalletLink } from './styles'
+import { TokenLogo, Info, AddWalletLink, MinTimeRemaining } from './styles'
 import InvestAction from '../../../../components/InvestAction'
 import { useInterval } from '../../../../utils/hooks'
 
@@ -161,6 +162,12 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                   </Heading>
                   The Epoch has just been closed and the order executions are currently being computed. Until the next
                   Epoch opens, you cannot submit new orders.
+                  {props.epochData?.minChallengePeriodEnd !== 0 && (
+                    <MinTimeRemaining>
+                      Minimum time remaining:{' '}
+                      {secondsToHms(props.epochData.minChallengePeriodEnd - new Date().getTime() / 1000)}
+                    </MinTimeRemaining>
+                  )}
                 </Info>
               )}
 
