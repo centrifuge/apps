@@ -57,7 +57,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const availableFunds = (props.pool && props.pool.data && props.pool.data.availableFunds) || '0'
   const ceilingOverflow = new BN(borrowAmount).cmp(new BN(props.loan.principal)) > 0
   const availableFundsOverflow = new BN(borrowAmount).cmp(new BN(availableFunds)) > 0
-  const borrowedAlready = props.loan.debt.toString() !== '0' || props.loan.status !== 'ongoing'
+  const borrowedAlready = new BN(props.loan.debt).isZero() === false || props.loan.status !== 'opened'
   const borrowEnabled = !ceilingOverflow && !availableFundsOverflow && ceilingSet && !borrowedAlready
 
   const epochState = props.pool?.data ? (props.pool?.data as PoolDataV3).epochState : undefined
@@ -91,9 +91,6 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
             The Epoch for this pool has just been closed and orders are currently being computed. Until the next Epoch
             opens, financing assets is not possible.
           </Box>
-        )}
-        {!isBlockedState && borrowedAlready && (
-          <Box margin={{ top: 'small' }}>Multiple financings are not allowed.</Box>
         )}
         {availableFundsOverflow && (
           <Box margin={{ top: 'small' }}>
