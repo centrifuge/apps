@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Box, FormField, Button, Text } from 'grommet'
 import NumberInput from '../../../components/NumberInput'
 import { baseToDisplay, displayToBase, Loan } from '@centrifuge/tinlake-js'
-import { PoolState, loadPool } from '../../../ducks/pool'
+import { PoolState, loadPool, PoolDataV3 } from '../../../ducks/pool'
 import { loadLoan } from '../../../ducks/loans'
 import { connect } from 'react-redux'
 import { ensureAuthed } from '../../../ducks/auth'
@@ -59,6 +59,13 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const availableFundsOverflow = new BN(borrowAmount).cmp(new BN(availableFunds)) > 0
   const borrowedAlready = props.loan.debt.toString() !== '0' || props.loan.status !== 'ongoing'
   const borrowEnabled = !ceilingOverflow && !availableFundsOverflow && ceilingSet && !borrowedAlready
+
+  const epochState = props.pool?.data ? (props.pool?.data as PoolDataV3).epochState : undefined
+  const isBlockedState =
+    epochState === 'in-submission-period' ||
+    epochState === 'in-challenge-period' ||
+    epochState === 'challenge-period-ended'
+
   return (
     <Box basis={'1/4'} gap="medium" margin={{ right: 'large' }}>
       <Box gap="medium">
@@ -79,7 +86,15 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
           label="Finance Asset"
           disabled={!borrowEnabled || status === 'unconfirmed' || status === 'pending'}
         />
-        {borrowedAlready && <Box margin={{ top: 'small' }}>Multiple financings are not allowed.</Box>}
+        {isBlockedState && (
+          <Box margin={{ top: 'small' }}>
+            The Epoch for this pool has just been closed and orders are currently being computed. Until the next Epoch
+            opens, financing assets is not possible.
+          </Box>
+        )}
+        {!isBlockedState && borrowedAlready && (
+          <Box margin={{ top: 'small' }}>Multiple financings are not allowed.</Box>
+        )}
         {availableFundsOverflow && (
           <Box margin={{ top: 'small' }}>
             Available funds exceeded. <br />

@@ -30,6 +30,7 @@ export interface PoolDataV3 extends PoolData {
   maxJuniorRatio: BN
   maxReserve: BN
   outstandingVolume: BN
+  epochState: 'open' | 'can-be-closed' | 'in-submission-period' | 'in-challenge-period' | 'challenge-period-ended'
 }
 
 export interface PoolState {

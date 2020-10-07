@@ -430,6 +430,8 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
   const juniorSymbol = await tinlake.getJuniorTokenSymbol()
   const juniorDecimals = await tinlake.getJuniorTokenDecimals()
 
+  const epochState = await tinlake.getCurrentEpochState()
+
   return {
     minJuniorRatio,
     maxJuniorRatio,
@@ -438,6 +440,7 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
     netAssetValue,
     outstandingVolume,
     reserve,
+    epochState,
     junior: {
       type: 'junior',
       availableFunds: juniorReserve,
