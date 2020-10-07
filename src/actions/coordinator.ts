@@ -110,8 +110,15 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         throw new Error('Solution could not be found for the current epoch')
       }
 
-      const toUintValue = (num: number): string => {
-        return new BN(num).mul(new BN(10).pow(new BN(18))).toString()
+      const validationScore = (await coordinator.validate(
+        toUintValue(solution.vars.dropRedeem),
+        toUintValue(solution.vars.tinRedeem),
+        toUintValue(solution.vars.tinInvest),
+        toUintValue(solution.vars.dropInvest)
+      )).toBN().toNumber()
+
+      if (validationScore !== 0) {
+        throw new Error(`Solution is not valid: ${validationScore}`)
       }
 
       const submissionTx = coordinator.submitSolution(
@@ -211,6 +218,10 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       )
     }
   }
+}
+
+const toUintValue = (num: number): string => {
+  return new BN(num).mul(new BN(10).pow(new BN(18))).toString()
 }
 
 export type EpochState =
