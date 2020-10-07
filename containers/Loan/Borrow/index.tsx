@@ -57,7 +57,8 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const availableFunds = (props.pool && props.pool.data && props.pool.data.availableFunds) || '0'
   const ceilingOverflow = new BN(borrowAmount).cmp(new BN(props.loan.principal)) > 0
   const availableFundsOverflow = new BN(borrowAmount).cmp(new BN(availableFunds)) > 0
-  const borrowEnabled = !ceilingOverflow && !availableFundsOverflow && ceilingSet
+  const borrowedAlready = props.loan.debt.toString() !== '0' || props.loan.status !== 'ongoing'
+  const borrowEnabled = !ceilingOverflow && !availableFundsOverflow && ceilingSet && !borrowedAlready
   return (
     <Box basis={'1/4'} gap="medium" margin={{ right: 'large' }}>
       <Box gap="medium">
@@ -78,6 +79,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
           label="Finance Asset"
           disabled={!borrowEnabled || status === 'unconfirmed' || status === 'pending'}
         />
+        {borrowedAlready && <Box margin={{ top: 'small' }}>Multiple financings are not allowed.</Box>}
         {availableFundsOverflow && (
           <Box margin={{ top: 'small' }}>
             Available funds exceeded. <br />
