@@ -110,12 +110,16 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         throw new Error('Solution could not be found for the current epoch')
       }
 
-      const validationScore = (await coordinator.validate(
-        toUintValue(solution.vars.dropRedeem),
-        toUintValue(solution.vars.tinRedeem),
-        toUintValue(solution.vars.tinInvest),
-        toUintValue(solution.vars.dropInvest)
-      )).toBN().toNumber()
+      const validationScore = (
+        await coordinator.validate(
+          toUintValue(solution.vars.dropRedeem),
+          toUintValue(solution.vars.tinRedeem),
+          toUintValue(solution.vars.tinInvest),
+          toUintValue(solution.vars.dropInvest)
+        )
+      )
+        .toBN()
+        .toNumber()
 
       if (validationScore !== 0) {
         throw new Error(`Solution is not valid: ${validationScore}`)
