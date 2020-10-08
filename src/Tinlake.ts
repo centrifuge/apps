@@ -84,7 +84,16 @@ export default class Tinlake {
   public readonly version: number = 3
 
   constructor(params: TinlakeParams) {
-    const { provider, signer, legacyWeb3Provider, contractAddresses, transactionTimeout, contractAbis, overrides, contractConfig } = params
+    const {
+      provider,
+      signer,
+      legacyWeb3Provider,
+      contractAddresses,
+      transactionTimeout,
+      contractAbis,
+      overrides,
+      contractConfig,
+    } = params
     this.contractAbis = contractAbis || abiDefinitions
     this.contractConfig = contractConfig || {}
     this.contractAddresses = contractAddresses || {}
