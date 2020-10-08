@@ -44,7 +44,7 @@ export const getDocumentCollaborators = (document: Document, contacts: Contact[]
     if (document!.header![value]) {
       userAccess = [
         ...userAccess,
-        ...(document!.header![value].map(address => {
+        ...(document!.header![value]!.map(address => {
           return {
             address,
             access: value,

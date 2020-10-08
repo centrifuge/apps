@@ -6,15 +6,16 @@ import {DatabaseService} from '../../database/database.service';
 import {DocumentsController} from '../documents.controller';
 import {centrifugeServiceProvider} from '../../centrifuge-client/centrifuge.module';
 import {CentrifugeService} from '../../centrifuge-client/centrifuge.service';
-import {V2SignedAttributeRequest} from '@centrifuge/gateway-lib/centrifuge-node-client';
+import { V2CreateDocumentRequest, V2SignedAttributeRequest } from '@centrifuge/gateway-lib/centrifuge-node-client';
 import TypeEnum = V2SignedAttributeRequest.TypeEnum;
+import { RegistriesErrors } from '@centrifuge/gateway-lib/models/schema';
 
 describe('DocumentsController', () => {
   let documentsModule: TestingModule;
   const documentToCreate: Document = {
     header: {
-      readAccess: ['0x111'],
-      writeAccess: ['0x222'],
+      read_access: ['0x111'],
+      write_access: ['0x222'],
     },
     attributes: {
       animal_type: {
@@ -34,8 +35,8 @@ describe('DocumentsController', () => {
 
   const documentToInsert: Document = {
     header: {
-      readAccess: ['0x111'],
-      writeAccess: ['0x222'],
+      read_access: ['0x111'],
+      write_access: ['0x222'],
     },
     attributes: {
       animal_type: {
@@ -70,7 +71,7 @@ describe('DocumentsController', () => {
     const databaseService = documentsModule.get<DatabaseService>(DatabaseService);
     insertedDocument = await databaseService.documents.insert({
       header: {
-        documentId: '0x39393939',
+        document_id: '0x39393939',
       },
       ...documentToInsert,
       ownerId: 'user_id',
@@ -86,69 +87,69 @@ describe('DocumentsController', () => {
     centApiSpies.spyGetDocument = jest.spyOn(centrifugeService.documents, 'getDocument');
   });
 
-  // describe('create', () => {
-  //   it('should return the created document', async () => {
-  //     const documentsController = documentsModule.get<DocumentsController>(
-  //       DocumentsController,
-  //     );
-  //
-  //     const payload: CoreapiCreateDocumentRequest = {
-  //       ...documentToCreate,
-  //     };
-  //     const result = await documentsController.create(
-  //       { user: { _id: 'user_id', account: 'user_account' } },
-  //       payload,
-  //     );
-  //
-  //     expect(result).toMatchObject({
-  //       ...documentToCreate,
-  //       header: {
-  //         job_id: 'some_job_id',
-  //       },
-  //       attributes: {
-  //         ...documentToCreate.attributes,
-  //         _createdBy: {
-  //           type: 'bytes',
-  //           value: 'user_account',
-  //         },
-  //       },
-  //       ownerId: 'user_id',
-  //     });
-  //
-  //     expect(databaseSpies.spyInsert).toHaveBeenCalledTimes(1);
-  //   });
-  // });
-  //
-  // describe('get documents list', () => {
-  //
-  //   it('should get the list of documents from the database', async () => {
-  //     const documentsController = documentsModule.get<DocumentsController>(
-  //       DocumentsController,
-  //     );
-  //
-  //     const payload: CoreapiCreateDocumentRequest = {
-  //       ...documentToCreate,
-  //     };
-  //
-  //     await documentsController.create(
-  //       { user: { _id: 'user_id' } },
-  //       payload,
-  //     );
-  //
-  //     payload.attributes = {};
-  //
-  //     await documentsController.create(
-  //       { user: { _id: 'user_id' } },
-  //       payload,
-  //     );
-  //
-  //     const result = await documentsController.getList({
-  //       user: { _id: 'user_id' },
-  //     });
-  //     expect(result.length).toEqual(3);
-  //     expect(databaseSpies.spyGetAll).toHaveBeenCalledTimes(1);
-  //   });
-  // });
+  describe('create', () => {
+    it('should return the created document', async () => {
+      const documentsController = documentsModule.get<DocumentsController>(
+        DocumentsController,
+      );
+
+      const payload: V2CreateDocumentRequest = {
+        ...documentToCreate,
+      };
+      const result = await documentsController.create(
+        { user: { _id: 'user_id', account: 'user_account' } },
+        payload,
+      );
+
+      expect(result).toMatchObject({
+        ...documentToCreate,
+        header: {
+          job_id: 'some_job_id',
+        },
+        attributes: {
+          ...documentToCreate.attributes,
+          _createdBy: {
+            type: 'bytes',
+            value: 'user_account',
+          },
+        },
+        ownerId: 'user_id',
+      });
+
+      expect(databaseSpies.spyInsert).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('get documents list', () => {
+
+    it('should get the list of documents from the database', async () => {
+      const documentsController = documentsModule.get<DocumentsController>(
+        DocumentsController,
+      );
+
+      const payload: V2CreateDocumentRequest = {
+        ...documentToCreate,
+      };
+
+      await documentsController.create(
+        { user: { _id: 'user_id' } },
+        payload,
+      );
+
+      payload.attributes = {};
+
+      await documentsController.create(
+        { user: { _id: 'user_id' } },
+        payload,
+      );
+
+      const result = await documentsController.getList({
+        user: { _id: 'user_id' },
+      });
+      expect(result.length).toEqual(3);
+      expect(databaseSpies.spyGetAll).toHaveBeenCalledTimes(1);
+    });
+  });
 
   describe('update', () => {
     it('should update the specified document', async () => {
@@ -194,7 +195,7 @@ describe('DocumentsController', () => {
       });
     });
 
-    it('should throw and error because the document does not exist', async () => {
+    it('should throw an error because the document does not exist', async () => {
       const documentsController = documentsModule.get<DocumentsController>(
         DocumentsController,
       );
@@ -202,19 +203,21 @@ describe('DocumentsController', () => {
       const updatedDocument: Document = {
         ...documentToCreate,
       };
-      await expect(
-        documentsController.updateById(
+
+      try {
+        let a = await documentsController.updateById(
           { id: 'someID' },
           { user: { _id: 'user_id', account: '0x4441122' } },
           { ...updatedDocument },
-        ),
-      ).rejects.toMatchObject({
-          message: `Can not find document #someID in the database`,
-      });
+        )
+      } catch (err) {
+        expect(err.message.message).toMatch('Can not find document #someID in the database');
+        expect(err.status).toEqual(404);
+      }
     });
   });
 
-  describe.only('get by id', () => {
+  describe('get by id', () => {
     it('should return the document by id', async () => {
       const documentsController = documentsModule.get<DocumentsController>(
         DocumentsController,

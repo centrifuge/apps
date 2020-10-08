@@ -49,7 +49,6 @@ export class DocumentsController {
     createResult.attributes = unflatten(createResult.attributes);
     const commitResult = await this.centrifugeService.documents.commitDocumentV2(
         request.user.account,
-        // @ts-ignore
         createResult.header.document_id,
     );
 
@@ -62,7 +61,6 @@ export class DocumentsController {
   }
 
   async updateDBDoc(updateResult: Document, id: string, userID: string) {
-    // @ts-ignore
     const updated = await this.centrifugeService.pullForJobComplete(updateResult.header.job_id, userID);
     return await this.databaseService.documents.updateById(id, {
       $set: {
@@ -97,15 +95,12 @@ export class DocumentsController {
       request.user.account,
       {
         attributes: payload.attributes,
-        // @ts-ignore
         read_access: payload.header.read_access ? payload.header.read_access : [],
-        // @ts-ignore
         write_access: payload.header.write_access ? payload.header.write_access : [],
         scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
       },
     );
 
-    // @ts-ignore
     const commitResp = await this.commitPendingDoc(createResult, request);
     return await this.updateDBDoc(commitResp.commitResult, commitResp.dbId, request.user.account);
   }
@@ -135,12 +130,10 @@ export class DocumentsController {
     document.header = cloneResult.header;
 
     const commitResp = await this.commitPendingDoc(document, request);
-    // @ts-ignore
     const commit = await this.centrifugeService.pullForJobComplete(commitResp.commitResult.header.job_id, request.user.account);
     if (commit.status === 'success') {
       const updateResult: Document = await this.centrifugeService.documents.updateDocument(
           request.user.account,
-          // @ts-ignore
           cloneResult.header.document_id,
           {
             attributes: document.attributes,
@@ -176,7 +169,6 @@ export class DocumentsController {
     const document = await this.getDocFromDB(params.id);
 
     try {
-      // @ts-ignore
       const docFromNode = await this.centrifugeService.documents.getDocument(request.user.account, document.header.document_id);
       return {
         _id: document._id,
@@ -213,19 +205,15 @@ export class DocumentsController {
 
     const updateResult: Document = await this.centrifugeService.documents.updateDocument(
       request.user.account,
-        // @ts-ignore
         documentFromDb.header.document_id,
       {
         attributes: updateDocRequest.attributes,
-        // @ts-ignore
         read_access: header ? header.read_access : [],
-        // @ts-ignore
         write_access: header ? header.write_access : [],
         scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
       },
     );
 
-    // @ts-ignore
     await this.centrifugeService.pullForJobComplete(updateResult.header.job_id, request.user.account);
     const unflattenAttr = unflatten(updateResult.attributes);
 

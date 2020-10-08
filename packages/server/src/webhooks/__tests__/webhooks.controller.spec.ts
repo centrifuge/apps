@@ -11,7 +11,7 @@ describe('WebhooksController', () => {
   const user = new User();
   user._id = 'id01';
   user.account = '0x1111';
-  const documentId = '112233';
+  const document_id = '112233';
   const documentSpies: any = {};
   const centrifugeSpies: any = {};
 
@@ -44,10 +44,9 @@ describe('WebhooksController', () => {
       );
 
       const result = await webhooksController.receiveMessage({
-        // @ts-ignore
         event_type: EventTypes.DOCUMENT,
         document_type: DocumentTypes.GENERIC_DOCUMENT,
-        document_id: documentId,
+        document_id,
         to_id: user.account,
         from_id: '0xRandomId',
       });
@@ -55,16 +54,16 @@ describe('WebhooksController', () => {
       expect(result).toEqual('OK');
       expect(centrifugeSpies.spyDocGet).toHaveBeenCalledWith(
         user.account,
-        documentId,
+        document_id,
       );
 
       expect(documentSpies.spyUpdate).toHaveBeenCalledWith(
-        { 'header.document_id': documentId, 'ownerId': 'id01' },
+        { 'header.document_id': document_id, 'ownerId': 'id01' },
         {
           $set: {
             ownerId: 'id01',
             header: {
-              document_id: documentId,
+              document_id,
               nfts: [{ owner: 'owner', token_id: 'token_id' }],
             },
             data: { currency: 'USD' },
@@ -98,10 +97,10 @@ describe('WebhooksController', () => {
       );
       try {
         const result = await webhooksController.receiveMessage({
-          eventType: EventTypes.DOCUMENT,
-          documentType: DocumentTypes.GENERIC_DOCUMENT,
-          documentId,
-          toId: '0x4444',
+          event_type: EventTypes.DOCUMENT,
+          document_type: DocumentTypes.GENERIC_DOCUMENT,
+          document_id,
+          to_id: '0x4444',
         });
       } catch (e) {
         expect(e.message).toEqual('Webhook Error: User is not present in database');

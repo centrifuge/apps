@@ -68,7 +68,7 @@ export const databaseServiceProvider = {
   useFactory: async (): Promise<DatabaseService> => {
 
     let testingMode: boolean;
-    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'functional') {
+    if (process.env.NODE_ENV === 'test') {
       testingMode = true;
     }
     if (!initializeDatabasePromise || testingMode) {

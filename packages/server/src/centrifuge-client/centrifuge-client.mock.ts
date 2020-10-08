@@ -70,7 +70,7 @@ export class MockCentrifugeService {
     updatePurchaseOrder: jest.fn((auth, id, data) => data),
   };
   funding = {
-    createFundingAgreement: jest.fn((document_id, payload, account) => {
+    createFundingAgreement: jest.fn((account, document_id, payload) => {
       return new Promise((resolve, reject) => {
         const result = {
           header: {

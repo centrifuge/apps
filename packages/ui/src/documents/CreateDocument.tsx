@@ -83,13 +83,14 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
       defaultDocument: document,
     });
       try {
+
         push(documentRoutes.index);
-        go(0);
         if (document.template && document.template !== '') {
           await httpClient.documents.clone(document);
         } else {
           await httpClient.documents.create(document);
         }
+        go(0);
       } catch (e) {
         notification.alert({
           type: NOTIFICATION.ERROR,
@@ -119,7 +120,7 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
       renderHeader={() => {
         return <SecondaryHeader>
           <Box direction="row" gap="small" align="center">
-            <Link to={documentRoutes.index} size="large">
+            <Link to={documentRoutes.index}>
               <LinkPrevious/>
             </Link>
             <Heading level="3">

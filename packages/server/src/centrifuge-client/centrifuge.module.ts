@@ -8,10 +8,6 @@ function checkNodeEnvironment() {
     case 'test': {
       return new MockCentrifugeService();
     }
-    case 'functional': {
-      config.centrifugeUrl = 'http://127.0.0.1:8084';
-      return new CentrifugeService();
-    }
   }
   return new CentrifugeService();
 }

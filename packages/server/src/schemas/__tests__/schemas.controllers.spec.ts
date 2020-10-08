@@ -95,7 +95,6 @@ describe('SchemasController', () => {
         await schemasController.create(schemaToCreate)
       } catch (err) {
         expect(err.message.message).toMatch(`Schema with name ${schemaToCreate.name} exists in the database`)
-        console.log(err)
       }
     });
 

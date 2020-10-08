@@ -23,7 +23,7 @@ export class FundingController {
     );
 
     await this.centrifugeService.pullForJobComplete(
-      signatureResponse.header.jobId,
+      signatureResponse.header.job_id,
       req.user.account,
     );
 
@@ -39,15 +39,15 @@ export class FundingController {
         apr: fundingRequest.apr.toString(),
         days: fundingRequest.days.toString(),
         fee: fundingRequest.fee.toString(),
-        repaymentDueDate: fundingRequest.repayment_due_date,
-        repaymentAmount: fundingRequest.repayment_amount.toString(),
+        repayment_due_date: fundingRequest.repayment_due_date,
+        repayment_amount: fundingRequest.repayment_amount.toString(),
         currency: fundingRequest.currency.toString(),
-        borrowerId: req.user.account.toString(),
-        funderId: fundingRequest.funder_id.toString(),
+        borrower_id: req.user.account.toString(),
+        funder_id: fundingRequest.funder_id.toString(),
       },
     };
 
-    if (fundingRequest.nft_address) payload.data.nftAddress = fundingRequest.nft_address;
+    if (fundingRequest.nft_address) payload.data.nft_address = fundingRequest.nft_address;
 
     const fundingResponse = await this.centrifugeService.funding.createFundingAgreement(
       req.user.account,
@@ -56,16 +56,16 @@ export class FundingController {
     );
 
     await this.centrifugeService.pullForJobComplete(
-      fundingResponse.header.jobId,
+      fundingResponse.header.job_id,
       req.user.account,
     );
     const signatureResponse = await this.centrifugeService.funding.signFundingAgreement(
       req.user.account,
       fundingRequest.document_id,
-      fundingResponse.data.funding.agreementId,
+      fundingResponse.data.funding.agreement_id,
     );
     await this.centrifugeService.pullForJobComplete(
-      signatureResponse.header.jobId,
+      signatureResponse.header.job_id,
       req.user.account,
     );
 

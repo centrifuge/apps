@@ -171,7 +171,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
         renderHeader={() => {
           return <SecondaryHeader>
             <Box direction="row" gap="small" align="center">
-              <Link to={documentRoutes.index} size="large">
+              <Link to={documentRoutes.index}>
                 <LinkPrevious/>
               </Link>
               <Heading level="3">

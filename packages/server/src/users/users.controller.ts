@@ -142,10 +142,8 @@ export class UsersController {
     // Create centrifuge identity in case user does not have one
     if (!user.account) {
       const account = await this.centrifugeService.accounts.generateAccount(
-        // @ts-ignore
         config.admin.chain,
       );
-      // @ts-ignore
       user.account = account.identity_id.toLowerCase();
     }
 

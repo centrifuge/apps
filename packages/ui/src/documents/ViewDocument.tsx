@@ -126,7 +126,7 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
     <Box pad={{ bottom: 'large' }}>
       <SecondaryHeader>
         <Box direction="row" gap="small" align="center">
-          <Link to={routes.documents.index} size="large">
+          <Link to={routes.documents.index}>
             <LinkPrevious/>
           </Link>
 
