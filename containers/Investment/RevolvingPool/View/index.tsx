@@ -50,7 +50,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
 
   useInterval(() => {
     updateEpochData()
-  }, 60000)
+  }, 30000)
 
   const dispatch = useDispatch()
   const address = useSelector<any, string | null>((state) => state.auth.address)

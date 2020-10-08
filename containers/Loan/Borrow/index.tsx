@@ -58,13 +58,13 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const ceilingOverflow = new BN(borrowAmount).cmp(new BN(props.loan.principal)) > 0
   const availableFundsOverflow = new BN(borrowAmount).cmp(new BN(availableFunds)) > 0
   const borrowedAlready = new BN(props.loan.debt).isZero() === false || props.loan.status !== 'opened'
-  const borrowEnabled = !ceilingOverflow && !availableFundsOverflow && ceilingSet && !borrowedAlready
 
   const epochState = props.pool?.data ? (props.pool?.data as PoolDataV3).epochState : undefined
   const isBlockedState =
     epochState === 'in-submission-period' ||
     epochState === 'in-challenge-period' ||
     epochState === 'challenge-period-ended'
+  const borrowEnabled = !ceilingOverflow && !availableFundsOverflow && ceilingSet && !borrowedAlready && !isBlockedState
 
   return (
     <Box basis={'1/4'} gap="medium" margin={{ right: 'large' }}>

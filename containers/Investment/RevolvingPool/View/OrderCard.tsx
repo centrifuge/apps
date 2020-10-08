@@ -121,7 +121,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
           {props.epochData?.minChallengePeriodEnd !== 0 && (
             <MinTimeRemaining>
               Minimum time remaining:{' '}
-              {secondsToHms(props.epochData.minChallengePeriodEnd - new Date().getTime() / 1000)}
+              {secondsToHms(props.epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
             </MinTimeRemaining>
           )}
         </Info>
