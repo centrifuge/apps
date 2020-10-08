@@ -53,7 +53,7 @@ class Apollo {
     const poolConfigs = config.pools
     const tinlakePools = poolConfigs.map((poolConfig: any) => {
       const poolId = poolConfig.addresses.ROOT_CONTRACT
-      const pool = pools.find((p) => p.id === poolId)
+      const pool = pools.find((p) => p.id === poolId.toLowerCase())
 
       const totalDebt = (pool && new BN(pool.totalDebt)) || new BN('0')
       const totalRepaysAggregatedAmount = (pool && new BN(pool.totalRepaysAggregatedAmount)) || new BN('0')
