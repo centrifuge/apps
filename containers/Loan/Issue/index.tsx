@@ -88,6 +88,8 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
     getNFT(props.registry, props.tokenId)
   }, [props])
 
+  const disabled = status === 'unconfirmed' || status === 'pending' || status === 'succeeded'
+
   return (
     <Box>
       <Box>
@@ -101,30 +103,17 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
           <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
             <Box basis={'1/3'} gap="medium">
               <FormField label="Collateral Token Registry Address">
-                <TextInput
-                  value={registry || ''}
-                  onChange={onRegistryAddressValueChange}
-                  disabled={status === 'unconfirmed' || status === 'pending'}
-                />
+                <TextInput value={registry || ''} onChange={onRegistryAddressValueChange} disabled={disabled} />
               </FormField>
             </Box>
 
             <Box basis={'1/3'} gap="medium">
               <FormField label="Token ID">
-                <TextInput
-                  value={tokenId}
-                  onChange={onTokenIdValueChange}
-                  disabled={status === 'unconfirmed' || status === 'pending'}
-                />
+                <TextInput value={tokenId} onChange={onTokenIdValueChange} disabled={disabled} />
               </FormField>
             </Box>
             <Box basis={'1/3'} gap="medium" align="end">
-              <Button
-                onClick={issueLoan}
-                primary
-                label="Open financing"
-                disabled={!nft || status === 'unconfirmed' || status === 'pending'}
-              />
+              <Button onClick={issueLoan} primary label="Open financing" disabled={!nft || disabled} />
             </Box>
           </Box>
         </Box>

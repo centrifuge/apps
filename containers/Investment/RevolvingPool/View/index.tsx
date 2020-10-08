@@ -24,6 +24,7 @@ export type EpochData = {
   state: 'open' | 'can-be-closed' | 'in-submission-period' | 'in-challenge-period' | 'challenge-period-ended'
   isBlockedState: boolean
   minimumEpochTime: number
+  minChallengePeriodEnd: number
   lastEpochClosed: number
   latestBlockTimestamp: number
 }
@@ -41,6 +42,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
       isBlockedState:
         state === 'in-submission-period' || state === 'in-challenge-period' || state === 'challenge-period-ended',
       minimumEpochTime: await props.tinlake.getMinimumEpochTime(),
+      minChallengePeriodEnd: await props.tinlake.getMinChallengePeriodEnd(),
       lastEpochClosed: await props.tinlake.getLastEpochClosed(),
       latestBlockTimestamp: await props.tinlake.getLatestBlockTimestamp(),
     })
@@ -48,7 +50,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
 
   useInterval(() => {
     updateEpochData()
-  }, 60000)
+  }, 30000)
 
   const dispatch = useDispatch()
   const address = useSelector<any, string | null>((state) => state.auth.address)
@@ -81,12 +83,12 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
       </ExplainerCard>
 
       <Box direction="row" justify="between" gap="medium">
+        {epochData ? <EpochOverview epochData={epochData} tinlake={props.tinlake} /> : <div>&nbsp;</div>}
+
         <Box>
           <TrancheOverview epochData={epochData} pool={props.activePool} tinlake={props.tinlake} tranche="senior" />
           <TrancheOverview epochData={epochData} pool={props.activePool} tinlake={props.tinlake} tranche="junior" />
         </Box>
-
-        {epochData && <EpochOverview epochData={epochData} tinlake={props.tinlake} />}
       </Box>
 
       {isAdmin && (

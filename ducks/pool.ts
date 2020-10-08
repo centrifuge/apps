@@ -12,6 +12,8 @@ const RECEIVE_POOL = 'tinlake-ui/pool/RECEIVE_POOL'
 export interface PoolTranche extends Tranche {
   pendingInvestments?: BN
   pendingRedemptions?: BN
+  decimals?: number
+  address?: string
 }
 
 export interface PoolData {
@@ -28,6 +30,7 @@ export interface PoolDataV3 extends PoolData {
   maxJuniorRatio: BN
   maxReserve: BN
   outstandingVolume: BN
+  epochState: 'open' | 'can-be-closed' | 'in-submission-period' | 'in-challenge-period' | 'challenge-period-ended'
 }
 
 export interface PoolState {

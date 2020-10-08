@@ -7,6 +7,7 @@ import { ITinlake as ITinlakeV3, baseToDisplay } from '@centrifuge/tinlake-js-v3
 import { connect } from 'react-redux'
 import { Decimal } from 'decimal.js-light'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
+import BN from 'bn.js'
 
 import { Description } from './styles'
 import { Card } from './TrancheOverview'
@@ -47,7 +48,6 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
     const method = props.tranche === 'senior' ? 'submitSeniorRedeemOrder' : 'submitJuniorRedeemOrder'
-    // @ts-ignore
     const txId = await props.createTransaction(`Redeem ${formatted} ${token}`, method, [props.tinlake, tokenValue])
     setTxId(txId)
   }
@@ -60,6 +60,18 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
 
   const disabled = status === 'unconfirmed' || status === 'pending'
 
+  const [error, setError] = React.useState<string | undefined>(undefined)
+
+  const onChange = (newValue: string) => {
+    setTokenValue(newValue)
+    if (limit && new BN(newValue).gt(new BN(limit))) {
+      setError('Amount larger than balance')
+    } else if (new BN(newValue).isZero()) {
+      setError('')
+    } else {
+      setError(undefined)
+    }
+  }
   return (
     <Box>
       <Description margin={{ top: 'medium' }}>
@@ -70,15 +82,16 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
       <TokenInput
         token={token}
         value={tokenValue}
+        error={error !== '' ? error : undefined}
         maxValue={limit}
         limitLabel="Your balance"
-        onChange={(newValue: string) => setTokenValue(newValue)}
+        onChange={onChange}
         disabled={disabled}
       />
 
       <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
-        <Button primary label={`Lock ${token}`} onClick={submit} disabled={disabled} />
+        <Button primary label={`Lock ${token}`} onClick={submit} disabled={error !== undefined || disabled} />
       </Box>
     </Box>
   )

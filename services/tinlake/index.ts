@@ -25,7 +25,7 @@ export function initTinlake({
     if (version === 2) {
       tinlake = (new Tinlake({ transactionTimeout, overrides, provider: rpcProvider }) as unknown) as ITinlake
     } else {
-      tinlake = new TinlakeV3({ transactionTimeout, overrides, provider: rpcProvider }) as ITinlakeV3
+      tinlake = (new TinlakeV3({ transactionTimeout, overrides, provider: rpcProvider }) as unknown) as ITinlakeV3
     }
   }
 

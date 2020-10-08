@@ -247,10 +247,7 @@ export async function setInterest(
   return tinlake.changeRate(loanId, rateGroup)
 }
 
-export async function submitSeniorSupplyOrder(
-  tinlake: ITinlakeV3,
-  amount: string
-): Promise<PendingTransaction | undefined> {
+export async function submitSeniorSupplyOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -267,17 +264,32 @@ export async function submitSeniorSupplyOrder(
     }
   }
 
-  return tinlake.submitSeniorSupplyOrderWithPermit(amount, address)
+  // return tinlake.submitSeniorSupplyOrderWithPermit(amount, address)
+  return tinlake.submitSeniorSupplyOrder(amount)
 }
 
 export async function cancelSeniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const address = await tinlake.signer?.getAddress()
+  const epochId = await tinlake.getCurrentEpochId()
+  const orderedInEpoch = await tinlake.getSeniorOrderedInEpoch(address)
+
+  if (epochId !== orderedInEpoch) {
+    const disbursements = await tinlake.calcSeniorDisburse(address)
+
+    if (disbursements.remainingSupplyCurrency.isZero() === false) {
+      const disburseTx = await tinlake.disburseSenior()
+      await tinlake.getTransactionReceipt(disburseTx)
+    }
+  }
+
   return tinlake.submitSeniorSupplyOrder('0')
 }
 
-export async function submitJuniorSupplyOrder(
-  tinlake: ITinlakeV3,
-  amount: string
-): Promise<PendingTransaction | undefined> {
+export async function submitJuniorSupplyOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -294,17 +306,32 @@ export async function submitJuniorSupplyOrder(
     }
   }
 
-  return tinlake.submitJuniorSupplyOrderWithPermit(amount, address)
+  // return tinlake.submitJuniorSupplyOrderWithPermit(amount, address)
+  return tinlake.submitJuniorSupplyOrder(amount)
 }
 
 export async function cancelJuniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const address = await tinlake.signer?.getAddress()
+  const epochId = await tinlake.getCurrentEpochId()
+  const orderedInEpoch = await tinlake.getJuniorOrderedInEpoch(address)
+
+  if (epochId !== orderedInEpoch) {
+    const disbursements = await tinlake.calcJuniorDisburse(address)
+
+    if (disbursements.remainingSupplyCurrency.isZero() === false) {
+      const disburseTx = await tinlake.disburseJunior()
+      await tinlake.getTransactionReceipt(disburseTx)
+    }
+  }
+
   return tinlake.submitJuniorSupplyOrder('0')
 }
 
-export async function submitSeniorRedeemOrder(
-  tinlake: ITinlakeV3,
-  amount: string
-): Promise<PendingTransaction | undefined> {
+export async function submitSeniorRedeemOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -321,17 +348,32 @@ export async function submitSeniorRedeemOrder(
     }
   }
 
-  return tinlake.submitSeniorRedeemOrderWithPermit(amount, address)
+  // return tinlake.submitSeniorRedeemOrderWithPermit(amount, address)
+  return tinlake.submitSeniorRedeemOrder(amount)
 }
 
 export async function cancelSeniorRedeemOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const address = await tinlake.signer?.getAddress()
+  const epochId = await tinlake.getCurrentEpochId()
+  const orderedInEpoch = await tinlake.getSeniorOrderedInEpoch(address)
+
+  if (epochId !== orderedInEpoch) {
+    const disbursements = await tinlake.calcSeniorDisburse(address)
+
+    if (disbursements.remainingRedeemToken.isZero() === false) {
+      const disburseTx = await tinlake.disburseSenior()
+      await tinlake.getTransactionReceipt(disburseTx)
+    }
+  }
+
   return tinlake.submitSeniorRedeemOrder('0')
 }
 
-export async function submitJuniorRedeemOrder(
-  tinlake: ITinlakeV3,
-  amount: string
-): Promise<PendingTransaction | undefined> {
+export async function submitJuniorRedeemOrder(tinlake: ITinlakeV3, amount: string): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -348,10 +390,28 @@ export async function submitJuniorRedeemOrder(
     }
   }
 
-  return tinlake.submitJuniorRedeemOrderWithPermit(amount, address)
+  // return tinlake.submitJuniorRedeemOrderWithPermit(amount, address)
+  return tinlake.submitJuniorRedeemOrder(amount)
 }
 
 export async function cancelJuniorRedeemOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const address = await tinlake.signer?.getAddress()
+  const epochId = await tinlake.getCurrentEpochId()
+  const orderedInEpoch = await tinlake.getJuniorOrderedInEpoch(address)
+
+  if (epochId !== orderedInEpoch) {
+    const disbursements = await tinlake.calcJuniorDisburse(address)
+
+    if (disbursements.remainingRedeemToken.isZero() === false) {
+      const disburseTx = await tinlake.disburseJunior()
+      await tinlake.getTransactionReceipt(disburseTx)
+    }
+  }
+
   return tinlake.submitJuniorRedeemOrder('0')
 }
 
@@ -437,6 +497,13 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
   const juniorPendingInvestments = await tinlake.getJuniorPendingInvestments()
   const juniorPendingRedemptions = await tinlake.getJuniorPendingRedemptions()
 
+  const seniorSymbol = await tinlake.getSeniorTokenSymbol()
+  const seniorDecimals = await tinlake.getSeniorTokenDecimals()
+  const juniorSymbol = await tinlake.getJuniorTokenSymbol()
+  const juniorDecimals = await tinlake.getJuniorTokenDecimals()
+
+  const epochState = await tinlake.getCurrentEpochState()
+
   return {
     minJuniorRatio,
     maxJuniorRatio,
@@ -445,12 +512,15 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
     netAssetValue,
     outstandingVolume,
     reserve,
+    epochState,
     junior: {
       type: 'junior',
       availableFunds: juniorReserve,
       tokenPrice: juniorTokenPrice,
       totalSupply: juniorTokenSupply,
-      token: 'TIN',
+      token: juniorSymbol,
+      decimals: juniorDecimals,
+      address: tinlake.contractAddresses['JUNIOR_TOKEN'],
       pendingInvestments: juniorPendingInvestments,
       pendingRedemptions: juniorPendingRedemptions,
     },
@@ -459,7 +529,9 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
       availableFunds: seniorReserve,
       tokenPrice: seniorTokenPrice,
       totalSupply: seniorTokenSupply,
-      token: 'DROP',
+      token: seniorSymbol,
+      decimals: seniorDecimals,
+      address: tinlake.contractAddresses['SENIOR_TOKEN'],
       interestRate: seniorInterestRate,
       pendingInvestments: seniorPendingInvestments,
       pendingRedemptions: seniorPendingRedemptions,

@@ -7,13 +7,14 @@ import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators
 import BN from 'bn.js'
 import { EpochData } from './index'
 import { useDispatch, useSelector } from 'react-redux'
-import { loadPool } from '../../../../ducks/pool'
+import { loadPool, PoolState } from '../../../../ducks/pool'
+import { secondsToHms } from '../../../../utils/time'
 
 import InvestCard from './InvestCard'
 import RedeemCard from './RedeemCard'
 import OrderCard from './OrderCard'
 import CollectCard from './CollectCard'
-import { TokenLogo, Info } from './styles'
+import { TokenLogo, Info, AddWalletLink, MinTimeRemaining } from './styles'
 import InvestAction from '../../../../components/InvestAction'
 import { useInterval } from '../../../../utils/hooks'
 
@@ -27,6 +28,9 @@ interface Props {
 export type Card = 'home' | 'collect' | 'order' | 'invest' | 'redeem'
 
 const TrancheOverview: React.FC<Props> = (props: Props) => {
+  const pool = useSelector<any, PoolState>((state) => state.pool)
+  const trancheData = props.tranche === 'senior' ? pool?.data?.senior : pool?.data?.junior
+
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
@@ -78,6 +82,27 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       setDisbursements(disbursements)
       setHasPendingOrder(!disbursements.remainingSupplyCurrency.add(disbursements.remainingRedeemToken).isZero())
       setHasPendingCollection(!disbursements.payoutCurrencyAmount.add(disbursements.payoutTokenAmount).isZero())
+    }
+  }
+
+  const addToWallet = async () => {
+    if (!trancheData || !trancheData.address || !trancheData.token || !trancheData.decimals) return
+
+    try {
+      await (window as any).ethereum.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: {
+            address: trancheData.address,
+            symbol: trancheData.token,
+            decimals: trancheData.decimals,
+            image: `https://tinlake.centrifuge.io/static/${token}_final.svg`,
+          },
+        },
+      })
+    } catch (error) {
+      console.log(error)
     }
   }
 
@@ -137,23 +162,31 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                   </Heading>
                   The Epoch has just been closed and the order executions are currently being computed. Until the next
                   Epoch opens, you cannot submit new orders.
+                  {props.epochData?.minChallengePeriodEnd !== 0 && (
+                    <MinTimeRemaining>
+                      Minimum time remaining:{' '}
+                      {secondsToHms(props.epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
+                    </MinTimeRemaining>
+                  )}
                 </Info>
               )}
 
-              <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-                <Button
-                  primary
-                  label="Redeem"
-                  onClick={() => setCard('redeem')}
-                  disabled={balance === '0' || props.epochData?.isBlockedState}
-                />
-                <Button
-                  primary
-                  label="Invest"
-                  onClick={() => setCard('invest')}
-                  disabled={props.epochData?.isBlockedState}
-                />
-              </Box>
+              {!props.epochData?.isBlockedState && (
+                <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                  <Button
+                    primary
+                    label="Redeem"
+                    onClick={() => setCard('redeem')}
+                    disabled={balance === '0' || props.epochData?.isBlockedState}
+                  />
+                  <Button
+                    primary
+                    label="Invest"
+                    onClick={() => setCard('invest')}
+                    disabled={props.epochData?.isBlockedState}
+                  />
+                </Box>
+              )}
             </>
           )}
           {card === 'order' && (
@@ -178,6 +211,10 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           )}
           {card === 'invest' && <InvestCard {...props} setCard={setCard} updateTrancheData={updateTrancheData} />}
           {card === 'redeem' && <RedeemCard {...props} setCard={setCard} updateTrancheData={updateTrancheData} />}
+
+          {trancheData?.token && trancheData.token.length > 0 && trancheData.token.length < 7 && (
+            <AddWalletLink onClick={addToWallet}>Add {trancheData?.token} to your wallet</AddWalletLink>
+          )}
         </>
       )}
 

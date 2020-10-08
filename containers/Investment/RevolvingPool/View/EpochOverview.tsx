@@ -12,20 +12,12 @@ import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { SignIcon } from './styles'
 import { useInterval } from '../../../../utils/hooks'
 import BN from 'bn.js'
+import { secondsToHms } from '../../../../utils/time'
 
 interface Props extends TransactionProps {
   epochData: EpochData
   tinlake: ITinlakeV3
   auth?: AuthState
-}
-
-const secondsToHms = (d: number) => {
-  const h = Math.floor(d / 3600)
-  const m = Math.floor((d % 3600) / 60)
-
-  const hDisplay = h > 0 ? h + (h === 1 ? ' hr' : ' hrs') : ''
-  const mDisplay = m > 0 ? m + (m === 1 ? ' min' : ' mins') : h > 0 ? '' : '0 min'
-  return hDisplay + (hDisplay.length > 0 && mDisplay.length > 0 ? ', ' : '') + mDisplay
 }
 
 const EpochOverview: React.FC<Props> = (props: Props) => {
@@ -46,10 +38,10 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
 
   const disabled = status === 'unconfirmed' || status === 'pending'
 
-  const [timePassed, setTimePassed] = React.useState(0)
+  const [timeLeft, setTimeLeft] = React.useState(0)
 
   useInterval(() => {
-    setTimePassed(new Date().getTime() / 1000 - props.epochData.lastEpochClosed)
+    setTimeLeft(props.epochData.lastEpochClosed + props.epochData.minimumEpochTime - new Date().getTime() / 1000)
   }, 1000)
 
   const totalPendingInvestments = poolData?.senior
@@ -89,14 +81,32 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               <TableCell scope="row">Epoch #</TableCell>
               <TableCell style={{ textAlign: 'end' }}>{props.epochData.id}</TableCell>
             </TableRow>
-            <TableRow>
-              <TableCell scope="row">Time passed since start of current epoch</TableCell>
-              <TableCell style={{ textAlign: 'end' }}>{secondsToHms(timePassed)}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell scope="row">Minimum epoch duration</TableCell>
-              <TableCell style={{ textAlign: 'end' }}>{secondsToHms(props.epochData.minimumEpochTime)}</TableCell>
-            </TableRow>
+            {isAdmin && (
+              <TableRow>
+                <TableCell scope="row">Epoch state</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>{props.epochData.state}</TableCell>
+              </TableRow>
+            )}
+            {props.epochData.isBlockedState && (
+              <TableRow>
+                <TableCell scope="row">Minimum time until next epoch starts</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  {secondsToHms(props.epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
+                </TableCell>
+              </TableRow>
+            )}
+            {!props.epochData.isBlockedState && (
+              <>
+                <TableRow>
+                  <TableCell scope="row">Minimum epoch duration</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>{secondsToHms(props.epochData.minimumEpochTime)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell scope="row">Minimum time left in current epoch</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>{secondsToHms(timeLeft)}</TableCell>
+                </TableRow>
+              </>
+            )}
             <TableRow>
               <TableCell scope="row">Total epoch investment capacity</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
