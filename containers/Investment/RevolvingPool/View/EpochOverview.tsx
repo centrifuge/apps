@@ -87,14 +87,26 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 <TableCell style={{ textAlign: 'end' }}>{props.epochData.state}</TableCell>
               </TableRow>
             )}
-            <TableRow>
-              <TableCell scope="row">Minimum epoch duration</TableCell>
-              <TableCell style={{ textAlign: 'end' }}>{secondsToHms(props.epochData.minimumEpochTime)}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell scope="row">Minimum time left in current epoch</TableCell>
-              <TableCell style={{ textAlign: 'end' }}>{secondsToHms(timeLeft)}</TableCell>
-            </TableRow>
+            {props.epochData.isBlockedState && (
+              <TableRow>
+                <TableCell scope="row">Minimum time until next epoch starts</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  {secondsToHms(props.epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
+                </TableCell>
+              </TableRow>
+            )}
+            {!props.epochData.isBlockedState && (
+              <>
+                <TableRow>
+                  <TableCell scope="row">Minimum epoch duration</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>{secondsToHms(props.epochData.minimumEpochTime)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell scope="row">Minimum time left in current epoch</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>{secondsToHms(timeLeft)}</TableCell>
+                </TableRow>
+              </>
+            )}
             <TableRow>
               <TableCell scope="row">Total epoch investment capacity</TableCell>
               <TableCell style={{ textAlign: 'end' }}>

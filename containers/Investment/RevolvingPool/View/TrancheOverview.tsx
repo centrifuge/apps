@@ -171,20 +171,22 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                 </Info>
               )}
 
-              <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-                <Button
-                  primary
-                  label="Redeem"
-                  onClick={() => setCard('redeem')}
-                  disabled={balance === '0' || props.epochData?.isBlockedState}
-                />
-                <Button
-                  primary
-                  label="Invest"
-                  onClick={() => setCard('invest')}
-                  disabled={props.epochData?.isBlockedState}
-                />
-              </Box>
+              {!props.epochData?.isBlockedState && (
+                <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                  <Button
+                    primary
+                    label="Redeem"
+                    onClick={() => setCard('redeem')}
+                    disabled={balance === '0' || props.epochData?.isBlockedState}
+                  />
+                  <Button
+                    primary
+                    label="Invest"
+                    onClick={() => setCard('invest')}
+                    disabled={props.epochData?.isBlockedState}
+                  />
+                </Box>
+              )}
             </>
           )}
           {card === 'order' && (
