@@ -185,7 +185,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const coordinator = this.contract('COORDINATOR')
 
       const minChallengePeriodEnd = (await coordinator.minChallengePeriodEnd()).toBN().toNumber()
-      const latestBlockTimestamp = (await this.provider.getBlock(await this.provider.getBlockNumber())).timestamp
+      const latestBlockTimestamp = await this.getLatestBlockTimestamp()
       if (minChallengePeriodEnd !== 0) {
         if (minChallengePeriodEnd < latestBlockTimestamp) return 'challenge-period-ended'
         return 'in-challenge-period'
