@@ -269,6 +269,18 @@ export async function submitSeniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
 }
 
 export async function cancelSeniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const address = await tinlake.signer?.getAddress()
+  const disbursements = await tinlake.calcSeniorDisburse(address)
+
+  if (disbursements.remainingSupplyCurrency.isZero() === false) {
+    const disburseTx = await tinlake.disburseSenior()
+    await tinlake.getTransactionReceipt(disburseTx)
+  }
+
   return tinlake.submitSeniorSupplyOrder('0')
 }
 
@@ -294,6 +306,18 @@ export async function submitJuniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
 }
 
 export async function cancelJuniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const address = await tinlake.signer?.getAddress()
+  const disbursements = await tinlake.calcJuniorDisburse(address)
+
+  if (disbursements.remainingSupplyCurrency.isZero() === false) {
+    const disburseTx = await tinlake.disburseJunior()
+    await tinlake.getTransactionReceipt(disburseTx)
+  }
+
   return tinlake.submitJuniorSupplyOrder('0')
 }
 
@@ -319,6 +343,18 @@ export async function submitSeniorRedeemOrder(tinlake: ITinlakeV3, amount: strin
 }
 
 export async function cancelSeniorRedeemOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const address = await tinlake.signer?.getAddress()
+  const disbursements = await tinlake.calcSeniorDisburse(address)
+
+  if (disbursements.remainingRedeemToken.isZero() === false) {
+    const disburseTx = await tinlake.disburseSenior()
+    await tinlake.getTransactionReceipt(disburseTx)
+  }
+
   return tinlake.submitSeniorRedeemOrder('0')
 }
 
@@ -344,6 +380,18 @@ export async function submitJuniorRedeemOrder(tinlake: ITinlakeV3, amount: strin
 }
 
 export async function cancelJuniorRedeemOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const address = await tinlake.signer?.getAddress()
+  const disbursements = await tinlake.calcJuniorDisburse(address)
+
+  if (disbursements.remainingRedeemToken.isZero() === false) {
+    const disburseTx = await tinlake.disburseJunior()
+    await tinlake.getTransactionReceipt(disburseTx)
+  }
+
   return tinlake.submitJuniorRedeemOrder('0')
 }
 
