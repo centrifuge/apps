@@ -274,11 +274,16 @@ export async function cancelSeniorSupplyOrder(tinlake: ITinlakeV3): Promise<Pend
   }
 
   const address = await tinlake.signer?.getAddress()
-  const disbursements = await tinlake.calcSeniorDisburse(address)
+  const epochId = await tinlake.getCurrentEpochId()
+  const orderedInEpoch = await tinlake.getSeniorOrderedInEpoch(address)
 
-  if (disbursements.remainingSupplyCurrency.isZero() === false) {
-    const disburseTx = await tinlake.disburseSenior()
-    await tinlake.getTransactionReceipt(disburseTx)
+  if (epochId !== orderedInEpoch) {
+    const disbursements = await tinlake.calcSeniorDisburse(address)
+
+    if (disbursements.remainingSupplyCurrency.isZero() === false) {
+      const disburseTx = await tinlake.disburseSenior()
+      await tinlake.getTransactionReceipt(disburseTx)
+    }
   }
 
   return tinlake.submitSeniorSupplyOrder('0')
@@ -311,11 +316,16 @@ export async function cancelJuniorSupplyOrder(tinlake: ITinlakeV3): Promise<Pend
   }
 
   const address = await tinlake.signer?.getAddress()
-  const disbursements = await tinlake.calcJuniorDisburse(address)
+  const epochId = await tinlake.getCurrentEpochId()
+  const orderedInEpoch = await tinlake.getJuniorOrderedInEpoch(address)
 
-  if (disbursements.remainingSupplyCurrency.isZero() === false) {
-    const disburseTx = await tinlake.disburseJunior()
-    await tinlake.getTransactionReceipt(disburseTx)
+  if (epochId !== orderedInEpoch) {
+    const disbursements = await tinlake.calcJuniorDisburse(address)
+
+    if (disbursements.remainingSupplyCurrency.isZero() === false) {
+      const disburseTx = await tinlake.disburseJunior()
+      await tinlake.getTransactionReceipt(disburseTx)
+    }
   }
 
   return tinlake.submitJuniorSupplyOrder('0')
@@ -348,11 +358,16 @@ export async function cancelSeniorRedeemOrder(tinlake: ITinlakeV3): Promise<Pend
   }
 
   const address = await tinlake.signer?.getAddress()
-  const disbursements = await tinlake.calcSeniorDisburse(address)
+  const epochId = await tinlake.getCurrentEpochId()
+  const orderedInEpoch = await tinlake.getSeniorOrderedInEpoch(address)
 
-  if (disbursements.remainingRedeemToken.isZero() === false) {
-    const disburseTx = await tinlake.disburseSenior()
-    await tinlake.getTransactionReceipt(disburseTx)
+  if (epochId !== orderedInEpoch) {
+    const disbursements = await tinlake.calcSeniorDisburse(address)
+
+    if (disbursements.remainingRedeemToken.isZero() === false) {
+      const disburseTx = await tinlake.disburseSenior()
+      await tinlake.getTransactionReceipt(disburseTx)
+    }
   }
 
   return tinlake.submitSeniorRedeemOrder('0')
@@ -385,11 +400,16 @@ export async function cancelJuniorRedeemOrder(tinlake: ITinlakeV3): Promise<Pend
   }
 
   const address = await tinlake.signer?.getAddress()
-  const disbursements = await tinlake.calcJuniorDisburse(address)
+  const epochId = await tinlake.getCurrentEpochId()
+  const orderedInEpoch = await tinlake.getJuniorOrderedInEpoch(address)
 
-  if (disbursements.remainingRedeemToken.isZero() === false) {
-    const disburseTx = await tinlake.disburseJunior()
-    await tinlake.getTransactionReceipt(disburseTx)
+  if (epochId !== orderedInEpoch) {
+    const disbursements = await tinlake.calcJuniorDisburse(address)
+
+    if (disbursements.remainingRedeemToken.isZero() === false) {
+      const disburseTx = await tinlake.disburseJunior()
+      await tinlake.getTransactionReceipt(disburseTx)
+    }
   }
 
   return tinlake.submitJuniorRedeemOrder('0')
