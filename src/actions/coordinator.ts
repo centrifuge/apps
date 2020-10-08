@@ -68,8 +68,8 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return {
         seniorRedeem: (await coordinator.weightSeniorRedeem()).toBN().toNumber(),
         juniorRedeem: (await coordinator.weightJuniorRedeem()).toBN().toNumber(),
-        juniorSupply: (await coordinator.weightsJuniorSupply()).toBN().toNumber(),
-        seniorSupply: (await coordinator.weightsSeniorSupply()).toBN().toNumber(),
+        juniorSupply: (await coordinator.weightJuniorSupply()).toBN().toNumber(),
+        seniorSupply: (await coordinator.weightSeniorSupply()).toBN().toNumber(),
       }
     }
 
@@ -93,14 +93,16 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
           return { status: 1, hash: closeResult.transactionHash } as any
         }
       }
-
+      console.log('Retrieving epoch state')
       const state = await this.getEpochState()
+      console.log('Retrieving order state')
       const orderState = await this.getOrderState()
+      console.log('Retrieving solver weights')
       const weights = await this.getSolverWeights()
 
       console.log('State', state)
-      console.log('Order State', orderState)
-      console.log('Solver Weights', weights)
+      console.log('Order state', orderState)
+      console.log('Solver weights', weights)
 
       const solution = await calculateOptimalSolution(state, orderState, weights)
       console.log('Solution found', solution)
@@ -122,7 +124,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         .toNumber()
 
       if (validationScore !== 0) {
-        throw new Error(`Solution is not valid: ${validationScore}`)
+        console.error(`Solution is not valid: ${validationScore}`)
       }
 
       const submissionTx = coordinator.submitSolution(
