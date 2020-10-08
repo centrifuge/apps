@@ -112,7 +112,7 @@ const PoolOverview: React.FC<Props> = () => {
 
       <Box direction="column" justify="between">
         <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'small' }}>
-          <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+          <Box direction="row" margin={{ top: '0', bottom: '0' }}>
             <Heading level="5" margin={'0'}>
               <TokenLogo src={`/static/DROP_final.svg`} />
               DROP Value
@@ -151,7 +151,7 @@ const PoolOverview: React.FC<Props> = () => {
         </DividerBottom>
 
         <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
-          <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+          <Box direction="row" margin={{ top: '0', bottom: '0' }}>
             <Heading level="5" margin={'0'}>
               <TokenLogo src={`/static/TIN_final.svg`} />
               TIN Value

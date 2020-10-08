@@ -110,7 +110,10 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
             <TableRow>
               <TableCell scope="row">Total epoch investment capacity</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(investmentCapacity, 18), 2))} DAI
+                {addThousandsSeparators(
+                  toPrecision(baseToDisplay(investmentCapacity.lt(new BN(0)) ? new BN(0) : investmentCapacity, 18), 2)
+                )}{' '}
+                DAI
               </TableCell>
             </TableRow>
           </TableBody>
