@@ -153,7 +153,9 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
     }
 
     getLatestBlockTimestamp = async () => {
-      return (await this.provider.getBlock(await this.provider.getBlockNumber())).timestamp
+      const latestBlock = await this.provider.getBlock(await this.provider.getBlockNumber())
+      if (!latestBlock) return new Date().getTime()
+      return latestBlock.timestamp
     }
 
     getLastEpochClosed = async () => {

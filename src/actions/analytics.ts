@@ -132,6 +132,13 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return !userOrder.orderedInEpoch.toBN().isZero()
     }
 
+    getJuniorOrderedInEpoch = async (user: string) => {
+      const userOrder = await this.contract('JUNIOR_TRANCHE').users(user)
+
+      if (!userOrder) return 0
+      return userOrder.orderedInEpoch.toBN().toNumber()
+    }
+
     getJuniorTokenSymbol = async () => {
       const symbol = await this.contract('JUNIOR_TOKEN').symbol()
 
@@ -172,6 +179,14 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
 
       if (!userOrder) return false
       return !userOrder.orderedInEpoch.toBN().isZero()
+    }
+
+    getSeniorOrderedInEpoch = async (user: string) => {
+      if (!this.existsSenior()) return 0
+      const userOrder = await this.contract('SENIOR_TRANCHE').users(user)
+
+      if (!userOrder) return 0
+      return userOrder.orderedInEpoch.toBN().toNumber()
     }
 
     getSeniorTokenSymbol = async () => {
@@ -315,6 +330,8 @@ export type IAnalyticsActions = {
   getSeniorTokenDecimals(): Promise<number>
   checkHasInvestedInSenior(user: string): Promise<boolean>
   checkHasInvestedInJunior(usr: string): Promise<boolean>
+  getSeniorOrderedInEpoch(user: string): Promise<number>
+  getJuniorOrderedInEpoch(user: string): Promise<number>
 }
 
 export default AnalyticsActions
