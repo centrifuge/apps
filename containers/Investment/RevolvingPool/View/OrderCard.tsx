@@ -73,7 +73,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
       </Heading>
       <Description>
         You have locked {token} to {type.toLowerCase()} {type === 'Invest' ? 'into' : 'from'} Tinlake for the next
-        epoch. You can cancel or update this order until the end of the current epoch.
+        epoch. You can cancel this order until the end of the current epoch.
       </Description>
 
       <Table margin={{ top: 'medium' }}>

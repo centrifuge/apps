@@ -19,16 +19,12 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   const onOpen = () => setModalIsOpen(true)
   const onClose = () => setModalIsOpen(false)
 
-  React.useEffect(() => {
-    console.log('pool in modal', props.pool)
-  }, [props.pool])
-
   const changeEmail = (event: any) => {
     setEmail(event.currentTarget.value)
     // error = 'Please provide a valid email address'
   }
 
-  const investDisabled = props.pool?.isUpcoming
+  const investDisabled = props.pool?.isUpcoming || !props.pool?.securitizeId
 
   return (
     <>
@@ -102,15 +98,17 @@ const InvestAction: React.FC<Props> = (props: Props) => {
           </Box>
           {props.pool && (
             <Box flex={true} justify="between">
-              {props.pool?.isUpcoming && <Paragraph>This pool is not open for investments yet</Paragraph>}
-              {!props.pool?.isUpcoming && (
+              {(props.pool?.isUpcoming || !props.pool.securitizeId) && (
+                <Paragraph>This pool is not open for investments yet</Paragraph>
+              )}
+              {!investDisabled && (
                 <Paragraph>Already an eligible investor? Sign the pool issuers Subscription Agreement.</Paragraph>
               )}
               <Button
                 primary
                 label="Invest in this pool"
                 fill={false}
-                href="https://kickfurther.invest.securitize.io/"
+                href={`https://${props.pool.securitizeId || ''}.invest.securitize.io/`}
                 target="_blank"
                 disabled={investDisabled}
               />
@@ -119,12 +117,25 @@ const InvestAction: React.FC<Props> = (props: Props) => {
         </Box>
 
         {props.pool && (
-          <Paragraph margin={{ top: 'medium', bottom: '0' }}>
+          <Paragraph
+            margin={{ top: 'medium', bottom: '0', left: 'large', right: 'large' }}
+            style={{ textAlign: 'center' }}
+          >
             Any questions left? Feel free to reach out to the Issuer directly (see{' '}
             <a href="#" onClick={onClose}>
               Pool Overview
             </a>
             ).
+          </Paragraph>
+        )}
+
+        {!props.pool && (
+          <Paragraph
+            margin={{ top: 'medium', bottom: '0', left: 'large', right: 'large' }}
+            style={{ textAlign: 'center' }}
+          >
+            Already an eligible Tinlake investor? Head over to the individual pools to get started with signing the
+            subscription agreement or login to Securitize and select the respective pool there.
           </Paragraph>
         )}
       </FormModal>
