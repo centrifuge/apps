@@ -1,261 +1,133 @@
 import * as React from 'react'
-import styled from 'styled-components'
-import { Box, Button, Paragraph, CheckBox, RadioButton, Form, FormField, TextInput, Select } from 'grommet'
+import { Box, Button, Paragraph, CheckBox, FormField, TextInput, Anchor } from 'grommet'
 
-import { countryList } from './countries'
-import { isValidEmail } from '../../utils/email'
-import InvestActionSuccessModal from './SuccessModal'
-import { FormModal, InvestmentSteps, FormFieldWithoutBorder, AcceptButton, ErrorMessage } from './styles'
-
-const LAMBDA_SEND_INVESTOR_EMAIL_URL = '/.netlify/functions/sendInvestorEmail'
-
-// Fixes the radio button alignment in firefox
-const StyledRadioButton = styled(RadioButton)`
-  display: none;
-`
+import { FormModal, InvestmentSteps } from './styles'
+import { Pool, UpcomingPool } from '../../config'
+// import { getPoolStatus } from '../../utils/pool'
 
 interface Props {
-  poolName: string
+  anchor?: React.ReactNode
+  pool?: Pool | UpcomingPool
 }
 
-interface FormData {
-  title: 'Mr.' | 'Ms.' | undefined
-  givenName: string
-  surname: string
-  email: string
-  countryOfResidence: string | undefined
-  investorType: string | undefined
-  investmentSize: string | undefined
-  investorConfirmation: boolean
-}
+const InvestAction: React.FC<Props> = (props: Props) => {
+  const [modalIsOpen, setModalIsOpen] = React.useState(false)
 
-export interface FormSubmission extends FormData, Props {}
-
-const initialForm: FormData = {
-  title: undefined,
-  givenName: '',
-  surname: '',
-  email: '',
-  countryOfResidence: undefined,
-  investorType: undefined,
-  investmentSize: undefined,
-  investorConfirmation: false,
-}
-
-type FormErrors = { [K in keyof FormData]?: string }
-
-const submitForm = async (form: FormData) => {
-  return await fetch(LAMBDA_SEND_INVESTOR_EMAIL_URL, {
-    method: 'POST',
-    body: JSON.stringify(form),
-  })
-}
-
-const InvestAction: React.FunctionComponent<Props> = (props: Props) => {
-  const [filteredCountries, setFilteredCountries] = React.useState<string[]>(countryList)
-  const [modalIsOpen, setModalIsOpen] = React.useState<boolean>(false)
-  const [successModalIsOpen, setSuccessModalIsOpen] = React.useState<boolean>(false)
-  const [failedSubmission, setFailedSubmission] = React.useState<boolean>(false)
-
-  const [form, setForm] = React.useState<FormData>(initialForm)
-  const [errors, setErrors] = React.useState<FormErrors>({})
-
-  const handleOnChange = (fieldName: keyof FormData) => {
-    return (event: React.FormEvent<HTMLInputElement>) => {
-      setForm({ ...form, [fieldName]: event.currentTarget.value })
-    }
-  }
-
-  const handleOnChangeSelect = (fieldName: keyof FormData) => {
-    return (event: { option: any }) => {
-      setForm({ ...form, [fieldName]: event.option })
-    }
-  }
-
-  const onSearchCountries = (searchQuery: string) => {
-    if (searchQuery.trim().length === 0) {
-      setFilteredCountries(countryList)
-    } else {
-      setFilteredCountries(
-        countryList.filter((country: string) => country.toLowerCase().includes(searchQuery.trim().toLowerCase()))
-      )
-    }
-  }
+  const [newsletter, setNewsletter] = React.useState(false)
+  const [email, setEmail] = React.useState('')
 
   const onOpen = () => setModalIsOpen(true)
   const onClose = () => setModalIsOpen(false)
 
-  const onSubmit = async () => {
-    // Check if all of the fields are set
-    const newErrors: FormErrors = {}
-    ;(Object.keys(form) as (keyof FormData)[]).map((fieldName: keyof FormData) => {
-      if (form[fieldName] === undefined || (form[fieldName] as string).length === 0) {
-        newErrors[fieldName] = 'This is required'
-      }
-    })
+  React.useEffect(() => {
+    console.log('pool in modal', props.pool)
+  }, [props.pool])
 
-    // Check for a valid email address
-    if (!newErrors['email'] && !isValidEmail(form.email)) {
-      newErrors['email'] = 'Please insert a valid email address'
-    }
-
-    // Check that the investor confirmation is checked
-    if (!form['investorConfirmation'] || (form['investorConfirmation'] && form['investorConfirmation'] !== true)) {
-      newErrors['investorConfirmation'] = 'This needs to be checked'
-    }
-
-    setErrors(newErrors)
-
-    if (Object.keys(newErrors).length === 0) {
-      const response = await submitForm({ ...form, ...props } as FormSubmission)
-
-      if (response.ok) {
-        onClose()
-        setSuccessModalIsOpen(true)
-      } else {
-        console.error('Failed to submit investor interest form', response.statusText)
-        setFailedSubmission(true)
-      }
-    }
+  const changeEmail = (event: any) => {
+    setEmail(event.currentTarget.value)
+    // error = 'Please provide a valid email address'
   }
+
+  const investDisabled = props.pool?.isUpcoming
 
   return (
     <>
-      <Box margin={{ left: 'auto' }}>
-        <Button primary label="Get started" fill={false} onClick={onOpen} />
-      </Box>
+      {props.pool && (
+        <Box margin={{ left: 'auto' }}>
+          <Button primary label="Get started" fill={false} onClick={onOpen} />
+        </Box>
+      )}
+      {!props.pool && (
+        <Anchor
+          onClick={onOpen}
+          margin={{ top: 'small', bottom: 'small' }}
+          label="Interested in investing in Tinlake Pools? Start your onboarding process now"
+        />
+      )}
 
       <FormModal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose}>
-        <Form onSubmit={onSubmit}>
-          <InvestmentSteps src="../../static/invest-steps1.svg" alt="Investment steps" />
+        <Paragraph margin={{ top: 'small', bottom: 'small' }}>
+          Tinlake has integrated Securitize.io’s automated KYC process for a smooth investor onboarding. Once Securitize
+          has verified your documentation you will be provided with your “Securitize iD” which makes you eligible to
+          invest in all open Tinlake pools. To invest in an individual pool you will be asked to sign the subscription
+          agreement with the pool’s issuer also provided through the Securitize dashboard.
+        </Paragraph>
 
-          <Paragraph margin={{ top: 'medium', bottom: 'medium' }}>
-            If you want to learn more please leave your contact details and investor profile to start on-boarding.
-            Please note that this is for non-US investors and accredited US investors only.
-          </Paragraph>
+        <InvestmentSteps src="/static/kyc-steps.svg" alt="Investment steps" />
 
-          <FormFieldWithoutBorder error={errors.title} margin={{ bottom: 'medium' }}>
-            <Box direction="row" gap={'medium'}>
-              <Box>
-                <StyledRadioButton
-                  name="radio"
-                  checked={form.title === 'Mr.'}
-                  label="Mr."
-                  onChange={(event: any) => setForm({ ...form, title: event.target.checked ? 'Mr.' : 'Ms.' })}
-                />
-              </Box>
-              <Box>
-                <StyledRadioButton
-                  name="radio"
-                  checked={form.title === 'Ms.'}
-                  label="Ms."
-                  onChange={(event: any) => setForm({ ...form, title: event.target.checked ? 'Ms.' : 'Mr.' })}
-                />
-              </Box>
-            </Box>
-          </FormFieldWithoutBorder>
-
-          <Box direction="row" gap={'medium'}>
-            <Box basis={'1/2'}>
-              <FormField label="Given Name" margin={{ bottom: 'medium' }} error={errors.givenName}>
-                <TextInput value={form.givenName} onChange={handleOnChange('givenName')} />
-              </FormField>
-            </Box>
-            <Box basis={'1/2'}>
-              <FormField label="Surname" margin={{ bottom: 'medium' }} error={errors.surname}>
-                <TextInput value={form.surname} onChange={handleOnChange('surname')} />
-              </FormField>
-            </Box>
-          </Box>
-          <Box direction="row" gap={'medium'}>
-            <Box basis={'1/2'}>
-              <FormField label="Email" margin={{ bottom: 'medium' }} error={errors.email}>
-                <TextInput type="email" value={form.email} onChange={handleOnChange('email')} />
-              </FormField>
-            </Box>
-            <Box basis={'1/2'}>
-              <FormField label="Country of Residence" margin={{ bottom: 'medium' }} error={errors.countryOfResidence}>
-                <Select
-                  placeholder="Select Country"
-                  options={filteredCountries}
-                  value={form.countryOfResidence}
-                  onChange={handleOnChangeSelect('countryOfResidence')}
-                  onSearch={onSearchCountries}
-                />
-              </FormField>
-            </Box>
-          </Box>
-          <Box direction="row" gap={'medium'}>
-            <Box basis={'1/2'}>
-              <FormField label="Type of Investor" error={errors.investorType}>
-                <Select
-                  placeholder="Select Investor Type"
-                  options={['Individual', 'Representing a legal entity']}
-                  value={form.investorType}
-                  onChange={handleOnChangeSelect('investorType')}
-                />
-              </FormField>
-            </Box>
-            <Box basis={'1/2'}>
-              <FormField label="Estimated Size of Investment, USD" error={errors.investmentSize}>
-                <Select
-                  placeholder="Select Investment Size"
-                  options={['<10,000 USD', '10,000-24,999 USD', '25,000-50,000 USD', '>50,000 USD']}
-                  value={form.investmentSize}
-                  onChange={handleOnChangeSelect('investmentSize')}
-                />
-              </FormField>
-            </Box>
-          </Box>
-
-          <FormFieldWithoutBorder error={errors.investorConfirmation}>
-            <Box direction="row" margin={{ top: 'small' }}>
-              <Box style={{ minWidth: '40px', paddingTop: '20px', paddingLeft: '4px' }}>
+        {!props.pool && (
+          <Box margin={{ left: 'auto', right: 'auto' }} width="40%">
+            <Box direction="row">
+              <Box style={{ minWidth: '40px', paddingTop: '14px', paddingLeft: '4px' }}>
                 <CheckBox
                   name="check"
-                  checked={form.investorConfirmation}
-                  onChange={(event: any) => setForm({ ...form, investorConfirmation: event.target.checked })}
+                  checked={newsletter}
+                  onChange={(event: any) => setNewsletter(event.target.checked)}
                 />
               </Box>
               <Box flex={'grow'}>
                 <Paragraph>
-                  I hereby confirm that I’m or I’m representing either:
-                  <br />
-                  A non-US investor not located in a jurisdiction restricting the purchase and holding of crypto assets
-                  <br />
-                  or
-                  <br />A US accredited investor, and I’m able to prove my accredited investor status to the Issuer.
+                  Sign me up to Centrifuge newsletters, for monthly updates on new pools and major Centrifuge
+                  announcements.
                 </Paragraph>
               </Box>
             </Box>
-          </FormFieldWithoutBorder>
+            {newsletter && (
+              <Box flex={true} margin={{ top: '0' }}>
+                <FormField>
+                  <TextInput value={email} onChange={changeEmail} placeholder="you@example.com" />
+                </FormField>
+              </Box>
+            )}
+          </Box>
+        )}
 
-          <Paragraph margin={{ top: 'small', bottom: 'small' }}>
+        <Box
+          direction="row"
+          justify="center"
+          width={props.pool ? '80%' : '40%'}
+          margin={{ left: 'auto', right: 'auto' }}
+          gap="medium"
+          style={{ textAlign: 'center' }}
+        >
+          <Box flex={true} justify="between">
+            <Paragraph>Start your KYC process to become to become an eligible investor.</Paragraph>
+            <Button
+              primary
+              label={newsletter ? `Sign up & onboard as investor` : `Onboard as an investor`}
+              fill={false}
+              href="https://centrifuge.invest.securitize.io/"
+              target="_blank"
+            />
+          </Box>
+          {props.pool && (
+            <Box flex={true} justify="between">
+              {props.pool?.isUpcoming && <Paragraph>This pool is not open for investments yet</Paragraph>}
+              {!props.pool?.isUpcoming && (
+                <Paragraph>Already an eligible investor? Sign the pool issuers Subscription Agreement.</Paragraph>
+              )}
+              <Button
+                primary
+                label="Invest in this pool"
+                fill={false}
+                href="https://kickfurther.invest.securitize.io/"
+                target="_blank"
+                disabled={investDisabled}
+              />
+            </Box>
+          )}
+        </Box>
+
+        {props.pool && (
+          <Paragraph margin={{ top: 'medium', bottom: '0' }}>
             Any questions left? Feel free to reach out to the Issuer directly (see{' '}
             <a href="#" onClick={onClose}>
               Pool Overview
             </a>
             ).
           </Paragraph>
-
-          {failedSubmission && (
-            <ErrorMessage type="error">
-              Failed to submit investor interest form. Please try again or reach out to us:{' '}
-              <a href="mailto:ask@centrifuge.io" target="_blank">
-                ask@centrifuge.io
-              </a>
-            </ErrorMessage>
-          )}
-
-          <Box direction="row" justify="end">
-            <Box basis={'1/5'}>
-              <AcceptButton primary onClick={onSubmit} label="Submit" fill={true} />
-            </Box>
-          </Box>
-        </Form>
+        )}
       </FormModal>
-
-      <InvestActionSuccessModal open={successModalIsOpen} onClose={() => setSuccessModalIsOpen(false)} />
     </>
   )
 }

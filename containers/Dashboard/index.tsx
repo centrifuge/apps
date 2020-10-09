@@ -5,6 +5,7 @@ import { Spinner } from '@centrifuge/axis-spinner'
 import { loadPools, PoolsState } from '../../ducks/pools'
 import PoolList from '../../components/PoolList'
 import PoolsMetrics from '../../components/PoolsMetrics'
+import InvestAction from '../../components/InvestAction/index'
 
 interface Props {
   loadPools?: () => Promise<void>
@@ -53,12 +54,7 @@ class Dashboard extends React.Component<Props> {
               </Box>
               <PoolList pools={pools.data.pools} />
               <Box style={{ borderBottom: '1px solid #bdbdbd' }} align="center" justify="center">
-                <Anchor
-                  margin={{ top: 'small', bottom: 'small' }}
-                  href="https://centrifuge.io/products/tinlake"
-                  target="_blank"
-                  label="Learn more about creating Tinlake pools"
-                />
+                <InvestAction />
               </Box>
             </Box>
           )
