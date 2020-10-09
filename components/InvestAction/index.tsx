@@ -1,10 +1,10 @@
 import * as React from 'react'
-import { Box, Button, Paragraph, CheckBox, FormField, TextInput, Anchor } from 'grommet'
+import { Box, Button, Paragraph, Anchor } from 'grommet'
+// CheckBox, FormField, TextInput
 
 import { FormModal, InvestmentSteps } from './styles'
 import { Pool, UpcomingPool } from '../../config'
 // import { getPoolStatus } from '../../utils/pool'
-import { PoolLink } from '../PoolLink'
 
 interface Props {
   anchor?: React.ReactNode
@@ -14,16 +14,16 @@ interface Props {
 const InvestAction: React.FC<Props> = (props: Props) => {
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
 
-  const [newsletter, setNewsletter] = React.useState(false)
-  const [email, setEmail] = React.useState('')
+  // const [newsletter, setNewsletter] = React.useState(false)
+  // const [email, setEmail] = React.useState('')
 
   const onOpen = () => setModalIsOpen(true)
   const onClose = () => setModalIsOpen(false)
 
-  const changeEmail = (event: any) => {
-    setEmail(event.currentTarget.value)
-    // error = 'Please provide a valid email address'
-  }
+  // const changeEmail = (event: any) => {
+  //   setEmail(event.currentTarget.value)
+  //   // error = 'Please provide a valid email address'
+  // }
 
   const investDisabled = props.pool?.isUpcoming || !props.pool?.securitizeId
 
@@ -89,9 +89,10 @@ const InvestAction: React.FC<Props> = (props: Props) => {
         >
           <Box flex={true} justify="between">
             <Paragraph>Start your KYC process to become to become an eligible investor.</Paragraph>
+            {/* newsletter ? `Sign up & onboard as investor` : */}
             <Button
               primary
-              label={newsletter ? `Sign up & onboard as investor` : `Onboard as an investor`}
+              label={`Onboard as an investor`}
               fill={false}
               href="https://centrifuge.invest.securitize.io/"
               target="_blank"
@@ -109,7 +110,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
                 primary
                 label="Invest in this pool"
                 fill={false}
-                href={`https://${props.pool.securitizeId || ''}.invest.securitize.io/`}
+                href={`https://${(props.pool as Pool).securitizeId || ''}.invest.securitize.io/`}
                 target="_blank"
                 disabled={investDisabled}
               />
@@ -122,11 +123,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
             margin={{ top: 'medium', bottom: '0', left: 'large', right: 'large' }}
             style={{ textAlign: 'center' }}
           >
-            Any questions left? Feel free to reach out to the Issuer directly (see{' '}
-            <PoolLink href="/" onClick={onClose}>
-              Pool Overview
-            </PoolLink>
-            ).
+            Any questions left? Feel free to reach out to the Issuer directly (see Pool Overview).
           </Paragraph>
         )}
 

@@ -90,9 +90,7 @@ const contractAddressesSchema = yup.object().shape({
 })
 
 const contractConfigSchema = yup.object().shape({
-  JUNIOR_OPERATOR: yup
-    .mixed<'ALLOWANCE_OPERATOR'>()
-    .oneOf(['ALLOWANCE_OPERATOR']),
+  JUNIOR_OPERATOR: yup.mixed<'ALLOWANCE_OPERATOR'>().oneOf(['ALLOWANCE_OPERATOR']),
   SENIOR_OPERATOR: yup
     .mixed<'PROPORTIONAL_OPERATOR' | 'ALLOWANCE_OPERATOR'>()
     .oneOf(['PROPORTIONAL_OPERATOR', 'ALLOWANCE_OPERATOR']),
