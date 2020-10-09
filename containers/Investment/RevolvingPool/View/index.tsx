@@ -27,6 +27,8 @@ export type EpochData = {
   minChallengePeriodEnd: number
   lastEpochClosed: number
   latestBlockTimestamp: number
+  seniorOrderedInEpoch: number
+  juniorOrderedInEpoch: number
 }
 
 const InvestmentsView: React.FC<Props> = (props: Props) => {
@@ -45,6 +47,8 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
       minChallengePeriodEnd: await props.tinlake.getMinChallengePeriodEnd(),
       lastEpochClosed: await props.tinlake.getLastEpochClosed(),
       latestBlockTimestamp: await props.tinlake.getLatestBlockTimestamp(),
+      seniorOrderedInEpoch: address ? await props.tinlake.getSeniorOrderedInEpoch(address) : 0,
+      juniorOrderedInEpoch: address ? await props.tinlake.getJuniorOrderedInEpoch(address) : 0,
     })
   }
 

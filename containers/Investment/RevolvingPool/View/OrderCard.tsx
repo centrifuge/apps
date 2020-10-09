@@ -64,6 +64,10 @@ const OrderCard: React.FC<Props> = (props: Props) => {
     }
   }, [status])
 
+  const rolledOver =
+    !props.epochData?.isBlockedState &&
+    props.epochData?.id !==
+      (props.tranche === 'senior' ? props.epochData?.seniorOrderedInEpoch : props.epochData?.juniorOrderedInEpoch)
   const disabled = status === 'pending' || status === 'unconfirmed' || props.epochData?.isBlockedState
 
   return (
@@ -72,8 +76,19 @@ const OrderCard: React.FC<Props> = (props: Props) => {
         Pending {type} Order
       </Heading>
       <Description>
-        You have locked {token} to {type.toLowerCase()} {type === 'Invest' ? 'into' : 'from'} Tinlake for the next
-        epoch. You can cancel this order until the end of the current epoch.
+        {!rolledOver && (
+          <>
+            You have locked {token} to {type.toLowerCase()} {type === 'Invest' ? 'into' : 'from'} Tinlake for the next
+            epoch. You can cancel this order until the end of the current epoch.
+          </>
+        )}
+        {rolledOver && (
+          <>
+            Your {type.toLowerCase()} order wasn’t fully executed. Your {token} remains locked for{' '}
+            {type === 'Invest' ? 'investment' : 'redemption'} for the next epoch. You can cancel this order until the
+            end of the current epoch.
+          </>
+        )}
       </Description>
 
       <Table margin={{ top: 'medium' }}>

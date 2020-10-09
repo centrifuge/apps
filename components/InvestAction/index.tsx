@@ -4,6 +4,7 @@ import { Box, Button, Paragraph, CheckBox, FormField, TextInput, Anchor } from '
 import { FormModal, InvestmentSteps } from './styles'
 import { Pool, UpcomingPool } from '../../config'
 // import { getPoolStatus } from '../../utils/pool'
+import { PoolLink } from '../PoolLink'
 
 interface Props {
   anchor?: React.ReactNode
@@ -51,7 +52,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
 
         <InvestmentSteps src="/static/kyc-steps.svg" alt="Investment steps" />
 
-        {!props.pool && (
+        {/* {!props.pool && (
           <Box margin={{ left: 'auto', right: 'auto' }} width="40%">
             <Box direction="row">
               <Box style={{ minWidth: '40px', paddingTop: '14px', paddingLeft: '4px' }}>
@@ -76,7 +77,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
               </Box>
             )}
           </Box>
-        )}
+        )} */}
 
         <Box
           direction="row"
@@ -122,9 +123,9 @@ const InvestAction: React.FC<Props> = (props: Props) => {
             style={{ textAlign: 'center' }}
           >
             Any questions left? Feel free to reach out to the Issuer directly (see{' '}
-            <a href="#" onClick={onClose}>
+            <PoolLink href="/" onClick={onClose}>
               Pool Overview
-            </a>
+            </PoolLink>
             ).
           </Paragraph>
         )}
