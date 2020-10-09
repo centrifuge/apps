@@ -71,7 +71,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
       <Box gap="medium">
         <FormField label="Financing amount">
           <NumberInput
-            value={baseToDisplay(borrowAmount, 18)}
+            value={baseToDisplay(borrowEnabled ? borrowAmount : '0', 18)}
             suffix=" DAI"
             precision={18}
             onValueChange={({ value }) => setBorrowAmount(displayToBase(value, 18))}

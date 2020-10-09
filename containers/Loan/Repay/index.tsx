@@ -9,6 +9,7 @@ import { createTransaction, useTransactionState, TransactionProps } from '../../
 import { Decimal } from 'decimal.js-light'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { Pool } from '../../../config'
+import BN from 'bn.js'
 
 interface Props extends TransactionProps {
   poolConfig: Pool
@@ -79,7 +80,9 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
           onClick={repay}
           primary
           label="Repay"
-          disabled={!hasDebt || status === 'unconfirmed' || status === 'pending'}
+          disabled={
+            !hasDebt || new BN(repayAmount).gt(new BN(debt)) || status === 'unconfirmed' || status === 'pending'
+          }
         />
       </Box>
     </Box>

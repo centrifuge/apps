@@ -60,7 +60,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }
 
   const pool = config.pools.find((p) => p.addresses.ROOT_CONTRACT === params!.root)
-  console.log(pool)
 
   if (!pool) {
     throw new Error(`Pool ${params.root} cannot be loaded`)
@@ -69,7 +68,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   // Fix to force page rerender, from https://github.com/vercel/next.js/issues/9992
   const newProps: Props = { pool, root: params.root as string, key: pool.name || '-' }
 
-  console.log(newProps)
   return { props: newProps }
 }
 
