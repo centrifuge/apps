@@ -116,5 +116,32 @@ describe('solver tests', async () => {
       assert.equal(result.vars.tinInvest > 0, true)
       assert.equal(result.vars.dropInvest > 0, true)
     })
+    
+    it('should handle the edge case from 10-10-2020', async () => {
+      const state = {
+        reserve: 34.0825884122082,
+        netAssetValue: 147.3110842662679,
+        seniorAsset: 145.0099137051328,
+        minTinRatio: 0.19999999999999996,
+        maxTinRatio: 1,
+        maxReserve: 100,
+      }
+
+      const orderState = {
+        dropRedeemOrder: 0,
+        tinRedeemOrder: 16.3842626848564,
+        tinInvestOrder: 0,
+        dropInvestOrder: 37.9167594426433,
+      }
+
+      const result = await calculateOptimalSolution(state, orderState, weights)
+
+      assert.equal(result.status > 0, true)
+      assert.equal(result.z > 0, true)
+      assert.equal(result.vars.tinRedeem > 0, true)
+      assert.equal(result.vars.dropRedeem > 0, true)
+      assert.equal(result.vars.tinInvest > 0, true)
+      assert.equal(result.vars.dropInvest > 0, true)
+    })
   })
 })
