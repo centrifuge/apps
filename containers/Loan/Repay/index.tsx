@@ -84,6 +84,9 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
             !hasDebt || new BN(repayAmount).gt(new BN(debt)) || status === 'unconfirmed' || status === 'pending'
           }
         />
+        {new BN(repayAmount).gt(new BN(debt)) && (
+          <Box margin={{ top: 'small' }}>Repay amount cannot be larger than Outstanding</Box>
+        )}
       </Box>
     </Box>
   )
