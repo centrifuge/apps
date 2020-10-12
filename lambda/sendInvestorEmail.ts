@@ -36,7 +36,7 @@ export {}
 //     Name: ${form.title} ${form.givenName} ${form.surname}
 //     Email: ${form.email}
 //     Country of Residence: ${form.countryOfResidence}
-    
+
 //     Type of Investor: ${form.investorType}
 //     Estimated Size of Investment: ${form.investmentSize}
 //     Investor Status: ${form.investorConfirmation ? 'Confirmed' : 'Unconfirmed'}`
