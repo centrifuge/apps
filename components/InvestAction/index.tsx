@@ -26,7 +26,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     if (props.pool) {
       const pool = pools.data?.pools.find((pool: PoolData) => {
-        return 'addresses' in props.pool! && pool.id === props.pool?.addresses!.ROOT_CONTRACT.toLowerCase()
+        return 'addresses' in props.pool! && pool.id === (props.pool as Pool).addresses.ROOT_CONTRACT.toLowerCase()
       })
 
       if (pool) setStatus(getPoolStatus(pool))
