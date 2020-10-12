@@ -112,8 +112,19 @@ export const calculateOptimalSolution = async (
       ],
     }
 
-    const output = glpk.solve(lp, glpk.GLP_MSG_ERR)
-    return output.result
+    try {
+      const output = glpk.solve(lp, glpk.GLP_MSG_ERR)
+      return output.result
+    } catch (e) {
+      console.error(`Error caught during solver execution: ${e}`)
+
+      return {
+        z: 0,
+        status: 0,
+        vars: {},
+        error: e,
+      }
+    }
   })
 }
 
@@ -151,4 +162,5 @@ export interface SolverResult {
   z: number
   status: number
   vars: SolverSolution
+  error?: string
 }
