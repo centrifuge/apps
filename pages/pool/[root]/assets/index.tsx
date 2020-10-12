@@ -36,6 +36,7 @@ class LoanListPage extends React.Component<Props> {
           <Box justify="evenly" direction="row">
             <Box width="xlarge" gap="medium">
               <WithTinlake
+                version={pool.version}
                 addresses={pool.addresses}
                 contractConfig={pool.contractConfig}
                 render={(tinlake) => (
@@ -46,7 +47,7 @@ class LoanListPage extends React.Component<Props> {
                         <SecondaryHeader>
                           <Heading level="3">Assets</Heading>
                         </SecondaryHeader>
-                        <LoanListUpcoming tinlake={tinlake} />
+                        <LoanListUpcoming />
                       </Box>
                     )}
                   />

@@ -50,10 +50,10 @@ class Apollo {
   }
 
   injectPoolData(pools: any[]): PoolData[] {
-    const configPools = config.pools
-    const tinlakePools = configPools.map((configPool: any) => {
-      const poolId = configPool.addresses.ROOT_CONTRACT
-      const pool = pools.find((p) => p.id === poolId)
+    const poolConfigs = config.pools
+    const tinlakePools = poolConfigs.map((poolConfig: any) => {
+      const poolId = poolConfig.addresses.ROOT_CONTRACT
+      const pool = pools.find((p) => p.id === poolId.toLowerCase())
 
       const totalDebt = (pool && new BN(pool.totalDebt)) || new BN('0')
       const totalRepaysAggregatedAmount = (pool && new BN(pool.totalRepaysAggregatedAmount)) || new BN('0')
@@ -80,9 +80,9 @@ class Apollo {
         order: this.getPoolOrder({ totalDebt, totalDebtNum, totalRepaysAggregatedAmount }),
         isUpcoming: false,
         id: poolId,
-        name: configPool.name,
-        slug: configPool.slug,
-        asset: configPool?.asset,
+        name: poolConfig.name,
+        slug: poolConfig.slug,
+        asset: poolConfig?.asset,
       }
     })
     return tinlakePools
@@ -151,7 +151,7 @@ class Apollo {
       result = await this.client.query({
         query: gql`
         {
-          pools (where : {id: "${root}"}){
+          pools (where : {id: "${root.toLowerCase()}"}){
             id
             loans {
               id

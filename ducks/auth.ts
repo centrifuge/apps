@@ -5,8 +5,11 @@ import Apollo from '../services/apollo'
 import { HYDRATE } from 'next-redux-wrapper'
 import { initOnboard, getOnboard } from '../services/onboard'
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { getDefaultHttpProvider, getTinlake } from '../services/tinlake'
+import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
+import { getTinlake } from '../services/tinlake'
 import config from '../config'
+import { ethers } from 'ethers'
+import { isTinlakeV3 } from '../utils/tinlakeVersion'
 
 // Actions
 const CLEAR = 'tinlake-ui/auth/CLEAR'
@@ -26,18 +29,25 @@ export type Address = string
 // Permissions depend on both the address and the selected pool/registry.
 export interface Permissions {
   // asset admin permissions
-  canIssueLoan: boolean
   canSetInterestRate: boolean
   // tranche admin permissions
   canSetMinimumJuniorRatio: boolean
   canSetRiskScore: boolean
-  canSetSeniorTrancheInterestRate: boolean
   // lender admin permissions
   canSetInvestorAllowanceJunior: boolean
   canSetInvestorAllowanceSenior: boolean
   // collector permissions
   canSetLoanPrice: boolean
-  canActAsKeeper: boolean
+}
+
+export interface PermissionsV3 {
+  // asset admin permissions
+  canSetInterestRate: boolean
+  // tranche admin permissions
+  canSetMinimumJuniorRatio: boolean
+  canSetRiskScore: boolean
+  // collector permissions
+  canSetLoanPrice: boolean
 }
 
 // Proxies depend on both the address and the selected pool/registry.
@@ -47,7 +57,7 @@ export interface AuthState {
   address: null | Address
   authState: null | 'authing' | 'aborted' | 'authed'
   permissionsState: null | 'loading' | 'loaded'
-  permissions: null | Permissions
+  permissions: null | Permissions | PermissionsV3
   proxiesState: null | 'loading' | 'loaded'
   proxies: null | Proxies
   network: string
@@ -113,7 +123,9 @@ export default function reducer(state: AuthState = initialState, action: AnyActi
 // navigation event between pages, which discards the redux state, but does not discard onboard. Putting onboard into
 // the state would work, but it would lead to two sources of truth. Consequently, we keep onboard as an external
 // stateful API here and manually sync values over on load.
-export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+export function load(
+  tinlake: ITinlake | ITinlakeV3
+): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     const { auth } = getState()
     let onboard = getOnboard()
@@ -128,9 +140,22 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
       if (networkName !== auth.network && networkName) {
         dispatch(setNetwork(networkName))
       }
+
       if (tinlake.provider !== wallet.provider && wallet.provider) {
-        tinlake.setProvider(wallet.provider)
+        const web3Provider = new ethers.providers.Web3Provider(wallet.provider)
+        const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+        const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
+
+        if (tinlake.version === 2) tinlake.setProviderAndSigner(rpcProvider, web3Provider.getSigner())
+        else {
+          ;(tinlake as ITinlakeV3).setProviderAndSigner(
+            fallbackProvider,
+            web3Provider.getSigner(),
+            web3Provider._web3Provider
+          )
+        }
       }
+
       if (wallet.name !== auth.providerName) {
         dispatch(setProviderName(wallet.name))
       }
@@ -143,21 +168,38 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
     // onboard not yet initialized, initialize now
     onboard = initOnboard({
       address: (address) => {
+        // TODO: when you switch your account in Metamask, this address hook get called, but the wallet subscription
+        // is not always being called. We should investigate whether this is an issue with the bnc-onboard library or
+        // our usage/implementation of the library.
         dispatch(setAddressAndLoadData(tinlake, address))
       },
       network: (network) => {
         const networkName = networkIdToName(network)
         dispatch(setNetwork(networkName))
       },
-      wallet: ({ provider, name }) => {
-        dispatch(setProviderName(name))
+      wallet: (wallet) => {
+        dispatch(setProviderName(wallet.name))
 
-        if (provider) {
-          tinlake.setProvider(provider)
+        if (wallet.provider) {
+          const web3Provider = new ethers.providers.Web3Provider(wallet.provider)
+          const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+          const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
+
+          if (tinlake.version === 2) tinlake.setProviderAndSigner(rpcProvider, web3Provider.getSigner())
+          else {
+            ;(tinlake as ITinlakeV3).setProviderAndSigner(
+              fallbackProvider,
+              web3Provider.getSigner(),
+              web3Provider._web3Provider
+            )
+          }
+        } else {
+          const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+          tinlake.setProviderAndSigner(rpcProvider)
         }
 
         // store the selected wallet name to be retrieved next time the app loads
-        window.localStorage.setItem('selectedWallet', name || '')
+        window.localStorage.setItem('selectedWallet', wallet.name || '')
       },
     })
 
@@ -253,7 +295,7 @@ export function ensureAuthed(): ThunkAction<Promise<void>, { auth: AuthState }, 
 }
 
 export function setAddressAndLoadData(
-  tinlake: ITinlake,
+  tinlake: ITinlake | ITinlakeV3,
   address: string
 ): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch) => {
@@ -262,8 +304,6 @@ export function setAddressAndLoadData(
       dispatch(clear())
       return
     }
-
-    tinlake.setEthConfig({ from: address })
 
     dispatch({ address, type: RECEIVE_ADDRESS })
 
@@ -304,6 +344,9 @@ export function loadProxies(): ThunkAction<Promise<void>, { auth: AuthState }, u
 
 export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
+    // If no addresses are loaded, we are not in a pool, and can't check permisions (nor do we need to)
+    if (Object.keys(tinlake.contractAddresses).length === 0) return
+
     const { auth } = getState()
 
     // don't load again if already loading
@@ -321,32 +364,55 @@ export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth
 
     dispatch({ type: LOAD_PERMISSIONS })
 
-    const [
-      interestRatePermission,
-      loanPricePermission,
-      equityRatioPermission,
-      riskScorePermission,
-      investorAllowancePermissionJunior,
-      investorAllowancePermissionSenior,
-    ] = await Promise.all([
-      tinlake.canSetInterestRate(auth.address),
-      tinlake.canSetLoanPrice(auth.address),
-      tinlake.canSetMinimumJuniorRatio(auth.address),
-      tinlake.canSetRiskScore(auth.address),
-      tinlake.canSetInvestorAllowanceJunior(auth.address),
-      tinlake.canSetInvestorAllowanceSenior(auth.address),
-    ])
+    if (isTinlakeV3(tinlake)) {
+      const [
+        interestRatePermission,
+        loanPricePermission,
+        equityRatioPermission,
+        riskScorePermission,
+      ] = await Promise.all([
+        tinlake.canSetSeniorTrancheInterest(auth.address),
+        tinlake.canSetLoanPrice(auth.address),
+        tinlake.canSetMinimumJuniorRatio(auth.address),
+        tinlake.canSetRiskScore(auth.address),
+      ])
 
-    const permissions = {
-      canSetInterestRate: interestRatePermission,
-      canSetLoanPrice: loanPricePermission,
-      canSetMinimumJuniorRatio: equityRatioPermission,
-      canSetRiskScore: riskScorePermission,
-      canSetInvestorAllowanceJunior: investorAllowancePermissionJunior,
-      canSetInvestorAllowanceSenior: investorAllowancePermissionSenior,
+      const permissions = {
+        canSetInterestRate: interestRatePermission,
+        canSetLoanPrice: loanPricePermission,
+        canSetMinimumJuniorRatio: equityRatioPermission,
+        canSetRiskScore: riskScorePermission,
+      }
+
+      dispatch({ permissions, type: RECEIVE_PERMISSIONS })
+    } else {
+      const [
+        interestRatePermission,
+        loanPricePermission,
+        equityRatioPermission,
+        riskScorePermission,
+        investorAllowancePermissionJunior,
+        investorAllowancePermissionSenior,
+      ] = await Promise.all([
+        tinlake.canSetInterestRate(auth.address),
+        tinlake.canSetLoanPrice(auth.address),
+        tinlake.canSetMinimumJuniorRatio(auth.address),
+        tinlake.canSetRiskScore(auth.address),
+        tinlake.canSetInvestorAllowanceJunior(auth.address),
+        tinlake.canSetInvestorAllowanceSenior(auth.address),
+      ])
+
+      const permissions = {
+        canSetInterestRate: interestRatePermission,
+        canSetLoanPrice: loanPricePermission,
+        canSetMinimumJuniorRatio: equityRatioPermission,
+        canSetRiskScore: riskScorePermission,
+        canSetInvestorAllowanceJunior: investorAllowancePermissionJunior,
+        canSetInvestorAllowanceSenior: investorAllowancePermissionSenior,
+      }
+
+      dispatch({ permissions, type: RECEIVE_PERMISSIONS })
     }
-
-    dispatch({ permissions, type: RECEIVE_PERMISSIONS })
   }
 }
 
@@ -376,8 +442,8 @@ export function clear(): ThunkAction<Promise<void>, { auth: AuthState }, undefin
   return async (dispatch) => {
     const tinlake = getTinlake()
     if (tinlake !== null) {
-      tinlake.setProvider(getDefaultHttpProvider())
-      tinlake.setEthConfig({ from: '' })
+      const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+      tinlake.setProviderAndSigner(rpcProvider)
     }
 
     const onboard = getOnboard()

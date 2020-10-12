@@ -38,11 +38,12 @@ const MintNFT: React.FC<Props> = (props: Props) => {
   const mint = async () => {
     await props.ensureAuthed!()
     const base = displayToBase(baseToDisplay(amount, 2), 2)
+    const address = await props.tinlake.signer.getAddress()
 
     const txId = await props.createTransaction(`Mint NFT ${referenceId}`, 'mintNFT', [
       props.tinlake,
       registry,
-      props.tinlake.ethConfig.from,
+      address,
       tokenId,
       referenceId,
       base,
@@ -71,8 +72,13 @@ const MintNFT: React.FC<Props> = (props: Props) => {
             <Alert pad={{ horizontal: 'medium' }} type="success">
               Successfully minted NFT for Token ID {tokenId}
               <p>
+                Please{' '}
+                <PoolLink href={{ pathname: '/demo/value-nft', query: { tokenId, registry } }}>
+                  <Anchor>proceed to value the NFT</Anchor>
+                </PoolLink>
+                {' or '}
                 <PoolLink href={{ pathname: '/assets/issue', query: { tokenId, registry } }}>
-                  <Anchor>Please proceed to asset financing</Anchor>
+                  <Anchor>proceed to asset financing</Anchor>
                 </PoolLink>{' '}
                 your NFT.
               </p>
@@ -101,13 +107,17 @@ const MintNFT: React.FC<Props> = (props: Props) => {
               </p>
               <p>
                 If you already have a token ID,{' '}
+                <PoolLink href={'/demo/value-nft'}>
+                  <Anchor>please proceed to value the NFT</Anchor>
+                </PoolLink>{' '}
+                or{' '}
                 <PoolLink href={'/assets/issue'}>
-                  <Anchor>please proceed to open a financing</Anchor>
+                  <Anchor>proceed to open a financing</Anchor>
                 </PoolLink>
                 .
               </p>
               <p>
-                Note that this functionality is only available on Kovan Testnet. On Mainnet NFTs are minted using
+                Note that this functionality is only available on Kovan Testnet. On Mainnet, NFTs are minted using
                 Centrifuge’s P2P Protocol.
               </p>
             </Alert>

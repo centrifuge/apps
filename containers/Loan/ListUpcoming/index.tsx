@@ -4,18 +4,16 @@ import LoanListData from '../../../components/Loan/List'
 import DashboardMetric from '../../../components/DashboardMetric'
 import DAI from '../../../static/dai.json'
 import ERC20Display from '../../../components/ERC20Display'
+import { connect } from 'react-redux'
+import { AuthState } from '../../../ducks/auth'
 
 interface Props {
-  tinlake: any
+  auth?: AuthState
 }
 
 class LoanListUpcoming extends React.Component<Props> {
   render() {
-    const {
-      tinlake: {
-        ethConfig: { from: ethFrom },
-      },
-    } = this.props
+    const { auth } = this.props
 
     return (
       <Box margin={{ bottom: 'large' }}>
@@ -35,7 +33,7 @@ class LoanListUpcoming extends React.Component<Props> {
             </DashboardMetric>
           </Box>
         </Box>
-        <LoanListData loans={[]} userAddress={ethFrom}>
+        <LoanListData loans={[]} userAddress={auth?.address || ''}>
           {' '}
         </LoanListData>
       </Box>
@@ -43,4 +41,4 @@ class LoanListUpcoming extends React.Component<Props> {
   }
 }
 
-export default LoanListUpcoming
+export default connect((state) => state)(LoanListUpcoming)

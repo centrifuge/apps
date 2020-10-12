@@ -34,7 +34,7 @@ const JuniorRatio: React.FC<Props> = (props: Props) => {
   const updateMinJuniorRatio = async () => {
     const normalizedRatio = new Decimal(minJuniorRatio).div(100).toString()
 
-    const txId = await props.createTransaction(`Set min TIN ratio`, 'setMinJuniorRatio', [
+    const txId = await props.createTransaction(`Set min TIN risk buffer`, 'setMinJuniorRatio', [
       props.tinlake,
       normalizedRatio,
     ])
@@ -43,18 +43,18 @@ const JuniorRatio: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (status === 'succeeded') {
-      loadPool && loadPool(props.tinlake)
+      props.loadPool && props.loadPool(props.tinlake)
     }
   }, [status])
 
   return (
     <Box pad={{ horizontal: 'medium' }}>
       <Box direction="row" margin={{ top: 'medium' }}>
-        <Heading level="4">Set minimum TIN ratio</Heading>
+        <Heading level="4">Set minimum TIN risk buffer</Heading>
       </Box>
       <Box direction="row" gap="medium">
         <Box basis={'1/3'}>
-          <FormField label="Min TIN ratio">
+          <FormField label="Min TIN risk buffer">
             <NumberInput
               value={baseToDisplay(minJuniorRatio, 27)}
               precision={2}
@@ -66,7 +66,7 @@ const JuniorRatio: React.FC<Props> = (props: Props) => {
         <Box align="start">
           <Button
             primary
-            label="Set min TIN ratio"
+            label="Set min TIN risk buffer"
             onClick={updateMinJuniorRatio}
             disabled={status === 'unconfirmed' || status === 'pending'}
           />

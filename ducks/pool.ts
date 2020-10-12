@@ -1,6 +1,6 @@
 import { AnyAction, Action } from 'redux'
 import { ThunkAction } from 'redux-thunk'
-import { getPool, TinlakeResult } from '../services/tinlake/actions'
+import { getPool } from '../services/tinlake/actions'
 import { Tranche } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { HYDRATE } from 'next-redux-wrapper'
@@ -9,17 +9,33 @@ import { HYDRATE } from 'next-redux-wrapper'
 const LOAD_POOL = 'tinlake-ui/pool/LOAD_POOL'
 const RECEIVE_POOL = 'tinlake-ui/pool/RECEIVE_POOL'
 
+export interface PoolTranche extends Tranche {
+  pendingInvestments?: BN
+  pendingRedemptions?: BN
+  decimals?: number
+  address?: string
+}
+
 export interface PoolData {
-  junior: Tranche
-  senior?: Tranche
+  junior: PoolTranche
+  senior?: PoolTranche
   availableFunds: BN
   minJuniorRatio: BN
   currentJuniorRatio: BN
 }
 
+export interface PoolDataV3 extends PoolData {
+  netAssetValue: BN
+  reserve: BN
+  maxJuniorRatio: BN
+  maxReserve: BN
+  outstandingVolume: BN
+  epochState: 'open' | 'can-be-closed' | 'in-submission-period' | 'in-challenge-period' | 'challenge-period-ended'
+}
+
 export interface PoolState {
   state: null | 'loading' | 'found'
-  data: null | PoolData
+  data: null | PoolData | PoolDataV3
 }
 
 const initialState: PoolState = {
@@ -43,7 +59,7 @@ export default function reducer(state: PoolState = initialState, action: AnyActi
 export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, undefined, Action> {
   return async (dispatch) => {
     dispatch({ type: LOAD_POOL })
-    const PoolData: TinlakeResult = await getPool(tinlake)
-    dispatch({ data: PoolData && PoolData.data, type: RECEIVE_POOL })
+    const poolData = await getPool(tinlake)
+    dispatch({ data: poolData, type: RECEIVE_POOL })
   }
 }

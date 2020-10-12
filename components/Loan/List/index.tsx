@@ -33,6 +33,7 @@ class LoanList extends React.Component<Props> {
           style={{ tableLayout: 'auto' }}
           data={loans}
           sort={{ direction: 'desc', property: 'loanId' }}
+          pad="xsmall"
           sortable
           onClickRow={this.clickRow as any}
           columns={[

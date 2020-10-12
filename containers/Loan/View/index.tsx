@@ -9,11 +9,13 @@ import LoanRepay from '../Repay'
 import NftData from '../../../components/NftData'
 import { AuthState, loadProxies } from '../../../ducks/auth'
 import { TransactionState } from '../../../ducks/transactions'
+import { Pool } from '../../../config'
 
 interface Props {
   tinlake: any
   loanId?: string
   loans?: LoansState
+  poolConfig: Pool
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>
   auth?: AuthState
   transactions?: TransactionState
@@ -26,11 +28,10 @@ class LoanView extends React.Component<Props> {
     const { tinlake, loanId, loadLoan, loadProxies } = this.props
     loanId && loadLoan!(tinlake, loanId)
     loadProxies && loadProxies()
-    console.log(this.props.auth?.permissions)
   }
 
   render() {
-    const { loans, loanId, tinlake, auth } = this.props
+    const { poolConfig, loans, loanId, tinlake, auth } = this.props
     const { loan, loanState } = loans!
     if (loanState === null || loanState === 'loading') {
       return null
@@ -43,7 +44,8 @@ class LoanView extends React.Component<Props> {
       )
     }
 
-    const hasBorrowerPermissions = loan && auth?.proxies?.includes(loan.ownerOf.toString())
+    const hasBorrowerPermissions =
+      loan && auth?.proxies?.map((proxy: string) => proxy.toLowerCase()).includes(loan.ownerOf.toString().toLowerCase())
 
     return (
       <Box>
@@ -59,13 +61,15 @@ class LoanView extends React.Component<Props> {
                 </Box>
                 <Box direction="row">
                   <LoanBorrow loan={loan!} tinlake={tinlake} />
-                  <LoanRepay loan={loan!} tinlake={tinlake} />
+                  <LoanRepay poolConfig={poolConfig} loan={loan!} tinlake={tinlake} />
                 </Box>
               </Box>
             )}
           </Box>
         )}
-        {loan && loan.nft && <NftData data={loan.nft} authedAddr={tinlake.ethConfig.from} />}
+        {loan && loan.nft && this.props.auth?.address && (
+          <NftData data={loan.nft} authedAddr={this.props.auth.address} />
+        )}
       </Box>
     )
   }

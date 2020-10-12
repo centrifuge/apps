@@ -8,9 +8,11 @@ import { AuthState, loadProxies, ensureAuthed } from '../../../ducks/auth'
 import { NFT } from '@centrifuge/tinlake-js'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 import { getNFT as getNFTAction } from '../../../services/tinlake/actions'
+import { Pool } from '../../../config'
 
 interface Props extends TransactionProps {
   tinlake: any
+  poolConfig: Pool
   tokenId: string
   registry: string
   auth: AuthState
@@ -86,6 +88,8 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
     getNFT(props.registry, props.tokenId)
   }, [props])
 
+  const disabled = status === 'unconfirmed' || status === 'pending' || status === 'succeeded'
+
   return (
     <Box>
       <Box>
@@ -99,30 +103,17 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
           <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
             <Box basis={'1/3'} gap="medium">
               <FormField label="Collateral Token Registry Address">
-                <TextInput
-                  value={registry || ''}
-                  onChange={onRegistryAddressValueChange}
-                  disabled={status === 'unconfirmed' || status === 'pending'}
-                />
+                <TextInput value={registry || ''} onChange={onRegistryAddressValueChange} disabled={disabled} />
               </FormField>
             </Box>
 
             <Box basis={'1/3'} gap="medium">
               <FormField label="Token ID">
-                <TextInput
-                  value={tokenId}
-                  onChange={onTokenIdValueChange}
-                  disabled={status === 'unconfirmed' || status === 'pending'}
-                />
+                <TextInput value={tokenId} onChange={onTokenIdValueChange} disabled={disabled} />
               </FormField>
             </Box>
             <Box basis={'1/3'} gap="medium" align="end">
-              <Button
-                onClick={issueLoan}
-                primary
-                label="Open financing"
-                disabled={!nft || status === 'unconfirmed' || status === 'pending'}
-              />
+              <Button onClick={issueLoan} primary label="Open financing" disabled={!nft || disabled} />
             </Box>
           </Box>
         </Box>
@@ -130,7 +121,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
         {loanId ? (
           <Box margin={{ bottom: 'medium', top: 'large' }}>
             {' '}
-            <LoanView tinlake={props.tinlake} loanId={loanId} />
+            <LoanView tinlake={props.tinlake} poolConfig={props.poolConfig} loanId={loanId} />
           </Box>
         ) : (
           <Box>
@@ -139,7 +130,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
                 {nftError}{' '}
               </Alert>
             )}
-            {nft && <NftData data={nft} authedAddr={props.tinlake.ethConfig.from} />}
+            {nft && props.auth?.address && <NftData data={nft} authedAddr={props.auth.address} />}
           </Box>
         )}
       </Box>

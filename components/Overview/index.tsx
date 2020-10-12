@@ -47,7 +47,7 @@ class Overview extends React.Component<Props> {
         </SecondaryHeader>
 
         <Box direction="row" margin={{ bottom: 'large' }}>
-          <Box basis={'1/2'}>
+          <Box basis={'1/3'}>
             <Box>
               <Heading level="4" margin={{ top: 'small', bottom: 'small' }}>
                 Assets
@@ -61,13 +61,13 @@ class Overview extends React.Component<Props> {
                   <TableRow>
                     <TableCell scope="row">Outstanding Volume</TableCell>
                     <TableCell style={{ textAlign: 'end' }}>
-                      DAI {addThousandsSeparators(toPrecision(baseToDisplay(outstandingDebt, 18), 2))}
+                      {addThousandsSeparators(toPrecision(baseToDisplay(outstandingDebt, 18), 2))} DAI
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell scope="row">Pool Reserve</TableCell>
                     <TableCell style={{ textAlign: 'end' }}>
-                      DAI {addThousandsSeparators(toPrecision(baseToDisplay(availableFunds, 18), 2))}
+                      {addThousandsSeparators(toPrecision(baseToDisplay(availableFunds, 18), 2))} DAI
                     </TableCell>
                   </TableRow>
                 </TableBody>
@@ -79,13 +79,13 @@ class Overview extends React.Component<Props> {
               <Table>
                 <TableBody>
                   <TableRow>
-                    <TableCell scope="row">Current TIN ratio</TableCell>
+                    <TableCell scope="row">Current TIN Risk Buffer</TableCell>
                     <TableCell style={{ textAlign: 'end' }}>
                       {addThousandsSeparators(toPrecision(baseToDisplay(currentJuniorRatio, 25), 2))} %
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell scope="row">Minimum TIN ratio</TableCell>
+                    <TableCell scope="row">Minimum TIN Risk Buffer</TableCell>
                     <TableCell style={{ textAlign: 'end' }}>
                       {addThousandsSeparators(toPrecision(baseToDisplay(minJuniorRatio, 25), 2))} %
                     </TableCell>
@@ -97,21 +97,23 @@ class Overview extends React.Component<Props> {
                   <TableRow>
                     <TableCell scope="row">DROP Supply</TableCell>
                     <TableCell style={{ textAlign: 'end' }}>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(seniorTokenSupply, 18), 2))}
+                      {addThousandsSeparators(toPrecision(baseToDisplay(seniorTokenSupply, 18), 2))} DROP
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell scope="row">TIN Supply</TableCell>
                     <TableCell style={{ textAlign: 'end' }}>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(juniorTokenSupply, 18), 2))}
+                      {addThousandsSeparators(toPrecision(baseToDisplay(juniorTokenSupply, 18), 2))} TIN
                     </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
-              <InvestAction poolName={selectedPool.name} />
+              <Box margin={{ vertical: 'large' }}>
+                <InvestAction pool={selectedPool} />
+              </Box>
             </Box>
           </Box>
-          <Box basis={'1/2'} margin={{ left: 'large' }}>
+          <Box basis={'2/3'} margin={{ left: 'large' }}>
             {!selectedPool.isUpcoming && selectedPool.description && (
               <div dangerouslySetInnerHTML={{ __html: selectedPool.description }} />
             )}

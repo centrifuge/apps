@@ -7,14 +7,15 @@ import { Pool } from '../../config'
 import { withRouter, NextRouter } from 'next/router'
 import OverviewComp from '../../components/Overview'
 import { ITinlake } from '@centrifuge/tinlake-js'
+import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 
 interface Props {
-  tinlake: ITinlake
+  tinlake: ITinlake | ITinlakeV3
   loans?: LoansState
-  loadLoans?: (tinlake: ITinlake) => Promise<void>
+  loadLoans?: (tinlake: ITinlake | ITinlakeV3) => Promise<void>
   pool?: PoolState
   auth?: AuthState
-  loadPool?: (tinlake: ITinlake) => Promise<void>
+  loadPool?: (tinlake: ITinlake | ITinlakeV3) => Promise<void>
   selectedPool: Pool
   router: NextRouter
 }
@@ -37,16 +38,9 @@ class Overview extends React.Component<Props> {
   }
 
   render() {
-    const { auth, tinlake, loans, pool, selectedPool } = this.props
+    const { auth, loans, pool, selectedPool } = this.props
 
-    return (
-      <OverviewComp
-        userAddress={auth?.address || tinlake.ethConfig.from || ''}
-        loans={loans}
-        pool={pool}
-        selectedPool={selectedPool}
-      />
-    )
+    return <OverviewComp userAddress={auth?.address || ''} loans={loans} pool={pool} selectedPool={selectedPool} />
   }
 }
 

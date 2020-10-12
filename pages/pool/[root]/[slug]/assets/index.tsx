@@ -33,6 +33,7 @@ class LoanListPage extends React.Component<Props> {
           <Box justify="evenly" direction="row">
             <Box width="xlarge" gap="medium">
               <WithTinlake
+                version={pool.version}
                 addresses={pool.addresses}
                 contractConfig={pool.contractConfig}
                 render={(tinlake) => (
