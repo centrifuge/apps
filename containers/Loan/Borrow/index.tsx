@@ -1,7 +1,6 @@
 import * as React from 'react'
-import { Box, FormField, Button, Text } from 'grommet'
-// import NumberInput from '../../../components/NumberInput'
-import { baseToDisplay, displayToBase, Loan } from '@centrifuge/tinlake-js'
+import { Box, Button } from 'grommet'
+import { baseToDisplay, Loan } from '@centrifuge/tinlake-js'
 import { PoolState, loadPool, PoolDataV3 } from '../../../ducks/pool'
 import { loadLoan } from '../../../ducks/loans'
 import { connect } from 'react-redux'
@@ -23,10 +22,6 @@ interface Props extends TransactionProps {
 
 const LoanBorrow: React.FC<Props> = (props: Props) => {
   const [borrowAmount, setBorrowAmount] = React.useState('0')
-
-  React.useEffect(() => {
-    setBorrowAmount((props.loan.principal && props.loan.principal.toString()) || '0')
-  }, [props.loan])
 
   React.useEffect(() => {
     props.loadPool && props.loadPool(props.tinlake)
@@ -56,8 +51,6 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
 
   const ceilingSet = props.loan.principal.toString() !== '0'
   const availableFunds = (props.pool && props.pool.data && props.pool.data.availableFunds) || '0'
-  // const ceilingOverflow = new BN(borrowAmount).cmp(new BN(props.loan.principal)) > 0
-  // const availableFundsOverflow = new BN(borrowAmount).cmp(new BN(availableFunds)) > 0
   const borrowedAlready = new BN(props.loan.debt).isZero() === false || props.loan.status !== 'opened'
 
   const epochState = props.pool?.data ? (props.pool?.data as PoolDataV3).epochState : undefined
@@ -69,13 +62,21 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const [error, setError] = React.useState<string | undefined>(undefined)
   const borrowEnabled = error === undefined && ceilingSet && !borrowedAlready && !isBlockedState
 
-  const onChange = (newValue: string) => {
-    console.log('setBorrowAmount: newValue')
-    if (newValue !== borrowAmount) setBorrowAmount(newValue)
+  // React.useEffect(() => {
+  //   if (borrowEnabled && props.loan.principal) {
+  //     setBorrowAmount(props.loan.principal.toString())
+  //   }
+  // }, [props.loan.principal])
 
-    if (new BN(newValue).cmp(new BN(availableFunds)) > 0) {
+  const onChange = (newValue: string) => {
+    if (new BN(newValue).cmp(new BN(borrowAmount)) !== 0) {
+      console.log(`setBorrowAMount: ${newValue}`)
+      setBorrowAmount(newValue)
+    }
+
+    if (new BN(newValue).gt(new BN(availableFunds))) {
       setError('Amount larger than available funds')
-    } else if (new BN(newValue).cmp(new BN(props.loan.principal)) > 0) {
+    } else if (new BN(newValue).gt(new BN(props.loan.principal))) {
       setError('Amount larger than max financing amount')
     } else {
       setError(undefined)
@@ -88,10 +89,10 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
         <TokenInput
           token="DAI"
           label="Financing amount"
-          value={borrowEnabled ? borrowAmount : '0'}
+          value={borrowAmount}
           error={error}
-          onChange={onChange}
-          disabled={status === 'unconfirmed' || status === 'pending'}
+          onChange={(newValue: string) => onChange(newValue)}
+          disabled={!borrowEnabled || status === 'unconfirmed' || status === 'pending'}
         />
       </Box>
       <Box align="start">

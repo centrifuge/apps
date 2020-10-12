@@ -65,7 +65,7 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
   const [error, setError] = React.useState<string | undefined>(undefined)
 
   const onChange = (newValue: string) => {
-    if (new BN(newValue).cmp(new BN(repayAmount)) > 0) setRepayAmount(newValue)
+    if (new BN(newValue).cmp(new BN(repayAmount)) !== 0) setRepayAmount(newValue)
 
     if (new BN(newValue).gt(new BN(debt))) {
       setError('Amount larger than outstanding')
