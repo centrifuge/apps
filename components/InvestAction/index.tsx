@@ -1,10 +1,11 @@
 import * as React from 'react'
 import { Box, Button, Paragraph, Anchor } from 'grommet'
-// CheckBox, FormField, TextInput
+import { useSelector } from 'react-redux'
+import { PoolsState, PoolData } from '../../ducks/pools'
 
 import { FormModal, InvestmentSteps } from './styles'
 import { Pool, UpcomingPool } from '../../config'
-// import { getPoolStatus } from '../../utils/pool'
+import { getPoolStatus } from '../../utils/pool'
 
 interface Props {
   anchor?: React.ReactNode
@@ -14,18 +15,26 @@ interface Props {
 const InvestAction: React.FC<Props> = (props: Props) => {
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
 
-  // const [newsletter, setNewsletter] = React.useState(false)
-  // const [email, setEmail] = React.useState('')
-
   const onOpen = () => setModalIsOpen(true)
   const onClose = () => setModalIsOpen(false)
 
-  // const changeEmail = (event: any) => {
-  //   setEmail(event.currentTarget.value)
-  //   // error = 'Please provide a valid email address'
-  // }
-
   const investDisabled = props.pool?.isUpcoming || !props.pool?.securitizeId
+
+  const pools = useSelector<any, PoolsState>((state) => state.pools)
+  const [status, setStatus] = React.useState('Open')
+
+  React.useEffect(() => {
+    if (props.pool) {
+      const pool = pools.data?.pools.find((pool: PoolData) => {
+        return 'addresses' in props.pool! && pool.id === props.pool?.addresses!.ROOT_CONTRACT.toLowerCase()
+      })
+
+      if (pool) setStatus(getPoolStatus(pool))
+    }
+  }, [pools])
+
+  const isClosed = status === 'Deployed' || status === 'Closed'
+  const isUpcoming = !isClosed && (props.pool?.isUpcoming || !props.pool?.securitizeId)
 
   return (
     <>
@@ -52,33 +61,6 @@ const InvestAction: React.FC<Props> = (props: Props) => {
 
         <InvestmentSteps src="/static/kyc-steps.svg" alt="Investment steps" />
 
-        {/* {!props.pool && (
-          <Box margin={{ left: 'auto', right: 'auto' }} width="40%">
-            <Box direction="row">
-              <Box style={{ minWidth: '40px', paddingTop: '14px', paddingLeft: '4px' }}>
-                <CheckBox
-                  name="check"
-                  checked={newsletter}
-                  onChange={(event: any) => setNewsletter(event.target.checked)}
-                />
-              </Box>
-              <Box flex={'grow'}>
-                <Paragraph>
-                  Sign me up to Centrifuge newsletters, for monthly updates on new pools and major Centrifuge
-                  announcements.
-                </Paragraph>
-              </Box>
-            </Box>
-            {newsletter && (
-              <Box flex={true} margin={{ top: '0' }}>
-                <FormField>
-                  <TextInput value={email} onChange={changeEmail} placeholder="you@example.com" />
-                </FormField>
-              </Box>
-            )}
-          </Box>
-        )} */}
-
         <Box
           direction="row"
           justify="center"
@@ -89,7 +71,6 @@ const InvestAction: React.FC<Props> = (props: Props) => {
         >
           <Box flex={true} justify="between">
             <Paragraph>Start your KYC process to become to become an eligible investor.</Paragraph>
-            {/* newsletter ? `Sign up & onboard as investor` : */}
             <Button
               primary
               label={`Onboard as an investor`}
@@ -100,12 +81,11 @@ const InvestAction: React.FC<Props> = (props: Props) => {
           </Box>
           {props.pool && (
             <Box flex={true} justify="between">
-              {(props.pool?.isUpcoming || !props.pool.securitizeId) && (
-                <Paragraph>This pool is not open for investments yet</Paragraph>
-              )}
+              {isUpcoming && <Paragraph>This pool is not open for investments yet</Paragraph>}
               {!investDisabled && (
                 <Paragraph>Already an eligible investor? Sign the pool issuers Subscription Agreement.</Paragraph>
               )}
+              {isClosed && <Paragraph>This pool is closed for investments.</Paragraph>}
               <Button
                 primary
                 label="Invest in this pool"
