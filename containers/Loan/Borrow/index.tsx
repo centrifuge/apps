@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Box, FormField, Button, Text } from 'grommet'
-import NumberInput from '../../../components/NumberInput'
+// import NumberInput from '../../../components/NumberInput'
 import { baseToDisplay, displayToBase, Loan } from '@centrifuge/tinlake-js'
 import { PoolState, loadPool, PoolDataV3 } from '../../../ducks/pool'
 import { loadLoan } from '../../../ducks/loans'
@@ -10,6 +10,7 @@ import BN from 'bn.js'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 import { Decimal } from 'decimal.js-light'
+import { TokenInput } from '@centrifuge/axis-token-input'
 
 interface Props extends TransactionProps {
   loan: Loan
@@ -55,8 +56,8 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
 
   const ceilingSet = props.loan.principal.toString() !== '0'
   const availableFunds = (props.pool && props.pool.data && props.pool.data.availableFunds) || '0'
-  const ceilingOverflow = new BN(borrowAmount).cmp(new BN(props.loan.principal)) > 0
-  const availableFundsOverflow = new BN(borrowAmount).cmp(new BN(availableFunds)) > 0
+  // const ceilingOverflow = new BN(borrowAmount).cmp(new BN(props.loan.principal)) > 0
+  // const availableFundsOverflow = new BN(borrowAmount).cmp(new BN(availableFunds)) > 0
   const borrowedAlready = new BN(props.loan.debt).isZero() === false || props.loan.status !== 'opened'
 
   const epochState = props.pool?.data ? (props.pool?.data as PoolDataV3).epochState : undefined
@@ -64,20 +65,34 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
     epochState === 'in-submission-period' ||
     epochState === 'in-challenge-period' ||
     epochState === 'challenge-period-ended'
-  const borrowEnabled = !ceilingOverflow && !availableFundsOverflow && ceilingSet && !borrowedAlready && !isBlockedState
+
+  const [error, setError] = React.useState<string | undefined>(undefined)
+  const borrowEnabled = error === undefined && ceilingSet && !borrowedAlready && !isBlockedState
+
+  const onChange = (newValue: string) => {
+    console.log('setBorrowAmount: newValue')
+    if (newValue !== borrowAmount) setBorrowAmount(newValue)
+
+    if (new BN(newValue).cmp(new BN(availableFunds)) > 0) {
+      setError('Amount larger than available funds')
+    } else if (new BN(newValue).cmp(new BN(props.loan.principal)) > 0) {
+      setError('Amount larger than max financing amount')
+    } else {
+      setError(undefined)
+    }
+  }
 
   return (
-    <Box basis={'1/4'} gap="medium" margin={{ right: 'large' }}>
-      <Box gap="medium">
-        <FormField label="Financing amount">
-          <NumberInput
-            value={baseToDisplay(borrowEnabled ? borrowAmount : '0', 18)}
-            suffix=" DAI"
-            precision={18}
-            onValueChange={({ value }) => setBorrowAmount(displayToBase(value, 18))}
-            disabled={status === 'unconfirmed' || status === 'pending'}
-          />
-        </FormField>
+    <Box basis={'1/3'} gap="medium" margin={{ right: 'small' }}>
+      <Box gap="medium" margin={{ right: 'small' }}>
+        <TokenInput
+          token="DAI"
+          label="Financing amount"
+          value={borrowEnabled ? borrowAmount : '0'}
+          error={error}
+          onChange={onChange}
+          disabled={status === 'unconfirmed' || status === 'pending'}
+        />
       </Box>
       <Box align="start">
         <Button
@@ -90,20 +105,6 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
           <Box margin={{ top: 'small' }}>
             The Epoch for this pool has just been closed and orders are currently being computed. Until the next Epoch
             opens, financing assets is not possible.
-          </Box>
-        )}
-        {!isBlockedState && availableFundsOverflow && (
-          <Box margin={{ top: 'small' }}>
-            Available funds exceeded. <br />
-            Amount has to be lower then <br />
-            <Text weight="bold">{`${addThousandsSeparators(baseToDisplay(availableFunds, 18))}`}</Text>
-          </Box>
-        )}
-        {!isBlockedState && ceilingOverflow && !availableFundsOverflow && (
-          <Box margin={{ top: 'small' }}>
-            Max financing amount exceeded. <br />
-            Amount has to be lower than <br />
-            <Text weight="bold">{`${addThousandsSeparators(baseToDisplay(props.loan.principal, 18))}`}</Text>
           </Box>
         )}
       </Box>
