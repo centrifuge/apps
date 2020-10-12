@@ -71,7 +71,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
       <Box gap="medium">
         <FormField label="Financing amount">
           <NumberInput
-            value={baseToDisplay(borrowAmount, 18)}
+            value={baseToDisplay(borrowEnabled ? borrowAmount : '0', 18)}
             suffix=" DAI"
             precision={18}
             onValueChange={({ value }) => setBorrowAmount(displayToBase(value, 18))}
@@ -92,14 +92,14 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
             opens, financing assets is not possible.
           </Box>
         )}
-        {availableFundsOverflow && (
+        {!isBlockedState && availableFundsOverflow && (
           <Box margin={{ top: 'small' }}>
             Available funds exceeded. <br />
             Amount has to be lower then <br />
             <Text weight="bold">{`${addThousandsSeparators(baseToDisplay(availableFunds, 18))}`}</Text>
           </Box>
         )}
-        {ceilingOverflow && !availableFundsOverflow && (
+        {!isBlockedState && ceilingOverflow && !availableFundsOverflow && (
           <Box margin={{ top: 'small' }}>
             Max financing amount exceeded. <br />
             Amount has to be lower than <br />

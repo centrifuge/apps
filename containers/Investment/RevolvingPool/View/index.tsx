@@ -27,6 +27,8 @@ export type EpochData = {
   minChallengePeriodEnd: number
   lastEpochClosed: number
   latestBlockTimestamp: number
+  seniorOrderedInEpoch: number
+  juniorOrderedInEpoch: number
 }
 
 const InvestmentsView: React.FC<Props> = (props: Props) => {
@@ -45,6 +47,8 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
       minChallengePeriodEnd: await props.tinlake.getMinChallengePeriodEnd(),
       lastEpochClosed: await props.tinlake.getLastEpochClosed(),
       latestBlockTimestamp: await props.tinlake.getLatestBlockTimestamp(),
+      seniorOrderedInEpoch: address ? await props.tinlake.getSeniorOrderedInEpoch(address) : 0,
+      juniorOrderedInEpoch: address ? await props.tinlake.getJuniorOrderedInEpoch(address) : 0,
     })
   }
 
@@ -77,9 +81,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
       <ExplainerCard margin={{ bottom: 'medium' }}>
         Please place your DROP and TIN investments and redemptions below. Tinlake pool investments and redemptions are
         locked in throughout the current “Epoch” and executed at the end of the Epoch based on available capital
-        considering the pools risk metrics. You can cancel your order at any time until the end of the Epoch. Please
-        find more detailed information about Epochs, the Epoch matching mechanism and how to invest and redeem into
-        Tinlake here…
+        considering the pools risk metrics. You can cancel your order at any time until the end of the Epoch.
       </ExplainerCard>
 
       <Box direction="row" justify="between" gap="medium">

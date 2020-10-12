@@ -225,7 +225,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           </Heading>
           If you want to learn more get started with your onboarding process.
           <Box justify="end" margin={{ top: 'small' }}>
-            <InvestAction poolName={props.pool.name} />
+            <InvestAction pool={props.pool} />
           </Box>
         </Info>
       )}

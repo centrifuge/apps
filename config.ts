@@ -36,13 +36,14 @@ export interface Pool extends PoolI {
     COLLATERAL_NFT: string
   }
   graph?: string
-  contractConfig: {
+  contractConfig?: {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
     SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
   }
   description?: string
   investHtml?: string
   partialRepay?: boolean
+  securitizeId?: string
 }
 
 export interface DisplayedField {
@@ -89,13 +90,9 @@ const contractAddressesSchema = yup.object().shape({
 })
 
 const contractConfigSchema = yup.object().shape({
-  JUNIOR_OPERATOR: yup
-    .mixed<'ALLOWANCE_OPERATOR'>()
-    .required('contractConfigSchema.JUNIOR_OPERATOR is required')
-    .oneOf(['ALLOWANCE_OPERATOR']),
+  JUNIOR_OPERATOR: yup.mixed<'ALLOWANCE_OPERATOR'>().oneOf(['ALLOWANCE_OPERATOR']),
   SENIOR_OPERATOR: yup
     .mixed<'PROPORTIONAL_OPERATOR' | 'ALLOWANCE_OPERATOR'>()
-    .required('contractConfigSchema.SENIOR_OPERATOR is required')
     .oneOf(['PROPORTIONAL_OPERATOR', 'ALLOWANCE_OPERATOR']),
 })
 
@@ -104,7 +101,7 @@ const contractConfigSchema = yup.object().shape({
 const poolSchema = yup.object().shape({
   addresses: contractAddressesSchema.required('poolSchema.addresses is required'),
   graph: yup.string(),
-  contractConfig: contractConfigSchema.required('poolSchema.contractConfig is required'),
+  contractConfig: contractConfigSchema.default(undefined),
   name: yup.string().required('poolSchema.name is required'),
   version: yup
     .number()
@@ -128,6 +125,7 @@ const poolSchema = yup.object().shape({
     })
   ),
   partialRepay: yup.bool(),
+  securitizeId: yup.string(),
 })
 
 const upcomingPoolSchema = yup.object().shape({

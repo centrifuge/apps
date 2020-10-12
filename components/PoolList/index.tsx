@@ -6,6 +6,7 @@ import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import NumberDisplay from '../NumberDisplay'
 import ChevronRight from '../ChevronRight'
 import Router from 'next/router'
+import { getPoolStatus } from '../../utils/pool'
 
 interface Props {
   pools?: PoolData[]
@@ -18,14 +19,6 @@ class PoolList extends React.Component<Props> {
     } else {
       Router.push('/pool/[root]/[slug]', `/pool/${datum!.id}/${datum!.slug}`, { shallow: true })
     }
-  }
-
-  getPoolStatus = (pool: PoolData) => {
-    if (pool.isUpcoming) return 'Upcoming'
-    if (pool.totalDebt.eqn(0) && pool.totalRepaysAggregatedAmount.eqn(0)) return 'Active'
-    if (pool.totalDebt.gtn(0)) return 'Deployed'
-    if (pool.totalDebt.eqn(0) && pool.totalRepaysAggregatedAmount.gtn(0)) return 'Closed'
-    return 'Open'
   }
 
   render() {
@@ -56,7 +49,7 @@ class PoolList extends React.Component<Props> {
               align: 'center',
               render: (p: PoolData) => (
                 <Box style={{ maxWidth: '200px' }}>
-                  <DisplayField as={'span'} value={this.getPoolStatus(p)} />
+                  <DisplayField as={'span'} value={getPoolStatus(p)} />
                 </Box>
               ),
             },
