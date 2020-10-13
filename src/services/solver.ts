@@ -14,7 +14,6 @@ export const calculateOptimalSolution = async (
   return require('glpk.js').then((glpk: any) => {
     const lp = {
       name: 'LP',
-      generals: ['dropRedeem', 'tinRedeem', 'tinInvest', 'dropInvest'],
       objective: {
         // Maximize: dropRedeem > tinRedeem > tinInvest > dropInvest
         direction: glpk.GLP_MAX,

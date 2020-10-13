@@ -45,6 +45,9 @@ const run = async () => {
     if (solveResult.status === 1) {
       console.log('Successfully ran the solver and submitted a solution')
       console.log(`Transaction hash: ${solveTx.hash}`)
+
+      const epochState = await tinlake.getCurrentEpochState()
+      console.log(`New epoch state: ${epochState}`)
     } else {
       console.error('Failed to run the solver')
     }

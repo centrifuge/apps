@@ -14,9 +14,9 @@ const web3 = require('web3-utils')
 const uintToNumber = (uint: ethers.utils.BigNumber) =>
   (uint as any)
     .toBN()
-    .div(new BN(10).pow(new BN(5)))
+    .div(new BN(10).pow(new BN(6)))
     .toNumber() /
-  10 ** 13
+  10 ** 12
 const fixed27ToNumber = (fixed27: ethers.utils.BigNumber) =>
   (fixed27 as any)
     .toBN()
@@ -25,7 +25,7 @@ const fixed27ToNumber = (fixed27: ethers.utils.BigNumber) =>
   10 ** 7
 
 const numberToUint = (num: number): string => {
-  return new BN(num).mul(new BN(10).pow(new BN(18))).toString()
+  return new BN(num * 10**12).mul(new BN(10).pow(new BN(6))).toString()
 }
 
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
