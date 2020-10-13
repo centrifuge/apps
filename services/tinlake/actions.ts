@@ -2,7 +2,7 @@ import BN from 'bn.js'
 import { Loan, interestRateToFee, ITinlake, PendingTransaction } from '@centrifuge/tinlake-js'
 import { ITinlake as ITinlakeV3, NFT } from '@centrifuge/tinlake-js-v3'
 import { maxUint256 } from '../../utils/maxUint256'
-import { PoolData, PoolDataV3 } from '../../ducks/pool'
+import { PoolData, PoolDataV3, EpochData } from '../../ducks/pool'
 import { isTinlakeV3 } from '../../utils/tinlakeVersion'
 
 export type TrancheType = 'junior' | 'senior'
@@ -487,6 +487,29 @@ export async function getPoolV2(tinlake: ITinlake): Promise<PoolData | null> {
   }
 }
 
+export async function getEpoch(tinlake: ITinlakeV3): Promise<EpochData | undefined> {
+  const address = await tinlake.signer?.getAddress()
+  const state = await tinlake.getCurrentEpochState()
+
+  const minimumEpochTime = await tinlake.getMinimumEpochTime()
+  const lastEpochClosed = await tinlake.getLastEpochClosed()
+  const minimumEpochTimeLeft = lastEpochClosed + minimumEpochTime - new Date().getTime() / 1000
+
+  return {
+    state,
+    minimumEpochTime,
+    minimumEpochTimeLeft,
+    lastEpochClosed,
+    id: await tinlake.getCurrentEpochId(),
+    isBlockedState:
+      state === 'in-submission-period' || state === 'in-challenge-period' || state === 'challenge-period-ended',
+    minChallengePeriodEnd: await tinlake.getMinChallengePeriodEnd(),
+    latestBlockTimestamp: await tinlake.getLatestBlockTimestamp(),
+    seniorOrderedInEpoch: address ? await tinlake.getSeniorOrderedInEpoch(address) : 0,
+    juniorOrderedInEpoch: address ? await tinlake.getJuniorOrderedInEpoch(address) : 0,
+  }
+}
+
 export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null> {
   const juniorReserve = await tinlake.getJuniorReserve()
   const juniorTokenPrice = await tinlake.getTokenPriceJunior()
@@ -509,12 +532,24 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
   const juniorPendingInvestments = await tinlake.getJuniorPendingInvestments()
   const juniorPendingRedemptions = await tinlake.getJuniorPendingRedemptions()
 
+  const totalPendingInvestments = seniorPendingInvestments.add(juniorPendingInvestments)
+
+  const juniorRedemptionsCurrency = new BN(juniorPendingRedemptions)
+        .mul(new BN(juniorTokenPrice))
+        .div(new BN(10).pow(new BN(27)))
+
+  const seniorRedemptionsCurrency = new BN(seniorPendingRedemptions)
+    .mul(new BN(seniorTokenPrice))
+    .div(new BN(10).pow(new BN(27)))
+
+  const totalRedemptionsCurrency = juniorRedemptionsCurrency.add(seniorRedemptionsCurrency)
+
   const seniorSymbol = await tinlake.getSeniorTokenSymbol()
   const seniorDecimals = await tinlake.getSeniorTokenDecimals()
   const juniorSymbol = await tinlake.getJuniorTokenSymbol()
   const juniorDecimals = await tinlake.getJuniorTokenDecimals()
 
-  const epochState = await tinlake.getCurrentEpochState()
+  const epoch = await getEpoch(tinlake)
 
   return {
     minJuniorRatio,
@@ -524,7 +559,7 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
     netAssetValue,
     outstandingVolume,
     reserve,
-    epochState,
+    epoch,
     junior: {
       type: 'junior',
       availableFunds: juniorReserve,
@@ -548,6 +583,8 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
       pendingInvestments: seniorPendingInvestments,
       pendingRedemptions: seniorPendingRedemptions,
     },
+    totalPendingInvestments,
+    totalRedemptionsCurrency,
     availableFunds: juniorReserve.add(seniorReserve),
   }
 }

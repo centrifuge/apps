@@ -59,11 +59,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const availableFundsOverflow = new BN(borrowAmount).cmp(new BN(availableFunds)) > 0
   const borrowedAlready = new BN(props.loan.debt).isZero() === false || props.loan.status !== 'opened'
 
-  const epochState = props.pool?.data ? (props.pool?.data as PoolDataV3).epochState : undefined
-  const isBlockedState =
-    epochState === 'in-submission-period' ||
-    epochState === 'in-challenge-period' ||
-    epochState === 'challenge-period-ended'
+  const isBlockedState = props.pool?.data ? (props.pool?.data as PoolDataV3).epoch?.isBlockedState : false
   const borrowEnabled = !ceilingOverflow && !availableFundsOverflow && ceilingSet && !borrowedAlready && !isBlockedState
 
   return (

@@ -24,13 +24,28 @@ export interface PoolData {
   currentJuniorRatio: BN
 }
 
+export type EpochData = {
+  id: number
+  state: 'open' | 'can-be-closed' | 'in-submission-period' | 'in-challenge-period' | 'challenge-period-ended'
+  isBlockedState: boolean
+  minimumEpochTime: number
+  minimumEpochTimeLeft: number
+  minChallengePeriodEnd: number
+  lastEpochClosed: number
+  latestBlockTimestamp: number
+  seniorOrderedInEpoch: number
+  juniorOrderedInEpoch: number
+}
+
 export interface PoolDataV3 extends PoolData {
   netAssetValue: BN
   reserve: BN
   maxJuniorRatio: BN
   maxReserve: BN
   outstandingVolume: BN
-  epochState: 'open' | 'can-be-closed' | 'in-submission-period' | 'in-challenge-period' | 'challenge-period-ended'
+  totalPendingInvestments: BN
+  totalRedemptionsCurrency: BN
+  epoch?: EpochData
 }
 
 export interface PoolState {

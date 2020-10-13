@@ -43,14 +43,12 @@ class LoanListPage extends React.Component<Props> {
                     tinlake={tinlake}
                     render={(auth) => (
                       <Box>
-                        {isTinlakeV2(tinlake) && (
-                          <SecondaryHeader>
-                            <Heading level="3">Assets</Heading>
-                            <PoolLink href={'/assets/issue'}>
-                              <Button primary label="Open Financing" />
-                            </PoolLink>
-                          </SecondaryHeader>
-                        )}
+                        <SecondaryHeader margin={{ top: 'medium' }}>
+                          <Heading level="4">Asset Overview {pool.name}</Heading>
+                          <PoolLink href={'/assets/issue'}>
+                            <Button primary label="Open Financing" />
+                          </PoolLink>
+                        </SecondaryHeader>
 
                         {isTinlakeV3(tinlake) && (
                           <>
