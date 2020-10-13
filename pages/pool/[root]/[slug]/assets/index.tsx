@@ -13,6 +13,8 @@ import config, { Pool } from '../../../../../config'
 import { GetStaticProps } from 'next'
 import Container from '../../../../../components/Container'
 import Head from 'next/head'
+import { isTinlakeV2, isTinlakeV3 } from '../../../../../utils/tinlakeVersion'
+import LoanOverview from '../../../../../containers/Loan/Overview/index'
 
 interface Props extends WithRouterProps {
   root: string
@@ -41,13 +43,21 @@ class LoanListPage extends React.Component<Props> {
                     tinlake={tinlake}
                     render={(auth) => (
                       <Box>
-                        <SecondaryHeader>
-                          <Heading level="3">Assets</Heading>
-                          <PoolLink href={'/assets/issue'}>
-                            <Button primary label="Open Financing" />
-                          </PoolLink>
-                        </SecondaryHeader>
-                        <LoanList tinlake={tinlake} auth={auth} />
+                        {isTinlakeV2(tinlake) && (
+                          <SecondaryHeader>
+                            <Heading level="3">Assets</Heading>
+                            <PoolLink href={'/assets/issue'}>
+                              <Button primary label="Open Financing" />
+                            </PoolLink>
+                          </SecondaryHeader>
+                        )}
+
+                        {isTinlakeV3(tinlake) && (
+                          <>
+                            <LoanOverview tinlake={tinlake} auth={auth} activePool={this.props.pool} />
+                          </>
+                        )}
+                        <LoanList tinlake={tinlake} auth={auth} hideMetrics={isTinlakeV3(tinlake)} />
                       </Box>
                     )}
                   />
