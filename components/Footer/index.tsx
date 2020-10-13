@@ -1,7 +1,13 @@
 import React from 'react'
-import { Box, Button, Text, Anchor, Paragraph } from 'grommet'
+import { Box, Button, FormField, Text, TextInput, Anchor, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import { Modal } from '@centrifuge/axis-modal'
+import styled from 'styled-components'
+
+const Logo = styled.img`
+  width: 120px;
+  margin-top: 14px;
+`
 
 interface Props {}
 
@@ -24,7 +30,7 @@ class Footer extends React.Component<Props, State> {
   render() {
     return (
       <Box
-        style={{ height: '150px' }}
+        style={{ height: '180px' }}
         border={{
           color: '#f5f5f5',
           size: 'xsmall',
@@ -34,19 +40,26 @@ class Footer extends React.Component<Props, State> {
         justify="center"
         direction="row"
       >
-        <Box
-          direction="row"
-          width="xlarge"
-          justify="between"
-          margin={{ top: 'medium', bottom: 'medium' }}
-          pad={{ horizontal: 'small' }}
-        >
+        <Box direction="row" width="xlarge" margin={{ top: 'medium', bottom: 'medium' }} pad={{ horizontal: 'small' }}>
           <Box basis={'1/5'}>
-            <Text> Centrifuge Tinlake </Text>
+            <Text>
+              <a href="https://centrifuge.io/" target="_blank">
+                <Logo src="/static/centrifuge-logo.png" alt="Centrifuge" />
+              </a>
+            </Text>
           </Box>
-          <Box basis={'1/5'} direction="row" gap={'80px'}>
+
+          <Box basis="1/5" direction="column" margin={{ left: 'large' }}>
+            <FormField label="Sign up to our newsletter" margin={{ top: 'xsmall', bottom: 'small' }}>
+              <TextInput required type="email" placeholder="Your email address" />
+            </FormField>
             <Box>
-              <Text> Learn More </Text>
+              <Button type="submit" label="Subscribe" size="small" />
+            </Box>
+          </Box>
+          <Box basis={'1/5'} direction="row" gap={'80px'} margin={{ left: 'auto' }}>
+            <Box>
+              <Text> Learn more </Text>
               <Anchor
                 margin={{ top: 'xsmall' }}
                 href="https://centrifuge.io/products/tinlake/"
