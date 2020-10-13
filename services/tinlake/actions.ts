@@ -28,7 +28,7 @@ export type TinlakeV3Action = (tinlake: ITinlakeV3, ...args: Serializable[]) => 
 export async function getNFT(registry: string, tinlake: ITinlake | ITinlakeV3, tokenId: string) {
   let nftOwner: string
   let nftData: any
-  let maturityDate: number
+  let maturityDate: number = 0
 
   try {
     nftOwner = (await tinlake.getOwnerOfCollateral(registry, tokenId)).toString()
@@ -55,7 +55,6 @@ export async function getNFT(registry: string, tinlake: ITinlake | ITinlakeV3, t
     }
   } catch (e) {
     console.error(e)
-    maturityDate = 0
   }
 
   const nft: NFT = {

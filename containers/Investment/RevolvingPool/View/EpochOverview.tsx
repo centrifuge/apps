@@ -9,7 +9,6 @@ import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { SignIcon } from './styles'
-import { useInterval } from '../../../../utils/hooks'
 import BN from 'bn.js'
 import { secondsToHms } from '../../../../utils/time'
 

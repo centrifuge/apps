@@ -5,9 +5,8 @@ import { baseToDisplay, ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import BN from 'bn.js'
-import { EpochData } from './index'
 import { useDispatch, useSelector } from 'react-redux'
-import { loadPool, PoolState } from '../../../../ducks/pool'
+import { loadPool, PoolState, PoolDataV3 } from '../../../../ducks/pool'
 import { secondsToHms } from '../../../../utils/time'
 
 import InvestCard from './InvestCard'
@@ -20,7 +19,6 @@ import { useInterval } from '../../../../utils/hooks'
 
 interface Props {
   pool: Pool
-  epochData: EpochData | undefined
   tranche: 'senior' | 'junior'
   tinlake: ITinlakeV3
 }
@@ -155,35 +153,40 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         <>
           {card === 'home' && (
             <>
-              {props.epochData?.isBlockedState && (
+              {pool?.data && (pool?.data as PoolDataV3).epoch?.isBlockedState && (
                 <Info>
                   <Heading level="6" margin={{ bottom: 'xsmall' }}>
                     Computing orders
                   </Heading>
                   The Epoch has just been closed and the order executions are currently being computed. Until the next
                   Epoch opens, you cannot submit new orders.
-                  {props.epochData?.minChallengePeriodEnd !== 0 && (
+                  {pool?.data && (pool?.data as PoolDataV3).epoch?.minChallengePeriodEnd !== 0 && (
                     <MinTimeRemaining>
                       Minimum time remaining:{' '}
-                      {secondsToHms(props.epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
+                      {secondsToHms(
+                        (pool.data as PoolDataV3).epoch!.minChallengePeriodEnd + 60 - new Date().getTime() / 1000
+                      )}
                     </MinTimeRemaining>
                   )}
                 </Info>
               )}
 
-              {!props.epochData?.isBlockedState && (
+              {!pool?.data && (pool?.data as PoolDataV3).epoch?.isBlockedState && (
                 <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
                   <Button
                     primary
                     label="Redeem"
                     onClick={() => setCard('redeem')}
-                    disabled={balance === '0' || props.epochData?.isBlockedState}
+                    disabled={
+                      balance === '0' ||
+                      (pool?.data ? (pool?.data as PoolDataV3).epoch?.isBlockedState === true : false)
+                    }
                   />
                   <Button
                     primary
                     label="Invest"
                     onClick={() => setCard('invest')}
-                    disabled={props.epochData?.isBlockedState}
+                    disabled={pool?.data ? (pool?.data as PoolDataV3).epoch?.isBlockedState === true : false}
                   />
                 </Box>
               )}
@@ -197,7 +200,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               disbursements={disbursements}
               tokenPrice={tokenPrice}
               updateTrancheData={updateTrancheData}
-              epochData={props.epochData}
             />
           )}
           {card === 'collect' && (

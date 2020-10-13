@@ -10,7 +10,6 @@ import PoolOverview from './PoolOverview'
 import TrancheOverview from './TrancheOverview'
 import EpochOverview from './EpochOverview'
 import AdminActions from './AdminActions'
-import { useInterval } from '../../../../utils/hooks'
 import { AuthState } from '../../../../ducks/auth'
 
 interface Props {

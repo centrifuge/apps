@@ -13,7 +13,7 @@ import config, { Pool } from '../../../../../config'
 import { GetStaticProps } from 'next'
 import Container from '../../../../../components/Container'
 import Head from 'next/head'
-import { isTinlakeV2, isTinlakeV3 } from '../../../../../utils/tinlakeVersion'
+import { isTinlakeV3 } from '../../../../../utils/tinlakeVersion'
 import LoanOverview from '../../../../../containers/Loan/Overview/index'
 
 interface Props extends WithRouterProps {
