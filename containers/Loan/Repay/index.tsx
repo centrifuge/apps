@@ -1,7 +1,6 @@
 import * as React from 'react'
-import { Box, FormField, Button } from 'grommet'
-import NumberInput from '../../../components/NumberInput'
-import { baseToDisplay, displayToBase, Loan } from '@centrifuge/tinlake-js'
+import { Box, Button } from 'grommet'
+import { baseToDisplay, Loan } from '@centrifuge/tinlake-js'
 import { loadLoan } from '../../../ducks/loans'
 import { connect } from 'react-redux'
 import { ensureAuthed } from '../../../ducks/auth'
@@ -10,6 +9,7 @@ import { Decimal } from 'decimal.js-light'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { Pool } from '../../../config'
 import BN from 'bn.js'
+import { TokenInput } from '@centrifuge/axis-token-input'
 
 interface Props extends TransactionProps {
   poolConfig: Pool
@@ -20,16 +20,13 @@ interface Props extends TransactionProps {
 }
 
 const LoanRepay: React.FC<Props> = (props: Props) => {
-  const [repayAmount, setRepayAmount] = React.useState('0')
+  const [repayAmount, setRepayAmount] = React.useState<string | undefined>(undefined)
   const debt = props.loan.debt?.toString() || '0'
-
-  React.useEffect(() => {
-    setRepayAmount(debt)
-  }, [debt])
 
   const [status, , setTxId] = useTransactionState()
 
   const repay = async () => {
+    if (!repayAmount) return
     await props.ensureAuthed!()
 
     const valueToDecimal = new Decimal(baseToDisplay(repayAmount, 18)).toFixed(2)
@@ -62,31 +59,39 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
 
   const hasDebt = debt !== '0'
 
+  const [error, setError] = React.useState<string | undefined>(undefined)
+
+  const onChange = (newValue: string) => {
+    if (!repayAmount || new BN(newValue).cmp(new BN(repayAmount)) !== 0) setRepayAmount(newValue)
+
+    if (new BN(newValue).gt(new BN(debt))) {
+      setError('Amount larger than outstanding')
+    } else if (new BN(newValue).isZero()) {
+      setError('')
+    } else {
+      setError(undefined)
+    }
+  }
+
   return (
-    <Box basis={'1/4'} gap="medium" margin={{ right: 'large' }}>
-      <Box gap="medium">
-        <FormField label="Repay amount">
-          <NumberInput
-            value={baseToDisplay(repayAmount, 18)}
-            suffix=" DAI"
-            precision={18}
-            onValueChange={({ value }) => setRepayAmount(displayToBase(value, 18))}
-            disabled={!props.poolConfig.partialRepay}
-          />
-        </FormField>
+    <Box basis={'1/3'} gap="medium" margin={{ right: 'large' }}>
+      <Box gap="medium" margin={{ right: 'small' }}>
+        <TokenInput
+          token="DAI"
+          label="Repay amount"
+          value={repayAmount === undefined ? debt : repayAmount}
+          error={error}
+          onChange={onChange}
+          disabled={!props.poolConfig.partialRepay || status === 'unconfirmed' || status === 'pending'}
+        />
       </Box>
       <Box align="start">
         <Button
           onClick={repay}
           primary
           label="Repay"
-          disabled={
-            !hasDebt || new BN(repayAmount).gt(new BN(debt)) || status === 'unconfirmed' || status === 'pending'
-          }
+          disabled={!hasDebt || error !== undefined || status === 'unconfirmed' || status === 'pending'}
         />
-        {new BN(repayAmount).gt(new BN(debt)) && (
-          <Box margin={{ top: 'small' }}>Repay amount cannot be larger than Outstanding</Box>
-        )}
       </Box>
     </Box>
   )
