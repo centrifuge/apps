@@ -60,12 +60,6 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const [error, setError] = React.useState<string | undefined>(undefined)
   const borrowEnabled = error === undefined && ceilingSet && !borrowedAlready && !isBlockedState
 
-  // React.useEffect(() => {
-  //   if (borrowEnabled && props.loan.principal) {
-  //     setBorrowAmount(props.loan.principal.toString())
-  //   }
-  // }, [props.loan.principal])
-
   const onChange = (newValue: string) => {
     if (!borrowAmount || new BN(newValue).cmp(new BN(borrowAmount)) !== 0) {
       setBorrowAmount(newValue)

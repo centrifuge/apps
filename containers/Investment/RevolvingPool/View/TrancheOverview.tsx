@@ -28,6 +28,7 @@ export type Card = 'home' | 'collect' | 'order' | 'invest' | 'redeem'
 const TrancheOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const trancheData = props.tranche === 'senior' ? pool?.data?.senior : pool?.data?.junior
+  const epochData = pool?.data ? (pool?.data as PoolDataV3).epoch : undefined
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
@@ -153,40 +154,35 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         <>
           {card === 'home' && (
             <>
-              {pool?.data && (pool?.data as PoolDataV3).epoch?.isBlockedState && (
+              {epochData?.isBlockedState && (
                 <Info>
                   <Heading level="6" margin={{ bottom: 'xsmall' }}>
                     Computing orders
                   </Heading>
                   The Epoch has just been closed and the order executions are currently being computed. Until the next
                   Epoch opens, you cannot submit new orders.
-                  {pool?.data && (pool?.data as PoolDataV3).epoch?.minChallengePeriodEnd !== 0 && (
+                  {epochData?.minChallengePeriodEnd !== 0 && (
                     <MinTimeRemaining>
                       Minimum time remaining:{' '}
-                      {secondsToHms(
-                        (pool.data as PoolDataV3).epoch!.minChallengePeriodEnd + 60 - new Date().getTime() / 1000
-                      )}
+                      {secondsToHms(epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
                     </MinTimeRemaining>
                   )}
                 </Info>
               )}
 
-              {!pool?.data && (pool?.data as PoolDataV3).epoch?.isBlockedState && (
+              {!epochData?.isBlockedState && (
                 <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
                   <Button
                     primary
                     label="Redeem"
                     onClick={() => setCard('redeem')}
-                    disabled={
-                      balance === '0' ||
-                      (pool?.data ? (pool?.data as PoolDataV3).epoch?.isBlockedState === true : false)
-                    }
+                    disabled={balance === '0' || epochData?.isBlockedState === true}
                   />
                   <Button
                     primary
                     label="Invest"
                     onClick={() => setCard('invest')}
-                    disabled={pool?.data ? (pool?.data as PoolDataV3).epoch?.isBlockedState === true : false}
+                    disabled={epochData?.isBlockedState === true}
                   />
                 </Box>
               )}
