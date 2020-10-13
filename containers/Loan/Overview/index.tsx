@@ -12,6 +12,7 @@ import { AuthState } from '../../../ducks/auth'
 import { Pool } from '../../../config'
 import { TINRatioBar } from '../../../components/TINRatioBar/index'
 import { secondsToHms } from '../../../utils/time'
+import MaxReserveForm from './MaxReserveForm'
 
 const parseRatio = (num: BN): number => {
   const base = new BN(10).pow(new BN(20))
@@ -39,63 +40,72 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
     dispatch(loadPool(props.tinlake))
   }, [address])
 
+  const [showMaxReserveForm, setShowMaxReserveForm] = React.useState(false)
+
   return (
     <Box margin={{ bottom: 'medium' }}>
       <Box direction="row" justify="between">
         <Box>
           <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
-            <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-              <Heading level="5" margin={'0'}>
-                Outstanding Volume
-              </Heading>
-              <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData.outstandingVolume, 18), 2))} DAI
-              </Heading>
-            </Box>
+            {!showMaxReserveForm && (
+              <>
+                <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+                  <Heading level="5" margin={'0'}>
+                    Outstanding Volume
+                  </Heading>
+                  <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.outstandingVolume || '0', 18), 2))} DAI
+                  </Heading>
+                </Box>
 
-            <Table margin={{ bottom: 'medium' }}>
-              <TableBody>
-                <TableRow>
-                  <TableCell scope="row">Avg Financing Fee</TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>7.43 %</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+                {/* <Table margin={{ bottom: 'medium' }}>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell scope="row">Avg Financing Fee</TableCell>
+                      <TableCell style={{ textAlign: 'end' }}>7.43 %</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table> */}
 
-            {poolData && (
-              <Table margin={{ bottom: 'small' }}>
-                <TableBody>
-                  <TableRow>
-                    <TableCell scope="row">Current Reserve</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(poolData.reserve, 18), 2))} DAI
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell scope="row">Maximum Reserve Amount</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(poolData.maxReserve, 18), 2))} DAI
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell scope="row">Total epoch investment capacity</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>
-                      {addThousandsSeparators(
-                        toPrecision(
-                          baseToDisplay(investmentCapacity.lt(new BN(0)) ? new BN(0) : investmentCapacity, 18),
-                          2
-                        )
-                      )}{' '}
-                      DAI
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+                {poolData && (
+                  <Table margin={{ bottom: 'small' }}>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell scope="row">Current Reserve</TableCell>
+                        <TableCell style={{ textAlign: 'end' }}>
+                          {addThousandsSeparators(toPrecision(baseToDisplay(poolData.reserve, 18), 2))} DAI
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell scope="row">Maximum Reserve Amount</TableCell>
+                        <TableCell style={{ textAlign: 'end' }}>
+                          {addThousandsSeparators(toPrecision(baseToDisplay(poolData.maxReserve, 18), 2))} DAI
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell scope="row">Total epoch investment capacity</TableCell>
+                        <TableCell style={{ textAlign: 'end' }}>
+                          {addThousandsSeparators(
+                            toPrecision(
+                              baseToDisplay(investmentCapacity.lt(new BN(0)) ? new BN(0) : investmentCapacity, 18),
+                              2
+                            )
+                          )}{' '}
+                          DAI
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                )}
+
+                <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                  <Button label="Set max reserve" onClick={() => setShowMaxReserveForm(true)} disabled={!poolData} />
+                </Box>
+              </>
             )}
-
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button label="Set max reserve" />
-            </Box>
+            {showMaxReserveForm && (
+              <MaxReserveForm tinlake={props.tinlake} setShowMaxReserveForm={setShowMaxReserveForm} />
+            )}
           </Box>
         </Box>
 

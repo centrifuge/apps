@@ -19,13 +19,11 @@ const AdminActions: React.FC<Props> = (props: Props) => {
 
   const [minJuniorRatio, setMinJuniorRatio] = React.useState('0')
   const [maxJuniorRatio, setMaxJuniorRatio] = React.useState('0')
-  const [maxReserve, setMaxReserve] = React.useState('0')
 
   React.useEffect(() => {
     if (pool && pool.data) {
       setMinJuniorRatio(pool.data.minJuniorRatio.toString())
       setMaxJuniorRatio((pool.data as PoolDataV3).maxJuniorRatio.toString())
-      setMaxReserve((pool.data as PoolDataV3).maxReserve.toString())
     }
   }, [pool?.data])
 
@@ -53,16 +51,6 @@ const AdminActions: React.FC<Props> = (props: Props) => {
     setMaxRatioTxId(txId)
   }
 
-  const [maxReserveStatus, , setMaxReserveTxId] = useTransactionState()
-
-  const saveMaxReserve = async () => {
-    const txId = await props.createTransaction(`Set max reserve`, 'setMaxReserve', [
-      props.tinlake,
-      maxReserve.toString(),
-    ])
-    setMaxReserveTxId(txId)
-  }
-
   React.useEffect(() => {
     if (minRatioStatus === 'succeeded') {
       props.loadPool && props.loadPool(props.tinlake)
@@ -74,12 +62,6 @@ const AdminActions: React.FC<Props> = (props: Props) => {
       props.loadPool && props.loadPool(props.tinlake)
     }
   }, [maxRatioStatus])
-
-  React.useEffect(() => {
-    if (maxReserveStatus === 'succeeded') {
-      props.loadPool && props.loadPool(props.tinlake)
-    }
-  }, [maxReserveStatus])
 
   return (
     <>
@@ -146,39 +128,6 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                   maxRatioStatus === 'unconfirmed' ||
                   maxRatioStatus === 'pending' ||
                   maxJuniorRatio === (pool.data as PoolDataV3).maxJuniorRatio.toString()
-                }
-              />
-            </Box>
-          </Box>
-
-          <Box width="medium" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
-            <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-              <Heading level="5" margin={'0'}>
-                Max reserve
-              </Heading>
-              <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).maxReserve, 18), 2))}
-              </Heading>
-            </Box>
-
-            <FormField label="Set maximum reserve">
-              <NumberInput
-                value={baseToDisplay(maxReserve, 18)}
-                precision={2}
-                onValueChange={({ value }) => setMaxReserve(displayToBase(value, 18))}
-                disabled={maxReserveStatus === 'unconfirmed' || maxReserveStatus === 'pending'}
-              />
-            </FormField>
-
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button
-                primary
-                label="Apply"
-                onClick={saveMaxReserve}
-                disabled={
-                  maxReserveStatus === 'unconfirmed' ||
-                  maxReserveStatus === 'pending' ||
-                  maxReserve === (pool.data as PoolDataV3).maxReserve.toString()
                 }
               />
             </Box>
