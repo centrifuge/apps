@@ -138,13 +138,21 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
       }
 
       console.log('signing erc262 permit')
+
+      const nonce = await this.provider.getTransactionCount(senderAddress)
+      console.log(nonce)
+
       const result = await signERC2612Permit(
         this.legacyWeb3Provider,
         this.contract('JUNIOR_TOKEN').address,
         senderAddress,
         this.contract('JUNIOR_TRANCHE').address,
-        amount
+        amount,
+        undefined,
+        nonce
       )
+      console.log(result)
+
       return this.pending(
         this.contract('JUNIOR_OPERATOR').supplyOrderWithPermit(
           amount,

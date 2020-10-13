@@ -25,8 +25,6 @@ export function BorrowerActions<ActionsBase extends Constructor<TinlakeParams>>(
       return this.pending(this.contract('SHELF').close(loan, this.overrides))
     }
 
-    // REV: add support for partial borrow (probably only requires changes in actions and component in Tinlake UI)
-    // REV: not required for MVP of rev pool UI
     borrow = async (loan: string, currencyAmount: string) => {
       return this.pending(this.contract('SHELF').borrow(loan, currencyAmount, this.overrides))
     }
@@ -35,8 +33,6 @@ export function BorrowerActions<ActionsBase extends Constructor<TinlakeParams>>(
       return this.pending(this.contract('SHELF').withdraw(loan, currencyAmount, usr, this.overrides))
     }
 
-    // REV: add support for partial repay (probably only requires changes in actions and component in Tinlake UI)
-    // REV: not required for MVP of rev pool UI
     repay = async (loan: string, currencyAmount: string) => {
       return this.pending(this.contract('SHELF').repay(loan, currencyAmount, this.overrides))
     }
