@@ -1,6 +1,6 @@
 import BN from 'bn.js'
-import { Loan, NFT, interestRateToFee, ITinlake, PendingTransaction } from '@centrifuge/tinlake-js'
-import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
+import { Loan, interestRateToFee, ITinlake, PendingTransaction } from '@centrifuge/tinlake-js'
+import { ITinlake as ITinlakeV3, NFT } from '@centrifuge/tinlake-js-v3'
 import { maxUint256 } from '../../utils/maxUint256'
 import { PoolData, PoolDataV3 } from '../../ducks/pool'
 import { isTinlakeV3 } from '../../utils/tinlakeVersion'
@@ -28,6 +28,7 @@ export type TinlakeV3Action = (tinlake: ITinlakeV3, ...args: Serializable[]) => 
 export async function getNFT(registry: string, tinlake: ITinlake | ITinlakeV3, tokenId: string) {
   let nftOwner: string
   let nftData: any
+  let maturityDate: number
 
   try {
     nftOwner = (await tinlake.getOwnerOfCollateral(registry, tokenId)).toString()
@@ -47,10 +48,21 @@ export async function getNFT(registry: string, tinlake: ITinlake | ITinlakeV3, t
   const replacedTokenId = tokenId.replace(/^0x/, '')
   const bnTokenId = new BN(replacedTokenId)
 
+  try {
+    if (tinlake.version === 3) {
+      const nftId = await(tinlake as ITinlakeV3).getNftFeedId(registry, tokenId)
+      maturityDate = (await(tinlake as ITinlakeV3) .getNftMaturityDate(nftId)).toNumber()
+    }
+  } catch (e) {
+    console.error(e)
+    maturityDate = 0
+  }
+
   const nft: NFT = {
     nftOwner,
     nftData,
     registry,
+    maturityDate,
     tokenId: bnTokenId,
   }
 
