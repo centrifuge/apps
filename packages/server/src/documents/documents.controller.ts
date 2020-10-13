@@ -4,8 +4,7 @@ import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import {
   CoreapiAttributeResponse,
   CoreapiCreateDocumentRequest, CoreapiDocumentResponse,
-  CoreapiResponseHeader,
-} from '@centrifuge/gateway-lib/centrifuge-node-client';
+  CoreapiResponseHeader } from '@centrifuge/gateway-lib/centrifuge-node-client';
 import { Document, DocumentStatus, NftStatus } from '@centrifuge/gateway-lib/models/document';
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
 import { SessionGuard } from '../auth/SessionGuard';

@@ -61,7 +61,6 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "@centrifuge/gateway-lib": "^0.1.0",
     "@nestjs/testing": "6.2.2",
     "@types/express": "^4.16.0",
     "@types/express-session": "^1.15.11",

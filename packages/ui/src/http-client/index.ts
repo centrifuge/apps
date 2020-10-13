@@ -52,6 +52,6 @@ export const httpClient = {
   },
   nfts: {
     mint: async (payload: MintNftRequest) => instance.post(`${ROUTES.NFTS}/mint`, payload),
-    tranfer: async (payload: TransferNftRequest) => instance.post(`${ROUTES.NFTS}/transfer`, payload),
+    transfer: async (payload: TransferNftRequest) => instance.post(`${ROUTES.NFTS}/transfer`, payload),
   },
 };

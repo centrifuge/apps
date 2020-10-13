@@ -11,3 +11,4 @@ export class TransferNftRequest {
   to: string;
   registry: string;
 }
+
