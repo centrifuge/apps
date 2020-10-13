@@ -50,8 +50,8 @@ export async function getNFT(registry: string, tinlake: ITinlake | ITinlakeV3, t
 
   try {
     if (tinlake.version === 3) {
-      const nftId = await(tinlake as ITinlakeV3).getNftFeedId(registry, tokenId)
-      maturityDate = (await(tinlake as ITinlakeV3) .getNftMaturityDate(nftId)).toNumber()
+      const nftId = await (tinlake as ITinlakeV3).getNftFeedId(registry, tokenId)
+      maturityDate = (await (tinlake as ITinlakeV3).getNftMaturityDate(nftId)).toNumber()
     }
   } catch (e) {
     console.error(e)
@@ -535,8 +535,8 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
   const totalPendingInvestments = seniorPendingInvestments.add(juniorPendingInvestments)
 
   const juniorRedemptionsCurrency = new BN(juniorPendingRedemptions)
-        .mul(new BN(juniorTokenPrice))
-        .div(new BN(10).pow(new BN(27)))
+    .mul(new BN(juniorTokenPrice))
+    .div(new BN(10).pow(new BN(27)))
 
   const seniorRedemptionsCurrency = new BN(seniorPendingRedemptions)
     .mul(new BN(seniorTokenPrice))

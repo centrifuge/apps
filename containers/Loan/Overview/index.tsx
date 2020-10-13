@@ -36,13 +36,26 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch()
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
+  const updateIsBorrower = async () => {
+    if (address) {
+      const proxyAddress = await props.tinlake.checkProxyExists(address)
+      if (proxyAddress) setIsBorrower(true)
+      else {
+        setIsBorrower(props.auth?.permissions?.canSetMinimumJuniorRatio || false)
+      }
+    }
+  }
+
+  const [isBorrower, setIsBorrower] = React.useState(false)
+
   React.useEffect(() => {
     dispatch(loadPool(props.tinlake))
+    updateIsBorrower()
   }, [address])
 
   const [showMaxReserveForm, setShowMaxReserveForm] = React.useState(false)
 
-  return (
+  return isBorrower ? (
     <Box margin={{ bottom: 'medium' }}>
       <Box direction="row" justify="between">
         <Box>
@@ -59,13 +72,13 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                 </Box>
 
                 {/* <Table margin={{ bottom: 'medium' }}>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell scope="row">Avg Financing Fee</TableCell>
-                      <TableCell style={{ textAlign: 'end' }}>7.43 %</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table> */}
+                    <TableBody>
+                      <TableRow>
+                        <TableCell scope="row">Avg Financing Fee</TableCell>
+                        <TableCell style={{ textAlign: 'end' }}>7.43 %</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table> */}
 
                 {poolData && (
                   <Table margin={{ bottom: 'small' }}>
@@ -172,6 +185,8 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
         </Box>
       </Box>
     </Box>
+  ) : (
+    <>&nbsp;</>
   )
 }
 
