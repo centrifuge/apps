@@ -15,6 +15,7 @@ export type Loan = {
   status?: string
   nft?: NFT
   proxyOwner?: string
+  riskGroup?: number
 }
 
 export type Tranche = {
@@ -30,6 +31,7 @@ export type NFT = {
   tokenId: BN
   nftOwner: string
   nftData: any
+  maturityDate?: number
 }
 export type Investor = {
   junior: {

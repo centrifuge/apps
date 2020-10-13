@@ -33,15 +33,19 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return this.contract('COLLATERAL_NFT', nftRegistryAddress).ownerOf(tokenId)
     }
 
-    getInterestRate = async (loanId: string): Promise<BN> => {
+    getRiskGroup = async (loanId: string): Promise<BN> => {
       // retrieve nftId = hash from tokenID & registry
       const nftId = await this.contract('FEED').nftID(loanId)
 
       // retrieve riskgroup from nft
-      const riskGroup = await this.contract('FEED').risk(nftId)
+      return (await this.contract('FEED').risk(nftId)).toBN()
+    }
+
+    getInterestRate = async (loanId: string): Promise<BN> => {
+      const riskGroup = await this.getRiskGroup(loanId)
 
       // retrieve rates for this risk group
-      const res = await this.contract('PILE').rates(riskGroup)
+      const res = await this.contract('PILE').rates(riskGroup.toNumber())
       return res[2].toBN()
     }
 
@@ -75,6 +79,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       const interestRate = await this.getInterestRate(loanId)
       const debt = await this.getDebt(loanId)
       const status = await this.getStatus(collateral.registry, collateral.tokenId, loanId)
+      const riskGroup = (await this.getRiskGroup(loanId)).toNumber()
 
       return {
         loanId,
@@ -83,6 +88,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
         ownerOf,
         debt,
         status,
+        riskGroup,
         registry: collateral.registry,
         tokenId: collateral.tokenId,
       }
@@ -298,6 +304,7 @@ export type IAnalyticsActions = {
   getLoan(loanId: string): Promise<Loan | null>
   getCollateral(loanId: string): Promise<any>
   getPrincipal(loanId: string): Promise<BN>
+  getRiskGroup(loanId: string): Promise<BN>
   getInterestRate(loanId: string): Promise<BN>
   getOwnerOfLoan(loanId: string): Promise<BN>
   getOwnerOfCollateral(nftRegistryAddr: string, tokenId: string): Promise<BN>
