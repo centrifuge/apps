@@ -83,7 +83,7 @@ class Apollo {
         name: poolConfig.name,
         slug: poolConfig.slug,
         asset: poolConfig?.asset,
-        version: Number(pool.version),
+        version: pool.version ? Number(pool.version) : 2,
       }
     })
     return tinlakePools
@@ -113,6 +113,7 @@ class Apollo {
     let result
     try {
       result = await this.client.query({
+        // TODO: add version
         query: gql`
           {
             pools {
@@ -124,7 +125,6 @@ class Apollo {
               }
               weightedInterestRate
               seniorInterestRate
-              version
             }
           }
         `,
