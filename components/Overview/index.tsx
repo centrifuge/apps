@@ -113,11 +113,13 @@ class Overview extends React.Component<Props> {
               </Box>
             </Box>
           </Box>
-          <Box basis={'2/3'} margin={{ left: 'large' }}>
+          <Box basis={'2/3'} margin={{ top: '0', left: 'large' }}>
             <div>
-              <Heading level="4">Asset Originator Details</Heading>
+              <Heading level="4" margin={{ top: 'small' }}>
+                Asset Originator Details
+              </Heading>
               <a href={selectedPool.website} target="_blank">
-                <img src={selectedPool.logo} style={{ maxHeight: '100px' }} />
+                <img src={selectedPool.logo} style={{ maxHeight: '80px', maxWidth: '50%' }} />
               </a>
 
               <p>{selectedPool.text}</p>

@@ -24,6 +24,7 @@ export interface PoolData {
   seniorInterestRate: BN
   seniorInterestRateNum: number
   order: number
+  version: number
 }
 
 export interface PoolsData {

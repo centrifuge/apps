@@ -10,6 +10,10 @@ export const StyledApp = createGlobalStyle`
   }
 
   .bn-onboard-custom.bn-onboard-modal {
+    z-index: 2;
+  }
+
+  .bn-onboard-custom.bn-onboard-modal {
     font-family: AvenirNextLTW01, 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
       sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
   }

@@ -71,23 +71,20 @@ const Footer: React.FC<{}> = () => {
         </Box>
 
         <Box basis="1/5" direction="column" margin={{ left: 'large' }}>
-          {!hasSubscribed && (
-            <>
-              <FormField label="Sign up to our newsletter" margin={{ top: 'small', bottom: 'small' }}>
-                <TextInput
-                  required
-                  type="email"
-                  value={email}
-                  onChange={(event: any) => setEmail(event.currentTarget.value)}
-                  placeholder="Your email address"
-                />
-              </FormField>
-              <Box>
-                <Button type="submit" label="Subscribe" size="small" onClick={subscribeToNewsLetter} />
-              </Box>
-            </>
-          )}
-          {hasSubscribed && <>Subscribed to the newsletter.</>}
+          <FormField label="Sign up to our newsletter" margin={{ top: 'small', bottom: 'small' }}>
+            <TextInput
+              required
+              type="email"
+              value={email}
+              onChange={(event: any) => setEmail(event.currentTarget.value)}
+              placeholder="Your email address"
+              disabled={hasSubscribed}
+            />
+          </FormField>
+          <Box>
+            {!hasSubscribed && <Button type="submit" label="Subscribe" size="small" onClick={subscribeToNewsLetter} />}
+            {hasSubscribed && <Button type="submit" label="Subscribed!" size="small" disabled />}
+          </Box>
         </Box>
         <Box basis={'1/5'} direction="row" gap={'80px'} margin={{ top: 'small', left: 'auto' }}>
           <Box>

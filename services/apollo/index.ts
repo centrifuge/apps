@@ -83,6 +83,7 @@ class Apollo {
         name: poolConfig.name,
         slug: poolConfig.slug,
         asset: poolConfig?.asset,
+        version: Number(pool.version),
       }
     })
     return tinlakePools
@@ -104,6 +105,7 @@ class Apollo {
       totalRepaysAggregatedAmountNum: 0,
       weightedInterestRateNum: 0,
       seniorInterestRateNum: parseFloat(new BN(p.seniorInterestRate || 0).toString()),
+      version: p.version,
     }))
   }
 
@@ -122,6 +124,7 @@ class Apollo {
               }
               weightedInterestRate
               seniorInterestRate
+              version
             }
           }
         `,
