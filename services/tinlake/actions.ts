@@ -559,6 +559,8 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
     outstandingVolume,
     reserve,
     epoch,
+    totalPendingInvestments,
+    totalRedemptionsCurrency,
     junior: {
       type: 'junior',
       availableFunds: juniorReserve,
@@ -582,8 +584,6 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
       pendingInvestments: seniorPendingInvestments,
       pendingRedemptions: seniorPendingRedemptions,
     },
-    totalPendingInvestments,
-    totalRedemptionsCurrency,
     availableFunds: juniorReserve.add(seniorReserve),
   }
 }

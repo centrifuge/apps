@@ -24,7 +24,7 @@ const Footer: React.FC<{}> = () => {
   }
 
   const [email, setEmail] = React.useState<string | undefined>(undefined)
-  const [hasSubscribed, setHasSubscribed] = React.useState(true)
+  const [hasSubscribed, setHasSubscribed] = React.useState(false)
 
   const subscribeToNewsLetter = () => {
     if (typeof email === 'string' && !EmailRegex.test(email)) {
@@ -36,7 +36,7 @@ const Footer: React.FC<{}> = () => {
     }
 
     jsonp(
-      `https://centrifuge.us17.list-manage.com/subscribe/post?u=27084e1d9e6f92398b5c7ce91&amp;id=e00b1ece80&${queryString.stringify(
+      `https://centrifuge.us17.list-manage.com/subscribe/post-json?u=27084e1d9e6f92398b5c7ce91&amp;id=e00b1ece80&${queryString.stringify(
         formData
       )}`,
       { param: 'c' },
