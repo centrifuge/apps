@@ -20,7 +20,7 @@ interface Props extends TransactionProps {
 }
 
 const LoanRepay: React.FC<Props> = (props: Props) => {
-  const [repayAmount, setRepayAmount] = React.useState<string | undefined>(undefined)
+  const [repayAmount, setRepayAmount] = React.useState<string>('')
   const debt = props.loan.debt?.toString() || '0'
 
   const [status, , setTxId] = useTransactionState()
@@ -52,6 +52,11 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
   }
 
   React.useEffect(() => {
+    if (repayAmount === '') setRepayAmount(debt.toString())
+    validate(debt.toString())
+  }, [debt])
+
+  React.useEffect(() => {
     if (status === 'succeeded') {
       props.loadLoan && props.loadLoan(props.tinlake, props.loan.loanId)
     }
@@ -63,11 +68,12 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
 
   const onChange = (newValue: string) => {
     if (!repayAmount || new BN(newValue).cmp(new BN(repayAmount)) !== 0) setRepayAmount(newValue)
+    validate(newValue)
+  }
 
-    if (new BN(newValue).gt(new BN(debt))) {
+  const validate = (value: string) => {
+    if (new BN(value).gt(new BN(debt))) {
       setError('Amount larger than outstanding')
-    } else if (new BN(newValue).isZero()) {
-      setError('')
     } else {
       setError(undefined)
     }
@@ -79,7 +85,9 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
         <TokenInput
           token="DAI"
           label="Repay amount"
-          value={repayAmount === undefined ? debt : repayAmount}
+          value={repayAmount}
+          maxValue={debt}
+          limitLabel="Outstanding"
           error={error}
           onChange={onChange}
           disabled={!props.poolConfig.partialRepay || status === 'unconfirmed' || status === 'pending'}

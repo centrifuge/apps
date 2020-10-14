@@ -68,8 +68,10 @@ const PoolOverview: React.FC<Props> = () => {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell scope="row">Maximum Reserve Amount</TableCell>
-              <TableCell style={{ textAlign: 'end' }}>
+              <TableCell scope="row" border={{ color: 'transparent' }}>
+                Maximum Reserve Amount
+              </TableCell>
+              <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                 {addThousandsSeparators(toPrecision(baseToDisplay(poolData.maxReserve, 18), 2))} DAI
               </TableCell>
             </TableRow>
