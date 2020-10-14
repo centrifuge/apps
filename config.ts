@@ -122,6 +122,7 @@ const upcomingPoolSchema = yup.object().shape({
   logo: yup.string(),
   website: yup.string(),
   details: yup.object(),
+  discourseLink: yup.string(),
   asset: yup.string().required('poolSchema.asset is required'),
   seniorInterestRate: yup
     .string()
