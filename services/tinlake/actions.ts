@@ -264,19 +264,7 @@ export async function submitSeniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
   }
 
   const address = await tinlake.signer?.getAddress()
-  const allowance = (await tinlake.getSeniorForCurrencyAllowance(address)) || new BN(0)
-
-  if (allowance.lt(new BN(amount))) {
-    try {
-      const approvalTx = await tinlake.approveSeniorForCurrency(maxUint256)
-      await tinlake.getTransactionReceipt(approvalTx!)
-    } catch (e) {
-      return loggedError(e, `Could not approve currency for senior`, '')
-    }
-  }
-
-  // return tinlake.submitSeniorSupplyOrderWithPermit(amount, address)
-  return tinlake.submitSeniorSupplyOrder(amount)
+  return tinlake.submitSeniorSupplyOrderWithPermit(amount, address)
 }
 
 export async function cancelSeniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
@@ -306,19 +294,7 @@ export async function submitJuniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
   }
 
   const address = await tinlake.signer?.getAddress()
-  const allowance = (await tinlake.getJuniorForCurrencyAllowance(address)) || new BN(0)
-
-  if (allowance.lt(new BN(amount))) {
-    try {
-      const approvalTx = await tinlake.approveJuniorForCurrency(maxUint256)
-      await tinlake.getTransactionReceipt(approvalTx!)
-    } catch (e) {
-      return loggedError(e, `Could not approve currency for junior`, '')
-    }
-  }
-
-  // return tinlake.submitJuniorSupplyOrderWithPermit(amount, address)
-  return tinlake.submitJuniorSupplyOrder(amount)
+  return tinlake.submitJuniorSupplyOrderWithPermit(amount, address)
 }
 
 export async function cancelJuniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
@@ -348,19 +324,7 @@ export async function submitSeniorRedeemOrder(tinlake: ITinlakeV3, amount: strin
   }
 
   const address = await tinlake.signer?.getAddress()
-  const allowance = (await tinlake.getSeniorTokenAllowance(address)) || new BN(0)
-
-  if (allowance.lt(new BN(amount))) {
-    try {
-      const approvalTx = await tinlake.approveSeniorToken(maxUint256)
-      await tinlake.getTransactionReceipt(approvalTx!)
-    } catch (e) {
-      return loggedError(e, `Could not approve token for senior`, '')
-    }
-  }
-
-  // return tinlake.submitSeniorRedeemOrderWithPermit(amount, address)
-  return tinlake.submitSeniorRedeemOrder(amount)
+  return tinlake.submitSeniorRedeemOrderWithPermit(amount, address)
 }
 
 export async function cancelSeniorRedeemOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
@@ -390,19 +354,7 @@ export async function submitJuniorRedeemOrder(tinlake: ITinlakeV3, amount: strin
   }
 
   const address = await tinlake.signer?.getAddress()
-  const allowance = (await tinlake.getJuniorTokenAllowance(address)) || new BN(0)
-
-  if (allowance.lt(new BN(amount))) {
-    try {
-      const approvalTx = await tinlake.approveJuniorToken(maxUint256)
-      await tinlake.getTransactionReceipt(approvalTx!)
-    } catch (e) {
-      return loggedError(e, `Could not approve currency for junior`, '')
-    }
-  }
-
-  // return tinlake.submitJuniorRedeemOrderWithPermit(amount, address)
-  return tinlake.submitJuniorRedeemOrder(amount)
+  return tinlake.submitJuniorRedeemOrderWithPermit(amount, address)
 }
 
 export async function cancelJuniorRedeemOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
