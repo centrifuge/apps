@@ -6,6 +6,7 @@ const DaiTokenAddress = '0x6b175474e89094c44da98b954eedeac495271d0f'
 
 export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Base: ActionBase) {
   return class extends Base implements ILenderActions {
+
     // senior tranche functions
     submitSeniorSupplyOrder = async (supplyAmount: string) => {
       return this.pending(this.contract('SENIOR_OPERATOR').supplyOrder(supplyAmount, this.overrides))
@@ -35,13 +36,15 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
           )
         )
       }
+
       const result = await signERC2612Permit(
         this.legacyWeb3Provider,
-        this.contract('SENIOR_TOKEN').address,
+        this.contract('TINLAKE_CURRENCY').address,
         senderAddress,
         this.contract('SENIOR_TRANCHE').address,
         amount
       )
+
       return this.pending(
         this.contract('SENIOR_OPERATOR').supplyOrderWithPermit(
           amount,
@@ -67,6 +70,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
         this.contract('SENIOR_TRANCHE').address,
         amount
       )
+
       return this.pending(
         this.contract('SENIOR_OPERATOR').redeemOrderWithPermit(
           amount,
@@ -117,13 +121,13 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
       }
 
       if (this.contractAddresses['TINLAKE_CURRENCY'] === DaiTokenAddress) {
-        console.log('signing dai permit')
         const result = await signDaiPermit(
           this.legacyWeb3Provider,
           this.contract('TINLAKE_CURRENCY').address,
           senderAddress,
           this.contract('JUNIOR_TRANCHE').address
         )
+
         return this.pending(
           this.contract('JUNIOR_OPERATOR').supplyOrderWithDaiPermit(
             amount,
@@ -137,27 +141,19 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
         )
       }
 
-      console.log('signing erc262 permit')
-
-      const nonce = await this.provider.getTransactionCount(senderAddress)
-      console.log(nonce)
-
       const result = await signERC2612Permit(
         this.legacyWeb3Provider,
-        this.contract('JUNIOR_TOKEN').address,
+        this.contract('TINLAKE_CURRENCY').address,
         senderAddress,
         this.contract('JUNIOR_TRANCHE').address,
-        amount,
-        undefined,
-        nonce
+        amount
       )
-      console.log(result)
 
       return this.pending(
         this.contract('JUNIOR_OPERATOR').supplyOrderWithPermit(
           amount,
           amount,
-          result.deadline && result.deadline,
+          result.deadline,
           result.v,
           result.r,
           result.s,
