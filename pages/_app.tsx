@@ -24,9 +24,8 @@ class MyApp extends App {
           <meta name="viewport" content="width=900, initial-scale=1" />
           <title>Tinlake | Centrifuge | Decentralized Asset Financing</title>
         </Head>
-        <StyledApp>
-          <Component {...pageProps} />
-        </StyledApp>
+        <StyledApp />
+        <Component {...pageProps} />
       </AxisTheme>
     )
   }
