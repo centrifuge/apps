@@ -113,71 +113,35 @@ class Overview extends React.Component<Props> {
               </Box>
             </Box>
           </Box>
-          <Box basis={'2/3'} margin={{ left: 'large' }}>
-            {!selectedPool.isUpcoming && selectedPool.description && (
-              <div dangerouslySetInnerHTML={{ __html: selectedPool.description }} />
-            )}
+          <Box basis={'2/3'} margin={{ top: '0', left: 'large' }}>
+            <div>
+              <Heading level="4" margin={{ top: 'small' }}>
+                Asset Originator Details
+              </Heading>
+              <a href={selectedPool.website} target="_blank">
+                <img src={selectedPool.logo} style={{ maxHeight: '80px', maxWidth: '50%' }} />
+              </a>
 
-            {(selectedPool.isUpcoming || !selectedPool.description) && (
-              <div>
-                <h4>Asset Originator Details</h4>
-                <p>The following information was provided by the Asset Originator.</p>
-                <a href={selectedPool.website} target="_blank">
-                  <img src={selectedPool.logo} width="275px" />
-                </a>
+              <p>{selectedPool.text}</p>
 
-                <p>{selectedPool.text}</p>
+              <p>
+                {Object.keys(selectedPool.details).map((key: string) => (
+                  <React.Fragment key={key}>
+                    <strong>{key}:&nbsp;</strong> {selectedPool.details[key]}
+                    <br />
+                  </React.Fragment>
+                ))}
+              </p>
 
-                <h4>Pool Details</h4>
-                <p>
-                  {Object.keys(selectedPool.details).map((key: string) => (
-                    <React.Fragment key={key}>
-                      <strong>{key}:</strong> {selectedPool.details[key]}
-                      <br />
-                    </React.Fragment>
-                  ))}
-                </p>
-
-                {(selectedPool.website ||
-                  selectedPool.email ||
-                  (selectedPool.additionalContactInfo && selectedPool.additionalContactInfo.length > 0)) && (
-                  <p>
-                    <strong>Interested in investing or want to learn more?</strong>
-                    {selectedPool.website && (
-                      <>
-                        <br />
-                        <a href={selectedPool.website} target="_blank">
-                          {new URL(selectedPool.website).hostname}
-                        </a>
-                      </>
-                    )}
-                    {selectedPool.email && (
-                      <>
-                        <br />
-                        <a href={`mailto:${selectedPool.email}`} target="_blank">
-                          {selectedPool.email}
-                        </a>
-                      </>
-                    )}
-                    {selectedPool.additionalContactInfo?.map((ci, i) =>
-                      ci.link ? (
-                        <React.Fragment key={ci.label + i}>
-                          <br />
-                          <a href={ci.link} target="_blank">
-                            {ci.label}
-                          </a>
-                        </React.Fragment>
-                      ) : (
-                        <React.Fragment key={ci.label + i}>
-                          <br />
-                          <span>{ci.label}</span>
-                        </React.Fragment>
-                      )
-                    )}
-                  </p>
-                )}
-              </div>
-            )}
+              {selectedPool.discourseLink && (
+                <>
+                  <h4 style={{ marginBottom: '0' }}>Learn more about this asset originator</h4>
+                  <a href={selectedPool.discourseLink} target="_blank">
+                    Join the discussion on Discourse
+                  </a>
+                </>
+              )}
+            </div>
           </Box>
         </Box>
 

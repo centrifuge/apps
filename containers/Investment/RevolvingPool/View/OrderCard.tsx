@@ -5,11 +5,11 @@ import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
-import { connect } from 'react-redux'
+import { connect, useSelector } from 'react-redux'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import BN from 'bn.js'
-import { EpochData } from './index'
 import { secondsToHms } from '../../../../utils/time'
+import { PoolDataV3, PoolState } from '../../../../ducks/pool'
 
 import { Description, Warning, Info, MinTimeRemaining } from './styles'
 import { Card } from './TrancheOverview'
@@ -22,10 +22,12 @@ interface Props extends TransactionProps {
   tokenPrice: string
   tinlake: ITinlakeV3
   updateTrancheData: () => void
-  epochData: EpochData | undefined
 }
 
 const OrderCard: React.FC<Props> = (props: Props) => {
+  const pool = useSelector<any, PoolState>((state) => state.pool)
+  const epochData = pool?.data ? (pool?.data as PoolDataV3).epoch : undefined
+
   const type = props.disbursements.remainingSupplyCurrency.isZero() ? 'Redeem' : 'Invest'
   const token = type === 'Invest' ? 'DAI' : props.tranche === 'senior' ? 'DROP' : 'TIN'
 
@@ -65,10 +67,9 @@ const OrderCard: React.FC<Props> = (props: Props) => {
   }, [status])
 
   const rolledOver =
-    !props.epochData?.isBlockedState &&
-    props.epochData?.id !==
-      (props.tranche === 'senior' ? props.epochData?.seniorOrderedInEpoch : props.epochData?.juniorOrderedInEpoch)
-  const disabled = status === 'pending' || status === 'unconfirmed' || props.epochData?.isBlockedState
+    !epochData?.isBlockedState &&
+    epochData?.id !== (props.tranche === 'senior' ? epochData?.seniorOrderedInEpoch : epochData?.juniorOrderedInEpoch)
+  const disabled = status === 'pending' || status === 'unconfirmed' || epochData?.isBlockedState
 
   return (
     <Box>
@@ -126,17 +127,16 @@ const OrderCard: React.FC<Props> = (props: Props) => {
         </TableBody>
       </Table>
 
-      {props.epochData?.isBlockedState && (
+      {epochData?.isBlockedState && (
         <Info>
           <Heading level="6" margin={{ bottom: 'xsmall' }}>
             Computing orders
           </Heading>
           The Epoch has just been closed and the order executions are currently being computed. Your executed order will
           be available for collection soon.
-          {props.epochData?.minChallengePeriodEnd !== 0 && (
+          {epochData?.minChallengePeriodEnd !== 0 && (
             <MinTimeRemaining>
-              Minimum time remaining:{' '}
-              {secondsToHms(props.epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
+              Minimum time remaining: {secondsToHms(epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
             </MinTimeRemaining>
           )}
         </Info>
@@ -159,7 +159,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
         </>
       )}
 
-      {!props.epochData?.isBlockedState && !confirmCancellation && (
+      {!epochData?.isBlockedState && !confirmCancellation && (
         <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
           <Button primary label="Cancel Order" onClick={() => setConfirmCancellation(true)} disabled={disabled} />
           {/* <Button primary label="Update Order" /> */}

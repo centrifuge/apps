@@ -5,7 +5,7 @@ class WithFooter extends React.Component<PropsWithChildren<{}>> {
   render() {
     return (
       <>
-        <Box style={{ minHeight: 'calc(100vh - 150px)' }}>{this.props.children}</Box>
+        <Box style={{ minHeight: 'calc(100vh - 180px)' }}>{this.props.children}</Box>
         <Footer />
       </>
     )

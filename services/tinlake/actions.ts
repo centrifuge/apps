@@ -1,8 +1,8 @@
 import BN from 'bn.js'
-import { Loan, NFT, interestRateToFee, ITinlake, PendingTransaction } from '@centrifuge/tinlake-js'
-import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
+import { Loan, interestRateToFee, ITinlake, PendingTransaction } from '@centrifuge/tinlake-js'
+import { ITinlake as ITinlakeV3, NFT } from '@centrifuge/tinlake-js-v3'
 import { maxUint256 } from '../../utils/maxUint256'
-import { PoolData, PoolDataV3 } from '../../ducks/pool'
+import { PoolData, PoolDataV3, EpochData } from '../../ducks/pool'
 import { isTinlakeV3 } from '../../utils/tinlakeVersion'
 
 export type TrancheType = 'junior' | 'senior'
@@ -28,6 +28,7 @@ export type TinlakeV3Action = (tinlake: ITinlakeV3, ...args: Serializable[]) => 
 export async function getNFT(registry: string, tinlake: ITinlake | ITinlakeV3, tokenId: string) {
   let nftOwner: string
   let nftData: any
+  let maturityDate: number = 0
 
   try {
     nftOwner = (await tinlake.getOwnerOfCollateral(registry, tokenId)).toString()
@@ -47,10 +48,20 @@ export async function getNFT(registry: string, tinlake: ITinlake | ITinlakeV3, t
   const replacedTokenId = tokenId.replace(/^0x/, '')
   const bnTokenId = new BN(replacedTokenId)
 
+  try {
+    if (tinlake.version === 3) {
+      const nftId = await (tinlake as ITinlakeV3).getNftFeedId(registry, tokenId)
+      maturityDate = (await (tinlake as ITinlakeV3).getNftMaturityDate(nftId)).toNumber()
+    }
+  } catch (e) {
+    console.error(e)
+  }
+
   const nft: NFT = {
     nftOwner,
     nftData,
     registry,
+    maturityDate,
     tokenId: bnTokenId,
   }
 
@@ -475,6 +486,29 @@ export async function getPoolV2(tinlake: ITinlake): Promise<PoolData | null> {
   }
 }
 
+export async function getEpoch(tinlake: ITinlakeV3): Promise<EpochData | undefined> {
+  const address = await tinlake.signer?.getAddress()
+  const state = await tinlake.getCurrentEpochState()
+
+  const minimumEpochTime = await tinlake.getMinimumEpochTime()
+  const lastEpochClosed = await tinlake.getLastEpochClosed()
+  const minimumEpochTimeLeft = lastEpochClosed + minimumEpochTime - new Date().getTime() / 1000
+
+  return {
+    state,
+    minimumEpochTime,
+    minimumEpochTimeLeft,
+    lastEpochClosed,
+    id: await tinlake.getCurrentEpochId(),
+    isBlockedState:
+      state === 'in-submission-period' || state === 'in-challenge-period' || state === 'challenge-period-ended',
+    minChallengePeriodEnd: await tinlake.getMinChallengePeriodEnd(),
+    latestBlockTimestamp: await tinlake.getLatestBlockTimestamp(),
+    seniorOrderedInEpoch: address ? await tinlake.getSeniorOrderedInEpoch(address) : 0,
+    juniorOrderedInEpoch: address ? await tinlake.getJuniorOrderedInEpoch(address) : 0,
+  }
+}
+
 export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null> {
   const juniorReserve = await tinlake.getJuniorReserve()
   const juniorTokenPrice = await tinlake.getTokenPriceJunior()
@@ -497,12 +531,24 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
   const juniorPendingInvestments = await tinlake.getJuniorPendingInvestments()
   const juniorPendingRedemptions = await tinlake.getJuniorPendingRedemptions()
 
+  const totalPendingInvestments = seniorPendingInvestments.add(juniorPendingInvestments)
+
+  const juniorRedemptionsCurrency = new BN(juniorPendingRedemptions)
+    .mul(new BN(juniorTokenPrice))
+    .div(new BN(10).pow(new BN(27)))
+
+  const seniorRedemptionsCurrency = new BN(seniorPendingRedemptions)
+    .mul(new BN(seniorTokenPrice))
+    .div(new BN(10).pow(new BN(27)))
+
+  const totalRedemptionsCurrency = juniorRedemptionsCurrency.add(seniorRedemptionsCurrency)
+
   const seniorSymbol = await tinlake.getSeniorTokenSymbol()
   const seniorDecimals = await tinlake.getSeniorTokenDecimals()
   const juniorSymbol = await tinlake.getJuniorTokenSymbol()
   const juniorDecimals = await tinlake.getJuniorTokenDecimals()
 
-  const epochState = await tinlake.getCurrentEpochState()
+  const epoch = await getEpoch(tinlake)
 
   return {
     minJuniorRatio,
@@ -512,7 +558,9 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
     netAssetValue,
     outstandingVolume,
     reserve,
-    epochState,
+    epoch,
+    totalPendingInvestments,
+    totalRedemptionsCurrency,
     junior: {
       type: 'junior',
       availableFunds: juniorReserve,

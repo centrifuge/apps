@@ -3,19 +3,16 @@ import { Box, Button, Heading, Table, TableBody, TableRow, TableCell } from 'gro
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
 import { connect, useSelector } from 'react-redux'
-import { EpochData } from './index'
 import { AuthState } from '../../../../ducks/auth'
 import { PoolDataV3, PoolState } from '../../../../ducks/pool'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { SignIcon } from './styles'
-import { useInterval } from '../../../../utils/hooks'
 import BN from 'bn.js'
 import { secondsToHms } from '../../../../utils/time'
 
 interface Props extends TransactionProps {
-  epochData: EpochData
   tinlake: ITinlakeV3
   auth?: AuthState
 }
@@ -27,40 +24,16 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   const [status, , setTxId] = useTransactionState()
 
   const solve = async () => {
-    const txId = await props.createTransaction(`Close epoch ${props.epochData.id}`, 'solveEpoch', [props.tinlake])
+    const txId = await props.createTransaction(`Close epoch ${poolData?.epoch?.id}`, 'solveEpoch', [props.tinlake])
     setTxId(txId)
   }
 
   const execute = async () => {
-    const txId = await props.createTransaction(`Execute epoch ${props.epochData.id}`, 'executeEpoch', [props.tinlake])
+    const txId = await props.createTransaction(`Execute epoch ${poolData?.epoch?.id}`, 'executeEpoch', [props.tinlake])
     setTxId(txId)
   }
 
   const disabled = status === 'unconfirmed' || status === 'pending'
-
-  const [timeLeft, setTimeLeft] = React.useState(0)
-
-  useInterval(() => {
-    setTimeLeft(props.epochData.lastEpochClosed + props.epochData.minimumEpochTime - new Date().getTime() / 1000)
-  }, 1000)
-
-  const totalPendingInvestments = poolData?.senior
-    ? poolData?.junior?.pendingInvestments!.add(poolData?.senior?.pendingInvestments!)
-    : new BN(0)
-
-  const juniorRedemptionsCurrency = poolData?.junior?.tokenPrice
-    ? new BN(poolData.junior.pendingRedemptions || 0)
-        .mul(new BN(poolData.junior.tokenPrice))
-        .div(new BN(10).pow(new BN(27)))
-    : new BN(0)
-
-  const seniorRedemptionsCurrency = poolData?.senior?.tokenPrice
-    ? new BN(poolData.senior.pendingRedemptions || 0)
-        .mul(new BN(poolData.senior.tokenPrice))
-        .div(new BN(10).pow(new BN(27)))
-    : new BN(0)
-
-  const totalRedemptionsCurrency = juniorRedemptionsCurrency.add(seniorRedemptionsCurrency)
 
   const investmentCapacity = poolData ? poolData.maxReserve.sub(poolData.reserve) : new BN(0)
 
@@ -75,71 +48,73 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
           </Heading>
         </Box>
 
-        <Table>
-          <TableBody>
-            <TableRow>
-              <TableCell scope="row">Epoch #</TableCell>
-              <TableCell style={{ textAlign: 'end' }}>{props.epochData.id}</TableCell>
-            </TableRow>
-            {isAdmin && (
+        {poolData?.epoch && (
+          <Table>
+            <TableBody>
               <TableRow>
-                <TableCell scope="row">Epoch state</TableCell>
-                <TableCell style={{ textAlign: 'end' }}>{props.epochData.state}</TableCell>
+                <TableCell scope="row">Epoch #</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>{poolData.epoch.id}</TableCell>
               </TableRow>
-            )}
-            {props.epochData.isBlockedState && (
+              {isAdmin && (
+                <TableRow>
+                  <TableCell scope="row">Epoch state</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>{poolData.epoch.state}</TableCell>
+                </TableRow>
+              )}
+              {poolData.epoch.isBlockedState && (
+                <TableRow>
+                  <TableCell scope="row">Minimum time until next epoch starts</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>
+                    {secondsToHms(poolData.epoch.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
+                  </TableCell>
+                </TableRow>
+              )}
+              {!poolData.epoch.isBlockedState && (
+                <>
+                  <TableRow>
+                    <TableCell scope="row">Minimum epoch duration</TableCell>
+                    <TableCell style={{ textAlign: 'end' }}>{secondsToHms(poolData.epoch.minimumEpochTime)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell scope="row">Minimum time left in current epoch</TableCell>
+                    <TableCell style={{ textAlign: 'end' }}>
+                      {secondsToHms(poolData.epoch.minimumEpochTimeLeft)}
+                    </TableCell>
+                  </TableRow>
+                </>
+              )}
               <TableRow>
-                <TableCell scope="row">Minimum time until next epoch starts</TableCell>
+                <TableCell scope="row">Total epoch investment capacity</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  {secondsToHms(props.epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
+                  {addThousandsSeparators(
+                    toPrecision(baseToDisplay(investmentCapacity.lt(new BN(0)) ? new BN(0) : investmentCapacity, 18), 2)
+                  )}{' '}
+                  DAI
                 </TableCell>
               </TableRow>
-            )}
-            {!props.epochData.isBlockedState && (
-              <>
-                <TableRow>
-                  <TableCell scope="row">Minimum epoch duration</TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>{secondsToHms(props.epochData.minimumEpochTime)}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell scope="row">Minimum time left in current epoch</TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>{secondsToHms(timeLeft)}</TableCell>
-                </TableRow>
-              </>
-            )}
-            <TableRow>
-              <TableCell scope="row">Total epoch investment capacity</TableCell>
-              <TableCell style={{ textAlign: 'end' }}>
-                {addThousandsSeparators(
-                  toPrecision(baseToDisplay(investmentCapacity.lt(new BN(0)) ? new BN(0) : investmentCapacity, 18), 2)
-                )}{' '}
-                DAI
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+            </TableBody>
+          </Table>
+        )}
 
-        {isAdmin && (
+        {isAdmin && poolData?.epoch && (
           <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-            {props.epochData.state === 'can-be-closed' && (
+            {poolData.epoch.state === 'can-be-closed' && (
               <Button
                 label={`Close epoch`}
                 primary
                 onClick={solve}
                 disabled={
                   disabled ||
-                  props.epochData?.lastEpochClosed + props.epochData?.minimumEpochTime >= new Date().getTime() / 1000
+                  poolData.epoch?.lastEpochClosed + poolData.epoch?.minimumEpochTime >= new Date().getTime() / 1000
                 }
               />
             )}
-            {props.epochData.state === 'in-submission-period' && (
-              <Button label={`Run solver`} primary disabled={true} />
+            {poolData.epoch.state === 'in-submission-period' && <Button label={`Run solver`} primary disabled={true} />}
+            {poolData.epoch.state === 'in-challenge-period' && (
+              <Button label={`Execute epoch ${poolData.epoch.id}`} primary disabled={true} />
             )}
-            {props.epochData.state === 'in-challenge-period' && (
-              <Button label={`Execute epoch ${props.epochData.id}`} primary disabled={true} />
-            )}
-            {props.epochData.state === 'challenge-period-ended' && (
-              <Button label={`Execute epoch ${props.epochData.id}`} primary onClick={execute} disabled={disabled} />
+            {poolData.epoch.state === 'challenge-period-ended' && (
+              <Button label={`Execute epoch ${poolData.epoch.id}`} primary onClick={execute} disabled={disabled} />
             )}
           </Box>
         )}
@@ -182,7 +157,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                   <Box direction="row">Total Pending Investments</Box>
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(totalPendingInvestments, 18), 2))} DAI
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData.totalPendingInvestments, 18), 2))} DAI
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -219,7 +194,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                   <Box direction="row">Estimated Total Pending Redemptions in DAI</Box>
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(totalRedemptionsCurrency, 18), 2))} DAI
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData.totalRedemptionsCurrency, 18), 2))} DAI
                 </TableCell>
               </TableRow>
             </TableBody>

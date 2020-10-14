@@ -11,6 +11,7 @@ import DAI from '../../../static/dai.json'
 import ERC20Display from '../../../components/ERC20Display'
 
 interface Props {
+  hideMetrics?: boolean
   tinlake: any
   loans?: LoansState
   loadLoans?: (tinlake: any) => Promise<void>
@@ -35,22 +36,28 @@ class LoanList extends React.Component<Props> {
 
     return (
       <Box margin={{ bottom: 'large' }}>
-        <Box direction="row" align="center">
-          <Box
-            basis={'full'}
-            gap="medium"
-            align="center"
-            alignSelf="center"
-            margin={{ bottom: 'medium' }}
-            style={{ fontSize: '1.4em' }}
-          >
-            <DashboardMetric label="Pool Reserve">
-              <Box align="center">
-                <ERC20Display value={availableFunds ? availableFunds.toString() : '0'} tokenMetas={DAI} precision={2} />
-              </Box>
-            </DashboardMetric>
+        {!this.props.hideMetrics && (
+          <Box direction="row" align="center">
+            <Box
+              basis={'full'}
+              gap="medium"
+              align="center"
+              alignSelf="center"
+              margin={{ bottom: 'medium' }}
+              style={{ fontSize: '1.4em' }}
+            >
+              <DashboardMetric label="Pool Reserve">
+                <Box align="center">
+                  <ERC20Display
+                    value={availableFunds ? availableFunds.toString() : '0'}
+                    tokenMetas={DAI}
+                    precision={2}
+                  />
+                </Box>
+              </DashboardMetric>
+            </Box>
           </Box>
-        </Box>
+        )}
         <LoanListData loans={(loans && loans.loans) || []} userAddress={auth?.address || ''}>
           {' '}
         </LoanListData>

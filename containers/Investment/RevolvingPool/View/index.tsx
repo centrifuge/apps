@@ -10,7 +10,6 @@ import PoolOverview from './PoolOverview'
 import TrancheOverview from './TrancheOverview'
 import EpochOverview from './EpochOverview'
 import AdminActions from './AdminActions'
-import { useInterval } from '../../../../utils/hooks'
 import { AuthState } from '../../../../ducks/auth'
 
 interface Props {
@@ -19,49 +18,14 @@ interface Props {
   auth?: AuthState
 }
 
-export type EpochData = {
-  id: number
-  state: 'open' | 'can-be-closed' | 'in-submission-period' | 'in-challenge-period' | 'challenge-period-ended'
-  isBlockedState: boolean
-  minimumEpochTime: number
-  minChallengePeriodEnd: number
-  lastEpochClosed: number
-  latestBlockTimestamp: number
-  seniorOrderedInEpoch: number
-  juniorOrderedInEpoch: number
-}
-
 const InvestmentsView: React.FC<Props> = (props: Props) => {
   const isAdmin = props.auth?.permissions?.canSetMinimumJuniorRatio
-
-  const [epochData, setEpochData] = React.useState<EpochData | undefined>(undefined)
-
-  const updateEpochData = async () => {
-    const state = await props.tinlake.getCurrentEpochState()
-    setEpochData({
-      state,
-      id: await props.tinlake.getCurrentEpochId(),
-      isBlockedState:
-        state === 'in-submission-period' || state === 'in-challenge-period' || state === 'challenge-period-ended',
-      minimumEpochTime: await props.tinlake.getMinimumEpochTime(),
-      minChallengePeriodEnd: await props.tinlake.getMinChallengePeriodEnd(),
-      lastEpochClosed: await props.tinlake.getLastEpochClosed(),
-      latestBlockTimestamp: await props.tinlake.getLatestBlockTimestamp(),
-      seniorOrderedInEpoch: address ? await props.tinlake.getSeniorOrderedInEpoch(address) : 0,
-      juniorOrderedInEpoch: address ? await props.tinlake.getJuniorOrderedInEpoch(address) : 0,
-    })
-  }
-
-  useInterval(() => {
-    updateEpochData()
-  }, 30000)
 
   const dispatch = useDispatch()
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
   React.useEffect(() => {
     dispatch(loadPool(props.tinlake))
-    updateEpochData()
   }, [address])
 
   return (
@@ -85,11 +49,11 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
       </ExplainerCard>
 
       <Box direction="row" justify="between" gap="medium">
-        {epochData ? <EpochOverview epochData={epochData} tinlake={props.tinlake} /> : <div>&nbsp;</div>}
+        {<EpochOverview tinlake={props.tinlake} />}
 
         <Box>
-          <TrancheOverview epochData={epochData} pool={props.activePool} tinlake={props.tinlake} tranche="senior" />
-          <TrancheOverview epochData={epochData} pool={props.activePool} tinlake={props.tinlake} tranche="junior" />
+          <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="senior" />
+          <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="junior" />
         </Box>
       </Box>
 

@@ -47,7 +47,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
         <Anchor
           onClick={onOpen}
           margin={{ top: 'small', bottom: 'small' }}
-          label="Interested in investing in Tinlake Pools? Start your onboarding process now"
+          label="Interested in investing in Tinlake pools? Start your onboarding process now"
         />
       )}
 

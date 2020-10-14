@@ -7,17 +7,12 @@ interface PoolI {
   name: string
   slug: string
   shortName?: string
-  assetOriginatorName?: string
   text?: string
   logo?: string
   website?: string
-  email?: string
   details?: any
   asset: string
-  additionalContactInfo?: {
-    label: string
-    link?: string
-  }[]
+  discourseLink?: string
   version: 2 | 3
 }
 
@@ -40,8 +35,6 @@ export interface Pool extends PoolI {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
     SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
   }
-  description?: string
-  investHtml?: string
   partialRepay?: boolean
   securitizeId?: string
 }
@@ -96,8 +89,6 @@ const contractConfigSchema = yup.object().shape({
     .oneOf(['PROPORTIONAL_OPERATOR', 'ALLOWANCE_OPERATOR']),
 })
 
-// TODO: text/logo/etc should be required and description/investHtml removed,
-// once we migrate all pool configs to the new format
 const poolSchema = yup.object().shape({
   addresses: contractAddressesSchema.required('poolSchema.addresses is required'),
   graph: yup.string(),
@@ -109,21 +100,12 @@ const poolSchema = yup.object().shape({
     .required('poolSchema.version is required'),
   slug: yup.string().required('poolSchema.slug is required'),
   shortName: yup.string(),
-  assetOriginatorName: yup.string(),
+  discourseLink: yup.string(),
   text: yup.string(),
   logo: yup.string(),
   website: yup.string(),
-  email: yup.string(),
   details: yup.object(),
-  description: yup.string(),
-  investHtml: yup.string(),
   asset: yup.string().required('poolSchema.asset is required'),
-  additionalContactInfo: yup.array(
-    yup.object().shape({
-      label: yup.string().required('poolSchema.additionalContactInfo[?].label is required'),
-      link: yup.string(),
-    })
-  ),
   partialRepay: yup.bool(),
   securitizeId: yup.string(),
 })
@@ -136,19 +118,12 @@ const upcomingPoolSchema = yup.object().shape({
     .required('poolSchema.version is required'),
   slug: yup.string().required('poolSchema.slug is required'),
   shortName: yup.string(),
-  assetOriginatorName: yup.string(),
   text: yup.string(),
   logo: yup.string(),
   website: yup.string(),
-  email: yup.string(),
   details: yup.object(),
+  discourseLink: yup.string(),
   asset: yup.string().required('poolSchema.asset is required'),
-  additionalContactInfo: yup.array(
-    yup.object().shape({
-      label: yup.string().required('poolSchema.additionalContactInfo[?].label is required'),
-      link: yup.string(),
-    })
-  ),
   seniorInterestRate: yup
     .string()
     .default('1000000003170979198376458650')
