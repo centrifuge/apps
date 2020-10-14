@@ -1,17 +1,13 @@
 import React from 'react'
-import { Box, Button, FormField, Text, TextInput, Anchor, Paragraph } from 'grommet'
+import { Box, Button, Text, Anchor, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import { Modal } from '@centrifuge/axis-modal'
 import styled from 'styled-components'
-import jsonp from 'jsonp'
-import queryString from 'query-string'
 
 const Logo = styled.img`
   width: 120px;
   margin-top: 20px;
 `
-
-const EmailRegex = /\S+@\S+\.\S+/
 
 const Footer: React.FC<{}> = () => {
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
@@ -21,32 +17,6 @@ const Footer: React.FC<{}> = () => {
   }
   const closeModal = () => {
     setModalIsOpen(false)
-  }
-
-  const [email, setEmail] = React.useState<string | undefined>(undefined)
-  const [hasSubscribed, setHasSubscribed] = React.useState(false)
-
-  const subscribeToNewsLetter = () => {
-    if (typeof email === 'string' && !EmailRegex.test(email)) {
-      return
-    }
-
-    const formData = {
-      EMAIL: email,
-    }
-
-    jsonp(
-      `https://centrifuge.us17.list-manage.com/subscribe/post-json?u=27084e1d9e6f92398b5c7ce91&amp;id=e00b1ece80&${queryString.stringify(
-        formData
-      )}`,
-      { param: 'c' },
-      (err: Error | null, data: any) => {
-        console.log('err:', err)
-        console.log('data:', data)
-
-        if (!err) setHasSubscribed(true)
-      }
-    )
   }
 
   return (
@@ -70,22 +40,6 @@ const Footer: React.FC<{}> = () => {
           </Text>
         </Box>
 
-        <Box basis="1/5" direction="column" margin={{ left: 'large' }}>
-          <FormField label="Sign up to our newsletter" margin={{ top: 'small', bottom: 'small' }}>
-            <TextInput
-              required
-              type="email"
-              value={email}
-              onChange={(event: any) => setEmail(event.currentTarget.value)}
-              placeholder="Your email address"
-              disabled={hasSubscribed}
-            />
-          </FormField>
-          <Box>
-            {!hasSubscribed && <Button type="submit" label="Subscribe" size="small" onClick={subscribeToNewsLetter} />}
-            {hasSubscribed && <Button type="submit" label="Subscribed!" size="small" disabled />}
-          </Box>
-        </Box>
         <Box basis={'1/5'} direction="row" gap={'80px'} margin={{ top: 'small', left: 'auto' }}>
           <Box>
             <Text> Learn more </Text>
