@@ -21,7 +21,7 @@ interface Props extends TransactionProps {
 }
 
 const LoanBorrow: React.FC<Props> = (props: Props) => {
-  const [borrowAmount, setBorrowAmount] = React.useState<string | undefined>(undefined)
+  const [borrowAmount, setBorrowAmount] = React.useState<string>('')
 
   React.useEffect(() => {
     props.loadPool && props.loadPool(props.tinlake)
@@ -30,8 +30,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const [status, , setTxId] = useTransactionState()
 
   const borrow = async () => {
-    if (!borrowAmount) return
-
+    if (!borrowAmount || error) return
     await props.ensureAuthed!()
 
     const valueToDecimal = new Decimal(baseToDisplay(borrowAmount, 18)).toFixed(2)
@@ -52,22 +51,43 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   }, [status])
 
   const ceilingSet = props.loan.principal.toString() !== '0'
-  const availableFunds = (props.pool && props.pool.data && props.pool.data.availableFunds) || '0'
+  const availableFunds = (props.pool && props.pool.data && props.pool.data.availableFunds.toString()) || '0'
   const borrowedAlready = new BN(props.loan.debt).isZero() === false || props.loan.status !== 'opened'
 
   const isBlockedState = props.pool?.data ? (props.pool?.data as PoolDataV3).epoch?.isBlockedState : false
 
   const [error, setError] = React.useState<string | undefined>(undefined)
-  const borrowEnabled = error === undefined && ceilingSet && !borrowedAlready && !isBlockedState
+  const borrowEnabled = ceilingSet && !borrowedAlready && !isBlockedState
+
+  React.useEffect(() => {
+    if (!borrowEnabled && borrowAmount === '') setBorrowAmount('0')
+    if (borrowAmount === '') {
+      if (props.loan.principal.lt(new BN(availableFunds))) {
+        setBorrowAmount(props.loan.principal.toString())
+        validate(props.loan.principal.toString())
+      } else {
+        setBorrowAmount(availableFunds)
+        validate(availableFunds)
+      }
+    }
+  }, [props.loan.principal])
+
+  React.useEffect(() => {
+    validate(borrowAmount)
+  }, [availableFunds])
 
   const onChange = (newValue: string) => {
     if (!borrowAmount || new BN(newValue).cmp(new BN(borrowAmount)) !== 0) {
       setBorrowAmount(newValue)
     }
 
-    if (new BN(newValue).gt(new BN(availableFunds))) {
+    validate(newValue)
+  }
+
+  const validate = (value: string) => {
+    if (new BN(value).gt(new BN(availableFunds))) {
       setError('Amount larger than available funds')
-    } else if (new BN(newValue).gt(new BN(props.loan.principal))) {
+    } else if (new BN(value).gt(new BN(props.loan.principal))) {
       setError('Amount larger than max financing amount')
     } else {
       setError(undefined)
@@ -80,12 +100,16 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
         <TokenInput
           token="DAI"
           label="Financing amount"
-          value={
-            borrowEnabled ? (borrowAmount === undefined ? props.loan.principal.toString() || '0' : borrowAmount) : '0'
-          }
+          value={borrowAmount}
           error={error}
+          maxValue={
+            new BN(availableFunds).gt(props.loan.principal)
+              ? props.loan.principal.toString()
+              : availableFunds.toString()
+          }
+          limitLabel={new BN(availableFunds).gt(props.loan.principal) ? 'Max financing amount' : 'Available funds'}
           onChange={(newValue: string) => onChange(newValue)}
-          disabled={!borrowEnabled || status === 'unconfirmed' || status === 'pending'}
+          disabled={error !== undefined || !borrowEnabled || status === 'unconfirmed' || status === 'pending'}
         />
       </Box>
       <Box align="start">
@@ -93,7 +117,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
           onClick={borrow}
           primary
           label="Finance Asset"
-          disabled={!borrowEnabled || status === 'unconfirmed' || status === 'pending'}
+          disabled={error !== undefined || !borrowEnabled || status === 'unconfirmed' || status === 'pending'}
         />
         {isBlockedState && (
           <Box margin={{ top: 'small' }}>
