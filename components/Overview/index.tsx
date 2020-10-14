@@ -120,25 +120,24 @@ class Overview extends React.Component<Props> {
 
             {(selectedPool.isUpcoming || !selectedPool.description) && (
               <div>
-                <h4>Asset Originator Details</h4>
-                <p>The following information was provided by the Asset Originator.</p>
+                <Heading level="4">Asset Originator Details</Heading>
+                {/* <p>The following information was provided by the Asset Originator.</p> */}
                 <a href={selectedPool.website} target="_blank">
                   <img src={selectedPool.logo} width="275px" />
                 </a>
 
                 <p>{selectedPool.text}</p>
 
-                <h4>Pool Details</h4>
                 <p>
                   {Object.keys(selectedPool.details).map((key: string) => (
                     <React.Fragment key={key}>
-                      <strong>{key}:</strong> {selectedPool.details[key]}
+                      <strong>{key}:&nbsp;</strong> {selectedPool.details[key]}
                       <br />
                     </React.Fragment>
                   ))}
                 </p>
 
-                {(selectedPool.website ||
+                {/* {(selectedPool.website ||
                   selectedPool.email ||
                   (selectedPool.additionalContactInfo && selectedPool.additionalContactInfo.length > 0)) && (
                   <p>
@@ -175,7 +174,12 @@ class Overview extends React.Component<Props> {
                       )
                     )}
                   </p>
-                )}
+                )} */}
+
+                <h4 style={{ marginBottom: '0' }}>Learn more about this asset originator</h4>
+                <a href="https://discourse.centrifuge.io/t/community-introduction-kickfurther/218?2" target="_blank">
+                  Join the discussion on Discourse
+                </a>
               </div>
             )}
           </Box>
