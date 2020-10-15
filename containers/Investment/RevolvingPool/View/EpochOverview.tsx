@@ -11,6 +11,7 @@ import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { SignIcon } from './styles'
 import BN from 'bn.js'
 import { secondsToHms } from '../../../../utils/time'
+import { LoadingValue } from '../../../../components/LoadingValue/index'
 
 interface Props extends TransactionProps {
   tinlake: ITinlakeV3
@@ -35,7 +36,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
 
   const disabled = status === 'unconfirmed' || status === 'pending'
 
-  const investmentCapacity = poolData ? poolData.maxReserve.sub(poolData.reserve) : new BN(0)
+  const investmentCapacity = poolData ? poolData.maxReserve.sub(poolData.reserve) : undefined
 
   const isAdmin = props.auth?.permissions?.canSetMinimumJuniorRatio
 
@@ -52,19 +53,27 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
           <TableBody>
             <TableRow>
               <TableCell scope="row">Epoch #</TableCell>
-              <TableCell style={{ textAlign: 'end' }}>{poolData?.epoch?.id || ''}</TableCell>
+              <TableCell style={{ textAlign: 'end' }}>
+                <LoadingValue done={poolData?.epoch?.id !== undefined}>{poolData?.epoch?.id || ''}</LoadingValue>
+              </TableCell>
             </TableRow>
             {isAdmin && (
               <TableRow>
                 <TableCell scope="row">Epoch state</TableCell>
-                <TableCell style={{ textAlign: 'end' }}>{poolData?.epoch?.state || ''}</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  <LoadingValue done={poolData?.epoch?.state !== undefined}>
+                    {poolData?.epoch?.state || ''}
+                  </LoadingValue>
+                </TableCell>
               </TableRow>
             )}
             {poolData?.epoch?.isBlockedState && (
               <TableRow>
                 <TableCell scope="row">Minimum time until next epoch starts</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  {secondsToHms((poolData?.epoch.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000)}
+                  <LoadingValue done={poolData?.epoch.minChallengePeriodEnd !== undefined}>
+                    {secondsToHms((poolData?.epoch.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000)}
+                  </LoadingValue>
                 </TableCell>
               </TableRow>
             )}
@@ -73,13 +82,17 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 <TableRow>
                   <TableCell scope="row">Minimum epoch duration</TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
-                    {secondsToHms(poolData?.epoch?.minimumEpochTime || 0)}
+                    <LoadingValue done={poolData?.epoch?.minimumEpochTime !== undefined}>
+                      {secondsToHms(poolData?.epoch?.minimumEpochTime || 0)}
+                    </LoadingValue>
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">Minimum time left in current epoch</TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
-                    {secondsToHms(poolData?.epoch?.minimumEpochTimeLeft || 0)}
+                    <LoadingValue done={poolData?.epoch?.minimumEpochTimeLeft !== undefined}>
+                      {secondsToHms(poolData?.epoch?.minimumEpochTimeLeft || 0)}
+                    </LoadingValue>
                   </TableCell>
                 </TableRow>
               </>
@@ -87,10 +100,18 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
             <TableRow>
               <TableCell scope="row">Total epoch investment capacity</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                {addThousandsSeparators(
-                  toPrecision(baseToDisplay(investmentCapacity.lt(new BN(0)) ? new BN(0) : investmentCapacity, 18), 2)
-                )}{' '}
-                DAI
+                <LoadingValue done={investmentCapacity !== undefined}>
+                  {addThousandsSeparators(
+                    toPrecision(
+                      baseToDisplay(
+                        (investmentCapacity || new BN(0)).lt(new BN(0)) ? new BN(0) : investmentCapacity || new BN(0),
+                        18
+                      ),
+                      2
+                    )
+                  )}{' '}
+                  DAI
+                </LoadingValue>
               </TableCell>
             </TableRow>
           </TableBody>
@@ -137,8 +158,12 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 </Box>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior?.pendingInvestments || '0', 18), 2))}{' '}
-                DAI
+                <LoadingValue done={poolData?.senior?.pendingInvestments !== undefined}>
+                  {addThousandsSeparators(
+                    toPrecision(baseToDisplay(poolData?.senior?.pendingInvestments || '0', 18), 2)
+                  )}{' '}
+                  DAI
+                </LoadingValue>
               </TableCell>
             </TableRow>
             <TableRow>
@@ -149,8 +174,12 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 </Box>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior?.pendingInvestments || '0', 18), 2))}{' '}
-                DAI
+                <LoadingValue done={poolData?.junior?.pendingInvestments !== undefined}>
+                  {addThousandsSeparators(
+                    toPrecision(baseToDisplay(poolData?.junior?.pendingInvestments || '0', 18), 2)
+                  )}{' '}
+                  DAI
+                </LoadingValue>
               </TableCell>
             </TableRow>
             <TableRow>
@@ -158,8 +187,10 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 <Box direction="row">Total Pending Investments</Box>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.totalPendingInvestments || '0', 18), 2))}{' '}
-                DAI
+                <LoadingValue done={poolData?.totalPendingInvestments !== undefined}>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.totalPendingInvestments || '0', 18), 2))}{' '}
+                  DAI
+                </LoadingValue>
               </TableCell>
             </TableRow>
           </TableBody>
@@ -176,8 +207,12 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 </Box>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior?.pendingRedemptions || '0', 18), 2))}{' '}
-                DROP
+                <LoadingValue done={poolData?.senior?.pendingRedemptions !== undefined}>
+                  {addThousandsSeparators(
+                    toPrecision(baseToDisplay(poolData?.senior?.pendingRedemptions || '0', 18), 2)
+                  )}{' '}
+                  DROP
+                </LoadingValue>
               </TableCell>
             </TableRow>
             <TableRow>
@@ -188,8 +223,12 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 </Box>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior?.pendingRedemptions || '0', 18), 2))}{' '}
-                TIN
+                <LoadingValue done={poolData?.junior?.pendingRedemptions !== undefined}>
+                  {addThousandsSeparators(
+                    toPrecision(baseToDisplay(poolData?.junior?.pendingRedemptions || '0', 18), 2)
+                  )}{' '}
+                  TIN
+                </LoadingValue>
               </TableCell>
             </TableRow>
             <TableRow>
@@ -197,8 +236,10 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 <Box direction="row">Estimated Total Pending Redemptions in DAI</Box>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.totalRedemptionsCurrency || '0', 18), 2))}{' '}
-                DAI
+                <LoadingValue done={poolData?.totalRedemptionsCurrency !== undefined}>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.totalRedemptionsCurrency || '0', 18), 2))}{' '}
+                  DAI
+                </LoadingValue>
               </TableCell>
             </TableRow>
           </TableBody>
