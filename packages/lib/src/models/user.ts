@@ -20,7 +20,7 @@ export interface IChainAccount {
     id: string;
     secret: string;
     ss_58_address: string;
-  }
+  };
 }
 
 export class User implements IUser {
@@ -36,34 +36,46 @@ export class User implements IUser {
   invited: boolean;
 }
 
+export class UserWithOrg extends User {
+  organizationName?: string;
+}
 
-export const canWriteToDoc = (user: { account: string } | null, doc?: Document): boolean => {
+
+export const canWriteToDoc = (
+  user: { account: string } | null,
+  doc?: Document,
+): boolean => {
   if (!user || !doc) return false;
   return accountHasDocAccess(user.account, DOCUMENT_ACCESS.WRITE, doc);
 };
 
-export const canReadDoc = (user: { account: string } | null, doc?: Document): boolean => {
+export const canReadDoc = (
+  user: { account: string } | null,
+  doc?: Document,
+): boolean => {
   if (!user || !doc) return false;
   return accountHasDocAccess(user.account, DOCUMENT_ACCESS.READ, doc);
 };
 
-export const accountHasDocAccess = (account: string, access: DOCUMENT_ACCESS, doc?: Document): boolean => {
+export const accountHasDocAccess = (
+  account: string,
+  access: DOCUMENT_ACCESS,
+  doc?: Document,
+): boolean => {
   return !!(
     doc &&
     doc.header &&
     doc.header[access] &&
     Array.isArray(doc.header[access]) &&
-    doc.header[access]!.find(
-      ac => ac.toLowerCase() === account.toLowerCase(),
-    )
+    doc.header[access]!.find(ac => ac.toLowerCase() === account.toLowerCase())
   );
 };
 
-
 export const canCreateDocuments = (user: User): boolean => {
   return (
-    user.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)
-    && user.schemas.length > 0);
+    user.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS) &&
+    user.schemas.length > 0
+  );
 };
 
 export const canTransferNft = (user: User, nft: CoreapiNFT): boolean => {
@@ -74,11 +86,12 @@ export const canTransferNft = (user: User, nft: CoreapiNFT): boolean => {
     console.log(e);
   }
   return false;
-
-
 };
 
-export const canSignFunding = (user: User | null, funding?: FundingAgreement): boolean => {
+export const canSignFunding = (
+  user: User | null,
+  funding?: FundingAgreement,
+): boolean => {
   if (!user || !funding || !funding.funder_id) return false;
   return String(funding.funder_id).toLowerCase() === user.account.toLowerCase();
 };

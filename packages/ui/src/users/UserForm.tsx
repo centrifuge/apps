@@ -1,32 +1,55 @@
 import React from 'react';
-import { Box, Button, FormField, Text, TextInput } from 'grommet';
-import { User } from '@centrifuge/gateway-lib/models/user';
+import { Box, Button, CheckBox, FormField, Text, TextInput } from 'grommet';
+import { User, UserWithOrg } from '@centrifuge/gateway-lib/models/user';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants';
 import { MultipleSelect } from '@centrifuge/axis-multiple-select';
 import { Schema } from '@centrifuge/gateway-lib/models/schema';
 import { mapSchemaNames } from '@centrifuge/gateway-lib/utils/schema-utils';
+import { Organization } from '@centrifuge/gateway-lib/models/organization';
+import { SearchSelect } from '@centrifuge/axis-search-select';
+import { Link } from 'react-router-dom';
+import routes from '../routes';
 
 type InviteProps = {
-  user: User,
-  schemas: Schema[],
+  user: UserWithOrg;
+  schemas: Schema[];
+  organizations: Organization[];
   onSubmit?: (user) => void;
   onDiscard?: () => void;
-}
+};
 
 export default class UserForm extends React.Component<InviteProps> {
-
-  state = { submitted: false };
+  state = { submitted: false, newOrg: false };
 
   onSubmit = (user: User) => {
     this.props.onSubmit && this.props.onSubmit(user);
   };
 
-
   render() {
+    const { user, schemas, organizations } = this.props;
+    const { submitted, newOrg } = this.state;
 
     const userValidation = Yup.object().shape({
+      organizationName:
+        newOrg &&
+        Yup.string()
+          .max(40, 'Please enter no more than 40 characters')
+          .required('This field is required')
+          .test({
+            name: 'test_org_name',
+            test: function(this, value) {
+              if (!value) return true;
+              const org = organizations.find(
+                o =>
+                  o.name?.trim().toLowerCase() === value.trim().toLowerCase(),
+              );
+              return !org;
+            },
+            message: 'Organization name exits',
+          }),
+      account: !newOrg && Yup.string().required('This field is required'),
       name: Yup.string()
         .max(40, 'Please enter no more than 40 characters')
         .required('This field is required'),
@@ -34,30 +57,26 @@ export default class UserForm extends React.Component<InviteProps> {
         .email('Please enter a valid email')
         .required('This field is required')
         .test({
-          name:'lowercase_string',
-          test: (function(this, value) {
-            return value === value.toLocaleLowerCase();
-          }),
+          name: 'lowercase_string',
+          test: function(this, value) {
+            return value && value === value.toLocaleLowerCase();
+          },
           message: 'Only lowercase letters',
         }),
-      permissions: Yup.array()
-        .required('This field is required'),
-      schemas: Yup.array()
-        .test({
-          name: 'test_schemas',
-          test: (function(this, value) {
-            if (this.parent.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)) {
-              return (value && value.length);
-            }
-            return true;
-          }),
-          message: 'This field is required',
-        }),
+      permissions: Yup.array().required('This field is required'),
+      schemas: Yup.array().test({
+        name: 'test_schemas',
+        test: function(this, value) {
+          if (
+            this.parent.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)
+          ) {
+            return value && value.length;
+          }
+          return true;
+        },
+        message: 'This field is required',
+      }),
     });
-
-    const { user, schemas } = this.props;
-
-    const { submitted } = this.state;
 
     const permissionOptions = [
       PERMISSIONS.CAN_MANAGE_USERS,
@@ -65,7 +84,6 @@ export default class UserForm extends React.Component<InviteProps> {
       PERMISSIONS.CAN_MANAGE_DOCUMENTS,
       PERMISSIONS.CAN_VIEW_DOCUMENTS,
     ];
-
 
     const schemaOptions = schemas.map(i => i.name);
 
@@ -81,111 +99,153 @@ export default class UserForm extends React.Component<InviteProps> {
             setSubmitting(true);
           }}
         >
-          {
-            ({
-               values,
-               errors,
-               handleChange,
-               handleSubmit,
-               setFieldValue,
-               dirty,
-             }) => (
-              <form
-                onSubmit={event => {
-                  this.setState({ submitted: true });
-                  handleSubmit(event);
-                }}
-              >
-                <Box gap="medium">
+          {({
+            values,
+            errors,
+            handleChange,
+            handleSubmit,
+            setFieldValue,
+            dirty,
+          }) => (
+            <form
+              onSubmit={event => {
+                this.setState({ submitted: true });
+                handleSubmit(event);
+              }}
+            >
+              <Box gap="medium">
+                {newOrg ? (
                   <FormField
-                    label="Name"
-                    error={errors.name}
+                    label="Organization name"
+                    error={errors.organizationName}
                   >
                     <TextInput
-                      name="name"
-                      value={values!.name}
+                      name="organizationName"
+                      value={values!.organizationName}
                       onChange={handleChange}
                     />
                   </FormField>
-                  <FormField
-                    label="Email"
-                    error={errors!.email}
-                  >
-                    <TextInput
-                      name="email"
-                      value={values!.email}
-                      onChange={handleChange}
+                ) : (
+                  <FormField label="Organization" error={errors.account}>
+                    <SearchSelect
+                      name="account"
+                      labelKey={org => {
+                        return org.name + ' / ' + org.account;
+                      }}
+                      searchPlaceholder="Search organizations"
+                      emptySearchMessage="No organizations found"
+                      valueKey={'account'}
+                      options={organizations}
+                      valueLabel={(() => {
+                        return values.account ? (
+                          <p>
+                            {values.organizationName + ' / ' + values.account}
+                          </p>
+                        ) : (
+                          undefined
+                        );
+                      })()}
+                      onChange={selected => {
+                        setFieldValue('account', selected.account);
+                        setFieldValue('organizationName', selected.name);
+                      }}
                     />
                   </FormField>
+                )}
 
-                  <Box margin={{ bottom: 'medium' }}>
-                    <FormField
-                      label="Permissions"
-                      error={errors!.permissions}
-                    >
-                      <MultipleSelect
-                        closeOnChange={false}
-                        value={values.permissions}
-                        options={permissionOptions}
-                        onChange={(selection) => {
-                          setFieldValue('permissions', selection);
-                          if (!selection.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)) {
-                            setFieldValue('schemas', []);
-                          }
-                        }}
-                      />
+                <CheckBox
+                  label={'Create new organization'}
+                  checked={newOrg}
+                  onChange={event => {
+                    setFieldValue('account', '');
+                    setFieldValue('organizationName', '');
+                    this.setState({ newOrg: event.target.checked });
+                  }}
+                />
 
-                    </FormField>
-                  </Box>
+                <FormField label="Name" error={errors.name}>
+                  <TextInput
+                    name="name"
+                    value={values!.name}
+                    onChange={handleChange}
+                  />
+                </FormField>
+                <FormField label="Email" error={errors!.email}>
+                  <TextInput
+                    name="email"
+                    value={values!.email}
+                    onChange={handleChange}
+                  />
+                </FormField>
 
-                  {
-                    values.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS) && <>
-                      {schemaOptions && schemaOptions.length > 0 ?
-                        <Box margin={{ bottom: 'medium' }}>
-                          <FormField
-                            label="Document schemas"
-                            error={errors!.schemas}
-                          >
-                            <MultipleSelect
-                              closeOnChange={false}
-                              labelKey={(item) => {
-                                return  item.label || item.name;
-                              }}
-                              valueKey={'name'}
-                              value={mapSchemaNames(values.schemas, schemas)}
-                              options={schemas}
-                              onChange={(selection) => {
-                                setFieldValue('schemas', selection.map(s => s.name));
-                              }}
-                            />
-
-                          </FormField>
-                        </Box>
-                        :
-                        <Text color={'status-warning'}>No schemas in the database. Please add schemas!</Text>
-                      }
-                    </>
-                  }
-
-                  <Box direction="row" justify={'end'} gap={'medium'}>
-                    <Button
-                      label="Discard"
-                      onClick={this.props.onDiscard}
+                <Box margin={{ bottom: 'medium' }}>
+                  <FormField label="Permissions" error={errors!.permissions}>
+                    <MultipleSelect
+                      closeOnChange={false}
+                      value={values.permissions}
+                      options={permissionOptions}
+                      onChange={selection => {
+                        setFieldValue('permissions', selection);
+                        if (
+                          !selection.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)
+                        ) {
+                          setFieldValue('schemas', []);
+                        }
+                      }}
                     />
-                    <Button
-                      disabled={!dirty}
-                      type="submit"
-                      primary
-                      label={user._id ? 'Update' : 'Create'}
-                    />
-                  </Box>
+                  </FormField>
                 </Box>
-              </form>
-            )
-          }
+
+                {values.permissions.includes(
+                  PERMISSIONS.CAN_MANAGE_DOCUMENTS,
+                ) && (
+                  <>
+                    {schemaOptions && schemaOptions.length > 0 ? (
+                      <Box margin={{ bottom: 'medium' }}>
+                        <FormField
+                          label="Document schemas"
+                          error={errors!.schemas}
+                        >
+                          <MultipleSelect
+                            closeOnChange={false}
+                            labelKey={item => {
+                              return item.label || item.name;
+                            }}
+                            valueKey={'name'}
+                            value={mapSchemaNames(values.schemas, schemas)}
+                            options={schemas}
+                            onChange={selection => {
+                              setFieldValue(
+                                'schemas',
+                                selection.map(s => s.name),
+                              );
+                            }}
+                          />
+                        </FormField>
+                      </Box>
+                    ) : (
+                      <Text color={'status-warning'}>
+                        No schemas in the database. Please{' '}
+                        <Link to={routes.schemas.index}>add schemas</Link>!
+                      </Text>
+                    )}
+                  </>
+                )}
+
+                <Box direction="row" justify={'end'} gap={'medium'}>
+                  <Button label="Discard" onClick={this.props.onDiscard} />
+                  <Button
+                    disabled={!dirty}
+                    type="submit"
+                    primary
+                    label={user._id ? 'Update' : 'Create'}
+                  />
+                </Box>
+              </Box>
+            </form>
+          )}
         </Formik>
       </Box>
     );
   }
 }
-

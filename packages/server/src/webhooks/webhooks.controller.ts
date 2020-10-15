@@ -10,21 +10,20 @@ export enum DocumentTypes {
   INVOICE = 'http://github.com/centrifuge/centrifuge-protobufs/invoice/#invoice.InvoiceData',
   PURCHASE_ORDERS = 'http://github.com/centrifuge/centrifuge-protobufs/purchaseorder/#purchaseorder.PurchaseOrderData',
   GENERIC_DOCUMENT = 'http://github.com/centrifuge/centrifuge-protobufs/generic/#generic.Generic',
-};
+}
 
 export enum EventTypes {
   DOCUMENT = 1,
   JOB = 1,
   ERROR = 0,
-};
+}
 
 @Controller(ROUTES.WEBHOOKS)
 export class WebhooksController {
   constructor(
     private readonly centrifugeService: CentrifugeService,
     private readonly databaseService: DatabaseService,
-  ) {
-  }
+  ) {}
 
   /**
    * Webhook endpoint for processing notifications from the centrifuge node.
@@ -38,8 +37,12 @@ export class WebhooksController {
     try {
       if (notification.event_type === EventTypes.DOCUMENT) {
         // Search for the user in the database
-        const user = await this.databaseService.users
-            .findOne({ $or: [{ account: notification.to_id!.toLowerCase() }, { account: notification.to_id }] });
+        const user = await this.databaseService.users.findOne({
+          $or: [
+            { account: notification.to_id!.toLowerCase() },
+            { account: notification.to_id },
+          ],
+        });
         if (!user) {
           throw new Error('User is not present in database');
         }
@@ -52,22 +55,27 @@ export class WebhooksController {
 
           const unflattenedAttributes = unflatten(result.attributes);
           await this.databaseService.documents.update(
-              { 'header.document_id': notification.document_id, 'ownerId': user._id },
+            {
+              'header.document_id': notification.document_id,
+               organizationId: user.account,
+            },
             {
               $set: {
                 ownerId: user._id,
+                organizationId: user.account,
                 header: result.header,
                 data: result.data,
                 attributes: unflattenedAttributes,
                 scheme: result.scheme,
                 fromId: notification.from_id,
-
               },
             },
             { upsert: true },
           );
         } else {
-          throw new Error(`Document type ${notification.document_type} not supported`);
+          throw new Error(
+            `Document type ${notification.document_type} not supported`,
+          );
         }
       }
     } catch (e) {

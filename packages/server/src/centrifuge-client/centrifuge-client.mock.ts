@@ -1,3 +1,8 @@
+export let testingHelpers = {
+  currentGeneratedAccount: null
+}
+
+
 export class MockCentrifugeService {
   invoices = {
     getInvoice: jest.fn((auth, document_id) => {
@@ -198,9 +203,14 @@ export class MockCentrifugeService {
   nftBeta = this.nft;
 
   accounts = {
-    generateAccount: jest.fn(() => ({
-      identity_id: 'generated_identity_id',
-    })),
+    generateAccount: jest.fn(() => {
+      testingHelpers.currentGeneratedAccount = '0x' +(new Date()).getTime()
+      return  (
+
+        {
+          identity_id: testingHelpers.currentGeneratedAccount,
+        })
+    })
   };
   documents = {
     getDocument: jest.fn((account_id, document_id) => {

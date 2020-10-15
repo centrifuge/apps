@@ -58,10 +58,11 @@ describe('WebhooksController', () => {
       );
 
       expect(documentSpies.spyUpdate).toHaveBeenCalledWith(
-        { 'header.document_id': document_id, 'ownerId': 'id01' },
+        { 'header.document_id': document_id, organizationId: user.account },
         {
           $set: {
-            ownerId: 'id01',
+            ownerId: user._id,
+            organizationId: user.account,
             header: {
               document_id,
               nfts: [{ owner: 'owner', token_id: 'token_id' }],

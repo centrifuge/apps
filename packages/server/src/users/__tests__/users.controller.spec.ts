@@ -1,16 +1,15 @@
 import { UsersController } from '../users.controller';
 import { databaseServiceProvider } from '../../database/database.providers';
-import { User } from '../../../../lib/models/user';
+import { User, UserWithOrg } from '../../../../lib/models/user';
 import config from '../../config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SessionGuard } from '../../auth/SessionGuard';
 import { DatabaseService } from '../../database/database.service';
 import { PERMISSIONS } from '../../../../lib/utils/constants';
 import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module';
+import { testingHelpers } from '../../centrifuge-client/centrifuge-client.mock';
 
 describe('Users controller', () => {
-  const userAccount = 'generated_identity_id';
-
   let invitedUser: User;
   let enabledUser: User;
   let userModule: TestingModule;
@@ -112,21 +111,62 @@ describe('Users controller', () => {
         );
       });
       it('should add user to the database with invite true and enabled false', async () => {
+        const user: UserWithOrg = {
+          ...new User(),
+          name: 'new_user',
+          password: 'password',
+          account: '0x4838394',
+          email: 'test1' + Math.random(),
+        };
+        try {
+          const invited = await usersController.invite(user);
+          expect(invited).toMatchObject({
+            ...user,
+            password: undefined,
+            invited: true,
+            enabled: false,
+          });
+        } catch (e) {
+          console.log(e);
+        }
+      });
+
+      it(' Create create a new user and org', async () => {
+        const databaseService = userModule.get<DatabaseService>(
+          DatabaseService,
+        );
+
+        const organizationName = 'Some org';
         const user: User = {
           ...new User(),
           name: 'new_user',
           password: 'password',
           email: 'test1' + Math.random(),
         };
+        try {
+          const invited = await usersController.invite({
+            ...user,
+            organizationName,
+          });
+          expect(invited).toMatchObject({
+            ...user,
+            password: undefined,
+            invited: true,
+            enabled: false,
+            account: testingHelpers.currentGeneratedAccount,
+          });
 
-        const invited = await usersController.invite(user);
-        expect(invited).toMatchObject({
-          ...user,
-          password: undefined,
-          invited: true,
-          enabled: false,
-          account: userAccount,
-        });
+          const org = await databaseService.organizations.findOne({
+            account: testingHelpers.currentGeneratedAccount
+          });
+
+          expect(org).toMatchObject({
+            name: organizationName,
+            account: testingHelpers.currentGeneratedAccount,
+          });
+        } catch (e) {
+          console.log(e);
+        }
       });
     });
 
@@ -250,12 +290,14 @@ describe('Users controller', () => {
       });
 
       it('should create the user if the username is not taken', async () => {
-        const newUser = {
+        const newUser: UserWithOrg = {
+          ...new UserWithOrg(),
           name: 'new_user',
           email: 'new_email',
           enabled: false,
           invited: false,
           password: 'SomePassW0rd!',
+          account: '0x39282833',
           permissions: [],
         };
 

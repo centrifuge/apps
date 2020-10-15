@@ -1,12 +1,15 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {Document} from '../../../../lib/models/document';
-import {SessionGuard} from '../../auth/SessionGuard';
-import {databaseServiceProvider} from '../../database/database.providers';
-import {DatabaseService} from '../../database/database.service';
-import {DocumentsController} from '../documents.controller';
-import {centrifugeServiceProvider} from '../../centrifuge-client/centrifuge.module';
-import {CentrifugeService} from '../../centrifuge-client/centrifuge.service';
-import { V2CreateDocumentRequest, V2SignedAttributeRequest } from '@centrifuge/gateway-lib/centrifuge-node-client';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Document } from '../../../../lib/models/document';
+import { SessionGuard } from '../../auth/SessionGuard';
+import { databaseServiceProvider } from '../../database/database.providers';
+import { DatabaseService } from '../../database/database.service';
+import { DocumentsController } from '../documents.controller';
+import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module';
+import { CentrifugeService } from '../../centrifuge-client/centrifuge.service';
+import {
+  V2CreateDocumentRequest,
+  V2SignedAttributeRequest,
+} from '@centrifuge/gateway-lib/centrifuge-node-client';
 import TypeEnum = V2SignedAttributeRequest.TypeEnum;
 import { RegistriesErrors } from '@centrifuge/gateway-lib/models/schema';
 
@@ -54,6 +57,8 @@ describe('DocumentsController', () => {
     },
   };
 
+  const user = { _id: 'user_id', account: 'user_account' };
+
   const databaseSpies: any = {};
   const centApiSpies: any = {};
   let insertedDocument: any = {};
@@ -68,23 +73,37 @@ describe('DocumentsController', () => {
       ],
     }).compile();
 
-    const databaseService = documentsModule.get<DatabaseService>(DatabaseService);
+    const databaseService = documentsModule.get<DatabaseService>(
+      DatabaseService,
+    );
     insertedDocument = await databaseService.documents.insert({
       header: {
         document_id: '0x39393939',
       },
       ...documentToInsert,
-      ownerId: 'user_id',
+      organizationId: user.account,
+      ownerId: user._id,
     });
 
     databaseSpies.spyFindOne = jest.spyOn(databaseService.documents, 'findOne');
     databaseSpies.spyInsert = jest.spyOn(databaseService.documents, 'insert');
     databaseSpies.spyUpdate = jest.spyOn(databaseService.documents, 'update');
-    databaseSpies.spyGetAll = jest.spyOn(databaseService.documents, 'getCursor');
-    databaseSpies.spyUpdateById = jest.spyOn(databaseService.documents, 'updateById');
+    databaseSpies.spyGetAll = jest.spyOn(
+      databaseService.documents,
+      'getCursor',
+    );
+    databaseSpies.spyUpdateById = jest.spyOn(
+      databaseService.documents,
+      'updateById',
+    );
 
-    const centrifugeService = documentsModule.get<CentrifugeService>(CentrifugeService);
-    centApiSpies.spyGetDocument = jest.spyOn(centrifugeService.documents, 'getDocument');
+    const centrifugeService = documentsModule.get<CentrifugeService>(
+      CentrifugeService,
+    );
+    centApiSpies.spyGetDocument = jest.spyOn(
+      centrifugeService.documents,
+      'getDocument',
+    );
   });
 
   describe('create', () => {
@@ -96,10 +115,8 @@ describe('DocumentsController', () => {
       const payload: V2CreateDocumentRequest = {
         ...documentToCreate,
       };
-      const result = await documentsController.create(
-        { user: { _id: 'user_id', account: 'user_account' } },
-        payload,
-      );
+
+      const result = await documentsController.create({ user }, payload);
 
       expect(result).toMatchObject({
         ...documentToCreate,
@@ -113,7 +130,8 @@ describe('DocumentsController', () => {
             value: 'user_account',
           },
         },
-        ownerId: 'user_id',
+        ownerId: user._id,
+        organizationId: user.account,
       });
 
       expect(databaseSpies.spyInsert).toHaveBeenCalledTimes(1);
@@ -121,7 +139,6 @@ describe('DocumentsController', () => {
   });
 
   describe('get documents list', () => {
-
     it('should get the list of documents from the database', async () => {
       const documentsController = documentsModule.get<DocumentsController>(
         DocumentsController,
@@ -130,21 +147,14 @@ describe('DocumentsController', () => {
       const payload: V2CreateDocumentRequest = {
         ...documentToCreate,
       };
-
-      await documentsController.create(
-        { user: { _id: 'user_id' } },
-        payload,
-      );
+      await documentsController.create({ user }, payload);
 
       payload.attributes = {};
 
-      await documentsController.create(
-        { user: { _id: 'user_id' } },
-        payload,
-      );
+      await documentsController.create({ user }, payload);
 
       const result = await documentsController.getList({
-        user: { _id: 'user_id' },
+        user,
       });
       expect(result.length).toEqual(3);
       expect(databaseSpies.spyGetAll).toHaveBeenCalledTimes(1);
@@ -175,18 +185,15 @@ describe('DocumentsController', () => {
       expect(databaseSpies.spyUpdate).toHaveBeenCalledWith(
         { _id: insertedDocument._id },
         {
-          $set:
-            {
-              attributes:
-                {
-                  animal_type:
-                    { type: 'string', value: 'iguana' },
-                  diet: { type: 'string', value: 'insects' },
-                  schema: { type: 'string', value: 'zoology' },
-                },
-
-              header: { job_id: 'some_job_id' },
+          $set: {
+            attributes: {
+              animal_type: { type: 'string', value: 'iguana' },
+              diet: { type: 'string', value: 'insects' },
+              schema: { type: 'string', value: 'zoology' },
             },
+
+            header: { job_id: 'some_job_id' },
+          },
         },
         { returnUpdatedDocs: true, upsert: false },
       );
@@ -209,9 +216,11 @@ describe('DocumentsController', () => {
           { id: 'someID' },
           { user: { _id: 'user_id', account: '0x4441122' } },
           { ...updatedDocument },
-        )
+        );
       } catch (err) {
-        expect(err.message.message).toMatch('Can not find document #someID in the database');
+        expect(err.message.message).toMatch(
+          'Can not find document #someID in the database',
+        );
         expect(err.status).toEqual(404);
       }
     });
@@ -232,7 +241,6 @@ describe('DocumentsController', () => {
         '0x4441',
         insertedDocument.header.document_id,
       );
-
     });
   });
 });

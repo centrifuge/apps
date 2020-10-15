@@ -11,6 +11,7 @@ import { AllExceptionFilter } from './exceptions/all-exception.filter';
 import { SchemasModule } from './schemas/schemas.module';
 import { DocumentsModule } from './documents/documents.module';
 import { NftsModule } from './nfts/nfts.module';
+import { OrganizationsModule } from './organizations/organizations.module';
 
 @Module({
   controllers: [AppController],
@@ -30,7 +31,7 @@ import { NftsModule } from './nfts/nfts.module';
     SchemasModule,
     DocumentsModule,
     NftsModule,
+    OrganizationsModule,
   ],
 })
-export class AppModule {
-}
+export class AppModule {}

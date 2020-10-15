@@ -30,7 +30,7 @@
     "url": "https://github.com/centrifuge/gateway.git)/issues"
   },
   "dependencies": {
-    "@centrifuge/gateway-lib": "file:../lib",
+    "@centrifuge/gateway-lib": "*",
     "@nestjs/common": "6.3.0",
     "@nestjs/core": "6.3.0",
     "@nestjs/passport": "6.2.0",

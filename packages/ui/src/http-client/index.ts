@@ -8,6 +8,7 @@ import { TransferDetailsRequest } from '@centrifuge/gateway-lib/models/transfer-
 import { Schema } from '@centrifuge/gateway-lib/models/schema';
 import { Document } from '@centrifuge/gateway-lib/models/document';
 import { MintNftRequest, TransferNftRequest } from '@centrifuge/gateway-lib/models/nfts';
+import { Organization } from '@centrifuge/gateway-lib/models/organization';
 
 const instance = axios.create();
 
@@ -53,5 +54,12 @@ export const httpClient = {
   nfts: {
     mint: async (payload: MintNftRequest) => instance.post(`${ROUTES.NFTS}/mint`, payload),
     transfer: async (payload: TransferNftRequest) => instance.post(`${ROUTES.NFTS}/transfer`, payload),
+  },
+
+  organizations: {
+    create: async (organization: Organization) => instance.post(ROUTES.ORGANIZATIONS, organization),
+    list: async () => instance.get(ROUTES.ORGANIZATIONS),
+    update: async (organization: Organization) =>
+      instance.put(`${ROUTES.ORGANIZATIONS}/${organization._id}`,organization),
   },
 };

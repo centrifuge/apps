@@ -7,6 +7,7 @@ import { Schema } from '@centrifuge/gateway-lib/models/schema';
 import config from '../config';
 import { DatabaseService } from './database.service';
 import { DocumentRequest } from '@centrifuge/gateway-lib/models/document';
+import { Organization } from '@centrifuge/gateway-lib/models/organization';
 
 // TODO refactor this in mutiple providers,services
 
@@ -14,10 +15,43 @@ import { DocumentRequest } from '@centrifuge/gateway-lib/models/document';
  * Initialize the database and the separate collections.
  */
 const initializeDatabase = async (inMemoryOnly: boolean) => {
+  const usersRepository = new DatabaseRepository<User>({
+    filename: `${config.dbPath}/usersDb`,
+    inMemoryOnly,
+  });
 
-  const usersRepository = new DatabaseRepository<User>(
-    { filename: `${config.dbPath}/usersDb`, inMemoryOnly },
-  );
+  await usersRepository.ensureIndex({
+    fieldName: 'email',
+    unique: true,
+  });
+
+  const organizationRepository = new DatabaseRepository<Organization>({
+    filename: `${config.dbPath}/organizationsDb`,
+    inMemoryOnly,
+  });
+
+  await organizationRepository.ensureIndex({
+    fieldName: 'account',
+    unique: true,
+  });
+
+  const contactsRepository = new DatabaseRepository<Contact>({
+    filename: `${config.dbPath}/contactsDb`,
+    inMemoryOnly,
+  });
+
+  const schemasRepository = new DatabaseRepository<Schema>({
+    filename: `${config.dbPath}/schemasDb`,
+    inMemoryOnly,
+  });
+
+  const documentsRepository = new DatabaseRepository<DocumentRequest>({
+    filename: `${config.dbPath}/documentsDb`,
+    inMemoryOnly,
+  });
+
+  // Add default data
+
   const admin: User = {
     name: config.admin.name,
     password: await promisify(bcrypt.hash)(config.admin.password, 10),
@@ -30,31 +64,25 @@ const initializeDatabase = async (inMemoryOnly: boolean) => {
     permissions: config.admin.permissions,
   };
 
-  const userExists = await usersRepository.findOne({
-    email: admin.email,
-  });
+  const centrifugeOrg = new Organization('Centrifuge', admin.account);
 
-  if (!userExists) {
+  try {
     await usersRepository.insert(admin);
+  } catch (e) {
+    // The user is already in the database}
   }
 
-  const contactsRepository = new DatabaseRepository<Contact>(
-    { filename: `${config.dbPath}/contactsDb`, inMemoryOnly },
-  );
-
-  const schemasRepository = new DatabaseRepository<Schema>(
-    { filename: `${config.dbPath}/schemasDb`, inMemoryOnly },
-  );
-
-  const documentsRepository = new DatabaseRepository<DocumentRequest>(
-      { filename: `${config.dbPath}/documentsDb`, inMemoryOnly },
-  );
-
+  try {
+    await organizationRepository.insert(centrifugeOrg);
+  } catch (e) {
+    // The organization is already in the database
+  }
   return {
     users: usersRepository,
     contacts: contactsRepository,
     schemas: schemasRepository,
     documents: documentsRepository,
+    organizations: organizationRepository,
   };
 };
 
@@ -66,8 +94,8 @@ let initializeDatabasePromise;
 export const databaseServiceProvider = {
   provide: DatabaseService,
   useFactory: async (): Promise<DatabaseService> => {
-
     let testingMode: boolean;
+
     if (process.env.NODE_ENV === 'test') {
       testingMode = true;
     }

@@ -23,6 +23,7 @@ export const ROUTES = Object.freeze({
   USERS: userRoutes,
   FUNDING: fundingRoutes,
   CONTACTS: `${API_BASE}/contacts`,
+  ORGANIZATIONS: `${API_BASE}/organizations`,
   WEBHOOKS: `${API_BASE}/webhooks`,
   PURCHASE_ORDERS: `${API_BASE}/purchase_orders`,
   TRANSFER_DETAILS: `${API_BASE}/transfer_details`,
