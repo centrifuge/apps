@@ -28,9 +28,9 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolDataV3 | undefined
 
-  const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : 0
-  const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : 0
-  const maxJuniorRatio = poolData ? parseRatio(poolData.maxJuniorRatio) : 0
+  const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
+  const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
+  const maxJuniorRatio = poolData ? parseRatio(poolData.maxJuniorRatio) : undefined
   const investmentCapacity = poolData ? poolData.maxReserve.sub(poolData.reserve) : new BN(0)
 
   const dispatch = useDispatch()
@@ -80,36 +80,34 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                     </TableBody>
                   </Table> */}
 
-                {poolData && (
-                  <Table margin={{ bottom: 'small' }}>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell scope="row">Current Reserve</TableCell>
-                        <TableCell style={{ textAlign: 'end' }}>
-                          {addThousandsSeparators(toPrecision(baseToDisplay(poolData.reserve, 18), 2))} DAI
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell scope="row">Maximum Reserve Amount</TableCell>
-                        <TableCell style={{ textAlign: 'end' }}>
-                          {addThousandsSeparators(toPrecision(baseToDisplay(poolData.maxReserve, 18), 2))} DAI
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell scope="row">Total epoch investment capacity</TableCell>
-                        <TableCell style={{ textAlign: 'end' }}>
-                          {addThousandsSeparators(
-                            toPrecision(
-                              baseToDisplay(investmentCapacity.lt(new BN(0)) ? new BN(0) : investmentCapacity, 18),
-                              2
-                            )
-                          )}{' '}
-                          DAI
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                )}
+                <Table margin={{ bottom: 'small' }}>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell scope="row">Current Reserve</TableCell>
+                      <TableCell style={{ textAlign: 'end' }}>
+                        {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 2))} DAI
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell scope="row">Maximum Reserve Amount</TableCell>
+                      <TableCell style={{ textAlign: 'end' }}>
+                        {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 2))} DAI
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell scope="row">Total epoch investment capacity</TableCell>
+                      <TableCell style={{ textAlign: 'end' }}>
+                        {addThousandsSeparators(
+                          toPrecision(
+                            baseToDisplay(investmentCapacity.lt(new BN(0)) ? new BN(0) : investmentCapacity, 18),
+                            2
+                          )
+                        )}{' '}
+                        DAI
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
 
                 <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
                   <Button label="Set max reserve" onClick={() => setShowMaxReserveForm(true)} disabled={!poolData} />
@@ -129,50 +127,56 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
             </Heading>
           </Box>
 
-          {poolData && poolData.epoch && (
-            <Table margin={{ bottom: 'medium' }}>
-              <TableBody>
-                <TableRow>
-                  <TableCell scope="row">Epoch #</TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>{poolData.epoch.id}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell scope="row">Minimum epoch duration</TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>{secondsToHms(poolData.epoch.minimumEpochTime)}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell scope="row">Minimum time left in current epoch</TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>
-                    {secondsToHms(poolData.epoch.minimumEpochTimeLeft)}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell scope="row">
-                    <Box direction="row">
-                      <SignIcon src={`/static/plus.svg`} />
-                      Total Pending Investments
-                    </Box>
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>
-                    {' '}
-                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData.totalPendingInvestments, 18), 2))} DAI
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell scope="row">
-                    <Box direction="row">
-                      <SignIcon src={`/static/min.svg`} />
-                      Estimated Total Pending Redemptions
-                    </Box>
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>
-                    {' '}
-                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData.totalRedemptionsCurrency, 18), 2))} DAI
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          )}
+          <Table margin={{ bottom: 'medium' }}>
+            <TableBody>
+              <TableRow>
+                <TableCell scope="row">Epoch #</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>{poolData?.epoch?.id || ''}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell scope="row">Minimum epoch duration</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  {secondsToHms(poolData?.epoch?.minimumEpochTime || 0)}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell scope="row">Minimum time left in current epoch</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  {secondsToHms(poolData?.epoch?.minimumEpochTimeLeft || 0)}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell scope="row">
+                  <Box direction="row">
+                    <SignIcon src={`/static/plus.svg`} />
+                    Total Pending Investments
+                  </Box>
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  {' '}
+                  {addThousandsSeparators(
+                    toPrecision(baseToDisplay(poolData?.totalPendingInvestments || '0', 18), 2)
+                  )}{' '}
+                  DAI
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell scope="row">
+                  <Box direction="row">
+                    <SignIcon src={`/static/min.svg`} />
+                    Estimated Total Pending Redemptions
+                  </Box>
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  {' '}
+                  {addThousandsSeparators(
+                    toPrecision(baseToDisplay(poolData?.totalRedemptionsCurrency || '0', 18), 2)
+                  )}{' '}
+                  DAI
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
 
           <Box margin={{ top: 'small', bottom: 'large' }}>
             <Heading level="5" margin={{ top: 'none', bottom: '28px', left: 'auto', right: 'auto' }}>

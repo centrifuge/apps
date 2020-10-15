@@ -16,6 +16,7 @@ import {
   DividerTop,
   DividerBottom,
   DividerInner,
+  Sidenote,
 } from './styles'
 import BN from 'bn.js'
 
@@ -41,7 +42,7 @@ const PoolOverview: React.FC<Props> = () => {
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : 0
   const maxJuniorRatio = poolData ? parseRatio(poolData.maxJuniorRatio) : 0
 
-  return poolData ? (
+  return (
     <Box direction="row" justify="between">
       <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
         <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
@@ -58,21 +59,18 @@ const PoolOverview: React.FC<Props> = () => {
             <TableRow>
               <TableCell scope="row">Current NAV</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData.netAssetValue, 18), 2))} DAI
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell scope="row">Current Reserve</TableCell>
-              <TableCell style={{ textAlign: 'end' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData.reserve, 18), 2))} DAI
+                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 2))} DAI
               </TableCell>
             </TableRow>
             <TableRow>
               <TableCell scope="row" border={{ color: 'transparent' }}>
-                Maximum Reserve Amount
+                Current Reserve
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData.maxReserve, 18), 2))} DAI
+                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 2))} DAI
+                <Sidenote>
+                  Max: {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 2))} DAI
+                </Sidenote>
               </TableCell>
             </TableRow>
           </TableBody>
@@ -86,7 +84,7 @@ const PoolOverview: React.FC<Props> = () => {
             <TableRow>
               <TableCell scope="row">Outstanding Volume</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData.outstandingVolume, 18), 2))} DAI
+                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.outstandingVolume || '0', 18), 2))} DAI
               </TableCell>
             </TableRow>
             <TableRow>
@@ -124,11 +122,11 @@ const PoolOverview: React.FC<Props> = () => {
                 {dropTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(dropTotalValue, 27 + 18), 2))} DAI
               </Heading>
               <span>
-                {poolData.senior &&
-                  addThousandsSeparators(toPrecision(baseToDisplay(poolData.senior!.totalSupply, 18), 2))}{' '}
+                {poolData?.senior &&
+                  addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior!.totalSupply || '0', 18), 2))}{' '}
                 Token supply @{' '}
-                {poolData.senior &&
-                  addThousandsSeparators(toPrecision(baseToDisplay(poolData.senior!.tokenPrice, 27), 2))}{' '}
+                {poolData?.senior &&
+                  addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior!.tokenPrice || '0', 27), 2))}{' '}
                 DAI
               </span>
             </Box>
@@ -163,15 +161,16 @@ const PoolOverview: React.FC<Props> = () => {
                 {tinTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 2))} DAI
               </Heading>
               <span>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData.junior.totalSupply, 18), 2))} Token supply @{' '}
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData.junior.tokenPrice, 27), 2))} DAI
+                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior.totalSupply || '0', 18), 2))} Token
+                supply @ {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior.tokenPrice || '0', 27), 2))}{' '}
+                DAI
               </span>
             </Box>
           </Box>
         </Box>
       </Box>
     </Box>
-  ) : null
+  )
 }
 
 export default PoolOverview

@@ -49,7 +49,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
       </ExplainerCard>
 
       <Box direction="row" justify="between" gap="medium">
-        {<EpochOverview tinlake={props.tinlake} />}
+        <EpochOverview tinlake={props.tinlake} />
 
         <Box>
           <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="senior" />
