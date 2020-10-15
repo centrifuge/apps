@@ -93,7 +93,7 @@ export const Nfts: FunctionComponent<Props> = (props) => {
   };
 
   const assembleDeepLink = (tokenId: string, registry: string, tinlakePool: string,) => {
-    const address = `${tinlakePool}/loans/issue?tokenId=${tokenId}&registry=${registry}`
+    const address = `${tinlakePool}/assets/issue?tokenId=${tokenId}&registry=${registry}`
 
     return <Anchor
         label={'Open Loan'}
