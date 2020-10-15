@@ -22,6 +22,11 @@ export const TokenLogo = styled.img`
   top: -2px;
 `
 
+export const Sidenote = styled.div`
+  color: #888;
+  font-size: 12px;
+`
+
 export const SignIcon = styled.img`
   vertical-align: middle;
   margin: 0 8px 0 0;

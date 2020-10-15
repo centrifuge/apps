@@ -8,6 +8,7 @@ import BN from 'bn.js'
 import { useDispatch, useSelector } from 'react-redux'
 import { loadPool, PoolState, PoolDataV3 } from '../../../../ducks/pool'
 import { secondsToHms } from '../../../../utils/time'
+import { LoadingValue } from '../../../../components/LoadingValue/index'
 
 import InvestCard from './InvestCard'
 import RedeemCard from './RedeemCard'
@@ -38,12 +39,15 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   const [isInMemberlist, setIsInMemberlist] = React.useState<boolean | undefined>(undefined)
 
-  const [balance, setBalance] = React.useState('0')
-  const [tokenPrice, setTokenPrice] = React.useState('0')
-  const value = new BN(balance)
-    .mul(new BN(tokenPrice))
-    .div(new BN(10).pow(new BN(27)))
-    .toString()
+  const [balance, setBalance] = React.useState<string | undefined>(undefined)
+  const [tokenPrice, setTokenPrice] = React.useState<string | undefined>(undefined)
+  const value =
+    balance && tokenPrice
+      ? new BN(balance)
+          .mul(new BN(tokenPrice))
+          .div(new BN(10).pow(new BN(27)))
+          .toString()
+      : undefined
 
   const [disbursements, setDisbursements] = React.useState<any>(undefined)
   const [hasPendingOrder, setHasPendingOrder] = React.useState(false)
@@ -54,6 +58,10 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   // V3 TODO: this should probably move to actions and expose a single TrancheData object (or to a duck?)
   const updateTrancheData = async () => {
     dispatch(loadPool(props.tinlake))
+
+    const tokenPrice =
+      props.tranche === 'senior' ? await props.tinlake.getTokenPriceSenior() : await props.tinlake.getTokenPriceJunior()
+    setTokenPrice(tokenPrice.toString())
 
     if (address) {
       const isInMemberlist =
@@ -68,12 +76,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           : await props.tinlake.getJuniorTokenBalance(address)
       setBalance(balance.toString())
 
-      const tokenPrice =
-        props.tranche === 'senior'
-          ? await props.tinlake.getTokenPriceSenior()
-          : await props.tinlake.getTokenPriceJunior()
-      setTokenPrice(tokenPrice.toString())
-
       const disbursements =
         props.tranche === 'senior'
           ? await props.tinlake.calcSeniorDisburse(address)
@@ -81,6 +83,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       setDisbursements(disbursements)
       setHasPendingOrder(!disbursements.remainingSupplyCurrency.add(disbursements.remainingRedeemToken).isZero())
       setHasPendingCollection(!disbursements.payoutCurrencyAmount.add(disbursements.payoutTokenAmount).isZero())
+    } else {
+      setIsInMemberlist(false)
+      setBalance('0')
     }
   }
 
@@ -127,7 +132,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           {token} Balance
         </Heading>
         <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-          {addThousandsSeparators(toPrecision(baseToDisplay(balance, 18), 2))}
+          <LoadingValue done={balance !== undefined} height={24}>
+            {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 2))}
+          </LoadingValue>
         </Heading>
       </Box>
 
@@ -136,7 +143,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           <TableRow>
             <TableCell scope="row">Current Price</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(tokenPrice, 27), 2))}
+              <LoadingValue done={tokenPrice !== undefined}>
+                {addThousandsSeparators(toPrecision(baseToDisplay(tokenPrice || '0', 27), 2))}
+              </LoadingValue>
             </TableCell>
           </TableRow>
           <TableRow>
@@ -144,7 +153,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               Your {token} Value
             </TableCell>
             <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(value, 18), 2))} DAI
+              <LoadingValue done={value !== undefined}>
+                {addThousandsSeparators(toPrecision(baseToDisplay(value || '0', 18), 2))} DAI
+              </LoadingValue>
             </TableCell>
           </TableRow>
         </TableBody>
@@ -194,7 +205,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               tinlake={props.tinlake}
               setCard={setCard}
               disbursements={disbursements}
-              tokenPrice={tokenPrice}
+              tokenPrice={tokenPrice || '0'}
               updateTrancheData={updateTrancheData}
             />
           )}
@@ -203,7 +214,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               {...props}
               setCard={setCard}
               disbursements={disbursements}
-              tokenPrice={tokenPrice}
+              tokenPrice={tokenPrice || '0'}
               updateTrancheData={updateTrancheData}
             />
           )}
