@@ -204,7 +204,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               tinlake={props.tinlake}
               setCard={setCard}
               disbursements={disbursements}
-              tokenPrice={tokenPrice}
+              tokenPrice={tokenPrice || '0'}
               updateTrancheData={updateTrancheData}
             />
           )}
@@ -213,7 +213,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               {...props}
               setCard={setCard}
               disbursements={disbursements}
-              tokenPrice={tokenPrice}
+              tokenPrice={tokenPrice || '0'}
               updateTrancheData={updateTrancheData}
             />
           )}
