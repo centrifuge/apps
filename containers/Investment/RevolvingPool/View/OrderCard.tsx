@@ -56,7 +56,11 @@ const OrderCard: React.FC<Props> = (props: Props) => {
         : props.tranche === 'senior'
         ? 'cancelSeniorRedeemOrder'
         : 'cancelJuniorRedeemOrder'
-    const txId = await props.createTransaction(`Cancel ${type.toLowerCase()} order`, method, [props.tinlake])
+    const txId = await props.createTransaction(
+      `Cancel ${props.tranche === 'senior' ? 'DROP' : 'TIN'} ${type.toLowerCase()} order`,
+      method,
+      [props.tinlake]
+    )
     setTxId(txId)
   }
 
