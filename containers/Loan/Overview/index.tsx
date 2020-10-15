@@ -7,7 +7,7 @@ import { toPrecision } from '../../../utils/toPrecision'
 import BN from 'bn.js'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 
-import { SignIcon } from './styles'
+import { SignIcon, Sidenote } from './styles'
 import { AuthState } from '../../../ducks/auth'
 import { Pool } from '../../../config'
 import { TINRatioBar } from '../../../components/TINRatioBar/index'
@@ -53,6 +53,8 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
     updateIsBorrower()
   }, [address])
 
+  const isAdmin = props.auth?.permissions?.canSetMinimumJuniorRatio
+
   const [showMaxReserveForm, setShowMaxReserveForm] = React.useState(false)
 
   return isBorrower ? (
@@ -83,20 +85,22 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                 <Table margin={{ bottom: 'small' }}>
                   <TableBody>
                     <TableRow>
-                      <TableCell scope="row">Current Reserve</TableCell>
+                      <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+                        <span>Current Reserve</span>
+                      </TableCell>
                       <TableCell style={{ textAlign: 'end' }}>
                         {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 2))} DAI
+                        <Sidenote>
+                          Max: {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 2))}{' '}
+                          DAI
+                        </Sidenote>
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell scope="row">Maximum Reserve Amount</TableCell>
-                      <TableCell style={{ textAlign: 'end' }}>
-                        {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 2))} DAI
+                      <TableCell scope="row" border={{ color: 'transparent' }}>
+                        Total epoch investment capacity
                       </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell scope="row">Total epoch investment capacity</TableCell>
-                      <TableCell style={{ textAlign: 'end' }}>
+                      <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                         {addThousandsSeparators(
                           toPrecision(
                             baseToDisplay(investmentCapacity.lt(new BN(0)) ? new BN(0) : investmentCapacity, 18),
@@ -109,9 +113,11 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                   </TableBody>
                 </Table>
 
-                <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-                  <Button label="Set max reserve" onClick={() => setShowMaxReserveForm(true)} disabled={!poolData} />
-                </Box>
+                {isAdmin && (
+                  <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                    <Button label="Set max reserve" onClick={() => setShowMaxReserveForm(true)} disabled={!poolData} />
+                  </Box>
+                )}
               </>
             )}
             {showMaxReserveForm && (

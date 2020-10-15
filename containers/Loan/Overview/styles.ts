@@ -14,3 +14,8 @@ export const Description = styled(Text)`
   color: #777;
   font-size: 14px;
 `
+
+export const Sidenote = styled.div`
+  color: #888;
+  font-size: 12px;
+`

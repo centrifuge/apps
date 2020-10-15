@@ -10,7 +10,7 @@ interface Props {
 
 export const TINRatioBar: React.FC<Props> = (props: Props) => {
   const segments =
-    props.current && props.min && props.max
+    props.current !== undefined && props.min !== undefined && props.max !== undefined
       ? [
           {
             width: 100 - props.max * 100,

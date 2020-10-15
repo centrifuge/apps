@@ -38,9 +38,9 @@ const PoolOverview: React.FC<Props> = () => {
   const dropTotalValue = poolData?.senior && poolData?.senior.totalSupply.mul(poolData.senior!.tokenPrice)
 
   const tinTotalValue = poolData && poolData.junior.totalSupply.mul(poolData?.junior.tokenPrice)
-  const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : 0
-  const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : 0
-  const maxJuniorRatio = poolData ? parseRatio(poolData.maxJuniorRatio) : 0
+  const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
+  const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
+  const maxJuniorRatio = poolData ? parseRatio(poolData.maxJuniorRatio) : undefined
 
   return (
     <Box direction="row" justify="between">
@@ -63,8 +63,12 @@ const PoolOverview: React.FC<Props> = () => {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell scope="row" border={{ color: 'transparent' }}>
-                Current Reserve
+              <TableCell
+                scope="row"
+                border={{ color: 'transparent' }}
+                style={{ alignItems: 'start', justifyContent: 'center' }}
+              >
+                <span>Current Reserve</span>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                 {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 2))} DAI
