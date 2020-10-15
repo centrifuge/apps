@@ -59,6 +59,10 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const updateTrancheData = async () => {
     dispatch(loadPool(props.tinlake))
 
+    const tokenPrice =
+      props.tranche === 'senior' ? await props.tinlake.getTokenPriceSenior() : await props.tinlake.getTokenPriceJunior()
+    setTokenPrice(tokenPrice.toString())
+
     if (address) {
       const isInMemberlist =
         props.tranche === 'senior'
@@ -72,12 +76,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           : await props.tinlake.getJuniorTokenBalance(address)
       setBalance(balance.toString())
 
-      const tokenPrice =
-        props.tranche === 'senior'
-          ? await props.tinlake.getTokenPriceSenior()
-          : await props.tinlake.getTokenPriceJunior()
-      setTokenPrice(tokenPrice.toString())
-
       const disbursements =
         props.tranche === 'senior'
           ? await props.tinlake.calcSeniorDisburse(address)
@@ -85,6 +83,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       setDisbursements(disbursements)
       setHasPendingOrder(!disbursements.remainingSupplyCurrency.add(disbursements.remainingRedeemToken).isZero())
       setHasPendingCollection(!disbursements.payoutCurrencyAmount.add(disbursements.payoutTokenAmount).isZero())
+    } else {
+      setIsInMemberlist(false)
+      setBalance('0')
     }
   }
 
