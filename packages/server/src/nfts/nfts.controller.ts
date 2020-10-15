@@ -60,13 +60,28 @@ export class NftsController {
         },
       });
 
-      if (!doc.attributes.oracle_address) { return }
-      return await this.centrifugeService.nft.pushAttributeOracle(request.user.account, {
+      if (!doc.attributes.oracle_address) {
+        console.log('not pushing to oracle', doc)
+        return
+      }
+
+      const oraclePushResult = await this.centrifugeService.nft.pushAttributeOracle(request.user.account, {
         // TODO: this attribute key is a hardcoded hash of 'result' --  we should update this when we have a UI mockup
         attribute_key: '0xf6a214f7a5fcda0c2cee9660b7fc29f5649e3c68aad48e20e950137c98913a68',
         oracle_address: doc.attributes.oracle_address.value,
         token_id: mintingResult.token_id,
       }, body.document_id)
+
+      const push = await this.centrifugeService.pullForJobComplete(oraclePushResult.job_id, request.user.account);
+
+      if (push.status === 'success') {
+        console.log('pushing to oracle succeeded'), oraclePushResult
+        return
+      } else {
+        console.log('pushing to oracle failed'), oraclePushResult
+        return
+      }
+
     } else {
       return await this.databaseService.documents.updateById(doc._id, {
         $set: {
