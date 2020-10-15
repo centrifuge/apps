@@ -6,6 +6,8 @@ import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import { TINRatioBar } from '../../../../components/TINRatioBar/index'
+import { LoadingValue } from '../../../../components/LoadingValue/index'
+
 import {
   TokenLogo,
   BalanceSheetDiagram,
@@ -32,12 +34,12 @@ const PoolOverview: React.FC<Props> = () => {
   const poolData = pool?.data as PoolDataV3 | undefined
 
   const poolValue =
-    (poolData?.netAssetValue && poolData?.reserve && poolData?.netAssetValue.add(poolData.reserve)) || '0'
-  const dropRate = poolData?.senior?.interestRate || '0'
+    (poolData?.netAssetValue && poolData?.reserve && poolData?.netAssetValue.add(poolData.reserve)) || undefined
+  const dropRate = poolData?.senior?.interestRate || undefined
 
-  const dropTotalValue = poolData?.senior && poolData?.senior.totalSupply.mul(poolData.senior!.tokenPrice)
+  const dropTotalValue = poolData?.senior ? poolData?.senior.totalSupply.mul(poolData.senior!.tokenPrice) : undefined
+  const tinTotalValue = poolData ? poolData.junior.totalSupply.mul(poolData?.junior.tokenPrice) : undefined
 
-  const tinTotalValue = poolData && poolData.junior.totalSupply.mul(poolData?.junior.tokenPrice)
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const maxJuniorRatio = poolData ? parseRatio(poolData.maxJuniorRatio) : undefined
@@ -50,7 +52,9 @@ const PoolOverview: React.FC<Props> = () => {
             Pool Value
           </Heading>
           <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-            {addThousandsSeparators(toPrecision(baseToDisplay(poolValue, 18), 2))} DAI
+            <LoadingValue done={poolValue !== undefined} height={24}>
+              {addThousandsSeparators(toPrecision(baseToDisplay(poolValue || '0', 18), 2))} DAI
+            </LoadingValue>
           </Heading>
         </Box>
 
@@ -59,7 +63,9 @@ const PoolOverview: React.FC<Props> = () => {
             <TableRow>
               <TableCell scope="row">Current NAV</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 2))} DAI
+                <LoadingValue done={poolData?.netAssetValue !== undefined}>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 2))} DAI
+                </LoadingValue>
               </TableCell>
             </TableRow>
             <TableRow>
@@ -71,10 +77,14 @@ const PoolOverview: React.FC<Props> = () => {
                 <span>Current Reserve</span>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 2))} DAI
-                <Sidenote>
-                  Max: {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 2))} DAI
-                </Sidenote>
+                <LoadingValue done={poolData?.reserve !== undefined} height={39}>
+                  <>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 2))} DAI
+                    <Sidenote>
+                      Max: {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 2))} DAI
+                    </Sidenote>
+                  </>
+                </LoadingValue>
               </TableCell>
             </TableRow>
           </TableBody>
@@ -88,7 +98,9 @@ const PoolOverview: React.FC<Props> = () => {
             <TableRow>
               <TableCell scope="row">Outstanding Volume</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.outstandingVolume || '0', 18), 2))} DAI
+                <LoadingValue done={poolData?.outstandingVolume !== undefined}>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.outstandingVolume || '0', 18), 2))} DAI
+                </LoadingValue>
               </TableCell>
             </TableRow>
             <TableRow>
@@ -99,7 +111,9 @@ const PoolOverview: React.FC<Props> = () => {
                 </span>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                {toPrecision(feeToInterestRate(dropRate), 2)} %
+                <LoadingValue done={dropRate !== undefined}>
+                  {toPrecision(feeToInterestRate(dropRate || '0'), 2)} %
+                </LoadingValue>
               </TableCell>
             </TableRow>
           </TableBody>
@@ -123,15 +137,21 @@ const PoolOverview: React.FC<Props> = () => {
             </Heading>
             <Box margin={{ left: 'auto' }}>
               <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {dropTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(dropTotalValue, 27 + 18), 2))} DAI
+                <LoadingValue done={dropTotalValue !== undefined} height={24}>
+                  {dropTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(dropTotalValue, 27 + 18), 2))} DAI
+                </LoadingValue>
               </Heading>
               <span>
-                {poolData?.senior &&
-                  addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior!.totalSupply || '0', 18), 2))}{' '}
-                Token supply @{' '}
-                {poolData?.senior &&
-                  addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior!.tokenPrice || '0', 27), 2))}{' '}
-                DAI
+                <LoadingValue done={poolData?.senior !== undefined} height={21}>
+                  {poolData?.senior &&
+                    addThousandsSeparators(
+                      toPrecision(baseToDisplay(poolData?.senior!.totalSupply || '0', 18), 2)
+                    )}{' '}
+                  Token supply @{' '}
+                  {poolData?.senior &&
+                    addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior!.tokenPrice || '0', 27), 2))}{' '}
+                  DAI
+                </LoadingValue>
               </span>
             </Box>
           </Box>
@@ -162,12 +182,16 @@ const PoolOverview: React.FC<Props> = () => {
             </Heading>
             <Box margin={{ left: 'auto' }}>
               <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {tinTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 2))} DAI
+                <LoadingValue done={tinTotalValue !== undefined} height={24}>
+                  {tinTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 2))} DAI
+                </LoadingValue>
               </Heading>
               <span>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior.totalSupply || '0', 18), 2))} Token
-                supply @ {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior.tokenPrice || '0', 27), 2))}{' '}
-                DAI
+                <LoadingValue done={poolData?.junior !== undefined} height={21}>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior.totalSupply || '0', 18), 2))} Token
+                  supply @{' '}
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior.tokenPrice || '0', 27), 2))} DAI
+                </LoadingValue>
               </span>
             </Box>
           </Box>

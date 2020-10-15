@@ -6,18 +6,13 @@ import { PoolDataV3, PoolState, loadPool } from '../../../ducks/pool'
 import { toPrecision } from '../../../utils/toPrecision'
 import BN from 'bn.js'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { LoadingValue } from '../../../components/LoadingValue/index'
 
 import { SignIcon, Sidenote } from './styles'
 import { AuthState } from '../../../ducks/auth'
 import { Pool } from '../../../config'
-import { TINRatioBar } from '../../../components/TINRatioBar/index'
 import { secondsToHms } from '../../../utils/time'
 import MaxReserveForm from './MaxReserveForm'
-
-const parseRatio = (num: BN): number => {
-  const base = new BN(10).pow(new BN(20))
-  return num.div(base).toNumber() / 10 ** 7
-}
 
 interface Props {
   activePool?: Pool
@@ -28,10 +23,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolDataV3 | undefined
 
-  const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
-  const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
-  const maxJuniorRatio = poolData ? parseRatio(poolData.maxJuniorRatio) : undefined
-  const investmentCapacity = poolData ? poolData.maxReserve.sub(poolData.reserve) : new BN(0)
+  const investmentCapacity = poolData ? poolData.maxReserve.sub(poolData.reserve) : undefined
 
   const dispatch = useDispatch()
   const address = useSelector<any, string | null>((state) => state.auth.address)
@@ -69,7 +61,10 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                     Outstanding Volume
                   </Heading>
                   <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.outstandingVolume || '0', 18), 2))} DAI
+                    <LoadingValue done={poolData?.outstandingVolume !== undefined} height={24}>
+                      {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.outstandingVolume || '0', 18), 2))}{' '}
+                      DAI
+                    </LoadingValue>
                   </Heading>
                 </Box>
 
@@ -89,11 +84,13 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                         <span>Current Reserve</span>
                       </TableCell>
                       <TableCell style={{ textAlign: 'end' }}>
-                        {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 2))} DAI
-                        <Sidenote>
-                          Max: {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 2))}{' '}
-                          DAI
-                        </Sidenote>
+                        <LoadingValue done={poolData?.reserve !== undefined} height={45}>
+                          {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 2))} DAI
+                          <Sidenote>
+                            Max:{' '}
+                            {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 2))} DAI
+                          </Sidenote>
+                        </LoadingValue>
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -101,13 +98,20 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                         Total epoch investment capacity
                       </TableCell>
                       <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                        {addThousandsSeparators(
-                          toPrecision(
-                            baseToDisplay(investmentCapacity.lt(new BN(0)) ? new BN(0) : investmentCapacity, 18),
-                            2
-                          )
-                        )}{' '}
-                        DAI
+                        <LoadingValue done={investmentCapacity !== undefined}>
+                          {addThousandsSeparators(
+                            toPrecision(
+                              baseToDisplay(
+                                (investmentCapacity || new BN(0)).lt(new BN(0))
+                                  ? new BN(0)
+                                  : investmentCapacity || new BN(0),
+                                18
+                              ),
+                              2
+                            )
+                          )}{' '}
+                          DAI
+                        </LoadingValue>
                       </TableCell>
                     </TableRow>
                   </TableBody>
@@ -137,18 +141,16 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
             <TableBody>
               <TableRow>
                 <TableCell scope="row">Epoch #</TableCell>
-                <TableCell style={{ textAlign: 'end' }}>{poolData?.epoch?.id || ''}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell scope="row">Minimum epoch duration</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  {secondsToHms(poolData?.epoch?.minimumEpochTime || 0)}
+                  <LoadingValue done={poolData?.epoch?.id !== undefined}>{poolData?.epoch?.id || ''}</LoadingValue>
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell scope="row">Minimum time left in current epoch</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  {secondsToHms(poolData?.epoch?.minimumEpochTimeLeft || 0)}
+                  <LoadingValue done={poolData?.epoch?.minimumEpochTimeLeft !== undefined}>
+                    {secondsToHms(poolData?.epoch?.minimumEpochTimeLeft || 0)}
+                  </LoadingValue>
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -159,11 +161,12 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                   </Box>
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  {' '}
-                  {addThousandsSeparators(
-                    toPrecision(baseToDisplay(poolData?.totalPendingInvestments || '0', 18), 2)
-                  )}{' '}
-                  DAI
+                  <LoadingValue done={poolData?.totalPendingInvestments !== undefined}>
+                    {addThousandsSeparators(
+                      toPrecision(baseToDisplay(poolData?.totalPendingInvestments || '0', 18), 2)
+                    )}{' '}
+                    DAI
+                  </LoadingValue>
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -174,24 +177,16 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                   </Box>
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  {' '}
-                  {addThousandsSeparators(
-                    toPrecision(baseToDisplay(poolData?.totalRedemptionsCurrency || '0', 18), 2)
-                  )}{' '}
-                  DAI
+                  <LoadingValue done={poolData?.totalRedemptionsCurrency !== undefined}>
+                    {addThousandsSeparators(
+                      toPrecision(baseToDisplay(poolData?.totalRedemptionsCurrency || '0', 18), 2)
+                    )}{' '}
+                    DAI
+                  </LoadingValue>
                 </TableCell>
               </TableRow>
             </TableBody>
           </Table>
-
-          <Box margin={{ top: 'small', bottom: 'large' }}>
-            <Heading level="5" margin={{ top: 'none', bottom: '28px', left: 'auto', right: 'auto' }}>
-              TIN Risk Buffer
-            </Heading>
-            <Box margin={{ left: '20px' }}>
-              <TINRatioBar current={currentJuniorRatio} min={minJuniorRatio} max={maxJuniorRatio} />
-            </Box>
-          </Box>
         </Box>
       </Box>
     </Box>
