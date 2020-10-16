@@ -88,7 +88,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
               {isClosed && <Paragraph>This pool is closed for investments.</Paragraph>}
               <Button
                 primary
-                label="Invest in this pool"
+                label="Sign up for this pool"
                 fill={false}
                 href={`https://${(props.pool as Pool).securitizeId || ''}.invest.securitize.io/`}
                 target="_blank"
