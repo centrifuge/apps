@@ -57,16 +57,6 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 <LoadingValue done={poolData?.epoch?.id !== undefined}>{poolData?.epoch?.id || ''}</LoadingValue>
               </TableCell>
             </TableRow>
-            {isAdmin && (
-              <TableRow>
-                <TableCell scope="row">Epoch state</TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={poolData?.epoch?.state !== undefined}>
-                    {poolData?.epoch?.state || ''}
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-            )}
             {poolData?.epoch?.isBlockedState && (
               <TableRow>
                 <TableCell scope="row">Minimum time until next epoch starts</TableCell>
