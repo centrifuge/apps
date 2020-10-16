@@ -51,7 +51,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
         />
       )}
 
-      <FormModal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose}>
+      <FormModal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose} style={{ width: '800px' }}>
         <Paragraph margin={{ top: 'small', bottom: 'small' }}>
           Tinlake has integrated Securitize.io’s automated KYC process for a smooth investor onboarding. Once Securitize
           has verified your documentation you will be provided with your “Securitize iD” which makes you eligible to
