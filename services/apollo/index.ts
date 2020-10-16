@@ -83,7 +83,7 @@ class Apollo {
         name: poolConfig.name,
         slug: poolConfig.slug,
         asset: poolConfig?.asset,
-        version: Number(pool.version),
+        version: Number(pool?.version || 3),
       }
     })
     return tinlakePools
