@@ -36,7 +36,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
   //         .toString()
   //     : new BN(0)
 
-  // If it's a redeem order, then convert amount back into DROP/TIN
+  // If it's a redeem order, then convert amount from DAI into DROP/TIN
   const settledAmount =
     type === 'Invest'
       ? props.disbursements.payoutTokenAmount
@@ -45,12 +45,14 @@ const CollectCard: React.FC<Props> = (props: Props) => {
           .mul(new BN(10).pow(new BN(18)))
           .toString()
 
-  const transactionValue = new BN(
-    type === 'Invest' ? props.disbursements.payoutTokenAmount : props.disbursements.payoutCurrencyAmount
-  )
-    .mul(new BN(props.tokenPrice))
-    .div(new BN(10).pow(new BN(18)))
-    .toString()
+  // If it's an invest order, then convert amount from DROP/TIN into DAI
+  const transactionValue =
+    type === 'Invest'
+      ? props.disbursements.payoutTokenAmount
+          .mul(new BN(props.tokenPrice))
+          .div(new BN(10).pow(new BN(27)))
+          .toString()
+      : props.disbursements.payoutCurrencyAmount.toString()
 
   const collect = async () => {
     const valueToDecimal = new Decimal(
@@ -115,7 +117,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
           <TableRow>
             <TableCell scope="row">Transaction value</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(transactionValue, 27), 2))} DAI
+              {addThousandsSeparators(toPrecision(baseToDisplay(transactionValue, 18), 2))} DAI
             </TableCell>
           </TableRow>
         </TableBody>

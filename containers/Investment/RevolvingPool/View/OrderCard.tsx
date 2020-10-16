@@ -36,13 +36,15 @@ const OrderCard: React.FC<Props> = (props: Props) => {
   const lockedValue =
     props.disbursements &&
     !(props.disbursements.remainingSupplyCurrency.isZero() && props.disbursements.remainingRedeemToken.isZero())
-      ? (props.disbursements.remainingSupplyCurrency.isZero()
-          ? props.disbursements.remainingRedeemToken
-          : props.disbursements.remainingSupplyCurrency
-        )
-          .mul(new BN(props.tokenPrice))
-          .div(new BN(10).pow(new BN(27)))
-          .toString()
+      ? props.disbursements.remainingSupplyCurrency.isZero()
+        ? props.disbursements.remainingRedeemToken
+            .mul(new BN(props.tokenPrice))
+            .div(new BN(10).pow(new BN(27)))
+            .toString()
+        : props.disbursements.remainingSupplyCurrency
+            .mul(new BN(10).pow(new BN(9 + 18)))
+            .div(new BN(props.tokenPrice))
+            .toString()
       : '0'
 
   const [status, , setTxId] = useTransactionState()
