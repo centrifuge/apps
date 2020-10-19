@@ -2,6 +2,13 @@ import { TinlakeActions } from '../actions'
 import BN from 'bn.js'
 import Tinlake, { PendingTransaction, ContractAddresses, ContractAbis, Contracts } from '../Tinlake'
 
+export type ScoreCard = {
+  thresholdRatio: BN
+  ceilingRatio: BN
+  interestRate: BN
+  recoveryRatePD: BN
+}
+
 export type Loan = {
   loanId: string
   registry: string
@@ -16,6 +23,7 @@ export type Loan = {
   nft?: NFT
   proxyOwner?: string
   riskGroup?: number
+  scoreCard?: ScoreCard
 }
 
 export type Tranche = {
