@@ -59,7 +59,9 @@ function getHref(rootOrSlug: string | string[], href: string | null | undefined 
 }
 
 function getAs(rootOrSlug: string | string[], as: string | null | undefined | UrlObject): string {
-  const pool = config.pools.find((p) => rootOrSlug === p.addresses.ROOT_CONTRACT)
+  const pool = config.pools.find(
+    (p) => (rootOrSlug as string).toLowerCase() === p.addresses.ROOT_CONTRACT.toLowerCase()
+  )
   if (pool) {
     return `/pool/${rootOrSlug}/${pool.slug}${as}`
   }
