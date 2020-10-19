@@ -1,6 +1,6 @@
 import { Constructor, TinlakeParams } from '../Tinlake'
 import { ZERO_ADDRESS } from '../services/ethereum'
-import { Loan, Investor } from '../types/tinlake'
+import { Loan, Investor, ScoreCard } from '../types/tinlake'
 import BN from 'bn.js'
 
 export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
@@ -39,6 +39,22 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
 
       // retrieve riskgroup from nft
       return (await this.contract('FEED').risk(nftId)).toBN()
+    }
+
+    getScoreCard = async (loanId: string): Promise<ScoreCard> => {
+      const riskGroup = await this.getRiskGroup(loanId)
+
+      const thresholdRatio = (await this.contract('FEED').thresholdRatio(riskGroup.toNumber())).toBN()
+      const ceilingRatio = (await this.contract('FEED').ceilingRatio(riskGroup.toNumber())).toBN()
+      const interestRate = await this.getInterestRate(loanId)
+      const recoveryRatePD = (await this.contract('FEED').recoveryRatePD(riskGroup.toNumber())).toBN()
+
+      return {
+        thresholdRatio,
+        ceilingRatio,
+        interestRate,
+        recoveryRatePD,
+      }
     }
 
     getInterestRate = async (loanId: string): Promise<BN> => {
@@ -80,6 +96,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       const debt = await this.getDebt(loanId)
       const status = await this.getStatus(collateral.registry, collateral.tokenId, loanId)
       const riskGroup = (await this.getRiskGroup(loanId)).toNumber()
+      const scoreCard = await this.getScoreCard(loanId)
 
       return {
         loanId,
@@ -89,6 +106,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
         debt,
         status,
         riskGroup,
+        scoreCard,
         registry: collateral.registry,
         tokenId: collateral.tokenId,
       }
@@ -242,6 +260,10 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return (await this.contract('ASSESSOR')['calcSeniorTokenPrice()']()).toBN()
     }
 
+    getAvailableFunds = async () => {
+      return (await this.contract('RESERVE').currencyAvailable()).toBN()
+    }
+
     getSeniorReserve = async () => {
       if (this.contractAddresses['SENIOR_TRANCHE'] !== ZERO_ADDRESS) {
         return (await this.contract('ASSESSOR').seniorBalance_()).toBN()
@@ -305,6 +327,7 @@ export type IAnalyticsActions = {
   getCollateral(loanId: string): Promise<any>
   getPrincipal(loanId: string): Promise<BN>
   getRiskGroup(loanId: string): Promise<BN>
+  getScoreCard(loanId: string): Promise<ScoreCard>
   getInterestRate(loanId: string): Promise<BN>
   getOwnerOfLoan(loanId: string): Promise<BN>
   getOwnerOfCollateral(nftRegistryAddr: string, tokenId: string): Promise<BN>
@@ -339,6 +362,7 @@ export type IAnalyticsActions = {
   checkHasInvestedInJunior(usr: string): Promise<boolean>
   getSeniorOrderedInEpoch(user: string): Promise<number>
   getJuniorOrderedInEpoch(user: string): Promise<number>
+  getAvailableFunds(): Promise<BN>
 }
 
 export default AnalyticsActions
