@@ -114,6 +114,15 @@ export default class UserForm extends React.Component<InviteProps> {
               }}
             >
               <Box gap="medium">
+                <CheckBox
+                  label={'Create new organization'}
+                  checked={newOrg}
+                  onChange={event => {
+                    setFieldValue('account', '');
+                    setFieldValue('organizationName', '');
+                    this.setState({ newOrg: event.target.checked });
+                  }}
+                />
                 {newOrg ? (
                   <FormField
                     label="Organization name"
@@ -153,15 +162,7 @@ export default class UserForm extends React.Component<InviteProps> {
                   </FormField>
                 )}
 
-                <CheckBox
-                  label={'Create new organization'}
-                  checked={newOrg}
-                  onChange={event => {
-                    setFieldValue('account', '');
-                    setFieldValue('organizationName', '');
-                    this.setState({ newOrg: event.target.checked });
-                  }}
-                />
+
 
                 <FormField label="Name" error={errors.name}>
                   <TextInput

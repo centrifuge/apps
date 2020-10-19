@@ -78,7 +78,7 @@ const UsersList: FunctionComponent = () => {
     try {
       const organizations = (await httpClient.organizations.list()).data;
       const users = (await httpClient.user.list()).data.map(user => {
-        const org = organizations.find(o => o.account === user.account);
+        const org = organizations.find(o => o.account.toLowerCase() === user.account.toLowerCase());
         const organizationName = org ? org.name : 'undefined';
         return {
           ...user,
