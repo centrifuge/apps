@@ -8,7 +8,7 @@ import { PoolDataV3, PoolState } from '../../../../ducks/pool'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
-import { SignIcon } from './styles'
+import { SignIcon, Sidenote } from './styles'
 import BN from 'bn.js'
 import { secondsToHms } from '../../../../utils/time'
 import { LoadingValue } from '../../../../components/LoadingValue/index'
@@ -57,7 +57,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 <LoadingValue done={poolData?.epoch?.id !== undefined}>{poolData?.epoch?.id || ''}</LoadingValue>
               </TableCell>
             </TableRow>
-            {poolData?.epoch?.isBlockedState && (
+            {/* {poolData?.epoch?.isBlockedState && (
               <TableRow>
                 <TableCell scope="row">Minimum time until next epoch starts</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
@@ -66,7 +66,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                   </LoadingValue>
                 </TableCell>
               </TableRow>
-            )}
+            )} */}
             {!poolData?.epoch?.isBlockedState && (
               <>
                 <TableRow>
@@ -77,16 +77,46 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                     </LoadingValue>
                   </TableCell>
                 </TableRow>
-                <TableRow>
+                {/* <TableRow>
                   <TableCell scope="row">Minimum time left in current epoch</TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
                     <LoadingValue done={poolData?.epoch?.minimumEpochTimeLeft !== undefined}>
                       {secondsToHms(poolData?.epoch?.minimumEpochTimeLeft || 0)}
                     </LoadingValue>
                   </TableCell>
-                </TableRow>
+                </TableRow> */}
               </>
             )}
+            <TableRow>
+              <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+                Current epoch state
+              </TableCell>
+              <TableCell style={{ textAlign: 'end' }}>
+                <LoadingValue done={poolData?.epoch?.state !== undefined}>
+                  {(poolData?.epoch?.state === 'open' || poolData?.epoch?.state === 'can-be-closed') && (
+                    <>
+                      Open
+                      <Sidenote>Min time left: {secondsToHms(poolData?.epoch?.minimumEpochTimeLeft || 0)}</Sidenote>
+                    </>
+                  )}
+                  {(poolData?.epoch?.state === 'in-submission-period' ||
+                    poolData?.epoch?.state === 'in-challenge-period' ||
+                    poolData?.epoch?.state === 'challenge-period-ended') && (
+                    <>
+                      In computation period
+                      {poolData?.epoch.minChallengePeriodEnd > 0 && (
+                        <Sidenote>
+                          Min time left:{' '}
+                          {secondsToHms(
+                            (poolData?.epoch.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000
+                          )}
+                        </Sidenote>
+                      )}
+                    </>
+                  )}
+                </LoadingValue>
+              </TableCell>
+            </TableRow>
             <TableRow>
               <TableCell scope="row">Total epoch investment capacity</TableCell>
               <TableCell style={{ textAlign: 'end' }}>

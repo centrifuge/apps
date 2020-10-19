@@ -4,7 +4,6 @@ import { ITinlake as ITinlakeV3, baseToDisplay } from '@centrifuge/tinlake-js-v3
 import { connect, useSelector, useDispatch } from 'react-redux'
 import { PoolDataV3, PoolState, loadPool } from '../../../ducks/pool'
 import { toPrecision } from '../../../utils/toPrecision'
-import BN from 'bn.js'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 
@@ -22,8 +21,6 @@ interface Props {
 const LoanOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolDataV3 | undefined
-
-  const investmentCapacity = poolData ? poolData.maxReserve.sub(poolData.reserve) : undefined
 
   const dispatch = useDispatch()
   const address = useSelector<any, string | null>((state) => state.auth.address)

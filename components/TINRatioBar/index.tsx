@@ -61,18 +61,7 @@ export const TINRatioBar: React.FC<Props> = (props: Props) => {
 
       const newSegments = [...minSegments, ...maxSegments]
 
-      setSegments(newSegments.slice(0, 1))
-      setTimeout(() => {
-        setSegments(newSegments.slice(0, 2))
-
-        setTimeout(() => {
-          setSegments(newSegments.slice(0, 3))
-
-          setTimeout(() => {
-            setSegments(newSegments.slice(0, 4))
-          }, 1)
-        }, 1)
-      }, 1)
+      setSegments(newSegments)
     } else {
       setSegments([
         {
