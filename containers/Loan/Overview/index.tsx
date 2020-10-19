@@ -81,35 +81,32 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                   <TableBody>
                     <TableRow>
                       <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
-                        <span>Current Reserve</span>
+                        <span>Pool reserve</span>
                       </TableCell>
                       <TableCell style={{ textAlign: 'end' }}>
                         <LoadingValue done={poolData?.reserve !== undefined} height={45}>
-                          {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 2))} DAI
-                          <Sidenote>
-                            Max:{' '}
-                            {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 2))} DAI
-                          </Sidenote>
+                          <>
+                            {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 2))} DAI
+                            <Sidenote>
+                              Max:{' '}
+                              {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 2))}{' '}
+                              DAI
+                            </Sidenote>
+                          </>
                         </LoadingValue>
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell scope="row" border={{ color: 'transparent' }}>
-                        Total epoch investment capacity
+                      <TableCell
+                        scope="row"
+                        style={{ alignItems: 'start', justifyContent: 'center' }}
+                        border={{ color: 'transparent' }}
+                      >
+                        <span>Available funds for financing</span>
                       </TableCell>
                       <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                        <LoadingValue done={investmentCapacity !== undefined}>
-                          {addThousandsSeparators(
-                            toPrecision(
-                              baseToDisplay(
-                                (investmentCapacity || new BN(0)).lt(new BN(0))
-                                  ? new BN(0)
-                                  : investmentCapacity || new BN(0),
-                                18
-                              ),
-                              2
-                            )
-                          )}{' '}
+                        <LoadingValue done={poolData?.reserve !== undefined} height={45}>
+                          {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.availableFunds || '0', 18), 2))}{' '}
                           DAI
                         </LoadingValue>
                       </TableCell>
