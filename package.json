@@ -24,8 +24,8 @@
   ],
   "workspaces": [
     "packages/lib",
-    "packages/server",
-    "packages/ui"
+    "packages/ui",
+    "packages/server"
   ],
   "jest": {
     "snapshotSerializers": [

@@ -9,8 +9,20 @@ import { Schema } from '@centrifuge/gateway-lib/models/schema';
 import { Document } from '@centrifuge/gateway-lib/models/document';
 import { MintNftRequest, TransferNftRequest } from '@centrifuge/gateway-lib/models/nfts';
 import { Organization } from '@centrifuge/gateway-lib/models/organization';
-
 const instance = axios.create();
+
+// We reload the app when session expires but we can extend with a modal
+// in the futre
+instance.interceptors.response.use(response => {
+  return response;
+}, error => {
+  if (error.response.status === 403) {
+    window.location.reload()
+  }
+  return error;
+});
+
+
 
 export const httpClient = {
   user: {
