@@ -44,11 +44,13 @@ export const PoolLink: React.FunctionComponent<Props> = ({ href, as, children })
 }
 
 function getHref(rootOrSlug: string | string[], href: string | null | undefined | UrlObject): string {
-  const pool = config.pools.find((p) => rootOrSlug === p.addresses.ROOT_CONTRACT)
+  const pool = config.pools.find(
+    (p) => (rootOrSlug as string).toLowerCase() === p.addresses.ROOT_CONTRACT.toLowerCase()
+  )
   if (pool) {
     return `/pool/[root]/[slug]${href}`
   }
-  const upPool = config.upcomingPools.find((p) => rootOrSlug === p.slug)
+  const upPool = config.upcomingPools.find((p) => (rootOrSlug as string) === p.slug)
   if (upPool) {
     return `/pool/[root]${href}`
   }
@@ -57,7 +59,9 @@ function getHref(rootOrSlug: string | string[], href: string | null | undefined 
 }
 
 function getAs(rootOrSlug: string | string[], as: string | null | undefined | UrlObject): string {
-  const pool = config.pools.find((p) => rootOrSlug === p.addresses.ROOT_CONTRACT)
+  const pool = config.pools.find(
+    (p) => (rootOrSlug as string).toLowerCase() === p.addresses.ROOT_CONTRACT.toLowerCase()
+  )
   if (pool) {
     return `/pool/${rootOrSlug}/${pool.slug}${as}`
   }

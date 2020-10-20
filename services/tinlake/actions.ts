@@ -477,6 +477,7 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
   const netAssetValue = await tinlake.getCurrentNAV()
   const reserve = juniorReserve.add(seniorReserve)
   const outstandingVolume = await tinlake.getTotalDebt()
+  const availableCurrency = await tinlake.getAvailableFunds()
 
   const seniorPendingInvestments = await tinlake.getSeniorPendingInvestments()
   const seniorPendingRedemptions = await tinlake.getSeniorPendingRedemptions()
@@ -536,7 +537,7 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
       pendingInvestments: seniorPendingInvestments,
       pendingRedemptions: seniorPendingRedemptions,
     },
-    availableFunds: juniorReserve.add(seniorReserve),
+    availableFunds: availableCurrency,
   }
 }
 
