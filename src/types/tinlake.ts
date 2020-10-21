@@ -53,5 +53,29 @@ export type Investor = {
   address: string
 }
 
+interface RSV {
+  r: string
+  s: string
+  v: number
+}
+
+export type DaiPermitMessage = RSV & {
+  holder: string
+  spender: string
+  nonce: number
+  expiry: number | string
+  allowed?: boolean
+}
+
+export type ERC2612PermitMessage = RSV & {
+  owner: string
+  spender: string
+  value: number | string
+  nonce: number | string
+  deadline: number | string
+}
+
+export type PermitMessage = DaiPermitMessage | ERC2612PermitMessage
+
 export type ITinlake = TinlakeActions & Tinlake
 export { PendingTransaction, ContractAddresses, ContractAbis, Contracts }
