@@ -74,7 +74,9 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         tokenId,
       ])
 
-      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
+      return this.pending(
+        proxy.execute(this.contract('ACTIONS').address, encoded, { ...this.overrides, gasLimit: 300000 })
+      )
     }
 
     proxyTransferIssue = async (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => {
@@ -85,7 +87,9 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         tokenId,
       ])
 
-      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
+      return this.pending(
+        proxy.execute(this.contract('ACTIONS').address, encoded, { ...this.overrides, gasLimit: 300000 })
+      )
     }
 
     proxyLockBorrowWithdraw = async (proxyAddress: string, loanId: string, amount: string, usr: string) => {
