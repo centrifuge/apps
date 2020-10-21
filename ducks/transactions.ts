@@ -226,14 +226,9 @@ export function processTransaction(
         Sentry.captureMessage(`Transaction failed: ${unconfirmedTx.actionName}`, { extra: { tx: outcomeTx } })
       }
     } catch (error) {
-      console.error(
-        `Transaction error: ${unconfirmedTx.actionName})`,
-        error
-      )
+      console.error(`Transaction error: ${unconfirmedTx.actionName})`, error)
 
-      Sentry.captureMessage(
-        `Transaction error: ${unconfirmedTx.actionName}): ${error.toString()}`
-      )
+      Sentry.captureMessage(`Transaction error: ${unconfirmedTx.actionName}): ${error.toString()}`)
 
       outcomeTx.status = 'failed'
 

@@ -444,10 +444,10 @@ export function setNetwork(network: string | null): ThunkAction<Promise<void>, {
 export function setProviderName(name: string | null) {
   if (name) {
     Sentry.setContext('wallet', {
-      name
+      name,
     })
   }
-  
+
   return { name, type: RECEIVE_PROVIDER_NAME }
 }
 
