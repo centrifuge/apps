@@ -336,7 +336,7 @@ export async function submitSeniorRedeemOrder(tinlake: ITinlakeV3, amount: strin
   }
 
   const address = await tinlake.signer?.getAddress()
-  
+
   try {
     const permit = await tinlake.signRedeemPermit(amount, address, 'senior')
     return tinlake.submitSeniorRedeemOrderWithPermit(amount, permit)
@@ -372,7 +372,7 @@ export async function submitJuniorRedeemOrder(tinlake: ITinlakeV3, amount: strin
   }
 
   const address = await tinlake.signer?.getAddress()
-  
+
   try {
     const permit = await tinlake.signRedeemPermit(amount, address, 'junior')
     return tinlake.submitJuniorRedeemOrderWithPermit(amount, permit)

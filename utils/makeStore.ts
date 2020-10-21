@@ -1,5 +1,5 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
-import * as Sentry from "@sentry/react";
+import * as Sentry from '@sentry/react'
 
 import poolsReducer from '../ducks/pools'
 import loansReducer from '../ducks/loans'
