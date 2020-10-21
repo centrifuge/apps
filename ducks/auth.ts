@@ -10,6 +10,7 @@ import { getTinlake } from '../services/tinlake'
 import config from '../config'
 import { ethers } from 'ethers'
 import { isTinlakeV3 } from '../utils/tinlakeVersion'
+import * as Sentry from '@sentry/react'
 
 // Actions
 const CLEAR = 'tinlake-ui/auth/CLEAR'
@@ -309,6 +310,8 @@ export function setAddressAndLoadData(
 
     dispatch(loadProxies())
     dispatch(loadPermissions(tinlake))
+
+    Sentry.setUser({ id: address })
   }
 }
 
@@ -430,11 +433,21 @@ export function setNetwork(network: string | null): ThunkAction<Promise<void>, {
       return
     }
 
+    Sentry.setContext('network', {
+      name: network,
+    })
+
     dispatch({ network, type: RECEIVE_NETWORK })
   }
 }
 
 export function setProviderName(name: string | null) {
+  if (name) {
+    Sentry.setContext('wallet', {
+      name
+    })
+  }
+  
   return { name, type: RECEIVE_PROVIDER_NAME }
 }
 

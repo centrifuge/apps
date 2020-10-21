@@ -46,13 +46,13 @@ const CollectCard: React.FC<Props> = (props: Props) => {
           .toString()
 
   // If it's an invest order, then convert amount from DROP/TIN into DAI
-  const transactionValue =
-    type === 'Invest'
-      ? props.disbursements.payoutTokenAmount
-          .mul(new BN(props.tokenPrice))
-          .div(new BN(10).pow(new BN(27)))
-          .toString()
-      : props.disbursements.payoutCurrencyAmount.toString()
+  // const transactionValue =
+  //   type === 'Invest'
+  //     ? props.disbursements.payoutTokenAmount
+  //         .mul(new BN(props.tokenPrice))
+  //         .div(new BN(10).pow(new BN(27)))
+  //         .toString()
+  //     : props.disbursements.payoutCurrencyAmount.toString()
 
   const collect = async () => {
     const valueToDecimal = new Decimal(
@@ -108,7 +108,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
               {props.tranche === 'senior' ? 'DROP' : 'TIN'}
             </TableCell>
           </TableRow>
-          <TableRow>
+          {/* <TableRow>
             <TableCell scope="row">Settled token price</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
               {addThousandsSeparators(toPrecision(baseToDisplay(props.tokenPrice, 27), 2))}
@@ -119,7 +119,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
             <TableCell style={{ textAlign: 'end' }}>
               {addThousandsSeparators(toPrecision(baseToDisplay(transactionValue, 18), 2))} DAI
             </TableCell>
-          </TableRow>
+          </TableRow> */}
         </TableBody>
       </Table>
 

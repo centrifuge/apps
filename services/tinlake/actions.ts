@@ -264,7 +264,13 @@ export async function submitSeniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
   }
 
   const address = await tinlake.signer?.getAddress()
-  return tinlake.submitSeniorSupplyOrderWithPermit(amount, address)
+
+  try {
+    const permit = await tinlake.signSupplyPermit(amount, address, 'senior')
+    return tinlake.submitSeniorSupplyOrderWithPermit(amount, permit)
+  } catch {
+    return await tinlake.submitSeniorSupplyOrderWithAllowance(amount, address)
+  }
 }
 
 export async function cancelSeniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
@@ -294,7 +300,13 @@ export async function submitJuniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
   }
 
   const address = await tinlake.signer?.getAddress()
-  return tinlake.submitJuniorSupplyOrderWithPermit(amount, address)
+
+  try {
+    const permit = await tinlake.signSupplyPermit(amount, address, 'junior')
+    return tinlake.submitJuniorSupplyOrderWithPermit(amount, permit)
+  } catch {
+    return await tinlake.submitJuniorSupplyOrderWithAllowance(amount, address)
+  }
 }
 
 export async function cancelJuniorSupplyOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
@@ -324,7 +336,13 @@ export async function submitSeniorRedeemOrder(tinlake: ITinlakeV3, amount: strin
   }
 
   const address = await tinlake.signer?.getAddress()
-  return tinlake.submitSeniorRedeemOrderWithPermit(amount, address)
+  
+  try {
+    const permit = await tinlake.signRedeemPermit(amount, address, 'senior')
+    return tinlake.submitSeniorRedeemOrderWithPermit(amount, permit)
+  } catch {
+    return await tinlake.submitSeniorRedeemOrderWithAllowance(amount, address)
+  }
 }
 
 export async function cancelSeniorRedeemOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {
@@ -354,7 +372,13 @@ export async function submitJuniorRedeemOrder(tinlake: ITinlakeV3, amount: strin
   }
 
   const address = await tinlake.signer?.getAddress()
-  return tinlake.submitJuniorRedeemOrderWithPermit(amount, address)
+  
+  try {
+    const permit = await tinlake.signRedeemPermit(amount, address, 'junior')
+    return tinlake.submitJuniorRedeemOrderWithPermit(amount, permit)
+  } catch {
+    return await tinlake.submitJuniorRedeemOrderWithAllowance(amount, address)
+  }
 }
 
 export async function cancelJuniorRedeemOrder(tinlake: ITinlakeV3): Promise<PendingTransaction> {

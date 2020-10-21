@@ -5,6 +5,7 @@ import { ThunkAction } from 'redux-thunk'
 import { HYDRATE } from 'next-redux-wrapper'
 import { initTinlake } from '../services/tinlake'
 import * as actions from '../services/tinlake/actions'
+import * as Sentry from '@sentry/react'
 
 import config from '../config'
 
@@ -207,6 +208,10 @@ export function processTransaction(
         outcomeTx.status = outcome ? 'succeeded' : 'failed'
         outcomeTx.result = receipt
         outcomeTx.hash = receipt.transactionHash
+
+        if (outcomeTx.status === 'failed') {
+          Sentry.captureMessage(`Transaction failed: ${unconfirmedTx.actionName}`, { extra: { tx: outcomeTx } })
+        }
       } else if (tx.status === 1) {
         // Succeeded immediately
         hasCompleted = true
@@ -217,11 +222,17 @@ export function processTransaction(
         outcomeTx.status = 'failed'
         outcomeTx.failedReason = tx.error
         if (tx.transactionhash) outcomeTx.hash = tx.transactionhash
+
+        Sentry.captureMessage(`Transaction failed: ${unconfirmedTx.actionName}`, { extra: { tx: outcomeTx } })
       }
     } catch (error) {
       console.error(
-        `Failed to process action ${unconfirmedTx.actionName}(${unconfirmedTx.actionArgs.join(',')})`,
+        `Transaction error: ${unconfirmedTx.actionName})`,
         error
+      )
+
+      Sentry.captureMessage(
+        `Transaction error: ${unconfirmedTx.actionName}): ${error.toString()}`
       )
 
       outcomeTx.status = 'failed'
