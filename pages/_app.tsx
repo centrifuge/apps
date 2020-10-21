@@ -7,10 +7,12 @@ import { StyledApp } from '../components/StyledApp'
 import Head from 'next/head'
 import * as Sentry from '@sentry/react'
 import { Integrations } from '@sentry/tracing'
+import config from '../config'
 
 require('regenerator-runtime/runtime')
 
 Sentry.init({
+  environment: config.network,
   dsn: 'https://2700a2b81fca4be481437bb77e9ea7f2@o464978.ingest.sentry.io/5476370',
   integrations: [new Integrations.BrowserTracing()],
   tracesSampleRate: 1.0,
