@@ -87,7 +87,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
             daiPermit.v,
             daiPermit.r,
             daiPermit.s,
-            this.overrides
+            { ...this.overrides, gasLimit: 400000 }
           )
         )
       }
@@ -102,7 +102,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
           erc2612Permit.v,
           erc2612Permit.r,
           erc2612Permit.s,
-          this.overrides
+          { ...this.overrides, gasLimit: 400000 }
         )
       )
     }
@@ -127,7 +127,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
           permit.v,
           permit.r,
           permit.s,
-          this.overrides
+          { ...this.overrides, gasLimit: 400000 }
         )
       )
     }
@@ -186,7 +186,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
             daiPermit.v,
             daiPermit.r,
             daiPermit.s,
-            this.overrides
+            { ...this.overrides, gasLimit: 400000 }
           )
         )
       }
@@ -201,7 +201,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
           erc2612Permit.v,
           erc2612Permit.r,
           erc2612Permit.s,
-          this.overrides
+          { ...this.overrides, gasLimit: 400000 }
         )
       )
     }
@@ -226,7 +226,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
           permit.v,
           permit.r,
           permit.s,
-          this.overrides
+          { ...this.overrides, gasLimit: 400000 }
         )
       )
     }
