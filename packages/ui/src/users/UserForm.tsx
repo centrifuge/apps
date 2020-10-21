@@ -47,7 +47,7 @@ export default class UserForm extends React.Component<InviteProps> {
               );
               return !org;
             },
-            message: 'Organization name exits',
+            message: 'Organization name exists',
           }),
       account: !newOrg && Yup.string().required('This field is required'),
       name: Yup.string()
@@ -63,19 +63,7 @@ export default class UserForm extends React.Component<InviteProps> {
           },
           message: 'Only lowercase letters',
         }),
-      permissions: Yup.array().required('This field is required'),
-      schemas: Yup.array().test({
-        name: 'test_schemas',
-        test: function(this, value) {
-          if (
-            this.parent.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS)
-          ) {
-            return value && value.length;
-          }
-          return true;
-        },
-        message: 'This field is required',
-      }),
+      permissions: Yup.array().required('This field is required')
     });
 
     const permissionOptions = [
