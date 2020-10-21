@@ -24,7 +24,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
       return this.submitSeniorSupplyOrder(amount)
     }
 
-    signCurrencyPermit = async (
+    signSupplyPermit = async (
       amount: string,
       senderAddress: string,
       tranche: 'senior' | 'junior'
@@ -54,7 +54,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
       )
     }
 
-    signERC2612Permit = async (
+    signRedeemPermit = async (
       amount: string,
       senderAddress: string,
       tranche: 'senior' | 'junior'
@@ -68,7 +68,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
 
       return await signERC2612Permit(
         this.legacyWeb3Provider,
-        this.contract('TINLAKE_CURRENCY').address,
+        this.contract(tranche === 'senior' ? 'SENIOR_TOKEN' : 'JUNIOR_TOKEN').address,
         senderAddress,
         trancheAddress,
         amount
@@ -280,8 +280,12 @@ export type ILenderActions = {
   getJuniorTokenAllowance(owner: string): Promise<BN>
   approveJuniorToken: (tokenAmount: string) => Promise<PendingTransaction>
   approveSeniorToken: (tokenAmount: string) => Promise<PendingTransaction>
-  signCurrencyPermit: (amount: string, senderAddress: string, tranche: 'senior' | 'junior') => Promise<PermitMessage>
-  signERC2612Permit: (
+  signSupplyPermit: (
+    amount: string,
+    senderAddress: string,
+    tranche: 'senior' | 'junior'
+  ) => Promise<PermitMessage>
+  signRedeemPermit: (
     amount: string,
     senderAddress: string,
     tranche: 'senior' | 'junior'
