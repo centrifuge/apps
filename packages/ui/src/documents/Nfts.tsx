@@ -73,7 +73,8 @@ export const Nfts: FunctionComponent<Props> = (props) => {
           deposit_address: data.deposit_address,
           proof_fields: data.registry!.proofs,
           registry_address: data.registry!.address,
-          asset_manager_address: data.registry!.asset_manager_address
+          asset_manager_address: data.registry!.asset_manager_address,
+          oracle_address: data.registry!.oracle_address,
         },
       )).data);
     } catch (e) {

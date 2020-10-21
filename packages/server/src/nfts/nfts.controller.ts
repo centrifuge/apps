@@ -60,7 +60,7 @@ export class NftsController {
         },
       });
 
-      if (!doc.attributes.oracle_address) {
+      if (body.oracle_address === '0x0000000000000000000000000000000000000000') {
         console.log('not pushing to oracle', doc)
         return
       }
@@ -68,7 +68,7 @@ export class NftsController {
       const oraclePushResult = await this.centrifugeService.nft.pushAttributeOracle(request.user.account, {
         // TODO: this attribute key is a hardcoded hash of 'result' --  we should update this when we have a UI mockup
         attribute_key: '0xf6a214f7a5fcda0c2cee9660b7fc29f5649e3c68aad48e20e950137c98913a68',
-        oracle_address: doc.attributes.oracle_address.value,
+        oracle_address: body.oracle_address,
         token_id: mintingResult.token_id,
       }, body.document_id)
 

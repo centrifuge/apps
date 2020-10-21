@@ -80,6 +80,7 @@ describe('Schema Form', () => {
               "label": "TestAssetNFT",
               "address": "0xc2c202c512786742A6A5C85C071ed140d03eF87c",
               "asset_manager_address": "0x75d05e5a0EC4c6424b093c89425f1443991daf09",
+              "oracle_address": "0x75d05e5a0EC4c6424b093c89425f1443991daf09",
               "proofs": [
                 "cd_tree.attributes[0xe24e7917d4fcaf79095539ac23af9f6d5c80ea8b0d95c9cd860152bff8fdab17].byte_val",
               ]

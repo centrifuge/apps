@@ -3,7 +3,8 @@ export class MintNftRequest {
   document_id:string
   proof_fields: string[];
   deposit_address: string;
-  registry_address: string
+  registry_address: string;
+  oracle_address: string;
 }
 
 export class TransferNftRequest {

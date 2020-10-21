@@ -36,6 +36,7 @@ describe('SchemasController', () => {
         label: 'BEST_ANIMALS_NFT',
         address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
         asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
+        oracle_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
         proofs: [
           'attributes.animals.wingspans',
           'header.document_id',
@@ -119,6 +120,7 @@ describe('SchemasController', () => {
               label: 'test registry',
               address: '0x111',
               asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
+              oracle_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
             },
           ],
         } as Schema);
@@ -149,6 +151,7 @@ describe('SchemasController', () => {
             {
               address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
               asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
+              oracle_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
               label: 'sdsds',
               proofs: ['sss', 'saaass'],
             },
@@ -160,7 +163,7 @@ describe('SchemasController', () => {
         expect(err instanceof HttpException).toEqual(true);
       }
     });
-    it('should throw error when attributes are nested', async function() {
+    it('should throw error when attributes are nested', async () => {
       expect.assertions(4);
       const schemasController = schemaModule.get<SchemasController>(
         SchemasController,
@@ -180,6 +183,7 @@ describe('SchemasController', () => {
             {
               address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
               asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
+              oracle_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
               label: 'sdsds',
               proofs: ['sss', 'saaass'],
             },
@@ -285,6 +289,7 @@ describe('SchemasController', () => {
             label: 'animal_registry',
             address: '0x87c574FB2DF0EaA2dAf5fc4a8A16dd3Ce39011B1',
             asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
+            oracle_address: '0x0000000000000000000000000000000000000000',
             proofs: ['attributes.wingspan'],
           },
         ],
@@ -312,6 +317,7 @@ describe('SchemasController', () => {
             registries: [{
               address: '0x87c574FB2DF0EaA2dAf5fc4a8A16dd3Ce39011B1',
               asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
+              oracle_address: '0x0000000000000000000000000000000000000000',
               label: 'animal_registry',
               proofs: ['attributes.wingspan'],
             }],

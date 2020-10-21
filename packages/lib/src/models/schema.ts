@@ -20,6 +20,7 @@ export interface Registry {
   address: string,
   asset_manager_address: string
   proofs: Array<string>
+  oracle_address: string
 }
 
 export enum AttrTypes {
@@ -143,6 +144,7 @@ export class Schema {
           tinlakePool: 'https://kovan.staging.tinlake.centrifuge.io/0xbb53072d054de55d56dbb4ee95840de3262e4097',
           address: '0x0000000000000000000000000000000000000000',
           asset_manager_address: '0x0000000000000000000000000000000000000000',
+          oracle_address:'0x0000000000000000000000000000000000000000',
           proofs: []
         }
       ],
@@ -249,6 +251,11 @@ export class Schema {
       let validAssetManager = isValidAddress(registry.asset_manager_address);
       if (!validAssetManager) {
         throw generateRegistryError(`registry address ${registry.address}`, RegistriesErrors.ADDRESS_FORMAT);
+      }
+
+      let validOracle = isValidAddress(registry.oracle_address);
+      if (!validOracle) {
+        throw generateRegistryError(`oracle address ${registry.oracle_address}`, RegistriesErrors.ADDRESS_FORMAT);
       }
 
       if (!registry.proofs || !Array.isArray(registry.proofs) || !registry.proofs.length) {
