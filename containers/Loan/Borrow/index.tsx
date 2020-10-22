@@ -109,7 +109,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
           }
           limitLabel={new BN(availableFunds).gt(props.loan.principal) ? 'Max financing amount' : 'Available funds'}
           onChange={(newValue: string) => onChange(newValue)}
-          disabled={error !== undefined || !borrowEnabled || status === 'unconfirmed' || status === 'pending'}
+          disabled={!borrowEnabled || status === 'unconfirmed' || status === 'pending'}
         />
       </Box>
       <Box align="start">
@@ -117,7 +117,13 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
           onClick={borrow}
           primary
           label="Finance Asset"
-          disabled={error !== undefined || !borrowEnabled || status === 'unconfirmed' || status === 'pending'}
+          disabled={
+            error !== undefined ||
+            new BN(borrowAmount).isZero() ||
+            !borrowEnabled ||
+            status === 'unconfirmed' ||
+            status === 'pending'
+          }
         />
         {isBlockedState && (
           <Box margin={{ top: 'small' }}>

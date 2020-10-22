@@ -98,7 +98,13 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
           onClick={repay}
           primary
           label="Repay"
-          disabled={!hasDebt || error !== undefined || status === 'unconfirmed' || status === 'pending'}
+          disabled={
+            !hasDebt ||
+            new BN(repayAmount).isZero() ||
+            error !== undefined ||
+            status === 'unconfirmed' ||
+            status === 'pending'
+          }
         />
       </Box>
     </Box>

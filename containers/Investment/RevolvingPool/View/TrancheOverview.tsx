@@ -16,7 +16,6 @@ import OrderCard from './OrderCard'
 import CollectCard from './CollectCard'
 import { TokenLogo, Info, AddWalletLink, MinTimeRemaining } from './styles'
 import InvestAction from '../../../../components/InvestAction'
-import { useInterval } from '../../../../utils/hooks'
 
 interface Props {
   pool: Pool
@@ -109,10 +108,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       console.log(error)
     }
   }
-
-  useInterval(() => {
-    updateTrancheData()
-  }, 10000)
 
   React.useEffect(() => {
     updateTrancheData()
