@@ -12,6 +12,9 @@ import { SchemasModule } from './schemas/schemas.module';
 import { DocumentsModule } from './documents/documents.module';
 import { NftsModule } from './nfts/nfts.module';
 import { OrganizationsModule } from './organizations/organizations.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import config from './config';
 
 @Module({
   controllers: [AppController],
@@ -32,6 +35,28 @@ import { OrganizationsModule } from './organizations/organizations.module';
     DocumentsModule,
     NftsModule,
     OrganizationsModule,
+    MailerModule.forRoot({
+      transport: {
+        host: config.email.host,
+        port: config.email.port,
+        secure: config.email.secure,
+        auth: {
+          user: config.email.user,
+          pass: config.email.password,
+        },
+      },
+      defaults: {
+        from: config.email.from,
+      },
+      template: {
+        dir: process.cwd() + '/email-templates/',
+        adapter: new HandlebarsAdapter(), // or new PugAdapter()
+        options: {
+          strict: true,
+        },
+      },
+    })
   ],
 })
+
 export class AppModule {}

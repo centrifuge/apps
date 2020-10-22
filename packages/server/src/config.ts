@@ -4,29 +4,47 @@ import { PERMISSIONS } from '../../lib/utils/constants';
 const config = {
   // URI for centrifuge node
   centrifugeUrl: env.CENTRIFUGE_URL || 'http://127.0.0.1:8082',
+  // The domain on which the application is hosted. Used for building links
+  // in emails
+  applicationHost: env.CENTRIFUGE_APPLICATION_HOST || 'http://gateway.centrifuge.io',
   // Port on which the application will run
-  applicationPort: env.APPLICATION_PORT || '3001',
+  applicationPort: env.CENTRIFUGE_APPLICATION_PORT || '3001',
   sessionSecret: env.CENTRIFUGE_SESSION_SECRET || 'centrifuge',
+  email: {
+    host: env.CENTRIFUGE_EMAIL_CLIENT_HOST || 'smtp.sendgrid.net',
+    port: env.CENTRIFUGE_EMAIL_CLIENT_PORT || 587,
+    secure: env.CENTRIFUGE_EMAIL_CLIENT_SECURE || true,
+    user: env.CENTRIFUGE_EMAIL_CLIENT_USER || 'apikey',
+    password: env.CENTRIFUGE_EMAIL_SERVICE_APIKEY,
+    from: env.CENTRIFUGE_ADMIN_EMAIL || 'gateway@centrifuge.io',
+  },
   // We use replace to create a new database without changing the deployment config
-  dbPath: env.DB_PATH ? env.DB_PATH.replace('db', 'db1') : './db',
+  dbPath: env.CENTRIFUGE_DB_PATH ? env.CENTRIFUGE_DB_PATH.replace('db', 'db1') : './db',
   // Default admin user that will be created
   admin: {
     name: env.CENTRIFUGE_ADMIN_USER || 'admin',
-    email: env.CENTRIFUGE_ADMIN_EMAIL || 'test@test.org',
+    email: env.CENTRIFUGE_ADMIN_EMAIL || 'gateway@centrifuge.io',
     password: env.CENTRIFUGE_ADMIN_PASSWORD || 'admin',
     // Centrifuge Identity Address
-    account: env.CENTRIFUGE_ADMIN_ACCOUNT || '0xd1A41F5BCa3366406b01eb2b2F5723Cddf659478',
+    account: env.CENTRIFUGE_ADMIN_ACCOUNT,
     chain: {
-      centrifuge_chain_account : {
-        id: env.CENTRIFUGE_CHAIN_ID || '0xac4316c9699a37bd15493702c5a9a1aa3936a1ae6b6a3b4e92b38eae393ca659',
-        secret: env.CENTRIFUGE_CHAIN_SECRET || '0xafe50b689f0ee19376768e2aa913d283c25b834ab3aecb558c2c73c0585e63e9',
-        ss_58_address: env.CENTRIFUGE_CHAIN_ADDRESS || '5Fxa2HPJrZ95guPC7G5kitVyAFrrtPcUPR2uN62VKthZiqpg',
+      centrifuge_chain_account: {
+        id: env.CENTRIFUGE_CHAIN_ID,
+        secret: env.CENTRIFUGE_CHAIN_SECRET,
+        ss_58_address: env.CENTRIFUGE_CHAIN_ADDRESS,
       },
     },
-    permissions: [PERMISSIONS.CAN_MANAGE_USERS, PERMISSIONS.CAN_MANAGE_SCHEMAS, PERMISSIONS.CAN_VIEW_DOCUMENTS, PERMISSIONS.CAN_MANAGE_DOCUMENTS],
+    permissions: [
+      PERMISSIONS.CAN_MANAGE_USERS,
+      PERMISSIONS.CAN_MANAGE_SCHEMAS,
+      PERMISSIONS.CAN_VIEW_DOCUMENTS,
+      PERMISSIONS.CAN_MANAGE_DOCUMENTS,
+    ],
   },
-  inviteOnly: Boolean(env.INVITE_ONLY || true),
+  inviteOnly: Boolean(env.CENTRIFUGE_INVITE_ONLY || true),
   ethNetwork: env.ETH_NETWORK || 'mainnet',
-  ethProvider: env.ETH_PROVIDER || 'https://mainnet.infura.io/v3/55b957b5c6be42c49e6d48cbb102bdd5',
+  ethProvider:
+    env.ETH_PROVIDER ||
+    'https://mainnet.infura.io/v3/55b957b5c6be42c49e6d48cbb102bdd5',
 };
 export default config;

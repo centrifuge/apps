@@ -7,7 +7,9 @@ import { SessionGuard } from '../../auth/SessionGuard';
 import { DatabaseService } from '../../database/database.service';
 import { PERMISSIONS } from '../../../../lib/utils/constants';
 import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module';
-import { testingHelpers } from '../../centrifuge-client/centrifuge-client.mock';
+import { testingHelpers } from '../../mocks/centrifuge-client.mock';
+import { MailerService } from '@nestjs-modules/mailer';
+import { MailerServiceMock } from '../../mocks/mailer-service.mock';
 
 describe('Users controller', () => {
   let invitedUser: User;
@@ -21,6 +23,10 @@ describe('Users controller', () => {
         SessionGuard,
         centrifugeServiceProvider,
         databaseServiceProvider,
+        {
+          provide: MailerService,
+          useValue: new MailerServiceMock(),
+        },
       ],
     }).compile();
 
@@ -157,7 +163,7 @@ describe('Users controller', () => {
           });
 
           const org = await databaseService.organizations.findOne({
-            account: testingHelpers.currentGeneratedAccount
+            account: testingHelpers.currentGeneratedAccount,
           });
 
           expect(org).toMatchObject({

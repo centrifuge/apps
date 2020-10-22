@@ -8,6 +8,7 @@ import * as Yup from 'yup';
 import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators';
 
 interface RegisterProps {
+  email: string,
   onSubmit: (values: any) => void;
 }
 
@@ -23,7 +24,7 @@ class RegisterForm extends React.Component<RegisterProps> {
 
     const { submitted } = this.state;
     const user = {
-      email: '',
+      email: this.props.email || '',
       password: '',
       passwordConfirm: '',
     };

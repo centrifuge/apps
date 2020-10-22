@@ -33,7 +33,7 @@ if (process.env.NODE_ENV === 'development') {
     redirect: 'follow',
     referrer: 'no-referrer',
     body: JSON.stringify({
-      email: 'test@test.org',
+      email: 'gateway@centrifuge.io',
       password: 'admin',
     }),
   })

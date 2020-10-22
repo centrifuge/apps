@@ -21,12 +21,14 @@ import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { UserAuthGuard } from '../auth/admin.auth.guard';
 import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators';
 import { Organization } from '@centrifuge/gateway-lib/models/organization';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Controller()
 export class UsersController {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly centrifugeService: CentrifugeService,
+    private readonly mailerService: MailerService,
   ) {}
 
   @Post(ROUTES.USERS.login)
@@ -103,7 +105,7 @@ export class UsersController {
       throw new ForbiddenException('User already invited!');
     }
 
-    return this.upsertUser(
+    const newUser = this.upsertUser(
       {
         ...user,
         name: user.name!,
@@ -118,6 +120,23 @@ export class UsersController {
       },
       true,
     );
+
+    try {
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Welcome to Centrifuge Gateway',
+        template: 'invite',
+        context: {
+          host: config.applicationHost,
+          username: user.name,
+          email: user.email,
+        },
+      });
+    } catch (e) {
+      console.log(e);
+    }
+
+    return newUser;
   }
 
   @Put(ROUTES.USERS.base)
