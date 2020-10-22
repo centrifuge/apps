@@ -128,7 +128,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         </Heading>
         <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
           <LoadingValue done={balance !== undefined} height={24}>
-            {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 2))}
+            {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))}
           </LoadingValue>
         </Heading>
       </Box>
@@ -139,7 +139,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             <TableCell scope="row">Current Price</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
               <LoadingValue done={tokenPrice !== undefined}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(tokenPrice || '0', 27), 2))}
+                {addThousandsSeparators(toPrecision(baseToDisplay(tokenPrice || '0', 27), 4))}
               </LoadingValue>
             </TableCell>
           </TableRow>
@@ -149,7 +149,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             </TableCell>
             <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
               <LoadingValue done={value !== undefined}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(value || '0', 18), 2))} DAI
+                {addThousandsSeparators(toPrecision(baseToDisplay(value || '0', 18), 4))} DAI
               </LoadingValue>
             </TableCell>
           </TableRow>

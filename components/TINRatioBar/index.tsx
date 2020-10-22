@@ -54,7 +54,7 @@ export const TINRatioBar: React.FC<Props> = (props: Props) => {
             ]
           : [
               {
-                width: 100 - props.current * 100 - props.min * 100,
+                width: 100 - props.current * 100,
                 backgroundColor: '#D8D8D8',
               },
             ]

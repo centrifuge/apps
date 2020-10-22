@@ -127,7 +127,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                         (investmentCapacity || new BN(0)).lt(new BN(0)) ? new BN(0) : investmentCapacity || new BN(0),
                         18
                       ),
-                      2
+                      0
                     )
                   )}{' '}
                   DAI
@@ -180,7 +180,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={poolData?.senior?.pendingInvestments !== undefined}>
                   {addThousandsSeparators(
-                    toPrecision(baseToDisplay(poolData?.senior?.pendingInvestments || '0', 18), 2)
+                    toPrecision(baseToDisplay(poolData?.senior?.pendingInvestments || '0', 18), 0)
                   )}{' '}
                   DAI
                 </LoadingValue>
@@ -196,7 +196,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               <TableCell style={{ textAlign: 'end' }}>
                 <LoadingValue done={poolData?.junior?.pendingInvestments !== undefined}>
                   {addThousandsSeparators(
-                    toPrecision(baseToDisplay(poolData?.junior?.pendingInvestments || '0', 18), 2)
+                    toPrecision(baseToDisplay(poolData?.junior?.pendingInvestments || '0', 18), 0)
                   )}{' '}
                   DAI
                 </LoadingValue>
@@ -208,7 +208,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               </TableCell>
               <TableCell style={{ textAlign: 'end' }}>
                 <LoadingValue done={poolData?.totalPendingInvestments !== undefined}>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.totalPendingInvestments || '0', 18), 2))}{' '}
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.totalPendingInvestments || '0', 18), 0))}{' '}
                   DAI
                 </LoadingValue>
               </TableCell>
@@ -229,7 +229,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={poolData?.senior?.pendingRedemptions !== undefined}>
                   {addThousandsSeparators(
-                    toPrecision(baseToDisplay(poolData?.senior?.pendingRedemptions || '0', 18), 2)
+                    toPrecision(baseToDisplay(poolData?.senior?.pendingRedemptions || '0', 18), 0)
                   )}{' '}
                   DROP
                 </LoadingValue>
@@ -245,7 +245,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               <TableCell style={{ textAlign: 'end' }}>
                 <LoadingValue done={poolData?.junior?.pendingRedemptions !== undefined}>
                   {addThousandsSeparators(
-                    toPrecision(baseToDisplay(poolData?.junior?.pendingRedemptions || '0', 18), 2)
+                    toPrecision(baseToDisplay(poolData?.junior?.pendingRedemptions || '0', 18), 0)
                   )}{' '}
                   TIN
                 </LoadingValue>
@@ -257,7 +257,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               </TableCell>
               <TableCell style={{ textAlign: 'end' }}>
                 <LoadingValue done={poolData?.totalRedemptionsCurrency !== undefined}>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.totalRedemptionsCurrency || '0', 18), 2))}{' '}
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.totalRedemptionsCurrency || '0', 18), 0))}{' '}
                   DAI
                 </LoadingValue>
               </TableCell>

@@ -1,18 +1,20 @@
 import * as React from 'react'
 import BN from 'bn.js'
+import { Spinner } from '@centrifuge/axis-spinner'
 import { Box, Heading, Table, TableCell, TableRow, TableBody, Button, Anchor } from 'grommet'
+import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
+
 import SecondaryHeader from '../../components/SecondaryHeader'
 import { PoolState } from '../../ducks/pool'
 import { LoansState } from '../../ducks/loans'
-import { Spinner } from '@centrifuge/axis-spinner'
 import LoanListData from '../../components/Loan/List'
 import { Pool, UpcomingPool } from '../../config'
 import { PoolLink } from '../../components/PoolLink'
 import { toPrecision } from '../../utils/toPrecision'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import InvestAction from '../../components/InvestAction'
-import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import { LoadingValue } from '../../components/LoadingValue/index'
+import PoolOverviewTable from './PoolOverviewTable'
 
 interface Props {
   userAddress: string
@@ -52,90 +54,93 @@ class Overview extends React.Component<Props> {
         </SecondaryHeader>
 
         <Box direction="row" margin={{ bottom: 'large' }}>
-          <Box basis={'1/3'}>
-            <Box>
-              <Heading level="4" margin={{ top: 'small', bottom: 'small' }}>
-                Assets
-              </Heading>
-              <Table>
-                <TableBody>
-                  <TableRow>
-                    <TableCell scope="row">Active Financings</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>
-                      <LoadingValue done={outstandingLoans !== undefined}>{outstandingLoans}</LoadingValue>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell scope="row">Outstanding Volume</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>
-                      <LoadingValue done={outstandingDebt !== undefined}>
-                        {addThousandsSeparators(toPrecision(baseToDisplay(outstandingDebt || '0', 18), 2))} DAI
-                      </LoadingValue>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell scope="row">Pool Reserve</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>
-                      <LoadingValue done={availableFunds !== undefined}>
-                        {addThousandsSeparators(toPrecision(baseToDisplay(availableFunds || '0', 18), 2))} DAI
-                      </LoadingValue>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+          {selectedPool.version === 2 && (
+            <Box basis={'1/3'}>
+              <Box>
+                <Heading level="4" margin={{ top: 'small', bottom: 'small' }}>
+                  Assets
+                </Heading>
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell scope="row">Active Financings</TableCell>
+                      <TableCell style={{ textAlign: 'end' }}>
+                        <LoadingValue done={outstandingLoans !== undefined}>{outstandingLoans}</LoadingValue>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell scope="row">Outstanding Volume</TableCell>
+                      <TableCell style={{ textAlign: 'end' }}>
+                        <LoadingValue done={outstandingDebt !== undefined}>
+                          {addThousandsSeparators(toPrecision(baseToDisplay(outstandingDebt || '0', 18), 0))} DAI
+                        </LoadingValue>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell scope="row">Pool Reserve</TableCell>
+                      <TableCell style={{ textAlign: 'end' }}>
+                        <LoadingValue done={availableFunds !== undefined}>
+                          {addThousandsSeparators(toPrecision(baseToDisplay(availableFunds || '0', 18), 0))} DAI
+                        </LoadingValue>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
 
-              <Heading level="4" margin={{ top: 'large', bottom: 'small' }}>
-                Investments
-              </Heading>
-              <Table>
-                <TableBody>
-                  <TableRow>
-                    <TableCell scope="row">Current TIN Risk Buffer</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>
-                      <LoadingValue done={currentJuniorRatio !== undefined}>
-                        {addThousandsSeparators(toPrecision(baseToDisplay(currentJuniorRatio || '0', 25), 2))} %
-                      </LoadingValue>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell scope="row">Minimum TIN Risk Buffer</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>
-                      <LoadingValue done={minJuniorRatio !== undefined}>
-                        {addThousandsSeparators(toPrecision(baseToDisplay(minJuniorRatio || '0', 25), 2))} %
-                      </LoadingValue>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell scope="row">DROP APR</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>
-                      <LoadingValue done={dropRate !== undefined}>
-                        {toPrecision(feeToInterestRate(dropRate || '0'), 2)} %
-                      </LoadingValue>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell scope="row">DROP Supply</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>
-                      <LoadingValue done={seniorTokenSupply !== undefined}>
-                        {addThousandsSeparators(toPrecision(baseToDisplay(seniorTokenSupply || '0', 18), 2))} DROP
-                      </LoadingValue>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell scope="row">TIN Supply</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>
-                      <LoadingValue done={juniorTokenSupply !== undefined}>
-                        {addThousandsSeparators(toPrecision(baseToDisplay(juniorTokenSupply || '0', 18), 2))} TIN
-                      </LoadingValue>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-              <Box margin={{ vertical: 'large' }}>
-                <InvestAction pool={selectedPool} />
+                <Heading level="4" margin={{ top: 'large', bottom: 'small' }}>
+                  Investments
+                </Heading>
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell scope="row">Current TIN Risk Buffer</TableCell>
+                      <TableCell style={{ textAlign: 'end' }}>
+                        <LoadingValue done={currentJuniorRatio !== undefined}>
+                          {addThousandsSeparators(toPrecision(baseToDisplay(currentJuniorRatio || '0', 25), 2))} %
+                        </LoadingValue>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell scope="row">Minimum TIN Risk Buffer</TableCell>
+                      <TableCell style={{ textAlign: 'end' }}>
+                        <LoadingValue done={minJuniorRatio !== undefined}>
+                          {addThousandsSeparators(toPrecision(baseToDisplay(minJuniorRatio || '0', 25), 2))} %
+                        </LoadingValue>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell scope="row">DROP APR</TableCell>
+                      <TableCell style={{ textAlign: 'end' }}>
+                        <LoadingValue done={dropRate !== undefined}>
+                          {toPrecision(feeToInterestRate(dropRate || '0'), 2)} %
+                        </LoadingValue>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell scope="row">DROP Supply</TableCell>
+                      <TableCell style={{ textAlign: 'end' }}>
+                        <LoadingValue done={seniorTokenSupply !== undefined}>
+                          {addThousandsSeparators(toPrecision(baseToDisplay(seniorTokenSupply || '0', 18), 0))} DROP
+                        </LoadingValue>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell scope="row">TIN Supply</TableCell>
+                      <TableCell style={{ textAlign: 'end' }}>
+                        <LoadingValue done={juniorTokenSupply !== undefined}>
+                          {addThousandsSeparators(toPrecision(baseToDisplay(juniorTokenSupply || '0', 18), 0))} TIN
+                        </LoadingValue>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+                <Box margin={{ vertical: 'large' }}>
+                  <InvestAction pool={selectedPool} />
+                </Box>
               </Box>
             </Box>
-          </Box>
+          )}
+          {selectedPool.version === 3 && <PoolOverviewTable selectedPool={this.props.selectedPool} />}
           <Box basis={'2/3'} margin={{ top: '0', left: 'large' }}>
             <div>
               <Heading level="4" margin={{ top: 'small' }}>

@@ -62,7 +62,7 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
     }
   }, [status])
 
-  const hasDebt = debt !== '0'
+  // const hasDebt = debt !== '0'
 
   const [error, setError] = React.useState<string | undefined>(undefined)
 
@@ -99,11 +99,10 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
           primary
           label="Repay"
           disabled={
-            !hasDebt ||
-            new BN(repayAmount).isZero() ||
-            error !== undefined ||
-            status === 'unconfirmed' ||
-            status === 'pending'
+            // !hasDebt ||
+            // new BN(repayAmount).isZero() ||
+            // error !== undefined ||
+            status === 'unconfirmed' || status === 'pending'
           }
         />
       </Box>

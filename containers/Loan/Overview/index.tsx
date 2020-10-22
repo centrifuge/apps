@@ -59,7 +59,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                   </Heading>
                   <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
                     <LoadingValue done={poolData?.outstandingVolume !== undefined} height={24}>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.outstandingVolume || '0', 18), 2))}{' '}
+                      {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.outstandingVolume || '0', 18), 0))}{' '}
                       DAI
                     </LoadingValue>
                   </Heading>
@@ -83,10 +83,10 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                       <TableCell style={{ textAlign: 'end' }}>
                         <LoadingValue done={poolData?.reserve !== undefined} height={45}>
                           <>
-                            {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 2))} DAI
+                            {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))} DAI
                             <Sidenote>
                               Max:{' '}
-                              {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 2))}{' '}
+                              {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 0))}{' '}
                               DAI
                             </Sidenote>
                           </>
@@ -103,7 +103,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                       </TableCell>
                       <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                         <LoadingValue done={poolData?.reserve !== undefined} height={45}>
-                          {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.availableFunds || '0', 18), 2))}{' '}
+                          {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.availableFunds || '0', 18), 0))}{' '}
                           DAI
                         </LoadingValue>
                       </TableCell>

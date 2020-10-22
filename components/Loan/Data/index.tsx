@@ -33,12 +33,12 @@ class LoanData extends React.Component<Props> {
         <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'large' }}>
           <Box basis={'1/4'} gap="medium">
             <FormField label="Available for Financing">
-              <NumberInput value={baseToDisplay(principal, 18)} suffix=" DAI" disabled precision={18} />
+              <NumberInput value={baseToDisplay(principal, 18)} suffix=" DAI" disabled precision={4} />
             </FormField>
           </Box>
           <Box basis={'1/4'} gap="medium">
             <FormField label="Outstanding">
-              <NumberInput value={baseToDisplay(debt, 18)} suffix=" DAI" precision={18} disabled />
+              <NumberInput value={baseToDisplay(debt, 18)} suffix=" DAI" precision={4} disabled />
             </FormField>
           </Box>
           <Box basis={'1/4'} gap="medium">
