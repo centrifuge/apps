@@ -88,10 +88,14 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               </>
             )}
             <TableRow>
-              <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+              <TableCell
+                scope="row"
+                style={{ alignItems: 'start', justifyContent: 'center' }}
+                pad={{ vertical: '6px' }}
+              >
                 Current epoch state
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }}>
+              <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
                 <LoadingValue done={poolData?.epoch?.state !== undefined}>
                   {(poolData?.epoch?.state === 'open' || poolData?.epoch?.state === 'can-be-closed') && (
                     <>

@@ -58,7 +58,13 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
             </TableRow>
             <TableRow>
               <TableCell scope="row">
-                <Tooltip text="Net Asset Value">Asset Value</Tooltip>
+                <Tooltip
+                  title="Net Asset Value"
+                  description="The NAV reflects the present value of the outstanding portfolio of financings. It is basically the sum of present values of the risk-adjusted expected repayments of all outstanding financings"
+                  link={{ text: 'Learn more', url: 'https://centrifuge.hackmd.io/OMYT-Gh6Tm-D91CynWX0fA?view#NAV' }}
+                >
+                  <span>Asset Value</span>
+                </Tooltip>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }}>
                 <LoadingValue done={poolData?.netAssetValue !== undefined}>
@@ -119,11 +125,15 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+              <TableCell
+                scope="row"
+                style={{ alignItems: 'start', justifyContent: 'center' }}
+                pad={{ vertical: '6px' }}
+              >
                 TIN Risk Buffer
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }}>
-                <LoadingValue done={currentJuniorRatio !== undefined}>
+              <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                <LoadingValue done={currentJuniorRatio !== undefined} height={39}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(currentJuniorRatio || '0', 25), 2))} %
                   <Sidenote>
                     Min: {addThousandsSeparators(toPrecision(baseToDisplay(minJuniorRatio || '0', 25), 2))} %

@@ -104,7 +104,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
           <TableRow>
             <TableCell scope="row">Settled amount</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(settledAmount, 18), 2))}{' '}
+              {addThousandsSeparators(toPrecision(baseToDisplay(settledAmount, 18), 4))}{' '}
               {props.tranche === 'senior' ? 'DROP' : 'TIN'}
             </TableCell>
           </TableRow>

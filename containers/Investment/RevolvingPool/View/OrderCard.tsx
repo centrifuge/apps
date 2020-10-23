@@ -115,7 +115,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
                       : props.disbursements.remainingRedeemToken,
                     18
                   ),
-                  2
+                  4
                 )
               )}{' '}
               {token}
@@ -126,7 +126,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
               {type === 'Redeem' ? 'Locked value at current token price' : `Token amount at current token price`}
             </TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(lockedValue, 18), 2))}{' '}
+              {addThousandsSeparators(toPrecision(baseToDisplay(lockedValue, 18), 4))}{' '}
               {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'}
             </TableCell>
           </TableRow>

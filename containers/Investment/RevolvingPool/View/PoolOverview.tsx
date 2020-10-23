@@ -73,10 +73,11 @@ const PoolOverview: React.FC<Props> = () => {
                 scope="row"
                 border={{ color: 'transparent' }}
                 style={{ alignItems: 'start', justifyContent: 'center' }}
+                pad={{ vertical: '6px' }}
               >
                 <span>Pool Reserve</span>
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+              <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }} pad={{ vertical: '6px' }}>
                 <LoadingValue done={poolData?.reserve !== undefined} height={39}>
                   <>
                     {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))} DAI
