@@ -456,7 +456,11 @@ export async function executeEpoch(tinlake: ITinlakeV3): Promise<PendingTransact
   return tinlake.executeEpoch()
 }
 
-export async function updateJuniorMemberList(tinlake: ITinlakeV3, user: string, validUntil: number): Promise<PendingTransaction> {
+export async function updateJuniorMemberList(
+  tinlake: ITinlakeV3,
+  user: string,
+  validUntil: number
+): Promise<PendingTransaction> {
   return tinlake.updateJuniorMemberList(user, validUntil)
 }
 

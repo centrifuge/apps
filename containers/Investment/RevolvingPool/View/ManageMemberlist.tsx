@@ -1,11 +1,9 @@
 import * as React from 'react'
 import { Box, Button, TextInput, Select, Heading, FormField } from 'grommet'
-import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { connect, useSelector } from 'react-redux'
 const web3 = require('web3-utils')
 
-import NumberInput from '../../../../components/NumberInput'
 import { loadPool, PoolState } from '../../../../ducks/pool'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
 
