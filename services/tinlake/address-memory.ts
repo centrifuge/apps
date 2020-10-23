@@ -5,30 +5,34 @@
  */
 
 type AddressMemoryItem = {
-    supportsPermits?: boolean
+  supportsPermits?: boolean
 }
 
 const AddressMemoryKey = 'address-memory'
 
 export const getAddressMemory = (address: string): AddressMemoryItem | undefined => {
-    const json = window.localStorage.getItem(AddressMemoryKey)
-    if (json) {
-        const memory = JSON.parse(json)
-        return address in memory ? memory[address] : undefined
-    }
+  const json = window.localStorage.getItem(AddressMemoryKey)
+  if (json) {
+    const memory = JSON.parse(json)
+    return address in memory ? memory[address] : undefined
+  }
 
-    return undefined
+  return undefined
 }
 
-export const setAddressMemory = <K extends keyof AddressMemoryItem>(address: string, key: K, value: AddressMemoryItem[K]) => {
+export const setAddressMemory = <K extends keyof AddressMemoryItem>(
+  address: string,
+  key: K,
+  value: AddressMemoryItem[K]
+) => {
   const json = window.localStorage.getItem(AddressMemoryKey)
   let newMemory
   if (json) {
     const memory = JSON.parse(json)
     if (address in memory) {
-        newMemory = { ...memory, address: { ...memory[address], [key]: value}}
+      newMemory = { ...memory, address: { ...memory[address], [key]: value } }
     } else {
-        newMemory = { ...memory, [address]: { [key]: value }}
+      newMemory = { ...memory, [address]: { [key]: value } }
     }
   } else {
     newMemory = { [address]: { [key]: value } }
