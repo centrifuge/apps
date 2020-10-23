@@ -77,7 +77,7 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
                 <span>Pool Reserve</span>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                <LoadingValue done={poolData?.reserve !== undefined} height={39}>
+                <LoadingValue done={poolData?.reserve !== undefined}>
                   <>{addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))} DAI</>
                 </LoadingValue>
               </TableCell>

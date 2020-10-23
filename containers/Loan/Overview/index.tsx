@@ -77,11 +77,15 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                 <Table margin={{ bottom: 'small' }}>
                   <TableBody>
                     <TableRow>
-                      <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+                      <TableCell
+                        scope="row"
+                        style={{ alignItems: 'start', justifyContent: 'center' }}
+                        pad={{ vertical: '6px' }}
+                      >
                         <span>Pool reserve</span>
                       </TableCell>
-                      <TableCell style={{ textAlign: 'end' }}>
-                        <LoadingValue done={poolData?.reserve !== undefined} height={45}>
+                      <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                        <LoadingValue done={poolData?.reserve !== undefined} height={39}>
                           <>
                             {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))} DAI
                             <Sidenote>
@@ -102,7 +106,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                         <span>Available funds for financing</span>
                       </TableCell>
                       <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                        <LoadingValue done={poolData?.reserve !== undefined} height={45}>
+                        <LoadingValue done={poolData?.reserve !== undefined}>
                           {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.availableFunds || '0', 18), 0))}{' '}
                           DAI
                         </LoadingValue>
