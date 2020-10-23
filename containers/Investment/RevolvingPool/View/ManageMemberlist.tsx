@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Box, Button, TextInput, Select, Heading, FormField } from 'grommet'
+import { Box, Button, CheckBox, TextInput, Select, Heading, FormField } from 'grommet'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { connect, useSelector } from 'react-redux'
 const web3 = require('web3-utils')
@@ -16,28 +16,23 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
 
   const [juniorAddress, setJuniorAddress] = React.useState('')
-  const [juniorValidFor, setJuniorValidFor] = React.useState('1 year')
-
   const [seniorAddress, setSeniorAddress] = React.useState('')
-  const [seniorValidFor, setSeniorValidFor] = React.useState('1 year')
 
   const [juniorStatus, , setJuniorTxId] = useTransactionState()
   const [seniorStatus, , setSeniorTxId] = useTransactionState()
 
   const save = async (tranche: 'senior' | 'junior') => {
     const address = tranche === 'senior' ? seniorAddress : juniorAddress
-    const validFor = tranche === 'senior' ? seniorValidFor : juniorValidFor
 
-    let validUntil = new Date()
-    if (validFor === '1 month') validUntil.setMonth(validUntil.getMonth() + 1)
-    if (validFor === '3 months') validUntil.setMonth(validUntil.getMonth() + 3)
-    if (validFor === '1 year') validUntil.setFullYear(validUntil.getFullYear() + 1)
-    if (validFor === 'Disabled') validUntil.setFullYear(validUntil.getFullYear() - 1)
+    let validUntilDate = new Date()
+    validUntilDate.setFullYear(validUntilDate.getFullYear() + 10)
+
+    const validUntil = Math.round(validUntilDate.getTime() / 1000)
 
     const txId = await props.createTransaction(
-      `Update ${tranche === 'senior' ? 'DROP' : 'TIN'} member  ${juniorAddress.substring(0, 8)}...`,
+      `Allow ${address.substring(0, 8)}... for ${tranche === 'senior' ? 'DROP' : 'TIN'}`,
       tranche === 'senior' ? 'updateSeniorMemberList' : 'updateJuniorMemberList',
-      [props.tinlake, address, validUntil.getTime() / 1000]
+      [props.tinlake, address, validUntil]
     )
 
     if (tranche === 'senior') setSeniorTxId(txId)
@@ -63,7 +58,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
           <Box width="medium" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
-                Update TIN member
+                Add TIN member
               </Heading>
             </Box>
 
@@ -78,23 +73,13 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
             </FormField>
 
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Box>
-                <Select
-                  placeholder="Valid for ..."
-                  options={['1 month', '3 months', '1 year', 'Disabled']}
-                  onChange={(event: any) => {
-                    setJuniorValidFor(event.target.value)
-                  }}
-                  plain
-                />
-              </Box>
               <Button
                 primary
-                label="Update"
+                label="Apply"
                 onClick={() => {
                   save('junior')
                 }}
-                disabled={!juniorAddress || !juniorValidFor || !web3.isAddress(juniorAddress)}
+                disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
               />
             </Box>
           </Box>
@@ -102,7 +87,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
           <Box width="medium" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
-                Update DROP member
+                Add DROP member
               </Heading>
             </Box>
 
@@ -117,23 +102,13 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
             </FormField>
 
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Box>
-                <Select
-                  placeholder="Valid for ..."
-                  options={['1 month', '3 months', '1 year', 'Disabled']}
-                  onChange={(event: any) => {
-                    setSeniorValidFor(event.target.value)
-                  }}
-                  plain
-                />
-              </Box>
               <Button
                 primary
-                label="Update"
+                label="Apply"
                 onClick={() => {
                   save('senior')
                 }}
-                disabled={!seniorAddress || !seniorValidFor || !web3.isAddress(seniorAddress)}
+                disabled={!seniorAddress || !web3.isAddress(seniorAddress)}
               />
             </Box>
           </Box>
