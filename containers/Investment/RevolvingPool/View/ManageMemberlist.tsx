@@ -94,7 +94,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
                 onClick={() => {
                   save('junior')
                 }}
-                disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
+                disabled={!juniorAddress || !juniorValidFor || !web3.isAddress(juniorAddress)}
               />
             </Box>
           </Box>
@@ -121,7 +121,6 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
                 <Select
                   placeholder="Valid for ..."
                   options={['1 month', '3 months', '1 year', 'Disabled']}
-                  value={seniorValidFor}
                   onChange={(event: any) => {
                     setSeniorValidFor(event.target.value)
                   }}
@@ -134,7 +133,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
                 onClick={() => {
                   save('senior')
                 }}
-                disabled={!seniorAddress || !web3.isAddress(seniorAddress)}
+                disabled={!seniorAddress || !seniorValidFor || !web3.isAddress(seniorAddress)}
               />
             </Box>
           </Box>
