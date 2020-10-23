@@ -175,13 +175,13 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell scope="row" border={{ color: 'transparent' }}>
+              <TableCell scope="row" border={{ color: 'transparent' }} pad={{ vertical: '6px' }}>
                 <Box direction="row">
                   <SignIcon src={`/static/plus.svg`} />
                   Investments DROP Tranche
                 </Box>
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+              <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }} pad={{ vertical: '6px' }}>
                 <LoadingValue done={poolData?.senior?.pendingInvestments !== undefined}>
                   {addThousandsSeparators(
                     toPrecision(baseToDisplay(poolData?.senior?.pendingInvestments || '0', 18), 0)
@@ -224,13 +224,17 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell scope="row" border={{ color: 'transparent' }}>
+              <TableCell scope="row" border={{ color: 'transparent' }} pad={{ top: '15px', bottom: '6px' }}>
                 <Box direction="row">
                   <SignIcon src={`/static/min.svg`} />
                   Redemptions DROP Tranche
                 </Box>
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+              <TableCell
+                style={{ textAlign: 'end' }}
+                border={{ color: 'transparent' }}
+                pad={{ top: '15px', bottom: '6px' }}
+              >
                 <LoadingValue done={poolData?.senior?.pendingRedemptions !== undefined}>
                   {addThousandsSeparators(
                     toPrecision(baseToDisplay(poolData?.senior?.pendingRedemptions || '0', 18), 0)

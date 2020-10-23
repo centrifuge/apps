@@ -456,6 +456,18 @@ export async function executeEpoch(tinlake: ITinlakeV3): Promise<PendingTransact
   return tinlake.executeEpoch()
 }
 
+export async function updateJuniorMemberList(tinlake: ITinlakeV3, user: string, validUntil: number): Promise<PendingTransaction> {
+  return tinlake.updateJuniorMemberList(user, validUntil)
+}
+
+export async function updateSeniorMemberList(
+  tinlake: ITinlakeV3,
+  user: string,
+  validUntil: number
+): Promise<PendingTransaction> {
+  return tinlake.updateSeniorMemberList(user, validUntil)
+}
+
 export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData | PoolDataV3 | null> {
   if (isTinlakeV3(tinlake)) {
     return getPoolV3(tinlake)

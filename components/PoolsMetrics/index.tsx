@@ -34,7 +34,7 @@ class PoolsMetrics extends React.Component<Props> {
           <ERC20Display
             value={pools.totalDebt.add(pools.totalRepaysAggregatedAmount).toString()}
             tokenMetas={DAI}
-            precision={2}
+            precision={0}
           />
         </PoolsMetric>
       </Box>

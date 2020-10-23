@@ -49,6 +49,9 @@ export interface PermissionsV3 {
   canSetRiskScore: boolean
   // collector permissions
   canSetLoanPrice: boolean
+  // memberlist permissions
+  canAddToJuniorMemberList: boolean
+  canAddToSeniorMemberList: boolean
 }
 
 // Proxies depend on both the address and the selected pool/registry.
@@ -373,11 +376,15 @@ export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth
         loanPricePermission,
         equityRatioPermission,
         riskScorePermission,
+        juniorMemberListPermission,
+        seniorMemberListPermission,
       ] = await Promise.all([
         tinlake.canSetSeniorTrancheInterest(auth.address),
         tinlake.canSetLoanPrice(auth.address),
         tinlake.canSetMinimumJuniorRatio(auth.address),
         tinlake.canSetRiskScore(auth.address),
+        tinlake.canAddToJuniorMemberList(auth.address),
+        tinlake.canAddToSeniorMemberList(auth.address),
       ])
 
       const permissions = {
@@ -385,6 +392,8 @@ export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth
         canSetLoanPrice: loanPricePermission,
         canSetMinimumJuniorRatio: equityRatioPermission,
         canSetRiskScore: riskScorePermission,
+        canAddToJuniorMemberList: juniorMemberListPermission,
+        canAddToSeniorMemberList: seniorMemberListPermission,
       }
 
       dispatch({ permissions, type: RECEIVE_PERMISSIONS })

@@ -24,9 +24,9 @@ interface Props {
 }
 
 const ERC20Display: FunctionComponent<Props> = ({ value, precision, tokenMetas }: Props) => {
-  Decimal.set({
-    precision,
-  })
+  // Decimal.set({
+  //   precision,
+  // })
 
   const { decimals, logo, symbol } = firstOrThrow(tokenMetas)
 

@@ -10,9 +10,9 @@ interface Props {
 }
 
 const NumberDisplay: FunctionComponent<Props> = ({ value, precision, prefix, suffix }: Props) => {
-  Decimal.set({
-    precision,
-  })
+  // Decimal.set({
+  //   precision,
+  // })
 
   const valueToDecimal = new Decimal(value.toString()).toFixed(precision)
   const formatted = addThousandsSeparators(valueToDecimal.toString())
