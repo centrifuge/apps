@@ -44,7 +44,7 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
   const [status, , setTxId] = useTransactionState()
 
   const submit = async () => {
-    const valueToDecimal = new Decimal(baseToDisplay(tokenValue, 18)).toFixed(2)
+    const valueToDecimal = new Decimal(baseToDisplay(tokenValue, 18)).toFixed(4)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
     const method = props.tranche === 'senior' ? 'submitSeniorRedeemOrder' : 'submitJuniorRedeemOrder'

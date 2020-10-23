@@ -4,7 +4,6 @@ import { Spinner } from '@centrifuge/axis-spinner'
 import { Box, Heading, Table, TableCell, TableRow, TableBody, Button, Anchor } from 'grommet'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 
-import SecondaryHeader from '../../components/SecondaryHeader'
 import { PoolState } from '../../ducks/pool'
 import { LoansState } from '../../ducks/loans'
 import LoanListData from '../../components/Loan/List'
@@ -49,9 +48,7 @@ class Overview extends React.Component<Props> {
 
     return (
       <Box margin={{ bottom: 'large', top: 'medium' }}>
-        <SecondaryHeader>
-          <Heading level="4">Pool Overview of {selectedPool.name} </Heading>
-        </SecondaryHeader>
+        <Heading level="4">Pool Overview of {selectedPool.name} </Heading>
 
         <Box direction="row" margin={{ bottom: 'large' }}>
           {selectedPool.version === 2 && (
@@ -134,7 +131,7 @@ class Overview extends React.Component<Props> {
                     </TableRow>
                   </TableBody>
                 </Table>
-                <Box margin={{ vertical: 'large' }}>
+                <Box margin={{ vertical: 'medium' }}>
                   <InvestAction pool={selectedPool} />
                 </Box>
               </Box>

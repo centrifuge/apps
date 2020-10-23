@@ -73,12 +73,21 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+              <TableCell
+                scope="row"
+                style={{ alignItems: 'start', justifyContent: 'center' }}
+                pad={{ vertical: '6px' }}
+              >
                 <span>Pool Reserve</span>
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }}>
-                <LoadingValue done={poolData?.reserve !== undefined}>
-                  <>{addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))} DAI</>
+              <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                <LoadingValue done={poolData?.reserve !== undefined} height={39}>
+                  <>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))} DAI
+                    <Sidenote>
+                      Max: {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 0))} DAI
+                    </Sidenote>
+                  </>
                 </LoadingValue>
               </TableCell>
             </TableRow>
@@ -143,7 +152,7 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
             </TableRow>
           </TableBody>
         </Table>
-        <Box margin={{ vertical: 'large' }}>
+        <Box margin={{ vertical: 'medium' }}>
           <InvestAction pool={props.selectedPool} />
         </Box>
       </Box>

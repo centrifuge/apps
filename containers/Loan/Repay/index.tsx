@@ -29,7 +29,7 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
     if (!repayAmount) return
     await props.ensureAuthed!()
 
-    const valueToDecimal = new Decimal(baseToDisplay(repayAmount, 18)).toFixed(2)
+    const valueToDecimal = new Decimal(baseToDisplay(repayAmount, 18)).toFixed(4)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
     let txId: string

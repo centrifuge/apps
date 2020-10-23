@@ -60,7 +60,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
         type === 'Invest' ? props.disbursements.payoutTokenAmount : props.disbursements.payoutCurrencyAmount,
         18
       )
-    ).toFixed(2)
+    ).toFixed(4)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
     const method = props.tranche === 'senior' ? 'disburseSenior' : 'disburseJunior'
