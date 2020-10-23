@@ -117,8 +117,8 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           <TokenLogo src={`/static/${token}_final.svg`} />
           {token} Balance
         </Heading>
-        <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-          <LoadingValue done={balance !== undefined} height={24}>
+        <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+          <LoadingValue done={balance !== undefined} height={22}>
             {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))}
           </LoadingValue>
         </Heading>

@@ -57,8 +57,8 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                   <Heading level="5" margin={'0'}>
                     Outstanding Volume
                   </Heading>
-                  <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                    <LoadingValue done={poolData?.outstandingVolume !== undefined} height={24}>
+                  <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+                    <LoadingValue done={poolData?.outstandingVolume !== undefined} height={22}>
                       {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.outstandingVolume || '0', 18), 0))}{' '}
                       DAI
                     </LoadingValue>

@@ -41,7 +41,7 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
           <Heading level="5" margin={'0'}>
             Pool Value
           </Heading>
-          <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+          <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
             <LoadingValue done={poolValue !== undefined} height={24}>
               {addThousandsSeparators(toPrecision(baseToDisplay(poolValue || '0', 18), 0))} DAI
             </LoadingValue>
@@ -85,7 +85,7 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
           </TableBody>
         </Table>
 
-        <Heading level="4" margin={{ top: 'large', bottom: 'small' }}>
+        <Heading level="5" margin={{ top: 'large', bottom: 'small' }}>
           Investments
         </Heading>
         <Table>
