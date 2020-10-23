@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Box, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
 import { useSelector } from 'react-redux'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
+import { Tooltip } from '@centrifuge/axis-tooltip'
 
 import { Pool, UpcomingPool } from '../../config'
 import { toPrecision } from '../../utils/toPrecision'
@@ -56,7 +57,9 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell scope="row">Asset Value</TableCell>
+              <TableCell scope="row">
+                <Tooltip text="Net Asset Value">Asset Value</Tooltip>
+              </TableCell>
               <TableCell style={{ textAlign: 'end' }}>
                 <LoadingValue done={poolData?.netAssetValue !== undefined}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))} DAI

@@ -527,6 +527,10 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
 
   const epoch = await getEpoch(tinlake)
 
+  const address = await tinlake.signer?.getAddress()
+  const seniorInMemberlist = address ? await tinlake.checkSeniorTokenMemberlist(address) : false
+  const juniorInMemberlist = address ? await tinlake.checkJuniorTokenMemberlist(address) : false
+
   return {
     minJuniorRatio,
     maxJuniorRatio,
@@ -548,6 +552,7 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
       address: tinlake.contractAddresses['JUNIOR_TOKEN'],
       pendingInvestments: juniorPendingInvestments,
       pendingRedemptions: juniorPendingRedemptions,
+      inMemberlist: juniorInMemberlist,
     },
     senior: {
       type: 'senior',
@@ -560,6 +565,7 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
       interestRate: seniorInterestRate,
       pendingInvestments: seniorPendingInvestments,
       pendingRedemptions: seniorPendingRedemptions,
+      inMemberlist: seniorInMemberlist,
     },
     availableFunds: availableCurrency,
   }
