@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Box, Button, CheckBox, TextInput, Select, Heading, FormField } from 'grommet'
+import { Box, Button, TextInput, Heading, FormField } from 'grommet'
 import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { connect, useSelector } from 'react-redux'
 const web3 = require('web3-utils')
@@ -24,8 +24,8 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
   const save = async (tranche: 'senior' | 'junior') => {
     const address = tranche === 'senior' ? seniorAddress : juniorAddress
 
-    let validUntilDate = new Date()
-    validUntilDate.setFullYear(validUntilDate.getFullYear() + 10)
+    const validUntilDate = new Date()
+    validUntilDate.setFullYear(validUntilDate.getFullYear() + 100)
 
     const validUntil = Math.round(validUntilDate.getTime() / 1000)
 

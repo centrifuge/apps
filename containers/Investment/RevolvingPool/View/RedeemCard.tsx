@@ -44,11 +44,14 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
   const [status, , setTxId] = useTransactionState()
 
   const submit = async () => {
-    const valueToDecimal = new Decimal(baseToDisplay(tokenValue, 18)).toFixed(4)
+    const valueToDecimal = new Decimal(baseToDisplay(tokenValue, 18)).toDecimalPlaces(4)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
     const method = props.tranche === 'senior' ? 'submitSeniorRedeemOrder' : 'submitJuniorRedeemOrder'
-    const txId = await props.createTransaction(`Redeem ${formatted} ${token}`, method, [props.tinlake, tokenValue])
+    const txId = await props.createTransaction(`Lock ${formatted} ${token} for redemption`, method, [
+      props.tinlake,
+      tokenValue,
+    ])
     setTxId(txId)
   }
 
@@ -74,7 +77,7 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
   }
   return (
     <Box>
-      <Description margin={{ top: 'medium' }}>
+      <Description margin={{ top: 'small' }}>
         Please set the amount of {token} you want to redeem from Tinlake. Your {token} will be locked until the end of
         the epoch, at which point your order will be executed. You can withdraw your DAI in the next epoch.{' '}
       </Description>

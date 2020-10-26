@@ -60,7 +60,7 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
               <TableCell scope="row">
                 <Tooltip
                   title="Net Asset Value"
-                  description="The NAV reflects the present value of the outstanding portfolio of financings. It is basically the sum of present values of the risk-adjusted expected repayments of all outstanding financings"
+                  description="The NAV reflects the present value of the outstanding portfolio of financings. It is basically the sum of present values of the risk-adjusted expected repayments of all outstanding financings."
                   link={{ text: 'Learn more', url: 'https://centrifuge.hackmd.io/OMYT-Gh6Tm-D91CynWX0fA?view#NAV' }}
                 >
                   <span>Asset Value</span>

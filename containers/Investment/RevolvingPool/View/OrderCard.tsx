@@ -11,7 +11,7 @@ import BN from 'bn.js'
 import { secondsToHms } from '../../../../utils/time'
 import { PoolDataV3, PoolState } from '../../../../ducks/pool'
 
-import { Description, Warning, Info, MinTimeRemaining } from './styles'
+import { Description, Warning, Info, MinTimeRemaining, OrderSteps } from './styles'
 import { Card } from './TrancheOverview'
 
 interface Props extends TransactionProps {
@@ -73,20 +73,27 @@ const OrderCard: React.FC<Props> = (props: Props) => {
   }, [status])
 
   const rolledOver =
+    epochData &&
+    epochData?.id &&
     !epochData?.isBlockedState &&
     epochData?.id !== (props.tranche === 'senior' ? epochData?.seniorOrderedInEpoch : epochData?.juniorOrderedInEpoch)
   const disabled = status === 'pending' || status === 'unconfirmed' || epochData?.isBlockedState
 
   return (
     <Box>
-      <Heading level="6" margin={{ bottom: 'xsmall' }}>
+      <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
         Pending {type} Order
       </Heading>
       <Description>
         {!rolledOver && (
           <>
-            You have locked {token} to {type.toLowerCase()} {type === 'Invest' ? 'into' : 'from'} Tinlake for the next
+            You have locked {token} to {type.toLowerCase()} {type === 'Invest' ? 'in' : 'from'} the pool for the next
             epoch. You can cancel this order until the end of the current epoch.
+            {epochData?.minimumEpochTimeLeft !== 0 && (
+              <MinTimeRemaining>
+                Time remaining for current epoch: {secondsToHms(epochData?.minimumEpochTimeLeft || 0)}
+              </MinTimeRemaining>
+            )}
           </>
         )}
         {rolledOver && (
@@ -97,6 +104,11 @@ const OrderCard: React.FC<Props> = (props: Props) => {
           </>
         )}
       </Description>
+
+      <OrderSteps
+        src={`/static/steps/locked-order-${props.tranche === 'senior' ? 'drop' : 'tin'}.svg`}
+        alt="Order steps"
+      />
 
       <Table margin={{ top: 'medium' }}>
         <TableBody>

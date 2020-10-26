@@ -57,16 +57,6 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 <LoadingValue done={poolData?.epoch?.id !== undefined}>{poolData?.epoch?.id || ''}</LoadingValue>
               </TableCell>
             </TableRow>
-            {/* {poolData?.epoch?.isBlockedState && (
-              <TableRow>
-                <TableCell scope="row">Minimum time until next epoch starts</TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={poolData?.epoch.minChallengePeriodEnd !== undefined}>
-                    {secondsToHms((poolData?.epoch.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000)}
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-            )} */}
             {!poolData?.epoch?.isBlockedState && (
               <>
                 <TableRow>
@@ -77,14 +67,6 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                     </LoadingValue>
                   </TableCell>
                 </TableRow>
-                {/* <TableRow>
-                  <TableCell scope="row">Minimum time left in current epoch</TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={poolData?.epoch?.minimumEpochTimeLeft !== undefined}>
-                      {secondsToHms(poolData?.epoch?.minimumEpochTimeLeft || 0)}
-                    </LoadingValue>
-                  </TableCell>
-                </TableRow> */}
               </>
             )}
             <TableRow>
@@ -96,7 +78,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 Current epoch state
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
-                <LoadingValue done={poolData?.epoch?.state !== undefined}>
+                <LoadingValue done={poolData?.epoch?.state !== undefined} height={39}>
                   {(poolData?.epoch?.state === 'open' || poolData?.epoch?.state === 'can-be-closed') && (
                     <>
                       Open

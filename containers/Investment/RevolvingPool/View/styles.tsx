@@ -22,6 +22,12 @@ export const TokenLogo = styled.img`
   top: -2px;
 `
 
+export const OrderSteps = styled.img`
+  display: block;
+  width: 100%;
+  margin: 0 auto;
+`
+
 export const Sidenote = styled.div`
   color: #888;
   font-size: 12px;
