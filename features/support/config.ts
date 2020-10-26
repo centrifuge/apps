@@ -31,6 +31,7 @@ export const config: Config = {
 export interface Pool {
   addresses:      Addresses;
   contractConfig: ContractConfig;
+  slug: string;
 }
 
 export interface Addresses {

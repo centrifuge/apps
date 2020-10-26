@@ -1,5 +1,5 @@
 import { Given, When, Then } from "cucumber"
-import { openPage } from "./browser-actions"
+import { openPage, openPoolPage } from "./browser-actions";
 import { config } from "./config"
 import { CentrifugeWorld } from "./world";
 import { selectors } from "./selectors";
@@ -23,11 +23,11 @@ Given('I am logged into MetaMask as borrower', async function (this: CentrifugeW
 });
 
 Given("I am on the Tinlake investments page", async function (this: CentrifugeWorld) {
-  await openPage(this, `${config.tinlakeUrl}/${config.tinlakePool.addresses.ROOT_CONTRACT}/investments`);
+  await openPoolPage(this, 'investments');
 });
 
 Given("I am on the Tinlake mint NFT page", async function (this: CentrifugeWorld) {
-  await openPage(this, `${config.tinlakeUrl}/${config.tinlakePool.addresses.ROOT_CONTRACT}/demo/mint-nft`);
+  await openPoolPage(this, 'demo/mint-nft');
 });
 
 Given("I am connected to Tinlake", async function (this: CentrifugeWorld) {
