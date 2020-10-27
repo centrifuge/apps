@@ -6,6 +6,7 @@ const baseFundingRoute = `${API_BASE}/funding`;
 const userRoutes = {
   base: baseUsersRoute,
   login: `${baseUsersRoute}/login`,
+  generateToken: `${baseUsersRoute}/generateToken`,
   logout: `${baseUsersRoute}/logout`,
   invite: `${baseUsersRoute}/invite`,
   register: `${baseUsersRoute}/register`,

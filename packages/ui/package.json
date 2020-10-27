@@ -44,7 +44,7 @@
     "yup": "0.27.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "REACT_APP_ADMIN_USER=${CENTRIFUGE_ADMIN_EMAIL:=gateway@centrifuge.io} REACT_APP_ADMIN_PASSWORD=${CENTRIFUGE_ADMIN_PASWORD:=admin} react-scripts start",
     "build": "react-scripts build",
     "clean": "rm -rf ./build",
     "test": "react-scripts test --coverage"

@@ -19,7 +19,7 @@ instance.interceptors.response.use(response => {
   if (error.response.status === 403) {
     window.location.reload()
   }
-  return error;
+  throw error;
 });
 
 
@@ -27,6 +27,7 @@ instance.interceptors.response.use(response => {
 export const httpClient = {
   user: {
     login: async (user: User) => instance.post(ROUTES.USERS.login, user),
+    generateToken: async (user: User) => instance.post(ROUTES.USERS.generateToken, user),
     logout: async () => instance.get(ROUTES.USERS.logout),
     register: async (user: User) => instance.post(ROUTES.USERS.base, user),
     invite: async (user: User) => instance.post(ROUTES.USERS.invite, user),

@@ -33,8 +33,8 @@ if (process.env.NODE_ENV === 'development') {
     redirect: 'follow',
     referrer: 'no-referrer',
     body: JSON.stringify({
-      email: 'gateway@centrifuge.io',
-      password: 'admin',
+      email: process.env.REACT_APP_ADMIN_USER,
+      password: process.env.REACT_APP_ADMIN_PASSWORD,
     }),
   })
     .then(res => res.json())

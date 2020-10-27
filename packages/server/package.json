@@ -31,9 +31,9 @@
   },
   "dependencies": {
     "@centrifuge/gateway-lib": "*",
+    "@nestjs-modules/mailer": "^1.4.2",
     "@nestjs/common": "6.3.0",
     "@nestjs/core": "6.3.0",
-    "@nestjs-modules/mailer": "^1.4.2",
     "@nestjs/passport": "6.2.0",
     "@nestjs/platform-express": "6.3.0",
     "bcrypt": "5.0.0",
@@ -50,6 +50,7 @@
     "passport-local": "^1.0.0",
     "portable-fetch": "^3.0.0",
     "reflect-metadata": "^0.1.12",
+    "speakeasy": "^2.0.0",
     "web3-eth": "^1.2.6"
   },
   "eslintConfig": {

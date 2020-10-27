@@ -3,5 +3,5 @@
   "watch": ["src"],
   "ext": "ts",
   "ignore": ["src/**/*spec.ts"],
-  "exec": "ts-node --project tsconfig.json -r tsconfig-paths/register src/main.ts"
+  "exec": "NODE_ENV=development ts-node --project tsconfig.json -r tsconfig-paths/register src/main.ts"
 }

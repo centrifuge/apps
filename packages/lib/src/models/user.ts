@@ -23,15 +23,24 @@ export interface IChainAccount {
   };
 }
 
+export type TwoFASecret = {
+  ascii: string;
+  hex: string;
+  base32: string;
+  otpauth_url: string;
+};
+
 export class User implements IUser {
   name: string = '';
   password?: string = '';
+  token?: string;
   email: string = '';
   _id?: string;
   account: string = '';
   chain: IChainAccount;
   permissions: PERMISSIONS[] = [];
   schemas: string[] = [];
+  secret?: TwoFASecret;
   enabled: boolean;
   invited: boolean;
 }
@@ -39,7 +48,6 @@ export class User implements IUser {
 export class UserWithOrg extends User {
   organizationName?: string;
 }
-
 
 export const canWriteToDoc = (
   user: { account: string } | null,

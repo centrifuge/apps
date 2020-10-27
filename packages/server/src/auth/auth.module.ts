@@ -5,17 +5,17 @@ import { LocalStrategy } from './local.strategy';
 import { CookieSerializer } from './cookie-serializer';
 import { DatabaseModule } from '../database/database.module';
 import {UserAuthGuard} from './admin.auth.guard';
+import { TwoFAStrategy } from './2fa.strategy';
 
 @Module({
   imports: [
-    PassportModule.register({
-      defaultStrategy: 'local',
-    }),
+    PassportModule.register({}),
     DatabaseModule,
   ],
   providers: [
     AuthService,
     LocalStrategy,
+    TwoFAStrategy,
     UserAuthGuard,
     CookieSerializer,
   ],
