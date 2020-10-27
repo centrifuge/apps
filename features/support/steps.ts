@@ -48,8 +48,6 @@ Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld
 
   const afterVal = (await tinlake.getMinJuniorRatio()).toString()
   assert.equal(newVal, afterVal)
-
-  // await this.currentPage.waitFor(300000)
 })
 
 Given('I have set the NFT reference to {string}', async function(this: CentrifugeWorld, string: string) {
@@ -73,6 +71,8 @@ When('I do mint NFT', async function(this: CentrifugeWorld) {
   debugger
   const button = await this.currentPage.waitForXPath(selectors.tinlake.mintNFTButton)
   await button.click()
+
+  // await this.currentPage.waitFor(10000)
 
   await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 300000 })
 })

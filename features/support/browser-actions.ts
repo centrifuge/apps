@@ -9,7 +9,7 @@ export async function openBrowser(world: CentrifugeWorld) {
   world.browser = await dappeteer.launch(puppeteer, {
     headless: false,
     slowMo: 0,
-    devtools: true,
+    devtools: false,
     args: [
       // '--no-sandbox',
       // '--disable-setuid-sandbox',
