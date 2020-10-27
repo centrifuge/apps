@@ -8,6 +8,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Docker build
-        run: docker build -t tinlake-e2e-tests docker
+        run: docker build -t tinlake-e2e-tests -f docker/Dockerfile .
       - name: Docker run
         run: docker run -it tinlake-e2e-tests
