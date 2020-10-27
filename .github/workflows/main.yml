@@ -1,13 +1,5 @@
 name: 'Run tests'
-description: 'Run end-to-end tests'
-
-on:
-  push:
-    branches:
-    - master
-  pull_request:
-    branches:
-      - master
+on: [push, pull_request]
 
 jobs:
   test:
