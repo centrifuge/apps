@@ -9,7 +9,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     redeemSenior = async (tokenAmount: string) => {
-      return this.pending(this.contract('SENIOR_OPERATOR').redeem(tokenAmount, this.overrides))
+      return this.pending(this.contract('SENIOR_OPERATOR').redeem(tokenAmount, { ...this.overrides, gasLimit: 300000 }))
     }
 
     getSeniorTokenAllowance = async (owner: string) => {
@@ -28,7 +28,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     redeemJunior = async (tokenAmount: string) => {
-      return this.pending(this.contract('JUNIOR_OPERATOR').redeem(tokenAmount, this.overrides))
+      return this.pending(this.contract('JUNIOR_OPERATOR').redeem(tokenAmount, { ...this.overrides, gasLimit: 300000 }))
     }
 
     getJuniorTokenAllowance = async (owner: string) => {
