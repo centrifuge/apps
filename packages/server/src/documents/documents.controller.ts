@@ -126,6 +126,7 @@ export class DocumentsController {
       },
     );
 
+
     const commitResp = await this.commitPendingDoc(createResult, request);
     return await this.updateDBDoc(
       commitResp.commitResult,
@@ -157,6 +158,7 @@ export class DocumentsController {
     );
     document.header = cloneResult.header;
 
+
     const commitResp = await this.commitPendingDoc(document, request);
     const commit = await this.centrifugeService.pullForJobComplete(
       commitResp.commitResult.header.job_id,
@@ -171,6 +173,7 @@ export class DocumentsController {
           scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
         },
       );
+
       return await this.updateDBDoc(
         updateResult,
         commitResp.dbId,

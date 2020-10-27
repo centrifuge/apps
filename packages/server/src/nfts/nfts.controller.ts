@@ -42,26 +42,24 @@ export class NftsController {
         payload,
     );
 
-    const doc = await this.databaseService.documents.findOne(
-        {'header.document_id': mintingResult.document_id},
-    );
-    await this.databaseService.documents.updateById(doc._id, {
-      $set: {
-        nft_status: NftStatus.Minting,
-      },
-    });
+    const docId = mintingResult.document_id;
+    await this.databaseService.documents.update({'header.document_id':docId},{
+          $set: {
+            nft_status: NftStatus.Minting,
+          },
+        }
+      );
 
     const mint = await this.centrifugeService.pullForJobComplete(mintingResult.header.job_id, request.user.account);
-
     if (mint.status === 'success') {
-      await this.databaseService.documents.updateById(doc._id, {
+      await this.databaseService.documents.update({'header.document_id': docId}, {
         $set: {
           nft_status: NftStatus.Minted,
         },
       });
 
       if (body.oracle_address === '0x0000000000000000000000000000000000000000') {
-        console.log('not pushing to oracle', doc)
+        console.log('not pushing to oracle', mintingResult)
         return
       }
 
@@ -83,7 +81,7 @@ export class NftsController {
       }
 
     } else {
-      return await this.databaseService.documents.updateById(doc._id, {
+      return await this.databaseService.documents.update({'header.document_id': docId}, {
         $set: {
           nft_status: NftStatus.MintingFail,
         },
