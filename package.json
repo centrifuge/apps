@@ -8,8 +8,13 @@
     "format": "prettier --write \"./**/*.{ts,tsx}\"",
     "check-format": "prettier --check \"./**/*.{ts,tsx}\""
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/centrifuge/e2e-tests.git"
+  },
   "author": "",
   "license": "ISC",
+  "homepage": "https://github.com/centrifuge/e2e-tests#readme",
   "dependencies": {
     "@centrifuge/tinlake-js": "3.0.0-develop.33",
     "@types/cucumber": "6.0.1",
