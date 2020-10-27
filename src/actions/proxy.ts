@@ -126,7 +126,9 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         loanId,
       ])
 
-      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
+      return this.pending(
+        proxy.execute(this.contract('ACTIONS').address, encoded, { ...this.overrides, gasLimit: 450000 })
+      )
     }
   }
 }
