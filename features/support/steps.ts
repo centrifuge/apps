@@ -68,6 +68,7 @@ When('I set Min TIN ratio to {int}%', async function (this: CentrifugeWorld, int
 });
 
 When('I do mint NFT', async function (this: CentrifugeWorld) {
+  debugger;
   const button = await this.currentPage.waitForXPath(selectors.tinlake.mintNFTButton)
   await button.click()
 

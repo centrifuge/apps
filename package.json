@@ -1,7 +1,7 @@
 {
-  "name": "testing",
+  "name": "@centrifuge/e2e-tests",
   "version": "1.0.0",
-  "description": "",
+  "description": "End-to-end tests for the Tinlake dapp",
   "main": "index.js",
   "scripts": {
     "test": "cucumber-js"
@@ -9,18 +9,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@centrifuge/tinlake-js": "0.0.19-develop.22",
-    "@types/puppeteer": "^3.0.0",
+    "@centrifuge/tinlake-js": "3.0.0-develop.33",
+    "@types/cucumber": "6.0.1",
+    "@types/puppeteer": "3.0.2",
     "cucumber": "^6.0.5",
-    "dappeteer": "^1.0.0",
-    "dotenv": "^8.2.0",
+    "dappeteer": "1.0.0",
+    "dotenv": "8.2.0",
     "ethers": "4.0.45",
-    "puppeteer": "^3.1.0",
-    "ts-node": "^8.10.1",
-    "tsc": "^1.20150623.0",
-    "typescript": "^3.9.3"
-  },
-  "devDependencies": {
-    "@types/cucumber": "^6.0.1"
+    "puppeteer": "5.4.0",
+    "ts-node": "9.0.0",
+    "typescript": "4.0.5"
   }
 }

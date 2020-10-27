@@ -9,7 +9,7 @@ export async function openBrowser(world: CentrifugeWorld) {
   world.browser = await dappeteer.launch(puppeteer, {
     headless: false,
     slowMo: 0,
-    devtools: false,
+    devtools: true,
     args: [
       // '--no-sandbox',
       // '--disable-setuid-sandbox',
@@ -26,7 +26,7 @@ export async function openPage(world: CentrifugeWorld, url: string) {
 
 export async function openPoolPage(world: CentrifugeWorld, path: string) {
   world.currentPage = await world.browser.newPage()
-  const url = `${config.tinlakeUrl}/pool/${config.tinlakePool.addresses.ROOT_CONTRACT}/${config.tinlakePool.slug}/${path}`;
+  const url = `${config.tinlakeUrl}pool/${config.tinlakePool.addresses.ROOT_CONTRACT}/${config.tinlakePool.slug}/${path}`;
   await world.currentPage.goto(url, {
     waitUntil: ["load"],
   });

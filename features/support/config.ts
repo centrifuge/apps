@@ -30,7 +30,6 @@ export const config: Config = {
 
 export interface Pool {
   addresses:      Addresses;
-  contractConfig: ContractConfig;
   slug: string;
 }
 
@@ -39,9 +38,3 @@ export interface Addresses {
   ACTIONS:        string;
   PROXY_REGISTRY: string;
 }
-
-export interface ContractConfig {
-  JUNIOR_OPERATOR: string;
-  SENIOR_OPERATOR: string;
-}
-

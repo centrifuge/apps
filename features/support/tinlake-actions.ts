@@ -17,11 +17,8 @@ export async function ensureTinlakeInit(world: CentrifugeWorld): Promise<ITinlak
     transactionTimeout: 3600,
     contractAddresses: config.tinlakePool.addresses,
     signer: wallet.connect(provider),
-    contractConfig: config.tinlakePool.contractConfig,
     overrides: { gasLimit: config.gasLimit }
   }) as any;
-
-  // await world.tinlake.setContractAddresses()
 
   return world.tinlake
 }
