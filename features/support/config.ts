@@ -1,17 +1,17 @@
 require('dotenv').config()
 
 export interface Config {
-  gatewayUrl: string,
-  tinlakeUrl: string,
-  rpcUrl: string,
-  ethNetwork: string,
-  ethAdminAddress: string,
-  ethAdminPrivateKey: string,
-  ethBorrowerAddress: string,
-  ethBorrowerPrivateKey: string,
-  tinlakePool: Pool,
-  gasLimit: number,
-  nftRegistry: string,
+  gatewayUrl: string
+  tinlakeUrl: string
+  rpcUrl: string
+  ethNetwork: string
+  ethAdminAddress: string
+  ethAdminPrivateKey: string
+  ethBorrowerAddress: string
+  ethBorrowerPrivateKey: string
+  tinlakePool: Pool
+  gasLimit: number
+  nftRegistry: string
 }
 
 export const config: Config = {
@@ -29,12 +29,12 @@ export const config: Config = {
 }
 
 export interface Pool {
-  addresses:      Addresses;
-  slug: string;
+  addresses: Addresses
+  slug: string
 }
 
 export interface Addresses {
-  ROOT_CONTRACT:  string;
-  ACTIONS:        string;
-  PROXY_REGISTRY: string;
+  ROOT_CONTRACT: string
+  ACTIONS: string
+  PROXY_REGISTRY: string
 }

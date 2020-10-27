@@ -1,62 +1,62 @@
-import { Given, When, Then } from "cucumber"
-import { displayToBase } from "@centrifuge/tinlake-js";
-import * as assert from "assert";
+import { Given, When, Then } from 'cucumber'
+import { displayToBase } from '@centrifuge/tinlake-js'
+import * as assert from 'assert'
 
-import { openPage, openPoolPage } from "./browser-actions";
-import { config } from "./config"
-import { CentrifugeWorld } from "./world";
-import { selectors } from "./selectors";
+import { openPage, openPoolPage } from './browser-actions'
+import { config } from './config'
+import { CentrifugeWorld } from './world'
+import { selectors } from './selectors'
 import { getTextContent } from './utils/getTextContent'
-import { waitUntil } from "./utils/waitUntil";
+import { waitUntil } from './utils/waitUntil'
 
-Given("I am on the Gateway Page", async function (this: CentrifugeWorld) {
-  await openPage(this, config.gatewayUrl);
-});
+Given('I am on the Gateway Page', async function(this: CentrifugeWorld) {
+  await openPage(this, config.gatewayUrl)
+})
 
-Given('I am logged into MetaMask as Tinlake admin', async function (this: CentrifugeWorld) {
+Given('I am logged into MetaMask as Tinlake admin', async function(this: CentrifugeWorld) {
   await this.metamaskImportAdminPK()
   await this.metamaskSwitchNetwork()
-});
+})
 
-Given('I am logged into MetaMask as borrower', async function (this: CentrifugeWorld) {
+Given('I am logged into MetaMask as borrower', async function(this: CentrifugeWorld) {
   await this.metamaskImportBorrowerPK()
   await this.metamaskSwitchNetwork()
-});
+})
 
-Given("I am on the Tinlake investments page", async function (this: CentrifugeWorld) {
-  await openPoolPage(this, 'investments');
-});
+Given('I am on the Tinlake investments page', async function(this: CentrifugeWorld) {
+  await openPoolPage(this, 'investments')
+})
 
-Given("I am on the Tinlake mint NFT page", async function (this: CentrifugeWorld) {
-  await openPoolPage(this, 'demo/mint-nft');
-});
+Given('I am on the Tinlake mint NFT page', async function(this: CentrifugeWorld) {
+  await openPoolPage(this, 'demo/mint-nft')
+})
 
-Given("I am connected to Tinlake", async function (this: CentrifugeWorld) {
+Given('I am connected to Tinlake', async function(this: CentrifugeWorld) {
   const connect = await this.currentPage.waitForXPath(selectors.tinlake.connectButton)
   await connect.click()
   const metamask = await this.currentPage.waitForXPath(selectors.tinlake.onboardMetamaskButton)
   await metamask.click()
   await this.metamaskApprove()
-});
+})
 
-Given('the min TIN ratio is set to {int}%', async function (this: CentrifugeWorld, int: number) {
+Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld, int: number) {
   const tinlake = await this.initializedTinlake()
   // console.log("min junior ratio before", (await tinlake.getMinJuniorRatio()).toString())
-  const newVal = displayToBase(`${int}`, 27-2) // 27 is the default, but the int is given in percentage points
+  const newVal = displayToBase(`${int}`, 27 - 2) // 27 is the default, but the int is given in percentage points
   // console.log("will set min junior ratio to", newVal)
   await tinlake.setMinimumJuniorRatio(newVal)
   const afterVal = (await tinlake.getMinJuniorRatio()).toString()
   // console.log("min junior ratio after", afterVal)
   assert.equal(newVal, afterVal)
-});
+})
 
-Given('I have set the NFT reference to {string}', async function (this: CentrifugeWorld, string: string) {
+Given('I have set the NFT reference to {string}', async function(this: CentrifugeWorld, string: string) {
   const input = await this.currentPage.waitForXPath(selectors.tinlake.mintNFTReferenceInput)
   await input.click({ clickCount: 3 }) // triple click to select all content
   await input.type(string)
-});
+})
 
-When('I set Min TIN ratio to {int}%', async function (this: CentrifugeWorld, int: number) {
+When('I set Min TIN ratio to {int}%', async function(this: CentrifugeWorld, int: number) {
   const input = await this.currentPage.waitForXPath(selectors.tinlake.minTINRatioInput)
   await input.click({ clickCount: 3 }) // triple click to select all content
   await input.type(`${int}`)
@@ -65,28 +65,31 @@ When('I set Min TIN ratio to {int}%', async function (this: CentrifugeWorld, int
   await button.click()
 
   await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 100000 })
-});
+})
 
-When('I do mint NFT', async function (this: CentrifugeWorld) {
-  debugger;
+When('I do mint NFT', async function(this: CentrifugeWorld) {
+  debugger
   const button = await this.currentPage.waitForXPath(selectors.tinlake.mintNFTButton)
   await button.click()
 
   await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 300000 })
-});
+})
 
-Then('I see that Min TIN ratio component is set to {int}%', async function (this: CentrifugeWorld, int: number) {
+Then('I see that Min TIN ratio component is set to {int}%', async function(this: CentrifugeWorld, int: number) {
   const expected = `${int}.00 %`
   let actual = ''
-  await waitUntil(async () => {
-    const display = await this.currentPage.waitForXPath(selectors.tinlake.minTINRatioDisplay)
-    actual = await getTextContent(display)
+  await waitUntil(
+    async () => {
+      const display = await this.currentPage.waitForXPath(selectors.tinlake.minTINRatioDisplay)
+      actual = await getTextContent(display)
 
-    return actual === expected
-  }, { errorMsg: `expected min tin ratio display to show ${int} %, but got ${actual}`})
-});
+      return actual === expected
+    },
+    { errorMsg: `expected min tin ratio display to show ${int} %, but got ${actual}` }
+  )
+})
 
-Then('I see that NFT ID is shown in UI', async function (this: CentrifugeWorld) {
+Then('I see that NFT ID is shown in UI', async function(this: CentrifugeWorld) {
   const alert = await this.currentPage.waitForXPath(selectors.tinlake.mintNFTSuccessAlert)
   const text = await getTextContent(alert)
 
@@ -98,13 +101,13 @@ Then('I see that NFT ID is shown in UI', async function (this: CentrifugeWorld) 
   // console.log('NFT ID:', this.context.nftID)
 
   assert.ok(this.context.nftID, 'NFT ID must not be empty')
-});
+})
 
-Then('that minted NFT is in my wallet', async function (this: CentrifugeWorld) {
+Then('that minted NFT is in my wallet', async function(this: CentrifugeWorld) {
   const tinlake = await this.initializedTinlake()
   const owner = await tinlake.getNFTOwner(config.nftRegistry, this.context.nftID)
 
   // console.log({ owner: owner.toString() })
 
   assert.equal(owner.toString().toLowerCase(), config.ethBorrowerAddress.toLowerCase())
-});
+})

@@ -4,7 +4,9 @@
   "description": "End-to-end tests for the Tinlake dapp",
   "main": "index.js",
   "scripts": {
-    "test": "cucumber-js"
+    "test": "cucumber-js",
+    "format": "prettier --write \"./**/*.{ts,tsx}\"",
+    "check-format": "prettier --check \"./**/*.{ts,tsx}\""
   },
   "author": "",
   "license": "ISC",
@@ -16,8 +18,11 @@
     "dappeteer": "1.0.0",
     "dotenv": "8.2.0",
     "ethers": "4.0.45",
-    "puppeteer": "5.4.0",
+    "puppeteer": "5.2.1",
     "ts-node": "9.0.0",
     "typescript": "4.0.5"
+  },
+  "devDependencies": {
+    "prettier": "1.19.1"
   }
 }

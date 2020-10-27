@@ -2,7 +2,7 @@ import { ethers } from 'ethers'
 import Tinlake, { ITinlake } from '@centrifuge/tinlake-js'
 
 import { CentrifugeWorld } from './world'
-import { config } from './config';
+import { config } from './config'
 
 export async function ensureTinlakeInit(world: CentrifugeWorld): Promise<ITinlake> {
   if (world.tinlake) {
@@ -17,8 +17,8 @@ export async function ensureTinlakeInit(world: CentrifugeWorld): Promise<ITinlak
     transactionTimeout: 3600,
     contractAddresses: config.tinlakePool.addresses,
     signer: wallet.connect(provider),
-    overrides: { gasLimit: config.gasLimit }
-  }) as any;
+    overrides: { gasLimit: config.gasLimit },
+  }) as any
 
   return world.tinlake
 }

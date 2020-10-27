@@ -19,4 +19,4 @@ export const selectors = {
     mintNFTSuccessAlert: `//div[contains(text(), "Successfully minted NFT for Token ID")]`,
     mintNFTButton: `//body[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[3]/button[1]`, // //button[contains(., "Mint NFT")]
   },
-};
+}

@@ -1,7 +1,7 @@
 import * as puppeteer from 'puppeteer'
 import * as dappeteer from 'dappeteer'
 import { CentrifugeWorld } from './world'
-import { config } from "./config";
+import { config } from './config'
 
 export async function openBrowser(world: CentrifugeWorld) {
   // console.log('Using chromium at', puppeteer.executablePath())
@@ -26,10 +26,10 @@ export async function openPage(world: CentrifugeWorld, url: string) {
 
 export async function openPoolPage(world: CentrifugeWorld, path: string) {
   world.currentPage = await world.browser.newPage()
-  const url = `${config.tinlakeUrl}pool/${config.tinlakePool.addresses.ROOT_CONTRACT}/${config.tinlakePool.slug}/${path}`;
+  const url = `${config.tinlakeUrl}pool/${config.tinlakePool.addresses.ROOT_CONTRACT}/${config.tinlakePool.slug}/${path}`
   await world.currentPage.goto(url, {
-    waitUntil: ["load"],
-  });
+    waitUntil: ['load'],
+  })
 }
 
 export async function closeBrowser(world: CentrifugeWorld) {
@@ -41,4 +41,3 @@ export async function closeBrowser(world: CentrifugeWorld) {
 export async function takeScreenshot(world: CentrifugeWorld, path = './screenshots/error-occured-here.png') {
   await world.currentPage.screenshot({ path })
 }
-

@@ -10,7 +10,7 @@ Before(async function(this: CentrifugeWorld, scenario) {
   await this.metamaskInit()
 })
 
-After( async function(this: CentrifugeWorld, scenario) {
+After(async function(this: CentrifugeWorld, scenario) {
   this.clearContext()
 
   if (scenario.result.exception || scenario.result.status === Status.FAILED) {
