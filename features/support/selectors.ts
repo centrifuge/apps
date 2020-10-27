@@ -10,9 +10,9 @@ export const selectors = {
     onboardMetamaskButton: `//aside[contains(concat(' ',normalize-space(@class),' '),' bn-onboard-modal ')]//button[span[contains(text(), 'MetaMask')]]`,
 
     // investor page
-    minTINRatioDisplay: `//div[span[contains(., "Minimum TIN ratio")]]//span`,
-    minTINRatioInput: `//div[label[contains(., "Min TIN ratio")]]//input`,
-    setMinTINRatioButton: `//button[contains(., "Set min TIN ratio")]`,
+    minTINRatioDisplay: `//div[div[h5[contains(., "Min TIN risk buffer")]]]//h4`,
+    minTINRatioInput: `//div[label[contains(., "Set minimum TIN risk buffer")]]//input`,
+    setMinTINRatioButton: `//div[div[h5[contains(., "Min TIN risk buffer")]]]//button[contains(., "Apply")]`,
 
     // mint nft page
     mintNFTReferenceInput: `//div[label[contains(., "NFT Reference")]]//input`,

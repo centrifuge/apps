@@ -41,13 +41,15 @@ Given('I am connected to Tinlake', async function(this: CentrifugeWorld) {
 
 Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld, int: number) {
   const tinlake = await this.initializedTinlake()
-  // console.log("min junior ratio before", (await tinlake.getMinJuniorRatio()).toString())
   const newVal = displayToBase(`${int}`, 27 - 2) // 27 is the default, but the int is given in percentage points
-  // console.log("will set min junior ratio to", newVal)
-  await tinlake.setMinimumJuniorRatio(newVal)
+
+  const setTx = await tinlake.setMinimumJuniorRatio(newVal)
+  await tinlake.getTransactionReceipt(setTx)
+
   const afterVal = (await tinlake.getMinJuniorRatio()).toString()
-  // console.log("min junior ratio after", afterVal)
   assert.equal(newVal, afterVal)
+
+  // await this.currentPage.waitFor(300000)
 })
 
 Given('I have set the NFT reference to {string}', async function(this: CentrifugeWorld, string: string) {
@@ -76,7 +78,7 @@ When('I do mint NFT', async function(this: CentrifugeWorld) {
 })
 
 Then('I see that Min TIN ratio component is set to {int}%', async function(this: CentrifugeWorld, int: number) {
-  const expected = `${int}.00 %`
+  const expected = `${int}.00%`
   let actual = ''
   await waitUntil(
     async () => {
