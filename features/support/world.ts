@@ -1,10 +1,11 @@
 import { setWorldConstructor, setDefaultTimeout } from 'cucumber';
 import { Browser, Page } from 'puppeteer';
+import { ITinlake } from '@centrifuge/tinlake-js';
 import { Dappeteer, TransactionOptions } from 'dappeteer';
-import { ITinlake } from 'tinlake';
+import * as dappeteer from "dappeteer"
+
 import { ensureTinlakeInit } from './tinlake-actions';
 import { config } from './config';
-import * as dappeteer from "dappeteer"
 
 export class CentrifugeWorld {
 

@@ -1,12 +1,13 @@
 import { Given, When, Then } from "cucumber"
+import { displayToBase } from "@centrifuge/tinlake-js";
+import * as assert from "assert";
+
 import { openPage, openPoolPage } from "./browser-actions";
 import { config } from "./config"
 import { CentrifugeWorld } from "./world";
 import { selectors } from "./selectors";
 import { getTextContent } from './utils/getTextContent'
 import { waitUntil } from "./utils/waitUntil";
-import * as assert from 'assert'
-import { displayToBase } from "tinlake";
 
 Given("I am on the Gateway Page", async function (this: CentrifugeWorld) {
   await openPage(this, config.gatewayUrl);
