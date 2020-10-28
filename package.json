@@ -13,6 +13,7 @@
     "dev:next": "PORT=3000 node server.js",
     "build:next": "next build",
     "start": "run-p -l dev:next dev:lambda",
+    "serve": "next start",
     "test": "jest",
     "export": "npm run build && next export",
     "lint": "tslint --project .",
