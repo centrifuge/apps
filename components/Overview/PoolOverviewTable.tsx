@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Box, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
 import { useSelector } from 'react-redux'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
+import { Tooltip } from '@centrifuge/axis-tooltip'
 
 import { Pool, UpcomingPool } from '../../config'
 import { toPrecision } from '../../utils/toPrecision'
@@ -40,7 +41,7 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
           <Heading level="5" margin={'0'}>
             Pool Value
           </Heading>
-          <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+          <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
             <LoadingValue done={poolValue !== undefined} height={24}>
               {addThousandsSeparators(toPrecision(baseToDisplay(poolValue || '0', 18), 0))} DAI
             </LoadingValue>
@@ -56,7 +57,19 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell scope="row">Asset Value</TableCell>
+              <TableCell scope="row">
+                <Tooltip
+                  title="Net Asset Value"
+                  description="The NAV reflects the present value of the outstanding portfolio of financings. It is basically the sum of present values of the risk-adjusted expected repayments of all outstanding financings."
+                  link={{
+                    text: 'Learn more',
+                    url:
+                      'https://medium.com/centrifuge/tinlake-pricing-and-valuation-series-part-2-valuing-an-asset-portfolio-247d8f2f0d5',
+                  }}
+                >
+                  <span>Asset Value</span>
+                </Tooltip>
+              </TableCell>
               <TableCell style={{ textAlign: 'end' }}>
                 <LoadingValue done={poolData?.netAssetValue !== undefined}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))} DAI
@@ -64,19 +77,28 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+              <TableCell
+                scope="row"
+                style={{ alignItems: 'start', justifyContent: 'center' }}
+                pad={{ vertical: '6px' }}
+              >
                 <span>Pool Reserve</span>
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }}>
+              <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
                 <LoadingValue done={poolData?.reserve !== undefined} height={39}>
-                  <>{addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))} DAI</>
+                  <>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))} DAI
+                    <Sidenote>
+                      Max: {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 0))} DAI
+                    </Sidenote>
+                  </>
                 </LoadingValue>
               </TableCell>
             </TableRow>
           </TableBody>
         </Table>
 
-        <Heading level="4" margin={{ top: 'large', bottom: 'small' }}>
+        <Heading level="5" margin={{ top: 'large', bottom: 'small' }}>
           Investments
         </Heading>
         <Table>
@@ -116,11 +138,15 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+              <TableCell
+                scope="row"
+                style={{ alignItems: 'start', justifyContent: 'center' }}
+                pad={{ vertical: '6px' }}
+              >
                 TIN Risk Buffer
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }}>
-                <LoadingValue done={currentJuniorRatio !== undefined}>
+              <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                <LoadingValue done={currentJuniorRatio !== undefined} height={39}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(currentJuniorRatio || '0', 25), 2))} %
                   <Sidenote>
                     Min: {addThousandsSeparators(toPrecision(baseToDisplay(minJuniorRatio || '0', 25), 2))} %
@@ -130,7 +156,7 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
             </TableRow>
           </TableBody>
         </Table>
-        <Box margin={{ vertical: 'large' }}>
+        <Box margin={{ vertical: 'medium' }}>
           <InvestAction pool={props.selectedPool} />
         </Box>
       </Box>

@@ -14,6 +14,7 @@ export interface PoolTranche extends Tranche {
   pendingRedemptions?: BN
   decimals?: number
   address?: string
+  inMemberlist?: boolean
 }
 
 export interface PoolData {

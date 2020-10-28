@@ -44,7 +44,7 @@ class Dashboard extends React.Component<Props> {
                       margin={{ left: 'xsmall', top: 'small' }}
                       href="https://centrifuge.io/products/tinlake/"
                       target="_blank"
-                      label="Learn More"
+                      label="Learn more"
                     />
                   </Text>
                 </Box>

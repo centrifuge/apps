@@ -69,7 +69,7 @@ class PoolList extends React.Component<Props> {
               align: 'center',
               render: (p: PoolData) => (
                 <Box style={{ maxWidth: '150px' }}>
-                  <NumberDisplay suffix="" precision={2} value={baseToDisplay(p.totalDebt, 18)} />
+                  <NumberDisplay suffix="" precision={0} value={baseToDisplay(p.totalDebt, 18)} />
                 </Box>
               ),
             },
@@ -78,14 +78,14 @@ class PoolList extends React.Component<Props> {
               property: 'totalRepaysAggregatedAmountNum',
               align: 'center',
               render: (p: PoolData) => (
-                <NumberDisplay suffix="" precision={2} value={baseToDisplay(p.totalRepaysAggregatedAmount, 18)} />
+                <NumberDisplay suffix="" precision={0} value={baseToDisplay(p.totalRepaysAggregatedAmount, 18)} />
               ),
             },
             {
               header: 'DROP APR',
               property: 'seniorInterestRateNum',
               align: 'center',
-              render: (p: PoolData) => <NumberDisplay suffix="%" value={feeToInterestRate(p.seniorInterestRate)} />,
+              render: (p: PoolData) => <NumberDisplay suffix=" %" value={feeToInterestRate(p.seniorInterestRate)} />,
             },
             {
               header: '',

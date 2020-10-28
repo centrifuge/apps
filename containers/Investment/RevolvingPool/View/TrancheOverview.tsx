@@ -36,8 +36,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   const [card, setCard] = React.useState<Card>('home')
 
-  const [isInMemberlist, setIsInMemberlist] = React.useState<boolean | undefined>(undefined)
-
   const [balance, setBalance] = React.useState<string | undefined>(undefined)
   const [tokenPrice, setTokenPrice] = React.useState<string | undefined>(undefined)
   const value =
@@ -63,12 +61,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
     setTokenPrice(tokenPrice.toString())
 
     if (address) {
-      const isInMemberlist =
-        props.tranche === 'senior'
-          ? await props.tinlake.checkSeniorTokenMemberlist(address)
-          : await props.tinlake.checkJuniorTokenMemberlist(address)
-      setIsInMemberlist(isInMemberlist)
-
       const balance =
         props.tranche === 'senior'
           ? await props.tinlake.getSeniorTokenBalance(address)
@@ -83,7 +75,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       setHasPendingOrder(!disbursements.remainingSupplyCurrency.add(disbursements.remainingRedeemToken).isZero())
       setHasPendingCollection(!disbursements.payoutCurrencyAmount.add(disbursements.payoutTokenAmount).isZero())
     } else {
-      setIsInMemberlist(false)
       setBalance('0')
     }
   }
@@ -126,8 +117,8 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           <TokenLogo src={`/static/${token}_final.svg`} />
           {token} Balance
         </Heading>
-        <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-          <LoadingValue done={balance !== undefined} height={24}>
+        <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+          <LoadingValue done={balance !== undefined} height={22}>
             {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))}
           </LoadingValue>
         </Heading>
@@ -156,7 +147,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         </TableBody>
       </Table>
 
-      {isInMemberlist === true && (
+      {trancheData?.inMemberlist === true && (
         <>
           {card === 'home' && (
             <>
@@ -222,7 +213,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         </>
       )}
 
-      {isInMemberlist === false && (
+      {trancheData?.inMemberlist === false && (
         <Info>
           <Heading level="6" margin={{ bottom: 'xsmall' }}>
             Interested in investing?

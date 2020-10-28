@@ -57,16 +57,6 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 <LoadingValue done={poolData?.epoch?.id !== undefined}>{poolData?.epoch?.id || ''}</LoadingValue>
               </TableCell>
             </TableRow>
-            {/* {poolData?.epoch?.isBlockedState && (
-              <TableRow>
-                <TableCell scope="row">Minimum time until next epoch starts</TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={poolData?.epoch.minChallengePeriodEnd !== undefined}>
-                    {secondsToHms((poolData?.epoch.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000)}
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-            )} */}
             {!poolData?.epoch?.isBlockedState && (
               <>
                 <TableRow>
@@ -77,22 +67,18 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                     </LoadingValue>
                   </TableCell>
                 </TableRow>
-                {/* <TableRow>
-                  <TableCell scope="row">Minimum time left in current epoch</TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={poolData?.epoch?.minimumEpochTimeLeft !== undefined}>
-                      {secondsToHms(poolData?.epoch?.minimumEpochTimeLeft || 0)}
-                    </LoadingValue>
-                  </TableCell>
-                </TableRow> */}
               </>
             )}
             <TableRow>
-              <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+              <TableCell
+                scope="row"
+                style={{ alignItems: 'start', justifyContent: 'center' }}
+                pad={{ vertical: '6px' }}
+              >
                 Current epoch state
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }}>
-                <LoadingValue done={poolData?.epoch?.state !== undefined}>
+              <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                <LoadingValue done={poolData?.epoch?.state !== undefined} height={39}>
                   {(poolData?.epoch?.state === 'open' || poolData?.epoch?.state === 'can-be-closed') && (
                     <>
                       Open
@@ -171,13 +157,13 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell scope="row" border={{ color: 'transparent' }}>
+              <TableCell scope="row" border={{ color: 'transparent' }} pad={{ vertical: '6px' }}>
                 <Box direction="row">
                   <SignIcon src={`/static/plus.svg`} />
                   Investments DROP Tranche
                 </Box>
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+              <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }} pad={{ vertical: '6px' }}>
                 <LoadingValue done={poolData?.senior?.pendingInvestments !== undefined}>
                   {addThousandsSeparators(
                     toPrecision(baseToDisplay(poolData?.senior?.pendingInvestments || '0', 18), 0)
@@ -220,13 +206,17 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell scope="row" border={{ color: 'transparent' }}>
+              <TableCell scope="row" border={{ color: 'transparent' }} pad={{ top: '15px', bottom: '6px' }}>
                 <Box direction="row">
                   <SignIcon src={`/static/min.svg`} />
                   Redemptions DROP Tranche
                 </Box>
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+              <TableCell
+                style={{ textAlign: 'end' }}
+                border={{ color: 'transparent' }}
+                pad={{ top: '15px', bottom: '6px' }}
+              >
                 <LoadingValue done={poolData?.senior?.pendingRedemptions !== undefined}>
                   {addThousandsSeparators(
                     toPrecision(baseToDisplay(poolData?.senior?.pendingRedemptions || '0', 18), 0)

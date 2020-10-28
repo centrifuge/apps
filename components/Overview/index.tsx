@@ -4,7 +4,6 @@ import { Spinner } from '@centrifuge/axis-spinner'
 import { Box, Heading, Table, TableCell, TableRow, TableBody, Button, Anchor } from 'grommet'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 
-import SecondaryHeader from '../../components/SecondaryHeader'
 import { PoolState } from '../../ducks/pool'
 import { LoansState } from '../../ducks/loans'
 import LoanListData from '../../components/Loan/List'
@@ -48,16 +47,14 @@ class Overview extends React.Component<Props> {
     const latestLoans = allLoans ? allLoans.slice(startIndex, allLoans.length) : []
 
     return (
-      <Box margin={{ bottom: 'large' }}>
-        <SecondaryHeader>
-          <Heading level="3">Pool Overview: {selectedPool.name} </Heading>
-        </SecondaryHeader>
+      <Box margin={{ bottom: 'large', top: 'medium' }}>
+        <Heading level="4">Pool Overview of {selectedPool.name} </Heading>
 
         <Box direction="row" margin={{ bottom: 'large' }}>
           {selectedPool.version === 2 && (
             <Box basis={'1/3'}>
               <Box>
-                <Heading level="4" margin={{ top: 'small', bottom: 'small' }}>
+                <Heading level="5" margin={{ top: 'small', bottom: 'small' }}>
                   Assets
                 </Heading>
                 <Table>
@@ -87,7 +84,7 @@ class Overview extends React.Component<Props> {
                   </TableBody>
                 </Table>
 
-                <Heading level="4" margin={{ top: 'large', bottom: 'small' }}>
+                <Heading level="5" margin={{ top: 'large', bottom: 'small' }}>
                   Investments
                 </Heading>
                 <Table>
@@ -134,7 +131,7 @@ class Overview extends React.Component<Props> {
                     </TableRow>
                   </TableBody>
                 </Table>
-                <Box margin={{ vertical: 'large' }}>
+                <Box margin={{ vertical: 'medium' }}>
                   <InvestAction pool={selectedPool} />
                 </Box>
               </Box>
@@ -143,7 +140,7 @@ class Overview extends React.Component<Props> {
           {selectedPool.version === 3 && <PoolOverviewTable selectedPool={this.props.selectedPool} />}
           <Box basis={'2/3'} margin={{ top: '0', left: 'large' }}>
             <div>
-              <Heading level="4" margin={{ top: 'small' }}>
+              <Heading level="5" margin={{ top: 'small' }}>
                 Asset Originator Details
               </Heading>
               <a href={selectedPool.website} target="_blank">

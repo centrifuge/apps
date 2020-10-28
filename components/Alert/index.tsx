@@ -21,8 +21,8 @@ const colors = {
     color: '#9b2c2c',
   },
   info: {
-    backgroundColor: '#bee3f8',
-    color: '#2c5282',
+    backgroundColor: '#f2f2f2',
+    color: '#333',
   },
   success: {
     backgroundColor: '#c6f6d5',
@@ -34,7 +34,7 @@ const AlertContainer = styled(Box)<{ type: 'error' | 'info' | 'success' }>`
   padding: 24px;
   background-color: ${(p) => colors[p.type].backgroundColor};
   color: ${(p) => colors[p.type].color};
-  border-radius: 18px;
+  border-radius: 8px;
 `
 
 export default Alert

@@ -16,10 +16,11 @@ class WrongNetwork extends React.Component<Props> {
     const { expected, actual } = this.props
 
     return (
-      <Alert type="error" margin="large">
-        <h1 style={{ marginTop: 0 }}>Please Change Network to {expected}</h1>
+      <Alert type="info" margin="large">
+        <h2 style={{ marginTop: 0, marginBottom: 0 }}>Change your network to {expected.toLowerCase()}</h2>
         <p style={{ marginBottom: 0 }}>
-          You are currently connected with {actual}. Please change your network to {expected} in order to use Tinlake.
+          You are currently connected with {actual.toLowerCase()}. Please change your network to{' '}
+          {expected.toLowerCase()} in order to use Tinlake.
         </p>
       </Alert>
     )

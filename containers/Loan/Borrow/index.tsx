@@ -33,7 +33,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
     if (!borrowAmount || error) return
     await props.ensureAuthed!()
 
-    const valueToDecimal = new Decimal(baseToDisplay(borrowAmount, 18)).toFixed(2)
+    const valueToDecimal = new Decimal(baseToDisplay(borrowAmount, 18)).toFixed(4)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
     const txId = await props.createTransaction(`Finance Asset ${props.loan.loanId} (${formatted} DAI)`, 'borrow', [

@@ -1,9 +1,11 @@
 import BN from 'bn.js'
 import { Loan, interestRateToFee, ITinlake, PendingTransaction } from '@centrifuge/tinlake-js'
 import { ITinlake as ITinlakeV3, NFT } from '@centrifuge/tinlake-js-v3'
+
 import { maxUint256 } from '../../utils/maxUint256'
 import { PoolData, PoolDataV3, EpochData } from '../../ducks/pool'
 import { isTinlakeV3 } from '../../utils/tinlakeVersion'
+import { getAddressMemory, setAddressMemory } from './address-memory'
 
 export type TrancheType = 'junior' | 'senior'
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -265,11 +267,20 @@ export async function submitSeniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
 
   const address = await tinlake.signer?.getAddress()
 
+  if (getAddressMemory(address)?.supportsPermits === false) {
+    return await tinlake.submitSeniorSupplyOrderWithAllowance(amount, address)
+  }
+
   try {
     const permit = await tinlake.signSupplyPermit(amount, address, 'senior')
     return tinlake.submitSeniorSupplyOrderWithPermit(amount, permit)
-  } catch {
-    return await tinlake.submitSeniorSupplyOrderWithAllowance(amount, address)
+  } catch (e) {
+    if (e.message.includes('Not supported on this device')) {
+      setAddressMemory(address, 'supportsPermits', false)
+      return await tinlake.submitSeniorSupplyOrderWithAllowance(amount, address)
+    }
+
+    return { status: 0, error: e.message }
   }
 }
 
@@ -301,11 +312,20 @@ export async function submitJuniorSupplyOrder(tinlake: ITinlakeV3, amount: strin
 
   const address = await tinlake.signer?.getAddress()
 
+  if (getAddressMemory(address)?.supportsPermits === false) {
+    return await tinlake.submitJuniorSupplyOrderWithAllowance(amount, address)
+  }
+
   try {
     const permit = await tinlake.signSupplyPermit(amount, address, 'junior')
     return tinlake.submitJuniorSupplyOrderWithPermit(amount, permit)
-  } catch {
-    return await tinlake.submitJuniorSupplyOrderWithAllowance(amount, address)
+  } catch (e) {
+    if (e.message.includes('Not supported on this device')) {
+      setAddressMemory(address, 'supportsPermits', false)
+      return await tinlake.submitJuniorSupplyOrderWithAllowance(amount, address)
+    }
+
+    return { status: 0, error: e.message }
   }
 }
 
@@ -337,11 +357,20 @@ export async function submitSeniorRedeemOrder(tinlake: ITinlakeV3, amount: strin
 
   const address = await tinlake.signer?.getAddress()
 
+  if (getAddressMemory(address)?.supportsPermits === false) {
+    return await tinlake.submitSeniorRedeemOrderWithAllowance(amount, address)
+  }
+
   try {
     const permit = await tinlake.signRedeemPermit(amount, address, 'senior')
     return tinlake.submitSeniorRedeemOrderWithPermit(amount, permit)
-  } catch {
-    return await tinlake.submitSeniorRedeemOrderWithAllowance(amount, address)
+  } catch (e) {
+    if (e.message.includes('Not supported on this device')) {
+      setAddressMemory(address, 'supportsPermits', false)
+      return await tinlake.submitSeniorRedeemOrderWithAllowance(amount, address)
+    }
+
+    return { status: 0, error: e.message }
   }
 }
 
@@ -373,11 +402,20 @@ export async function submitJuniorRedeemOrder(tinlake: ITinlakeV3, amount: strin
 
   const address = await tinlake.signer?.getAddress()
 
+  if (getAddressMemory(address)?.supportsPermits === false) {
+    return await tinlake.submitJuniorRedeemOrderWithAllowance(amount, address)
+  }
+
   try {
     const permit = await tinlake.signRedeemPermit(amount, address, 'junior')
     return tinlake.submitJuniorRedeemOrderWithPermit(amount, permit)
-  } catch {
-    return await tinlake.submitJuniorRedeemOrderWithAllowance(amount, address)
+  } catch (e) {
+    if (e.message.includes('Not supported on this device')) {
+      setAddressMemory(address, 'supportsPermits', false)
+      return await tinlake.submitJuniorRedeemOrderWithAllowance(amount, address)
+    }
+
+    return { status: 0, error: e.message }
   }
 }
 
@@ -416,6 +454,22 @@ export async function solveEpoch(tinlake: ITinlakeV3): Promise<PendingTransactio
 
 export async function executeEpoch(tinlake: ITinlakeV3): Promise<PendingTransaction> {
   return tinlake.executeEpoch()
+}
+
+export async function updateJuniorMemberList(
+  tinlake: ITinlakeV3,
+  user: string,
+  validUntil: number
+): Promise<PendingTransaction> {
+  return tinlake.updateJuniorMemberList(user, validUntil)
+}
+
+export async function updateSeniorMemberList(
+  tinlake: ITinlakeV3,
+  user: string,
+  validUntil: number
+): Promise<PendingTransaction> {
+  return tinlake.updateSeniorMemberList(user, validUntil)
 }
 
 export async function getPool(tinlake: ITinlake | ITinlakeV3): Promise<PoolData | PoolDataV3 | null> {
@@ -527,6 +581,10 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
 
   const epoch = await getEpoch(tinlake)
 
+  const address = await tinlake.signer?.getAddress()
+  const seniorInMemberlist = address ? await tinlake.checkSeniorTokenMemberlist(address) : false
+  const juniorInMemberlist = address ? await tinlake.checkJuniorTokenMemberlist(address) : false
+
   return {
     minJuniorRatio,
     maxJuniorRatio,
@@ -548,6 +606,7 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
       address: tinlake.contractAddresses['JUNIOR_TOKEN'],
       pendingInvestments: juniorPendingInvestments,
       pendingRedemptions: juniorPendingRedemptions,
+      inMemberlist: juniorInMemberlist,
     },
     senior: {
       type: 'senior',
@@ -560,6 +619,7 @@ export async function getPoolV3(tinlake: ITinlakeV3): Promise<PoolDataV3 | null>
       interestRate: seniorInterestRate,
       pendingInvestments: seniorPendingInvestments,
       pendingRedemptions: seniorPendingRedemptions,
+      inMemberlist: seniorInMemberlist,
     },
     availableFunds: availableCurrency,
   }

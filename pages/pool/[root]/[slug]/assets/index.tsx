@@ -44,7 +44,7 @@ class LoanListPage extends React.Component<Props> {
                     render={(auth) => (
                       <Box>
                         <SecondaryHeader margin={{ top: 'medium' }}>
-                          <Heading level="4">Asset Overview {pool.name}</Heading>
+                          <Heading level="4">Asset Overview of {pool.name}</Heading>
                           <PoolLink href={'/assets/issue'}>
                             <Button primary label="Open Financing" />
                           </PoolLink>

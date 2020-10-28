@@ -29,7 +29,7 @@ const InvestorSupply: React.FC<Props> = (props: Props) => {
   const supply = async () => {
     await ensureAuthed!()
 
-    const valueToDecimal = new Decimal(baseToDisplay(supplyAmount, 18)).toFixed(2)
+    const valueToDecimal = new Decimal(baseToDisplay(supplyAmount, 18)).toFixed(4)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
     const tokenSymbol = props.trancheType === 'senior' ? 'DROP' : 'TIN'
 

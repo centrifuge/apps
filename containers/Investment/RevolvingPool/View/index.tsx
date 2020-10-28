@@ -6,11 +6,12 @@ import { connect, useDispatch, useSelector } from 'react-redux'
 import { loadPool } from '../../../../ducks/pool'
 
 import { ExplainerCard } from './styles'
-import PoolOverview from './PoolOverview'
+import InvestmentOverview from './InvestmentOverview'
 import TrancheOverview from './TrancheOverview'
 import EpochOverview from './EpochOverview'
 import AdminActions from './AdminActions'
-import { AuthState } from '../../../../ducks/auth'
+import { AuthState, PermissionsV3 } from '../../../../ducks/auth'
+import ManageMemberlist from './ManageMemberlist'
 
 interface Props {
   activePool: Pool
@@ -20,6 +21,9 @@ interface Props {
 
 const InvestmentsView: React.FC<Props> = (props: Props) => {
   const isAdmin = props.auth?.permissions?.canSetMinimumJuniorRatio
+  const canManagePermissions =
+    (props.auth?.permissions as PermissionsV3 | undefined)?.canAddToJuniorMemberList ||
+    (props.auth?.permissions as PermissionsV3 | undefined)?.canAddToSeniorMemberList
 
   const dispatch = useDispatch()
   const address = useSelector<any, string | null>((state) => state.auth.address)
@@ -30,7 +34,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
 
   return (
     <Box margin={{ top: 'medium' }}>
-      <Heading level="4">Pool Overview {props.activePool?.name}</Heading>
+      <Heading level="4">Investment Overview of {props.activePool?.name}</Heading>
       <ExplainerCard margin={{ bottom: 'medium' }}>
         Investors can invest into this Tinlake pool through two tokens that are backed by collateral locked by the Asset
         Originator: TIN and DROP. Both tokens represent the liquidity deposited into Tinlake and accrue interest over
@@ -39,7 +43,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
         lower) returns at the DROP rate.
       </ExplainerCard>
 
-      <PoolOverview />
+      <InvestmentOverview />
 
       <Heading level="4">Invest/Redeem in {props.activePool?.name}</Heading>
       <ExplainerCard margin={{ bottom: 'medium' }}>
@@ -56,6 +60,13 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
           <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="junior" />
         </Box>
       </Box>
+
+      {canManagePermissions && (
+        <>
+          <Heading level="4">Manage members for {props.activePool?.name}</Heading>
+          <ManageMemberlist tinlake={props.tinlake} />
+        </>
+      )}
 
       {isAdmin && (
         <>

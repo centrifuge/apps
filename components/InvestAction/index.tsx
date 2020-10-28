@@ -2,10 +2,12 @@ import * as React from 'react'
 import { Box, Button, Paragraph, Anchor } from 'grommet'
 import { useSelector } from 'react-redux'
 import { PoolsState, PoolData } from '../../ducks/pools'
+import { PoolDataV3, PoolState } from '../../ducks/pool'
 
 import { FormModal, InvestmentSteps } from './styles'
 import { Pool, UpcomingPool } from '../../config'
 import { getPoolStatus } from '../../utils/pool'
+import { PoolLink } from '../PoolLink'
 
 interface Props {
   anchor?: React.ReactNode
@@ -21,6 +23,9 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   const investDisabled = props.pool?.isUpcoming || !props.pool?.securitizeId
 
   const pools = useSelector<any, PoolsState>((state) => state.pools)
+  const pool = useSelector<any, PoolState>((state) => state.pool)
+  const poolData = pool?.data as PoolDataV3 | undefined
+
   const [status, setStatus] = React.useState('Open')
 
   React.useEffect(() => {
@@ -38,7 +43,14 @@ const InvestAction: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      {props.pool && (
+      {props.pool && (poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
+        <Box margin={{ left: 'auto' }}>
+          <PoolLink href={'/investments'}>
+            <Button primary label="Invest" fill={false} />
+          </PoolLink>
+        </Box>
+      )}
+      {props.pool && !(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
         <Box margin={{ left: 'auto' }}>
           <Button primary label="Get started" fill={false} onClick={onOpen} />
         </Box>

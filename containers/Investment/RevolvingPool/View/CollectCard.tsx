@@ -9,7 +9,7 @@ import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
 
-import { Description } from './styles'
+import { Description, OrderSteps } from './styles'
 import { Card } from './TrancheOverview'
 
 interface Props extends TransactionProps {
@@ -60,7 +60,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
         type === 'Invest' ? props.disbursements.payoutTokenAmount : props.disbursements.payoutCurrencyAmount,
         18
       )
-    ).toFixed(2)
+    ).toFixed(4)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
     const method = props.tranche === 'senior' ? 'disburseSenior' : 'disburseJunior'
@@ -78,13 +78,19 @@ const CollectCard: React.FC<Props> = (props: Props) => {
 
   return (
     <Box>
-      <Heading level="6" margin={{ bottom: 'xsmall' }}>
+      <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
         {token} available for collection
       </Heading>
       <Description>
-        Your {props.tranche === 'senior' ? 'DROP' : 'TIN'} {type.toLowerCase()} order has been executed. You need to
-        collect your tokens before you can submit new invest or redeem orders.
+        Your {props.tranche === 'senior' ? 'DROP' : 'TIN'} {type.toLowerCase()} order has been executed. Your{' '}
+        {props.tranche === 'senior' ? 'DROP' : 'TIN'} tokens are already earning yield. You need to collect your tokens
+        before you can submit new orders.
       </Description>
+
+      <OrderSteps
+        src={`/static/steps/collect-order-${props.tranche === 'senior' ? 'drop' : 'tin'}.svg`}
+        alt="Order steps"
+      />
 
       <Table margin={{ top: 'medium' }}>
         <TableBody>
@@ -104,7 +110,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
           <TableRow>
             <TableCell scope="row">Settled amount</TableCell>
             <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(settledAmount, 18), 2))}{' '}
+              {addThousandsSeparators(toPrecision(baseToDisplay(settledAmount, 18), 4))}{' '}
               {props.tranche === 'senior' ? 'DROP' : 'TIN'}
             </TableCell>
           </TableRow>

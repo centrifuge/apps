@@ -29,7 +29,7 @@ const InvestorRedeem: React.FC<Props> = (props: Props) => {
   const redeem = async () => {
     await ensureAuthed!()
 
-    const valueToDecimal = new Decimal(baseToDisplay(redeemAmount, 18)).toFixed(2)
+    const valueToDecimal = new Decimal(baseToDisplay(redeemAmount, 18)).toFixed(4)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
     const tokenSymbol = ((props.tranche.type as any) as TrancheType) === 'senior' ? 'DROP' : 'TIN'
 

@@ -29,7 +29,7 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
     if (!repayAmount) return
     await props.ensureAuthed!()
 
-    const valueToDecimal = new Decimal(baseToDisplay(repayAmount, 18)).toFixed(2)
+    const valueToDecimal = new Decimal(baseToDisplay(repayAmount, 18)).toFixed(4)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
     let txId: string
@@ -62,7 +62,7 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
     }
   }, [status])
 
-  // const hasDebt = debt !== '0'
+  const hasDebt = debt !== '0'
 
   const [error, setError] = React.useState<string | undefined>(undefined)
 
@@ -99,10 +99,11 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
           primary
           label="Repay"
           disabled={
-            // !hasDebt ||
-            // new BN(repayAmount).isZero() ||
-            // error !== undefined ||
-            status === 'unconfirmed' || status === 'pending'
+            !hasDebt ||
+            new BN(repayAmount).isZero() ||
+            error !== undefined ||
+            status === 'unconfirmed' ||
+            status === 'pending'
           }
         />
       </Box>

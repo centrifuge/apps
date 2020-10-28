@@ -72,7 +72,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
               <Heading level="5" margin={'0'}>
                 Min TIN risk buffer
               </Heading>
-              <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+              <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
                 {addThousandsSeparators(toPrecision(baseToDisplay(pool.data.minJuniorRatio, 25), 2))}%
               </Heading>
             </Box>
@@ -105,7 +105,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
               <Heading level="5" margin={'0'}>
                 Max TIN risk buffer
               </Heading>
-              <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+              <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
                 {addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).maxJuniorRatio, 25), 2))}%
               </Heading>
             </Box>

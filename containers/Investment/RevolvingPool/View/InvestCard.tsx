@@ -56,11 +56,14 @@ const InvestCard: React.FC<Props> = (props: Props) => {
   const [status, , setTxId] = useTransactionState()
 
   const submit = async () => {
-    const valueToDecimal = new Decimal(baseToDisplay(daiValue, 18)).toFixed(2)
+    const valueToDecimal = new Decimal(baseToDisplay(daiValue, 18)).toDecimalPlaces(4)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
     const method = props.tranche === 'senior' ? 'submitSeniorSupplyOrder' : 'submitJuniorSupplyOrder'
-    const txId = await props.createTransaction(`${token} Invest ${formatted} DAI`, method, [props.tinlake, daiValue])
+    const txId = await props.createTransaction(`Lock ${formatted} DAI for ${token} investment`, method, [
+      props.tinlake,
+      daiValue,
+    ])
     setTxId(txId)
   }
 
@@ -89,7 +92,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
 
   return (
     <Box>
-      <Description margin={{ top: 'medium' }}>
+      <Description margin={{ top: 'small' }}>
         Please set the amount of DAI you want to invest into {token} on Tinlake. Your DAI will be locked until the end
         of the epoch, at which point your order will be executed. You can collect your {token} in the next epoch.
       </Description>

@@ -1,10 +1,12 @@
 import * as React from 'react'
 import { Box, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
 import { useSelector } from 'react-redux'
+import { Tooltip } from '@centrifuge/axis-tooltip'
+import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
+
 import { PoolDataV3, PoolState } from '../../../../ducks/pool'
 import { toPrecision } from '../../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
-import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import { TINRatioBar } from '../../../../components/TINRatioBar/index'
 import { LoadingValue } from '../../../../components/LoadingValue/index'
 
@@ -29,7 +31,7 @@ const parseRatio = (num: BN): number => {
   return num.div(base).toNumber() / 10 ** 7
 }
 
-const PoolOverview: React.FC<Props> = () => {
+const InvestmentOverview: React.FC<Props> = () => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolDataV3 | undefined
 
@@ -51,8 +53,8 @@ const PoolOverview: React.FC<Props> = () => {
           <Heading level="5" margin={'0'}>
             Pool Value
           </Heading>
-          <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-            <LoadingValue done={poolValue !== undefined} height={24}>
+          <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+            <LoadingValue done={poolValue !== undefined} height={22}>
               {addThousandsSeparators(toPrecision(baseToDisplay(poolValue || '0', 18), 0))} DAI
             </LoadingValue>
           </Heading>
@@ -61,7 +63,19 @@ const PoolOverview: React.FC<Props> = () => {
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell scope="row">Asset Value</TableCell>
+              <TableCell scope="row">
+                <Tooltip
+                  title="Net Asset Value"
+                  description="The NAV reflects the present value of the outstanding portfolio of financings. It is basically the sum of present values of the risk-adjusted expected repayments of all outstanding financings."
+                  link={{
+                    text: 'Learn more',
+                    url:
+                      'https://medium.com/centrifuge/tinlake-pricing-and-valuation-series-part-2-valuing-an-asset-portfolio-247d8f2f0d5',
+                  }}
+                >
+                  <span>Asset Value</span>
+                </Tooltip>
+              </TableCell>
               <TableCell style={{ textAlign: 'end' }}>
                 <LoadingValue done={poolData?.netAssetValue !== undefined}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))} DAI
@@ -73,10 +87,11 @@ const PoolOverview: React.FC<Props> = () => {
                 scope="row"
                 border={{ color: 'transparent' }}
                 style={{ alignItems: 'start', justifyContent: 'center' }}
+                pad={{ vertical: '6px' }}
               >
                 <span>Pool Reserve</span>
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+              <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }} pad={{ vertical: '6px' }}>
                 <LoadingValue done={poolData?.reserve !== undefined} height={39}>
                   <>
                     {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))} DAI
@@ -136,8 +151,8 @@ const PoolOverview: React.FC<Props> = () => {
               DROP Value
             </Heading>
             <Box margin={{ left: 'auto' }}>
-              <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                <LoadingValue done={dropTotalValue !== undefined} height={24}>
+              <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+                <LoadingValue done={dropTotalValue !== undefined} height={22}>
                   {dropTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(dropTotalValue, 27 + 18), 0))} DAI
                 </LoadingValue>
               </Heading>
@@ -181,8 +196,8 @@ const PoolOverview: React.FC<Props> = () => {
               TIN Value
             </Heading>
             <Box margin={{ left: 'auto' }}>
-              <Heading level="4" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                <LoadingValue done={tinTotalValue !== undefined} height={24}>
+              <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+                <LoadingValue done={tinTotalValue !== undefined} height={22}>
                   {tinTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 0))} DAI
                 </LoadingValue>
               </Heading>
@@ -201,4 +216,4 @@ const PoolOverview: React.FC<Props> = () => {
   )
 }
 
-export default PoolOverview
+export default InvestmentOverview

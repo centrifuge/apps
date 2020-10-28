@@ -24,10 +24,6 @@ interface Props {
 }
 
 const ERC20Display: FunctionComponent<Props> = ({ value, precision, tokenMetas }: Props) => {
-  Decimal.set({
-    precision,
-  })
-
   const { decimals, logo, symbol } = firstOrThrow(tokenMetas)
 
   const valueToDecimal = new Decimal(baseToDisplay(value, decimals)).toFixed(precision)
@@ -37,7 +33,6 @@ const ERC20Display: FunctionComponent<Props> = ({ value, precision, tokenMetas }
       <Amount
         onClick={(event) => {
           if (event.detail === 1) {
-            // setCopied("Copied")
             copyToClipboard(formatted)
           }
         }}
