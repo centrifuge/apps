@@ -88,7 +88,9 @@ const CollectCard: React.FC<Props> = (props: Props) => {
       </Description>
 
       <OrderSteps
-        src={`/static/steps/collect-order-${props.tranche === 'senior' ? 'drop' : 'tin'}.svg`}
+        src={`/static/steps/collect-order-$${
+          type === 'Invest' ? (props.tranche === 'senior' ? 'drop' : 'tin') : 'dai'
+        }.svg`}
         alt="Order steps"
       />
 
