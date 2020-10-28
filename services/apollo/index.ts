@@ -43,10 +43,18 @@ class Apollo {
   }
 
   getPoolOrder = (p: { totalDebt: BN; totalRepaysAggregatedAmount: BN; totalDebtNum: number; version: number }) => {
-    if ((p.version === 3 && p.totalDebt.gtn(0)) || (p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.eqn(0)))
+    if ((p.version === 3 && p.totalDebt.gtn(0)) || (p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.eqn(0))) {
       return orderSummandPoolActive + p.totalDebtNum
-    if (p.totalDebt.gtn(0)) return orderSummandPoolDeployed + p.totalDebtNum
-    if (p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.gtn(0)) return orderSummandPoolClosed + p.totalDebtNum
+    }
+
+    if (p.totalDebt.gtn(0)) {
+      return orderSummandPoolDeployed + p.totalDebtNum
+    }
+
+    if (p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.gtn(0)) {
+      return orderSummandPoolClosed + p.totalDebtNum
+    }
+
     return 0
   }
 

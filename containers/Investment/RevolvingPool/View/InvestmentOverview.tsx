@@ -67,7 +67,11 @@ const InvestmentOverview: React.FC<Props> = () => {
                 <Tooltip
                   title="Net Asset Value"
                   description="The NAV reflects the present value of the outstanding portfolio of financings. It is basically the sum of present values of the risk-adjusted expected repayments of all outstanding financings."
-                  link={{ text: 'Learn more', url: 'https://centrifuge.hackmd.io/OMYT-Gh6Tm-D91CynWX0fA?view#NAV' }}
+                  link={{
+                    text: 'Learn more',
+                    url:
+                      'https://medium.com/centrifuge/tinlake-pricing-and-valuation-series-part-2-valuing-an-asset-portfolio-247d8f2f0d5',
+                  }}
                 >
                   <span>Asset Value</span>
                 </Tooltip>
