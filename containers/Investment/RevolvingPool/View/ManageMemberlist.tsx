@@ -30,7 +30,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
     const validUntil = Math.round(validUntilDate.getTime() / 1000)
 
     const txId = await props.createTransaction(
-      `Allow ${address.substring(0, 8)}... for ${tranche === 'senior' ? 'DROP' : 'TIN'}`,
+      `Add ${address.substring(0, 8)}... to ${tranche === 'senior' ? 'DROP' : 'TIN'}`,
       tranche === 'senior' ? 'updateSeniorMemberList' : 'updateJuniorMemberList',
       [props.tinlake, address, validUntil]
     )
@@ -75,7 +75,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
               <Button
                 primary
-                label="Apply"
+                label="Add"
                 onClick={() => {
                   save('junior')
                 }}
@@ -104,7 +104,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
               <Button
                 primary
-                label="Apply"
+                label="Add"
                 onClick={() => {
                   save('senior')
                 }}
