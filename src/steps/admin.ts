@@ -2,42 +2,11 @@ import { Given, When, Then } from 'cucumber'
 import { displayToBase } from '@centrifuge/tinlake-js'
 import * as assert from 'assert'
 
-import { openPage, openPoolPage } from './browser-actions'
-import { config } from './config'
-import { CentrifugeWorld } from './world'
-import { selectors } from './selectors'
-import { getTextContent } from './utils/getTextContent'
-import { waitUntil } from './utils/waitUntil'
-
-Given('I am on the Gateway Page', async function(this: CentrifugeWorld) {
-  await openPage(this, config.gatewayUrl)
-})
-
-Given('I am logged into MetaMask as Tinlake admin', async function(this: CentrifugeWorld) {
-  await this.metamaskImportAdminPK()
-  await this.metamaskSwitchNetwork()
-})
-
-Given('I am logged into MetaMask as borrower', async function(this: CentrifugeWorld) {
-  await this.metamaskImportBorrowerPK()
-  await this.metamaskSwitchNetwork()
-})
-
-Given('I am on the Tinlake investments page', async function(this: CentrifugeWorld) {
-  await openPoolPage(this, 'investments')
-})
-
-Given('I am on the Tinlake mint NFT page', async function(this: CentrifugeWorld) {
-  await openPoolPage(this, 'demo/mint-nft')
-})
-
-Given('I am connected to Tinlake', async function(this: CentrifugeWorld) {
-  const connect = await this.currentPage.waitForXPath(selectors.tinlake.connectButton)
-  await connect.click()
-  const metamask = await this.currentPage.waitForXPath(selectors.tinlake.onboardMetamaskButton)
-  await metamask.click()
-  await this.metamaskApprove()
-})
+import { config } from '../config'
+import { CentrifugeWorld } from '../support/world'
+import { selectors } from '../selectors'
+import { getTextContent } from '../utils/getTextContent'
+import { waitUntil } from '../utils/waitUntil'
 
 Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld, int: number) {
   const tinlake = await this.initializedTinlake()

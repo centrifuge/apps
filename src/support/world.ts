@@ -5,7 +5,7 @@ import { Dappeteer, TransactionOptions } from 'dappeteer'
 import * as dappeteer from 'dappeteer'
 
 import { ensureTinlakeInit } from './tinlake-actions'
-import { config } from './config'
+import { config } from '../config'
 
 export class CentrifugeWorld {
   browser: null | Browser = null

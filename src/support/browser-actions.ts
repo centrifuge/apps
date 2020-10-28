@@ -1,7 +1,8 @@
 import * as puppeteer from 'puppeteer'
 import * as dappeteer from 'dappeteer'
+
 import { CentrifugeWorld } from './world'
-import { config } from './config'
+import { config } from '../config'
 
 export async function openBrowser(world: CentrifugeWorld) {
   // console.log('Using chromium at', puppeteer.executablePath())
