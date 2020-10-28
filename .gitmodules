@@ -1,0 +1,3 @@
+[submodule "lib/tinlake-ui"]
+	path = lib/tinlake-ui
+	url = https://github.com/centrifuge/tinlake-ui

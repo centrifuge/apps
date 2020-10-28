@@ -1,0 +1,22 @@
+version: '3'
+services:
+  # tinlake:
+  #   image: centrifugeio/tinlake-in-a-box
+  #   expose:
+  #     - "8545"
+  ui:
+    build:
+      context: ../lib/tinlake-ui
+      dockerfile: docker/Dockerfile
+    expose:
+      - "3000"
+#   tests:
+#     build:
+#       context: ..
+#       dockerfile: ./Dockerfile
+#     volumes:
+#       - "../screenshots:/screenshots"
+#     command: "wait-for-it.sh web:80 -- mocha --recursive /integration-tests"
+#     depends_on:
+#       - ui
+#       - tinlake
