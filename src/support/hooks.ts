@@ -1,8 +1,8 @@
 // Dependencies
 import { After, Before, Status } from 'cucumber'
 
-import { openBrowser, closeBrowser, takeScreenshot } from './support/browser-actions'
-import { CentrifugeWorld } from './support/world'
+import { openBrowser, closeBrowser, takeScreenshot } from './browser-actions'
+import { CentrifugeWorld } from './world'
 
 Before(async function(this: CentrifugeWorld, scenario) {
   this.clearContext()

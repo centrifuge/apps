@@ -1,13 +1,8 @@
 import { Given } from 'cucumber'
 
-import { openPage, openPoolPage } from '../support/browser-actions'
-import { config } from '../config'
-import { CentrifugeWorld } from '../support/world'
-import { selectors } from '../selectors'
-
-Given('I am on the Gateway Page', async function(this: CentrifugeWorld) {
-  await openPage(this, config.gatewayUrl)
-})
+import { openPoolPage } from '../../support/browser-actions'
+import { CentrifugeWorld } from '../../support/world'
+import tinlakeSelectors from '../../selectors/tinlake'
 
 Given('I am logged into MetaMask as Tinlake admin', async function(this: CentrifugeWorld) {
   await this.metamaskImportAdminPK()
@@ -28,9 +23,9 @@ Given('I am on the Tinlake mint NFT page', async function(this: CentrifugeWorld)
 })
 
 Given('I am connected to Tinlake', async function(this: CentrifugeWorld) {
-  const connect = await this.currentPage.waitForXPath(selectors.tinlake.connectButton)
+  const connect = await this.currentPage.waitForXPath(tinlakeSelectors.connectButton)
   await connect.click()
-  const metamask = await this.currentPage.waitForXPath(selectors.tinlake.onboardMetamaskButton)
+  const metamask = await this.currentPage.waitForXPath(tinlakeSelectors.onboardMetamaskButton)
   await metamask.click()
   await this.metamaskApprove()
 })
