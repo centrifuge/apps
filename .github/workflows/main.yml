@@ -10,7 +10,7 @@ jobs:
       - name: Docker build
         run: docker build -t tinlake-e2e-tests -f docker/Dockerfile .
       - name: Docker run
-        run: docker run -it tinlake-e2e-tests
+        run: docker run tinlake-e2e-tests
         env:
           GATEWAY_URL: https://gateway.amber.centrifuge.io/
           TINLAKE_URL: https://kovan.staging.tinlake.centrifuge.io/
