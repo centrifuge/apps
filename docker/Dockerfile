@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -yq gconf-service libasound2 libatk1.0-0 l
 
 # I am going to ignore dumb-init or such for now since it will add complexities to understand what is actually needed here. 
 
+# Install git because we need it to pull tinlake-pool-config when running npm install
+RUN apk add --no-cache git
+
 # Copy files
 COPY package.json /package.json
 COPY package-lock.json /package-lock.json
