@@ -36,7 +36,7 @@ When('I set Min TIN ratio to {int}%', async function(this: CentrifugeWorld, int:
 
   await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 100000 })
 
-  await debug(this)
+  // await debug(this)
 })
 
 When('I do mint NFT', async function(this: CentrifugeWorld) {
