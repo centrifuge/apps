@@ -10,7 +10,7 @@ jobs:
       - name: Docker build
         run: docker build -t tinlake-e2e-tests -f docker/Dockerfile .
       - name: Docker run
-        run: docker run tinlake-e2e-tests
+        run: docker run -e GATEWAY_URL -e TINLAKE_URL -e RPC_URL -e ETH_ADMIN_ADDRESS -e ETH_ADMIN_PRIVATE_KEY -e ETH_BORROWER_ADDRESS -e ETH_BORROWER_PRIVATE_KEY -e POOL_ID -e NFT_REGISTRY tinlake-e2e-tests
             
     env:
       GATEWAY_URL: "https://gateway.amber.centrifuge.io/"
