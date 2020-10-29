@@ -13,15 +13,13 @@ COPY package-lock.json /package-lock.json
 
 RUN npm install
 
-COPY .env /.env
-COPY cucumber.js /cucumber.js
+# optionally copy .env
+COPY cucumber.js .env* /
 COPY features/ /features/
+COPY src/ /src/
 
 # I'll also assume you are going to use root user, 
 # and your script has `--no-sandbox` and `--disable-setuid-sandbox` arguments.
 # We run a fake display and run our script.
 # Start script on Xvfb
 CMD xvfb-run --server-args="-screen 0 1024x768x24" npm run test
-
-# run the tests
-# CMD ["npm", "run", "test"]

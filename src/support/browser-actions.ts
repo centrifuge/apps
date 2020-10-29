@@ -31,7 +31,7 @@ export async function openPage(world: CentrifugeWorld, url: string) {
 
 export async function openPoolPage(world: CentrifugeWorld, path: string) {
   world.currentPage = await world.browser.newPage()
-  const url = `${config.tinlakeUrl}pool/${config.tinlakePool.addresses.ROOT_CONTRACT}/${config.tinlakePool.slug}/${path}`
+  const url = `${config.tinlakeUrl}pool/${config.pool.addresses.ROOT_CONTRACT}/${config.pool.slug}/${path}`
   await world.currentPage.goto(url, {
     waitUntil: ['load'],
   })

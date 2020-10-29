@@ -7,6 +7,7 @@ import { CentrifugeWorld } from '../../support/world'
 import tinlakeSelectors from '../../selectors/tinlake'
 import { getTextContent } from '../../utils/getTextContent'
 import { waitUntil } from '../../utils/waitUntil'
+import { debug } from '../../utils/debug'
 
 Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld, int: number) {
   const tinlake = await this.initializedTinlake()
@@ -34,6 +35,8 @@ When('I set Min TIN ratio to {int}%', async function(this: CentrifugeWorld, int:
   await button.click()
 
   await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 100000 })
+
+  await debug(this)
 })
 
 When('I do mint NFT', async function(this: CentrifugeWorld) {
