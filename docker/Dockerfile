@@ -10,6 +10,17 @@ RUN apt-get update && apt-get install -yq gconf-service libasound2 libatk1.0-0 l
 # Install git because we need it to pull tinlake-pool-config when running npm install
 RUN apt-get install -y git
 
+# Pass required env vars
+ENV GATEWAY_URL $GATEWAY_URL
+ENV TINLAKE_URL $TINLAKE_URL
+ENV RPC_URL $RPC_URL
+ENV ETH_ADMIN_ADDRESS $ETH_ADMIN_ADDRESS
+ENV ETH_ADMIN_PRIVATE_KEY $ETH_ADMIN_PRIVATE_KEY
+ENV ETH_BORROWER_ADDRESS $ETH_BORROWER_ADDRESS
+ENV ETH_BORROWER_PRIVATE_KEY $ETH_BORROWER_PRIVATE_KEY
+ENV POOL_ID $POOL_ID
+ENV NFT_REGISTRY $NFT_REGISTRY
+
 # Copy files
 COPY package.json /package.json
 COPY package-lock.json /package-lock.json
