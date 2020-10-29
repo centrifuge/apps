@@ -4,6 +4,9 @@ FROM node:12.16.3
 COPY . /app
 WORKDIR /app
 
+# Install git because we need it to pull tinlake-pool-config when running npm install
+RUN apt-get install -y git
+
 RUN npm install
 
 RUN npm run build:next
