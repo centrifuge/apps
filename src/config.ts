@@ -18,9 +18,6 @@ export interface Config {
 const network = process.env.ETH_NETWORK || 'kovan'
 const networkConfigs = poolConfigs[network === 'kovan' ? 'kovanStaging' : 'mainnetProduction']
 
-console.log('process.env', JSON.stringify(process.env))
-console.log('networkConfigs', JSON.stringify(networkConfigs))
-
 const pool = networkConfigs.find((pool: Pool) => pool.addresses.ROOT_CONTRACT.toLowerCase() === process.env.POOL_ID.toLowerCase())
 
 export const config: Config = {

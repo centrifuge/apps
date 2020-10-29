@@ -7,7 +7,6 @@ import { CentrifugeWorld } from '../../support/world'
 import tinlakeSelectors from '../../selectors/tinlake'
 import { getTextContent } from '../../utils/getTextContent'
 import { waitUntil } from '../../utils/waitUntil'
-import { debug } from '../../utils/debug'
 
 Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld, int: number) {
   const tinlake = await this.initializedTinlake()
@@ -21,6 +20,8 @@ Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld
 })
 
 Given('I have set the NFT reference to {string}', async function(this: CentrifugeWorld, string: string) {
+  this.currentPage.waitFor(3000)
+  console.log('setting nft reference')
   const input = await this.currentPage.waitForXPath(tinlakeSelectors.mintNFTReferenceInput)
   await input.click({ clickCount: 3 }) // triple click to select all content
   await input.type(string)
@@ -34,18 +35,16 @@ When('I set Min TIN ratio to {int}%', async function(this: CentrifugeWorld, int:
   const button = await this.currentPage.waitForXPath(tinlakeSelectors.setMinTINRatioButton)
   await button.click()
 
+  await this.currentPage.waitFor(100)
   await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 100000 })
-
-  // await debug(this)
 })
 
 When('I do mint NFT', async function(this: CentrifugeWorld) {
-  debugger
   const button = await this.currentPage.waitForXPath(tinlakeSelectors.mintNFTButton)
+  await this.currentPage.waitFor(100)
   await button.click()
 
-  // await this.currentPage.waitFor(10000)
-
+  await this.currentPage.waitFor(100)
   await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 300000 })
 })
 
@@ -61,6 +60,13 @@ Then('I see that Min TIN ratio component is set to {int}%', async function(this:
     },
     { errorMsg: `expected min tin ratio display to show ${int} %, but got ${actual}` }
   )
+})
+
+Given('I can verify that the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld, int: number) {
+  const tinlake = await this.initializedTinlake()
+  const actualVal = (await tinlake.getMinJuniorRatio()).toString()
+  
+  assert.strictEqual(int.toString() + '0'.repeat(25), actualVal)
 })
 
 Then('I see that NFT ID is shown in UI', async function(this: CentrifugeWorld) {

@@ -6,19 +6,18 @@ services:
   #     dockerfile: Dockerfile
   #   expose:
   #     - "8545"
-  ui:
+  # ui:
+  #   build:
+  #     context: ../lib/tinlake-ui
+  #     dockerfile: docker/Dockerfile
+  #   expose:
+  #     - "3000"
+  tests:
     build:
-      context: ../lib/tinlake-ui
-      dockerfile: docker/Dockerfile
-    expose:
-      - "3000"
-#   tests:
-#     build:
-#       context: ..
-#       dockerfile: ./Dockerfile
-#     volumes:
-#       - "../screenshots:/screenshots"
-#     command: "wait-for-it.sh web:80 -- mocha --recursive /integration-tests"
-#     depends_on:
-#       - ui
-#       - tinlake
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    volumes:
+      - "../screenshots:/screenshots"
+    # depends_on:
+      # - ui
+      # - tinlake

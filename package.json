@@ -19,6 +19,7 @@
     "@centrifuge/tinlake-js": "3.0.0-develop.33",
     "@types/cucumber": "6.0.1",
     "@types/puppeteer": "3.0.2",
+    "bn.js": "5.1.3",
     "cucumber": "^6.0.5",
     "dappeteer": "1.0.0",
     "dotenv": "8.2.0",

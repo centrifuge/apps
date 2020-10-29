@@ -24,8 +24,14 @@ Given('I am on the Tinlake mint NFT page', async function(this: CentrifugeWorld)
 
 Given('I am connected to Tinlake', async function(this: CentrifugeWorld) {
   const connect = await this.currentPage.waitForXPath(tinlakeSelectors.connectButton)
+  console.log('connect', connect)
   await connect.click()
+
   const metamask = await this.currentPage.waitForXPath(tinlakeSelectors.onboardMetamaskButton)
+  console.log('metamask', metamask)
+
   await metamask.click()
+  await this.currentPage.waitFor(2000)
   await this.metamaskApprove()
+  await this.currentPage.waitFor(2000)
 })

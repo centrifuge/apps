@@ -1,7 +1,6 @@
 import { setWorldConstructor, setDefaultTimeout } from 'cucumber'
 import { Browser, Page } from 'puppeteer'
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { Dappeteer, TransactionOptions } from 'dappeteer'
 import * as dappeteer from 'dappeteer'
 
 import { ensureTinlakeInit } from './tinlake-actions'
@@ -11,7 +10,7 @@ export class CentrifugeWorld {
   browser: null | Browser = null
   currentPage: null | Page = null
   // wrap all Dappeteer metamask actions so we can bring the current page back to front after interacting with metamask
-  private metamask: null | Dappeteer = null
+  private metamask: null | dappeteer.Dappeteer = null
   tinlake: null | ITinlake = null
   context: { [key: string]: any } = {}
 
@@ -48,7 +47,7 @@ export class CentrifugeWorld {
   }
 
   // wrap Dappeteer metamask actions so we can bring the current page back to front after interacting with metamask
-  async metamaskConfirmTransaction(options: TransactionOptions) {
+  async metamaskConfirmTransaction(options: dappeteer.TransactionOptions) {
     await this.metamask.confirmTransaction(options)
     await this.currentPage.bringToFront()
   }
