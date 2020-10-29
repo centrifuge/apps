@@ -13,7 +13,8 @@ const config = {
   email: {
     host: env.CENTRIFUGE_EMAIL_CLIENT_HOST || 'smtp.sendgrid.net',
     port: env.CENTRIFUGE_EMAIL_CLIENT_PORT || 587,
-    secure: env.CENTRIFUGE_EMAIL_CLIENT_SECURE || true,
+    // node treats boolean as strings
+    secure: env.CENTRIFUGE_EMAIL_CLIENT_SECURE === 'false'? false  : true,
     user: env.CENTRIFUGE_EMAIL_CLIENT_USER || 'apikey',
     password: env.CENTRIFUGE_EMAIL_SERVICE_APIKEY,
     from: env.CENTRIFUGE_ADMIN_EMAIL || 'gateway@centrifuge.io',

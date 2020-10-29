@@ -8,10 +8,10 @@
     "test": "cross-env CI=true yarn workspaces run test ",
     "start": "yarn workspace @centrifuge/gateway-lib run start & yarn workspace @centrifuge/gateway-server run start & yarn workspace @centrifuge/gateway-ui run start",
     "build": "yarn workspaces run build",
-    "postbuild": "yarn run move:ui",
-    "build:series": "yarn workspaces run build",
-    "postbuild:series": "npm run move:ui",
-    "move:ui": "rm -rf ./build && mv packages/ui/build ."
+    "postbuild": "yarn run move:assets",
+    "move:assets": "yarn run move:email-templates && yarn run move:ui",
+    "move:ui": "rm -rf ./build && mv packages/ui/build .",
+    "move:email-templates": "rm -rf ./email-templates && rsync -a packages/server/email-templates ."
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -8,7 +8,7 @@ COPY . ./
 RUN npm config set unsafe-perm true
 
 RUN yarn install --pure-lockfile
-RUN yarn build:series
+RUN yarn build
 
 EXPOSE 3001
 
