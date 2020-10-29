@@ -1,11 +1,11 @@
 version: '3'
 services:
-  tinlake:
-    build:
-      context: ../lib/tinlake-deploy
-      dockerfile: Dockerfile
-    expose:
-      - "8545"
+  # tinlake:
+  #   build:
+  #     context: ../lib/tinlake-deploy
+  #     dockerfile: Dockerfile
+  #   expose:
+  #     - "8545"
   ui:
     build:
       context: ../lib/tinlake-ui
