@@ -8,6 +8,10 @@ COPY . ./
 RUN npm config set unsafe-perm true
 
 RUN yarn install --pure-lockfile
+
+# install rsync to copy over build files
+RUN apt-get install -y rsync
+
 RUN yarn build
 
 EXPOSE 3001
