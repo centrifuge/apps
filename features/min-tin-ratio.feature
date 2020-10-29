@@ -1,6 +1,6 @@
 Feature: Set Min TIN ratio
 
-  Only admins shold allowed to do this
+  Only admins should be allowed to do this
 
   Scenario: successfully setting the min TIN ratio as admin
     Given I am logged into MetaMask as Tinlake admin
