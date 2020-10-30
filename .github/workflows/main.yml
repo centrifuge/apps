@@ -15,7 +15,7 @@ jobs:
     env:
       GATEWAY_URL: "https://gateway.amber.centrifuge.io/"
       TINLAKE_URL: "https://kovan.staging.tinlake.centrifuge.io/"
-      RPC_URL: "https://kovan.infura.io/v3/270d356e743d463985d05ed87c6441e8"
+      RPC_URL: "https://kovan.infura.io/v3/a4ba76cd4be643618572e7467a444e3a"
       ETH_ADMIN_ADDRESS: ${{ secrets.ETH_ADMIN_ADDRESS }}
       ETH_ADMIN_PRIVATE_KEY: ${{ secrets.ETH_ADMIN_PRIVATE_KEY }}
       ETH_BORROWER_ADDRESS: ${{ secrets.ETH_BORROWER_ADDRESS }}

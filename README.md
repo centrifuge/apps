@@ -1,15 +1,12 @@
 # e2e-tests
 End-to-end test suite for Tinlake.
 
-See https://cucumber.io/docs/bdd/ for an introduction into Cucumber.
-
 ## Setup
-1. Make sure you are on a stable node version, v12.16.3 on the time of writing this (the sha3 dependency did not work with newer versions in some cases): `nvm use`
-2. Install dependencies with `npm install`
+1. Use Node v12.18.3: `nvm use`
+2. Install dependencies: `npm install`
 3. Add a `.env` file with the right environment variables.
 
 ## Usage
-
 Run all tests: `npm test`
 
 Run a specific test: `npm test -- features/[name].feature`

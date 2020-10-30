@@ -13,6 +13,7 @@ Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld
   const newVal = displayToBase(`${int}`, 27 - 2) // 27 is the default, but the int is given in percentage points
 
   const setTx = await tinlake.setMinimumJuniorRatio(newVal)
+  console.log(`Setting TIN ratio to ${int}`, setTx)
   await tinlake.getTransactionReceipt(setTx)
 
   const afterVal = (await tinlake.getMinJuniorRatio()).toString()
@@ -21,7 +22,6 @@ Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld
 
 Given('I have set the NFT reference to {string}', async function(this: CentrifugeWorld, string: string) {
   this.currentPage.waitFor(3000)
-  console.log('setting nft reference')
   const input = await this.currentPage.waitForXPath(tinlakeSelectors.mintNFTReferenceInput)
   await input.click({ clickCount: 3 }) // triple click to select all content
   await input.type(string)
@@ -37,6 +37,8 @@ When('I set Min TIN ratio to {int}%', async function(this: CentrifugeWorld, int:
 
   await this.currentPage.waitFor(100)
   await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 100000 })
+
+  await this.currentPage.waitFor(1000)
 })
 
 When('I do mint NFT', async function(this: CentrifugeWorld) {
