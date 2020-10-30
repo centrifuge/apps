@@ -19,7 +19,6 @@ Given('I am on the Tinlake investments page', async function(this: CentrifugeWor
 })
 
 Given('I have reloaded the page', async function(this: CentrifugeWorld) {
-  console.log('Reloading')
   await this.currentPage.reload({ waitUntil: ['networkidle0', 'domcontentloaded'] })
 })
 
@@ -28,7 +27,6 @@ Given('I am on the Tinlake mint NFT page', async function(this: CentrifugeWorld)
 })
 
 Given('I am connected to Tinlake', async function(this: CentrifugeWorld) {
-  console.log('Connecting')
   const connect = await this.currentPage.waitForXPath(tinlakeSelectors.connectButton)
   await connect.click()
 
@@ -38,5 +36,4 @@ Given('I am connected to Tinlake', async function(this: CentrifugeWorld) {
   await this.currentPage.waitFor(100)
   await this.metamaskApprove()
   await this.currentPage.waitFor(100)
-  console.log('Connected')
 })

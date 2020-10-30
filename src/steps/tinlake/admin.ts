@@ -13,7 +13,6 @@ Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld
   const newVal = displayToBase(`${int}`, 27 - 2) // 27 is the default, but the int is given in percentage points
 
   const setTx = await tinlake.setMinimumJuniorRatio(newVal)
-  console.log(`Setting TIN ratio to ${int}`, setTx)
   await tinlake.getTransactionReceipt(setTx)
 
   const afterVal = (await tinlake.getMinJuniorRatio()).toString()
