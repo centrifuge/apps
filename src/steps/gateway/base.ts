@@ -1,4 +1,4 @@
-import { Given } from 'cucumber'
+import { Given } from '@cucumber/cucumber'
 
 import { openPage } from '../../support/browser-actions'
 import { config } from '../../config'

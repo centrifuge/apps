@@ -1,4 +1,4 @@
-import { Given, When, Then } from 'cucumber'
+import { Given, When, Then } from '@cucumber/cucumber'
 import { displayToBase } from '@centrifuge/tinlake-js'
 import * as assert from 'assert'
 

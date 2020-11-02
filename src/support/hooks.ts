@@ -1,5 +1,5 @@
 // Dependencies
-import { After, AfterAll, Before, Status } from 'cucumber'
+import { After, Before, Status } from '@cucumber/cucumber'
 
 import { openBrowser, closeBrowser, takeScreenshot } from './browser-actions'
 import { CentrifugeWorld } from './world'
@@ -14,8 +14,8 @@ Before(async function(this: CentrifugeWorld, scenario) {
 After(async function(this: CentrifugeWorld, scenario) {
   this.clearContext()
 
-  if (scenario.result.exception || scenario.result.status === Status.FAILED) {
-    console.log('Exception or failure – will take a screenshot')
+  if (scenario.result.status === Status.FAILED) {
+    console.log('Test failure – will take a screenshot')
 
     await takeScreenshot(this, `./screenshots/scenario-${scenario.pickle.name}-failed.png`)
 

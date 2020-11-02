@@ -1,4 +1,4 @@
-import { Given } from 'cucumber'
+import { Given } from '@cucumber/cucumber'
 
 import { openPoolPage } from '../../support/browser-actions'
 import { CentrifugeWorld } from '../../support/world'
