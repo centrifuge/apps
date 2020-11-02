@@ -10,7 +10,7 @@ jobs:
       - name: Docker build
         run: docker build -t tinlake-e2e-tests -f docker/Dockerfile .
       - name: Docker run
-        run: docker run -e GATEWAY_URL -e TINLAKE_URL -e RPC_URL -e ETH_ADMIN_ADDRESS -e ETH_ADMIN_PRIVATE_KEY -e ETH_BORROWER_ADDRESS -e ETH_BORROWER_PRIVATE_KEY -e POOL_ID -e NFT_REGISTRY tinlake-e2e-tests
+        run: docker run -e GATEWAY_URL -e TINLAKE_URL -e RPC_URL -e ETH_ADMIN_ADDRESS -e ETH_ADMIN_PRIVATE_KEY -e ETH_BORROWER_ADDRESS -e ETH_BORROWER_PRIVATE_KEY -e POOL_ID -e NFT_REGISTRY -e CI tinlake-e2e-tests
             
     env:
       GATEWAY_URL: "https://gateway.amber.centrifuge.io/"
@@ -22,3 +22,4 @@ jobs:
       ETH_BORROWER_PRIVATE_KEY: ${{ secrets.ETH_BORROWER_PRIVATE_KEY }}
       POOL_ID: "0xc4084221Fb5D0f28f817c795435C2d17EAb6c389"
       NFT_REGISTRY: "0xaC0c1EF395290288028A0a9FDFc8FDebEbE54a24x"
+      CI: true
