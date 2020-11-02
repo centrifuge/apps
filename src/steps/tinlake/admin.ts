@@ -20,7 +20,7 @@ Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld
 })
 
 Given('I have set the NFT reference to {string}', async function(this: CentrifugeWorld, string: string) {
-  this.currentPage.waitFor(3000)
+  this.currentPage.waitFor(100)
   const input = await this.currentPage.waitForXPath(tinlakeSelectors.mintNFTReferenceInput)
   await input.click({ clickCount: 3 }) // triple click to select all content
   await input.type(string)
