@@ -10,4 +10,4 @@ Feature: Mint NFT
     And I have set the NFT reference to "demo"
     When I do mint NFT
     Then I see that NFT ID is shown in UI
-    And that minted NFT is in my wallet
+    # And that minted NFT is in my wallet
