@@ -13,7 +13,7 @@ import {AuthModule} from '../auth/auth.module';
 export class UsersModule implements NestModule {
   configure(consumer: MiddlewareConsumer): MiddlewareConsumer | void {
     consumer
-      .apply(passport.authenticate('local'))
+      .apply(passport.authenticate('local',{session: false}))
       .forRoutes(`${ROUTES.USERS.generateToken}`);
 
     consumer
