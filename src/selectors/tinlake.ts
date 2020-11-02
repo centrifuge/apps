@@ -2,20 +2,35 @@
 // Cheatsheet: https://devhints.io/xpath
 export const selectors = {
   // header
-  connectButton: `//button[contains(., 'Connect')]`,
+  connectButton: `//button[contains(., "Connect")]`,
 
   // onboard modal
-  onboardMetamaskButton: `//aside[contains(concat(' ',normalize-space(@class),' '),' bn-onboard-modal ')]//button[span[contains(text(), 'MetaMask')]]`,
+  onboardMetamaskButton: `//aside[contains(concat(" ",normalize-space(@class)," ")," bn-onboard-modal ")]//button[span[contains(text(), 'MetaMask')]]`,
 
-  // investor page
-  minTINRatioDisplay: `//div[div[h5[contains(., "Min TIN risk buffer")]]]//h4`,
-  minTINRatioInput: `//div[label[contains(., "Set minimum TIN risk buffer")]]//input`,
-  setMinTINRatioButton: `//div[div[h5[contains(., "Min TIN risk buffer")]]]//button[contains(., "Apply")]`,
+  // investments page
 
-  // mint nft page
-  mintNFTReferenceInput: `//div[label[contains(., "NFT Reference")]]//input`,
-  mintNFTSuccessAlert: `//div[contains(text(), "Successfully minted NFT for Token ID")]`,
-  mintNFTButton: `//body[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[3]/button[1]`, // //button[contains(., "Mint NFT")]
+  investmentsPage: {
+    _path: `//div[h4[contains(., "Invest/Redeem")]]`,
+    tinInvest: {
+      _path: `//div[contains(., "TIN Balance")]`,
+      investButton: `//button[contains(., "Invest")]`,
+      amountInput: `//input`,
+      lockDAIButton: `//button[contains(., "Lock DAI")]`
+    },
+    minTinRatio: {
+      _path: `//div[div[h5[contains(., "Min TIN risk buffer")]]]`,
+      value: `//h5[2]`,
+      input: `//input`,
+      updateButton: `//button[contains(., "Apply")]`,
+    }
+  },
+
+  mintNFTPage: {
+    _path: `//div[div[contains(b, "Please specify metadata of NFT")]]`,
+    referenceInput: `//div[label[contains(., "NFT Reference")]]//input`,
+    successAlert: `//div[contains(text(), "Successfully minted NFT for Token ID")]`,
+    mintButton: `//button[contains(text(), "Mint NFT")]`
+  }
 }
 
 export default selectors

@@ -4,7 +4,7 @@ import * as assert from 'assert'
 
 import { config } from '../../config'
 import { CentrifugeWorld } from '../../support/world'
-import tinlakeSelectors from '../../selectors/tinlake'
+import { tinlake } from '../../selectors'
 import { getTextContent } from '../../utils/getTextContent'
 import { waitUntil } from '../../utils/waitUntil'
 
@@ -24,17 +24,17 @@ Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld
 
 Given('I have set the NFT reference to {string}', async function(this: CentrifugeWorld, string: string) {
   this.currentPage.waitFor(100)
-  const input = await this.currentPage.waitForXPath(tinlakeSelectors.mintNFTReferenceInput)
+  const input = await this.currentPage.waitForXPath(tinlake('mintNFTPage.referenceInput'))
   await input.click({ clickCount: 3 }) // triple click to select all content
   await input.type(string)
 })
 
 When('I set Min TIN ratio to {int}%', async function(this: CentrifugeWorld, int: number) {
-  const input = await this.currentPage.waitForXPath(tinlakeSelectors.minTINRatioInput)
+  const input = await this.currentPage.waitForXPath(tinlake('investmentsPage.minTinRatio.input'))
   await input.click({ clickCount: 3 }) // triple click to select all content
   await input.type(`${int}`)
 
-  const button = await this.currentPage.waitForXPath(tinlakeSelectors.setMinTINRatioButton)
+  const button = await this.currentPage.waitForXPath(tinlake('investmentsPage.minTinRatio.updateButton'))
   await button.click()
 
   await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 100000 })
@@ -44,7 +44,7 @@ When('I set Min TIN ratio to {int}%', async function(this: CentrifugeWorld, int:
 })
 
 When('I do mint NFT', async function(this: CentrifugeWorld) {
-  const button = await this.currentPage.waitForXPath(tinlakeSelectors.mintNFTButton)
+  const button = await this.currentPage.waitForXPath(tinlake('mintNFTPage.mintButton'))
   await button.click()
 
   await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 300000 })
@@ -55,7 +55,7 @@ Then('I see that Min TIN ratio component is set to {int}%', async function(this:
   let actual = ''
   await waitUntil(
     async () => {
-      const display = await this.currentPage.waitForXPath(tinlakeSelectors.minTINRatioDisplay)
+      const display = await this.currentPage.waitForXPath(tinlake('investmentsPage.minTinRatio.value'))
       actual = await getTextContent(display)
 
       return actual === expected
@@ -72,7 +72,7 @@ Given('I can verify that the min TIN ratio is set to {int}%', async function(thi
 })
 
 Then('I see that NFT ID is shown in UI', async function(this: CentrifugeWorld) {
-  const alert = await this.currentPage.waitForXPath(tinlakeSelectors.mintNFTSuccessAlert)
+  const alert = await this.currentPage.waitForXPath(tinlake('mintNFTPage.successAlert'))
   const text = await getTextContent(alert)
 
   const regex = /Successfully minted NFT for Token ID ([0-9]+)/

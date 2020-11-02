@@ -48,6 +48,8 @@ export class CentrifugeWorld {
 
   // wrap Dappeteer metamask actions so we can bring the current page back to front after interacting with metamask
   async metamaskConfirmTransaction(options: dappeteer.TransactionOptions) {
+    // TODO: handle signing step
+    
     await this.metamask.confirmTransaction(options)
     await this.currentPage.bringToFront()
   }
