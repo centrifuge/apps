@@ -17,7 +17,6 @@ RUN npm install
 COPY cucumber.js .env* /
 COPY features/ /features/
 COPY src/ /src/
-COPY docker/start.sh /start.sh
 
 RUN mkdir /screenshots
 
