@@ -121,7 +121,6 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
   });
 
   const extendedContacts = extendContactsWithUsers(contacts, [user!]);
-
   return (
     <Box pad={{ bottom: 'large' }}>
       <SecondaryHeader>

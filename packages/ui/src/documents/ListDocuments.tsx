@@ -112,8 +112,8 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
     return false
   };
 
-  const displayView = (doc_status: string, nft_status: string) => {
-    return nft_status !==  NftStatus.Minting && doc_status !== DocumentStatus.CreationFail;
+  const displayView = (doc_status: string) => {
+    return doc_status !== DocumentStatus.CreationFail;
   };
 
   return (
@@ -172,7 +172,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               sortable: false,
               render: datum => (
                 <Box direction="row" gap="small">
-                  {displayView(datum.document_status, datum.nft_status) && <Anchor
+                  {displayView(datum.document_status) && <Anchor
                     label={'View'}
                     onClick={() =>
                       push(

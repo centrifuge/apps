@@ -58,7 +58,7 @@ export class NftsController {
         },
       });
 
-      if (body.oracle_address === '0x0000000000000000000000000000000000000000') {
+      if (!body.oracle_address || body.oracle_address === '0x0000000000000000000000000000000000000000') {
         console.log('not pushing to oracle', mintingResult)
         return
       }

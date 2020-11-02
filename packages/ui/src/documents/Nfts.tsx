@@ -114,6 +114,12 @@ export const Nfts: FunctionComponent<Props> = (props) => {
     return actions
   };
 
+  const renderNodeUrl = () => {
+    return window['__ETH_NETWORK__'] === 'kovan' ?
+        getAddressLink('0x44a0579754D6c94e7bB2c26bFA7394311Cc50Ccb') :
+        getAddressLink('0x3ba4280217e78a0eaea612c1502fc2e92a7fe5d7')
+  }
+
   const mintActions = !viewMode ? [
     <Button key="mint-nft" onClick={openMintModal} plain label={'Mint NFT'}/>,
   ] : [];
@@ -123,7 +129,6 @@ export const Nfts: FunctionComponent<Props> = (props) => {
       title="NFTs"
       actions={mintActions}
     >
-
       <DataTableWithDynamicHeight
         size={'360px'}
         sortable={false}
@@ -178,7 +183,8 @@ export const Nfts: FunctionComponent<Props> = (props) => {
       />
 
       {!document!.header!.nfts &&
-      <Paragraph color={'dark-2'}>There are no NFTs minted on this document yet.</Paragraph>}
+      <Paragraph color={'dark-2'}>There are no NFTs minted on this document yet. Pending transactions can be found {<a href={renderNodeUrl()}>here.</a>}</Paragraph>
+      }
     </Section>);
   };
 

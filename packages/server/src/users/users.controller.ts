@@ -54,7 +54,7 @@ export class UsersController {
 
     try {
       await this.mailerService.sendMail({
-        to: user.email, //user.email,
+        to: user.email,
         subject: 'Centrifuge Gateway Account Verification',
         template: '2fa',
         context: {
