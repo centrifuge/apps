@@ -29,7 +29,3 @@ After(async function(this: CentrifugeWorld, scenario) {
 
   await closeBrowser(this)
 })
-
-AfterAll(async function() {
-  process.exit(0)
-})
