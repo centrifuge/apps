@@ -23,4 +23,3 @@ RUN mkdir /screenshots
 
 # Run tests with the xvfb virtual display
 CMD xvfb-run --server-args="-screen 0 1024x768x24" npm run test -- --exit --publish
-# ENTRYPOINT ["sh", "start.sh"]
