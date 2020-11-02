@@ -20,5 +20,5 @@ COPY src/ /src/
 COPY docker/start.sh /start.sh
 
 # Run tests with the xvfb virtual display
-# CMD xvfb-run --server-args="-screen 0 1024x768x24" npm run test
-ENTRYPOINT ["sh", "start.sh"]
+CMD xvfb-run --server-args="-screen 0 1024x768x24" npm run test
+# ENTRYPOINT ["sh", "start.sh"]

@@ -1,5 +1,5 @@
 // Dependencies
-import { After, Before, Status } from 'cucumber'
+import { After, AfterAll, Before, Status } from 'cucumber'
 
 import { openBrowser, closeBrowser, takeScreenshot } from './browser-actions'
 import { CentrifugeWorld } from './world'
@@ -15,17 +15,21 @@ After(async function(this: CentrifugeWorld, scenario) {
   this.clearContext()
 
   if (scenario.result.exception || scenario.result.status === Status.FAILED) {
-    console.log('exception or failure – will take a screenshot')
+    console.log('Exception or failure – will take a screenshot')
 
     await takeScreenshot(this, `./screenshots/scenario-${scenario.pickle.name}-failed.png`)
 
     // return if not on CI, which keeps the browser open for debugging
     if (!process.env.CI) {
-      console.log('skipping close browser')
+      console.log('Skipping close browser')
       return
     }
   }
-  console.log('closing browser')
+  console.log('Closing browser')
 
   await closeBrowser(this)
+})
+
+AfterAll(async function() {
+  process.exit(0)
 })

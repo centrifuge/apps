@@ -17,6 +17,9 @@ Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld
 
   const afterVal = (await tinlake.getMinJuniorRatio()).toString()
   assert.equal(newVal, afterVal)
+
+  // Changing values can take a few seconds to process
+  this.currentPage.waitFor(3000)
 })
 
 Given('I have set the NFT reference to {string}', async function(this: CentrifugeWorld, string: string) {
@@ -28,6 +31,7 @@ Given('I have set the NFT reference to {string}', async function(this: Centrifug
 
 When('I set Min TIN ratio to {int}%', async function(this: CentrifugeWorld, int: number) {
   const input = await this.currentPage.waitForXPath(tinlakeSelectors.minTINRatioInput)
+  await this.currentPage.waitFor(100)
   await input.click({ clickCount: 3 }) // triple click to select all content
   await input.type(`${int}`)
 
@@ -64,6 +68,9 @@ Then('I see that Min TIN ratio component is set to {int}%', async function(this:
 })
 
 Given('I can verify that the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld, int: number) {
+  // Changing values can take a few seconds to process
+  this.currentPage.waitFor(3000)
+  
   const tinlake = await this.initializedTinlake()
   const actualVal = (await tinlake.getMinJuniorRatio()).toString()
   
