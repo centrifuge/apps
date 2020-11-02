@@ -9,7 +9,7 @@ export async function openBrowser(world: CentrifugeWorld) {
 
   world.browser = await dappeteer.launch(puppeteer, {
     headless: false,
-    slowMo: 0,
+    slowMo: 1,
     devtools: false,
     args: [
       // Required for Docker version of Puppeteer

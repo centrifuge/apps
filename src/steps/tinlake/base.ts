@@ -33,7 +33,5 @@ Given('I am connected to Tinlake', async function(this: CentrifugeWorld) {
   const metamask = await this.currentPage.waitForXPath(tinlakeSelectors.onboardMetamaskButton)
 
   await metamask.click()
-  await this.currentPage.waitFor(100)
   await this.metamaskApprove()
-  await this.currentPage.waitFor(100)
 })

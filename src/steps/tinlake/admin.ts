@@ -16,7 +16,7 @@ Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld
   await tinlake.getTransactionReceipt(setTx)
 
   const afterVal = (await tinlake.getMinJuniorRatio()).toString()
-  assert.equal(newVal, afterVal)
+  assert.strictEqual(newVal, afterVal)
 
   // Changing values can take a few seconds to process
   this.currentPage.waitFor(3000)
@@ -31,25 +31,22 @@ Given('I have set the NFT reference to {string}', async function(this: Centrifug
 
 When('I set Min TIN ratio to {int}%', async function(this: CentrifugeWorld, int: number) {
   const input = await this.currentPage.waitForXPath(tinlakeSelectors.minTINRatioInput)
-  await this.currentPage.waitFor(100)
   await input.click({ clickCount: 3 }) // triple click to select all content
   await input.type(`${int}`)
 
   const button = await this.currentPage.waitForXPath(tinlakeSelectors.setMinTINRatioButton)
   await button.click()
 
-  await this.currentPage.waitFor(100)
   await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 100000 })
 
-  await this.currentPage.waitFor(1000)
+  // Changing values can take a few seconds to process
+  await this.currentPage.waitFor(3000)
 })
 
 When('I do mint NFT', async function(this: CentrifugeWorld) {
   const button = await this.currentPage.waitForXPath(tinlakeSelectors.mintNFTButton)
-  await this.currentPage.waitFor(100)
   await button.click()
 
-  await this.currentPage.waitFor(100)
   await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 300000 })
 })
 
@@ -68,9 +65,6 @@ Then('I see that Min TIN ratio component is set to {int}%', async function(this:
 })
 
 Given('I can verify that the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld, int: number) {
-  // Changing values can take a few seconds to process
-  this.currentPage.waitFor(3000)
-  
   const tinlake = await this.initializedTinlake()
   const actualVal = (await tinlake.getMinJuniorRatio()).toString()
   
@@ -85,9 +79,6 @@ Then('I see that NFT ID is shown in UI', async function(this: CentrifugeWorld) {
   const result = regex.exec(text)
 
   this.context.nftID = result[1]
-
-  // console.log('NFT ID:', this.context.nftID)
-
   assert.ok(this.context.nftID, 'NFT ID must not be empty')
 })
 
@@ -95,7 +86,5 @@ Then('that minted NFT is in my wallet', async function(this: CentrifugeWorld) {
   const tinlake = await this.initializedTinlake()
   const owner = await tinlake.getNFTOwner(config.nftRegistry, this.context.nftID)
 
-  // console.log({ owner: owner.toString() })
-
-  assert.equal(owner.toString().toLowerCase(), config.ethBorrowerAddress.toLowerCase())
+  assert.strictEqual(owner.toString().toLowerCase(), config.ethBorrowerAddress.toLowerCase())
 })
