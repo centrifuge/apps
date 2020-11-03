@@ -1,5 +1,5 @@
 import * as puppeteer from 'puppeteer'
-import * as dappeteer from 'dappeteer'
+import * as dappeteer from 'dappeteer-test'
 
 import { CentrifugeWorld } from './world'
 import { config } from '../config'
