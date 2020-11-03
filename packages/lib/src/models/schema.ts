@@ -9,6 +9,7 @@ export interface Attribute {
   options?: string[],
   placeholder?: string,
   defaultValue?: string,
+  multiplier?: number,
   type: AttrTypes.STRING | AttrTypes.TIMESTAMP | AttrTypes.INTEGER | AttrTypes.BYTES | AttrTypes.DECIMAL | AttrTypes.PERCENT
   subtype?: AttrSubtypes.SIGNED,
   fieldWriteAccess?: string
@@ -89,6 +90,8 @@ export enum AttributesErrors {
   ATTRIBUTES_FORMAT = 'Schema requires an attributes property containing an array of Attributes. It is mandatory',
   ATTRIBUTES_UNIQUE_NAMES = 'Schema attributes must have unique names',
   NAME_PROP_MISSING = 'name property is missing or empty',
+  MULTIPLIER_ONLY_ON_NUMBERS = 'Multiplier attribute can only be set for int and decimal',
+  MULTIPLIER_FORMAT = 'Multiplier attribute must be a number',
   LABEL_PROP_MISSING = 'label property is missing or empty',
   TYPE_PROP_MISSING = 'type property is missing or empty',
   TYPE_NOT_SUPPORTED = 'type is not valid. Please also check for white spaces!',
@@ -253,7 +256,7 @@ export class Schema {
         throw generateRegistryError(`registry address ${registry.address}`, RegistriesErrors.ADDRESS_FORMAT);
       }
 
-      let validOracle = isValidAddress(registry.oracle_address);
+      let validOracle = !propertyUnset(registry, 'oracle_address') &&  isValidAddress(registry.oracle_address);
       if (!validOracle) {
         throw generateRegistryError(`oracle address ${registry.oracle_address}`, RegistriesErrors.ADDRESS_FORMAT);
       }
@@ -310,6 +313,13 @@ export class Schema {
           if (!Array.isArray(attr.options)) throw generateAttributeError(attr.name, AttributesErrors.OPTIONS_BAD_FORMAT);
           if (attr.options.length < 1) throw generateAttributeError(attr.name, AttributesErrors.OPTIONS_EMPTY);
           if (attr.type === AttrTypes.TIMESTAMP) throw generateAttributeError(attr.name, AttributesErrors.OPTIONS_NOT_FOR_TIMESTAMP);
+        }
+
+        if(attr.hasOwnProperty('multiplier')) {
+          if(typeof attr.multiplier !== 'number')
+            throw generateAttributeError(attr.name, AttributesErrors.MULTIPLIER_FORMAT);
+          if(([AttrTypes.DECIMAL, AttrTypes.INTEGER].indexOf(attr.type) === - 1))
+            throw generateAttributeError(attr.name, AttributesErrors.MULTIPLIER_ONLY_ON_NUMBERS);
         }
 
         if (attr.name === 'comments') {

@@ -34,6 +34,7 @@
     "url": "https://github.com/centrifuge/gateway/issues"
   },
   "dependencies": {
+    "bignumber.js": "^9.0.0",
     "ethereumjs-util": "7.0.5",
     "lodash": "^4.17.19",
     "portable-fetch": "^3.0.0"

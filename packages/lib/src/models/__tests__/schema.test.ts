@@ -86,6 +86,8 @@ describe('Schema validations', () => {
       }).toThrow(AttributesErrors.TYPE_NOT_SUPPORTED);
     });
 
+
+
     it('should fail when placeholder is not a string', () => {
       expect(() => {
         Schema.validateAttributes([{
@@ -150,6 +152,29 @@ describe('Schema validations', () => {
           options: {} as any,
         }]);
       }).toThrow(AttributesErrors.OPTIONS_BAD_FORMAT);
+    });
+
+    it('should fail when multiplier is set for wrong type', () => {
+      expect(() => {
+        Schema.validateAttributes([{
+          name: 'test',
+          label: 'test',
+          multiplier: 20,
+          type: AttrTypes.STRING
+        }]);
+      }).toThrow(AttributesErrors.MULTIPLIER_ONLY_ON_NUMBERS);
+    });
+
+    it('should fail when multiplier is not a number', () => {
+      expect(() => {
+        Schema.validateAttributes([{
+          name: 'test',
+          label: 'test',
+          //@ts-ignore
+          multiplier: '20',
+          type: AttrTypes.INTEGER
+        }]);
+      }).toThrow(AttributesErrors.MULTIPLIER_FORMAT);
     });
 
     it('should fail if options are present on a timestamp field', () => {

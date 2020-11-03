@@ -11,28 +11,30 @@ import Comments from './Comments';
 import Attributes from './Attributes';
 import { ViewModeFormContainer } from '../components/ViewModeFormContainer';
 import Collaborators from './Collaborators';
+import {
+  applySchemaRules,
+  revertSchemaRules,
+} from '@centrifuge/gateway-lib/utils/document-mutations';
 
 // TODO use function components here
 type Props = {
   onSubmit?: (document: Document) => void;
   renderHeader?: () => JSX.Element;
   contacts: Contact[];
-  schemas?: Schema[],
-  mode?: 'edit' | 'view' | 'create',
-  document: Document
+  schemas?: Schema[];
+  mode?: 'edit' | 'view' | 'create';
+  document: Document;
   selectedSchema?: Schema;
 };
 
 type State = {
-  submitted: boolean,
-  columnGap: string,
-  sectionGap: string,
-  selectedSchema?: Schema
-}
-
+  submitted: boolean;
+  columnGap: string;
+  sectionGap: string;
+  selectedSchema?: Schema;
+};
 
 export class DocumentForm extends React.Component<Props, State> {
-
   static defaultProps: Props = {
     onSubmit: () => {
       // do nothing
@@ -45,7 +47,7 @@ export class DocumentForm extends React.Component<Props, State> {
       header: {
         // @ts-ignore
         read_access: [],
-        write_access:[]
+        write_access: [],
       },
       template: '',
     },
@@ -55,20 +57,23 @@ export class DocumentForm extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     const { schemas, document, selectedSchema } = props;
-
     // If no selectedSchema is provided search if the provided document has a
     // _schema defined and select it
     // The selectedSchema prop is used when the selectedSchema is calculated in the parent component
     // in order not to do the same calculation twice. Ex: in EditDocument.tsx we need schema to pass
     // down the registries to the Nfts section
-    const found: Schema | undefined = selectedSchema || schemas.find(s => {
-      return (
-        document &&
-        document.attributes &&
-        document.attributes._schema &&
-        s.name === document.attributes._schema.value
-      );
-    });
+    const found: Schema | undefined =
+      selectedSchema ||
+      schemas.find(s => {
+        return (
+          document &&
+          document.attributes &&
+          document.attributes._schema &&
+          s.name === document.attributes._schema.value
+        );
+      });
+
+    found && revertSchemaRules(document, found);
 
     this.state = {
       submitted: false,
@@ -77,12 +82,14 @@ export class DocumentForm extends React.Component<Props, State> {
       selectedSchema: found,
     };
   }
+  selectSchema = selected => {
+    this.setState({ selectedSchema: selected });
+  };
 
-  onSubmit = (values) => {
-
+  onSubmit = values => {
     const { selectedSchema } = this.state;
     const { onSubmit, document } = this.props;
-    const template =  selectedSchema && selectedSchema.template
+    const template = selectedSchema && selectedSchema.template;
 
     let payload = {
       ...values,
@@ -95,14 +102,14 @@ export class DocumentForm extends React.Component<Props, State> {
       attributes: {
         ...values.attributes,
         // add schema as tech field
-        '_schema': {
+        _schema: {
           type: 'string',
           value: selectedSchema!.name,
         },
       },
       template: template,
     };
-
+    applySchemaRules(payload, selectedSchema!);
     onSubmit && onSubmit(payload);
   };
 
@@ -111,22 +118,22 @@ export class DocumentForm extends React.Component<Props, State> {
     let read_access = [];
     let write_access = [];
 
-      collaborators.forEach(c => {
+    collaborators.forEach(c => {
+      // @ts-ignore
+      if (c.access === 'read_access' && !read_access.includes(c.address)) {
         // @ts-ignore
-        if ( c.access === 'read_access' && !read_access.includes(c.address)) {
-          // @ts-ignore
-          read_access.push(c.address)
-        }
+        read_access.push(c.address);
+      }
+      // @ts-ignore
+      if (c.access === 'write_access' && !write_access.includes(c.address)) {
         // @ts-ignore
-        if (c.access === 'write_access' && !write_access.includes(c.address)) {
-          // @ts-ignore
-          write_access.push(c.address)
-        }
-      })
+        write_access.push(c.address);
+      }
+    });
     // @ts-ignore
     document.header.read_access = read_access;
     // @ts-ignore
-    document.header.write_access= write_access
+    document.header.write_access = write_access;
   };
 
   generateValidationSchema = (schema: Schema | undefined) => {
@@ -180,25 +187,29 @@ export class DocumentForm extends React.Component<Props, State> {
       }
     }
 
-
     return {
-      validationSchema: Yup.object().shape(
-        {
-          attributes: Yup.object().shape(attributes),
-        }),
+      validationSchema: Yup.object().shape({
+        attributes: Yup.object().shape(attributes),
+      }),
       defaultValues,
     };
   };
 
-
   render() {
-
     const { submitted, selectedSchema, sectionGap, columnGap } = this.state;
-    const { document, mode, children, renderHeader, contacts, schemas } = this.props;
+    const {
+      document,
+      mode,
+      children,
+      renderHeader,
+      contacts,
+      schemas,
+    } = this.props;
     const isViewMode = mode === 'view';
     const isEditMode = mode === 'edit';
-    const { validationSchema, defaultValues } = this.generateValidationSchema(selectedSchema);
-
+    const { validationSchema, defaultValues } = this.generateValidationSchema(
+      selectedSchema,
+    );
 
     // Make sure document has the right form in order not to break the form
     // This should never be the case
@@ -216,30 +227,32 @@ export class DocumentForm extends React.Component<Props, State> {
         // @ts-ignore
         read_access: [],
         write_access: [],
-      }
+      };
     }
 
     // If a set of collaborators is set on schema, use it as default
-    const collaborators = (selectedSchema && selectedSchema.collaborators) || [];
+    const collaborators =
+      (selectedSchema && selectedSchema.collaborators) || [];
 
     return (
-      <ViewModeFormContainer isViewMode={mode === 'view'} pad={{ bottom: 'xlarge' }}>
+      <ViewModeFormContainer
+        isViewMode={mode === 'view'}
+        pad={{ bottom: 'xlarge' }}
+      >
         <ResponsiveContext.Consumer>
           {size => {
-            return <Formik
-              validationSchema={validationSchema}
-              initialValues={document}
-              validateOnBlur={submitted}
-              validateOnChange={submitted}
-              onSubmit={(values, { setSubmitting }) => {
-                this.onSubmit(values);
-                setSubmitting(true);
-              }}
-            >
-              {
-                ({
-                   handleSubmit,
-                 }) => (
+            return (
+              <Formik
+                validationSchema={validationSchema}
+                initialValues={document}
+                validateOnBlur={submitted}
+                validateOnChange={submitted}
+                onSubmit={(values, { setSubmitting }) => {
+                  this.onSubmit(values);
+                  setSubmitting(true);
+                }}
+              >
+                {({ handleSubmit }) => (
                   <form
                     onSubmit={event => {
                       this.setState({ submitted: true });
@@ -250,50 +263,53 @@ export class DocumentForm extends React.Component<Props, State> {
                       {renderHeader && renderHeader()}
 
                       <Section title="Document Details">
-                        <FormField
-                          label="Document Schema"
-                        >
+                        <FormField label="Document Schema">
                           <SearchSelect
                             disabled={isViewMode || isEditMode}
-                            labelKey={(item) => {
-                              return  item.label || item.name;
+                            labelKey={item => {
+                              return item.label || item.name;
                             }}
                             options={schemas}
                             value={selectedSchema || ''}
-                            onChange={(selected) => {
-                              this.setState({ selectedSchema: selected });
-                            }}
-                          >
-
-                          </SearchSelect>
+                            onChange={this.selectSchema}
+                          ></SearchSelect>
                         </FormField>
                       </Section>
                       <Collaborators
                         contacts={contacts}
                         collaborators={collaborators}
                         viewMode={isViewMode}
-                        addCollaboratorToPayload={this.addCollaboratorToPayload}/>
+                        addCollaboratorToPayload={this.addCollaboratorToPayload}
+                      />
                       {children}
 
-                      {selectedSchema && <>
-                        <Attributes columnGap={columnGap} schema={selectedSchema} isViewMode={isViewMode} size={size}/>
-                        {(selectedSchema.formFeatures && selectedSchema.formFeatures.comments) &&
-                        <Comments columnGap={columnGap} isViewMode={isViewMode}/>}
-                      </>}
+                      {selectedSchema && (
+                        <>
+                          <Attributes
+                            columnGap={columnGap}
+                            schema={selectedSchema}
+                            isViewMode={isViewMode}
+                            size={size}
+                          />
+                          {selectedSchema.formFeatures &&
+                            selectedSchema.formFeatures.comments && (
+                              <Comments
+                                columnGap={columnGap}
+                                isViewMode={isViewMode}
+                              />
+                            )}
+                        </>
+                      )}
                     </Box>
                   </form>
-                )
-              }
-            </Formik>;
+                )}
+              </Formik>
+            );
           }}
         </ResponsiveContext.Consumer>
-
       </ViewModeFormContainer>
     );
   }
-
-};
+}
 
 export default DocumentForm;
-
-
