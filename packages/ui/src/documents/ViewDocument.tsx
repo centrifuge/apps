@@ -134,7 +134,8 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
           </Heading>
         </Box>
         <Box direction="row" gap="medium">
-          {canWriteToDoc(user, document) && document && document.header && document.header.status === 'Created' && <Button
+          {canWriteToDoc(user, document) && document && document.header  && <Button
+            primary={true}
             onClick={() => {
               push(
                 documentRoutes.edit.replace(':id', id),

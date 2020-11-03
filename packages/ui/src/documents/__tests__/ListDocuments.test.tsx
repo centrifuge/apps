@@ -116,37 +116,6 @@ describe('List Documents', () => {
     });
   });
 
-  it('Should render 2 documents with the proper actions', async () => {
-
-    const history = createMemoryHistory();
-
-    await act(async () => {
-      const component = mount(
-        withAllProvidersAndContexts(
-          <MemoryRouter>
-            <ListDocuments
-              history={history}/>
-          </MemoryRouter>
-          ,
-        ),
-      );
-
-      await new Promise(r => setTimeout(r, 0));
-      component.update();
-
-      const dataTable = component.find(DataTable);
-      expect(dataTable.length).toEqual(1);
-      const rows = dataTable.find('tbody tr');
-      expect(rows.length).toBe(2);
-      const firstRowactions = rows.at(0).find(Anchor);
-      const secondRowactions = rows.at(1).find(Anchor);
-      expect(firstRowactions.length).toBe(1);
-      // NOTE: 'Edit should not be displayed until the document is anchored
-      expect(firstRowactions.at(0).text()).toEqual('View');
-      expect(secondRowactions.length).toBe(1);
-      expect(secondRowactions.at(0).text()).toEqual('View');
-    });
-  });
 
   it('Should render the received documents', async () => {
     await act(async () => {
@@ -173,7 +142,7 @@ describe('List Documents', () => {
   });
 
 
-  it('Should open document when clicking View', async () => {
+  it('Should open document when clicking on row', async () => {
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
@@ -192,8 +161,7 @@ describe('List Documents', () => {
       const dataTable = component.find(DataTable);
       expect(dataTable.length).toEqual(1);
       const rows = dataTable.find('tbody tr');
-      const actions = rows.at(0).find(Anchor);
-      actions.at(0).simulate('click');
+      rows.at(0).simulate('click');
       expect(push).toHaveBeenCalledWith(documentRoutes.view.replace(':id', '1'));
     });
 

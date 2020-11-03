@@ -144,12 +144,12 @@ describe('Collaborators', () => {
     // after that write_access
 
     // should have only view because it has read access
-    const firstRowActions = firstRowColumns.at(3).find(Anchor);
+    const firstRowActions = firstRowColumns.at(2).find(Anchor);
     expect(firstRowActions.length).toBe(1);
     expect(firstRowActions.text()).toBe('View');
 
     //Should all all 3 actions: View, Edit, Remove because it has write access
-    const secondRowActions = secondRowColumns.at(3).find(Anchor);
+    const secondRowActions = secondRowColumns.at(2).find(Anchor);
     expect(secondRowActions.length).toBe(3);
 
 
@@ -314,7 +314,7 @@ describe('Collaborators', () => {
 
     const rows = dataTable.find('tbody tr');
     const columnWithWriteAccess = rows.at(1).find('td');
-    const removeAction = columnWithWriteAccess.at(3).find(Anchor).at(2);
+    const removeAction = columnWithWriteAccess.at(2).find(Anchor).at(2);
     removeAction.simulate('click');
     component.update();
     expect(component.find(DataTable).find('tbody tr').length).toBe(1);
@@ -353,7 +353,7 @@ describe('Collaborators', () => {
 
     const rows = dataTable.find('tbody tr');
     const columnWithWriteAccess = rows.at(1).find('td');
-    const editAction = columnWithWriteAccess.at(3).find(Anchor).at(1);
+    const editAction = columnWithWriteAccess.at(2).find(Anchor).at(1);
     editAction.simulate('click');
     expect(component.find({title:'Edit collaborator'}).find(Modal).length).toBe(1);
     const collaboratorForm = component.find(CollaboratorForm);
@@ -400,7 +400,7 @@ describe('Collaborators', () => {
 
     const rows = dataTable.find('tbody tr');
     const firstRowColumns = rows.at(0).find('td');
-    const viewAction = firstRowColumns.at(3).find(Anchor).at(0);
+    const viewAction = firstRowColumns.at(2).find(Anchor).at(0);
     viewAction.simulate('click');
     expect(component.find({title:'View collaborator'}).find(Modal).length).toBe(1);
     const collaboratorForm = component.find(CollaboratorForm);

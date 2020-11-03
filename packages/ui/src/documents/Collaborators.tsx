@@ -225,13 +225,6 @@ export const Collaborators: FunctionComponent<Props> = (props) => {
             header: 'Access',
           },
           {
-            property: 'type',
-            header: 'Type',
-            render: (datum: Collaborator) => {
-              return <Text>{datum.type || 'Contact'}</Text>;
-            },
-          },
-          {
             property: '_id',
             header: 'Actions',
             sortable: false,

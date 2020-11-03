@@ -121,7 +121,7 @@ export const Nfts: FunctionComponent<Props> = (props) => {
   }
 
   const mintActions = !viewMode ? [
-    <Button key="mint-nft" onClick={openMintModal} plain label={'Mint NFT'}/>,
+    <Button key="mint-nft" onClick={openMintModal} primary={true} label={'Mint NFT'}/>,
   ] : [];
 
   const renderNftSection = () => {
