@@ -17,6 +17,7 @@ export const selectors = {
   // onboard modal
   onboardMetamaskButton: `//aside[contains(concat(" ",normalize-space(@class)," ")," bn-onboard-modal ")]//button[span[contains(text(), 'MetaMask')]]`,
 
+  pendingTransaction: `//div[contains(text(), "Transaction pending")]`,
   successfulTransaction: `//div[contains(text(), "Transaction successful")]`,
 
   // investments page

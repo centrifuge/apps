@@ -3,7 +3,7 @@ import * as assert from 'assert'
 
 import { CentrifugeWorld } from '../../support/world'
 import { tinlake } from '../../selectors'
-import { isElementVisible } from '../../utils/isElementVisible'
+import { isElementVisible } from '../../utils/elements'
 
 type Order = 'invest' | 'redeem'
 type Tranche = 'DROP' | 'TIN'
