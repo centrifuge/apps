@@ -26,7 +26,6 @@ Given('there is no outstanding order or collection for the {tranche} tranche', a
 })
 
 When('I {order} {int} DAI for {tranche}', async function(this: CentrifugeWorld, order: Order, amount: number, tranche: Tranche) {
-  console.log(`${order}, ${tranche}`)
   // TODO: implement redeem (invest/redeemButton)
   const investButton = await this.currentPage.waitForXPath(
     tinlake(tranche === 'DROP' ? 'investmentsPage.dropCard.investButton' : 'investmentsPage.tinCard.investButton')
@@ -45,7 +44,7 @@ When('I {order} {int} DAI for {tranche}', async function(this: CentrifugeWorld, 
   )
   await lockButton.click()
   
-  console.log('COnfirming')
+  console.log('Confirming')
   await this.metamaskSignAndConfirmTransaction({ gas: 50, gasLimit: 1000000 })
   console.log('Confirmed')
 
