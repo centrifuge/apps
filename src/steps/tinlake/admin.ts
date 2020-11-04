@@ -47,9 +47,7 @@ When('I do mint NFT', async function(this: CentrifugeWorld) {
   const button = await this.currentPage.waitForXPath(tinlake('mintNFTPage.mintButton'))
   await button.click()
 
-  console.log('Started minting')
   await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 300000 })
-  console.log('Stopped minting')
 })
 
 Then('I see that Min TIN ratio component is set to {int}%', async function(this: CentrifugeWorld, int: number) {

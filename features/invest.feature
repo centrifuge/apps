@@ -11,6 +11,7 @@ Feature: Investment flow
     Scenario Outline: successfully investing
         Given there is no outstanding order or collection for the <tranche> tranche
         When I invest 10 DAI for <tranche>
+        And I have reloaded the page
         Then there is an outstanding order for the <tranche> tranche
         And I cancel my <tranche> order
         And there is no outstanding order or collection for the <tranche> tranche
