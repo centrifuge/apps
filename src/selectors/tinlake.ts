@@ -11,16 +11,12 @@ const trancheOverviewSelectors = {
 }
 
 export const selectors = {
-  // header
   connectButton: `//button[contains(., "Connect")]`,
 
-  // onboard modal
   onboardMetamaskButton: `//aside[contains(concat(" ",normalize-space(@class)," ")," bn-onboard-modal ")]//button[span[contains(text(), 'MetaMask')]]`,
 
   pendingTransaction: `//div[contains(text(), "Transaction pending")]`,
   successfulTransaction: `//div[contains(text(), "Transaction successful")]`,
-
-  // investments page
 
   investmentsPage: {
     _path: `//div[h4[contains(., "Invest/Redeem")]]`,
@@ -32,6 +28,16 @@ export const selectors = {
       input: `//input`,
       updateButton: `//button[contains(., "Apply")]`,
     },
+  },
+
+  assetsPage: {
+    setMaxReserveButton: `//button[contains(., "Set max reserve")][not(@disabled)]`,
+    maxReserveValue: `//tr[th[contains(., "Pool reserve")]]//div[contains(string(), "Max: ")]//div`,
+    setMaxReserve: {
+      _path: `//div[div[h5[contains(., "Set maximum reserve amount")]]]`,
+      input: `//input`,
+      saveButton: `//button[contains(., "Save")]`
+    }
   },
 
   mintNFTPage: {

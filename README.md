@@ -9,7 +9,9 @@ End-to-end test suite for Tinlake.
 ## Usage
 Run all tests: `npm test`
 
-Run a specific test: `npm test -- features/[name].feature`
+Run a specific feature file: `npm test -- features/[name].feature`
+
+Run a specific scenario: `npm test -- --name "[scenario_name]"`
 
 ## Debugging
 
