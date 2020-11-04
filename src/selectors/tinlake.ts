@@ -20,8 +20,8 @@ export const selectors = {
 
   investmentsPage: {
     _path: `//div[h4[contains(., "Invest/Redeem")]]`,
-    dropCard: { ...trancheOverviewSelectors, _path: `//div[contains(., "DROP Balance")]` },
-    tinCard: { ...trancheOverviewSelectors, _path: `//div[contains(., "TIN Balance")]` },
+    dropCard: { ...trancheOverviewSelectors, _path: `//div[div[h5[contains(., "DROP Balance")]]]` },
+    tinCard: { ...trancheOverviewSelectors, _path: `//div[div[h5[contains(., "TIN Balance")]]]` },
     minTinRatio: {
       _path: `//div[div[h5[contains(., "Min TIN risk buffer")]]]`,
       value: `//h5[2]`,

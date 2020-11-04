@@ -50,6 +50,7 @@ export class CentrifugeWorld {
   async metamaskSignAndConfirmTransaction(options: dappeteer.TransactionOptions) {
     await this.currentPage.waitFor(1000)
     await this.metamask.sign()
+    await this.currentPage.bringToFront()
     await this.metamask.confirmTransaction(options)
     await this.currentPage.bringToFront()
   }
