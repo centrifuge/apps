@@ -1,8 +1,9 @@
 import { Given } from '@cucumber/cucumber'
+import * as assert from 'assert'
 
 import { openPoolPage } from '../../support/browser-actions'
 import { CentrifugeWorld } from '../../support/world'
-import tinlakeSelectors from '../../selectors/tinlake'
+import { tinlake } from '../../selectors'
 
 Given('I am logged into MetaMask as Tinlake admin', async function(this: CentrifugeWorld) {
   await this.metamaskImportAdminPK()
@@ -27,11 +28,18 @@ Given('I am on the Tinlake mint NFT page', async function(this: CentrifugeWorld)
 })
 
 Given('I am connected to Tinlake', async function(this: CentrifugeWorld) {
-  const connect = await this.currentPage.waitForXPath(tinlakeSelectors.connectButton)
+  const connect = await this.currentPage.waitForXPath(tinlake('connectButton'))
   await connect.click()
 
-  const metamask = await this.currentPage.waitForXPath(tinlakeSelectors.onboardMetamaskButton)
+  const metamask = await this.currentPage.waitForXPath(tinlake('onboardMetamaskButton'))
 
   await metamask.click()
   await this.metamaskApprove()
 })
+
+// Given('the transaction was successful', async function(this: CentrifugeWorld) {
+//   console.log('Wiating for green tx')
+//   const successfulTxExists = await isElementVisible(this.currentPage, tinlake('successfulTransaction'), 30000)
+//   assert.strictEqual(successfulTxExists, true)
+//   console.log('Found green tx')
+// })

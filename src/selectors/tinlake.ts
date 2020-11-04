@@ -6,6 +6,7 @@ const trancheOverviewSelectors = {
   amountInput: `//input`,
   lockDAIButton: `//button[contains(., "Lock DAI")]`,
   cancelOrderButton: `//button[contains(., "Cancel Order")]`,
+  confirmCancellationButton: `//button[contains(., "Confirm Cancellation")]`,
   collectButton: `//button[contains(., "Collect")]`,
 }
 
@@ -15,6 +16,8 @@ export const selectors = {
 
   // onboard modal
   onboardMetamaskButton: `//aside[contains(concat(" ",normalize-space(@class)," ")," bn-onboard-modal ")]//button[span[contains(text(), 'MetaMask')]]`,
+
+  successfulTransaction: `//div[contains(text(), "Transaction successful")]`,
 
   // investments page
 

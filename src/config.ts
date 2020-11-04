@@ -13,6 +13,7 @@ export interface Config {
   pool: Pool
   gasLimit: number
   nftRegistry: string
+  transactionTimeout: number
 }
 
 const network = process.env.ETH_NETWORK || 'kovan'
@@ -32,6 +33,7 @@ export const config: Config = {
   pool: pool,
   gasLimit: Number(process.env.GAS_LIMIT|| '100000') ,
   nftRegistry: process.env.NFT_REGISTRY,
+  transactionTimeout: Number(process.env.TRANSACTION_TIMEOUT || '30000')
 }
 
 console.log(

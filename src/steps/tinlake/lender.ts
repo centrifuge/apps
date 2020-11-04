@@ -44,22 +44,25 @@ When('I {order} {int} DAI for {tranche}', async function(this: CentrifugeWorld, 
   )
   await lockButton.click()
   
-  console.log('Confirming')
   await this.metamaskSignAndConfirmTransaction({ gas: 50, gasLimit: 1000000 })
-  console.log('Confirmed')
-
-  // Changing values can take a few seconds to process
-  await this.currentPage.waitFor(10000)
-  console.log('Waited')
 })
 
 When('I cancel my {tranche} order', async function(this: CentrifugeWorld, tranche: Tranche) {
   const button = await this.currentPage.waitForXPath(
     tinlake(tranche === 'DROP' ? 'investmentsPage.dropCard.cancelOrderButton' : 'investmentsPage.tinCard.cancelOrderButton')
   )
-  await button.click()
   await this.currentPage.waitFor(100)
   await button.click()
+  await this.currentPage.waitFor(100)
+
+  const confirmButton = await this.currentPage.waitForXPath(
+    tinlake(
+      tranche === 'DROP'
+        ? 'investmentsPage.dropCard.confirmCancellationButton'
+        : 'investmentsPage.tinCard.confirmCancellationButton'
+    )
+  )
+  await confirmButton.click()
 
   await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 1000000 })
 
@@ -70,7 +73,8 @@ When('I cancel my {tranche} order', async function(this: CentrifugeWorld, tranch
 Then('there is an outstanding order for the {tranche} tranche', async function(this: CentrifugeWorld, tranche: Tranche) {
   const hasOutstandingOrder = await isElementVisible(
     this.currentPage,
-    tinlake(tranche === 'DROP' ? 'investmentsPage.dropCard.cancelOrderButton' : 'investmentsPage.tinCard.cancelOrderButton')
+    tinlake(tranche === 'DROP' ? 'investmentsPage.dropCard.cancelOrderButton' : 'investmentsPage.tinCard.cancelOrderButton'),
+    10000
   )
   assert.strictEqual(hasOutstandingOrder, true)
 })
