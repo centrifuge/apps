@@ -6,8 +6,7 @@ import * as assert from 'assert'
 
 import { ensureTinlakeInit } from './tinlake-actions'
 import { config } from '../config'
-import { isElementVisible } from '../utils/elements'
-import { waitUntil } from '../utils/waitUntil'
+import { isElementVisible, waitUntilElementsIsVisible, waitUntilElementsIsInvisible } from '../utils/elements'
 import { tinlake } from '../selectors'
 
 export class CentrifugeWorld {
@@ -66,20 +65,9 @@ export class CentrifugeWorld {
   }
 
   async waitForSuccessfulTransaction() {
-    // Wait until pending transaction toasts shows up
-    this.currentPage.waitFor(1000)
-
-    // TODO: in parallel, wait for failed tx text and return false immediately if it shows up. Now, we wait 30s even if it immediately failsfails
-    await waitUntil(
-      async () => {
-        const pendingTx = await isElementVisible(this.currentPage, tinlake('pendingTransaction'), 1000)
-        return pendingTx === false
-      },
-      { errorMsg: `Expected pending transaction toast to disappear` }
-    )
-    
-    const successfulTxExists = await isElementVisible(this.currentPage, tinlake('successfulTransaction'), 1000)
-    assert.strictEqual(successfulTxExists, true)
+    await waitUntilElementsIsVisible(this.currentPage, tinlake('pendingTransaction'))
+    await waitUntilElementsIsInvisible(this.currentPage, tinlake('pendingTransaction'))
+    await waitUntilElementsIsVisible(this.currentPage, tinlake('successfulTransaction'))
   }
 }
 
