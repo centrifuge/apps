@@ -55,15 +55,19 @@ export class CentrifugeWorld {
     await this.currentPage.bringToFront()
     await this.metamask.confirmTransaction(options)
     await this.currentPage.bringToFront()
-
-    // TODO: in parallel, wait for failed tx text and return false immediately if it shows up. Now, we wait 30s even if it immediately fails
-    const successfulTxExists = await isElementVisible(this.currentPage, tinlake('successfulTransaction'), config.transactionTimeout)
-    assert.strictEqual(successfulTxExists, true)
+    await this.waitForSuccessfulTransaction()
   }
 
   async metamaskConfirmTransaction(options: dappeteer.TransactionOptions) {    
     await this.metamask.confirmTransaction(options)
     await this.currentPage.bringToFront()
+    await this.waitForSuccessfulTransaction()
+  }
+
+  async waitForSuccessfulTransaction() {
+    // TODO: in parallel, wait for failed tx text and return false immediately if it shows up. Now, we wait 30s even if it immediately fails
+    const successfulTxExists = await isElementVisible(this.currentPage, tinlake('successfulTransaction'), config.transactionTimeout)
+    assert.strictEqual(successfulTxExists, true)
   }
 }
 

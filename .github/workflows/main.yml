@@ -8,7 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Docker build
-        run: docker build -t tinlake-e2e-tests -f docker/Dockerfile .
+        run: DOCKER_BUILDKIT=1 docker build -t tinlake-e2e-tests -f docker/Dockerfile .
       - name: Docker run
         run: docker run -e GATEWAY_URL -e TINLAKE_URL -e RPC_URL -e ETH_ADMIN_ADDRESS -e ETH_ADMIN_PRIVATE_KEY -e ETH_BORROWER_ADDRESS -e ETH_BORROWER_PRIVATE_KEY -e POOL_ID -e NFT_REGISTRY -e CI -e CUCUMBER_PUBLISH_TOKEN tinlake-e2e-tests
             
