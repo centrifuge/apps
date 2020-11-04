@@ -47,9 +47,15 @@ export class CentrifugeWorld {
   }
 
   // wrap Dappeteer metamask actions so we can bring the current page back to front after interacting with metamask
-  async metamaskConfirmTransaction(options: dappeteer.TransactionOptions) {
-    // TODO: handle signing step
-    
+  async metamaskSignAndConfirmTransaction(options: dappeteer.TransactionOptions) {
+    await this.currentPage.waitFor(1000)
+    await this.metamask.sign()
+    await this.metamask.confirmTransaction(options)
+    await this.currentPage.bringToFront()
+  }
+
+  // wrap Dappeteer metamask actions so we can bring the current page back to front after interacting with metamask
+  async metamaskConfirmTransaction(options: dappeteer.TransactionOptions) {    
     await this.metamask.confirmTransaction(options)
     await this.currentPage.bringToFront()
   }
