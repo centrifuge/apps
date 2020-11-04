@@ -15,7 +15,7 @@ import {NOTIFICATION, NotificationContext} from '../components/NotificationConte
 import { AppContext } from '../App';
 import { useMergeState } from '../hooks';
 import { PageError } from '../components/PageError';
-import {AxiosError} from "axios";
+import { AxiosError, AxiosResponse } from 'axios';
 
 type Props = RouteComponentProps;
 
@@ -84,12 +84,14 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
     });
       try {
 
-        push(documentRoutes.index);
+        let createResult:AxiosResponse<Document>;
         if (document.template && document.template !== '') {
-          await httpClient.documents.clone(document);
+          createResult = await httpClient.documents.clone(document);
         } else {
-          await httpClient.documents.create(document);
+          createResult = await httpClient.documents.create(document);
         }
+        push(documentRoutes.index);
+        await httpClient.documents.commit(createResult.data._id!)
         go(0);
       } catch (e) {
         notification.alert({

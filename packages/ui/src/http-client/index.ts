@@ -58,11 +58,13 @@ export const httpClient = {
     restore: async (id: string) => instance.put(`${ROUTES.SCHEMAS}/${id}/restore`),
   },
   documents: {
-    create: async (document: Document) => instance.post(ROUTES.DOCUMENTS, document),
+    create: async (document: Document) => instance.post<Document>(ROUTES.DOCUMENTS, document),
     list: async () => instance.get(ROUTES.DOCUMENTS),
     getById: async (id): Promise<Document> => instance.get(`${ROUTES.DOCUMENTS}/${id}`),
     update: async (document: Document) => instance.put(`${ROUTES.DOCUMENTS}/${document._id}`, document),
-    clone: async (document: Document) => instance.post(`${ROUTES.DOCUMENTS}/${document.template}/clone`, document),
+    //TODO we should not use template as the document _id.
+    clone: async (document: Document) => instance.post<Document>(`${ROUTES.DOCUMENTS}/${document.template}/clone`, document),
+    commit: async (id: string) => instance.put(`${ROUTES.DOCUMENTS}/${id}/commit`),
   },
   nfts: {
     mint: async (payload: MintNftRequest) => instance.post(`${ROUTES.NFTS}/mint`, payload),

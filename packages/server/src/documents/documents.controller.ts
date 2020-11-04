@@ -1,6 +1,6 @@
 import {
   Body,
-  Controller,
+  Controller, ForbiddenException,
   Get,
   NotFoundException,
   Param,
@@ -26,6 +26,7 @@ import { SessionGuard } from '../auth/SessionGuard';
 import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes';
 import TypeEnum = CoreapiAttributeResponse.TypeEnum;
 import SchemeEnum = CoreapiDocumentResponse.SchemeEnum;
+import { User } from '@centrifuge/gateway-lib/models/user';
 
 export class CommitResp {
   commitResult: Document;
@@ -52,42 +53,78 @@ export class DocumentsController {
     return documentFromDb;
   }
 
-  async commitPendingDoc(createResult: Document, request: any) {
-    createResult.document_status = DocumentStatus.Creating;
-    createResult.nft_status = NftStatus.NoNft;
-
-    const created = await this.databaseService.documents.insert({
-      ...createResult,
-      ownerId: request.user._id,
-      organizationId: request.user.account,
-    });
-
-    createResult.attributes = unflatten(createResult.attributes);
+  async commitDoc(document: Document, user: User) {
+    if(!document._id)  {
+      throw new ForbiddenException('Document must be first inserted in the database')
+    }
     const commitResult = await this.centrifugeService.documents.commitDocumentV2(
-      request.user.account,
-      createResult.header.document_id,
+      user.account,
+      document.header.document_id,
     );
 
-    const commitResp: CommitResp = {
-      commitResult,
-      dbId: created._id,
-    };
-
-    return commitResp;
-  }
-
-  async updateDBDoc(updateResult: Document, id: string, userID: string) {
     const updated = await this.centrifugeService.pullForJobComplete(
-      updateResult.header.job_id,
-      userID,
+      commitResult.header.job_id,
+      user.account,
     );
-    return await this.databaseService.documents.updateById(id, {
+    return await this.databaseService.documents.updateById(document._id, {
       $set: {
         document_status:
           updated.status === 'success'
             ? DocumentStatus.Created
             : DocumentStatus.CreationFail,
       },
+    });
+  }
+
+  async saveDoc(document: Document, user: User) {
+    const createResult: Document = await this.centrifugeService.documents.createDocumentV2(
+      user.account,
+      {
+        attributes: document.attributes,
+        read_access: document.header.read_access
+          ? document.header.read_access
+          : [],
+        write_access: document.header.write_access
+          ? document.header.write_access
+          : [],
+        scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
+      },
+    );
+
+    return  await this.databaseService.documents.insert({
+      ...createResult,
+      attributes: unflatten(createResult.attributes),
+      ownerId: user._id,
+      document_status: DocumentStatus.Creating,
+      nft_status: NftStatus.NoNft,
+      organizationId: user.account,
+    });
+  }
+
+  async cloneDoc(document: Document, template, user: User) {
+    const cloneResult: Document = await this.centrifugeService.documents.cloneDocumentV2(
+      user.account,
+      {
+        scheme: SchemeEnum.Generic,
+      },
+      template,
+    );
+
+    const updateResult: Document = await this.centrifugeService.documents.updateDocument(
+      user.account,
+      cloneResult.header.document_id,
+      {
+        attributes: document.attributes,
+        scheme: SchemeEnum.Generic,
+      },
+    );
+
+    return  await this.databaseService.documents.insert({
+      ...updateResult,
+      ownerId: user._id,
+      document_status: DocumentStatus.Creating,
+      nft_status: NftStatus.NoNft,
+      organizationId: user.account,
     });
   }
 
@@ -111,28 +148,7 @@ export class DocumentsController {
         },
       },
     };
-
-    const createResult: Document = await this.centrifugeService.documents.createDocumentV2(
-      request.user.account,
-      {
-        attributes: payload.attributes,
-        read_access: payload.header.read_access
-          ? payload.header.read_access
-          : [],
-        write_access: payload.header.write_access
-          ? payload.header.write_access
-          : [],
-        scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
-      },
-    );
-
-
-    const commitResp = await this.commitPendingDoc(createResult, request);
-    return await this.updateDBDoc(
-      commitResp.commitResult,
-      commitResp.dbId,
-      request.user.account,
-    );
+    return  await this.saveDoc(payload, request.user)
   }
 
   @Post(':id/clone')
@@ -149,37 +165,23 @@ export class DocumentsController {
     @Body() document: Document,
     @Param() params,
   ): Promise<Document> {
-    const cloneResult: Document = await this.centrifugeService.documents.cloneDocumentV2(
-      request.user.account,
-      {
-        scheme: SchemeEnum.Generic,
-      },
-      params.id,
-    );
-    document.header = cloneResult.header;
+    return await this.cloneDoc(document,params.id,request.user);
+  }
 
-
-    const commitResp = await this.commitPendingDoc(document, request);
-    const commit = await this.centrifugeService.pullForJobComplete(
-      commitResp.commitResult.header.job_id,
-      request.user.account,
-    );
-    if (commit.status === 'success') {
-      const updateResult: Document = await this.centrifugeService.documents.updateDocument(
-        request.user.account,
-        cloneResult.header.document_id,
-        {
-          attributes: document.attributes,
-          scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
-        },
-      );
-
-      return await this.updateDBDoc(
-        updateResult,
-        commitResp.dbId,
-        request.user.account,
-      );
-    }
+  @Put(':id/commit')
+  /**
+   * Anchor a document on chain
+   * @async
+   * @param {Param} params - the query params
+   * @param request - the http request
+   * @return {Promise<Document>} result
+   */
+  async commit(
+    @Req() request,
+    @Param() params,
+  ): Promise<Document> {
+    const doc = await this.getDocFromDB(params.id);
+    return this.commitDoc(doc, request.user)
   }
 
   @Get()
