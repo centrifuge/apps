@@ -25,7 +25,7 @@ const fixed27ToNumber = (fixed27: ethers.utils.BigNumber) =>
   10 ** 7
 
 const numberToUint = (num: number): string => {
-  return new BN(num * 10**12).mul(new BN(10).pow(new BN(6))).toString()
+  return new BN(num * 10 ** 12).mul(new BN(10).pow(new BN(6))).toString()
 }
 
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
