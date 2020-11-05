@@ -25,10 +25,10 @@ class LoanListPage extends React.Component<Props> {
     return (
       <WithFooter>
         <Head>
-          <title>Assets: {pool.name} | Tinlake | Centrifuge</title>
+          <title>Assets: {pool.metadata.name} | Tinlake | Centrifuge</title>
         </Head>
         <Header
-          poolTitle={pool.shortName || pool.name}
+          poolTitle={pool.metadata.shortName || pool.metadata.name}
           selectedRoute={'/assets'}
           menuItems={menuItems.filter(noDemo)}
         />
@@ -63,14 +63,14 @@ class LoanListPage extends React.Component<Props> {
 
 export async function getStaticPaths() {
   // We'll pre-render only these paths at build time.
-  const paths = config.upcomingPools.map((pool) => ({ params: { root: pool.slug } }))
+  const paths = config.upcomingPools.map((pool) => ({ params: { root: pool.metadata.slug } }))
 
   // { fallback: false } means other routes should 404.
   return { paths, fallback: false }
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  return { props: { root: params?.root, pool: config.upcomingPools.find((p) => p.slug === params?.root) } }
+  return { props: { root: params?.root, pool: config.upcomingPools.find((p) => p.metadata.slug === params?.root) } }
 }
 
 export default LoanListPage

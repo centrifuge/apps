@@ -32,7 +32,7 @@ module.exports = {
       //   - `/pool/0xbb53072d054de55d56dbb4ee95840de3262e4097` to `/pool/0xbb53072d054de55d56dbb4ee95840de3262e4097/kovan-staging-1`
       ...config.default.pools.map(p => ({
         source: `/pool/${p.addresses.ROOT_CONTRACT}`,
-        destination: `/pool/${p.addresses.ROOT_CONTRACT}/${p.slug}`,
+        destination: `/pool/${p.addresses.ROOT_CONTRACT}/${p.metadata.slug}`,
         permanent: true,
       })),
 
@@ -41,8 +41,8 @@ module.exports = {
       ...config.default.pools.map(p => ({
         source: `/pool/${p.addresses.ROOT_CONTRACT}/:rest(assets|demo|investments)/:rest2*`,
         // NOTE: negative lookaheads like the one below don't work in next.js' redirect feature
-        // source: `/pool/${p.addresses.ROOT_CONTRACT}/:rest((?!${p.slug}))/:rest2*`,
-        destination: `/pool/${p.addresses.ROOT_CONTRACT}/${p.slug}/:rest/:rest2*`,
+        // source: `/pool/${p.addresses.ROOT_CONTRACT}/:rest((?!${p.metadata.slug}))/:rest2*`,
+        destination: `/pool/${p.addresses.ROOT_CONTRACT}/${p.metadata.slug}/:rest/:rest2*`,
         permanent: true,
       })),
 
@@ -50,8 +50,8 @@ module.exports = {
       //   - `/pool/kovan-staging-1` to `/pool/0xbb53072d054de55d56dbb4ee95840de3262e4097/kovan-staging-1`
       //   - `/pool/kovan-staging-1/assets` to `/pool/0xbb53072d054de55d56dbb4ee95840de3262e4097/kovan-staging-1/assets`
       ...config.default.pools.map(p => ({
-        source: `/pool/${p.slug}/:rest*`,
-        destination: `/pool/${p.addresses.ROOT_CONTRACT}/${p.slug}/:rest*`,
+        source: `/pool/${p.metadata.slug}/:rest*`,
+        destination: `/pool/${p.addresses.ROOT_CONTRACT}/${p.metadata.slug}/:rest*`,
         permanent: true,
       })),
 

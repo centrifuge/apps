@@ -48,7 +48,7 @@ class Overview extends React.Component<Props> {
 
     return (
       <Box margin={{ bottom: 'large', top: 'medium' }}>
-        <Heading level="4">Pool Overview of {selectedPool.name} </Heading>
+        <Heading level="4">Pool Overview of {selectedPool.metadata.name} </Heading>
 
         <Box direction="row" margin={{ bottom: 'large' }}>
           {selectedPool.version === 2 && (
@@ -143,25 +143,25 @@ class Overview extends React.Component<Props> {
               <Heading level="5" margin={{ top: 'small' }}>
                 Asset Originator Details
               </Heading>
-              <a href={selectedPool.website} target="_blank">
-                <img src={selectedPool.logo} style={{ maxHeight: '80px', maxWidth: '50%' }} />
+              <a href={selectedPool.metadata.website} target="_blank">
+                <img src={selectedPool.metadata.logo} style={{ maxHeight: '80px', maxWidth: '50%' }} />
               </a>
 
-              <p>{selectedPool.text}</p>
+              <p>{selectedPool.metadata.description}</p>
 
               <p>
-                {Object.keys(selectedPool.details).map((key: string) => (
+                {Object.keys(selectedPool.metadata.details).map((key: string) => (
                   <React.Fragment key={key}>
-                    <strong>{key}:&nbsp;</strong> {selectedPool.details[key]}
+                    <strong>{key}:&nbsp;</strong> {selectedPool.metadata.details[key]}
                     <br />
                   </React.Fragment>
                 ))}
               </p>
 
-              {selectedPool.discourseLink && (
+              {selectedPool.metadata.discourseLink && (
                 <>
                   <h4 style={{ marginBottom: '0' }}>Learn more about this asset originator</h4>
-                  <a href={selectedPool.discourseLink} target="_blank">
+                  <a href={selectedPool.metadata.discourseLink} target="_blank">
                     Join the discussion on Discourse
                   </a>
                 </>

@@ -20,7 +20,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   const onOpen = () => setModalIsOpen(true)
   const onClose = () => setModalIsOpen(false)
 
-  const investDisabled = props.pool?.isUpcoming || !props.pool?.securitizeId
+  const investDisabled = props.pool?.isUpcoming || !props.pool?.metadata.securitizeId
 
   const pools = useSelector<any, PoolsState>((state) => state.pools)
   const pool = useSelector<any, PoolState>((state) => state.pool)
@@ -39,7 +39,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   }, [pools])
 
   const isClosed = status === 'Deployed' || status === 'Closed'
-  const isUpcoming = !isClosed && (props.pool?.isUpcoming || !props.pool?.securitizeId)
+  const isUpcoming = !isClosed && (props.pool?.isUpcoming || !props.pool?.metadata.securitizeId)
 
   return (
     <>
@@ -102,7 +102,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
                 primary
                 label="Sign up for this pool"
                 fill={false}
-                href={`https://${(props.pool as Pool).securitizeId || ''}.invest.securitize.io/`}
+                href={`https://${(props.pool as Pool).metadata.securitizeId || ''}.invest.securitize.io/`}
                 target="_blank"
                 disabled={investDisabled}
               />

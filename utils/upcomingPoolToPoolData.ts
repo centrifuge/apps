@@ -25,10 +25,10 @@ const emptyPoolData: PoolData | PoolDataV3 = {
 export function upcomingPoolToPooldata(p: UpcomingPool): PoolData {
   return {
     ...emptyPoolData,
-    minJuniorRatio: new BN(p.minimumJuniorRatio || 0),
+    minJuniorRatio: new BN(p.presetValues.minimumJuniorRatio || 0),
     senior: {
       ...emptyTranche,
-      interestRate: new BN(p.seniorInterestRate || 0),
+      interestRate: new BN(p.presetValues.seniorInterestRate || 0),
     },
   }
 }

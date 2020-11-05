@@ -1,28 +1,38 @@
-import { networkUrlToName } from './utils/networkNameResolver'
-import poolConfigs from 'tinlake-pool-config'
 import * as yup from 'yup'
 import BN from 'bn.js'
+import mainnetPools from '@centrifuge/tinlake-pools-mainnet'
+import kovanPools from '@centrifuge/tinlake-pools-kovan'
 
-interface PoolI {
+import { networkUrlToName } from './utils/networkNameResolver'
+
+interface PoolMetadata {
   name: string
-  slug: string
   shortName?: string
-  text?: string
+  slug: string
+  description?: string
   logo?: string
   website?: string
   details?: any
   asset: string
   discourseLink?: string
+  securitizeId?: string
+}
+
+interface BasePool {
+  network: 'mainnet' | 'kovan'
   version: 2 | 3
+  metadata: PoolMetadata
 }
 
-export interface UpcomingPool extends PoolI {
+export interface UpcomingPool extends BasePool {
   isUpcoming: true
-  seniorInterestRate?: string
-  minimumJuniorRatio?: string
+  presetValues: {
+    seniorInterestRate?: string
+    minimumJuniorRatio?: string
+  }
 }
 
-export interface Pool extends PoolI {
+export interface Pool extends BasePool {
   isUpcoming: false
   addresses: {
     ROOT_CONTRACT: string
@@ -30,13 +40,11 @@ export interface Pool extends PoolI {
     PROXY_REGISTRY: string
     COLLATERAL_NFT: string
   }
-  graph?: string
   contractConfig?: {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
     SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
+    partialRepay?: boolean
   }
-  partialRepay?: boolean
-  securitizeId?: string
 }
 
 export interface DisplayedField {
@@ -87,51 +95,56 @@ const contractConfigSchema = yup.object().shape({
   SENIOR_OPERATOR: yup
     .mixed<'PROPORTIONAL_OPERATOR' | 'ALLOWANCE_OPERATOR'>()
     .oneOf(['PROPORTIONAL_OPERATOR', 'ALLOWANCE_OPERATOR']),
+  partialRepay: yup.bool(),
 })
 
-const poolSchema = yup.object().shape({
-  addresses: contractAddressesSchema.required('poolSchema.addresses is required'),
-  graph: yup.string(),
-  contractConfig: contractConfigSchema.default(undefined),
+const metadataSchema = yup.object().shape({
   name: yup.string().required('poolSchema.name is required'),
-  version: yup
-    .number()
-    .oneOf([2, 3])
-    .required('poolSchema.version is required'),
-  slug: yup.string().required('poolSchema.slug is required'),
   shortName: yup.string(),
-  discourseLink: yup.string(),
-  text: yup.string(),
+  slug: yup.string().required('poolSchema.slug is required'),
+  description: yup.string(),
   logo: yup.string(),
   website: yup.string(),
   details: yup.object(),
   asset: yup.string().required('poolSchema.asset is required'),
-  partialRepay: yup.bool(),
+  discourseLink: yup.string(),
   securitizeId: yup.string(),
 })
 
-const upcomingPoolSchema = yup.object().shape({
-  name: yup.string().required('poolSchema.name is required'),
+const poolSchema = yup.object().shape({
+  network: yup
+    .string()
+    .oneOf(['mainnet', 'kovan'])
+    .required('poolSchema.network is required'),
   version: yup
     .number()
     .oneOf([2, 3])
     .required('poolSchema.version is required'),
-  slug: yup.string().required('poolSchema.slug is required'),
-  shortName: yup.string(),
-  text: yup.string(),
-  logo: yup.string(),
-  website: yup.string(),
-  details: yup.object(),
-  discourseLink: yup.string(),
-  asset: yup.string().required('poolSchema.asset is required'),
-  seniorInterestRate: yup
+  addresses: contractAddressesSchema.required('poolSchema.addresses is required'),
+  contractConfig: contractConfigSchema.default(undefined),
+  metadata: metadataSchema.required('poolSchema.metadata is required'),
+})
+
+const upcomingPoolSchema = yup.object().shape({
+  network: yup
     .string()
-    .default('1000000003170979198376458650')
-    .test('fee', 'value must be a fee such as 1000000003170979198376458650', fee),
-  minimumJuniorRatio: yup
-    .string()
-    .default('200000000000000000000000000')
-    .test('between-1e23-1e27', 'value must between 0 and 1e25', between1e23and1e27),
+    .oneOf(['mainnet', 'kovan'])
+    .required('poolSchema.network is required'),
+  version: yup
+    .number()
+    .oneOf([2, 3])
+    .required('poolSchema.version is required'),
+  metadata: metadataSchema.required('poolSchema.metadata is required'),
+  presetValues: yup.object().shape({
+    seniorInterestRate: yup
+      .string()
+      .default('1000000003170979198376458650')
+      .test('fee', 'value must be a fee such as 1000000003170979198376458650', fee),
+    minimumJuniorRatio: yup
+      .string()
+      .default('200000000000000000000000000')
+      .test('between-1e23-1e27', 'value must between 0 and 1e25', between1e23and1e27),
+  }),
 })
 
 const poolsSchema = yup.array(poolSchema)
@@ -143,11 +156,13 @@ const selectedPoolConfig = yup
   .oneOf(['kovanStaging', 'mainnetStaging', 'mainnetProduction'])
   .validateSync(process.env.NEXT_PUBLIC_POOLS_CONFIG)
 
+const networkConfigs = selectedPoolConfig === 'mainnetProduction' ? mainnetPools : kovanPools
+
 const pools = poolsSchema
-  .validateSync(poolConfigs[`${selectedPoolConfig}`].filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
+  .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
   .map((p) => ({ ...p, isUpcoming: false } as Pool))
 const upcomingPools = upcomingPoolsSchema
-  .validateSync(poolConfigs[`${selectedPoolConfig}`].filter((p: Pool) => !p.addresses || !p.addresses.ROOT_CONTRACT))
+  .validateSync(networkConfigs.filter((p: Pool) => !p.addresses || !p.addresses.ROOT_CONTRACT))
   .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
 
 const config: Config = {
