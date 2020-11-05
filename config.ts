@@ -1,4 +1,3 @@
-
 import * as yup from 'yup'
 import BN from 'bn.js'
 import mainnetPools from '@centrifuge/tinlake-pools-mainnet'
@@ -143,7 +142,7 @@ const upcomingPoolSchema = yup.object().shape({
     minimumJuniorRatio: yup
       .string()
       .default('200000000000000000000000000')
-      .test('between-1e23-1e27', 'value must between 0 and 1e25', between1e23and1e27)
+      .test('between-1e23-1e27', 'value must between 0 and 1e25', between1e23and1e27),
   }),
 })
 
