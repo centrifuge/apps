@@ -1,6 +1,7 @@
 import * as yup from 'yup'
 import BN from 'bn.js'
 import mainnetPools from '@centrifuge/tinlake-pools-mainnet'
+import kovanPools from '@centrifuge/tinlake-pools-kovan'
 
 import { networkUrlToName } from './utils/networkNameResolver'
 
@@ -155,7 +156,7 @@ const selectedPoolConfig = yup
   .oneOf(['kovanStaging', 'mainnetStaging', 'mainnetProduction'])
   .validateSync(process.env.NEXT_PUBLIC_POOLS_CONFIG)
 
-const networkConfigs = selectedPoolConfig === 'mainnetProduction' ? mainnetPools : mainnetPools
+const networkConfigs = selectedPoolConfig === 'mainnetProduction' ? mainnetPools : kovanPools
 
 const pools = poolsSchema
   .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
