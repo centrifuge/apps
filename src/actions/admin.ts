@@ -35,6 +35,12 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       if (!this.contract('FEED')?.wards) return false
       return (await this.contract('FEED').wards(user)).toBN().toNumber() === 1
     }
+
+    canSetMaxReserve = async (user: string) => {
+      if (!this.contract('ASSESSOR_ADMIN')?.wards) return false
+      return (await this.contract('ASSESSOR_ADMIN').wards(user)).toBN().toNumber() === 1
+    }
+
     canSetMinimumJuniorRatio = async (user: string) => {
       if (!this.contract('ASSESSOR')?.wards) return false
       return (await this.contract('ASSESSOR').wards(user)).toBN().toNumber() === 1
@@ -83,6 +89,11 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     setMaximumReserve = async (value: string) => {
+      if (this.contract('ASSESSOR_ADMIN')) {
+        // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
+        return this.pending(this.contract('ASSESSOR_ADMIN').setMaxReserve(value, this.overrides))
+      }
+
       // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
       return this.pending(
         this.contract('ASSESSOR').file(web3.fromAscii('maxReserve').padEnd(66, '0'), value, this.overrides)
@@ -147,6 +158,7 @@ export type IAdminActions = {
   canSetRiskScore(user: string): Promise<boolean>
   canSetSeniorTrancheInterest(user: string): Promise<boolean>
   canSetMinimumJuniorRatio(user: string): Promise<boolean>
+  canSetMaxReserve(user: string): Promise<boolean>
   canAddToJuniorMemberList(user: string): Promise<boolean>
   canAddToSeniorMemberList(user: string): Promise<boolean>
   updateJuniorMemberList(user: string, validUntil: number): Promise<PendingTransaction>

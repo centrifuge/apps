@@ -1,4 +1,4 @@
-import abiDefinitions from './abi/v3'
+import abiDefinitions from './abi'
 import { ethers } from 'ethers'
 import BN from 'bn.js'
 
@@ -14,6 +14,7 @@ const contractNames = [
   'PILE',
   'DISTRIBUTOR',
   'ASSESSOR',
+  'ASSESSOR_ADMIN',
   'ROOT_CONTRACT',
   'JUNIOR_TOKEN',
   'SENIOR_TOKEN',

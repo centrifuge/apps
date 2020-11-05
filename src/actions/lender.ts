@@ -280,11 +280,7 @@ export type ILenderActions = {
   getJuniorTokenAllowance(owner: string): Promise<BN>
   approveJuniorToken: (tokenAmount: string) => Promise<PendingTransaction>
   approveSeniorToken: (tokenAmount: string) => Promise<PendingTransaction>
-  signSupplyPermit: (
-    amount: string,
-    senderAddress: string,
-    tranche: 'senior' | 'junior'
-  ) => Promise<PermitMessage>
+  signSupplyPermit: (amount: string, senderAddress: string, tranche: 'senior' | 'junior') => Promise<PermitMessage>
   signRedeemPermit: (
     amount: string,
     senderAddress: string,

@@ -116,7 +116,7 @@ describe('solver tests', async () => {
       assert.equal(result.vars.tinInvest > 0, true)
       assert.equal(result.vars.dropInvest > 0, true)
     })
-    
+
     it('should handle the edge case from 10-10-2020', async () => {
       const state = {
         reserve: 34.0825884122082,
