@@ -58,7 +58,8 @@ class TwoFAForm extends React.Component<LoginProps> {
                   <Box gap="small">
 
                     <FormField
-                      label="Code"
+                      label="Security code"
+                      info={'We just sent you a message via email with your security code. Enter the code in the form above to verify your identity.'}
                       error={errors!.token}
                     >
                       <TextInput
@@ -74,7 +75,7 @@ class TwoFAForm extends React.Component<LoginProps> {
                     }
 
                     <Box direction="row" height="50px">
-                      <Button type="submit" primary label="Validate Token" fill={true}/>
+                      <Button type="submit" primary label="Verify" fill={true}/>
                     </Box>
                   </Box>
                 </form>

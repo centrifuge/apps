@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Box, Button, Heading } from 'grommet';
 import documentRoutes from './routes';
 import { RouteComponentProps, withRouter } from 'react-router';
-import {Document} from '@centrifuge/gateway-lib/models/document';
+import {Document,canLoadDocument} from '@centrifuge/gateway-lib/models/document';
 import { SecondaryHeader } from '../components/SecondaryHeader';
 import { canCreateDocuments } from '@centrifuge/gateway-lib/models/user';
 import { Preloader } from '../components/Preloader';
@@ -125,11 +125,12 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
         <DataTableWithDynamicHeight
           sortable={true}
           data={getFilteredDocuments()}
-          onClickRow={({datum}) =>
+          onClickRow={({datum}) => {
+            if(!canLoadDocument(datum)) return;
             push(
               documentRoutes.view.replace(':id', datum._id),
             )
-          }
+          }}
           primaryKey={'_id'}
           columns={[
             {
@@ -165,8 +166,8 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               align: 'center',
               sortable: false,
               size: '36px',
-              render: () => {
-                return <FormNext/>
+              render: (datum) => {
+                return canLoadDocument(datum) ? <FormNext/> : <></>
               }
             }
           ]}

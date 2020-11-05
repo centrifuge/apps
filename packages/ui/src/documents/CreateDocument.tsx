@@ -15,7 +15,8 @@ import {NOTIFICATION, NotificationContext} from '../components/NotificationConte
 import { AppContext } from '../App';
 import { useMergeState } from '../hooks';
 import { PageError } from '../components/PageError';
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosError } from 'axios';
+import { HARDCODED_FIELDS } from '@centrifuge/gateway-lib/utils/constants';
 
 type Props = RouteComponentProps;
 
@@ -83,21 +84,42 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
       defaultDocument: document,
     });
       try {
+        document = {
+          ...document,
+          attributes: {
+            ...document.attributes,
+            [HARDCODED_FIELDS.ORIGINATOR]: {
+              type: 'bytes',
+              value: user?.account,
+            } as any
+          },
+        };
 
-        let createResult:AxiosResponse<Document>;
+        let createResult: Document;
         if (document.template && document.template !== '') {
-          createResult = await httpClient.documents.clone(document);
+          createResult = (await httpClient.documents.clone(document)).data;
         } else {
-          createResult = await httpClient.documents.create(document);
+          createResult = (await httpClient.documents.create(document)).data;
         }
         push(documentRoutes.index);
-        await httpClient.documents.commit(createResult.data._id!)
+        await httpClient.documents.update({
+          ...createResult,
+          attributes: {
+            ...createResult.attributes,
+            [HARDCODED_FIELDS.ASSET_IDENTIFIER]: {
+              type: 'bytes',
+              value: createResult.header!.document_id,
+            } as any,
+          }
+
+        })
+        await httpClient.documents.commit(createResult._id!)
         go(0);
       } catch (e) {
         notification.alert({
           type: NOTIFICATION.ERROR,
           title: 'Failed to save document',
-          message: (e as AxiosError)!.response!.data.message,
+          message: (e as AxiosError)!.response?.data.message,
         });
       }
     };

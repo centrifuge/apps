@@ -1,8 +1,6 @@
 import React, { FunctionComponent } from 'react';
 import { Schema } from '@centrifuge/gateway-lib/models/schema';
-import { Grid } from 'grommet';
-import { Section } from '../components/Section';
-import AttributeField from './AttributeField';
+import AttributeSection from './AttributeSection';
 
 interface Props {
   columnGap: string,
@@ -22,24 +20,8 @@ export const Attributes: FunctionComponent<Props> = (props: Props) => {
 
   const { formFeatures, attributes } = schema;
 
-  const getSectionGridProps = (size) => {
 
-    let numOfRows = (formFeatures && formFeatures.columnNo) ? formFeatures.columnNo : 1;
-    switch (size) {
-      case 'medium':
-        numOfRows = Math.min(4, numOfRows);
-        break;
-      case 'small':
-        numOfRows = 1;
-
-    }
-    return {
-      gap: columnGap,
-      style: { gridTemplateColumns: `repeat(${numOfRows}, 1fr)` },
-    };
-  };
-
-
+  const columnNo = (formFeatures && formFeatures.columnNo) ? formFeatures.columnNo : 1
   const defaultSectionName = formFeatures && formFeatures.defaultSection ? formFeatures.defaultSection : 'Attributes';
   const sections = {};
   // Group in sections
@@ -47,7 +29,7 @@ export const Attributes: FunctionComponent<Props> = (props: Props) => {
     const sectionName = attr.section || defaultSectionName;
     if (!sections[sectionName]) sections[sectionName] = [];
     sections[sectionName].push(
-      <AttributeField key={attr.name} attr={attr} isViewMode={isViewMode}/>,
+      attr
     );
   });
 
@@ -55,11 +37,7 @@ export const Attributes: FunctionComponent<Props> = (props: Props) => {
 
   return <>
     {sectionNames.map(name => {
-      return <Section key={name} title={name}>
-        <Grid {...getSectionGridProps(size)}>
-          {sections[name]}
-        </Grid>
-      </Section>;
+      return <AttributeSection name={name} attributes={sections[name]} columnGap={columnGap} size={size} columnNo={columnNo} isViewMode={isViewMode}/>
     })}
   </>;
 

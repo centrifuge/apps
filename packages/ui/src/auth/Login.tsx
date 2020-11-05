@@ -36,7 +36,7 @@ const LoginPage: FunctionComponent<Props> = props => {
   };
 
   // TODO figure out how to do user based redirects
-  if (!!user && (loginCandidate || process.env.NODE_ENV === 'development')) {
+  if (!!user) {
     if (user.permissions.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
       return <Redirect to={routes.user.index} />;
     }

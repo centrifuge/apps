@@ -6,7 +6,6 @@ import { Document } from '@centrifuge/gateway-lib/models/document';
 import { AttrTypes, Schema } from '@centrifuge/gateway-lib/models/schema';
 import { SearchSelect } from '@centrifuge/axis-search-select';
 import { Contact } from '@centrifuge/gateway-lib/models/contact';
-import { Section } from '../components/Section';
 import Comments from './Comments';
 import Attributes from './Attributes';
 import { ViewModeFormContainer } from '../components/ViewModeFormContainer';
@@ -15,6 +14,9 @@ import {
   applySchemaRules,
   revertSchemaRules,
 } from '@centrifuge/gateway-lib/utils/document-mutations';
+import { HARDCODED_FIELDS } from '@centrifuge/gateway-lib/utils/constants';
+import AttributeSection from './AttributeSection';
+import { cloneDeep } from 'lodash';
 
 // TODO use function components here
 type Props = {
@@ -31,6 +33,8 @@ type State = {
   submitted: boolean;
   columnGap: string;
   sectionGap: string;
+  document: Document;
+  validationSchema: any;
   selectedSchema?: Schema;
 };
 
@@ -72,23 +76,38 @@ export class DocumentForm extends React.Component<Props, State> {
           s.name === document.attributes._schema.value
         );
       });
+    const { validationSchema, clone } = this.generateDefaultValuesAndValidation(
+      found,
+      document,
+    );
 
-    found && revertSchemaRules(document, found);
+    found && revertSchemaRules(clone, found);
 
     this.state = {
       submitted: false,
       columnGap: 'medium',
       sectionGap: 'none',
+      document: clone,
+      validationSchema,
       selectedSchema: found,
     };
   }
   selectSchema = selected => {
-    this.setState({ selectedSchema: selected });
+    const { validationSchema, clone } = this.generateDefaultValuesAndValidation(
+      selected,
+      this.props.document,
+    );
+    revertSchemaRules(clone, selected);
+    this.setState({
+      selectedSchema: selected,
+      document: clone,
+      validationSchema,
+    });
   };
 
   onSubmit = values => {
-    const { selectedSchema } = this.state;
-    const { onSubmit, document } = this.props;
+    const { selectedSchema, document } = this.state;
+    const { onSubmit } = this.props;
     const template = selectedSchema && selectedSchema.template;
 
     let payload = {
@@ -102,7 +121,7 @@ export class DocumentForm extends React.Component<Props, State> {
       attributes: {
         ...values.attributes,
         // add schema as tech field
-        _schema: {
+        [HARDCODED_FIELDS.SCHEMA]: {
           type: 'string',
           value: selectedSchema!.name,
         },
@@ -114,7 +133,7 @@ export class DocumentForm extends React.Component<Props, State> {
   };
 
   addCollaboratorToPayload = (collaborators: Array<any>) => {
-    const { document } = this.props;
+    const { document } = this.state;
     let read_access = [];
     let write_access = [];
 
@@ -136,7 +155,10 @@ export class DocumentForm extends React.Component<Props, State> {
     document.header.write_access = write_access;
   };
 
-  generateValidationSchema = (schema: Schema | undefined) => {
+  generateDefaultValuesAndValidation = (
+    schema: Schema | undefined,
+    document: Document,
+  ) => {
     // Attributes validation
     let attributes = {};
     let defaultValues = {};
@@ -180,55 +202,65 @@ export class DocumentForm extends React.Component<Props, State> {
       }
       // Add comments field if schema has the option
       if (schema.formFeatures && schema.formFeatures.comments) {
-        defaultValues['comments'] = {
+        defaultValues[HARDCODED_FIELDS.COMMENTS] = {
           value: '',
           type: AttrTypes.STRING,
         };
       }
+    }
+    const clone = cloneDeep(document);
+    if (!clone.attributes) {
+      clone.attributes = defaultValues;
+    } else {
+      clone.attributes = {
+        ...defaultValues,
+        ...clone.attributes
+      };
+    }
+
+    if (!clone.header) {
+      clone.header = {
+        // @ts-ignore
+        read_access: [],
+        write_access: [],
+      };
     }
 
     return {
       validationSchema: Yup.object().shape({
         attributes: Yup.object().shape(attributes),
       }),
-      defaultValues,
+      clone,
     };
   };
 
   render() {
-    const { submitted, selectedSchema, sectionGap, columnGap } = this.state;
     const {
+      submitted,
+      selectedSchema,
+      sectionGap,
+      columnGap,
       document,
-      mode,
-      children,
-      renderHeader,
-      contacts,
-      schemas,
-    } = this.props;
+      validationSchema,
+    } = this.state;
+    const { mode, children, renderHeader, contacts, schemas } = this.props;
     const isViewMode = mode === 'view';
     const isEditMode = mode === 'edit';
-    const { validationSchema, defaultValues } = this.generateValidationSchema(
-      selectedSchema,
-    );
 
     // Make sure document has the right form in order not to break the form
     // This should never be the case
-    if (!document.attributes) {
-      document.attributes = defaultValues;
-    } else {
-      document.attributes = {
-        ...defaultValues,
-        ...document.attributes,
-      };
-    }
 
-    if (!document.header) {
-      document.header = {
-        // @ts-ignore
-        read_access: [],
-        write_access: [],
-      };
-    }
+    const documentProps: any[] = [];
+    document.attributes![HARDCODED_FIELDS.ORIGINATOR] && documentProps.push({
+      ...document.attributes![HARDCODED_FIELDS.ORIGINATOR],
+      label:'Originator',
+      name: HARDCODED_FIELDS.ORIGINATOR,
+    })
+    document.attributes![HARDCODED_FIELDS.ASSET_IDENTIFIER] && documentProps.push({
+      ...document.attributes![HARDCODED_FIELDS.ORIGINATOR],
+      label:'Asset ID',
+      name: HARDCODED_FIELDS.ASSET_IDENTIFIER,
+    })
 
     // If a set of collaborators is set on schema, use it as default
     const collaborators =
@@ -243,6 +275,7 @@ export class DocumentForm extends React.Component<Props, State> {
           {size => {
             return (
               <Formik
+                enableReinitialize={true}
                 validationSchema={validationSchema}
                 initialValues={document}
                 validateOnBlur={submitted}
@@ -262,7 +295,14 @@ export class DocumentForm extends React.Component<Props, State> {
                     <Box gap={sectionGap}>
                       {renderHeader && renderHeader()}
 
-                      <Section title="Document Details">
+                      <AttributeSection
+                        columnGap={columnGap}
+                        attributes={documentProps}
+                        columnNo={2}
+                        size={size}
+                        name={'Document Details'}
+                        isViewMode={true}
+                      >
                         <FormField label="Document Schema">
                           <SearchSelect
                             disabled={isViewMode || isEditMode}
@@ -274,7 +314,7 @@ export class DocumentForm extends React.Component<Props, State> {
                             onChange={this.selectSchema}
                           ></SearchSelect>
                         </FormField>
-                      </Section>
+                      </AttributeSection>
                       <Collaborators
                         contacts={contacts}
                         collaborators={collaborators}
@@ -282,7 +322,6 @@ export class DocumentForm extends React.Component<Props, State> {
                         addCollaboratorToPayload={this.addCollaboratorToPayload}
                       />
                       {children}
-
                       {selectedSchema && (
                         <>
                           <Attributes

@@ -246,7 +246,6 @@ export class DocumentsController {
 
     // Node does not support signed attributes
     delete updateDocRequest.attributes.funding_agreement;
-
     const updateResult: Document = await this.centrifugeService.documents.updateDocument(
       request.user.account,
       documentFromDb.header.document_id,

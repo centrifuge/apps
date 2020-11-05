@@ -17,7 +17,6 @@ const fundingRoutes = {
   sign: `${baseFundingRoute}/sign`,
 };
 
-
 export const ROUTES = Object.freeze({
   API_BASE,
   INVOICES: `${API_BASE}/invoices`,
@@ -38,5 +37,13 @@ export enum PERMISSIONS {
   CAN_MANAGE_ACCOUNTS = 'can_manage_accounts',
   CAN_MANAGE_SCHEMAS = 'can_manage_schemas',
   CAN_MANAGE_DOCUMENTS = 'can_manage_documents',
-  CAN_VIEW_DOCUMENTS = 'can_view_documents'
+  CAN_VIEW_DOCUMENTS = 'can_view_documents',
+}
+
+//Hardcoded Fields
+export enum HARDCODED_FIELDS {
+  SCHEMA = '_schema',
+  COMMENTS = 'comments',
+  ORIGINATOR = 'Originator',
+  ASSET_IDENTIFIER = 'AssetIdentifier',
 }
