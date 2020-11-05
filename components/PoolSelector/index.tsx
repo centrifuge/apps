@@ -90,7 +90,6 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
         >
           <Wrapper>
             <PoolList>
-              {/* TODO */}
               {pools.data?.pools && pools.data?.pools.length >= 5 && (
                 <SearchField>
                   <TextInput

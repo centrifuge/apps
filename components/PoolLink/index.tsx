@@ -50,7 +50,7 @@ function getHref(rootOrSlug: string | string[], href: string | null | undefined 
   if (pool) {
     return `/pool/[root]/[slug]${href}`
   }
-  const upPool = config.upcomingPools.find((p) => (rootOrSlug as string) === p.slug)
+  const upPool = config.upcomingPools.find((p) => (rootOrSlug as string) === p.metadata.slug)
   if (upPool) {
     return `/pool/[root]${href}`
   }
@@ -63,9 +63,9 @@ function getAs(rootOrSlug: string | string[], as: string | null | undefined | Ur
     (p) => (rootOrSlug as string).toLowerCase() === p.addresses.ROOT_CONTRACT.toLowerCase()
   )
   if (pool) {
-    return `/pool/${rootOrSlug}/${pool.slug}${as}`
+    return `/pool/${rootOrSlug}/${pool.metadata.slug}${as}`
   }
-  const upPool = config.upcomingPools.find((p) => rootOrSlug === p.slug)
+  const upPool = config.upcomingPools.find((p) => rootOrSlug === p.metadata.slug)
   if (upPool) {
     return `/pool/${rootOrSlug}${as}`
   }

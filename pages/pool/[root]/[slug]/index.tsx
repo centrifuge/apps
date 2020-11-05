@@ -24,9 +24,9 @@ class Pool extends React.Component<Props> {
     return (
       <WithFooter>
         <Head>
-          <title>Pool Overview: {pool.name} | Tinlake | Centrifuge</title>
+          <title>Pool Overview: {pool.metadata.name} | Tinlake | Centrifuge</title>
         </Head>
-        <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/'} menuItems={menuItems} />
+        <Header poolTitle={pool.metadata.shortName || pool.metadata.name} selectedRoute={'/'} menuItems={menuItems} />
         <Container>
           <Box justify="center" direction="row">
             <Box width="xlarge">
@@ -48,7 +48,9 @@ class Pool extends React.Component<Props> {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   // We'll pre-render only these paths at build time.
-  const paths = config.pools.map((pool) => ({ params: { root: pool.addresses.ROOT_CONTRACT, slug: pool.slug } }))
+  const paths = config.pools.map((pool) => ({
+    params: { root: pool.addresses.ROOT_CONTRACT, slug: pool.metadata.slug },
+  }))
 
   // { fallback: false } means other routes should 404.
   return { paths, fallback: false }
@@ -66,7 +68,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }
 
   // Fix to force page rerender, from https://github.com/vercel/next.js/issues/9992
-  const newProps: Props = { pool, root: params.root as string, key: pool.name || '-' }
+  const newProps: Props = { pool, root: params.root as string, key: pool.metadata.name || '-' }
 
   return { props: newProps }
 }

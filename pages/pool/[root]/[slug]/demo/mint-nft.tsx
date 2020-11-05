@@ -24,9 +24,13 @@ class MintNFTPage extends React.Component<Props> {
     return (
       <WithFooter>
         <Head>
-          <title>Mint NFT: {pool.name} | Tinlake | Centrifuge</title>
+          <title>Mint NFT: {pool.metadata.name} | Tinlake | Centrifuge</title>
         </Head>
-        <Header poolTitle={pool.shortName || pool.name} selectedRoute={'/demo/mint-nft'} menuItems={menuItems} />
+        <Header
+          poolTitle={pool.metadata.shortName || pool.metadata.name}
+          selectedRoute={'/demo/mint-nft'}
+          menuItems={menuItems}
+        />
         <Container>
           <Box justify="center" direction="row">
             <Box width="xlarge">
@@ -46,7 +50,9 @@ class MintNFTPage extends React.Component<Props> {
 
 export async function getStaticPaths() {
   // We'll pre-render only these paths at build time.
-  const paths = config.pools.map((pool) => ({ params: { root: pool.addresses.ROOT_CONTRACT, slug: pool.slug } }))
+  const paths = config.pools.map((pool) => ({
+    params: { root: pool.addresses.ROOT_CONTRACT, slug: pool.metadata.slug },
+  }))
 
   // { fallback: false } means other routes should 404.
   return { paths, fallback: false }

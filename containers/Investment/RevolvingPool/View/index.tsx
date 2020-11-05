@@ -34,7 +34,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
 
   return (
     <Box margin={{ top: 'medium' }}>
-      <Heading level="4">Investment Overview of {props.activePool?.name}</Heading>
+      <Heading level="4">Investment Overview of {props.activePool?.metadata.name}</Heading>
       <ExplainerCard margin={{ bottom: 'medium' }}>
         Investors can invest into this Tinlake pool through two tokens that are backed by collateral locked by the Asset
         Originator: TIN and DROP. Both tokens represent the liquidity deposited into Tinlake and accrue interest over
@@ -45,7 +45,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
 
       <InvestmentOverview />
 
-      <Heading level="4">Invest/Redeem in {props.activePool?.name}</Heading>
+      <Heading level="4">Invest/Redeem in {props.activePool?.metadata.name}</Heading>
       <ExplainerCard margin={{ bottom: 'medium' }}>
         Please place your DROP and TIN investments and redemptions below. Tinlake pool investments and redemptions are
         locked in throughout the current “Epoch” and executed at the end of the Epoch based on available capital
@@ -63,14 +63,14 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
 
       {canManagePermissions && (
         <>
-          <Heading level="4">Manage members for {props.activePool?.name}</Heading>
+          <Heading level="4">Manage members for {props.activePool?.metadata.name}</Heading>
           <ManageMemberlist tinlake={props.tinlake} />
         </>
       )}
 
       {isAdmin && (
         <>
-          <Heading level="4">Admin actions for {props.activePool?.name}</Heading>
+          <Heading level="4">Admin actions for {props.activePool?.metadata.name}</Heading>
           <AdminActions tinlake={props.tinlake} />
         </>
       )}

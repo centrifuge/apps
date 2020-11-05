@@ -90,7 +90,7 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
           limitLabel="Outstanding"
           error={error}
           onChange={onChange}
-          disabled={!props.poolConfig.partialRepay || status === 'unconfirmed' || status === 'pending'}
+          disabled={!props.poolConfig.contractConfig?.partialRepay || status === 'unconfirmed' || status === 'pending'}
         />
       </Box>
       <Box align="start">
