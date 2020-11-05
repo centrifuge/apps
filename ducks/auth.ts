@@ -43,6 +43,7 @@ export interface Permissions {
 
 export interface PermissionsV3 {
   // asset admin permissions
+  canSetMaxReserve: boolean
   canSetInterestRate: boolean
   // tranche admin permissions
   canSetMinimumJuniorRatio: boolean
@@ -372,6 +373,7 @@ export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth
 
     if (isTinlakeV3(tinlake)) {
       const [
+        maxReservePermission,
         interestRatePermission,
         loanPricePermission,
         equityRatioPermission,
@@ -379,6 +381,7 @@ export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth
         juniorMemberListPermission,
         seniorMemberListPermission,
       ] = await Promise.all([
+        tinlake.canSetMaxReserve(auth.address),
         tinlake.canSetSeniorTrancheInterest(auth.address),
         tinlake.canSetLoanPrice(auth.address),
         tinlake.canSetMinimumJuniorRatio(auth.address),
@@ -388,6 +391,7 @@ export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth
       ])
 
       const permissions = {
+        canSetMaxReserve: maxReservePermission,
         canSetInterestRate: interestRatePermission,
         canSetLoanPrice: loanPricePermission,
         canSetMinimumJuniorRatio: equityRatioPermission,

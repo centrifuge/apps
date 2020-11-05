@@ -8,7 +8,7 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 
 import { SignIcon, Sidenote } from './styles'
-import { AuthState } from '../../../ducks/auth'
+import { AuthState, PermissionV3 } from '../../../ducks/auth'
 import { Pool } from '../../../config'
 import { secondsToHms } from '../../../utils/time'
 import MaxReserveForm from './MaxReserveForm'
@@ -42,7 +42,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
     updateIsBorrower()
   }, [address])
 
-  const isAdmin = props.auth?.permissions?.canSetMinimumJuniorRatio
+  const isAdmin = props.auth?.permissions && (props.auth?.permissions as PermissionV3).canSetMaxReserve
 
   const [showMaxReserveForm, setShowMaxReserveForm] = React.useState(false)
 
