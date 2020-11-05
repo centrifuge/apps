@@ -24,9 +24,9 @@ import {
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
 import { SessionGuard } from '../auth/SessionGuard';
 import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes';
+import { User } from '@centrifuge/gateway-lib/models/user';
 import TypeEnum = CoreapiAttributeResponse.TypeEnum;
 import SchemeEnum = CoreapiDocumentResponse.SchemeEnum;
-import { User } from '@centrifuge/gateway-lib/models/user';
 
 export class CommitResp {
   commitResult: Document;
@@ -66,7 +66,7 @@ export class DocumentsController {
       commitResult.header.job_id,
       user.account,
     );
-    return await this.databaseService.documents.updateById(document._id, {
+    await this.databaseService.documents.update({'header.document_id': document.header.document_id}, {
       $set: {
         document_status:
           updated.status === 'success'
@@ -74,6 +74,7 @@ export class DocumentsController {
             : DocumentStatus.CreationFail,
       },
     });
+    return commitResult
   }
 
   async saveDoc(document: Document, user: User) {
