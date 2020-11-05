@@ -89,15 +89,8 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     setMaximumReserve = async (value: string) => {
-      if (this.contract('ASSESSOR_ADMIN')) {
-        // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
-        return this.pending(this.contract('ASSESSOR_ADMIN').setMaxReserve(value, this.overrides))
-      }
-
       // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
-      return this.pending(
-        this.contract('ASSESSOR').file(web3.fromAscii('maxReserve').padEnd(66, '0'), value, this.overrides)
-      )
+      return this.pending(this.contract('ASSESSOR_ADMIN').setMaxReserve(value, this.overrides))
     }
 
     setSeniorTrancheInterest = async (value: string) => {
