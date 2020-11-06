@@ -1,4 +1,5 @@
-const poolConfigs = require('tinlake-pool-config')
+const mainnetPools = require('@centrifuge/tinlake-pools-mainnet')
+const kovanPools = require('@centrifuge/tinlake-pools-kovan')
 require('dotenv').config()
 
 export interface Config {
@@ -17,7 +18,7 @@ export interface Config {
 }
 
 const network = process.env.ETH_NETWORK || 'kovan'
-const networkConfigs = poolConfigs[network === 'kovan' ? 'kovanStaging' : 'mainnetProduction']
+const networkConfigs = network === 'mainnet' ? mainnetPools : kovanPools
 
 const pool = networkConfigs.find((pool: Pool) => pool.addresses.ROOT_CONTRACT.toLowerCase() === process.env.POOL_ID.toLowerCase())
 
@@ -38,14 +39,16 @@ export const config: Config = {
 
 console.log(
   `Running Tinlake end-to-end test suite:\n` +
-    ` - Pool: ${pool.name || pool.shortName} (${pool.addresses.ROOT_CONTRACT})\n` +
+    ` - Pool: ${pool.metadata.shortName || pool.metadata.name} (${pool.addresses.ROOT_CONTRACT})\n` +
     ` - Tinlake URL: ${config.tinlakeUrl}\n` +
     ` - Gateway URL: ${config.gatewayUrl}\n`
 )
 
 export interface Pool {
   addresses: Addresses
-  slug: string
+  metadata: {
+    slug: string
+  }
 }
 
 export interface Addresses {
