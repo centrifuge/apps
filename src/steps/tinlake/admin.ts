@@ -63,13 +63,10 @@ When('I increase the max reserve amount by 1', async function(this: CentrifugeWo
   const button = await this.currentPage.waitForXPath(tinlake('assetsPage.setMaxReserveButton'))
   await button.click()
 
-  console.log(`Current max reserve: ${this.context.maxReserve}`)
   this.context.newMaxReserve = new BN(this.context.maxReserve).add(new BN(1).mul(new BN(10).pow(new BN(18)))).div(new BN(10).pow(new BN(18))).toString() // Add 1*10**18, then convert back
-  console.log(`New max reserve: ${this.context.newMaxReserve}`)
 
   const input = await this.currentPage.waitForXPath(tinlake('assetsPage.setMaxReserve.input'))
   await input.click({ clickCount: 3 }) // triple click to select all content
-  console.log('')
   await input.type(`${this.context.newMaxReserve}`)
 
   const saveButton = await this.currentPage.waitForXPath(tinlake('assetsPage.setMaxReserve.saveButton'))
@@ -96,8 +93,6 @@ Then('I see that Min TIN ratio component is set to {int}%', async function(this:
 })
 
 Then('I see that the max reserve amount is set to X+1', async function(this: CentrifugeWorld) {
-  console.log(`New max reserve: ${this.context.newMaxReserve}`)
-
   const expected = `Max: ${this.context.newMaxReserve} DAI`
   let actual = ''
   await waitUntil(

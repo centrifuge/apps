@@ -1,10 +1,17 @@
-// Use Xpaths to select elements with a specific text/content
-// Cheatsheet: https://devhints.io/xpath
+/**
+ * Tree structure for selectors. Any leaf is prepended with the _path values in its parent nodes.
+ * E.g. investmentsPage.minTinRatio.value = investmentsPage._path + minTinRatio._path + value
+ * 
+ * Cheatsheet: https://devhints.io/xpath
+ */
 
 const trancheOverviewSelectors = {
   investButton: `//button[contains(., "Invest")]`,
+  redeemButton: `//button[contains(., "Redeem")]`,
   amountInput: `//input`,
   lockDAIButton: `//button[contains(., "Lock DAI")]`,
+  lockTINButton: `//button[contains(., "Lock TIN")]`,
+  lockDROPButton: `//button[contains(., "Lock DROP")]`,
   cancelOrderButton: `//button[contains(., "Cancel Order")]`,
   confirmCancellationButton: `//button[contains(., "Confirm Cancellation")]`,
   collectButton: `//button[contains(., "Collect")]`,
@@ -47,5 +54,6 @@ export const selectors = {
     mintButton: `//button[contains(text(), "Mint NFT")]`,
   },
 }
+
 
 export default selectors

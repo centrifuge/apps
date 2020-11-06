@@ -26,11 +26,18 @@ Given('there is no outstanding order or collection for the {tranche} tranche', a
 })
 
 When('I {order} {int} DAI for {tranche}', async function(this: CentrifugeWorld, order: Order, amount: number, tranche: Tranche) {
-  // TODO: implement redeem (invest/redeemButton)
-  const investButton = await this.currentPage.waitForXPath(
-    tinlake(tranche === 'DROP' ? 'investmentsPage.dropCard.investButton' : 'investmentsPage.tinCard.investButton')
+  const chooseOrderButton = await this.currentPage.waitForXPath(
+    tinlake(
+      tranche === 'DROP'
+        ? order === 'invest'
+          ? 'investmentsPage.dropCard.investButton'
+          : 'investmentsPage.dropCard.redeemButton'
+        : order === 'invest'
+        ? 'investmentsPage.tinCard.investButton'
+        : 'investmentsPage.tinCard.redeemButton'
+    )
   )
-  await investButton.click()
+  await chooseOrderButton.click()
 
   const input = await this.currentPage.waitForXPath(
     tinlake(tranche === 'DROP' ? 'investmentsPage.dropCard.amountInput' : 'investmentsPage.tinCard.amountInput')
@@ -38,9 +45,16 @@ When('I {order} {int} DAI for {tranche}', async function(this: CentrifugeWorld, 
   await input.click({ clickCount: 3 }) // triple click to select all content
   await input.type(`${amount}`)
 
-  // TODO: implement redeem (lockDROP/TINButton)
   const lockButton = await this.currentPage.waitForXPath(
-    tinlake(tranche === 'DROP' ? 'investmentsPage.dropCard.lockDAIButton' : 'investmentsPage.tinCard.lockDAIButton')
+    tinlake(
+      tranche === 'DROP'
+        ? order === 'invest'
+          ? 'investmentsPage.dropCard.lockDAIButton'
+          : 'investmentsPage.dropCard.lockDROPButton'
+        : order === 'invest'
+        ? 'investmentsPage.tinCard.lockDAIButton'
+        : 'investmentsPage.tinCard.lockTINButton'
+    )
   )
   await lockButton.click()
   
