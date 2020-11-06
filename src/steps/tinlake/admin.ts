@@ -64,7 +64,7 @@ When('I increase the max reserve amount by 1', async function(this: CentrifugeWo
   await button.click()
 
   console.log(`Current max reserve: ${this.context.maxReserve}`)
-  this.context.newMaxReserve = new BN(this.context.maxReserve).add(new BN(1).mul(new BN(10).pow(new BN(18)))).divRound(new BN(18)).toString() // Add 1*10**18, then convert back
+  this.context.newMaxReserve = new BN(this.context.maxReserve).add(new BN(1).mul(new BN(10).pow(new BN(18)))).div(new BN(10).pow(new BN(18))).toString() // Add 1*10**18, then convert back
   console.log(`New max reserve: ${this.context.newMaxReserve}`)
 
   const input = await this.currentPage.waitForXPath(tinlake('assetsPage.setMaxReserve.input'))
@@ -111,11 +111,22 @@ Then('I see that the max reserve amount is set to X+1', async function(this: Cen
   )
 })
 
+Then('I can verify that the max reserve amount is set to X+1', async function(
+  this: CentrifugeWorld
+) {
+  const tinlake = await this.initializedTinlake()
+  const actual = (await tinlake.getMaxReserve()).toString()
+  const expected = new BN(this.context.newMaxReserve).mul(new BN(10).pow(new BN(18))).toString()
+
+  assert.strictEqual(expected, actual)
+})
+
 Then('I can verify that the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld, minTinRatio: number) {
   const tinlake = await this.initializedTinlake()
-  const actualVal = (await tinlake.getMinJuniorRatio()).toString()
+  const expected = minTinRatio.toString() + '0'.repeat(25)
+  const actual = (await tinlake.getMinJuniorRatio()).toString()
   
-  assert.strictEqual(minTinRatio.toString() + '0'.repeat(25), actualVal)
+  assert.strictEqual(expected, actual)
 })
 
 Then('I see that NFT ID is shown in UI', async function(this: CentrifugeWorld) {

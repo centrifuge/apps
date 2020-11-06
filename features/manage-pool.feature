@@ -13,4 +13,4 @@ Feature: Set min TIN ratio
         And I have reloaded the page
         When I increase the max reserve amount by 1
         And I have reloaded the page
-        Then I see that the max reserve amount is set to X+1
+        Then I can verify that the max reserve amount is set to X+1

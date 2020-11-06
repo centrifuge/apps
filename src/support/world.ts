@@ -69,6 +69,7 @@ export class CentrifugeWorld {
     await waitUntilElementsIsInvisible(this.currentPage, tinlake('pendingTransaction'))
     await waitUntilElementsIsVisible(this.currentPage, tinlake('successfulTransaction'))
   }
+  
 }
 
 setDefaultTimeout(100 * 1000)
