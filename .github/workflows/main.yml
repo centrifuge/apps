@@ -1,0 +1,26 @@
+name: 'Run tests'
+on: [pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      - name: Docker build
+        run: DOCKER_BUILDKIT=1 docker build -t tinlake-e2e-tests -f docker/Dockerfile .
+      - name: Docker run
+        run: docker run -e GATEWAY_URL -e TINLAKE_URL -e RPC_URL -e ETH_ADMIN_ADDRESS -e ETH_ADMIN_PRIVATE_KEY -e ETH_BORROWER_ADDRESS -e ETH_BORROWER_PRIVATE_KEY -e POOL_ID -e NFT_REGISTRY -e CI -e CUCUMBER_PUBLISH_TOKEN tinlake-e2e-tests
+            
+    env:
+      GATEWAY_URL: "https://gateway.amber.centrifuge.io/"
+      TINLAKE_URL: "https://kovan.staging.tinlake.centrifuge.io/"
+      RPC_URL: "https://kovan.infura.io/v3/a4ba76cd4be643618572e7467a444e3a"
+      ETH_ADMIN_ADDRESS: ${{ secrets.ETH_ADMIN_ADDRESS }}
+      ETH_ADMIN_PRIVATE_KEY: ${{ secrets.ETH_ADMIN_PRIVATE_KEY }}
+      ETH_BORROWER_ADDRESS: ${{ secrets.ETH_BORROWER_ADDRESS }}
+      ETH_BORROWER_PRIVATE_KEY: ${{ secrets.ETH_BORROWER_PRIVATE_KEY }}
+      POOL_ID: "0xc4084221Fb5D0f28f817c795435C2d17EAb6c389"
+      NFT_REGISTRY: "0xaC0c1EF395290288028A0a9FDFc8FDebEbE54a24x"
+      CI: true
+      CUCUMBER_PUBLISH_TOKEN: ${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
