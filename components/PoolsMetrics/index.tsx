@@ -12,7 +12,7 @@ interface Props {
 class PoolsMetrics extends React.Component<Props> {
   render() {
     const { pools } = this.props
-    return (
+   return (
       <Box direction="row" gap="medium" margin={{ bottom: 'medium' }} justify="evenly">
         <PoolsMetric label="Total Number of Pools">
           <Box direction="row" style={{ alignItems: 'center' }}>
@@ -32,7 +32,7 @@ class PoolsMetrics extends React.Component<Props> {
         </PoolsMetric>
         <PoolsMetric label="Total Financed to Date">
           <ERC20Display
-            value={pools.totalDebt.add(pools.totalRepaysAggregatedAmount).toString()}
+            value={pools.totalFinancedCurrency.toString()}
             tokenMetas={DAI}
             precision={0}
           />

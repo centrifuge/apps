@@ -1,9 +1,9 @@
-import * as yup from 'yup'
-import BN from 'bn.js'
-import mainnetPools from '@centrifuge/tinlake-pools-mainnet'
-import kovanPools from '@centrifuge/tinlake-pools-kovan'
+import * as yup from 'yup';
+import BN from 'bn.js';
+import mainnetPools from '@centrifuge/tinlake-pools-mainnet';
+import kovanPools from '@centrifuge/tinlake-pools-kovan';
 
-import { networkUrlToName } from './utils/networkNameResolver'
+import {networkUrlToName} from './utils/networkNameResolver';
 
 interface PoolMetadata {
   name: string
@@ -32,6 +32,16 @@ export interface UpcomingPool extends BasePool {
   }
 }
 
+export interface ArchivedPool extends BasePool {
+  isArchived: true
+  archivedValues: {
+    totalFinancedCurrency: string
+    financingsCount: string
+    seniorInterestRate: string
+    averageFinancingFee: string
+  }
+}
+
 export interface Pool extends BasePool {
   isUpcoming: false
   addresses: {
@@ -44,6 +54,12 @@ export interface Pool extends BasePool {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
     SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
     partialRepay?: boolean
+  }
+  archivedValues?: {
+    totalFinancedCurrency?: string
+    financingsCount?: string
+    seniorInterestRate?: string
+    averageFinancingFee?: string
   }
 }
 
@@ -64,6 +80,7 @@ interface Config {
   network: 'Mainnet' | 'Kovan'
   pools: Pool[]
   upcomingPools: UpcomingPool[]
+  archivedPools: ArchivedPool[]
   portisApiKey: string
   gasLimit: number
 }
@@ -147,8 +164,35 @@ const upcomingPoolSchema = yup.object().shape({
   }),
 })
 
+const archivedPoolSchema = yup.object().shape({
+ network: yup
+    .string()
+    .oneOf(['mainnet', 'kovan'])
+    .required('poolSchema.network is required'),
+ version: yup
+    .number()
+    .oneOf([2, 3])
+    .required('poolSchema.version is required'),
+ metadata: metadataSchema.required('poolSchema.metadata is required'),
+ archivedValues: yup.object().shape({
+    totalFinancedCurrency: yup
+      .string(),
+    financingsCount: yup
+      .string(),
+    seniorInterestRate: yup
+      .string()
+      .default('1000000003170979198376458650')
+      .test('fee', 'value must be a fee such as 1000000003170979198376458650', fee),
+    averageFinancingFee: yup
+      .string()
+      .default('1000000003805175038051750380')
+      .test('fee', 'value must be a fee such as 1000000003805175038051750380', fee),
+    }),
+ });
+
 const poolsSchema = yup.array(poolSchema)
 const upcomingPoolsSchema = yup.array(upcomingPoolSchema)
+const archivedPoolsSchema = yup.array(archivedPoolSchema)
 
 const selectedPoolConfig = yup
   .mixed<'kovanStaging' | 'mainnetStaging' | 'mainnetProduction'>()
@@ -161,13 +205,17 @@ const networkConfigs = selectedPoolConfig === 'mainnetProduction' ? mainnetPools
 const pools = poolsSchema
   .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
   .map((p) => ({ ...p, isUpcoming: false } as Pool))
+const archivedPools = archivedPoolsSchema
+  .validateSync(networkConfigs.filter((p: Pool) => p.archivedValues))
+  .map((p) => ({ ...p, isArchived: true } as ArchivedPool))
 const upcomingPools = upcomingPoolsSchema
-  .validateSync(networkConfigs.filter((p: Pool) => !p.addresses || !p.addresses.ROOT_CONTRACT))
+  .validateSync(networkConfigs.filter((p: Pool) => !p.archivedValues && !p.addresses))
   .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
 
 const config: Config = {
   pools,
   upcomingPools,
+  archivedPools,
   rpcUrl: yup
     .string()
     .required('NEXT_PUBLIC_RPC_URL is required')

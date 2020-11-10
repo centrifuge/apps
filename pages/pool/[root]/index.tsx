@@ -4,23 +4,23 @@ import * as React from 'react'
 import Header from '../../../components/Header'
 import WithTinlake from '../../../components/WithTinlake'
 import { menuItems, noDemo } from '../../../menuItems'
-import config, { UpcomingPool } from '../../../config'
+import config, {ArchivedPool, UpcomingPool} from '../../../config';
 import WithFooter from '../../../components/WithFooter'
 import Auth from '../../../components/Auth'
 import Container from '../../../components/Container'
 import Head from 'next/head'
 import OverviewUpcoming from '../../../containers/OverviewUpcoming'
+import OverviewArchived from '../../../containers/OverviewArchived';
 
 interface Props {
   root: string
-  pool: UpcomingPool
+  pool: any
   key: string
 }
 
 class Pool extends React.Component<Props> {
   render() {
     const { pool } = this.props
-
     return (
       <WithFooter>
         <Head>
@@ -36,7 +36,11 @@ class Pool extends React.Component<Props> {
             <Box width="xlarge">
               <WithTinlake
                 render={(tinlake) => (
-                  <Auth tinlake={tinlake} render={() => <OverviewUpcoming tinlake={tinlake} selectedPool={pool} />} />
+                  <Auth tinlake={tinlake} render={() =>
+                    pool.isArchived ?
+                      <OverviewArchived selectedPool={pool}/> :
+                      <OverviewUpcoming tinlake={tinlake} selectedPool={pool}/>
+                  } />
                 )}
               />
             </Box>
@@ -49,7 +53,9 @@ class Pool extends React.Component<Props> {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   // We'll pre-render only these paths at build time.
-  const paths = config.upcomingPools.map((pool) => ({ params: { root: pool.metadata.slug } }))
+  let paths = config.upcomingPools.map((pool) => ({ params: { root: pool.metadata.slug } }))
+  const archivePaths = config.archivedPools.map((pool) => ({ params: { root: pool.metadata.slug } }))
+  paths = paths.concat(archivePaths)
 
   // { fallback: false } means other routes should 404.
   return { paths, fallback: false }
@@ -60,8 +66,11 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     throw new Error(`Params are not passed`)
   }
 
-  const pool = config.upcomingPools.find((p) => p.metadata.slug === params!.root)
-
+  let pool: UpcomingPool | ArchivedPool | undefined
+  pool = config.upcomingPools.find((p) => p.metadata.slug === params!.root);
+  if (!pool) {
+    pool = config.archivedPools.find((p) => p.metadata.slug === params!.root)
+  }
   if (!pool) {
     throw new Error(`Pool ${params.root} cannot be loaded`)
   }
