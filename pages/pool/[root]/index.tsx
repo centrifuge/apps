@@ -4,13 +4,13 @@ import * as React from 'react'
 import Header from '../../../components/Header'
 import WithTinlake from '../../../components/WithTinlake'
 import { menuItems, noDemo } from '../../../menuItems'
-import config, {ArchivedPool, UpcomingPool} from '../../../config';
+import config, { ArchivedPool, UpcomingPool } from '../../../config'
 import WithFooter from '../../../components/WithFooter'
 import Auth from '../../../components/Auth'
 import Container from '../../../components/Container'
 import Head from 'next/head'
 import OverviewUpcoming from '../../../containers/OverviewUpcoming'
-import OverviewArchived from '../../../containers/OverviewArchived';
+import OverviewArchived from '../../../containers/OverviewArchived'
 
 interface Props {
   root: string
@@ -36,11 +36,16 @@ class Pool extends React.Component<Props> {
             <Box width="xlarge">
               <WithTinlake
                 render={(tinlake) => (
-                  <Auth tinlake={tinlake} render={() =>
-                    pool.isArchived ?
-                      <OverviewArchived selectedPool={pool}/> :
-                      <OverviewUpcoming tinlake={tinlake} selectedPool={pool}/>
-                  } />
+                  <Auth
+                    tinlake={tinlake}
+                    render={() =>
+                      pool.isArchived ? (
+                        <OverviewArchived selectedPool={pool} />
+                      ) : (
+                        <OverviewUpcoming tinlake={tinlake} selectedPool={pool} />
+                      )
+                    }
+                  />
                 )}
               />
             </Box>
@@ -67,7 +72,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }
 
   let pool: UpcomingPool | ArchivedPool | undefined
-  pool = config.upcomingPools.find((p) => p.metadata.slug === params!.root);
+  pool = config.upcomingPools.find((p) => p.metadata.slug === params!.root)
   if (!pool) {
     pool = config.archivedPools.find((p) => p.metadata.slug === params!.root)
   }

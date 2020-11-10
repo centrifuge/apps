@@ -58,7 +58,7 @@ export interface PoolDataV3 extends PoolData {
 
 export interface PoolState {
   state: null | 'loading' | 'found'
-  data: null |  PoolData | PoolDataV3
+  data: null | PoolData | PoolDataV3
 }
 
 const initialState: PoolState = {

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { ArchivedPool } from '../../config';
-import Archived from '../../components/Overview/Archived';
+import { ArchivedPool } from '../../config'
+import Archived from '../../components/Overview/Archived'
 
 interface Props {
   selectedPool: ArchivedPool
@@ -10,11 +10,7 @@ interface Props {
 class OverviewArchived extends React.Component<Props> {
   render() {
     const { selectedPool } = this.props
-    return (
-      <Archived
-        selectedPool={selectedPool}
-      />
-    )
+    return <Archived selectedPool={selectedPool} />
   }
 }
 

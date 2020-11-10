@@ -67,11 +67,16 @@ class PoolList extends React.Component<Props> {
               header: 'Total Financed (DAI)',
               property: 'totalFinancedCurrency',
               align: 'center',
-              render: (p: PoolData) => (
-                p.isArchived ?
-                  <NumberDisplay suffix="" precision={0} value={baseToDisplay(p.totalFinancedCurrency, 18)} /> :
-                  <NumberDisplay suffix="" precision={0} value={baseToDisplay(p.totalRepaysAggregatedAmount.add(p.totalDebt), 18)} />
-              ),
+              render: (p: PoolData) =>
+                p.isArchived ? (
+                  <NumberDisplay suffix="" precision={0} value={baseToDisplay(p.totalFinancedCurrency, 18)} />
+                ) : (
+                  <NumberDisplay
+                    suffix=""
+                    precision={0}
+                    value={baseToDisplay(p.totalRepaysAggregatedAmount.add(p.totalDebt), 18)}
+                  />
+                ),
             },
             {
               header: 'DROP APR',

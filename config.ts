@@ -1,9 +1,9 @@
-import * as yup from 'yup';
-import BN from 'bn.js';
-import mainnetPools from '@centrifuge/tinlake-pools-mainnet';
-import kovanPools from '@centrifuge/tinlake-pools-kovan';
+import * as yup from 'yup'
+import BN from 'bn.js'
+import mainnetPools from '@centrifuge/tinlake-pools-mainnet'
+import kovanPools from '@centrifuge/tinlake-pools-kovan'
 
-import {networkUrlToName} from './utils/networkNameResolver';
+import { networkUrlToName } from './utils/networkNameResolver'
 
 interface PoolMetadata {
   name: string
@@ -165,20 +165,18 @@ const upcomingPoolSchema = yup.object().shape({
 })
 
 const archivedPoolSchema = yup.object().shape({
- network: yup
+  network: yup
     .string()
     .oneOf(['mainnet', 'kovan'])
     .required('poolSchema.network is required'),
- version: yup
+  version: yup
     .number()
     .oneOf([2, 3])
     .required('poolSchema.version is required'),
- metadata: metadataSchema.required('poolSchema.metadata is required'),
- archivedValues: yup.object().shape({
-    totalFinancedCurrency: yup
-      .string(),
-    financingsCount: yup
-      .string(),
+  metadata: metadataSchema.required('poolSchema.metadata is required'),
+  archivedValues: yup.object().shape({
+    totalFinancedCurrency: yup.string(),
+    financingsCount: yup.string(),
     seniorInterestRate: yup
       .string()
       .default('1000000003170979198376458650')
@@ -187,8 +185,8 @@ const archivedPoolSchema = yup.object().shape({
       .string()
       .default('1000000003805175038051750380')
       .test('fee', 'value must be a fee such as 1000000003805175038051750380', fee),
-    }),
- });
+  }),
+})
 
 const poolsSchema = yup.array(poolSchema)
 const upcomingPoolsSchema = yup.array(upcomingPoolSchema)

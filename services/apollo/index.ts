@@ -6,7 +6,7 @@ import config, { UpcomingPool, ArchivedPool } from '../../config'
 import fetch from 'node-fetch'
 import gql from 'graphql-tag'
 import BN from 'bn.js'
-import {PoolData, PoolsData} from '../../ducks/pools';
+import { PoolData, PoolsData } from '../../ducks/pools'
 
 const { tinlakeDataBackendUrl } = config
 const cache = new InMemoryCache()
@@ -177,7 +177,11 @@ class Apollo {
     }
 
     let pools = result.data?.pools
-      ? [...this.injectPoolData(result.data.pools), ...this.injectUpcomingPoolData(config.upcomingPools), ...this.injectArchivedPoolData(config.archivedPools)]
+      ? [
+          ...this.injectPoolData(result.data.pools),
+          ...this.injectUpcomingPoolData(config.upcomingPools),
+          ...this.injectArchivedPoolData(config.archivedPools),
+        ]
       : []
 
     pools = pools.sort((a, b) => a.name.localeCompare(b.name))
@@ -188,7 +192,7 @@ class Apollo {
       ongoingLoans: pools.reduce((p, c) => p + c.ongoingLoans, 0),
       totalDebt: pools.reduce((p, c) => p.add(c.totalDebt), new BN(0)),
       totalRepaysAggregatedAmount: pools.reduce((p, c) => p.add(c.totalRepaysAggregatedAmount), new BN(0)),
-      totalFinancedCurrency: pools.reduce((p, c) => p.add(c.totalFinancedCurrency), new BN(0))
+      totalFinancedCurrency: pools.reduce((p, c) => p.add(c.totalFinancedCurrency), new BN(0)),
     }
   }
 
