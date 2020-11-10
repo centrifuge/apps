@@ -6,7 +6,7 @@ import { ArchivedPool } from '../../config'
 import { toPrecision } from '../../utils/toPrecision'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { LoadingValue } from '../../components/LoadingValue/index'
-import {ExplainerCard} from '../../containers/Investment/RevolvingPool/View/styles';
+import { ExplainerCard } from '../../containers/Investment/RevolvingPool/View/styles'
 
 interface Props {
   selectedPool: ArchivedPool
@@ -30,7 +30,8 @@ class Archived extends React.Component<Props> {
           <Box basis={'1/3'}>
             <Box>
               <ExplainerCard margin={{ bottom: 'medium' }}>
-                This pool has been fully repaid and closed. For current Tinlake pools, please check <a href={"https://tinlake.centrifuge.io"}>here.</a>
+                This pool has been fully repaid and closed. For current Tinlake pools, please check{' '}
+                <a href={'https://tinlake.centrifuge.io'}>here.</a>
               </ExplainerCard>
               <Heading level="5" margin={{ top: 'small', bottom: 'small' }}>
                 Pool Details
