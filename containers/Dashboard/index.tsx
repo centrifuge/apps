@@ -21,7 +21,6 @@ class Dashboard extends React.Component<Props> {
   render() {
     const { pools } = this.props
 
-    console.log(pools)
     return (
       <Box>
         {!pools || pools.state === 'loading' ? (

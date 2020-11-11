@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Box, Heading, Table, TableCell, TableRow, TableBody } from 'grommet'
+import { Box, Button, Heading, Table, TableCell, TableRow, TableBody } from 'grommet'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import { ArchivedPoolData } from '../../ducks/pool'
 import { ArchivedPool } from '../../config'
@@ -7,6 +7,7 @@ import { toPrecision } from '../../utils/toPrecision'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { LoadingValue } from '../../components/LoadingValue/index'
 import { ExplainerCard } from '../../containers/Investment/RevolvingPool/View/styles'
+import Link from 'next/link'
 
 interface Props {
   selectedPool: ArchivedPool
@@ -29,10 +30,6 @@ class Archived extends React.Component<Props> {
         <Box direction="row" margin={{ bottom: 'large' }}>
           <Box basis={'1/3'}>
             <Box>
-              <ExplainerCard margin={{ bottom: 'medium' }}>
-                This pool has been fully repaid and closed. For current Tinlake pools, please check{' '}
-                <a href={'https://tinlake.centrifuge.io'}>here.</a>
-              </ExplainerCard>
               <Heading level="5" margin={{ top: 'small', bottom: 'small' }}>
                 Pool Details
               </Heading>
@@ -70,9 +67,18 @@ class Archived extends React.Component<Props> {
                   </TableRow>
                 </TableBody>
               </Table>
+
+              <ExplainerCard margin={{ top: 'large' }}>
+                <Box margin={{ left: 'auto', right: 'auto' }}>
+                  This pool has been fully repaid and closed.
+                  <Link href="/">
+                    <Button margin={{ top: 'medium' }} primary label="View all pools" fill={false} />
+                  </Link>
+                </Box>
+              </ExplainerCard>
             </Box>
           </Box>
-          <Box basis={'2/3'} margin={{ top: '0', left: 'xxlarge' }}>
+          <Box basis={'2/3'} margin={{ top: '0', left: 'large' }}>
             <div>
               <Heading level="5" margin={{ top: 'small' }}>
                 Asset Originator Details

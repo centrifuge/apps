@@ -18,7 +18,7 @@ interface PoolMetadata {
   securitizeId?: string
 }
 
-interface BasePool {
+export interface BasePool {
   network: 'mainnet' | 'kovan'
   version: 2 | 3
   metadata: PoolMetadata
@@ -54,12 +54,6 @@ export interface Pool extends BasePool {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
     SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
     partialRepay?: boolean
-  }
-  archivedValues?: {
-    totalFinancedCurrency?: string
-    financingsCount?: string
-    seniorInterestRate?: string
-    averageFinancingFee?: string
   }
 }
 
@@ -204,10 +198,10 @@ const pools = poolsSchema
   .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
   .map((p) => ({ ...p, isUpcoming: false } as Pool))
 const archivedPools = archivedPoolsSchema
-  .validateSync(networkConfigs.filter((p: Pool) => p.archivedValues))
+  .validateSync(networkConfigs.filter((p: Pool) => 'archivedValues' in p))
   .map((p) => ({ ...p, isArchived: true } as ArchivedPool))
 const upcomingPools = upcomingPoolsSchema
-  .validateSync(networkConfigs.filter((p: Pool) => !p.archivedValues && !p.addresses))
+  .validateSync(networkConfigs.filter((p: Pool) => !('archivedValues' in p) && !p.addresses))
   .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
 
 const config: Config = {

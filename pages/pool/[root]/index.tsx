@@ -4,7 +4,7 @@ import * as React from 'react'
 import Header from '../../../components/Header'
 import WithTinlake from '../../../components/WithTinlake'
 import { menuItems, noDemo } from '../../../menuItems'
-import config, { ArchivedPool, UpcomingPool } from '../../../config'
+import config, { ArchivedPool, UpcomingPool, Pool as LivePool } from '../../../config'
 import WithFooter from '../../../components/WithFooter'
 import Auth from '../../../components/Auth'
 import Container from '../../../components/Container'
@@ -14,7 +14,7 @@ import OverviewArchived from '../../../containers/OverviewArchived'
 
 interface Props {
   root: string
-  pool: any
+  pool: ArchivedPool | UpcomingPool | LivePool
   key: string
 }
 
@@ -29,7 +29,7 @@ class Pool extends React.Component<Props> {
         <Header
           poolTitle={pool.metadata.shortName || pool.metadata.name}
           selectedRoute={'/'}
-          menuItems={menuItems.filter(noDemo)}
+          menuItems={'isArchived' in pool ? [] : menuItems.filter(noDemo)}
         />
         <Container>
           <Box justify="center" direction="row">
@@ -39,10 +39,10 @@ class Pool extends React.Component<Props> {
                   <Auth
                     tinlake={tinlake}
                     render={() =>
-                      pool.isArchived ? (
+                      'isArchived' in pool ? (
                         <OverviewArchived selectedPool={pool} />
                       ) : (
-                        <OverviewUpcoming tinlake={tinlake} selectedPool={pool} />
+                        <OverviewUpcoming tinlake={tinlake} selectedPool={pool as UpcomingPool} />
                       )
                     }
                   />
