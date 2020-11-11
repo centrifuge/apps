@@ -20,7 +20,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   const onOpen = () => setModalIsOpen(true)
   const onClose = () => setModalIsOpen(false)
 
-  const investDisabled = props.pool?.isUpcoming || !props.pool?.metadata.securitizeId
+  const investDisabled = props.pool?.isUpcoming || !props.pool?.metadata.securitize?.issuerId
 
   const pools = useSelector<any, PoolsState>((state) => state.pools)
   const pool = useSelector<any, PoolState>((state) => state.pool)
@@ -38,8 +38,9 @@ const InvestAction: React.FC<Props> = (props: Props) => {
     }
   }, [pools])
 
-  const isClosed = status === 'Deployed' || status === 'Closed'
-  const isUpcoming = !isClosed && (props.pool?.isUpcoming || !props.pool?.metadata.securitizeId)
+  // TODO: remove hardcoded exception for PC2
+  const isClosed = (status === 'Deployed' || status === 'Closed') && !(props.pool?.metadata.slug === 'paperchain-2')
+  const isUpcoming = !isClosed && (props.pool?.isUpcoming || !props.pool?.metadata.securitize?.issuerId)
 
   return (
     <>
@@ -83,13 +84,27 @@ const InvestAction: React.FC<Props> = (props: Props) => {
         >
           <Box flex={true} justify="between">
             <Paragraph>Start your KYC process to become to become an eligible investor.</Paragraph>
-            <Button
-              primary
-              label={`Onboard as an investor`}
-              fill={false}
-              href="https://centrifuge.invest.securitize.io/"
-              target="_blank"
-            />
+            {(props.pool as Pool)?.metadata.securitize?.issuerId ? (
+              <Button
+                primary
+                label={`Onboard as an investor`}
+                fill={false}
+                href={`https://id.securitize.io/#/authorize?registration=true&issuerId=${
+                  (props.pool as Pool).metadata.securitize?.issuerId
+                }&scope=info%20details%20verification&redirecturl=https://${
+                  (props.pool as Pool).metadata.securitize?.slug
+                }.invest.securitize.io/%23/authorize`}
+                target="_blank"
+              />
+            ) : (
+              <Button
+                primary
+                label={`Onboard as an investor`}
+                href={`https://id.securitize.io/#/authorize?issuerId=4d11b353-a327-49ab-b45b-ae5be60697c6&scope=info%20details%20verification&registration=true&redirecturl=https://centrifuge.invest.securitize.io/#/authorize`}
+                fill={false}
+                target="_blank"
+              />
+            )}
           </Box>
           {props.pool && (
             <Box flex={true} justify="between">
@@ -98,14 +113,20 @@ const InvestAction: React.FC<Props> = (props: Props) => {
                 <Paragraph>Already an eligible investor? Sign the pool issuers Subscription Agreement.</Paragraph>
               )}
               {isClosed && <Paragraph>This pool is closed for investments.</Paragraph>}
-              <Button
-                primary
-                label="Sign up for this pool"
-                fill={false}
-                href={`https://${(props.pool as Pool).metadata.securitizeId || ''}.invest.securitize.io/`}
-                target="_blank"
-                disabled={investDisabled}
-              />
+              {(props.pool as Pool)?.metadata.securitize?.issuerId && (
+                <Button
+                  primary
+                  label={`Sign up for this pool`}
+                  fill={false}
+                  href={`https://id.securitize.io/#/authorize?issuerId=${
+                    (props.pool as Pool).metadata.securitize?.issuerId
+                  }&scope=info%20details%20verification&redirecturl=https://${
+                    (props.pool as Pool).metadata.securitize?.slug
+                  }.invest.securitize.io/%23/authorize`}
+                  target="_blank"
+                  disabled={investDisabled}
+                />
+              )}
             </Box>
           )}
         </Box>
