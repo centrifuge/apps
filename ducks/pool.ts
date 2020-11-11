@@ -29,7 +29,6 @@ export interface ArchivedPoolData {
   totalFinancedCurrency: string
   financingsCount: string
   seniorInterestRate: string
-  averageFinancingFee: string
 }
 
 export type EpochData = {

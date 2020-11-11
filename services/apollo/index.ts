@@ -143,7 +143,6 @@ class Apollo {
       financingsCount: parseFloat(new BN(p.archivedValues?.financingsCount || 0).toString()),
       totalFinancedCurrency: new BN(p.archivedValues?.totalFinancedCurrency || 0),
       seniorInterestRateNum: parseFloat(new BN(p.archivedValues?.seniorInterestRate || 0).toString()),
-      averageFinancingFee: parseFloat(new BN(p.archivedValues?.averageFinancingFee || 0).toString()),
       version: p.version,
       ongoingLoans: 0,
       totalDebtNum: 0,

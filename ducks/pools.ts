@@ -28,7 +28,6 @@ export interface PoolData {
   version: number
   totalFinancedCurrency: BN
   financingsCount?: number
-  averageFinancingFee?: number
 }
 
 export interface PoolsData {
