@@ -21,7 +21,6 @@ class Archived extends React.Component<Props> {
     const totalFinanced = poolData?.totalFinancedCurrency
     const totalFinancings = poolData?.financingsCount
     const seniorInterest = poolData?.seniorInterestRate
-    const averageFee = poolData?.averageFinancingFee
 
     return (
       <Box margin={{ bottom: 'large', top: 'medium' }}>
@@ -54,14 +53,6 @@ class Archived extends React.Component<Props> {
                     <TableCell style={{ textAlign: 'end' }}>
                       <LoadingValue done={seniorInterest !== undefined}>
                         {toPrecision(feeToInterestRate(seniorInterest || '0'), 2)} %
-                      </LoadingValue>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell scope="row">Average Financing Fee</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>
-                      <LoadingValue done={averageFee !== undefined}>
-                        {toPrecision(feeToInterestRate(averageFee || '0'), 2)} %
                       </LoadingValue>
                     </TableCell>
                   </TableRow>

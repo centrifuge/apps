@@ -38,7 +38,6 @@ export interface ArchivedPool extends BasePool {
     totalFinancedCurrency: string
     financingsCount: string
     seniorInterestRate: string
-    averageFinancingFee: string
   }
 }
 
@@ -175,10 +174,6 @@ const archivedPoolSchema = yup.object().shape({
       .string()
       .default('1000000003170979198376458650')
       .test('fee', 'value must be a fee such as 1000000003170979198376458650', fee),
-    averageFinancingFee: yup
-      .string()
-      .default('1000000003805175038051750380')
-      .test('fee', 'value must be a fee such as 1000000003805175038051750380', fee),
   }),
 })
 
