@@ -25,6 +25,13 @@ export interface PoolData {
   currentJuniorRatio: BN
 }
 
+export interface ArchivedPoolData {
+  totalFinancedCurrency: string
+  financingsCount: string
+  seniorInterestRate: string
+  averageFinancingFee: string
+}
+
 export type EpochData = {
   id: number
   state: 'open' | 'can-be-closed' | 'in-submission-period' | 'in-challenge-period' | 'challenge-period-ended'

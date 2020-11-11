@@ -2,7 +2,7 @@ import { ApolloClient, DefaultOptions } from 'apollo-client'
 import { Loan } from '@centrifuge/tinlake-js'
 import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory'
 import { createHttpLink } from 'apollo-link-http'
-import config, { UpcomingPool } from '../../config'
+import config, { UpcomingPool, ArchivedPool } from '../../config'
 import fetch from 'node-fetch'
 import gql from 'graphql-tag'
 import BN from 'bn.js'
@@ -75,8 +75,9 @@ class Apollo {
       const seniorInterestRateNum = parseFloat(seniorInterestRate.toString())
 
       const ongoingLoans = (pool && pool.ongoingLoans.length) || 0 // TODO add count field to subgraph, inefficient to query all assets
-
+      const totalFinancedCurrency = totalRepaysAggregatedAmount.add(totalDebt)
       return {
+        totalFinancedCurrency,
         ongoingLoans,
         totalDebt,
         totalRepaysAggregatedAmount,
@@ -93,6 +94,7 @@ class Apollo {
           version: Number(pool?.version || 3),
         }),
         isUpcoming: false,
+        isArchived: false,
         id: poolId,
         name: poolConfig.metadata.name,
         slug: poolConfig.metadata.slug,
@@ -105,6 +107,8 @@ class Apollo {
   injectUpcomingPoolData(upcomingPools: UpcomingPool[]): PoolData[] {
     return upcomingPools.map((p) => ({
       isUpcoming: true,
+      isArchived: false,
+      totalFinancedCurrency: new BN('0'),
       order: orderSummandPoolUpcoming,
       totalDebt: new BN('0'),
       totalRepaysAggregatedAmount: new BN('0'),
@@ -120,6 +124,31 @@ class Apollo {
       weightedInterestRateNum: 0,
       seniorInterestRateNum: parseFloat(new BN(p.presetValues?.seniorInterestRate || 0).toString()),
       version: p.version,
+    }))
+  }
+
+  injectArchivedPoolData(archivedPools: ArchivedPool[]): PoolData[] {
+    return archivedPools.map((p) => ({
+      isUpcoming: false,
+      isArchived: true,
+      order: orderSummandPoolClosed,
+      totalDebt: new BN('0'),
+      totalRepaysAggregatedAmount: new BN('0'),
+      weightedInterestRate: new BN('0'),
+      seniorInterestRate: new BN(p.archivedValues?.seniorInterestRate || 0),
+      id: p.metadata.slug,
+      name: p.metadata.name,
+      slug: p.metadata.slug,
+      asset: p.metadata.asset,
+      financingsCount: parseFloat(new BN(p.archivedValues?.financingsCount || 0).toString()),
+      totalFinancedCurrency: new BN(p.archivedValues?.totalFinancedCurrency || 0),
+      seniorInterestRateNum: parseFloat(new BN(p.archivedValues?.seniorInterestRate || 0).toString()),
+      averageFinancingFee: parseFloat(new BN(p.archivedValues?.averageFinancingFee || 0).toString()),
+      version: p.version,
+      ongoingLoans: 0,
+      totalDebtNum: 0,
+      totalRepaysAggregatedAmountNum: 0,
+      weightedInterestRateNum: 0,
     }))
   }
 
@@ -148,7 +177,11 @@ class Apollo {
     }
 
     let pools = result.data?.pools
-      ? [...this.injectPoolData(result.data.pools), ...this.injectUpcomingPoolData(config.upcomingPools)]
+      ? [
+          ...this.injectPoolData(result.data.pools),
+          ...this.injectUpcomingPoolData(config.upcomingPools),
+          ...this.injectArchivedPoolData(config.archivedPools),
+        ]
       : []
 
     pools = pools.sort((a, b) => a.name.localeCompare(b.name))
@@ -159,6 +192,7 @@ class Apollo {
       ongoingLoans: pools.reduce((p, c) => p + c.ongoingLoans, 0),
       totalDebt: pools.reduce((p, c) => p.add(c.totalDebt), new BN(0)),
       totalRepaysAggregatedAmount: pools.reduce((p, c) => p.add(c.totalRepaysAggregatedAmount), new BN(0)),
+      totalFinancedCurrency: pools.reduce((p, c) => p.add(c.totalFinancedCurrency), new BN(0)),
     }
   }
 

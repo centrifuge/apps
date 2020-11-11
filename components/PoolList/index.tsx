@@ -14,7 +14,7 @@ interface Props {
 
 class PoolList extends React.Component<Props> {
   clickRow = ({ datum }: { datum?: PoolData; index?: number }) => {
-    if (datum?.isUpcoming) {
+    if (datum?.isUpcoming || datum?.isArchived) {
       Router.push('/pool/[slug]', `/pool/${datum!.slug}`, { shallow: true })
     } else {
       Router.push('/pool/[root]/[slug]', `/pool/${datum!.id}/${datum!.slug}`, { shallow: true })
@@ -64,22 +64,19 @@ class PoolList extends React.Component<Props> {
               ),
             },
             {
-              header: 'Outstanding (DAI)',
-              property: 'totalDebtNum',
+              header: 'Total Financed (DAI)',
+              property: 'totalFinancedCurrency',
               align: 'center',
-              render: (p: PoolData) => (
-                <Box style={{ maxWidth: '150px' }}>
-                  <NumberDisplay suffix="" precision={0} value={baseToDisplay(p.totalDebt, 18)} />
-                </Box>
-              ),
-            },
-            {
-              header: 'Total Repaid (DAI)',
-              property: 'totalRepaysAggregatedAmountNum',
-              align: 'center',
-              render: (p: PoolData) => (
-                <NumberDisplay suffix="" precision={0} value={baseToDisplay(p.totalRepaysAggregatedAmount, 18)} />
-              ),
+              render: (p: PoolData) =>
+                p.isArchived ? (
+                  <NumberDisplay suffix="" precision={0} value={baseToDisplay(p.totalFinancedCurrency, 18)} />
+                ) : (
+                  <NumberDisplay
+                    suffix=""
+                    precision={0}
+                    value={baseToDisplay(p.totalRepaysAggregatedAmount.add(p.totalDebt), 18)}
+                  />
+                ),
             },
             {
               header: 'DROP APR',

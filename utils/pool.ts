@@ -1,6 +1,7 @@
 import { PoolData } from '../ducks/pools'
 
 export const getPoolStatus = (pool: PoolData) => {
+  if (pool.isArchived) return 'Closed'
   if (pool.isUpcoming) return 'Upcoming'
   if (
     (pool.totalDebt.eqn(0) && pool.totalRepaysAggregatedAmount.eqn(0)) ||
