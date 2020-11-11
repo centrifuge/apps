@@ -5,6 +5,11 @@ import kovanPools from '@centrifuge/tinlake-pools-kovan'
 
 import { networkUrlToName } from './utils/networkNameResolver'
 
+interface SecuritizeData {
+  issuerId: string
+  slug: string
+}
+
 interface PoolMetadata {
   name: string
   shortName?: string
@@ -15,7 +20,7 @@ interface PoolMetadata {
   details?: any
   asset: string
   discourseLink?: string
-  securitizeId?: string
+  securitize?: SecuritizeData
 }
 
 export interface BasePool {
@@ -109,6 +114,11 @@ const contractConfigSchema = yup.object().shape({
   partialRepay: yup.bool(),
 })
 
+const securitizeDataSchema = yup.object().shape({
+  issuerId: yup.string(),
+  slug: yup.string(),
+})
+
 const metadataSchema = yup.object().shape({
   name: yup.string().required('poolSchema.name is required'),
   shortName: yup.string(),
@@ -119,7 +129,7 @@ const metadataSchema = yup.object().shape({
   details: yup.object(),
   asset: yup.string().required('poolSchema.asset is required'),
   discourseLink: yup.string(),
-  securitizeId: yup.string(),
+  securitize: securitizeDataSchema,
 })
 
 const poolSchema = yup.object().shape({
