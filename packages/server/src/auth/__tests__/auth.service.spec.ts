@@ -37,7 +37,7 @@ describe('LocalStrategy', () => {
     authService = module.get<AuthService>(AuthService);
   });
 
-  describe('validateUser', async () => {
+  describe('validateUser',  () => {
     it('should return user if credentials are valid', async () => {
       const result = await authService.validateUser(
         mockUser.email,
@@ -66,7 +66,7 @@ describe('LocalStrategy', () => {
     });
   })
 
-  describe('validateUserWithToken', async () => {
+  describe('validateUserWithToken',  () => {
     it('should return user if credentials and token are valid', async () => {
       const token = speakeasy.totp({
         secret: mockUser.secret.base32,

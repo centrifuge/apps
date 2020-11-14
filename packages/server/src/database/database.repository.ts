@@ -2,6 +2,7 @@ import * as DataStore from 'nedb-promises';
 import * as Nedb from 'nedb';
 import { DataStoreOptions, EnsureIndexOptions } from 'nedb';
 
+const COMPACTION_INTERVAL = 1000 * 60 * 30;
 /**
  * A repository class for accessing database data. Class methods promisify the equivalent Nedb methods
  * @type T - the entity model as saved in the database
@@ -18,6 +19,11 @@ export class DatabaseRepository<T> {
       ...defaultOptions,
       ...options,
     });
+
+    if (process.env.NODE_ENV !== 'test')
+      this.repository.persistence.setAutocompactionInterval(
+        COMPACTION_INTERVAL,
+      );
   }
 
   /**
