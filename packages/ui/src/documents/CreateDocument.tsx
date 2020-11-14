@@ -102,7 +102,7 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
           createResult = (await httpClient.documents.create(document)).data;
         }
         push(documentRoutes.index);
-        await httpClient.documents.update({
+        /*await httpClient.documents.update({
           ...createResult,
           attributes: {
             ...createResult.attributes,
@@ -112,7 +112,7 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
             } as any,
           }
 
-        })
+        })*/
         await httpClient.documents.commit(createResult._id!)
         go(0);
       } catch (e) {
@@ -164,7 +164,7 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
               label="Save"
             />
           </Box>
-        </SecondaryHeader>;
+        </SecondaryHeader>
       }}
     >
     </DocumentForm>

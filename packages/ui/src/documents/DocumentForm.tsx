@@ -214,7 +214,7 @@ export class DocumentForm extends React.Component<Props, State> {
     } else {
       clone.attributes = {
         ...defaultValues,
-        ...clone.attributes
+        ...clone.attributes,
       };
     }
 
@@ -251,16 +251,18 @@ export class DocumentForm extends React.Component<Props, State> {
     // This should never be the case
 
     const documentProps: any[] = [];
-    document.attributes![HARDCODED_FIELDS.ORIGINATOR] && documentProps.push({
-      ...document.attributes![HARDCODED_FIELDS.ORIGINATOR],
-      label:'Originator',
-      name: HARDCODED_FIELDS.ORIGINATOR,
-    })
-    document.attributes![HARDCODED_FIELDS.ASSET_IDENTIFIER] && documentProps.push({
-      ...document.attributes![HARDCODED_FIELDS.ORIGINATOR],
-      label:'Asset ID',
-      name: HARDCODED_FIELDS.ASSET_IDENTIFIER,
-    })
+    document.attributes![HARDCODED_FIELDS.ORIGINATOR] &&
+      documentProps.push({
+        ...document.attributes![HARDCODED_FIELDS.ORIGINATOR],
+        label: 'Originator',
+        name: HARDCODED_FIELDS.ORIGINATOR,
+      });
+    document.attributes![HARDCODED_FIELDS.ASSET_IDENTIFIER] &&
+      documentProps.push({
+        ...document.attributes![HARDCODED_FIELDS.ORIGINATOR],
+        label: 'Asset ID',
+        name: HARDCODED_FIELDS.ASSET_IDENTIFIER,
+      });
 
     // If a set of collaborators is set on schema, use it as default
     const collaborators =

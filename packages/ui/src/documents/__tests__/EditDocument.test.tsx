@@ -15,6 +15,7 @@ import { Heading, Paragraph } from 'grommet';
 import { Nfts } from '../Nfts';
 import { FundingAgreements } from '../FundingAgreements';
 import {createMemoryHistory} from "history";
+import { DocumentStatus, NftStatus } from '@centrifuge/gateway-lib/models/document';
 
 jest.mock('../../http-client');
 const httpClient = require('../../http-client').httpClient;
@@ -24,6 +25,8 @@ const EditDocumentDynamicProps: any = EditDocument;
 describe('Edit Document', () => {
 
   const document = {
+    nft_status: NftStatus.NoNft,
+    document_status: DocumentStatus.Created,
     header: {
       write_access: [defaultUser.account],
     },

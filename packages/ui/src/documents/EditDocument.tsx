@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react';
+import React, {
+  FunctionComponent,
+  useCallback,
+  useContext,
+  useEffect,
+} from 'react';
 import { Link } from 'react-router-dom';
 
 import DocumentForm from './DocumentForm';
@@ -7,7 +12,10 @@ import { Box, Button, Heading } from 'grommet';
 import { LinkPrevious } from 'grommet-icons';
 import { canWriteToDoc } from '@centrifuge/gateway-lib/models/user';
 import { Preloader } from '../components/Preloader';
-import { Document } from '@centrifuge/gateway-lib/models/document';
+import {
+  Document,
+  documentIsEditable,
+} from '@centrifuge/gateway-lib/models/document';
 import { SecondaryHeader } from '../components/SecondaryHeader';
 import { Schema } from '@centrifuge/gateway-lib/models/schema';
 import { Contact } from '@centrifuge/gateway-lib/models/contact';
@@ -16,7 +24,10 @@ import { AppContext } from '../App';
 import { useMergeState } from '../hooks';
 import { PageError } from '../components/PageError';
 import documentRoutes from './routes';
-import { NOTIFICATION, NotificationContext } from '../components/NotificationContext';
+import {
+  NOTIFICATION,
+  NotificationContext,
+} from '../components/NotificationContext';
 import { AxiosError } from 'axios';
 import { FundingAgreements } from './FundingAgreements';
 import { Nfts } from './Nfts';
@@ -24,37 +35,25 @@ import { extendContactsWithUsers } from '@centrifuge/gateway-lib/models/contact'
 
 type Props = RouteComponentProps<{ id: string }>;
 
-
 type State = {
-  loadingMessage: string | null
+  loadingMessage: string | null;
   document?: Document;
   schemas: Schema[];
   contacts: Contact[];
   error?: any;
-}
-
+};
 
 export const EditDocument: FunctionComponent<Props> = (props: Props) => {
-
   const {
-    history: {
-      push,
-    },
+    history: { push },
     match: {
-      params: {
-        id,
-      },
+      params: { id },
     },
   } = props;
   const [
-    {
-      loadingMessage,
-      contacts,
-      document,
-      schemas,
-      error,
-    },
-    setState] = useMergeState<State>({
+    { loadingMessage, contacts, document, schemas, error },
+    setState,
+  ] = useMergeState<State>({
     loadingMessage: 'Loading',
     schemas: [],
     contacts: [],
@@ -63,13 +62,15 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
   const { user } = useContext(AppContext);
   const notification = useContext(NotificationContext);
 
-
-  const displayPageError = useCallback((error) => {
-    setState({
-      loadingMessage: null,
-      error,
-    });
-  }, [setState]);
+  const displayPageError = useCallback(
+    error => {
+      setState({
+        loadingMessage: null,
+        error,
+      });
+    },
+    [setState],
+  );
 
   const loadData = useCallback(async () => {
     setState({
@@ -85,17 +86,14 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
         schemas,
         document,
       });
-
     } catch (e) {
       displayPageError(e);
     }
   }, [id, setState, displayPageError]);
 
-
   useEffect(() => {
     loadData();
   }, [loadData]);
-
 
   const updateDocument = async (newDoc: Document) => {
     setState({
@@ -110,7 +108,6 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
     } catch (e) {
       displayModalError(e, 'Failed to update document');
     }
-
   };
 
   const startLoading = (loadingMessage: string = 'Loading') => {
@@ -119,7 +116,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
 
   const returnToList = () => {
     push(documentRoutes.index);
-  }
+  };
 
   const displayModalError = (e: AxiosError, title: string = 'Error') => {
     setState({
@@ -136,28 +133,33 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
     props.history.goBack();
   };
 
-
-  if (loadingMessage) return <Preloader message={loadingMessage}/>;
-  if (error) return <PageError error={error}/>;
+  if (loadingMessage) return <Preloader message={loadingMessage} />;
+  if (error) return <PageError error={error} />;
   // Redirect to view when the user can not edit this document
-  if (!canWriteToDoc(user!, document)) return <Redirect to={documentRoutes.view.replace(':id', id)}/>;
+  if (!canWriteToDoc(user!, document) || !documentIsEditable(document!))
+    return <Redirect to={documentRoutes.view.replace(':id', id)} />;
 
   const selectedSchema: Schema | undefined = schemas.find(s => {
     return !!(
-        document &&
-        document.attributes &&
-        document.attributes._schema &&
-        s.name === document.attributes._schema.value
+      document &&
+      document.attributes &&
+      document.attributes._schema &&
+      s.name === document.attributes._schema.value
     );
   });
 
-  if (!selectedSchema) return <PageError error={new Error('Can not find schema definition for document')}/>;
+  if (!selectedSchema)
+    return (
+      <PageError
+        error={new Error('Can not find schema definition for document')}
+      />
+    );
 
   // Add mint action if schema has any registries defined
-  const canMint = selectedSchema!.registries && selectedSchema!.registries.length > 0;
+  const canMint =
+    selectedSchema!.registries && selectedSchema!.registries.length > 0;
   const canFund = canWriteToDoc(user, document);
   const extendedContacts = extendContactsWithUsers(contacts, [user!]);
-
 
   return (
     <>
@@ -169,29 +171,21 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
         document={document}
         schemas={schemas}
         renderHeader={() => {
-          return <SecondaryHeader>
-            <Box direction="row" gap="small" align="center">
-              <Link to={documentRoutes.index}>
-                <LinkPrevious/>
-              </Link>
-              <Heading level="3">
-                {'Update Document'}
-              </Heading>
-            </Box>
+          return (
+            <SecondaryHeader>
+              <Box direction="row" gap="small" align="center">
+                <Link to={documentRoutes.index}>
+                  <LinkPrevious />
+                </Link>
+                <Heading level="3">{'Update Document'}</Heading>
+              </Box>
 
-            <Box direction="row" gap="medium">
-              <Button
-                onClick={onCancel}
-                label="Discard"
-              />
-              <Button
-                type="submit"
-                primary
-                label="Update"
-              />
-
-            </Box>
-          </SecondaryHeader>;
+              <Box direction="row" gap="medium">
+                <Button onClick={onCancel} label="Discard" />
+                <Button type="submit" primary label="Update" />
+              </Box>
+            </SecondaryHeader>
+          );
         }}
       >
         <Nfts
@@ -202,21 +196,24 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
           viewMode={!canMint}
           document={document!}
           contacts={contacts}
-          registries={selectedSchema!.registries}/>
+          registries={selectedSchema!.registries}
+        />
 
-        {(selectedSchema!.formFeatures && selectedSchema!.formFeatures!.fundingAgreement) && <FundingAgreements
-          onAsyncStart={startLoading}
-          onAsyncComplete={loadData}
-          onAsyncError={displayModalError}
-          viewMode={!canFund}
-          document={document!}
-          user={user}
-          contacts={contacts}/>}
+        {selectedSchema!.formFeatures &&
+          selectedSchema!.formFeatures!.fundingAgreement && (
+            <FundingAgreements
+              onAsyncStart={startLoading}
+              onAsyncComplete={loadData}
+              onAsyncError={displayModalError}
+              viewMode={!canFund}
+              document={document!}
+              user={user}
+              contacts={contacts}
+            />
+          )}
       </DocumentForm>
     </>
   );
-
 };
-
 
 export default withRouter(EditDocument);

@@ -1,4 +1,7 @@
-import {CoreapiCreateDocumentRequest, CoreapiDocumentResponse} from '../centrifuge-node-client';
+import {
+  CoreapiCreateDocumentRequest,
+  CoreapiDocumentResponse,
+} from '../centrifuge-node-client';
 import { Contact, extendContactLikeObjects } from './contact';
 import { Collaborator, collaboratorsToAccessList } from './collaborator';
 
@@ -7,16 +10,16 @@ export interface DocumentRequest extends CoreapiCreateDocumentRequest {
 }
 
 export interface Document extends CoreapiDocumentResponse {
-  ownerId?: string,
-  organizationId?:string,
-  _id?: string,
-  fromId?:string,
-  createdAt?: Date,
-  updatedAt?: Date
-  document_id?:string,
-  nft_status?:string,
-  document_status?:string,
-  template?:string,
+  ownerId?: string;
+  organizationId?: string;
+  _id?: string;
+  fromId?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  document_id?: string;
+  nft_status?: string;
+  document_status?: string;
+  template?: string;
 }
 
 export enum DOCUMENT_ACCESS {
@@ -27,18 +30,33 @@ export enum DOCUMENT_ACCESS {
 export enum DocumentStatus {
   Creating = 'Creating',
   Created = 'Created',
-  CreationFail = 'Document creation failed'
+  CreationFail = 'Document creation failed',
 }
 
 export enum NftStatus {
   Minting = 'Minting',
   Minted = 'Minted',
   MintingFail = 'NFT minting failed',
-  NoNft = 'No NFT minted'
+  NoNft = 'No NFT minted',
 }
 
+export const documentHasNFTs = (document: Document) => {
+  return document.header?.nfts && document.header?.nfts.length > 0;
+};
 
-export const getDocumentCollaborators = (document: Document, contacts: Contact[]) => {
+export const documentIsEditable = (document: Document) => {
+  return (
+    (document.nft_status === NftStatus.NoNft ||
+      document.nft_status === NftStatus.MintingFail) &&
+    (document.document_status === DocumentStatus.Created ||
+      document.document_status === DocumentStatus.CreationFail)
+  );
+};
+
+export const getDocumentCollaborators = (
+  document: Document,
+  contacts: Contact[],
+) => {
   if (!document || !document.header) return [];
   let userAccess = [];
   Object.values(DOCUMENT_ACCESS).forEach(value => {
@@ -66,5 +84,4 @@ export const createDocumentCollaborators = (collaborators: Collaborator[]) => {
 
 export const canLoadDocument = (document: Document) => {
   return document._id && document.nft_status !== NftStatus.Minting;
-}
-
+};

@@ -265,6 +265,14 @@ export class MockCentrifugeService {
         ...data,
       };
     }),
+    updateDocumentV2: jest.fn((authid, data, docid) => {
+      return {
+        header: {
+          job_id: 'some_job_id',
+        },
+        ...data,
+      };
+    }),
   };
   pullForJobComplete = () => true;
 }

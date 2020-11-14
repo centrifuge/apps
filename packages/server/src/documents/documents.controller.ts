@@ -111,13 +111,13 @@ export class DocumentsController {
       template,
     );
 
-    const updateResult: Document = await this.centrifugeService.documents.updateDocument(
+    const updateResult: Document = await this.centrifugeService.documents.updateDocumentV2(
       user.account,
-      cloneResult.header.document_id,
       {
         attributes: document.attributes,
         scheme: SchemeEnum.Generic,
       },
+      cloneResult.header.document_id,
     );
 
     return  await this.databaseService.documents.insert({
@@ -217,7 +217,7 @@ export class DocumentsController {
         document.header.document_id,
       );
       return {
-        _id: document._id,
+        ...document,
         ...docFromNode,
         attributes: {
           ...unflatten(docFromNode.attributes),

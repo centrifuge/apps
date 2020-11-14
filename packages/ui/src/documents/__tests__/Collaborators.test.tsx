@@ -7,7 +7,7 @@ import Collaborators from '../Collaborators';
 import { Formik } from 'formik';
 import CollaboratorForm from '../CollaboratorForm';
 import { act } from 'react-dom/test-utils';
-import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document';
+import { DOCUMENT_ACCESS, DocumentStatus, NftStatus } from '@centrifuge/gateway-lib/models/document';
 import { Modal } from '@centrifuge/axis-modal';
 
 
@@ -16,20 +16,9 @@ describe('Collaborators', () => {
   const getDocument = () => {
     return {
       _id: 'first_id',
+      nft_status: NftStatus.NoNft,
+      document_status: DocumentStatus.Created,
       header: {
-
-        nfts: [
-          {
-            owner: 'Owner of first nft',
-            registry: '0xFirstRegistry',
-            token_id: '0x8416c0d06fae1a25dd11e6f0991f58816e0c2de1c755aa5a9ceee389f23ded3c',
-          },
-          {
-            owner: 'Owner of second nft',
-            registry: '0xSecondRegistry',
-            token_id: '0xSecondTokenId',
-          },
-        ],
       },
       createdAt: new Date('2019-07-09T10:54:59.900Z'),
       attributes: {

@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Document } from '@centrifuge/gateway-lib/models/document';
+import { Document, documentIsEditable } from '@centrifuge/gateway-lib/models/document';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { Schema } from '@centrifuge/gateway-lib/models/schema';
 import { Contact, extendContactsWithUsers } from '@centrifuge/gateway-lib/models/contact';
@@ -134,7 +134,7 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
           </Heading>
         </Box>
         <Box direction="row" gap="medium">
-          {canWriteToDoc(user, document) && document && document.header  && <Button
+          {canWriteToDoc(user, document) && documentIsEditable(document!)  && <Button
             primary={true}
             onClick={() => {
               push(

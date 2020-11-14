@@ -1148,57 +1148,57 @@
     lodash "^4.17.19"
     to-fast-properties "^2.0.0"
 
-"@centrifuge/axis-date-input@^0.4.2-develop.143":
-  version "0.4.2-develop.143"
-  resolved "https://registry.yarnpkg.com/@centrifuge/axis-date-input/-/axis-date-input-0.4.2-develop.143.tgz#9f9ff116486bd70edf1fa598ee169a878db54441"
-  integrity sha512-x4sgEgAy4fZMyrKHJC5bOJoh0eMNOF2ajSzfp8PPuE+8KFTp/0w/FKrnHUIVaFi8HZLj9E3lfiHDT4qmeFMheg==
+"@centrifuge/axis-date-input@^0.4.2-develop.15065bc.147":
+  version "0.4.2-develop.15065bc.147"
+  resolved "https://registry.yarnpkg.com/@centrifuge/axis-date-input/-/axis-date-input-0.4.2-develop.15065bc.147.tgz#59cceb5f994a7b706ae59b620ae45b3c4c0a549d"
+  integrity sha512-YztDvzx17OT44W+4pTomIXirJT4oKemlCtZcP6FjWiML8BXzkzT78KS0dbBSAvaQD0GpWIVBtK4+oF5Hs3iIHA==
 
-"@centrifuge/axis-display-field@^0.4.2-develop.143":
-  version "0.4.2-develop.143"
-  resolved "https://registry.yarnpkg.com/@centrifuge/axis-display-field/-/axis-display-field-0.4.2-develop.143.tgz#b00c31d081e1dc26d35e7bf61b10498f65839a50"
-  integrity sha512-xjLFbG0MLQPq3g0ypLJMhsh/fDM7mtUqw0i81T6Os5lgVlSZz6nLnBWibfSNRGvuBpJwTzrmCd8YauDMlMf+Rg==
+"@centrifuge/axis-display-field@^0.4.2-develop.a1231ee.147":
+  version "0.4.2-develop.a1231ee.147"
+  resolved "https://registry.yarnpkg.com/@centrifuge/axis-display-field/-/axis-display-field-0.4.2-develop.a1231ee.147.tgz#f130a771644d0b5f6b53d8eccf3729d9970a558c"
+  integrity sha512-aSlRYHq6FHr62CCMGAryTxGrntAwUA53H2EQwnB/cSqr7sG3JYvyW/EqIN3K5Mx7Ox6H1okeCK2EIePSdGi6Xw==
 
-"@centrifuge/axis-modal@^0.4.2-develop.143":
-  version "0.4.2-develop.143"
-  resolved "https://registry.yarnpkg.com/@centrifuge/axis-modal/-/axis-modal-0.4.2-develop.143.tgz#c0bb0225659afe26ddc1fad454a34616e9320988"
-  integrity sha512-4MioxA0G8PUeH1nvH9hG+9+cPnm2ks2GfeFblwmgLwxRJ4+JXbf/dwWVtv2YCKjtGBKSTx6Y0XsahuK9WnRVZQ==
+"@centrifuge/axis-modal@^0.4.2-develop.a1231ee.147":
+  version "0.4.2-develop.a1231ee.147"
+  resolved "https://registry.yarnpkg.com/@centrifuge/axis-modal/-/axis-modal-0.4.2-develop.a1231ee.147.tgz#1c4ab2021d158ef5c89447c5312be3ed266ac32d"
+  integrity sha512-oPFXJ08rYMGve3uGiDfWonVnwYZ5NQok3JFbdeCkHckO/E7FXJZ+KRHZjGQGC+hbrufuBLtNGgwhG03Qzbidjg==
 
 "@centrifuge/axis-multiple-select@^0.4.2-develop.143":
   version "0.4.2-develop.143"
   resolved "https://registry.yarnpkg.com/@centrifuge/axis-multiple-select/-/axis-multiple-select-0.4.2-develop.143.tgz#eb4e38544b527d53651a3ddb29ace9e71ebe4594"
   integrity sha512-j3um1kZ/GLeq7JgRpNtWpkSEHWdJt1e71GOpsbElvEsyyaTYxVWzKNclEU2HON+ZOXNz1T+34BYhpN7x8zYm1Q==
 
-"@centrifuge/axis-nav-bar@^0.4.2-develop.143":
-  version "0.4.2-develop.143"
-  resolved "https://registry.yarnpkg.com/@centrifuge/axis-nav-bar/-/axis-nav-bar-0.4.2-develop.143.tgz#120c270e1998f76b08d09e94cce8f7906f4b9954"
-  integrity sha512-sAr9HoA9vhwLLVlVW0xTheOVtWTDMT2fM47J02Qn4aaPQXjVWzTRxDI/inMsR3O0vqOQEfnIOgyWeYQWWmePoQ==
+"@centrifuge/axis-nav-bar@^0.4.2-develop.a1231ee.147":
+  version "0.4.2-develop.a1231ee.147"
+  resolved "https://registry.yarnpkg.com/@centrifuge/axis-nav-bar/-/axis-nav-bar-0.4.2-develop.a1231ee.147.tgz#4ccea5068ee0a0e510652e842b09088dc35014fa"
+  integrity sha512-zoWJipiLmHCJ5dYGaNGAIl/mwxz9Yob2S38ALK4aoiB5EbfMSQ6T6LRuLOmBOIsqYqmmBGnKcRxoocRQ4PmazQ==
 
-"@centrifuge/axis-number-input@^0.4.2-develop.143":
-  version "0.4.2-develop.143"
-  resolved "https://registry.yarnpkg.com/@centrifuge/axis-number-input/-/axis-number-input-0.4.2-develop.143.tgz#537259d2a903dd90f84afffd6e2f6c39e2d2ade9"
-  integrity sha512-tGSOqzNLX1AaBaml6FPktW+w2q6nRetutDA0VHGnhWrhVKDRXMsqrd3mBHNsNpNRFESb7H+qJLW8d6/XbEHFow==
+"@centrifuge/axis-number-input@^0.4.2-develop.a1231ee.147":
+  version "0.4.2-develop.a1231ee.147"
+  resolved "https://registry.yarnpkg.com/@centrifuge/axis-number-input/-/axis-number-input-0.4.2-develop.a1231ee.147.tgz#a5e86b7b5ecbbeb7f1737907de7fdb7f1e4ae68f"
+  integrity sha512-BAUyivQnQb0jjHJ/aZZA8Bs0wSebqzSTXz6KNpVEjml6t1kpQj19mf/lV4aWmoDB6YWThIyb76jSp/MRBrn/BQ==
   dependencies:
     react-number-format "^4.2.0"
 
-"@centrifuge/axis-search-select@^0.4.2-develop.143":
-  version "0.4.2-develop.143"
-  resolved "https://registry.yarnpkg.com/@centrifuge/axis-search-select/-/axis-search-select-0.4.2-develop.143.tgz#0570ec8f2f74e346fb1279dcc64e18674fb9d48d"
-  integrity sha512-ERUljxSxa1pdvAiqFzbvLVN1BW3NOOmMB9GV8ad8MMTmoBPCb7DHxfKAEtEt0RSKJVchTqRGxHz1JqhJb8379w==
+"@centrifuge/axis-search-select@^0.4.2-develop.a1231ee.147":
+  version "0.4.2-develop.a1231ee.147"
+  resolved "https://registry.yarnpkg.com/@centrifuge/axis-search-select/-/axis-search-select-0.4.2-develop.a1231ee.147.tgz#9526bcbd6caf4f599a3c9f6bd5176134e479854f"
+  integrity sha512-V8Gmw/rs6jOQIEI+BnY/WhLWiEXyp9GCEkTLtQcYIP5MbthUnii0SWFUMG+OPE31807AoD9IKiFfkPFUzDaEfQ==
 
-"@centrifuge/axis-spinner@^0.4.2-develop.143":
-  version "0.4.2-develop.143"
-  resolved "https://registry.yarnpkg.com/@centrifuge/axis-spinner/-/axis-spinner-0.4.2-develop.143.tgz#437526b65c917758620f73055645983139fc365f"
-  integrity sha512-jKaWK3ZQ8uOslwELVzFmCHr8Ch4EK9HIC8cvEn0zmAnVuKo7zyvOyqqFMuEBhyLJF9wRXDqp3JPM1AJDagS3iw==
+"@centrifuge/axis-spinner@^0.4.2-develop.a1231ee.147":
+  version "0.4.2-develop.a1231ee.147"
+  resolved "https://registry.yarnpkg.com/@centrifuge/axis-spinner/-/axis-spinner-0.4.2-develop.a1231ee.147.tgz#c558cb5008f9985ac2a4b373c3b262befa3acb82"
+  integrity sha512-K7b0MC0GOyZScyW5oIDgkplsflz9HmTrowhNFqmFZHs7O8kdWfOV74or7NNCwdMmruEZT+/dHjulw6YxxcruxA==
 
-"@centrifuge/axis-theme@^0.4.2-develop.143":
-  version "0.4.2-develop.143"
-  resolved "https://registry.yarnpkg.com/@centrifuge/axis-theme/-/axis-theme-0.4.2-develop.143.tgz#d065c9195e90679236c21e0271f90feb72b1dafb"
-  integrity sha512-RgKZCkMGbjosgxRscOKkVEKevpUiK1xP5oCAzWk73spNacz/bgZZ/yOOsdGG4G6BlIoU8/JGHj6lHbEBodSeRg==
+"@centrifuge/axis-theme@^0.4.2-develop.a1231ee.147":
+  version "0.4.2-develop.a1231ee.147"
+  resolved "https://registry.yarnpkg.com/@centrifuge/axis-theme/-/axis-theme-0.4.2-develop.a1231ee.147.tgz#98b70d1751930a7826f5f3366f8625fb78bd3d12"
+  integrity sha512-xGN0PkBRAT56jGnd693pe+2+HubproKiuodY9oDAYn1P8LmYz3dewlu+cGyjwTSPbCfiJlXSp2c0A1UI2Cf+iQ==
 
-"@centrifuge/axis-utils@^0.4.2-develop.143":
-  version "0.4.2-develop.143"
-  resolved "https://registry.yarnpkg.com/@centrifuge/axis-utils/-/axis-utils-0.4.2-develop.143.tgz#8255ac1f78b79559c51b0156e6949a76e14bbe8c"
-  integrity sha512-IGl4qURy+SD6kY6vVlkCzf0djbqetqAdGNmhWvUw/jkjNWw00KvJjaEb8W+tLblCe2ihqeffWVBnAAvCcjU1mA==
+"@centrifuge/axis-utils@^0.4.2-develop.a1231ee.147":
+  version "0.4.2-develop.a1231ee.147"
+  resolved "https://registry.yarnpkg.com/@centrifuge/axis-utils/-/axis-utils-0.4.2-develop.a1231ee.147.tgz#574a126aa93a29d976b3c4bfb345721b0c539a83"
+  integrity sha512-RPQcjmqzCsySmfEcJ+JjRfsWIeOGVTBtpI4jMzFJ1VsolGc4T1CRJS0gfIYc12dTlNl00OKjU72FPsrE68/mIA==
 
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
@@ -3016,11 +3016,6 @@ bignumber.js@^9.0.0:
   version "9.0.0"
   resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.0.0.tgz#805880f84a329b5eac6e7cb6f8274b6d82bdf075"
   integrity sha512-t/OYhhJ2SD+YGBQcjY8GzzDHEk9f3nerxjtfa6tlMXfe7frs/WozhvCNoGvpM0P3bNf3Gq5ZRMlGr5f3r4/N8A==
-
-bignumber@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/bignumber/-/bignumber-1.1.0.tgz#e6ab0a743da5f3ea018e5c17597d121f7868c159"
-  integrity sha1-5qsKdD2l8+oBjlwXWX0SH3howVk=
 
 binary-extensions@^1.0.0:
   version "1.13.1"
