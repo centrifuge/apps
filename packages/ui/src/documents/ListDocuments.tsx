@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Box, Button, Heading } from 'grommet';
 import documentRoutes from './routes';
 import { RouteComponentProps, withRouter } from 'react-router';
-import {Document,canLoadDocument} from '@centrifuge/gateway-lib/models/document';
+import { Document, canLoadDocument, documentHasNFTs } from '@centrifuge/gateway-lib/models/document';
 import { SecondaryHeader } from '../components/SecondaryHeader';
 import { canCreateDocuments } from '@centrifuge/gateway-lib/models/user';
 import { Preloader } from '../components/Preloader';
@@ -159,6 +159,12 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               property: 'nft_status',
               header: 'NFT Status',
               sortable: true,
+              render: datum => {
+                if(documentHasNFTs(datum)) {
+                    return datum.header.nfts.map(nft => nft.token_id).join(', ')
+                }
+                return datum.nft_status;
+              }
             },
             {
               header: '',
