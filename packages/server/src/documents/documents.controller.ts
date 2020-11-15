@@ -196,7 +196,7 @@ export class DocumentsController {
       .getCursor({
         organizationId: request.user.account,
       })
-      .sort({ updatedAt: -1 })
+      .sort({ createdAt: -1 })
       .exec();
   }
 

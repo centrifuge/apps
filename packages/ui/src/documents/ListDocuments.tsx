@@ -148,7 +148,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               property: 'createdAt',
               header: 'Date created',
               sortable: true,
-              render: datum => formatDate(datum.createdAt),
+              render: datum => formatDate(datum.createdAt, true),
             },
             {
               property: 'document_status',

@@ -16,17 +16,28 @@ export const extractDate = value => {
   }
 };
 
-
-export const formatNumber = (value) => {
+export const formatNumber = value => {
   return new Intl.NumberFormat(locale).format(value);
 };
 
-export const formatDate = (value: any) => {
+export const formatDate = (value: any, withTime: boolean = false) => {
   if (!value) return '';
   if (!(value instanceof Date)) {
     value = new Date(value);
   }
-  return new Intl.DateTimeFormat(locale, { month: '2-digit', year: 'numeric', day: '2-digit' }).format(value);
+  let options: any = {
+    month: '2-digit',
+    year: 'numeric',
+    day: '2-digit',
+  };
+  if (withTime) {
+    options = {
+      ...options,
+      hour: 'numeric',
+      minute: 'numeric',
+    };
+  }
+  return new Intl.DateTimeFormat(locale, options).format(value);
 };
 
 export const formatCurrency = (value, currency) => {
@@ -38,11 +49,9 @@ export const formatCurrency = (value, currency) => {
   } catch (e) {
     return `${currency} `;
   }
-
 };
 
-
-export const getCurrencyFormat = (currency) => {
+export const getCurrencyFormat = currency => {
   let prefix = formatCurrency(1, currency).replace(/[0-9.,]/g, '');
   // now care only about the prefix
   // TODO we should should also handle the suffix case.
@@ -63,7 +72,6 @@ export const getNumberFormat = () => {
 };
 
 export const getPercentFormat = () => {
-
   let suffix = formatPercent(1).replace(/[0-9.,]/g, '');
   return {
     ...getNumberFormat(),
@@ -73,7 +81,9 @@ export const getPercentFormat = () => {
   };
 };
 
-
 export const formatPercent = value => {
-  return new Intl.NumberFormat(locale, { style: 'percent', minimumFractionDigits: 2 }).format(value);
+  return new Intl.NumberFormat(locale, {
+    style: 'percent',
+    minimumFractionDigits: 2,
+  }).format(value);
 };
