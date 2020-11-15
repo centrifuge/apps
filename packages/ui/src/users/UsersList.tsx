@@ -26,6 +26,7 @@ import {
 import { AxiosError } from 'axios';
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
 import { Organization } from '@centrifuge/gateway-lib/models/organization';
+import { AppContext } from '../App';
 
 type State = {
   loadingMessage: string | null;
@@ -60,6 +61,7 @@ const UsersList: FunctionComponent = () => {
   });
 
   const notification = useContext(NotificationContext);
+  const { user } = useContext(AppContext);
 
   const displayPageError = useCallback(
     error => {
@@ -78,7 +80,9 @@ const UsersList: FunctionComponent = () => {
     try {
       const organizations = (await httpClient.organizations.list()).data;
       const users = (await httpClient.user.list()).data.map(user => {
-        const org = organizations.find(o => o.account.toLowerCase() === user.account.toLowerCase());
+        const org = organizations.find(
+          o => o.account.toLowerCase() === user.account.toLowerCase(),
+        );
         const organizationName = org ? org.name : 'undefined';
         return {
           ...user,
@@ -121,13 +125,33 @@ const UsersList: FunctionComponent = () => {
 
   const generateDefaultUser = (): UserWithOrg => {
     return {
-      ...(new UserWithOrg()),
+      ...new UserWithOrg(),
       permissions: [
         PERMISSIONS.CAN_MANAGE_DOCUMENTS,
         PERMISSIONS.CAN_VIEW_DOCUMENTS,
-      ]
+      ],
+    };
+  };
+
+  const onUserDelete = async (user: UserWithOrg) => {
+    try {
+      setState({
+        loadingMessage: 'Deleting user',
+      });
+      await httpClient.user.delete(user);
+      await loadData();
+    } catch (e) {
+      notification.alert({
+        type: NOTIFICATION.ERROR,
+        title: 'Failed to delete user',
+        message: (e as AxiosError).response!.data.message,
+      });
+
+      setState({
+        loadingMessage: null,
+      });
     }
-  }
+  };
 
   const onUserFormSubmit = async (user: UserWithOrg) => {
     let context: any = {};
@@ -257,6 +281,9 @@ const UsersList: FunctionComponent = () => {
             render: data => (
               <Box direction="row" gap="small">
                 <Anchor label={'Edit'} onClick={() => openUserForm(data)} />
+                {user?.email !== data.email && (
+                  <Anchor label={'Delete'} onClick={() => onUserDelete(data)} />
+                )}
               </Box>
             ),
           },

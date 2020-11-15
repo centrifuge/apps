@@ -99,8 +99,8 @@ export class DatabaseRepository<T> {
   }
 
   /**
-   * Ensures an index of the table
-   * @param {EnsureIndexOptions} options
+   * removes item
+   * @param {any} query - Nedb query object
    */
   remove(query: any): Promise<number> {
     return this.repository.remove(query);

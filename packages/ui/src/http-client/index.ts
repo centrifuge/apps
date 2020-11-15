@@ -32,6 +32,7 @@ export const httpClient = {
     register: async (user: User) => instance.post(ROUTES.USERS.base, user),
     invite: async (user: User) => instance.post(ROUTES.USERS.invite, user),
     update: async (user: User) => instance.put(ROUTES.USERS.base, user),
+    delete: async (user: User) => instance.delete(`${ROUTES.USERS.base}/${user._id}`),
     list: async () => instance.get(ROUTES.USERS.base),
 
   },

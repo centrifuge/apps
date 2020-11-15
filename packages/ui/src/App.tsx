@@ -21,6 +21,7 @@ import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan';
 import { DisplayField } from '@centrifuge/axis-display-field';
 import logo from './assets/logo.png';
 import { RouteComponentProps, withRouter } from 'react-router';
+import { theme } from './theme';
 
 interface AppPros extends RouteComponentProps {
   loggedInUser: User | null;
@@ -134,7 +135,7 @@ const App: FunctionComponent<AppPros> = (props: AppPros) => {
 
   return (
     <div className="App">
-      <AxisTheme full={true}>
+      <AxisTheme theme={theme} full={true}>
         <AppContext.Provider value={{ user, setUser }}>
           <NotificationProvider>
             <Box align="center">

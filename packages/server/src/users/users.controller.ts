@@ -1,9 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
-  HttpCode,
+  HttpCode, Param,
   Post,
   Put,
   Request,
@@ -191,6 +192,14 @@ export class UsersController {
     }
 
     return await this.upsertUser(user, false);
+  }
+
+  @Delete(`${ROUTES.USERS.base}/:id`)
+  @UseGuards(UserAuthGuard)
+  async remove( @Param() params): Promise<number> {
+    return await this.databaseService.users.remove({
+      _id: params.id,
+    });
   }
 
   private async upsertUser(user: UserWithOrg, upsert: boolean = false) {

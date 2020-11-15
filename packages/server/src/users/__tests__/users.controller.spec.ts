@@ -387,4 +387,24 @@ describe('Users controller', () => {
       });
     });
   });
+
+  it('should remove an existing user', async () => {
+    const usersController = userModule.get<UsersController>(UsersController);
+    const newUser: UserWithOrg = {
+      ...new UserWithOrg(),
+      name: 'new_user',
+      email: 'test@remove.com',
+      enabled: false,
+      invited: false,
+      password: 'SomePassW0rd!',
+      account: '0x39282833',
+      permissions: [],
+    };
+
+    const insertedUser = await usersController.invite(newUser);
+    const result = await usersController.remove(
+      { id: insertedUser._id }
+    );
+    expect(result).toBe(1);
+  });
 });
