@@ -25,7 +25,11 @@ export interface PoolData {
   currentJuniorRatio: BN
 }
 
+export type PoolStatus = 'Upcoming' | 'Active' | 'Deployed' | 'Closed'
+
 export interface ArchivedPoolData {
+  status: PoolStatus
+  legacyLink: string
   totalFinancedCurrency: string
   financingsCount: string
   seniorInterestRate: string

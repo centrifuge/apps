@@ -61,9 +61,12 @@ class Archived extends React.Component<Props> {
 
               <ExplainerCard margin={{ top: 'large' }}>
                 <Box margin={{ left: 'auto', right: 'auto' }}>
-                  This pool has been fully repaid and closed.
-                  <Link href="/">
-                    <Button margin={{ top: 'medium' }} primary label="View all pools" fill={false} />
+                  This is an archived static pool based on a previous version of the smart contracts (v2). You can view
+                  details and use this pool in the legacy app.
+                  <Link href={poolData?.legacyLink || 'https://v2.tinlake.centrifuge.io/'}>
+                    <a target="_blank">
+                      <Button margin={{ top: 'medium' }} primary label="View Pool" fill={false} />
+                    </a>
                   </Link>
                 </Box>
               </ExplainerCard>

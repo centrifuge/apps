@@ -3,6 +3,7 @@ import { ThunkAction } from 'redux-thunk'
 import { HYDRATE } from 'next-redux-wrapper'
 import BN from 'bn.js'
 import Apollo from '../services/apollo'
+import { PoolStatus } from './pool'
 
 // Actions
 const LOAD_POOLS = 'tinlake-ui/pools/LOAD_POOLS'
@@ -28,6 +29,7 @@ export interface PoolData {
   version: number
   totalFinancedCurrency: BN
   financingsCount?: number
+  status?: PoolStatus
 }
 
 export interface PoolsData {

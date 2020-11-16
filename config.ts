@@ -4,6 +4,7 @@ import mainnetPools from '@centrifuge/tinlake-pools-mainnet'
 import kovanPools from '@centrifuge/tinlake-pools-kovan'
 
 import { networkUrlToName } from './utils/networkNameResolver'
+import { PoolStatus } from './ducks/pool'
 
 interface SecuritizeData {
   issuerId: string
@@ -40,6 +41,8 @@ export interface UpcomingPool extends BasePool {
 export interface ArchivedPool extends BasePool {
   isArchived: true
   archivedValues: {
+    status: PoolStatus
+    legacyLink: string
     totalFinancedCurrency: string
     financingsCount: string
     seniorInterestRate: string
@@ -178,6 +181,8 @@ const archivedPoolSchema = yup.object().shape({
     .required('poolSchema.version is required'),
   metadata: metadataSchema.required('poolSchema.metadata is required'),
   archivedValues: yup.object().shape({
+    status: yup.string().oneOf(['Deployed', 'Closed']),
+    legacyLink: yup.string(),
     totalFinancedCurrency: yup.string(),
     financingsCount: yup.string(),
     seniorInterestRate: yup

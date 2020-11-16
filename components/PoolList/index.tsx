@@ -6,7 +6,6 @@ import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import NumberDisplay from '../NumberDisplay'
 import ChevronRight from '../ChevronRight'
 import Router from 'next/router'
-import { getPoolStatus } from '../../utils/pool'
 
 interface Props {
   pools?: PoolData[]
@@ -49,7 +48,7 @@ class PoolList extends React.Component<Props> {
               align: 'center',
               render: (p: PoolData) => (
                 <Box style={{ maxWidth: '200px' }}>
-                  <DisplayField as={'span'} value={getPoolStatus(p)} />
+                  <DisplayField as={'span'} value={p.status} />
                 </Box>
               ),
             },
