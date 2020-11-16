@@ -34,7 +34,9 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
 
   return (
     <Box margin={{ top: 'medium' }}>
-      <Heading level="4">Investment Overview of {props.activePool?.metadata.name}</Heading>
+      <Heading level="4" style={{ maxWidth: '100%' }}>
+        Investment Overview of {props.activePool?.metadata.name}
+      </Heading>
       <ExplainerCard margin={{ bottom: 'medium' }}>
         Investors can invest into this Tinlake pool through two tokens that are backed by collateral locked by the Asset
         Originator: TIN and DROP. Both tokens represent the liquidity deposited into Tinlake and accrue interest over
