@@ -117,8 +117,8 @@ const contractConfigSchema = yup.object().shape({
 })
 
 const securitizeDataSchema = yup.object().shape({
-  issuerId: yup.string(),
-  slug: yup.string(),
+  issuerId: yup.string().default(''),
+  slug: yup.string().default(''),
 })
 
 const metadataSchema = yup.object().shape({
