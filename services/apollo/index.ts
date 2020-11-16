@@ -103,7 +103,7 @@ class Apollo {
         version: Number(pool?.version || 3),
       }
 
-      return { ...poolData, status: getPoolStatus(poolData)}
+      return { ...poolData, status: getPoolStatus(poolData) }
     })
     return tinlakePools
   }
