@@ -13,7 +13,6 @@ import config, { Pool } from '../../../../../config'
 import { GetStaticProps } from 'next'
 import Container from '../../../../../components/Container'
 import Head from 'next/head'
-import { isTinlakeV3 } from '../../../../../utils/tinlakeVersion'
 import LoanOverview from '../../../../../containers/Loan/Overview/index'
 
 interface Props extends WithRouterProps {
@@ -39,7 +38,6 @@ class LoanListPage extends React.Component<Props> {
           <Box justify="evenly" direction="row">
             <Box width="xlarge" gap="medium">
               <WithTinlake
-                version={pool.version}
                 addresses={pool.addresses}
                 contractConfig={pool.contractConfig}
                 render={(tinlake) => (
@@ -54,12 +52,8 @@ class LoanListPage extends React.Component<Props> {
                           </PoolLink>
                         </SecondaryHeader>
 
-                        {isTinlakeV3(tinlake) && (
-                          <>
-                            <LoanOverview tinlake={tinlake} auth={auth} activePool={this.props.pool} />
-                          </>
-                        )}
-                        <LoanList tinlake={tinlake} auth={auth} hideMetrics={isTinlakeV3(tinlake)} />
+                        <LoanOverview tinlake={tinlake} auth={auth} activePool={this.props.pool} />
+                        <LoanList tinlake={tinlake} auth={auth} hideMetrics={true} />
                       </Box>
                     )}
                   />

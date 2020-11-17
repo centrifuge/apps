@@ -1,14 +1,14 @@
 import * as React from 'react'
 import { Box, Button } from 'grommet'
 import { TokenInput } from '@centrifuge/axis-token-input'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
-import { ITinlake as ITinlakeV3, baseToDisplay } from '@centrifuge/tinlake-js-v3'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
+import { ITinlake, baseToDisplay } from '@centrifuge/tinlake-js'
 import { connect, useSelector } from 'react-redux'
 import { Decimal } from 'decimal.js-light'
-import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
+import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import BN from 'bn.js'
 
-import config, { Pool } from '../../../../config'
+import config, { Pool } from '../../../config'
 import { Description } from './styles'
 import { Card } from './TrancheOverview'
 
@@ -16,7 +16,7 @@ interface Props extends TransactionProps {
   pool: Pool
   tranche: 'senior' | 'junior'
   setCard: (card: Card) => void
-  tinlake: ITinlakeV3
+  tinlake: ITinlake
   updateTrancheData: () => void
 }
 

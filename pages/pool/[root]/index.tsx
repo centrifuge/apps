@@ -29,7 +29,7 @@ class Pool extends React.Component<Props> {
         <Header
           poolTitle={pool.metadata.shortName || pool.metadata.name}
           selectedRoute={'/'}
-          menuItems={'isArchived' in pool ? [] : menuItems.filter(noDemo)}
+          menuItems={'isArchived' in pool || 'isUpcoming' in pool ? [] : menuItems.filter(noDemo)}
         />
         <Container>
           <Box justify="center" direction="row">

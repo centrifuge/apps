@@ -1,16 +1,15 @@
 import * as React from 'react'
 import { Box, Button, Heading, FormField } from 'grommet'
-import { baseToDisplay, displayToBase } from '@centrifuge/tinlake-js'
-import NumberInput from '../../../../components/NumberInput'
-import { loadPool, PoolDataV3, PoolState } from '../../../../ducks/pool'
-import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
-import { toPrecision } from '../../../../utils/toPrecision'
-import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
+import NumberInput from '../../../components/NumberInput'
+import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
+import { baseToDisplay, displayToBase, ITinlake } from '@centrifuge/tinlake-js'
+import { toPrecision } from '../../../utils/toPrecision'
+import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 import { connect, useSelector } from 'react-redux'
 
 interface Props extends TransactionProps {
-  tinlake: ITinlakeV3
+  tinlake: ITinlake
   loadPool?: (tinlake: any) => Promise<void>
 }
 
@@ -23,7 +22,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     if (pool && pool.data) {
       setMinJuniorRatio(pool.data.minJuniorRatio.toString())
-      setMaxJuniorRatio((pool.data as PoolDataV3).maxJuniorRatio.toString())
+      setMaxJuniorRatio((pool.data as PoolData).maxJuniorRatio.toString())
     }
   }, [pool?.data])
 
@@ -106,7 +105,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 Max TIN risk buffer
               </Heading>
               <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolDataV3).maxJuniorRatio, 25), 2))}%
+                {addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolData).maxJuniorRatio, 25), 2))}%
               </Heading>
             </Box>
 
@@ -127,7 +126,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 disabled={
                   maxRatioStatus === 'unconfirmed' ||
                   maxRatioStatus === 'pending' ||
-                  maxJuniorRatio === (pool.data as PoolDataV3).maxJuniorRatio.toString()
+                  maxJuniorRatio === (pool.data as PoolData).maxJuniorRatio.toString()
                 }
               />
             </Box>

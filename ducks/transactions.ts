@@ -20,7 +20,7 @@ export interface WalletTransaction {
 
 // This refers to any function in ../services/tinlake/actions which aligns to the TinlakeAction type
 export type TransactionAction = {
-  [P in keyof typeof actions]: typeof actions[P] extends actions.TinlakeAction | actions.TinlakeV3Action ? P : never
+  [P in keyof typeof actions]: typeof actions[P] extends actions.TinlakeAction ? P : never
 }[keyof typeof actions]
 
 // Can be extended by components which create and subscribe to transactions
@@ -123,7 +123,6 @@ export function createTransaction<A extends TransactionAction>(
      * and then re-initialize Tinlake.js with the same config when processing the transaction.
      * */
     const tinlakeConfig = {
-      version: args[0].version as 2 | 3,
       addresses: args[0].contractAddresses,
       contractConfig: args[0].contractConfig,
     }

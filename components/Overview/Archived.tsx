@@ -6,7 +6,7 @@ import { ArchivedPool } from '../../config'
 import { toPrecision } from '../../utils/toPrecision'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { LoadingValue } from '../../components/LoadingValue/index'
-import { ExplainerCard } from '../../containers/Investment/RevolvingPool/View/styles'
+import { ExplainerCard } from '../../containers/Investment/View/styles'
 import Link from 'next/link'
 
 interface Props {

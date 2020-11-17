@@ -31,7 +31,6 @@ class Pool extends React.Component<Props> {
           <Box justify="center" direction="row">
             <Box width="xlarge">
               <WithTinlake
-                version={pool.version}
                 addresses={pool.addresses}
                 contractConfig={pool.contractConfig}
                 render={(tinlake) => (

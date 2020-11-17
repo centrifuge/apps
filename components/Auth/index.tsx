@@ -2,15 +2,14 @@ import * as React from 'react'
 import { AuthState, load } from '../../ducks/auth'
 import { connect } from 'react-redux'
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import config from '../../config'
 import WrongNetwork from '../WrongNetwork'
 
 interface Props {
-  tinlake: ITinlake | ITinlakeV3
+  tinlake: ITinlake
   render: (auth: AuthState) => React.ReactElement | null | false
   auth?: AuthState
-  load?: (tinlake: ITinlake | ITinlakeV3) => Promise<void>
+  load?: (tinlake: ITinlake) => Promise<void>
 }
 
 class Auth extends React.Component<Props> {

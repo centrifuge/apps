@@ -8,7 +8,7 @@ import { Pool, UpcomingPool } from '../../config'
 import { toPrecision } from '../../utils/toPrecision'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { LoansState } from '../../ducks/loans'
-import { PoolState, PoolDataV3 } from '../../ducks/pool'
+import { PoolState, PoolData } from '../../ducks/pool'
 import { LoadingValue } from '../LoadingValue/index'
 import { Sidenote, TokenLogo } from './styles'
 import InvestAction from '../../components/InvestAction'
@@ -19,7 +19,7 @@ interface Props {
 
 const PoolOverviewTable: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolDataV3 | undefined
+  const poolData = pool?.data as PoolData | undefined
 
   const loans = useSelector<any, LoansState>((state) => state.loans)
   const outstandingLoans = loans?.loans

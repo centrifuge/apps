@@ -23,6 +23,14 @@ export interface PoolData {
   availableFunds: BN
   minJuniorRatio: BN
   currentJuniorRatio: BN
+  netAssetValue: BN
+  reserve: BN
+  maxJuniorRatio: BN
+  maxReserve: BN
+  outstandingVolume: BN
+  totalPendingInvestments: BN
+  totalRedemptionsCurrency: BN
+  epoch?: EpochData
 }
 
 export type PoolStatus = 'Upcoming' | 'Active' | 'Deployed' | 'Closed'
@@ -48,20 +56,9 @@ export type EpochData = {
   juniorOrderedInEpoch: number
 }
 
-export interface PoolDataV3 extends PoolData {
-  netAssetValue: BN
-  reserve: BN
-  maxJuniorRatio: BN
-  maxReserve: BN
-  outstandingVolume: BN
-  totalPendingInvestments: BN
-  totalRedemptionsCurrency: BN
-  epoch?: EpochData
-}
-
 export interface PoolState {
   state: null | 'loading' | 'found'
-  data: null | PoolData | PoolDataV3
+  data: null | PoolData
 }
 
 const initialState: PoolState = {

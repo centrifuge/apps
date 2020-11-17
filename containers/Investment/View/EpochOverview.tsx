@@ -1,26 +1,25 @@
 import * as React from 'react'
 import { Box, Button, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
-import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
+import { ITinlake, baseToDisplay } from '@centrifuge/tinlake-js'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 import { connect, useSelector } from 'react-redux'
-import { AuthState } from '../../../../ducks/auth'
-import { PoolDataV3, PoolState } from '../../../../ducks/pool'
-import { toPrecision } from '../../../../utils/toPrecision'
-import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
-import { baseToDisplay } from '@centrifuge/tinlake-js'
+import { AuthState } from '../../../ducks/auth'
+import { PoolData, PoolState } from '../../../ducks/pool'
+import { toPrecision } from '../../../utils/toPrecision'
+import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { SignIcon, Sidenote } from './styles'
 import BN from 'bn.js'
-import { secondsToHms } from '../../../../utils/time'
-import { LoadingValue } from '../../../../components/LoadingValue/index'
+import { secondsToHms } from '../../../utils/time'
+import { LoadingValue } from '../../../components/LoadingValue/index'
 
 interface Props extends TransactionProps {
-  tinlake: ITinlakeV3
+  tinlake: ITinlake
   auth?: AuthState
 }
 
 const EpochOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolDataV3 | undefined
+  const poolData = pool?.data as PoolData | undefined
 
   const [status, , setTxId] = useTransactionState()
 
