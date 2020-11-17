@@ -53,6 +53,8 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
   const navigateToPool = (pool: PoolData) => {
     if (pool.isUpcoming) {
       router.push('/pool/[slug]', `/pool/${pool.slug}`)
+    } else if (pool.isArchived) {
+      router.push('/pool/[slug]', `/pool/${pool.slug}`)
     } else {
       router.push('/pool/[root]/[slug]', `/pool/${pool.id}/${pool.slug}`)
     }

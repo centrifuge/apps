@@ -7,6 +7,7 @@ import fetch from 'node-fetch'
 import gql from 'graphql-tag'
 import BN from 'bn.js'
 import { PoolData, PoolsData } from '../../ducks/pools'
+import { getPoolStatus } from '../../utils/pool'
 
 const { tinlakeDataBackendUrl } = config
 const cache = new InMemoryCache()
@@ -76,7 +77,7 @@ class Apollo {
 
       const ongoingLoans = (pool && pool.ongoingLoans.length) || 0 // TODO add count field to subgraph, inefficient to query all assets
       const totalFinancedCurrency = totalRepaysAggregatedAmount.add(totalDebt)
-      return {
+      const poolData = {
         totalFinancedCurrency,
         ongoingLoans,
         totalDebt,
@@ -101,6 +102,8 @@ class Apollo {
         asset: poolConfig?.metadata.asset,
         version: Number(pool?.version || 3),
       }
+
+      return { ...poolData, status: getPoolStatus(poolData) }
     })
     return tinlakePools
   }
@@ -123,6 +126,7 @@ class Apollo {
       totalRepaysAggregatedAmountNum: 0,
       weightedInterestRateNum: 0,
       seniorInterestRateNum: parseFloat(new BN(p.presetValues?.seniorInterestRate || 0).toString()),
+      status: 'Upcoming',
       version: p.version,
     }))
   }
@@ -131,7 +135,7 @@ class Apollo {
     return archivedPools.map((p) => ({
       isUpcoming: false,
       isArchived: true,
-      order: orderSummandPoolClosed,
+      order: p.archivedValues?.status === 'Deployed' ? orderSummandPoolDeployed : orderSummandPoolClosed,
       totalDebt: new BN('0'),
       totalRepaysAggregatedAmount: new BN('0'),
       weightedInterestRate: new BN('0'),
@@ -143,7 +147,7 @@ class Apollo {
       financingsCount: parseFloat(new BN(p.archivedValues?.financingsCount || 0).toString()),
       totalFinancedCurrency: new BN(p.archivedValues?.totalFinancedCurrency || 0),
       seniorInterestRateNum: parseFloat(new BN(p.archivedValues?.seniorInterestRate || 0).toString()),
-      averageFinancingFee: parseFloat(new BN(p.archivedValues?.averageFinancingFee || 0).toString()),
+      status: p.archivedValues?.status || 'Closed',
       version: p.version,
       ongoingLoans: 0,
       totalDebtNum: 0,

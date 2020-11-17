@@ -4,6 +4,7 @@ import mainnetPools from '@centrifuge/tinlake-pools-mainnet'
 import kovanPools from '@centrifuge/tinlake-pools-kovan'
 
 import { networkUrlToName } from './utils/networkNameResolver'
+import { PoolStatus } from './ducks/pool'
 
 interface SecuritizeData {
   issuerId: string
@@ -40,10 +41,11 @@ export interface UpcomingPool extends BasePool {
 export interface ArchivedPool extends BasePool {
   isArchived: true
   archivedValues: {
+    status: PoolStatus
+    legacyLink: string
     totalFinancedCurrency: string
     financingsCount: string
     seniorInterestRate: string
-    averageFinancingFee: string
   }
 }
 
@@ -115,8 +117,8 @@ const contractConfigSchema = yup.object().shape({
 })
 
 const securitizeDataSchema = yup.object().shape({
-  issuerId: yup.string(),
-  slug: yup.string(),
+  issuerId: yup.string().default(''),
+  slug: yup.string().default(''),
 })
 
 const metadataSchema = yup.object().shape({
@@ -179,16 +181,14 @@ const archivedPoolSchema = yup.object().shape({
     .required('poolSchema.version is required'),
   metadata: metadataSchema.required('poolSchema.metadata is required'),
   archivedValues: yup.object().shape({
+    status: yup.string().oneOf(['Deployed', 'Closed']),
+    legacyLink: yup.string(),
     totalFinancedCurrency: yup.string(),
     financingsCount: yup.string(),
     seniorInterestRate: yup
       .string()
       .default('1000000003170979198376458650')
       .test('fee', 'value must be a fee such as 1000000003170979198376458650', fee),
-    averageFinancingFee: yup
-      .string()
-      .default('1000000003805175038051750380')
-      .test('fee', 'value must be a fee such as 1000000003805175038051750380', fee),
   }),
 })
 

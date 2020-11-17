@@ -21,7 +21,6 @@ class Archived extends React.Component<Props> {
     const totalFinanced = poolData?.totalFinancedCurrency
     const totalFinancings = poolData?.financingsCount
     const seniorInterest = poolData?.seniorInterestRate
-    const averageFee = poolData?.averageFinancingFee
 
     return (
       <Box margin={{ bottom: 'large', top: 'medium' }}>
@@ -57,22 +56,17 @@ class Archived extends React.Component<Props> {
                       </LoadingValue>
                     </TableCell>
                   </TableRow>
-                  <TableRow>
-                    <TableCell scope="row">Average Financing Fee</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>
-                      <LoadingValue done={averageFee !== undefined}>
-                        {toPrecision(feeToInterestRate(averageFee || '0'), 2)} %
-                      </LoadingValue>
-                    </TableCell>
-                  </TableRow>
                 </TableBody>
               </Table>
 
               <ExplainerCard margin={{ top: 'large' }}>
                 <Box margin={{ left: 'auto', right: 'auto' }}>
-                  This pool has been fully repaid and closed.
-                  <Link href="/">
-                    <Button margin={{ top: 'medium' }} primary label="View all pools" fill={false} />
+                  This is an archived static pool based on a previous version of the smart contracts (v2). You can view
+                  details and use this pool in the legacy app.
+                  <Link href={poolData?.legacyLink || 'https://v2.tinlake.centrifuge.io/'}>
+                    <a target="_blank">
+                      <Button margin={{ top: 'medium' }} primary label="View Pool" fill={false} />
+                    </a>
                   </Link>
                 </Box>
               </ExplainerCard>
