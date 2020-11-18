@@ -63,7 +63,7 @@ class Apollo {
     const poolConfigs = config.pools
     const tinlakePools = poolConfigs.map((poolConfig: any) => {
       const poolId = poolConfig.addresses.ROOT_CONTRACT
-      const pool = pools.find((p) => p.id === poolId.toLowerCase())
+      const pool = pools.find((p) => p.id.toLowerCase() === poolId.toLowerCase())
 
       const totalDebt = (pool && new BN(pool.totalDebt)) || new BN('0')
       const totalRepaysAggregatedAmount = (pool && new BN(pool.totalRepaysAggregatedAmount)) || new BN('0')
@@ -203,10 +203,11 @@ class Apollo {
   async getLoans(root: string) {
     let result
     try {
+      // TODO: root should be root.toLowerCase() once we add lowercasing to the subgraph code (after AssemblyScript is updated)
       result = await this.client.query({
         query: gql`
         {
-          pools (where : {id: "${root.toLowerCase()}"}){
+          pools (where : {id: "${root}"}){
             id
             loans {
               id
