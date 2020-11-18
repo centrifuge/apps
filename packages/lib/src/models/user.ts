@@ -2,7 +2,8 @@ import { PERMISSIONS } from '../utils/constants';
 import {
   Document,
   DOCUMENT_ACCESS,
-  DocumentStatus, NftStatus,
+  DocumentStatus,
+  NftStatus,
 } from './document';
 import { FundingAgreement } from './funding-request';
 import { CoreapiNFT } from '../centrifuge-node-client';
@@ -60,7 +61,8 @@ export const canWriteToDoc = (
   if (!user || !doc) return false;
   return (
     accountHasDocAccess(user.account, DOCUMENT_ACCESS.WRITE, doc) &&
-    doc.document_status === DocumentStatus.Created && doc.nft_status === NftStatus.NoNft
+    doc.document_status === DocumentStatus.Created &&
+    doc.nft_status === NftStatus.NoNft
   );
 };
 
@@ -77,12 +79,17 @@ export const accountHasDocAccess = (
   access: DOCUMENT_ACCESS,
   doc?: Document,
 ): boolean => {
+  console.log(account, doc?.header?.author);
   return !!(
     doc &&
     doc.header &&
-    doc.header[access] &&
-    Array.isArray(doc.header[access]) &&
-    doc.header[access]!.find(ac => ac.toLowerCase() === account.toLowerCase())
+    ((doc.header[access] &&
+      Array.isArray(doc.header[access]) &&
+      doc.header[access]!.find(
+        ac => ac.toLowerCase() === account.toLowerCase(),
+      )) ||
+      (doc.header.author &&
+        doc.header.author?.toLowerCase() === account.toLowerCase()))
   );
 };
 
