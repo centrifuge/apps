@@ -96,17 +96,30 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
   }, [loadData]);
 
   const updateDocument = async (newDoc: Document) => {
+    let document;
     setState({
       loadingMessage: 'Updating document',
     });
     try {
-      const document = (await httpClient.documents.update(newDoc)).data;
+      /*
+      * We need to create a new version when updating a doc.
+      * TODO this might need to change if we do not auto commit anymore
+      * */
+      newDoc.document_id = newDoc!.header!.document_id
+      document = (await httpClient.documents.create(newDoc)).data;
       setState({
         loadingMessage: null,
         document,
       });
     } catch (e) {
       displayModalError(e, 'Failed to update document');
+      return;
+    }
+
+    try {
+      await httpClient.documents.commit(document._id!)
+    } catch (e) {
+      displayModalError(e, 'Failed to commit document');
     }
   };
 
@@ -125,7 +138,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
     notification.alert({
       type: NOTIFICATION.ERROR,
       title,
-      message: e!.response!.data.message,
+      message: e.response!.data!.message,
     });
   };
 

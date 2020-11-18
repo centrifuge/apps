@@ -109,7 +109,7 @@ export const CreateDocument: FunctionComponent<Props> = props => {
         createResult = (await httpClient.documents.create(document)).data;
       }
       push(documentRoutes.index);
-      /*await httpClient.documents.update({
+      await httpClient.documents.update({
           ...createResult,
           attributes: {
             ...createResult.attributes,
@@ -119,7 +119,7 @@ export const CreateDocument: FunctionComponent<Props> = props => {
             } as any,
           }
 
-        })*/
+        })
     } catch (e) {
       notification.alert({
         type: NOTIFICATION.ERROR,

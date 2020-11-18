@@ -114,9 +114,7 @@ export class DocumentForm extends React.Component<Props, State> {
       ...values,
       header: {
         // @ts-ignore
-        read_access: document.header.read_access,
-        // @ts-ignore
-        write_access: document.header.write_access,
+        ...document.header,
       },
       attributes: {
         ...values.attributes,

@@ -29,6 +29,7 @@ describe('Edit Document', () => {
     document_status: DocumentStatus.Created,
     header: {
       write_access: [defaultUser.account],
+      document_id: '0x1232314432199'
     },
     attributes: {
       ['_schema']: {
@@ -241,8 +242,11 @@ describe('Edit Document', () => {
 
   it('Should update a document', async () => {
 
-    httpClient.documents.update.mockImplementation(async (doc) => {
+    httpClient.documents.create.mockImplementation(async (doc) => {
       return { data: doc };
+    });
+    httpClient.documents.commit.mockImplementation(async (id) => {
+      return { data: id };
     });
 
     const history = createMemoryHistory();
@@ -295,7 +299,7 @@ describe('Edit Document', () => {
         },
       },
     };
-    httpClient.documents.update.mockImplementation(async (data) => {
+    httpClient.documents.create.mockImplementation(async (data) => {
       throw error;
     });
 
@@ -322,9 +326,9 @@ describe('Edit Document', () => {
       await new Promise(r => setTimeout(r, 0));
       component.update();
       const documentForm = component.find(DocumentForm);
-      await documentForm.prop('onSubmit')({
+      await documentForm.prop('onSubmit')(
         document,
-      });
+      );
       await new Promise(r => setTimeout(r, 0));
       component.update();
       const alert = component.find(Modal);

@@ -1,6 +1,7 @@
 import {
   Body,
-  Controller, ForbiddenException,
+  Controller,
+  ForbiddenException,
   Get,
   NotFoundException,
   Param,
@@ -15,7 +16,8 @@ import {
   CoreapiAttributeResponse,
   CoreapiCreateDocumentRequest,
   CoreapiDocumentResponse,
-  CoreapiResponseHeader } from '@centrifuge/gateway-lib/centrifuge-node-client';
+  CoreapiResponseHeader,
+} from '@centrifuge/gateway-lib/centrifuge-node-client';
 import {
   Document,
   DocumentStatus,
@@ -54,9 +56,12 @@ export class DocumentsController {
   }
 
   async commitDoc(document: Document, user: User) {
-    if(!document._id)  {
-      throw new ForbiddenException('Document must be first inserted in the database')
+    if (!document._id) {
+      throw new ForbiddenException(
+        'Document must be first inserted in the database',
+      );
     }
+
     const commitResult = await this.centrifugeService.documents.commitDocumentV2(
       user.account,
       document.header.document_id,
@@ -66,21 +71,28 @@ export class DocumentsController {
       commitResult.header.job_id,
       user.account,
     );
-    await this.databaseService.documents.update({'header.document_id': document.header.document_id}, {
-      $set: {
-        document_status:
-          updated.status === 'success'
-            ? DocumentStatus.Created
-            : DocumentStatus.CreationFail,
+    await this.databaseService.documents.update(
+      { 'header.document_id': document.header.document_id },
+      {
+        $set: {
+          document_status:
+            updated.status === 'success'
+              ? DocumentStatus.Created
+              : DocumentStatus.CreationFail,
+        },
       },
-    });
-    return commitResult
+    );
+    return commitResult;
   }
-
+  /*
+   * Can create a new doc or creates a new version of a doc
+   * When a new version is created it updated the gateway db
+   * */
   async saveDoc(document: Document, user: User) {
     const createResult: Document = await this.centrifugeService.documents.createDocumentV2(
       user.account,
       {
+        document_id: document.document_id,
         attributes: document.attributes,
         read_access: document.header.read_access
           ? document.header.read_access
@@ -92,14 +104,18 @@ export class DocumentsController {
       },
     );
 
-    return  await this.databaseService.documents.insert({
-      ...createResult,
-      attributes: unflatten(createResult.attributes),
-      ownerId: user._id,
-      document_status: DocumentStatus.Creating,
-      nft_status: NftStatus.NoNft,
-      organizationId: user.account,
-    });
+    return await this.databaseService.documents.updateById(
+      document._id,
+      {
+        ...createResult,
+        attributes: unflatten(createResult.attributes),
+        ownerId: user._id,
+        document_status: DocumentStatus.Creating,
+        nft_status: NftStatus.NoNft,
+        organizationId: user.account,
+      },
+      true,
+    );
   }
 
   async cloneDoc(document: Document, template, user: User) {
@@ -120,7 +136,7 @@ export class DocumentsController {
       cloneResult.header.document_id,
     );
 
-    return  await this.databaseService.documents.insert({
+    return await this.databaseService.documents.insert({
       ...updateResult,
       ownerId: user._id,
       document_status: DocumentStatus.Creating,
@@ -131,7 +147,8 @@ export class DocumentsController {
 
   @Post()
   /**
-   * Create a generic document and save in the centrifuge node and the local database
+   * Creates a generic document or a new version and saves in the local database
+   * If the document has a document_id prop it will create a new version
    * @async
    * @param request - the http request
    * @param {Document} document - the body of the request
@@ -149,7 +166,8 @@ export class DocumentsController {
         },
       },
     };
-    return  await this.saveDoc(payload, request.user)
+
+    return await this.saveDoc(payload, request.user);
   }
 
   @Post(':id/clone')
@@ -166,7 +184,7 @@ export class DocumentsController {
     @Body() document: Document,
     @Param() params,
   ): Promise<Document> {
-    return await this.cloneDoc(document,params.id,request.user);
+    return await this.cloneDoc(document, params.id, request.user);
   }
 
   @Put(':id/commit')
@@ -177,12 +195,9 @@ export class DocumentsController {
    * @param request - the http request
    * @return {Promise<Document>} result
    */
-  async commit(
-    @Req() request,
-    @Param() params,
-  ): Promise<Document> {
+  async commit(@Req() request, @Param() params): Promise<Document> {
     const doc = await this.getDocFromDB(params.id);
-    return this.commitDoc(doc, request.user)
+    return this.commitDoc(doc, request.user);
   }
 
   @Get()
@@ -244,26 +259,19 @@ export class DocumentsController {
   ) {
     const documentFromDb: Document = await this.getDocFromDB(params.id);
     const header: CoreapiResponseHeader = updateDocRequest.header;
-
     // Node does not support signed attributes
     delete updateDocRequest.attributes.funding_agreement;
-    const updateResult: Document = await this.centrifugeService.documents.updateDocument(
+    const updateResult: Document = await this.centrifugeService.documents.updateDocumentV2(
       request.user.account,
-      documentFromDb.header.document_id,
       {
         attributes: updateDocRequest.attributes,
         read_access: header ? header.read_access : [],
         write_access: header ? header.write_access : [],
         scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
       },
-    );
-
-    await this.centrifugeService.pullForJobComplete(
-      updateResult.header.job_id,
-      request.user.account,
+      documentFromDb.header.document_id,
     );
     const unflattenAttr = unflatten(updateResult.attributes);
-
     return await this.databaseService.documents.updateById(params.id, {
       $set: {
         header: updateResult.header,
