@@ -34,7 +34,7 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
   const seniorTokenSupply = (poolData && poolData.senior && poolData.senior.totalSupply) || undefined
   const juniorTokenSupply = (poolData && poolData.junior.totalSupply) || undefined
 
-  const isUpcoming = 'isUpcoming' in props.selectedPool
+  const isUpcoming = 'isUpcoming' in props.selectedPool && props.selectedPool.isUpcoming === true
 
   return (
     <Box basis={'1/3'}>

@@ -26,7 +26,7 @@ class Overview extends React.Component<Props> {
     const startIndex = allLoans ? (allLoans.length >= 10 ? allLoans.length - 10 : 0) : undefined
     const latestLoans = allLoans ? allLoans.slice(startIndex, allLoans.length) : []
 
-    const isUpcoming = 'isUpcoming' in selectedPool
+    const isUpcoming = 'isUpcoming' in selectedPool && selectedPool.isUpcoming === true
 
     return (
       <Box margin={{ bottom: 'large', top: 'medium' }}>
