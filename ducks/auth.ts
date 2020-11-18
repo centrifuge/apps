@@ -126,9 +126,7 @@ export default function reducer(state: AuthState = initialState, action: AnyActi
 // navigation event between pages, which discards the redux state, but does not discard onboard. Putting onboard into
 // the state would work, but it would lead to two sources of truth. Consequently, we keep onboard as an external
 // stateful API here and manually sync values over on load.
-export function load(
-  tinlake: ITinlake
-): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     const { auth } = getState()
     let onboard = getOnboard()
@@ -149,11 +147,7 @@ export function load(
         const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
         const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
 
-        tinlake.setProviderAndSigner(
-          fallbackProvider,
-          web3Provider.getSigner(),
-          web3Provider._web3Provider
-        )
+        tinlake.setProviderAndSigner(fallbackProvider, web3Provider.getSigner(), web3Provider._web3Provider)
       }
 
       if (wallet.name !== auth.providerName) {
@@ -185,11 +179,7 @@ export function load(
           const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
           const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
 
-          tinlake.setProviderAndSigner(
-            fallbackProvider,
-            web3Provider.getSigner(),
-            web3Provider._web3Provider
-          )
+          tinlake.setProviderAndSigner(fallbackProvider, web3Provider.getSigner(), web3Provider._web3Provider)
         } else {
           const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
           tinlake.setProviderAndSigner(rpcProvider)
