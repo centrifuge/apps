@@ -1,5 +1,4 @@
 import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
-const abiCoder = require('web3-eth-abi')
 import BN from 'bn.js'
 import { ethers } from 'ethers'
 
@@ -75,7 +74,9 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         tokenId,
       ])
 
-      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
+      return this.pending(
+        proxy.execute(this.contract('ACTIONS').address, encoded, { ...this.overrides, gasLimit: 300000 })
+      )
     }
 
     proxyTransferIssue = async (proxyAddress: string, nftRegistryAddress: string, tokenId: string) => {
@@ -86,12 +87,35 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         tokenId,
       ])
 
-      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
+      return this.pending(
+        proxy.execute(this.contract('ACTIONS').address, encoded, { ...this.overrides, gasLimit: 300000 })
+      )
     }
 
     proxyLockBorrowWithdraw = async (proxyAddress: string, loanId: string, amount: string, usr: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
       const encoded = this.contract('ACTIONS').interface.functions.lockBorrowWithdraw.encode([
+        this.contract('SHELF').address,
+        loanId,
+        amount,
+        usr,
+      ])
+
+      return this.pending(
+        proxy.execute(this.contract('ACTIONS').address, encoded, { ...this.overrides, gasLimit: 700000 })
+      )
+    }
+
+    proxyLock = async (proxyAddress: string, loanId: string) => {
+      const proxy = this.contract('PROXY', proxyAddress)
+      const encoded = this.contract('ACTIONS').interface.functions.lock.encode([this.contract('SHELF').address, loanId])
+
+      return this.pending(proxy.execute(this.contract('ACTIONS').address, encoded, this.overrides))
+    }
+
+    proxyBorrowWithdraw = async (proxyAddress: string, loanId: string, amount: string, usr: string) => {
+      const proxy = this.contract('PROXY', proxyAddress)
+      const encoded = this.contract('ACTIONS').interface.functions.borrowWithdraw.encode([
         this.contract('SHELF').address,
         loanId,
         amount,
@@ -153,6 +177,8 @@ export type IProxyActions = {
     loanId: string,
     registry: string
   ): Promise<PendingTransaction>
+  proxyLock(proxyAddr: string, loanId: string): Promise<PendingTransaction>
+  proxyBorrowWithdraw(proxyAddr: string, loanId: string, amount: string, usr: string): Promise<PendingTransaction>
 }
 
 export default ProxyActions

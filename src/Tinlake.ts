@@ -3,32 +3,30 @@ import { ethers } from 'ethers'
 import BN from 'bn.js'
 
 const contractNames = [
+  'COLLATERAL_NFT',
+  'TITLE',
   'TINLAKE_CURRENCY',
-  'JUNIOR_OPERATOR',
-  'JUNIOR_TRANCHE',
-  'JUNIOR_TOKEN',
-  'SENIOR_TRANCHE',
-  'SENIOR_TOKEN',
-  'SENIOR_OPERATOR',
+  'SHELF',
+  'COLLECTOR',
+  'FEED',
+  'JUNIOR_MEMBERLIST',
+  'SENIOR_MEMBERLIST',
+  'PILE',
   'DISTRIBUTOR',
   'ASSESSOR',
-  'TITLE',
-  'PILE',
-  'SHELF',
-  'CEILING',
-  'COLLECTOR',
-  'THRESHOLD',
-  'PRICE_POOL',
-  'COLLATERAL_NFT',
+  'ASSESSOR_ADMIN',
   'ROOT_CONTRACT',
+  'JUNIOR_TOKEN',
+  'SENIOR_TOKEN',
+  'RESERVE',
   'PROXY',
   'PROXY_REGISTRY',
   'ACTIONS',
-  'BORROWER_DEPLOYER',
-  'LENDER_DEPLOYER',
-  'NFT_FEED',
-  'GOVERNANCE',
-  'ALLOWANCE_OPERATOR',
+  'JUNIOR_OPERATOR',
+  'SENIOR_OPERATOR',
+  'JUNIOR_TRANCHE',
+  'SENIOR_TRANCHE',
+  'COORDINATOR',
 ] as const
 
 export type PendingTransaction = {
@@ -56,6 +54,7 @@ export type ContractAddresses = {
 export type TinlakeParams = {
   provider: ethers.providers.Provider
   signer?: ethers.Signer
+  legacyWeb3Provider?: ethers.providers.AsyncSendable
   transactionTimeout?: number
   contractAddresses?: ContractAddresses | {}
   contractAbis?: ContractAbis | {}
@@ -76,22 +75,32 @@ ethers.errors.setLogLevel('error')
 export default class Tinlake {
   public provider: ethers.providers.Provider
   public signer?: ethers.Signer
+  public legacyWeb3Provider?: ethers.providers.AsyncSendable
   public overrides: ethers.providers.TransactionRequest = {}
   public contractAddresses: ContractAddresses
   public transactionTimeout: number
   public contracts: Contracts = {}
   public contractAbis: ContractAbis = {}
   public contractConfig: any = {}
-  public readonly version: number = 2
+  public readonly version: number = 3
 
   constructor(params: TinlakeParams) {
-    const { provider, signer, contractAddresses, transactionTimeout, contractAbis, overrides, contractConfig } = params
+    const {
+      provider,
+      signer,
+      legacyWeb3Provider,
+      contractAddresses,
+      transactionTimeout,
+      contractAbis,
+      overrides,
+      contractConfig,
+    } = params
     this.contractAbis = contractAbis || abiDefinitions
     this.contractConfig = contractConfig || {}
     this.contractAddresses = contractAddresses || {}
     this.transactionTimeout = transactionTimeout || 3600
     this.overrides = overrides || {}
-    this.setProviderAndSigner(provider, signer)
+    this.setProviderAndSigner(provider, signer, legacyWeb3Provider)
     this.setContracts()
   }
 
@@ -102,23 +111,16 @@ export default class Tinlake {
         this.contracts[name] = this.createContract(this.contractAddresses[name]!, name)
       }
     })
-
-    // modular contracts
-    if (this.contractAddresses['JUNIOR_OPERATOR']) {
-      this.contracts['JUNIOR_OPERATOR'] = this.contractConfig['JUNIOR_OPERATOR']
-        ? this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], this.contractConfig['JUNIOR_OPERATOR'])
-        : this.createContract(this.contractAddresses['JUNIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
-    }
-    if (this.contractAddresses['SENIOR_OPERATOR']) {
-      this.contracts['SENIOR_OPERATOR'] = this.contractConfig['SENIOR_OPERATOR']
-        ? this.createContract(this.contractAddresses['SENIOR_OPERATOR'], this.contractConfig['SENIOR_OPERATOR'])
-        : this.createContract(this.contractAddresses['SENIOR_OPERATOR'], 'ALLOWANCE_OPERATOR')
-    }
   }
 
-  setProviderAndSigner = (provider: ethers.providers.Provider, signer?: ethers.Signer) => {
+  setProviderAndSigner = (
+    provider: ethers.providers.Provider,
+    signer?: ethers.Signer,
+    legacyWeb3Provider?: ethers.providers.AsyncSendable
+  ) => {
     this.provider = provider
     this.signer = signer
+    this.legacyWeb3Provider = legacyWeb3Provider
   }
 
   createContract(address: string, abiName: ContractName) {
@@ -216,14 +218,15 @@ export default class Tinlake {
     })
   }
 
+  // TODO: remove this with admin
   getOperatorType = (tranche: string) => {
     switch (tranche) {
       case 'senior':
-        return this.contractConfig['SENIOR_OPERATOR'] || 'ALLOWANCE_OPERATOR'
+        return this.contractConfig['SENIOR_OPERATOR']
       case 'junior':
-        return this.contractConfig['SENIOR_OPERATOR'] || 'ALLOWANCE_OPERATOR'
+        return this.contractConfig['JUNIOR_OPERATOR']
       default:
-        return 'ALLOWANCE_OPERATOR'
+        return '_OPERATOR'
     }
   }
 }

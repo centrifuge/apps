@@ -2,7 +2,6 @@ import assert from 'assert'
 import { ITinlake } from '../types/tinlake'
 import { createTinlake, TestProvider } from '../test/utils'
 import testConfig from '../test/config'
-import { Account } from '../test/types'
 import { ethers } from 'ethers'
 import { ContractName } from '../Tinlake'
 

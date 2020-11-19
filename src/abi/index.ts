@@ -1,23 +1,22 @@
 import contractAbiTitle from './Title.abi.json'
-import contractAbiCurrency from './test/SimpleToken.abi.json'
+import contractAbiCurrency from './RestrictedToken.abi.json'
 import contractAbiShelf from './Shelf.abi.json'
-import contractAbiNftFeed from './NFTFeed.abi.json'
+import contractAbiNavFeed from './NAVFeed.abi.json'
+import contractAbiEpochCoordinator from './EpochCoordinator.abi.json'
+import contractAbiMemberlist from './Memberlist.abi.json'
 import contractAbiCollector from './Collector.abi.json'
-import contractAbiPricePool from './PricePool.abi.json'
 import contractAbiPile from './Pile.abi.json'
-import contractAbiAllowanceOperator from './AllowanceOperator.abi.json'
-import contractAbiProportionalOperator from './ProportionalOperator.abi.json'
-import contractAbiDistributor from './DefaultDistributor.abi.json'
-import contractAbiAssessor from './DefaultAssessor.abi.json'
-import contractAbiRoot from './Root.abi.json'
+import contractAbiOperator from './Operator.abi.json'
+import contractAbiDistributor from './Distributor.abi.json'
+import contractAbiAssessor from './Assessor.abi.json'
+import contractAbiAssessorAdmin from './AssessorAdmin.abi.json'
+import contractAbiRoot from './TinlakeRoot.abi.json'
 import contractAbiActions from './Actions.abi.json'
 import contractAbiProxy from './Proxy.abi.json'
 import contractAbiProxyRegistry from './ProxyRegistry.abi.json'
 import contractAbiTranche from './Tranche.abi.json'
-import contractAbiSeniorTranche from './SeniorTranche.abi.json'
+import contractAbiReserve from './Reserve.abi.json'
 import contractAbiNFT from './test/SimpleNFT.abi.json'
-import contractAbiBorrowerDeployer from './BorrowerDeployer.abi.json'
-import contractAbiLenderDeployer from './LenderDeployer.abi.json'
 import { ContractAbis } from '../Tinlake'
 
 export default {
@@ -25,24 +24,24 @@ export default {
   TITLE: contractAbiTitle,
   TINLAKE_CURRENCY: contractAbiCurrency,
   SHELF: contractAbiShelf,
-  CEILING: contractAbiNftFeed,
   COLLECTOR: contractAbiCollector,
-  THRESHOLD: contractAbiNftFeed,
-  PRICE_POOL: contractAbiPricePool,
+  FEED: contractAbiNavFeed,
+  COORDINATOR: contractAbiEpochCoordinator,
+  JUNIOR_MEMBERLIST: contractAbiMemberlist,
+  SENIOR_MEMBERLIST: contractAbiMemberlist,
   PILE: contractAbiPile,
   DISTRIBUTOR: contractAbiDistributor,
   ASSESSOR: contractAbiAssessor,
+  ASSESSOR_ADMIN: contractAbiAssessorAdmin,
   ROOT_CONTRACT: contractAbiRoot,
   JUNIOR_TOKEN: contractAbiCurrency,
   SENIOR_TOKEN: contractAbiCurrency,
   PROXY: contractAbiProxy,
   PROXY_REGISTRY: contractAbiProxyRegistry,
   ACTIONS: contractAbiActions,
-  ALLOWANCE_OPERATOR: contractAbiAllowanceOperator,
-  PROPORTIONAL_OPERATOR: contractAbiProportionalOperator,
+  RESERVE: contractAbiReserve,
+  JUNIOR_OPERATOR: contractAbiOperator,
+  SENIOR_OPERATOR: contractAbiOperator,
   JUNIOR_TRANCHE: contractAbiTranche,
-  SENIOR_TRANCHE: contractAbiSeniorTranche,
-  BORROWER_DEPLOYER: contractAbiBorrowerDeployer,
-  LENDER_DEPLOYER: contractAbiLenderDeployer,
-  NFT_FEED: contractAbiNftFeed,
+  SENIOR_TRANCHE: contractAbiTranche,
 } as ContractAbis

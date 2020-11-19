@@ -7,13 +7,12 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
   return class extends Base implements IAdminActions {
     canQueryPermissions = () => {
       return (
-        !!this.contract('PILE')?.wards &&
-        !!this.contract('SENIOR_TRANCHE')?.wards &&
-        !!this.contract('PRICE_POOL')?.wards &&
+        !!this.contract('FEED')?.wards &&
         !!this.contract('ASSESSOR')?.wards &&
         !!this.contract('JUNIOR_OPERATOR')?.wards &&
         !!this.contract('SENIOR_OPERATOR')?.wards &&
-        !!this.contract('COLLECTOR')?.wards
+        !!this.contract('JUNIOR_MEMBERLIST')?.wards &&
+        !!this.contract('SENIOR_MEMBERLIST')?.wards
       )
     }
 
@@ -22,131 +21,152 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return (await this.contract(contractName).wards(user)).toBN()
     }
 
-    canSetInterestRate = async (user: string) => {
-      if (!this.contract('PILE')?.wards) return false
-      return (await this.contract('PILE').wards(user)).toBN().toNumber() === 1
+    canUpdateNftFeed = async (user: string) => {
+      if (!this.contract('FEED')?.wards) return false
+      return (await this.contract('FEED').wards(user)).toBN().toNumber() === 1
     }
 
     canSetSeniorTrancheInterest = async (user: string) => {
-      if (!(this.contractAddresses['SENIOR_TRANCHE'] !== ZERO_ADDRESS)) return false
-      if (!this.contract('SENIOR_TRANCHE')?.wards) return false
-      return (await this.contract('SENIOR_TRANCHE').wards(user)).toBN().toNumber() === 1
+      if (!this.contract('ASSESSOR')?.wards) return false
+      return (await this.contract('ASSESSOR').wards(user)).toBN().toNumber() === 1
     }
 
     canSetRiskScore = async (user: string) => {
-      if (!this.contract('PRICE_POOL')?.wards) return false
-      return (await this.contract('PRICE_POOL').wards(user)).toBN().toNumber() === 1
+      if (!this.contract('FEED')?.wards) return false
+      return (await this.contract('FEED').wards(user)).toBN().toNumber() === 1
     }
 
-    // lender permissions (note: allowance operator for default deployment)
+    canSetMaxReserve = async (user: string) => {
+      if (!this.contract('ASSESSOR_ADMIN')?.wards) return false
+      return (await this.contract('ASSESSOR_ADMIN').wards(user)).toBN().toNumber() === 1
+    }
+
     canSetMinimumJuniorRatio = async (user: string) => {
       if (!this.contract('ASSESSOR')?.wards) return false
       return (await this.contract('ASSESSOR').wards(user)).toBN().toNumber() === 1
     }
 
-    canSetInvestorAllowanceJunior = async (user: string) => {
-      if (!this.contract('JUNIOR_OPERATOR')?.wards) return false
-      return (await this.contract('JUNIOR_OPERATOR').wards(user)).toBN().toNumber() === 1
+    canAddToJuniorMemberList = async (user: string) => {
+      if (!this.contract('JUNIOR_MEMBERLIST')?.wards) return false
+      return (await this.contract('JUNIOR_MEMBERLIST').wards(user)).toBN().toNumber() === 1
     }
 
-    canSetInvestorAllowanceSenior = async (user: string) => {
-      if (!this.contract('SENIOR_OPERATOR')?.wards) return false
-      if (!(this.contractAddresses['SENIOR_OPERATOR'] !== ZERO_ADDRESS)) return false
-      return (await this.contract('SENIOR_OPERATOR').wards(user)).toBN().toNumber() === 1
+    canAddToSeniorMemberList = async (user: string) => {
+      if (!this.contract('SENIOR_MEMBERLIST')?.wards) return false
+      if (!(this.contractAddresses['SENIOR_MEMBERLIST'] !== ZERO_ADDRESS)) return false
+      return (await this.contract('SENIOR_MEMBERLIST').wards(user)).toBN().toNumber() === 1
     }
 
+    // REV: not used, but can be left
     canSetLoanPrice = async (user: string) => {
       if (!this.contract('COLLECTOR')?.wards) return false
       return (await this.contract('COLLECTOR').wards(user)).toBN().toNumber() === 1
     }
 
-    // ------------ admin functions borrower-site -------------
-    existsRateGroup = async (ratePerSecond: string) => {
-      const rateGroup = getRateGroup(ratePerSecond)
-      const actualRate = (await this.contract('PILE').rates(rateGroup)).toBN()
-      return !actualRate.isZero()
-    }
-
-    initRate = async (ratePerSecond: string) => {
-      const rateGroup = getRateGroup(ratePerSecond)
-      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
-      return this.pending(
-        this.contract('PILE').file(web3.fromAscii('rate').padEnd(66, '0'), rateGroup, ratePerSecond, this.overrides)
-      )
-    }
-
-    changeRate = async (loan: string, ratePerSecond: string) => {
-      const rateGroup = getRateGroup(ratePerSecond)
-      return this.pending(this.contract('PILE').changeRate(loan, rateGroup, this.overrides))
-    }
-
-    setRate = async (loan: string, ratePerSecond: string) => {
-      const rateGroup = getRateGroup(ratePerSecond)
-      return this.pending(this.contract('PILE').setRate(loan, rateGroup, this.overrides))
-    }
-
-    // ------------ admin functions lender-site -------------
+    // ------------ admin functions lender-side -------------
     setMinimumJuniorRatio = async (ratio: string) => {
       // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
+      const maxSeniorRatio = new BN(10).pow(new BN(27)).sub(new BN(ratio))
       return this.pending(
-        this.contract('ASSESSOR').file(web3.fromAscii('minJuniorRatio').padEnd(66, '0'), ratio, this.overrides)
+        this.contract('ASSESSOR').file(
+          web3.fromAscii('maxSeniorRatio').padEnd(66, '0'),
+          maxSeniorRatio.toString(),
+          this.overrides
+        )
       )
     }
 
-    approveAllowanceJunior = async (user: string, maxCurrency: string, maxToken: string) => {
-      return this.pending(this.contract('JUNIOR_OPERATOR').approve(user, maxCurrency, maxToken, this.overrides))
+    setMaximumJuniorRatio = async (ratio: string) => {
+      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
+      const minSeniorRatio = new BN(10).pow(new BN(27)).sub(new BN(ratio))
+      return this.pending(
+        this.contract('ASSESSOR').file(
+          web3.fromAscii('minSeniorRatio').padEnd(66, '0'),
+          minSeniorRatio.toString(),
+          this.overrides
+        )
+      )
     }
 
-    approveAllowanceSenior = async (user: string, maxCurrency: string, maxToken: string) => {
-      if (this.getOperatorType('senior') === 'PROPORTIONAL_OPERATOR') {
-        return this.pending(this.contract('SENIOR_OPERATOR').approve(user, maxCurrency, this.overrides))
-      }
-      return this.pending(this.contract('SENIOR_OPERATOR').approve(user, maxCurrency, maxToken, this.overrides))
+    setMaximumReserve = async (value: string) => {
+      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
+      return this.pending(this.contract('ASSESSOR_ADMIN').setMaxReserve(value, this.overrides))
     }
 
-    updateNftFeed = async (tokenId: string, value: number, riskGroup?: number) => {
+    setSeniorTrancheInterest = async (value: string) => {
+      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
+      return this.pending(
+        this.contract('ASSESSOR').file(web3.fromAscii('seniorInterestRate').padEnd(66, '0'), value, this.overrides)
+      )
+    }
+
+    updateJuniorMemberList = async (user: string, validUntil: number) => {
+      return this.pending(this.contract('JUNIOR_MEMBERLIST').updateMember(user, validUntil, this.overrides))
+    }
+
+    updateSeniorMemberList = async (user: string, validUntil: number) => {
+      return this.pending(this.contract('SENIOR_MEMBERLIST').updateMember(user, validUntil, this.overrides))
+    }
+
+    // ------------ admin functions lender-side -------------
+
+    getNftFeedId = async (registry: string, tokenId: string) => {
+      return await this.contract('FEED')['nftID(address,uint256)'](registry, tokenId)
+    }
+
+    getNftFeedValue = async (nftId: string) => {
+      return (await this.contract('FEED').nftValues(nftId)).toBN()
+    }
+
+    getNftMaturityDate = async (nftId: string) => {
+      return (await this.contract('FEED').maturityDate(nftId)).toBN()
+    }
+
+    setDiscountRate = async (rate: string) => {
+      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
+      return this.pending(
+        this.contract('FEED').file(web3.fromAscii('discountRate').padEnd(66, '0'), rate, this.overrides)
+      )
+    }
+
+    updateNftFeed = async (nftId: string, value: string, riskGroup?: string) => {
       if (!riskGroup) {
-        return this.pending(this.contract('NFT_FEED')['update(bytes32,uint256)'](tokenId, value, this.overrides))
+        return this.pending(this.contract('FEED')['update(bytes32,uint256)'](nftId, value, this.overrides))
       }
       return this.pending(
-        this.contract('NFT_FEED')['update(bytes32,uint256,uint256)'](tokenId, value, riskGroup, this.overrides)
+        this.contract('FEED')['update(bytes32,uint256,uint256)'](nftId, value, riskGroup, this.overrides)
       )
     }
-
-    getNftFeedId = async (registry: string, tokenId: number) => {
-      return await this.contract('NFT_FEED')['nftID(address,uint256)'](registry, tokenId)
-    }
-
-    getNftFeedValue = async (nftFeedId: string) => {
-      return (await this.contract('NFT_FEED').nftValues(nftFeedId)).toBN()
+    setMaturityDate = async (nftId: string, timestampSecs: number) => {
+      return this.pending(
+        this.contract('FEED').file(web3.fromAscii('maturityDate').padEnd(66, '0'), nftId, timestampSecs)
+      )
     }
   }
 }
 
-const ONE: string = '1000000000000000000000000000'
-function getRateGroup(ratePerSecond: string) {
-  return ratePerSecond === ONE ? 0 : ratePerSecond
-}
-
 export type IAdminActions = {
   isWard(user: string, contractName: ContractName): Promise<BN>
-  canSetInterestRate(user: string): Promise<boolean>
+  canUpdateNftFeed(user: string): Promise<boolean>
+  canSetRiskScore(user: string): Promise<boolean>
   canSetSeniorTrancheInterest(user: string): Promise<boolean>
   canSetMinimumJuniorRatio(user: string): Promise<boolean>
-  canSetRiskScore(user: string): Promise<boolean>
-  canSetInvestorAllowanceJunior(user: string): Promise<boolean>
-  canSetInvestorAllowanceSenior(user: string): Promise<boolean>
+  canSetMaxReserve(user: string): Promise<boolean>
+  canAddToJuniorMemberList(user: string): Promise<boolean>
+  canAddToSeniorMemberList(user: string): Promise<boolean>
+  updateJuniorMemberList(user: string, validUntil: number): Promise<PendingTransaction>
+  updateSeniorMemberList(user: string, validUntil: number): Promise<PendingTransaction>
   canSetLoanPrice(user: string): Promise<boolean>
-  existsRateGroup(ratePerSecond: string): Promise<boolean>
-  initRate(rate: string): Promise<PendingTransaction>
-  setRate(loan: string, rate: string): Promise<PendingTransaction>
-  changeRate(loan: string, ratePerSecond: string): Promise<PendingTransaction>
   setMinimumJuniorRatio(amount: string): Promise<PendingTransaction>
-  approveAllowanceJunior(user: string, maxCurrency: string, maxToken: string): Promise<PendingTransaction>
-  approveAllowanceSenior(user: string, maxCurrency: string, maxToken: string): Promise<PendingTransaction>
-  updateNftFeed(nftId: string, value: number, riskGroup?: number): Promise<PendingTransaction>
-  getNftFeedId(registry: string, tokenId: number): Promise<any>
+  setMaximumJuniorRatio(amount: string): Promise<PendingTransaction>
+  setMaximumReserve(amount: string): Promise<PendingTransaction>
+  setSeniorTrancheInterest(amount: string): Promise<PendingTransaction>
+  setDiscountRate(amount: string): Promise<PendingTransaction>
+  setMaturityDate(nftId: string, timestampSecs: number): Promise<PendingTransaction>
+  updateNftFeed(nftId: string, value: string, riskGroup?: string): Promise<PendingTransaction>
+  getNftFeedId(registry: string, tokenId: string): Promise<string>
   getNftFeedValue(tokenId: string): Promise<BN>
+  getNftMaturityDate(tokenId: string): Promise<BN>
 }
 
 export default AdminActions

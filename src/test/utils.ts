@@ -1,7 +1,7 @@
 import Tinlake from '..'
 import { ITinlake } from '../types/tinlake'
 import { ProviderConfig } from './config'
-import { ethers, Wallet } from 'ethers'
+import { ethers } from 'ethers'
 
 export class TestProvider {
   public provider: ethers.providers.Provider
@@ -26,7 +26,7 @@ export class TestProvider {
   }
 }
 
-export function createTinlake(wallet: Wallet, testConfig: ProviderConfig): ITinlake {
+export function createTinlake(wallet: ethers.Wallet, testConfig: ProviderConfig): ITinlake {
   const { rpcUrl, transactionTimeout, contractAddresses } = testConfig
   const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
 

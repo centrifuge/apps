@@ -13,7 +13,7 @@ let adminTinlake: ITinlake
 let governanceTinlake: ITinlake
 
 // ------------ admin tests borrower-site -------------
-describe('admin tests', async () => {
+describe.skip('admin tests', async () => {
   before(async () => {
     // fund admin account with eth
     adminTinlake = createTinlake(adminAccount, testConfig)
