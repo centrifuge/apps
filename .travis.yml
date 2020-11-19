@@ -31,9 +31,3 @@ jobs:
     script:
       - npm set //registry.npmjs.org/:_authToken $NPM_TOKEN
       - npm run publish:develop
-  - stage: Publish v3 patch
-    if: "(NOT type IN (pull_request)) AND (branch = v3)"
-    script:
-      - npm set //registry.npmjs.org/:_authToken $NPM_TOKEN
-      - npm run publish:develop
-
