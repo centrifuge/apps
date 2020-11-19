@@ -1,9 +1,8 @@
-import React, { FunctionComponent, useContext } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 
 import RegisterForm from './RegisterForm';
 import { Redirect, RouteComponentProps, withRouter } from 'react-router';
 import { User } from '@centrifuge/gateway-lib/models/user';
-import { AppContext } from '../App';
 import { httpClient } from '../http-client';
 import { parse } from 'query-string';
 type Props = {
@@ -20,13 +19,15 @@ const Register: FunctionComponent<Props> = (props: Props) => {
       ? queryParams.email[0]
       : (queryParams.email as string)
     : '';
-  const { user, setUser } = useContext(AppContext);
+  const [ user, setUser ] = useState<User>()
+  const [error, setError] = useState<Error>();
   const register = async (registerCandidate: User) => {
     try {
-      await httpClient.user.register(registerCandidate);
-      const user = (await httpClient.user.login(registerCandidate)).data;
-      setUser(user);
+
+      const registedUser = (await httpClient.user.register(registerCandidate)).data;
+      setUser(registedUser);
     } catch (e) {
+      setError(e);
       console.log('Failed to register', e);
     }
   };
@@ -34,7 +35,7 @@ const Register: FunctionComponent<Props> = (props: Props) => {
   if (user) {
     return <Redirect to={'/'} />;
   }
-  return <RegisterForm email={email} onSubmit={register} />;
+  return <RegisterForm email={email} onSubmit={register}  error={error}/>;
 };
 
 export default withRouter(Register);

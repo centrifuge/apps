@@ -2,7 +2,7 @@ import {
   Body,
   Controller,
   Delete,
-  ForbiddenException,
+  MethodNotAllowedException,
   Get,
   HttpCode, Param,
   Post,
@@ -94,10 +94,10 @@ export class UsersController {
     });
 
     if (!user.password || !user.password.trim()) {
-      throw new ForbiddenException('Password is mandatory');
+      throw new MethodNotAllowedException('Password is mandatory');
     }
     if (!isPasswordValid(user.password)) {
-      throw new ForbiddenException('Password format is not valid');
+      throw new MethodNotAllowedException('Password format is not valid');
     }
 
     if (config.inviteOnly) {
@@ -111,11 +111,11 @@ export class UsersController {
           false,
         );
       } else {
-        throw new ForbiddenException('Email taken!');
+        throw new MethodNotAllowedException('Email taken!');
       }
     } else {
       if (existingUser) {
-        throw new ForbiddenException('Email taken!');
+        throw new MethodNotAllowedException('Email taken!');
       }
       return this.upsertUser(
         {
@@ -133,14 +133,14 @@ export class UsersController {
   @UseGuards(UserAuthGuard)
   async invite(@Body() user: Partial<User>) {
     if (!config.inviteOnly) {
-      throw new ForbiddenException('Invite functionality not enabled!');
+      throw new MethodNotAllowedException('Invite functionality not enabled!');
     }
     const userExists = await this.databaseService.users.findOne({
       email: user.email,
     });
 
     if (userExists) {
-      throw new ForbiddenException('User already invited!');
+      throw new MethodNotAllowedException('User already invited!');
     }
 
     const newUser = this.upsertUser(
@@ -188,7 +188,7 @@ export class UsersController {
     });
 
     if (otherUserWithEmail) {
-      throw new ForbiddenException('Email taken!');
+      throw new MethodNotAllowedException('Email taken!');
     }
 
     return await this.upsertUser(user, false);
@@ -206,7 +206,7 @@ export class UsersController {
     // Create centrifuge identity in case user does not have one
     if (!user.account) {
       if (!user.organizationName) {
-        throw new ForbiddenException('Organization name is mandatory!');
+        throw new MethodNotAllowedException('Organization name is mandatory!');
       }
       const generatedAccount = await this.centrifugeService.accounts.generateAccount(
         config.admin.chain,

@@ -79,7 +79,6 @@ export const accountHasDocAccess = (
   access: DOCUMENT_ACCESS,
   doc?: Document,
 ): boolean => {
-  console.log(account, doc?.header?.author);
   return !!(
     doc &&
     doc.header &&

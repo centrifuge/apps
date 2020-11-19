@@ -281,7 +281,7 @@ export class DocumentForm extends React.Component<Props, State> {
                 validateOnBlur={submitted}
                 validateOnChange={submitted}
                 onSubmit={(values, { setSubmitting }) => {
-                  this.onSubmit(values);
+                  this.onSubmit(cloneDeep(values));
                   setSubmitting(true);
                 }}
               >

@@ -1,7 +1,7 @@
 import {
   Body,
   Controller,
-  ForbiddenException,
+  MethodNotAllowedException,
   Get,
   NotFoundException,
   Param,
@@ -57,7 +57,7 @@ export class DocumentsController {
 
   async commitDoc(document: Document, user: User) {
     if (!document._id) {
-      throw new ForbiddenException(
+      throw new MethodNotAllowedException(
         'Document must be first inserted in the database',
       );
     }

@@ -70,7 +70,7 @@ class TwoFAForm extends React.Component<LoginProps> {
                     </FormField>
 
                     {error && <Text color={'status-error'}>
-                      Failed to login! Wrong username or password!
+                      Failed to validate code!
                     </Text>
                     }
 

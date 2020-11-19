@@ -52,7 +52,7 @@ class LoginForm extends React.Component<LoginProps> {
                 <form
                   onSubmit={event => {
                     event.preventDefault();
-                    handleSubmit();
+                    handleSubmit(event);
                   }}
                 >
 

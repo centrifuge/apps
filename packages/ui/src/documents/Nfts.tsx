@@ -95,7 +95,7 @@ export const Nfts: FunctionComponent<Props> = props => {
   ) => {
     const address = `${tinlakePool}/assets/issue?tokenId=${tokenId}&registry=${registry}`;
 
-    return <Anchor label={'Open Loan'} href={address} />;
+    return <Anchor label={'Open Loan'} target={'_blank'} href={address} />;
   };
 
   const renderNftActions = (datum: any, registries: Registry[]) => {
