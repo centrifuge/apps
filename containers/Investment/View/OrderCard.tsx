@@ -1,15 +1,14 @@
 import * as React from 'react'
 import { Box, Button, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
-import { Pool } from '../../../../config'
-import { toPrecision } from '../../../../utils/toPrecision'
-import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
-import { baseToDisplay } from '@centrifuge/tinlake-js'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
+import { Pool } from '../../../config'
+import { toPrecision } from '../../../utils/toPrecision'
+import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 import { connect, useSelector } from 'react-redux'
-import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
+import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { secondsToHms } from '../../../../utils/time'
-import { PoolDataV3, PoolState } from '../../../../ducks/pool'
+import { secondsToHms } from '../../../utils/time'
+import { PoolData, PoolState } from '../../../ducks/pool'
 
 import { Description, Warning, Info, MinTimeRemaining, OrderSteps } from './styles'
 import { Card } from './TrancheOverview'
@@ -20,13 +19,13 @@ interface Props extends TransactionProps {
   setCard: (card: Card) => void
   disbursements: any
   tokenPrice: string
-  tinlake: ITinlakeV3
+  tinlake: ITinlake
   updateTrancheData: () => void
 }
 
 const OrderCard: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
-  const epochData = pool?.data ? (pool?.data as PoolDataV3).epoch : undefined
+  const epochData = pool?.data ? (pool?.data as PoolData).epoch : undefined
 
   const type = props.disbursements.remainingSupplyCurrency.isZero() ? 'Redeem' : 'Invest'
   const token = type === 'Invest' ? 'DAI' : props.tranche === 'senior' ? 'DROP' : 'TIN'

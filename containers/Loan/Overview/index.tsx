@@ -1,8 +1,8 @@
 import * as React from 'react'
 import { Box, Button, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
-import { ITinlake as ITinlakeV3, baseToDisplay } from '@centrifuge/tinlake-js-v3'
+import { ITinlake, baseToDisplay } from '@centrifuge/tinlake-js'
 import { connect, useSelector, useDispatch } from 'react-redux'
-import { PoolDataV3, PoolState, loadPool } from '../../../ducks/pool'
+import { PoolData, PoolState, loadPool } from '../../../ducks/pool'
 import { toPrecision } from '../../../utils/toPrecision'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { LoadingValue } from '../../../components/LoadingValue/index'
@@ -15,12 +15,12 @@ import MaxReserveForm from './MaxReserveForm'
 
 interface Props {
   activePool?: Pool
-  tinlake: ITinlakeV3
+  tinlake: ITinlake
   auth?: AuthState
 }
 const LoanOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolDataV3 | undefined
+  const poolData = pool?.data as PoolData | undefined
 
   const dispatch = useDispatch()
   const address = useSelector<any, string | null>((state) => state.auth.address)

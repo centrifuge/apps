@@ -1,14 +1,14 @@
 import * as React from 'react'
 import { Box, Button, TextInput, Heading, FormField } from 'grommet'
-import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
+import { ITinlake } from '@centrifuge/tinlake-js'
 import { connect, useSelector } from 'react-redux'
 const web3 = require('web3-utils')
 
-import { loadPool, PoolState } from '../../../../ducks/pool'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../../ducks/transactions'
+import { loadPool, PoolState } from '../../../ducks/pool'
+import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 
 interface Props extends TransactionProps {
-  tinlake: ITinlakeV3
+  tinlake: ITinlake
   loadPool?: (tinlake: any) => Promise<void>
 }
 

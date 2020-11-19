@@ -1,83 +1,83 @@
 import * as React from 'react'
-import { AuthState } from '../../../ducks/auth'
-import { connect } from 'react-redux'
-import { Box, FormField, TextInput, Button, Heading, Anchor } from 'grommet'
-import { isValidAddress } from '../../../utils/address'
-import JuniorRatio from '../JuniorRatio'
-import InvestmentsOverview from '../../../components/Investment/Overview'
-import { PoolState, loadPool } from '../../../ducks/pool'
-import { TransactionState } from '../../../ducks/transactions'
-import { PoolLink } from '../../../components/PoolLink'
+import { Box, Heading } from 'grommet'
+import { Pool } from '../../../config'
+import { ITinlake } from '@centrifuge/tinlake-js'
+import { connect, useDispatch, useSelector } from 'react-redux'
+import { loadPool } from '../../../ducks/pool'
+
+import { ExplainerCard } from './styles'
+import InvestmentOverview from './InvestmentOverview'
+import TrancheOverview from './TrancheOverview'
+import EpochOverview from './EpochOverview'
+import AdminActions from './AdminActions'
+import { AuthState, PermissionsV3 } from '../../../ducks/auth'
+import ManageMemberlist from './ManageMemberlist'
 
 interface Props {
-  tinlake: any
-  auth: AuthState
-  loadPool?: (tinlake: any) => Promise<void>
-  pool?: PoolState
-  transactions?: TransactionState
+  activePool: Pool
+  tinlake: ITinlake
+  auth?: AuthState
 }
 
-interface State {
-  investorAddress: string
-}
+const InvestmentsView: React.FC<Props> = (props: Props) => {
+  const isAdmin = props.auth?.permissions?.canSetMinimumJuniorRatio
+  const canManagePermissions =
+    (props.auth?.permissions as PermissionsV3 | undefined)?.canAddToJuniorMemberList ||
+    (props.auth?.permissions as PermissionsV3 | undefined)?.canAddToSeniorMemberList
 
-class InvestmentsView extends React.Component<Props, State> {
-  state: State = {
-    investorAddress: '',
-  }
+  const dispatch = useDispatch()
+  const address = useSelector<any, string | null>((state) => state.auth.address)
 
-  componentDidMount() {
-    const { loadPool, tinlake } = this.props
-    loadPool && loadPool(tinlake)
-  }
+  React.useEffect(() => {
+    dispatch(loadPool(props.tinlake))
+  }, [address])
 
-  render() {
-    const { pool, auth, tinlake } = this.props
-    const canLoadInvestor = this.state.investorAddress !== '' && isValidAddress(this.state.investorAddress)
+  return (
+    <Box margin={{ top: 'medium' }}>
+      <Heading level="4" style={{ maxWidth: '100%' }}>
+        Investment Overview of {props.activePool?.metadata.name}
+      </Heading>
+      <ExplainerCard margin={{ bottom: 'medium' }}>
+        Investors can invest into this Tinlake pool through two tokens that are backed by collateral locked by the Asset
+        Originator: TIN and DROP. Both tokens represent the liquidity deposited into Tinlake and accrue interest over
+        time. TIN, known as the “risk token,” takes the risk of defaults first but also receives higher returns. DROP,
+        known as the “yield token,” is protected against defaults by the TIN token and receives stable (but usually
+        lower) returns at the DROP rate.
+      </ExplainerCard>
 
-    return (
-      <Box>
-        {pool?.data && (
-          <Box margin={{ bottom: 'medium' }}>
-            {' '}
-            <InvestmentsOverview data={pool?.data} />{' '}
-          </Box>
-        )}
+      <InvestmentOverview />
 
-        {pool?.data && auth.permissions?.canSetMinimumJuniorRatio && (
-          <JuniorRatio tinlake={tinlake} minJuniorRatio={pool.data.minJuniorRatio} />
-        )}
+      <Heading level="4">Invest/Redeem in {props.activePool?.metadata.name}</Heading>
+      <ExplainerCard margin={{ bottom: 'medium' }}>
+        Please place your DROP and TIN investments and redemptions below. Tinlake pool investments and redemptions are
+        locked in throughout the current “Epoch” and executed at the end of the Epoch based on available capital
+        considering the pools risk metrics. You can cancel your order at any time until the end of the Epoch.
+      </ExplainerCard>
 
-        <Box margin={{ top: 'large' }} pad={{ horizontal: 'medium' }}>
-          <Box direction="row" gap="medium" margin={{ top: 'medium' }}>
-            <Heading level="4">Load investor details</Heading>
-          </Box>
-        </Box>
+      <Box direction="row" justify="between" gap="medium">
+        <EpochOverview tinlake={props.tinlake} />
 
-        <Box pad={{ horizontal: 'medium' }}>
-          <Box direction="row" gap="medium" margin={{ bottom: 'medium' }}>
-            <Box basis={'1/3'}>
-              <FormField label="Investor Address">
-                <TextInput
-                  value={this.state.investorAddress}
-                  onChange={(event) => this.setState({ investorAddress: event.currentTarget.value })}
-                />
-              </FormField>
-            </Box>
-            <Box align="start">
-              <PoolLink
-                href={{ pathname: '/investments/investor', query: { investorAddress: this.state.investorAddress } }}
-              >
-                <Anchor>
-                  <Button primary label="Load investor details" disabled={!canLoadInvestor} />
-                </Anchor>
-              </PoolLink>
-            </Box>
-          </Box>
+        <Box>
+          <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="senior" />
+          <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="junior" />
         </Box>
       </Box>
-    )
-  }
+
+      {canManagePermissions && (
+        <>
+          <Heading level="4">Manage members for {props.activePool?.metadata.name}</Heading>
+          <ManageMemberlist tinlake={props.tinlake} />
+        </>
+      )}
+
+      {isAdmin && (
+        <>
+          <Heading level="4">Admin actions for {props.activePool?.metadata.name}</Heading>
+          <AdminActions tinlake={props.tinlake} />
+        </>
+      )}
+    </Box>
+  )
 }
 
-export default connect((state) => state, { loadPool })(InvestmentsView)
+export default connect((state) => state)(InvestmentsView)

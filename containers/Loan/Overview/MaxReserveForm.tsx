@@ -1,22 +1,22 @@
 import * as React from 'react'
 import { Box, Heading, Button } from 'grommet'
-import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
+import { ITinlake } from '@centrifuge/tinlake-js'
 import { connect, useSelector } from 'react-redux'
 import { TokenInput } from '@centrifuge/axis-token-input'
 
-import { loadPool, PoolDataV3, PoolState } from '../../../ducks/pool'
+import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
 import { Description } from './styles'
 import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 
 interface Props extends TransactionProps {
-  tinlake: ITinlakeV3
+  tinlake: ITinlake
   loadPool?: (tinlake: any) => Promise<void>
   setShowMaxReserveForm: (value: boolean) => void
 }
 
 const MaxReserveForm: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolDataV3 | undefined
+  const poolData = pool?.data as PoolData | undefined
 
   const [value, setValue] = React.useState<string | undefined>(undefined)
 

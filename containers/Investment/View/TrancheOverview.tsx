@@ -1,26 +1,26 @@
 import * as React from 'react'
 import { Box, Button, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
-import { Pool } from '../../../../config'
-import { baseToDisplay, ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
-import { toPrecision } from '../../../../utils/toPrecision'
-import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
+import { Pool } from '../../../config'
+import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { toPrecision } from '../../../utils/toPrecision'
+import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import BN from 'bn.js'
 import { useDispatch, useSelector } from 'react-redux'
-import { loadPool, PoolState, PoolDataV3 } from '../../../../ducks/pool'
-import { secondsToHms } from '../../../../utils/time'
-import { LoadingValue } from '../../../../components/LoadingValue/index'
+import { loadPool, PoolState, PoolData } from '../../../ducks/pool'
+import { secondsToHms } from '../../../utils/time'
+import { LoadingValue } from '../../../components/LoadingValue/index'
 
 import InvestCard from './InvestCard'
 import RedeemCard from './RedeemCard'
 import OrderCard from './OrderCard'
 import CollectCard from './CollectCard'
 import { TokenLogo, Info, AddWalletLink, MinTimeRemaining } from './styles'
-import InvestAction from '../../../../components/InvestAction'
+import InvestAction from '../../../components/InvestAction'
 
 interface Props {
   pool: Pool
   tranche: 'senior' | 'junior'
-  tinlake: ITinlakeV3
+  tinlake: ITinlake
 }
 
 export type Card = 'home' | 'collect' | 'order' | 'invest' | 'redeem'
@@ -28,7 +28,7 @@ export type Card = 'home' | 'collect' | 'order' | 'invest' | 'redeem'
 const TrancheOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const trancheData = props.tranche === 'senior' ? pool?.data?.senior : pool?.data?.junior
-  const epochData = pool?.data ? (pool?.data as PoolDataV3).epoch : undefined
+  const epochData = pool?.data ? (pool?.data as PoolData).epoch : undefined
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
 

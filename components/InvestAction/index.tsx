@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Box, Button, Paragraph, Anchor } from 'grommet'
 import { useSelector } from 'react-redux'
 import { PoolsState, PoolData } from '../../ducks/pools'
-import { PoolDataV3, PoolState } from '../../ducks/pool'
+import { PoolData as PoolDataV3, PoolState } from '../../ducks/pool'
 
 import { FormModal, InvestmentSteps } from './styles'
 import { Pool, UpcomingPool } from '../../config'

@@ -5,11 +5,9 @@ import Apollo from '../services/apollo'
 import { HYDRATE } from 'next-redux-wrapper'
 import { initOnboard, getOnboard } from '../services/onboard'
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { ITinlake as ITinlakeV3 } from '@centrifuge/tinlake-js-v3'
 import { getTinlake } from '../services/tinlake'
 import config from '../config'
 import { ethers } from 'ethers'
-import { isTinlakeV3 } from '../utils/tinlakeVersion'
 import * as Sentry from '@sentry/react'
 
 // Actions
@@ -128,9 +126,7 @@ export default function reducer(state: AuthState = initialState, action: AnyActi
 // navigation event between pages, which discards the redux state, but does not discard onboard. Putting onboard into
 // the state would work, but it would lead to two sources of truth. Consequently, we keep onboard as an external
 // stateful API here and manually sync values over on load.
-export function load(
-  tinlake: ITinlake | ITinlakeV3
-): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     const { auth } = getState()
     let onboard = getOnboard()
@@ -151,14 +147,7 @@ export function load(
         const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
         const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
 
-        if (tinlake.version === 2) tinlake.setProviderAndSigner(rpcProvider, web3Provider.getSigner())
-        else {
-          ;(tinlake as ITinlakeV3).setProviderAndSigner(
-            fallbackProvider,
-            web3Provider.getSigner(),
-            web3Provider._web3Provider
-          )
-        }
+        tinlake.setProviderAndSigner(fallbackProvider, web3Provider.getSigner(), web3Provider._web3Provider)
       }
 
       if (wallet.name !== auth.providerName) {
@@ -190,14 +179,7 @@ export function load(
           const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
           const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
 
-          if (tinlake.version === 2) tinlake.setProviderAndSigner(rpcProvider, web3Provider.getSigner())
-          else {
-            ;(tinlake as ITinlakeV3).setProviderAndSigner(
-              fallbackProvider,
-              web3Provider.getSigner(),
-              web3Provider._web3Provider
-            )
-          }
+          tinlake.setProviderAndSigner(fallbackProvider, web3Provider.getSigner(), web3Provider._web3Provider)
         } else {
           const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
           tinlake.setProviderAndSigner(rpcProvider)
@@ -300,7 +282,7 @@ export function ensureAuthed(): ThunkAction<Promise<void>, { auth: AuthState }, 
 }
 
 export function setAddressAndLoadData(
-  tinlake: ITinlake | ITinlakeV3,
+  tinlake: ITinlake,
   address: string
 ): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch) => {
@@ -371,64 +353,35 @@ export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth
 
     dispatch({ type: LOAD_PERMISSIONS })
 
-    if (isTinlakeV3(tinlake)) {
-      const [
-        maxReservePermission,
-        interestRatePermission,
-        loanPricePermission,
-        equityRatioPermission,
-        riskScorePermission,
-        juniorMemberListPermission,
-        seniorMemberListPermission,
-      ] = await Promise.all([
-        tinlake.canSetMaxReserve(auth.address),
-        tinlake.canSetSeniorTrancheInterest(auth.address),
-        tinlake.canSetLoanPrice(auth.address),
-        tinlake.canSetMinimumJuniorRatio(auth.address),
-        tinlake.canSetRiskScore(auth.address),
-        tinlake.canAddToJuniorMemberList(auth.address),
-        tinlake.canAddToSeniorMemberList(auth.address),
-      ])
+    const [
+      maxReservePermission,
+      interestRatePermission,
+      loanPricePermission,
+      equityRatioPermission,
+      riskScorePermission,
+      juniorMemberListPermission,
+      seniorMemberListPermission,
+    ] = await Promise.all([
+      tinlake.canSetMaxReserve(auth.address),
+      tinlake.canSetSeniorTrancheInterest(auth.address),
+      tinlake.canSetLoanPrice(auth.address),
+      tinlake.canSetMinimumJuniorRatio(auth.address),
+      tinlake.canSetRiskScore(auth.address),
+      tinlake.canAddToJuniorMemberList(auth.address),
+      tinlake.canAddToSeniorMemberList(auth.address),
+    ])
 
-      const permissions = {
-        canSetMaxReserve: maxReservePermission,
-        canSetInterestRate: interestRatePermission,
-        canSetLoanPrice: loanPricePermission,
-        canSetMinimumJuniorRatio: equityRatioPermission,
-        canSetRiskScore: riskScorePermission,
-        canAddToJuniorMemberList: juniorMemberListPermission,
-        canAddToSeniorMemberList: seniorMemberListPermission,
-      }
-
-      dispatch({ permissions, type: RECEIVE_PERMISSIONS })
-    } else {
-      const [
-        interestRatePermission,
-        loanPricePermission,
-        equityRatioPermission,
-        riskScorePermission,
-        investorAllowancePermissionJunior,
-        investorAllowancePermissionSenior,
-      ] = await Promise.all([
-        tinlake.canSetInterestRate(auth.address),
-        tinlake.canSetLoanPrice(auth.address),
-        tinlake.canSetMinimumJuniorRatio(auth.address),
-        tinlake.canSetRiskScore(auth.address),
-        tinlake.canSetInvestorAllowanceJunior(auth.address),
-        tinlake.canSetInvestorAllowanceSenior(auth.address),
-      ])
-
-      const permissions = {
-        canSetInterestRate: interestRatePermission,
-        canSetLoanPrice: loanPricePermission,
-        canSetMinimumJuniorRatio: equityRatioPermission,
-        canSetRiskScore: riskScorePermission,
-        canSetInvestorAllowanceJunior: investorAllowancePermissionJunior,
-        canSetInvestorAllowanceSenior: investorAllowancePermissionSenior,
-      }
-
-      dispatch({ permissions, type: RECEIVE_PERMISSIONS })
+    const permissions = {
+      canSetMaxReserve: maxReservePermission,
+      canSetInterestRate: interestRatePermission,
+      canSetLoanPrice: loanPricePermission,
+      canSetMinimumJuniorRatio: equityRatioPermission,
+      canSetRiskScore: riskScorePermission,
+      canAddToJuniorMemberList: juniorMemberListPermission,
+      canAddToSeniorMemberList: seniorMemberListPermission,
     }
+
+    dispatch({ permissions, type: RECEIVE_PERMISSIONS })
   }
 }
 

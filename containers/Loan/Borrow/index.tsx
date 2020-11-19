@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Box, Button } from 'grommet'
 import { baseToDisplay, Loan } from '@centrifuge/tinlake-js'
-import { PoolState, loadPool, PoolDataV3 } from '../../../ducks/pool'
+import { PoolState, loadPool, PoolData } from '../../../ducks/pool'
 import { loadLoan } from '../../../ducks/loans'
 import { connect } from 'react-redux'
 import { ensureAuthed } from '../../../ducks/auth'
@@ -54,7 +54,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const availableFunds = (props.pool && props.pool.data && props.pool.data.availableFunds.toString()) || '0'
   const borrowedAlready = new BN(props.loan.debt).isZero() === false || props.loan.status !== 'opened'
 
-  const isBlockedState = props.pool?.data ? (props.pool?.data as PoolDataV3).epoch?.isBlockedState : false
+  const isBlockedState = props.pool?.data ? (props.pool?.data as PoolData).epoch?.isBlockedState : false
 
   const [error, setError] = React.useState<string | undefined>(undefined)
   const borrowEnabled = ceilingSet && !borrowedAlready && !isBlockedState

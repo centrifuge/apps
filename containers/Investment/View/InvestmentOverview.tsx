@@ -4,11 +4,11 @@ import { useSelector } from 'react-redux'
 import { Tooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 
-import { PoolDataV3, PoolState } from '../../../../ducks/pool'
-import { toPrecision } from '../../../../utils/toPrecision'
-import { addThousandsSeparators } from '../../../../utils/addThousandsSeparators'
-import { TINRatioBar } from '../../../../components/TINRatioBar/index'
-import { LoadingValue } from '../../../../components/LoadingValue/index'
+import { PoolData, PoolState } from '../../../ducks/pool'
+import { toPrecision } from '../../../utils/toPrecision'
+import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { TINRatioBar } from '../../../components/TINRatioBar/index'
+import { LoadingValue } from '../../../components/LoadingValue/index'
 
 import {
   TokenLogo,
@@ -33,7 +33,7 @@ const parseRatio = (num: BN): number => {
 
 const InvestmentOverview: React.FC<Props> = () => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolDataV3 | undefined
+  const poolData = pool?.data as PoolData | undefined
 
   const poolValue =
     (poolData?.netAssetValue && poolData?.reserve && poolData?.netAssetValue.add(poolData.reserve)) || undefined
