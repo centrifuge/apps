@@ -26,6 +26,7 @@ import {
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
 import { SessionGuard } from '../auth/SessionGuard';
 import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes';
+import { merge } from 'lodash';
 import { User } from '@centrifuge/gateway-lib/models/user';
 import TypeEnum = CoreapiAttributeResponse.TypeEnum;
 import SchemeEnum = CoreapiDocumentResponse.SchemeEnum;
@@ -110,7 +111,11 @@ export class DocumentsController {
         ...createResult,
         attributes: unflatten(createResult.attributes),
         ownerId: user._id,
-        document_status: DocumentStatus.Creating,
+        // We use save doc also for update when we create a new version
+        // In that case wo will not set this to Creating
+        document_status: !document.document_status
+          ? DocumentStatus.Creating
+          : document.document_status,
         nft_status: NftStatus.NoNft,
         organizationId: user.account,
       },
@@ -127,10 +132,14 @@ export class DocumentsController {
       template,
     );
 
+    const mergedDoc: Document = merge(cloneResult, document);
+
     const updateResult: Document = await this.centrifugeService.documents.updateDocumentV2(
       user.account,
       {
-        attributes: document.attributes,
+        write_access: mergedDoc.header.write_access,
+        read_access: mergedDoc.header.read_access,
+        attributes: mergedDoc.attributes,
         scheme: SchemeEnum.Generic,
       },
       cloneResult.header.document_id,
@@ -231,13 +240,12 @@ export class DocumentsController {
         request.user.account,
         document.header.document_id,
       );
-      return {
-        ...document,
-        ...docFromNode,
-        attributes: {
-          ...unflatten(docFromNode.attributes),
-        },
+
+      docFromNode.attributes = {
+        ...unflatten(docFromNode.attributes),
       };
+
+      return merge(document, docFromNode);
     } catch (error) {
       return document;
     }
@@ -258,16 +266,19 @@ export class DocumentsController {
     @Body() updateDocRequest: Document,
   ) {
     const documentFromDb: Document = await this.getDocFromDB(params.id);
-    const header: CoreapiResponseHeader = updateDocRequest.header;
+
     // Node does not support signed attributes
     delete updateDocRequest.attributes.funding_agreement;
+
+    const mergedDoc: Document = merge(documentFromDb, updateDocRequest);
+    const header: CoreapiResponseHeader = mergedDoc.header;
     const updateResult: Document = await this.centrifugeService.documents.updateDocumentV2(
       request.user.account,
       {
-        attributes: updateDocRequest.attributes,
+        attributes: mergedDoc.attributes,
         read_access: header ? header.read_access : [],
         write_access: header ? header.write_access : [],
-        scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
+        scheme: SchemeEnum.Generic,
       },
       documentFromDb.header.document_id,
     );
