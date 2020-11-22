@@ -60,9 +60,7 @@ export const canWriteToDoc = (
 ): boolean => {
   if (!user || !doc) return false;
   return (
-    accountHasDocAccess(user.account, DOCUMENT_ACCESS.WRITE, doc) &&
-    doc.document_status === DocumentStatus.Created &&
-    doc.nft_status === NftStatus.NoNft
+    accountHasDocAccess(user.account, DOCUMENT_ACCESS.WRITE, doc)
   );
 };
 

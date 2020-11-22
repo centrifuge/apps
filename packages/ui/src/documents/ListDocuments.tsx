@@ -36,6 +36,8 @@ type State = {
   error: any;
 };
 
+let timeoutRef;
+
 export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
   const {
     history: { push },
@@ -81,7 +83,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
         !inBg && displayPageError(e);
       }
 
-      setTimeout(() => {
+      timeoutRef = setTimeout(() => {
         loadData(true);
       }, POLLING_INTERVAL);
     },
@@ -106,6 +108,9 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
 
   useEffect(() => {
     loadData();
+    return () => {
+      clearTimeout(timeoutRef);
+    }
   }, [loadData]);
 
   if (loadingMessage) {

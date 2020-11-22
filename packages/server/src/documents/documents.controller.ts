@@ -82,6 +82,9 @@ export class DocumentsController {
               : DocumentStatus.CreationFail,
         },
       },
+      {
+        multi: true,
+      },
     );
     return commitResult;
   }
@@ -244,8 +247,25 @@ export class DocumentsController {
       docFromNode.attributes = {
         ...unflatten(docFromNode.attributes),
       };
-
-      return merge(document, docFromNode);
+      /*
+       * Each time we load a doc for the doc update the gateway db.
+       * The node is the source of truth for header and attributes
+       * and it can happen that the webhook is not called
+       * */
+      const docs: any = await this.databaseService.documents.update(
+        { 'header.document_id': docFromNode.header.document_id },
+        {
+          $set: {
+            attributes: docFromNode.attributes,
+            header: docFromNode.header,
+          },
+        },
+        {
+          multi: true,
+          returnUpdatedDocs: true,
+        },
+      );
+      return docs.find(doc => doc._id === params.id);
     } catch (error) {
       return document;
     }
