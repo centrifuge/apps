@@ -8,17 +8,23 @@ RUN apt-get install -y git
 
 # Copy files
 COPY package.json /package.json
-COPY package-lock.json /package-lock.json
+COPY yarn.lock /yarn.lock
+
+RUN mkdir /e2e-tests
+COPY e2e-tests/package.json /e2e-tests/package.json
 
 # Install npm dependencies
-RUN npm install
+RUN yarn install
 
 # Optionally copy .env
-COPY cucumber.js .env* /
-COPY features/ /features/
-COPY src/ /src/
+COPY e2e-tests/cucumber.js .env* /e2e-tests/
 
-RUN mkdir /screenshots
+# Copy source files
+COPY e2e-tests/features/ /e2e-tests/features/
+COPY e2e-tests/src/ /e2e-tests/src/
+
+RUN mkdir /e2e-tests/screenshots
 
 # Run tests with the xvfb virtual display
-CMD xvfb-run --server-args="-screen 0 1024x768x24" npm run test -- --exit --publish
+WORKDIR /e2e-tests
+CMD xvfb-run --server-args="-screen 0 1024x768x24" yarn run test -- --exit --publish
