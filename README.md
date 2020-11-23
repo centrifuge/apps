@@ -1,4 +1,4 @@
-# e2e-tests
+# apps
 ![e2e-tests](https://github.com/centrifuge/apps/workflows/e2e-tests/badge.svg)
 
 Monorepo for the Tinlake applications.
