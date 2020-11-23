@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
+import fetch from 'node-fetch'
 
 @Injectable()
 export class SecuritizeService {
   getAuthorizationLink(): string {
-    console.log('process in SecuritizeService', process.env)
     const scope = `info%20details%20verification`
     const redirectUrl = 'http://localhost:3100/authorization/callback/securitize'
     const url = `https://id.sandbox.securitize.io/#/authorize?issuerId=${process.env.SECURITIZE_CLIENT_ID}&scope=${scope}&redirecturl=${redirectUrl}`
