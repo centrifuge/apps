@@ -1,0 +1,21 @@
+{
+  "extends": [
+    "tslint-config-airbnb",
+    "tslint-config-prettier"
+  ],
+  "rules": {
+    "function-name": [
+      true,
+      {
+        "function-regex": "^[A-Za-z$][\\w\\d]+$",
+        "method-regex": "^[a-z$][\\w\\d]+$",
+        "private-method-regex": "^[a-z$][\\w\\d]+$",
+        "protected-method-regex": "^[a-z$][\\w\\d]+$",
+        "static-method-regex": "^[a-z$][\\w\\d]+$"
+      }
+    ],
+    "variable-name": false,
+    "import-name": false,
+    "no-boolean-literal-compare": false
+  }
+}

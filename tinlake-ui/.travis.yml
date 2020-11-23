@@ -1,0 +1,25 @@
+language: node_js
+
+branches:
+  only:
+    - develop
+    - master
+
+cache:
+  directories:
+    - $HOME/.cache/yarn
+    - node_modules
+    - .next/cache
+
+install:
+  - npm install
+
+script:
+  - npm run lint
+  - npm run check-format
+  # - npm run test # TODO: add
+  - npm run export
+
+# Make sure you delete spaces behind colons to not confuse yaml (i. e. the JSON should not contain `: `). You can paste the whole `.travis.yml` config here: https://config.travis-ci.com/explore to validate it.
+env:
+  - NEXT_PUBLIC_PORTIS_KEY=bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f NEXT_PUBLIC_ETHERSCAN_URL=https://kovan.etherscan.io NEXT_PUBLIC_RPC_URL=https://kovan.infura.io/v3/092108ec6aea46ab97b2175b45130455 NEXT_PUBLIC_ENV=demo NEXT_PUBLIC_TRANSACTION_TIMEOUT=3600 NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL=https://api.thegraph.com/subgraphs/name/centrifuge/tinlake-kovan-staging NEXT_PUBLIC_POOLS_CONFIG=kovanStaging

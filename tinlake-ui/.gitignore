@@ -1,0 +1,14 @@
+.next
+.idea/
+.vscode
+node_modules
+out
+services/tinlake/addresses_tinlake.json
+nft_data_definition.json
+.DS_Store
+.env*.local
+.env
+functions
+
+# Local Netlify folder
+.netlify
