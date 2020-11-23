@@ -1,18 +1,18 @@
-name: 'tinlake-ui:build'
+name: 'tinlake-ui'
 on: 
   pull_request:
     paths:
     - 'tinlake-ui/**'
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2-beta
         with:
-          node-version: 12.x
+          node-version: '12'
       - run: yarn install
         working-directory: ./
       - run: yarn run lint
