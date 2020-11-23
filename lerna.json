@@ -1,0 +1,10 @@
+{
+  "lerna": "3.22.1",
+  "packages": [
+    "e2e-tests",
+    "tinlake-ui"
+  ],
+  "version": "independent",
+  "npmClient": "yarn",
+  "useWorkspaces": true
+}

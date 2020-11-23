@@ -1,14 +1,19 @@
 .next
 .idea/
 .vscode
+.DS_Store
 node_modules
 out
 services/tinlake/addresses_tinlake.json
 nft_data_definition.json
-.DS_Store
-.env*.local
-.env
 functions
 
 # Local Netlify folder
 .netlify
+
+# Yarn
+yarn-error.log
+
+# Environment files
+.env*.local
+.env
