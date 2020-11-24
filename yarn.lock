@@ -10813,6 +10813,11 @@ postcss@^7.0.14, postcss@^7.0.26, postcss@^7.0.32, postcss@^7.0.5, postcss@^7.0.
     source-map "^0.6.1"
     supports-color "^6.1.0"
 
+postgres@2.0.0-beta.2:
+  version "2.0.0-beta.2"
+  resolved "https://registry.yarnpkg.com/postgres/-/postgres-2.0.0-beta.2.tgz#4844381137b6394a66c4c7566aedb63392ffe416"
+  integrity sha512-x5/FBSLsU/eVeKcIREsaCBeFp5CFbZoberSug3dgsJMlvWwGBtl753hALBVR+GJ5Dty1lb+zfqV9ySHyOndypA==
+
 preact@10.4.1:
   version "10.4.1"
   resolved "https://registry.yarnpkg.com/preact/-/preact-10.4.1.tgz#9b3ba020547673a231c6cf16f0fbaef0e8863431"

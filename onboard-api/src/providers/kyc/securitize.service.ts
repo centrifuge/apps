@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import fetch from 'node-fetch'
 
+// TODO: move this somewhere else
 export interface KYCInfo {
   providerId: string
   provider: string
