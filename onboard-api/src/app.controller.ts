@@ -1,20 +1,29 @@
-import { Controller, Get, Query, Param } from '@nestjs/common'
+import { Controller, Get, Query, Param, NotFoundException } from '@nestjs/common'
 
 import { SecuritizeService } from './providers/kyc/securitize.service'
 import { DocusignService } from './providers/docusign.service'
 import { DocusignAuthService } from './providers/docusign-auth.service'
+import { UserRepo, User } from './repos/user.repo'
 
 @Controller()
 export class AppController {
   constructor(
     private readonly securitizeService: SecuritizeService,
     private readonly docusignService: DocusignService,
-    private readonly docusignAuthService: DocusignAuthService
+    private readonly docusignAuthService: DocusignAuthService,
+    private readonly userRepo: UserRepo
   ) {}
 
   @Get()
   getHello(): string {
     return 'OK'
+  }
+
+  @Get('users/email/:email')
+  checkEmail(@Param() params): Promise<User> {
+    const user = this.userRepo.getByEmail(params.email)
+    if (!user) throw new NotFoundException('User not found')
+    return user
   }
 
   @Get('authorization')
