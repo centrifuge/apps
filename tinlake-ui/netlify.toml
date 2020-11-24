@@ -1,5 +1,5 @@
 [build]
-  command = "yarn --cwd tinlake-ui export"
-  publish = "tinlake-ui/out"
-  # functions = "tinlake-ui/functions"
-  ignore = "git diff --quiet HEAD^ HEAD tinlake-ui/"
+  base = "tinlake-ui"
+  command = "yarn export"
+  publish = "out"
+  # functions = "functions"
