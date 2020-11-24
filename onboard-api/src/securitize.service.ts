@@ -39,7 +39,6 @@ export class SecuritizeService {
     })
 
     const content = await response.json()
-    console.log({ content })
 
     return {
       providerId: content.investorId,
@@ -50,5 +49,18 @@ export class SecuritizeService {
         expiration: content.expiration,
       },
     }
+  }
+
+  async getInvestor(accessToken: string): Promise<any> {
+    const url = `${process.env.SECURITIZE_API_HOST}v1/${process.env.SECURITIZE_CLIENT_ID}/investor`
+
+    const response = await fetch(url, {
+      headers: {
+        'access-token': accessToken,
+        Authorization: `${process.env.SECURITIZE_SECRET}`,
+      },
+    })
+
+    return await response.json()
   }
 }

@@ -19,6 +19,18 @@ export class DocusignAuthService {
     return this.accessToken
   }
 
+  async getUserInfo(): Promise<any> {
+    const accessToken = await this.getAccessToken()
+
+    const response = await fetch(`${process.env.DOCUSIGN_ACCOUNT_API_HOST}oauth/userinfo`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    return await response.json()
+  }
+
   private async createAccessToken(): Promise<string> {
     const jwt = this.getJWT()
 
@@ -50,7 +62,7 @@ export class DocusignAuthService {
 
     const body = {
       iss: process.env.DOCUSIGN_INTEGRATION_KEY,
-      sub: process.env.DOCUSIGN_ACCOUNT_ID,
+      sub: process.env.DOCUSIGN_API_USERNAME,
       aud: 'account-d.docusign.com',
       iat: unixNow,
       exp: unixNow + 3600,
@@ -59,8 +71,6 @@ export class DocusignAuthService {
 
     const privateKey = process.env.DOCUSIGN_RSA_PRIVATE_KEY.replace(/\\n/g, '\n')
     const jwt = JwtUtils.encode(privateKey, header, body)
-
-    console.log({ jwt })
 
     return jwt
   }

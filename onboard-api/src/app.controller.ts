@@ -23,14 +23,16 @@ export class AppController {
   }
 
   @Get('authorization/:address/callback/securitize')
-  getAuthorizationCallback(@Param() params, @Query() query): Promise<any> {
-    const kycInfo = this.securitizeService.processAuthorizationCallback(params.address, query.code)
-    // const agreement = this.docusignService.getAgreementURL('jeroen+signer@centrifuge.io')
-    return kycInfo
+  async getAuthorizationCallback(@Param() params, @Query() query): Promise<any> {
+    const kycInfo = await this.securitizeService.processAuthorizationCallback(params.address, query.code)
+    const investor = await this.securitizeService.getInvestor(kycInfo.authTokens.accessToken)
+    const agreement = await this.docusignService.getAgreementURL(investor.email)
+    return { investor, agreement }
   }
 
   @Get('agreement')
   async getAgreement(): Promise<string> {
+    await this.docusignAuthService.getUserInfo()
     return await this.docusignService.getAgreementURL('jeroen+signer@centrifuge.io')
   }
 
