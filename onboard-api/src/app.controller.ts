@@ -1,8 +1,8 @@
 import { Controller, Get, Query, Param } from '@nestjs/common'
 
-import { SecuritizeService } from './securitize.service'
-import { DocusignService } from './docusign.service'
-import { DocusignAuthService } from './docusign-auth.service'
+import { SecuritizeService } from './providers/kyc/securitize.service'
+import { DocusignService } from './providers/docusign.service'
+import { DocusignAuthService } from './providers/docusign-auth.service'
 
 @Controller()
 export class AppController {
