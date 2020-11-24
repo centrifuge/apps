@@ -8,6 +8,7 @@ import { FormModal, InvestmentSteps } from './styles'
 import { Pool, UpcomingPool } from '../../config'
 import { getPoolStatus } from '../../utils/pool'
 import { PoolLink } from '../PoolLink'
+import config from '../../config'
 
 interface Props {
   anchor?: React.ReactNode
@@ -20,13 +21,19 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   const onOpen = () => setModalIsOpen(true)
   const onClose = () => setModalIsOpen(false)
 
-  const investDisabled = props.pool?.isUpcoming || !props.pool?.metadata.securitize?.issuerId
-
   const pools = useSelector<any, PoolsState>((state) => state.pools)
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolDataV3 | undefined
 
   const [status, setStatus] = React.useState('Open')
+  const [authorizationLink, setAuthorizationLink] = React.useState('')
+
+  const getAuthorizationLink = async () => {
+    const req = await fetch(`${config.onboardAPIHost}authorization`)
+    const link = await req.text()
+    console.log({ link })
+    setAuthorizationLink(link)
+  }
 
   React.useEffect(() => {
     if (props.pool) {
@@ -36,11 +43,9 @@ const InvestAction: React.FC<Props> = (props: Props) => {
 
       if (pool) setStatus(getPoolStatus(pool))
     }
-  }, [pools])
 
-  // TODO: remove hardcoded exception for PC2
-  const isClosed = (status === 'Deployed' || status === 'Closed') && !(props.pool?.metadata.slug === 'paperchain-2')
-  const isUpcoming = !isClosed && (props.pool?.isUpcoming || !props.pool?.metadata.securitize?.issuerId)
+    getAuthorizationLink()
+  }, [pools])
 
   return (
     <>
@@ -77,58 +82,15 @@ const InvestAction: React.FC<Props> = (props: Props) => {
         <Box
           direction="row"
           justify="center"
-          width={props.pool ? '80%' : '40%'}
+          width={'40%'}
           margin={{ left: 'auto', right: 'auto' }}
           gap="medium"
           style={{ textAlign: 'center' }}
         >
           <Box flex={true} justify="between">
             <Paragraph>Start your KYC process to become to become an eligible investor.</Paragraph>
-            {(props.pool as Pool)?.metadata.securitize?.issuerId ? (
-              <Button
-                primary
-                label={`Onboard as an investor`}
-                fill={false}
-                href={`https://id.securitize.io/#/authorize?registration=true&issuerId=${
-                  (props.pool as Pool).metadata.securitize?.issuerId
-                }&scope=info%20details%20verification&redirecturl=https://${
-                  (props.pool as Pool).metadata.securitize?.slug
-                }.invest.securitize.io/%23/authorize`}
-                target="_blank"
-              />
-            ) : (
-              <Button
-                primary
-                label={`Onboard as an investor`}
-                href={`https://id.securitize.io/#/authorize?issuerId=4d11b353-a327-49ab-b45b-ae5be60697c6&scope=info%20details%20verification&registration=true&redirecturl=https://centrifuge.invest.securitize.io/#/authorize`}
-                fill={false}
-                target="_blank"
-              />
-            )}
+            <Button primary label={`Start KYC`} href={authorizationLink} fill={false} />
           </Box>
-          {props.pool && (
-            <Box flex={true} justify="between">
-              {isUpcoming && <Paragraph>This pool is not open for investments yet</Paragraph>}
-              {!investDisabled && (
-                <Paragraph>Already an eligible investor? Sign the pool issuers Subscription Agreement.</Paragraph>
-              )}
-              {isClosed && <Paragraph>This pool is closed for investments.</Paragraph>}
-              {(props.pool as Pool)?.metadata.securitize?.issuerId && (
-                <Button
-                  primary
-                  label={`Sign up for this pool`}
-                  fill={false}
-                  href={`https://id.securitize.io/#/authorize?issuerId=${
-                    (props.pool as Pool).metadata.securitize?.issuerId
-                  }&scope=info%20details%20verification&redirecturl=https://${
-                    (props.pool as Pool).metadata.securitize?.slug
-                  }.invest.securitize.io/%23/authorize`}
-                  target="_blank"
-                  disabled={investDisabled}
-                />
-              )}
-            </Box>
-          )}
         </Box>
 
         {props.pool && (

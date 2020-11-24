@@ -1,33 +1,21 @@
 import { Injectable } from '@nestjs/common'
-
-const { DOCUSIGN_BASE_PATH, DOCUSIGN_ACCESS_TOKEN, DOCUSIGN_TEMPLATE_ID, DOCUSIGN_ACCOUNT_ID } = process.env
+import fetch from 'node-fetch'
 
 @Injectable()
 export class DocusignService {
-  async sendSubscriptionAgreement(): Promise<any> {
-    try {
-      const envelopeId = await this.createEnvelope()
-      const embedUrl = await this.createRecipientView(envelopeId)
+  async getAgreementURL(email: string): Promise<string> {
+    const envelopeId = await this.createEnvelope(email)
+    const embedUrl = await this.createRecipientView(envelopeId)
 
-      return {
-        statusCode: 200,
-        body: embedUrl,
-      }
-    } catch (e) {
-      console.error(e)
-      return {
-        statusCode: 500,
-        body: e.message,
-      }
-    }
+    return embedUrl
   }
 
-  private async createEnvelope(): Promise<string> {
+  private async createEnvelope(email: string): Promise<string> {
     const envelopeDefinition = {
-      // templateId: DOCUSIGN_TEMPLATE_ID,
+      templateId: process.env.DOCUSIGN_TEMPLATE_ID,
       templateRoles: [
         {
-          email: 'jeroen+signer@centrifuge.io',
+          email,
           name: 'Investor',
           roleName: 'signer',
           clientUserId: 'something',
@@ -38,56 +26,16 @@ export class DocusignService {
           roleName: 'cc',
         },
       ],
-      compositeTemplates: [
-        {
-          serverTemplates: [
-            {
-              sequence: 1,
-              templateId: DOCUSIGN_TEMPLATE_ID,
-            },
-          ],
-          inlineTemplates: [
-            {
-              sequence: 2,
-              recipients: {
-                signers: [
-                  {
-                    recipientId: 1,
-                    email: 'jeroen+signer@centrifuge.io',
-                    name: 'Investor',
-                    roleName: 'signer',
-                    clientUserId: '0',
-                    tabs: {
-                      textTabs: [
-                        {
-                          tabLabel: 'name1',
-                          value: 'Some Prefilled Name',
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    recipientId: 2,
-                    email: 'jeroen+cc@centrifuge.io',
-                    name: 'Centrifuge',
-                    roleName: 'cc',
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      ],
       status: 'sent',
     }
 
-    const url = `${DOCUSIGN_BASE_PATH}/restapi/v2.1/accounts/${DOCUSIGN_ACCOUNT_ID}/envelopes`
+    const url = `${process.env.DOCUSIGN_BASE_PATH}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes`
 
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${DOCUSIGN_ACCESS_TOKEN}`,
+        Authorization: `Bearer ${process.env.DOCUSIGN_ACCESS_TOKEN}`,
       },
       body: JSON.stringify(envelopeDefinition),
     })
@@ -102,7 +50,7 @@ export class DocusignService {
   }
 
   private async createRecipientView(envelopeId: string): Promise<string> {
-    const url = `${DOCUSIGN_BASE_PATH}/restapi/v2.1/accounts/${DOCUSIGN_ACCOUNT_ID}/envelopes/${envelopeId}/views/recipient`
+    const url = `${process.env.DOCUSIGN_BASE_PATH}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes/${envelopeId}/views/recipient`
 
     const recipientViewRequest = {
       authenticationMethod: 'none',
@@ -115,7 +63,7 @@ export class DocusignService {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${DOCUSIGN_ACCESS_TOKEN}`,
+        Authorization: `Bearer ${process.env.DOCUSIGN_ACCESS_TOKEN}`,
       },
       body: JSON.stringify(recipientViewRequest),
     })

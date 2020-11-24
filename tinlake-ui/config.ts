@@ -84,6 +84,7 @@ interface Config {
   archivedPools: ArchivedPool[]
   portisApiKey: string
   gasLimit: number
+  onboardAPIHost: string
 }
 
 const contractAddressesSchema = yup.object().shape({
@@ -256,6 +257,10 @@ const config: Config = {
     .number()
     .required('gasLimit is required')
     .validateSync('7000000'),
+  onboardAPIHost: yup
+    .string()
+    .required('NEXT_PUBLIC_ONBOARD_API_HOST is required')
+    .validateSync(process.env.NEXT_PUBLIC_ONBOARD_API_HOST),
 }
 
 export default config

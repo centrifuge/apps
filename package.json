@@ -19,5 +19,10 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "styled-components": "5.1.1"
+  },
+  "scripts": {
+    "onboard-api": "yarn workspace @centrifuge/onboard-api start",
+    "tinlake-ui": "yarn workspace @centrifuge/tinlake-ui start",
+    "start": "concurrently --kill-others-on-fail \"yarn onboard-api\"  \"yarn tinlake-ui\" -p name -n \"onboard-api,tinlake-ui\""
   }
 }
