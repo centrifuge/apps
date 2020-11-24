@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import fetch from 'node-fetch'
 
+import { DocusignAuthService } from './docusign-auth.service'
+
 @Injectable()
 export class DocusignService {
+  constructor(private readonly docusignAuthService: DocusignAuthService) {}
+
   async getAgreementURL(email: string): Promise<string> {
     const envelopeId = await this.createEnvelope(email)
     const embedUrl = await this.createRecipientView(envelopeId)
@@ -29,13 +33,14 @@ export class DocusignService {
       status: 'sent',
     }
 
-    const url = `${process.env.DOCUSIGN_BASE_PATH}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes`
+    const url = `${process.env.DOCUSIGN_REST_API_HOST}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes`
 
+    const accessToken = await this.docusignAuthService.getAccessToken()
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.DOCUSIGN_ACCESS_TOKEN}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(envelopeDefinition),
     })
@@ -50,7 +55,7 @@ export class DocusignService {
   }
 
   private async createRecipientView(envelopeId: string): Promise<string> {
-    const url = `${process.env.DOCUSIGN_BASE_PATH}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes/${envelopeId}/views/recipient`
+    const url = `${process.env.DOCUSIGN_REST_API_HOST}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes/${envelopeId}/views/recipient`
 
     const recipientViewRequest = {
       authenticationMethod: 'none',
@@ -59,11 +64,12 @@ export class DocusignService {
       returnUrl: 'https://tinlake.centrifuge.io/',
     }
 
+    const accessToken = await this.docusignAuthService.getAccessToken()
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.DOCUSIGN_ACCESS_TOKEN}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(recipientViewRequest),
     })

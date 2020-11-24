@@ -1397,6 +1397,11 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
+"@connectedcars/jwtutils@^1.0.26":
+  version "1.0.26"
+  resolved "https://registry.yarnpkg.com/@connectedcars/jwtutils/-/jwtutils-1.0.26.tgz#fd6763ec8b2256d27cd6745848b939b4d0c1e57f"
+  integrity sha512-fsMtK2M42NbN4h2w3YnnnHHGWlf020A+xp7H9VKZsb4Yneb59OOltRrfEV8r+J3iwXJDC6xPd7gjQmeF1FFAYA==
+
 "@cucumber/create-meta@^2.0.2":
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/@cucumber/create-meta/-/create-meta-2.0.4.tgz#692379105fb599703fc2dfe39bcc408d55d5df74"

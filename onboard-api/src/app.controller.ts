@@ -1,12 +1,15 @@
 import { Controller, Get, Query, Param } from '@nestjs/common'
-import { DocusignService } from './docusign.service'
+
 import { SecuritizeService } from './securitize.service'
+import { DocusignService } from './docusign.service'
+import { DocusignAuthService } from './docusign-auth.service'
 
 @Controller()
 export class AppController {
   constructor(
     private readonly securitizeService: SecuritizeService,
-    private readonly docusignService: DocusignService
+    private readonly docusignService: DocusignService,
+    private readonly docusignAuthService: DocusignAuthService
   ) {}
 
   @Get()
@@ -21,12 +24,24 @@ export class AppController {
 
   @Get('authorization/:address/callback/securitize')
   getAuthorizationCallback(@Param() params, @Query() query): Promise<any> {
-    console.log({ address: params.address })
-    return this.securitizeService.processAuthorizationCallback(params.address, query.code)
+    const kycInfo = this.securitizeService.processAuthorizationCallback(params.address, query.code)
+    // const agreement = this.docusignService.getAgreementURL('jeroen+signer@centrifuge.io')
+    return kycInfo
   }
 
   @Get('agreement')
   async getAgreement(): Promise<string> {
     return await this.docusignService.getAgreementURL('jeroen+signer@centrifuge.io')
+  }
+
+  @Get('docusign/authorization')
+  getDocusignAuthorization(): string {
+    return this.docusignAuthService.getAuthorizationLink()
+  }
+
+  @Get('docusign/callback')
+  async getDocusignCallback(): Promise<any> {
+    await this.docusignAuthService.getAccessToken()
+    return 'Callback received'
   }
 }
