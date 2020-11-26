@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common'
+import { Logger, Injectable } from '@nestjs/common'
 import fetch from 'node-fetch'
 import { JwtUtils } from '@connectedcars/jwtutils'
 
 @Injectable()
 export class DocusignAuthService {
+  private readonly logger = new Logger(DocusignAuthService.name)
+
   accessToken: string | undefined = undefined
   expiresAt: number | undefined = undefined
 
@@ -15,7 +17,7 @@ export class DocusignAuthService {
     const hasExpired = this.expiresAt && Date.now() >= this.expiresAt + 10 * 1000 // Add 10s buffer
     if (!this.accessToken || hasExpired) return this.createAccessToken()
 
-    console.log('Re-using access token for Docusign')
+    this.logger.log('Re-using access token for Docusign')
     return this.accessToken
   }
 
@@ -47,7 +49,7 @@ export class DocusignAuthService {
     this.accessToken = data['access_token']
     this.expiresAt = Date.now() + 60 * 60 * 1000
 
-    console.log('Created new access token for Docusign')
+    this.logger.log('Created new access token for Docusign')
 
     return this.accessToken
   }

@@ -1,8 +1,8 @@
 import { Controller, Get, Query, Param, NotFoundException } from '@nestjs/common'
 
-import { SecuritizeService } from './providers/kyc/securitize.service'
-import { DocusignService } from './providers/docusign.service'
-import { DocusignAuthService } from './providers/docusign-auth.service'
+import { SecuritizeService } from './services/kyc/securitize.service'
+import { DocusignService } from './services/docusign.service'
+import { DocusignAuthService } from './services/docusign-auth.service'
 import { UserRepo, User } from './repos/user.repo'
 
 @Controller()
