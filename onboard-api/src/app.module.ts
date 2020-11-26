@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 
 import { AppController } from './app.controller'
 import { AddressController } from './controllers/address.controller'
+import { KycController } from './controllers/kyc.controller'
 
 import { DatabaseService } from './repos/db.service'
 import { AddressRepo } from './repos/address.repo'
@@ -11,13 +12,14 @@ import { SecuritizeService } from './services/kyc/securitize.service'
 import { DocusignService } from './services/docusign.service'
 import { DocusignAuthService } from './services/docusign-auth.service'
 import { PoolService } from './services/pool.service'
+import { KycRepo } from './repos/kyc.repo'
 
-const databaseProviders = [DatabaseService, UserRepo, AddressRepo]
+const databaseProviders = [DatabaseService, UserRepo, AddressRepo, KycRepo]
 const serviceProviders = [PoolService, SecuritizeService, DocusignService, DocusignAuthService]
 
 @Module({
   imports: [],
-  controllers: [AppController, AddressController],
+  controllers: [AppController, AddressController, KycController],
   providers: [...databaseProviders, ...serviceProviders],
 })
 export class AppModule {}

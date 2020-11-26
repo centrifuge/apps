@@ -1,16 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import fetch from 'node-fetch'
 
-// TODO: move this somewhere else
-export interface KYCInfo {
-  providerId: string
-  provider: string
-  authTokens: object
-}
-
-export interface SecuritizeKYCInfo extends KYCInfo {
-  provider: 'securitize'
-  authTokens: {
+export interface SecuritizeKYCInfo {
+  providerAccountId: string
+  digest: {
     accessToken: string
     refreshToken: string
     expiration: string
@@ -21,13 +14,13 @@ export interface SecuritizeKYCInfo extends KYCInfo {
 export class SecuritizeService {
   getAuthorizationLink(address: string): string {
     const scope = `info%20details%20verification`
-    const redirectUrl = `http://localhost:3100/authorization/${address}/callback/securitize`
+    const redirectUrl = `http://localhost:3100/callback/${address}/securitize`
     const url = `https://id.sandbox.securitize.io/#/authorize?issuerId=${process.env.SECURITIZE_CLIENT_ID}&scope=${scope}&redirecturl=${redirectUrl}`
 
     return url
   }
 
-  async processAuthorizationCallback(address: string, code: string): Promise<SecuritizeKYCInfo> {
+  async processAuthorizationCallback(code: string): Promise<SecuritizeKYCInfo> {
     const url = `${process.env.SECURITIZE_API_HOST}v1/${process.env.SECURITIZE_CLIENT_ID}/oauth2/authorize`
 
     const response = await fetch(url, {
@@ -42,9 +35,8 @@ export class SecuritizeService {
     const content = await response.json()
 
     return {
-      providerId: content.investorId,
-      provider: 'securitize',
-      authTokens: {
+      providerAccountId: content.investorId,
+      digest: {
         accessToken: content.accessToken,
         refreshToken: content.refreshToken,
         expiration: content.expiration,

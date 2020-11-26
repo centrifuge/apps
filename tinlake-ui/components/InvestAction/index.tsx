@@ -42,6 +42,8 @@ const InvestAction: React.FC<Props> = (props: Props) => {
       })
 
       if (pool) setStatus(getPoolStatus(pool))
+
+      console.log({ status })
     }
 
     getAuthorizationLink()

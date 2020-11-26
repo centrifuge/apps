@@ -19,25 +19,18 @@ export class AppController {
     return 'OK'
   }
 
-  @Get('users/email/:email')
-  checkEmail(@Param() params): Promise<User> {
-    const user = this.userRepo.getByEmail(params.email)
-    if (!user) throw new NotFoundException('User not found')
-    return user
-  }
+  // @Get('authorization')
+  // getAuthorizationLink(): string {
+  //   return this.securitizeService.getAuthorizationLink('0x0A735602a357802f553113F5831FE2fbf2F0E2e0')
+  // }
 
-  @Get('authorization')
-  getAuthorizationLink(): string {
-    return this.securitizeService.getAuthorizationLink('0x0A735602a357802f553113F5831FE2fbf2F0E2e0')
-  }
-
-  @Get('authorization/:address/callback/securitize')
-  async getAuthorizationCallback(@Param() params, @Query() query): Promise<any> {
-    const kycInfo = await this.securitizeService.processAuthorizationCallback(params.address, query.code)
-    const investor = await this.securitizeService.getInvestor(kycInfo.authTokens.accessToken)
-    const agreement = await this.docusignService.getAgreementURL(investor.email)
-    return { investor, agreement }
-  }
+  // @Get('authorization/:address/callback/securitize')
+  // async getAuthorizationCallback(@Param() params, @Query() query): Promise<any> {
+  //   const kycInfo = await this.securitizeService.processAuthorizationCallback(params.address, query.code)
+  //   const investor = await this.securitizeService.getInvestor(kycInfo.authTokens.accessToken)
+  //   const agreement = await this.docusignService.getAgreementURL(investor.email)
+  //   return { investor, agreement }
+  // }
 
   @Get('agreement')
   async getAgreement(): Promise<string> {
