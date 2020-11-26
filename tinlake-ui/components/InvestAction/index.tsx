@@ -1,14 +1,12 @@
+import { Anchor, Box, Button, Paragraph } from 'grommet'
 import * as React from 'react'
-import { Box, Button, Paragraph, Anchor } from 'grommet'
-import { useSelector } from 'react-redux'
-import { PoolsState, PoolData } from '../../ducks/pools'
+import { useDispatch, useSelector } from 'react-redux'
+import config, { Pool, UpcomingPool } from '../../config'
+import { ensureAuthed } from '../../ducks/auth'
 import { PoolData as PoolDataV3, PoolState } from '../../ducks/pool'
-
-import { FormModal, InvestmentSteps } from './styles'
-import { Pool, UpcomingPool } from '../../config'
-import { getPoolStatus } from '../../utils/pool'
+import { PoolsState } from '../../ducks/pools'
 import { PoolLink } from '../PoolLink'
-import config from '../../config'
+import { FormModal, InvestmentSteps } from './styles'
 
 interface Props {
   anchor?: React.ReactNode
@@ -21,32 +19,53 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   const onOpen = () => setModalIsOpen(true)
   const onClose = () => setModalIsOpen(false)
 
+  const dispatch = useDispatch()
+
   const pools = useSelector<any, PoolsState>((state) => state.pools)
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolDataV3 | undefined
 
-  const [status, setStatus] = React.useState('Open')
-  const [authorizationLink, setAuthorizationLink] = React.useState('')
+  const [status, setStatus] = React.useState<any>(undefined)
+  const [agreementLink, setAgreementLink] = React.useState<string | undefined>(undefined)
 
-  const getAuthorizationLink = async () => {
-    const req = await fetch(`${config.onboardAPIHost}authorization`)
-    const link = await req.text()
-    console.log({ link })
-    setAuthorizationLink(link)
+  const address = useSelector<any, string | null>((state) => state.auth.address)
+
+  const connect = () => {
+    dispatch(ensureAuthed())
+    setModalIsOpen(false)
+  }
+
+  const getOnboardingStatus = async () => {
+    if (address) {
+      const req = await fetch(`${config.onboardAPIHost}addresses/${address}/status`)
+      const body = await req.json()
+      console.log({ status: body })
+      setStatus(body)
+
+      if (body.agreements.length > 0) {
+        const req = await fetch(`${config.onboardAPIHost}agreements/${body.agreements[0].id}/link`)
+        const link = await req.text()
+        setAgreementLink(link)
+      }
+    }
   }
 
   React.useEffect(() => {
-    if (props.pool) {
-      const pool = pools.data?.pools.find((pool: PoolData) => {
-        return 'addresses' in props.pool! && pool.id === (props.pool as Pool).addresses.ROOT_CONTRACT.toLowerCase()
-      })
+    getOnboardingStatus()
+  }, [address])
 
-      if (pool) setStatus(getPoolStatus(pool))
+  React.useEffect(() => {
+    // if (props.pool) {
+    //   const pool = pools.data?.pools.find((pool: PoolData) => {
+    //     return 'addresses' in props.pool! && pool.id === (props.pool as Pool).addresses.ROOT_CONTRACT.toLowerCase()
+    //   })
 
-      console.log({ status })
-    }
+    //   if (pool) setStatus(getPoolStatus(pool))
 
-    getAuthorizationLink()
+    //   console.log({ status })
+    // }
+
+    getOnboardingStatus()
   }, [pools])
 
   return (
@@ -89,10 +108,24 @@ const InvestAction: React.FC<Props> = (props: Props) => {
           gap="medium"
           style={{ textAlign: 'center' }}
         >
-          <Box flex={true} justify="between">
-            <Paragraph>Start your KYC process to become to become an eligible investor.</Paragraph>
-            <Button primary label={`Start KYC`} href={authorizationLink} fill={false} />
-          </Box>
+          {!address && (
+            <Box flex={true} justify="between">
+              <Paragraph>Please connect with the wallet you want to use for investment.</Paragraph>
+              <Button primary label={`Connect`} onClick={connect} fill={false} />
+            </Box>
+          )}
+          {status?.kyc.url && !status.kyc.created && (
+            <Box flex={true} justify="between">
+              <Paragraph>KYC started, will notify when done, can continue with SubDoc.</Paragraph>
+              <Button primary label={`Start KYC`} href={status.kyc.url} fill={false} />
+            </Box>
+          )}
+          {status?.kyc.url && status.kyc.created && !status.kyc.verified && (
+            <Box flex={true} justify="between">
+              <Paragraph>Onboarding pending, please continue signing subdoc.</Paragraph>
+              <Button primary label={`Sign Subscription Agreement`} href={agreementLink} fill={false} />
+            </Box>
+          )}
         </Box>
 
         {props.pool && (
