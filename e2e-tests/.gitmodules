@@ -1,6 +1,0 @@
-[submodule "lib/tinlake-ui"]
-	path = lib/tinlake-ui
-	url = https://github.com/centrifuge/tinlake-ui
-[submodule "lib/tinlake-deploy"]
-	path = lib/tinlake-deploy
-	url = https://github.com/centrifuge/tinlake-deploy
