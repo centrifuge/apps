@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { AppController } from './app.controller'
 import { AddressController } from './controllers/address.controller'
+import { AgreementController } from './controllers/agreement.controller'
 import { KycController } from './controllers/kyc.controller'
 import { AddressRepo } from './repos/address.repo'
 import { AgreementRepo } from './repos/agreement.repo'
@@ -17,7 +18,7 @@ const serviceProviders = [PoolService, SecuritizeService, DocusignService, Docus
 
 @Module({
   imports: [],
-  controllers: [AppController, AddressController, KycController],
+  controllers: [AppController, AddressController, KycController, AgreementController],
   providers: [...databaseProviders, ...serviceProviders],
 })
 export class AppModule {}

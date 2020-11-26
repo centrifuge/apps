@@ -2,7 +2,6 @@ import { BadRequestException, Controller, Get, Param, Query } from '@nestjs/comm
 import { AddressRepo } from '../repos/address.repo'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { KycRepo } from '../repos/kyc.repo'
-import { DocusignService } from '../services/docusign.service'
 import { SecuritizeService } from '../services/kyc/securitize.service'
 
 @Controller()
@@ -11,7 +10,6 @@ export class AddressController {
     private readonly addressRepo: AddressRepo,
     private readonly securitizeService: SecuritizeService,
     private readonly kycRepo: KycRepo,
-    private readonly docusignService: DocusignService,
     private readonly agreementRepo: AgreementRepo
   ) {}
 
@@ -27,7 +25,6 @@ export class AddressController {
     const kyc = await this.kycRepo.find(address.userId)
     if (kyc) {
       // TODO: if not verified, check verified status
-
       const agreements = await this.agreementRepo.findByUser(address.userId)
       const agreementLinks = await agreements.map(
         (agreement: Agreement): AgreementsStatus => {
@@ -40,7 +37,6 @@ export class AddressController {
         }
       )
 
-      // TODO security: the agreement URL should probably only be visible after verifying the address
       return {
         kyc: {
           url: authorizationLink,

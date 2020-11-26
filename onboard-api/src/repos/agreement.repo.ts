@@ -17,6 +17,16 @@ export type Agreement = {
 export class AgreementRepo {
   constructor(private readonly db: DatabaseService, private readonly docusignService: DocusignService) {}
 
+  async find(id: string): Promise<Agreement | undefined> {
+    const [agreement] = await this.db.sql`
+      select *
+      from agreements
+      where agreements.id = ${id}
+    `
+
+    return agreement as Agreement | undefined
+  }
+
   async findByUser(userId: string): Promise<Agreement[]> {
     const agreements = await this.db.sql`
       select *

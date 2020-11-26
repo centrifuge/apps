@@ -27,6 +27,8 @@ export class KycController {
     if (!investor) throw new BadRequestException('Failed to retrieve investor information from Securitize')
 
     console.log({ kycInfo })
+
+    console.log({ investor })
     const kyc = await this.kycRepo.upsertSecuritize(address.userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!kyc) throw new BadRequestException('Failed to create KYC entity')
 
@@ -41,6 +43,6 @@ export class KycController {
     )
     if (!agreement) throw new BadRequestException('Failed to create agreement envelope')
 
-    return res.redirect('https://tinlake.centrifuge.io/')
+    return res.redirect(`/addresses/${params.address}/status`)
   }
 }

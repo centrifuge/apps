@@ -18,7 +18,7 @@ create table if not exists addresses (
 );
 
 -- Kyc
-create table kyc (
+create table if not exists kyc (
     user_id uuid not null references users(id) on delete cascade on update cascade,
     provider character varying(100) not null,
     provider_account_id character varying(255) not null,
@@ -28,10 +28,10 @@ create table kyc (
     verified_at timestamp with time zone
 );
 
-create unique index kyc_unique if not exists on kyc (user_id, provider, provider_account_id);
+create unique index if not exists kyc_unique on kyc (user_id, provider, provider_account_id);
 
 -- Agreements
-create table agreements (
+create table if not exists agreements (
     id uuid primary key,
     user_id uuid not null references users(id) on delete cascade on update cascade,
     provider character varying(100) not null,
