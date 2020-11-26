@@ -7,27 +7,22 @@ import { DocusignAuthService } from './docusign-auth.service'
 export class DocusignService {
   constructor(private readonly docusignAuthService: DocusignAuthService) {}
 
-  async getAgreementURL(email: string): Promise<string> {
-    const envelopeId = await this.createEnvelope(email)
-    const embedUrl = await this.createRecipientView(envelopeId)
-
-    return embedUrl
-  }
-
-  private async createEnvelope(email: string): Promise<string> {
+  async createAgreement(email: string, templateId: string): Promise<string> {
     const envelopeDefinition = {
-      templateId: process.env.DOCUSIGN_TEMPLATE_ID,
+      templateId: templateId,
       templateRoles: [
         {
           email,
           name: 'Investor',
           roleName: 'signer',
           clientUserId: 'something',
+          routingOrder: 1,
         },
         {
           email: 'jeroen+cc@centrifuge.io',
           name: 'Centrifuge',
           roleName: 'cc',
+          routingOrder: 2,
         },
       ],
       status: 'sent',
@@ -54,7 +49,7 @@ export class DocusignService {
     return content.envelopeId
   }
 
-  private async createRecipientView(envelopeId: string): Promise<string> {
+  async getAgreementLink(envelopeId: string): Promise<string> {
     const url = `${process.env.DOCUSIGN_REST_API_HOST}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes/${envelopeId}/views/recipient`
 
     const recipientViewRequest = {

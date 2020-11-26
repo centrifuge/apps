@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-
 import { DatabaseService } from './db.service'
 import { UserRepo } from './user.repo'
 
@@ -28,7 +27,7 @@ export class AddressRepo {
     return data as Address | undefined
   }
 
-  async findOrCreate(blockchain: Blockchain, network: Network, address: string): Promise<Address | undefined> {
+  async findOrCreate(blockchain: Blockchain, network: Network, address: string): Promise<Address> {
     const [data] = await this.db.sql`
       select *
       from addresses
@@ -50,10 +49,10 @@ export class AddressRepo {
         returning *
       `
 
-      return newAddress as Address | undefined
+      return newAddress as Address
     }
 
-    return data as Address | undefined
+    return data as Address
   }
 
   // TODO: addAddressForExistingUser(user: User, blockchain: Blockchain, network: Network, address: string)
