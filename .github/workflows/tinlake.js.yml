@@ -1,0 +1,23 @@
+name: 'tinlake.js'
+on: 
+  pull_request:
+    paths:
+    - 'tinlake.js/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12'
+      - run: yarn install
+        working-directory: ./
+      - run: yarn run lint
+        working-directory: ./tinlake.js
+      - run: yarn run check-format
+        working-directory: ./tinlake.js
+      - run: yarn run build
+        working-directory: ./tinlake.js

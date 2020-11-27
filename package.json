@@ -2,6 +2,7 @@
   "private": true,
   "workspaces": [
     "e2e-tests",
+    "tinlake.js",
     "tinlake-ui"
   ],
   "devDependencies": {
