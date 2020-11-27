@@ -1,0 +1,74 @@
+{
+  "name": "@centrifuge/tinlake-js",
+  "version": "3.0.0-develop.33",
+  "description": "Centrifuge Tinlake Contracts Client",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "module": "dist/index.es.js",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "bignumber.js": "^9.0.0",
+    "decimal.js-light": "^2.5.0",
+    "dotenv": "^8.2.0",
+    "eth-permit": "^0.1.7",
+    "ethers": "4.0.45",
+    "glpk.js": "3.1.2",
+    "mocha": "^6.1.4",
+    "web3-eth-abi": "^1.2.11",
+    "web3-utils": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/assert": "^1.4.2",
+    "@types/bn.js": "^4.11.6",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^13.11.0",
+    "@types/web3-eth-abi": "^1.0.0",
+    "declaration-bundler-webpack-plugin": "^1.0.3",
+    "husky": "^4.2.3",
+    "nodemon": "^1.19.1",
+    "prettier": "2.1.1",
+    "rollup": "^1.16.3",
+    "rollup-plugin-commonjs": "^10.0.1",
+    "rollup-plugin-json": "^4.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-typescript2": "^0.21.2",
+    "ts-mocha": "^6.0.0",
+    "tslint": "^5.18.0",
+    "tslint-config-airbnb": "^5.11.1",
+    "tslint-config-prettier": "1.18.0",
+    "typedoc": "^0.17.3",
+    "typescript": "^3.8.3"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "start": "rollup -cw",
+    "test": "ts-mocha -p src/test/tsconfig.json src/**/*.spec.ts --timeout 80000",
+    "nodemon": "nodemon node inspect dist/Tinlake.js",
+    "generate-docs": "typedoc --out docs --exclude \"./node_modules/**\"  --exclude \"./src/abi/**\" --exclude \"./src/index.ts\" --exclude \"./src/actions/*.spec.ts\" --exclude \"./src/test/**\" --excludeExternals --excludeNotExported --ignoreCompilerErrors ./src",
+    "lint": "tslint --project .",
+    "lint-fix": "tslint --fix -c ./tslint.json 'src/**/*{.ts,.tsx}'",
+    "format": "prettier --write \"./**/*.{ts,tsx}\"",
+    "check-format": "prettier --check \"./**/*.{ts,tsx}\"",
+    "publish:patch": "npm run build && npm version patch && npm publish --access public",
+    "publish:minor": "npm run build && npm version minor && npm publish --access public",
+    "publish:major": "npm run build && npm version major && npm publish --access public",
+    "publish:develop": "npm run build && npm version prerelease --preid develop && npm publish --access public"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run generate-docs && npm run lint-fix && npm run build"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/centrifuge/tinlake.js.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/centrifuge/tinlake.js/issues"
+  },
+  "homepage": "https://github.com/centrifuge/tinlake.js#readme"
+}
