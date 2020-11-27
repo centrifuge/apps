@@ -2,6 +2,7 @@ import { BadRequestException, Controller, Get, Param, Query } from '@nestjs/comm
 import { AddressRepo } from '../repos/address.repo'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { KycRepo } from '../repos/kyc.repo'
+import { DocusignService } from '../services/docusign.service'
 import { SecuritizeService } from '../services/kyc/securitize.service'
 
 @Controller()
@@ -10,7 +11,8 @@ export class AddressController {
     private readonly addressRepo: AddressRepo,
     private readonly securitizeService: SecuritizeService,
     private readonly kycRepo: KycRepo,
-    private readonly agreementRepo: AgreementRepo
+    private readonly agreementRepo: AgreementRepo,
+    private readonly docusignService: DocusignService
   ) {}
 
   @Get('addresses/:address/status')
@@ -37,6 +39,8 @@ export class AddressController {
         }
       )
 
+      await this.docusignService.getEnvelopeStatus(agreements[0].providerEnvelopeId)
+
       return {
         kyc: {
           url: authorizationLink,
@@ -62,6 +66,7 @@ export interface KycStatus {
   url?: string
 }
 
+// TODO: remove whether it's been created
 export interface AgreementsStatus {
   name: string
   id: string

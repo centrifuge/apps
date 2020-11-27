@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import fetch from 'node-fetch'
-
 import { DocusignAuthService } from './docusign-auth.service'
 
 @Injectable()
 export class DocusignService {
   constructor(private readonly docusignAuthService: DocusignAuthService) {}
 
-  async createAgreement(email: string, templateId: string): Promise<string> {
+  async createAgreement(userId: string, email: string, templateId: string): Promise<string> {
     const envelopeDefinition = {
       templateId: templateId,
       templateRoles: [
@@ -15,7 +14,7 @@ export class DocusignService {
           email,
           name: 'Investor',
           roleName: 'signer',
-          clientUserId: 'something',
+          clientUserId: userId,
           routingOrder: 1,
         },
         {
@@ -52,6 +51,7 @@ export class DocusignService {
   async getAgreementLink(envelopeId: string): Promise<string> {
     const url = `${process.env.DOCUSIGN_REST_API_HOST}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes/${envelopeId}/views/recipient`
 
+    // TODO: email and userName here should be taken from Securitize
     const recipientViewRequest = {
       authenticationMethod: 'none',
       email: 'jeroen+signer@centrifuge.io',
@@ -76,5 +76,22 @@ export class DocusignService {
     }
 
     return content.url
+  }
+
+  async getEnvelopeStatus(envelopeId: string): Promise<string> {
+    const url = `${process.env.DOCUSIGN_REST_API_HOST}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes/${envelopeId}/recipients`
+
+    const accessToken = await this.docusignAuthService.getAccessToken()
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    const content = await response.json()
+    console.log({ signers: content.signers })
+
+    return 'ok'
   }
 }
