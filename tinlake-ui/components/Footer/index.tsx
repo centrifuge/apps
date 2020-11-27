@@ -1,7 +1,7 @@
-import React from 'react'
-import { Box, Button, Text, Anchor, Paragraph } from 'grommet'
-import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import { Modal } from '@centrifuge/axis-modal'
+import { Anchor, Box, Button, Paragraph, Text } from 'grommet'
+import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
+import React from 'react'
 import styled from 'styled-components'
 
 const Logo = styled.img`

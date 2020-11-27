@@ -1,13 +1,12 @@
-import * as React from 'react'
-import { AnyAction, Action } from 'redux'
-import { useSelector } from 'react-redux'
-import { ThunkAction } from 'redux-thunk'
+import * as Sentry from '@sentry/react'
 import { HYDRATE } from 'next-redux-wrapper'
+import * as React from 'react'
+import { useSelector } from 'react-redux'
+import { Action, AnyAction } from 'redux'
+import { ThunkAction } from 'redux-thunk'
+import config from '../config'
 import { initTinlake } from '../services/tinlake'
 import * as actions from '../services/tinlake/actions'
-import * as Sentry from '@sentry/react'
-
-import config from '../config'
 
 // TODO: should be imported from @centrifuge/axis-web3-wallet
 export interface WalletTransaction {

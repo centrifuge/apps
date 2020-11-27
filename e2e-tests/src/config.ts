@@ -20,7 +20,9 @@ export interface Config {
 const network = process.env.ETH_NETWORK || 'kovan'
 const networkConfigs = network === 'mainnet' ? mainnetPools : kovanPools
 
-const pool = networkConfigs.find((pool: Pool) => pool.addresses.ROOT_CONTRACT.toLowerCase() === process.env.POOL_ID.toLowerCase())
+const pool = networkConfigs.find(
+  (pool: Pool) => pool.addresses.ROOT_CONTRACT.toLowerCase() === process.env.POOL_ID.toLowerCase()
+)
 
 export const config: Config = {
   gatewayUrl: process.env.GATEWAY_URL,
@@ -32,9 +34,9 @@ export const config: Config = {
   ethBorrowerAddress: process.env.ETH_BORROWER_ADDRESS,
   ethBorrowerPrivateKey: process.env.ETH_BORROWER_PRIVATE_KEY,
   pool: pool,
-  gasLimit: Number(process.env.GAS_LIMIT|| '100000') ,
+  gasLimit: Number(process.env.GAS_LIMIT || '100000'),
   nftRegistry: process.env.NFT_REGISTRY,
-  transactionTimeout: Number(process.env.TRANSACTION_TIMEOUT || '30000')
+  transactionTimeout: Number(process.env.TRANSACTION_TIMEOUT || '30000'),
 }
 
 console.log(

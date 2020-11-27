@@ -1,6 +1,5 @@
-import styled from 'styled-components'
-
 import { Modal } from '@centrifuge/axis-modal'
+import styled from 'styled-components'
 
 export const FormModal = styled(Modal)`
   max-height: 100%;

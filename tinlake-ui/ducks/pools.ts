@@ -1,7 +1,7 @@
-import { AnyAction, Action } from 'redux'
-import { ThunkAction } from 'redux-thunk'
-import { HYDRATE } from 'next-redux-wrapper'
 import BN from 'bn.js'
+import { HYDRATE } from 'next-redux-wrapper'
+import { Action, AnyAction } from 'redux'
+import { ThunkAction } from 'redux-thunk'
 import Apollo from '../services/apollo'
 import { PoolStatus } from './pool'
 

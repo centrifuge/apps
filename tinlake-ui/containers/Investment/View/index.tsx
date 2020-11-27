@@ -1,17 +1,16 @@
-import * as React from 'react'
-import { Box, Heading } from 'grommet'
-import { Pool } from '../../../config'
 import { ITinlake } from '@centrifuge/tinlake-js'
+import { Box, Heading } from 'grommet'
+import * as React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import { loadPool } from '../../../ducks/pool'
-
-import { ExplainerCard } from './styles'
-import InvestmentOverview from './InvestmentOverview'
-import TrancheOverview from './TrancheOverview'
-import EpochOverview from './EpochOverview'
-import AdminActions from './AdminActions'
+import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
+import { loadPool } from '../../../ducks/pool'
+import AdminActions from './AdminActions'
+import EpochOverview from './EpochOverview'
+import InvestmentOverview from './InvestmentOverview'
 import ManageMemberlist from './ManageMemberlist'
+import { ExplainerCard } from './styles'
+import TrancheOverview from './TrancheOverview'
 
 interface Props {
   activePool: Pool

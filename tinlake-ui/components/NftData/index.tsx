@@ -1,10 +1,10 @@
-import * as React from 'react'
-import { Box, Heading } from 'grommet'
-import styled from 'styled-components'
-import Badge from '../Badge'
 import { DisplayField } from '@centrifuge/axis-display-field'
-import { getNFTLink, getAddressLink, hexToInt } from '../../utils/etherscanLinkGenerator'
 import { bnToHex, NFT } from '@centrifuge/tinlake-js'
+import { Box, Heading } from 'grommet'
+import * as React from 'react'
+import styled from 'styled-components'
+import { getAddressLink, getNFTLink, hexToInt } from '../../utils/etherscanLinkGenerator'
+import Badge from '../Badge'
 
 interface Props {
   data: NFT

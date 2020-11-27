@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { ArchivedPool } from '../../config'
 import Archived from '../../components/Overview/Archived'
+import { ArchivedPool } from '../../config'
 
 interface Props {
   selectedPool: ArchivedPool

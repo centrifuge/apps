@@ -1,10 +1,10 @@
-import { FunctionComponent } from 'react'
+import { copyToClipboard } from '@centrifuge/axis-utils'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { Decimal } from 'decimal.js-light'
 import { Box, Text } from 'grommet'
+import { FunctionComponent } from 'react'
 import styled from 'styled-components'
-import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
-import { copyToClipboard } from '@centrifuge/axis-utils'
 
 export interface TokenMeta {
   symbol: string

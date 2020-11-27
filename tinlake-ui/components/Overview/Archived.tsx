@@ -1,13 +1,13 @@
-import * as React from 'react'
-import { Box, Button, Heading, Table, TableCell, TableRow, TableBody } from 'grommet'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
-import { ArchivedPoolData } from '../../ducks/pool'
-import { ArchivedPool } from '../../config'
-import { toPrecision } from '../../utils/toPrecision'
-import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
-import { LoadingValue } from '../../components/LoadingValue/index'
-import { ExplainerCard } from '../../containers/Investment/View/styles'
+import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import Link from 'next/link'
+import * as React from 'react'
+import { LoadingValue } from '../../components/LoadingValue/index'
+import { ArchivedPool } from '../../config'
+import { ExplainerCard } from '../../containers/Investment/View/styles'
+import { ArchivedPoolData } from '../../ducks/pool'
+import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
+import { toPrecision } from '../../utils/toPrecision'
 
 interface Props {
   selectedPool: ArchivedPool

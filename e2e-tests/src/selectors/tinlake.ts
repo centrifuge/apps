@@ -1,7 +1,7 @@
 /**
  * Tree structure for selectors. Any leaf is prepended with the _path values in its parent nodes.
  * E.g. investmentsPage.minTinRatio.value = investmentsPage._path + minTinRatio._path + value
- * 
+ *
  * Cheatsheet: https://devhints.io/xpath
  */
 
@@ -43,8 +43,8 @@ export const selectors = {
     setMaxReserve: {
       _path: `//div[div[h5[contains(., "Set maximum reserve amount")]]]`,
       input: `//input`,
-      saveButton: `//button[contains(., "Save")]`
-    }
+      saveButton: `//button[contains(., "Save")]`,
+    },
   },
 
   mintNFTPage: {
@@ -54,6 +54,5 @@ export const selectors = {
     mintButton: `//button[contains(text(), "Mint NFT")]`,
   },
 }
-
 
 export default selectors

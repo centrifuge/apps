@@ -1,28 +1,26 @@
-import * as React from 'react'
-import { Box, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
-import { useSelector } from 'react-redux'
 import { Tooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
-
-import { PoolData, PoolState } from '../../../ducks/pool'
-import { toPrecision } from '../../../utils/toPrecision'
-import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { TINRatioBar } from '../../../components/TINRatioBar/index'
+import BN from 'bn.js'
+import { Box, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import * as React from 'react'
+import { useSelector } from 'react-redux'
 import { LoadingValue } from '../../../components/LoadingValue/index'
-
+import { TINRatioBar } from '../../../components/TINRatioBar/index'
+import { PoolData, PoolState } from '../../../ducks/pool'
+import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { toPrecision } from '../../../utils/toPrecision'
 import {
-  TokenLogo,
   BalanceSheetDiagram,
   BalanceSheetDiagramLeft,
-  BalanceSheetMidLine,
-  BalanceSheetFiller,
   BalanceSheetDiagramRight,
-  DividerTop,
+  BalanceSheetFiller,
+  BalanceSheetMidLine,
   DividerBottom,
   DividerInner,
+  DividerTop,
   Sidenote,
+  TokenLogo,
 } from './styles'
-import BN from 'bn.js'
 
 interface Props {}
 

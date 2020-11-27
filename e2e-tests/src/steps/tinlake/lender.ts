@@ -1,8 +1,7 @@
-import { Given, When, Then } from '@cucumber/cucumber'
+import { Given, Then, When } from '@cucumber/cucumber'
 import * as assert from 'assert'
-
-import { CentrifugeWorld } from '../../support/world'
 import { tinlake } from '../../selectors'
+import { CentrifugeWorld } from '../../support/world'
 import { isElementVisible } from '../../utils/elements'
 
 type Order = 'invest' | 'redeem'
@@ -14,7 +13,9 @@ Given('there is no outstanding order or collection for the {tranche} tranche', a
 ) {
   const hasOutstandingOrder = await isElementVisible(
     this.currentPage,
-    tinlake(tranche === 'DROP' ? 'investmentsPage.dropCard.cancelOrderButton' : 'investmentsPage.tinCard.cancelOrderButton')
+    tinlake(
+      tranche === 'DROP' ? 'investmentsPage.dropCard.cancelOrderButton' : 'investmentsPage.tinCard.cancelOrderButton'
+    )
   )
   assert.strictEqual(hasOutstandingOrder, false)
 
@@ -25,7 +26,12 @@ Given('there is no outstanding order or collection for the {tranche} tranche', a
   assert.strictEqual(hasCollection, false)
 })
 
-When('I {order} {int} DAI for {tranche}', async function(this: CentrifugeWorld, order: Order, amount: number, tranche: Tranche) {
+When('I {order} {int} DAI for {tranche}', async function(
+  this: CentrifugeWorld,
+  order: Order,
+  amount: number,
+  tranche: Tranche
+) {
   const chooseOrderButton = await this.currentPage.waitForXPath(
     tinlake(
       tranche === 'DROP'
@@ -57,13 +63,15 @@ When('I {order} {int} DAI for {tranche}', async function(this: CentrifugeWorld, 
     )
   )
   await lockButton.click()
-  
+
   await this.metamaskSignAndConfirmTransaction({ gas: 50, gasLimit: 1000000 })
 })
 
 When('I cancel my {tranche} order', async function(this: CentrifugeWorld, tranche: Tranche) {
   const button = await this.currentPage.waitForXPath(
-    tinlake(tranche === 'DROP' ? 'investmentsPage.dropCard.cancelOrderButton' : 'investmentsPage.tinCard.cancelOrderButton')
+    tinlake(
+      tranche === 'DROP' ? 'investmentsPage.dropCard.cancelOrderButton' : 'investmentsPage.tinCard.cancelOrderButton'
+    )
   )
   await this.currentPage.waitFor(100)
   await button.click()
@@ -84,10 +92,15 @@ When('I cancel my {tranche} order', async function(this: CentrifugeWorld, tranch
   await this.currentPage.waitFor(3000)
 })
 
-Then('there is an outstanding order for the {tranche} tranche', async function(this: CentrifugeWorld, tranche: Tranche) {
+Then('there is an outstanding order for the {tranche} tranche', async function(
+  this: CentrifugeWorld,
+  tranche: Tranche
+) {
   const hasOutstandingOrder = await isElementVisible(
     this.currentPage,
-    tinlake(tranche === 'DROP' ? 'investmentsPage.dropCard.cancelOrderButton' : 'investmentsPage.tinCard.cancelOrderButton'),
+    tinlake(
+      tranche === 'DROP' ? 'investmentsPage.dropCard.cancelOrderButton' : 'investmentsPage.tinCard.cancelOrderButton'
+    ),
     10000
   )
   assert.strictEqual(hasOutstandingOrder, true)

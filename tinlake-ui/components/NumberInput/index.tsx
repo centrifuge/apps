@@ -1,6 +1,6 @@
+import { TextInput } from 'grommet'
 import { FunctionComponent } from 'react'
 import NumberFormat, { NumberFormatValues } from 'react-number-format'
-import { TextInput } from 'grommet'
 
 interface Props {
   value: string

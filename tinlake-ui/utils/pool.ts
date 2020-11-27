@@ -1,5 +1,5 @@
-import { PoolData } from '../ducks/pools'
 import { PoolStatus } from '../ducks/pool'
+import { PoolData } from '../ducks/pools'
 
 export const getPoolStatus = (pool: PoolData): PoolStatus => {
   if (pool.isArchived) return 'Closed'

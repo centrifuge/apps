@@ -1,5 +1,5 @@
+import { Box, Text } from 'grommet'
 import { FunctionComponent } from 'react'
-import { Text, Box } from 'grommet'
 
 interface Props {
   label: string

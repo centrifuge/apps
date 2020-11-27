@@ -1,6 +1,6 @@
-import * as React from 'react'
-import { Box, FormField, TextInput } from 'grommet'
 import { baseToDisplay, feeToInterestRate, Loan } from '@centrifuge/tinlake-js'
+import { Box, FormField, TextInput } from 'grommet'
+import * as React from 'react'
 import NumberInput from '../../NumberInput'
 
 interface Props {

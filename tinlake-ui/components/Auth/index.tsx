@@ -1,8 +1,8 @@
-import * as React from 'react'
-import { AuthState, load } from '../../ducks/auth'
-import { connect } from 'react-redux'
 import { ITinlake } from '@centrifuge/tinlake-js'
+import * as React from 'react'
+import { connect } from 'react-redux'
 import config from '../../config'
+import { AuthState, load } from '../../ducks/auth'
 import WrongNetwork from '../WrongNetwork'
 
 interface Props {

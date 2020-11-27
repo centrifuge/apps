@@ -1,15 +1,15 @@
-import * as React from 'react'
-import { Box, Button } from 'grommet'
+import { TokenInput } from '@centrifuge/axis-token-input'
 import { baseToDisplay, Loan } from '@centrifuge/tinlake-js'
-import { PoolState, loadPool, PoolData } from '../../../ducks/pool'
-import { loadLoan } from '../../../ducks/loans'
+import BN from 'bn.js'
+import { Decimal } from 'decimal.js-light'
+import { Box, Button } from 'grommet'
+import * as React from 'react'
 import { connect } from 'react-redux'
 import { ensureAuthed } from '../../../ducks/auth'
-import BN from 'bn.js'
+import { loadLoan } from '../../../ducks/loans'
+import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
+import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
-import { Decimal } from 'decimal.js-light'
-import { TokenInput } from '@centrifuge/axis-token-input'
 
 interface Props extends TransactionProps {
   loan: Loan

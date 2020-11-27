@@ -1,13 +1,12 @@
+import { Anchor, Box, Button, Paragraph } from 'grommet'
 import * as React from 'react'
-import { Box, Button, Paragraph, Anchor } from 'grommet'
 import { useSelector } from 'react-redux'
-import { PoolsState, PoolData } from '../../ducks/pools'
-import { PoolData as PoolDataV3, PoolState } from '../../ducks/pool'
-
-import { FormModal, InvestmentSteps } from './styles'
 import { Pool, UpcomingPool } from '../../config'
+import { PoolData as PoolDataV3, PoolState } from '../../ducks/pool'
+import { PoolData, PoolsState } from '../../ducks/pools'
 import { getPoolStatus } from '../../utils/pool'
 import { PoolLink } from '../PoolLink'
+import { FormModal, InvestmentSteps } from './styles'
 
 interface Props {
   anchor?: React.ReactNode

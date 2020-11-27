@@ -1,7 +1,6 @@
 // Dependencies
 import { After, Before, Status } from '@cucumber/cucumber'
-
-import { openBrowser, closeBrowser, takeScreenshot } from './browser-actions'
+import { closeBrowser, openBrowser, takeScreenshot } from './browser-actions'
 import { CentrifugeWorld } from './world'
 
 Before(async function(this: CentrifugeWorld, scenario) {

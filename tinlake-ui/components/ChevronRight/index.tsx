@@ -1,6 +1,6 @@
+import { Image } from 'grommet'
 import React, { FunctionComponent } from 'react'
 import styled from 'styled-components'
-import { Image } from 'grommet'
 
 interface Props {
   [key: string]: any

@@ -1,11 +1,11 @@
+import { Spinner } from '@centrifuge/axis-spinner'
+import { Anchor, Box, Image, Text } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { Box, Image, Text, Anchor } from 'grommet'
-import { Spinner } from '@centrifuge/axis-spinner'
-import { loadPools, PoolsState } from '../../ducks/pools'
+import InvestAction from '../../components/InvestAction/index'
 import PoolList from '../../components/PoolList'
 import PoolsMetrics from '../../components/PoolsMetrics'
-import InvestAction from '../../components/InvestAction/index'
+import { loadPools, PoolsState } from '../../ducks/pools'
 
 interface Props {
   loadPools?: () => Promise<void>

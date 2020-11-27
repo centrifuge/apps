@@ -1,9 +1,9 @@
-import * as React from 'react'
 import { Box, Text } from 'grommet'
+import * as React from 'react'
 import { PoolsData } from '../../ducks/pools'
-import PoolsMetric from '../PoolsMetric'
 import DAI from '../../static/dai.json'
 import ERC20Display from '../ERC20Display'
+import PoolsMetric from '../PoolsMetric'
 
 interface Props {
   pools: PoolsData

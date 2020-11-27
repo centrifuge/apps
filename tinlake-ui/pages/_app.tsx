@@ -1,13 +1,13 @@
-import React from 'react'
-import App from 'next/app'
-import { createWrapper } from 'next-redux-wrapper'
-import makeStore from '../utils/makeStore'
 import { AxisTheme } from '@centrifuge/axis-theme'
-import { StyledApp } from '../components/StyledApp'
-import Head from 'next/head'
 import * as Sentry from '@sentry/react'
 import { Integrations } from '@sentry/tracing'
+import { createWrapper } from 'next-redux-wrapper'
+import App from 'next/app'
+import Head from 'next/head'
+import React from 'react'
+import { StyledApp } from '../components/StyledApp'
 import config from '../config'
+import makeStore from '../utils/makeStore'
 
 require('regenerator-runtime/runtime')
 

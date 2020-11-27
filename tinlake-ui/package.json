@@ -24,11 +24,6 @@
     "dev:lambda": "netlify-lambda serve lambda",
     "build:lambda": "netlify-lambda build lambda"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn lint-fix-staged && yarn format"
-    }
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/centrifuge/tinlake-ui.git"

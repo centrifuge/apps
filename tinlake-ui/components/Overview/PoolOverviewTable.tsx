@@ -1,17 +1,16 @@
-import * as React from 'react'
-import { Box, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
-import { useSelector } from 'react-redux'
-import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import { Tooltip } from '@centrifuge/axis-tooltip'
-
+import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
+import { Box, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import * as React from 'react'
+import { useSelector } from 'react-redux'
+import InvestAction from '../../components/InvestAction'
 import { Pool, UpcomingPool } from '../../config'
-import { toPrecision } from '../../utils/toPrecision'
-import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { LoansState } from '../../ducks/loans'
-import { PoolState, PoolData } from '../../ducks/pool'
+import { PoolData, PoolState } from '../../ducks/pool'
+import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
+import { toPrecision } from '../../utils/toPrecision'
 import { LoadingValue } from '../LoadingValue/index'
 import { Sidenote, TokenLogo } from './styles'
-import InvestAction from '../../components/InvestAction'
 
 interface Props {
   selectedPool: Pool | UpcomingPool

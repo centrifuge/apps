@@ -1,11 +1,11 @@
-import * as React from 'react'
-import { Box, DataTable } from 'grommet'
-import { PoolData } from '../../ducks/pools'
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
-import NumberDisplay from '../NumberDisplay'
-import ChevronRight from '../ChevronRight'
+import { Box, DataTable } from 'grommet'
 import Router from 'next/router'
+import * as React from 'react'
+import { PoolData } from '../../ducks/pools'
+import ChevronRight from '../ChevronRight'
+import NumberDisplay from '../NumberDisplay'
 
 interface Props {
   pools?: PoolData[]
