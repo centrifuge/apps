@@ -1,16 +1,16 @@
+import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
+import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
-import { Box, Button, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
-import { ITinlake, baseToDisplay } from '@centrifuge/tinlake-js'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 import { connect, useSelector } from 'react-redux'
+import { LoadingValue } from '../../../components/LoadingValue/index'
 import { AuthState } from '../../../ducks/auth'
 import { PoolData, PoolState } from '../../../ducks/pool'
-import { toPrecision } from '../../../utils/toPrecision'
+import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { SignIcon, Sidenote } from './styles'
-import BN from 'bn.js'
 import { secondsToHms } from '../../../utils/time'
-import { LoadingValue } from '../../../components/LoadingValue/index'
+import { toPrecision } from '../../../utils/toPrecision'
+import { Sidenote, SignIcon } from './styles'
 
 interface Props extends TransactionProps {
   tinlake: ITinlake

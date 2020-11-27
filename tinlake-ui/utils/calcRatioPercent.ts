@@ -1,5 +1,5 @@
-import { Decimal } from 'decimal.js-light'
 import BN from 'bn.js'
+import { Decimal } from 'decimal.js-light'
 
 Decimal.set({
   precision: 30,

@@ -1,12 +1,11 @@
-import * as React from 'react'
 import { Spinner } from '@centrifuge/axis-spinner'
-import { Box, Heading, Button, Anchor } from 'grommet'
-
-import { PoolState } from '../../ducks/pool'
-import { LoansState } from '../../ducks/loans'
+import { Anchor, Box, Button, Heading } from 'grommet'
+import * as React from 'react'
 import LoanListData from '../../components/Loan/List'
-import { Pool, UpcomingPool } from '../../config'
 import { PoolLink } from '../../components/PoolLink'
+import { Pool, UpcomingPool } from '../../config'
+import { LoansState } from '../../ducks/loans'
+import { PoolState } from '../../ducks/pool'
 import PoolOverviewTable from './PoolOverviewTable'
 
 interface Props {

@@ -1,7 +1,7 @@
 import Onboard from 'bnc-onboard'
-import { networkNameToId } from '../../utils/networkNameResolver'
+import { API, Subscriptions } from 'bnc-onboard/dist/src/interfaces'
 import config from '../../config'
-import { Subscriptions, API } from 'bnc-onboard/dist/src/interfaces'
+import { networkNameToId } from '../../utils/networkNameResolver'
 
 const wallets = [
   {

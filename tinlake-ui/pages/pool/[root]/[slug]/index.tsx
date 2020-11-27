@@ -1,15 +1,15 @@
 import { Box } from 'grommet'
 import { GetStaticPaths, GetStaticProps } from 'next'
+import Head from 'next/head'
 import * as React from 'react'
-import Header from '../../../../components/Header'
-import Overview from '../../../../containers/Overview'
-import WithTinlake from '../../../../components/WithTinlake'
-import { menuItems } from '../../../../menuItems'
-import config, { Pool as IPool } from '../../../../config'
-import WithFooter from '../../../../components/WithFooter'
 import Auth from '../../../../components/Auth'
 import Container from '../../../../components/Container'
-import Head from 'next/head'
+import Header from '../../../../components/Header'
+import WithFooter from '../../../../components/WithFooter'
+import WithTinlake from '../../../../components/WithTinlake'
+import config, { Pool as IPool } from '../../../../config'
+import Overview from '../../../../containers/Overview'
+import { menuItems } from '../../../../menuItems'
 
 interface Props {
   root: string

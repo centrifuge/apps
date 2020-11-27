@@ -1,8 +1,7 @@
-import { ethers } from 'ethers'
 import Tinlake, { ITinlake } from '@centrifuge/tinlake-js'
-
-import { CentrifugeWorld } from './world'
+import { ethers } from 'ethers'
 import { config } from '../config'
+import { CentrifugeWorld } from './world'
 
 export async function ensureTinlakeInit(world: CentrifugeWorld): Promise<ITinlake> {
   if (world.tinlake) {

@@ -1,5 +1,5 @@
-import styled from 'styled-components'
 import { Box, Text } from 'grommet'
+import styled from 'styled-components'
 
 export const Description = styled(Text)`
   color: #777;

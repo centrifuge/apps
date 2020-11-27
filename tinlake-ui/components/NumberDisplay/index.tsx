@@ -1,5 +1,5 @@
-import { FunctionComponent } from 'react'
 import { Decimal } from 'decimal.js-light'
+import { FunctionComponent } from 'react'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 
 interface Props {

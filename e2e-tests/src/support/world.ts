@@ -1,12 +1,11 @@
-import { setWorldConstructor, setDefaultTimeout } from '@cucumber/cucumber'
-import { Browser, Page } from 'puppeteer'
 import { ITinlake } from '@centrifuge/tinlake-js'
+import { setDefaultTimeout, setWorldConstructor } from '@cucumber/cucumber'
 import * as dappeteer from 'dappeteer-test'
-
-import { ensureTinlakeInit } from './tinlake-actions'
+import { Browser, Page } from 'puppeteer'
 import { config } from '../config'
-import { waitUntilElementsIsVisible, waitUntilElementsIsInvisible } from '../utils/elements'
 import { tinlake } from '../selectors'
+import { waitUntilElementsIsInvisible, waitUntilElementsIsVisible } from '../utils/elements'
+import { ensureTinlakeInit } from './tinlake-actions'
 
 export class CentrifugeWorld {
   browser: null | Browser = null
@@ -57,7 +56,7 @@ export class CentrifugeWorld {
     await this.waitForSuccessfulTransaction()
   }
 
-  async metamaskConfirmTransaction(options: dappeteer.TransactionOptions) {    
+  async metamaskConfirmTransaction(options: dappeteer.TransactionOptions) {
     await this.metamask.confirmTransaction(options)
     await this.currentPage.bringToFront()
     await this.waitForSuccessfulTransaction()
@@ -70,7 +69,6 @@ export class CentrifugeWorld {
     await waitUntilElementsIsInvisible(this.currentPage, tinlake('pendingTransaction'))
     await waitUntilElementsIsVisible(this.currentPage, tinlake('successfulTransaction'))
   }
-
 }
 
 setDefaultTimeout(100 * 1000)

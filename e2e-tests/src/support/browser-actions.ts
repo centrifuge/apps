@@ -1,8 +1,7 @@
-import * as puppeteer from 'puppeteer'
 import * as dappeteer from 'dappeteer-test'
-
-import { CentrifugeWorld } from './world'
+import * as puppeteer from 'puppeteer'
 import { config } from '../config'
+import { CentrifugeWorld } from './world'
 
 export async function openBrowser(world: CentrifugeWorld) {
   world.browser = await dappeteer.launch(puppeteer, {

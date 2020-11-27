@@ -1,7 +1,7 @@
-import { PoolData } from '../ducks/pool'
-import BN from 'bn.js'
 import { Tranche } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { UpcomingPool } from '../config'
+import { PoolData } from '../ducks/pool'
 
 const emptyTranche: Tranche = {
   availableFunds: new BN(0),

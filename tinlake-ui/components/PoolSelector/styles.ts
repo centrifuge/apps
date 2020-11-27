@@ -1,5 +1,5 @@
-import styled from 'styled-components'
 import { Box, FormField } from 'grommet'
+import styled from 'styled-components'
 
 export const Button = styled(Box)`
   flex: 0 0 239px;

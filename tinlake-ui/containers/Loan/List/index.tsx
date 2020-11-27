@@ -1,14 +1,14 @@
-import * as React from 'react'
-import { Box } from 'grommet'
-import { connect } from 'react-redux'
-import { LoansState, loadLoans } from '../../../ducks/loans'
-import { PoolState, loadPool } from '../../../ducks/pool'
 import { Spinner } from '@centrifuge/axis-spinner'
-import { AuthState } from '../../../ducks/auth'
-import LoanListData from '../../../components/Loan/List'
+import { Box } from 'grommet'
+import * as React from 'react'
+import { connect } from 'react-redux'
 import DashboardMetric from '../../../components/DashboardMetric'
-import DAI from '../../../static/dai.json'
 import ERC20Display from '../../../components/ERC20Display'
+import LoanListData from '../../../components/Loan/List'
+import { AuthState } from '../../../ducks/auth'
+import { loadLoans, LoansState } from '../../../ducks/loans'
+import { loadPool, PoolState } from '../../../ducks/pool'
+import DAI from '../../../static/dai.json'
 
 interface Props {
   hideMetrics?: boolean

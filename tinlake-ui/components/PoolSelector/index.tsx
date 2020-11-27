@@ -1,11 +1,10 @@
-import * as React from 'react'
 import { Drop, TextInput } from 'grommet'
-import { useSelector, useDispatch } from 'react-redux'
-import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
-import { useRouter } from 'next/router'
 import { FormDown, FormSearch } from 'grommet-icons'
-
-import { Button, Wrapper, Title, PoolTitle, Desc, PoolList, SearchField, PoolLink, Caret } from './styles'
+import { useRouter } from 'next/router'
+import * as React from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
+import { Button, Caret, Desc, PoolLink, PoolList, PoolTitle, SearchField, Title, Wrapper } from './styles'
 
 interface Props {
   title: string

@@ -1,9 +1,9 @@
-import { AnyAction, Action } from 'redux'
-import { ThunkAction } from 'redux-thunk'
-import { getPool } from '../services/tinlake/actions'
 import { Tranche } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { HYDRATE } from 'next-redux-wrapper'
+import { Action, AnyAction } from 'redux'
+import { ThunkAction } from 'redux-thunk'
+import { getPool } from '../services/tinlake/actions'
 
 // Actions
 const LOAD_POOL = 'tinlake-ui/pool/LOAD_POOL'
