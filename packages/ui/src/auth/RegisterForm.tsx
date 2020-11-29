@@ -48,14 +48,6 @@ class RegisterForm extends React.Component<RegisterProps> {
     });
 
     return (
-      <Box align="center" justify="center">
-        <Box
-          width="medium"
-          background="white"
-          border="all"
-          margin="medium"
-          pad="medium"
-        >
           <Formik
             initialValues={user}
             validationSchema={registrationValidation}
@@ -127,8 +119,6 @@ class RegisterForm extends React.Component<RegisterProps> {
               </form>
             )}
           </Formik>
-        </Box>
-      </Box>
     );
   }
 }

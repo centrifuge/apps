@@ -8,27 +8,36 @@ import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants';
 import { AppContext } from '../App';
 import { httpClient } from '../http-client';
 import TwoFAForm from './TwoFAForm';
+import { Box } from 'grommet';
 
 type Props = {} & RouteComponentProps;
 
 const LoginPage: FunctionComponent<Props> = props => {
   const [error, setError] = useState<Error>();
   const [loginCandidate, setLoginCandidate] = useState<User>();
-  const { user, setUser } = useContext(AppContext);
+  const { user } = useContext(AppContext);
 
   const login = async (loginCandidate: User) => {
     try {
-      const user = (await httpClient.user.login(loginCandidate)).data;
-      setUser(user);
+      await httpClient.user.login(loginCandidate);
+      window.location.reload();
     } catch (e) {
       setError(e);
     }
   };
 
-  const generateToken = async (loginCandidate: User) => {
+  const loginTentative = async (loginCandidate: User) => {
     try {
-      await httpClient.user.generateToken(loginCandidate);
-      setLoginCandidate(loginCandidate);
+      console.log(loginCandidate)
+      const result = (await httpClient.user.loginTentative(loginCandidate)).data;
+      console.log({
+        ...result,
+        ...loginCandidate
+      })
+      setLoginCandidate({
+        ...result,
+        ...loginCandidate
+      });
       setError(undefined);
     } catch (e) {
       setError(e);
@@ -50,13 +59,21 @@ const LoginPage: FunctionComponent<Props> = props => {
   }
 
   return (
-    <>
+    <Box align="center" justify="center">
+      <Box
+        width="medium"
+        background="white"
+        border="all"
+        margin="medium"
+        pad="medium"
+      >
       {loginCandidate ? (
         <TwoFAForm user={loginCandidate} error={error} onSubmit={login} />
       ) : (
-        <LoginForm error={error} onSubmit={generateToken} />
+        <LoginForm error={error} onSubmit={loginTentative} />
       )}
-    </>
+      </Box>
+    </Box>
   );
 };
 

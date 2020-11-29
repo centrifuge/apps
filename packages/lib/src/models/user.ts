@@ -52,7 +52,7 @@ export class User implements IUser {
   schemas: string[] = [];
   secret?: TwoFASecret;
   // undefined acts like email in order not run migrations
-  twoFAType?: TwoFaType = TwoFaType.EMAIL;
+  twoFAType?: TwoFaType;
   enabled: boolean;
   invited: boolean;
 }

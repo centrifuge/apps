@@ -16,7 +16,7 @@ import * as speakeasy from 'speakeasy';
 import * as bcrypt from 'bcrypt';
 import { promisify } from 'util';
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
-import { User, UserWithOrg } from '@centrifuge/gateway-lib/models/user';
+import { TwoFaType, User, UserWithOrg } from '@centrifuge/gateway-lib/models/user';
 import { DatabaseService } from '../database/database.service';
 import config from '../config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
@@ -33,38 +33,39 @@ export class UsersController {
     private readonly mailerService: MailerService,
   ) {}
 
-  @Post(ROUTES.USERS.generateToken)
+  @Post(ROUTES.USERS.loginTentative)
   @HttpCode(200)
-  async generateToken(@Request() req): Promise<User> {
+  async loginTentative(@Request() req): Promise<User> {
     let { user } = req;
-    if (!user.secret) {
-      const secret = speakeasy.generateSecret();
-      user = await this.upsertUser(
-        {
-          ...req.user,
-          secret,
-        },
-        false,
-      );
-    }
-
-    const token = speakeasy.totp({
-      secret: user.secret.base32,
-      encoding: 'base32',
-    });
-
-    try {
-      await this.mailerService.sendMail({
-        to: user.email,
-        subject: 'Centrifuge Gateway Account Verification',
-        template: '2fa',
-        context: {
-          username: user.name,
-          token,
-        },
+    if(user.twoFAType !== TwoFaType.APP) {
+      if (!user.secret) {
+        const secret = speakeasy.generateSecret();
+        user = await this.upsertUser(
+          {
+            ...req.user,
+            secret,
+          },
+          false,
+        );
+      }
+      const token = speakeasy.totp({
+        secret: user.secret.base32,
+        encoding: 'base32',
       });
-    } catch (e) {
-      console.log(e);
+
+      try {
+        await this.mailerService.sendMail({
+          to: user.email,
+          subject: 'Centrifuge Gateway Account Verification',
+          template: '2fa',
+          context: {
+            username: user.name,
+            token,
+          },
+        });
+      } catch (e) {
+        console.log(e);
+      }
     }
     return user;
   }

@@ -22,14 +22,7 @@ class LoginForm extends React.Component<LoginProps> {
     const { error } = this.props;
 
     return (
-      <Box align="center" justify="center">
-        <Box
-          width="medium"
-          background="white"
-          border="all"
-          margin="medium"
-          pad="medium"
-        >
+
           <Formik
             initialValues={user}
             validate={values => {
@@ -99,8 +92,6 @@ class LoginForm extends React.Component<LoginProps> {
               )
             }
           </Formik>
-        </Box>
-      </Box>
     );
   }
 }

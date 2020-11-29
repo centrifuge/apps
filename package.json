@@ -10,7 +10,7 @@
     "build": "yarn workspaces run build",
     "postbuild": "yarn run move:assets",
     "move:assets": "yarn run move:email-templates && yarn run move:ui",
-    "move:ui": "rm -rf ./build && mv packages/ui/build .",
+    "move:ui": "rm -rf ./build && rsync -a packages/ui/build .",
     "move:email-templates": "rm -rf ./email-templates && rsync -a packages/server/email-templates ."
   },
   "eslintConfig": {

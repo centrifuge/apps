@@ -120,7 +120,7 @@ export class DocumentsController {
           ? DocumentStatus.Creating
           : document.document_status,
         nft_status: NftStatus.NoNft,
-        organizationId: user.account,
+        organizationId: user.account.toLowerCase(),
       },
       true,
     );
@@ -153,7 +153,7 @@ export class DocumentsController {
       ownerId: user._id,
       document_status: DocumentStatus.Creating,
       nft_status: NftStatus.NoNft,
-      organizationId: user.account,
+      organizationId: user.account.toLowerCase(),
     });
   }
 
@@ -221,7 +221,9 @@ export class DocumentsController {
   async getList(@Req() request): Promise<Document[]> {
     return this.databaseService.documents
       .getCursor({
-        organizationId: request.user.account,
+        $or: [
+          { organizationId: {$regex: new RegExp(request.user.account, 'i')} },
+        ]
       })
       .sort({ createdAt: -1 })
       .exec();

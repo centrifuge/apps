@@ -21,39 +21,19 @@ const runApplication = (preloadedState) => {
 // in dev mode we do not have the prerendering so we autologin a user
 // and set the __ETH_NETWORK__ to kovan
 if (process.env.NODE_ENV === 'development') {
-  // AUTO login the admin user
-  fetch('/api/users/login', {
-    method: 'POST',
-    mode: 'cors',
-    cache: 'no-cache',
-    credentials: 'same-origin',
-    headers: {
-      'Content-Type': 'application/json',
+  window['__ETH_NETWORK__'] = 'kovan';
+  window['__PRELOADED_STATE__'] = {
+    user: null,
+  };
+
+  const defaultStore = {
+    user: {
+      auth: {
+        loggedInUser: null,
+      },
     },
-    redirect: 'follow',
-    referrer: 'no-referrer',
-    body: JSON.stringify({
-      email: process.env.REACT_APP_ADMIN_USER,
-      password: process.env.REACT_APP_ADMIN_PASSWORD,
-    }),
-  })
-    .then(res => res.json())
-    .then(response => {
-      window['__ETH_NETWORK__'] = 'kovan';
-      window['__PRELOADED_STATE__'] = {
-        user: response,
-      };
-
-      const defaultStore = {
-        user: {
-          auth: {
-            loggedInUser: response,
-          },
-        },
-      };
-      runApplication(defaultStore);
-    });
-
+  };
+  runApplication(defaultStore);
 
 } else {
   //@ts-ignore
