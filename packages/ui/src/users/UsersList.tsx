@@ -243,6 +243,10 @@ const UsersList: FunctionComponent = () => {
               ),
           },
           {
+            property: 'twoFAType',
+            header: '2Fa Type',
+          },
+          {
             property: 'permissions',
             sortable: false,
             header: 'User rights',

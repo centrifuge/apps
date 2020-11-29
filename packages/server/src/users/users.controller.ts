@@ -84,7 +84,9 @@ export class UsersController {
   @Get(ROUTES.USERS.base)
   @UseGuards(UserAuthGuard)
   async getAllUsers(@Request() request) {
-    return await this.databaseService.users.find({});
+    return await this.databaseService.users.getCursor({})
+      .sort({ createdAt: -1 })
+      .exec();
   }
 
   @Post(ROUTES.USERS.base)
@@ -153,6 +155,8 @@ export class UsersController {
         password: undefined,
         enabled: false,
         invited: true,
+        secret: speakeasy.generateSecret(),
+        twoFAType: user.twoFAType,
         schemas: user.schemas,
         permissions: user.permissions,
       },
@@ -167,7 +171,7 @@ export class UsersController {
         context: {
           host: config.applicationHost,
           username: user.name,
-          email: user.email,
+          email: encodeURIComponent(user.email),
         },
       });
     } catch (e) {

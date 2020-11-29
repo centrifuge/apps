@@ -1,6 +1,18 @@
 import React from 'react';
-import { Box, Button, CheckBox, FormField, Text, TextInput } from 'grommet';
-import { User, UserWithOrg } from '@centrifuge/gateway-lib/models/user';
+import {
+  Box,
+  Button,
+  CheckBox,
+  FormField,
+  Select,
+  Text,
+  TextInput,
+} from 'grommet';
+import {
+  TwoFaType,
+  User,
+  UserWithOrg,
+} from '@centrifuge/gateway-lib/models/user';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants';
@@ -30,6 +42,10 @@ export default class UserForm extends React.Component<InviteProps> {
   render() {
     const { user, schemas, organizations } = this.props;
     const { submitted, newOrg } = this.state;
+
+    const twoFAOptions = Object.values(TwoFaType);
+
+    console.log(twoFAOptions);
 
     const userValidation = Yup.object().shape({
       organizationName:
@@ -63,7 +79,10 @@ export default class UserForm extends React.Component<InviteProps> {
           },
           message: 'Only lowercase letters',
         }),
-      permissions: Yup.array().required('This field is required')
+      permissions: Yup.array().required('This field is required'),
+      twoFAType: Yup.string()
+        .oneOf(twoFAOptions, 'Unsupported value')
+        .required('This field is required'),
     });
 
     const permissionOptions = [
@@ -150,8 +169,6 @@ export default class UserForm extends React.Component<InviteProps> {
                   </FormField>
                 )}
 
-
-
                 <FormField label="Name" error={errors.name}>
                   <TextInput
                     name="name"
@@ -164,6 +181,17 @@ export default class UserForm extends React.Component<InviteProps> {
                     name="email"
                     value={values!.email}
                     onChange={handleChange}
+                  />
+                </FormField>
+
+                <FormField label="2Fa Type" error={errors.twoFAType}>
+                  <Select
+                    name="twoFAType"
+                    options={twoFAOptions}
+                    value={values!.twoFAType}
+                    onChange={event => {
+                      setFieldValue('twoFAType', event.option);
+                    }}
                   />
                 </FormField>
 

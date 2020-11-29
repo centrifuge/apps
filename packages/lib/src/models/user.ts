@@ -28,6 +28,11 @@ export interface IChainAccount {
   };
 }
 
+export enum TwoFaType {
+  EMAIL = 'email',
+  APP = 'application',
+}
+
 export type TwoFASecret = {
   ascii: string;
   hex: string;
@@ -46,6 +51,8 @@ export class User implements IUser {
   permissions: PERMISSIONS[] = [];
   schemas: string[] = [];
   secret?: TwoFASecret;
+  // undefined acts like email in order not run migrations
+  twoFAType?: TwoFaType = TwoFaType.EMAIL;
   enabled: boolean;
   invited: boolean;
 }
