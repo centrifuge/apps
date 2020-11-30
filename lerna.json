@@ -2,6 +2,7 @@
   "lerna": "3.22.1",
   "packages": [
     "e2e-tests",
+    "tinlake.js",
     "tinlake-ui"
   ],
   "version": "independent",

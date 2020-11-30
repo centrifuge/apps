@@ -32,7 +32,7 @@ export const selector = (path: any, selectors: typeof tinlakeSelectors) => {
   let subObject = selectors
   for (let element of elements) {
     if ('_path' in subObject) concatenatedPath += (subObject as any)._path
-    subObject = subObject[element]
+    subObject = (subObject as any)[element]
   }
 
   concatenatedPath += subObject // Add final leaf

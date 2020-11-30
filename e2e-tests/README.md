@@ -3,15 +3,15 @@ End-to-end test suite for Tinlake.
 
 ## Setup
 1. Use Node v12.18.3: `nvm use`
-2. Install dependencies: `npm install`
+2. Install dependencies: `yarn install`
 3. Add a `.env` file with the right environment variables.
 
 ## Usage
-Run all tests: `npm test`
+Run all tests: `yarn test`
 
-Run a specific feature file: `npm test -- features/[name].feature`
+Run a specific feature file: `yarn test -- features/[name].feature`
 
-Run a specific scenario: `npm test -- --name "[scenario_name]"`
+Run a specific scenario: `yarn test -- --name "[scenario_name]"`
 
 ## Debugging
 

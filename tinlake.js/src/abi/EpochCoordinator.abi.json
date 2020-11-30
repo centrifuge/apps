@@ -1,0 +1,744 @@
+[
+  {
+    "inputs": [{ "internalType": "uint256", "name": "challengeTime_", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": true,
+    "inputs": [
+      { "indexed": true, "internalType": "bytes4", "name": "sig", "type": "bytes4" },
+      { "indexed": true, "internalType": "address", "name": "guy", "type": "address" },
+      { "indexed": true, "internalType": "bytes32", "name": "foo", "type": "bytes32" },
+      { "indexed": true, "internalType": "bytes32", "name": "bar", "type": "bytes32" },
+      { "indexed": false, "internalType": "uint256", "name": "wad", "type": "uint256" },
+      { "indexed": false, "internalType": "bytes", "name": "fax", "type": "bytes" }
+    ],
+    "name": "LogNote",
+    "type": "event"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "BIG_NUMBER",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "ERR_CURRENCY_AVAILABLE",
+    "outputs": [{ "internalType": "int256", "name": "", "type": "int256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "ERR_MAX_ORDER",
+    "outputs": [{ "internalType": "int256", "name": "", "type": "int256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "ERR_MAX_RESERVE",
+    "outputs": [{ "internalType": "int256", "name": "", "type": "int256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "ERR_MAX_SENIOR_RATIO",
+    "outputs": [{ "internalType": "int256", "name": "", "type": "int256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "ERR_MIN_SENIOR_RATIO",
+    "outputs": [{ "internalType": "int256", "name": "", "type": "int256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "ERR_NOT_NEW_BEST",
+    "outputs": [{ "internalType": "int256", "name": "", "type": "int256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "ERR_POOL_CLOSING",
+    "outputs": [{ "internalType": "int256", "name": "", "type": "int256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "IMPROVEMENT_WEIGHT",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "NEW_BEST",
+    "outputs": [{ "internalType": "int256", "name": "", "type": "int256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "SUCCESS",
+    "outputs": [{ "internalType": "int256", "name": "", "type": "int256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "x", "type": "uint256" },
+      { "internalType": "uint256", "name": "y", "type": "uint256" }
+    ],
+    "name": "absDistance",
+    "outputs": [{ "internalType": "uint256", "name": "delta", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "assessor",
+    "outputs": [{ "internalType": "contract AssessorLike_1", "name": "", "type": "address" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "bestRatioImprovement",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "bestReserveImprovement",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "bestSubScore",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "bestSubmission",
+    "outputs": [
+      { "internalType": "uint256", "name": "seniorRedeem", "type": "uint256" },
+      { "internalType": "uint256", "name": "juniorRedeem", "type": "uint256" },
+      { "internalType": "uint256", "name": "juniorSupply", "type": "uint256" },
+      { "internalType": "uint256", "name": "seniorSupply", "type": "uint256" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "NAV", "type": "uint256" },
+      { "internalType": "uint256", "name": "reserve_", "type": "uint256" }
+    ],
+    "name": "calcAssets",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "amount", "type": "uint256" },
+      { "internalType": "uint256", "name": "totalOrder", "type": "uint256" }
+    ],
+    "name": "calcFulfillment",
+    "outputs": [
+      {
+        "components": [{ "internalType": "uint256", "name": "value", "type": "uint256" }],
+        "internalType": "struct FixedPoint.Fixed27",
+        "name": "percent",
+        "type": "tuple"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "seniorRedeem", "type": "uint256" },
+      { "internalType": "uint256", "name": "juniorRedeem", "type": "uint256" },
+      { "internalType": "uint256", "name": "seniorSupply", "type": "uint256" },
+      { "internalType": "uint256", "name": "juniorSupply", "type": "uint256" }
+    ],
+    "name": "calcNewReserve",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "seniorRedeem", "type": "uint256" },
+      { "internalType": "uint256", "name": "seniorSupply", "type": "uint256" },
+      { "internalType": "uint256", "name": "currSeniorAsset", "type": "uint256" },
+      { "internalType": "uint256", "name": "reserve_", "type": "uint256" },
+      { "internalType": "uint256", "name": "nav_", "type": "uint256" }
+    ],
+    "name": "calcSeniorAssetValue",
+    "outputs": [{ "internalType": "uint256", "name": "seniorAsset", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "seniorAsset", "type": "uint256" },
+      { "internalType": "uint256", "name": "NAV", "type": "uint256" },
+      { "internalType": "uint256", "name": "reserve_", "type": "uint256" }
+    ],
+    "name": "calcSeniorRatio",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "challengeTime",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "components": [{ "internalType": "uint256", "name": "value", "type": "uint256" }],
+        "internalType": "struct FixedPoint.Fixed27",
+        "name": "ratio",
+        "type": "tuple"
+      },
+      {
+        "components": [{ "internalType": "uint256", "name": "value", "type": "uint256" }],
+        "internalType": "struct FixedPoint.Fixed27",
+        "name": "minRatio",
+        "type": "tuple"
+      },
+      {
+        "components": [{ "internalType": "uint256", "name": "value", "type": "uint256" }],
+        "internalType": "struct FixedPoint.Fixed27",
+        "name": "maxRatio",
+        "type": "tuple"
+      }
+    ],
+    "name": "checkRatioInRange",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "closeEpoch",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "currentEpoch",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{ "internalType": "address", "name": "usr", "type": "address" }],
+    "name": "deny",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "bytes32", "name": "contractName", "type": "bytes32" },
+      { "internalType": "address", "name": "addr", "type": "address" }
+    ],
+    "name": "depend",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "epochJuniorTokenPrice",
+    "outputs": [{ "internalType": "uint256", "name": "value", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "epochNAV",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "epochReserve",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "epochSeniorAsset",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "epochSeniorTokenPrice",
+    "outputs": [{ "internalType": "uint256", "name": "value", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "executeEpoch",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "bytes32", "name": "name", "type": "bytes32" },
+      { "internalType": "uint256", "name": "value", "type": "uint256" }
+    ],
+    "name": "file",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "gotFullValidSolution",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "juniorTranche",
+    "outputs": [{ "internalType": "contract EpochTrancheLike", "name": "", "type": "address" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "lastEpochClosed",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "lastEpochExecuted",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "minChallengePeriodEnd",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "minimumEpochTime",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "order",
+    "outputs": [
+      { "internalType": "uint256", "name": "seniorRedeem", "type": "uint256" },
+      { "internalType": "uint256", "name": "juniorRedeem", "type": "uint256" },
+      { "internalType": "uint256", "name": "juniorSupply", "type": "uint256" },
+      { "internalType": "uint256", "name": "seniorSupply", "type": "uint256" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "poolClosing",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "x", "type": "uint256" },
+      { "internalType": "uint256", "name": "y", "type": "uint256" }
+    ],
+    "name": "rdiv",
+    "outputs": [{ "internalType": "uint256", "name": "z", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{ "internalType": "address", "name": "usr", "type": "address" }],
+    "name": "rely",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "reserve",
+    "outputs": [{ "internalType": "contract ReserveLike_2", "name": "", "type": "address" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "x", "type": "uint256" },
+      { "internalType": "uint256", "name": "y", "type": "uint256" }
+    ],
+    "name": "rmul",
+    "outputs": [{ "internalType": "uint256", "name": "z", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "x", "type": "uint256" },
+      { "internalType": "uint256", "name": "y", "type": "uint256" }
+    ],
+    "name": "safeAdd",
+    "outputs": [{ "internalType": "uint256", "name": "z", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "x", "type": "uint256" },
+      { "internalType": "uint256", "name": "y", "type": "uint256" }
+    ],
+    "name": "safeDiv",
+    "outputs": [{ "internalType": "uint256", "name": "z", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "x", "type": "uint256" },
+      { "internalType": "uint256", "name": "y", "type": "uint256" }
+    ],
+    "name": "safeMul",
+    "outputs": [{ "internalType": "uint256", "name": "z", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "x", "type": "uint256" },
+      { "internalType": "uint256", "name": "y", "type": "uint256" }
+    ],
+    "name": "safeSub",
+    "outputs": [{ "internalType": "uint256", "name": "z", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "components": [{ "internalType": "uint256", "name": "value", "type": "uint256" }],
+        "internalType": "struct FixedPoint.Fixed27",
+        "name": "newSeniorRatio_",
+        "type": "tuple"
+      },
+      { "internalType": "uint256", "name": "newReserve_", "type": "uint256" }
+    ],
+    "name": "scoreImprovement",
+    "outputs": [
+      { "internalType": "int256", "name": "", "type": "int256" },
+      { "internalType": "uint256", "name": "", "type": "uint256" },
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "components": [{ "internalType": "uint256", "name": "value", "type": "uint256" }],
+        "internalType": "struct FixedPoint.Fixed27",
+        "name": "newSeniorRatio",
+        "type": "tuple"
+      }
+    ],
+    "name": "scoreRatioImprovement",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [{ "internalType": "uint256", "name": "newReserve_", "type": "uint256" }],
+    "name": "scoreReserveImprovement",
+    "outputs": [{ "internalType": "uint256", "name": "score", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "seniorRedeem", "type": "uint256" },
+      { "internalType": "uint256", "name": "juniorRedeem", "type": "uint256" },
+      { "internalType": "uint256", "name": "juniorSupply", "type": "uint256" },
+      { "internalType": "uint256", "name": "seniorSupply", "type": "uint256" }
+    ],
+    "name": "scoreSolution",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "seniorTranche",
+    "outputs": [{ "internalType": "contract EpochTrancheLike", "name": "", "type": "address" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "submissionPeriod",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "uint256", "name": "seniorRedeem", "type": "uint256" },
+      { "internalType": "uint256", "name": "juniorRedeem", "type": "uint256" },
+      { "internalType": "uint256", "name": "juniorSupply", "type": "uint256" },
+      { "internalType": "uint256", "name": "seniorSupply", "type": "uint256" }
+    ],
+    "name": "submitSolution",
+    "outputs": [{ "internalType": "int256", "name": "", "type": "int256" }],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "seniorRedeem", "type": "uint256" },
+      { "internalType": "uint256", "name": "juniorRedeem", "type": "uint256" },
+      { "internalType": "uint256", "name": "seniorSupply", "type": "uint256" },
+      { "internalType": "uint256", "name": "juniorSupply", "type": "uint256" }
+    ],
+    "name": "validate",
+    "outputs": [{ "internalType": "int256", "name": "", "type": "int256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "currencyAvailable", "type": "uint256" },
+      { "internalType": "uint256", "name": "currencyOut", "type": "uint256" },
+      { "internalType": "uint256", "name": "seniorRedeem", "type": "uint256" },
+      { "internalType": "uint256", "name": "juniorRedeem", "type": "uint256" },
+      { "internalType": "uint256", "name": "seniorSupply", "type": "uint256" },
+      { "internalType": "uint256", "name": "juniorSupply", "type": "uint256" }
+    ],
+    "name": "validateCoreConstraints",
+    "outputs": [{ "internalType": "int256", "name": "err", "type": "int256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "reserve_", "type": "uint256" },
+      { "internalType": "uint256", "name": "seniorAsset", "type": "uint256" },
+      { "internalType": "uint256", "name": "nav_", "type": "uint256" }
+    ],
+    "name": "validatePoolConstraints",
+    "outputs": [{ "internalType": "int256", "name": "err", "type": "int256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "wards",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "weightJuniorRedeem",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "weightJuniorSupply",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "weightSeniorRedeem",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "weightSeniorSupply",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
