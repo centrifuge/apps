@@ -18,49 +18,49 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     isWard = async (user: string, contractName: ContractName) => {
       if (!this.contract(contractName)?.wards) return new BN(0)
-      return (await this.contract(contractName).wards(user)).toBN()
+      return await this.toBN(this.contract(contractName).wards(user))
     }
 
     canUpdateNftFeed = async (user: string) => {
       if (!this.contract('FEED')?.wards) return false
-      return (await this.contract('FEED').wards(user)).toBN().toNumber() === 1
+      return (await this.toBN(this.contract('FEED').wards(user))).toNumber() === 1
     }
 
     canSetSeniorTrancheInterest = async (user: string) => {
       if (!this.contract('ASSESSOR')?.wards) return false
-      return (await this.contract('ASSESSOR').wards(user)).toBN().toNumber() === 1
+      return (await this.toBN(this.contract('ASSESSOR').wards(user))).toNumber() === 1
     }
 
     canSetRiskScore = async (user: string) => {
       if (!this.contract('FEED')?.wards) return false
-      return (await this.contract('FEED').wards(user)).toBN().toNumber() === 1
+      return (await this.toBN(this.contract('FEED').wards(user))).toNumber() === 1
     }
 
     canSetMaxReserve = async (user: string) => {
       if (!this.contract('ASSESSOR_ADMIN')?.wards) return false
-      return (await this.contract('ASSESSOR_ADMIN').wards(user)).toBN().toNumber() === 1
+      return (await this.toBN(this.contract('ASSESSOR_ADMIN').wards(user))).toNumber() === 1
     }
 
     canSetMinimumJuniorRatio = async (user: string) => {
       if (!this.contract('ASSESSOR')?.wards) return false
-      return (await this.contract('ASSESSOR').wards(user)).toBN().toNumber() === 1
+      return (await this.toBN(this.contract('ASSESSOR').wards(user))).toNumber() === 1
     }
 
     canAddToJuniorMemberList = async (user: string) => {
       if (!this.contract('JUNIOR_MEMBERLIST')?.wards) return false
-      return (await this.contract('JUNIOR_MEMBERLIST').wards(user)).toBN().toNumber() === 1
+      return (await this.toBN(this.contract('JUNIOR_MEMBERLIST').wards(user))).toNumber() === 1
     }
 
     canAddToSeniorMemberList = async (user: string) => {
       if (!this.contract('SENIOR_MEMBERLIST')?.wards) return false
       if (!(this.contractAddresses['SENIOR_MEMBERLIST'] !== ZERO_ADDRESS)) return false
-      return (await this.contract('SENIOR_MEMBERLIST').wards(user)).toBN().toNumber() === 1
+      return (await this.toBN(this.contract('SENIOR_MEMBERLIST').wards(user))).toNumber() === 1
     }
 
     // REV: not used, but can be left
     canSetLoanPrice = async (user: string) => {
       if (!this.contract('COLLECTOR')?.wards) return false
-      return (await this.contract('COLLECTOR').wards(user)).toBN().toNumber() === 1
+      return (await this.toBN(this.contract('COLLECTOR').wards(user))).toNumber() === 1
     }
 
     // ------------ admin functions lender-side -------------
@@ -115,11 +115,11 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     getNftFeedValue = async (nftId: string) => {
-      return (await this.contract('FEED').nftValues(nftId)).toBN()
+      return await this.toBN(this.contract('FEED').nftValues(nftId))
     }
 
     getNftMaturityDate = async (nftId: string) => {
-      return (await this.contract('FEED').maturityDate(nftId)).toBN()
+      return await this.toBN(this.contract('FEED').maturityDate(nftId))
     }
 
     setDiscountRate = async (rate: string) => {

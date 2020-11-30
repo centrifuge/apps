@@ -6,7 +6,7 @@ Documentation can be found in `./docs/` or at https://centrifuge.github.io/tinla
 
 ## Development
 
-Install dependencies with `npm install`.
+Install dependencies with `yarn install`.
 
 ## Running tests
 ### Pre Installed
@@ -28,7 +28,7 @@ Install dependencies with `npm install`.
 `./bin/deploy.sh`
 
 #### Run integration tests
-`npm run test`
+`yarn test`
 
 ## Alternatively, run a docker-based local network with all tinlake contracts deployed
 

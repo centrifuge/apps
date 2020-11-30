@@ -60,10 +60,10 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const coordinator = this.contract('COORDINATOR')
 
       return {
-        seniorRedeem: (await coordinator.weightSeniorRedeem()).toBN().toNumber(),
-        juniorRedeem: (await coordinator.weightJuniorRedeem()).toBN().toNumber(),
-        juniorSupply: (await coordinator.weightJuniorSupply()).toBN().toNumber(),
-        seniorSupply: (await coordinator.weightSeniorSupply()).toBN().toNumber(),
+        seniorRedeem: (await this.toBN(coordinator.weightSeniorRedeem())).toNumber(),
+        juniorRedeem: (await this.toBN(coordinator.weightJuniorRedeem())).toNumber(),
+        juniorSupply: (await this.toBN(coordinator.weightJuniorSupply())).toNumber(),
+        seniorSupply: (await this.toBN(coordinator.weightSeniorSupply())).toNumber(),
       }
     }
 
@@ -143,7 +143,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
     getCurrentEpochId = async () => {
       const coordinator = this.contract('COORDINATOR')
-      return (await coordinator.currentEpoch()).toBN().toNumber()
+      return (await this.toBN(coordinator.currentEpoch())).toNumber()
     }
 
     getLatestBlockTimestamp = async () => {
@@ -154,17 +154,17 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
     getLastEpochClosed = async () => {
       const coordinator = this.contract('COORDINATOR')
-      return (await coordinator.lastEpochClosed()).toBN().toNumber()
+      return (await this.toBN(coordinator.lastEpochClosed())).toNumber()
     }
 
     getMinimumEpochTime = async () => {
       const coordinator = this.contract('COORDINATOR')
-      return (await coordinator.minimumEpochTime()).toBN().toNumber()
+      return (await this.toBN(coordinator.minimumEpochTime())).toNumber()
     }
 
     getMinChallengePeriodEnd = async () => {
       const coordinator = this.contract('COORDINATOR')
-      return (await coordinator.minChallengePeriodEnd()).toBN().toNumber()
+      return (await this.toBN(coordinator.minChallengePeriodEnd())).toNumber()
     }
 
     getSubmissionPeriod = async () => {
@@ -172,13 +172,13 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
     }
 
     getChallengeTime = async () => {
-      return (await this.contract('COORDINATOR').challengeTime()).toBN()
+      return await this.toBN(this.contract('COORDINATOR').challengeTime())
     }
 
     getCurrentEpochState = async () => {
       const coordinator = this.contract('COORDINATOR')
 
-      const minChallengePeriodEnd = (await coordinator.minChallengePeriodEnd()).toBN().toNumber()
+      const minChallengePeriodEnd = (await this.toBN(coordinator.minChallengePeriodEnd())).toNumber()
       const latestBlockTimestamp = await this.getLatestBlockTimestamp()
       if (minChallengePeriodEnd !== 0) {
         if (minChallengePeriodEnd < latestBlockTimestamp) return 'challenge-period-ended'
@@ -190,8 +190,8 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         return 'in-submission-period'
       }
 
-      const lastEpochClosed = (await coordinator.lastEpochClosed()).toBN().toNumber()
-      const minimumEpochTime = (await coordinator.minimumEpochTime()).toBN().toNumber()
+      const lastEpochClosed = (await this.toBN(coordinator.lastEpochClosed())).toNumber()
+      const minimumEpochTime = (await this.toBN(coordinator.minimumEpochTime())).toNumber()
       if (submissionPeriod === false) {
         if (lastEpochClosed + minimumEpochTime < latestBlockTimestamp) return 'can-be-closed'
         return 'open'

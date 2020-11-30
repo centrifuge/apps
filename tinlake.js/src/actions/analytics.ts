@@ -7,22 +7,22 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
   return class extends Base implements IAnalyticsActions {
     // borrower analytics
     getCurrentNAV = async (): Promise<BN> => {
-      return (await this.contract('FEED').currentNAV()).toBN()
+      return await this.toBN(this.contract('FEED').currentNAV())
     }
 
     getTotalDebt = async (): Promise<BN> => {
-      return (await this.contract('PILE').total()).toBN()
+      return await this.toBN(this.contract('PILE').total())
     }
 
     getPrincipal = async (loanId: string): Promise<BN> => {
-      return (await this.contract('FEED').ceiling(loanId)).toBN()
+      return await this.toBN(this.contract('FEED').ceiling(loanId))
     }
     getDebt = async (loanId: string): Promise<BN> => {
-      return (await this.contract('PILE').debt(loanId)).toBN()
+      return await this.toBN(this.contract('PILE').debt(loanId))
     }
 
     loanCount = async (): Promise<BN> => {
-      return (await this.contract('TITLE').count()).toBN()
+      return await this.toBN(this.contract('TITLE').count())
     }
 
     getCollateral = async (loanId: string): Promise<any> => {
@@ -38,16 +38,16 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       const nftId = await this.contract('FEED').nftID(loanId)
 
       // retrieve riskgroup from nft
-      return (await this.contract('FEED').risk(nftId)).toBN()
+      return await this.toBN(this.contract('FEED').risk(nftId))
     }
 
     getScoreCard = async (loanId: string): Promise<ScoreCard> => {
       const riskGroup = await this.getRiskGroup(loanId)
 
-      const thresholdRatio = (await this.contract('FEED').thresholdRatio(riskGroup.toNumber())).toBN()
-      const ceilingRatio = (await this.contract('FEED').ceilingRatio(riskGroup.toNumber())).toBN()
+      const thresholdRatio = await this.toBN(this.contract('FEED').thresholdRatio(riskGroup.toNumber()))
+      const ceilingRatio = await this.toBN(this.contract('FEED').ceilingRatio(riskGroup.toNumber()))
       const interestRate = await this.getInterestRate(loanId)
-      const recoveryRatePD = (await this.contract('FEED').recoveryRatePD(riskGroup.toNumber())).toBN()
+      const recoveryRatePD = await this.toBN(this.contract('FEED').recoveryRatePD(riskGroup.toNumber()))
 
       return {
         thresholdRatio,
@@ -146,21 +146,21 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getJuniorTokenBalance = async (user: string) => {
-      return (await this.contract('JUNIOR_TOKEN').balanceOf(user)).toBN()
+      return await this.toBN(this.contract('JUNIOR_TOKEN').balanceOf(user))
     }
 
     checkHasInvestedInJunior = async (user: string) => {
       const userOrder = await this.contract('JUNIOR_TRANCHE').users(user)
 
       if (!userOrder) return false
-      return !userOrder.orderedInEpoch.toBN().isZero()
+      return !new BN(userOrder.orderedInEpoch.toString()).isZero()
     }
 
     getJuniorOrderedInEpoch = async (user: string) => {
       const userOrder = await this.contract('JUNIOR_TRANCHE').users(user)
 
       if (!userOrder) return 0
-      return userOrder.orderedInEpoch.toBN().toNumber()
+      return new BN(userOrder.orderedInEpoch.toString()).toNumber()
     }
 
     getJuniorTokenSymbol = async () => {
@@ -177,15 +177,15 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getJuniorTotalSupply = async () => {
-      return (await this.contract('JUNIOR_TOKEN').totalSupply()).toBN()
+      return await this.toBN(this.contract('JUNIOR_TOKEN').totalSupply())
     }
 
     getMaxSupplyAmountJunior = async (user: string) => {
-      return (await this.contract('TINLAKE_CURRENCY').balanceOf(user)).toBN()
+      return await this.toBN(this.contract('TINLAKE_CURRENCY').balanceOf(user))
     }
 
     getTokenPriceJunior = async () => {
-      return (await this.contract('ASSESSOR')['calcJuniorTokenPrice()']()).toBN()
+      return await this.toBN(this.contract('ASSESSOR')['calcJuniorTokenPrice()']())
     }
 
     existsSenior = () => {
@@ -194,7 +194,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
 
     getSeniorTokenBalance = async (user: string) => {
       if (!this.existsSenior()) return new BN(0)
-      return (await this.contract('SENIOR_TOKEN').balanceOf(user)).toBN()
+      return await this.toBN(this.contract('SENIOR_TOKEN').balanceOf(user))
     }
 
     checkHasInvestedInSenior = async (user: string) => {
@@ -202,7 +202,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       const userOrder = await this.contract('SENIOR_TRANCHE').users(user)
 
       if (!userOrder) return false
-      return !userOrder.orderedInEpoch.toBN().isZero()
+      return !new BN(userOrder.orderedInEpoch.toString()).isZero()
     }
 
     getSeniorOrderedInEpoch = async (user: string) => {
@@ -210,7 +210,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       const userOrder = await this.contract('SENIOR_TRANCHE').users(user)
 
       if (!userOrder) return 0
-      return userOrder.orderedInEpoch.toBN().toNumber()
+      return new BN(userOrder.orderedInEpoch.toString()).toNumber()
     }
 
     getSeniorTokenSymbol = async () => {
@@ -230,83 +230,83 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
 
     getSeniorTotalSupply = async () => {
       if (!this.existsSenior()) return new BN(0)
-      return (await this.contract('SENIOR_TOKEN').totalSupply()).toBN()
+      return await this.toBN(this.contract('SENIOR_TOKEN').totalSupply())
     }
 
     getSeniorPendingInvestments = async () => {
       if (!this.existsSenior()) return new BN(0)
-      return (await this.contract('SENIOR_TRANCHE').totalSupply()).toBN()
+      return await this.toBN(this.contract('SENIOR_TRANCHE').totalSupply())
     }
 
     getSeniorPendingRedemptions = async () => {
       if (!this.existsSenior()) return new BN(0)
-      return (await this.contract('SENIOR_TRANCHE').totalRedeem()).toBN()
+      return await this.toBN(this.contract('SENIOR_TRANCHE').totalRedeem())
     }
 
     getJuniorPendingInvestments = async () => {
-      return (await this.contract('JUNIOR_TRANCHE').totalSupply()).toBN()
+      return await this.toBN(this.contract('JUNIOR_TRANCHE').totalSupply())
     }
 
     getJuniorPendingRedemptions = async () => {
-      return (await this.contract('JUNIOR_TRANCHE').totalRedeem()).toBN()
+      return await this.toBN(this.contract('JUNIOR_TRANCHE').totalRedeem())
     }
 
     getMaxSupplyAmountSenior = async (user: string) => {
       if (!this.existsSenior()) return new BN(0)
-      return (await this.contract('TINLAKE_CURRENCY').balanceOf(user)).toBN()
+      return await this.toBN(this.contract('TINLAKE_CURRENCY').balanceOf(user))
     }
 
     getTokenPriceSenior = async () => {
-      return (await this.contract('ASSESSOR')['calcSeniorTokenPrice()']()).toBN()
+      return await this.toBN(this.contract('ASSESSOR')['calcSeniorTokenPrice()']())
     }
 
     getAvailableFunds = async () => {
-      return (await this.contract('RESERVE').currencyAvailable()).toBN()
+      return await this.toBN(this.contract('RESERVE').currencyAvailable())
     }
 
     getSeniorReserve = async () => {
       if (this.contractAddresses['SENIOR_TRANCHE'] !== ZERO_ADDRESS) {
-        return (await this.contract('ASSESSOR').seniorBalance_()).toBN()
+        return await this.toBN(this.contract('ASSESSOR').seniorBalance_())
       }
       return new BN(0)
     }
 
     getJuniorReserve = async () => {
       const seniorBalance = await this.getSeniorReserve()
-      const totalBalance = (await this.contract('RESERVE').totalBalance()).toBN()
+      const totalBalance = await this.toBN(this.contract('RESERVE').totalBalance())
       return totalBalance.sub(seniorBalance)
     }
 
     getMinJuniorRatio = async () => {
-      return seniorToJuniorRatio((await this.contract('ASSESSOR').maxSeniorRatio()).toBN())
+      return seniorToJuniorRatio(await this.toBN(this.contract('ASSESSOR').maxSeniorRatio()))
     }
 
     getMaxJuniorRatio = async () => {
-      return seniorToJuniorRatio((await this.contract('ASSESSOR').minSeniorRatio()).toBN())
+      return seniorToJuniorRatio(await this.toBN(this.contract('ASSESSOR').minSeniorRatio()))
     }
 
     getMaxReserve = async () => {
-      return (await this.contract('ASSESSOR').maxReserve()).toBN()
+      return await this.toBN(this.contract('ASSESSOR').maxReserve())
     }
 
     getCurrentJuniorRatio = async () => {
-      return seniorToJuniorRatio((await this.contract('ASSESSOR').seniorRatio()).toBN())
+      return seniorToJuniorRatio(await this.toBN(this.contract('ASSESSOR').seniorRatio()))
     }
 
     getAssetValueJunior = async () => {
-      return (await this.contract('ASSESSOR').calcAssetValue(this.contractAddresses['JUNIOR_TRANCHE'])).toBN()
+      return await this.toBN(this.contract('ASSESSOR').calcAssetValue(this.contractAddresses['JUNIOR_TRANCHE']))
     }
 
     getSeniorDebt = async () => {
       if (this.contractAddresses['SENIOR_TRANCHE'] !== ZERO_ADDRESS) {
-        return (await this.contract('ASSESSOR').seniorDebt_()).toBN()
+        return await this.toBN(this.contract('ASSESSOR').seniorDebt_())
       }
       return new BN(0)
     }
 
     getSeniorInterestRate = async () => {
       if (this.contractAddresses['SENIOR_TRANCHE'] !== ZERO_ADDRESS) {
-        return (await this.contract('ASSESSOR').seniorInterestRate()).toBN()
+        return await this.toBN(this.contract('ASSESSOR').seniorInterestRate())
       }
       return new BN(0)
     }

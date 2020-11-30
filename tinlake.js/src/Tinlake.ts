@@ -85,7 +85,6 @@ export default class Tinlake {
   public readonly version: number = 3
 
   constructor(params: TinlakeParams) {
-    console.log('It works 3!')
     const {
       provider,
       signer,
@@ -231,5 +230,9 @@ export default class Tinlake {
       default:
         return '_OPERATOR'
     }
+  }
+
+  toBN = async (num: Promise<ethers.BigNumber>): Promise<BN> => {
+    return new BN((await num).toString())
   }
 }

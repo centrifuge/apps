@@ -30,23 +30,23 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     getProxyAccessToken = async (proxyAddress: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
-      const accessToken = (await proxy.accessToken()).toBN()
+      const accessToken = await this.toBN(proxy.accessToken())
       return accessToken.toNumber()
     }
 
     getProxyOwnerByLoan = async (loanId: string) => {
       const loanOwner = this.contract('TITLE').ownerOf(loanId)
       const accessToken = await this.getProxyAccessToken(loanOwner)
-      return this.getProxyAccessTokenOwner(accessToken)
+      return this.getProxyAccessTokenOwner(accessToken.toString())
     }
 
     getProxyOwnerByAddress = async (proxyAddress: string) => {
       const accessToken = await this.getProxyAccessToken(proxyAddress)
-      return this.getProxyAccessTokenOwner(accessToken)
+      return this.getProxyAccessTokenOwner(accessToken.toString())
     }
 
     proxyCount = async (): Promise<BN> => {
-      return (await this.contract('PROXY_REGISTRY').count()).toBN()
+      return await this.toBN(this.contract('PROXY_REGISTRY').count())
     }
 
     checkProxyExists = async (address: string): Promise<string | null> => {

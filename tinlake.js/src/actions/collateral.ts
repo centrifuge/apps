@@ -46,7 +46,7 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
     }
 
     getNFTCount = async (nftAddress: string): Promise<BN> => {
-      return (await this.contract('COLLATERAL_NFT', nftAddress).count()).toBN()
+      return await this.toBN(this.contract('COLLATERAL_NFT', nftAddress).count())
     }
 
     getNFTData = async (nftAddress: string, tokenId: string): Promise<any> => {

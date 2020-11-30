@@ -1,4 +1,4 @@
-var Decimal = require('decimal.js-light')
+const Decimal = require('decimal.js-light')
 import BN from 'bn.js'
 
 Decimal.set({

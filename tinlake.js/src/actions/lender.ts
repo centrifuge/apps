@@ -141,7 +141,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     getSeniorTokenAllowance = async (owner: string) => {
-      return (await this.contract('SENIOR_TOKEN').allowance(owner, this.contractAddresses['SENIOR_TRANCHE'])).toBN()
+      return await this.toBN(this.contract('SENIOR_TOKEN').allowance(owner, this.contractAddresses['SENIOR_TRANCHE']))
     }
 
     checkSeniorTokenMemberlist = async (user: string) => {
@@ -240,7 +240,7 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     getJuniorTokenAllowance = async (owner: string) => {
-      return (await this.contract('JUNIOR_TOKEN').allowance(owner, this.contractAddresses['JUNIOR_TRANCHE'])).toBN()
+      return await this.toBN(this.contract('JUNIOR_TOKEN').allowance(owner, this.contractAddresses['JUNIOR_TRANCHE']))
     }
 
     checkJuniorTokenMemberlist = async (user: string) => {
@@ -261,10 +261,10 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
 
 const disburseToBN = (disburse: any): CalcDisburseResult => {
   return {
-    payoutCurrencyAmount: disburse.payoutCurrencyAmount.toBN(),
-    payoutTokenAmount: disburse.payoutTokenAmount.toBN(),
-    remainingSupplyCurrency: disburse.remainingSupplyCurrency.toBN(),
-    remainingRedeemToken: disburse.remainingRedeemToken.toBN(),
+    payoutCurrencyAmount: new BN(disburse.payoutCurrencyAmount.toString()),
+    payoutTokenAmount: new BN(disburse.payoutTokenAmount.toString()),
+    remainingSupplyCurrency: new BN(disburse.remainingSupplyCurrency.toString()),
+    remainingRedeemToken: new BN(disburse.remainingRedeemToken.toString()),
   }
 }
 
