@@ -1,5 +1,4 @@
 {
-  "extends": "../tsconfig.base.json",
   "compilerOptions": {
     /* Required because of an import error with @types/puppeteer */
     "forceConsistentCasingInFileNames": false,
