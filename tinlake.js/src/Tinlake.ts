@@ -54,7 +54,7 @@ export type ContractAddresses = {
 export type TinlakeParams = {
   provider: ethers.providers.Provider
   signer?: ethers.Signer
-  legacyWeb3Provider?: ethers.providers.Web3Provider
+  legacyWeb3Provider?: ethers.providers.ExternalProvider
   transactionTimeout?: number
   contractAddresses?: ContractAddresses | {}
   contractAbis?: ContractAbis | {}
@@ -75,7 +75,7 @@ export type Constructor<T = {}> = new (...args: any[]) => Tinlake
 export default class Tinlake {
   public provider: ethers.providers.Provider
   public signer?: ethers.Signer
-  public legacyWeb3Provider?: ethers.providers.Web3Provider
+  public legacyWeb3Provider?: ethers.providers.ExternalProvider
   public overrides: ethers.providers.TransactionRequest = {}
   public contractAddresses: ContractAddresses
   public transactionTimeout: number
@@ -118,7 +118,7 @@ export default class Tinlake {
   setProviderAndSigner = (
     provider: ethers.providers.Provider,
     signer?: ethers.Signer,
-    legacyWeb3Provider?: ethers.providers.Web3Provider
+    legacyWeb3Provider?: ethers.providers.ExternalProvider
   ) => {
     this.provider = provider
     this.signer = signer
