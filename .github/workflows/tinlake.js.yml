@@ -4,6 +4,10 @@ on:
     paths:
     - 'tinlake.js/**'
 
+defaults:
+  run:
+    working-directory: tinlake.js
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,13 +19,9 @@ jobs:
           node-version: '12'
       - uses: c-hive/gha-yarn-cache@v1
       - run: yarn install
-        working-directory: ./
-      - run: yarn run lint
-        working-directory: ./tinlake.js
-      - run: yarn run check-format
-        working-directory: ./tinlake.js
-      - run: yarn run build
-        working-directory: ./tinlake.js
+      - run: yarn lint
+      - run: yarn check-format
+      - run: yarn build
 
   deploy:
     runs-on: ubuntu-latest
@@ -36,9 +36,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - uses: c-hive/gha-yarn-cache@v1
       - run: yarn install
-        working-directory: ./
-      - run: yarn run build
-        working-directory: ./tinlake.js
+      - run: yarn build
       - run: yarn publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
