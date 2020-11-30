@@ -6,5 +6,6 @@ export const DataTableWithDynamicHeight = styled(DataTable).attrs(props => ({
 }))`
   tbody {
     max-height: ${props => props.size};
+    overflow: overlay;
   }
 `;

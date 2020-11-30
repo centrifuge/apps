@@ -168,11 +168,11 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
             },
             {
               property: 'nft_status',
-              header: 'NFT Status',
+              header: 'NFT ID',
               sortable: true,
               render: datum => {
                 if(documentHasNFTs(datum)) {
-                    return datum.header.nfts.map(nft => nft.token_id).join(', ')
+                    return datum.header.nfts.map(nft => nft.token_id.replace(/^0x/,'')).join(', ')
                 }
                 return datum.nft_status;
               }
@@ -184,7 +184,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               sortable: false,
               size: '36px',
               render: datum => {
-                return canLoadDocument(datum) ? <FormNext /> : <></>;
+                return canLoadDocument(datum) ? <Box><FormNext /></Box> : <></>;
               },
             },
           ]}

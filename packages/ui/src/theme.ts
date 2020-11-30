@@ -3,6 +3,18 @@ import { css } from 'styled-components'
 
 export const theme = {
   ...axisThemeConfig,
+  table: {
+
+    ...axisThemeConfig.table,
+    body: {
+      ...axisThemeConfig.table.body,
+      pad: {
+        ...axisThemeConfig.table.body.pad,
+        right:'12px'
+
+      },
+    }
+  },
   dataTable: {
     ...axisThemeConfig.dataTable,
     body: {

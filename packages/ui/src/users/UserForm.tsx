@@ -95,7 +95,7 @@ export default class UserForm extends React.Component<InviteProps> {
     const schemaOptions = schemas.map(i => i.name);
 
     return (
-      <Box margin={{ vertical: 'medium' }}>
+      <Box margin={{ vertical: 'medium' }} overflow={'auto'}>
         <Formik
           initialValues={user}
           validateOnBlur={submitted}
@@ -157,9 +157,7 @@ export default class UserForm extends React.Component<InviteProps> {
                           <p>
                             {values.organizationName + ' / ' + values.account}
                           </p>
-                        ) : (
-                          undefined
-                        );
+                        ) : undefined;
                       })()}
                       onChange={selected => {
                         setFieldValue('account', selected.account);

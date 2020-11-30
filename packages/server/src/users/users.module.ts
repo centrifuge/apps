@@ -17,7 +17,7 @@ export class UsersModule implements NestModule {
       .forRoutes(`${ROUTES.USERS.loginTentative}`);
 
     consumer
-      .apply(passport.authenticate(process.env.NODE_ENV === 'development'? '2fa':'2fa'))
+      .apply(passport.authenticate(process.env.NODE_ENV === 'development'? 'local':'2fa'))
       .forRoutes(`${ROUTES.USERS.login}`);
   }
 }
