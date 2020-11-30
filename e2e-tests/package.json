@@ -16,7 +16,7 @@
   "license": "ISC",
   "homepage": "https://github.com/centrifuge/e2e-tests#readme",
   "dependencies": {
-    "@centrifuge/tinlake-js": "3.0.0-develop.34",
+    "@centrifuge/tinlake-js": "3.0.0-develop.35",
     "@centrifuge/tinlake-pools-kovan": "0.0.1-develop.3",
     "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.3",
     "@cucumber/cucumber": "^7.0.0-rc.0",
