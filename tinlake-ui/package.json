@@ -8,7 +8,7 @@
     "fs": false
   },
   "scripts": {
-    "build": "yarn build:next && yarn build:lambda",
+    "build": "yarn build:deps && yarn build:next && yarn build:lambda",
     "build-for-husky": "tsc",
     "dev:next": "PORT=3000 node server.js",
     "build:next": "next build",
@@ -22,7 +22,8 @@
     "format": "prettier --write \"./**/*.{ts,tsx}\"",
     "check-format": "prettier --check \"./**/*.{ts,tsx}\"",
     "dev:lambda": "netlify-lambda serve lambda",
-    "build:lambda": "netlify-lambda build lambda"
+    "build:lambda": "netlify-lambda build lambda",
+    "build:deps": "cd ../tinlake.js && yarn build && cd ../tinlake-ui"
   },
   "repository": {
     "type": "git",
