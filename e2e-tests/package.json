@@ -24,6 +24,6 @@
     "puppeteer": "5.2.1"
   },
   "devDependencies": {
-    "@types/puppeteer": "^5.4.0"
+    "@types/puppeteer": "5.4.0@ts4.1"
   }
 }
