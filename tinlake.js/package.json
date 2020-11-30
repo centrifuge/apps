@@ -1,6 +1,6 @@
 {
   "name": "@centrifuge/tinlake-js",
-  "version": "3.0.0-develop.33",
+  "version": "3.0.0-develop.34",
   "description": "Centrifuge Tinlake Contracts Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,12 +10,12 @@
   ],
   "dependencies": {
     "bignumber.js": "^9.0.0",
-    "decimal.js-light": "^2.5.0",
+    "decimal.js-light": "2.5.1",
     "dotenv": "^8.2.0",
     "eth-permit": "^0.1.7",
-    "ethers": "4.0.45",
     "glpk.js": "3.1.2",
     "mocha": "^6.1.4",
+    "util": "0.12.3",
     "web3-eth-abi": "^1.2.11",
     "web3-utils": "^1.2.0"
   },

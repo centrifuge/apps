@@ -30,12 +30,12 @@ describe('coordinator tests', async () => {
     assert(submissionPeriod === true || submissionPeriod === false)
 
     const order = await coordinator.order()
-    assert(order.seniorRedeem instanceof ethers.utils.BigNumber)
+    assert(order.seniorRedeem instanceof ethers.BigNumber)
 
     const lastEpochExecuted = await coordinator.lastEpochExecuted()
-    assert(lastEpochExecuted instanceof ethers.utils.BigNumber)
+    assert(lastEpochExecuted instanceof ethers.BigNumber)
 
     const epochNAV = await coordinator.epochNAV()
-    assert(epochNAV instanceof ethers.utils.BigNumber)
+    assert(epochNAV instanceof ethers.BigNumber)
   })
 })

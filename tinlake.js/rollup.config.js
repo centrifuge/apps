@@ -22,7 +22,7 @@ export default {
     ...Object.keys(pkg.peerDependencies || {})
   ],
   plugins: [
-    resolve({preferBuiltins: true}),
+    resolve({ browser: true, preferBuiltins: false, mainFields: [ "browser", "module", "main" ] }),
     commonjs(),
     json({
       // All JSON files will be parsed by default,

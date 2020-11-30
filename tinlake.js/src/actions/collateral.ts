@@ -15,7 +15,7 @@ export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>
       }
 
       const parsedLog = this.contract('PROXY_REGISTRY').interface.parseLog(receipt.logs[0])
-      const nftId = parsedLog.values['2'].toString()
+      const nftId = parsedLog.args['2'].toString()
       return nftId
     }
 

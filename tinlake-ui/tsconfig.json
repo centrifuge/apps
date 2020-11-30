@@ -3,10 +3,6 @@
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "jsx": "preserve",
-    "lib": [
-      "dom",
-      "es2017"
-    ],
     "module": "esnext",
     "moduleResolution": "node",
     "noEmit": true,
@@ -17,11 +13,16 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
-    "target": "esnext",
+    "target": "es6",
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ]
   },
   "exclude": [
     "node_modules",

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "module": "esnext",
-    "target": "es5",
+    "module": "es6",
+    "target": "es6",
     "noImplicitAny": true,
     "sourceMap": true,
     "moduleResolution": "node",
@@ -10,13 +10,12 @@
     "declarationDir": "./dist",
     "strictNullChecks": true,
     "esModuleInterop": true,
-    "lib": [
-      "es2015"
-    ],
     "resolveJsonModule": true
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "src/abi/*.abi.json",
+    "src/abi/test/*.abi.json"
   ],
   "exclude": [
     "node_modules",

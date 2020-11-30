@@ -1,4 +1,4 @@
-import { Decimal } from 'decimal.js-light'
+var Decimal = require('decimal.js-light')
 
 Decimal.set({
   precision: 28,

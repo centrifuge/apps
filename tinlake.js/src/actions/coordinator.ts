@@ -11,13 +11,13 @@ const web3 = require('web3-utils')
  * the ratios by 10**27, which is the precision of these values on contract. However, BN.js doesn't support decimals,
  * so we basically limit the ratios to 7 decimals here.
  */
-const uintToNumber = (uint: ethers.utils.BigNumber) =>
+const uintToNumber = (uint: ethers.BigNumber) =>
   (uint as any)
     .toBN()
     .div(new BN(10).pow(new BN(6)))
     .toNumber() /
   10 ** 12
-const fixed27ToNumber = (fixed27: ethers.utils.BigNumber) =>
+const fixed27ToNumber = (fixed27: ethers.BigNumber) =>
   (fixed27 as any)
     .toBN()
     .div(new BN(10).pow(new BN(20)))
