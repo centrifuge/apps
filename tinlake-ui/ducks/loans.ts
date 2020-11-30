@@ -1,9 +1,9 @@
-import { AnyAction, Action } from 'redux'
-import { ThunkAction } from 'redux-thunk'
 import { Loan } from '@centrifuge/tinlake-js'
-import { getLoan } from '../services/tinlake/actions'
-import Apollo from '../services/apollo'
 import { HYDRATE } from 'next-redux-wrapper'
+import { Action, AnyAction } from 'redux'
+import { ThunkAction } from 'redux-thunk'
+import Apollo from '../services/apollo'
+import { getLoan } from '../services/tinlake/actions'
 
 // SortableLoan adds properties of number type that support sorting in numerical order for grommet DataTable
 export interface SortableLoan extends Loan {

@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { UrlObject } from 'url'
 import { useRouter } from 'next/router'
+import { UrlObject } from 'url'
 import config from '../../config'
 
 interface Props {

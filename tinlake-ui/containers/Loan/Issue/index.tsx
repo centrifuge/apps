@@ -1,14 +1,14 @@
+import { NFT } from '@centrifuge/tinlake-js'
+import { Box, Button, FormField, TextInput } from 'grommet'
 import * as React from 'react'
-import { Box, FormField, TextInput, Button } from 'grommet'
+import { connect } from 'react-redux'
 import Alert from '../../../components/Alert'
 import NftData from '../../../components/NftData'
-import { connect } from 'react-redux'
-import LoanView from '../View'
-import { AuthState, loadProxies, ensureAuthed } from '../../../ducks/auth'
-import { NFT } from '@centrifuge/tinlake-js'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
-import { getNFT as getNFTAction } from '../../../services/tinlake/actions'
 import { Pool } from '../../../config'
+import { AuthState, ensureAuthed, loadProxies } from '../../../ducks/auth'
+import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
+import { getNFT as getNFTAction } from '../../../services/tinlake/actions'
+import LoanView from '../View'
 
 interface Props extends TransactionProps {
   tinlake: any

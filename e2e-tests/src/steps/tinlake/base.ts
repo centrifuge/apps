@@ -1,8 +1,7 @@
 import { Given } from '@cucumber/cucumber'
-
+import { tinlake } from '../../selectors'
 import { openPoolPage } from '../../support/browser-actions'
 import { CentrifugeWorld } from '../../support/world'
-import { tinlake } from '../../selectors'
 
 Given('I am logged into MetaMask as Tinlake admin', async function(this: CentrifugeWorld) {
   await this.metamaskImportAdminPK()

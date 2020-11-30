@@ -1,15 +1,15 @@
-import * as React from 'react'
-import { LoansState, loadLoan } from '../../../ducks/loans'
 import { Box, Heading } from 'grommet'
+import * as React from 'react'
 import { connect } from 'react-redux'
 import Alert from '../../../components/Alert'
 import LoanData from '../../../components/Loan/Data'
+import NftData from '../../../components/NftData'
+import { Pool } from '../../../config'
+import { AuthState, loadProxies } from '../../../ducks/auth'
+import { loadLoan, LoansState } from '../../../ducks/loans'
+import { TransactionState } from '../../../ducks/transactions'
 import LoanBorrow from '../Borrow'
 import LoanRepay from '../Repay'
-import NftData from '../../../components/NftData'
-import { AuthState, loadProxies } from '../../../ducks/auth'
-import { TransactionState } from '../../../ducks/transactions'
-import { Pool } from '../../../config'
 
 interface Props {
   tinlake: any

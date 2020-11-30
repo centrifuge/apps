@@ -1,13 +1,12 @@
-import { Given, When, Then } from '@cucumber/cucumber'
 import { displayToBase } from '@centrifuge/tinlake-js'
+import { Given, Then, When } from '@cucumber/cucumber'
 import * as assert from 'assert'
-const BN = require('bn.js')
-
 import { config } from '../../config'
-import { CentrifugeWorld } from '../../support/world'
 import { tinlake } from '../../selectors'
+import { CentrifugeWorld } from '../../support/world'
 import { getTextContent } from '../../utils/getTextContent'
 import { waitUntil } from '../../utils/waitUntil'
+const BN = require('bn.js')
 
 Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld, minTinRatio: number) {
   const tinlake = await this.initializedTinlake()
@@ -63,7 +62,10 @@ When('I increase the max reserve amount by 1', async function(this: CentrifugeWo
   const button = await this.currentPage.waitForXPath(tinlake('assetsPage.setMaxReserveButton'))
   await button.click()
 
-  this.context.newMaxReserve = new BN(this.context.maxReserve).add(new BN(1).mul(new BN(10).pow(new BN(18)))).div(new BN(10).pow(new BN(18))).toString() // Add 1*10**18, then convert back
+  this.context.newMaxReserve = new BN(this.context.maxReserve)
+    .add(new BN(1).mul(new BN(10).pow(new BN(18))))
+    .div(new BN(10).pow(new BN(18)))
+    .toString() // Add 1*10**18, then convert back
 
   const input = await this.currentPage.waitForXPath(tinlake('assetsPage.setMaxReserve.input'))
   await input.click({ clickCount: 3 }) // triple click to select all content
@@ -106,9 +108,7 @@ Then('I see that the max reserve amount is set to X+1', async function(this: Cen
   )
 })
 
-Then('I can verify that the max reserve amount is set to X+1', async function(
-  this: CentrifugeWorld
-) {
+Then('I can verify that the max reserve amount is set to X+1', async function(this: CentrifugeWorld) {
   const tinlake = await this.initializedTinlake()
   const actual = (await tinlake.getMaxReserve()).toString()
   const expected = new BN(this.context.newMaxReserve).mul(new BN(10).pow(new BN(18))).toString()
@@ -116,11 +116,14 @@ Then('I can verify that the max reserve amount is set to X+1', async function(
   assert.strictEqual(expected, actual)
 })
 
-Then('I can verify that the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld, minTinRatio: number) {
+Then('I can verify that the min TIN ratio is set to {int}%', async function(
+  this: CentrifugeWorld,
+  minTinRatio: number
+) {
   const tinlake = await this.initializedTinlake()
   const expected = minTinRatio.toString() + '0'.repeat(25)
   const actual = (await tinlake.getMinJuniorRatio()).toString()
-  
+
   assert.strictEqual(expected, actual)
 })
 
@@ -131,7 +134,7 @@ Then('I see that NFT ID is shown in UI', async function(this: CentrifugeWorld) {
   const regex = /Successfully minted NFT for Token ID ([0-9]+)/
   const result = regex.exec(text)
 
-  this.context.nftID = result[1]
+  this.context.nftID = result && result[1]
   assert.ok(this.context.nftID, 'NFT ID must not be empty')
 })
 

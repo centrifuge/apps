@@ -1,17 +1,16 @@
+import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
-import { Box, Button, Heading, Table, TableBody, TableRow, TableCell } from 'grommet'
-import { ITinlake, baseToDisplay } from '@centrifuge/tinlake-js'
-import { connect, useSelector, useDispatch } from 'react-redux'
-import { PoolData, PoolState, loadPool } from '../../../ducks/pool'
-import { toPrecision } from '../../../utils/toPrecision'
-import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import { LoadingValue } from '../../../components/LoadingValue/index'
-
-import { SignIcon, Sidenote } from './styles'
-import { AuthState, PermissionsV3 } from '../../../ducks/auth'
 import { Pool } from '../../../config'
+import { AuthState, PermissionsV3 } from '../../../ducks/auth'
+import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
+import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
+import { toPrecision } from '../../../utils/toPrecision'
 import MaxReserveForm from './MaxReserveForm'
+import { Sidenote, SignIcon } from './styles'
 
 interface Props {
   activePool?: Pool

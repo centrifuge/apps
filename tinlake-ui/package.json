@@ -8,7 +8,7 @@
     "fs": false
   },
   "scripts": {
-    "build": "yarn build:next && yarn build:lambda",
+    "build": "yarn build:deps && yarn build:next && yarn build:lambda",
     "build-for-husky": "tsc",
     "dev:next": "PORT=3000 node server.js",
     "build:next": "next build",
@@ -22,12 +22,8 @@
     "format": "prettier --write \"./**/*.{ts,tsx}\"",
     "check-format": "prettier --check \"./**/*.{ts,tsx}\"",
     "dev:lambda": "netlify-lambda serve lambda",
-    "build:lambda": "netlify-lambda build lambda"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn lint-fix-staged && yarn format"
-    }
+    "build:lambda": "netlify-lambda build lambda",
+    "build:deps": "cd ../tinlake.js && yarn build && cd ../tinlake-ui"
   },
   "repository": {
     "type": "git",
@@ -50,7 +46,7 @@
     "@centrifuge/axis-tooltip": "0.4.2-develop.147",
     "@centrifuge/axis-utils": "0.4.2-develop.109",
     "@centrifuge/axis-web3-wallet": "0.0.3-develop.121",
-    "@centrifuge/tinlake-js": "npm:@centrifuge/tinlake-js@3.0.0-develop.34",
+    "@centrifuge/tinlake-js": "3.0.0-develop.35",
     "@centrifuge/tinlake-pools-kovan": "0.0.1-develop.5",
     "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.13",
     "@sendgrid/mail": "7.1.1",

@@ -1,14 +1,14 @@
-import { AnyAction, Action } from 'redux'
-import { ThunkAction } from 'redux-thunk'
-import { networkIdToName } from '../utils/networkNameResolver'
-import Apollo from '../services/apollo'
-import { HYDRATE } from 'next-redux-wrapper'
-import { initOnboard, getOnboard } from '../services/onboard'
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { getTinlake } from '../services/tinlake'
-import config from '../config'
-import { ethers } from 'ethers'
 import * as Sentry from '@sentry/react'
+import { ethers } from 'ethers'
+import { HYDRATE } from 'next-redux-wrapper'
+import { Action, AnyAction } from 'redux'
+import { ThunkAction } from 'redux-thunk'
+import config from '../config'
+import Apollo from '../services/apollo'
+import { getOnboard, initOnboard } from '../services/onboard'
+import { getTinlake } from '../services/tinlake'
+import { networkIdToName } from '../utils/networkNameResolver'
 
 // Actions
 const CLEAR = 'tinlake-ui/auth/CLEAR'
@@ -147,7 +147,7 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
         const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
         const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
 
-        tinlake.setProviderAndSigner(fallbackProvider, web3Provider.getSigner(), web3Provider._web3Provider)
+        tinlake.setProviderAndSigner(fallbackProvider, web3Provider.getSigner(), web3Provider.provider)
       }
 
       if (wallet.name !== auth.providerName) {
@@ -179,7 +179,7 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
           const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
           const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
 
-          tinlake.setProviderAndSigner(fallbackProvider, web3Provider.getSigner(), web3Provider._web3Provider)
+          tinlake.setProviderAndSigner(fallbackProvider, web3Provider.getSigner(), web3Provider.provider)
         } else {
           const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
           tinlake.setProviderAndSigner(rpcProvider)

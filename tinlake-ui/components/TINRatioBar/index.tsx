@@ -1,6 +1,5 @@
-import * as React from 'react'
-
 import { RatioBar } from '@centrifuge/axis-ratio-bar'
+import * as React from 'react'
 
 interface Props {
   current?: number

@@ -1,12 +1,11 @@
-import * as React from 'react'
-import { Box, Heading, Button } from 'grommet'
-import { ITinlake } from '@centrifuge/tinlake-js'
-import { connect, useSelector } from 'react-redux'
 import { TokenInput } from '@centrifuge/axis-token-input'
-
+import { ITinlake } from '@centrifuge/tinlake-js'
+import { Box, Button, Heading } from 'grommet'
+import * as React from 'react'
+import { connect, useSelector } from 'react-redux'
 import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
+import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { Description } from './styles'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
 
 interface Props extends TransactionProps {
   tinlake: ITinlake

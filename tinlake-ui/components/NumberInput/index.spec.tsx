@@ -1,6 +1,6 @@
 import React from 'react'
-import NumberInput from '.'
 import renderer from 'react-test-renderer'
+import NumberInput from '.'
 
 it('renders correctly', () => {
   const tree = renderer

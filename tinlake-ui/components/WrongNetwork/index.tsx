@@ -1,6 +1,6 @@
 import * as React from 'react'
-import Alert from '../Alert'
 import { getOnboard } from '../../services/onboard'
+import Alert from '../Alert'
 
 interface Props {
   expected: string

@@ -1,12 +1,12 @@
+import { ITinlake } from '@centrifuge/tinlake-js'
+import { NextRouter, withRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { PoolState, loadPool } from '../../ducks/pool'
-import { LoansState, loadLoans } from '../../ducks/loans'
-import { AuthState } from '../../ducks/auth'
-import { Pool } from '../../config'
-import { withRouter, NextRouter } from 'next/router'
 import OverviewComp from '../../components/Overview'
-import { ITinlake } from '@centrifuge/tinlake-js'
+import { Pool } from '../../config'
+import { AuthState } from '../../ducks/auth'
+import { loadLoans, LoansState } from '../../ducks/loans'
+import { loadPool, PoolState } from '../../ducks/pool'
 
 interface Props {
   tinlake: ITinlake

@@ -1,5 +1,4 @@
 import { Page } from 'puppeteer'
-
 import { waitUntil } from './waitUntil'
 
 export const isElementVisible = async (page: Page, xpathSelector: string, timeout?: number) => {

@@ -1,10 +1,10 @@
 import { Box } from 'grommet'
-import Header from '../components/Header'
-import Dashboard from '../containers/Dashboard'
-import WithFooter from '../components/WithFooter'
-import WithTinlake from '../components/WithTinlake'
 import Auth from '../components/Auth'
 import Container from '../components/Container'
+import Header from '../components/Header'
+import WithFooter from '../components/WithFooter'
+import WithTinlake from '../components/WithTinlake'
+import Dashboard from '../containers/Dashboard'
 
 function Home() {
   return (

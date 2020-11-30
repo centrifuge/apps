@@ -1,26 +1,32 @@
 name: 'tinlake-ui'
 on: 
+  push:
+    branches:
+      - main
   pull_request:
     paths:
     - 'tinlake-ui/**'
 
+defaults:
+  run:
+    working-directory: tinlake-ui
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
         with:
           node-version: '12'
+      - uses: c-hive/gha-yarn-cache@v1
       - run: yarn install
-        working-directory: ./
-      - run: yarn run lint
-        working-directory: ./tinlake-ui
-      - run: yarn run check-format
-        working-directory: ./tinlake-ui
-      - run: yarn run export
-        working-directory: ./tinlake-ui
+      - run: yarn lint
+      - run: yarn check-format
+      - run: yarn lint
+      - run: yarn export
+      - run: yarn lint
             
     env:
       NEXT_PUBLIC_PORTIS_KEY: "bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f"

@@ -1,6 +1,6 @@
 import React from 'react'
-import Alert from '.'
 import renderer from 'react-test-renderer'
+import Alert from '.'
 
 it('renders errors correctly', () => {
   const tree = renderer.create(<Alert type="error">My error</Alert>).toJSON()

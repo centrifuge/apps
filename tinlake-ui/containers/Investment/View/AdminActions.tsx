@@ -1,12 +1,12 @@
+import { baseToDisplay, displayToBase, ITinlake } from '@centrifuge/tinlake-js'
+import { Box, Button, FormField, Heading } from 'grommet'
 import * as React from 'react'
-import { Box, Button, Heading, FormField } from 'grommet'
+import { connect, useSelector } from 'react-redux'
 import NumberInput from '../../../components/NumberInput'
 import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
-import { baseToDisplay, displayToBase, ITinlake } from '@centrifuge/tinlake-js'
-import { toPrecision } from '../../../utils/toPrecision'
+import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { createTransaction, useTransactionState, TransactionProps } from '../../../ducks/transactions'
-import { connect, useSelector } from 'react-redux'
+import { toPrecision } from '../../../utils/toPrecision'
 
 interface Props extends TransactionProps {
   tinlake: ITinlake

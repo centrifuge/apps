@@ -3,6 +3,7 @@
   "packages": [
     "e2e-tests",
     "onboard-api",
+    "tinlake.js",
     "tinlake-ui"
   ],
   "version": "independent",

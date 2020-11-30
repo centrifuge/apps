@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    /* Required because of an import error with @types/puppeteer */
+    "forceConsistentCasingInFileNames": false,
+
+    /* Required since the browser/currentPage/etc props on CentrifugeWorld are initially undefined */
+    "strictPropertyInitialization": false
+  }
+}

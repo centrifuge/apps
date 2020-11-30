@@ -1,12 +1,12 @@
-import * as React from 'react'
-import { Box, Button, Heading, Text } from 'grommet'
-import Alert from '../Alert'
-import SecondaryHeader from '../SecondaryHeader'
-import { BackLink } from '../BackLink'
 import { Spinner } from '@centrifuge/axis-spinner'
 import BN from 'bn.js'
-import { ensureAuthed } from '../../ducks/auth'
+import { Box, Button, Heading, Text } from 'grommet'
+import * as React from 'react'
 import { connect } from 'react-redux'
+import { ensureAuthed } from '../../ducks/auth'
+import Alert from '../Alert'
+import { BackLink } from '../BackLink'
+import SecondaryHeader from '../SecondaryHeader'
 
 interface Props {
   tinlake: any

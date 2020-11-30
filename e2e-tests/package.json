@@ -16,12 +16,14 @@
   "license": "ISC",
   "homepage": "https://github.com/centrifuge/e2e-tests#readme",
   "dependencies": {
-    "@centrifuge/tinlake-js": "3.0.0-develop.33",
+    "@centrifuge/tinlake-js": "3.0.0-develop.35",
     "@centrifuge/tinlake-pools-kovan": "0.0.1-develop.3",
     "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.3",
     "@cucumber/cucumber": "^7.0.0-rc.0",
-    "@types/puppeteer": "3.0.2",
     "dappeteer-test": "1.0.0-develop.1",
     "puppeteer": "5.2.1"
+  },
+  "devDependencies": {
+    "@types/puppeteer": "5.4.0"
   }
 }

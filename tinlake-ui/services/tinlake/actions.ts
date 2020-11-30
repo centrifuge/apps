@@ -1,8 +1,7 @@
+import { ITinlake, Loan, NFT, PendingTransaction } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Loan, ITinlake, PendingTransaction, NFT } from '@centrifuge/tinlake-js'
-
+import { EpochData, PoolData } from '../../ducks/pool'
 import { maxUint256 } from '../../utils/maxUint256'
-import { PoolData, EpochData } from '../../ducks/pool'
 import { getAddressMemory, setAddressMemory } from './address-memory'
 
 export type TrancheType = 'junior' | 'senior'

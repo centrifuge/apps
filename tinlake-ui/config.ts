@@ -1,10 +1,9 @@
-import * as yup from 'yup'
-import BN from 'bn.js'
-import mainnetPools from '@centrifuge/tinlake-pools-mainnet'
 import kovanPools from '@centrifuge/tinlake-pools-kovan'
-
-import { networkUrlToName } from './utils/networkNameResolver'
+import mainnetPools from '@centrifuge/tinlake-pools-mainnet'
+import BN from 'bn.js'
+import * as yup from 'yup'
 import { PoolStatus } from './ducks/pool'
+import { networkUrlToName } from './utils/networkNameResolver'
 
 interface SecuritizeData {
   issuerId: string

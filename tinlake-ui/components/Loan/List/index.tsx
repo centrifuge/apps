@@ -1,13 +1,13 @@
-import * as React from 'react'
-import { bnToHex, baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
-import { Box, DataTable, Text } from 'grommet'
-import NumberDisplay from '../../../components/NumberDisplay'
 import { DisplayField } from '@centrifuge/axis-display-field'
+import { baseToDisplay, bnToHex, feeToInterestRate } from '@centrifuge/tinlake-js'
+import { Box, DataTable, Text } from 'grommet'
+import { WithRouterProps } from 'next/dist/client/with-router'
+import { withRouter } from 'next/router'
+import * as React from 'react'
+import NumberDisplay from '../../../components/NumberDisplay'
+import { SortableLoan } from '../../../ducks/loans'
 import { hexToInt } from '../../../utils/etherscanLinkGenerator'
 import ChevronRight from '../../ChevronRight'
-import { SortableLoan } from '../../../ducks/loans'
-import { withRouter } from 'next/router'
-import { WithRouterProps } from 'next/dist/client/with-router'
 
 interface Props extends WithRouterProps {
   loans: SortableLoan[]

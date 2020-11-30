@@ -1,5 +1,5 @@
-import React, { PropsWithChildren } from 'react'
 import { Box } from 'grommet'
+import React, { PropsWithChildren } from 'react'
 import Footer from '../Footer'
 class WithFooter extends React.Component<PropsWithChildren<{}>> {
   render() {

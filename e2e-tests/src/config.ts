@@ -20,21 +20,23 @@ export interface Config {
 const network = process.env.ETH_NETWORK || 'kovan'
 const networkConfigs = network === 'mainnet' ? mainnetPools : kovanPools
 
-const pool = networkConfigs.find((pool: Pool) => pool.addresses.ROOT_CONTRACT.toLowerCase() === process.env.POOL_ID.toLowerCase())
+const pool = networkConfigs.find(
+  (pool: Pool) => pool.addresses.ROOT_CONTRACT.toLowerCase() === process.env.POOL_ID?.toLowerCase()
+)
 
 export const config: Config = {
-  gatewayUrl: process.env.GATEWAY_URL,
-  tinlakeUrl: process.env.TINLAKE_URL,
-  rpcUrl: process.env.RPC_URL,
+  gatewayUrl: process.env.GATEWAY_URL || 'https://gateway.amber.centrifuge.io/',
+  tinlakeUrl: process.env.TINLAKE_URL || 'https://kovan.staging.tinlake.centrifuge.io/',
+  rpcUrl: process.env.RPC_URL || '',
   ethNetwork: network,
-  ethAdminAddress: process.env.ETH_ADMIN_ADDRESS,
-  ethAdminPrivateKey: process.env.ETH_ADMIN_PRIVATE_KEY,
-  ethBorrowerAddress: process.env.ETH_BORROWER_ADDRESS,
-  ethBorrowerPrivateKey: process.env.ETH_BORROWER_PRIVATE_KEY,
+  ethAdminAddress: process.env.ETH_ADMIN_ADDRESS || '',
+  ethAdminPrivateKey: process.env.ETH_ADMIN_PRIVATE_KEY || '',
+  ethBorrowerAddress: process.env.ETH_BORROWER_ADDRESS || '',
+  ethBorrowerPrivateKey: process.env.ETH_BORROWER_PRIVATE_KEY || '',
   pool: pool,
-  gasLimit: Number(process.env.GAS_LIMIT|| '100000') ,
-  nftRegistry: process.env.NFT_REGISTRY,
-  transactionTimeout: Number(process.env.TRANSACTION_TIMEOUT || '30000')
+  gasLimit: Number(process.env.GAS_LIMIT || '100000'),
+  nftRegistry: process.env.NFT_REGISTRY || '',
+  transactionTimeout: Number(process.env.TRANSACTION_TIMEOUT || '30000'),
 }
 
 console.log(

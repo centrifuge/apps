@@ -1,7 +1,7 @@
-import { AnyAction, Action } from 'redux'
+import { HYDRATE } from 'next-redux-wrapper'
+import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { getInvestor } from '../services/tinlake/actions'
-import { HYDRATE } from 'next-redux-wrapper'
 
 // Actions
 const LOAD_INVESTOR = 'tinlake-ui/investments/LOAD_INVESTOR'

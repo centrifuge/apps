@@ -1,5 +1,5 @@
-import { FunctionComponent, default as React } from 'react'
 import { Box, Text } from 'grommet'
+import { default as React, FunctionComponent } from 'react'
 
 interface MetricProps {
   label: string
