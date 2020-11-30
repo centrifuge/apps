@@ -8,14 +8,12 @@ import { waitUntilElementsIsInvisible, waitUntilElementsIsVisible } from '../uti
 import { ensureTinlakeInit } from './tinlake-actions'
 
 export class CentrifugeWorld {
-  browser: null | Browser = null
-  currentPage: null | Page = null
-  private metamask: null | dappeteer.Dappeteer = null
+  browser: Browser
+  currentPage: Page
+  private metamask: dappeteer.Dappeteer
 
-  tinlake: null | ITinlake = null
+  tinlake: ITinlake
   context: { [key: string]: any } = {}
-
-  constructor() {}
 
   async initializedTinlake() {
     return await ensureTinlakeInit(this)
@@ -26,7 +24,7 @@ export class CentrifugeWorld {
   }
 
   async metamaskInit() {
-    this.metamask = await dappeteer.getMetamask(this.browser)
+    this.metamask = await dappeteer.getMetamask(this.browser!)
   }
 
   async metamaskImportAdminPK() {

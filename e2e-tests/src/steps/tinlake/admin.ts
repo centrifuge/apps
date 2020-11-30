@@ -134,7 +134,7 @@ Then('I see that NFT ID is shown in UI', async function(this: CentrifugeWorld) {
   const regex = /Successfully minted NFT for Token ID ([0-9]+)/
   const result = regex.exec(text)
 
-  this.context.nftID = result[1]
+  this.context.nftID = result && result[1]
   assert.ok(this.context.nftID, 'NFT ID must not be empty')
 })
 

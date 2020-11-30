@@ -1,5 +1,5 @@
 import * as dappeteer from 'dappeteer-test'
-import * as puppeteer from 'puppeteer'
+import puppeteer from 'puppeteer'
 import { config } from '../config'
 import { CentrifugeWorld } from './world'
 
@@ -20,14 +20,14 @@ export async function openBrowser(world: CentrifugeWorld) {
 }
 
 export async function openPage(world: CentrifugeWorld, url: string) {
-  world.currentPage = await world.browser.newPage()
+  world.currentPage = await world.browser!.newPage()
   await world.currentPage.goto(url, {
     waitUntil: ['load'],
   })
 }
 
 export async function openPoolPage(world: CentrifugeWorld, path: string) {
-  world.currentPage = await world.browser.newPage()
+  world.currentPage = await world.browser!.newPage()
   const url = `${config.tinlakeUrl}pool/${config.pool.addresses.ROOT_CONTRACT}/${config.pool.metadata.slug}/${path}`
   await world.currentPage.goto(url, {
     waitUntil: ['load'],
@@ -41,5 +41,5 @@ export async function closeBrowser(world: CentrifugeWorld) {
 }
 
 export async function takeScreenshot(world: CentrifugeWorld, path = './screenshots/error-occured-here.png') {
-  await world.currentPage.screenshot({ path })
+  await world.currentPage!.screenshot({ path })
 }

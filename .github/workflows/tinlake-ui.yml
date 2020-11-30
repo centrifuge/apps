@@ -26,13 +26,10 @@ jobs:
       - run: yarn build
         working-directory: ./tinlake.js
       - run: yarn lint
-        working-directory: ./tinlake-ui
       - run: yarn check-format
       - run: yarn lint
-        working-directory: ./tinlake-ui
       - run: yarn export
       - run: yarn lint
-        working-directory: ./tinlake-ui
             
     env:
       NEXT_PUBLIC_PORTIS_KEY: "bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f"

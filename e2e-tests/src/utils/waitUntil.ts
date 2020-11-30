@@ -26,7 +26,7 @@ export function waitUntil(
         return
       }
 
-      sleep(intervalMs)
+      sleep(intervalMs || 50)
     }
   })
 }
