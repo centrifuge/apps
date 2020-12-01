@@ -7,8 +7,8 @@
   "scripts": {
     "build": "",
     "test": "cucumber-js",
-    "format": "prettier --write \"./**/*.{ts,tsx}\"",
-    "check-format": "prettier --check \"./**/*.{ts,tsx}\""
+    "format": "yarn format:run",
+    "check-format": "yarn format:check"
   },
   "repository": {
     "type": "git",

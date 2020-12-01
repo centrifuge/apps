@@ -21,7 +21,8 @@
     "react-dom": "16.13.1"
   },
   "scripts": {
-    "format": "yarn workspaces foreach run format",
+    "format:run": "cd $INIT_CWD && prettier --write \"./**/*.{ts,tsx}\"",
+    "format:check": "cd $INIT_CWD && prettier --check \"./**/*.{ts,tsx}\"",
     "publish:develop": "yarn workspaces foreach run prepublish && lerna publish --canary --preid develop.$(git rev-parse --short HEAD) --yes --force-publish"
   }
 }

@@ -20,8 +20,8 @@
     "lint": "tslint --project .",
     "lint-fix": "tslint --fix --project .",
     "lint-fix-staged": "git diff --staged --name-only | grep -E '\\.tsx?$' | xargs yarn lint-fix && git diff --staged --name-only | grep -E '\\.tsx?$' | xargs git add",
-    "format": "prettier --write \"./**/*.{ts,tsx}\"",
-    "check-format": "prettier --check \"./**/*.{ts,tsx}\"",
+    "format": "yarn format:run",
+    "check-format": "yarn format:check",
     "dev:lambda": "netlify-lambda serve lambda",
     "build:lambda": "netlify-lambda build lambda",
     "build:deps": "cd ../tinlake.js && yarn build && cd ../tinlake-ui"
