@@ -33,6 +33,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
 
   const lockedValue =
     props.disbursements &&
+    !new BN(props.tokenPrice).isZero() &&
     !(props.disbursements.remainingSupplyCurrency.isZero() && props.disbursements.remainingRedeemToken.isZero())
       ? props.disbursements.remainingSupplyCurrency.isZero()
         ? props.disbursements.remainingRedeemToken
