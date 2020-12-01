@@ -12,9 +12,10 @@ import { DocusignAuthService } from './services/docusign-auth.service'
 import { DocusignService } from './services/docusign.service'
 import { SecuritizeService } from './services/kyc/securitize.service'
 import { PoolService } from './services/pool.service'
+import { SessionService } from './services/session.service'
 
 const databaseProviders = [DatabaseService, UserRepo, AddressRepo, KycRepo, AgreementRepo]
-const serviceProviders = [PoolService, SecuritizeService, DocusignService, DocusignAuthService]
+const serviceProviders = [PoolService, SecuritizeService, DocusignService, DocusignAuthService, SessionService]
 
 @Module({
   imports: [],

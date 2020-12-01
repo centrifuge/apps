@@ -3,6 +3,9 @@ import fetch from 'node-fetch'
 import { User } from '../repos/user.repo'
 import { DocusignAuthService } from './docusign-auth.service'
 
+const InvestorRoleName = 'Investor'
+const IssuerRoleName = 'Issuer'
+
 @Injectable()
 export class DocusignService {
   constructor(private readonly docusignAuthService: DocusignAuthService) {}
@@ -13,15 +16,15 @@ export class DocusignService {
       templateRoles: [
         {
           email,
-          name: 'Investor',
-          roleName: 'signer',
-          // clientUserId: userId,
+          name: 'Investor 1',
+          roleName: InvestorRoleName,
+          clientUserId: userId,
           routingOrder: 1,
         },
         {
           email: 'jeroen+issuer@centrifuge.io',
-          name: 'Issuer',
-          roleName: 'cc',
+          name: 'Issuer 1',
+          roleName: IssuerRoleName,
           routingOrder: 2,
         },
       ],
@@ -56,8 +59,9 @@ export class DocusignService {
     const recipientViewRequest = {
       authenticationMethod: 'none',
       email: user.email,
-      userName: 'Investor',
-      roleName: 'signer',
+      userName: 'Investor 1',
+      roleName: InvestorRoleName,
+      clientUserId: user.id,
       returnUrl: returnUrl || 'https://tinlake.centrifuge.io/',
     }
 
@@ -92,9 +96,8 @@ export class DocusignService {
     })
 
     const content = await response.json()
-
-    const investor = content.signers.find((signer: any) => signer.name === 'Investor')
-    const issuer = content.signers.find((signer: any) => signer.name === 'Issuer')
+    const investor = content.signers.find((signer: any) => signer.roleName === InvestorRoleName)
+    const issuer = content.signers.find((signer: any) => signer.roleName === IssuerRoleName)
 
     return {
       signed: investor?.status === 'completed',

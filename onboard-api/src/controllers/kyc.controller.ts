@@ -5,6 +5,7 @@ import { KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
 import { SecuritizeService } from '../services/kyc/securitize.service'
 import { PoolService } from '../services/pool.service'
+import { SessionCookieName, SessionService } from '../services/session.service'
 
 @Controller()
 export class KycController {
@@ -14,17 +15,20 @@ export class KycController {
     private readonly kycRepo: KycRepo,
     private readonly userRepo: UserRepo,
     private readonly agreementRepo: AgreementRepo,
-    private readonly poolService: PoolService
+    private readonly poolService: PoolService,
+    private readonly sessionService: SessionService
   ) {}
 
   @Get('pools/:poolId/callback/:address/securitize')
-  async securitizeCallback(@Param() params, @Query() query, @Res() res): Promise<any> {
+  async securitizeCallback(@Param() params, @Query() query, @Res({ passthrough: true }) res): Promise<any> {
+    // Check input
     const address = await this.addressRepo.find(params.address)
     if (!address) throw new BadRequestException(`Address ${address} does not exist`)
 
     const pool = await this.poolService.get(params.poolId)
     if (!pool) throw new BadRequestException('Invalid pool')
 
+    // Get info from Securitize
     const kycInfo = await this.securitizeService.processAuthorizationCallback(query.code)
     // TODO: redirect to app?
     if (!kycInfo.providerAccountId) throw new BadRequestException('Code has already been used')
@@ -32,11 +36,13 @@ export class KycController {
     const investor = await this.securitizeService.getInvestor(kycInfo.digest.accessToken)
     if (!investor) throw new BadRequestException('Failed to retrieve investor information from Securitize')
 
+    // Update KYC and email records in our databsae
     const kyc = await this.kycRepo.upsertSecuritize(address.userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!kyc) throw new BadRequestException('Failed to create KYC entity')
 
     await this.userRepo.setEmail(address.userId, investor.email)
 
+    // Find or create the relevant agreement for this pool
     // TODO: templateId should be based on the agreement required for the pool
     const agreement = await this.agreementRepo.findOrCreate(
       address.userId,
@@ -46,9 +52,20 @@ export class KycController {
     )
     if (!agreement) throw new BadRequestException('Failed to create agreement envelope')
 
+    // Create session cookie and redirect user
     const redirectUrl = `${process.env.TINLAKE_UI_HOST}pool/${params.poolId}/${pool.metadata.slug}?onb=1`
     console.log({ redirectUrl })
 
+    const session = this.sessionService.create(address.userId)
+
+    let thirtyDaysFromNow = new Date()
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30)
+
+    res.cookie(SessionCookieName, session, {
+      path: '/',
+      expires: thirtyDaysFromNow,
+      httpOnly: true,
+    })
     return res.redirect(redirectUrl)
   }
 }
