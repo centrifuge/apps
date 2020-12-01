@@ -13,6 +13,11 @@ functions
 
 # Yarn
 yarn-error.log
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
 
 # Environment files
 .env*.local

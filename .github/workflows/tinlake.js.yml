@@ -13,12 +13,27 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      # Setup
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
         with:
           node-version: '12'
-      - uses: c-hive/gha-yarn-cache@v1
+
+      # Cache
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+
+      - uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
       - run: yarn install
+
+      # Run
       - run: yarn lint
       - run: yarn check-format
       - run: yarn build
@@ -29,13 +44,28 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
+      # Setup
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
         with:
           node-version: '12'
           registry-url: 'https://registry.npmjs.org'
-      - uses: c-hive/gha-yarn-cache@v1
+
+      # Cache
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+
+      - uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
       - run: yarn install
+
+      # Run
       - run: yarn build
       - run: yarn publish
         env:
