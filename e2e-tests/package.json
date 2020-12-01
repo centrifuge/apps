@@ -1,12 +1,14 @@
 {
   "name": "@centrifuge/e2e-tests",
-  "version": "1.0.0",
+  "private": true,
+  "version": "0.1.0",
   "description": "End-to-end tests for the Tinlake dapp",
   "main": "index.js",
   "scripts": {
+    "build": "",
     "test": "cucumber-js",
-    "format": "prettier --write \"./**/*.{ts,tsx}\"",
-    "check-format": "prettier --check \"./**/*.{ts,tsx}\""
+    "format": "yarn format:run",
+    "check-format": "yarn format:check"
   },
   "repository": {
     "type": "git",
@@ -16,11 +18,11 @@
   "license": "ISC",
   "homepage": "https://github.com/centrifuge/e2e-tests#readme",
   "dependencies": {
-    "@centrifuge/tinlake-js": "3.0.0-develop.35",
+    "@centrifuge/tinlake-js": "workspace:*",
     "@centrifuge/tinlake-pools-kovan": "0.0.1-develop.3",
     "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.3",
     "@cucumber/cucumber": "^7.0.0-rc.0",
-    "dappeteer-test": "1.0.0-develop.1",
+    "dappeteer-test": "1.0.0-develop.2",
     "puppeteer": "5.2.1"
   },
   "devDependencies": {

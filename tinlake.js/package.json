@@ -50,6 +50,7 @@
     "lint-fix": "tslint --fix -c ./tslint.json 'src/**/*{.ts,.tsx}'",
     "format": "prettier --write \"./**/*.{ts,tsx}\"",
     "check-format": "prettier --check \"./**/*.{ts,tsx}\"",
+    "prepublish": "yarn build",
     "publish:patch": "npm run build && npm version patch && npm publish --access public",
     "publish:minor": "npm run build && npm version minor && npm publish --access public",
     "publish:major": "npm run build && npm version major && npm publish --access public",

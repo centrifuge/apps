@@ -1,6 +1,7 @@
 {
   "name": "@centrifuge/tinlake-ui",
-  "version": "1.0.0",
+  "private": true,
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "browser": {
@@ -19,8 +20,8 @@
     "lint": "tslint --project .",
     "lint-fix": "tslint --fix --project .",
     "lint-fix-staged": "git diff --staged --name-only | grep -E '\\.tsx?$' | xargs yarn lint-fix && git diff --staged --name-only | grep -E '\\.tsx?$' | xargs git add",
-    "format": "prettier --write \"./**/*.{ts,tsx}\"",
-    "check-format": "prettier --check \"./**/*.{ts,tsx}\"",
+    "format": "yarn format:run",
+    "check-format": "yarn format:check",
     "dev:lambda": "netlify-lambda serve lambda",
     "build:lambda": "netlify-lambda build lambda",
     "build:deps": "cd ../tinlake.js && yarn build && cd ../tinlake-ui"
@@ -46,7 +47,7 @@
     "@centrifuge/axis-tooltip": "0.4.2-develop.147",
     "@centrifuge/axis-utils": "0.4.2-develop.109",
     "@centrifuge/axis-web3-wallet": "0.0.3-develop.121",
-    "@centrifuge/tinlake-js": "3.0.0-develop.35",
+    "@centrifuge/tinlake-js": "workspace:*",
     "@centrifuge/tinlake-pools-kovan": "0.0.1-develop.5",
     "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.13",
     "@sendgrid/mail": "7.1.1",
@@ -66,6 +67,8 @@
     "next-redux-wrapper": "6.0.0",
     "node-fetch": "2.6.1",
     "prop-types": "15.7.2",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
     "react-number-format": "4.4.1",
     "react-redux": "7.2.0",
     "redux": "4.0.5",
