@@ -21,7 +21,7 @@ export class AddressRepo {
     const [data] = await this.db.sql`
       select *
       from addresses
-      where addresses.address = ${address}
+      where lower(addresses.address) = ${address.toLowerCase()}
     `
 
     return data as Address | undefined
@@ -33,7 +33,7 @@ export class AddressRepo {
       from addresses
       where addresses.blockchain = ${blockchain}
       and addresses.network = ${network}
-      and addresses.address = ${address}
+      and lower(addresses.address) = ${address.toLowerCase()}
     `
 
     if (!data) {

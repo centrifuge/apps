@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-
 import { uuidv4 } from '../utils/uuid'
 import { DatabaseService } from './db.service'
 
@@ -11,6 +10,16 @@ export type User = {
 @Injectable()
 export class UserRepo {
   constructor(private readonly db: DatabaseService) {}
+
+  async find(userId: string): Promise<User | undefined> {
+    const [data] = await this.db.sql`
+      select *
+      from users
+      where users.id = ${userId}
+    `
+
+    return data as User | undefined
+  }
 
   async create(): Promise<User | undefined> {
     const id = uuidv4()

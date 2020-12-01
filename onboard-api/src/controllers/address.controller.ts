@@ -28,7 +28,24 @@ export class AddressController {
     if (kyc) {
       // TODO: if not verified, check verified status
       const agreements = await this.agreementRepo.findByUser(address.userId)
-      const agreementLinks = await agreements.map(
+
+      // TODO: this should be handled in a Connect webhook from Docusign
+      agreements.forEach(async (agreement: Agreement) => {
+        if (!agreement.signedAt || !agreement.counterSignedAt) {
+          const status = await this.docusignService.getEnvelopeStatus(agreement.providerEnvelopeId)
+          console.log(status)
+          if (!agreement.signedAt && status.signed) {
+            await this.agreementRepo.hasBeenSigned(agreement.id)
+          }
+
+          if (!agreement.counterSignedAt && status.counterSigned) {
+            await this.agreementRepo.hasBeenCounterSigned(agreement.id)
+          }
+        }
+      })
+
+      // TODO: this is a hack, we shouldn't need to retrieve them twice
+      const agreementLinks = await (await this.agreementRepo.findByUser(address.userId)).map(
         (agreement: Agreement): AgreementsStatus => {
           return {
             name: 'Subscription Agreement',
@@ -38,8 +55,6 @@ export class AddressController {
           }
         }
       )
-
-      await this.docusignService.getEnvelopeStatus(agreements[0].providerEnvelopeId)
 
       return {
         kyc: {

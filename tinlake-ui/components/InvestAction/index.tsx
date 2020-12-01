@@ -120,10 +120,25 @@ const InvestAction: React.FC<Props> = (props: Props) => {
               <Button primary label={`Start KYC`} href={status.kyc.url} fill={false} />
             </Box>
           )}
-          {status?.kyc.url && status.kyc.created && !status.kyc.verified && (
+          {status?.kyc.url && status.kyc.created && !status.kyc.verified && !status.agreements[0]?.signed && (
             <Box flex={true} justify="between">
               <Paragraph>Onboarding pending, please continue signing subdoc.</Paragraph>
               <Button primary label={`Sign Subscription Agreement`} href={agreementLink} fill={false} />
+            </Box>
+          )}
+          {status?.kyc.url && status.agreements[0]?.signed && !status.agreements[0]?.counterSigned && (
+            <Box flex={true} justify="between">
+              <Paragraph>You signed subdoc, AO will sign, will let you know, then you can invest.</Paragraph>
+            </Box>
+          )}
+          {status?.kyc.url && !status.kyc.verified && status.agreements[0]?.counterSigned && (
+            <Box flex={true} justify="between">
+              <Paragraph>AO signed, waiting for KYC.</Paragraph>
+            </Box>
+          )}
+          {status?.kyc.url && status.kyc.verified && status.agreements[0]?.counterSigned && (
+            <Box flex={true} justify="between">
+              <Paragraph>AO signed &amp; KYC finished, you can invest.</Paragraph>
             </Box>
           )}
         </Box>
