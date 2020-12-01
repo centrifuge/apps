@@ -1807,7 +1807,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@centrifuge/e2e-tests@workspace:e2e-tests"
   dependencies:
-    "@centrifuge/tinlake-js": 3.0.0-develop.35
+    "@centrifuge/tinlake-js": "workspace:*"
     "@centrifuge/tinlake-pools-kovan": 0.0.1-develop.3
     "@centrifuge/tinlake-pools-mainnet": 0.0.1-develop.3
     "@cucumber/cucumber": ^7.0.0-rc.0
@@ -1817,7 +1817,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@centrifuge/tinlake-js@3.0.0-develop.35, @centrifuge/tinlake-js@workspace:tinlake.js":
+"@centrifuge/tinlake-js@workspace:*, @centrifuge/tinlake-js@workspace:tinlake.js":
   version: 0.0.0-use.local
   resolution: "@centrifuge/tinlake-js@workspace:tinlake.js"
   dependencies:
@@ -1896,7 +1896,7 @@ __metadata:
     "@centrifuge/axis-tooltip": 0.4.2-develop.147
     "@centrifuge/axis-utils": 0.4.2-develop.109
     "@centrifuge/axis-web3-wallet": 0.0.3-develop.121
-    "@centrifuge/tinlake-js": 3.0.0-develop.35
+    "@centrifuge/tinlake-js": "workspace:*"
     "@centrifuge/tinlake-pools-kovan": 0.0.1-develop.5
     "@centrifuge/tinlake-pools-mainnet": 0.0.1-develop.13
     "@sendgrid/mail": 7.1.1
