@@ -6,9 +6,10 @@
     "tinlake-ui"
   ],
   "devDependencies": {
-    "babel-plugin-styled-components": "^1.12.0",
+    "babel-plugin-styled-components": "1.12.0",
+    "lerna": "3.22.1",
     "prettier": "1.19.1",
-    "prettier-plugin-organize-imports": "^1.1.1",
+    "prettier-plugin-organize-imports": "1.1.1",
     "ts-node": "9.0.0",
     "typescript": "4.1.2"
   },
@@ -20,6 +21,7 @@
     "react-dom": "16.13.1"
   },
   "scripts": {
-    "format": "yarn workspaces run format"
+    "format": "yarn workspaces foreach run format",
+    "publish:develop": "yarn workspaces foreach run prepublish && lerna publish --canary --preid develop.$(git rev-parse --short HEAD) --yes --force-publish"
   }
 }

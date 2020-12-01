@@ -1,9 +1,11 @@
 {
   "name": "@centrifuge/e2e-tests",
-  "version": "1.0.0",
+  "private": true,
+  "version": "0.1.0",
   "description": "End-to-end tests for the Tinlake dapp",
   "main": "index.js",
   "scripts": {
+    "build": "",
     "test": "cucumber-js",
     "format": "prettier --write \"./**/*.{ts,tsx}\"",
     "check-format": "prettier --check \"./**/*.{ts,tsx}\""
@@ -20,7 +22,7 @@
     "@centrifuge/tinlake-pools-kovan": "0.0.1-develop.3",
     "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.3",
     "@cucumber/cucumber": "^7.0.0-rc.0",
-    "dappeteer-test": "1.0.0-develop.1",
+    "dappeteer-test": "1.0.0-develop.2",
     "puppeteer": "5.2.1"
   },
   "devDependencies": {
