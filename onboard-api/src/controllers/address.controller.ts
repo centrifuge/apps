@@ -15,7 +15,7 @@ export class AddressController {
     private readonly docusignService: DocusignService
   ) {}
 
-  @Get('addresses/:address/status')
+  @Get('pools/:poolId/addresses/:address')
   async getStatus(@Param() params, @Query() query): Promise<AddressStatus> {
     const blockchain = query.blockchain || 'ethereum'
     const network = query.network || 'mainnet'
@@ -23,7 +23,7 @@ export class AddressController {
     const address = await this.addressRepo.findOrCreate(blockchain, network, params.address)
     if (!address) throw new BadRequestException('Failed to create address')
 
-    const authorizationLink = this.securitizeService.getAuthorizationLink(params.address)
+    const authorizationLink = this.securitizeService.getAuthorizationLink(params.poolId, params.address)
     const kyc = await this.kycRepo.find(address.userId)
     if (kyc) {
       // TODO: if not verified, check verified status

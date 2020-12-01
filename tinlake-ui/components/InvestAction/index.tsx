@@ -1,4 +1,5 @@
 import { Anchor, Box, Button, Paragraph } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import config, { Pool, UpcomingPool } from '../../config'
@@ -19,6 +20,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   const onOpen = () => setModalIsOpen(true)
   const onClose = () => setModalIsOpen(false)
 
+  const router = useRouter()
   const dispatch = useDispatch()
 
   const pools = useSelector<any, PoolsState>((state) => state.pools)
@@ -36,14 +38,18 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   }
 
   const getOnboardingStatus = async () => {
-    if (address) {
-      const req = await fetch(`${config.onboardAPIHost}addresses/${address}/status`)
+    if (address && props.pool && 'addresses' in props.pool) {
+      const req = await fetch(
+        `${config.onboardAPIHost}pools/${props.pool?.addresses?.ROOT_CONTRACT}/addresses/${address}`
+      )
       const body = await req.json()
       console.log({ status: body })
       setStatus(body)
 
       if (body.agreements.length > 0) {
-        const req = await fetch(`${config.onboardAPIHost}agreements/${body.agreements[0].id}/link`)
+        const req = await fetch(
+          `${config.onboardAPIHost}pools/${props.pool?.addresses?.ROOT_CONTRACT}/agreements/${body.agreements[0].id}/link`
+        )
         const link = await req.text()
         setAgreementLink(link)
       }
@@ -53,6 +59,12 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     getOnboardingStatus()
   }, [address])
+
+  React.useEffect(() => {
+    if (!modalIsOpen && 'onb' in router.query && router.query.onb === '1') {
+      setModalIsOpen(true)
+    }
+  }, [router.query])
 
   React.useEffect(() => {
     // if (props.pool) {
@@ -116,7 +128,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
           )}
           {status?.kyc.url && !status.kyc.created && (
             <Box flex={true} justify="between">
-              <Paragraph>KYC started, will notify when done, can continue with SubDoc.</Paragraph>
+              <Paragraph>Ready to start.</Paragraph>
               <Button primary label={`Start KYC`} href={status.kyc.url} fill={false} />
             </Box>
           )}

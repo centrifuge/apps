@@ -63,6 +63,7 @@
     "decimal.js-light": "2.5.0",
     "graphql": "15.0.0",
     "graphql-tag": "2.10.3",
+    "grommet": "2.15.0",
     "next": "9.5.5",
     "next-redux-wrapper": "6.0.0",
     "node-fetch": "2.6.1",
