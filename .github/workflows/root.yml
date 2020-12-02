@@ -3,7 +3,7 @@ on:
   pull_request
 
 jobs:
-  lint:
+  check-format:
     runs-on: ubuntu-latest
     
     steps:
@@ -27,5 +27,5 @@ jobs:
             ${{ runner.os }}-yarn-
       - run: yarn install
 
-      # Lint
+      # Check formatting
       - run: yarn format:check

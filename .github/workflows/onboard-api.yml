@@ -30,8 +30,6 @@ jobs:
       - run: yarn install
 
       # Build
-      - run: yarn run check-format
-        working-directory: ./onboard-api
       - run: yarn run build
         working-directory: ./onboard-api
 
