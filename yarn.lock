@@ -1872,7 +1872,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@centrifuge/e2e-tests@workspace:e2e-tests"
   dependencies:
-    "@centrifuge/tinlake-js": "workspace:*"
+    "@centrifuge/tinlake-js": 3.0.0-develop.35
     "@centrifuge/tinlake-pools-kovan": 0.0.1-develop.3
     "@centrifuge/tinlake-pools-mainnet": 0.0.1-develop.3
     "@cucumber/cucumber": ^7.0.0-rc.0
@@ -1908,7 +1908,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@centrifuge/tinlake-js@workspace:*, @centrifuge/tinlake-js@workspace:tinlake.js":
+"@centrifuge/tinlake-js@3.0.0-develop.35, @centrifuge/tinlake-js@workspace:*, @centrifuge/tinlake-js@workspace:tinlake.js":
   version: 0.0.0-use.local
   resolution: "@centrifuge/tinlake-js@workspace:tinlake.js"
   dependencies:

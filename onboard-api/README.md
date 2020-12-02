@@ -3,7 +3,7 @@
 ## Setup
 Make sure you have installed Yarn and NVM.
 
-1. Use Node v12.18.3: `nvm use` in the root of `apps`
+1. Use Node v12.18.3: `nvm use` 
 2. Install dependencies: `yarn install`
 3. Create a Postgres database
 4. Add `.env` file to the `onboard-api` folder
