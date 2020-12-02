@@ -1,6 +1,6 @@
-import { Logger, Injectable } from '@nestjs/common'
-import fetch from 'node-fetch'
 import { JwtUtils } from '@connectedcars/jwtutils'
+import { Injectable, Logger } from '@nestjs/common'
+import fetch from 'node-fetch'
 
 @Injectable()
 export class DocusignAuthService {

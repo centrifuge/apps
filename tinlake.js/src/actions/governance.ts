@@ -1,4 +1,4 @@
-import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
+import { Constructor, PendingTransaction, TinlakeParams } from '../Tinlake'
 
 function GovernanceActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IGovernanceActions {

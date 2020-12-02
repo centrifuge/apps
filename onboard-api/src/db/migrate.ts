@@ -1,7 +1,7 @@
-import * as postgres from 'postgres'
-import * as shift from 'postgres-shift'
 import { config } from 'dotenv'
 import * as path from 'path'
+import * as postgres from 'postgres'
+import * as shift from 'postgres-shift'
 
 config()
 

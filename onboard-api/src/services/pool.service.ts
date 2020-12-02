@@ -1,4 +1,4 @@
-import { Logger, Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import fetch from 'node-fetch'
 
 @Injectable()
@@ -20,6 +20,7 @@ export class PoolService {
   }
 
   private async loadFromIPFS() {
+    // TODO: use ethers to get all pools file from on chain registry
     const response = await fetch(`${process.env.IPFS_GATEWAY}${process.env.POOLS_IPFS_HASH}`)
 
     const pools = await response.json()

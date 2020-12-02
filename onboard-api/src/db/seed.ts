@@ -1,7 +1,7 @@
-import * as postgres from 'postgres'
-import * as fs from 'fs'
 import { config } from 'dotenv'
+import * as fs from 'fs'
 import * as path from 'path'
+import * as postgres from 'postgres'
 
 config()
 

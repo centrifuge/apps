@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-
 import { DatabaseService } from './db.service'
 
 export type Blockchain = 'ethereum'

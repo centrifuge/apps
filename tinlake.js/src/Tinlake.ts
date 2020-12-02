@@ -1,6 +1,6 @@
-import abiDefinitions from './abi'
-import { ethers } from 'ethers'
 import BN from 'bn.js'
+import { ethers } from 'ethers'
+import abiDefinitions from './abi'
 
 const contractNames = [
   'COLLATERAL_NFT',
@@ -68,7 +68,7 @@ export type Constructor<T = {}> = new (...args: any[]) => Tinlake
 // ethers.errors.setLogLevel('error')
 
 // This adds a .toBN() function to all BigNumber instances returned by ethers.js
-;(ethers.BigNumber as any).prototype.toBN = function () {
+;(ethers.BigNumber as any).prototype.toBN = function() {
   return new BN((this as any).toString())
 }
 

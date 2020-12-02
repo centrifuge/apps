@@ -51,3 +51,4 @@ jobs:
       NEXT_PUBLIC_TRANSACTION_TIMEOUT: "3600"
       NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL: "https://api.thegraph.com/subgraphs/name/centrifuge/tinlake-kovan-staging"
       NEXT_PUBLIC_POOLS_CONFIG: "kovanStaging"
+      NEXT_PUBLIC_ONBOARD_API_HOST: "http://localhost:3100/"
