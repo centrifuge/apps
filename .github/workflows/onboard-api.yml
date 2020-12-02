@@ -57,6 +57,5 @@ jobs:
         with:
           context: .
           file: ./onboard-api/docker/Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/386
           push: true
           tags: centrifugeio/onboard-api:latest
