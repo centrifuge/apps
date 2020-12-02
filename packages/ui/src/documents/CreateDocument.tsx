@@ -109,7 +109,33 @@ export const CreateDocument: FunctionComponent<Props> = props => {
         createResult = (await httpClient.documents.create(document)).data;
       }
       push(documentRoutes.index);
-      await httpClient.documents.update({
+
+      if (document.template && document.template !== '') {
+        /*
+        * When a document has a template if we update template rules are lost
+        * A temp workaround is to commit and create a new version.
+        * The extra commit is necessary because you can create a new version
+        * only for committed docs.
+        * TODO this should be changed
+        * */
+        await httpClient.documents.commit(createResult._id!)
+        await httpClient.documents.create({
+
+          _id:createResult._id!,
+          document_id: createResult?.header!.document_id,
+          attributes: {
+            [HARDCODED_FIELDS.ASSET_IDENTIFIER]: {
+              type: 'bytes',
+              value: createResult.header!.document_id,
+            } as any
+          }
+        });
+      } else {
+        /*
+        * Update v2 replaces the entire document we make sure we do not lose
+        * any fields when adding the ASSET_IDENTIFIER
+        * */
+        const toUpdate = {
           ...createResult,
           attributes: {
             ...createResult.attributes,
@@ -119,7 +145,12 @@ export const CreateDocument: FunctionComponent<Props> = props => {
             } as any,
           }
 
-        })
+        };
+        await httpClient.documents.update(toUpdate)
+      }
+
+
+
     } catch (e) {
       notification.alert({
         type: NOTIFICATION.ERROR,

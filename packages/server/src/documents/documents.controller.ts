@@ -93,23 +93,34 @@ export class DocumentsController {
    * When a new version is created it updated the gateway db
    * */
   async saveDoc(document: Document, user: User) {
+    let payload: any = {
+      document_id: document.document_id,
+      attributes: document.attributes,
+
+      scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
+    };
+
+    if (document.header && document.header.read_access) {
+      payload = {
+        ...payload,
+        read_access: document.header.read_access,
+      };
+    }
+
+    if (document.header && document.header.write_access) {
+      payload = {
+        ...payload,
+        write_access: document.header.write_access,
+      };
+    }
+
     const createResult: Document = await this.centrifugeService.documents.createDocumentV2(
       user.account,
-      {
-        document_id: document.document_id,
-        attributes: document.attributes,
-        read_access: document.header.read_access
-          ? document.header.read_access
-          : [],
-        write_access: document.header.write_access
-          ? document.header.write_access
-          : [],
-        scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
-      },
+      payload,
     );
 
-    return await this.databaseService.documents.updateById(
-      document._id,
+    return (await this.databaseService.documents.update(
+      { 'header.document_id': createResult.header.document_id },
       {
         ...createResult,
         attributes: unflatten(createResult.attributes),
@@ -122,8 +133,11 @@ export class DocumentsController {
         nft_status: NftStatus.NoNft,
         organizationId: user.account.toLowerCase(),
       },
-      true,
-    );
+      {
+        returnUpdatedDocs: true,
+        upsert: true,
+      },
+    )) as Document;
   }
 
   async cloneDoc(document: Document, template, user: User) {
@@ -222,8 +236,8 @@ export class DocumentsController {
     return this.databaseService.documents
       .getCursor({
         $or: [
-          { organizationId: {$regex: new RegExp(request.user.account, 'i')} },
-        ]
+          { organizationId: { $regex: new RegExp(request.user.account, 'i') } },
+        ],
       })
       .sort({ createdAt: -1 })
       .exec();

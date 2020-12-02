@@ -134,7 +134,7 @@ describe('DocumentsController', () => {
         organizationId: user.account,
       });
 
-      expect(databaseSpies.spyUpdateById).toHaveBeenCalledTimes(1);
+      expect(databaseSpies.spyUpdate).toHaveBeenCalledTimes(1);
     });
   });
 

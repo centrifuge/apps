@@ -26,6 +26,7 @@ import { Schema } from '@centrifuge/gateway-lib/models/schema';
 import { getSchemaLabel } from '@centrifuge/gateway-lib/utils/schema-utils';
 import { FormNext } from 'grommet-icons';
 import { POLLING_INTERVAL } from '../constants';
+import { hexToInt } from '@centrifuge/gateway-lib/utils/etherscan';
 
 type Props = RouteComponentProps;
 
@@ -172,7 +173,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               sortable: true,
               render: datum => {
                 if(documentHasNFTs(datum)) {
-                    return datum.header.nfts.map(nft => nft.token_id.replace(/^0x/,'')).join(', ')
+                    return datum.header.nfts.map(nft => hexToInt(nft.token_id)).join(', ')
                 }
                 return datum.nft_status;
               }
