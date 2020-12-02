@@ -89,6 +89,7 @@
     "@types/react": "16.9.34",
     "@types/react-redux": "7.1.8",
     "@types/react-test-renderer": "16.9.2",
+    "@types/styled-components": "^5.1.4",
     "@types/yup": "0.28.3",
     "@zeit/next-typescript": "1.1.1",
     "dotenv": "8.2.0",

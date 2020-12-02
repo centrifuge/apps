@@ -2002,6 +2002,7 @@ __metadata:
     "@types/react": 16.9.34
     "@types/react-redux": 7.1.8
     "@types/react-test-renderer": 16.9.2
+    "@types/styled-components": ^5.1.4
     "@types/yup": 0.28.3
     "@zeit/next-typescript": 1.1.1
     apollo-cache-inmemory: 1.6.5
@@ -3665,7 +3666,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/hoist-non-react-statics@npm:^3.3.0":
+"@types/hoist-non-react-statics@npm:*, @types/hoist-non-react-statics@npm:^3.3.0":
   version: 3.3.1
   resolution: "@types/hoist-non-react-statics@npm:3.3.1"
   dependencies:
@@ -3882,6 +3883,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-native@npm:*":
+  version: 0.63.37
+  resolution: "@types/react-native@npm:0.63.37"
+  dependencies:
+    "@types/react": "*"
+  checksum: 05c5ebb675c7e30719f74f87a0f1bfab3c29735e1c9792fc87f8b6be70ab03f3918f378258d3908ddc1c7156342121a50f4524da4139fd73ad4c037e3bff65f9
+  languageName: node
+  linkType: hard
+
 "@types/react-redux@npm:7.1.8":
   version: 7.1.8
   resolution: "@types/react-redux@npm:7.1.8"
@@ -3971,6 +3981,18 @@ __metadata:
   version: 1.0.1
   resolution: "@types/stack-utils@npm:1.0.1"
   checksum: 59738e4b71b233b438a6ecb9faaf577d6f02afec4ea093d5ad3c10e78cb7096ab32648a2c2017c6c2e6c6853498aa783643a2c6b859c4a75f6750e7b37ae8bae
+  languageName: node
+  linkType: hard
+
+"@types/styled-components@npm:^5.1.4":
+  version: 5.1.4
+  resolution: "@types/styled-components@npm:5.1.4"
+  dependencies:
+    "@types/hoist-non-react-statics": "*"
+    "@types/react": "*"
+    "@types/react-native": "*"
+    csstype: ^3.0.2
+  checksum: 0f458fa8989ccf921200f590680580ab1d69dc198a6db27765974d0d707713ef38f6b2d1facbd8f9a411373cc2200f74def6d2f5b46dd037bc7687654152b2b0
   languageName: node
   linkType: hard
 
