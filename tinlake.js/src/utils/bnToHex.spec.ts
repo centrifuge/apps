@@ -1,6 +1,6 @@
-import { bnToHex } from './bnToHex'
-import BN from 'bn.js'
 import assert from 'assert'
+import BN from 'bn.js'
+import { bnToHex } from './bnToHex'
 
 it('bnToHex formats correctly', () => {
   assert.equal(bnToHex(new BN(0)), '0x0')

@@ -1,5 +1,5 @@
 import { baseToDisplay } from '@centrifuge/tinlake-js'
-import { Box, Heading, Text } from 'grommet'
+import { Box } from 'grommet'
 import * as React from 'react'
 import styled from 'styled-components'
 import { PoolsData } from '../../ducks/pools'
@@ -23,7 +23,9 @@ class PoolsMetrics extends React.Component<Props> {
         <Box width="256px" pad="medium" elevation="small" round="xsmall" background="white">
           <Cont>
             <TokenLogo src={`/static/dai.svg`} />
-            <Value><NumberDisplay value={baseToDisplay(pools.totalFinancedCurrency, 18)} precision={0} /></Value>{' '}
+            <Value>
+              <NumberDisplay value={baseToDisplay(pools.totalFinancedCurrency, 18)} precision={0} />
+            </Value>{' '}
             <Unit>DAI</Unit>
           </Cont>
           <Label>Total value locked</Label>

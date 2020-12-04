@@ -1,11 +1,9 @@
-import { DisplayField } from '@centrifuge/axis-display-field'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
-import { Box, DataTable } from 'grommet'
+import { Box } from 'grommet'
 import Router from 'next/router'
 import * as React from 'react'
 import styled from 'styled-components'
 import { PoolData } from '../../ducks/pools'
-import ChevronRight from '../ChevronRight'
 import NumberDisplay from '../NumberDisplay'
 
 interface Props {
@@ -34,29 +32,68 @@ class PoolList extends React.Component<Props> {
     return (
       <Box>
         <Header>
-          <Desc><HeaderTitle>Pool</HeaderTitle></Desc>
-          <HeaderCol><HeaderTitle>Pool Value</HeaderTitle></HeaderCol>
-          <HeaderCol><HeaderTitle>DROP Yield</HeaderTitle><HeaderSub>14 days</HeaderSub></HeaderCol>
-          <HeaderCol><HeaderTitle>TIN Yield</HeaderTitle><HeaderSub>14 days</HeaderSub></HeaderCol>
+          <Desc>
+            <HeaderTitle>Pool</HeaderTitle>
+          </Desc>
+          <HeaderCol>
+            <HeaderTitle>Pool Value</HeaderTitle>
+          </HeaderCol>
+          <HeaderCol>
+            <HeaderTitle>DROP Yield</HeaderTitle>
+            <HeaderSub>14 days</HeaderSub>
+          </HeaderCol>
+          <HeaderCol>
+            <HeaderTitle>TIN Yield</HeaderTitle>
+            <HeaderSub>14 days</HeaderSub>
+          </HeaderCol>
         </Header>
-        {pools?.map(p =>
+        {pools?.map((p) => (
           <PoolRow key={p.id} onClick={() => this.clickPool(p)}>
             <Icon></Icon>
             <Desc>
               <Name>{p.name}</Name>
               <Type>{p.asset}</Type>
             </Desc>
-            <DataCol><NumberDisplay
+            <DataCol>
+              <NumberDisplay
                 precision={0}
-                render={(v) => v === '0' ? <Dash>-</Dash> : <><Number>{v}</Number> <Unit>DAI</Unit></>}
+                render={(v) =>
+                  v === '0' ? (
+                    <Dash>-</Dash>
+                  ) : (
+                    <>
+                      <Number>{v}</Number> <Unit>DAI</Unit>
+                    </>
+                  )
+                }
                 value={baseToDisplay(p.totalRepaysAggregatedAmount.add(p.totalDebt), 18)}
-              /></DataCol> {/* TODO */}
-            <DataCol><NumberDisplay render={(v) => <><Number>{v}</Number> <Unit>%</Unit></>}
-              value={feeToInterestRate(p.seniorInterestRate)} /></DataCol> {/* TODO */}
-            <DataCol><NumberDisplay render={(v) => <><Number>{v}</Number> <Unit>%</Unit></>}
-              value={feeToInterestRate(p.seniorInterestRate)} /></DataCol> {/* TODO */}
+              />
+            </DataCol>{' '}
+            {/* TODO */}
+            <DataCol>
+              <NumberDisplay
+                render={(v) => (
+                  <>
+                    <Number>{v}</Number> <Unit>%</Unit>
+                  </>
+                )}
+                value={feeToInterestRate(p.seniorInterestRate)}
+              />
+            </DataCol>{' '}
+            {/* TODO */}
+            <DataCol>
+              <NumberDisplay
+                render={(v) => (
+                  <>
+                    <Number>{v}</Number> <Unit>%</Unit>
+                  </>
+                )}
+                value={feeToInterestRate(p.seniorInterestRate)}
+              />
+            </DataCol>{' '}
+            {/* TODO */}
           </PoolRow>
-        )}
+        ))}
       </Box>
     )
   }
@@ -86,7 +123,7 @@ const PoolRow = styled.div`
 const Icon = styled.img`
   width: 40px;
   height: 40px;
-  margin-right: 16px
+  margin-right: 16px;
 `
 
 const Desc = styled.div`

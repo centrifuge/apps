@@ -7,7 +7,7 @@ interface Props {
   precision?: number
   prefix?: string
   suffix?: string
-  render?: (formatted: string, prefix: string|undefined, suffix: string|undefined) => React.ReactElement
+  render?: (formatted: string, prefix: string | undefined, suffix: string | undefined) => React.ReactElement
 }
 
 const NumberDisplay: FunctionComponent<Props> = ({ value, precision, prefix, suffix, render }: Props) => {

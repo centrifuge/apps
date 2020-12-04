@@ -1,6 +1,6 @@
-import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
 import BN from 'bn.js'
 import { ethers } from 'ethers'
+import { Constructor, PendingTransaction, TinlakeParams } from '../Tinlake'
 
 export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IProxyActions {

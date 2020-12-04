@@ -1,6 +1,6 @@
-import { ContractName, Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
-import { ZERO_ADDRESS } from '../services/ethereum'
 import BN from 'bn.js'
+import { ZERO_ADDRESS } from '../services/ethereum'
+import { Constructor, ContractName, PendingTransaction, TinlakeParams } from '../Tinlake'
 const web3 = require('web3-utils')
 
 export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
