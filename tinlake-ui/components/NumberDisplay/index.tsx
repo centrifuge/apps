@@ -7,11 +7,17 @@ interface Props {
   precision?: number
   prefix?: string
   suffix?: string
+  render?: (formatted: string, prefix: string|undefined, suffix: string|undefined) => React.ReactElement
 }
 
-const NumberDisplay: FunctionComponent<Props> = ({ value, precision, prefix, suffix }: Props) => {
+const NumberDisplay: FunctionComponent<Props> = ({ value, precision, prefix, suffix, render }: Props) => {
   const valueToDecimal = new Decimal(value.toString()).toFixed(precision)
   const formatted = addThousandsSeparators(valueToDecimal.toString())
+
+  if (render) {
+    return render(formatted, prefix, suffix)
+  }
+
   return (
     <span>
       {prefix}

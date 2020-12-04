@@ -3,6 +3,7 @@ import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import { Box, DataTable } from 'grommet'
 import Router from 'next/router'
 import * as React from 'react'
+import styled from 'styled-components'
 import { PoolData } from '../../ducks/pools'
 import ChevronRight from '../ChevronRight'
 import NumberDisplay from '../NumberDisplay'
@@ -20,84 +21,134 @@ class PoolList extends React.Component<Props> {
     }
   }
 
+  clickPool = (p: PoolData) => {
+    if (p.isUpcoming || p.isArchived) {
+      Router.push('/pool/[slug]', `/pool/${p.slug}`, { shallow: true })
+    } else {
+      Router.push('/pool/[root]/[slug]', `/pool/${p.id}/${p.slug}`, { shallow: true })
+    }
+  }
+
   render() {
     const { pools } = this.props
     return (
       <Box>
-        <DataTable
-          style={{ tableLayout: 'auto' }}
-          data={pools}
-          sortable
-          onClickRow={this.clickRow as any}
-          sort={{ property: 'order', direction: 'desc' }}
-          pad="xsmall"
-          columns={[
-            {
-              header: 'Pool',
-              property: 'name',
-              align: 'center',
-              render: (p: PoolData) => (
-                <Box style={{ maxWidth: '200px' }}>
-                  <DisplayField as={'span'} value={p.name} />
-                </Box>
-              ),
-            },
-            {
-              header: 'Status',
-              property: 'order',
-              align: 'center',
-              render: (p: PoolData) => (
-                <Box style={{ maxWidth: '200px' }}>
-                  <DisplayField as={'span'} value={p.status} />
-                </Box>
-              ),
-            },
-            {
-              header: 'Asset Type',
-              property: 'type',
-              align: 'center',
-              render: (p: PoolData) => (
-                <Box style={{ maxWidth: '150px' }}>
-                  <DisplayField as={'span'} value={p.asset} />
-                </Box>
-              ),
-            },
-            {
-              header: 'Total Financed (DAI)',
-              property: 'totalFinancedCurrency',
-              align: 'center',
-              render: (p: PoolData) =>
-                p.isArchived ? (
-                  <NumberDisplay suffix="" precision={0} value={baseToDisplay(p.totalFinancedCurrency, 18)} />
-                ) : (
-                  <NumberDisplay
-                    suffix=""
-                    precision={0}
-                    value={baseToDisplay(p.totalRepaysAggregatedAmount.add(p.totalDebt), 18)}
-                  />
-                ),
-            },
-            {
-              header: 'DROP APR',
-              property: 'seniorInterestRateNum',
-              align: 'center',
-              render: (p: PoolData) => <NumberDisplay suffix=" %" value={feeToInterestRate(p.seniorInterestRate)} />,
-            },
-            {
-              header: '',
-              property: 'id',
-              align: 'center',
-              sortable: false,
-              size: '36px',
-              render: (_p: PoolData) => {
-                return <ChevronRight />
-              },
-            },
-          ]}
-        />
+        <Header>
+          <Desc><HeaderTitle>Pool</HeaderTitle></Desc>
+          <HeaderCol><HeaderTitle>Pool Value</HeaderTitle></HeaderCol>
+          <HeaderCol><HeaderTitle>DROP Yield</HeaderTitle><HeaderSub>14 days</HeaderSub></HeaderCol>
+          <HeaderCol><HeaderTitle>TIN Yield</HeaderTitle><HeaderSub>14 days</HeaderSub></HeaderCol>
+        </Header>
+        {pools?.map(p =>
+          <PoolRow key={p.id} onClick={() => this.clickPool(p)}>
+            <Icon></Icon>
+            <Desc>
+              <Name>{p.name}</Name>
+              <Type>{p.asset}</Type>
+            </Desc>
+            <DataCol><NumberDisplay
+                precision={0}
+                render={(v) => v === '0' ? <Dash>-</Dash> : <><Number>{v}</Number> <Unit>DAI</Unit></>}
+                value={baseToDisplay(p.totalRepaysAggregatedAmount.add(p.totalDebt), 18)}
+              /></DataCol> {/* TODO */}
+            <DataCol><NumberDisplay render={(v) => <><Number>{v}</Number> <Unit>%</Unit></>}
+              value={feeToInterestRate(p.seniorInterestRate)} /></DataCol> {/* TODO */}
+            <DataCol><NumberDisplay render={(v) => <><Number>{v}</Number> <Unit>%</Unit></>}
+              value={feeToInterestRate(p.seniorInterestRate)} /></DataCol> {/* TODO */}
+          </PoolRow>
+        )}
       </Box>
     )
   }
 }
 
 export default PoolList
+
+const Header = styled.div`
+  padding: 16px;
+  display: flex;
+`
+
+const PoolRow = styled.div`
+  padding: 16px;
+  display: flex;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px #00000030;
+  background: white;
+  margin-bottom: 16px;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: 0 2px 6px #00000060;
+  }
+`
+
+const Icon = styled.img`
+  width: 40px;
+  height: 40px;
+  margin-right: 16px
+`
+
+const Desc = styled.div`
+  flex: 1 1 auto;
+`
+
+const Name = styled.h3`
+  margin: 0;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 28px;
+  color: #333;
+`
+
+const Type = styled.p`
+  margin: 0;
+  font-weight: 500;
+  font-size: 10px;
+  line-height: 14px;
+  color: #979797;
+`
+
+const HeaderCol = styled.div`
+  width: 120px;
+  margin-left: 16px;
+  text-align: right;
+`
+
+const DataCol = styled(HeaderCol)`
+  align-self: center;
+`
+
+const Number = styled.span`
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 28px;
+  color: #333;
+`
+
+const Unit = styled.span`
+  font-weight: 500;
+  font-size: 10px;
+  line-height: 14px;
+  color: #979797;
+`
+
+const Dash = styled(Number)`
+  color: #979797;
+`
+
+const HeaderTitle = styled.h4`
+  margin: 0;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 20px;
+  color: #777;
+`
+
+const HeaderSub = styled.p`
+  margin: 0;
+  font-weight: 500;
+  font-size: 10px;
+  line-height: 14px;
+  color: #979797;
+`
