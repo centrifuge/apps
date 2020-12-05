@@ -139,7 +139,11 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
     setMaturityDate = async (nftId: string, timestampSecs: number) => {
       return this.pending(
-        this.contract('FEED').file(web3.fromAscii('maturityDate').padEnd(66, '0'), nftId, timestampSecs)
+        this.contract('FEED')['file(bytes32,bytes32,uint256)'](
+          web3.fromAscii('maturityDate').padEnd(66, '0'),
+          nftId,
+          timestampSecs
+        )
       )
     }
   }
