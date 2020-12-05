@@ -120,10 +120,10 @@ export const CreateDocument: FunctionComponent<Props> = props => {
         * */
         await httpClient.documents.commit(createResult._id!)
         await httpClient.documents.create({
-
-          _id:createResult._id!,
+          ...document,
           document_id: createResult?.header!.document_id,
           attributes: {
+            ...document.attributes,
             [HARDCODED_FIELDS.ASSET_IDENTIFIER]: {
               type: 'bytes',
               value: createResult.header!.document_id,

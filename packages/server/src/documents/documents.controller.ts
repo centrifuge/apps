@@ -72,6 +72,7 @@ export class DocumentsController {
       commitResult.header.job_id,
       user.account,
     );
+
     await this.databaseService.documents.update(
       { 'header.document_id': document.header.document_id },
       {
@@ -149,21 +150,16 @@ export class DocumentsController {
       template,
     );
 
+    /*
+     * We add the document attributes in the database on clone even if the doc
+     * does not have this on the node for a better UX.
+     * At the moment a commit is required before and new version and this takes
+     * time and blocks the interface
+     * TODO this should be removed when we do not require a commit before each update
+     * */
     const mergedDoc: Document = merge(cloneResult, document);
-
-    const updateResult: Document = await this.centrifugeService.documents.updateDocumentV2(
-      user.account,
-      {
-        write_access: mergedDoc.header.write_access,
-        read_access: mergedDoc.header.read_access,
-        attributes: mergedDoc.attributes,
-        scheme: SchemeEnum.Generic,
-      },
-      cloneResult.header.document_id,
-    );
-
     return await this.databaseService.documents.insert({
-      ...updateResult,
+      ...mergedDoc,
       ownerId: user._id,
       document_status: DocumentStatus.Creating,
       nft_status: NftStatus.NoNft,
@@ -257,7 +253,7 @@ export class DocumentsController {
     try {
       const docFromNode = await this.centrifugeService.documents.getDocument(
         request.user.account,
-        document.header.document_id,
+        document.header.document_id
       );
 
       docFromNode.attributes = {
