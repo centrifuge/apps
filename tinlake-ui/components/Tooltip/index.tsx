@@ -1,5 +1,5 @@
-import * as React from 'react'
 import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
+import * as React from 'react'
 import tooltips from '../../static/tooltips.json'
 
 interface Props {

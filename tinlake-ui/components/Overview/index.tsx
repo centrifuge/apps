@@ -1,11 +1,11 @@
-import { Anchor, Button, Box, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
+import { useSelector } from 'react-redux'
+import { PoolLink } from '../../components/PoolLink'
 import { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
-import { PoolState } from '../../ducks/pool'
-import { useSelector } from 'react-redux'
 import { LoansState } from '../../ducks/loans'
-import { PoolLink } from '../../components/PoolLink'
+import { PoolState } from '../../ducks/pool'
 
 interface Props {
   pool?: PoolState

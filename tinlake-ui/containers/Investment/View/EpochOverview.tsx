@@ -4,6 +4,7 @@ import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'gro
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import { LoadingValue } from '../../../components/LoadingValue/index'
+import { Tooltip } from '../../../components/Tooltip'
 import { AuthState } from '../../../ducks/auth'
 import { PoolData, PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
@@ -11,7 +12,6 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
 import { toPrecision } from '../../../utils/toPrecision'
 import { Sidenote, SignIcon } from './styles'
-import { Tooltip } from '../../../components/Tooltip'
 
 interface Props extends TransactionProps {
   tinlake: ITinlake
