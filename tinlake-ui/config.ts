@@ -16,6 +16,7 @@ interface PoolMetadata {
   slug: string
   description?: string
   logo?: string
+  icon?: string
   website?: string
   details?: any
   asset: string
@@ -126,6 +127,7 @@ const metadataSchema = yup.object().shape({
   slug: yup.string().required('poolSchema.slug is required'),
   description: yup.string(),
   logo: yup.string(),
+  icon: yup.string(),
   website: yup.string(),
   details: yup.object(),
   asset: yup.string().required('poolSchema.asset is required'),

@@ -61,7 +61,7 @@ class Apollo {
 
   injectPoolData(pools: any[]): PoolData[] {
     const poolConfigs = config.pools
-    const tinlakePools = poolConfigs.map((poolConfig: any) => {
+    const tinlakePools = poolConfigs.map((poolConfig) => {
       const poolId = poolConfig.addresses.ROOT_CONTRACT
       const pool = pools.find((p) => p.id.toLowerCase() === poolId.toLowerCase())
 
@@ -105,6 +105,7 @@ class Apollo {
         assetValue: (pool && new BN(pool.assetValue)) || new BN('0'),
         juniorYield14Days: (pool && new BN(pool.juniorYield14Days))|| null,
         seniorYield14Days: (pool && new BN(pool.seniorYield14Days))|| null,
+        icon: poolConfig.metadata.icon || null,
       }
 
       return { ...poolData, status: getPoolStatus(poolData) }
@@ -136,6 +137,7 @@ class Apollo {
       assetValue: new BN('0'),
       juniorYield14Days: null,
       seniorYield14Days: null,
+      icon: p.metadata.icon || null,
     }))
   }
 
@@ -165,6 +167,7 @@ class Apollo {
       assetValue: new BN('0'),
       juniorYield14Days: null,
       seniorYield14Days: null,
+      icon: p.metadata.icon || null,
     }))
   }
 

@@ -34,6 +34,7 @@ export interface PoolData {
   assetValue: BN
   juniorYield14Days: BN | null
   seniorYield14Days: BN | null
+  icon: string | null
 }
 
 export interface PoolsData {

@@ -52,7 +52,7 @@ class PoolList extends React.Component<Props> {
         </Header>
         {pools?.map((p) => (
           <PoolRow key={p.id} onClick={() => this.clickPool(p)}>
-            <Icon></Icon>
+            <Icon src={p.icon || 'https://storage.googleapis.com/tinlake/pool-icons/Placeholder.svg'} />
             <Desc>
               <Name>{p.name}</Name>
               <Type>{p.asset}</Type>
@@ -95,7 +95,7 @@ class PoolList extends React.Component<Props> {
               )}
             </DataCol>{' '}
             <DataCol>
-              {p.seniorYield14Days === null ? '-' : (
+              {p.juniorYield14Days === null ? '-' : (
                 <NumberDisplay
                   render={(v) => (
                     <>

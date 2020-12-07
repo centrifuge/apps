@@ -49,7 +49,7 @@
     "@centrifuge/axis-web3-wallet": "0.0.3-develop.121",
     "@centrifuge/tinlake-js": "workspace:*",
     "@centrifuge/tinlake-pools-kovan": "0.0.1-develop.5",
-    "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.13",
+    "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.15",
     "@sendgrid/mail": "7.1.1",
     "@sentry/react": "^5.26.0",
     "@sentry/tracing": "^5.26.0",

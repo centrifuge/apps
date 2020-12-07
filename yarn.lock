@@ -1866,10 +1866,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@centrifuge/tinlake-pools-mainnet@npm:0.0.1-develop.13":
-  version: 0.0.1-develop.13
-  resolution: "@centrifuge/tinlake-pools-mainnet@npm:0.0.1-develop.13"
-  checksum: 1b03d476cab32ce5162f281f5def0919121f1995014c13ce079733b56b30ed7e182eccabee0228c9a40a87b950e181e87abac1e9ce7d38f50db1eea66565d054
+"@centrifuge/tinlake-pools-mainnet@npm:0.0.1-develop.15":
+  version: 0.0.1-develop.15
+  resolution: "@centrifuge/tinlake-pools-mainnet@npm:0.0.1-develop.15"
+  checksum: 94c7b7fbfd22bc134ed10a00f533a080a1a184cf09fe8340eaccb3eb4fc2e2e21499a636b2c254893dfab6a4e4bcb8008843747a49ae3766676e07a202e688b2
   languageName: node
   linkType: hard
 
@@ -1898,7 +1898,7 @@ __metadata:
     "@centrifuge/axis-web3-wallet": 0.0.3-develop.121
     "@centrifuge/tinlake-js": "workspace:*"
     "@centrifuge/tinlake-pools-kovan": 0.0.1-develop.5
-    "@centrifuge/tinlake-pools-mainnet": 0.0.1-develop.13
+    "@centrifuge/tinlake-pools-mainnet": 0.0.1-develop.15
     "@sendgrid/mail": 7.1.1
     "@sentry/react": ^5.26.0
     "@sentry/tracing": ^5.26.0
