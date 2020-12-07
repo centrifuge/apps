@@ -14,9 +14,16 @@ interface Props {
 const QrImage = styled.img`
   width: 60%;
 `;
+const Stepper = styled.ol`
+  margin: 0px;
+  padding:0px;
+  list-style-position:inside;
+`;
 
-const Step = styled.h4`
+const Step = styled.li`
   margin-top: 0px;
+  margin-bottom: 12px;
+  font-weight: bold;
 `;
 const QrCode: FunctionComponent<Props> = (props: Props) => {
   const [qrCode, setQrCode] = useState();
@@ -31,15 +38,16 @@ const QrCode: FunctionComponent<Props> = (props: Props) => {
   return (
     <>
       <h2>2 Factor Authentication Setup</h2>
-      <Step>1. Install Authy on your mobile phone</Step>
-      <Step>2. Press add account in Authy</Step>
-      <Step>3. Scan the QR Code</Step>
+      <Stepper>
+      <Step>Install Authentificator App on your mobile phone (e.g Google Authentificator or Authy)</Step>
+      <Step>Add new account in your app</Step>
+      <Step>Scan the QR Code</Step>
       <Box align={'center'}>
         <QrImage src={qrCode} />
       </Box>
 
-      <Step>3. Verify security code</Step>
-
+      <Step>Input the generated security code</Step>
+      </Stepper>
       <TwoFAForm user={user!} error={error} onSubmit={onSubmit} />
     </>
   );

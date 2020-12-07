@@ -31,6 +31,7 @@ import { AppContext } from '../App';
 type State = {
   loadingMessage: string | null;
   userFormOpened: boolean;
+  confirmDeleteOpened: boolean;
   users: UserWithOrg[];
   schemas: Schema[];
   organizations: Organization[];
@@ -43,6 +44,7 @@ const UsersList: FunctionComponent = () => {
     {
       loadingMessage,
       userFormOpened,
+      confirmDeleteOpened,
       users,
       schemas,
       selectedUser,
@@ -53,6 +55,7 @@ const UsersList: FunctionComponent = () => {
   ] = useMergeState<State>({
     loadingMessage: 'Loading',
     userFormOpened: false,
+    confirmDeleteOpened: false,
     selectedUser: new UserWithOrg(),
     users: [],
     schemas: [],
@@ -116,10 +119,21 @@ const UsersList: FunctionComponent = () => {
     setState({ userFormOpened: false });
   };
 
+  const closeDeleteConfirmation = () => {
+    setState({ confirmDeleteOpened: false });
+  };
+
   const openUserForm = (user: User) => {
     setState({
       selectedUser: user,
       userFormOpened: true,
+    });
+  };
+
+  const confirmUserDelete = (user: User) => {
+    setState({
+      selectedUser: user,
+      confirmDeleteOpened: true,
     });
   };
 
@@ -286,7 +300,7 @@ const UsersList: FunctionComponent = () => {
               <Box direction="row" gap="small">
                 <Anchor label={'Edit'} onClick={() => openUserForm(data)} />
                 {user?.email !== data.email && (
-                  <Anchor label={'Delete'} onClick={() => onUserDelete(data)} />
+                  <Anchor label={'Delete'} onClick={() => confirmUserDelete(data)} />
                 )}
               </Box>
             ),
@@ -320,6 +334,26 @@ const UsersList: FunctionComponent = () => {
           onSubmit={onUserFormSubmit}
           onDiscard={closeUserForm}
         />
+      </Modal>
+
+      <Modal
+        opened={confirmDeleteOpened}
+        headingProps={{ level: 3 }}
+        title={'Delete User'}
+        onClose={closeDeleteConfirmation}
+      >
+        <Box margin={{ vertical: 'medium' }} >
+          <p>Are you sure you want to delete user <strong>{selectedUser.name}</strong>?</p>
+        </Box>
+        <Box  direction="row" justify={'between'} gap={'medium'}>
+          <Button label="Discard" onClick={closeDeleteConfirmation} />
+          <Button
+            type="submit"
+            onClick={() =>onUserDelete(selectedUser)}
+            primary
+            label={'Delete user'}
+          />
+        </Box>
       </Modal>
       <SecondaryHeader>
         <Heading level="3">User Management</Heading>

@@ -2,7 +2,7 @@ import React, { FunctionComponent, useContext, useState } from 'react';
 
 import LoginForm from './LoginForm';
 import { Redirect, RouteComponentProps, withRouter } from 'react-router';
-import { User } from '@centrifuge/gateway-lib/models/user';
+import { TwoFaType, User } from '@centrifuge/gateway-lib/models/user';
 import routes from '../routes';
 import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants';
 import { AppContext } from '../App';
@@ -28,12 +28,7 @@ const LoginPage: FunctionComponent<Props> = props => {
 
   const loginTentative = async (loginCandidate: User) => {
     try {
-      console.log(loginCandidate)
       const result = (await httpClient.user.loginTentative(loginCandidate)).data;
-      console.log({
-        ...result,
-        ...loginCandidate
-      })
       setLoginCandidate({
         ...result,
         ...loginCandidate
@@ -56,6 +51,14 @@ const LoginPage: FunctionComponent<Props> = props => {
     ) {
       return <Redirect to={routes.documents.index} />;
     }
+
+  }
+
+  const getInfo = (loginCandidate) => {
+    return loginCandidate.twoFAType === TwoFaType.APP
+      ? 'Open the Authenticator App on your mobile phone and enter in the generated security code for Gateway in the form below.'
+      : 'We just sent you a message with your security code via email. Enter the code in the form below to verify your identity.';
+
   }
 
   return (
@@ -68,7 +71,7 @@ const LoginPage: FunctionComponent<Props> = props => {
         pad="medium"
       >
       {loginCandidate ? (
-        <TwoFAForm user={loginCandidate} error={error} onSubmit={login} />
+        <TwoFAForm info={getInfo(loginCandidate)} user={loginCandidate} error={error} onSubmit={login} />
       ) : (
         <LoginForm error={error} onSubmit={loginTentative} />
       )}

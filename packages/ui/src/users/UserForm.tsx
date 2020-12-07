@@ -43,9 +43,11 @@ export default class UserForm extends React.Component<InviteProps> {
     const { user, schemas, organizations } = this.props;
     const { submitted, newOrg } = this.state;
 
-    const twoFAOptions = Object.values(TwoFaType);
-
-    console.log(twoFAOptions);
+    const twoFAOptions = Object.values(TwoFaType)
+    const twoFALabels = {
+      [TwoFaType.APP]: 'Authenticator App',
+      [TwoFaType.EMAIL]: 'Email'
+    }
 
     const userValidation = Yup.object().shape({
       organizationName:
@@ -157,7 +159,9 @@ export default class UserForm extends React.Component<InviteProps> {
                           <p>
                             {values.organizationName + ' / ' + values.account}
                           </p>
-                        ) : undefined;
+                        ) : (
+                          undefined
+                        );
                       })()}
                       onChange={selected => {
                         setFieldValue('account', selected.account);
@@ -187,7 +191,11 @@ export default class UserForm extends React.Component<InviteProps> {
                     name="twoFAType"
                     options={twoFAOptions}
                     value={values!.twoFAType}
+                    labelKey={(item) => {
+                      return twoFALabels[item]
+                    }}
                     onChange={event => {
+                      console.info(event.option)
                       setFieldValue('twoFAType', event.option);
                     }}
                   />
