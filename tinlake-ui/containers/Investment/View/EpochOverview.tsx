@@ -40,112 +40,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   const isAdmin = props.auth?.permissions?.canSetMinimumJuniorRatio
 
   return (
-    <Box direction="column">
-      <Box width="420px" margin={{ top: 'small', bottom: 'medium' }}>
-        <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-          <Heading level="5" margin={'0'}>
-            Current Epoch
-          </Heading>
-        </Box>
-
-        <Table>
-          <TableBody>
-            <TableRow>
-              <TableCell scope="row">Epoch #</TableCell>
-              <TableCell style={{ textAlign: 'end' }}>
-                <LoadingValue done={poolData?.epoch?.id !== undefined}>{poolData?.epoch?.id || ''}</LoadingValue>
-              </TableCell>
-            </TableRow>
-            {!poolData?.epoch?.isBlockedState && (
-              <>
-                <TableRow>
-                  <TableCell scope="row">Minimum epoch duration</TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={poolData?.epoch?.minimumEpochTime !== undefined}>
-                      {secondsToHms(poolData?.epoch?.minimumEpochTime || 0)}
-                    </LoadingValue>
-                  </TableCell>
-                </TableRow>
-              </>
-            )}
-            <TableRow>
-              <TableCell
-                scope="row"
-                style={{ alignItems: 'start', justifyContent: 'center' }}
-                pad={{ vertical: '6px' }}
-              >
-                Current epoch state
-              </TableCell>
-              <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
-                <LoadingValue done={poolData?.epoch?.state !== undefined} height={39}>
-                  {(poolData?.epoch?.state === 'open' || poolData?.epoch?.state === 'can-be-closed') && (
-                    <>
-                      Open
-                      <Sidenote>Min time left: {secondsToHms(poolData?.epoch?.minimumEpochTimeLeft || 0)}</Sidenote>
-                    </>
-                  )}
-                  {(poolData?.epoch?.state === 'in-submission-period' ||
-                    poolData?.epoch?.state === 'in-challenge-period' ||
-                    poolData?.epoch?.state === 'challenge-period-ended') && (
-                    <>
-                      In computation period
-                      {poolData?.epoch.minChallengePeriodEnd > 0 && (
-                        <Sidenote>
-                          Min time left:{' '}
-                          {secondsToHms(
-                            (poolData?.epoch.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000
-                          )}
-                        </Sidenote>
-                      )}
-                    </>
-                  )}
-                </LoadingValue>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell scope="row">Total epoch investment capacity</TableCell>
-              <TableCell style={{ textAlign: 'end' }}>
-                <LoadingValue done={investmentCapacity !== undefined}>
-                  {addThousandsSeparators(
-                    toPrecision(
-                      baseToDisplay(
-                        (investmentCapacity || new BN(0)).lt(new BN(0)) ? new BN(0) : investmentCapacity || new BN(0),
-                        18
-                      ),
-                      0
-                    )
-                  )}{' '}
-                  DAI
-                </LoadingValue>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-
-        {isAdmin && poolData?.epoch && (
-          <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-            {poolData.epoch.state === 'can-be-closed' && (
-              <Button
-                label={`Close epoch`}
-                primary
-                onClick={solve}
-                disabled={
-                  disabled ||
-                  poolData.epoch?.lastEpochClosed + poolData.epoch?.minimumEpochTime >= new Date().getTime() / 1000
-                }
-              />
-            )}
-            {poolData.epoch.state === 'in-submission-period' && <Button label={`Run solver`} primary disabled={true} />}
-            {poolData.epoch.state === 'in-challenge-period' && (
-              <Button label={`Execute epoch ${poolData.epoch.id}`} primary disabled={true} />
-            )}
-            {poolData.epoch.state === 'challenge-period-ended' && (
-              <Button label={`Execute epoch ${poolData.epoch.id}`} primary onClick={execute} disabled={disabled} />
-            )}
-          </Box>
-        )}
-      </Box>
-
+    <Box direction="row" justify="between" gap="medium">
       <Box width="420px" margin={{ top: 'medium', bottom: 'medium' }}>
         <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
           <Heading level="5" margin={'0'}>
@@ -253,6 +148,111 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
             </TableRow>
           </TableBody>
         </Table>
+      </Box>
+
+      <Box width="420px" margin={{ top: 'small', bottom: 'medium' }}>
+        <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+          <Heading level="5" margin={'0'}>
+            Current Epoch
+          </Heading>
+        </Box>
+
+        <Table>
+          <TableBody>
+            <TableRow>
+              <TableCell scope="row">Epoch #</TableCell>
+              <TableCell style={{ textAlign: 'end' }}>
+                <LoadingValue done={poolData?.epoch?.id !== undefined}>{poolData?.epoch?.id || ''}</LoadingValue>
+              </TableCell>
+            </TableRow>
+            {!poolData?.epoch?.isBlockedState && (
+              <>
+                <TableRow>
+                  <TableCell scope="row">Minimum epoch duration</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>
+                    <LoadingValue done={poolData?.epoch?.minimumEpochTime !== undefined}>
+                      {secondsToHms(poolData?.epoch?.minimumEpochTime || 0)}
+                    </LoadingValue>
+                  </TableCell>
+                </TableRow>
+              </>
+            )}
+            <TableRow>
+              <TableCell
+                scope="row"
+                style={{ alignItems: 'start', justifyContent: 'center' }}
+                pad={{ vertical: '6px' }}
+              >
+                Current epoch state
+              </TableCell>
+              <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                <LoadingValue done={poolData?.epoch?.state !== undefined} height={39}>
+                  {(poolData?.epoch?.state === 'open' || poolData?.epoch?.state === 'can-be-closed') && (
+                    <>
+                      Open
+                      <Sidenote>Min time left: {secondsToHms(poolData?.epoch?.minimumEpochTimeLeft || 0)}</Sidenote>
+                    </>
+                  )}
+                  {(poolData?.epoch?.state === 'in-submission-period' ||
+                    poolData?.epoch?.state === 'in-challenge-period' ||
+                    poolData?.epoch?.state === 'challenge-period-ended') && (
+                    <>
+                      In computation period
+                      {poolData?.epoch.minChallengePeriodEnd > 0 && (
+                        <Sidenote>
+                          Min time left:{' '}
+                          {secondsToHms(
+                            (poolData?.epoch.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000
+                          )}
+                        </Sidenote>
+                      )}
+                    </>
+                  )}
+                </LoadingValue>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell scope="row">Total epoch investment capacity</TableCell>
+              <TableCell style={{ textAlign: 'end' }}>
+                <LoadingValue done={investmentCapacity !== undefined}>
+                  {addThousandsSeparators(
+                    toPrecision(
+                      baseToDisplay(
+                        (investmentCapacity || new BN(0)).lt(new BN(0)) ? new BN(0) : investmentCapacity || new BN(0),
+                        18
+                      ),
+                      0
+                    )
+                  )}{' '}
+                  DAI
+                </LoadingValue>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+
+        {isAdmin && poolData?.epoch && (
+          <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+            {poolData.epoch.state === 'can-be-closed' && (
+              <Button
+                label={`Close epoch`}
+                primary
+                onClick={solve}
+                disabled={
+                  disabled ||
+                  poolData.epoch?.lastEpochClosed + poolData.epoch?.minimumEpochTime >= new Date().getTime() / 1000
+                }
+              />
+            )}
+            {poolData.epoch.state === 'in-submission-period' && <Button label={`Run solver`} primary disabled={true} />}
+            {poolData.epoch.state === 'in-challenge-period' && (
+              <Button label={`Execute epoch ${poolData.epoch.id}`} primary disabled={true} />
+            )}
+            {poolData.epoch.state === 'challenge-period-ended' && (
+              <Button label={`Execute epoch ${poolData.epoch.id}`} primary onClick={execute} disabled={disabled} />
+            )}
+          </Box>
+        )}
       </Box>
     </Box>
   )
