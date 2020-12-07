@@ -54,8 +54,16 @@ class PoolList extends React.Component<Props> {
           <PoolRow key={p.id} onClick={() => this.clickPool(p)}>
             <Icon src={p.icon || 'https://storage.googleapis.com/tinlake/pool-icons/Placeholder.svg'} />
             <Desc>
-              <Name>{p.name} {p.isUpcoming ? <Label blue>Upcoming</Label> : p.isArchived ? <Label>Archived</Label> :
-                p.isOversubscribed && <Label orange>Oversubscribed</Label>}</Name>
+              <Name>
+                {p.name}{' '}
+                {p.isUpcoming ? (
+                  <Label blue>Upcoming</Label>
+                ) : p.isArchived ? (
+                  <Label>Archived</Label>
+                ) : (
+                  p.isOversubscribed && <Label orange>Oversubscribed</Label>
+                )}
+              </Name>
               <Type>{p.asset}</Type>
             </Desc>
             <DataCol>
@@ -84,7 +92,9 @@ class PoolList extends React.Component<Props> {
               />
             </DataCol>{' '}
             <DataCol>
-              {p.seniorYield14Days === null ? <Unit>N/A</Unit> : (
+              {p.seniorYield14Days === null ? (
+                <Unit>N/A</Unit>
+              ) : (
                 <NumberDisplay
                   render={(v) => (
                     <>
@@ -96,7 +106,9 @@ class PoolList extends React.Component<Props> {
               )}
             </DataCol>{' '}
             <DataCol>
-              {p.juniorYield14Days === null ? <Unit>N/A</Unit> : (
+              {p.juniorYield14Days === null ? (
+                <Unit>N/A</Unit>
+              ) : (
                 <NumberDisplay
                   render={(v) => (
                     <>
@@ -205,7 +217,7 @@ const HeaderSub = styled.p`
   color: #979797;
 `
 
-const Label = styled.div<{ blue?: true, orange?: true }>`
+const Label = styled.div<{ blue?: true; orange?: true }>`
   margin-left: 13px;
   position: relative;
   top: -2px;
@@ -217,5 +229,5 @@ const Label = styled.div<{ blue?: true, orange?: true }>`
   color: white;
   padding: 0 12px;
   border-radius: 8px;
-  background-color: ${({blue, orange}) => blue ? '#0828be' : orange ? '#fcba59' : 'gray' }
+  background-color: ${({ blue, orange }) => (blue ? '#0828be' : orange ? '#fcba59' : 'gray')};
 `

@@ -96,7 +96,7 @@ class Apollo {
         }),
         isUpcoming: false,
         isArchived: false,
-        isOversubscribed: pool && new BN(pool.maxReserve).lte(new BN(pool.reserve)) || false,
+        isOversubscribed: (pool && new BN(pool.maxReserve).lte(new BN(pool.reserve))) || false,
         id: poolId,
         name: poolConfig.metadata.name,
         slug: poolConfig.metadata.slug,
@@ -104,8 +104,8 @@ class Apollo {
         version: Number(pool?.version || 3),
         reserve: (pool && new BN(pool.reserve)) || new BN('0'),
         assetValue: (pool && new BN(pool.assetValue)) || new BN('0'),
-        juniorYield14Days: (pool && new BN(pool.juniorYield14Days))|| null,
-        seniorYield14Days: (pool && new BN(pool.seniorYield14Days))|| null,
+        juniorYield14Days: (pool && new BN(pool.juniorYield14Days)) || null,
+        seniorYield14Days: (pool && new BN(pool.seniorYield14Days)) || null,
         icon: poolConfig.metadata.icon || null,
       }
 

@@ -1,4 +1,4 @@
-import { Anchor, Box, Button, Paragraph } from 'grommet'
+import { Box, Button, Paragraph } from 'grommet'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import { Pool, UpcomingPool } from '../../config'
