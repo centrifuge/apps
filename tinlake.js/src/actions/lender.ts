@@ -1,6 +1,6 @@
-import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
 import BN from 'bn.js'
 import { signDaiPermit, signERC2612Permit } from 'eth-permit'
+import { Constructor, PendingTransaction, TinlakeParams } from '../Tinlake'
 import { DaiPermitMessage, ERC2612PermitMessage, PermitMessage } from '../types/tinlake'
 
 const DaiTokenAddress = '0x6b175474e89094c44da98b954eedeac495271d0f'

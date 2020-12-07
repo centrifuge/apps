@@ -1,7 +1,7 @@
-import { Constructor, TinlakeParams } from '../Tinlake'
-import { ZERO_ADDRESS } from '../services/ethereum'
-import { Loan, Investor, ScoreCard } from '../types/tinlake'
 import BN from 'bn.js'
+import { ZERO_ADDRESS } from '../services/ethereum'
+import { Constructor, TinlakeParams } from '../Tinlake'
+import { Investor, Loan, ScoreCard } from '../types/tinlake'
 
 export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IAnalyticsActions {

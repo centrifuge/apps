@@ -1,9 +1,9 @@
 import assert from 'assert'
+import BN from 'bn.js'
 import { ethers, Wallet } from 'ethers'
 import testConfig from '../test/config'
-import { ITinlake } from '../types/tinlake'
 import { createTinlake, TestProvider } from '../test/utils'
-import BN from 'bn.js'
+import { ITinlake } from '../types/tinlake'
 
 let lenderAccount: Wallet
 let lenderTinlake: ITinlake
