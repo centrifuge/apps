@@ -1,11 +1,10 @@
 import { Anchor, Box, Button, Paragraph } from 'grommet'
-import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import config, { Pool, UpcomingPool } from '../../config'
-import { ensureAuthed } from '../../ducks/auth'
+import { useSelector } from 'react-redux'
+import { Pool, UpcomingPool } from '../../config'
 import { PoolData as PoolDataV3, PoolState } from '../../ducks/pool'
-import { PoolsState } from '../../ducks/pools'
+import { PoolData, PoolsState } from '../../ducks/pools'
+import { getPoolStatus } from '../../utils/pool'
 import { PoolLink } from '../PoolLink'
 import { FormModal, InvestmentSteps } from './styles'
 
@@ -20,65 +19,27 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   const onOpen = () => setModalIsOpen(true)
   const onClose = () => setModalIsOpen(false)
 
-  const router = useRouter()
-  const dispatch = useDispatch()
+  const investDisabled = props.pool?.isUpcoming || !props.pool?.metadata.securitize?.issuerId
 
   const pools = useSelector<any, PoolsState>((state) => state.pools)
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolDataV3 | undefined
 
-  const [status, setStatus] = React.useState<any>(undefined)
-  const [agreementLink, setAgreementLink] = React.useState<string | undefined>(undefined)
+  const [status, setStatus] = React.useState('Open')
 
-  const address = useSelector<any, string | null>((state) => state.auth.address)
+  React.useEffect(() => {
+    if (props.pool) {
+      const pool = pools.data?.pools.find((pool: PoolData) => {
+        return 'addresses' in props.pool! && pool.id === (props.pool as Pool).addresses.ROOT_CONTRACT.toLowerCase()
+      })
 
-  const connect = () => {
-    dispatch(ensureAuthed())
-    setModalIsOpen(false)
-  }
-
-  const getOnboardingStatus = async () => {
-    if (address && props.pool && 'addresses' in props.pool) {
-      const req = await fetch(
-        `${config.onboardAPIHost}pools/${props.pool?.addresses?.ROOT_CONTRACT}/addresses/${address}`
-      )
-      const body = await req.json()
-      console.log({ status: body })
-      setStatus(body)
-
-      if (body.agreements.length > 0) {
-        const req = await fetch(
-          `${config.onboardAPIHost}pools/${props.pool?.addresses?.ROOT_CONTRACT}/agreements/${body.agreements[0].id}/link`
-        )
-        const link = await req.text()
-        setAgreementLink(link)
-      }
+      if (pool) setStatus(getPoolStatus(pool))
     }
-  }
-
-  React.useEffect(() => {
-    getOnboardingStatus()
-  }, [address])
-
-  React.useEffect(() => {
-    if (!modalIsOpen && 'onb' in router.query && router.query.onb === '1') {
-      setModalIsOpen(true)
-    }
-  }, [router.query])
-
-  React.useEffect(() => {
-    // if (props.pool) {
-    //   const pool = pools.data?.pools.find((pool: PoolData) => {
-    //     return 'addresses' in props.pool! && pool.id === (props.pool as Pool).addresses.ROOT_CONTRACT.toLowerCase()
-    //   })
-
-    //   if (pool) setStatus(getPoolStatus(pool))
-
-    //   console.log({ status })
-    // }
-
-    getOnboardingStatus()
   }, [pools])
+
+  // TODO: remove hardcoded exception for PC2
+  const isClosed = (status === 'Deployed' || status === 'Closed') && !(props.pool?.metadata.slug === 'paperchain-2')
+  const isUpcoming = !isClosed && (props.pool?.isUpcoming || !props.pool?.metadata.securitize?.issuerId)
 
   return (
     <>
@@ -115,42 +76,56 @@ const InvestAction: React.FC<Props> = (props: Props) => {
         <Box
           direction="row"
           justify="center"
-          width={'40%'}
+          width={props.pool ? '80%' : '40%'}
           margin={{ left: 'auto', right: 'auto' }}
           gap="medium"
           style={{ textAlign: 'center' }}
         >
-          {!address && (
+          <Box flex={true} justify="between">
+            <Paragraph>Start your KYC process to become to become an eligible investor.</Paragraph>
+            {(props.pool as Pool)?.metadata.securitize?.issuerId ? (
+              <Button
+                primary
+                label={`Onboard as an investor`}
+                fill={false}
+                href={`https://id.securitize.io/#/authorize?registration=true&issuerId=${
+                  (props.pool as Pool).metadata.securitize?.issuerId
+                }&scope=info%20details%20verification&redirecturl=https://${
+                  (props.pool as Pool).metadata.securitize?.slug
+                }.invest.securitize.io/%23/authorize`}
+                target="_blank"
+              />
+            ) : (
+              <Button
+                primary
+                label={`Onboard as an investor`}
+                href={`https://id.securitize.io/#/authorize?issuerId=4d11b353-a327-49ab-b45b-ae5be60697c6&scope=info%20details%20verification&registration=true&redirecturl=https://centrifuge.invest.securitize.io/#/authorize`}
+                fill={false}
+                target="_blank"
+              />
+            )}
+          </Box>
+          {props.pool && (
             <Box flex={true} justify="between">
-              <Paragraph>Please connect with the wallet you want to use for investment.</Paragraph>
-              <Button primary label={`Connect`} onClick={connect} fill={false} />
-            </Box>
-          )}
-          {status?.kyc.url && !status.kyc.created && (
-            <Box flex={true} justify="between">
-              <Paragraph>Ready to start.</Paragraph>
-              <Button primary label={`Start KYC`} href={status.kyc.url} fill={false} />
-            </Box>
-          )}
-          {status?.kyc.url && status.kyc.created && !status.kyc.verified && !status.agreements[0]?.signed && (
-            <Box flex={true} justify="between">
-              <Paragraph>Onboarding pending, please continue signing subdoc.</Paragraph>
-              <Button primary label={`Sign Subscription Agreement`} href={agreementLink} fill={false} />
-            </Box>
-          )}
-          {status?.kyc.url && status.agreements[0]?.signed && !status.agreements[0]?.counterSigned && (
-            <Box flex={true} justify="between">
-              <Paragraph>You signed subdoc, AO will sign, will let you know, then you can invest.</Paragraph>
-            </Box>
-          )}
-          {status?.kyc.url && !status.kyc.verified && status.agreements[0]?.counterSigned && (
-            <Box flex={true} justify="between">
-              <Paragraph>AO signed, waiting for KYC.</Paragraph>
-            </Box>
-          )}
-          {status?.kyc.url && status.kyc.verified && status.agreements[0]?.counterSigned && (
-            <Box flex={true} justify="between">
-              <Paragraph>AO signed &amp; KYC finished, you can invest.</Paragraph>
+              {isUpcoming && <Paragraph>This pool is not open for investments yet</Paragraph>}
+              {!investDisabled && (
+                <Paragraph>Already an eligible investor? Sign the pool issuers Subscription Agreement.</Paragraph>
+              )}
+              {isClosed && <Paragraph>This pool is closed for investments.</Paragraph>}
+              {(props.pool as Pool)?.metadata.securitize?.issuerId && (
+                <Button
+                  primary
+                  label={`Sign up for this pool`}
+                  fill={false}
+                  href={`https://id.securitize.io/#/authorize?issuerId=${
+                    (props.pool as Pool).metadata.securitize?.issuerId
+                  }&scope=info%20details%20verification&redirecturl=https://${
+                    (props.pool as Pool).metadata.securitize?.slug
+                  }.invest.securitize.io/%23/authorize`}
+                  target="_blank"
+                  disabled={investDisabled}
+                />
+              )}
             </Box>
           )}
         </Box>
