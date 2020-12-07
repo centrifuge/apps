@@ -1,10 +1,12 @@
 import { Box } from 'grommet'
 import React, { PropsWithChildren } from 'react'
 
-class Container extends React.Component<PropsWithChildren<{}>> {
+class Container extends React.Component<PropsWithChildren<{ [k: string]: any }>> {
   render() {
+    const { children, ...rest } = this.props
+
     return (
-      <Box align="center" pad={{ horizontal: 'small' }}>
+      <Box align="center" pad={{ horizontal: 'small' }} {...rest}>
         {this.props.children}
       </Box>
     )

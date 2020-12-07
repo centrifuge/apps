@@ -101,6 +101,8 @@ class Apollo {
         slug: poolConfig.metadata.slug,
         asset: poolConfig?.metadata.asset,
         version: Number(pool?.version || 3),
+        reserve: (pool && new BN(pool.reserve)) || new BN('0'),
+        assetValue: (pool && new BN(pool.assetValue)) || new BN('0'),
       }
 
       return { ...poolData, status: getPoolStatus(poolData) }
@@ -128,6 +130,8 @@ class Apollo {
       seniorInterestRateNum: parseFloat(new BN(p.presetValues?.seniorInterestRate || 0).toString()),
       status: 'Upcoming',
       version: p.version,
+      reserve: new BN('0'),
+      assetValue: new BN('0'),
     }))
   }
 
@@ -153,6 +157,8 @@ class Apollo {
       totalDebtNum: 0,
       totalRepaysAggregatedAmountNum: 0,
       weightedInterestRateNum: 0,
+      reserve: new BN('0'),
+      assetValue: new BN('0'),
     }))
   }
 
@@ -172,6 +178,8 @@ class Apollo {
               weightedInterestRate
               seniorInterestRate
               version
+              reserve
+              assetValue
             }
           }
         `,
@@ -197,6 +205,7 @@ class Apollo {
       totalDebt: pools.reduce((p, c) => p.add(c.totalDebt), new BN(0)),
       totalRepaysAggregatedAmount: pools.reduce((p, c) => p.add(c.totalRepaysAggregatedAmount), new BN(0)),
       totalFinancedCurrency: pools.reduce((p, c) => p.add(c.totalFinancedCurrency), new BN(0)),
+      totalValue: pools.reduce((p, c) => p.add(c.reserve).add(c.assetValue), new BN(0)),
     }
   }
 

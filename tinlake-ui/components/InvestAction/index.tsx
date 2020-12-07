@@ -55,13 +55,6 @@ const InvestAction: React.FC<Props> = (props: Props) => {
           <Button primary label="Get started" fill={false} onClick={onOpen} />
         </Box>
       )}
-      {!props.pool && (
-        <Anchor
-          onClick={onOpen}
-          margin={{ top: 'small', bottom: 'small' }}
-          label="Interested in investing in Tinlake pools? Start your onboarding process now"
-        />
-      )}
 
       <FormModal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose} style={{ width: '800px' }}>
         <Paragraph margin={{ top: 'small', bottom: 'small' }}>

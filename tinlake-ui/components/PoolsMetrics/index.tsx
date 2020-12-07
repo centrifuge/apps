@@ -16,7 +16,7 @@ class PoolsMetrics extends React.Component<Props> {
       <>
         <Box width="256px" pad="medium" elevation="small" round="xsmall" background="white" margin={{ right: '32px' }}>
           <Cont>
-            <Value>{pools.pools.length}</Value>
+            <Value>{pools.ongoingLoans}</Value>
           </Cont>
           <Label>Assets Locked</Label>
         </Box>
@@ -24,7 +24,7 @@ class PoolsMetrics extends React.Component<Props> {
           <Cont>
             <TokenLogo src={`/static/dai.svg`} />
             <Value>
-              <NumberDisplay value={baseToDisplay(pools.totalFinancedCurrency, 18)} precision={0} />
+              <NumberDisplay value={baseToDisplay(pools.totalValue, 18)} precision={0} />
             </Value>{' '}
             <Unit>DAI</Unit>
           </Cont>

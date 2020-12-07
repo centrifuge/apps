@@ -66,7 +66,7 @@ class PoolList extends React.Component<Props> {
                     </>
                   )
                 }
-                value={baseToDisplay(p.totalRepaysAggregatedAmount.add(p.totalDebt), 18)}
+                value={baseToDisplay(p.reserve.add(p.assetValue), 18)}
               />
             </DataCol>{' '}
             {/* TODO */}

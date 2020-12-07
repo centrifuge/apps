@@ -1,13 +1,14 @@
+import { Anchor } from 'grommet'
 import { FormDown } from 'grommet-icons'
 import * as React from 'react'
 import styled from 'styled-components'
 
 const TinlakeExplainer: React.FC = () => {
-  const [open, setOpen] = React.useState(true)
+  const [open, setOpen] = React.useState(false)
 
   return (
     <Container>
-      <Row onClick={(e) => setOpen(!open)}>
+      <Row onClick={() => setOpen(!open)}>
         <Primer>
           Tinlake is an open market place of real-world asset pools. Explore the pools and start investing now.
         </Primer>
@@ -26,6 +27,12 @@ const TinlakeExplainer: React.FC = () => {
           tokenized real-world assets such as invoices, mortgages or streaming royalties. Tinlake’s smart contract
           platform coordinates the different parties required to structure, administer and finance collateralized pools
           of these real-world assets.
+          <Anchor
+            margin={{ left: 'xsmall', top: 'small' }}
+            href="https://centrifuge.io/products/tinlake/"
+            target="_blank"
+            label="Learn more"
+          />
         </Text>
       )}
     </Container>

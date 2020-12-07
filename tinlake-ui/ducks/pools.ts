@@ -30,6 +30,8 @@ export interface PoolData {
   totalFinancedCurrency: BN
   financingsCount?: number
   status?: PoolStatus
+  reserve: BN
+  assetValue: BN
 }
 
 export interface PoolsData {
@@ -38,6 +40,7 @@ export interface PoolsData {
   totalDebt: BN
   totalRepaysAggregatedAmount: BN
   totalFinancedCurrency: BN
+  totalValue: BN
   pools: PoolData[]
 }
 
