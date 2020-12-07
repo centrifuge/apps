@@ -1,15 +1,16 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { UrlObject } from 'url'
-import config from '../../config'
+import config, { Pool } from '../../config'
 
 interface Props {
   href: string | UrlObject
   as?: string | UrlObject
+  configPools: Pool[]
 }
 
 // PoolLink allows navigation within the same pool (it pre-fixes the passed href by the root address)
-export const PoolLink: React.FunctionComponent<Props> = ({ href, as, children }) => {
+export const PoolLink: React.FunctionComponent<Props> = ({ href, as, children, configPools }) => {
   const { root } = useRouter().query
 
   if (!root) {
@@ -24,16 +25,16 @@ export const PoolLink: React.FunctionComponent<Props> = ({ href, as, children })
   let poolHref: string | UrlObject = ''
   let poolAs: string | UrlObject = ''
   if (typeof href === 'string') {
-    poolHref = getHref(root, href)
-    poolAs = getAs(root, as || href)
+    poolHref = getHref(root, href, configPools)
+    poolAs = getAs(root, as || href, configPools)
   } else {
     poolHref = {
       ...href,
-      pathname: getHref(root, href.pathname),
+      pathname: getHref(root, href.pathname, configPools),
     }
     poolAs = {
       ...((as as UrlObject) || href),
-      pathname: getAs(root, href.pathname),
+      pathname: getAs(root, href.pathname, configPools),
     }
   }
   return (
@@ -43,9 +44,8 @@ export const PoolLink: React.FunctionComponent<Props> = ({ href, as, children })
   )
 }
 
-function getHref(rootOrSlug: string | string[], href: string | null | undefined | UrlObject): string {
-  console.log("GETHREF", config.pools, config.upcomingPools)
-  const pool = config.pools.find(
+function getHref(rootOrSlug: string | string[], href: string | null | undefined | UrlObject, configPools: Pool[]): string {
+  const pool = configPools.find(
     (p) => (rootOrSlug as string).toLowerCase() === p.addresses.ROOT_CONTRACT.toLowerCase()
   )
   if (pool) {
@@ -59,8 +59,8 @@ function getHref(rootOrSlug: string | string[], href: string | null | undefined 
   throw new Error(`could not find root ${rootOrSlug} for href in pools or upcoming pools`)
 }
 
-function getAs(rootOrSlug: string | string[], as: string | null | undefined | UrlObject): string {
-  const pool = config.pools.find(
+function getAs(rootOrSlug: string | string[], as: string | null | undefined | UrlObject, configPools: Pool[]): string {
+  const pool = configPools.find(
     (p) => (rootOrSlug as string).toLowerCase() === p.addresses.ROOT_CONTRACT.toLowerCase()
   )
   if (pool) {

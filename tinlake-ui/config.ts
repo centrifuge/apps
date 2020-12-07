@@ -2,8 +2,10 @@ import kovanPools from '@centrifuge/tinlake-pools-kovan'
 import mainnetPools from '@centrifuge/tinlake-pools-mainnet'
 import BN from 'bn.js'
 import * as yup from 'yup'
-import { PoolStatus } from './ducks/pool'
+import { PoolData, PoolStatus } from './ducks/pool'
 import { networkUrlToName } from './utils/networkNameResolver'
+// import { ethers, utils } from 'ethers';
+
 
 interface SecuritizeData {
   issuerId: string
@@ -204,7 +206,7 @@ const selectedPoolConfig = yup
 
 const networkConfigs = selectedPoolConfig === 'mainnetProduction' ? mainnetPools : kovanPools
 
-let pools:
+let ipfsPools:
   | {
   active: Pool[]
   archived: ArchivedPool[]
@@ -212,10 +214,28 @@ let pools:
 }
   | undefined = undefined
 
+// export async function payWithMetamask(sender, receiver, strEther) {
+//   console.log(`payWithMetamask(receiver=${receiver}, sender=${sender}, strEther=${strEther})`)
+//
+//   const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+//   const wallet = new ethers.Wallet(config.ethAdminPrivateKey, provider)
+//
+//   // Acccounts now exposed
+//   const params = [{
+//     from: sender,
+//     to: receiver,
+//     value: ethers.utils.parseUnits(strEther, 'ether').toHexString()
+//   }];
+//
+//   const transactionHash = await provider.send('eth_sendTransaction', params)
+//   console.log('transactionHash is ' + transactionHash);
+// }
+
+
 export const loadPoolsFromIPFS = async () => {
-  if(pools){
-    console.log("POOL ALREADY EXISTS", pools)
-    return pools
+  if(ipfsPools){
+    console.log("POOL ALREADY EXISTS", ipfsPools)
+    return ipfsPools
   }
   // await assembleIpfsUrl()
   // TODO: error handling
@@ -233,9 +253,9 @@ export const loadPoolsFromIPFS = async () => {
     .validateSync(networkConfigs.filter((p: Pool) => !('archivedValues' in p) && !p.addresses))
     .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
 
-  pools = { active, upcoming, archived}
+  ipfsPools = { active, upcoming, archived}
 
-  return pools
+  return ipfsPools
 }
 const activePools = poolsSchema
   .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
@@ -300,16 +320,12 @@ export default config
 
 function between1e23and1e27(s: string): boolean {
   const n = new BN(s)
-  if (n.gte(new BN('100000000000000000000000')) && n.lte(new BN('1000000000000000000000000000'))) {
-    return true
-  }
-  return false
+  return n.gte(new BN('100000000000000000000000')) && n.lte(new BN('1000000000000000000000000000'));
+
 }
 
 function fee(s: string): boolean {
   const n = new BN(s)
-  if (n.gte(new BN('1000000000000000000000000000')) && n.lte(new BN('1000000009000000000000000000'))) {
-    return true
-  }
-  return false
+  return n.gte(new BN('1000000000000000000000000000')) && n.lte(new BN('1000000009000000000000000000'));
+
 }

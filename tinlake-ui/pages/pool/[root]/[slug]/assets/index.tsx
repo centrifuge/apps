@@ -10,7 +10,7 @@ import { PoolLink } from '../../../../../components/PoolLink'
 import SecondaryHeader from '../../../../../components/SecondaryHeader'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
-import config, { Pool } from '../../../../../config'
+import config, { loadPoolsFromIPFS, Pool } from '../../../../../config'
 import LoanList from '../../../../../containers/Loan/List'
 import LoanOverview from '../../../../../containers/Loan/Overview/index'
 import { menuItems } from '../../../../../menuItems'
@@ -18,11 +18,14 @@ import { menuItems } from '../../../../../menuItems'
 interface Props extends WithRouterProps {
   root: string
   pool: Pool
+  pools: any
 }
 
 class LoanListPage extends React.Component<Props> {
   render() {
-    const { pool } = this.props
+    const { pools, pool } = this.props
+
+    console.log("POOLS IN LOAN LIST", pools)
 
     return (
       <WithFooter>
@@ -47,7 +50,7 @@ class LoanListPage extends React.Component<Props> {
                       <Box>
                         <SecondaryHeader margin={{ top: 'medium' }}>
                           <Heading level="4">Asset Overview of {pool.metadata.name}</Heading>
-                          <PoolLink href={'/assets/issue'}>
+                          <PoolLink href={'/assets/issue'} configPools={pools.active}>
                             <Button primary label="Open Financing" />
                           </PoolLink>
                         </SecondaryHeader>
@@ -69,7 +72,8 @@ class LoanListPage extends React.Component<Props> {
 
 export async function getStaticPaths() {
   // We'll pre-render only these paths at build time.
-  const paths = config.pools.map((pool) => ({
+  const pools = await loadPoolsFromIPFS()
+  const paths = pools.active.map((pool) => ({
     params: { root: pool.addresses.ROOT_CONTRACT, slug: pool.metadata.slug },
   }))
 
@@ -78,7 +82,8 @@ export async function getStaticPaths() {
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  return { props: { root: params?.root, pool: config.pools.find((p) => p.addresses.ROOT_CONTRACT === params?.root) } }
+  const pools = await loadPoolsFromIPFS()
+  return { props: { root: params?.root, pool: pools.active.find((p) => p.addresses.ROOT_CONTRACT === params?.root) } }
 }
 
 export default LoanListPage

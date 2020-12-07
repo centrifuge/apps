@@ -7,13 +7,15 @@ import { Pool } from '../../config'
 import { AuthState } from '../../ducks/auth'
 import { loadLoans, LoansState } from '../../ducks/loans'
 import { loadPool, PoolState } from '../../ducks/pool'
+import { PoolsState } from '../../ducks/pools'
 
 interface Props {
   tinlake: ITinlake
   loans?: LoansState
   loadLoans?: (tinlake: ITinlake) => Promise<void>
-  pool?: PoolState
-  pools: Pool[]
+  pool: PoolState
+  pools: PoolsState
+  configPools: Pool[]
   auth?: AuthState
   loadPool?: (tinlake: ITinlake) => Promise<void>
   selectedPool: Pool
@@ -23,7 +25,6 @@ interface Props {
 class Overview extends React.Component<Props> {
   componentDidMount() {
     this.loadData()
-    console.log("loading in overview container1", this.props)
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -39,9 +40,9 @@ class Overview extends React.Component<Props> {
   }
 
   render() {
-    const { auth, loans, pool, selectedPool, pools } = this.props
+    const { auth, loans, selectedPool, configPools, pools, pool } = this.props
     console.log("loading in overview container", this.props)
-    return <OverviewComp userAddress={auth?.address || ''} loans={loans} pool={pool} selectedPool={selectedPool} pools={pools} />
+    return pools.data && <OverviewComp userAddress={auth?.address || ''} loans={loans} selectedPool={selectedPool} configPools={configPools} pools={pools.data} />
   }
 }
 

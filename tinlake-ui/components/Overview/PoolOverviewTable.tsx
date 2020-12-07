@@ -18,6 +18,9 @@ interface Props {
 
 const PoolOverviewTable: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
+  const test = useSelector<any, PoolState>((state) => state.pools)
+  const { selectedPool } = props
+  console.log( "POOLS IN POOL OVERVIEW", selectedPool, test)
   const poolData = pool?.data as PoolData | undefined
 
   const loans = useSelector<any, LoansState>((state) => state.loans)
@@ -33,7 +36,7 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
   const seniorTokenSupply = (poolData && poolData.senior && poolData.senior.totalSupply) || undefined
   const juniorTokenSupply = (poolData && poolData.junior.totalSupply) || undefined
 
-  const isUpcoming = 'isUpcoming' in props.selectedPool && props.selectedPool.isUpcoming === true
+  const isUpcoming = 'isUpcoming' in props.selectedPool && props.selectedPool.isUpcoming
 
   return (
     <Box basis={'1/3'}>

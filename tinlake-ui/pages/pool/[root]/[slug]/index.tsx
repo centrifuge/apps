@@ -7,7 +7,7 @@ import Container from '../../../../components/Container'
 import Header from '../../../../components/Header'
 import WithFooter from '../../../../components/WithFooter'
 import WithTinlake from '../../../../components/WithTinlake'
-import config, { loadPoolsFromIPFS, Pool as IPool } from '../../../../config'
+import { loadPoolsFromIPFS, Pool as IPool } from '../../../../config'
 import Overview from '../../../../containers/Overview'
 import { menuItems } from '../../../../menuItems'
 
@@ -20,8 +20,9 @@ interface Props {
 
 class Pool extends React.Component<Props> {
   render() {
-    const { pool, pools } = this.props
-    console.log("PROPS IN SLUG", this.props)
+    const { pools, pool } = this.props
+    console.log("POOL IN POOL",  pool)
+    console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&", pools)
 
     return (
       <WithFooter>
@@ -36,7 +37,7 @@ class Pool extends React.Component<Props> {
                 addresses={pool.addresses}
                 contractConfig={pool.contractConfig}
                 render={(tinlake) => (
-                  <Auth tinlake={tinlake} render={() => <Overview tinlake={tinlake} selectedPool={pool} pools={pools.active}/>} />
+                  <Auth tinlake={tinlake} render={() => <Overview tinlake={tinlake} selectedPool={pool} configPools={pools.active}/>} />
                 )}
               />
             </Box>
@@ -70,7 +71,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }
 
   // Fix to force page rerender, from https://github.com/vercel/next.js/issues/9992
-  const newProps: Props = { pool, pools, root: params.root as string, key: pool.metadata.name || '-'}
+  const newProps: Props = { pools, pool, root: params.root as string, key: pool.metadata.name || '-'}
   return { props: newProps }
 }
 

@@ -83,6 +83,7 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
   return async (dispatch) => {
     dispatch({ type: LOAD_POOL })
     const poolData = await getPool(tinlake)
+    console.log("LOading POOL", poolData)
     dispatch({ data: poolData, type: RECEIVE_POOL })
   }
 }

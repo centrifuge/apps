@@ -3,24 +3,28 @@ import { Anchor, Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import LoanListData from '../../components/Loan/List'
 import { PoolLink } from '../../components/PoolLink'
-import config, { Pool, UpcomingPool } from '../../config'
+import { Pool, UpcomingPool } from '../../config'
 import { LoansState } from '../../ducks/loans'
-import { PoolState } from '../../ducks/pool'
 import PoolOverviewTable from './PoolOverviewTable'
-import { PoolsState } from '../../ducks/pools'
+import { PoolData } from '../../ducks/pools'
 
 interface Props {
   userAddress: string
   loans?: LoansState
-  pool?: PoolState
-  pools?: any
+  configPools?: Pool[]
+  pools: any
   selectedPool: Pool | UpcomingPool
 }
 
 class Overview extends React.Component<Props> {
   render() {
-    const { userAddress, loans, selectedPool } = this.props
-    console.log("PROPSOVERVIEW component", this.props)
+    const { userAddress, loans, selectedPool, configPools, pools } = this.props
+    console.log("PROPSOVERVIEW component", this.props, pools)
+    const isUpcoming = 'isUpcoming' in selectedPool && selectedPool.isUpcoming === true
+
+    // let currentPool
+    // isUpcoming ? currentPool = selectedPool : currentPool = pools.pools.find((p: PoolData) => (p.id as string).toLowerCase() === selectedPool.addresses?.ROOT_CONTRACT.toLowerCase())
+    // console.log("CURRENT", currentPool)
 
     const allLoans = (loans && loans.loans) || undefined
 
@@ -28,13 +32,11 @@ class Overview extends React.Component<Props> {
     const startIndex = allLoans ? (allLoans.length >= 10 ? allLoans.length - 10 : 0) : undefined
     const latestLoans = allLoans ? allLoans.slice(startIndex, allLoans.length) : []
 
-    const isUpcoming = 'isUpcoming' in selectedPool && selectedPool.isUpcoming === true
-
     return (
-      <Box margin={{ bottom: 'large', top: 'medium' }}>
+       <Box margin={{ bottom: 'large', top: 'medium' }}>
         <Heading level="4">Pool Overview of {selectedPool.metadata.name} </Heading>
         <Box direction="row" margin={{ bottom: 'large' }}>
-          <PoolOverviewTable selectedPool={this.props.selectedPool} />
+          <PoolOverviewTable selectedPool={selectedPool} />
 
           <Box basis={'2/3'} margin={{ top: '0', left: 'large' }}>
             <div>
@@ -80,7 +82,7 @@ class Overview extends React.Component<Props> {
               </LoanListData>
             )}
             <Box margin={{ top: 'medium', bottom: 'large' }} align="center">
-              <PoolLink href={{ pathname: '/assets' }}>
+              <PoolLink href={{ pathname: '/assets' }} configPools={configPools}>
                 <Anchor>
                   <Button label="View all assets" />
                 </Anchor>
