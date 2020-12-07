@@ -54,7 +54,8 @@ class PoolList extends React.Component<Props> {
           <PoolRow key={p.id} onClick={() => this.clickPool(p)}>
             <Icon src={p.icon || 'https://storage.googleapis.com/tinlake/pool-icons/Placeholder.svg'} />
             <Desc>
-              <Name>{p.name}</Name>
+              <Name>{p.name} {p.isUpcoming ? <Label blue>Upcoming</Label> : p.isArchived ? <Label>Archived</Label> :
+                p.isOversubscribed && <Label orange>Oversubscribed</Label>}</Name>
               <Type>{p.asset}</Type>
             </Desc>
             <DataCol>
@@ -83,7 +84,7 @@ class PoolList extends React.Component<Props> {
               />
             </DataCol>{' '}
             <DataCol>
-              {p.seniorYield14Days === null ? '-' : (
+              {p.seniorYield14Days === null ? <Unit>N/A</Unit> : (
                 <NumberDisplay
                   render={(v) => (
                     <>
@@ -95,7 +96,7 @@ class PoolList extends React.Component<Props> {
               )}
             </DataCol>{' '}
             <DataCol>
-              {p.juniorYield14Days === null ? '-' : (
+              {p.juniorYield14Days === null ? <Unit>N/A</Unit> : (
                 <NumberDisplay
                   render={(v) => (
                     <>
@@ -106,7 +107,6 @@ class PoolList extends React.Component<Props> {
                 />
               )}
             </DataCol>{' '}
-            {/* TODO */}
           </PoolRow>
         ))}
       </Box>
@@ -203,4 +203,19 @@ const HeaderSub = styled.p`
   font-size: 10px;
   line-height: 14px;
   color: #979797;
+`
+
+const Label = styled.div<{ blue?: true, orange?: true }>`
+  margin-left: 13px;
+  position: relative;
+  top: -2px;
+  display: inline-block;
+  height: 16px;
+  font-weight: 500;
+  font-size: 10px;
+  line-height: 16px;
+  color: white;
+  padding: 0 12px;
+  border-radius: 8px;
+  background-color: ${({blue, orange}) => blue ? '#0828be' : orange ? '#fcba59' : 'gray' }
 `
