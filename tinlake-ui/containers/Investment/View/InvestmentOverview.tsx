@@ -8,6 +8,9 @@ import { LoadingValue } from '../../../components/LoadingValue/index'
 import { TINRatioBar } from '../../../components/TINRatioBar/index'
 import { PoolData, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import InvestAction from '../../../components/InvestAction'
+import OnboardModal from '../../../components/OnboardModal'
+import config, { Pool, UpcomingPool } from '../../../config'
 import { toPrecision } from '../../../utils/toPrecision'
 import {
   BalanceSheetDiagram,
@@ -22,14 +25,16 @@ import {
   TokenLogo,
 } from './styles'
 
-interface Props {}
+interface Props {
+  selectedPool: Pool | UpcomingPool
+}
 
 const parseRatio = (num: BN): number => {
   const base = new BN(10).pow(new BN(20))
   return num.div(base).toNumber() / 10 ** 7
 }
 
-const InvestmentOverview: React.FC<Props> = () => {
+const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined
 
@@ -131,6 +136,14 @@ const InvestmentOverview: React.FC<Props> = () => {
             </TableRow>
           </TableBody>
         </Table>
+
+        <Box margin={{ top: 'medium' }}>
+          {config.featureFlagNewOnboarding ? (
+            <OnboardModal pool={props.selectedPool} />
+          ) : (
+            <InvestAction pool={props.selectedPool} />
+          )}
+        </Box>
       </Box>
 
       <BalanceSheetDiagram direction="row">

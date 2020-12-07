@@ -1,93 +1,72 @@
-import { Spinner } from '@centrifuge/axis-spinner'
-import { Anchor, Box, Button, Heading } from 'grommet'
+import { Anchor, Button, Box, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
-import LoanListData from '../../components/Loan/List'
-import { PoolLink } from '../../components/PoolLink'
 import { Pool, UpcomingPool } from '../../config'
-import { LoansState } from '../../ducks/loans'
+import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
 import { PoolState } from '../../ducks/pool'
-import PoolOverviewTable from './PoolOverviewTable'
+import { useSelector } from 'react-redux'
+import { LoansState } from '../../ducks/loans'
+import { PoolLink } from '../../components/PoolLink'
 
 interface Props {
-  userAddress: string
-  loans?: LoansState
   pool?: PoolState
   selectedPool: Pool | UpcomingPool
 }
 
-class Overview extends React.Component<Props> {
-  render() {
-    const { userAddress, loans, selectedPool } = this.props
+const Overview: React.FC<Props> = (props: Props) => {
+  const loans = useSelector<any, LoansState>((state) => state.loans)
+  const outstandingLoans = loans?.loans
+    ? loans?.loans.filter((loan) => loan.status && loan.status === 'ongoing').length
+    : undefined
 
-    const allLoans = (loans && loans.loans) || undefined
+  return (
+    <Box margin={{ bottom: 'large', top: 'medium' }}>
+      <Heading level="4">Pool Overview of {props.selectedPool.metadata.name} </Heading>
+      <InvestmentOverview selectedPool={props.selectedPool} />
 
-    // show just recent 10 assets
-    const startIndex = allLoans ? (allLoans.length >= 10 ? allLoans.length - 10 : 0) : undefined
-    const latestLoans = allLoans ? allLoans.slice(startIndex, allLoans.length) : []
+      <Box direction="row" justify="between" gap="medium" margin={{ top: 'medium', bottom: 'medium' }}>
+        <Box basis="1/2">
+          <Heading level="4">Asset Originator Details</Heading>
+          <a href={props.selectedPool.metadata.website} target="_blank">
+            <img src={props.selectedPool.metadata.logo} style={{ maxHeight: '80px', maxWidth: '50%' }} />
+          </a>
 
-    const isUpcoming = 'isUpcoming' in selectedPool && selectedPool.isUpcoming === true
+          <p>{props.selectedPool.metadata.description}</p>
 
-    return (
-      <Box margin={{ bottom: 'large', top: 'medium' }}>
-        <Heading level="4">Pool Overview of {selectedPool.metadata.name} </Heading>
-        <Box direction="row" margin={{ bottom: 'large' }}>
-          <PoolOverviewTable selectedPool={this.props.selectedPool} />
-
-          <Box basis={'2/3'} margin={{ top: '0', left: 'large' }}>
-            <div>
-              <Heading level="5" margin={{ top: 'small' }}>
-                Asset Originator Details
-              </Heading>
-              <a href={selectedPool.metadata.website} target="_blank">
-                <img src={selectedPool.metadata.logo} style={{ maxHeight: '80px', maxWidth: '50%' }} />
+          {props.selectedPool.metadata.discourseLink && (
+            <>
+              <h4 style={{ marginBottom: '0' }}>Learn more about this asset originator</h4>
+              <a href={props.selectedPool.metadata.discourseLink} target="_blank">
+                Join the discussion on Discourse
               </a>
+            </>
+          )}
+        </Box>
+        <Box width="420px">
+          <Heading level="4">{outstandingLoans || 0} Active Assets</Heading>
+          <Table>
+            <TableBody>
+              {Object.keys(props.selectedPool.metadata.details).map((key: string) => (
+                <TableRow key={key}>
+                  <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+                    {key}
+                  </TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>{props.selectedPool.metadata.details[key]}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
 
-              <p>{selectedPool.metadata.description}</p>
-
-              <p>
-                {Object.keys(selectedPool.metadata.details).map((key: string) => (
-                  <React.Fragment key={key}>
-                    <strong>{key}:&nbsp;</strong> {selectedPool.metadata.details[key]}
-                    <br />
-                  </React.Fragment>
-                ))}
-              </p>
-
-              {selectedPool.metadata.discourseLink && (
-                <>
-                  <h4 style={{ marginBottom: '0' }}>Learn more about this asset originator</h4>
-                  <a href={selectedPool.metadata.discourseLink} target="_blank">
-                    Join the discussion on Discourse
-                  </a>
-                </>
-              )}
-            </div>
+          <Box margin={{ top: 'medium', left: 'auto' }}>
+            <PoolLink href={{ pathname: '/assets' }}>
+              <Anchor>
+                <Button label="View all assets" />
+              </Anchor>
+            </PoolLink>
           </Box>
         </Box>
-        {!isUpcoming && (
-          <>
-            <Heading level="4" margin={{ top: 'xsmall' }}>
-              Latest Assets
-            </Heading>
-            {loans!.loansState === 'loading' ? (
-              <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />
-            ) : (
-              <LoanListData loans={latestLoans} userAddress={userAddress}>
-                {' '}
-              </LoanListData>
-            )}
-            <Box margin={{ top: 'medium', bottom: 'large' }} align="center">
-              <PoolLink href={{ pathname: '/assets' }}>
-                <Anchor>
-                  <Button label="View all assets" />
-                </Anchor>
-              </PoolLink>
-            </Box>
-          </>
-        )}
       </Box>
-    )
-  }
+    </Box>
+  )
 }
 
 export default Overview
