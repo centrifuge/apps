@@ -170,15 +170,15 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                 <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
                   <Button
                     primary
-                    label="Redeem"
-                    onClick={() => setCard('redeem')}
-                    disabled={balance === '0' || epochData?.isBlockedState === true}
-                  />
-                  <Button
-                    primary
                     label="Invest"
                     onClick={() => setCard('invest')}
                     disabled={epochData?.isBlockedState === true}
+                  />
+                  <Button
+                    primary
+                    label="Redeem"
+                    onClick={() => setCard('redeem')}
+                    disabled={balance === '0' || epochData?.isBlockedState === true}
                   />
                 </Box>
               )}

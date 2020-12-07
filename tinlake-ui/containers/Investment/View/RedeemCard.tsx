@@ -93,7 +93,7 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
 
       <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
-        <Button primary label={`Lock ${token}`} onClick={submit} disabled={error !== undefined || disabled} />
+        <Button primary label={'Redeem'} onClick={submit} disabled={error !== undefined || disabled} />
       </Box>
     </Box>
   )

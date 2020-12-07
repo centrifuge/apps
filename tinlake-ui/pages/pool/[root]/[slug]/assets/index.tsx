@@ -48,7 +48,7 @@ class LoanListPage extends React.Component<Props> {
                         <SecondaryHeader margin={{ top: 'medium' }}>
                           <Heading level="4">Asset Overview of {pool.metadata.name}</Heading>
                           <PoolLink href={'/assets/issue'}>
-                            <Button primary label="Open Financing" />
+                            <Button primary label="Lock NFT" />
                           </PoolLink>
                         </SecondaryHeader>
 

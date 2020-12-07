@@ -66,7 +66,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
   const issueLoan = async () => {
     await props.ensureAuthed!()
 
-    const txId = await props.createTransaction(`Open financing NFT ${tokenId.slice(0, 4)}...`, 'issue', [
+    const txId = await props.createTransaction(`Lock NFT ${tokenId.slice(0, 4)}...`, 'issue', [
       props.tinlake,
       tokenId,
       registry,
@@ -113,7 +113,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
               </FormField>
             </Box>
             <Box basis={'1/3'} gap="medium" align="end">
-              <Button onClick={issueLoan} primary label="Open financing" disabled={!nft || disabled} />
+              <Button onClick={issueLoan} primary label="Lock NFT" disabled={!nft || disabled} />
             </Box>
           </Box>
         </Box>
