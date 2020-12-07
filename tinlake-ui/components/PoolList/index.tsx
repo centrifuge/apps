@@ -39,6 +39,9 @@ class PoolList extends React.Component<Props> {
             <HeaderTitle>Pool Value</HeaderTitle>
           </HeaderCol>
           <HeaderCol>
+            <HeaderTitle>DROP APR</HeaderTitle>
+          </HeaderCol>
+          <HeaderCol>
             <HeaderTitle>DROP Yield</HeaderTitle>
             <HeaderSub>14 days</HeaderSub>
           </HeaderCol>
@@ -69,7 +72,6 @@ class PoolList extends React.Component<Props> {
                 value={baseToDisplay(p.reserve.add(p.assetValue), 18)}
               />
             </DataCol>{' '}
-            {/* TODO */}
             <DataCol>
               <NumberDisplay
                 render={(v) => (
@@ -80,16 +82,29 @@ class PoolList extends React.Component<Props> {
                 value={feeToInterestRate(p.seniorInterestRate)}
               />
             </DataCol>{' '}
-            {/* TODO */}
             <DataCol>
-              <NumberDisplay
-                render={(v) => (
-                  <>
-                    <Number>{v}</Number> <Unit>%</Unit>
-                  </>
-                )}
-                value={feeToInterestRate(p.seniorInterestRate)}
-              />
+              {p.seniorYield14Days === null ? '-' : (
+                <NumberDisplay
+                  render={(v) => (
+                    <>
+                      <Number>{v}</Number> <Unit>%</Unit>
+                    </>
+                  )}
+                  value={baseToDisplay(p.seniorYield14Days.muln(100), 27)}
+                />
+              )}
+            </DataCol>{' '}
+            <DataCol>
+              {p.seniorYield14Days === null ? '-' : (
+                <NumberDisplay
+                  render={(v) => (
+                    <>
+                      <Number>{v}</Number> <Unit>%</Unit>
+                    </>
+                  )}
+                  value={baseToDisplay(p.juniorYield14Days.muln(100), 27)}
+                />
+              )}
             </DataCol>{' '}
             {/* TODO */}
           </PoolRow>

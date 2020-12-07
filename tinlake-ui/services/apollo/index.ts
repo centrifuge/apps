@@ -103,6 +103,8 @@ class Apollo {
         version: Number(pool?.version || 3),
         reserve: (pool && new BN(pool.reserve)) || new BN('0'),
         assetValue: (pool && new BN(pool.assetValue)) || new BN('0'),
+        juniorYield14Days: (pool && new BN(pool.juniorYield14Days))|| null,
+        seniorYield14Days: (pool && new BN(pool.seniorYield14Days))|| null,
       }
 
       return { ...poolData, status: getPoolStatus(poolData) }
@@ -132,6 +134,8 @@ class Apollo {
       version: p.version,
       reserve: new BN('0'),
       assetValue: new BN('0'),
+      juniorYield14Days: null,
+      seniorYield14Days: null,
     }))
   }
 
@@ -159,6 +163,8 @@ class Apollo {
       weightedInterestRateNum: 0,
       reserve: new BN('0'),
       assetValue: new BN('0'),
+      juniorYield14Days: null,
+      seniorYield14Days: null,
     }))
   }
 
@@ -180,6 +186,8 @@ class Apollo {
               version
               reserve
               assetValue
+              juniorYield14Days
+              seniorYield14Days
             }
           }
         `,

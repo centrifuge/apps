@@ -32,6 +32,8 @@ export interface PoolData {
   status?: PoolStatus
   reserve: BN
   assetValue: BN
+  juniorYield14Days: BN | null
+  seniorYield14Days: BN | null
 }
 
 export interface PoolsData {
