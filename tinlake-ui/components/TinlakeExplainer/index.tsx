@@ -1,7 +1,7 @@
 import { Anchor } from 'grommet'
 import { FormDown } from 'grommet-icons'
 import * as React from 'react'
-import styled from 'styled-components'
+import { Btn, Caret, Container, Primer, Row, Text } from './styles'
 
 const TinlakeExplainer: React.FC = () => {
   const [open, setOpen] = React.useState(false)
@@ -40,49 +40,3 @@ const TinlakeExplainer: React.FC = () => {
 }
 
 export default TinlakeExplainer
-
-const Container = styled.div`
-  flex: 1;
-  border-bottom: 1px solid #d8d8d8;
-  padding-bottom: 16px;
-`
-
-const Row = styled.div`
-  cursor: pointer;
-  display: flex;
-`
-
-const Primer = styled.div`
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 24px;
-  color: #0828be;
-`
-
-const Btn = styled.div`
-  margin-left: auto;
-  display: flex;
-  flex-direction: row;
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 24px;
-  color: #333;
-  text-decoration: underline;
-`
-
-const Caret = styled.div`
-  height: 24px;
-  margin-left: 10px;
-  svg {
-    transition: 200ms;
-    transform-style: preserve-3d;
-  }
-`
-
-const Text = styled.div`
-  margin-top: 16px;
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 24px;
-  color: #333;
-`
