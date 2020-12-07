@@ -2,7 +2,7 @@ import kovanPools from '@centrifuge/tinlake-pools-kovan'
 import mainnetPools from '@centrifuge/tinlake-pools-mainnet'
 import BN from 'bn.js'
 import * as yup from 'yup'
-import { PoolData, PoolStatus } from './ducks/pool'
+import { PoolStatus } from './ducks/pool'
 import { networkUrlToName } from './utils/networkNameResolver'
 // import { ethers, utils } from 'ethers';
 
@@ -241,6 +241,7 @@ export const loadPoolsFromIPFS = async () => {
   // TODO: error handling
   const response = await fetch(`${config.ipfsGateway}${'QmVWW6UN2hC4U2VqryA3LTkPpN9TA93JG4o9jjrya59qLv'}`)
   const body = await response.json()
+  console.log("BODY OF IPFS", body)
   const networkConfigs: any[] = Object.values(body)
 
   const active = poolsSchema
@@ -257,6 +258,7 @@ export const loadPoolsFromIPFS = async () => {
 
   return ipfsPools
 }
+
 const activePools = poolsSchema
   .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
   .map((p) => ({ ...p, isUpcoming: false } as Pool))
@@ -316,8 +318,6 @@ const config: Config = {
     .validateSync('7000000'),
 }
 
-export default config
-
 function between1e23and1e27(s: string): boolean {
   const n = new BN(s)
   return n.gte(new BN('100000000000000000000000')) && n.lte(new BN('1000000000000000000000000000'));
@@ -329,3 +329,5 @@ function fee(s: string): boolean {
   return n.gte(new BN('1000000000000000000000000000')) && n.lte(new BN('1000000009000000000000000000'));
 
 }
+
+export default config
