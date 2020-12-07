@@ -1,5 +1,5 @@
-import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
 import BN from 'bn.js'
+import { Constructor, PendingTransaction, TinlakeParams } from '../Tinlake'
 const util = require('util')
 
 export function CollateralActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {

@@ -1,8 +1,8 @@
-import { ITinlake } from '../types/tinlake'
 import assert from 'assert'
-import { createTinlake, TestProvider } from '../test/utils'
-import testConfig from '../test/config'
 import { ethers } from 'ethers'
+import testConfig from '../test/config'
+import { createTinlake, TestProvider } from '../test/utils'
+import { ITinlake } from '../types/tinlake'
 
 const testProvider = new TestProvider(testConfig)
 const adminAccount = ethers.Wallet.createRandom()

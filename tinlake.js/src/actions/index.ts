@@ -1,12 +1,12 @@
 import Admin, { IAdminActions } from './admin'
-import Borrower, { IBorrowerActions } from './borrower'
-import Lender, { ILenderActions } from './lender'
-import Currency, { ICurrencyActions } from './currency'
-import Collateral, { ICollateralActions } from './collateral'
 import Analytics, { IAnalyticsActions } from './analytics'
-import Governance, { IGovernanceActions } from './governance'
-import Proxy, { IProxyActions } from './proxy'
+import Borrower, { IBorrowerActions } from './borrower'
+import Collateral, { ICollateralActions } from './collateral'
 import Coordinator, { ICoordinatorActions } from './coordinator'
+import Currency, { ICurrencyActions } from './currency'
+import Governance, { IGovernanceActions } from './governance'
+import Lender, { ILenderActions } from './lender'
+import Proxy, { IProxyActions } from './proxy'
 
 export default {
   Admin,

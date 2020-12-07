@@ -1,6 +1,6 @@
-import { TinlakeActions } from '../actions'
 import BN from 'bn.js'
-import Tinlake, { PendingTransaction, ContractAddresses, ContractAbis, Contracts } from '../Tinlake'
+import { TinlakeActions } from '../actions'
+import Tinlake, { ContractAbis, ContractAddresses, Contracts, PendingTransaction } from '../Tinlake'
 
 export type ScoreCard = {
   thresholdRatio: BN
