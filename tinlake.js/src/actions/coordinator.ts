@@ -1,7 +1,7 @@
-import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
-import { calculateOptimalSolution, State, OrderState, SolverWeights } from '../services/solver'
 import BN from 'bn.js'
 import { ethers } from 'ethers'
+import { calculateOptimalSolution, OrderState, SolverWeights, State } from '../services/solver'
+import { Constructor, PendingTransaction, TinlakeParams } from '../Tinlake'
 const web3 = require('web3-utils')
 
 /**

@@ -58,6 +58,7 @@ export default function reducer(state: PoolsState = initialState, action: AnyAct
     case LOAD_POOLS:
       return { ...state, state: 'loading' }
     case RECEIVE_POOLS:
+      console.log("FOUND!!", action.data)
       return { ...state, state: 'found', data: action.data }
     default:
       return state
@@ -71,3 +72,4 @@ export function loadPools(): ThunkAction<Promise<void>, PoolsState, undefined, A
     dispatch({ data: poolsData, type: RECEIVE_POOLS })
   }
 }
+

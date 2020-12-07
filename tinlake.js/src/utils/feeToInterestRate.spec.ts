@@ -1,5 +1,5 @@
-import { feeToInterestRate } from './feeToInterestRate'
 import assert from 'assert'
+import { feeToInterestRate } from './feeToInterestRate'
 
 it('feeToInterestRate formats correctly', () => {
   assert.equal(feeToInterestRate('0'), '0')

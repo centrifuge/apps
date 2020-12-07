@@ -1,8 +1,8 @@
-import contractAddresses from './addresses.json'
-import abiDefinitions from '../abi/'
-import { ContractAddresses, ContractAbis } from '../Tinlake'
 import dotenv from 'dotenv'
 import { ethers } from 'ethers'
+import abiDefinitions from '../abi/'
+import { ContractAbis, ContractAddresses } from '../Tinlake'
+import contractAddresses from './addresses.json'
 
 dotenv.config()
 

@@ -3,21 +3,24 @@ import { Anchor, Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import LoanListData from '../../components/Loan/List'
 import { PoolLink } from '../../components/PoolLink'
-import { Pool, UpcomingPool } from '../../config'
+import config, { Pool, UpcomingPool } from '../../config'
 import { LoansState } from '../../ducks/loans'
 import { PoolState } from '../../ducks/pool'
 import PoolOverviewTable from './PoolOverviewTable'
+import { PoolsState } from '../../ducks/pools'
 
 interface Props {
   userAddress: string
   loans?: LoansState
   pool?: PoolState
+  pools?: any
   selectedPool: Pool | UpcomingPool
 }
 
 class Overview extends React.Component<Props> {
   render() {
     const { userAddress, loans, selectedPool } = this.props
+    console.log("PROPSOVERVIEW component", this.props)
 
     const allLoans = (loans && loans.loans) || undefined
 

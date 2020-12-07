@@ -1,9 +1,9 @@
 import assert from 'assert'
-import { ITinlake } from '../types/tinlake'
-import { createTinlake, TestProvider } from '../test/utils'
-import testConfig from '../test/config'
 import { ethers } from 'ethers'
+import testConfig from '../test/config'
+import { createTinlake, TestProvider } from '../test/utils'
 import { ContractName } from '../Tinlake'
+import { ITinlake } from '../types/tinlake'
 
 // god account = governance address for the tinlake test deployment
 const userAccount = ethers.Wallet.createRandom()

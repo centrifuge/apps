@@ -13,6 +13,7 @@ interface Props {
   loans?: LoansState
   loadLoans?: (tinlake: ITinlake) => Promise<void>
   pool?: PoolState
+  pools: Pool[]
   auth?: AuthState
   loadPool?: (tinlake: ITinlake) => Promise<void>
   selectedPool: Pool
@@ -20,8 +21,9 @@ interface Props {
 }
 
 class Overview extends React.Component<Props> {
-  componentWillMount() {
+  componentDidMount() {
     this.loadData()
+    console.log("loading in overview container1", this.props)
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -37,9 +39,9 @@ class Overview extends React.Component<Props> {
   }
 
   render() {
-    const { auth, loans, pool, selectedPool } = this.props
-
-    return <OverviewComp userAddress={auth?.address || ''} loans={loans} pool={pool} selectedPool={selectedPool} />
+    const { auth, loans, pool, selectedPool, pools } = this.props
+    console.log("loading in overview container", this.props)
+    return <OverviewComp userAddress={auth?.address || ''} loans={loans} pool={pool} selectedPool={selectedPool} pools={pools} />
   }
 }
 

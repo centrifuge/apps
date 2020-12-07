@@ -1,7 +1,7 @@
-import { Constructor, TinlakeParams } from '../Tinlake'
-import { ZERO_ADDRESS } from '../services/ethereum'
-import { Loan, Investor, ScoreCard } from '../types/tinlake'
 import BN from 'bn.js'
+import { ZERO_ADDRESS } from '../services/ethereum'
+import { Constructor, TinlakeParams } from '../Tinlake'
+import { Investor, Loan, ScoreCard } from '../types/tinlake'
 
 export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IAnalyticsActions {
@@ -310,6 +310,13 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       }
       return new BN(0)
     }
+
+    getPoolRegistryHash = async (registryAddress: string) => {
+      const registry = this.contract('POOL_REGISTRY', registryAddress)
+      const poolData = await registry.pools(0)
+      // TODO: fourth item is the ipfs hash -- we could use IPNS so this doesn't have to keep changing
+      return poolData[3]
+    }
   }
 }
 
@@ -363,6 +370,7 @@ export type IAnalyticsActions = {
   getSeniorOrderedInEpoch(user: string): Promise<number>
   getJuniorOrderedInEpoch(user: string): Promise<number>
   getAvailableFunds(): Promise<BN>
+  getPoolRegistryHash(registryAddress:string): Promise<any>
 }
 
 export default AnalyticsActions

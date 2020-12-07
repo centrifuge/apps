@@ -1,13 +1,14 @@
-import { Loan } from '@centrifuge/tinlake-js'
+import {Loan}  from '@centrifuge/tinlake-js'
 import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory'
 import { ApolloClient, DefaultOptions } from 'apollo-client'
 import { createHttpLink } from 'apollo-link-http'
 import BN from 'bn.js'
 import gql from 'graphql-tag'
 import fetch from 'node-fetch'
-import config, { ArchivedPool, UpcomingPool } from '../../config'
+import config, { ArchivedPool, loadPoolsFromIPFS, Pool, UpcomingPool } from '../../config'
 import { PoolData, PoolsData } from '../../ducks/pools'
 import { getPoolStatus } from '../../utils/pool'
+
 
 const { tinlakeDataBackendUrl } = config
 const cache = new InMemoryCache()
@@ -59,9 +60,11 @@ class Apollo {
     return 0
   }
 
-  injectPoolData(pools: any[]): PoolData[] {
-    const poolConfigs = config.pools
-    const tinlakePools = poolConfigs.map((poolConfig: any) => {
+  injectPoolData(pools: any[], poolConfigs: Pool[] | undefined): PoolData[] {
+    if (!poolConfigs) {
+      return []
+    }
+    const tinlakePools = poolConfigs?.map((poolConfig: any) => {
       const poolId = poolConfig.addresses.ROOT_CONTRACT
       const pool = pools.find((p) => p.id.toLowerCase() === poolId.toLowerCase())
 
@@ -107,7 +110,11 @@ class Apollo {
     })
     return tinlakePools
   }
-  injectUpcomingPoolData(upcomingPools: UpcomingPool[]): PoolData[] {
+
+  injectUpcomingPoolData(upcomingPools: UpcomingPool[] | undefined): PoolData[] {
+    if (!upcomingPools) {
+      return []
+    }
     return upcomingPools.map((p) => ({
       isUpcoming: true,
       isArchived: false,
@@ -131,7 +138,10 @@ class Apollo {
     }))
   }
 
-  injectArchivedPoolData(archivedPools: ArchivedPool[]): PoolData[] {
+  injectArchivedPoolData(archivedPools: ArchivedPool[] | undefined): PoolData[] {
+    if (!archivedPools) {
+      return []
+    }
     return archivedPools.map((p) => ({
       isUpcoming: false,
       isArchived: true,
@@ -179,12 +189,12 @@ class Apollo {
     } catch (err) {
       throw new Error(`error occured while fetching assets from apollo ${err}`)
     }
-
+    const ipfsPools = await loadPoolsFromIPFS()
     let pools = result.data?.pools
       ? [
-          ...this.injectPoolData(result.data.pools),
-          ...this.injectUpcomingPoolData(config.upcomingPools),
-          ...this.injectArchivedPoolData(config.archivedPools),
+          ...this.injectPoolData(result.data.pools, ipfsPools.active),
+          ...this.injectUpcomingPoolData(ipfsPools.upcoming),
+          ...this.injectArchivedPoolData(ipfsPools.archived),
         ]
       : []
 

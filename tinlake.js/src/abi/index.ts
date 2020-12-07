@@ -1,23 +1,24 @@
-import contractAbiTitle from './Title.abi.json'
-import contractAbiCurrency from './RestrictedToken.abi.json'
-import contractAbiShelf from './Shelf.abi.json'
-import contractAbiNavFeed from './NAVFeed.abi.json'
-import contractAbiEpochCoordinator from './EpochCoordinator.abi.json'
-import contractAbiMemberlist from './Memberlist.abi.json'
-import contractAbiCollector from './Collector.abi.json'
-import contractAbiPile from './Pile.abi.json'
-import contractAbiOperator from './Operator.abi.json'
-import contractAbiDistributor from './Distributor.abi.json'
+import { ContractAbis } from '../Tinlake'
+import contractAbiActions from './Actions.abi.json'
 import contractAbiAssessor from './Assessor.abi.json'
 import contractAbiAssessorAdmin from './AssessorAdmin.abi.json'
-import contractAbiRoot from './TinlakeRoot.abi.json'
-import contractAbiActions from './Actions.abi.json'
+import contractAbiCollector from './Collector.abi.json'
+import contractAbiDistributor from './Distributor.abi.json'
+import contractAbiEpochCoordinator from './EpochCoordinator.abi.json'
+import contractAbiMemberlist from './Memberlist.abi.json'
+import contractAbiNavFeed from './NAVFeed.abi.json'
+import contractAbiOperator from './Operator.abi.json'
+import contractAbiPile from './Pile.abi.json'
 import contractAbiProxy from './Proxy.abi.json'
 import contractAbiProxyRegistry from './ProxyRegistry.abi.json'
-import contractAbiTranche from './Tranche.abi.json'
 import contractAbiReserve from './Reserve.abi.json'
+import contractAbiCurrency from './RestrictedToken.abi.json'
+import contractAbiShelf from './Shelf.abi.json'
 import contractAbiNFT from './test/SimpleNFT.abi.json'
-import { ContractAbis } from '../Tinlake'
+import contractAbiRoot from './TinlakeRoot.abi.json'
+import contractAbiTitle from './Title.abi.json'
+import contractAbiTranche from './Tranche.abi.json'
+import contractAbiPoolRegistry from './PoolRegistry.abi.json'
 
 export default {
   COLLATERAL_NFT: contractAbiNFT,
@@ -44,4 +45,5 @@ export default {
   SENIOR_OPERATOR: contractAbiOperator,
   JUNIOR_TRANCHE: contractAbiTranche,
   SENIOR_TRANCHE: contractAbiTranche,
+  POOL_REGISTRY: contractAbiPoolRegistry
 } as ContractAbis

@@ -44,6 +44,7 @@ export const PoolLink: React.FunctionComponent<Props> = ({ href, as, children })
 }
 
 function getHref(rootOrSlug: string | string[], href: string | null | undefined | UrlObject): string {
+  console.log("GETHREF", config.pools, config.upcomingPools)
   const pool = config.pools.find(
     (p) => (rootOrSlug as string).toLowerCase() === p.addresses.ROOT_CONTRACT.toLowerCase()
   )

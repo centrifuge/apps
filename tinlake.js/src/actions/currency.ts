@@ -1,5 +1,5 @@
-import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
 import BN from 'bn.js'
+import { Constructor, PendingTransaction, TinlakeParams } from '../Tinlake'
 
 export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICurrencyActions {

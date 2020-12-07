@@ -1,5 +1,5 @@
-import { Constructor, TinlakeParams, PendingTransaction } from '../Tinlake'
 import { ethers } from 'ethers'
+import { Constructor, PendingTransaction, TinlakeParams } from '../Tinlake'
 
 export function BorrowerActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IBorrowerActions {

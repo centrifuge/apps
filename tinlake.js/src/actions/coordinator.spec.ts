@@ -1,8 +1,8 @@
 import assert from 'assert'
-import { ITinlake } from '../types/tinlake'
-import { createTinlake } from '../test/utils'
-import testConfig from '../test/config'
 import { ethers } from 'ethers'
+import testConfig from '../test/config'
+import { createTinlake } from '../test/utils'
+import { ITinlake } from '../types/tinlake'
 
 let tinlake: ITinlake
 

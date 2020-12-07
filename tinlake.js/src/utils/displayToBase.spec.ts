@@ -1,5 +1,5 @@
-import { displayToBase } from './displayToBase'
 import assert from 'assert'
+import { displayToBase } from './displayToBase'
 
 it('displayToBase formats correctly', () => {
   assert.equal(displayToBase('0.00', 2), '000')

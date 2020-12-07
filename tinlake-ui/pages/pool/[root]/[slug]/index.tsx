@@ -7,7 +7,7 @@ import Container from '../../../../components/Container'
 import Header from '../../../../components/Header'
 import WithFooter from '../../../../components/WithFooter'
 import WithTinlake from '../../../../components/WithTinlake'
-import config, { Pool as IPool } from '../../../../config'
+import config, { loadPoolsFromIPFS, Pool as IPool } from '../../../../config'
 import Overview from '../../../../containers/Overview'
 import { menuItems } from '../../../../menuItems'
 
@@ -15,11 +15,13 @@ interface Props {
   root: string
   pool: IPool
   key: string
+  pools: any
 }
 
 class Pool extends React.Component<Props> {
   render() {
-    const { pool } = this.props
+    const { pool, pools } = this.props
+    console.log("PROPS IN SLUG", this.props)
 
     return (
       <WithFooter>
@@ -34,7 +36,7 @@ class Pool extends React.Component<Props> {
                 addresses={pool.addresses}
                 contractConfig={pool.contractConfig}
                 render={(tinlake) => (
-                  <Auth tinlake={tinlake} render={() => <Overview tinlake={tinlake} selectedPool={pool} />} />
+                  <Auth tinlake={tinlake} render={() => <Overview tinlake={tinlake} selectedPool={pool} pools={pools.active}/>} />
                 )}
               />
             </Box>
@@ -47,7 +49,8 @@ class Pool extends React.Component<Props> {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   // We'll pre-render only these paths at build time.
-  const paths = config.pools.map((pool) => ({
+  const pools = await loadPoolsFromIPFS()
+  const paths = pools.active.map((pool) => ({
     params: { root: pool.addresses.ROOT_CONTRACT, slug: pool.metadata.slug },
   }))
 
@@ -59,16 +62,15 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   if (!params) {
     throw new Error(`Params are not passed`)
   }
-
-  const pool = config.pools.find((p) => p.addresses.ROOT_CONTRACT === params!.root)
+  const pools = await loadPoolsFromIPFS()
+  const pool = pools.active.find((p) => p.addresses.ROOT_CONTRACT === params!.root)
 
   if (!pool) {
     throw new Error(`Pool ${params.root} cannot be loaded`)
   }
 
   // Fix to force page rerender, from https://github.com/vercel/next.js/issues/9992
-  const newProps: Props = { pool, root: params.root as string, key: pool.metadata.name || '-' }
-
+  const newProps: Props = { pool, pools, root: params.root as string, key: pool.metadata.name || '-'}
   return { props: newProps }
 }
 

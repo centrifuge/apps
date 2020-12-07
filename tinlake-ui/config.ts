@@ -73,6 +73,7 @@ export interface DisplayedField {
 
 interface Config {
   rpcUrl: string
+  ipfsGateway: string
   etherscanUrl: string
   transactionTimeout: number
   tinlakeDataBackendUrl: string
@@ -203,7 +204,40 @@ const selectedPoolConfig = yup
 
 const networkConfigs = selectedPoolConfig === 'mainnetProduction' ? mainnetPools : kovanPools
 
-const pools = poolsSchema
+let pools:
+  | {
+  active: Pool[]
+  archived: ArchivedPool[]
+  upcoming: UpcomingPool[]
+}
+  | undefined = undefined
+
+export const loadPoolsFromIPFS = async () => {
+  if(pools){
+    console.log("POOL ALREADY EXISTS", pools)
+    return pools
+  }
+  // await assembleIpfsUrl()
+  // TODO: error handling
+  const response = await fetch(`${config.ipfsGateway}${'QmVWW6UN2hC4U2VqryA3LTkPpN9TA93JG4o9jjrya59qLv'}`)
+  const body = await response.json()
+  const networkConfigs: any[] = Object.values(body)
+
+  const active = poolsSchema
+    .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
+    .map((p) => ({ ...p, isUpcoming: false } as Pool))
+  const archived = archivedPoolsSchema
+    .validateSync(networkConfigs.filter((p: Pool) => 'archivedValues' in p))
+    .map((p) => ({ ...p, isArchived: true } as ArchivedPool))
+  const upcoming = upcomingPoolsSchema
+    .validateSync(networkConfigs.filter((p: Pool) => !('archivedValues' in p) && !p.addresses))
+    .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
+
+  pools = { active, upcoming, archived}
+
+  return pools
+}
+const activePools = poolsSchema
   .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
   .map((p) => ({ ...p, isUpcoming: false } as Pool))
 const archivedPools = archivedPoolsSchema
@@ -214,14 +248,19 @@ const upcomingPools = upcomingPoolsSchema
   .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
 
 const config: Config = {
-  pools,
   upcomingPools,
   archivedPools,
+  pools: activePools,
   rpcUrl: yup
     .string()
     .required('NEXT_PUBLIC_RPC_URL is required')
     .url()
     .validateSync(process.env.NEXT_PUBLIC_RPC_URL),
+  ipfsGateway: yup
+  .string()
+  .required('NEXT_PUBLIC_IPFS_GATEWAY is required')
+  .url()
+  .validateSync(process.env.NEXT_PUBLIC_IPFS_GATEWAY),
   etherscanUrl: yup
     .string()
     .required('NEXT_PUBLIC_ETHERSCAN_URL is required')
