@@ -11,6 +11,7 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
 import { toPrecision } from '../../../utils/toPrecision'
 import { Sidenote, SignIcon } from './styles'
+import { Tooltip } from '../../../components/Tooltip'
 
 interface Props extends TransactionProps {
   tinlake: ITinlake
@@ -160,7 +161,9 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell scope="row">Epoch #</TableCell>
+              <TableCell scope="row">
+                <Tooltip id="epochNumber">Epoch #</Tooltip>
+              </TableCell>
               <TableCell style={{ textAlign: 'end' }}>
                 <LoadingValue done={poolData?.epoch?.id !== undefined}>{poolData?.epoch?.id || ''}</LoadingValue>
               </TableCell>
@@ -168,7 +171,9 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
             {!poolData?.epoch?.isBlockedState && (
               <>
                 <TableRow>
-                  <TableCell scope="row">Minimum epoch duration</TableCell>
+                  <TableCell scope="row">
+                    <Tooltip id="mininumEpochDuration">Minimum epoch duration</Tooltip>
+                  </TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
                     <LoadingValue done={poolData?.epoch?.minimumEpochTime !== undefined}>
                       {secondsToHms(poolData?.epoch?.minimumEpochTime || 0)}
@@ -212,7 +217,9 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell scope="row">Total epoch investment capacity</TableCell>
+              <TableCell scope="row">
+                <Tooltip id="investmentCapacity">Total epoch investment capacity</Tooltip>
+              </TableCell>
               <TableCell style={{ textAlign: 'end' }}>
                 <LoadingValue done={investmentCapacity !== undefined}>
                   {addThousandsSeparators(
