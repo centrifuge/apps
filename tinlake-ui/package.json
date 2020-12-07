@@ -13,7 +13,7 @@
     "build-for-husky": "tsc",
     "dev:next": "PORT=3000 node server.js",
     "build:next": "next build",
-    "start": "run-p -l dev:next dev:lambda",
+    "start": "yarn build:deps && run-p -l dev:next dev:lambda",
     "serve": "next start",
     "test": "jest",
     "export": "yarn build && next export",

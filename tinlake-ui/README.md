@@ -20,6 +20,5 @@ add the following env variables
 To build tinlake.js and start the NextJs server and serve the Netlify lambdas locally
 
 ```shell
-../tinlake.js; yarn build; cd ../tinlake-ui
 yarn start
 ```
