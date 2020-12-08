@@ -22,16 +22,14 @@ export class KycController {
   @Get('pools/:poolId/callback/:address/securitize')
   async securitizeCallback(@Param() params, @Query() query, @Res({ passthrough: true }) res): Promise<any> {
     // Check input
+    const pool = await this.poolService.get(params.poolId)
+    if (!pool) throw new BadRequestException('Invalid pool')
 
-    // TODO: we actually need to pass these through the callback URL
-    const blockchain = query.blockchain || 'ethereum'
-    const network = query.network || 'mainnet'
+    const blockchain = 'ethereum' // TODO: take this from the pool config as well
+    const network = pool.network || 'mainnet'
 
     const address = await this.addressRepo.find(blockchain, network, params.address)
     if (!address) throw new BadRequestException(`Address ${address} does not exist`)
-
-    const pool = await this.poolService.get(params.poolId)
-    if (!pool) throw new BadRequestException('Invalid pool')
 
     // Get info from Securitize
     const kycInfo = await this.securitizeService.processAuthorizationCallback(query.code)
@@ -57,20 +55,21 @@ export class KycController {
     )
     if (!agreement) throw new BadRequestException('Failed to create agreement envelope')
 
-    // Create session cookie and redirect user
-    const redirectUrl = `${process.env.TINLAKE_UI_HOST}pool/${params.poolId}/${pool.metadata.slug}?onb=1`
-    console.log({ redirectUrl })
-
+    // Create session and redirect user
     const session = this.sessionService.create(address.userId)
 
-    let thirtyDaysFromNow = new Date()
-    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30)
+    // let thirtyDaysFromNow = new Date()
+    // thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30)
 
-    res.cookie(SessionCookieName, session, {
-      path: '/',
-      expires: thirtyDaysFromNow,
-      httpOnly: true,
-    })
+    // res.cookie(SessionCookieName, session, {
+    //   path: '/',
+    //   expires: thirtyDaysFromNow,
+    //   httpOnly: true,
+    // })
+
+    const redirectUrl = `${process.env.TINLAKE_UI_HOST}pool/${params.poolId}/${pool.metadata.slug}?onb=1&session=${session}`
+    console.log({ redirectUrl })
+
     return res.redirect(redirectUrl)
   }
 }

@@ -1,4 +1,5 @@
-import { BadRequestException, Controller, Get, Param, Query } from '@nestjs/common'
+import { BadRequestException, Controller, Get, Param } from '@nestjs/common'
+import { PoolService } from '../services/pool.service'
 import { AddressRepo } from '../repos/address.repo'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { KycRepo } from '../repos/kyc.repo'
@@ -12,13 +13,17 @@ export class AddressController {
     private readonly securitizeService: SecuritizeService,
     private readonly kycRepo: KycRepo,
     private readonly agreementRepo: AgreementRepo,
-    private readonly docusignService: DocusignService
+    private readonly docusignService: DocusignService,
+    private readonly poolService: PoolService
   ) {}
 
   @Get('pools/:poolId/addresses/:address')
-  async getStatus(@Param() params, @Query() query): Promise<AddressStatus> {
-    const blockchain = query.blockchain || 'ethereum'
-    const network = query.network || 'mainnet'
+  async getStatus(@Param() params): Promise<AddressStatus> {
+    const pool = await this.poolService.get(params.poolId)
+    if (!pool) throw new BadRequestException('Invalid pool')
+
+    const blockchain = 'ethereum' // TODO: take this from the pool config as well
+    const network = pool.network || 'mainnet'
 
     const address = await this.addressRepo.findOrCreate(blockchain, network, params.address)
     if (!address) throw new BadRequestException('Failed to create address')

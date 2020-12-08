@@ -15,7 +15,7 @@ export class SecuritizeService {
   getAuthorizationLink(poolId: string, address: string): string {
     const scope = `info%20details%20verification`
     const redirectUrl = `${process.env.ONBOARD_API_HOST}pools/${poolId}/callback/${address}/securitize`
-    const url = `https://id.sandbox.securitize.io/#/authorize?issuerId=${process.env.SECURITIZE_CLIENT_ID}&scope=${scope}&redirecturl=${redirectUrl}`
+    const url = `${process.env.SECURITIZE_ID_HOST}#/authorize?issuerId=${process.env.SECURITIZE_CLIENT_ID}&scope=${scope}&redirecturl=${redirectUrl}`
 
     return url
   }
@@ -44,7 +44,7 @@ export class SecuritizeService {
     }
   }
 
-  async getInvestor(accessToken: string): Promise<any> {
+  async getInvestor(accessToken: string): Promise<Investor> {
     const url = `${process.env.SECURITIZE_API_HOST}v1/${process.env.SECURITIZE_CLIENT_ID}/investor`
 
     const response = await fetch(url, {
@@ -54,6 +54,18 @@ export class SecuritizeService {
       },
     })
 
-    return await response.json()
+    const investor = await response.json()
+    return investor
   }
+}
+
+export interface Investor {
+  investorId: string
+  createDate: string
+  fullName: string
+  tfaEnabled: boolean
+  language: string
+  email: string
+  verificationStatus: string
+  details: object
 }

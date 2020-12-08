@@ -45,9 +45,9 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
       const body = await req.json()
       setStatus(body)
 
-      if (body.agreements.length > 0) {
+      if (body.agreements.length > 0 && 'session' in router.query) {
         const req = await fetch(
-          `${config.onboardAPIHost}pools/${props.pool?.addresses?.ROOT_CONTRACT}/agreements/${body.agreements[0].id}/link`
+          `${config.onboardAPIHost}pools/${props.pool?.addresses?.ROOT_CONTRACT}/agreements/${body.agreements[0].id}/link?session=${router.query.session}`
         )
         const link = await req.text()
         setAgreementLink(link)
