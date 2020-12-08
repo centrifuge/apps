@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common'
-import fetch from 'node-fetch'
+const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 @Injectable()
 export class PoolService {
   private readonly logger = new Logger(PoolService.name)
-  private pools: any[]
+  private pools: Pool[]
 
   constructor() {
     this.loadFromIPFS()
@@ -32,4 +32,10 @@ export class PoolService {
         .join(', ')}`
     )
   }
+}
+
+export interface Pool {
+  metadata: any
+  addresses: { [key: string]: string }
+  network: 'mainnet' | 'kovan'
 }

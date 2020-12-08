@@ -8,13 +8,14 @@ import { PoolData as PoolDataV3, PoolState } from '../../ducks/pool'
 import { PoolsState } from '../../ducks/pools'
 import { PoolLink } from '../PoolLink'
 import { FormModal, InvestmentSteps } from './styles'
+import { AddressStatus } from '@centrifuge/onboard-api/src/controllers/address.controller'
 
 interface Props {
   anchor?: React.ReactNode
   pool?: Pool | UpcomingPool
 }
 
-const InvestAction: React.FC<Props> = (props: Props) => {
+const OnboardModal: React.FC<Props> = (props: Props) => {
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
 
   const onOpen = () => setModalIsOpen(true)
@@ -27,14 +28,14 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolDataV3 | undefined
 
-  const [status, setStatus] = React.useState<any>(undefined)
+  const [status, setStatus] = React.useState<AddressStatus | undefined>(undefined)
   const [agreementLink, setAgreementLink] = React.useState<string | undefined>(undefined)
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
   const connect = () => {
     dispatch(ensureAuthed())
-    setModalIsOpen(false)
+    setModalIsOpen(false) // Hide this modal and focus on the modal for connecting your wallet
   }
 
   const getOnboardingStatus = async () => {
@@ -43,12 +44,11 @@ const InvestAction: React.FC<Props> = (props: Props) => {
         `${config.onboardAPIHost}pools/${props.pool?.addresses?.ROOT_CONTRACT}/addresses/${address}`
       )
       const body = await req.json()
-      console.log({ status: body })
       setStatus(body)
 
-      if (body.agreements.length > 0) {
+      if (body.agreements.length > 0 && 'session' in router.query) {
         const req = await fetch(
-          `${config.onboardAPIHost}pools/${props.pool?.addresses?.ROOT_CONTRACT}/agreements/${body.agreements[0].id}/link`
+          `${config.onboardAPIHost}pools/${props.pool?.addresses?.ROOT_CONTRACT}/agreements/${body.agreements[0].id}/link?session=${router.query.session}`
         )
         const link = await req.text()
         setAgreementLink(link)
@@ -124,6 +124,11 @@ const InvestAction: React.FC<Props> = (props: Props) => {
               <Button primary label={`Connect`} onClick={connect} fill={false} />
             </Box>
           )}
+          {address && !status && (
+            <Box flex={true} justify="between">
+              <Paragraph>Loading...</Paragraph>
+            </Box>
+          )}
           {status?.kyc.url && !status.kyc.created && (
             <Box flex={true} justify="between">
               <Paragraph>Ready to start.</Paragraph>
@@ -174,4 +179,4 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default InvestAction
+export default OnboardModal

@@ -35,7 +35,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
 
     getRiskGroup = async (loanId: string): Promise<BN> => {
       // retrieve nftId = hash from tokenID & registry
-      const nftId = await this.contract('FEED').nftID(loanId)
+      const nftId = await this.contract('FEED')['nftID(uint256)'](loanId)
 
       // retrieve riskgroup from nft
       return await this.toBN(this.contract('FEED').risk(nftId))
@@ -62,7 +62,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
 
       // retrieve rates for this risk group
       const res = await this.contract('PILE').rates(riskGroup.toNumber())
-      return res[2].toBN()
+      return new BN(res[2].toString())
     }
 
     getOwnerOfLoan = async (loanId: string): Promise<any> => {

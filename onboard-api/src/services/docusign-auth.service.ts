@@ -1,6 +1,9 @@
 import { JwtUtils } from '@connectedcars/jwtutils'
 import { Injectable, Logger } from '@nestjs/common'
-import fetch from 'node-fetch'
+const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
+
+const HourInSeconds = 60 * 60
+const HourInMilliseconds = HourInSeconds * 1000
 
 @Injectable()
 export class DocusignAuthService {
@@ -10,7 +13,7 @@ export class DocusignAuthService {
   expiresAt: number | undefined = undefined
 
   getAuthorizationLink(): string {
-    return `${process.env.DOCUSIGN_ACCOUNT_API_HOST}oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&state=a39fh23hnf23&redirect_uri=http://localhost:3100/docusign/callback`
+    return `${process.env.DOCUSIGN_ACCOUNT_API_HOST}oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.ONBOARD_API_HOST}docusign/callback`
   }
 
   async getAccessToken(): Promise<string> {
@@ -47,7 +50,7 @@ export class DocusignAuthService {
     const data = await response.json()
 
     this.accessToken = data['access_token']
-    this.expiresAt = Date.now() + 60 * 60 * 1000
+    this.expiresAt = Date.now() + HourInMilliseconds
 
     this.logger.log('Created new access token for Docusign')
 
@@ -67,7 +70,7 @@ export class DocusignAuthService {
       sub: process.env.DOCUSIGN_API_USERNAME,
       aud: 'account-d.docusign.com',
       iat: unixNow,
-      exp: unixNow + 3600,
+      exp: unixNow + HourInSeconds,
       scope: 'signature impersonation',
     }
 
