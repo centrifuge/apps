@@ -1,10 +1,11 @@
 import { BadRequestException, Controller, Get, Param } from '@nestjs/common'
-import { PoolService } from '../services/pool.service'
 import { AddressRepo } from '../repos/address.repo'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { KycRepo } from '../repos/kyc.repo'
 import { DocusignService } from '../services/docusign.service'
 import { SecuritizeService } from '../services/kyc/securitize.service'
+import { PoolService } from '../services/pool.service'
+import { AddressStatus, AgreementsStatus } from './types'
 
 import { AddressStatus } from './types'
 
