@@ -8,6 +8,7 @@ import { PoolData as PoolDataV3, PoolState } from '../../ducks/pool'
 import { PoolsState } from '../../ducks/pools'
 import { PoolLink } from '../PoolLink'
 import { FormModal, InvestmentSteps } from './styles'
+import { AddressStatus } from '@centrifuge/onboard-api/src/controllers/address.controller'
 
 interface Props {
   anchor?: React.ReactNode
@@ -27,7 +28,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolDataV3 | undefined
 
-  const [status, setStatus] = React.useState<any>(undefined)
+  const [status, setStatus] = React.useState<AddressStatus | undefined>(undefined)
   const [agreementLink, setAgreementLink] = React.useState<string | undefined>(undefined)
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
@@ -121,6 +122,11 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
             <Box flex={true} justify="between">
               <Paragraph>Please connect with the wallet you want to use for investment.</Paragraph>
               <Button primary label={`Connect`} onClick={connect} fill={false} />
+            </Box>
+          )}
+          {address && !status && (
+            <Box flex={true} justify="between">
+              <Paragraph>Loading...</Paragraph>
             </Box>
           )}
           {status?.kyc.url && !status.kyc.created && (
