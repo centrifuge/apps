@@ -68,8 +68,6 @@ export class KycController {
     // })
 
     const redirectUrl = `${process.env.TINLAKE_UI_HOST}pool/${params.poolId}/${pool.metadata.slug}?onb=1&session=${session}`
-    console.log({ redirectUrl })
-
     return res.redirect(redirectUrl)
   }
 }

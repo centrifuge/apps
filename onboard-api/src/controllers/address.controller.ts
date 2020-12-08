@@ -7,8 +7,6 @@ import { SecuritizeService } from '../services/kyc/securitize.service'
 import { PoolService } from '../services/pool.service'
 import { AddressStatus, AgreementsStatus } from './types'
 
-import { AddressStatus } from './types'
-
 @Controller()
 export class AddressController {
   constructor(

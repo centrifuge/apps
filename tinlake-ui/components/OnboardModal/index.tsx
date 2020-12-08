@@ -141,21 +141,29 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
               <Button primary label={`Sign Subscription Agreement`} href={agreementLink} fill={false} />
             </Box>
           )}
-          {status?.kyc.url && status.agreements[0]?.signed && !status.agreements[0]?.counterSigned && (
-            <Box flex={true} justify="between">
-              <Paragraph>You signed subdoc, AO will sign, will let you know, then you can invest.</Paragraph>
-            </Box>
-          )}
-          {status?.kyc.url && !status.kyc.verified && status.agreements[0]?.counterSigned && (
-            <Box flex={true} justify="between">
-              <Paragraph>AO signed, waiting for KYC.</Paragraph>
-            </Box>
-          )}
-          {status?.kyc.url && status.kyc.verified && status.agreements[0]?.counterSigned && (
-            <Box flex={true} justify="between">
-              <Paragraph>AO signed &amp; KYC finished, you can invest.</Paragraph>
-            </Box>
-          )}
+          {status?.kyc.url &&
+            status.agreements.every((agreement) => agreement.signed) &&
+            !status.agreements.every((agreement) => agreement.counterSigned) && (
+              <Box flex={true} justify="between">
+                <Paragraph>You signed subdoc, AO will sign, will let you know, then you can invest.</Paragraph>
+              </Box>
+            )}
+          {status?.kyc.url &&
+            !status.kyc.verified &&
+            status.agreements.length > 0 &&
+            status.agreements.every((agreement) => agreement.counterSigned) && (
+              <Box flex={true} justify="between">
+                <Paragraph>AO signed, waiting for KYC.</Paragraph>
+              </Box>
+            )}
+          {status?.kyc.url &&
+            status.kyc.verified &&
+            status.agreements.length > 0 &&
+            status.agreements.every((agreement) => agreement.counterSigned) && (
+              <Box flex={true} justify="between">
+                <Paragraph>AO signed &amp; KYC finished, you can invest.</Paragraph>
+              </Box>
+            )}
         </Box>
         {props.pool && (
           <Paragraph
