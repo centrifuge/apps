@@ -35,7 +35,6 @@ jobs:
 
       # Run
       - run: yarn lint
-      - run: yarn check-format
       - run: yarn build
 
   deploy:

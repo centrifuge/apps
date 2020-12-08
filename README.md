@@ -6,7 +6,7 @@ Monorepo for the Tinlake applications.
 ## Setup
 Make sure you have installed Yarn and NVM.
 
-1. Use Node v12.18.3: `nvm use`
+1. Use Node v14.15.1: `nvm use`
 2. Install dependencies: `yarn install`
 3. Add `.env` files with the right environment variables to each project.
 
