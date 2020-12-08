@@ -1,6 +1,7 @@
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import { Box } from 'grommet'
-import Router from 'next/router'
+import { WithRouterProps } from 'next/dist/client/with-router'
+import Router, { withRouter } from 'next/router'
 import * as React from 'react'
 import { PoolData } from '../../ducks/pools'
 import NumberDisplay from '../NumberDisplay'
@@ -21,7 +22,7 @@ import {
   Unit,
 } from './styles'
 
-interface Props {
+interface Props extends WithRouterProps {
   pools?: PoolData[]
 }
 
@@ -43,7 +44,13 @@ class PoolList extends React.Component<Props> {
   }
 
   render() {
-    const { pools } = this.props
+    const {
+      pools,
+      router: {
+        query: { showYields, showArchived },
+      },
+    } = this.props
+
     return (
       <Box>
         <Header>
@@ -51,94 +58,122 @@ class PoolList extends React.Component<Props> {
             <HeaderTitle>Pool</HeaderTitle>
           </Desc>
           <HeaderCol>
-            <HeaderTitle>Pool Value</HeaderTitle>
+            <HeaderTitle>Total Financed</HeaderTitle>
           </HeaderCol>
+          {showYields && (
+            <HeaderCol>
+              <HeaderTitle>Pool Value</HeaderTitle>
+            </HeaderCol>
+          )}
           <HeaderCol>
             <HeaderTitle>DROP APR</HeaderTitle>
           </HeaderCol>
-          <HeaderCol>
-            <HeaderTitle>DROP Yield</HeaderTitle>
-            <HeaderSub>14 days</HeaderSub>
-          </HeaderCol>
-          <HeaderCol>
-            <HeaderTitle>TIN Yield</HeaderTitle>
-            <HeaderSub>14 days</HeaderSub>
-          </HeaderCol>
+          {showYields && (
+            <>
+              <HeaderCol>
+                <HeaderTitle>DROP Yield</HeaderTitle>
+                <HeaderSub>14 days</HeaderSub>
+              </HeaderCol>
+              <HeaderCol>
+                <HeaderTitle>TIN Yield</HeaderTitle>
+                <HeaderSub>14 days</HeaderSub>
+              </HeaderCol>
+            </>
+          )}
         </Header>
-        {pools?.map((p) => (
-          <PoolRow key={p.id} onClick={() => this.clickPool(p)}>
-            <Icon src={p.icon || 'https://storage.googleapis.com/tinlake/pool-icons/Placeholder.svg'} />
-            <Desc>
-              <Name>
-                {p.name}{' '}
-                {p.isUpcoming ? (
-                  <Label blue>Upcoming</Label>
-                ) : p.isArchived ? (
-                  <Label>Archived</Label>
-                ) : (
-                  p.isOversubscribed && <Label orange>Oversubscribed</Label>
-                )}
-              </Name>
-              <Type>{p.asset}</Type>
-            </Desc>
-            <DataCol>
-              <NumberDisplay
-                precision={0}
-                render={(v) =>
-                  v === '0' ? (
-                    <Dash>-</Dash>
+        {pools
+          ?.filter((p) => showArchived || !p.isArchived)
+          .map((p) => (
+            <PoolRow key={p.id} onClick={() => this.clickPool(p)}>
+              <Icon src={p.icon || 'https://storage.googleapis.com/tinlake/pool-icons/Placeholder.svg'} />
+              <Desc>
+                <Name>
+                  {p.name}{' '}
+                  {p.isUpcoming ? (
+                    <Label blue>Upcoming</Label>
+                  ) : p.isArchived ? (
+                    <Label>Archived</Label>
                   ) : (
+                    p.isOversubscribed && <Label orange>Oversubscribed</Label>
+                  )}
+                </Name>
+                <Type>{p.asset}</Type>
+              </Desc>
+              <DataCol>
+                <NumberDisplay
+                  render={(v) => (
                     <>
                       <Number>{v}</Number> <Unit>DAI</Unit>
                     </>
-                  )
-                }
-                value={baseToDisplay(p.reserve.add(p.assetValue), 18)}
-              />
-            </DataCol>{' '}
-            <DataCol>
-              <NumberDisplay
-                render={(v) => (
-                  <>
-                    <Number>{v}</Number> <Unit>%</Unit>
-                  </>
-                )}
-                value={feeToInterestRate(p.seniorInterestRate)}
-              />
-            </DataCol>{' '}
-            <DataCol>
-              {p.seniorYield14Days === null ? (
-                <Unit>N/A</Unit>
-              ) : (
+                  )}
+                  precision={0}
+                  value={baseToDisplay(p.totalFinancedCurrency, 18)}
+                />
+              </DataCol>
+              {showYields && (
+                <DataCol>
+                  <NumberDisplay
+                    precision={0}
+                    render={(v) =>
+                      v === '0' ? (
+                        <Dash>-</Dash>
+                      ) : (
+                        <>
+                          <Number>{v}</Number> <Unit>DAI</Unit>
+                        </>
+                      )
+                    }
+                    value={baseToDisplay(p.reserve.add(p.assetValue), 18)}
+                  />
+                </DataCol>
+              )}
+              <DataCol>
                 <NumberDisplay
                   render={(v) => (
                     <>
                       <Number>{v}</Number> <Unit>%</Unit>
                     </>
                   )}
-                  value={baseToDisplay(p.seniorYield14Days.muln(100), 27)}
+                  value={feeToInterestRate(p.seniorInterestRate)}
                 />
+              </DataCol>
+              {showYields && (
+                <>
+                  <DataCol>
+                    {p.seniorYield14Days === null ? (
+                      <Unit>N/A</Unit>
+                    ) : (
+                      <NumberDisplay
+                        render={(v) => (
+                          <>
+                            <Number>{v}</Number> <Unit>%</Unit>
+                          </>
+                        )}
+                        value={baseToDisplay(p.seniorYield14Days.muln(100), 27)}
+                      />
+                    )}
+                  </DataCol>
+                  <DataCol>
+                    {p.juniorYield14Days === null ? (
+                      <Unit>N/A</Unit>
+                    ) : (
+                      <NumberDisplay
+                        render={(v) => (
+                          <>
+                            <Number>{v}</Number> <Unit>%</Unit>
+                          </>
+                        )}
+                        value={baseToDisplay(p.juniorYield14Days.muln(100), 27)}
+                      />
+                    )}
+                  </DataCol>
+                </>
               )}
-            </DataCol>{' '}
-            <DataCol>
-              {p.juniorYield14Days === null ? (
-                <Unit>N/A</Unit>
-              ) : (
-                <NumberDisplay
-                  render={(v) => (
-                    <>
-                      <Number>{v}</Number> <Unit>%</Unit>
-                    </>
-                  )}
-                  value={baseToDisplay(p.juniorYield14Days.muln(100), 27)}
-                />
-              )}
-            </DataCol>{' '}
-          </PoolRow>
-        ))}
+            </PoolRow>
+          ))}
       </Box>
     )
   }
 }
 
-export default PoolList
+export default withRouter(PoolList)

@@ -1,38 +1,78 @@
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { Box } from 'grommet'
+import { WithRouterProps } from 'next/dist/client/with-router'
+import { withRouter } from 'next/router'
 import * as React from 'react'
 import { PoolsData } from '../../ducks/pools'
 import NumberDisplay from '../NumberDisplay'
 import { Cont, Label, TokenLogo, Unit, Value } from './styles'
 
-interface Props {
+interface Props extends WithRouterProps {
   pools: PoolsData
 }
 
 class PoolsMetrics extends React.Component<Props> {
   render() {
-    const { pools } = this.props
+    const {
+      pools,
+      router: {
+        query: { showTotalValueLocked },
+      },
+    } = this.props
     return (
       <>
-        <Box width="256px" pad="medium" elevation="small" round="xsmall" background="white" margin={{ right: '32px' }}>
+        <Box
+          width="256px"
+          pad="medium"
+          elevation="small"
+          round="xsmall"
+          background="white"
+          margin={{ horizontal: '16px' }}
+        >
           <Cont>
             <Value>{pools.ongoingLoans}</Value>
           </Cont>
           <Label>Assets Locked</Label>
         </Box>
-        <Box width="256px" pad="medium" elevation="small" round="xsmall" background="white">
+        <Box
+          width="256px"
+          pad="medium"
+          elevation="small"
+          round="xsmall"
+          background="white"
+          margin={{ horizontal: '16px' }}
+        >
           <Cont>
             <TokenLogo src={`/static/dai.svg`} />
             <Value>
-              <NumberDisplay value={baseToDisplay(pools.totalValue, 18)} precision={0} />
+              <NumberDisplay value={baseToDisplay(pools.totalFinancedCurrency, 18)} precision={0} />
             </Value>{' '}
             <Unit>DAI</Unit>
           </Cont>
-          <Label>Total value locked</Label>
+          <Label>Total Financed to Date</Label>
         </Box>
+        {showTotalValueLocked && (
+          <Box
+            width="256px"
+            pad="medium"
+            elevation="small"
+            round="xsmall"
+            background="white"
+            margin={{ horizontal: '16px' }}
+          >
+            <Cont>
+              <TokenLogo src={`/static/dai.svg`} />
+              <Value>
+                <NumberDisplay value={baseToDisplay(pools.totalValue, 18)} precision={0} />
+              </Value>{' '}
+              <Unit>DAI</Unit>
+            </Cont>
+            <Label>Total Value Locked</Label>
+          </Box>
+        )}
       </>
     )
   }
 }
 
-export default PoolsMetrics
+export default withRouter(PoolsMetrics)
