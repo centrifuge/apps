@@ -40,7 +40,7 @@ export const Name = styled.h3`
 export const Type = styled.p`
   margin: 0;
   font-weight: 500;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 14px;
   color: #979797;
 `
@@ -64,7 +64,7 @@ export const Number = styled.span`
 
 export const Unit = styled.span`
   font-weight: 500;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 14px;
   color: #979797;
 `
@@ -84,7 +84,7 @@ export const HeaderTitle = styled.h4`
 export const HeaderSub = styled.p`
   margin: 0;
   font-weight: 500;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 14px;
   color: #979797;
 `
@@ -96,7 +96,7 @@ export const Label = styled.div<{ blue?: true; orange?: true }>`
   display: inline-block;
   height: 16px;
   font-weight: 500;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 16px;
   color: white;
   padding: 0 12px;
