@@ -1,3 +1,4 @@
+import { AddressStatus } from '@centrifuge/onboard-api/src/controllers/types'
 import { Anchor, Box, Button, Paragraph } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
@@ -8,7 +9,6 @@ import { PoolData as PoolDataV3, PoolState } from '../../ducks/pool'
 import { PoolsState } from '../../ducks/pools'
 import { PoolLink } from '../PoolLink'
 import { FormModal, InvestmentSteps } from './styles'
-import type { AddressStatus } from '@centrifuge/onboard-api/src/controllers/types'
 
 interface Props {
   anchor?: React.ReactNode

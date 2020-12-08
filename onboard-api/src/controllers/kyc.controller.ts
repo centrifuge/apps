@@ -5,7 +5,7 @@ import { KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
 import { SecuritizeService } from '../services/kyc/securitize.service'
 import { PoolService } from '../services/pool.service'
-import { SessionCookieName, SessionService } from '../services/session.service'
+import { SessionService } from '../services/session.service'
 
 @Controller()
 export class KycController {
