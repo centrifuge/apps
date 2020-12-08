@@ -14,7 +14,7 @@ interface Props {
   pool?: Pool | UpcomingPool
 }
 
-const InvestAction: React.FC<Props> = (props: Props) => {
+const OnboardModal: React.FC<Props> = (props: Props) => {
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
 
   const onOpen = () => setModalIsOpen(true)
@@ -173,4 +173,4 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default InvestAction
+export default OnboardModal

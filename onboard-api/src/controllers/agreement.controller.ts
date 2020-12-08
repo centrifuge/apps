@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Get, NotFoundException, Param, Req } from '@nestjs/common'
+import { BadRequestException, Body, Controller, Get, NotFoundException, Param, Post, Req } from '@nestjs/common'
 import { AgreementRepo } from '../repos/agreement.repo'
 import { UserRepo } from '../repos/user.repo'
 import { DocusignService } from '../services/docusign.service'
@@ -32,5 +32,13 @@ export class AgreementController {
 
     const returnUrl = `${process.env.TINLAKE_UI_HOST}pool/${params.poolId}/${pool.metadata.slug}?onb=1`
     return this.docusignService.getAgreementLink(agreement.providerEnvelopeId, user, returnUrl)
+  }
+
+  // TODO: this should probably only be returned after verifying address ownership
+  @Post('docusign/connect')
+  async postDocusignConnect(@Body() body): Promise<string> {
+    console.log('Received Docusign Connect message')
+    console.log(body)
+    return 'OK'
   }
 }

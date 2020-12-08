@@ -1,6 +1,6 @@
 import { JwtUtils } from '@connectedcars/jwtutils'
 import { Injectable, Logger } from '@nestjs/common'
-import fetch from 'node-fetch'
+const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 const HourInSeconds = 60 * 60
 const HourInMilliseconds = HourInSeconds * 1000
@@ -13,7 +13,7 @@ export class DocusignAuthService {
   expiresAt: number | undefined = undefined
 
   getAuthorizationLink(): string {
-    return `${process.env.DOCUSIGN_ACCOUNT_API_HOST}oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&state=a39fh23hnf23&redirect_uri=${process.env.ONBOARD_API_HOST}docusign/callback`
+    return `${process.env.DOCUSIGN_ACCOUNT_API_HOST}oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.ONBOARD_API_HOST}docusign/callback`
   }
 
   async getAccessToken(): Promise<string> {

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
-import fetch from 'node-fetch'
+const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 @Injectable()
 export class PoolService {

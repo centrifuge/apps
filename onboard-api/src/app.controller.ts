@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common'
+import { Controller, Get, Res } from '@nestjs/common'
 import { DocusignAuthService } from './services/docusign-auth.service'
 
 @Controller()
@@ -10,10 +10,10 @@ export class AppController {
     return 'OK'
   }
 
-  // These two endpoints are used to provide consent for the API user
+  // These two endpoints are used to provide consent for the Docusign API user
   @Get('docusign/authorization')
-  getDocusignAuthorization(): string {
-    return this.docusignAuthService.getAuthorizationLink()
+  getDocusignAuthorization(@Res({ passthrough: true }) res): string {
+    return res.redirect(this.docusignAuthService.getAuthorizationLink())
   }
 
   @Get('docusign/callback')
