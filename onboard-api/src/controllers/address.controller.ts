@@ -6,6 +6,8 @@ import { KycRepo } from '../repos/kyc.repo'
 import { DocusignService } from '../services/docusign.service'
 import { SecuritizeService } from '../services/kyc/securitize.service'
 
+import { AddressStatus } from './types'
+
 @Controller()
 export class AddressController {
   constructor(
@@ -78,23 +80,4 @@ export class AddressController {
       agreements: [],
     }
   }
-}
-
-export interface KycStatus {
-  created?: boolean
-  verified?: boolean
-  url?: string
-}
-
-// TODO: remove whether it's been created
-export interface AgreementsStatus {
-  name: string
-  id: string
-  signed?: boolean
-  counterSigned?: boolean
-}
-
-export interface AddressStatus {
-  kyc: KycStatus
-  agreements: AgreementsStatus[]
 }

@@ -14,6 +14,7 @@
     "sourceMap": true,
     "strict": true,
     "target": "es6",
+    "experimentalDecorators": true,
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
