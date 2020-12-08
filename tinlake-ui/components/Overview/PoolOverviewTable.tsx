@@ -4,7 +4,8 @@ import { Box, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import InvestAction from '../../components/InvestAction'
-import { Pool, UpcomingPool } from '../../config'
+import OnboardModal from '../../components/OnboardModal'
+import config, { Pool, UpcomingPool } from '../../config'
 import { LoansState } from '../../ducks/loans'
 import { PoolData, PoolState } from '../../ducks/pool'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
@@ -161,7 +162,11 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
           </TableBody>
         </Table>
         <Box margin={{ vertical: 'medium' }}>
-          <InvestAction pool={props.selectedPool} />
+          {config.featureFlagNewOnboarding ? (
+            <OnboardModal pool={props.selectedPool} />
+          ) : (
+            <InvestAction pool={props.selectedPool} />
+          )}
         </Box>
       </Box>
     </Box>

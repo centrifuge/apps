@@ -202,7 +202,7 @@ export default class Tinlake {
     return new Promise(async (resolve, reject) => {
       if (!tx.hash) return reject(tx)
 
-      let timer: number | undefined = undefined
+      let timer: NodeJS.Timer | number | undefined = undefined
       if (tx.timesOutAt) {
         timer = setTimeout(() => {
           return reject(`Transaction ${tx.hash} timed out at ${tx.timesOutAt}`)

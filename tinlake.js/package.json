@@ -48,8 +48,6 @@
     "generate-docs": "typedoc --out docs --exclude \"./node_modules/**\"  --exclude \"./src/abi/**\" --exclude \"./src/index.ts\" --exclude \"./src/actions/*.spec.ts\" --exclude \"./src/test/**\" --excludeExternals --excludeNotExported --ignoreCompilerErrors ./src",
     "lint": "tslint --project .",
     "lint-fix": "tslint --fix -c ./tslint.json 'src/**/*{.ts,.tsx}'",
-    "format": "yarn format:run",
-    "check-format": "yarn format:check",
     "prepublish": "yarn build",
     "publish:patch": "npm run build && npm version patch && npm publish --access public",
     "publish:minor": "npm run build && npm version minor && npm publish --access public",
