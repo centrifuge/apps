@@ -14,7 +14,7 @@ export interface SecuritizeKYCInfo {
 export class SecuritizeService {
   getAuthorizationLink(poolId: string, address: string): string {
     const scope = `info%20details%20verification`
-    const redirectUrl = `http://localhost:3100/pools/${poolId}/callback/${address}/securitize`
+    const redirectUrl = `${process.env.ONBOARD_API_HOST}pools/${poolId}/callback/${address}/securitize`
     const url = `https://id.sandbox.securitize.io/#/authorize?issuerId=${process.env.SECURITIZE_CLIENT_ID}&scope=${scope}&redirecturl=${redirectUrl}`
 
     return url

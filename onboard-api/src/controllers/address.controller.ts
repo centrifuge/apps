@@ -35,11 +35,11 @@ export class AddressController {
           const status = await this.docusignService.getEnvelopeStatus(agreement.providerEnvelopeId)
           console.log(status)
           if (!agreement.signedAt && status.signed) {
-            await this.agreementRepo.hasBeenSigned(agreement.id)
+            await this.agreementRepo.setSigned(agreement.id)
           }
 
           if (!agreement.counterSignedAt && status.counterSigned) {
-            await this.agreementRepo.hasBeenCounterSigned(agreement.id)
+            await this.agreementRepo.setCounterSigned(agreement.id)
           }
         }
       })

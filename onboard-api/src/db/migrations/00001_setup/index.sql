@@ -7,6 +7,7 @@ create table if not exists users
 );
 
 create unique index if not exists users_pkey on users(id uuid_ops);
+create unique index if not exists users_unique_email_idx ON users (lower(email));
 
 -- Addresses
 create table if not exists addresses (
@@ -16,6 +17,9 @@ create table if not exists addresses (
     address character varying(100) not null,
     created_at timestamp with time zone not null default now()
 );
+
+create index if not exists addresses_lookup_idx ON addresses (lower(address));
+create unique index if not exists addresses_unique_idx ON addresses (blockchain, network, lower(address));
 
 -- Kyc
 create table if not exists kyc (
@@ -27,7 +31,8 @@ create table if not exists kyc (
     verified_at timestamp with time zone
 );
 
-create unique index if not exists kyc_unique on kyc (user_id, provider, provider_account_id);
+create unique index if not exists kyc_unique on kyc (provider, provider_account_id);
+create index if not exists kyc_user_id_lookup on kyc(user_id uuid_ops);
 
 -- Agreements
 create table if not exists agreements (
@@ -43,4 +48,6 @@ create table if not exists agreements (
 );
 
 create unique index if not exists agreements_pkey on agreements(id uuid_ops);
-create unique index if not exists agreements_unique on agreements (user_id, provider, provider_envelope_id);
+create index if not exists agreements_user_id_lookup on agreements(user_id uuid_ops);
+create unique index if not exists agreements_unique on agreements (provider, provider_envelope_id);
+create unique index if not exists agreements_unique_per_user on agreements (user_id, pool_id, provider_template_id);

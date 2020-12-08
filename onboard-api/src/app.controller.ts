@@ -6,7 +6,7 @@ export class AppController {
   constructor(private readonly docusignAuthService: DocusignAuthService) {}
 
   @Get()
-  getHello(): string {
+  getRoot(): string {
     return 'OK'
   }
 
@@ -17,7 +17,7 @@ export class AppController {
   }
 
   @Get('docusign/callback')
-  async getDocusignCallback(): Promise<any> {
+  async getDocusignCallback(): Promise<string> {
     await this.docusignAuthService.getAccessToken()
     return 'Callback received'
   }

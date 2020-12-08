@@ -34,7 +34,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
 
   const connect = () => {
     dispatch(ensureAuthed())
-    setModalIsOpen(false)
+    setModalIsOpen(false) // Hide this modal and focus on the modal for connecting your wallet
   }
 
   const getOnboardingStatus = async () => {
@@ -43,7 +43,6 @@ const InvestAction: React.FC<Props> = (props: Props) => {
         `${config.onboardAPIHost}pools/${props.pool?.addresses?.ROOT_CONTRACT}/addresses/${address}`
       )
       const body = await req.json()
-      console.log({ status: body })
       setStatus(body)
 
       if (body.agreements.length > 0) {

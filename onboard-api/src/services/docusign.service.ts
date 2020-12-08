@@ -52,7 +52,7 @@ export class DocusignService {
     return content.envelopeId
   }
 
-  async getAgreementLink(envelopeId: string, user: User, returnUrl?: string): Promise<string> {
+  async getAgreementLink(envelopeId: string, user: User, returnUrl: string): Promise<string> {
     const url = `${process.env.DOCUSIGN_REST_API_HOST}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes/${envelopeId}/views/recipient`
 
     // TODO: email and userName here should be taken from Securitize
@@ -62,7 +62,7 @@ export class DocusignService {
       userName: 'Investor 1',
       roleName: InvestorRoleName,
       clientUserId: user.id,
-      returnUrl: returnUrl || 'https://tinlake.centrifuge.io/',
+      returnUrl: returnUrl,
     }
 
     const accessToken = await this.docusignAuthService.getAccessToken()

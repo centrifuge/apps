@@ -65,7 +65,7 @@ export class AgreementRepo {
     return existingAgreement as Agreement
   }
 
-  async hasBeenSigned(agreementId: string): Promise<Agreement | undefined> {
+  async setSigned(agreementId: string): Promise<Agreement | undefined> {
     const [updatedAgreement] = await this.db.sql`
       update agreements
       set signed_at = now()
@@ -77,7 +77,7 @@ export class AgreementRepo {
     return updatedAgreement as Agreement | undefined
   }
 
-  async hasBeenCounterSigned(agreementId: string): Promise<Agreement | undefined> {
+  async setCounterSigned(agreementId: string): Promise<Agreement | undefined> {
     const [updatedAgreement] = await this.db.sql`
       update agreements
       set counter_signed_at = now()

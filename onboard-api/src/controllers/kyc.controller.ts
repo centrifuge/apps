@@ -22,7 +22,12 @@ export class KycController {
   @Get('pools/:poolId/callback/:address/securitize')
   async securitizeCallback(@Param() params, @Query() query, @Res({ passthrough: true }) res): Promise<any> {
     // Check input
-    const address = await this.addressRepo.find(params.address)
+
+    // TODO: we actually need to pass these through the callback URL
+    const blockchain = query.blockchain || 'ethereum'
+    const network = query.network || 'mainnet'
+
+    const address = await this.addressRepo.find(blockchain, network, params.address)
     if (!address) throw new BadRequestException(`Address ${address} does not exist`)
 
     const pool = await this.poolService.get(params.poolId)

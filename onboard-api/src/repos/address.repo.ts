@@ -17,11 +17,13 @@ export type Address = {
 export class AddressRepo {
   constructor(private readonly db: DatabaseService, private readonly userRepo: UserRepo) {}
 
-  async find(address: string): Promise<Address | undefined> {
+  async find(blockchain: Blockchain, network: Network, address: string): Promise<Address | undefined> {
     const [data] = await this.db.sql`
       select *
       from addresses
-      where lower(addresses.address) = ${address.toLowerCase()}
+      where addresses.blockchain = ${blockchain}
+      and addresses.network = ${network}
+      and lower(addresses.address) = ${address.toLowerCase()}
     `
 
     return data as Address | undefined
