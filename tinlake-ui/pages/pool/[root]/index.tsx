@@ -7,7 +7,7 @@ import Container from '../../../components/Container'
 import Header from '../../../components/Header'
 import WithFooter from '../../../components/WithFooter'
 import WithTinlake from '../../../components/WithTinlake'
-import config, { ArchivedPool, Pool as LivePool, UpcomingPool } from '../../../config'
+import config, { ArchivedPool, loadPoolsFromIPFS, Pool as LivePool, UpcomingPool } from '../../../config'
 import OverviewArchived from '../../../containers/OverviewArchived'
 import OverviewUpcoming from '../../../containers/OverviewUpcoming'
 import { menuItems, noDemo } from '../../../menuItems'
@@ -58,8 +58,9 @@ class Pool extends React.Component<Props> {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   // We'll pre-render only these paths at build time.
-  let paths = config.upcomingPools.map((pool) => ({ params: { root: pool.metadata.slug } }))
-  const archivePaths = config.archivedPools.map((pool) => ({ params: { root: pool.metadata.slug } }))
+  const pools = await loadPoolsFromIPFS()
+  let paths = pools?.upcoming.map((pool) => ({ params: { root: pool.metadata.slug } }))
+  const archivePaths = pools?.archived.map((pool) => ({ params: { root: pool.metadata.slug } }))
   paths = paths.concat(archivePaths)
 
   // { fallback: false } means other routes should 404.
@@ -72,9 +73,9 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }
 
   let pool: UpcomingPool | ArchivedPool | undefined
-  pool = config.upcomingPools.find((p) => p.metadata.slug === params!.root)
+  pool = config.ipfsPools.upcoming.find((p) => p.metadata.slug === params!.root)
   if (!pool) {
-    pool = config.archivedPools.find((p) => p.metadata.slug === params!.root)
+    pool = config.ipfsPools.archived.find((p) => p.metadata.slug === params!.root)
   }
   if (!pool) {
     throw new Error(`Pool ${params.root} cannot be loaded`)

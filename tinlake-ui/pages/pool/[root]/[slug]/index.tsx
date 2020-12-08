@@ -7,7 +7,7 @@ import Container from '../../../../components/Container'
 import Header from '../../../../components/Header'
 import WithFooter from '../../../../components/WithFooter'
 import WithTinlake from '../../../../components/WithTinlake'
-import { loadPoolsFromIPFS, Pool as IPool } from '../../../../config'
+import config, { loadPoolsFromIPFS, Pool as IPool } from '../../../../config'
 import Overview from '../../../../containers/Overview'
 import { menuItems } from '../../../../menuItems'
 
@@ -37,7 +37,7 @@ class Pool extends React.Component<Props> {
                 addresses={pool.addresses}
                 contractConfig={pool.contractConfig}
                 render={(tinlake) => (
-                  <Auth tinlake={tinlake} render={() => <Overview tinlake={tinlake} selectedPool={pool} configPools={pools.active}/>} />
+                  <Auth tinlake={tinlake} render={() => <Overview tinlake={tinlake} selectedPool={pool} configPools={pools}/>} />
                 )}
               />
             </Box>

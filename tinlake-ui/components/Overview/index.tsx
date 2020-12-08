@@ -3,28 +3,24 @@ import { Anchor, Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import LoanListData from '../../components/Loan/List'
 import { PoolLink } from '../../components/PoolLink'
-import { Pool, UpcomingPool } from '../../config'
+import { IpfsPools, Pool, UpcomingPool } from '../../config'
 import { LoansState } from '../../ducks/loans'
 import PoolOverviewTable from './PoolOverviewTable'
 
 interface Props {
   userAddress: string
   loans?: LoansState
-  configPools?: Pool[]
+  configPools?: IpfsPools
   pools: any
   selectedPool: Pool | UpcomingPool
 }
 
 class Overview extends React.Component<Props> {
+
   render() {
     const { userAddress, loans, selectedPool, configPools, pools } = this.props
     console.log("PROPSOVERVIEW component", this.props, pools)
     const isUpcoming = 'isUpcoming' in selectedPool && selectedPool.isUpcoming === true
-
-    // let currentPool
-    // isUpcoming ? currentPool = selectedPool : currentPool = pools.pools.find((p: PoolData) => (p.id as string).toLowerCase() === selectedPool.addresses?.ROOT_CONTRACT.toLowerCase())
-    // console.log("CURRENT", currentPool)
-
     const allLoans = (loans && loans.loans) || undefined
 
     // show just recent 10 assets
