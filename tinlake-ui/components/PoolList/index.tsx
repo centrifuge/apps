@@ -83,6 +83,7 @@ class PoolList extends React.Component<Props> {
         </Header>
         {pools
           ?.filter((p) => showArchived || !p.isArchived)
+          .sort((a, b) => b.order - a.order)
           .map((p) => (
             <PoolRow key={p.id} onClick={() => this.clickPool(p)}>
               <Icon src={p.icon || 'https://storage.googleapis.com/tinlake/pool-icons/Placeholder.svg'} />
