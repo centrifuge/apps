@@ -255,7 +255,8 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
     const juniorInMemberlist = address ? await tinlake.checkJuniorTokenMemberlist(address) : false
 
     try {
-      const prev = (getState() as any).pool.data || {
+      const prev = ((getState() as any).pool.poolId === tinlake.contractAddresses.ROOT_CONTRACT &&
+        (getState() as any).pool.data) || {
         junior: { type: 'junior' },
         senior: { type: 'senior' },
         epoch: {},
