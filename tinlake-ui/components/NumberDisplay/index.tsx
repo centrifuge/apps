@@ -1,5 +1,5 @@
 import { Decimal } from 'decimal.js-light'
-import { FunctionComponent } from 'react'
+import * as React from 'react'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
   suffix?: string
 }
 
-const NumberDisplay: FunctionComponent<Props> = ({ value, precision, prefix, suffix }: Props) => {
+const NumberDisplay: React.FC<Props> = ({ value, precision, prefix, suffix }: Props) => {
   const valueToDecimal = new Decimal(value.toString()).toFixed(precision)
   const formatted = addThousandsSeparators(valueToDecimal.toString())
   return (

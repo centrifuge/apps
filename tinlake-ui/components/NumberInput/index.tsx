@@ -1,5 +1,5 @@
 import { TextInput } from 'grommet'
-import { FunctionComponent } from 'react'
+import * as React from 'react'
 import NumberFormat, { NumberFormatValues } from 'react-number-format'
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
   [key: string]: any
 }
 
-const NumberInput: FunctionComponent<Props> = ({ value, precision, prefix, suffix, onValueChange, ...rest }: Props) => {
+const NumberInput: React.FC<Props> = ({ value, precision, prefix, suffix, onValueChange, ...rest }: Props) => {
   return (
     <NumberFormat
       thousandSeparator=","
