@@ -21,7 +21,7 @@ const PoolOverviewTable: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const test = useSelector<any, PoolState>((state) => state.pools)
   const { selectedPool } = props
-  console.log( "POOLS IN POOL OVERVIEW", selectedPool, pool)
+  console.log( "POOLS IN POOL OVERVIEW", selectedPool, pool, test)
   const poolData = pool?.data as PoolData | undefined
 
   const loans = useSelector<any, LoansState>((state) => state.loans)

@@ -3,7 +3,7 @@ import { NextRouter, withRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import OverviewComp from '../../components/Overview'
-import { IpfsPools, Pool } from '../../config'
+import { Pool } from '../../config'
 import { AuthState } from '../../ducks/auth'
 import { loadLoans, LoansState } from '../../ducks/loans'
 import { loadPool, PoolState } from '../../ducks/pool'
@@ -15,7 +15,6 @@ interface Props {
   loadLoans?: (tinlake: ITinlake) => Promise<void>
   pool?: PoolState
   pools: PoolsState
-  configPools: IpfsPools 
   auth?: AuthState
   loadPool?: (tinlake: ITinlake) => Promise<void>
   selectedPool: Pool
@@ -40,9 +39,9 @@ class Overview extends React.Component<Props> {
   }
 
   render() {
-    const { auth, loans, selectedPool, configPools, pools, pool } = this.props
-    console.log("loading in overview container", pools, "POOL", pool, "configPools", configPools)
-    return pools.data && <OverviewComp userAddress={auth?.address || ''} loans={loans} selectedPool={selectedPool} configPools={configPools} pools={pools.data} />
+    const { auth, loans, selectedPool, pools, pool } = this.props
+    console.log("loading in overview container", pools, "POOL", pool, "configPools")
+    return pools.data && <OverviewComp userAddress={auth?.address || ''} loans={loans} selectedPool={selectedPool}/>
   }
 }
 

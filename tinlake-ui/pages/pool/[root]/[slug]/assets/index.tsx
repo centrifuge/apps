@@ -10,7 +10,7 @@ import { PoolLink } from '../../../../../components/PoolLink'
 import SecondaryHeader from '../../../../../components/SecondaryHeader'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
-import config, { loadPoolsFromIPFS, Pool } from '../../../../../config'
+import { loadPoolsFromIPFS, Pool } from '../../../../../config'
 import LoanList from '../../../../../containers/Loan/List'
 import LoanOverview from '../../../../../containers/Loan/Overview/index'
 import { menuItems } from '../../../../../menuItems'
@@ -50,11 +50,10 @@ class LoanListPage extends React.Component<Props> {
                       <Box>
                         <SecondaryHeader margin={{ top: 'medium' }}>
                           <Heading level="4">Asset Overview of {pool.metadata.name}</Heading>
-                          <PoolLink href={'/assets/issue'} configPools={pools.active}>
+                          <PoolLink href={'/assets/issue'}>
                             <Button primary label="Open Financing" />
                           </PoolLink>
                         </SecondaryHeader>
-
                         <LoanOverview tinlake={tinlake} auth={auth} activePool={this.props.pool} />
                         <LoanList tinlake={tinlake} auth={auth} hideMetrics={true} />
                       </Box>

@@ -7,7 +7,7 @@ import Container from '../../../components/Container'
 import Header from '../../../components/Header'
 import WithFooter from '../../../components/WithFooter'
 import WithTinlake from '../../../components/WithTinlake'
-import config, { ArchivedPool, loadPoolsFromIPFS, Pool as LivePool, UpcomingPool } from '../../../config'
+import { ArchivedPool, loadPoolsFromIPFS, Pool as LivePool, UpcomingPool } from '../../../config'
 import OverviewArchived from '../../../containers/OverviewArchived'
 import OverviewUpcoming from '../../../containers/OverviewUpcoming'
 import { menuItems, noDemo } from '../../../menuItems'
@@ -71,11 +71,11 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   if (!params) {
     throw new Error(`Params are not passed`)
   }
-
+  const pools = await loadPoolsFromIPFS()
   let pool: UpcomingPool | ArchivedPool | undefined
-  pool = config.ipfsPools.upcoming.find((p) => p.metadata.slug === params!.root)
+  pool = pools.upcoming.find((p) => p.metadata.slug === params!.root)
   if (!pool) {
-    pool = config.ipfsPools.archived.find((p) => p.metadata.slug === params!.root)
+    pool = pools.archived.find((p) => p.metadata.slug === params!.root)
   }
   if (!pool) {
     throw new Error(`Pool ${params.root} cannot be loaded`)

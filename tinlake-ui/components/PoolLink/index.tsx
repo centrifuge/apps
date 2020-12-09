@@ -1,18 +1,17 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { UrlObject } from 'url'
-import config, { IpfsPools, Pool } from '../../config'
+import config, { ipfsPools } from '../../config'
+import React from 'react'
 
 interface Props {
   href: string | UrlObject
   as?: string | UrlObject
-  configPools: IpfsPools
 }
 
 // PoolLink allows navigation within the same pool (it pre-fixes the passed href by the root address)
-export const PoolLink: React.FunctionComponent<Props> = ({ href, as, children, configPools }) => {
+export const PoolLink: React.FunctionComponent<Props> = ({ href, as, children}) => {
   const { root } = useRouter().query
-
   if (!root) {
     throw new Error('expected `root` to be in route query, but was not')
   }
@@ -25,33 +24,34 @@ export const PoolLink: React.FunctionComponent<Props> = ({ href, as, children, c
   let poolHref: string | UrlObject = ''
   let poolAs: string | UrlObject = ''
   if (typeof href === 'string') {
-    poolHref = getHref(root, href, configPools)
-    poolAs = getAs(root, as || href, configPools)
+    poolHref = getHref(root, href)
+    poolAs = getAs(root, as || href)
   } else {
     poolHref = {
       ...href,
-      pathname: getHref(root, href.pathname, configPools),
+      pathname: getHref(root, href.pathname),
     }
     poolAs = {
       ...((as as UrlObject) || href),
-      pathname: getAs(root, href.pathname, configPools),
+      pathname: getAs(root, href.pathname),
     }
   }
   return (
-    <Link href={poolHref} as={poolAs} shallow>
+    ipfsPools && <Link href={poolHref} as={poolAs} shallow>
       {children}
     </Link>
   )
 }
 
-function getHref(rootOrSlug: string | string[], href: string | null | undefined | UrlObject, configPools: IpfsPools): string {
-  const pool = configPools.active.find(
+function getHref(rootOrSlug: string | string[], href: string | null | undefined | UrlObject): string {
+  console.log(config, "GET HRED")
+  const pool = ipfsPools?.active.find(
     (p) => (rootOrSlug as string).toLowerCase() === p.addresses.ROOT_CONTRACT.toLowerCase()
   )
   if (pool) {
     return `/pool/[root]/[slug]${href}`
   }
-  const upPool = configPools.upcoming.find((p) => (rootOrSlug as string) === p.metadata.slug)
+  const upPool = ipfsPools?.upcoming.find((p) => (rootOrSlug as string) === p.metadata.slug)
   if (upPool) {
     return `/pool/[root]${href}`
   }
@@ -59,14 +59,14 @@ function getHref(rootOrSlug: string | string[], href: string | null | undefined 
   throw new Error(`could not find root ${rootOrSlug} for href in pools or upcoming pools`)
 }
 
-function getAs(rootOrSlug: string | string[], as: string | null | undefined | UrlObject, configPools: IpfsPools): string {
-  const pool = configPools.active.find(
+function getAs(rootOrSlug: string | string[], as: string | null | undefined | UrlObject): string {
+  const pool = ipfsPools?.active.find(
     (p) => (rootOrSlug as string).toLowerCase() === p.addresses.ROOT_CONTRACT.toLowerCase()
   )
   if (pool) {
     return `/pool/${rootOrSlug}/${pool.metadata.slug}${as}`
   }
-  const upPool = configPools.upcoming.find((p) => rootOrSlug === p.metadata.slug)
+  const upPool = ipfsPools?.upcoming.find((p) => rootOrSlug === p.metadata.slug)
   if (upPool) {
     return `/pool/${rootOrSlug}${as}`
   }

@@ -81,10 +81,10 @@ interface Config {
   tinlakeDataBackendUrl: string
   isDemo: boolean
   network: 'Mainnet' | 'Kovan'
-  // pools: Pool[]
-  // upcomingPools: UpcomingPool[]
-  // archivedPools: ArchivedPool[]
-  ipfsPools: IpfsPools
+  pools: Pool[]
+  upcomingPools: UpcomingPool[]
+  archivedPools: ArchivedPool[]
+  ipfsPools: IpfsPools | undefined
   portisApiKey: string
   gasLimit: number
   onboardAPIHost: string
@@ -207,15 +207,15 @@ const poolsSchema = yup.array(poolSchema)
 const upcomingPoolsSchema = yup.array(upcomingPoolSchema)
 const archivedPoolsSchema = yup.array(archivedPoolSchema)
 
-// const selectedPoolConfig = yup
-//   .mixed<'kovanStaging' | 'mainnetStaging' | 'mainnetProduction'>()
-//   .required('POOLS config is required')
-//   .oneOf(['kovanStaging', 'mainnetStaging', 'mainnetProduction'])
-//   .validateSync(process.env.NEXT_PUBLIC_POOLS_CONFIG)
+const selectedPoolConfig = yup
+  .mixed<'kovanStaging' | 'mainnetStaging' | 'mainnetProduction'>()
+  .required('POOLS config is required')
+  .oneOf(['kovanStaging', 'mainnetStaging', 'mainnetProduction'])
+  .validateSync(process.env.NEXT_PUBLIC_POOLS_CONFIG)
 
-// const networkConfigs = selectedPoolConfig === 'mainnetProduction' ? mainnetPools : kovanPools
+const networkConfigs = selectedPoolConfig === 'mainnetProduction' ? mainnetPools : kovanPools
 
-let ipfsPools: IpfsPools | undefined = undefined
+export let ipfsPools: IpfsPools | undefined = undefined
 
 // export async function payWithMetamask(sender, receiver, strEther) {
 //   console.log(`payWithMetamask(receiver=${receiver}, sender=${sender}, strEther=${strEther})`)
@@ -262,20 +262,20 @@ export const loadPoolsFromIPFS = async () => {
   return ipfsPools
 }
 
-// const activePools = poolsSchema
-//   .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
-//   .map((p) => ({ ...p, isUpcoming: false } as Pool))
-// const archivedPools = archivedPoolsSchema
-//   .validateSync(networkConfigs.filter((p: Pool) => 'archivedValues' in p))
-//   .map((p) => ({ ...p, isArchived: true } as ArchivedPool))
-// const upcomingPools = upcomingPoolsSchema
-//   .validateSync(networkConfigs.filter((p: Pool) => !('archivedValues' in p) && !p.addresses))
-//   .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
+const activePools = poolsSchema
+  .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
+  .map((p) => ({ ...p, isUpcoming: false } as Pool))
+const archivedPools = archivedPoolsSchema
+  .validateSync(networkConfigs.filter((p: Pool) => 'archivedValues' in p))
+  .map((p) => ({ ...p, isArchived: true } as ArchivedPool))
+const upcomingPools = upcomingPoolsSchema
+  .validateSync(networkConfigs.filter((p: Pool) => !('archivedValues' in p) && !p.addresses))
+  .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
 
 const config: Config = {
-  // upcomingPools,
-  // archivedPools,
-  // pools: activePools,
+  upcomingPools,
+  archivedPools,
+  pools: activePools,
   ipfsPools,
   rpcUrl: yup
     .string()
@@ -338,5 +338,8 @@ function fee(s: string): boolean {
   return n.gte(new BN('1000000000000000000000000000')) && n.lte(new BN('1000000009000000000000000000'));
 
 }
+
+(async () => {await loadPoolsFromIPFS()
+console.log("in anon function", ipfsPools)})()
 
 export default config

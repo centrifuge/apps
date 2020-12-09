@@ -3,23 +3,22 @@ import { Anchor, Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import LoanListData from '../../components/Loan/List'
 import { PoolLink } from '../../components/PoolLink'
-import { IpfsPools, Pool, UpcomingPool } from '../../config'
+import { ipfsPools, loadPoolsFromIPFS, Pool, UpcomingPool } from '../../config'
 import { LoansState } from '../../ducks/loans'
 import PoolOverviewTable from './PoolOverviewTable'
 
 interface Props {
   userAddress: string
   loans?: LoansState
-  configPools?: IpfsPools
-  pools: any
+  // pools: any
   selectedPool: Pool | UpcomingPool
 }
 
 class Overview extends React.Component<Props> {
 
   render() {
-    const { userAddress, loans, selectedPool, configPools, pools } = this.props
-    console.log("PROPSOVERVIEW component", this.props, pools)
+    const { userAddress, loans, selectedPool }  = this.props
+    // console.log("PROPSOVERVIEW component", this.props, pools)
     const isUpcoming = 'isUpcoming' in selectedPool && selectedPool.isUpcoming === true
     const allLoans = (loans && loans.loans) || undefined
 
@@ -77,7 +76,7 @@ class Overview extends React.Component<Props> {
               </LoanListData>
             )}
             <Box margin={{ top: 'medium', bottom: 'large' }} align="center">
-              <PoolLink href={{ pathname: '/assets' }} configPools={configPools}>
+              <PoolLink href={{ pathname: '/assets' }}>
                 <Anchor>
                   <Button label="View all assets" />
                 </Anchor>
