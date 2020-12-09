@@ -1,6 +1,6 @@
 import { Box } from 'grommet'
-import styled from 'styled-components'
 import * as React from 'react'
+import styled from 'styled-components'
 
 interface Props {
   type: 'error' | 'info' | 'success'
