@@ -40,6 +40,34 @@ jobs:
       - run: yarn lint
       - run: yarn export
             
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      # Setup
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12'
+
+      # Cache
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+
+      - uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - run: yarn install
+
+      # Run
+      - run: yarn test
+            
     env:
       NEXT_PUBLIC_PORTIS_KEY: "bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f"
       NEXT_PUBLIC_ETHERSCAN_URL: "https://kovan.etherscan.io"
