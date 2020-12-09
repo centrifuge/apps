@@ -4,7 +4,7 @@ import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { getEpoch } from '../services/tinlake/actions'
-import { createWatcher, IUpdate } from '@makerdao/multicall'
+import { createWatcher } from '@makerdao/multicall'
 import config from '../config'
 import { BigNumber } from 'ethers'
 
@@ -240,9 +240,10 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
       multicallConfig
     )
 
-    // TODO: also get this using multicall
     const t0_init = performance.now()
     const address = await tinlake.signer?.getAddress()
+
+    // TODO: also get this using multicall
     const seniorInMemberlist = address ? await tinlake.checkSeniorTokenMemberlist(address) : false
     const juniorInMemberlist = address ? await tinlake.checkJuniorTokenMemberlist(address) : false
 
@@ -251,9 +252,9 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
 
     try {
       const t0 = performance.now()
-      watcher.batch().subscribe((updates: IUpdate[]) => {
+      watcher.batch().subscribe((updates: any[]) => {
         const data: Partial<PoolData> = updates.reduce(
-          (prev: any, update: IUpdate) => {
+          (prev: any, update: any) => {
             const prefix = update.type.split('.')[0]
             if (prefix === 'junior') prev['junior'][update.type.split('.')[1]] = update.value
             else if (prefix === 'senior') prev['senior'][update.type.split('.')[1]] = update.value
@@ -296,6 +297,7 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
       console.error(e)
     }
 
+    // TODO: also get this using multicall
     const t0_epoch = performance.now()
     const epoch = await getEpoch(tinlake)
     dispatch({ epoch, type: RECEIVE_EPOCH })

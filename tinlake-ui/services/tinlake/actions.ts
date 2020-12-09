@@ -3,9 +3,6 @@ import BN from 'bn.js'
 import { EpochData, PoolData } from '../../ducks/pool'
 import { maxUint256 } from '../../utils/maxUint256'
 import { getAddressMemory, setAddressMemory } from './address-memory'
-import { createWatcher, IUpdate } from '@makerdao/multicall'
-import config from '../../config'
-import { BigNumber } from 'ethers'
 
 export type TrancheType = 'junior' | 'senior'
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -464,65 +461,7 @@ export async function getEpoch(tinlake: ITinlake): Promise<EpochData | undefined
   }
 }
 
-let watcher = undefined
-
-export async function getMulticallPool(tinlake: ITinlake): Promise<any> {
-  const multicallConfig = {
-    rpcUrl: config.rpcUrl,
-    multicallAddress: '0x2cc8688c5f75e365aaeeb4ea8d6a480405a48d2a',
-  }
-
-  const toBN = (val: BigNumber) => new BN(val.toString())
-
-  watcher = createWatcher(
-    [
-      {
-        target: tinlake.contractAddresses.ASSESSOR,
-        call: ['maxReserve()(uint256)'],
-        returns: [[`maxReserve`, toBN]],
-      },
-      {
-        target: tinlake.contractAddresses.ASSESSOR,
-        call: ['calcJuniorTokenPrice()(uint256)'],
-        returns: [[`juniorTokenPrice`, toBN]],
-      },
-      {
-        target: tinlake.contractAddresses.ASSESSOR,
-        call: ['calcSeniorTokenPrice()(uint256)'],
-        returns: [[`seniorTokenPrice`, toBN]],
-      },
-      {
-        target: tinlake.contractAddresses.ASSESSOR,
-        call: ['seniorBalance_()(uint256)'],
-        returns: [[`seniorReserve`, toBN]],
-      },
-      {
-        target: tinlake.contractAddresses.RESERVE,
-        call: ['totalBalance()(uint256)'],
-        returns: [[`totalReserve`, toBN]],
-      },
-    ],
-    multicallConfig
-  )
-
-  // juniorReserve = totalReserve.sub(seniorReserve)
-
-  watcher.batch().subscribe((updates: IUpdate[]) => {
-    let pool: any = {}
-    updates.forEach((update: IUpdate) => {
-      console.log(`${update.type} = ${update.value.toString()}`)
-      pool[update.type] = update.value.toString()
-    })
-    console.log({ pool })
-  })
-
-  console.log('starting watcher')
-  watcher.start()
-}
-
 export async function getPool(tinlake: ITinlake): Promise<PoolData | null> {
-  // getMulticallPool(tinlake)
-
   const juniorReserve = await tinlake.getJuniorReserve()
   const juniorTokenPrice = await tinlake.getTokenPriceJunior()
   const seniorReserve = await tinlake.getSeniorReserve()
