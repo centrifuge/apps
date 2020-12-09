@@ -10,7 +10,10 @@ import { BigNumber } from 'ethers'
 
 const multicallConfig = {
   rpcUrl: config.rpcUrl,
-  multicallAddress: '0x2cc8688c5f75e365aaeeb4ea8d6a480405a48d2a',
+  multicallAddress:
+    config.network === 'Mainnet'
+      ? '0xeefba1e63905ef1d7acba5a8513c70307c1ce441'
+      : '0x2cc8688c5f75e365aaeeb4ea8d6a480405a48d2a',
 }
 
 // Actions
@@ -67,11 +70,13 @@ export type EpochData = {
 
 export interface PoolState {
   state: null | 'loading' | 'found'
+  poolId: string | null
   data: null | PoolData
 }
 
 const initialState: PoolState = {
   state: null,
+  poolId: null,
   data: null,
 }
 
@@ -80,7 +85,7 @@ export default function reducer(state: PoolState = initialState, action: AnyActi
     case HYDRATE:
       return { ...state, ...(action.payload.pool || {}) }
     case LOAD_POOL:
-      return { ...state, state: 'loading' }
+      return { ...state, state: 'loading', poolId: action.poolId }
     case RECEIVE_POOL:
       return { ...state, state: 'found', data: action.data }
     case RECEIVE_EPOCH:
@@ -93,10 +98,13 @@ export default function reducer(state: PoolState = initialState, action: AnyActi
 let watcher: any = undefined
 
 export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, undefined, Action> {
-  return async (dispatch) => {
-    dispatch({ type: LOAD_POOL })
-    // const poolData = await getPool(tinlake)
-    // dispatch({ data: poolData, type: RECEIVE_POOL })
+  return async (dispatch, getState) => {
+    const poolId = tinlake.contractAddresses.ROOT_CONTRACT
+    if ((getState() as any).pool.poolId === poolId) {
+      return
+    }
+
+    dispatch({ poolId, type: LOAD_POOL })
 
     const toBN = (val: BigNumber) => new BN(val.toString())
 
@@ -240,29 +248,26 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
       multicallConfig
     )
 
-    const t0_init = performance.now()
     const address = await tinlake.signer?.getAddress()
 
     // TODO: also get this using multicall
     const seniorInMemberlist = address ? await tinlake.checkSeniorTokenMemberlist(address) : false
     const juniorInMemberlist = address ? await tinlake.checkJuniorTokenMemberlist(address) : false
 
-    const t1_init = performance.now()
-    console.log('Call to get initial values took ' + (t1_init - t0_init) + ' milliseconds.')
-
     try {
-      const t0 = performance.now()
+      const prev = (getState() as any).pool.data || {
+        junior: { type: 'junior' },
+        senior: { type: 'senior' },
+        epoch: {},
+      }
       watcher.batch().subscribe((updates: any[]) => {
-        const data: Partial<PoolData> = updates.reduce(
-          (prev: any, update: any) => {
-            const prefix = update.type.split('.')[0]
-            if (prefix === 'junior') prev['junior'][update.type.split('.')[1]] = update.value
-            else if (prefix === 'senior') prev['senior'][update.type.split('.')[1]] = update.value
-            else prev[update.type] = update.value
-            return prev
-          },
-          { junior: { type: 'junior' }, senior: { type: 'senior' }, epoch: {} }
-        )
+        const data: Partial<PoolData> = updates.reduce((prev: any, update: any) => {
+          const prefix = update.type.split('.')[0]
+          if (prefix === 'junior') prev['junior'][update.type.split('.')[1]] = update.value
+          else if (prefix === 'senior') prev['senior'][update.type.split('.')[1]] = update.value
+          else prev[update.type] = update.value
+          return prev
+        }, prev)
 
         const zero = new BN(0)
         data.junior!.availableFunds = (data.reserve || zero).sub(data.senior!.availableFunds || zero)
@@ -285,10 +290,6 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
 
         data.totalRedemptionsCurrency = juniorRedemptionsCurrency.add(seniorRedemptionsCurrency)
 
-        const t1 = performance.now()
-        console.log('Call to get multicall values took ' + (t1 - t0) + ' milliseconds.')
-        console.log('Receiving data', data)
-
         dispatch({ data: data, type: RECEIVE_POOL })
       })
 
@@ -298,10 +299,7 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
     }
 
     // TODO: also get this using multicall
-    const t0_epoch = performance.now()
     const epoch = await getEpoch(tinlake)
     dispatch({ epoch, type: RECEIVE_EPOCH })
-    const t1_epoch = performance.now()
-    console.log('Call to get epoch data took ' + (t1_epoch - t0_epoch) + ' milliseconds.')
   }
 }

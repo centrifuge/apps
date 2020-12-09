@@ -18,7 +18,10 @@ class OverviewUpcoming extends React.Component<Props> {
     const { selectedPool } = this.props
 
     return (
-      <OverviewComp pool={{ data: upcomingPoolToPooldata(selectedPool), state: 'found' }} selectedPool={selectedPool} />
+      <OverviewComp
+        pool={{ data: upcomingPoolToPooldata(selectedPool), state: 'found', poolId: selectedPool.metadata.slug }}
+        selectedPool={selectedPool}
+      />
     )
   }
 }
