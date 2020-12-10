@@ -47,7 +47,7 @@ class PoolList extends React.Component<Props> {
     const {
       pools,
       router: {
-        query: { showYields, showArchived },
+        query: { showAll, showArchived },
       },
     } = this.props
 
@@ -57,18 +57,18 @@ class PoolList extends React.Component<Props> {
           <Desc>
             <HeaderTitle>Pool</HeaderTitle>
           </Desc>
-          <HeaderCol>
-            <HeaderTitle>Total Financed</HeaderTitle>
-          </HeaderCol>
-          {showYields && (
+          {showAll && (
             <HeaderCol>
-              <HeaderTitle>Pool Value</HeaderTitle>
+              <HeaderTitle>Total Financed</HeaderTitle>
             </HeaderCol>
           )}
           <HeaderCol>
+            <HeaderTitle>Pool Value</HeaderTitle>
+          </HeaderCol>
+          <HeaderCol>
             <HeaderTitle>DROP APR</HeaderTitle>
           </HeaderCol>
-          {showYields && (
+          {showAll && (
             <>
               <HeaderCol>
                 <HeaderTitle>DROP Yield</HeaderTitle>
@@ -100,34 +100,35 @@ class PoolList extends React.Component<Props> {
                 </Name>
                 <Type>{p.asset}</Type>
               </Desc>
-              <DataCol>
-                <NumberDisplay
-                  render={(v) => (
-                    <>
-                      <Number>{v}</Number> <Unit>DAI</Unit>
-                    </>
-                  )}
-                  precision={0}
-                  value={baseToDisplay(p.totalFinancedCurrency, 18)}
-                />
-              </DataCol>
-              {showYields && (
+              {showAll && (
                 <DataCol>
                   <NumberDisplay
+                    render={(v) => (
+                      <>
+                        <Number>{v}</Number> <Unit>DAI</Unit>
+                      </>
+                    )}
                     precision={0}
-                    render={(v) =>
-                      v === '0' ? (
-                        <Dash>-</Dash>
-                      ) : (
-                        <>
-                          <Number>{v}</Number> <Unit>DAI</Unit>
-                        </>
-                      )
-                    }
-                    value={baseToDisplay(p.reserve.add(p.assetValue), 18)}
+                    value={baseToDisplay(p.totalFinancedCurrency, 18)}
                   />
                 </DataCol>
               )}
+
+              <DataCol>
+                <NumberDisplay
+                  precision={0}
+                  render={(v) =>
+                    v === '0' ? (
+                      <Dash>-</Dash>
+                    ) : (
+                      <>
+                        <Number>{v}</Number> <Unit>DAI</Unit>
+                      </>
+                    )
+                  }
+                  value={baseToDisplay(p.reserve.add(p.assetValue), 18)}
+                />
+              </DataCol>
               <DataCol>
                 <NumberDisplay
                   render={(v) => (
@@ -138,7 +139,7 @@ class PoolList extends React.Component<Props> {
                   value={feeToInterestRate(p.seniorInterestRate)}
                 />
               </DataCol>
-              {showYields && (
+              {showAll && (
                 <>
                   <DataCol>
                     {p.seniorYield14Days === null ? (
