@@ -51,7 +51,7 @@ export class AddressController {
       })
 
       // TODO: this is a hack, we shouldn't need to retrieve them twice
-      const agreementLinks = await (await this.agreementRepo.findByUser(address.userId)).map(
+      const agreementLinks = await (await this.agreementRepo.findByUserAndPool(address.userId, params.poolId)).map(
         (agreement: Agreement): AgreementsStatus => {
           return {
             name: 'Subscription Agreement',

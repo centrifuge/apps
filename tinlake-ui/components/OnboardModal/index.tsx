@@ -139,12 +139,26 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
               <Button primary label={`Start KYC`} href={status.kyc.url} fill={false} />
             </Box>
           )}
-          {status?.kyc.url && status.kyc.created && !status.kyc.verified && !status.agreements[0]?.signed && (
-            <Box flex={true} justify="between">
-              <Paragraph>Onboarding pending, please continue signing subdoc.</Paragraph>
-              <Button primary label={`Sign Subscription Agreement`} href={agreementLink} fill={false} />
-            </Box>
-          )}
+          {status?.kyc.url &&
+            status.kyc.created &&
+            !status.kyc.verified &&
+            !status.agreements[0]?.signed &&
+            agreementLink && (
+              <Box flex={true} justify="between">
+                <Paragraph>Onboarding pending, please continue signing subdoc.</Paragraph>
+                <Button primary label={`Sign Subscription Agreement`} href={agreementLink} fill={false} />
+              </Box>
+            )}
+          {status?.kyc.url &&
+            status.kyc.created &&
+            !status.kyc.verified &&
+            !status.agreements[0]?.signed &&
+            !agreementLink && (
+              <Box flex={true} justify="between">
+                <Paragraph>Onboarding pending, please sign in again to continue signing subdoc.</Paragraph>
+                <Button primary label={`Sign in with Securitize`} href={status.kyc.url} fill={false} />
+              </Box>
+            )}
           {status?.kyc.url &&
             status.agreements.every((agreement) => agreement.signed) &&
             !status.agreements.every((agreement) => agreement.counterSigned) && (
