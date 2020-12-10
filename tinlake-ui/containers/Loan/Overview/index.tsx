@@ -7,10 +7,9 @@ import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
 import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { secondsToHms } from '../../../utils/time'
 import { toPrecision } from '../../../utils/toPrecision'
 import MaxReserveForm from './MaxReserveForm'
-import { Sidenote, SignIcon } from './styles'
+import { Sidenote } from './styles'
 
 interface Props {
   activePool?: Pool

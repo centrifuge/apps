@@ -136,10 +136,10 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell scope="row">
+              <TableCell scope="row" border={{ color: 'transparent' }}>
                 <Tooltip id="outstandingVolume">Outstanding Volume</Tooltip>
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }}>
+              <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={poolData?.outstandingVolume !== undefined}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.outstandingVolume || '0', 18), 0))} DAI
                 </LoadingValue>
