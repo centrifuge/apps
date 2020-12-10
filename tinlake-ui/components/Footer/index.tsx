@@ -1,13 +1,7 @@
 import { Modal } from '@centrifuge/axis-modal'
-import { Anchor, Box, Button, Paragraph, Text } from 'grommet'
+import { Anchor, Box, Button, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import React from 'react'
-import styled from 'styled-components'
-
-const Logo = styled.img`
-  width: 120px;
-  margin-top: 20px;
-`
 
 const Footer: React.FC<{}> = () => {
   const [modalIsOpen, setModalIsOpen] = React.useState(false)

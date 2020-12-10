@@ -61,7 +61,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
   }
 
   React.useEffect(() => {
-    getOnboardingStatus()
+    if (address) getOnboardingStatus()
   }, [address])
 
   React.useEffect(() => {
@@ -113,7 +113,16 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
           invest in all open Tinlake pools. To invest in an individual pool you will be asked to sign the subscription
           agreement with the pool’s issuer also provided through the Securitize dashboard.
         </Paragraph>
-        <InvestmentSteps src="/static/kyc-steps.svg" alt="Investment steps" />
+        <InvestmentSteps
+          src={
+            !status?.kyc.created
+              ? '/static/onboarding/1.svg'
+              : status.agreements[0]?.signed
+              ? '/static/onboarding/3.svg'
+              : '/static/onboarding/2.svg'
+          }
+          alt="Investment steps"
+        />
         <Box
           direction="row"
           justify="center"
@@ -135,7 +144,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
           )}
           {status?.kyc.url && !status.kyc.created && (
             <Box flex={true} justify="between">
-              <Paragraph>Ready to start.</Paragraph>
+              <Paragraph>Ready to start the KYC process to onboard as an investor.</Paragraph>
               <Button primary label={`Start KYC`} href={status.kyc.url} fill={false} />
             </Box>
           )}
@@ -145,7 +154,10 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
             !status.agreements[0]?.signed &&
             agreementLink && (
               <Box flex={true} justify="between">
-                <Paragraph>Onboarding pending, please continue signing subdoc.</Paragraph>
+                <Paragraph>
+                  Your KYC status is pending, you can already continue by signing the Subscription Agreement for{' '}
+                  {props.pool?.metadata.name}.
+                </Paragraph>
                 <Button primary label={`Sign Subscription Agreement`} href={agreementLink} fill={false} />
               </Box>
             )}
@@ -155,7 +167,10 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
             !status.agreements[0]?.signed &&
             !agreementLink && (
               <Box flex={true} justify="between">
-                <Paragraph>Onboarding pending, please sign in again to continue signing subdoc.</Paragraph>
+                <Paragraph>
+                  Your KYC status is pending, you can sign in again with your Securitize iD in order to continue with
+                  the next step.
+                </Paragraph>
                 <Button primary label={`Sign in with Securitize`} href={status.kyc.url} fill={false} />
               </Box>
             )}
@@ -163,7 +178,10 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
             status.agreements.every((agreement) => agreement.signed) &&
             !status.agreements.every((agreement) => agreement.counterSigned) && (
               <Box flex={true} justify="between">
-                <Paragraph>You signed subdoc, AO will sign, will let you know, then you can invest.</Paragraph>
+                <Paragraph>
+                  Your KYC status is pending and you have signed the Subscription Agreement, which is pending a
+                  signature from the issuer of {props.pool?.metadata.name}.
+                </Paragraph>
               </Box>
             )}
           {status?.kyc.url &&
@@ -171,7 +189,11 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
             status.agreements.length > 0 &&
             status.agreements.every((agreement) => agreement.counterSigned) && (
               <Box flex={true} justify="between">
-                <Paragraph>AO signed, waiting for KYC.</Paragraph>
+                <Paragraph>
+                  The Subscription Agreement has been signed by you and the issuer of {props.pool?.metadata.name}. Your
+                  KYC status is still pending.
+                </Paragraph>
+                <Button primary label={`Waiting for KYC verification`} disabled fill={false} />
               </Box>
             )}
           {status?.kyc.url &&
@@ -179,18 +201,20 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
             status.agreements.length > 0 &&
             status.agreements.every((agreement) => agreement.counterSigned) && (
               <Box flex={true} justify="between">
-                <Paragraph>AO signed &amp; KYC finished, you can invest.</Paragraph>
+                <Paragraph>
+                  You have completed onboarding successfuly for {props.pool?.metadata.name} and can now invest.
+                </Paragraph>
               </Box>
             )}
         </Box>
-        {props.pool && (
+        {/* {props.pool && (
           <Paragraph
             margin={{ top: 'medium', bottom: '0', left: 'large', right: 'large' }}
             style={{ textAlign: 'center' }}
           >
             Any questions left? Feel free to reach out to the Issuer directly (see Pool Overview).
           </Paragraph>
-        )}
+        )} */}
         {!props.pool && (
           <Paragraph
             margin={{ top: 'medium', bottom: '0', left: 'large', right: 'large' }}
