@@ -14,7 +14,7 @@ interface Props {
   loans?: LoansState
   loadLoans?: (tinlake: ITinlake) => Promise<void>
   pool?: PoolState
-  pools: PoolsState
+  pools?: PoolsState
   auth?: AuthState
   loadPool?: (tinlake: ITinlake) => Promise<void>
   selectedPool: Pool
@@ -39,9 +39,8 @@ class Overview extends React.Component<Props> {
   }
 
   render() {
-    const { auth, loans, selectedPool, pools, pool } = this.props
-    console.log("loading in overview container", pools, "POOL", pool, "configPools")
-    return pools.data && <OverviewComp userAddress={auth?.address || ''} loans={loans} selectedPool={selectedPool}/>
+    const { auth, loans, selectedPool, pools } = this.props
+    return pools?.data && <OverviewComp userAddress={auth?.address || ''} loans={loans} selectedPool={selectedPool}/>
   }
 }
 

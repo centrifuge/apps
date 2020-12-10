@@ -59,8 +59,8 @@ class Pool extends React.Component<Props> {
 export const getStaticPaths: GetStaticPaths = async () => {
   // We'll pre-render only these paths at build time.
   const pools = await loadPoolsFromIPFS()
-  let paths = pools?.upcoming.map((pool) => ({ params: { root: pool.metadata.slug } }))
-  const archivePaths = pools?.archived.map((pool) => ({ params: { root: pool.metadata.slug } }))
+  let paths = pools.upcoming.map((pool) => ({ params: { root: pool.metadata.slug } }))
+  const archivePaths = pools.archived.map((pool) => ({ params: { root: pool.metadata.slug } }))
   paths = paths.concat(archivePaths)
 
   // { fallback: false } means other routes should 404.

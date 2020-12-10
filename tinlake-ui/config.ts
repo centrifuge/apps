@@ -1,11 +1,9 @@
-import kovanPools from '@centrifuge/tinlake-pools-kovan'
-import mainnetPools from '@centrifuge/tinlake-pools-mainnet'
 import BN from 'bn.js'
 import * as yup from 'yup'
 import { PoolStatus } from './ducks/pool'
 import { networkUrlToName } from './utils/networkNameResolver'
-// import { ethers, utils } from 'ethers';
-
+import { ethers } from 'ethers';
+import contractAbiPoolRegistry from '../tinlake.js/src/abi/PoolRegistry.abi.json'
 
 interface SecuritizeData {
   issuerId: string
@@ -74,6 +72,7 @@ export interface DisplayedField {
 }
 
 interface Config {
+  poolRegistry: string
   rpcUrl: string
   ipfsGateway: string
   etherscanUrl: string
@@ -81,10 +80,6 @@ interface Config {
   tinlakeDataBackendUrl: string
   isDemo: boolean
   network: 'Mainnet' | 'Kovan'
-  pools: Pool[]
-  upcomingPools: UpcomingPool[]
-  archivedPools: ArchivedPool[]
-  ipfsPools: IpfsPools | undefined
   portisApiKey: string
   gasLimit: number
   onboardAPIHost: string
@@ -207,41 +202,23 @@ const poolsSchema = yup.array(poolSchema)
 const upcomingPoolsSchema = yup.array(upcomingPoolSchema)
 const archivedPoolsSchema = yup.array(archivedPoolSchema)
 
-const selectedPoolConfig = yup
-  .mixed<'kovanStaging' | 'mainnetStaging' | 'mainnetProduction'>()
-  .required('POOLS config is required')
-  .oneOf(['kovanStaging', 'mainnetStaging', 'mainnetProduction'])
-  .validateSync(process.env.NEXT_PUBLIC_POOLS_CONFIG)
-
-const networkConfigs = selectedPoolConfig === 'mainnetProduction' ? mainnetPools : kovanPools
-
 export let ipfsPools: IpfsPools | undefined = undefined
 
-// export async function payWithMetamask(sender, receiver, strEther) {
-//   console.log(`payWithMetamask(receiver=${receiver}, sender=${sender}, strEther=${strEther})`)
-//
-//   const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
-//   const wallet = new ethers.Wallet(config.ethAdminPrivateKey, provider)
-//
-//   // Acccounts now exposed
-//   const params = [{
-//     from: sender,
-//     to: receiver,
-//     value: ethers.utils.parseUnits(strEther, 'ether').toHexString()
-//   }];
-//
-//   const transactionHash = await provider.send('eth_sendTransaction', params)
-//   console.log('transactionHash is ' + transactionHash);
-// }
-
+// TODO: temp for now until we figure out a better way to handle not having an instance of Tinlake
+const assembleIpfsUrl =  async (): Promise<string> =>  {
+  // @ts-ignore
+  const provider = new ethers.providers.Web3Provider(window.ethereum)
+  const registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, provider)
+  const poolData = await registry.pools(0)
+  return poolData[3]
+}
 
 export const loadPoolsFromIPFS = async () => {
   if(ipfsPools){
     return ipfsPools
   }
-  // await assembleIpfsUrl()
-  // TODO: error handling
-  const response = await fetch(`${config.ipfsGateway}${'QmWhnoDUQP84nq1UB3RE1cYpjSo6mTDfv84rhPqxXToEUM'}`)
+  const hash = await assembleIpfsUrl()
+  const response = await fetch(`${config.ipfsGateway}${hash}`)
   const body = await response.json()
   const networkConfigs: any[] = Object.values(body)
 
@@ -260,21 +237,11 @@ export const loadPoolsFromIPFS = async () => {
   return ipfsPools
 }
 
-const activePools = poolsSchema
-  .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
-  .map((p) => ({ ...p, isUpcoming: false } as Pool))
-const archivedPools = archivedPoolsSchema
-  .validateSync(networkConfigs.filter((p: Pool) => 'archivedValues' in p))
-  .map((p) => ({ ...p, isArchived: true } as ArchivedPool))
-const upcomingPools = upcomingPoolsSchema
-  .validateSync(networkConfigs.filter((p: Pool) => !('archivedValues' in p) && !p.addresses))
-  .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
-
 const config: Config = {
-  upcomingPools,
-  archivedPools,
-  pools: activePools,
-  ipfsPools,
+  poolRegistry: yup
+    .string()
+    .required('NEXT_PUBLIC_POOL_REGISTRY is required')
+    .validateSync(process.env.NEXT_PUBLIC_POOL_REGISTRY),
   rpcUrl: yup
     .string()
     .required('NEXT_PUBLIC_RPC_URL is required')

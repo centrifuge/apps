@@ -314,7 +314,6 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     getPoolRegistryHash = async (registryAddress: string) => {
       const registry = this.contract('POOL_REGISTRY', registryAddress)
       const poolData = await registry.pools(0)
-      // TODO: fourth item is the ipfs hash -- we could use IPNS so this doesn't have to keep changing
       return poolData[3]
     }
   }
