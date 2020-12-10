@@ -212,7 +212,6 @@ class Apollo {
       throw new Error(`error occured while fetching assets from apollo ${err}`)
     }
     const ipfsPools = await loadPoolsFromIPFS()
-    console.log(ipfsPools, 'IN DUCKs')
     let pools = result.data?.pools
       ? [
           ...this.injectPoolData(result.data.pools, ipfsPools.active),

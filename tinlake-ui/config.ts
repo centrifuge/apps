@@ -243,8 +243,6 @@ export const loadPoolsFromIPFS = async () => {
     .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
 
   ipfsPools = { active, upcoming, archived }
-  console.log(ipfsPools)
-  console.log(body)
   return ipfsPools
 }
 
