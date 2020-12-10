@@ -1,4 +1,4 @@
-import { Anchor, Box, Button, Paragraph } from 'grommet'
+import { Box, Button, Paragraph } from 'grommet'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import { Pool, UpcomingPool } from '../../config'
@@ -54,13 +54,6 @@ const InvestAction: React.FC<Props> = (props: Props) => {
         <Box margin={{ left: 'auto' }}>
           <Button primary label="Get started" fill={false} onClick={onOpen} />
         </Box>
-      )}
-      {!props.pool && (
-        <Anchor
-          onClick={onOpen}
-          margin={{ top: 'small', bottom: 'small' }}
-          label="Interested in investing in Tinlake pools? Start your onboarding process now"
-        />
       )}
 
       <FormModal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose} style={{ width: '800px' }}>
