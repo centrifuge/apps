@@ -86,7 +86,7 @@ class PoolList extends React.Component<Props> {
           .sort((a, b) => b.order - a.order)
           .map((p) => (
             <PoolRow key={p.id} onClick={() => this.clickPool(p)}>
-              <Icon src={p.icon || 'https://storage.googleapis.com/tinlake/pool-icons/Placeholder.svg'} />
+              <Icon src={p.icon || 'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'} />
               <Desc>
                 <Name>
                   {p.name}{' '}

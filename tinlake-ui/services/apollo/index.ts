@@ -106,7 +106,7 @@ class Apollo {
         assetValue: (pool && new BN(pool.assetValue)) || new BN('0'),
         juniorYield14Days: (pool && new BN(pool.juniorYield14Days)) || null,
         seniorYield14Days: (pool && new BN(pool.seniorYield14Days)) || null,
-        icon: poolConfig.metadata.icon || null,
+        icon: poolConfig.metadata.media?.icon || null,
       }
 
       return { ...poolData, status: getPoolStatus(poolData) }
@@ -139,7 +139,7 @@ class Apollo {
       assetValue: new BN('0'),
       juniorYield14Days: null,
       seniorYield14Days: null,
-      icon: p.metadata.icon || null,
+      icon: p.metadata.media?.icon || null,
     }))
   }
 
@@ -170,7 +170,7 @@ class Apollo {
       assetValue: new BN('0'),
       juniorYield14Days: null,
       seniorYield14Days: null,
-      icon: p.metadata.icon || null,
+      icon: p.metadata.media?.icon || null,
     }))
   }
 

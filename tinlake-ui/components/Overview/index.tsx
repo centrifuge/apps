@@ -39,7 +39,7 @@ class Overview extends React.Component<Props> {
                 Asset Originator Details
               </Heading>
               <a href={selectedPool.metadata.website} target="_blank">
-                <img src={selectedPool.metadata.logo} style={{ maxHeight: '80px', maxWidth: '50%' }} />
+                <img src={selectedPool.metadata.media?.logo} style={{ maxHeight: '80px', maxWidth: '50%' }} />
               </a>
 
               <p>{selectedPool.metadata.description}</p>
