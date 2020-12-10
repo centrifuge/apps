@@ -11302,7 +11302,7 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"invariant@npm:2, invariant@npm:^2.2.2":
+"invariant@npm:2, invariant@npm:^2.2.2, invariant@npm:^2.2.4":
   version: 2.2.4
   resolution: "invariant@npm:2.2.4"
   dependencies:
