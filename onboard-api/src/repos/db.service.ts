@@ -13,7 +13,5 @@ export class DatabaseService {
         column: postgres.toCamel,
       },
     })
-
-    console.log(`Connected to ${connectionString}`)
   }
 }
