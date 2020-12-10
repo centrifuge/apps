@@ -34,7 +34,7 @@ class Pool extends React.Component<Props> {
                 addresses={pool.addresses}
                 contractConfig={pool.contractConfig}
                 render={(tinlake) => (
-                  <Auth tinlake={tinlake} render={() => <Overview tinlake={tinlake} selectedPool={pool}/>} />
+                  <Auth tinlake={tinlake} render={() => <Overview tinlake={tinlake} selectedPool={pool} />} />
                 )}
               />
             </Box>
@@ -70,7 +70,10 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   // Fix to force page rerender, from https://github.com/vercel/next.js/issues/9992
   const newProps: Props = {
     // pools,
-    pool, root: params.root as string, key: pool.metadata.name || '-'}
+    pool,
+    root: params.root as string,
+    key: pool.metadata.name || '-',
+  }
   return { props: newProps }
 }
 

@@ -1,4 +1,4 @@
-import {Loan}  from '@centrifuge/tinlake-js'
+import { Loan } from '@centrifuge/tinlake-js'
 import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory'
 import { ApolloClient, DefaultOptions } from 'apollo-client'
 import { createHttpLink } from 'apollo-link-http'
@@ -8,7 +8,6 @@ import fetch from 'node-fetch'
 import config, { ArchivedPool, loadPoolsFromIPFS, Pool, UpcomingPool } from '../../config'
 import { PoolData, PoolsData } from '../../ducks/pools'
 import { getPoolStatus } from '../../utils/pool'
-
 
 const { tinlakeDataBackendUrl } = config
 const cache = new InMemoryCache()
@@ -213,6 +212,7 @@ class Apollo {
       throw new Error(`error occured while fetching assets from apollo ${err}`)
     }
     const ipfsPools = await loadPoolsFromIPFS()
+    console.log(ipfsPools, 'IN DUCKs')
     let pools = result.data?.pools
       ? [
           ...this.injectPoolData(result.data.pools, ipfsPools.active),

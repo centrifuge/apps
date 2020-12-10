@@ -19,8 +19,9 @@ class Dashboard extends React.Component<Props> {
   }
 
   render() {
-
     const { pools } = this.props
+    console.log(pools, 'POOLS')
+
     return (
       <Box>
         {!pools || pools.state === 'loading' ? (
@@ -38,11 +39,10 @@ class Dashboard extends React.Component<Props> {
             </Box>
           )
         )}
-        <Box pad={{ vertical: 'medium' }}/>
+        <Box pad={{ vertical: 'medium' }} />
       </Box>
     )
   }
 }
 
 export default connect((state) => state, { loadPools })(Dashboard)
-

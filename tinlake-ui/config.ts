@@ -1,9 +1,9 @@
 import BN from 'bn.js'
+import { ethers } from 'ethers'
 import * as yup from 'yup'
+import contractAbiPoolRegistry from '../tinlake.js/src/abi/PoolRegistry.abi.json'
 import { PoolStatus } from './ducks/pool'
 import { networkUrlToName } from './utils/networkNameResolver'
-import { ethers } from 'ethers';
-import contractAbiPoolRegistry from '../tinlake.js/src/abi/PoolRegistry.abi.json'
 
 interface SecuritizeData {
   issuerId: string
@@ -215,7 +215,7 @@ const archivedPoolsSchema = yup.array(archivedPoolSchema)
 export let ipfsPools: IpfsPools | undefined = undefined
 
 // TODO: temp for now until we figure out a better way to handle not having an instance of Tinlake
-const assembleIpfsUrl =  async (): Promise<string> =>  {
+const assembleIpfsUrl = async (): Promise<string> => {
   // @ts-ignore
   const provider = new ethers.providers.Web3Provider(window.ethereum)
   const registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, provider)
@@ -224,7 +224,7 @@ const assembleIpfsUrl =  async (): Promise<string> =>  {
 }
 
 export const loadPoolsFromIPFS = async () => {
-  if(ipfsPools){
+  if (ipfsPools) {
     return ipfsPools
   }
   const hash = await assembleIpfsUrl()
@@ -242,8 +242,9 @@ export const loadPoolsFromIPFS = async () => {
     .validateSync(networkConfigs.filter((p: Pool) => !('archivedValues' in p) && !p.addresses))
     .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
 
-  ipfsPools = { active, upcoming, archived}
-
+  ipfsPools = { active, upcoming, archived }
+  console.log(ipfsPools)
+  console.log(body)
   return ipfsPools
 }
 
@@ -258,10 +259,10 @@ const config: Config = {
     .url()
     .validateSync(process.env.NEXT_PUBLIC_RPC_URL),
   ipfsGateway: yup
-  .string()
-  .required('NEXT_PUBLIC_IPFS_GATEWAY is required')
-  .url()
-  .validateSync(process.env.NEXT_PUBLIC_IPFS_GATEWAY),
+    .string()
+    .required('NEXT_PUBLIC_IPFS_GATEWAY is required')
+    .url()
+    .validateSync(process.env.NEXT_PUBLIC_IPFS_GATEWAY),
   etherscanUrl: yup
     .string()
     .required('NEXT_PUBLIC_ETHERSCAN_URL is required')
@@ -304,14 +305,12 @@ const config: Config = {
 
 function between1e23and1e27(s: string): boolean {
   const n = new BN(s)
-  return n.gte(new BN('100000000000000000000000')) && n.lte(new BN('1000000000000000000000000000'));
-
+  return n.gte(new BN('100000000000000000000000')) && n.lte(new BN('1000000000000000000000000000'))
 }
 
 function fee(s: string): boolean {
   const n = new BN(s)
-  return n.gte(new BN('1000000000000000000000000000')) && n.lte(new BN('1000000009000000000000000000'));
-
+  return n.gte(new BN('1000000000000000000000000000')) && n.lte(new BN('1000000009000000000000000000'))
 }
 
 export default config

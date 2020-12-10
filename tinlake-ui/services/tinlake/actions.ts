@@ -3,7 +3,6 @@ import BN from 'bn.js'
 import { EpochData, PoolData } from '../../ducks/pool'
 import { maxUint256 } from '../../utils/maxUint256'
 import { getAddressMemory, setAddressMemory } from './address-memory'
-import config from '../../config'
 
 export type TrancheType = 'junior' | 'senior'
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'

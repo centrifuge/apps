@@ -21,12 +21,12 @@ interface Props extends WithRouterProps {
 }
 
 class LoanPage extends React.Component<Props> {
-
   render() {
     const { pool } = this.props
     const { assetId }: { assetId: string } = this.props.router.query as any
 
-    return <WithFooter>
+    return (
+      <WithFooter>
         <Head>
           <title>
             Asset {assetId}: {pool.metadata.name} | Tinlake | Centrifuge | Decentralized Asset Financing
@@ -64,6 +64,7 @@ class LoanPage extends React.Component<Props> {
           </Box>
         </Container>
       </WithFooter>
+    )
   }
 }
 

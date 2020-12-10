@@ -9,6 +9,7 @@ import contractAbiMemberlist from './Memberlist.abi.json'
 import contractAbiNavFeed from './NAVFeed.abi.json'
 import contractAbiOperator from './Operator.abi.json'
 import contractAbiPile from './Pile.abi.json'
+import contractAbiPoolRegistry from './PoolRegistry.abi.json'
 import contractAbiProxy from './Proxy.abi.json'
 import contractAbiProxyRegistry from './ProxyRegistry.abi.json'
 import contractAbiReserve from './Reserve.abi.json'
@@ -18,7 +19,6 @@ import contractAbiNFT from './test/SimpleNFT.abi.json'
 import contractAbiRoot from './TinlakeRoot.abi.json'
 import contractAbiTitle from './Title.abi.json'
 import contractAbiTranche from './Tranche.abi.json'
-import contractAbiPoolRegistry from './PoolRegistry.abi.json'
 
 export default {
   COLLATERAL_NFT: contractAbiNFT,
@@ -45,5 +45,5 @@ export default {
   SENIOR_OPERATOR: contractAbiOperator,
   JUNIOR_TRANCHE: contractAbiTranche,
   SENIOR_TRANCHE: contractAbiTranche,
-  POOL_REGISTRY: contractAbiPoolRegistry
+  POOL_REGISTRY: contractAbiPoolRegistry,
 } as ContractAbis

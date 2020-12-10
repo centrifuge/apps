@@ -78,4 +78,3 @@ export function loadPools(): ThunkAction<Promise<void>, PoolsState, undefined, A
     dispatch({ data: poolsData, type: RECEIVE_POOLS })
   }
 }
-

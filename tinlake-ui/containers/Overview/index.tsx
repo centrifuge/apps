@@ -40,7 +40,7 @@ class Overview extends React.Component<Props> {
 
   render() {
     const { auth, loans, selectedPool, pools } = this.props
-    return pools?.data && <OverviewComp userAddress={auth?.address || ''} loans={loans} selectedPool={selectedPool}/>
+    return pools?.data && <OverviewComp userAddress={auth?.address || ''} loans={loans} selectedPool={selectedPool} />
   }
 }
 
