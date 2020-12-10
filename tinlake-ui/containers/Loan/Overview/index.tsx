@@ -49,7 +49,14 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
     <Box margin={{ bottom: 'medium' }}>
       <Box direction="row" justify="between">
         <Box>
-          <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
+          <Box
+            width="420px"
+            pad="medium"
+            elevation="small"
+            round="xsmall"
+            margin={{ bottom: 'medium' }}
+            background="white"
+          >
             {!showMaxReserveForm && (
               <>
                 <Box direction="row" margin={{ top: '0', bottom: 'small' }}>

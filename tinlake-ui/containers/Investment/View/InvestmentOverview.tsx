@@ -51,7 +51,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
   return (
     <Box direction="row" justify="between">
-      <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
+      <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
         <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
           <Heading level="5" margin={'0'}>
             <Tooltip id="poolValue">Pool Value</Tooltip>
@@ -147,7 +147,14 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
       </BalanceSheetDiagram>
 
       <Box direction="column" justify="between">
-        <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'small' }}>
+        <Box
+          width="420px"
+          pad="medium"
+          elevation="small"
+          round="xsmall"
+          margin={{ bottom: 'small' }}
+          background="white"
+        >
           <Box direction="row" margin={{ top: '0', bottom: '0' }}>
             <Heading level="5" margin={'0'}>
               <TokenLogo src={`/static/DROP_final.svg`} />
@@ -192,7 +199,14 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           <DividerInner>&nbsp;</DividerInner>
         </DividerBottom>
 
-        <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
+        <Box
+          width="420px"
+          pad="medium"
+          elevation="small"
+          round="xsmall"
+          margin={{ bottom: 'medium' }}
+          background="white"
+        >
           <Box direction="row" margin={{ top: '0', bottom: '0' }}>
             <Heading level="5" margin={'0'}>
               <TokenLogo src={`/static/TIN_final.svg`} />

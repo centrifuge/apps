@@ -10,12 +10,17 @@ interface SecuritizeData {
   slug: string
 }
 
+interface PoolMedia {
+  logo?: string
+  icon?: string
+}
+
 interface PoolMetadata {
   name: string
   shortName?: string
   slug: string
   description?: string
-  logo?: string
+  media?: PoolMedia
   website?: string
   details?: any
   asset: string
@@ -122,12 +127,17 @@ const securitizeDataSchema = yup.object().shape({
   slug: yup.string().default(''),
 })
 
+const mediaSchema = yup.object().shape({
+  logo: yup.string(),
+  icon: yup.string(),
+})
+
 const metadataSchema = yup.object().shape({
   name: yup.string().required('poolSchema.name is required'),
   shortName: yup.string(),
   slug: yup.string().required('poolSchema.slug is required'),
   description: yup.string(),
-  logo: yup.string(),
+  media: mediaSchema,
   website: yup.string(),
   details: yup.object(),
   asset: yup.string().required('poolSchema.asset is required'),
@@ -136,28 +146,16 @@ const metadataSchema = yup.object().shape({
 })
 
 const poolSchema = yup.object().shape({
-  network: yup
-    .string()
-    .oneOf(['mainnet', 'kovan'])
-    .required('poolSchema.network is required'),
-  version: yup
-    .number()
-    .oneOf([2, 3])
-    .required('poolSchema.version is required'),
+  network: yup.string().oneOf(['mainnet', 'kovan']).required('poolSchema.network is required'),
+  version: yup.number().oneOf([2, 3]).required('poolSchema.version is required'),
   addresses: contractAddressesSchema.required('poolSchema.addresses is required'),
   contractConfig: contractConfigSchema.default(undefined),
   metadata: metadataSchema.required('poolSchema.metadata is required'),
 })
 
 const upcomingPoolSchema = yup.object().shape({
-  network: yup
-    .string()
-    .oneOf(['mainnet', 'kovan'])
-    .required('poolSchema.network is required'),
-  version: yup
-    .number()
-    .oneOf([2, 3])
-    .required('poolSchema.version is required'),
+  network: yup.string().oneOf(['mainnet', 'kovan']).required('poolSchema.network is required'),
+  version: yup.number().oneOf([2, 3]).required('poolSchema.version is required'),
   metadata: metadataSchema.required('poolSchema.metadata is required'),
   presetValues: yup.object().shape({
     seniorInterestRate: yup
@@ -172,14 +170,8 @@ const upcomingPoolSchema = yup.object().shape({
 })
 
 const archivedPoolSchema = yup.object().shape({
-  network: yup
-    .string()
-    .oneOf(['mainnet', 'kovan'])
-    .required('poolSchema.network is required'),
-  version: yup
-    .number()
-    .oneOf([2, 3])
-    .required('poolSchema.version is required'),
+  network: yup.string().oneOf(['mainnet', 'kovan']).required('poolSchema.network is required'),
+  version: yup.number().oneOf([2, 3]).required('poolSchema.version is required'),
   metadata: metadataSchema.required('poolSchema.metadata is required'),
   archivedValues: yup.object().shape({
     status: yup.string().oneOf(['Deployed', 'Closed']),
@@ -219,11 +211,7 @@ const config: Config = {
   pools,
   upcomingPools,
   archivedPools,
-  rpcUrl: yup
-    .string()
-    .required('NEXT_PUBLIC_RPC_URL is required')
-    .url()
-    .validateSync(process.env.NEXT_PUBLIC_RPC_URL),
+  rpcUrl: yup.string().required('NEXT_PUBLIC_RPC_URL is required').url().validateSync(process.env.NEXT_PUBLIC_RPC_URL),
   etherscanUrl: yup
     .string()
     .required('NEXT_PUBLIC_ETHERSCAN_URL is required')
@@ -239,24 +227,14 @@ const config: Config = {
     .required('NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL is required')
     .url()
     .validateSync(process.env.NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL),
-  isDemo:
-    yup
-      .string()
-      .required('NEXT_PUBLIC_ENV is required')
-      .validateSync(process.env.NEXT_PUBLIC_ENV) === 'demo',
+  isDemo: yup.string().required('NEXT_PUBLIC_ENV is required').validateSync(process.env.NEXT_PUBLIC_ENV) === 'demo',
   network: yup
     .mixed<'Mainnet' | 'Kovan'>()
     .required('NEXT_PUBLIC_RPC_URL is required')
     .oneOf(['Mainnet', 'Kovan'])
     .validateSync(networkUrlToName(process.env.NEXT_PUBLIC_RPC_URL || '')),
-  portisApiKey: yup
-    .string()
-    .required()
-    .validateSync(process.env.NEXT_PUBLIC_PORTIS_KEY),
-  gasLimit: yup
-    .number()
-    .required('gasLimit is required')
-    .validateSync('7000000'),
+  portisApiKey: yup.string().required().validateSync(process.env.NEXT_PUBLIC_PORTIS_KEY),
+  gasLimit: yup.number().required('gasLimit is required').validateSync('7000000'),
   onboardAPIHost: yup
     .string()
     .required('NEXT_PUBLIC_ONBOARD_API_HOST is required')

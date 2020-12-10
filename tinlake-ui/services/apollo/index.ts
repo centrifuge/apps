@@ -61,7 +61,7 @@ class Apollo {
 
   injectPoolData(pools: any[]): PoolData[] {
     const poolConfigs = config.pools
-    const tinlakePools = poolConfigs.map((poolConfig: any) => {
+    const tinlakePools = poolConfigs.map((poolConfig) => {
       const poolId = poolConfig.addresses.ROOT_CONTRACT
       const pool = pools.find((p) => p.id.toLowerCase() === poolId.toLowerCase())
 
@@ -96,11 +96,17 @@ class Apollo {
         }),
         isUpcoming: false,
         isArchived: false,
+        isOversubscribed: (pool && new BN(pool.maxReserve).lte(new BN(pool.reserve))) || false,
         id: poolId,
         name: poolConfig.metadata.name,
         slug: poolConfig.metadata.slug,
         asset: poolConfig?.metadata.asset,
         version: Number(pool?.version || 3),
+        reserve: (pool && new BN(pool.reserve)) || new BN('0'),
+        assetValue: (pool && new BN(pool.assetValue)) || new BN('0'),
+        juniorYield14Days: (pool && new BN(pool.juniorYield14Days)) || null,
+        seniorYield14Days: (pool && new BN(pool.seniorYield14Days)) || null,
+        icon: poolConfig.metadata.media?.icon || null,
       }
 
       return { ...poolData, status: getPoolStatus(poolData) }
@@ -111,6 +117,7 @@ class Apollo {
     return upcomingPools.map((p) => ({
       isUpcoming: true,
       isArchived: false,
+      isOversubscribed: false,
       totalFinancedCurrency: new BN('0'),
       order: orderSummandPoolUpcoming,
       totalDebt: new BN('0'),
@@ -128,6 +135,11 @@ class Apollo {
       seniorInterestRateNum: parseFloat(new BN(p.presetValues?.seniorInterestRate || 0).toString()),
       status: 'Upcoming',
       version: p.version,
+      reserve: new BN('0'),
+      assetValue: new BN('0'),
+      juniorYield14Days: null,
+      seniorYield14Days: null,
+      icon: p.metadata.media?.icon || null,
     }))
   }
 
@@ -135,6 +147,7 @@ class Apollo {
     return archivedPools.map((p) => ({
       isUpcoming: false,
       isArchived: true,
+      isOversubscribed: false,
       order: p.archivedValues?.status === 'Deployed' ? orderSummandPoolDeployed : orderSummandPoolClosed,
       totalDebt: new BN('0'),
       totalRepaysAggregatedAmount: new BN('0'),
@@ -153,6 +166,11 @@ class Apollo {
       totalDebtNum: 0,
       totalRepaysAggregatedAmountNum: 0,
       weightedInterestRateNum: 0,
+      reserve: new BN('0'),
+      assetValue: new BN('0'),
+      juniorYield14Days: null,
+      seniorYield14Days: null,
+      icon: p.metadata.media?.icon || null,
     }))
   }
 
@@ -172,6 +190,11 @@ class Apollo {
               weightedInterestRate
               seniorInterestRate
               version
+              reserve
+              maxReserve
+              assetValue
+              juniorYield14Days
+              seniorYield14Days
             }
           }
         `,
@@ -197,6 +220,7 @@ class Apollo {
       totalDebt: pools.reduce((p, c) => p.add(c.totalDebt), new BN(0)),
       totalRepaysAggregatedAmount: pools.reduce((p, c) => p.add(c.totalRepaysAggregatedAmount), new BN(0)),
       totalFinancedCurrency: pools.reduce((p, c) => p.add(c.totalFinancedCurrency), new BN(0)),
+      totalValue: pools.reduce((p, c) => p.add(c.reserve).add(c.assetValue), new BN(0)),
     }
   }
 

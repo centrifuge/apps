@@ -39,7 +39,6 @@ export class AddressController {
       agreements.forEach(async (agreement: Agreement) => {
         if (!agreement.signedAt || !agreement.counterSignedAt) {
           const status = await this.docusignService.getEnvelopeStatus(agreement.providerEnvelopeId)
-          console.log(status)
           if (!agreement.signedAt && status.signed) {
             await this.agreementRepo.setSigned(agreement.id)
           }

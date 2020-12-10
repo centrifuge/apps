@@ -17,6 +17,8 @@ add the following env variables
 
 ### Run
 
+To build tinlake.js and start the NextJs server and serve the Netlify lambdas locally
+
 ```shell
-yarn start # to start the NextJs server and serve the Netlify lambdas locally
+yarn start
 ```
