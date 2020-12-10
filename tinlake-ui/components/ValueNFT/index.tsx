@@ -192,7 +192,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
               Successfully valued NFT for Token ID {tokenId}
               <p>
                 Please set the maturity date or{' '}
-                <PoolLink href={{ pathname: '/assets/issue', query: { tokenId, registry } }}>
+                <PoolLink href={'/assets/issue'}>
                   <Anchor>proceed to asset financing</Anchor>
                 </PoolLink>{' '}
                 your NFT.
@@ -232,7 +232,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
               Successfully set maturity date for NFT for Token ID {tokenId}
               <p>
                 Please value the NFT or{' '}
-                <PoolLink href={{ pathname: '/assets/issue', query: { tokenId, registry } }}>
+                <PoolLink href={'/assets/issue'}>
                   <Anchor>proceed to asset financing</Anchor>
                 </PoolLink>{' '}
                 your NFT.
