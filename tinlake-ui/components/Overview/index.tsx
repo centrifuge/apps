@@ -5,8 +5,8 @@ import LoanListData from '../../components/Loan/List'
 import { PoolLink } from '../../components/PoolLink'
 import { Pool, UpcomingPool } from '../../config'
 import { LoansState } from '../../ducks/loans'
-import PoolOverviewTable from './PoolOverviewTable'
 import { PoolState } from '../../ducks/pool'
+import PoolOverviewTable from './PoolOverviewTable'
 
 interface Props {
   userAddress: string
