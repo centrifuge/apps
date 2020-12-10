@@ -10,7 +10,7 @@ function Home() {
   return (
     <WithFooter>
       <Header selectedRoute={''} menuItems={[]} />
-      <Container>
+      <Container style={{ backgroundColor: '#f9f9f9' }}>
         <Box justify="center" direction="row">
           <Box width="xlarge">
             <WithTinlake render={(tinlake) => <Auth tinlake={tinlake} render={() => <Dashboard />} />} />

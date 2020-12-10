@@ -33,7 +33,7 @@ const Overview: React.FC<Props> = (props: Props) => {
                 Asset Originator Details
               </Heading>
               <a href={props.selectedPool.metadata.website} target="_blank">
-                <img src={props.selectedPool.metadata.logo} style={{ maxHeight: '80px', maxWidth: '50%' }} />
+                <img src={props.selectedPool.metadata.media?.logo} style={{ maxHeight: '80px', maxWidth: '50%' }} />
               </a>
 
               <p>{props.selectedPool.metadata.description}</p>

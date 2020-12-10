@@ -1,10 +1,10 @@
 import { Spinner } from '@centrifuge/axis-spinner'
-import { Anchor, Box, Image, Text } from 'grommet'
+import { Box } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
-import InvestAction from '../../components/InvestAction/index'
 import PoolList from '../../components/PoolList'
 import PoolsMetrics from '../../components/PoolsMetrics'
+import TinlakeExplainer from '../../components/TinlakeExplainer'
 import { loadPools, PoolsState } from '../../ducks/pools'
 
 interface Props {
@@ -28,34 +28,13 @@ class Dashboard extends React.Component<Props> {
         ) : (
           pools.data && (
             <Box basis={'full'}>
-              <Box margin={{ top: 'large', bottom: 'medium' }} direction="row">
-                <Box gap="large" style={{ minWidth: 130 }}>
-                  <Image src="/static/tinlake-logo.svg" style={{ width: 130 }} />
-                </Box>
-                <Box margin={{ left: 'medium' }}>
-                  <Text>
-                    Tinlake is an open market place of asset pools bringing together Asset Originators and Investors
-                    that seek to utilize the full potential of Decentralized Finance (DeFi). Asset Originators can
-                    responsibly bridge real-world assets into DeFi and access bankless liquidity. Investors can earn
-                    attractive yields on different tokenized real-world assets such as invoices, mortgages or streaming
-                    royalties. Tinlake’s smart contract platform coordinates the different parties required to
-                    structure, administer and finance collateralized pools of these real-world assets.
-                    <Anchor
-                      margin={{ left: 'xsmall', top: 'small' }}
-                      href="https://centrifuge.io/products/tinlake/"
-                      target="_blank"
-                      label="Learn more"
-                    />
-                  </Text>
-                </Box>
+              <Box margin={{ top: 'medium', bottom: 'none' }} direction="row">
+                <TinlakeExplainer />
               </Box>
-              <Box direction="row" gap="large" margin={{ bottom: 'medium' }} justify="evenly">
+              <Box direction="row" gap="large" margin={{ bottom: 'large', top: 'medium' }} justify="center">
                 <PoolsMetrics pools={pools.data} />
               </Box>
               <PoolList pools={pools.data.pools} />
-              <Box style={{ borderBottom: '1px solid #bdbdbd' }} align="center" justify="center">
-                <InvestAction />
-              </Box>
             </Box>
           )
         )}

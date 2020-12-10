@@ -10,12 +10,17 @@ interface SecuritizeData {
   slug: string
 }
 
+interface PoolMedia {
+  logo?: string
+  icon?: string
+}
+
 interface PoolMetadata {
   name: string
   shortName?: string
   slug: string
   description?: string
-  logo?: string
+  media?: PoolMedia
   website?: string
   details?: any
   asset: string
@@ -127,12 +132,17 @@ const securitizeDataSchema = yup.object().shape({
   slug: yup.string().default(''),
 })
 
+const mediaSchema = yup.object().shape({
+  logo: yup.string(),
+  icon: yup.string(),
+})
+
 const metadataSchema = yup.object().shape({
   name: yup.string().required('poolSchema.name is required'),
   shortName: yup.string(),
   slug: yup.string().required('poolSchema.slug is required'),
   description: yup.string(),
-  logo: yup.string(),
+  media: mediaSchema,
   website: yup.string(),
   details: yup.object(),
   asset: yup.string().required('poolSchema.asset is required'),
