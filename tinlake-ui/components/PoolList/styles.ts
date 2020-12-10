@@ -13,6 +13,7 @@ export const PoolRow = styled.div`
   background: white;
   margin-bottom: 16px;
   cursor: pointer;
+  transition: box-shadow 200ms linear;
 
   &:hover {
     box-shadow: 0 2px 6px #00000060;

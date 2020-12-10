@@ -177,6 +177,8 @@ class Apollo {
   async getPools(): Promise<PoolsData> {
     let result
     try {
+      // juniorYield14Days
+      // seniorYield14Days
       result = await this.client.query({
         query: gql`
           {
@@ -193,8 +195,6 @@ class Apollo {
               reserve
               maxReserve
               assetValue
-              juniorYield14Days
-              seniorYield14Days
             }
           }
         `,

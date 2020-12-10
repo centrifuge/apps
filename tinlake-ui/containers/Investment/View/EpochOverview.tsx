@@ -42,7 +42,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
 
   const isAdmin = props.auth?.permissions?.canSetMinimumJuniorRatio
 
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(true)
 
   return (
     <>
@@ -61,6 +61,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
           round="xsmall"
           pad="medium"
           background="white"
+          margin={{ bottom: 'medium' }}
         >
           <Box width="420px" margin={{ bottom: 'medium' }}>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>

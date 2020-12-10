@@ -115,7 +115,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
         </Paragraph>
         <InvestmentSteps
           src={
-            !status?.kyc.created
+            !status?.kyc?.created
               ? '/static/onboarding/1.svg'
               : status.agreements[0]?.signed
               ? '/static/onboarding/3.svg'
@@ -142,15 +142,15 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
               <Paragraph>Loading...</Paragraph>
             </Box>
           )}
-          {status?.kyc.url && !status.kyc.created && (
+          {status?.kyc?.url && !status.kyc?.created && (
             <Box flex={true} justify="between">
               <Paragraph>Ready to start the KYC process to onboard as an investor.</Paragraph>
-              <Button primary label={`Start KYC`} href={status.kyc.url} fill={false} />
+              <Button primary label={`Start KYC`} href={status.kyc?.url} fill={false} />
             </Box>
           )}
-          {status?.kyc.url &&
-            status.kyc.created &&
-            !status.kyc.verified &&
+          {status?.kyc?.url &&
+            status.kyc?.created &&
+            !status.kyc?.verified &&
             !status.agreements[0]?.signed &&
             agreementLink && (
               <Box flex={true} justify="between">
@@ -161,9 +161,9 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                 <Button primary label={`Sign Subscription Agreement`} href={agreementLink} fill={false} />
               </Box>
             )}
-          {status?.kyc.url &&
-            status.kyc.created &&
-            !status.kyc.verified &&
+          {status?.kyc?.url &&
+            status.kyc?.created &&
+            !status.kyc?.verified &&
             !status.agreements[0]?.signed &&
             !agreementLink && (
               <Box flex={true} justify="between">
@@ -171,10 +171,10 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                   Your KYC status is pending, you can sign in again with your Securitize iD in order to continue with
                   the next step.
                 </Paragraph>
-                <Button primary label={`Sign in with Securitize`} href={status.kyc.url} fill={false} />
+                <Button primary label={`Sign in with Securitize`} href={status.kyc?.url} fill={false} />
               </Box>
             )}
-          {status?.kyc.url &&
+          {status?.kyc?.url &&
             status.agreements.every((agreement) => agreement.signed) &&
             !status.agreements.every((agreement) => agreement.counterSigned) && (
               <Box flex={true} justify="between">
@@ -184,8 +184,8 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                 </Paragraph>
               </Box>
             )}
-          {status?.kyc.url &&
-            !status.kyc.verified &&
+          {status?.kyc?.url &&
+            !status.kyc?.verified &&
             status.agreements.length > 0 &&
             status.agreements.every((agreement) => agreement.counterSigned) && (
               <Box flex={true} justify="between">
@@ -196,8 +196,8 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                 <Button primary label={`Waiting for KYC verification`} disabled fill={false} />
               </Box>
             )}
-          {status?.kyc.url &&
-            status.kyc.verified &&
+          {status?.kyc?.url &&
+            status.kyc?.verified &&
             status.agreements.length > 0 &&
             status.agreements.every((agreement) => agreement.counterSigned) && (
               <Box flex={true} justify="between">

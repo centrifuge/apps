@@ -58,9 +58,9 @@ const MintNFT: React.FC<Props> = (props: Props) => {
   return (
     <Box>
       <SecondaryHeader>
-        <Box direction="row" gap="small" align="center">
+        <Box direction="row" gap="small" align="center" margin={{ top: 'medium' }}>
           <BackLink href="/assets" />
-          <Heading level="3">Mint NFT</Heading>
+          <Heading level="4">Mint NFT</Heading>
         </Box>
       </SecondaryHeader>
 
@@ -123,30 +123,38 @@ const MintNFT: React.FC<Props> = (props: Props) => {
             </Alert>
           )}
 
-          <Box direction="row" gap="large" margin={{ vertical: 'large' }}>
-            <b>Please specify metadata of NFT:</b>
-          </Box>
+          <Box
+            pad="medium"
+            elevation="small"
+            round="xsmall"
+            margin={{ top: 'medium', bottom: 'medium' }}
+            background="white"
+          >
+            <Box direction="row" gap="large" margin={{ bottom: 'large' }}>
+              <b>Please specify metadata of NFT:</b>
+            </Box>
 
-          <Box direction="row" gap="large" justify="evenly">
-            {status === 'succeeded' && (
-              <FormField label="Token ID">
-                <TextInput value={tokenId} disabled={true} />
+            <Box direction="row" gap="large" justify="evenly">
+              {status === 'succeeded' && (
+                <FormField label="Token ID">
+                  <TextInput value={tokenId} disabled={true} />
+                </FormField>
+              )}
+              <FormField label="NFT Reference">
+                <TextInput
+                  value={referenceId}
+                  onChange={(e) => setReferenceId(e.currentTarget.value)}
+                  disabled={status === 'succeeded'}
+                />
               </FormField>
-            )}
-            <FormField label="NFT Reference">
-              <TextInput
-                value={referenceId}
-                onChange={(e) => setReferenceId(e.currentTarget.value)}
-                disabled={status === 'succeeded'}
-              />
-            </FormField>
-            <FormField label="Asset Type">
-              <TextInput value={assetType} disabled />
-            </FormField>
-            <FormField label="Invoice Amount">
-              <NumberInput suffix=" USD" value={amount} disabled />
-            </FormField>
-            <Button primary onClick={mint} label="Mint NFT" disabled={status === 'succeeded'} />
+              <FormField label="Asset Type">
+                <TextInput value={assetType} disabled />
+              </FormField>
+              <FormField label="Invoice Amount">
+                <NumberInput suffix=" USD" value={amount} disabled />
+              </FormField>
+              <Button primary onClick={mint} label="Mint NFT" disabled={status === 'succeeded'} />
+            </Box>
           </Box>
         </Box>
       )}

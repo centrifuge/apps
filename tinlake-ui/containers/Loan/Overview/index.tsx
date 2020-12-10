@@ -134,7 +134,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
           </Box>
         </Box>
 
-        <Box
+        {/* <Box
           width="420px"
           margin={{ top: 'small', bottom: 'medium' }}
           pad="medium"
@@ -198,7 +198,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
               </TableRow>
             </TableBody>
           </Table>
-        </Box>
+        </Box> */}
       </Box>
     </Box>
   ) : (
