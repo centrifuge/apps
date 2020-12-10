@@ -134,7 +134,14 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
           </Box>
         </Box>
 
-        <Box width="420px" margin={{ top: 'small', bottom: 'medium' }}>
+        <Box
+          width="420px"
+          margin={{ top: 'small', bottom: 'medium' }}
+          pad="medium"
+          elevation="small"
+          round="xsmall"
+          background="white"
+        >
           <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
             <Heading level="5" margin={'0'}>
               Current Epoch

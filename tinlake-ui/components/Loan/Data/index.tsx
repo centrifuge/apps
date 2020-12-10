@@ -15,7 +15,7 @@ class LoanData extends React.Component<Props> {
   render() {
     const { loanId, debt, principal, interestRate, status } = this.props.loan
     return (
-      <Box>
+      <Box pad="medium" elevation="small" round="xsmall" background="white">
         <Box direction="row" gap="medium">
           <FormField label="Asset ID">
             <TextInput value={loanId} disabled />

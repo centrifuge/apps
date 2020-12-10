@@ -35,7 +35,7 @@ class Overview extends React.Component<Props> {
   render() {
     const { pool, selectedPool } = this.props
 
-    return <OverviewComp pool={pool} selectedPool={selectedPool} />
+    return <OverviewComp pool={pool} selectedPool={selectedPool} tinlake={this.props.tinlake} />
   }
 }
 

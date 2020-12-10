@@ -1,17 +1,19 @@
-import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
+import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import OnboardModal from '../../../components/OnboardModal'
 import { TINRatioBar } from '../../../components/TINRatioBar/index'
 import { Tooltip } from '../../../components/Tooltip'
 import config, { Pool, UpcomingPool } from '../../../config'
+import { LoansState } from '../../../ducks/loans'
 import { PoolData, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { toPrecision } from '../../../utils/toPrecision'
+import { loadLoans } from '../../../ducks/loans'
 import {
   BalanceSheetDiagram,
   BalanceSheetDiagramLeft,
@@ -27,6 +29,7 @@ import {
 
 interface Props {
   selectedPool: Pool | UpcomingPool
+  tinlake: ITinlake
 }
 
 const parseRatio = (num: BN): number => {
@@ -36,6 +39,11 @@ const parseRatio = (num: BN): number => {
 
 const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
+  const loans = useSelector<any, LoansState>((state) => state.loans)
+  const outstandingLoans = loans?.loans
+    ? loans?.loans.filter((loan) => loan.status && loan.status === 'ongoing').length
+    : undefined
+  const dispatch = useDispatch()
   const poolData = pool?.data as PoolData | undefined
 
   const poolValue =
@@ -48,6 +56,10 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const maxJuniorRatio = poolData ? parseRatio(poolData.maxJuniorRatio) : undefined
+
+  React.useEffect(() => {
+    dispatch(loadLoans(props.tinlake))
+  }, [props.selectedPool])
 
   return (
     <Box direction="row" justify="between">
@@ -78,13 +90,12 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             <TableRow>
               <TableCell
                 scope="row"
-                border={{ color: 'transparent' }}
                 style={{ alignItems: 'start', justifyContent: 'center' }}
                 pad={{ vertical: '6px' }}
               >
                 <Tooltip id="poolReserve">Pool Reserve</Tooltip>
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }} pad={{ vertical: '6px' }}>
+              <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
                 <LoadingValue done={poolData?.reserve !== undefined} height={39}>
                   <>
                     {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))} DAI
@@ -92,24 +103,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                       Max: {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 0))} DAI
                     </Sidenote>
                   </>
-                </LoadingValue>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-
-        <Heading level="5" margin={{ bottom: 'small' }}>
-          Assets
-        </Heading>
-        <Table>
-          <TableBody>
-            <TableRow>
-              <TableCell scope="row">
-                <Tooltip id="outstandingVolume">Outstanding Volume</Tooltip>
-              </TableCell>
-              <TableCell style={{ textAlign: 'end' }}>
-                <LoadingValue done={poolData?.outstandingVolume !== undefined}>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.outstandingVolume || '0', 18), 0))} DAI
                 </LoadingValue>
               </TableCell>
             </TableRow>
@@ -123,6 +116,32 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={dropRate !== undefined}>
                   {toPrecision(feeToInterestRate(dropRate || '0'), 2)} %
+                </LoadingValue>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+
+        <Heading level="5" margin={{ bottom: 'small' }}>
+          Assets
+        </Heading>
+        <Table>
+          <TableBody>
+            <TableRow>
+              <TableCell scope="row">
+                <Tooltip id="outstandingVolume">Active Financings</Tooltip>
+              </TableCell>
+              <TableCell style={{ textAlign: 'end' }}>
+                <LoadingValue done={outstandingLoans !== undefined}>{outstandingLoans || 0}</LoadingValue>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell scope="row">
+                <Tooltip id="outstandingVolume">Outstanding Volume</Tooltip>
+              </TableCell>
+              <TableCell style={{ textAlign: 'end' }}>
+                <LoadingValue done={poolData?.outstandingVolume !== undefined}>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.outstandingVolume || '0', 18), 0))} DAI
                 </LoadingValue>
               </TableCell>
             </TableRow>

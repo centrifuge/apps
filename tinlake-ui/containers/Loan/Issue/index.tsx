@@ -91,7 +91,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
   const disabled = status === 'unconfirmed' || status === 'pending' || status === 'succeeded'
 
   return (
-    <Box>
+    <Box pad="medium" elevation="small" round="xsmall" background="white">
       <Box>
         <Box>
           <Box direction="row" gap="medium" margin={{ top: 'medium' }}>

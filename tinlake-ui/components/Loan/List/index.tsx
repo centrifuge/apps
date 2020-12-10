@@ -28,7 +28,7 @@ class LoanList extends React.Component<Props> {
   render() {
     const { loans } = this.props
     return (
-      <Box>
+      <Box pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
         <DataTable
           style={{ tableLayout: 'auto' }}
           data={loans}

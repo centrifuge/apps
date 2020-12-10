@@ -14,18 +14,7 @@ const Footer: React.FC<{}> = () => {
   }
 
   return (
-    <Box
-      background="rgb(249, 249, 249)"
-      style={{ height: '120px' }}
-      border={{
-        color: '#f5f5f5',
-        size: 'xsmall',
-        style: 'solid',
-        side: 'top',
-      }}
-      direction="column"
-      justify="end"
-    >
+    <Box background="rgb(249, 249, 249)" style={{ height: '120px' }} direction="column" justify="end">
       <Box direction="row" margin={{ bottom: 'large', top: 'large' }} justify="center" pad={{ horizontal: 'small' }}>
         <Box direction="row" gap="large">
           <Anchor

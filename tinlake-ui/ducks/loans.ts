@@ -56,6 +56,7 @@ export default function reducer(state: LoansState = initialState, action: AnyAct
 // hardcoded root just for testing - will be removed in next pr
 export function loadLoans(tinlake: any): ThunkAction<Promise<void>, LoansState, undefined, Action> {
   return async (dispatch) => {
+    console.log('load loans')
     dispatch({ type: LOAD })
     const root = tinlake.contractAddresses['ROOT_CONTRACT']
     if (root === undefined) {

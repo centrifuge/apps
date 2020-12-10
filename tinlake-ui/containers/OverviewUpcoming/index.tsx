@@ -21,6 +21,7 @@ class OverviewUpcoming extends React.Component<Props> {
       <OverviewComp
         pool={{ data: upcomingPoolToPooldata(selectedPool), state: 'found', poolId: selectedPool.metadata.slug }}
         selectedPool={selectedPool}
+        tinlake={this.props.tinlake}
       />
     )
   }

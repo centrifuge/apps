@@ -19,60 +19,54 @@ class NftData extends React.Component<Props> {
     } = this.props
 
     return (
-      <NftDataContainer>
-        <Heading level="5" margin="none">
+      <>
+        <Heading margin={{ top: 'xlarge' }} level="5">
           NFT Data
         </Heading>
-        <Box direction="row" gap="medium" margin={{ bottom: 'large', top: 'medium' }}>
-          <Box basis={'1/3'} gap="medium">
-            <DisplayField
-              label={'NFT ID'}
-              copy={true}
-              as={'span'}
-              value={hexToInt(bnToHex(tokenId).toString())}
-              link={{
-                href: getNFTLink(hexToInt(bnToHex(tokenId).toString()), registry),
-                target: '_blank',
-              }}
-            />
-          </Box>
-          <Box basis={'1/3'} gap="medium">
-            <DisplayField
-              label={'NFT registry'}
-              copy={true}
-              as={'span'}
-              value={registry}
-              link={{
-                href: getAddressLink(registry),
-                target: '_blank',
-              }}
-            />
-          </Box>
-          <Box basis={'1/3'} gap="medium">
-            <DisplayField
-              label={'NFT Owner'}
-              copy={true}
-              as={'span'}
-              value={nftOwner}
-              link={{
-                href: getAddressLink(nftOwner),
-                target: '_blank',
-              }}
-            />
-            {authedAddr === nftOwner && <Badge text={'Me'} style={{ position: 'absolute', left: 100, top: 32 }} />}
+        <Box pad="medium" elevation="small" round="xsmall" background="white">
+          <Box direction="row" gap="medium" margin={{ bottom: 'large', top: 'medium' }}>
+            <Box basis={'1/3'} gap="medium">
+              <DisplayField
+                label={'NFT ID'}
+                copy={true}
+                as={'span'}
+                value={hexToInt(bnToHex(tokenId).toString())}
+                link={{
+                  href: getNFTLink(hexToInt(bnToHex(tokenId).toString()), registry),
+                  target: '_blank',
+                }}
+              />
+            </Box>
+            <Box basis={'1/3'} gap="medium">
+              <DisplayField
+                label={'NFT registry'}
+                copy={true}
+                as={'span'}
+                value={registry}
+                link={{
+                  href: getAddressLink(registry),
+                  target: '_blank',
+                }}
+              />
+            </Box>
+            <Box basis={'1/3'} gap="medium">
+              <DisplayField
+                label={'NFT Owner'}
+                copy={true}
+                as={'span'}
+                value={nftOwner}
+                link={{
+                  href: getAddressLink(nftOwner),
+                  target: '_blank',
+                }}
+              />
+              {authedAddr === nftOwner && <Badge text={'Me'} style={{ position: 'absolute', left: 100, top: 32 }} />}
+            </Box>
           </Box>
         </Box>
-        <Box direction="row" gap="medium" margin={{ bottom: 'small', top: 'medium' }}></Box>
-      </NftDataContainer>
+      </>
     )
   }
 }
 
 export default NftData
-
-const NftDataContainer = styled(Box)`
-  margin: 56px 0;
-  padding: 20px;
-  border-radius: 3px;
-  background: #f7f7f7;
-`

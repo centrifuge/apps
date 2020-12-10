@@ -39,13 +39,11 @@ class LoanPage extends React.Component<Props> {
         />
         <Container>
           <Box justify="center" direction="row">
-            <Box width="xlarge">
-              <SecondaryHeader>
-                <Box direction="row" gap="small" align="center">
-                  <BackLink href={'/assets'} />
-                  <Heading level="3">Asset Details</Heading>
-                </Box>
-              </SecondaryHeader>
+            <Box width="xlarge" margin={{ top: 'medium' }}>
+              <Box direction="row" gap="small" align="center">
+                <BackLink href={'/assets'} />
+                <Heading level="4">Asset Details</Heading>
+              </Box>
               <WithTinlake
                 addresses={pool.addresses}
                 contractConfig={pool.contractConfig}
