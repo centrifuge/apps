@@ -13,18 +13,15 @@ interface Props {
   selectedPool: ArchivedPool
 }
 
-class Archived extends React.Component<Props> {
-  render() {
-    const { selectedPool } = this.props
-
-    const poolData: ArchivedPoolData = selectedPool.archivedValues
+const Archived:  React.FC<Props> = (props: Props) => {
+    const poolData: ArchivedPoolData = props.selectedPool.archivedValues
     const totalFinanced = poolData?.totalFinancedCurrency
     const totalFinancings = poolData?.financingsCount
     const seniorInterest = poolData?.seniorInterestRate
 
     return (
       <Box margin={{ bottom: 'large', top: 'medium' }}>
-        <Heading level="4">Pool Overview of {selectedPool.metadata.name} </Heading>
+        <Heading level="4">Pool Overview of {props.selectedPool.metadata.name} </Heading>
 
         <Box direction="row" margin={{ bottom: 'large' }}>
           <Box basis={'1/3'}>
@@ -77,25 +74,25 @@ class Archived extends React.Component<Props> {
               <Heading level="5" margin={{ top: 'small' }}>
                 Asset Originator Details
               </Heading>
-              <a href={selectedPool.metadata.website} target="_blank">
-                <img src={selectedPool.metadata.logo} style={{ maxHeight: '80px', maxWidth: '50%' }} />
+              <a href={props.selectedPool.metadata.website} target="_blank">
+                <img src={props.selectedPool.metadata.logo} style={{ maxHeight: '80px', maxWidth: '50%' }} />
               </a>
 
-              <p>{selectedPool.metadata.description}</p>
+              <p>{props.selectedPool.metadata.description}</p>
 
               <p>
-                {Object.keys(selectedPool.metadata.details).map((key: string) => (
+                {Object.keys(props.selectedPool.metadata.details).map((key: string) => (
                   <React.Fragment key={key}>
-                    <strong>{key}:&nbsp;</strong> {selectedPool.metadata.details[key]}
+                    <strong>{key}:&nbsp;</strong> {props.selectedPool.metadata.details[key]}
                     <br />
                   </React.Fragment>
                 ))}
               </p>
 
-              {selectedPool.metadata.discourseLink && (
+              {props.selectedPool.metadata.discourseLink && (
                 <>
                   <h4 style={{ marginBottom: '0' }}>Learn more about this asset originator</h4>
-                  <a href={selectedPool.metadata.discourseLink} target="_blank">
+                  <a href={props.selectedPool.metadata.discourseLink} target="_blank">
                     Join the discussion on Discourse
                   </a>
                 </>
@@ -105,7 +102,6 @@ class Archived extends React.Component<Props> {
         </Box>
       </Box>
     )
-  }
 }
 
 export default Archived

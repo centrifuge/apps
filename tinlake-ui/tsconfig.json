@@ -2,7 +2,7 @@
   "compilerOptions": {
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
-    "jsx": "react",
+    "jsx": "preserve",
     "module": "esnext",
     "moduleResolution": "node",
     "noEmit": true,

@@ -11,7 +11,7 @@ import Header from '../../../../../components/Header'
 import SecondaryHeader from '../../../../../components/SecondaryHeader'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
-import config, { ipfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
+import { loadPoolsFromIPFS, Pool } from '../../../../../config'
 import LoanView from '../../../../../containers/Loan/View'
 import { menuItems } from '../../../../../menuItems'
 
@@ -22,17 +22,11 @@ interface Props extends WithRouterProps {
 
 class LoanPage extends React.Component<Props> {
 
-  componentDidMount() {
-    loadPoolsFromIPFS()
-  }
-
   render() {
     const { pool } = this.props
     const { assetId }: { assetId: string } = this.props.router.query as any
-    console.log("loan page", this.props, ipfsPools, config)
 
-    return ( ipfsPools &&
-      <WithFooter>
+    return <WithFooter>
         <Head>
           <title>
             Asset {assetId}: {pool.metadata.name} | Tinlake | Centrifuge | Decentralized Asset Financing
@@ -70,7 +64,6 @@ class LoanPage extends React.Component<Props> {
           </Box>
         </Container>
       </WithFooter>
-    )
   }
 }
 

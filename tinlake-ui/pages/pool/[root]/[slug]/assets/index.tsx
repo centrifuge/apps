@@ -18,14 +18,11 @@ import { menuItems } from '../../../../../menuItems'
 interface Props extends WithRouterProps {
   root: string
   pool: Pool
-  pools: any
 }
 
 class LoanListPage extends React.Component<Props> {
   render() {
-    const { pools, pool } = this.props
-
-    console.log("POOLS IN LOAN LIST", pools)
+    const { pool } = this.props
 
     return (
       <WithFooter>

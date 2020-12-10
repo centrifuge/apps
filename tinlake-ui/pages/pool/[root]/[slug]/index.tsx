@@ -20,7 +20,6 @@ interface Props {
 class Pool extends React.Component<Props> {
   render() {
     const { pool } = this.props
-    console.log("POOL IN POOL",  this.props)
 
     return (
       <WithFooter>

@@ -237,14 +237,12 @@ export let ipfsPools: IpfsPools | undefined = undefined
 
 export const loadPoolsFromIPFS = async () => {
   if(ipfsPools){
-    console.log("POOL ALREADY EXISTS", ipfsPools)
     return ipfsPools
   }
   // await assembleIpfsUrl()
   // TODO: error handling
   const response = await fetch(`${config.ipfsGateway}${'QmWhnoDUQP84nq1UB3RE1cYpjSo6mTDfv84rhPqxXToEUM'}`)
   const body = await response.json()
-  console.log("BODY OF IPFS", body)
   const networkConfigs: any[] = Object.values(body)
 
   const active = poolsSchema
@@ -338,8 +336,5 @@ function fee(s: string): boolean {
   return n.gte(new BN('1000000000000000000000000000')) && n.lte(new BN('1000000009000000000000000000'));
 
 }
-
-(async () => {await loadPoolsFromIPFS()
-console.log("in anon function", ipfsPools)})()
 
 export default config
