@@ -2,6 +2,8 @@
 
 exports[`renders correctly 1`] = `
 <span>
-  o134,144,000,000,000,000,000.000 CCC
+  o
+  134,144.000
+   CCC
 </span>
 `;

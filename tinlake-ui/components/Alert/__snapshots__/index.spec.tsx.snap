@@ -2,7 +2,7 @@
 
 exports[`renders errors correctly 1`] = `
 <div
-  className="sc-bdVaJa gLzRZh StyledBox-sc-13pk1d4-0 IRSNj"
+  className="StyledBox-sc-13pk1d4-0 bFwQzJ sc-AxjAm jYezye"
   type="error"
 >
   My error
@@ -11,7 +11,7 @@ exports[`renders errors correctly 1`] = `
 
 exports[`renders infos correctly 1`] = `
 <div
-  className="sc-bdVaJa jXuNwu StyledBox-sc-13pk1d4-0 IRSNj"
+  className="StyledBox-sc-13pk1d4-0 bFwQzJ sc-AxjAm dVbhHN"
   type="info"
 >
   My info
@@ -20,7 +20,7 @@ exports[`renders infos correctly 1`] = `
 
 exports[`renders success correctly 1`] = `
 <div
-  className="sc-bdVaJa dTbgYV StyledBox-sc-13pk1d4-0 IRSNj"
+  className="StyledBox-sc-13pk1d4-0 bFwQzJ sc-AxjAm evBkGX"
   type="success"
 >
   My success
