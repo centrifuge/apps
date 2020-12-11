@@ -1,0 +1,78 @@
+{
+  "poolValue": {
+    "title": "Pool Value",
+    "description": "Total pool value calculated as the sum of the asset value and the pool reserve."
+  },
+  "assetValue": {
+    "title": "Asset Value",
+    "description": "The asset value or NAV reflects the present value of the outstanding portfolio of financings. It is the sum of the present values of the risk-adjusted expected repayments of all outstanding financings.",
+    "link": "https://medium.com/centrifuge/tinlake-pricing-and-valuation-series-part-2-valuing-an-asset-portfolio-247d8f2f0d5"
+  },
+  "poolReserve": {
+    "title": "Pool Reserve",
+    "description": "Amount of currency currently held in the pool that is not currently deployed for financings by the asset originator. The reserve is available for financings by the asset originator and redemptions by investors."
+  },
+  "dropAPR": {
+    "title": "DROP APR",
+    "description": "Annual interest rate (APR) at which the DROP tokens accrues interest applied on outstanding financings (compounded per second)."
+  },
+  "dropSupply": {
+    "title": "DROP Supply",
+    "description": "Amount of outstanding DROP tokens for this pool."
+  },
+  "tinSupply": {
+    "title": "TIN Supply",
+    "description": "Amount of outstanding TIN tokens for this pool."
+  },
+  "tinRiskBuffer": {
+    "title": "TIN Risk Buffer",
+    "description": "Current amount of TIN in relation to the pool value. The minimum TIN risk buffer indicates the lower limit and ensures that DROP investors are protected by a certain amount of TIN invested in the pool at any time.",
+    "link": "https://developer.centrifuge.io/tinlake/overview/tranches/"
+  },
+  "outstandingVolume": {
+    "title": "Outstanding Volume",
+    "description": "Sum of current outstanding financings by the asset originator. This deviates from the asset value, which considers expected repayments and risk-adjustments."
+  },
+  "dropValue": {
+    "title": "DROP Value",
+    "description": "Total value of outstanding DROP tokens at the current DROP token price."
+  },
+  "tinValue": {
+    "title": "TIN Value",
+    "description": "Total value of outstanding TIN tokens at the current TIN token price."
+  },
+  "epochNumber": {
+    "title": "Epoch #",
+    "description": "Invest and redeem transactions are locked over a defined period of time (\"Epoch\") and automatically executed—if possible within certain predetermined risk limits such as the Minimum TIN Risk Buffer—at the end of this period."
+  },
+  "mininumEpochDuration": {
+    "title": "Minimum epoch duration",
+    "description": "Minimum time per epoch for this pool during which invest and redeem orders can be locked. At the end of the epoch, the locked orders will be executed by the smart contracts. An epoch can also take longer if no outstanding orders are locked."
+  },
+  "investmentCapacity": {
+    "title": "Total epoch investment capacity",
+    "description": "The investment capacity indicates how much investors can invest before the pool is oversubscribed. It is calculated as the difference between the maximum reserve allowed for this pool and currently locked invest and redeem orders."
+  },
+  "availableForFinancing": {
+    "title": "Available for financing",
+    "description": "The value of the underlying collateral determines how much an asset originator can finance against a locked NFT. An asset originator may choose to finance less than the available amount."
+  },
+  "outstanding": {
+    "title": "Outstanding",
+    "description": "Current amount the asset originator has to repay for this financing. Interest is accrued based on the financing fee."
+  },
+  "riskGroup": {
+    "title": "Risk group",
+    "description": "The risk group of a financing determines the interest rate based on the underlying scorecard.",
+    "link": "https://medium.com/centrifuge/tinlake-pricing-and-valuation-series-part-1-how-to-price-real-world-assets-cf6655132bef"
+  },
+  "maturityDate": {
+    "title": "Maturity date",
+    "description": "Expected repayment date for the outstanding financing. It is used to calculate the present value of the financing for the pool's asset value.",
+    "link": "https://medium.com/centrifuge/tinlake-pricing-and-valuation-series-part-2-valuing-an-asset-portfolio-247d8f2f0d5"
+  },
+  "financingFee": {
+    "title": "Financing Fee",
+    "description": "Annual interest rate (APR) at which the interest for the outstanding financing is accrued with compounding per second."
+  }
+}

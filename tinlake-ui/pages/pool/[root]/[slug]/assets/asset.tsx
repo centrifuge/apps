@@ -8,7 +8,6 @@ import Auth from '../../../../../components/Auth'
 import { BackLink } from '../../../../../components/BackLink'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
-import SecondaryHeader from '../../../../../components/SecondaryHeader'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
 import { loadPoolsFromIPFS, Pool } from '../../../../../config'
@@ -39,13 +38,11 @@ class LoanPage extends React.Component<Props> {
         />
         <Container>
           <Box justify="center" direction="row">
-            <Box width="xlarge">
-              <SecondaryHeader>
-                <Box direction="row" gap="small" align="center">
-                  <BackLink href={'/assets'} />
-                  <Heading level="3">Asset Details</Heading>
-                </Box>
-              </SecondaryHeader>
+            <Box width="xlarge" margin={{ top: 'medium' }}>
+              <Box direction="row" gap="small" align="center">
+                <BackLink href={'/assets'} />
+                <Heading level="4">Asset Details</Heading>
+              </Box>
               <WithTinlake
                 addresses={pool.addresses}
                 contractConfig={pool.contractConfig}
@@ -55,6 +52,7 @@ class LoanPage extends React.Component<Props> {
                     render={(auth) => (
                       <Box>
                         {assetId && <LoanView auth={auth} tinlake={tinlake} poolConfig={pool} loanId={assetId} />}
+                        {!assetId && <div>Loading...</div>}
                       </Box>
                     )}
                   />

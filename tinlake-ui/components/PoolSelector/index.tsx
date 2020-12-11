@@ -4,7 +4,19 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
-import { Button, Caret, Desc, PoolLink, PoolList, PoolTitle, SearchField, Title, Wrapper } from './styles'
+import {
+  Button,
+  Caret,
+  Desc,
+  DesktopOnlyBox,
+  Icon,
+  PoolLink,
+  PoolList,
+  PoolTitle,
+  SearchField,
+  Title,
+  Wrapper,
+} from './styles'
 
 interface Props {
   title: string
@@ -39,14 +51,19 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
     setSearchQuery(event.currentTarget.value)
   }
 
-  const filterPools = (pools: PoolData[] | undefined) => {
-    if (!pools) {
+  const getLivePools = () => {
+    return pools.data?.pools.filter((p) => !p.isArchived).sort((a, b) => b.order - a.order) || []
+  }
+
+  const filterPools = () => {
+    const livePools = getLivePools()
+    if (!livePools) {
       return []
     }
     if (searchQuery.trim().length === 0) {
-      return pools
+      return livePools
     }
-    return pools.filter((pool: PoolData) => pool.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+    return livePools.filter((pool: PoolData) => pool.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
   }
 
   const navigateToPool = (pool: PoolData) => {
@@ -61,7 +78,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <>
+    <DesktopOnlyBox>
       <Button
         ref={poolRef}
         onClick={() => {
@@ -91,7 +108,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
         >
           <Wrapper>
             <PoolList>
-              {pools.data?.pools && pools.data?.pools.length >= 5 && (
+              {getLivePools().length >= 6 && (
                 <SearchField>
                   <TextInput
                     placeholder="Search"
@@ -103,8 +120,9 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
                   />
                 </SearchField>
               )}
-              {filterPools(pools.data?.pools).map((pool: PoolData) => (
+              {filterPools().map((pool: PoolData) => (
                 <PoolLink key={pool.id} active={pool.name === props.title} onClick={() => navigateToPool(pool)}>
+                  <Icon src={pool.icon || 'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'} />
                   {pool.name}
                 </PoolLink>
               ))}
@@ -112,6 +130,6 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
           </Wrapper>
         </Drop>
       )}
-    </>
+    </DesktopOnlyBox>
   )
 }

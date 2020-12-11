@@ -8,6 +8,7 @@ import fetch from 'node-fetch'
 import config, { ArchivedPool, loadPoolsFromIPFS, Pool, UpcomingPool } from '../../config'
 import { PoolData, PoolsData } from '../../ducks/pools'
 import { getPoolStatus } from '../../utils/pool'
+import { UintBase } from '../../utils/ratios'
 
 const { tinlakeDataBackendUrl } = config
 const cache = new InMemoryCache()
@@ -43,22 +44,6 @@ class Apollo {
     })
   }
 
-  getPoolOrder = (p: { totalDebt: BN; totalRepaysAggregatedAmount: BN; totalDebtNum: number; version: number }) => {
-    if ((p.version === 3 && p.totalDebt.gtn(0)) || (p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.eqn(0))) {
-      return orderSummandPoolActive + p.totalDebtNum
-    }
-
-    if (p.totalDebt.gtn(0)) {
-      return orderSummandPoolDeployed + p.totalDebtNum
-    }
-
-    if (p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.gtn(0)) {
-      return orderSummandPoolClosed + p.totalDebtNum
-    }
-
-    return 0
-  }
-
   injectPoolData(pools: any[], poolConfigs: Pool[] | undefined): PoolData[] {
     if (!poolConfigs) {
       return []
@@ -79,7 +64,14 @@ class Apollo {
 
       const ongoingLoans = (pool && pool.ongoingLoans.length) || 0 // TODO add count field to subgraph, inefficient to query all assets
       const totalFinancedCurrency = totalRepaysAggregatedAmount.add(totalDebt)
+
+      const reserve = (pool && new BN(pool.reserve)) || new BN('0')
+      const assetValue = (pool && new BN(pool.assetValue)) || new BN('0')
+      const poolValueNum = parseInt(reserve.div(UintBase).toString()) + parseInt(assetValue.div(UintBase).toString())
+
       const poolData = {
+        reserve,
+        assetValue,
         totalFinancedCurrency,
         ongoingLoans,
         totalDebt,
@@ -90,12 +82,7 @@ class Apollo {
         totalRepaysAggregatedAmountNum,
         weightedInterestRateNum,
         seniorInterestRateNum,
-        order: this.getPoolOrder({
-          totalDebt,
-          totalDebtNum,
-          totalRepaysAggregatedAmount,
-          version: Number(pool?.version || 3),
-        }),
+        order: poolValueNum,
         isUpcoming: false,
         isArchived: false,
         isOversubscribed: (pool && new BN(pool.maxReserve).lte(new BN(pool.reserve))) || false,
@@ -104,8 +91,6 @@ class Apollo {
         slug: poolConfig.metadata.slug,
         asset: poolConfig?.metadata.asset,
         version: Number(pool?.version || 3),
-        reserve: (pool && new BN(pool.reserve)) || new BN('0'),
-        assetValue: (pool && new BN(pool.assetValue)) || new BN('0'),
         juniorYield14Days: (pool && new BN(pool.juniorYield14Days)) || null,
         seniorYield14Days: (pool && new BN(pool.seniorYield14Days)) || null,
         icon: poolConfig.metadata.media?.icon || null,
@@ -157,7 +142,7 @@ class Apollo {
       isUpcoming: false,
       isArchived: true,
       isOversubscribed: false,
-      order: p.archivedValues?.status === 'Deployed' ? orderSummandPoolDeployed : orderSummandPoolClosed,
+      order: orderSummandPoolClosed,
       totalDebt: new BN('0'),
       totalRepaysAggregatedAmount: new BN('0'),
       weightedInterestRate: new BN('0'),
@@ -186,6 +171,8 @@ class Apollo {
   async getPools(): Promise<PoolsData> {
     let result
     try {
+      // juniorYield14Days
+      // seniorYield14Days
       result = await this.client.query({
         query: gql`
           {
@@ -202,8 +189,6 @@ class Apollo {
               reserve
               maxReserve
               assetValue
-              juniorYield14Days
-              seniorYield14Days
             }
           }
         `,
@@ -341,7 +326,5 @@ function getLoanStatus(loan: any) {
 
 export default new Apollo()
 
-const orderSummandPoolUpcoming = 3e30 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt
-const orderSummandPoolActive = 2e30
-const orderSummandPoolDeployed = 1e30 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt
-const orderSummandPoolClosed = 0 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt
+const orderSummandPoolUpcoming = 1e15 // No pool value should be more than 1000 billion DAI
+const orderSummandPoolClosed = 0

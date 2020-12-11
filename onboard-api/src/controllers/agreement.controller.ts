@@ -26,7 +26,6 @@ export class AgreementController {
     private readonly sessionService: SessionService
   ) {}
 
-  // TODO: this should probably only be returned after verifying address ownership
   @Get('pools/:poolId/agreements/:agreementId/link')
   async getAgreementLink(@Param() params, @Req() req, @Query() query): Promise<string> {
     if (!query.session) throw new BadRequestException('Missing session')
@@ -37,6 +36,7 @@ export class AgreementController {
     const user = await this.userRepo.find(agreement.userId)
     if (!user) throw new BadRequestException('User for this agreement does not exist')
 
+    // TODO: actually implement this verification
     const verifiedSession = this.sessionService.verify(query.session, user.id)
     if (!verifiedSession) throw new UnauthorizedException('Invalid session')
 
@@ -47,7 +47,6 @@ export class AgreementController {
     return this.docusignService.getAgreementLink(agreement.providerEnvelopeId, user, returnUrl)
   }
 
-  // TODO: this should probably only be returned after verifying address ownership
   @Post('docusign/connect')
   async postDocusignConnect(@Body() body): Promise<string> {
     console.log('Received Docusign Connect message')

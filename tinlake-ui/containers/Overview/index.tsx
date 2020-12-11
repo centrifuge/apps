@@ -5,14 +5,11 @@ import { connect } from 'react-redux'
 import OverviewComp from '../../components/Overview'
 import { Pool } from '../../config'
 import { AuthState } from '../../ducks/auth'
-import { loadLoans, LoansState } from '../../ducks/loans'
 import { loadPool, PoolState } from '../../ducks/pool'
 import { PoolsState } from '../../ducks/pools'
 
 interface Props {
   tinlake: ITinlake
-  loans?: LoansState
-  loadLoans?: (tinlake: ITinlake) => Promise<void>
   pool?: PoolState
   pools?: PoolsState
   auth?: AuthState
@@ -33,15 +30,15 @@ class Overview extends React.Component<Props> {
   }
 
   loadData() {
-    const { loadLoans, loadPool, tinlake } = this.props
-    loadLoans && loadLoans(tinlake)
+    const { loadPool, tinlake } = this.props
     loadPool && loadPool(tinlake)
   }
 
   render() {
-    const { auth, loans, selectedPool, pools } = this.props
-    return pools?.data && <OverviewComp userAddress={auth?.address || ''} loans={loans} selectedPool={selectedPool} />
+    const { pool, selectedPool } = this.props
+
+    return <OverviewComp pool={pool} selectedPool={selectedPool} tinlake={this.props.tinlake} />
   }
 }
 
-export default connect((state) => state, { loadLoans, loadPool })(withRouter(Overview))
+export default connect((state) => state, { loadPool })(withRouter(Overview))

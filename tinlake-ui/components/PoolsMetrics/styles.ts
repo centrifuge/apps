@@ -21,7 +21,7 @@ export const Unit = styled.span`
 export const Label = styled.div`
   text-align: center;
   font-weight: 500;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 14px;
   color: #979797;
 `

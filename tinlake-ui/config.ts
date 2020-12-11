@@ -89,6 +89,7 @@ interface Config {
   gasLimit: number
   onboardAPIHost: string
   featureFlagNewOnboarding: boolean
+  enableErrorLogging: boolean
 }
 
 export interface IpfsPools {
@@ -299,6 +300,7 @@ const config: Config = {
     .required('NEXT_PUBLIC_ONBOARD_API_HOST is required')
     .validateSync(process.env.NEXT_PUBLIC_ONBOARD_API_HOST),
   featureFlagNewOnboarding: yup.boolean().validateSync(process.env.NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING),
+  enableErrorLogging: yup.boolean().validateSync(false),
 }
 
 function between1e23and1e27(s: string): boolean {

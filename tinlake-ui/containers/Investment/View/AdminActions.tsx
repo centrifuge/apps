@@ -66,7 +66,14 @@ const AdminActions: React.FC<Props> = (props: Props) => {
     <>
       {pool && pool.data && (
         <Box direction="row" gap="medium">
-          <Box width="medium" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
+          <Box
+            width="medium"
+            pad="medium"
+            elevation="small"
+            round="xsmall"
+            margin={{ bottom: 'medium' }}
+            background="white"
+          >
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
                 Min TIN risk buffer
@@ -99,7 +106,14 @@ const AdminActions: React.FC<Props> = (props: Props) => {
             </Box>
           </Box>
 
-          <Box width="medium" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
+          <Box
+            width="medium"
+            pad="medium"
+            elevation="small"
+            round="xsmall"
+            margin={{ bottom: 'medium' }}
+            background="white"
+          >
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
                 Max TIN risk buffer

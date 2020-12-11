@@ -39,7 +39,7 @@ export class KycController {
     const investor = await this.securitizeService.getInvestor(kycInfo.digest.accessToken)
     if (!investor) throw new BadRequestException('Failed to retrieve investor information from Securitize')
 
-    // Update KYC and email records in our databsae
+    // Update KYC and email records in our database
     const kyc = await this.kycRepo.upsertSecuritize(address.userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!kyc) throw new BadRequestException('Failed to create KYC entity')
 

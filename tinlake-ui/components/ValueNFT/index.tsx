@@ -125,8 +125,14 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
           <p>You need to be an admin to value NFTs.</p>
         </Alert>
       ) : (
-        <>
-          <Box direction="row" gap="large" margin={{ vertical: 'large' }}>
+        <Box
+          pad="medium"
+          elevation="small"
+          round="xsmall"
+          margin={{ top: 'medium', bottom: 'medium' }}
+          background="white"
+        >
+          <Box direction="row" gap="large">
             <b>Please paste your Token ID and corresponding registry address below to value an NFT:</b>
           </Box>
 
@@ -240,7 +246,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
               <p> Your NFT ID will automatically be pasted in the respective field.</p>
             </Alert>
           )}
-        </>
+        </Box>
       )}
 
       <Box>

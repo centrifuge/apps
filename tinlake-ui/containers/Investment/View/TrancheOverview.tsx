@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Pool } from '../../../config'
-import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
+import { loadPool, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
 import { toPrecision } from '../../../utils/toPrecision'
@@ -27,7 +27,7 @@ export type Card = 'home' | 'collect' | 'order' | 'invest' | 'redeem'
 const TrancheOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const trancheData = props.tranche === 'senior' ? pool?.data?.senior : pool?.data?.junior
-  const epochData = pool?.data ? (pool?.data as PoolData).epoch : undefined
+  const epochData = pool?.epoch || undefined
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
@@ -110,19 +110,20 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   }, [hasPendingCollection, hasPendingOrder])
 
   return (
-    <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
+    <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
       <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
         <Heading level="5" margin={'0'}>
           <TokenLogo src={`/static/${token}_final.svg`} />
-          {token} Balance
+          {trancheData?.inMemberlist === true ? `${token} Balance` : token}
         </Heading>
         <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-          <LoadingValue done={balance !== undefined} height={22}>
-            {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))}
-          </LoadingValue>
+          {trancheData?.inMemberlist === true && (
+            <LoadingValue done={balance !== undefined} height={22}>
+              {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))}
+            </LoadingValue>
+          )}
         </Heading>
       </Box>
-
       <Table>
         <TableBody>
           <TableRow>
@@ -145,7 +146,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           </TableRow>
         </TableBody>
       </Table>
-
       {trancheData?.inMemberlist === true && (
         <>
           {card === 'home' && (
@@ -170,15 +170,15 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                 <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
                   <Button
                     primary
-                    label="Redeem"
-                    onClick={() => setCard('redeem')}
-                    disabled={balance === '0' || epochData?.isBlockedState === true}
-                  />
-                  <Button
-                    primary
                     label="Invest"
                     onClick={() => setCard('invest')}
                     disabled={epochData?.isBlockedState === true}
+                  />
+                  <Button
+                    primary
+                    label="Redeem"
+                    onClick={() => setCard('redeem')}
+                    disabled={balance === '0' || epochData?.isBlockedState === true}
                   />
                 </Box>
               )}
@@ -211,7 +211,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           )}
         </>
       )}
-
       {trancheData?.inMemberlist === false && (
         <Info>
           <Heading level="6" margin={{ bottom: 'xsmall' }}>

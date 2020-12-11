@@ -7,10 +7,9 @@ import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
 import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { secondsToHms } from '../../../utils/time'
 import { toPrecision } from '../../../utils/toPrecision'
 import MaxReserveForm from './MaxReserveForm'
-import { Sidenote, SignIcon } from './styles'
+import { Sidenote } from './styles'
 
 interface Props {
   activePool?: Pool
@@ -49,7 +48,14 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
     <Box margin={{ bottom: 'medium' }}>
       <Box direction="row" justify="between">
         <Box>
-          <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }}>
+          <Box
+            width="420px"
+            pad="medium"
+            elevation="small"
+            round="xsmall"
+            margin={{ bottom: 'medium' }}
+            background="white"
+          >
             {!showMaxReserveForm && (
               <>
                 <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
@@ -125,65 +131,6 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
               <MaxReserveForm tinlake={props.tinlake} setShowMaxReserveForm={setShowMaxReserveForm} />
             )}
           </Box>
-        </Box>
-
-        <Box width="420px" margin={{ top: 'small', bottom: 'medium' }}>
-          <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-            <Heading level="5" margin={'0'}>
-              Current Epoch
-            </Heading>
-          </Box>
-
-          <Table margin={{ bottom: 'medium' }}>
-            <TableBody>
-              <TableRow>
-                <TableCell scope="row">Epoch #</TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={poolData?.epoch?.id !== undefined}>{poolData?.epoch?.id || ''}</LoadingValue>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell scope="row">Minimum time left in current epoch</TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={poolData?.epoch?.minimumEpochTimeLeft !== undefined}>
-                    {secondsToHms(poolData?.epoch?.minimumEpochTimeLeft || 0)}
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell scope="row">
-                  <Box direction="row">
-                    <SignIcon src={`/static/plus.svg`} />
-                    Total Pending Investments
-                  </Box>
-                </TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={poolData?.totalPendingInvestments !== undefined}>
-                    {addThousandsSeparators(
-                      toPrecision(baseToDisplay(poolData?.totalPendingInvestments || '0', 18), 2)
-                    )}{' '}
-                    DAI
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell scope="row">
-                  <Box direction="row">
-                    <SignIcon src={`/static/min.svg`} />
-                    Estimated Total Pending Redemptions
-                  </Box>
-                </TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={poolData?.totalRedemptionsCurrency !== undefined}>
-                    {addThousandsSeparators(
-                      toPrecision(baseToDisplay(poolData?.totalRedemptionsCurrency || '0', 18), 2)
-                    )}{' '}
-                    DAI
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
         </Box>
       </Box>
     </Box>
