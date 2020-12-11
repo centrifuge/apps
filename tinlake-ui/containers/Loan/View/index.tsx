@@ -10,6 +10,7 @@ import { loadLoan, LoansState } from '../../../ducks/loans'
 import { TransactionState } from '../../../ducks/transactions'
 import LoanBorrow from '../Borrow'
 import LoanRepay from '../Repay'
+import { Spinner } from '@centrifuge/axis-spinner'
 
 interface Props {
   tinlake: any
@@ -34,7 +35,7 @@ class LoanView extends React.Component<Props> {
     const { poolConfig, loans, loanId, tinlake, auth } = this.props
     const { loan, loanState } = loans!
     if (loanState === null || loanState === 'loading') {
-      return null
+      return <Spinner height={'300px'} message={'Loading...'} />
     }
     if (loanState === 'not found') {
       return (

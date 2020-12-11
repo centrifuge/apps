@@ -44,7 +44,6 @@ export interface PoolData {
   outstandingVolume: BN
   totalPendingInvestments: BN
   totalRedemptionsCurrency: BN
-  epoch?: EpochData
 }
 
 export type PoolStatus = 'Upcoming' | 'Active' | 'Deployed' | 'Closed'
@@ -74,12 +73,14 @@ export interface PoolState {
   state: null | 'loading' | 'found'
   poolId: string | null
   data: null | PoolData
+  epoch: null | EpochData
 }
 
 const initialState: PoolState = {
   state: null,
   poolId: null,
   data: null,
+  epoch: null,
 }
 
 export default function reducer(state: PoolState = initialState, action: AnyAction = { type: '' }): PoolState {
@@ -91,7 +92,7 @@ export default function reducer(state: PoolState = initialState, action: AnyActi
     case RECEIVE_POOL:
       return { ...state, state: 'found', data: action.data }
     case RECEIVE_EPOCH:
-      return { ...state, state: 'found', data: { ...(state.data as PoolData), epoch: action.epoch } }
+      return { ...state, state: 'found', epoch: action.epoch }
     default:
       return state
   }
@@ -257,7 +258,6 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
       const initial = {
         junior: { type: 'junior' },
         senior: { type: 'senior' },
-        epoch: {},
       }
 
       const prev =

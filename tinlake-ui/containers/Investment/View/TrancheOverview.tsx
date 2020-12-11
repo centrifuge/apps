@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Pool } from '../../../config'
-import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
+import { loadPool, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
 import { toPrecision } from '../../../utils/toPrecision'
@@ -27,7 +27,7 @@ export type Card = 'home' | 'collect' | 'order' | 'invest' | 'redeem'
 const TrancheOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const trancheData = props.tranche === 'senior' ? pool?.data?.senior : pool?.data?.junior
-  const epochData = pool?.data ? (pool?.data as PoolData).epoch : undefined
+  const epochData = pool?.epoch || undefined
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
 

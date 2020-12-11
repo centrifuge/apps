@@ -1,6 +1,15 @@
 import { Box, FormField } from 'grommet'
 import styled from 'styled-components'
 
+export const DesktopOnlyBox = styled.div`
+  display: block;
+  width: 239px;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`
+
 export const Button = styled(Box)`
   flex: 0 0 239px;
   height: 32;

@@ -54,7 +54,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const availableFunds = (props.pool && props.pool.data && props.pool.data.availableFunds.toString()) || '0'
   const borrowedAlready = new BN(props.loan.debt).isZero() === false || props.loan.status !== 'opened'
 
-  const isBlockedState = props.pool?.data ? (props.pool?.data as PoolData).epoch?.isBlockedState : false
+  const isBlockedState = props.pool ? props.pool?.epoch?.isBlockedState : false
 
   const [error, setError] = React.useState<string | undefined>(undefined)
   const borrowEnabled = ceilingSet && !borrowedAlready && !isBlockedState

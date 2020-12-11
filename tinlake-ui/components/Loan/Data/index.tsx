@@ -23,7 +23,7 @@ class LoanData extends React.Component<Props> {
           <FormField label="Status">
             <TextInput value={status} disabled />
           </FormField>
-          {(this.props.loan as any).riskGroup && (
+          {(this.props.loan as any).riskGroup !== undefined && (
             <FormField label="Risk group">
               <TextInput value={(this.props.loan as any).riskGroup} disabled />
             </FormField>

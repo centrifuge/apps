@@ -7,7 +7,7 @@ import { connect, useSelector } from 'react-redux'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Tooltip } from '../../../components/Tooltip'
 import { AuthState } from '../../../ducks/auth'
-import { PoolData, PoolState } from '../../../ducks/pool'
+import { PoolData, PoolState, EpochData } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
@@ -22,16 +22,17 @@ interface Props extends TransactionProps {
 const EpochOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined
+  const epochData = pool?.epoch as EpochData | undefined
 
   const [status, , setTxId] = useTransactionState()
 
   const solve = async () => {
-    const txId = await props.createTransaction(`Close epoch ${poolData?.epoch?.id}`, 'solveEpoch', [props.tinlake])
+    const txId = await props.createTransaction(`Close epoch ${epochData?.id}`, 'solveEpoch', [props.tinlake])
     setTxId(txId)
   }
 
   const execute = async () => {
-    const txId = await props.createTransaction(`Execute epoch ${poolData?.epoch?.id}`, 'executeEpoch', [props.tinlake])
+    const txId = await props.createTransaction(`Execute epoch ${epochData?.id}`, 'executeEpoch', [props.tinlake])
     setTxId(txId)
   }
 
@@ -189,18 +190,18 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                     <Tooltip id="epochNumber">Epoch #</Tooltip>
                   </TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={poolData?.epoch?.id !== undefined}>{poolData?.epoch?.id || ''}</LoadingValue>
+                    <LoadingValue done={epochData?.id !== undefined}>{epochData?.id || ''}</LoadingValue>
                   </TableCell>
                 </TableRow>
-                {!poolData?.epoch?.isBlockedState && (
+                {!epochData?.isBlockedState && (
                   <>
                     <TableRow>
                       <TableCell scope="row">
                         <Tooltip id="mininumEpochDuration">Minimum epoch duration</Tooltip>
                       </TableCell>
                       <TableCell style={{ textAlign: 'end' }}>
-                        <LoadingValue done={poolData?.epoch?.minimumEpochTime !== undefined}>
-                          {secondsToHms(poolData?.epoch?.minimumEpochTime || 0)}
+                        <LoadingValue done={epochData?.minimumEpochTime !== undefined}>
+                          {secondsToHms(epochData?.minimumEpochTime || 0)}
                         </LoadingValue>
                       </TableCell>
                     </TableRow>
@@ -215,24 +216,22 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                     Current epoch state
                   </TableCell>
                   <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
-                    <LoadingValue done={poolData?.epoch?.state !== undefined} height={39}>
-                      {(poolData?.epoch?.state === 'open' || poolData?.epoch?.state === 'can-be-closed') && (
+                    <LoadingValue done={epochData?.state !== undefined} height={39}>
+                      {(epochData?.state === 'open' || epochData?.state === 'can-be-closed') && (
                         <>
                           Open
-                          <Sidenote>Min time left: {secondsToHms(poolData?.epoch?.minimumEpochTimeLeft || 0)}</Sidenote>
+                          <Sidenote>Min time left: {secondsToHms(epochData?.minimumEpochTimeLeft || 0)}</Sidenote>
                         </>
                       )}
-                      {(poolData?.epoch?.state === 'in-submission-period' ||
-                        poolData?.epoch?.state === 'in-challenge-period' ||
-                        poolData?.epoch?.state === 'challenge-period-ended') && (
+                      {(epochData?.state === 'in-submission-period' ||
+                        epochData?.state === 'in-challenge-period' ||
+                        epochData?.state === 'challenge-period-ended') && (
                         <>
                           In computation period
-                          {poolData?.epoch.minChallengePeriodEnd > 0 && (
+                          {epochData?.minChallengePeriodEnd > 0 && (
                             <Sidenote>
                               Min time left:{' '}
-                              {secondsToHms(
-                                (poolData?.epoch.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000
-                              )}
+                              {secondsToHms((epochData?.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000)}
                             </Sidenote>
                           )}
                         </>
@@ -264,27 +263,25 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               </TableBody>
             </Table>
 
-            {isAdmin && poolData?.epoch && (
+            {isAdmin && epochData && (
               <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-                {poolData.epoch.state === 'can-be-closed' && (
+                {epochData?.state === 'can-be-closed' && (
                   <Button
                     label={`Close epoch`}
                     primary
                     onClick={solve}
                     disabled={
                       disabled ||
-                      poolData.epoch?.lastEpochClosed + poolData.epoch?.minimumEpochTime >= new Date().getTime() / 1000
+                      epochData?.lastEpochClosed + epochData?.minimumEpochTime >= new Date().getTime() / 1000
                     }
                   />
                 )}
-                {poolData.epoch.state === 'in-submission-period' && (
-                  <Button label={`Run solver`} primary disabled={true} />
+                {epochData?.state === 'in-submission-period' && <Button label={`Run solver`} primary disabled={true} />}
+                {epochData?.state === 'in-challenge-period' && (
+                  <Button label={`Execute epoch ${epochData?.id}`} primary disabled={true} />
                 )}
-                {poolData.epoch.state === 'in-challenge-period' && (
-                  <Button label={`Execute epoch ${poolData.epoch.id}`} primary disabled={true} />
-                )}
-                {poolData.epoch.state === 'challenge-period-ended' && (
-                  <Button label={`Execute epoch ${poolData.epoch.id}`} primary onClick={execute} disabled={disabled} />
+                {epochData?.state === 'challenge-period-ended' && (
+                  <Button label={`Execute epoch ${epochData?.id}`} primary onClick={execute} disabled={disabled} />
                 )}
               </Box>
             )}

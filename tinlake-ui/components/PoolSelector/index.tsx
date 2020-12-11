@@ -4,7 +4,19 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
-import { Button, Caret, Desc, PoolLink, PoolList, PoolTitle, SearchField, Title, Wrapper, Icon } from './styles'
+import {
+  DesktopOnlyBox,
+  Button,
+  Caret,
+  Desc,
+  PoolLink,
+  PoolList,
+  PoolTitle,
+  SearchField,
+  Title,
+  Wrapper,
+  Icon,
+} from './styles'
 
 interface Props {
   title: string
@@ -66,7 +78,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <>
+    <DesktopOnlyBox>
       <Button
         ref={poolRef}
         onClick={() => {
@@ -96,7 +108,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
         >
           <Wrapper>
             <PoolList>
-              {getLivePools().length >= 5 && (
+              {getLivePools().length >= 6 && (
                 <SearchField>
                   <TextInput
                     placeholder="Search"
@@ -118,6 +130,6 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
           </Wrapper>
         </Drop>
       )}
-    </>
+    </DesktopOnlyBox>
   )
 }

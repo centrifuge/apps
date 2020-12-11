@@ -52,6 +52,7 @@ class LoanPage extends React.Component<Props> {
                     render={(auth) => (
                       <Box>
                         {assetId && <LoanView auth={auth} tinlake={tinlake} poolConfig={pool} loanId={assetId} />}
+                        {!assetId && <div>Loading...</div>}
                       </Box>
                     )}
                   />
