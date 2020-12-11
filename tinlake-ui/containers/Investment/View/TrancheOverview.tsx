@@ -124,7 +124,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           )}
         </Heading>
       </Box>
-
       <Table>
         <TableBody>
           <TableRow>
@@ -147,7 +146,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           </TableRow>
         </TableBody>
       </Table>
-
       {trancheData?.inMemberlist === true && (
         <>
           {card === 'home' && (
@@ -213,7 +211,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           )}
         </>
       )}
-
       {trancheData?.inMemberlist === false && (
         <Info>
           <Heading level="6" margin={{ bottom: 'xsmall' }}>

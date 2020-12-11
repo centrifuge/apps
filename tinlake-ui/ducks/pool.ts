@@ -100,18 +100,25 @@ export default function reducer(state: PoolState = initialState, action: AnyActi
 
 let watcher: any = createWatcher([], multicallConfig)
 
+let prevAddress: string | undefined = undefined
+
 export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, undefined, Action> {
   return async (dispatch, getState) => {
+    const address = await tinlake.signer?.getAddress()
+
     const poolId = tinlake.contractAddresses.ROOT_CONTRACT
-    if ((getState() as any).pool.poolId === poolId) {
+
+    // Dont load data again for the same pool and address combination
+    if ((getState() as any).pool.poolId === poolId && prevAddress === address) {
       return
     }
+
+    // Save the address so we do reload the data if the address changes
+    prevAddress = address
 
     dispatch({ poolId, type: LOAD_POOL })
 
     const toBN = (val: BigNumber) => new BN(val.toString())
-
-    const address = await tinlake.signer?.getAddress()
 
     const addressWatchers = address
       ? [
