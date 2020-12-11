@@ -1,6 +1,6 @@
 import { ITinlake, Loan, NFT, PendingTransaction } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { EpochData, PoolData } from '../../ducks/pool'
+import { EpochData } from '../../ducks/pool'
 import { maxUint256 } from '../../utils/maxUint256'
 import { getAddressMemory, setAddressMemory } from './address-memory'
 
@@ -458,92 +458,6 @@ export async function getEpoch(tinlake: ITinlake): Promise<EpochData | undefined
     latestBlockTimestamp: await tinlake.getLatestBlockTimestamp(),
     seniorOrderedInEpoch: address ? await tinlake.getSeniorOrderedInEpoch(address) : 0,
     juniorOrderedInEpoch: address ? await tinlake.getJuniorOrderedInEpoch(address) : 0,
-  }
-}
-
-export async function getPool(tinlake: ITinlake): Promise<PoolData | null> {
-  const juniorReserve = await tinlake.getJuniorReserve()
-  const juniorTokenPrice = await tinlake.getTokenPriceJunior()
-  const seniorReserve = await tinlake.getSeniorReserve()
-  const seniorTokenPrice = await tinlake.getTokenPriceSenior()
-  const seniorInterestRate = await tinlake.getSeniorInterestRate()
-  const seniorTokenSupply = await tinlake.getSeniorTotalSupply()
-  const minJuniorRatio = await tinlake.getMinJuniorRatio()
-  const maxJuniorRatio = await tinlake.getMaxJuniorRatio()
-  const maxReserve = await tinlake.getMaxReserve()
-  const juniorTokenSupply = await tinlake.getJuniorTotalSupply()
-  const currentJuniorRatio = await tinlake.getCurrentJuniorRatio()
-
-  const netAssetValue = await tinlake.getCurrentNAV()
-  const reserve = juniorReserve.add(seniorReserve)
-  const outstandingVolume = await tinlake.getTotalDebt()
-  const availableCurrency = await tinlake.getAvailableFunds()
-
-  const seniorPendingInvestments = await tinlake.getSeniorPendingInvestments()
-  const seniorPendingRedemptions = await tinlake.getSeniorPendingRedemptions()
-  const juniorPendingInvestments = await tinlake.getJuniorPendingInvestments()
-  const juniorPendingRedemptions = await tinlake.getJuniorPendingRedemptions()
-
-  const totalPendingInvestments = seniorPendingInvestments.add(juniorPendingInvestments)
-
-  const juniorRedemptionsCurrency = new BN(juniorPendingRedemptions)
-    .mul(new BN(juniorTokenPrice))
-    .div(new BN(10).pow(new BN(27)))
-
-  const seniorRedemptionsCurrency = new BN(seniorPendingRedemptions)
-    .mul(new BN(seniorTokenPrice))
-    .div(new BN(10).pow(new BN(27)))
-
-  const totalRedemptionsCurrency = juniorRedemptionsCurrency.add(seniorRedemptionsCurrency)
-
-  const seniorSymbol = await tinlake.getSeniorTokenSymbol()
-  const seniorDecimals = await tinlake.getSeniorTokenDecimals()
-  const juniorSymbol = await tinlake.getJuniorTokenSymbol()
-  const juniorDecimals = await tinlake.getJuniorTokenDecimals()
-
-  const epoch = await getEpoch(tinlake)
-
-  const address = await tinlake.signer?.getAddress()
-  const seniorInMemberlist = address ? await tinlake.checkSeniorTokenMemberlist(address) : false
-  const juniorInMemberlist = address ? await tinlake.checkJuniorTokenMemberlist(address) : false
-
-  return {
-    minJuniorRatio,
-    maxJuniorRatio,
-    currentJuniorRatio,
-    maxReserve,
-    netAssetValue,
-    outstandingVolume,
-    reserve,
-    epoch,
-    totalPendingInvestments,
-    totalRedemptionsCurrency,
-    junior: {
-      type: 'junior',
-      availableFunds: juniorReserve,
-      tokenPrice: juniorTokenPrice,
-      totalSupply: juniorTokenSupply,
-      token: juniorSymbol,
-      decimals: juniorDecimals,
-      address: tinlake.contractAddresses['JUNIOR_TOKEN'],
-      pendingInvestments: juniorPendingInvestments,
-      pendingRedemptions: juniorPendingRedemptions,
-      inMemberlist: juniorInMemberlist,
-    },
-    senior: {
-      type: 'senior',
-      availableFunds: seniorReserve,
-      tokenPrice: seniorTokenPrice,
-      totalSupply: seniorTokenSupply,
-      token: seniorSymbol,
-      decimals: seniorDecimals,
-      address: tinlake.contractAddresses['SENIOR_TOKEN'],
-      interestRate: seniorInterestRate,
-      pendingInvestments: seniorPendingInvestments,
-      pendingRedemptions: seniorPendingRedemptions,
-      inMemberlist: seniorInMemberlist,
-    },
-    availableFunds: availableCurrency,
   }
 }
 

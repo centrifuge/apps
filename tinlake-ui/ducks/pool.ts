@@ -305,25 +305,6 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
 
         data.totalRedemptionsCurrency = juniorRedemptionsCurrency.add(seniorRedemptionsCurrency)
 
-        // TODO: used for debugging, to be removed before merging
-        // try {
-        //   let newObj: any = {}
-        //   Object.keys(data).map((key: string) => {
-        //     if (key !== 'junior' && key !== 'senior') newObj[key] = (data as any)[key].toString()
-        //   })
-        //   newObj['junior'] = {}
-        //   Object.keys((data as any)['junior']).map((key: string) => {
-        //     newObj['junior'][key] = (data as any)['junior'][key].toString()
-        //   })
-        //   newObj['senior'] = {}
-        //   Object.keys((data as any)['senior']).map((key: string) => {
-        //     newObj['senior'][key] = (data as any)['senior'][key].toString()
-        //   })
-        //   console.log(`New data: ${newObj['senior']['token']} / ${newObj['junior']['token']}`, newObj)
-        // } catch (e) {
-        //   console.error(e)
-        // }
-
         dispatch({ data: data, type: RECEIVE_POOL })
       })
 
