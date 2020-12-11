@@ -218,9 +218,14 @@ export let ipfsPools: IpfsPools | undefined = undefined
 // TODO: temp for now until we figure out a better way to handle not having an instance of Tinlake
 const assembleIpfsUrl = async (): Promise<string> => {
     const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+  let url: URL
+  if (process.env.NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE) {
+    url= new URL(process.env.NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE, config.ipfsGateway)
+    return url.href
+  }
     const registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, provider)
     const poolData = await registry.pools(0)
-    const url = new URL(poolData[3], config.ipfsGateway)
+    url = new URL(poolData[3], config.ipfsGateway)
     return url.href
 }
 

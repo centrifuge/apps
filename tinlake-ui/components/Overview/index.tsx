@@ -70,7 +70,7 @@ const Overview: React.FC<Props> = (props: Props) => {
 
           {!isUpcoming && (
             <Box margin={{ top: 'medium', left: 'auto' }}>
-              <PoolLink href={{ pathname: '/assets' }}>
+              <PoolLink href={'/assets' }>
                 <Anchor>
                   <Button label="View all assets" />
                 </Anchor>
