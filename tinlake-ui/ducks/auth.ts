@@ -293,6 +293,7 @@ export function setAddressAndLoadData(
     }
 
     dispatch({ address, type: RECEIVE_ADDRESS })
+    dispatch(setAuthState('authed'))
 
     dispatch(loadProxies())
     dispatch(loadPermissions(tinlake))

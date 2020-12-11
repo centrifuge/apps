@@ -7,7 +7,7 @@ import { getEpoch } from '../services/tinlake/actions'
 import { createWatcher } from '@makerdao/multicall'
 import config from '../config'
 import { BigNumber } from 'ethers'
-import { seniorToJuniorRatio } from '../utils/ratios'
+import { Fixed27Base, seniorToJuniorRatio } from '../utils/ratios'
 
 const multicallConfig = {
   rpcUrl: config.rpcUrl,
@@ -283,11 +283,11 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
 
         const juniorRedemptionsCurrency = (data.junior?.pendingRedemptions || new BN(0))
           .mul(data.junior?.tokenPrice || new BN(0))
-          .div(new BN(10).pow(new BN(27)))
+          .div(Fixed27Base)
 
         const seniorRedemptionsCurrency = (data.senior?.pendingRedemptions || new BN(0))
           .mul(data.senior?.tokenPrice || new BN(0))
-          .div(new BN(10).pow(new BN(27)))
+          .div(Fixed27Base)
 
         data.totalRedemptionsCurrency = juniorRedemptionsCurrency.add(seniorRedemptionsCurrency)
 
