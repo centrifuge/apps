@@ -13,9 +13,11 @@ export const PoolRow = styled.div`
   background: white;
   margin-bottom: 16px;
   cursor: pointer;
+  transition: all 100ms linear 0s;
 
   &:hover {
-    box-shadow: 0 2px 6px #00000060;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 2px 6px;
+    transform: scale(1.01);
   }
 `
 
@@ -40,7 +42,7 @@ export const Name = styled.h3`
 export const Type = styled.p`
   margin: 0;
   font-weight: 500;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 14px;
   color: #979797;
 `

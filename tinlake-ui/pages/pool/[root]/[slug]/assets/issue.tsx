@@ -27,7 +27,7 @@ class LoanIssuePage extends React.Component<Props> {
     return (
       <WithFooter>
         <Head>
-          <title>Open Financing: {pool.metadata.name} | Tinlake | Centrifuge</title>
+          <title>Lock NFT: {pool.metadata.name} | Tinlake | Centrifuge</title>
         </Head>
         <Header
           poolTitle={pool.metadata.shortName || pool.metadata.name}
@@ -46,9 +46,9 @@ class LoanIssuePage extends React.Component<Props> {
                     render={(auth) => (
                       <Box>
                         <SecondaryHeader>
-                          <Box direction="row" gap="small" align="center">
+                          <Box direction="row" gap="small" align="center" margin={{ top: 'medium' }}>
                             <BackLink href={'/assets'} />
-                            <Heading level="3">Open Financing</Heading>
+                            <Heading level="4">Lock NFT</Heading>
                           </Box>
                         </SecondaryHeader>
                         <IssueLoan

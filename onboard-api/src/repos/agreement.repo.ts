@@ -37,6 +37,17 @@ export class AgreementRepo {
     return (agreements as unknown) as Agreement[]
   }
 
+  async findByUserAndPool(userId: string, poolId: string): Promise<Agreement[]> {
+    const agreements = await this.db.sql`
+      select *
+      from agreements
+      where agreements.user_id = ${userId}
+      and agreements.pool_id = ${poolId}
+    `
+
+    return (agreements as unknown) as Agreement[]
+  }
+
   async findOrCreate(userId: string, email: string, poolId: string, templateId: string): Promise<Agreement> {
     const [existingAgreement] = await this.db.sql`
       select *

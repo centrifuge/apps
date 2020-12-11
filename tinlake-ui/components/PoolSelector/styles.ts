@@ -1,6 +1,15 @@
 import { Box, FormField } from 'grommet'
 import styled from 'styled-components'
 
+export const DesktopOnlyBox = styled.div`
+  display: block;
+  width: 239px;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`
+
 export const Button = styled(Box)`
   flex: 0 0 239px;
   height: 32;
@@ -12,6 +21,14 @@ export const Button = styled(Box)`
 
 export const PoolTitle = styled.div`
   flex-grow: 1;
+`
+
+export const Icon = styled.img`
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  position: relative;
+  top: 5px;
 `
 
 export const Desc = styled.div`

@@ -33,6 +33,7 @@ create table if not exists kyc (
 
 create unique index if not exists kyc_unique on kyc (provider, provider_account_id);
 create index if not exists kyc_user_id_lookup on kyc(user_id uuid_ops);
+create unique index if not exists kyc_unique_upsert on kyc (user_id, provider, provider_account_id); -- Required for the upsert method
 
 -- Agreements
 create table if not exists agreements (

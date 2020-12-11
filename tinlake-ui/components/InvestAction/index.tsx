@@ -69,7 +69,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
         <Box
           direction="row"
           justify="center"
-          width={props.pool ? '80%' : '40%'}
+          width={props.pool && !isUpcoming ? '80%' : '40%'}
           margin={{ left: 'auto', right: 'auto' }}
           gap="medium"
           style={{ textAlign: 'center' }}
@@ -98,7 +98,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
               />
             )}
           </Box>
-          {props.pool && (
+          {!isUpcoming && props.pool && (
             <Box flex={true} justify="between">
               {isUpcoming && <Paragraph>This pool is not open for investments yet</Paragraph>}
               {!investDisabled && (

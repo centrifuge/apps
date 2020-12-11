@@ -68,7 +68,7 @@ class PoolsMetrics extends React.Component<Props> {
             </Value>{' '}
             <Unit>DAI</Unit>
           </Cont>
-          <Label>Total Value Locked</Label>
+          <Label>Current Value Locked</Label>
         </Box>
       </>
     )

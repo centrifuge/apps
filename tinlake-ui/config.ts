@@ -90,6 +90,7 @@ interface Config {
   gasLimit: number
   onboardAPIHost: string
   featureFlagNewOnboarding: boolean
+  enableErrorLogging: boolean
 }
 
 const contractAddressesSchema = yup.object().shape({
@@ -272,6 +273,7 @@ const config: Config = {
     .required('NEXT_PUBLIC_ONBOARD_API_HOST is required')
     .validateSync(process.env.NEXT_PUBLIC_ONBOARD_API_HOST),
   featureFlagNewOnboarding: yup.boolean().validateSync(process.env.NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING),
+  enableErrorLogging: yup.boolean().validateSync(false),
 }
 
 export default config
