@@ -217,18 +217,19 @@ export let ipfsPools: IpfsPools | undefined = undefined
 // TODO: temp for now until we figure out a better way to handle not having an instance of Tinlake
 const assembleIpfsUrl = async (): Promise<string> => {
   // @ts-ignore
-  const provider = new ethers.providers.Web3Provider(window.ethereum)
-  const registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, provider)
-  const poolData = await registry.pools(0)
-  return poolData[3]
+    const provider = await new ethers.providers.Web3Provider(window.ethereum)
+    const registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, provider)
+    const poolData = await registry.pools(0)
+    const url = new URL(poolData[3], config.ipfsGateway)
+    return url.href
 }
 
 export const loadPoolsFromIPFS = async () => {
   if (ipfsPools) {
     return ipfsPools
   }
-  const hash = await assembleIpfsUrl()
-  const response = await fetch(`${config.ipfsGateway}${hash}`)
+  const url = await assembleIpfsUrl()
+  const response = await fetch(url)
   const body = await response.json()
   const networkConfigs: any[] = Object.values(body)
 
