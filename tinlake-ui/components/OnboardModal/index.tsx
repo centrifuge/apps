@@ -1,4 +1,6 @@
-import { Anchor, Box, Button, Paragraph } from 'grommet'
+import { Spinner } from '@centrifuge/axis-spinner'
+import { AddressStatus } from '@centrifuge/onboard-api/src/controllers/types'
+import { Box, Button, Paragraph } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -8,8 +10,6 @@ import { PoolData as PoolDataV3, PoolState } from '../../ducks/pool'
 import { PoolsState } from '../../ducks/pools'
 import { PoolLink } from '../PoolLink'
 import { FormModal, InvestmentSteps } from './styles'
-import { AddressStatus } from '@centrifuge/onboard-api/src/controllers/types'
-import { Spinner } from '@centrifuge/axis-spinner'
 
 interface Props {
   anchor?: React.ReactNode

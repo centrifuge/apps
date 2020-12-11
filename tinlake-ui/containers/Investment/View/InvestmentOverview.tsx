@@ -2,18 +2,17 @@ import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-
 import BN from 'bn.js'
 import { Box, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import OnboardModal from '../../../components/OnboardModal'
 import { TINRatioBar } from '../../../components/TINRatioBar/index'
 import { Tooltip } from '../../../components/Tooltip'
 import config, { Pool, UpcomingPool } from '../../../config'
-import { LoansState } from '../../../ducks/loans'
+import { loadLoans, LoansState } from '../../../ducks/loans'
 import { PoolData, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { toPrecision } from '../../../utils/toPrecision'
-import { loadLoans } from '../../../ducks/loans'
 import {
   BalanceSheetDiagram,
   BalanceSheetDiagramLeft,

@@ -1,6 +1,7 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { FormDown } from 'grommet-icons'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import { LoadingValue } from '../../../components/LoadingValue/index'
@@ -11,9 +12,7 @@ import { createTransaction, TransactionProps, useTransactionState } from '../../
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
 import { toPrecision } from '../../../utils/toPrecision'
-import { Sidenote, SignIcon } from './styles'
-import { Caret } from './styles'
-import { FormDown } from 'grommet-icons'
+import { Caret, Sidenote, SignIcon } from './styles'
 
 interface Props extends TransactionProps {
   tinlake: ITinlake

@@ -1,12 +1,12 @@
 import { Tranche } from '@centrifuge/tinlake-js'
+import { createWatcher } from '@makerdao/multicall'
 import BN from 'bn.js'
+import { BigNumber } from 'ethers'
 import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
-import { getEpoch } from '../services/tinlake/actions'
-import { createWatcher } from '@makerdao/multicall'
 import config from '../config'
-import { BigNumber } from 'ethers'
+import { getEpoch } from '../services/tinlake/actions'
 import { Fixed27Base, seniorToJuniorRatio } from '../utils/ratios'
 
 const multicallConfig = {
