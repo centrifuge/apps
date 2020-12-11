@@ -6,9 +6,10 @@ import investmentsReducer from '../ducks/investments'
 import loansReducer from '../ducks/loans'
 import poolReducer from '../ducks/pool'
 import poolsReducer from '../ducks/pools'
+import config from '../config'
 import transactionReducer from '../ducks/transactions'
 
-const sentryReduxEnhancer = Sentry.createReduxEnhancer({})
+const sentryReduxEnhancer = config.enableErrorLogging ? Sentry.createReduxEnhancer({}) : {}
 
 declare global {
   interface Window {
