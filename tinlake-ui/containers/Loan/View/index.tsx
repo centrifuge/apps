@@ -1,3 +1,4 @@
+import { Spinner } from '@centrifuge/axis-spinner'
 import { Box, Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
@@ -10,7 +11,6 @@ import { loadLoan, LoansState } from '../../../ducks/loans'
 import { TransactionState } from '../../../ducks/transactions'
 import LoanBorrow from '../Borrow'
 import LoanRepay from '../Repay'
-import { Spinner } from '@centrifuge/axis-spinner'
 
 interface Props {
   tinlake: any

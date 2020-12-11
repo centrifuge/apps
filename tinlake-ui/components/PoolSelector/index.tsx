@@ -5,17 +5,17 @@ import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
 import {
-  DesktopOnlyBox,
   Button,
   Caret,
   Desc,
+  DesktopOnlyBox,
+  Icon,
   PoolLink,
   PoolList,
   PoolTitle,
   SearchField,
   Title,
   Wrapper,
-  Icon,
 } from './styles'
 
 interface Props {

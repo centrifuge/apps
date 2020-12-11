@@ -1,13 +1,12 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
-import { PoolLink } from '../../components/PoolLink'
-import { Pool, UpcomingPool } from '../../config'
-import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
-import { PoolState } from '../../ducks/pool'
 import InvestAction from '../../components/InvestAction'
 import OnboardModal from '../../components/OnboardModal'
-import config from '../../config'
+import { PoolLink } from '../../components/PoolLink'
+import config, { Pool, UpcomingPool } from '../../config'
+import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
+import { PoolState } from '../../ducks/pool'
 
 interface Props {
   pool?: PoolState

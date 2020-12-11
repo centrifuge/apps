@@ -1,12 +1,12 @@
 import * as Sentry from '@sentry/react'
 import { applyMiddleware, combineReducers, compose, createStore } from 'redux'
 import thunk from 'redux-thunk'
+import config from '../config'
 import authReducer from '../ducks/auth'
 import investmentsReducer from '../ducks/investments'
 import loansReducer from '../ducks/loans'
 import poolReducer from '../ducks/pool'
 import poolsReducer from '../ducks/pools'
-import config from '../config'
 import transactionReducer from '../ducks/transactions'
 
 const sentryReduxEnhancer = config.enableErrorLogging ? Sentry.createReduxEnhancer({}) : {}
