@@ -145,7 +145,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
           {status?.kyc?.url && !status.kyc?.created && (
             <Box flex={true} justify="between">
               <Paragraph>Ready to start the KYC process to onboard as an investor.</Paragraph>
-              <Button primary label={`Start KYC`} href={status.kyc?.url} fill={false} />
+              <Button primary label={`Start KYC now`} href={status.kyc?.url} fill={false} />
             </Box>
           )}
           {status?.kyc?.url &&

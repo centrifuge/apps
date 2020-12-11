@@ -7,6 +7,7 @@ import { getEpoch } from '../services/tinlake/actions'
 import { createWatcher } from '@makerdao/multicall'
 import config from '../config'
 import { BigNumber } from 'ethers'
+import { seniorToJuniorRatio } from '../utils/ratios'
 
 const multicallConfig = {
   rpcUrl: config.rpcUrl,
@@ -95,7 +96,7 @@ export default function reducer(state: PoolState = initialState, action: AnyActi
   }
 }
 
-let watcher: any = undefined
+let watcher: any = createWatcher([], multicallConfig)
 
 export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, undefined, Action> {
   return async (dispatch, getState) => {
@@ -108,11 +109,7 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
 
     const toBN = (val: BigNumber) => new BN(val.toString())
 
-    const seniorToJuniorRatio = (seniorRatio: BN) => {
-      return new BN(10).pow(new BN(27)).sub(seniorRatio)
-    }
-
-    watcher = createWatcher(
+    watcher.recreate(
       [
         {
           target: tinlake.contractAddresses.ASSESSOR,
@@ -264,16 +261,19 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
       watcher.batch().subscribe((updates: any[]) => {
         const data: Partial<PoolData> = updates.reduce((prev: any, update: any) => {
           const prefix = update.type.split('.')[0]
-          if (prefix === 'junior') prev['junior'][update.type.split('.')[1]] = update.value
-          else if (prefix === 'senior') prev['senior'][update.type.split('.')[1]] = update.value
-          else prev[update.type] = update.value
+          if (prefix === 'junior' || prefix === 'senior') {
+            const item = update.type.split('.')[1]
+            prev[prefix][item] = update.value
+          } else {
+            prev[update.type] = update.value
+          }
+
           return prev
         }, prev)
 
-        const zero = new BN(0)
-        data.junior!.availableFunds = (data.reserve || zero).sub(data.senior!.availableFunds || zero)
-        data.totalPendingInvestments = (data.senior!.pendingInvestments || zero).add(
-          data.junior!.pendingInvestments || zero
+        data.junior!.availableFunds = (data.reserve || new BN(0)).sub(data.senior!.availableFunds || new BN(0))
+        data.totalPendingInvestments = (data.senior!.pendingInvestments || new BN(0)).add(
+          data.junior!.pendingInvestments || new BN(0)
         )
 
         data.senior!.address = tinlake.contractAddresses['JUNIOR_TOKEN']
@@ -281,15 +281,34 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
         data.junior!.address = tinlake.contractAddresses['SENIOR_TOKEN']
         data.junior!.inMemberlist = juniorInMemberlist
 
-        const juniorRedemptionsCurrency = (data.junior?.pendingRedemptions || zero)
-          .mul(data.junior?.tokenPrice || zero)
+        const juniorRedemptionsCurrency = (data.junior?.pendingRedemptions || new BN(0))
+          .mul(data.junior?.tokenPrice || new BN(0))
           .div(new BN(10).pow(new BN(27)))
 
-        const seniorRedemptionsCurrency = (data.senior?.pendingRedemptions || zero)
-          .mul(data.senior?.tokenPrice || zero)
+        const seniorRedemptionsCurrency = (data.senior?.pendingRedemptions || new BN(0))
+          .mul(data.senior?.tokenPrice || new BN(0))
           .div(new BN(10).pow(new BN(27)))
 
         data.totalRedemptionsCurrency = juniorRedemptionsCurrency.add(seniorRedemptionsCurrency)
+
+        // TODO: used for debugging, to be removed before merging
+        // try {
+        //   let newObj: any = {}
+        //   Object.keys(data).map((key: string) => {
+        //     if (key !== 'junior' && key !== 'senior') newObj[key] = (data as any)[key].toString()
+        //   })
+        //   newObj['junior'] = {}
+        //   Object.keys((data as any)['junior']).map((key: string) => {
+        //     newObj['junior'][key] = (data as any)['junior'][key].toString()
+        //   })
+        //   newObj['senior'] = {}
+        //   Object.keys((data as any)['senior']).map((key: string) => {
+        //     newObj['senior'][key] = (data as any)['senior'][key].toString()
+        //   })
+        //   console.log(`New data: ${newObj['senior']['token']} / ${newObj['junior']['token']}`, newObj)
+        // } catch (e) {
+        //   console.error(e)
+        // }
 
         dispatch({ data: data, type: RECEIVE_POOL })
       })
