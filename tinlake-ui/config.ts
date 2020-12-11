@@ -217,39 +217,39 @@ export let ipfsPools: IpfsPools | undefined = undefined
 
 // TODO: temp for now until we figure out a better way to handle not having an instance of Tinlake
 const assembleIpfsUrl = async (): Promise<string> => {
-    const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+  const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
   let url: URL
   if (process.env.NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE) {
-    url= new URL(process.env.NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE, config.ipfsGateway)
+    url = new URL(process.env.NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE, config.ipfsGateway)
     return url.href
   }
-    const registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, provider)
-    const poolData = await registry.pools(0)
-    url = new URL(poolData[3], config.ipfsGateway)
-    return url.href
+  const registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, provider)
+  const poolData = await registry.pools(0)
+  url = new URL(poolData[3], config.ipfsGateway)
+  return url.href
 }
 
 export const loadPoolsFromIPFS = async () => {
   if (ipfsPools) {
     return ipfsPools
   }
-    const url = await assembleIpfsUrl()
-    const response = await fetch(url)
-    const body = await response.json()
-    const networkConfigs: any[] = Object.values(body)
+  const url = await assembleIpfsUrl()
+  const response = await fetch(url)
+  const body = await response.json()
+  const networkConfigs: any[] = Object.values(body)
 
-    const active = poolsSchema
-      .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
-      .map((p) => ({ ...p, isUpcoming: false } as Pool))
-    const archived = archivedPoolsSchema
-      .validateSync(networkConfigs.filter((p: Pool) => 'archivedValues' in p))
-      .map((p) => ({ ...p, isArchived: true } as ArchivedPool))
-    const upcoming = upcomingPoolsSchema
-      .validateSync(networkConfigs.filter((p: Pool) => !('archivedValues' in p) && !p.addresses))
-      .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
+  const active = poolsSchema
+    .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
+    .map((p) => ({ ...p, isUpcoming: false } as Pool))
+  const archived = archivedPoolsSchema
+    .validateSync(networkConfigs.filter((p: Pool) => 'archivedValues' in p))
+    .map((p) => ({ ...p, isArchived: true } as ArchivedPool))
+  const upcoming = upcomingPoolsSchema
+    .validateSync(networkConfigs.filter((p: Pool) => !('archivedValues' in p) && !p.addresses))
+    .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
 
-    ipfsPools = { active, upcoming, archived }
-    return ipfsPools
+  ipfsPools = { active, upcoming, archived }
+  return ipfsPools
 }
 
 const config: Config = {
