@@ -15,6 +15,7 @@ const multicallConfig = {
     config.network === 'Mainnet'
       ? '0xeefba1e63905ef1d7acba5a8513c70307c1ce441'
       : '0x2cc8688c5f75e365aaeeb4ea8d6a480405a48d2a',
+  interval: 60000,
 }
 
 // Actions
@@ -245,6 +246,7 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
       multicallConfig
     )
 
+    const t0 = performance.now()
     const address = await tinlake.signer?.getAddress()
 
     // TODO: also get this using multicall
@@ -252,12 +254,17 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
     const juniorInMemberlist = address ? await tinlake.checkJuniorTokenMemberlist(address) : false
 
     try {
-      const prev = ((getState() as any).pool.poolId === tinlake.contractAddresses.ROOT_CONTRACT &&
-        (getState() as any).pool.data) || {
+      const initial = {
         junior: { type: 'junior' },
         senior: { type: 'senior' },
         epoch: {},
       }
+
+      const prev =
+        (getState() as any).pool.poolId === tinlake.contractAddresses.ROOT_CONTRACT
+          ? (getState() as any).pool.data || initial
+          : initial
+
       watcher.batch().subscribe((updates: any[]) => {
         const data: Partial<PoolData> = updates.reduce((prev: any, update: any) => {
           const prefix = update.type.split('.')[0]
@@ -311,6 +318,8 @@ export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, un
         // }
 
         dispatch({ data: data, type: RECEIVE_POOL })
+        const t1 = performance.now()
+        console.log(`Time: ${t1 - t0}seconds`)
       })
 
       watcher.start()

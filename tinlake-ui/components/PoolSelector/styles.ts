@@ -14,6 +14,14 @@ export const PoolTitle = styled.div`
   flex-grow: 1;
 `
 
+export const Icon = styled.img`
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  position: relative;
+  top: 5px;
+`
+
 export const Desc = styled.div`
   height: 12px;
   line-height: 12px;

@@ -1977,10 +1977,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@centrifuge/tinlake-pools-mainnet@npm:0.0.1-develop.17":
-  version: 0.0.1-develop.17
-  resolution: "@centrifuge/tinlake-pools-mainnet@npm:0.0.1-develop.17"
-  checksum: 82d509f19f12e1dc8e4b57bcbd2a3daa321b4087d591cd3d1ef5a2e9cfbc45f3f8da0466e81352cbd7ad48100588505d267fef8b334669b05093c815cd0b87a8
+"@centrifuge/tinlake-pools-mainnet@npm:0.0.1-develop.19":
+  version: 0.0.1-develop.19
+  resolution: "@centrifuge/tinlake-pools-mainnet@npm:0.0.1-develop.19"
+  checksum: cccc52580584f7fb3527c40bf22e3682d5d715b9adbf11e80e4b23da8b8131ebb981e515d2ed8e1f02744c7222adac75b0d0559cb490e20ea16cba732be29a29
   languageName: node
   linkType: hard
 
@@ -2010,7 +2010,7 @@ __metadata:
     "@centrifuge/onboard-api": "workspace:*"
     "@centrifuge/tinlake-js": "workspace:*"
     "@centrifuge/tinlake-pools-kovan": 0.0.1-develop.6
-    "@centrifuge/tinlake-pools-mainnet": 0.0.1-develop.17
+    "@centrifuge/tinlake-pools-mainnet": 0.0.1-develop.19
     "@makerdao/multicall": ^0.12.0
     "@sendgrid/mail": 7.1.1
     "@sentry/react": ^5.26.0

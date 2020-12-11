@@ -5,6 +5,9 @@ import { PoolLink } from '../../components/PoolLink'
 import { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
 import { PoolState } from '../../ducks/pool'
+import InvestAction from '../../components/InvestAction'
+import OnboardModal from '../../components/OnboardModal'
+import config from '../../config'
 
 interface Props {
   pool?: PoolState
@@ -13,12 +16,20 @@ interface Props {
 }
 
 const Overview: React.FC<Props> = (props: Props) => {
+  const isUpcoming = props.selectedPool?.isUpcoming === true
+
   return (
     <Box margin={{ bottom: 'large', top: 'medium' }}>
-      <Heading level="4">Pool Overview of {props.selectedPool.metadata.name} </Heading>
-      <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />
+      {!isUpcoming && (
+        <>
+          <Heading level="4">Pool Overview of {props.selectedPool.metadata.name} </Heading>
+          <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />
+        </>
+      )}
 
-      <Heading level="4">Asset Originator Details</Heading>
+      <Heading level="4">
+        {isUpcoming ? `Upcoming Pool: ${props.selectedPool.metadata.name}` : 'Asset Originator Details'}
+      </Heading>
       <Box
         direction="row"
         justify="between"
@@ -58,13 +69,25 @@ const Overview: React.FC<Props> = (props: Props) => {
             </TableBody>
           </Table>
 
-          <Box margin={{ top: 'medium', left: 'auto' }}>
-            <PoolLink href={{ pathname: '/assets' }}>
-              <Anchor>
-                <Button label="View all assets" />
-              </Anchor>
-            </PoolLink>
-          </Box>
+          {!isUpcoming && (
+            <Box margin={{ top: 'medium', left: 'auto' }}>
+              <PoolLink href={{ pathname: '/assets' }}>
+                <Anchor>
+                  <Button label="View all assets" />
+                </Anchor>
+              </PoolLink>
+            </Box>
+          )}
+
+          {isUpcoming && (
+            <Box margin={{ top: 'medium' }}>
+              {config.featureFlagNewOnboarding ? (
+                <OnboardModal pool={props.selectedPool} />
+              ) : (
+                <InvestAction pool={props.selectedPool} />
+              )}
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>

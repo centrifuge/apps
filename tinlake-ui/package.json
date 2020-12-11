@@ -48,7 +48,7 @@
     "@centrifuge/onboard-api": "workspace:*",
     "@centrifuge/tinlake-js": "workspace:*",
     "@centrifuge/tinlake-pools-kovan": "0.0.1-develop.6",
-    "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.17",
+    "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.19",
     "@makerdao/multicall": "^0.12.0",
     "@sendgrid/mail": "7.1.1",
     "@sentry/react": "^5.26.0",

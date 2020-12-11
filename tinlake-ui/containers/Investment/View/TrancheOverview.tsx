@@ -114,12 +114,14 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
         <Heading level="5" margin={'0'}>
           <TokenLogo src={`/static/${token}_final.svg`} />
-          {token} Balance
+          {trancheData?.inMemberlist === true ? `${token} Balance` : token}
         </Heading>
         <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-          <LoadingValue done={balance !== undefined} height={22}>
-            {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))}
-          </LoadingValue>
+          {trancheData?.inMemberlist === true && (
+            <LoadingValue done={balance !== undefined} height={22}>
+              {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))}
+            </LoadingValue>
+          )}
         </Heading>
       </Box>
 
