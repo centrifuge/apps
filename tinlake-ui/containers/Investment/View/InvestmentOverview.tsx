@@ -127,9 +127,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell scope="row">
-                <Tooltip id="outstandingVolume">Active Financings</Tooltip>
-              </TableCell>
+              <TableCell scope="row">Active Financings</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
                 <LoadingValue done={outstandingLoans !== undefined}>{outstandingLoans || 0}</LoadingValue>
               </TableCell>
