@@ -90,10 +90,6 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
     getOnboardingStatus()
   }, [pools])
 
-  React.useEffect(() => {
-    console.log(authState.authState)
-  }, [authState.authState])
-
   return (
     <>
       {(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (

@@ -13,6 +13,7 @@ import config, { Pool } from '../../../../../config'
 import LoanList from '../../../../../containers/Loan/List'
 import LoanOverview from '../../../../../containers/Loan/Overview/index'
 import { menuItems } from '../../../../../menuItems'
+import PoolTitle from '../../../../../components/PoolTitle'
 
 interface Props extends WithRouterProps {
   root: string
@@ -45,7 +46,8 @@ class LoanListPage extends React.Component<Props> {
                     render={(auth) => (
                       <Box>
                         <Box direction="row" margin={{ top: 'medium' }} justify="between">
-                          <Heading level="4">Asset Overview of {pool.metadata.name}</Heading>
+                          <PoolTitle pool={this.props.pool} page="Assets" />
+
                           <Box pad={{ top: 'small' }}>
                             <PoolLink href={'/assets/issue'}>
                               <Button primary label="Lock NFT" />

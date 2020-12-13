@@ -9,6 +9,7 @@ import AdminActions from './AdminActions'
 import EpochOverview from './EpochOverview'
 import ManageMemberlist from './ManageMemberlist'
 import TrancheOverview from './TrancheOverview'
+import PoolTitle from '../../../components/PoolTitle'
 
 interface Props {
   activePool: Pool
@@ -31,7 +32,8 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
 
   return (
     <Box margin={{ top: 'medium' }}>
-      <Heading level="4">Invest/Redeem in {props.activePool?.metadata.name}</Heading>
+      <PoolTitle pool={props.activePool} page="Investments" />
+
       <Box direction="row" justify="between" gap="medium" margin={{ bottom: 'large' }}>
         <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="senior" />
         <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="junior" />

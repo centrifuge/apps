@@ -7,6 +7,7 @@ import { PoolLink } from '../../components/PoolLink'
 import config, { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
 import { PoolState } from '../../ducks/pool'
+import PoolTitle from '../../components/PoolTitle'
 
 interface Props {
   pool?: PoolState
@@ -21,7 +22,7 @@ const Overview: React.FC<Props> = (props: Props) => {
     <Box margin={{ bottom: 'large', top: 'medium' }}>
       {!isUpcoming && (
         <>
-          <Heading level="4">Pool Overview of {props.selectedPool.metadata.name} </Heading>
+          <PoolTitle pool={props.selectedPool} page="Pool Overview" />
           <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />
         </>
       )}
