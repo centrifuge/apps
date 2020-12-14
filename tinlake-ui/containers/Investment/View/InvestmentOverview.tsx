@@ -13,7 +13,6 @@ import { loadLoans, LoansState } from '../../../ducks/loans'
 import { PoolData, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { toPrecision } from '../../../utils/toPrecision'
-import { ethers } from 'ethers'
 import {
   BalanceSheetDiagram,
   BalanceSheetDiagramLeft,
@@ -56,16 +55,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const maxJuniorRatio = poolData ? parseRatio(poolData.maxJuniorRatio) : undefined
-
-  // const sign = async () => {
-  //   const message = 'Sign this message to verify your address for Tinlake'
-  //   if (props.tinlake.signer) {
-  //     const flatSig = await props.tinlake.signer.signMessage(message)
-  //     console.log({ flatSig })
-  //     const recovered = await ethers.utils.verifyMessage(message, flatSig)
-  //     console.log(recovered)
-  //   }
-  // }
 
   React.useEffect(() => {
     // sign()

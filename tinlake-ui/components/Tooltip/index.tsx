@@ -7,6 +7,7 @@ interface Props {
   children: React.ReactNode
 }
 
+// TODO: this is an experiment for better indicating tooltips, but should be improved upon at a later time
 // const Wrapper = styled.div`
 //   &:hover {
 //     &::after {
