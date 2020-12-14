@@ -9,7 +9,7 @@ import Header from '../../../../../components/Header'
 import { PoolLink } from '../../../../../components/PoolLink'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
-import { loadPoolsFromIPFS, Pool } from '../../../../../config'
+import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import LoanList from '../../../../../containers/Loan/List'
 import LoanOverview from '../../../../../containers/Loan/Overview/index'
 import { menuItems } from '../../../../../menuItems'
@@ -17,11 +17,12 @@ import { menuItems } from '../../../../../menuItems'
 interface Props extends WithRouterProps {
   root: string
   pool: Pool
+  ipfsPools: IpfsPools
 }
 
 class LoanListPage extends React.Component<Props> {
   render() {
-    const { pool } = this.props
+    const { pool, ipfsPools } = this.props
 
     return (
       <WithFooter>
@@ -29,6 +30,7 @@ class LoanListPage extends React.Component<Props> {
           <title>Assets: {pool.metadata.name} | Tinlake | Centrifuge</title>
         </Head>
         <Header
+          ipfsPools={ipfsPools}
           poolTitle={pool.metadata.shortName || pool.metadata.name}
           selectedRoute={'/assets'}
           menuItems={menuItems}
@@ -82,7 +84,7 @@ export async function getStaticPaths() {
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const pools = await loadPoolsFromIPFS()
-  return { props: { root: params?.root, pool: pools.active.find((p) => p.addresses.ROOT_CONTRACT === params?.root) } }
+  return { props: { root: params?.root, pool: pools.active.find((p) => p.addresses.ROOT_CONTRACT === params?.root), ipfsPools: pools} }
 }
 
 export default LoanListPage

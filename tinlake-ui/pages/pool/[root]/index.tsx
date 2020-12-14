@@ -7,7 +7,7 @@ import Container from '../../../components/Container'
 import Header from '../../../components/Header'
 import WithFooter from '../../../components/WithFooter'
 import WithTinlake from '../../../components/WithTinlake'
-import { ArchivedPool, loadPoolsFromIPFS, Pool as LivePool, UpcomingPool } from '../../../config'
+import { ArchivedPool, IpfsPools, loadPoolsFromIPFS, Pool as LivePool, UpcomingPool } from '../../../config'
 import OverviewArchived from '../../../containers/OverviewArchived'
 import OverviewUpcoming from '../../../containers/OverviewUpcoming'
 import { menuItems, noDemo } from '../../../menuItems'
@@ -16,17 +16,19 @@ interface Props {
   root: string
   pool: ArchivedPool | UpcomingPool | LivePool
   key: string
+  ipfsPools: IpfsPools
 }
 
 class Pool extends React.Component<Props> {
   render() {
-    const { pool } = this.props
+    const { pool, ipfsPools } = this.props
     return (
       <WithFooter>
         <Head>
           <title>Pool Overview: {pool.metadata.name} | Tinlake | Centrifuge</title>
         </Head>
         <Header
+          ipfsPools={ipfsPools}
           poolTitle={pool.metadata.shortName || pool.metadata.name}
           selectedRoute={'/'}
           menuItems={'isArchived' in pool || 'isUpcoming' in pool ? [] : menuItems.filter(noDemo)}
@@ -82,7 +84,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }
 
   // Fix to force page rerender, from https://github.com/vercel/next.js/issues/9992
-  const newProps: Props = { pool, root: params.root as string, key: pool.metadata.name || '-' }
+  const newProps: Props = { pool, root: params.root as string, key: pool.metadata.name || '-' , ipfsPools: pools}
 
   return { props: newProps }
 }

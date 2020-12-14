@@ -10,18 +10,19 @@ import Header from '../../../../../components/Header'
 import SecondaryHeader from '../../../../../components/SecondaryHeader'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
-import { loadPoolsFromIPFS, Pool } from '../../../../../config'
+import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import IssueLoan from '../../../../../containers/Loan/Issue'
 import { menuItems } from '../../../../../menuItems'
 
 interface Props extends WithRouterProps {
   root: string
   pool: Pool
+  ipfsPools: IpfsPools
 }
 
 class LoanIssuePage extends React.Component<Props> {
   render() {
-    const { pool } = this.props
+    const { pool, ipfsPools } = this.props
     const { tokenId, registry }: { tokenId: string; registry: string } = this.props.router.query as any
 
     return (
@@ -30,6 +31,7 @@ class LoanIssuePage extends React.Component<Props> {
           <title>Lock NFT: {pool.metadata.name} | Tinlake | Centrifuge</title>
         </Head>
         <Header
+          ipfsPools={ipfsPools}
           poolTitle={pool.metadata.shortName || pool.metadata.name}
           selectedRoute={'/assets/issue'}
           menuItems={menuItems}
@@ -84,7 +86,7 @@ export async function getStaticPaths() {
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const pools = await loadPoolsFromIPFS()
-  return { props: { root: params?.root, pool: pools.active.find((p) => p.addresses.ROOT_CONTRACT === params?.root) } }
+  return { props: { ipfsPools: pools, root: params?.root, pool: pools.active.find((p) => p.addresses.ROOT_CONTRACT === params?.root) } }
 }
 
 export default withRouter(LoanIssuePage)

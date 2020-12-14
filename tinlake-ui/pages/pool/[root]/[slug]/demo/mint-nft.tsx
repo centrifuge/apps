@@ -9,17 +9,18 @@ import Header from '../../../../../components/Header'
 import MintNFT from '../../../../../components/MintNFT'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
-import { loadPoolsFromIPFS, Pool } from '../../../../../config'
+import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import { menuItems } from '../../../../../menuItems'
 
 interface Props extends WithRouterProps {
   root: string
   pool: Pool
+  ipfsPools: IpfsPools
 }
 
 class MintNFTPage extends React.Component<Props> {
   render() {
-    const { pool } = this.props
+    const { pool, ipfsPools } = this.props
 
     return (
       <WithFooter>
@@ -27,6 +28,7 @@ class MintNFTPage extends React.Component<Props> {
           <title>Mint NFT: {pool.metadata.name} | Tinlake | Centrifuge</title>
         </Head>
         <Header
+          ipfsPools={ipfsPools}
           poolTitle={pool.metadata.shortName || pool.metadata.name}
           selectedRoute={'/demo/mint-nft'}
           menuItems={menuItems}

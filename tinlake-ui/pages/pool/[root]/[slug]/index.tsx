@@ -7,11 +7,12 @@ import Container from '../../../../components/Container'
 import Header from '../../../../components/Header'
 import WithFooter from '../../../../components/WithFooter'
 import WithTinlake from '../../../../components/WithTinlake'
-import { loadPoolsFromIPFS, Pool as IPool } from '../../../../config'
+import { IpfsPools, loadPoolsFromIPFS, Pool as IPool } from '../../../../config'
 import Overview from '../../../../containers/Overview'
 import { menuItems } from '../../../../menuItems'
 
 interface Props {
+  ipfsPools: IpfsPools
   root: string
   pool: IPool
   key: string
@@ -19,14 +20,14 @@ interface Props {
 
 class Pool extends React.Component<Props> {
   render() {
-    const { pool } = this.props
+    const { pool, ipfsPools } = this.props
 
     return (
       <WithFooter>
         <Head>
           <title>Pool Overview: {pool.metadata.name} | Tinlake | Centrifuge</title>
         </Head>
-        <Header poolTitle={pool.metadata.shortName || pool.metadata.name} selectedRoute={'/'} menuItems={menuItems} />
+        <Header poolTitle={pool.metadata.shortName || pool.metadata.name} selectedRoute={'/'} menuItems={menuItems} ipfsPools={ipfsPools}/>
         <Container>
           <Box justify="center" direction="row">
             <Box width="xlarge">
@@ -69,8 +70,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   // Fix to force page rerender, from https://github.com/vercel/next.js/issues/9992
   const newProps: Props = {
-    // pools,
     pool,
+    ipfsPools: pools,
     root: params.root as string,
     key: pool.metadata.name || '-',
   }
