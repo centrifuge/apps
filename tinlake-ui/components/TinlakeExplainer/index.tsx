@@ -1,4 +1,4 @@
-import { Anchor } from 'grommet'
+import { Anchor, Box, Button } from 'grommet'
 import { FormDown } from 'grommet-icons'
 import * as React from 'react'
 import { Btn, Caret, Container, Primer, Row, Text } from './styles'
@@ -27,12 +27,17 @@ const TinlakeExplainer: React.FC = () => {
           tokenized real-world assets such as invoices, mortgages or streaming royalties. Tinlake’s smart contract
           platform coordinates the different parties required to structure, administer and finance collateralized pools
           of these real-world assets.
-          <Anchor
-            margin={{ left: 'xsmall', top: 'small' }}
-            href="https://centrifuge.io/products/tinlake/"
-            target="_blank"
-            label="Learn more"
-          />
+          <Box justify="center">
+            <Box margin={{ bottom: 'small', left: 'auto', right: 'auto' }}>
+              <Button
+                primary
+                label="Read more about Tinlake"
+                href="https://centrifuge.io/products/tinlake/"
+                target="_blank"
+                fill={false}
+              />
+            </Box>
+          </Box>
         </Text>
       )}
     </Container>
