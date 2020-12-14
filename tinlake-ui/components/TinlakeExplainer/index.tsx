@@ -1,4 +1,4 @@
-import { Anchor, Box, Button } from 'grommet'
+import { Box, Button } from 'grommet'
 import { FormDown } from 'grommet-icons'
 import * as React from 'react'
 import { Btn, Caret, Container, Primer, Row, Text } from './styles'

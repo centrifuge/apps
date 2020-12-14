@@ -4,10 +4,10 @@ import * as React from 'react'
 import InvestAction from '../../components/InvestAction'
 import OnboardModal from '../../components/OnboardModal'
 import { PoolLink } from '../../components/PoolLink'
+import PoolTitle from '../../components/PoolTitle'
 import config, { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
 import { PoolState } from '../../ducks/pool'
-import PoolTitle from '../../components/PoolTitle'
 
 interface Props {
   pool?: PoolState

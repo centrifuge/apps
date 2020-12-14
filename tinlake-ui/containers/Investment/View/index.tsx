@@ -2,6 +2,7 @@ import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Heading } from 'grommet'
 import * as React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
+import PoolTitle from '../../../components/PoolTitle'
 import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
 import { loadPool } from '../../../ducks/pool'
@@ -9,7 +10,6 @@ import AdminActions from './AdminActions'
 import EpochOverview from './EpochOverview'
 import ManageMemberlist from './ManageMemberlist'
 import TrancheOverview from './TrancheOverview'
-import PoolTitle from '../../../components/PoolTitle'
 
 interface Props {
   activePool: Pool

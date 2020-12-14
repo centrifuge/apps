@@ -7,13 +7,13 @@ import Auth from '../../../../../components/Auth'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
 import { PoolLink } from '../../../../../components/PoolLink'
+import PoolTitle from '../../../../../components/PoolTitle'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
 import config, { Pool } from '../../../../../config'
 import LoanList from '../../../../../containers/Loan/List'
 import LoanOverview from '../../../../../containers/Loan/Overview/index'
 import { menuItems } from '../../../../../menuItems'
-import PoolTitle from '../../../../../components/PoolTitle'
 
 interface Props extends WithRouterProps {
   root: string
