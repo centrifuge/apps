@@ -17,8 +17,10 @@ import {
   Title,
   Wrapper,
 } from './styles'
+import { IpfsPools } from '../../config'
 
 interface Props {
+  ipfsPools: IpfsPools
   title: string
 }
 
@@ -44,7 +46,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
   }
 
   React.useEffect(() => {
-    dispatch(loadPools())
+    dispatch(loadPools(props.ipfsPools))
   }, [router.query])
 
   const onChangeSearchQuery = (event: React.FormEvent<HTMLInputElement>) => {
