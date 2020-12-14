@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import config, { Pool, UpcomingPool } from '../../config'
-import { AuthState, ensureAuthed } from '../../ducks/auth'
+import { ensureAuthed } from '../../ducks/auth'
 import { PoolData as PoolDataV3, PoolState } from '../../ducks/pool'
 import { PoolsState } from '../../ducks/pools'
 import { PoolLink } from '../PoolLink'
@@ -25,7 +25,6 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
   const router = useRouter()
   const dispatch = useDispatch()
 
-  const authState = useSelector<any, AuthState>((state) => state.auth)
   const pools = useSelector<any, PoolsState>((state) => state.pools)
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolDataV3 | undefined
