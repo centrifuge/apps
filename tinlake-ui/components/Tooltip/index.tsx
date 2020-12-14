@@ -7,6 +7,22 @@ interface Props {
   children: React.ReactNode
 }
 
+// TODO: this is an experiment for better indicating tooltips, but should be improved upon at a later time
+// const Wrapper = styled.div`
+//   &:hover {
+//     &::after {
+//       content: ' ?';
+//       margin-left: 8px;
+//       background: rgba(0, 0, 0, 0.8);
+//       color: #fff;
+//       padding: 3px 7px 3px 4px;
+//       font-weight: bold;
+//       border-radius: 100%;
+//       font-size: 12px;
+//     }
+//   }
+// `
+
 export const Tooltip: React.FC<Props> = (props: Props) => {
   return props.id in tooltips ? (
     <AxisTooltip
