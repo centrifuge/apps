@@ -369,7 +369,7 @@ export type IAnalyticsActions = {
   getSeniorOrderedInEpoch(user: string): Promise<number>
   getJuniorOrderedInEpoch(user: string): Promise<number>
   getAvailableFunds(): Promise<BN>
-  getPoolRegistryHash(registryAddress: string): Promise<any>
+  getPoolRegistryHash(registryAddress: string): Promise<string>
 }
 
 export default AnalyticsActions

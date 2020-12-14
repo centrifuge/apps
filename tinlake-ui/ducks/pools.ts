@@ -4,6 +4,7 @@ import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import Apollo from '../services/apollo'
 import { PoolStatus } from './pool'
+import { IpfsPools } from '../config'
 
 // Actions
 const LOAD_POOLS = 'tinlake-ui/pools/LOAD_POOLS'
@@ -71,10 +72,10 @@ export default function reducer(state: PoolsState = initialState, action: AnyAct
   }
 }
 
-export function loadPools(): ThunkAction<Promise<void>, PoolsState, undefined, Action> {
+export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, PoolsState, undefined, Action> {
   return async (dispatch) => {
     dispatch({ type: LOAD_POOLS })
-    const poolsData = await Apollo.getPools()
+    const poolsData = await Apollo.getPools(pools)
     dispatch({ data: poolsData, type: RECEIVE_POOLS })
   }
 }

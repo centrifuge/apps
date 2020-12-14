@@ -14,7 +14,7 @@ export const PoolLink: React.FC<Props> = ({ href, children }) => {
   let linkHref = ''
   const hrefWithoutStartSlash = href.substring(0, 1) === '/' ? href.substring(1) : href
   if (router.query.root) linkHref = `/pool/${router.query.root}/${router.query.slug}/${hrefWithoutStartSlash}`
-  else linkHref = `/pool/${router.query.slug}/${href}`
+  else linkHref = `/pool/${router.query.slug}/${hrefWithoutStartSlash}`
 
   return (
     <Link href={linkHref} shallow>

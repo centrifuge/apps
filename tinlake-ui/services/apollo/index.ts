@@ -5,7 +5,7 @@ import { createHttpLink } from 'apollo-link-http'
 import BN from 'bn.js'
 import gql from 'graphql-tag'
 import fetch from 'node-fetch'
-import config, { ArchivedPool, loadPoolsFromIPFS, Pool, UpcomingPool } from '../../config'
+import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
 import { PoolData, PoolsData } from '../../ducks/pools'
 import { getPoolStatus } from '../../utils/pool'
 import { UintBase } from '../../utils/ratios'
@@ -168,7 +168,7 @@ class Apollo {
     }))
   }
 
-  async getPools(): Promise<PoolsData> {
+  async getPools(ipfsPools: IpfsPools): Promise<PoolsData> {
     let result
     try {
       // juniorYield14Days
@@ -196,7 +196,6 @@ class Apollo {
     } catch (err) {
       throw new Error(`error occured while fetching assets from apollo ${err}`)
     }
-    const ipfsPools = await loadPoolsFromIPFS()
     let pools = result.data?.pools
       ? [
           ...this.injectPoolData(result.data.pools, ipfsPools.active),
