@@ -4,7 +4,7 @@ import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'gro
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { LoadingValue } from '../../../components/LoadingValue/index'
-import { Pool } from '../../../config'
+import config, { Pool } from '../../../config'
 import { loadPool, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
@@ -16,6 +16,8 @@ import RedeemCard from './RedeemCard'
 import { AddWalletLink, Info, MinTimeRemaining, TokenLogo } from './styles'
 import { ensureAuthed } from '../../../ducks/auth'
 import OnboardCard from './OnboardCard'
+import OnboardModal from '../../../components/OnboardModal'
+import InvestAction from '../../../components/InvestAction'
 
 interface Props {
   pool: Pool
@@ -219,7 +221,20 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         )}
 
         {address && props.tranche === 'senior' && props.pool && trancheData?.inMemberlist === false && (
-          <OnboardCard pool={props.pool} />
+          <Info>
+            {config.featureFlagNewOnboarding && <OnboardModal pool={props.pool} card />}
+            {!config.featureFlagNewOnboarding && (
+              <>
+                <Heading level="6" margin={{ bottom: 'xsmall' }}>
+                  Interested in investing?
+                </Heading>
+                If you want to learn more get started with your onboarding process.
+                <Box justify="end" margin={{ top: 'small' }}>
+                  <InvestAction pool={props.pool} />
+                </Box>
+              </>
+            )}
+          </Info>
         )}
 
         {!address && (
