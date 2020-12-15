@@ -1,7 +1,7 @@
+import contractAbiPoolRegistry from '@centrifuge/tinlake-js/src/abi/PoolRegistry.abi.json'
 import BN from 'bn.js'
 import { ethers } from 'ethers'
 import * as yup from 'yup'
-import contractAbiPoolRegistry from '@centrifuge/tinlake-js/src/abi/PoolRegistry.abi.json'
 import { PoolStatus } from './ducks/pool'
 import { networkUrlToName } from './utils/networkNameResolver'
 

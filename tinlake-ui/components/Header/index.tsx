@@ -110,7 +110,7 @@ const Header: React.FC<Props> = (props: Props) => {
               </a>
             </Link>
           </div>
-          {poolTitle && <PoolSelector title={poolTitle} ipfsPools={props.ipfsPools}/>}
+          {poolTitle && <PoolSelector title={poolTitle} ipfsPools={props.ipfsPools} />}
           <Box
             flex="grow"
             basis="auto"

@@ -84,7 +84,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }
 
   // Fix to force page rerender, from https://github.com/vercel/next.js/issues/9992
-  const newProps: Props = { pool, root: params.root as string, key: pool.metadata.name || '-' , ipfsPools: pools}
+  const newProps: Props = { pool, root: params.root as string, key: pool.metadata.name || '-', ipfsPools: pools }
 
   return { props: newProps }
 }

@@ -81,7 +81,13 @@ export async function getStaticPaths() {
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const pools = await loadPoolsFromIPFS()
-  return { props: { root: params?.root, pool: pools.active.find((p) => p.addresses.ROOT_CONTRACT === params?.root) , ipfsPools: pools} }
+  return {
+    props: {
+      root: params?.root,
+      pool: pools.active.find((p) => p.addresses.ROOT_CONTRACT === params?.root),
+      ipfsPools: pools,
+    },
+  }
 }
 
 export default withRouter(LoanPage)

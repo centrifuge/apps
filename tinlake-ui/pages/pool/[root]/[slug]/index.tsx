@@ -27,7 +27,12 @@ class Pool extends React.Component<Props> {
         <Head>
           <title>Pool Overview: {pool.metadata.name} | Tinlake | Centrifuge</title>
         </Head>
-        <Header poolTitle={pool.metadata.shortName || pool.metadata.name} selectedRoute={'/'} menuItems={menuItems} ipfsPools={ipfsPools}/>
+        <Header
+          poolTitle={pool.metadata.shortName || pool.metadata.name}
+          selectedRoute={'/'}
+          menuItems={menuItems}
+          ipfsPools={ipfsPools}
+        />
         <Container>
           <Box justify="center" direction="row">
             <Box width="xlarge">

@@ -21,7 +21,7 @@ export const PoolLink: React.FC<Props> = ({ href, as, children }) => {
   let poolAs: string | UrlObject = ''
   if (typeof href === 'string') {
     poolHref = getHref(router.query.root, href)
-    poolAs = getAs(router.query.root,  router.query.slug,as || href)
+    poolAs = getAs(router.query.root, router.query.slug, as || href)
   } else {
     poolHref = {
       ...href,
@@ -44,10 +44,14 @@ function getHref(root: string | string[] | undefined, href: string | null | unde
   if (root) {
     return `/pool/[root]/[slug]${href}`
   }
-    return `/pool/[slug]${href}`
+  return `/pool/[slug]${href}`
 }
 
-function getAs(root: string | string[] | undefined, slug: string | string[] | undefined , as: string | null | undefined | UrlObject): string {
+function getAs(
+  root: string | string[] | undefined,
+  slug: string | string[] | undefined,
+  as: string | null | undefined | UrlObject
+): string {
   if (root) {
     return `/pool/${root}/${slug}${as}`
   }

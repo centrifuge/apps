@@ -3,6 +3,7 @@ import { FormDown, FormSearch } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { IpfsPools } from '../../config'
 import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
 import {
   Button,
@@ -17,7 +18,6 @@ import {
   Title,
   Wrapper,
 } from './styles'
-import { IpfsPools } from '../../config'
 
 interface Props {
   ipfsPools: IpfsPools

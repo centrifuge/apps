@@ -2,9 +2,9 @@ import BN from 'bn.js'
 import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
+import { IpfsPools } from '../config'
 import Apollo from '../services/apollo'
 import { PoolStatus } from './pool'
-import { IpfsPools } from '../config'
 
 // Actions
 const LOAD_POOLS = 'tinlake-ui/pools/LOAD_POOLS'
