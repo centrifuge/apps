@@ -1,15 +1,15 @@
 import { Spinner } from '@centrifuge/axis-spinner'
-import { AddressStatus } from '@centrifuge/onboard-api/src/controllers/types'
 import { Box, Button, Paragraph } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import config, { Pool, UpcomingPool } from '../../config'
+import { Pool, UpcomingPool } from '../../config'
 import { ensureAuthed } from '../../ducks/auth'
 import { PoolData as PoolDataV3, PoolState } from '../../ducks/pool'
 import { PoolsState } from '../../ducks/pools'
 import { PoolLink } from '../PoolLink'
 import { FormModal, InvestmentSteps } from './styles'
+import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
 
 interface Props {
   anchor?: React.ReactNode
@@ -25,12 +25,10 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
   const router = useRouter()
   const dispatch = useDispatch()
 
+  const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
   const pools = useSelector<any, PoolsState>((state) => state.pools)
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolDataV3 | undefined
-
-  const [status, setStatus] = React.useState<AddressStatus | undefined>(undefined)
-  const [agreementLink, setAgreementLink] = React.useState<string | undefined>(undefined)
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
@@ -39,35 +37,14 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
     setModalIsOpen(false) // Hide this modal and focus on the modal for connecting your wallet
   }
 
-  const getOnboardingStatus = async () => {
-    if (address && props.pool && 'addresses' in props.pool) {
-      try {
-        const req = await fetch(
-          `${config.onboardAPIHost}pools/${props.pool?.addresses?.ROOT_CONTRACT}/addresses/${address}`
-        )
-        const body = await req.json()
-        setStatus(body)
-
-        if (body.agreements.length > 0 && 'session' in router.query) {
-          const req = await fetch(
-            `${config.onboardAPIHost}pools/${props.pool?.addresses?.ROOT_CONTRACT}/agreements/${body.agreements[0].id}/link?session=${router.query.session}`
-          )
-          const link = await req.text()
-          setAgreementLink(link)
-        }
-      } catch (e) {
-        console.error(e)
-      }
-    }
-  }
-
   const [addressIsLoading, setAddressIsLoading] = React.useState(true)
 
   React.useEffect(() => {
     if (address) {
       setAddressIsLoading(false)
-      getOnboardingStatus()
+      dispatch(loadOnboardingStatus(props.pool, router.query?.session))
     }
+
     if (address && !modalIsOpen && 'onb' in router.query && router.query.onb === '1') setModalIsOpen(true)
   }, [address])
 
@@ -86,7 +63,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
   }, [router.query])
 
   React.useEffect(() => {
-    getOnboardingStatus()
+    dispatch(loadOnboardingStatus(props.pool, router.query?.session))
   }, [pools])
 
   return (
@@ -104,10 +81,12 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
         </Box>
       )}
 
+      {JSON.stringify(onboarding)}
+
       <FormModal
         opened={modalIsOpen}
         title={
-          !status?.kyc?.created
+          !onboarding.data?.kyc.created
             ? 'First time investor? Start your KYC process now.'
             : 'Continue onboarding as an investor'
         }
@@ -127,7 +106,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
               </Box>
             )}
 
-            {status?.kyc?.url && !status.kyc?.created && (
+            {onboarding.data?.kyc.url && !onboarding.data?.kyc?.created && (
               <>
                 <Paragraph
                   margin={{ top: 'small', bottom: 'small', left: 'auto', right: 'auto' }}
@@ -142,16 +121,16 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                 </Paragraph>
                 <InvestmentSteps src={'/static/onboarding/1.svg'} alt="Investment steps" />
                 <div>
-                  <Button primary label={`Start KYC now`} href={status.kyc?.url} fill={false} />
+                  <Button primary label={`Start KYC now`} href={onboarding.data?.kyc?.url} fill={false} />
                 </div>
               </>
             )}
 
-            {status?.kyc?.url &&
-              status.kyc?.created &&
-              !status.kyc?.verified &&
-              !status.agreements[0]?.signed &&
-              agreementLink && (
+            {onboarding.data?.kyc.url &&
+              onboarding.data?.kyc?.created &&
+              !onboarding.data?.kyc?.verified &&
+              !onboarding.data?.agreements[0]?.signed &&
+              onboarding.agreementLinks[onboarding.data?.agreements[0]?.id] && (
                 <>
                   <Paragraph
                     margin={{ top: 'small', bottom: 'small', left: 'auto', right: 'auto' }}
@@ -162,16 +141,21 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                   </Paragraph>
                   <InvestmentSteps src={'/static/onboarding/2.svg'} alt="Investment steps" />
                   <div>
-                    <Button primary label={`Sign Subscription Agreement`} href={agreementLink} fill={false} />
+                    <Button
+                      primary
+                      label={`Sign Subscription Agreement`}
+                      href={onboarding.agreementLinks[onboarding.data?.agreements[0]?.id]}
+                      fill={false}
+                    />
                   </div>
                 </>
               )}
 
-            {status?.kyc?.url &&
-              status.kyc?.created &&
-              !status.kyc?.verified &&
-              !status.agreements[0]?.signed &&
-              !agreementLink && (
+            {onboarding.data?.kyc.url &&
+              onboarding.data?.kyc?.created &&
+              !onboarding.data?.kyc?.verified &&
+              !onboarding.data?.agreements[0]?.signed &&
+              !onboarding.agreementLinks[onboarding.data?.agreements[0]?.id] && (
                 <>
                   <Paragraph
                     margin={{ top: 'small', bottom: 'small', left: 'auto', right: 'auto' }}
@@ -182,14 +166,14 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                   </Paragraph>
                   <InvestmentSteps src={'/static/onboarding/2.svg'} alt="Investment steps" />
                   <div>
-                    <Button primary label={`Sign in with Securitize`} href={status.kyc?.url} fill={false} />
+                    <Button primary label={`Sign in with Securitize`} href={onboarding.data?.kyc?.url} fill={false} />
                   </div>
                 </>
               )}
 
-            {status?.kyc?.url &&
-              status.agreements.every((agreement) => agreement.signed) &&
-              !status.agreements.every((agreement) => agreement.counterSigned) && (
+            {onboarding.data?.kyc.url &&
+              onboarding.data?.agreements.every((agreement) => agreement.signed) &&
+              !onboarding.data?.agreements.every((agreement) => agreement.counterSigned) && (
                 <>
                   <Paragraph
                     margin={{ top: 'small', bottom: 'small', left: 'auto', right: 'auto' }}
@@ -205,10 +189,10 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                 </>
               )}
 
-            {status?.kyc?.url &&
-              !status.kyc?.verified &&
-              status.agreements.length > 0 &&
-              status.agreements.every((agreement) => agreement.counterSigned) && (
+            {onboarding.data?.kyc.url &&
+              !onboarding.data?.kyc?.verified &&
+              onboarding.data?.agreements.length > 0 &&
+              onboarding.data?.agreements.every((agreement) => agreement.counterSigned) && (
                 <>
                   <Paragraph
                     margin={{ top: 'small', bottom: 'small', left: 'auto', right: 'auto' }}
@@ -224,10 +208,10 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                 </>
               )}
 
-            {status?.kyc?.url &&
-              status.kyc?.verified &&
-              status.agreements.length > 0 &&
-              status.agreements.every((agreement) => agreement.counterSigned) && (
+            {onboarding.data?.kyc.url &&
+              onboarding.data?.kyc?.verified &&
+              onboarding.data?.agreements.length > 0 &&
+              onboarding.data?.agreements.every((agreement) => agreement.counterSigned) && (
                 <>
                   <Paragraph
                     margin={{ top: 'small', bottom: 'small', left: 'auto', right: 'auto' }}

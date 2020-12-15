@@ -3,9 +3,8 @@ import BN from 'bn.js'
 import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
-import config, { Pool } from '../../../config'
+import { Pool } from '../../../config'
 import { loadPool, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
@@ -16,7 +15,7 @@ import OrderCard from './OrderCard'
 import RedeemCard from './RedeemCard'
 import { AddWalletLink, Info, MinTimeRemaining, TokenLogo } from './styles'
 import { ensureAuthed } from '../../../ducks/auth'
-import OnboardModal from '../../../components/OnboardModal'
+import OnboardCard from './OnboardCard'
 
 interface Props {
   pool: Pool
@@ -218,21 +217,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             )}
           </>
         )}
-        {address && trancheData?.inMemberlist === false && (
-          <Info>
-            <Heading level="6" margin={{ bottom: 'xsmall' }}>
-              Interested in investing?
-            </Heading>
-            If you want to learn more get started with your onboarding process.
-            <Box justify="end" margin={{ top: 'small' }}>
-              {config.featureFlagNewOnboarding ? (
-                <OnboardModal pool={props.pool} />
-              ) : (
-                <InvestAction pool={props.pool} />
-              )}
-            </Box>
-          </Info>
-        )}
+
+        {address && props.pool && trancheData?.inMemberlist === false && <OnboardCard pool={props.pool} />}
+
         {!address && (
           <Info>
             <Heading level="6" margin={{ bottom: 'xsmall' }}>
