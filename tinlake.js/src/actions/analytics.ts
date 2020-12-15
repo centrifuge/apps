@@ -310,6 +310,12 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       }
       return new BN(0)
     }
+
+    getPoolRegistryHash = async (registryAddress: string) => {
+      const registry = this.contract('POOL_REGISTRY', registryAddress)
+      const poolData = await registry.pools(0)
+      return poolData[3]
+    }
   }
 }
 
@@ -363,6 +369,7 @@ export type IAnalyticsActions = {
   getSeniorOrderedInEpoch(user: string): Promise<number>
   getJuniorOrderedInEpoch(user: string): Promise<number>
   getAvailableFunds(): Promise<BN>
+  getPoolRegistryHash(registryAddress: string): Promise<string>
 }
 
 export default AnalyticsActions

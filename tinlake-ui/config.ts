@@ -1,6 +1,6 @@
-import kovanPools from '@centrifuge/tinlake-pools-kovan'
-import mainnetPools from '@centrifuge/tinlake-pools-mainnet'
+import contractAbiPoolRegistry from '@centrifuge/tinlake-js/src/abi/PoolRegistry.abi.json'
 import BN from 'bn.js'
+import { ethers } from 'ethers'
 import * as yup from 'yup'
 import { PoolStatus } from './ducks/pool'
 import { networkUrlToName } from './utils/networkNameResolver'
@@ -77,20 +77,25 @@ export interface DisplayedField {
 }
 
 interface Config {
+  poolRegistry: string
   rpcUrl: string
+  ipfsGateway: string
   etherscanUrl: string
   transactionTimeout: number
   tinlakeDataBackendUrl: string
   isDemo: boolean
   network: 'Mainnet' | 'Kovan'
-  pools: Pool[]
-  upcomingPools: UpcomingPool[]
-  archivedPools: ArchivedPool[]
   portisApiKey: string
   gasLimit: number
   onboardAPIHost: string
   featureFlagNewOnboarding: boolean
   enableErrorLogging: boolean
+}
+
+export interface IpfsPools {
+  active: Pool[]
+  archived: ArchivedPool[]
+  upcoming: UpcomingPool[]
 }
 
 const contractAddressesSchema = yup.object().shape({
@@ -208,33 +213,60 @@ const poolsSchema = yup.array(poolSchema)
 const upcomingPoolsSchema = yup.array(upcomingPoolSchema)
 const archivedPoolsSchema = yup.array(archivedPoolSchema)
 
-const selectedPoolConfig = yup
-  .mixed<'kovanStaging' | 'mainnetStaging' | 'mainnetProduction'>()
-  .required('POOLS config is required')
-  .oneOf(['kovanStaging', 'mainnetStaging', 'mainnetProduction'])
-  .validateSync(process.env.NEXT_PUBLIC_POOLS_CONFIG)
+export let ipfsPools: IpfsPools | undefined = undefined
 
-const networkConfigs = selectedPoolConfig === 'mainnetProduction' ? mainnetPools : kovanPools
+// TODO: temp for now until we figure out a better way to handle not having an instance of Tinlake
+const assembleIpfsUrl = async (): Promise<string> => {
+  const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+  let url: URL
+  if (process.env.NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE) {
+    url = new URL(process.env.NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE, config.ipfsGateway)
+    return url.href
+  }
+  const registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, provider)
+  const poolData = await registry.pools(0)
+  url = new URL(poolData[3], config.ipfsGateway)
+  return url.href
+}
 
-const pools = poolsSchema
-  .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
-  .map((p) => ({ ...p, isUpcoming: false } as Pool))
-const archivedPools = archivedPoolsSchema
-  .validateSync(networkConfigs.filter((p: Pool) => 'archivedValues' in p))
-  .map((p) => ({ ...p, isArchived: true } as ArchivedPool))
-const upcomingPools = upcomingPoolsSchema
-  .validateSync(networkConfigs.filter((p: Pool) => !('archivedValues' in p) && !p.addresses))
-  .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
+export const loadPoolsFromIPFS = async () => {
+  if (ipfsPools) {
+    return ipfsPools
+  }
+  const url = await assembleIpfsUrl()
+  const response = await fetch(url)
+  const body = await response.json()
+  const networkConfigs: any[] = Object.values(body)
+
+  const active = poolsSchema
+    .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
+    .map((p) => ({ ...p, isUpcoming: false } as Pool))
+  const archived = archivedPoolsSchema
+    .validateSync(networkConfigs.filter((p: Pool) => 'archivedValues' in p))
+    .map((p) => ({ ...p, isArchived: true } as ArchivedPool))
+  const upcoming = upcomingPoolsSchema
+    .validateSync(networkConfigs.filter((p: Pool) => !('archivedValues' in p) && !p.addresses))
+    .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
+
+  ipfsPools = { active, upcoming, archived }
+  return ipfsPools
+}
 
 const config: Config = {
-  pools,
-  upcomingPools,
-  archivedPools,
+  poolRegistry: yup
+    .string()
+    .required('NEXT_PUBLIC_POOL_REGISTRY is required')
+    .validateSync(process.env.NEXT_PUBLIC_POOL_REGISTRY),
   rpcUrl: yup
     .string()
     .required('NEXT_PUBLIC_RPC_URL is required')
     .url()
     .validateSync(process.env.NEXT_PUBLIC_RPC_URL),
+  ipfsGateway: yup
+    .string()
+    .required('NEXT_PUBLIC_IPFS_GATEWAY is required')
+    .url()
+    .validateSync(process.env.NEXT_PUBLIC_IPFS_GATEWAY),
   etherscanUrl: yup
     .string()
     .required('NEXT_PUBLIC_ETHERSCAN_URL is required')
@@ -276,20 +308,14 @@ const config: Config = {
   enableErrorLogging: yup.boolean().validateSync(false),
 }
 
-export default config
-
 function between1e23and1e27(s: string): boolean {
   const n = new BN(s)
-  if (n.gte(new BN('100000000000000000000000')) && n.lte(new BN('1000000000000000000000000000'))) {
-    return true
-  }
-  return false
+  return n.gte(new BN('100000000000000000000000')) && n.lte(new BN('1000000000000000000000000000'))
 }
 
 function fee(s: string): boolean {
   const n = new BN(s)
-  if (n.gte(new BN('1000000000000000000000000000')) && n.lte(new BN('1000000009000000000000000000'))) {
-    return true
-  }
-  return false
+  return n.gte(new BN('1000000000000000000000000000')) && n.lte(new BN('1000000009000000000000000000'))
 }
+
+export default config

@@ -3,6 +3,7 @@ import { FormDown, FormSearch } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { IpfsPools } from '../../config'
 import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
 import {
   Button,
@@ -19,6 +20,7 @@ import {
 } from './styles'
 
 interface Props {
+  ipfsPools: IpfsPools
   title: string
 }
 
@@ -44,7 +46,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
   }
 
   React.useEffect(() => {
-    dispatch(loadPools())
+    dispatch(loadPools(props.ipfsPools))
   }, [router.query])
 
   const onChangeSearchQuery = (event: React.FormEvent<HTMLInputElement>) => {
