@@ -24,7 +24,6 @@ interface Props extends TransactionProps {
 const DAYS = 24 * 60 * 60 * 1000
 
 const ValueNFT: React.FC<Props> = (props: Props) => {
-  console.log(props.tokenId, 'TOKEN ID VALUE')
   const [registry, setRegistry] = React.useState('')
   const [tokenId, setTokenId] = React.useState('')
   const [value, setValue] = React.useState('800000000000000000000')

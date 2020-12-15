@@ -52,7 +52,7 @@ function getAs(
   slug: string | string[] | undefined,
   as: string | null | undefined | UrlObject
 ): string {
-  if (root) {
+  if (slug) {
     return `/pool/${root}/${slug}${as}`
   }
   return `/pool/${root}${as}`
