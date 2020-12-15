@@ -1870,9 +1870,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@centrifuge/axis-web3-wallet@npm:0.0.3-develop.121":
-  version: 0.0.3-develop.121
-  resolution: "@centrifuge/axis-web3-wallet@npm:0.0.3-develop.121"
+"@centrifuge/axis-web3-wallet@npm:0.0.3-develop.fa0a71f.151":
+  version: 0.0.3-develop.fa0a71f.151
+  resolution: "@centrifuge/axis-web3-wallet@npm:0.0.3-develop.fa0a71f.151"
   dependencies:
     ethereum-blockies: "github:MyEtherWallet/blockies"
     grommet-icons: ^4.4.0
@@ -1882,7 +1882,7 @@ __metadata:
     react: ">= 16.6.1"
     react-dom: ">= 16.6.1"
     styled-components: ">= 4.x"
-  checksum: 1d541c6e9971b8dd4e422205a4dcd622df8d8757f73655cac2aab469fb6e2bb915b3ed9c5aa52bc0d7e79d02e6848d3b2be80718747006ef543a2dfe686ec72c
+  checksum: 5dad65635bdff549b5b38119b4e769b9f8d5d8565ec03ffc2d19936fd061694b4db8d5b55c9a667e2420142b13b46e314a1df32c4a31e430884e7be59318fb79
   languageName: node
   linkType: hard
 
@@ -2006,7 +2006,7 @@ __metadata:
     "@centrifuge/axis-token-input": 0.4.1-develop.143
     "@centrifuge/axis-tooltip": 0.4.2-develop.4bb6c15.148
     "@centrifuge/axis-utils": 0.4.2-develop.109
-    "@centrifuge/axis-web3-wallet": 0.0.3-develop.121
+    "@centrifuge/axis-web3-wallet": 0.0.3-develop.fa0a71f.151
     "@centrifuge/onboard-api": "workspace:*"
     "@centrifuge/tinlake-js": "workspace:*"
     "@centrifuge/tinlake-pools-kovan": 0.0.1-develop.6

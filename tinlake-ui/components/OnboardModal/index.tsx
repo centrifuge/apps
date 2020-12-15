@@ -5,7 +5,6 @@ import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Pool, UpcomingPool } from '../../config'
 import { ensureAuthed } from '../../ducks/auth'
-import { PoolData as PoolDataV3, PoolState } from '../../ducks/pool'
 import { PoolsState } from '../../ducks/pools'
 import { PoolLink } from '../PoolLink'
 import { FormModal, InvestmentSteps } from './styles'
@@ -27,8 +26,6 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
 
   const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
   const pools = useSelector<any, PoolsState>((state) => state.pools)
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolDataV3 | undefined
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
@@ -68,20 +65,18 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      {(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
+      {onboarding.data?.kyc.created && (
         <Box margin={{ left: 'auto' }}>
           <PoolLink href={'/investments'}>
             <Button primary label="Invest" fill={false} />
           </PoolLink>
         </Box>
       )}
-      {!(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
+      {!onboarding.data?.kyc.created && (
         <Box margin={{ left: 'auto' }}>
           <Button primary label="Get started" fill={false} onClick={onOpen} />
         </Box>
       )}
-
-      {JSON.stringify(onboarding)}
 
       <FormModal
         opened={modalIsOpen}

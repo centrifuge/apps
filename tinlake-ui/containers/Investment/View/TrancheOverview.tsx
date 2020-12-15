@@ -218,7 +218,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           </>
         )}
 
-        {address && props.pool && trancheData?.inMemberlist === false && <OnboardCard pool={props.pool} />}
+        {address && props.tranche === 'senior' && props.pool && trancheData?.inMemberlist === false && (
+          <OnboardCard pool={props.pool} />
+        )}
 
         {!address && (
           <Info>

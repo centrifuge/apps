@@ -5,10 +5,11 @@ import { Close as CloseIcon, Menu as MenuIcon, User as UserIcon } from 'grommet-
 import Link from 'next/link'
 import Router, { NextRouter, withRouter } from 'next/router'
 import React from 'react'
-import { connect } from 'react-redux'
+import { connect, useSelector } from 'react-redux'
 import { PoolSelector } from '../../components/PoolSelector'
 import config from '../../config'
 import { AuthState, clear, ensureAuthed } from '../../ducks/auth'
+import { OnboardingState } from '../../ducks/onboarding'
 import { selectWalletTransactions, TransactionState } from '../../ducks/transactions'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 
@@ -33,6 +34,8 @@ interface Props {
 }
 
 const Header: React.FC<Props> = (props: Props) => {
+  const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
+
   const connectAccount = async () => {
     try {
       await props.ensureAuthed!()
@@ -140,6 +143,10 @@ const Header: React.FC<Props> = (props: Props) => {
                 transactions={selectWalletTransactions(transactions)}
                 getAddressLink={getAddressLink}
                 style={{ padding: 0 }}
+                kycStatus={
+                  onboarding.data?.kyc.verified ? 'verified' : onboarding.data?.kyc.created ? 'pending' : 'none'
+                }
+                showKycInfo={true}
               />
             )}
           </div>

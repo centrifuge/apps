@@ -7,7 +7,6 @@ import OnboardModal from '../../../components/OnboardModal'
 
 interface Props {
   pool: Pool
-  tranche: 'senior' | 'junior'
 }
 
 // {
