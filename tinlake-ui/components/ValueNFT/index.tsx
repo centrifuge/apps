@@ -24,6 +24,9 @@ interface Props extends TransactionProps {
 const DAYS = 24 * 60 * 60 * 1000
 
 const ValueNFT: React.FC<Props> = (props: Props) => {
+
+
+  console.log(props.tokenId, "TOKEN ID VALUE")
   const [registry, setRegistry] = React.useState('')
   const [tokenId, setTokenId] = React.useState('')
   const [value, setValue] = React.useState('800000000000000000000')
@@ -198,7 +201,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
               Successfully valued NFT for Token ID {tokenId}
               <p>
                 Please set the maturity date or{' '}
-                <PoolLink href={'/assets/issue'}>
+                <PoolLink href={{ pathname: '/assets/issue', query: { tokenId, registry } }}>
                   <Anchor>proceed to asset financing</Anchor>
                 </PoolLink>{' '}
                 your NFT.
@@ -238,7 +241,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
               Successfully set maturity date for NFT for Token ID {tokenId}
               <p>
                 Please value the NFT or{' '}
-                <PoolLink href={'/assets/issue'}>
+                <PoolLink href={{ pathname: '/assets/issue', query: { tokenId, registry } }}>
                   <Anchor>proceed to asset financing</Anchor>
                 </PoolLink>{' '}
                 your NFT.

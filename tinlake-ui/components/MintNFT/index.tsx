@@ -73,11 +73,11 @@ const MintNFT: React.FC<Props> = (props: Props) => {
               Successfully minted NFT for Token ID {tokenId}
               <p>
                 Please{' '}
-                <PoolLink href={'/demo/value-nft'}>
+                <PoolLink href={{ pathname: '/demo/value-nft', query: { tokenId, registry } }}>
                   <Anchor>proceed to value the NFT</Anchor>
                 </PoolLink>
                 {' or '}
-                <PoolLink href={'/assets/issue'}>
+                <PoolLink href={{ pathname: '/demo/value-nft', query: { tokenId, registry } }}>
                   <Anchor>proceed to asset financing</Anchor>
                 </PoolLink>{' '}
                 your NFT.
