@@ -1,5 +1,5 @@
 import { Spinner } from '@centrifuge/axis-spinner'
-import { Box, Button, Heading, Paragraph } from 'grommet'
+import { Box, CheckBox, Button, Heading, Paragraph } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -70,6 +70,8 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
     dispatch(loadOnboardingStatus(props.pool, router.query?.session))
   }, [pools])
 
+  const [checked, setChecked] = React.useState(false)
+
   return (
     <>
       {!props.card && kycStatus !== 'none' && (
@@ -91,8 +93,8 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
           <Heading level="6" margin={{ bottom: 'xsmall' }}>
             Interested in investing?
           </Heading>
-          If you want to learn more get started with your onboarding process.
-          <Box justify="end" margin={{ top: 'small' }}>
+          If you want to learn more, get started with your onboarding process.
+          <Box direction="row" justify="end" margin={{ top: 'small' }}>
             <Button primary label="Get started" fill={false} onClick={onOpen} />
           </Box>
         </>
@@ -116,9 +118,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
             </>
           )}
           <Box direction="row" justify="end" margin={{ top: 'small' }}>
-            <div>
-              <Button primary label="Sign Subscription Agreement" fill={false} onClick={onOpen} />
-            </div>
+            <Button primary label="Sign Subscription Agreement" fill={false} onClick={onOpen} />
           </Box>
         </>
       )}
@@ -176,6 +176,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
 
             {kycStatus === 'none' && (
               <>
+                <InvestmentSteps src={'/static/onboarding/1.svg'} alt="Investment steps" />
                 <Paragraph
                   margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}
                   style={{ textAlign: 'center', width: '100%' }}
@@ -187,9 +188,21 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                   agreement with the pool’s issuer also provided through the Securitize dashboard and signed through
                   DocuSign. Once the issuer has countersigned, you are ready to invest.
                 </Paragraph>
-                {/* <InvestmentSteps src={'/static/onboarding/1.svg'} alt="Investment steps" /> */}
+                <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
+                  <CheckBox
+                    checked={checked}
+                    label="I accept the data privacy policy and that data is shared with Centrifuge and the issuer."
+                    onChange={(event) => setChecked(event.target.checked)}
+                  />
+                </Box>
                 <div>
-                  <Button primary label={`Start KYC now`} href={onboarding.data?.kyc?.url} fill={false} />
+                  <Button
+                    primary
+                    label={`Start KYC now`}
+                    href={onboarding.data?.kyc?.url}
+                    disabled={!checked}
+                    fill={false}
+                  />
                 </div>
               </>
             )}
@@ -203,10 +216,18 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                   You can continue onboarding by signing the Subscription Agreement for {props.pool?.metadata.name}.
                 </Paragraph>
                 {/* <InvestmentSteps src={'/static/onboarding/2.svg'} alt="Investment steps" /> */}
+                <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
+                  <CheckBox
+                    checked={checked}
+                    label="I accept that this is an US offering which is not solicited nor offered in my home country."
+                    onChange={(event) => setChecked(event.target.checked)}
+                  />
+                </Box>
                 <div>
                   <Button
                     primary
                     label={`Sign Subscription Agreement`}
+                    disabled={!checked}
                     href={onboarding.agreementLinks[onboarding.data?.agreements[0]?.id]}
                     fill={false}
                   />
@@ -214,7 +235,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
               </>
             )}
 
-            {agreementStatus === 'none' && !onboarding.data?.agreements[0]?.id && (
+            {kycStatus !== 'none' && agreementStatus === 'none' && !onboarding.data?.agreements[0]?.id && (
               <>
                 <Paragraph
                   margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}
