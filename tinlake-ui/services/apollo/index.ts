@@ -8,6 +8,7 @@ import fetch from 'node-fetch'
 import config, { ArchivedPool, UpcomingPool } from '../../config'
 import { PoolData, PoolsData } from '../../ducks/pools'
 import { getPoolStatus } from '../../utils/pool'
+import { UintBase } from '../../utils/ratios'
 
 const { tinlakeDataBackendUrl } = config
 const cache = new InMemoryCache()
@@ -43,25 +44,9 @@ class Apollo {
     })
   }
 
-  getPoolOrder = (p: { totalDebt: BN; totalRepaysAggregatedAmount: BN; totalDebtNum: number; version: number }) => {
-    if ((p.version === 3 && p.totalDebt.gtn(0)) || (p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.eqn(0))) {
-      return orderSummandPoolActive + p.totalDebtNum
-    }
-
-    if (p.totalDebt.gtn(0)) {
-      return orderSummandPoolDeployed + p.totalDebtNum
-    }
-
-    if (p.totalDebt.eqn(0) && p.totalRepaysAggregatedAmount.gtn(0)) {
-      return orderSummandPoolClosed + p.totalDebtNum
-    }
-
-    return 0
-  }
-
   injectPoolData(pools: any[]): PoolData[] {
     const poolConfigs = config.pools
-    const tinlakePools = poolConfigs.map((poolConfig: any) => {
+    const tinlakePools = poolConfigs.map((poolConfig) => {
       const poolId = poolConfig.addresses.ROOT_CONTRACT
       const pool = pools.find((p) => p.id.toLowerCase() === poolId.toLowerCase())
 
@@ -77,7 +62,14 @@ class Apollo {
 
       const ongoingLoans = (pool && pool.ongoingLoans.length) || 0 // TODO add count field to subgraph, inefficient to query all assets
       const totalFinancedCurrency = totalRepaysAggregatedAmount.add(totalDebt)
+
+      const reserve = (pool && new BN(pool.reserve)) || new BN('0')
+      const assetValue = (pool && new BN(pool.assetValue)) || new BN('0')
+      const poolValueNum = parseInt(reserve.div(UintBase).toString()) + parseInt(assetValue.div(UintBase).toString())
+
       const poolData = {
+        reserve,
+        assetValue,
         totalFinancedCurrency,
         ongoingLoans,
         totalDebt,
@@ -88,19 +80,18 @@ class Apollo {
         totalRepaysAggregatedAmountNum,
         weightedInterestRateNum,
         seniorInterestRateNum,
-        order: this.getPoolOrder({
-          totalDebt,
-          totalDebtNum,
-          totalRepaysAggregatedAmount,
-          version: Number(pool?.version || 3),
-        }),
+        order: poolValueNum,
         isUpcoming: false,
         isArchived: false,
+        isOversubscribed: (pool && new BN(pool.maxReserve).lte(new BN(pool.reserve))) || false,
         id: poolId,
         name: poolConfig.metadata.name,
         slug: poolConfig.metadata.slug,
         asset: poolConfig?.metadata.asset,
         version: Number(pool?.version || 3),
+        juniorYield14Days: (pool && new BN(pool.juniorYield14Days)) || null,
+        seniorYield14Days: (pool && new BN(pool.seniorYield14Days)) || null,
+        icon: poolConfig.metadata.media?.icon || null,
       }
 
       return { ...poolData, status: getPoolStatus(poolData) }
@@ -111,6 +102,7 @@ class Apollo {
     return upcomingPools.map((p) => ({
       isUpcoming: true,
       isArchived: false,
+      isOversubscribed: false,
       totalFinancedCurrency: new BN('0'),
       order: orderSummandPoolUpcoming,
       totalDebt: new BN('0'),
@@ -128,6 +120,11 @@ class Apollo {
       seniorInterestRateNum: parseFloat(new BN(p.presetValues?.seniorInterestRate || 0).toString()),
       status: 'Upcoming',
       version: p.version,
+      reserve: new BN('0'),
+      assetValue: new BN('0'),
+      juniorYield14Days: null,
+      seniorYield14Days: null,
+      icon: p.metadata.media?.icon || null,
     }))
   }
 
@@ -135,7 +132,8 @@ class Apollo {
     return archivedPools.map((p) => ({
       isUpcoming: false,
       isArchived: true,
-      order: p.archivedValues?.status === 'Deployed' ? orderSummandPoolDeployed : orderSummandPoolClosed,
+      isOversubscribed: false,
+      order: orderSummandPoolClosed,
       totalDebt: new BN('0'),
       totalRepaysAggregatedAmount: new BN('0'),
       weightedInterestRate: new BN('0'),
@@ -153,12 +151,19 @@ class Apollo {
       totalDebtNum: 0,
       totalRepaysAggregatedAmountNum: 0,
       weightedInterestRateNum: 0,
+      reserve: new BN('0'),
+      assetValue: new BN('0'),
+      juniorYield14Days: null,
+      seniorYield14Days: null,
+      icon: p.metadata.media?.icon || null,
     }))
   }
 
   async getPools(): Promise<PoolsData> {
     let result
     try {
+      // juniorYield14Days
+      // seniorYield14Days
       result = await this.client.query({
         query: gql`
           {
@@ -172,6 +177,9 @@ class Apollo {
               weightedInterestRate
               seniorInterestRate
               version
+              reserve
+              maxReserve
+              assetValue
             }
           }
         `,
@@ -197,6 +205,7 @@ class Apollo {
       totalDebt: pools.reduce((p, c) => p.add(c.totalDebt), new BN(0)),
       totalRepaysAggregatedAmount: pools.reduce((p, c) => p.add(c.totalRepaysAggregatedAmount), new BN(0)),
       totalFinancedCurrency: pools.reduce((p, c) => p.add(c.totalFinancedCurrency), new BN(0)),
+      totalValue: pools.reduce((p, c) => p.add(c.reserve).add(c.assetValue), new BN(0)),
     }
   }
 
@@ -308,7 +317,5 @@ function getLoanStatus(loan: any) {
 
 export default new Apollo()
 
-const orderSummandPoolUpcoming = 3e30 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt
-const orderSummandPoolActive = 2e30
-const orderSummandPoolDeployed = 1e30 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt
-const orderSummandPoolClosed = 0 // NOTE 18 decimals for dai + 1 trillion DAI as max assumed debt
+const orderSummandPoolUpcoming = 1e15 // No pool value should be more than 1000 billion DAI
+const orderSummandPoolClosed = 0

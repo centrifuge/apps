@@ -7,7 +7,7 @@ import Auth from '../../../../../components/Auth'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
 import { PoolLink } from '../../../../../components/PoolLink'
-import SecondaryHeader from '../../../../../components/SecondaryHeader'
+import PoolTitle from '../../../../../components/PoolTitle'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
 import config, { Pool } from '../../../../../config'
@@ -45,14 +45,18 @@ class LoanListPage extends React.Component<Props> {
                     tinlake={tinlake}
                     render={(auth) => (
                       <Box>
-                        <SecondaryHeader margin={{ top: 'medium' }}>
-                          <Heading level="4">Asset Overview of {pool.metadata.name}</Heading>
-                          <PoolLink href={'/assets/issue'}>
-                            <Button primary label="Open Financing" />
-                          </PoolLink>
-                        </SecondaryHeader>
+                        <Box direction="row" margin={{ top: 'medium' }} justify="between">
+                          <PoolTitle pool={this.props.pool} page="Assets" />
+
+                          <Box pad={{ top: 'small' }}>
+                            <PoolLink href={'/assets/issue'}>
+                              <Button primary label="Lock NFT" />
+                            </PoolLink>
+                          </Box>
+                        </Box>
 
                         <LoanOverview tinlake={tinlake} auth={auth} activePool={this.props.pool} />
+                        <Heading level="4">Asset List</Heading>
                         <LoanList tinlake={tinlake} auth={auth} hideMetrics={true} />
                       </Box>
                     )}

@@ -28,70 +28,75 @@ class LoanList extends React.Component<Props> {
   render() {
     const { loans } = this.props
     return (
-      <Box>
-        <DataTable
-          style={{ tableLayout: 'auto' }}
-          data={loans}
-          sort={{ direction: 'desc', property: 'loanId' }}
-          pad="xsmall"
-          sortable
-          onClickRow={this.clickRow as any}
-          columns={[
-            { header: <HeaderCell text={'Asset ID'}></HeaderCell>, property: 'loanId', align: 'end' },
-            {
-              header: 'NFT ID',
-              primary: true,
-              property: 'tokenId',
-              align: 'end',
-              render: (l: SortableLoan) => (
-                <Box style={{ maxWidth: '150px' }}>
-                  <DisplayField as={'span'} value={hexToInt(bnToHex(l.tokenId).toString())} />
-                </Box>
-              ),
-            },
-            {
-              header: 'Outstanding (DAI)',
-              property: 'debtNum',
-              align: 'end',
-              render: (l: SortableLoan) => <NumberDisplay suffix="" precision={0} value={baseToDisplay(l.debt, 18)} />,
-            },
-            {
-              header: 'Available for Financing (DAI)',
-              property: 'principalNum',
-              align: 'end',
-              render: (l: SortableLoan) => (
-                <NumberDisplay suffix="" precision={0} value={baseToDisplay(l.principal, 18)} />
-              ),
-            },
-            {
-              header: <HeaderCell text={'Financing Fee'}></HeaderCell>,
-              property: 'interestRateNum',
-              align: 'end',
-              render: (l: SortableLoan) =>
-                l.status === 'Repaid' ? (
-                  '-'
-                ) : (
-                  <NumberDisplay suffix=" %" precision={2} value={feeToInterestRate(l.interestRate)} />
+      <Box pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
+        {loans.length > 0 && (
+          <DataTable
+            style={{ tableLayout: 'auto' }}
+            data={loans}
+            sort={{ direction: 'desc', property: 'loanId' }}
+            pad="xsmall"
+            sortable
+            onClickRow={this.clickRow as any}
+            columns={[
+              { header: <HeaderCell text={'Asset ID'}></HeaderCell>, property: 'loanId', align: 'end' },
+              {
+                header: 'NFT ID',
+                primary: true,
+                property: 'tokenId',
+                align: 'end',
+                render: (l: SortableLoan) => (
+                  <Box style={{ maxWidth: '150px' }}>
+                    <DisplayField as={'span'} value={hexToInt(bnToHex(l.tokenId).toString())} />
+                  </Box>
                 ),
-            },
-            {
-              header: 'Status',
-              property: 'status',
-              align: 'end',
-              render: (l: SortableLoan) => l.status,
-            },
-            {
-              header: '',
-              property: 'id',
-              align: 'center',
-              sortable: false,
-              size: '36px',
-              render: (_l: SortableLoan) => {
-                return <ChevronRight />
               },
-            },
-          ]}
-        />
+              {
+                header: 'Outstanding (DAI)',
+                property: 'debtNum',
+                align: 'end',
+                render: (l: SortableLoan) => (
+                  <NumberDisplay suffix="" precision={0} value={baseToDisplay(l.debt, 18)} />
+                ),
+              },
+              {
+                header: 'Available for Financing (DAI)',
+                property: 'principalNum',
+                align: 'end',
+                render: (l: SortableLoan) => (
+                  <NumberDisplay suffix="" precision={0} value={baseToDisplay(l.principal, 18)} />
+                ),
+              },
+              {
+                header: <HeaderCell text={'Financing Fee'}></HeaderCell>,
+                property: 'interestRateNum',
+                align: 'end',
+                render: (l: SortableLoan) =>
+                  l.status === 'Repaid' ? (
+                    '-'
+                  ) : (
+                    <NumberDisplay suffix=" %" precision={2} value={feeToInterestRate(l.interestRate)} />
+                  ),
+              },
+              {
+                header: 'Status',
+                property: 'status',
+                align: 'end',
+                render: (l: SortableLoan) => l.status,
+              },
+              {
+                header: '',
+                property: 'id',
+                align: 'center',
+                sortable: false,
+                size: '36px',
+                render: (_l: SortableLoan) => {
+                  return <ChevronRight />
+                },
+              },
+            ]}
+          />
+        )}
+        {loans.length === 0 && <Text>No assets have been originated.</Text>}
       </Box>
     )
   }

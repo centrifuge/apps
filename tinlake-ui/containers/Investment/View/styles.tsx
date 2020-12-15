@@ -135,3 +135,15 @@ export const AddWalletLink = styled.a`
 export const MinTimeRemaining = styled.div`
   margin-top: 12px;
 `
+
+export const Caret = styled.div`
+  position: relative;
+  display: inline-block;
+  top: 6px;
+  height: 24px;
+  margin-left: 10px;
+  svg {
+    transition: 200ms;
+    transform-style: preserve-3d;
+  }
+`

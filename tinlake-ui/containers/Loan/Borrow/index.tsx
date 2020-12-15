@@ -7,7 +7,7 @@ import * as React from 'react'
 import { connect } from 'react-redux'
 import { ensureAuthed } from '../../../ducks/auth'
 import { loadLoan } from '../../../ducks/loans'
-import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
+import { loadPool, PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 
@@ -54,7 +54,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const availableFunds = (props.pool && props.pool.data && props.pool.data.availableFunds.toString()) || '0'
   const borrowedAlready = new BN(props.loan.debt).isZero() === false || props.loan.status !== 'opened'
 
-  const isBlockedState = props.pool?.data ? (props.pool?.data as PoolData).epoch?.isBlockedState : false
+  const isBlockedState = props.pool ? props.pool?.epoch?.isBlockedState : false
 
   const [error, setError] = React.useState<string | undefined>(undefined)
   const borrowEnabled = ceilingSet && !borrowedAlready && !isBlockedState

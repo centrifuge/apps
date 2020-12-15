@@ -1,41 +1,78 @@
-import { Box, Text } from 'grommet'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
+import { Box } from 'grommet'
+import { WithRouterProps } from 'next/dist/client/with-router'
+import { withRouter } from 'next/router'
 import * as React from 'react'
 import { PoolsData } from '../../ducks/pools'
-import DAI from '../../static/dai.json'
-import ERC20Display from '../ERC20Display'
-import PoolsMetric from '../PoolsMetric'
+import NumberDisplay from '../NumberDisplay'
+import { Cont, Label, TokenLogo, Unit, Value } from './styles'
 
-interface Props {
+interface Props extends WithRouterProps {
   pools: PoolsData
 }
 
 class PoolsMetrics extends React.Component<Props> {
   render() {
-    const { pools } = this.props
+    const {
+      pools,
+      router: {
+        query: { showAll },
+      },
+    } = this.props
     return (
-      <Box direction="row" gap="medium" margin={{ bottom: 'medium' }} justify="evenly">
-        <PoolsMetric label="Total Number of Pools">
-          <Box direction="row" style={{ alignItems: 'center' }}>
-            <Text
-              style={{
-                fontSize: '0.7em',
-                width: '250px',
-                height: 40,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              {pools.pools.length}
-            </Text>
+      <>
+        {showAll && (
+          <Box
+            width="256px"
+            pad="medium"
+            elevation="small"
+            round="xsmall"
+            background="white"
+            margin={{ horizontal: '16px' }}
+          >
+            <Cont>
+              <Value>{pools.ongoingLoans}</Value>
+            </Cont>
+            <Label>Assets Locked</Label>
           </Box>
-        </PoolsMetric>
-        <PoolsMetric label="Total Financed to Date">
-          <ERC20Display value={pools.totalFinancedCurrency.toString()} tokenMetas={DAI} precision={0} />
-        </PoolsMetric>
-      </Box>
+        )}
+        <Box
+          width="256px"
+          pad="medium"
+          elevation="small"
+          round="xsmall"
+          background="white"
+          margin={{ horizontal: '16px' }}
+        >
+          <Cont>
+            <TokenLogo src={`/static/dai.svg`} />
+            <Value>
+              <NumberDisplay value={baseToDisplay(pools.totalFinancedCurrency, 18)} precision={0} />
+            </Value>{' '}
+            <Unit>DAI</Unit>
+          </Cont>
+          <Label>Total Financed to Date</Label>
+        </Box>
+        <Box
+          width="256px"
+          pad="medium"
+          elevation="small"
+          round="xsmall"
+          background="white"
+          margin={{ horizontal: '16px' }}
+        >
+          <Cont>
+            <TokenLogo src={`/static/dai.svg`} />
+            <Value>
+              <NumberDisplay value={baseToDisplay(pools.totalValue, 18)} precision={0} />
+            </Value>{' '}
+            <Unit>DAI</Unit>
+          </Cont>
+          <Label>Current Value Locked</Label>
+        </Box>
+      </>
     )
   }
 }
 
-export default PoolsMetrics
+export default withRouter(PoolsMetrics)

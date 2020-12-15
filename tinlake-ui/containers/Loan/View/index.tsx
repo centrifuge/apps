@@ -1,3 +1,4 @@
+import { Spinner } from '@centrifuge/axis-spinner'
 import { Box, Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
@@ -34,7 +35,7 @@ class LoanView extends React.Component<Props> {
     const { poolConfig, loans, loanId, tinlake, auth } = this.props
     const { loan, loanState } = loans!
     if (loanState === null || loanState === 'loading') {
-      return null
+      return <Spinner height={'300px'} message={'Loading...'} />
     }
     if (loanState === 'not found') {
       return (

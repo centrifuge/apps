@@ -15,6 +15,7 @@ export interface PoolData {
   slug: string
   isUpcoming: boolean
   isArchived: boolean
+  isOversubscribed: boolean
   asset: string
   ongoingLoans: number
   totalDebt: BN
@@ -30,6 +31,11 @@ export interface PoolData {
   totalFinancedCurrency: BN
   financingsCount?: number
   status?: PoolStatus
+  reserve: BN
+  assetValue: BN
+  juniorYield14Days: BN | null
+  seniorYield14Days: BN | null
+  icon: string | null
 }
 
 export interface PoolsData {
@@ -38,6 +44,7 @@ export interface PoolsData {
   totalDebt: BN
   totalRepaysAggregatedAmount: BN
   totalFinancedCurrency: BN
+  totalValue: BN
   pools: PoolData[]
 }
 

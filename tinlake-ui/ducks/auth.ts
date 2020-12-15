@@ -293,11 +293,12 @@ export function setAddressAndLoadData(
     }
 
     dispatch({ address, type: RECEIVE_ADDRESS })
+    dispatch(setAuthState('authed'))
 
     dispatch(loadProxies())
     dispatch(loadPermissions(tinlake))
 
-    Sentry.setUser({ id: address })
+    if (config.enableErrorLogging) Sentry.setUser({ id: address })
   }
 }
 
@@ -399,16 +400,18 @@ export function setNetwork(network: string | null): ThunkAction<Promise<void>, {
       return
     }
 
-    Sentry.setContext('network', {
-      name: network,
-    })
+    if (config.enableErrorLogging) {
+      Sentry.setContext('network', {
+        name: network,
+      })
+    }
 
     dispatch({ network, type: RECEIVE_NETWORK })
   }
 }
 
 export function setProviderName(name: string | null) {
-  if (name) {
+  if (name && config.enableErrorLogging) {
     Sentry.setContext('wallet', {
       name,
     })

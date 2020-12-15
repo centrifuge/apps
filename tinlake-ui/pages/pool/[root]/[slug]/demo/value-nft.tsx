@@ -46,7 +46,7 @@ class ValueNFTPage extends React.Component<Props> {
                     render={(auth) => (
                       <Box>
                         <SecondaryHeader>
-                          <Box direction="row" gap="small" align="center">
+                          <Box direction="row" gap="small" align="center" margin={{ top: 'medium' }}>
                             <BackLink href={'/assets'} />
                             <Heading level="3">Value NFT</Heading>
                           </Box>

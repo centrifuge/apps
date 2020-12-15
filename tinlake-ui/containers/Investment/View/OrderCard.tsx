@@ -4,7 +4,7 @@ import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'gro
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import { Pool } from '../../../config'
-import { PoolData, PoolState } from '../../../ducks/pool'
+import { PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
@@ -24,7 +24,7 @@ interface Props extends TransactionProps {
 
 const OrderCard: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
-  const epochData = pool?.data ? (pool?.data as PoolData).epoch : undefined
+  const epochData = pool?.epoch || undefined
 
   const type = props.disbursements.remainingSupplyCurrency.isZero() ? 'Redeem' : 'Invest'
   const token = type === 'Invest' ? 'DAI' : props.tranche === 'senior' ? 'DROP' : 'TIN'

@@ -11,12 +11,14 @@ import makeStore from '../utils/makeStore'
 
 require('regenerator-runtime/runtime')
 
-Sentry.init({
-  environment: config.network,
-  dsn: 'https://2700a2b81fca4be481437bb77e9ea7f2@o464978.ingest.sentry.io/5476370',
-  integrations: [new Integrations.BrowserTracing()],
-  tracesSampleRate: 1.0,
-})
+if (config.enableErrorLogging) {
+  Sentry.init({
+    environment: config.network,
+    dsn: 'https://2700a2b81fca4be481437bb77e9ea7f2@o464978.ingest.sentry.io/5476370',
+    integrations: [new Integrations.BrowserTracing()],
+    tracesSampleRate: 1.0,
+  })
+}
 
 class MyApp extends App {
   static async getInitialProps({ Component, ctx }: { Component: any; ctx: any }) {
@@ -34,10 +36,18 @@ class MyApp extends App {
           <meta name="viewport" content="width=900, initial-scale=1" />
           <title>Tinlake | Centrifuge | Decentralized Asset Financing</title>
         </Head>
-        <Sentry.ErrorBoundary fallback={'An error has occured'}>
-          <StyledApp />
-          <Component {...pageProps} />
-        </Sentry.ErrorBoundary>
+        {config.enableErrorLogging && (
+          <Sentry.ErrorBoundary fallback={'An error has occured'}>
+            <StyledApp />
+            <Component {...pageProps} />
+          </Sentry.ErrorBoundary>
+        )}
+        {!config.enableErrorLogging && (
+          <>
+            <StyledApp />
+            <Component {...pageProps} />
+          </>
+        )}
       </AxisTheme>
     )
   }

@@ -1,13 +1,7 @@
 import { Modal } from '@centrifuge/axis-modal'
-import { Anchor, Box, Button, Paragraph, Text } from 'grommet'
+import { Anchor, Box, Button, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import React from 'react'
-import styled from 'styled-components'
-
-const Logo = styled.img`
-  width: 120px;
-  margin-top: 20px;
-`
 
 const Footer: React.FC<{}> = () => {
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
@@ -20,74 +14,29 @@ const Footer: React.FC<{}> = () => {
   }
 
   return (
-    <Box
-      style={{ height: '180px' }}
-      border={{
-        color: '#f5f5f5',
-        size: 'xsmall',
-        style: 'solid',
-        side: 'top',
-      }}
-      justify="center"
-      direction="row"
-    >
-      <Box direction="row" width="xlarge" margin={{ top: 'medium', bottom: 'medium' }} pad={{ horizontal: 'small' }}>
-        <Box basis={'1/5'}>
-          <Text>
-            <a href="https://centrifuge.io/" target="_blank">
-              <Logo src="/static/centrifuge-logo.png" alt="Centrifuge" />
-            </a>
-          </Text>
-        </Box>
-
-        <Box basis={'1/5'} direction="row" gap={'80px'} margin={{ top: 'small', left: 'auto' }}>
-          <Box>
-            <Text> Learn more </Text>
-            <Anchor
-              margin={{ top: 'xsmall' }}
-              href="https://centrifuge.io/products/tinlake/"
-              target="_blank"
-              style={{ textDecoration: 'none', color: '#2762FF' }}
-              label="Website"
-            />
-            <Anchor
-              margin={{ top: 'xsmall' }}
-              href="https://developer.centrifuge.io/"
-              target="_blank"
-              style={{ textDecoration: 'none', color: '#2762FF' }}
-              label="Documentation"
-            />
-            <Anchor
-              margin={{ top: 'xsmall' }}
-              href="https://github.com/centrifuge"
-              target="_blank"
-              style={{ textDecoration: 'none', color: '#2762FF' }}
-              label="GitHub"
-            />
-          </Box>
-          <Box>
-            <Text>&nbsp;</Text>
-            <Anchor
-              margin={{ top: 'xsmall' }}
-              onClick={openModal}
-              style={{ textDecoration: 'none', color: '#2762FF' }}
-              label="Investment Disclaimer"
-            />
-            <Anchor
-              margin={{ top: 'xsmall' }}
-              href="https://centrifuge.io/data-privacy-policy/"
-              target="_blank"
-              style={{ textDecoration: 'none', color: '#2762FF' }}
-              label="Data Privacy Policy"
-            />
-            <Anchor
-              margin={{ top: 'xsmall' }}
-              href="https://centrifuge.io/imprint"
-              target="_blank"
-              style={{ textDecoration: 'none', color: '#2762FF' }}
-              label="Imprint"
-            />
-          </Box>
+    <Box background="rgb(249, 249, 249)" style={{ height: '120px' }} direction="column" justify="end">
+      <Box direction="row" margin={{ bottom: 'large', top: 'large' }} justify="center" pad={{ horizontal: 'small' }}>
+        <Box direction="row" gap="large">
+          <Anchor
+            margin={{ top: 'xsmall' }}
+            onClick={openModal}
+            style={{ textDecoration: 'none', color: '#999' }}
+            label="Investment Disclaimer"
+          />
+          <Anchor
+            margin={{ top: 'xsmall' }}
+            href="https://centrifuge.io/data-privacy-policy/"
+            target="_blank"
+            style={{ textDecoration: 'none', color: '#999' }}
+            label="Data Privacy Policy"
+          />
+          <Anchor
+            margin={{ top: 'xsmall' }}
+            href="https://centrifuge.io/imprint"
+            target="_blank"
+            style={{ textDecoration: 'none', color: '#999' }}
+            label="Imprint"
+          />
         </Box>
       </Box>
 

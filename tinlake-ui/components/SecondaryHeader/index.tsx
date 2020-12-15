@@ -12,7 +12,7 @@ const SecondaryHeader = withTheme((props) => {
   const { children, ...rest } = props
 
   return (
-    <StyledSecondaryHeader background="white" justify="between" direction="row" align="center" {...rest}>
+    <StyledSecondaryHeader background="rgb(249, 249, 249)" justify="between" direction="row" align="center" {...rest}>
       {children}
     </StyledSecondaryHeader>
   )
