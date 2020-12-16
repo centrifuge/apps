@@ -138,7 +138,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       ])
 
       return this.pending(
-        proxy.execute(this.contract('ACTIONS').address, encoded, { ...this.overrides, gasLimit: 450000 })
+        proxy.execute(this.contract('ACTIONS').address, encoded, { ...this.overrides, gasLimit: 550000 })
       )
     }
 
@@ -154,7 +154,7 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       ])
 
       return this.pending(
-        proxy.execute(this.contract('ACTIONS').address, encoded, { ...this.overrides, gasLimit: 450000 })
+        proxy.execute(this.contract('ACTIONS').address, encoded, { ...this.overrides, gasLimit: 550000 })
       )
     }
   }
