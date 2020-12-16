@@ -3,6 +3,7 @@ import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import config, { Pool } from '../../../config'
@@ -26,6 +27,9 @@ const InvestCard: React.FC<Props> = (props: Props) => {
   const [daiValue, setDaiValue] = React.useState('0')
 
   const [limit, setLimit] = React.useState<string | undefined>(undefined)
+
+  const router = useRouter()
+  const disableLimit = 'disableLimit' in router.query
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
   const authProvider = useSelector<any, string | null>((state) => state.auth.providerName)
@@ -81,7 +85,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
 
   const onChange = (newValue: string) => {
     setDaiValue(newValue)
-    if (hasInvested === false && new BN(newValue).lt(MinInvestment)) {
+    if (!disableLimit && hasInvested === false && new BN(newValue).lt(MinInvestment)) {
       setError(`Minimum investment: ${config.network === 'Mainnet' ? '10.000' : '10'} DAI`)
     } else if (limit && new BN(newValue).gt(new BN(limit))) {
       setError('Amount larger than balance')
