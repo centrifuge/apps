@@ -28,6 +28,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
   const [limit, setLimit] = React.useState<string | undefined>(undefined)
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
+  const authProvider = useSelector<any, string | null>((state) => state.auth.providerName)
   const [hasInvested, setHasInvested] = React.useState<boolean | undefined>(undefined)
 
   const loadHasInvested = async () => {
@@ -59,9 +60,11 @@ const InvestCard: React.FC<Props> = (props: Props) => {
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
     const method = props.tranche === 'senior' ? 'submitSeniorSupplyOrder' : 'submitJuniorSupplyOrder'
+    const skipSigning = authProvider !== 'MetaMask' // Ledger & Portis don't support EIP-712
     const txId = await props.createTransaction(`Lock ${formatted} DAI for ${token} investment`, method, [
       props.tinlake,
       daiValue,
+      skipSigning,
     ])
     setTxId(txId)
   }
