@@ -53,7 +53,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   // V3 TODO: this should probably move to actions and expose a single TrancheData object (or to a duck?)
   const updateTrancheData = async () => {
-    dispatch(loadPool(props.tinlake))
+    dispatch(loadPool(props.tinlake, true))
 
     const tokenPrice =
       props.tranche === 'senior' ? await props.tinlake.getTokenPriceSenior() : await props.tinlake.getTokenPriceJunior()
