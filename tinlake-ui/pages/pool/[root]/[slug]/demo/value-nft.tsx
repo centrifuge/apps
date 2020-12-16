@@ -10,17 +10,18 @@ import Header from '../../../../../components/Header'
 import ValueNFT from '../../../../../components/ValueNFT'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
-import config, { Pool } from '../../../../../config'
+import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import { menuItems } from '../../../../../menuItems'
 
 interface Props extends WithRouterProps {
   root: string
   pool: Pool
+  ipfsPools: IpfsPools
 }
 
 class ValueNFTPage extends React.Component<Props> {
   render() {
-    const { pool } = this.props
+    const { pool, ipfsPools } = this.props
     const { tokenId, registry }: { tokenId: string; registry: string } = this.props.router.query as any
 
     return (
@@ -29,6 +30,7 @@ class ValueNFTPage extends React.Component<Props> {
           <title>Value NFT: {pool.metadata.name} | Tinlake | Centrifuge</title>
         </Head>
         <Header
+          ipfsPools={ipfsPools}
           poolTitle={pool.metadata.shortName || pool.metadata.name}
           selectedRoute={'/demo/value-nft'}
           menuItems={menuItems}
@@ -64,7 +66,8 @@ class ValueNFTPage extends React.Component<Props> {
 
 export async function getStaticPaths() {
   // We'll pre-render only these paths at build time.
-  const paths = config.pools.map((pool) => ({
+  const pools = await loadPoolsFromIPFS()
+  const paths = pools.active.map((pool) => ({
     params: { root: pool.addresses.ROOT_CONTRACT, slug: pool.metadata.slug },
   }))
 
@@ -73,7 +76,14 @@ export async function getStaticPaths() {
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  return { props: { root: params?.root, pool: config.pools.find((p) => p.addresses.ROOT_CONTRACT === params?.root) } }
+  const pools = await loadPoolsFromIPFS()
+  return {
+    props: {
+      ipfsPools: pools,
+      root: params?.root,
+      pool: pools.active.find((p) => p.addresses.ROOT_CONTRACT === params?.root),
+    },
+  }
 }
 
 export default withRouter(ValueNFTPage)

@@ -27,6 +27,7 @@ const contractNames = [
   'JUNIOR_TRANCHE',
   'SENIOR_TRANCHE',
   'COORDINATOR',
+  'POOL_REGISTRY',
 ] as const
 
 export type PendingTransaction = {
@@ -64,8 +65,6 @@ export type TinlakeParams = {
 }
 
 export type Constructor<T = {}> = new (...args: any[]) => Tinlake
-
-// ethers.errors.setLogLevel('error')
 
 // This adds a .toBN() function to all BigNumber instances returned by ethers.js
 ;(ethers.BigNumber as any).prototype.toBN = function() {

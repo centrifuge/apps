@@ -6,10 +6,12 @@ import OverviewComp from '../../components/Overview'
 import { Pool } from '../../config'
 import { AuthState } from '../../ducks/auth'
 import { loadPool, PoolState } from '../../ducks/pool'
+import { PoolsState } from '../../ducks/pools'
 
 interface Props {
   tinlake: ITinlake
   pool?: PoolState
+  pools?: PoolsState
   auth?: AuthState
   loadPool?: (tinlake: ITinlake) => Promise<void>
   selectedPool: Pool
@@ -17,7 +19,7 @@ interface Props {
 }
 
 class Overview extends React.Component<Props> {
-  componentWillMount() {
+  componentDidMount() {
     this.loadData()
   }
 

@@ -5,17 +5,19 @@ import { connect } from 'react-redux'
 import PoolList from '../../components/PoolList'
 import PoolsMetrics from '../../components/PoolsMetrics'
 import TinlakeExplainer from '../../components/TinlakeExplainer'
+import { IpfsPools } from '../../config'
 import { loadPools, PoolsState } from '../../ducks/pools'
 
 interface Props {
-  loadPools?: () => Promise<void>
+  loadPools?: (pools: IpfsPools) => Promise<void>
   pools?: PoolsState
+  ipfsPools: IpfsPools
 }
 
 class Dashboard extends React.Component<Props> {
   componentDidMount() {
-    const { loadPools } = this.props
-    loadPools && loadPools()
+    const { loadPools, ipfsPools } = this.props
+    loadPools && loadPools(ipfsPools)
   }
 
   render() {
@@ -38,7 +40,7 @@ class Dashboard extends React.Component<Props> {
             </Box>
           )
         )}
-        <Box pad={{ vertical: 'medium' }}></Box>
+        <Box pad={{ vertical: 'medium' }} />
       </Box>
     )
   }
