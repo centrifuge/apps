@@ -26,7 +26,7 @@ export const PoolTitle = styled.div`
 export const Icon = styled.img`
   width: 20px;
   height: 20px;
-  margin-right: 8px;
+  margin-right: 12px;
   position: relative;
   top: 5px;
 `
@@ -80,7 +80,7 @@ interface PoolLinkProps {
 }
 
 export const PoolLink = styled.div<PoolLinkProps>`
-  padding: 12px 14px;
+  padding: 10px 14px 14px 14px;
   width: 100%;
   color: ${(props) => (props.active ? '#2762FF' : '#000')};
   cursor: pointer;
