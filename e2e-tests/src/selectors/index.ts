@@ -35,7 +35,16 @@ export const selector = (path: any, selectors: typeof tinlakeSelectors) => {
     subObject = (subObject as any)[element]
   }
 
-  concatenatedPath += subObject // Add final leaf
+  // Add final leaf if it is a string.
+  if (typeof subObject === 'string') {
+    return concatenatedPath + subObject
+  }
+
+  // Otherwise, the path points to an object, so we add the `_path` if it exists, otherwise none.
+  if ('_path' in subObject) {
+    return concatenatedPath + (subObject as any)._path
+  }
+
   return concatenatedPath
 }
 
