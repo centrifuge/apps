@@ -102,14 +102,17 @@ let watcher: any = createWatcher([], multicallConfig)
 
 let prevAddress: string | undefined = undefined
 
-export function loadPool(tinlake: any): ThunkAction<Promise<void>, PoolState, undefined, Action> {
+export function loadPool(
+  tinlake: any,
+  forceReload?: boolean
+): ThunkAction<Promise<void>, PoolState, undefined, Action> {
   return async (dispatch, getState) => {
     const address = await tinlake.signer?.getAddress()
 
     const poolId = tinlake.contractAddresses.ROOT_CONTRACT
 
     // Dont load data again for the same pool and address combination
-    if ((getState() as any).pool.poolId === poolId && prevAddress === address) {
+    if (!forceReload && (getState() as any).pool.poolId === poolId && prevAddress === address) {
       return
     }
 

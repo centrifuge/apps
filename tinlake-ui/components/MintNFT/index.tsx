@@ -9,7 +9,6 @@ import Alert from '../Alert'
 import { BackLink } from '../BackLink'
 import NumberInput from '../NumberInput'
 import { PoolLink } from '../PoolLink'
-import SecondaryHeader from '../SecondaryHeader'
 
 const NFT_REGISTRY = '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24'
 
@@ -57,12 +56,10 @@ const MintNFT: React.FC<Props> = (props: Props) => {
 
   return (
     <Box>
-      <SecondaryHeader>
-        <Box direction="row" gap="small" align="center" margin={{ top: 'medium' }}>
-          <BackLink href="/assets" />
-          <Heading level="4">Mint NFT</Heading>
-        </Box>
-      </SecondaryHeader>
+      <Box direction="row" gap="small" align="center" margin={{ top: 'medium' }}>
+        <BackLink href="/assets" />
+        <Heading level="4">Mint NFT</Heading>
+      </Box>
 
       {status === 'unconfirmed' || status === 'pending' ? (
         <Spinner height={'calc(100vh - 89px - 84px)'} message={'Minting...'} />
