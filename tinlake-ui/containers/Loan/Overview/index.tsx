@@ -44,7 +44,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
 
   const [showMaxReserveForm, setShowMaxReserveForm] = React.useState(false)
 
-  return isBorrower ? (
+  return isBorrower || isAdmin ? (
     <Box margin={{ bottom: 'medium' }}>
       <Box direction="row" justify="between">
         <Box>
