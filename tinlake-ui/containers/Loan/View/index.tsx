@@ -50,8 +50,9 @@ class LoanView extends React.Component<Props> {
 
     return (
       <Box>
-        <LoanData loan={loan!} />
-        {loan && loan.status !== 'closed' && (
+        <LoanData loan={loan!} auth={this.props.auth} />
+        {/* <LoanData loan={loan!} /> */}
+        {/* {loan && loan.status !== 'closed' && (
           <Box>
             {hasBorrowerPermissions && (
               <>
@@ -67,10 +68,10 @@ class LoanView extends React.Component<Props> {
               </>
             )}
           </Box>
-        )}
-        {loan && loan.nft && this.props.auth?.address && (
+        )} */}
+        {/* {loan && loan.nft && this.props.auth?.address && (
           <NftData data={loan.nft} authedAddr={this.props.auth.address} />
-        )}
+        )} */}
       </Box>
     )
   }
