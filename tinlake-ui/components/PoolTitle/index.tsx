@@ -1,10 +1,10 @@
+import BN from 'bn.js'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Pool, UpcomingPool } from '../../config'
-import { PoolState, PoolData } from '../../ducks/pool'
+import { PoolData, PoolState } from '../../ducks/pool'
 import { Label } from '../PoolList/styles'
-import BN from 'bn.js'
 
 interface Props {
   pool: Pool | UpcomingPool
