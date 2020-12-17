@@ -49,7 +49,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
 
   const AddressLoadingDelay = 3000 // milliseconds
 
-  const kycStatus = onboarding.data?.kyc.verified ? 'verified' : onboarding.data?.kyc.created ? 'created' : 'none'
+  const kycStatus = onboarding.data?.kyc?.verified ? 'verified' : onboarding.data?.kyc?.created ? 'created' : 'none'
   const agreement = onboarding.data?.agreements.filter(
     (agreement: AgreementsStatus) => !props.tranche || agreement.tranche === props.tranche
   )[0]

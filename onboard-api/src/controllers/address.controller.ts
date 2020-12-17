@@ -1,4 +1,5 @@
 import { BadRequestException, Controller, Get, Param } from '@nestjs/common'
+import { UserRepo } from '../repos/user.repo'
 import { AddressRepo } from '../repos/address.repo'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { KycRepo } from '../repos/kyc.repo'
@@ -15,7 +16,8 @@ export class AddressController {
     private readonly kycRepo: KycRepo,
     private readonly agreementRepo: AgreementRepo,
     private readonly docusignService: DocusignService,
-    private readonly poolService: PoolService
+    private readonly poolService: PoolService,
+    private readonly userRepo: UserRepo
   ) {}
 
   @Get('pools/:poolId/addresses/:address')
@@ -28,6 +30,9 @@ export class AddressController {
 
     const address = await this.addressRepo.findOrCreate(blockchain, network, params.address)
     if (!address) throw new BadRequestException('Failed to create address')
+
+    const user = await this.userRepo.find(address.userId)
+    if (!user) throw new BadRequestException('Invalid user')
 
     const authorizationLink = this.securitizeService.getAuthorizationLink(params.poolId, params.address)
     const kyc = await this.kycRepo.find(address.userId)
@@ -65,6 +70,7 @@ export class AddressController {
       return {
         kyc: {
           url: authorizationLink,
+          us: user.countryCode === 'US',
           created: kyc.createdAt !== null,
           verified: kyc.verifiedAt !== null,
         },

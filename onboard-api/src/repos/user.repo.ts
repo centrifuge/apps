@@ -5,6 +5,7 @@ import { DatabaseService } from './db.service'
 export type User = {
   id: string
   email?: string
+  countryCode?: string
 }
 
 @Injectable()

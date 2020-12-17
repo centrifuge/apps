@@ -145,7 +145,7 @@ const Header: React.FC<Props> = (props: Props) => {
                 getAddressLink={getAddressLink}
                 style={{ padding: 0 }}
                 kycStatus={
-                  onboarding.data?.kyc.verified ? 'verified' : onboarding.data?.kyc.created ? 'pending' : 'none'
+                  onboarding.data?.kyc?.verified ? 'verified' : onboarding.data?.kyc?.created ? 'pending' : 'none'
                 }
                 showKycInfo={true}
               />

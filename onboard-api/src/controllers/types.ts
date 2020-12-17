@@ -1,6 +1,7 @@
 export interface KycStatus {
   created?: boolean
   verified?: boolean
+  us?: boolean
   url?: string
 }
 
