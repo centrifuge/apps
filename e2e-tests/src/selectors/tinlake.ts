@@ -25,6 +25,26 @@ export const selectors = {
   pendingTransaction: `//div[contains(text(), "Transaction pending")]`,
   successfulTransaction: `//div[contains(text(), "Transaction successful")]`,
 
+  dashboardPage: {
+    totalFinancedToDateBox: {
+      _path: `//div[div[contains(text(), "Total Financed to Date")]]`,
+      value: `/div[1]/span[1]`,
+    },
+    poolList: {
+      _path: `//div[div[div[contains(h4, "Pool Value")]]]`,
+      entries: {
+        _path: `//div[img]`,
+        first: {
+          _path: `[1]`,
+          aprCol: {
+            _path: `//div[contains(., "%")]`,
+            value: `/span[1]`,
+          },
+        },
+      },
+    },
+  },
+
   investmentsPage: {
     _path: `//div[h4[contains(., "Invest/Redeem")]]`,
     dropCard: { ...trancheOverviewSelectors, _path: `//div[div[h5[contains(., "DROP Balance")]]]` },
