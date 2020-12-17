@@ -10,7 +10,7 @@ import { PoolLink } from '../../../../../components/PoolLink'
 import PoolTitle from '../../../../../components/PoolTitle'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
-import config, { Pool } from '../../../../../config'
+import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import LoanList from '../../../../../containers/Loan/List'
 import LoanOverview from '../../../../../containers/Loan/Overview/index'
 import { menuItems } from '../../../../../menuItems'
@@ -18,11 +18,12 @@ import { menuItems } from '../../../../../menuItems'
 interface Props extends WithRouterProps {
   root: string
   pool: Pool
+  ipfsPools: IpfsPools
 }
 
 class LoanListPage extends React.Component<Props> {
   render() {
-    const { pool } = this.props
+    const { pool, ipfsPools } = this.props
 
     return (
       <WithFooter>
@@ -30,6 +31,7 @@ class LoanListPage extends React.Component<Props> {
           <title>Assets: {pool.metadata.name} | Tinlake | Centrifuge</title>
         </Head>
         <Header
+          ipfsPools={ipfsPools}
           poolTitle={pool.metadata.shortName || pool.metadata.name}
           selectedRoute={'/assets'}
           menuItems={menuItems}
@@ -56,7 +58,20 @@ class LoanListPage extends React.Component<Props> {
                         </Box>
 
                         <LoanOverview tinlake={tinlake} auth={auth} activePool={this.props.pool} />
-                        <Heading level="4">Asset List</Heading>
+                        <Box direction="row" justify="between">
+                          <Heading level="4" margin={{ bottom: 'medium' }}>
+                            Asset List
+                          </Heading>
+                          <div>
+                            <Box direction="row" gap="medium" margin={{ top: 'small' }}>
+                              Show:
+                              {/* <Button secondary label="Show all" size="small" /> */}
+                              <Button secondary label="Open" size="small" />
+                              <Button secondary label="Ongoing" size="small" />
+                              <Button plain label="Closed" size="small" />
+                            </Box>
+                          </div>
+                        </Box>
                         <LoanList tinlake={tinlake} auth={auth} hideMetrics={true} />
                       </Box>
                     )}
@@ -73,7 +88,8 @@ class LoanListPage extends React.Component<Props> {
 
 export async function getStaticPaths() {
   // We'll pre-render only these paths at build time.
-  const paths = config.pools.map((pool) => ({
+  const pools = await loadPoolsFromIPFS()
+  const paths = pools.active.map((pool) => ({
     params: { root: pool.addresses.ROOT_CONTRACT, slug: pool.metadata.slug },
   }))
 
@@ -82,7 +98,14 @@ export async function getStaticPaths() {
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  return { props: { root: params?.root, pool: config.pools.find((p) => p.addresses.ROOT_CONTRACT === params?.root) } }
+  const pools = await loadPoolsFromIPFS()
+  return {
+    props: {
+      root: params?.root,
+      pool: pools.active.find((p) => p.addresses.ROOT_CONTRACT === params?.root),
+      ipfsPools: pools,
+    },
+  }
 }
 
 export default LoanListPage

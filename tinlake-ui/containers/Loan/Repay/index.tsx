@@ -1,10 +1,10 @@
 import { TokenInput } from '@centrifuge/axis-token-input'
-import { baseToDisplay, Loan } from '@centrifuge/tinlake-js'
+import { baseToDisplay, ITinlake, Loan } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
 import * as React from 'react'
-import { connect } from 'react-redux'
+import { connect, useSelector } from 'react-redux'
 import { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
 import { loadLoan } from '../../../ducks/loans'
@@ -14,7 +14,7 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 interface Props extends TransactionProps {
   poolConfig: Pool
   loan: Loan
-  tinlake: any
+  tinlake: ITinlake
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>
   ensureAuthed?: () => Promise<void>
 }
@@ -51,10 +51,31 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
     setTxId(txId)
   }
 
+  const [balance, setBalance] = React.useState('')
+
+  const address = useSelector<any, string | null>((state) => state.auth.address)
+
   React.useEffect(() => {
-    if (repayAmount === '') setRepayAmount(debt.toString())
-    validate(debt.toString())
-  }, [debt])
+    ;(async () => {
+      if (!address) {
+        return
+      }
+
+      const balance = await props.tinlake.getCurrencyBalance(address)
+      setBalance(balance.toString())
+    })()
+  }, [address])
+
+  const useBalanceAsMax = new BN(balance).lt(new BN(debt))
+
+  React.useEffect(() => {
+    if (balance === '' || repayAmount !== '') {
+      return
+    }
+    const newRepayAmount = useBalanceAsMax ? balance : debt.toString()
+    setRepayAmount(newRepayAmount)
+    validate(newRepayAmount)
+  }, [debt, balance])
 
   React.useEffect(() => {
     if (status === 'succeeded') {
@@ -74,6 +95,8 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
   const validate = (value: string) => {
     if (new BN(value).gt(new BN(debt))) {
       setError('Amount larger than outstanding')
+    } else if (new BN(value).gt(new BN(balance))) {
+      setError('Amount larger than your balance')
     } else {
       setError(undefined)
     }
@@ -86,8 +109,8 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
           token="DAI"
           label="Repay amount"
           value={repayAmount}
-          maxValue={debt}
-          limitLabel="Outstanding"
+          maxValue={useBalanceAsMax ? balance : debt}
+          limitLabel={useBalanceAsMax ? 'Your balance' : 'Outstanding'}
           error={error}
           onChange={onChange}
           disabled={!props.poolConfig.contractConfig?.partialRepay || status === 'unconfirmed' || status === 'pending'}

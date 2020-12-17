@@ -7,7 +7,7 @@ import Router, { NextRouter, withRouter } from 'next/router'
 import React from 'react'
 import { connect, useSelector } from 'react-redux'
 import { PoolSelector } from '../../components/PoolSelector'
-import config from '../../config'
+import config, { IpfsPools } from '../../config'
 import { AuthState, clear, ensureAuthed } from '../../ducks/auth'
 import { OnboardingState } from '../../ducks/onboarding'
 import { selectWalletTransactions, TransactionState } from '../../ducks/transactions'
@@ -23,6 +23,7 @@ export interface MenuItem {
 }
 
 interface Props {
+  ipfsPools: IpfsPools
   poolTitle?: string
   selectedRoute: string
   menuItems: MenuItem[]
@@ -112,7 +113,7 @@ const Header: React.FC<Props> = (props: Props) => {
               </a>
             </Link>
           </div>
-          {poolTitle && <PoolSelector title={poolTitle} />}
+          {poolTitle && <PoolSelector title={poolTitle} ipfsPools={props.ipfsPools} />}
           <Box
             flex="grow"
             basis="auto"

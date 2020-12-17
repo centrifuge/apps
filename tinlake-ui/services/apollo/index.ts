@@ -5,7 +5,7 @@ import { createHttpLink } from 'apollo-link-http'
 import BN from 'bn.js'
 import gql from 'graphql-tag'
 import fetch from 'node-fetch'
-import config, { ArchivedPool, UpcomingPool } from '../../config'
+import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
 import { PoolData, PoolsData } from '../../ducks/pools'
 import { getPoolStatus } from '../../utils/pool'
 import { UintBase } from '../../utils/ratios'
@@ -44,9 +44,11 @@ class Apollo {
     })
   }
 
-  injectPoolData(pools: any[]): PoolData[] {
-    const poolConfigs = config.pools
-    const tinlakePools = poolConfigs.map((poolConfig) => {
+  injectPoolData(pools: any[], poolConfigs: Pool[] | undefined): PoolData[] {
+    if (!poolConfigs) {
+      return []
+    }
+    const tinlakePools = poolConfigs?.map((poolConfig: any) => {
       const poolId = poolConfig.addresses.ROOT_CONTRACT
       const pool = pools.find((p) => p.id.toLowerCase() === poolId.toLowerCase())
 
@@ -98,7 +100,11 @@ class Apollo {
     })
     return tinlakePools
   }
-  injectUpcomingPoolData(upcomingPools: UpcomingPool[]): PoolData[] {
+
+  injectUpcomingPoolData(upcomingPools: UpcomingPool[] | undefined): PoolData[] {
+    if (!upcomingPools) {
+      return []
+    }
     return upcomingPools.map((p) => ({
       isUpcoming: true,
       isArchived: false,
@@ -128,7 +134,10 @@ class Apollo {
     }))
   }
 
-  injectArchivedPoolData(archivedPools: ArchivedPool[]): PoolData[] {
+  injectArchivedPoolData(archivedPools: ArchivedPool[] | undefined): PoolData[] {
+    if (!archivedPools) {
+      return []
+    }
     return archivedPools.map((p) => ({
       isUpcoming: false,
       isArchived: true,
@@ -159,7 +168,7 @@ class Apollo {
     }))
   }
 
-  async getPools(): Promise<PoolsData> {
+  async getPools(ipfsPools: IpfsPools): Promise<PoolsData> {
     let result
     try {
       // juniorYield14Days
@@ -187,12 +196,11 @@ class Apollo {
     } catch (err) {
       throw new Error(`error occured while fetching assets from apollo ${err}`)
     }
-
     let pools = result.data?.pools
       ? [
-          ...this.injectPoolData(result.data.pools),
-          ...this.injectUpcomingPoolData(config.upcomingPools),
-          ...this.injectArchivedPoolData(config.archivedPools),
+          ...this.injectPoolData(result.data.pools, ipfsPools.active),
+          ...this.injectUpcomingPoolData(ipfsPools.upcoming),
+          ...this.injectArchivedPoolData(ipfsPools.archived),
         ]
       : []
 

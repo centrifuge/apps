@@ -9,10 +9,12 @@ import { PoolsState } from '../../ducks/pools'
 import { PoolLink } from '../PoolLink'
 import { FormModal, InvestmentSteps } from './styles'
 import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
+import { AgreementsStatus, Tranche } from '@centrifuge/onboard-api/src/controllers/types'
 
 interface Props {
   pool: Pool | UpcomingPool
   card?: boolean
+  tranche?: Tranche
 }
 
 const OnboardModal: React.FC<Props> = (props: Props) => {
@@ -48,11 +50,10 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
   const AddressLoadingDelay = 3000 // milliseconds
 
   const kycStatus = onboarding.data?.kyc.verified ? 'verified' : onboarding.data?.kyc.created ? 'created' : 'none'
-  const agreementStatus = onboarding.data?.agreements[0]?.counterSigned
-    ? 'countersigned'
-    : onboarding.data?.agreements[0]?.signed
-    ? 'signed'
-    : 'none'
+  const agreement = onboarding.data?.agreements.filter(
+    (agreement: AgreementsStatus) => !props.tranche || agreement.tranche === props.tranche
+  )[0]
+  const agreementStatus = agreement?.counterSigned ? 'countersigned' : agreement?.signed ? 'signed' : 'none'
 
   React.useEffect(() => {
     setTimeout(() => {
@@ -107,18 +108,17 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
           </Heading>
           {kycStatus === 'created' && (
             <>
-              Your KYC status is pending, you can already continue onboarding as an investor by signing the Subscription
-              Agreement for DROP tokens of {props.pool.metadata.name}.
+              Your KYC status is pending, you can already continue onboarding as an investor by signing the{' '}
+              {agreement?.name} of {props.pool.metadata.name}.
             </>
           )}
           {kycStatus === 'verified' && (
             <>
-              You can continue onboarding as an investor by signing the Subscription Agreement for DROP tokens of{' '}
-              {props.pool.metadata.name}.
+              You can continue onboarding as an investor by signing the {agreement?.name} of {props.pool.metadata.name}.
             </>
           )}
           <Box direction="row" justify="end" margin={{ top: 'small' }}>
-            <Button primary label="Sign Subscription Agreement" fill={false} onClick={onOpen} />
+            <Button primary label={`Sign ${agreement?.name}`} fill={false} onClick={onOpen} />
           </Box>
         </>
       )}
@@ -207,13 +207,16 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
               </>
             )}
 
-            {agreementStatus === 'none' && onboarding.data?.agreements[0]?.id && (
+            {agreementStatus === 'none' && agreement?.id && (
               <>
                 <Paragraph
                   margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}
                   style={{ textAlign: 'center', width: '50%' }}
                 >
-                  You can continue onboarding by signing the Subscription Agreement for {props.pool?.metadata.name}.
+                  {kycStatus === 'verified'
+                    ? 'You have successfully completed KYC verification.'
+                    : 'Your KYC status is pending.'}{' '}
+                  You can continue onboarding by signing the {agreement.name} for {props.pool?.metadata.name}.
                 </Paragraph>
                 {/* <InvestmentSteps src={'/static/onboarding/2.svg'} alt="Investment steps" /> */}
                 <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
@@ -226,9 +229,9 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                 <div>
                   <Button
                     primary
-                    label={`Sign Subscription Agreement`}
+                    label={`Sign ${agreement?.name}`}
                     disabled={!checked}
-                    href={onboarding.agreementLinks[onboarding.data?.agreements[0]?.id]}
+                    href={onboarding.agreementLinks[agreement.id]}
                     fill={false}
                   />
                 </div>

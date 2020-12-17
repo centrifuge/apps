@@ -1,6 +1,6 @@
 import { BadRequestException, Controller, Get, Param, Query, Res } from '@nestjs/common'
 import { AddressRepo } from '../repos/address.repo'
-import { AgreementRepo } from '../repos/agreement.repo'
+import { AgreementRepo, Tranche } from '../repos/agreement.repo'
 import { KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
 import { SecuritizeService } from '../services/kyc/securitize.service'
@@ -43,17 +43,22 @@ export class KycController {
     const kyc = await this.kycRepo.upsertSecuritize(address.userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!kyc) throw new BadRequestException('Failed to create KYC entity')
 
-    await this.userRepo.setEmail(address.userId, investor.email)
+    await this.userRepo.update(address.userId, investor.email, investor.details.address.countryCode)
 
     // Find or create the relevant agreement for this pool
     // TODO: templateId should be based on the agreement required for the pool
-    const agreement = await this.agreementRepo.findOrCreate(
-      address.userId,
-      investor.email,
-      params.poolId,
-      process.env.DOCUSIGN_TEMPLATE_ID
-    )
-    if (!agreement) throw new BadRequestException('Failed to create agreement envelope')
+    // TODO: if US, then a, else b
+    for (let tranche of ['senior', 'junior'] as Tranche[]) {
+      const agreement = await this.agreementRepo.findOrCreate(
+        address.userId,
+        investor.email,
+        params.poolId,
+        tranche,
+        `${tranche === 'senior' ? 'DROP' : 'TIN'} Subscription Agreement`,
+        process.env.DOCUSIGN_TEMPLATE_ID
+      )
+      if (!agreement) throw new BadRequestException('Failed to create agreement envelope')
+    }
 
     // Create session and redirect user
     const session = this.sessionService.create(address.userId)

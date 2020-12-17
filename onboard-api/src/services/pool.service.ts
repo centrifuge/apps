@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { ethers } from 'ethers'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
+import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
 
 @Injectable()
 export class PoolService {
@@ -20,17 +22,21 @@ export class PoolService {
   }
 
   private async loadFromIPFS() {
-    // TODO: use ethers to get all pools file from on chain registry
-    const response = await fetch(`${process.env.IPFS_GATEWAY}${process.env.POOLS_IPFS_HASH}`)
+    const url = await this.assembleIpfsUrl()
+    const response = await fetch(url)
 
     const pools = await response.json()
     this.pools = pools
 
-    this.logger.log(
-      `Loaded ${Object.keys(this.pools).length} pools from IPFS: ${Object.values(this.pools)
-        .map((pool: any) => pool.metadata?.shortName || pool.metadata?.name)
-        .join(', ')}`
-    )
+    this.logger.log(`Loaded ${Object.keys(this.pools).length} pools from IPFS`)
+  }
+
+  private async assembleIpfsUrl(): Promise<string> {
+    const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL)
+    const registry = new ethers.Contract(process.env.POOL_REGISTRY, contractAbiPoolRegistry, provider)
+    const poolData = await registry.pools(0)
+    const url = new URL(poolData[3], process.env.IPFS_GATEWAY)
+    return url.href
   }
 }
 

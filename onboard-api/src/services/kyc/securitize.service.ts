@@ -44,6 +44,7 @@ export class SecuritizeService {
     }
   }
 
+  // TODO: implement support for refreshing the access token
   async getInvestor(accessToken: string): Promise<Investor> {
     const url = `${process.env.SECURITIZE_API_HOST}v1/${process.env.SECURITIZE_CLIENT_ID}/investor`
 
@@ -55,6 +56,8 @@ export class SecuritizeService {
     })
 
     const investor = await response.json()
+    console.log({ investor })
+    console.log({ details: investor.details })
     return investor
   }
 }
@@ -67,5 +70,10 @@ export interface Investor {
   language: string
   email: string
   verificationStatus: string
-  details: object
+  details: {
+    tax: any[]
+    address: {
+      countryCode: string
+    }
+  }
 }

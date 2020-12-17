@@ -3,6 +3,7 @@ create table if not exists users
 (
   id uuid primary key,
   email varchar(255),
+  country_code character varying(5),
   created_at timestamp with time zone not null default now()
 );
 
@@ -40,6 +41,8 @@ create table if not exists agreements (
     id uuid primary key,
     user_id uuid not null references users(id) on delete cascade on update cascade,
     pool_id character(42) not null,
+    tranche character varying(20) NOT NULL DEFAULT '''senior'''::character varying,
+    name character varying(100) NOT NULL DEFAULT ''::character varying,
     provider character varying(100) not null,
     provider_template_id character varying(100) not null,
     provider_envelope_id character varying(100) not null,

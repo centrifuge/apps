@@ -53,7 +53,8 @@ export class AddressController {
       const agreementLinks = await (await this.agreementRepo.findByUserAndPool(address.userId, params.poolId)).map(
         (agreement: Agreement): AgreementsStatus => {
           return {
-            name: 'Subscription Agreement',
+            name: agreement.name,
+            tranche: agreement.tranche,
             id: agreement.id,
             signed: agreement.signedAt !== null,
             counterSigned: agreement.counterSignedAt !== null,

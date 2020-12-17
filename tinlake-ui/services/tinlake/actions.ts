@@ -226,14 +226,18 @@ export async function getLoans(tinlake: ITinlake): Promise<TinlakeResult | Pendi
   }
 }
 
-export async function submitSeniorSupplyOrder(tinlake: ITinlake, amount: string): Promise<PendingTransaction> {
+export async function submitSeniorSupplyOrder(
+  tinlake: ITinlake,
+  amount: string,
+  skipSigning?: boolean
+): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
 
   const address = await tinlake.signer?.getAddress()
 
-  if (getAddressMemory(address)?.supportsPermits === false) {
+  if (skipSigning || getAddressMemory(address)?.supportsPermits === false) {
     return await tinlake.submitSeniorSupplyOrderWithAllowance(amount, address)
   }
 
@@ -271,14 +275,18 @@ export async function cancelSeniorSupplyOrder(tinlake: ITinlake): Promise<Pendin
   return tinlake.submitSeniorSupplyOrder('0')
 }
 
-export async function submitJuniorSupplyOrder(tinlake: ITinlake, amount: string): Promise<PendingTransaction> {
+export async function submitJuniorSupplyOrder(
+  tinlake: ITinlake,
+  amount: string,
+  skipSigning?: boolean
+): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
 
   const address = await tinlake.signer?.getAddress()
 
-  if (getAddressMemory(address)?.supportsPermits === false) {
+  if (skipSigning || getAddressMemory(address)?.supportsPermits === false) {
     return await tinlake.submitJuniorSupplyOrderWithAllowance(amount, address)
   }
 
@@ -316,14 +324,18 @@ export async function cancelJuniorSupplyOrder(tinlake: ITinlake): Promise<Pendin
   return tinlake.submitJuniorSupplyOrder('0')
 }
 
-export async function submitSeniorRedeemOrder(tinlake: ITinlake, amount: string): Promise<PendingTransaction> {
+export async function submitSeniorRedeemOrder(
+  tinlake: ITinlake,
+  amount: string,
+  skipSigning?: boolean
+): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
 
   const address = await tinlake.signer?.getAddress()
 
-  if (getAddressMemory(address)?.supportsPermits === false) {
+  if (skipSigning || getAddressMemory(address)?.supportsPermits === false) {
     return await tinlake.submitSeniorRedeemOrderWithAllowance(amount, address)
   }
 
@@ -361,14 +373,18 @@ export async function cancelSeniorRedeemOrder(tinlake: ITinlake): Promise<Pendin
   return tinlake.submitSeniorRedeemOrder('0')
 }
 
-export async function submitJuniorRedeemOrder(tinlake: ITinlake, amount: string): Promise<PendingTransaction> {
+export async function submitJuniorRedeemOrder(
+  tinlake: ITinlake,
+  amount: string,
+  skipSigning?: boolean
+): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
 
   const address = await tinlake.signer?.getAddress()
 
-  if (getAddressMemory(address)?.supportsPermits === false) {
+  if (skipSigning || getAddressMemory(address)?.supportsPermits === false) {
     return await tinlake.submitJuniorRedeemOrderWithAllowance(amount, address)
   }
 

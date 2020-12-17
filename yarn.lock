@@ -1870,9 +1870,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@centrifuge/axis-web3-wallet@npm:0.0.3-develop.fa0a71f.151":
-  version: 0.0.3-develop.fa0a71f.151
-  resolution: "@centrifuge/axis-web3-wallet@npm:0.0.3-develop.fa0a71f.151"
+"@centrifuge/axis-web3-wallet@npm:0.0.3-develop.b4fd639.151":
+  version: 0.0.3-develop.b4fd639.151
+  resolution: "@centrifuge/axis-web3-wallet@npm:0.0.3-develop.b4fd639.151"
   dependencies:
     ethereum-blockies: "github:MyEtherWallet/blockies"
     grommet-icons: ^4.4.0
@@ -1882,7 +1882,7 @@ __metadata:
     react: ">= 16.6.1"
     react-dom: ">= 16.6.1"
     styled-components: ">= 4.x"
-  checksum: 5dad65635bdff549b5b38119b4e769b9f8d5d8565ec03ffc2d19936fd061694b4db8d5b55c9a667e2420142b13b46e314a1df32c4a31e430884e7be59318fb79
+  checksum: fe4717d316567c639a2d4e2eb464c158ee622c763d0d1915bc339c09d1adb79308bacc08aba47374d48ccd97197fbef35cf8c86eb934a15a85bb10aff360aced
   languageName: node
   linkType: hard
 
@@ -1916,6 +1916,7 @@ __metadata:
     "@vercel/fetch-retry": ^5.0.3
     concurrently: ^5.3.0
     cookie-parser: ^1.4.5
+    ethers: 5.0.23
     postgres: 2.0.0-beta.2
     postgres-shift: ^0.0.4
     prettier-plugin-organize-imports: ^1.1.1
@@ -2006,7 +2007,7 @@ __metadata:
     "@centrifuge/axis-token-input": 0.4.1-develop.143
     "@centrifuge/axis-tooltip": 0.4.2-develop.4bb6c15.148
     "@centrifuge/axis-utils": 0.4.2-develop.109
-    "@centrifuge/axis-web3-wallet": 0.0.3-develop.fa0a71f.151
+    "@centrifuge/axis-web3-wallet": 0.0.3-develop.b4fd639.151
     "@centrifuge/onboard-api": "workspace:*"
     "@centrifuge/tinlake-js": "workspace:*"
     "@centrifuge/tinlake-pools-kovan": 0.0.1-develop.6

@@ -7,11 +7,15 @@ export type Agreement = {
   id: string
   userId: string
   poolId: string
+  tranche: Tranche
+  name: string
   provider: 'docusign'
   providerEnvelopeId: string
   signedAt: Date
   counterSignedAt: Date
 }
+
+export type Tranche = 'senior' | 'junior'
 
 @Injectable()
 export class AgreementRepo {
@@ -48,12 +52,20 @@ export class AgreementRepo {
     return (agreements as unknown) as Agreement[]
   }
 
-  async findOrCreate(userId: string, email: string, poolId: string, templateId: string): Promise<Agreement> {
+  async findOrCreate(
+    userId: string,
+    email: string,
+    poolId: string,
+    tranche: Tranche,
+    name: string,
+    templateId: string
+  ): Promise<Agreement> {
     const [existingAgreement] = await this.db.sql`
       select *
       from agreements
       where agreements.user_id = ${userId}
       and agreements.pool_id = ${poolId}
+      and agreements.tranche = ${tranche}
       and agreements.provider_template_id = ${templateId}
     `
 
@@ -63,9 +75,9 @@ export class AgreementRepo {
 
       const [newAgreement] = await this.db.sql`
         insert into agreements (
-          id, user_id, pool_id, provider, provider_template_id, provider_envelope_id
+          id, user_id, pool_id, tranche, name, provider, provider_template_id, provider_envelope_id
         ) values (
-          ${[id, userId, poolId, 'docusign', templateId, envelopeId]}
+          ${[id, userId, poolId, tranche, name, 'docusign', templateId, envelopeId]}
         )
 
         returning *

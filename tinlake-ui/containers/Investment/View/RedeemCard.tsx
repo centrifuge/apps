@@ -4,7 +4,7 @@ import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
 import * as React from 'react'
-import { connect } from 'react-redux'
+import { connect, useSelector } from 'react-redux'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -23,6 +23,7 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
   const [tokenValue, setTokenValue] = React.useState('0')
 
+  const authProvider = useSelector<any, string | null>((state) => state.auth.providerName)
   const [limit, setLimit] = React.useState<string | undefined>(undefined)
 
   React.useEffect(() => {
@@ -47,9 +48,11 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
     const method = props.tranche === 'senior' ? 'submitSeniorRedeemOrder' : 'submitJuniorRedeemOrder'
+    const skipSigning = authProvider !== 'MetaMask' // Ledger & Portis don't support EIP-712
     const txId = await props.createTransaction(`Lock ${formatted} ${token} for redemption`, method, [
       props.tinlake,
       tokenValue,
+      skipSigning,
     ])
     setTxId(txId)
   }
