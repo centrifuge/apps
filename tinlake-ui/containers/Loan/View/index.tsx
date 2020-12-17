@@ -54,17 +54,17 @@ class LoanView extends React.Component<Props> {
         {loan && loan.status !== 'closed' && (
           <Box>
             {hasBorrowerPermissions && (
-              <Box margin={{ top: 'large', bottom: 'large' }}>
-                <Box gap="medium" align="start" margin={{ bottom: 'medium' }}>
-                  <Heading level="5" margin="none">
-                    Finance / Repay{' '}
-                  </Heading>
+              <>
+                <Heading level="5" margin={{ top: 'large', bottom: 'medium' }}>
+                  Finance / Repay{' '}
+                </Heading>
+                <Box margin={{ bottom: 'medium' }} pad="medium" elevation="small" round="xsmall" background="white">
+                  <Box direction="row">
+                    <LoanBorrow loan={loan!} tinlake={tinlake} />
+                    <LoanRepay poolConfig={poolConfig} loan={loan!} tinlake={tinlake} />
+                  </Box>
                 </Box>
-                <Box direction="row">
-                  <LoanBorrow loan={loan!} tinlake={tinlake} />
-                  <LoanRepay poolConfig={poolConfig} loan={loan!} tinlake={tinlake} />
-                </Box>
-              </Box>
+              </>
             )}
           </Box>
         )}

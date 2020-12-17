@@ -91,8 +91,8 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
   const disabled = status === 'unconfirmed' || status === 'pending' || status === 'succeeded'
 
   return (
-    <Box pad="medium" elevation="small" round="xsmall" background="white">
-      <Box>
+    <Box>
+      <Box pad="medium" elevation="small" round="xsmall" background="white">
         <Box>
           <Box direction="row" gap="medium" margin={{ top: 'medium' }}>
             <b>Please paste your Token ID and corresponding registry address below to finance an asset:</b>
@@ -117,23 +117,23 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
             </Box>
           </Box>
         </Box>
-
-        {loanId ? (
-          <Box margin={{ bottom: 'medium', top: 'large' }}>
-            {' '}
-            <LoanView tinlake={props.tinlake} poolConfig={props.poolConfig} loanId={loanId} />
-          </Box>
-        ) : (
-          <Box>
-            {nftError && (
-              <Alert type="error" margin={{ vertical: 'large' }}>
-                {nftError}{' '}
-              </Alert>
-            )}
-            {nft && props.auth?.address && <NftData data={nft} authedAddr={props.auth.address} />}
-          </Box>
-        )}
       </Box>
+
+      {loanId ? (
+        <Box margin={{ bottom: 'medium', top: 'large' }}>
+          {' '}
+          <LoanView tinlake={props.tinlake} poolConfig={props.poolConfig} loanId={loanId} />
+        </Box>
+      ) : (
+        <Box>
+          {nftError && (
+            <Alert type="error" margin={{ vertical: 'large' }}>
+              {nftError}{' '}
+            </Alert>
+          )}
+          {nft && props.auth?.address && <NftData data={nft} authedAddr={props.auth.address} />}
+        </Box>
+      )}
     </Box>
   )
 }

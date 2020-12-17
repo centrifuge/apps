@@ -4,6 +4,7 @@ import * as React from 'react'
 import InvestAction from '../../components/InvestAction'
 import OnboardModal from '../../components/OnboardModal'
 import { PoolLink } from '../../components/PoolLink'
+import PoolTitle from '../../components/PoolTitle'
 import config, { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
 import { PoolState } from '../../ducks/pool'
@@ -21,7 +22,7 @@ const Overview: React.FC<Props> = (props: Props) => {
     <Box margin={{ bottom: 'large', top: 'medium' }}>
       {!isUpcoming && (
         <>
-          <Heading level="4">Pool Overview of {props.selectedPool.metadata.name} </Heading>
+          <PoolTitle pool={props.selectedPool} page="Pool Overview" />
           <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />
         </>
       )}

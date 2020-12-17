@@ -7,7 +7,6 @@ import Auth from '../../../../../components/Auth'
 import { BackLink } from '../../../../../components/BackLink'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
-import SecondaryHeader from '../../../../../components/SecondaryHeader'
 import ValueNFT from '../../../../../components/ValueNFT'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
@@ -47,12 +46,10 @@ class ValueNFTPage extends React.Component<Props> {
                     tinlake={tinlake}
                     render={(auth) => (
                       <Box>
-                        <SecondaryHeader>
-                          <Box direction="row" gap="small" align="center">
-                            <BackLink href={'/assets'} />
-                            <Heading level="3">Value NFT</Heading>
-                          </Box>
-                        </SecondaryHeader>
+                        <Box direction="row" gap="small" align="center" margin={{ top: 'medium' }}>
+                          <BackLink href={'/assets'} />
+                          <Heading level="4">Value NFT</Heading>
+                        </Box>
                         <ValueNFT tinlake={tinlake} auth={auth} tokenId={tokenId} registry={registry} />
                       </Box>
                     )}

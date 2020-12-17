@@ -19,11 +19,11 @@ class NftData extends React.Component<Props> {
 
     return (
       <>
-        <Heading margin={{ top: 'xlarge' }} level="5">
+        <Heading margin={{ top: 'large' }} level="5">
           NFT Data
         </Heading>
         <Box pad="medium" elevation="small" round="xsmall" background="white">
-          <Box direction="row" gap="medium" margin={{ bottom: 'large', top: 'medium' }}>
+          <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'medium' }}>
             <Box basis={'1/3'} gap="medium">
               <DisplayField
                 label={'NFT ID'}

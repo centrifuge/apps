@@ -42,27 +42,18 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
 
   const isAdmin = props.auth?.permissions?.canSetMinimumJuniorRatio
 
-  const [open, setOpen] = React.useState(true)
+  const [open, setOpen] = React.useState(false)
 
   return (
-    <>
+    <Box background="#eee" pad={{ horizontal: '34px', bottom: 'xsmall' }} round="xsmall" margin={{ bottom: 'medium' }}>
       <Heading level="4" onClick={() => setOpen(!open)} style={{ cursor: 'pointer' }}>
-        Show Epoch Details
+        Epoch Details
         <Caret>
           <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
         </Caret>
       </Heading>
       {open && (
-        <Box
-          direction="row"
-          justify="between"
-          gap="medium"
-          elevation="small"
-          round="xsmall"
-          pad="medium"
-          background="white"
-          margin={{ bottom: 'medium' }}
-        >
+        <Box direction="row" justify="between" margin={{ bottom: 'medium' }}>
           <Box width="420px" margin={{ bottom: 'medium' }}>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
@@ -288,7 +279,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
           </Box>
         </Box>
       )}
-    </>
+    </Box>
   )
 }
 
