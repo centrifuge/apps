@@ -302,8 +302,8 @@ export function loadPool(
           data.junior!.pendingInvestments || new BN(0)
         )
 
-        data.senior!.address = tinlake.contractAddresses['JUNIOR_TOKEN']
-        data.junior!.address = tinlake.contractAddresses['SENIOR_TOKEN']
+        data.senior!.address = tinlake.contractAddresses['SENIOR_TOKEN']
+        data.junior!.address = tinlake.contractAddresses['JUNIOR_TOKEN']
 
         const juniorRedemptionsCurrency = (data.junior?.pendingRedemptions || new BN(0))
           .mul(data.junior?.tokenPrice || new BN(0))

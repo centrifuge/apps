@@ -320,7 +320,7 @@ function getLoanStatus(loan: any) {
   if (loan.debt && loan.debt !== '0') {
     return 'ongoing'
   }
-  return 'opened'
+  return 'NFT locked'
 }
 
 export default new Apollo()
