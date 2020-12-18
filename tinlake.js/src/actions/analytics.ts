@@ -82,7 +82,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       if ((await this.getOwnerOfLoan(loanId)) === ZERO_ADDRESS) {
         return 'closed'
       }
-      return 'opened'
+      return 'NFT locked'
     }
 
     getLoan = async (loanId: string): Promise<Loan | null> => {

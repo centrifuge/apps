@@ -1,6 +1,7 @@
 import { Given } from '@cucumber/cucumber'
+import { config } from '../../config'
 import { tinlake } from '../../selectors'
-import { openPoolPage } from '../../support/browser-actions'
+import { openPage, openPoolPage } from '../../support/browser-actions'
 import { CentrifugeWorld } from '../../support/world'
 
 Given('I am logged into MetaMask as Tinlake admin', async function(this: CentrifugeWorld) {
@@ -15,6 +16,10 @@ Given('I am logged into MetaMask as borrower', async function(this: CentrifugeWo
 
 Given('I have reloaded the page', async function(this: CentrifugeWorld) {
   await this.currentPage.reload({ waitUntil: ['networkidle0', 'domcontentloaded'] })
+})
+
+Given('I am on the Tinlake dashboard', async function(this: CentrifugeWorld) {
+  await openPage(this, config.tinlakeUrl)
 })
 
 Given('I am on the Tinlake investments page', async function(this: CentrifugeWorld) {
