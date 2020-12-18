@@ -3,7 +3,7 @@ import * as React from 'react'
 import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Pool, UpcomingPool } from '../../config'
-import { PoolData, PoolState } from '../../ducks/pool'
+import { PoolState } from '../../ducks/pool'
 import { Label } from '../PoolList/styles'
 
 interface Props {
@@ -13,8 +13,7 @@ interface Props {
 
 const PoolTitle: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolData | undefined
-  const isOversubscribed = (poolData && new BN(poolData.maxReserve).lte(new BN(poolData.reserve))) || false
+  const isOversubscribed = (pool?.data && new BN(pool?.data.maxReserve).lte(new BN(pool?.data.reserve))) || false
 
   return (
     <Wrapper>
