@@ -5,10 +5,10 @@ import { assertTxSuccess, createTinlake, TestProvider } from '../test/utils'
 import { ITinlake } from '../types/tinlake'
 
 const testProvider = new TestProvider(testConfig)
-const borrowerAccount = ethers.Wallet.createRandom()
-const lenderAccount = ethers.Wallet.createRandom()
-let borrowerTinlake: ITinlake
+const borrowerAccount = testProvider.createRandomAccount()
+const lenderAccount = testProvider.createRandomAccount()
 let governanceTinlake: ITinlake
+let borrowerTinlake: ITinlake
 let lenderTinlake: ITinlake
 
 const { FAUCET_AMOUNT, contractAddresses } = testConfig
@@ -29,10 +29,13 @@ describe('proxy tests', async () => {
     governanceTinlake = createTinlake(testConfig.godAccount, testConfig)
     lenderTinlake = createTinlake(lenderAccount, testConfig)
 
-    // fund accounts with ETH
-    await testProvider.fundAccountWithETH(borrowerAccount.address, FAUCET_AMOUNT)
-    await testProvider.fundAccountWithETH(testConfig.godAccount.address, FAUCET_AMOUNT)
-    await testProvider.fundAccountWithETH(lenderAccount.address, FAUCET_AMOUNT)
+    await testProvider.fundAccountWithETH(borrowerAccount, FAUCET_AMOUNT)
+    await testProvider.fundAccountWithETH(lenderAccount, FAUCET_AMOUNT)
+  })
+
+  after(async () => {
+    await testProvider.refundETHFromAccount(borrowerAccount)
+    await testProvider.refundETHFromAccount(lenderAccount)
   })
 
   describe('borrow - lend - repay - redeem flow', async () => {

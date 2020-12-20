@@ -22,18 +22,18 @@ export class TestProvider {
     return ethers.Wallet.createRandom().connect(this.provider)
   }
 
-  async fundAccountWithETH(usr: string, amount: string) {
-    // console.log(`funding account ${usr} with ${amount} ETH`)
-    await transferEth(this.wallet, usr, ethers.BigNumber.from(amount))
-    // console.log(`funded account ${usr} with ${amount} ETH`)
+  async fundAccountWithETH(account: ethers.Wallet, amount: string) {
+    console.log(`funding account ${account.address} with ${amount} ETH`)
+    await transferEth(this.wallet, account.address, ethers.BigNumber.from(amount))
+    console.log(`funded account ${account.address} with ${amount} ETH`)
   }
 
   async refundETHFromAccount(account: ethers.Wallet) {
     const balance = await account.provider.getBalance(account.address)
-    // console.log(`refunding from account ${account.address} with ${balance.toString()} ETH`)
+    console.log(`refunding from account ${account.address} with ${balance.toString()} ETH`)
     const refundAmt = balance.sub('105000000000000')
     await transferEth(account, this.wallet.address, refundAmt)
-    // console.log(`refunded from account ${account.address} ${refundAmt.toString()} ETH (balance - gas)`)
+    console.log(`refunded from account ${account.address} ${refundAmt.toString()} ETH (balance - gas)`)
   }
 }
 
