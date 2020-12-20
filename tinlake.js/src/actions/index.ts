@@ -7,6 +7,7 @@ import Currency, { ICurrencyActions } from './currency'
 import Governance, { IGovernanceActions } from './governance'
 import Lender, { ILenderActions } from './lender'
 import Proxy, { IProxyActions } from './proxy'
+import ClaimRAD, { IClaimRADActions } from './claimRAD'
 
 export default {
   Admin,
@@ -18,6 +19,7 @@ export default {
   Governance,
   Proxy,
   Coordinator,
+  ClaimRAD,
 }
 
 export type TinlakeActions = IAdminActions &
@@ -28,4 +30,5 @@ export type TinlakeActions = IAdminActions &
   ICollateralActions &
   IGovernanceActions &
   IProxyActions &
-  ICoordinatorActions
+  ICoordinatorActions &
+  IClaimRADActions

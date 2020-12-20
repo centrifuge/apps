@@ -1,9 +1,9 @@
 import actions from './actions/index'
 import Tinlake from './Tinlake'
-const { Admin, Borrower, Lender, Analytics, Currency, Collateral, Governance, Proxy, Coordinator } = actions
+const { Admin, Borrower, ClaimRAD, Lender, Analytics, Currency, Collateral, Governance, Proxy, Coordinator } = actions
 
 export const TinlakeWithActions = Coordinator(
-  Proxy(Borrower(Admin(Lender(Analytics(Currency(Collateral(Governance(Tinlake))))))))
+  ClaimRAD(Proxy(Borrower(Admin(Lender(Analytics(Currency(Collateral(Governance(Tinlake)))))))))
 )
 export default TinlakeWithActions
 
