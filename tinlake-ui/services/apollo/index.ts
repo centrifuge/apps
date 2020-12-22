@@ -91,8 +91,8 @@ class Apollo {
         slug: poolConfig.metadata.slug,
         asset: poolConfig?.metadata.asset,
         version: Number(pool?.version || 3),
-        juniorYield14Days: (pool && new BN(pool.juniorYield14Days)) || null,
-        seniorYield14Days: (pool && new BN(pool.seniorYield14Days)) || null,
+        juniorYield14Days: (pool?.juniorYield14Days && new BN(pool.juniorYield14Days)) || null,
+        seniorYield14Days: (pool?.seniorYield14Days && new BN(pool.seniorYield14Days)) || null,
         icon: poolConfig.metadata.media?.icon || null,
       }
 
@@ -171,8 +171,6 @@ class Apollo {
   async getPools(ipfsPools: IpfsPools): Promise<PoolsData> {
     let result
     try {
-      // juniorYield14Days
-      // seniorYield14Days
       result = await this.client.query({
         query: gql`
           {
@@ -189,6 +187,8 @@ class Apollo {
               reserve
               maxReserve
               assetValue
+              juniorYield14Days
+              seniorYield14Days
             }
           }
         `,
