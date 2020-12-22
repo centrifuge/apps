@@ -43,7 +43,7 @@ export class AgreementController {
     const pool = await this.poolService.get(params.poolId)
     if (!pool) throw new BadRequestException('Invalid pool')
 
-    const returnUrl = `${process.env.TINLAKE_UI_HOST}pool/${params.poolId}/${pool.metadata.slug}?onb=1`
+    const returnUrl = `${process.env.TINLAKE_UI_HOST}pool/${params.poolId}/${pool.metadata.slug}/investments?onb=1&tranche=${agreement.tranche}`
     return this.docusignService.getAgreementLink(agreement.providerEnvelopeId, user, returnUrl)
   }
 

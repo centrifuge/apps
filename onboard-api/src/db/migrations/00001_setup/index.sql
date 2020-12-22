@@ -54,4 +54,4 @@ create table if not exists agreements (
 create unique index if not exists agreements_pkey on agreements(id uuid_ops);
 create index if not exists agreements_user_id_lookup on agreements(user_id uuid_ops);
 create unique index if not exists agreements_unique on agreements (provider, provider_envelope_id);
-create unique index if not exists agreements_unique_per_user on agreements (user_id, pool_id, provider_template_id);
+create unique index if not exists agreements_unique_per_user on agreements (user_id, pool_id, tranche, provider_template_id);

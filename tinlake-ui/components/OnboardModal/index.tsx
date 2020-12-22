@@ -17,6 +17,8 @@ interface Props {
   tranche?: Tranche
 }
 
+const DefaultTranche: Tranche = 'senior'
+
 const OnboardModal: React.FC<Props> = (props: Props) => {
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
 
@@ -44,14 +46,21 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
       dispatch(loadOnboardingStatus(props.pool, router.query?.session))
     }
 
-    if (address && !modalIsOpen && 'onb' in router.query && router.query.onb === '1') setModalIsOpen(true)
+    if (
+      address &&
+      !modalIsOpen &&
+      'onb' in router.query &&
+      router.query.onb === '1' &&
+      ('tranche' in router.query ? props.tranche === router.query.tranche : props.tranche === DefaultTranche)
+    )
+      setModalIsOpen(true)
   }, [address])
 
   const AddressLoadingDelay = 3000 // milliseconds
 
   const kycStatus = onboarding.data?.kyc?.verified ? 'verified' : onboarding.data?.kyc?.created ? 'created' : 'none'
-  const agreement = onboarding.data?.agreements.filter(
-    (agreement: AgreementsStatus) => !props.tranche || agreement.tranche === props.tranche
+  const agreement = onboarding.data?.agreements.filter((agreement: AgreementsStatus) =>
+    props.tranche ? agreement.tranche === props.tranche : DefaultTranche
   )[0]
   const agreementStatus = agreement?.counterSigned ? 'countersigned' : agreement?.signed ? 'signed' : 'none'
 
@@ -62,7 +71,12 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
   }, [])
 
   React.useEffect(() => {
-    if (!modalIsOpen && 'onb' in router.query && router.query.onb === '1') {
+    if (
+      !modalIsOpen &&
+      'onb' in router.query &&
+      router.query.onb === '1' &&
+      ('tranche' in router.query ? props.tranche === router.query.tranche : props.tranche === DefaultTranche)
+    ) {
       setModalIsOpen(true)
     }
   }, [router.query])
@@ -104,7 +118,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
       {props.card && kycStatus !== 'none' && agreementStatus === 'none' && (
         <>
           <Heading level="6" margin={{ bottom: 'xsmall' }}>
-            Sign up for this pool.
+            Sign up for this pool
           </Heading>
           {kycStatus === 'created' && (
             <>
@@ -114,6 +128,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
           )}
           {kycStatus === 'verified' && (
             <>
+              {/* TODO: if non-US, then link this button to the Docusign doc directly */}
               You can continue onboarding as an investor by signing the {agreement?.name} of {props.pool.metadata.name}.
             </>
           )}
@@ -137,7 +152,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
           <Heading level="6" margin={{ bottom: 'xsmall' }}>
             Awaiting counter-signature
           </Heading>
-          The issuer needs to counter-sign the Subscription Agreement.
+          The issuer needs to counter-sign the {agreement?.name} of {props.pool.metadata.name}.
         </>
       )}
 
@@ -207,7 +222,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
               </>
             )}
 
-            {agreementStatus === 'none' && agreement?.id && (
+            {agreementStatus === 'none' && agreement && onboarding.agreementLinks[agreement.id] && (
               <>
                 <Paragraph
                   margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}
@@ -238,21 +253,24 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
               </>
             )}
 
-            {kycStatus !== 'none' && agreementStatus === 'none' && !onboarding.data?.agreements[0]?.id && (
-              <>
-                <Paragraph
-                  margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}
-                  style={{ textAlign: 'center', width: '50%' }}
-                >
-                  To complete the next step of signing the Subscription Agreement, you can sign in again with your
-                  Securitize iD.
-                </Paragraph>
-                {/* <InvestmentSteps src={'/static/onboarding/2.svg'} alt="Investment steps" /> */}
-                <div>
-                  <Button primary label={`Sign in with Securitize`} href={onboarding.data?.kyc?.url} fill={false} />
-                </div>
-              </>
-            )}
+            {kycStatus !== 'none' &&
+              agreementStatus === 'none' &&
+              agreement &&
+              !onboarding.agreementLinks[agreement.id] && (
+                <>
+                  <Paragraph
+                    margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}
+                    style={{ textAlign: 'center', width: '50%' }}
+                  >
+                    To complete the next step of signing the {agreement.name} for {props.pool?.metadata.name}, you can
+                    sign in again with your Securitize iD.
+                  </Paragraph>
+                  {/* <InvestmentSteps src={'/static/onboarding/2.svg'} alt="Investment steps" /> */}
+                  <div>
+                    <Button primary label={`Sign in with Securitize`} href={onboarding.data?.kyc?.url} fill={false} />
+                  </div>
+                </>
+              )}
 
             {kycStatus !== 'verified' && agreementStatus === 'signed' && (
               <>
@@ -265,7 +283,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                 </Paragraph>
                 {/* <InvestmentSteps src={'/static/onboarding/3.svg'} alt="Investment steps" /> */}
                 <div>
-                  <Button primary label={`OK`} onClick={close} fill={false} />
+                  <Button primary label={`OK`} onClick={onClose} fill={false} />
                 </div>
               </>
             )}
@@ -281,7 +299,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                 </Paragraph>
                 {/* <InvestmentSteps src={'/static/onboarding/3.svg'} alt="Investment steps" /> */}
                 <div>
-                  <Button primary label={`OK`} onClick={close} fill={false} />
+                  <Button primary label={`OK`} onClick={onClose} fill={false} />
                 </div>
               </>
             )}

@@ -41,13 +41,18 @@ export class AgreementRepo {
     return (agreements as unknown) as Agreement[]
   }
 
-  async findByUserAndPool(userId: string, poolId: string): Promise<Agreement[]> {
+  async findByUserAndPool(userId: string, poolId: string, email: string): Promise<Agreement[]> {
     const agreements = await this.db.sql`
       select *
       from agreements
       where agreements.user_id = ${userId}
       and agreements.pool_id = ${poolId}
     `
+
+    if (agreements.length === 0) {
+      console.log('no agreements', agreements)
+      return await this.createAgreementsForPool(poolId, userId, email)
+    }
 
     return (agreements as unknown) as Agreement[]
   }
@@ -86,6 +91,35 @@ export class AgreementRepo {
     }
 
     return existingAgreement as Agreement
+  }
+
+  // Find or create the relevant agreement for this pool
+  // TODO: templateId should be based on the agreement required for the pool
+  // TODO: if US, then a, else b
+  async createAgreementsForPool(poolId: string, userId: string, email: string): Promise<Agreement[]> {
+    console.log('creating agreements for pool')
+    let agreements = []
+    const tranches = ['senior', 'junior']
+
+    await tranches.forEach(async (tranche: Tranche) => {
+      console.log('creating agreements for ')
+      console.log({ userId, email, poolId, tranche })
+      try {
+        const agreement = await this.findOrCreate(
+          userId,
+          email,
+          poolId,
+          tranche,
+          `${tranche === 'senior' ? 'DROP' : 'TIN'} Subscription Agreement`,
+          process.env.DOCUSIGN_TEMPLATE_ID
+        )
+        agreements.push(agreement)
+      } catch (e) {
+        console.error(e)
+      }
+    })
+
+    return agreements
   }
 
   async setSigned(agreementId: string): Promise<Agreement | undefined> {

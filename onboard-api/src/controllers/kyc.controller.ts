@@ -45,20 +45,8 @@ export class KycController {
 
     await this.userRepo.update(address.userId, investor.email, investor.details.address.countryCode)
 
-    // Find or create the relevant agreement for this pool
-    // TODO: templateId should be based on the agreement required for the pool
-    // TODO: if US, then a, else b
-    for (let tranche of ['senior', 'junior'] as Tranche[]) {
-      const agreement = await this.agreementRepo.findOrCreate(
-        address.userId,
-        investor.email,
-        params.poolId,
-        tranche,
-        `${tranche === 'senior' ? 'DROP' : 'TIN'} Subscription Agreement`,
-        process.env.DOCUSIGN_TEMPLATE_ID
-      )
-      if (!agreement) throw new BadRequestException('Failed to create agreement envelope')
-    }
+    console.log('creating agreements')
+    await this.agreementRepo.createAgreementsForPool(params.poolId, address.userId, investor.email)
 
     // Create session and redirect user
     const session = this.sessionService.create(address.userId)
@@ -72,7 +60,7 @@ export class KycController {
     //   httpOnly: true,
     // })
 
-    const redirectUrl = `${process.env.TINLAKE_UI_HOST}pool/${params.poolId}/${pool.metadata.slug}?onb=1&session=${session}`
+    const redirectUrl = `${process.env.TINLAKE_UI_HOST}pool/${params.poolId}/${pool.metadata.slug}/investments?onb=1&session=${session}`
     return res.redirect(redirectUrl)
   }
 }
