@@ -31,8 +31,10 @@ export class TestProvider {
   async refundETHFromAccount(account: ethers.Wallet) {
     const balance = await account.provider.getBalance(account.address)
     console.log(`refunding from account ${account.address} with ${balance.toString()} ETH`)
-    const refundAmt = balance.sub('105000000000000')
-    await transferEth(account, this.wallet.address, refundAmt)
+    const gasPrice = await account.provider.getGasPrice()
+    const gasLimit = 21000 // simple transfer default, if recipient runs no logic
+    const refundAmt = balance.sub(gasPrice.mul(gasLimit))
+    await transferEth(account, this.wallet.address, refundAmt, { gasPrice, gasLimit })
     console.log(`refunded from account ${account.address} ${refundAmt.toString()} ETH (balance - gas)`)
   }
 }
@@ -52,13 +54,17 @@ export function createTinlake(wallet: ethers.Wallet, testConfig: ProviderConfig)
   return tinlake
 }
 
-export async function transferEth(from: ethers.Wallet, to: string, value: ethers.BigNumber) {
-  const transaction = {
+export async function transferEth(
+  from: ethers.Wallet,
+  to: string,
+  value: ethers.BigNumber,
+  options?: ethers.utils.Deferrable<ethers.providers.TransactionRequest>
+) {
+  const res = await from.sendTransaction({
     to,
     value,
-  }
-
-  const res = await from.sendTransaction(transaction)
+    ...options,
+  })
   await from.provider.waitForTransaction(res.hash!)
 }
 
