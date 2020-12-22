@@ -20,7 +20,7 @@ export class KycController {
   ) {}
 
   @Get('pools/:poolId/callback/:address/securitize')
-  async securitizeCallback(@Param() params, @Query() query, @Res({ passthrough: true }) res): Promise<any> {
+  async securitizeCallback(@Param() params, @Query() query, @Res({ passthrough: true }) res) {
     // Check input
     const pool = await this.poolService.get(params.poolId)
     if (!pool) throw new BadRequestException('Invalid pool')

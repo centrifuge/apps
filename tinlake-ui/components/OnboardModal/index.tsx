@@ -10,6 +10,7 @@ import { PoolLink } from '../PoolLink'
 import { FormModal, InvestmentSteps } from './styles'
 import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
 import { AgreementsStatus, Tranche } from '@centrifuge/onboard-api/src/controllers/types'
+import config from '../../config'
 
 interface Props {
   pool: Pool | UpcomingPool
@@ -43,7 +44,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     if (address) {
       setAddressIsLoading(false)
-      dispatch(loadOnboardingStatus(props.pool, router.query?.session))
+      dispatch(loadOnboardingStatus(props.pool))
     }
 
     if (
@@ -58,6 +59,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
 
   const AddressLoadingDelay = 3000 // milliseconds
 
+  const session = 'session' in router.query ? router.query.session : '' // TODO: check this on the API and display message if it has expired
   const kycStatus = onboarding.data?.kyc?.verified ? 'verified' : onboarding.data?.kyc?.created ? 'created' : 'none'
   const agreement = onboarding.data?.agreements.filter((agreement: AgreementsStatus) =>
     props.tranche ? agreement.tranche === props.tranche : DefaultTranche
@@ -82,7 +84,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
   }, [router.query])
 
   React.useEffect(() => {
-    dispatch(loadOnboardingStatus(props.pool, router.query?.session))
+    dispatch(loadOnboardingStatus(props.pool))
   }, [pools])
 
   const [checked, setChecked] = React.useState(false)
@@ -222,7 +224,7 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
               </>
             )}
 
-            {agreementStatus === 'none' && agreement && onboarding.agreementLinks[agreement.id] && (
+            {agreementStatus === 'none' && agreement && session && (
               <>
                 <Paragraph
                   margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}
@@ -246,31 +248,30 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                     primary
                     label={`Sign ${agreement?.name}`}
                     disabled={!checked}
-                    href={onboarding.agreementLinks[agreement.id]}
+                    href={`${config.onboardAPIHost}pools/${(props.pool as Pool).addresses.ROOT_CONTRACT}/agreements/${
+                      agreement?.id
+                    }/redirect?session=${session}`}
                     fill={false}
                   />
                 </div>
               </>
             )}
 
-            {kycStatus !== 'none' &&
-              agreementStatus === 'none' &&
-              agreement &&
-              !onboarding.agreementLinks[agreement.id] && (
-                <>
-                  <Paragraph
-                    margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}
-                    style={{ textAlign: 'center', width: '50%' }}
-                  >
-                    To complete the next step of signing the {agreement.name} for {props.pool?.metadata.name}, you can
-                    sign in again with your Securitize iD.
-                  </Paragraph>
-                  {/* <InvestmentSteps src={'/static/onboarding/2.svg'} alt="Investment steps" /> */}
-                  <div>
-                    <Button primary label={`Sign in with Securitize`} href={onboarding.data?.kyc?.url} fill={false} />
-                  </div>
-                </>
-              )}
+            {kycStatus !== 'none' && agreementStatus === 'none' && agreement && !session && (
+              <>
+                <Paragraph
+                  margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}
+                  style={{ textAlign: 'center', width: '50%' }}
+                >
+                  To complete the next step of signing the {agreement.name} for {props.pool?.metadata.name}, you can
+                  sign in again with your Securitize iD.
+                </Paragraph>
+                {/* <InvestmentSteps src={'/static/onboarding/2.svg'} alt="Investment steps" /> */}
+                <div>
+                  <Button primary label={`Sign in with Securitize`} href={onboarding.data?.kyc?.url} fill={false} />
+                </div>
+              </>
+            )}
 
             {kycStatus !== 'verified' && agreementStatus === 'signed' && (
               <>
