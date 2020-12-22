@@ -62,15 +62,14 @@ class LoanListPage extends React.Component<Props> {
                           <Heading level="4" margin={{ bottom: 'medium' }}>
                             Asset List
                           </Heading>
-                          <div>
+                          {/* <div>
                             <Box direction="row" gap="medium" margin={{ top: 'small' }}>
                               Show:
-                              {/* <Button secondary label="Show all" size="small" /> */}
                               <Button secondary label="Open" size="small" />
                               <Button secondary label="Ongoing" size="small" />
                               <Button plain label="Closed" size="small" />
                             </Box>
-                          </div>
+                          </div> */}
                         </Box>
                         <LoanList tinlake={tinlake} auth={auth} hideMetrics={true} />
                       </Box>
