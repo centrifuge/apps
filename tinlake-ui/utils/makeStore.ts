@@ -5,6 +5,7 @@ import config from '../config'
 import authReducer from '../ducks/auth'
 import investmentsReducer from '../ducks/investments'
 import loansReducer from '../ducks/loans'
+import onboardingReducer from '../ducks/onboarding'
 import poolReducer from '../ducks/pool'
 import poolsReducer from '../ducks/pools'
 import transactionReducer from '../ducks/transactions'
@@ -31,6 +32,7 @@ const makeStore = () => {
       pool: poolReducer,
       auth: authReducer,
       transactions: transactionReducer,
+      onboarding: onboardingReducer,
     }),
     composeEnhancers(applyMiddleware(thunk))
   )

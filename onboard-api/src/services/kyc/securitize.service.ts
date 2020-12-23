@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import config from '../../config'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 export interface SecuritizeKYCInfo {
@@ -14,20 +15,20 @@ export interface SecuritizeKYCInfo {
 export class SecuritizeService {
   getAuthorizationLink(poolId: string, address: string): string {
     const scope = `info%20details%20verification`
-    const redirectUrl = `${process.env.ONBOARD_API_HOST}pools/${poolId}/callback/${address}/securitize`
-    const url = `${process.env.SECURITIZE_ID_HOST}#/authorize?issuerId=${process.env.SECURITIZE_CLIENT_ID}&scope=${scope}&redirecturl=${redirectUrl}`
+    const redirectUrl = `${config.onboardApiHost}pools/${poolId}/callback/${address}/securitize`
+    const url = `${config.securitize.idHost}#/authorize?issuerId=${config.securitize.clientId}&scope=${scope}&redirecturl=${redirectUrl}`
 
     return url
   }
 
   async processAuthorizationCallback(code: string): Promise<SecuritizeKYCInfo> {
-    const url = `${process.env.SECURITIZE_API_HOST}v1/${process.env.SECURITIZE_CLIENT_ID}/oauth2/authorize`
+    const url = `${config.securitize.apiHost}v1/${config.securitize.clientId}/oauth2/authorize`
 
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `${process.env.SECURITIZE_SECRET}`,
+        Authorization: `${config.securitize.secret}`,
       },
       body: JSON.stringify({ code }),
     })
@@ -44,13 +45,14 @@ export class SecuritizeService {
     }
   }
 
+  // TODO: implement support for refreshing the access token
   async getInvestor(accessToken: string): Promise<Investor> {
-    const url = `${process.env.SECURITIZE_API_HOST}v1/${process.env.SECURITIZE_CLIENT_ID}/investor`
+    const url = `${config.securitize.apiHost}v1/${config.securitize.clientId}/investor`
 
     const response = await fetch(url, {
       headers: {
         'access-token': accessToken,
-        Authorization: `${process.env.SECURITIZE_SECRET}`,
+        Authorization: `${config.securitize.secret}`,
       },
     })
 
@@ -67,5 +69,10 @@ export interface Investor {
   language: string
   email: string
   verificationStatus: string
-  details: object
+  details: {
+    tax: any[]
+    address: {
+      countryCode: string
+    }
+  }
 }

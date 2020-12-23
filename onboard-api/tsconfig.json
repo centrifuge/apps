@@ -11,6 +11,7 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "skipLibCheck": true,
+    "resolveJsonModule": true,
     "incremental": true
   }
 }
