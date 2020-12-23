@@ -19,6 +19,7 @@ interface Props {
 
 const DefaultTranche: Tranche = 'senior'
 
+// TODO: the various conditions should be refactored to be more organised
 const OnboardModal: React.FC<Props> = (props: Props) => {
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
 
