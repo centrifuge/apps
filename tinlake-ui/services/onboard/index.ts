@@ -19,11 +19,6 @@ const wallets = [
     rpcUrl: config.rpcUrl,
     preferred: true,
   },
-  // {
-  //   walletName: 'walletConnect',
-  //   infuraKey: 'bf808e7d3d924fbeb74672d9341d0550',
-  //   preferred: true,
-  // },
 ]
 
 let onboard: API | null = null
