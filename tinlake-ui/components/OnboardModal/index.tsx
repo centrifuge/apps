@@ -1,16 +1,15 @@
 import { Spinner } from '@centrifuge/axis-spinner'
-import { Box, CheckBox, Button, Heading, Paragraph } from 'grommet'
+import { AgreementsStatus, Tranche } from '@centrifuge/onboard-api/src/controllers/types'
+import { Box, Button, CheckBox, Heading, Paragraph } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Pool, UpcomingPool } from '../../config'
+import config, { Pool, UpcomingPool } from '../../config'
 import { ensureAuthed } from '../../ducks/auth'
+import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
 import { PoolsState } from '../../ducks/pools'
 import { PoolLink } from '../PoolLink'
 import { FormModal, InvestmentSteps } from './styles'
-import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
-import { AgreementsStatus, Tranche } from '@centrifuge/onboard-api/src/controllers/types'
-import config from '../../config'
 
 interface Props {
   pool: Pool | UpcomingPool

@@ -5,10 +5,10 @@ import config from '../config'
 import authReducer from '../ducks/auth'
 import investmentsReducer from '../ducks/investments'
 import loansReducer from '../ducks/loans'
+import onboardingReducer from '../ducks/onboarding'
 import poolReducer from '../ducks/pool'
 import poolsReducer from '../ducks/pools'
 import transactionReducer from '../ducks/transactions'
-import onboardingReducer from '../ducks/onboarding'
 
 const sentryReduxEnhancer = config.enableErrorLogging ? Sentry.createReduxEnhancer({}) : {}
 
