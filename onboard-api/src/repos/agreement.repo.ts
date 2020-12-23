@@ -50,7 +50,6 @@ export class AgreementRepo {
     `
 
     if (agreements.length === 0) {
-      console.log('no agreements', agreements)
       return await this.createAgreementsForPool(poolId, userId, email)
     }
 
