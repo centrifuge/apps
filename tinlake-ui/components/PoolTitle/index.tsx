@@ -23,16 +23,18 @@ const PoolTitle: React.FC<Props> = (props: Props) => {
         }
       />
       <PageTitle>
-        <PageName>{props.page}</PageName>
+        <PageName>
+          {props.page}
+          <PoolLabel>
+            {props.pool.isUpcoming ? (
+              <Label blue>Upcoming</Label>
+            ) : (
+              isOversubscribed && <Label orange>Oversubscribed</Label>
+            )}
+          </PoolLabel>
+        </PageName>
         <PoolName>{props.pool.metadata.name}</PoolName>
       </PageTitle>
-      <PoolLabel>
-        {props.pool.isUpcoming ? (
-          <Label blue>Upcoming</Label>
-        ) : (
-          isOversubscribed && <Label orange>Oversubscribed</Label>
-        )}
-      </PoolLabel>
     </Wrapper>
   )
 }
@@ -70,6 +72,6 @@ const PoolName = styled.h2`
 `
 
 const PoolLabel = styled.div`
-  margin-top: 4px;
+  display: inline-block;
   margin-left: 8px;
 `
