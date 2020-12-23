@@ -1,6 +1,10 @@
+import BN from 'bn.js'
 import * as React from 'react'
+import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Pool, UpcomingPool } from '../../config'
+import { PoolState } from '../../ducks/pool'
+import { Label } from '../PoolList/styles'
 
 interface Props {
   pool: Pool | UpcomingPool
@@ -8,6 +12,9 @@ interface Props {
 }
 
 const PoolTitle: React.FC<Props> = (props: Props) => {
+  const pool = useSelector<any, PoolState>((state) => state.pool)
+  const isOversubscribed = (pool?.data && new BN(pool?.data.maxReserve).lte(new BN(pool?.data.reserve))) || false
+
   return (
     <Wrapper>
       <Icon
@@ -19,6 +26,13 @@ const PoolTitle: React.FC<Props> = (props: Props) => {
         <PageName>{props.page}</PageName>
         <PoolName>{props.pool.metadata.name}</PoolName>
       </PageTitle>
+      <PoolLabel>
+        {props.pool.isUpcoming ? (
+          <Label blue>Upcoming</Label>
+        ) : (
+          isOversubscribed && <Label orange>Oversubscribed</Label>
+        )}
+      </PoolLabel>
     </Wrapper>
   )
 }
@@ -53,4 +67,9 @@ const PoolName = styled.h2`
   font-weight: bold;
   margin: 0;
   color: #979797;
+`
+
+const PoolLabel = styled.div`
+  margin-top: 4px;
+  margin-left: 8px;
 `
