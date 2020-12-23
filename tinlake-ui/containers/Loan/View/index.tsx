@@ -1,16 +1,13 @@
 import { Spinner } from '@centrifuge/axis-spinner'
-import { Box, Heading } from 'grommet'
+import { Box } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import Alert from '../../../components/Alert'
 import LoanData from '../../../components/Loan/Data'
-import NftData from '../../../components/NftData'
 import { Pool } from '../../../config'
 import { AuthState, loadProxies } from '../../../ducks/auth'
 import { loadLoan, LoansState } from '../../../ducks/loans'
 import { TransactionState } from '../../../ducks/transactions'
-import LoanBorrow from '../Borrow'
-import LoanRepay from '../Repay'
 
 interface Props {
   tinlake: any
@@ -32,7 +29,7 @@ class LoanView extends React.Component<Props> {
   }
 
   render() {
-    const { poolConfig, loans, loanId, tinlake, auth } = this.props
+    const { loans, loanId, tinlake } = this.props
     const { loan, loanState } = loans!
     if (loanState === null || loanState === 'loading') {
       return <Spinner height={'300px'} message={'Loading...'} />
@@ -45,12 +42,12 @@ class LoanView extends React.Component<Props> {
       )
     }
 
-    const hasBorrowerPermissions =
-      loan && auth?.proxies?.map((proxy: string) => proxy.toLowerCase()).includes(loan.ownerOf.toString().toLowerCase())
+    // const hasBorrowerPermissions =
+    //   loan && auth?.proxies?.map((proxy: string) => proxy.toLowerCase()).includes(loan.ownerOf.toString().toLowerCase())
 
     return (
       <Box>
-        <LoanData loan={loan!} auth={this.props.auth} />
+        <LoanData loan={loan!} auth={this.props.auth} tinlake={tinlake} />
         {/* <LoanData loan={loan!} /> */}
         {/* {loan && loan.status !== 'closed' && (
           <Box>
