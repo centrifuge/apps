@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 import config from '../../config'
+const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 export interface SecuritizeKYCInfo {
   providerAccountId: string

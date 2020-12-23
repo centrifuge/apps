@@ -1,7 +1,7 @@
 import { JwtUtils } from '@connectedcars/jwtutils'
 import { Injectable, Logger } from '@nestjs/common'
-const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 import config from '../config'
+const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 const HourInSeconds = 60 * 60
 const HourInMilliseconds = HourInSeconds * 1000

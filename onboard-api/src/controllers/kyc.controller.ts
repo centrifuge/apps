@@ -1,4 +1,5 @@
 import { BadRequestException, Controller, Get, Param, Query, Res } from '@nestjs/common'
+import config from '../config'
 import { AddressRepo } from '../repos/address.repo'
 import { AgreementRepo } from '../repos/agreement.repo'
 import { KycRepo } from '../repos/kyc.repo'
@@ -6,7 +7,6 @@ import { UserRepo } from '../repos/user.repo'
 import { SecuritizeService } from '../services/kyc/securitize.service'
 import { PoolService } from '../services/pool.service'
 import { SessionService } from '../services/session.service'
-import config from '../config'
 
 @Controller()
 export class KycController {

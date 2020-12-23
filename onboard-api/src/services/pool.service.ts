@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { ethers } from 'ethers'
+import config from '../config'
 import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
-import config from '../config'
 
 @Injectable()
 export class PoolService {

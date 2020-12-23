@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
+import config from '../config'
+import { Tranche } from '../controllers/types'
 import { DocusignService } from '../services/docusign.service'
 import { uuidv4 } from '../utils/uuid'
 import { DatabaseService } from './db.service'
-import config from '../config'
-import { Tranche } from '../controllers/types'
 
 export type Agreement = {
   id: string

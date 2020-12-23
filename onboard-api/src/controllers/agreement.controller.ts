@@ -10,12 +10,12 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common'
+import config from '../config'
 import { AgreementRepo } from '../repos/agreement.repo'
 import { UserRepo } from '../repos/user.repo'
 import { DocusignService } from '../services/docusign.service'
 import { PoolService } from '../services/pool.service'
 import { SessionService } from '../services/session.service'
-import config from '../config'
 
 @Controller()
 export class AgreementController {
