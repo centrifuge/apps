@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import * as postgres from 'postgres'
+import config from '../config'
 
 @Injectable()
 export class DatabaseService {
   sql: postgres.Sql<{}>
 
   constructor() {
-    const connectionString = `postgres://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`
+    const connectionString = `postgres://${config.db.username}:${config.db.password}@${config.db.host}:${config.db.port}/${config.db.name}`
 
     this.sql = postgres(connectionString, {
       transform: {

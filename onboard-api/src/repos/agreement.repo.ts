@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { DocusignService } from '../services/docusign.service'
 import { uuidv4 } from '../utils/uuid'
 import { DatabaseService } from './db.service'
+import config from '../config'
 
 export type Agreement = {
   id: string
@@ -109,7 +110,7 @@ export class AgreementRepo {
           poolId,
           tranche,
           `${tranche === 'senior' ? 'DROP' : 'TIN'} Subscription Agreement`,
-          process.env.DOCUSIGN_TEMPLATE_ID
+          config.docusign.templateId
         )
         agreements.push(agreement)
       } catch (e) {

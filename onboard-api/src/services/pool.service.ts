@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { ethers } from 'ethers'
 import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
+import config from '../config'
 
 @Injectable()
 export class PoolService {
@@ -32,10 +33,10 @@ export class PoolService {
   }
 
   private async assembleIpfsUrl(): Promise<string> {
-    const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL)
-    const registry = new ethers.Contract(process.env.POOL_REGISTRY, contractAbiPoolRegistry, provider)
+    const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+    const registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, provider)
     const poolData = await registry.pools(0)
-    const url = new URL(poolData[3], process.env.IPFS_GATEWAY)
+    const url = new URL(poolData[3], config.ipfsGateway)
     return url.href
   }
 }

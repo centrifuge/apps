@@ -1,5 +1,6 @@
 import { JwtUtils } from '@connectedcars/jwtutils'
 import { Injectable } from '@nestjs/common'
+import config from '../config'
 
 export const SessionCookieName = 'Onboard-API-Session'
 
@@ -7,8 +8,8 @@ export const SessionCookieName = 'Onboard-API-Session'
 export class SessionService {
   pubKeys = {
     'https://jwt.io/': {
-      '1@RS256': process.env.SESSIONS_PUBLIC_KEY.replace(/\\n/g, '\n'),
-      'default@RS256': process.env.SESSIONS_PUBLIC_KEY.replace(/\\n/g, '\n'),
+      '1@RS256': config.sessions.publicKey.replace(/\\n/g, '\n'),
+      'default@RS256': config.sessions.publicKey.replace(/\\n/g, '\n'),
     },
   }
 
@@ -21,21 +22,21 @@ export class SessionService {
 
     const body = {
       sub: userId,
-      aud: process.env.ONBOARD_API_HOST,
+      aud: config.onboardApiHost,
       iss: 'https://jwt.io/',
       iat: unixNow,
       exp: unixNow + 600,
     }
 
-    const privateKey = process.env.SESSIONS_PRIVATE_KEY.replace(/\\n/g, '\n')
-    const jwt = JwtUtils.encode(privateKey, header, body, process.env.SESSIONS_PRIVATE_KEY_PASSWORD)
+    const privateKey = config.sessions.privateKey.replace(/\\n/g, '\n')
+    const jwt = JwtUtils.encode(privateKey, header, body, config.sessions.privateKeyPassword)
 
     return jwt
   }
 
   verify(session: string, userId: string): boolean {
     try {
-      const decodedJwtBody = JwtUtils.decode(session, this.pubKeys, [process.env.ONBOARD_API_HOST])
+      const decodedJwtBody = JwtUtils.decode(session, this.pubKeys, [config.onboardApiHost])
       return decodedJwtBody.sub === userId
     } catch (e) {
       console.error(e)
