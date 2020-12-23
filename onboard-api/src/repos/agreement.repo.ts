@@ -97,12 +97,10 @@ export class AgreementRepo {
   // TODO: templateId should be based on the agreement required for the pool
   // TODO: if US, then a, else b
   async createAgreementsForPool(poolId: string, userId: string, email: string): Promise<Agreement[]> {
-    console.log('creating agreements for pool')
     let agreements = []
     const tranches = ['senior', 'junior']
 
     await tranches.forEach(async (tranche: Tranche) => {
-      console.log('creating agreements for ')
       console.log({ userId, email, poolId, tranche })
       try {
         const agreement = await this.findOrCreate(

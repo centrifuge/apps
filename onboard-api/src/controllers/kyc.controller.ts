@@ -45,7 +45,6 @@ export class KycController {
 
     await this.userRepo.update(address.userId, investor.email, investor.details.address.countryCode)
 
-    console.log('creating agreements')
     await this.agreementRepo.createAgreementsForPool(params.poolId, address.userId, investor.email)
 
     // Create session and redirect user
