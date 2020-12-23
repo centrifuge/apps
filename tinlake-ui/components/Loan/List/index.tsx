@@ -1,6 +1,6 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { baseToDisplay, bnToHex, feeToInterestRate } from '@centrifuge/tinlake-js'
-import { Box, DataTable, Button, Text } from 'grommet'
+import { Box, DataTable, Text } from 'grommet'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import { withRouter } from 'next/router'
 import * as React from 'react'

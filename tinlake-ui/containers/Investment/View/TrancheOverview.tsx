@@ -15,7 +15,6 @@ import OrderCard from './OrderCard'
 import RedeemCard from './RedeemCard'
 import { AddWalletLink, Info, MinTimeRemaining, TokenLogo } from './styles'
 import { ensureAuthed } from '../../../ducks/auth'
-import OnboardCard from './OnboardCard'
 import OnboardModal from '../../../components/OnboardModal'
 import InvestAction from '../../../components/InvestAction'
 
