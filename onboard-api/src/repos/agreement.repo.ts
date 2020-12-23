@@ -3,6 +3,7 @@ import { DocusignService } from '../services/docusign.service'
 import { uuidv4 } from '../utils/uuid'
 import { DatabaseService } from './db.service'
 import config from '../config'
+import { Tranche } from '../controllers/types'
 
 export type Agreement = {
   id: string
@@ -15,8 +16,6 @@ export type Agreement = {
   signedAt: Date
   counterSignedAt: Date
 }
-
-export type Tranche = 'senior' | 'junior'
 
 @Injectable()
 export class AgreementRepo {
