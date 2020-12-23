@@ -56,8 +56,6 @@ export class SecuritizeService {
     })
 
     const investor = await response.json()
-    console.log({ investor })
-    console.log({ details: investor.details })
     return investor
   }
 }
