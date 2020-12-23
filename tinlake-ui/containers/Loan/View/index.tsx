@@ -50,7 +50,7 @@ class LoanView extends React.Component<Props> {
 
     return (
       <Box>
-        <LoanData loan={loan!} auth={this.props.auth} />
+        <LoanData loan={loan!} auth={this.props.auth} tinlake={tinlake} />
         {/* <LoanData loan={loan!} /> */}
         {/* {loan && loan.status !== 'closed' && (
           <Box>

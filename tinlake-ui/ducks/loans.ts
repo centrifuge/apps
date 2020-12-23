@@ -4,6 +4,21 @@ import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import Apollo from '../services/apollo'
 import { getLoan } from '../services/tinlake/actions'
+import { createWatcher } from '@makerdao/multicall'
+import config from '../config'
+import { BigNumber } from 'ethers'
+import BN from 'bn.js'
+
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+
+const multicallConfig = {
+  rpcUrl: config.rpcUrl,
+  multicallAddress:
+    config.network === 'Mainnet'
+      ? '0xeefba1e63905ef1d7acba5a8513c70307c1ce441'
+      : '0x2cc8688c5f75e365aaeeb4ea8d6a480405a48d2a',
+  interval: 60000,
+}
 
 // SortableLoan adds properties of number type that support sorting in numerical order for grommet DataTable
 export interface SortableLoan extends Loan {
@@ -54,7 +69,6 @@ export default function reducer(state: LoansState = initialState, action: AnyAct
   }
 }
 
-// hardcoded root just for testing - will be removed in next pr
 export function loadLoans(tinlake: any): ThunkAction<Promise<void>, LoansState, undefined, Action> {
   return async (dispatch) => {
     dispatch({ type: LOAD })
@@ -81,6 +95,8 @@ export function loadLoans(tinlake: any): ThunkAction<Promise<void>, LoansState, 
   }
 }
 
+let watcher: any = createWatcher([], multicallConfig)
+
 export function loadLoan(
   tinlake: any,
   loanId: string,
@@ -90,11 +106,71 @@ export function loadLoan(
     if (!refresh) {
       dispatch({ type: LOAD_LOAN })
     }
-    const loan = await getLoan(tinlake, loanId)
-    if (!loan) {
+
+    // if (!loan) {
+    //   dispatch({ type: LOAN_NOT_FOUND })
+    //   return
+    // }
+
+    if (loanId === '0') {
       dispatch({ type: LOAN_NOT_FOUND })
       return
     }
+
+    // TODO: also get using multicall
+    const riskGroup = await tinlake.getRiskGroup(loanId)
+
+    const toBN = (val: BigNumber) => new BN(val.toString())
+
+    const globalWatchers = [
+      {
+        target: tinlake.contractAddresses.SHELF,
+        call: ['shelf(uint256)(address,uint256)', loanId],
+        returns: [[`registry`], [`tokenId`]],
+      },
+      {
+        target: tinlake.contractAddresses.FEED,
+        call: ['ceiling(uint256)(uint256)', loanId],
+        returns: [[`principal`, toBN]],
+      },
+      {
+        target: tinlake.contractAddresses.TITLE,
+        call: ['ownerOf(uint256)(address)', loanId],
+        returns: [
+          [
+            `ownerOf`,
+            (val: string | null) => {
+              if (!val) return ZERO_ADDRESS
+              return val
+            },
+          ],
+        ],
+      },
+      {
+        target: tinlake.contractAddresses.PILE,
+        call: ['rates(uint256)(uint256,uint256,uint256,uint48,uint256)', riskGroup.toNumber()],
+        returns: [[`rates.pie`], [`rates.chi`], [`rates.interestRate`], [`rates.lastUpdated`], [`rates.fixedRate`]],
+      },
+      {
+        target: tinlake.contractAddresses.PILE,
+        call: ['debt(uint256)(uint256)', loanId],
+        returns: [[`debt`, toBN]],
+      },
+    ]
+
+    watcher.recreate(globalWatchers, multicallConfig)
+
+    try {
+      console.log('subscribing')
+      watcher.batch().subscribe((updates: any[]) => {
+        console.log(updates)
+      })
+      watcher.start()
+    } catch (e) {
+      console.error(e)
+    }
+    const loan = await getLoan(tinlake, loanId)
+
     dispatch({ loan, type: RECEIVE_LOAN })
   }
 }

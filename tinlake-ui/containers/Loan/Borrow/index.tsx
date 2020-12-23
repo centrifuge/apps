@@ -2,7 +2,7 @@ import { TokenInput } from '@centrifuge/axis-token-input'
 import { baseToDisplay, Loan } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
-import { Box, Button } from 'grommet'
+import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import { ensureAuthed } from '../../../ducks/auth'
@@ -112,7 +112,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
           disabled={!borrowEnabled || status === 'unconfirmed' || status === 'pending'}
         />
       </Box>
-      <Box align="start">
+      <Box align="end">
         <Button
           onClick={borrow}
           primary
