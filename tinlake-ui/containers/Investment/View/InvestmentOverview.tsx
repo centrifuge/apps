@@ -1,11 +1,12 @@
 import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import OnboardModal from '../../../components/OnboardModal'
+import { PoolLink } from '../../../components/PoolLink'
 import { TINRatioBar } from '../../../components/TINRatioBar/index'
 import { Tooltip } from '../../../components/Tooltip'
 import config, { Pool, UpcomingPool } from '../../../config'
@@ -148,7 +149,14 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
         <Box margin={{ top: 'medium' }}>
           {config.featureFlagNewOnboarding ? (
-            <OnboardModal pool={props.selectedPool} />
+            <Box gap="small" justify="end" direction="row">
+              {/* TODO: if already whitelisted, then go to investments page */}
+              <PoolLink href={'/onboarding'}>
+                <Anchor>
+                  <Button label="Invest" primary />
+                </Anchor>
+              </PoolLink>
+            </Box>
           ) : (
             <InvestAction pool={props.selectedPool} />
           )}

@@ -1,9 +1,9 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, CheckBox, Paragraph } from 'grommet'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { Pool } from '../../config'
-import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
+import { OnboardingState } from '../../ducks/onboarding'
 import { Step, StepHeader, StepIcon, StepTitle, StepBody } from './styles'
 
 interface Props {
@@ -12,18 +12,10 @@ interface Props {
 }
 
 const KycStep: React.FC<Props> = (props: Props) => {
-  const dispatch = useDispatch()
-
   const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
   const kycStatus = onboarding.data?.kyc?.verified ? 'verified' : onboarding.data?.kyc?.created ? 'created' : 'none'
 
-  const address = useSelector<any, string | null>((state) => state.auth.address)
-
-  React.useEffect(() => {
-    if (address) {
-      dispatch(loadOnboardingStatus(props.activePool))
-    }
-  }, [address])
+  const [checked, setChecked] = React.useState(false)
 
   return (
     <Step>
@@ -51,8 +43,9 @@ const KycStep: React.FC<Props> = (props: Props) => {
           </Paragraph>
           <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
             <CheckBox
-              checked={false}
+              checked={checked}
               label="I accept the data privacy policy and that data is shared with Centrifuge and the issuer."
+              onChange={(event) => setChecked(event.target.checked)}
             />
           </Box>
           <div>

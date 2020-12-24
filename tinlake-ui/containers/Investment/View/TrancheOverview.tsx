@@ -1,11 +1,12 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import OnboardModal from '../../../components/OnboardModal'
+import { PoolLink } from '../../../components/PoolLink'
 import config, { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
 import { loadPool, PoolState } from '../../../ducks/pool'
@@ -220,20 +221,30 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         )}
 
         {address && props.pool && trancheData?.inMemberlist === false && (
-          <Info>
-            {config.featureFlagNewOnboarding && <OnboardModal pool={props.pool} card tranche={props.tranche} />}
-            {!config.featureFlagNewOnboarding && (
-              <>
-                <Heading level="6" margin={{ bottom: 'xsmall' }}>
-                  Interested in investing?
-                </Heading>
-                If you want to learn more get started with your onboarding process.
-                <Box justify="end" margin={{ top: 'small' }}>
-                  <InvestAction pool={props.pool} />
-                </Box>
-              </>
+          <>
+            {config.featureFlagNewOnboarding && (
+              <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                <PoolLink href={'/onboarding'}>
+                  <Anchor>
+                    <Button label="Invest" primary />
+                  </Anchor>
+                </PoolLink>
+              </Box>
             )}
-          </Info>
+            {!config.featureFlagNewOnboarding && (
+              <Info>
+                <>
+                  <Heading level="6" margin={{ bottom: 'xsmall' }}>
+                    Interested in investing?
+                  </Heading>
+                  If you want to learn more get started with your onboarding process.
+                  <Box justify="end" margin={{ top: 'small' }}>
+                    <InvestAction pool={props.pool} />
+                  </Box>
+                </>
+              </Info>
+            )}
+          </>
         )}
 
         {!address && (
