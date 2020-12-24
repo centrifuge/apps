@@ -1,5 +1,5 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { Box, Button } from 'grommet'
+import { Box } from 'grommet'
 import * as React from 'react'
 import PoolTitle from '../../components/PoolTitle'
 import { Pool } from '../../config'
@@ -38,10 +38,6 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
           </StepHeader>
         </Step>
       </Box>
-
-      <div>
-        <Button margin={{ top: 'medium' }} secondary label={`Go back`} fill={false} />
-      </div>
     </Box>
   )
 }

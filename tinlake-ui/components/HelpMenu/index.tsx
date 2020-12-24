@@ -1,6 +1,7 @@
 import { Box, Drop } from 'grommet'
 import React from 'react'
 import styled from 'styled-components'
+import { preload } from '../../utils/images'
 
 const Wrapper = styled.div`
   position: fixed;
@@ -29,26 +30,24 @@ const Title = styled.div`
   margin-bottom: 4px;
 `
 
-const MenuItem = styled.a`
+const MenuItem = styled.a<{ icon?: string }>`
   display: flex;
   flex-direction: row;
-  padding: 12px 0 4px 0;
+  padding: 12px 0 4px 40px;
   cursor: pointer;
   color: #000;
+  background-image: url('/static/help/${(props) => props.icon || 'email'}.svg');
+  background-repeat: no-repeat;
+  background-position: 2px 10px;
 
   &:hover {
     color: #0828be !important;
+    background-image: url('/static/help/${(props) => props.icon || 'email'}-hover.svg');
   }
 
   &:visited {
     color: #000;
   }
-`
-
-const Icon = styled.div`
-  margin-right: 12px;
-  width: 24px;
-  height: 24px;
 `
 
 const Name = styled.div`
@@ -69,14 +68,29 @@ const HelpMenu: React.FC<{}> = () => {
     }
   }
 
+  const [hasPreloaded, setHasPreloaded] = React.useState<boolean>(false)
+
+  const loadImages = () => {
+    preload([
+      '/static/help/slack.svg',
+      '/static/help/telegram.svg',
+      '/static/help/email.svg',
+      '/static/help/documentation.svg',
+      '/static/help/slack-hover.svg',
+      '/static/help/telegram-hover.svg',
+      '/static/help/email-hover.svg',
+      '/static/help/documentation-hover.svg',
+    ])
+    setHasPreloaded(true)
+  }
+
   return (
     <>
       <Wrapper
         ref={ref}
         onClick={() => {
-          if (!justClosed) {
-            setOpen(true)
-          }
+          if (!justClosed) setOpen(true)
+          if (!hasPreloaded) loadImages()
         }}
       >
         ?
@@ -93,34 +107,19 @@ const HelpMenu: React.FC<{}> = () => {
         >
           <InnerMenu width="240px" elevation="small" round="xsmall" background="white">
             <Title>Need help?</Title>
-            <MenuItem href="https://centrifuge.io/slack/" target="_blank">
-              <Icon>
-                <img src="/static/help/slack.svg" />
-              </Icon>
+            <MenuItem href="https://centrifuge.io/slack/" target="_blank" icon="slack">
               <Name>Slack</Name>
             </MenuItem>
-            <MenuItem href="https://t.me/centrifuge_chat" target="_blank">
-              <Icon>
-                <img src="/static/help/telegram.svg" />
-              </Icon>
+            <MenuItem href="https://t.me/centrifuge_chat" target="_blank" icon="telegram">
               <Name>Telegram</Name>
             </MenuItem>
-            <MenuItem href="mailto:hello@centrifuge.io" target="_blank">
-              <Icon>
-                <img src="/static/help/email.svg" />
-              </Icon>
+            <MenuItem href="mailto:hello@centrifuge.io" target="_blank" icon="email">
               <Name>Email</Name>
             </MenuItem>
             {/* <MenuItem>
-              <Icon>
-                <img src="/static/help/slack.svg" />
-              </Icon>
               <Name>FAQ</Name>
             </MenuItem> */}
-            <MenuItem href="https://developer.centrifuge.io/" target="_blank">
-              <Icon>
-                <img src="/static/help/documentation.svg" />
-              </Icon>
+            <MenuItem href="https://developer.centrifuge.io/" target="_blank" icon="documentation">
               <Name>Documentation</Name>
             </MenuItem>
           </InnerMenu>

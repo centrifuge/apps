@@ -18,6 +18,14 @@ const PoolTitle: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const isOversubscribed = (pool?.data && new BN(pool?.data.maxReserve).lte(new BN(pool?.data.reserve))) || false
 
+  // TODO: fix this somehow, otherwise the oversubscribed label isn't shown on pages which don't load the pool data
+  // (but this requires injecting the tinlake prop everywhere we include the PoolTitle component)
+  // const dispatch = useDispatch()
+
+  // React.useEffect(() => {
+  //   dispatch(loadPool(props.tinlake))
+  // }, [props.pool])
+
   return (
     <Wrapper>
       <Icon
@@ -26,7 +34,16 @@ const PoolTitle: React.FC<Props> = (props: Props) => {
         }
       />
       <PageTitle>
-        <PoolName>{props.pool.metadata.name}</PoolName>
+        <PoolName>
+          {props.pool.metadata.name}
+          <PoolLabel>
+            {props.pool.isUpcoming ? (
+              <Label blue>Upcoming</Label>
+            ) : (
+              isOversubscribed && <Label orange>Oversubscribed</Label>
+            )}
+          </PoolLabel>
+        </PoolName>
         <PageName>
           {props.parentPage && props.parentPageHref && (
             <>
@@ -36,13 +53,6 @@ const PoolTitle: React.FC<Props> = (props: Props) => {
           {props.page}
         </PageName>
       </PageTitle>
-      <PoolLabel>
-        {props.pool.isUpcoming ? (
-          <Label blue>Upcoming</Label>
-        ) : (
-          isOversubscribed && <Label orange>Oversubscribed</Label>
-        )}
-      </PoolLabel>
     </Wrapper>
   )
 }
@@ -83,7 +93,7 @@ const PageName = styled.h1`
     text-decoration: none;
 
     &:hover {
-      color: #0828be;
+      color: rgb(39, 98, 255);
     }
   }
 `
@@ -97,6 +107,6 @@ const Arrow = styled.span`
 `
 
 const PoolLabel = styled.div`
-  margin-top: 4px;
   margin-left: 8px;
+  display: inline-block;
 `

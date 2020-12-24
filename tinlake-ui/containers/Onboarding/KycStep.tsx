@@ -11,7 +11,7 @@ interface Props {
   tinlake: ITinlake
 }
 
-const KycStep: React.FC<Props> = (props: Props) => {
+const KycStep: React.FC<Props> = () => {
   const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
   const kycStatus = onboarding.data?.kyc?.verified ? 'verified' : onboarding.data?.kyc?.created ? 'created' : 'none'
 
@@ -36,8 +36,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
             process to become an eligible investor for all Tinlake pools. Once Securitize has verified your
             documentation you will be provided with your “Securitize iD” which makes you eligible to invest in all open
             Tinlake pools. To invest in an individual pool you will be asked to sign the subscription agreement with the
-            pool’s issuer also provided through the Securitize dashboard and signed through DocuSign. Once the issuer
-            has countersigned, you are ready to invest.
+            pool’s issuer, signed through DocuSign. Once the issuer has countersigned, you are ready to invest.
           </Paragraph>
           <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
             <CheckBox
