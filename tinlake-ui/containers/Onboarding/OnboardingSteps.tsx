@@ -33,9 +33,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
         <AgreementStep {...props} />
         <Step>
           <StepHeader>
-            <StepIcon>
-              <img src="/static/circle.svg" />
-            </StepIcon>
+            <StepIcon inactive />
             <StepTitle inactive>Invest in {props.activePool.metadata.name}</StepTitle>
           </StepHeader>
         </Step>

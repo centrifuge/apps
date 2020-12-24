@@ -60,7 +60,7 @@ export class KycController {
     //   httpOnly: true,
     // })
 
-    const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/investments?onb=1&session=${session}`
+    const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?onb=1&session=${session}`
     return res.redirect(redirectUrl)
   }
 }

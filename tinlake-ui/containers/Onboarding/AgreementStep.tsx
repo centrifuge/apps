@@ -31,9 +31,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
   return (
     <Step>
       <StepHeader>
-        <StepIcon>
-          <img src="/static/circle.svg" />
-        </StepIcon>
+        <StepIcon inactive={agreementStatus === 'countersigned'} />
         <StepTitle inactive={agreementStatus === 'countersigned'}>
           {agreementStatus === 'none'
             ? 'Sign the Subscription Agreement'
@@ -42,7 +40,19 @@ const KycStep: React.FC<Props> = (props: Props) => {
             : 'Subscription Agreement awaiting counter-signature'}
         </StepTitle>
       </StepHeader>
-      {agreementStatus === 'none' && agreement && (
+      {agreementStatus === 'none' && agreement && !session && (
+        <StepBody>
+          <Paragraph margin={{ bottom: 'medium' }} style={{ width: '70%' }}>
+            To complete the next step of signing the {agreement.name} for {props.activePool?.metadata.name}, you can
+            sign in again with your Securitize iD.
+          </Paragraph>
+          <div>
+            <Button primary label={'Sign in with Securitize'} href={onboarding.data?.kyc?.url} fill={false} />
+          </div>
+          <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
+        </StepBody>
+      )}
+      {agreementStatus === 'none' && agreement && session && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             You can continue onboarding by signing the {agreement.name} for {props.activePool.metadata.name}.
@@ -50,7 +60,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
             <CheckBox
               checked={checked}
-              label="I accept that this is an US offering which is not solicited nor offered in my home country."
+              label="I accept that this is a US offering which is not solicited nor offered in my home country."
               onChange={(event) => setChecked(event.target.checked)}
             />
           </Box>

@@ -7,9 +7,11 @@ export const StepHeader = styled.div`
   flex-direction: row;
 `
 
-export const StepIcon = styled.div`
+export const StepIcon = styled.div<{ inactive?: boolean }>`
   width: 40px;
   padding-top: 2px;
+  background: ${(props) => (props.inactive ? "url('/static/circle-inactive.svg')" : "url('/static/circle.svg')")};
+  background-repeat: no-repeat;
 
   img {
     width: 20px;
