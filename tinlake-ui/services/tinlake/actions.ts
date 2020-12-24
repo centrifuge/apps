@@ -201,7 +201,7 @@ export async function getLoan(tinlake: ITinlake, loanId: string): Promise<Loan |
   return loan
 }
 
-async function addProxyDetails(tinlake: ITinlake, loan: Loan) {
+export async function addProxyDetails(tinlake: ITinlake, loan: Loan) {
   try {
     loan.proxyOwner = (await tinlake.getProxyOwnerByLoan(loan.loanId)).toString()
   } catch (e) {}

@@ -112,7 +112,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
           disabled={!borrowEnabled || status === 'unconfirmed' || status === 'pending'}
         />
       </Box>
-      <Box align="start">
+      <Box align="end">
         <Button
           onClick={borrow}
           primary

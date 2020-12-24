@@ -107,6 +107,10 @@ const Arrow = styled.span`
 `
 
 const PoolLabel = styled.div`
+<<<<<<< HEAD
+=======
+  display: inline-block;
+>>>>>>> bf7be9368800df1d97cb8516c7e884c58b9ef83b
   margin-left: 8px;
   display: inline-block;
 `

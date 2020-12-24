@@ -51,19 +51,21 @@ class LoanList extends React.Component<Props> {
                 ),
               },
               {
-                header: 'Outstanding (DAI)',
-                property: 'debtNum',
+                header: 'Status',
+                property: 'status',
                 align: 'end',
-                render: (l: SortableLoan) => (
-                  <NumberDisplay suffix="" precision={0} value={baseToDisplay(l.debt, 18)} />
-                ),
+                render: (l: SortableLoan) => l.status,
               },
               {
-                header: 'Available for Financing (DAI)',
-                property: 'principalNum',
+                header: 'Amount (DAI)',
+                property: 'amountNum',
                 align: 'end',
                 render: (l: SortableLoan) => (
-                  <NumberDisplay suffix="" precision={0} value={baseToDisplay(l.principal, 18)} />
+                  <NumberDisplay
+                    suffix=""
+                    precision={0}
+                    value={baseToDisplay(l.debt.isZero() ? l.principal : l.debt, 18)}
+                  />
                 ),
               },
               {
@@ -76,12 +78,6 @@ class LoanList extends React.Component<Props> {
                   ) : (
                     <NumberDisplay suffix=" %" precision={2} value={feeToInterestRate(l.interestRate)} />
                   ),
-              },
-              {
-                header: 'Status',
-                property: 'status',
-                align: 'end',
-                render: (l: SortableLoan) => l.status,
               },
               {
                 header: '',
