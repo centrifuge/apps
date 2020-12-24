@@ -28,22 +28,22 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch()
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
-  const updateIsBorrower = async () => {
-    if (address) {
-      const proxyAddress = await props.tinlake.checkProxyExists(address)
-      if (proxyAddress) setIsBorrower(true)
-      else {
-        setIsBorrower(props.auth?.permissions?.canSetMinimumJuniorRatio || false)
-      }
-    }
-  }
+  // const updateIsBorrower = async () => {
+  //   if (address) {
+  //     const proxyAddress = await props.tinlake.checkProxyExists(address)
+  //     if (proxyAddress) setIsBorrower(true)
+  //     else {
+  //       setIsBorrower(props.auth?.permissions?.canSetMinimumJuniorRatio || false)
+  //     }
+  //   }
+  // }
 
-  const [isBorrower, setIsBorrower] = React.useState(false)
+  // const [isBorrower, setIsBorrower] = React.useState(false)
 
   React.useEffect(() => {
     dispatch(loadPool(props.tinlake))
     dispatch(loadAssetData(props.tinlake))
-    updateIsBorrower()
+    // updateIsBorrower()
   }, [address])
 
   const isAdmin = props.auth?.permissions && (props.auth?.permissions as PermissionsV3).canSetMaxReserve
