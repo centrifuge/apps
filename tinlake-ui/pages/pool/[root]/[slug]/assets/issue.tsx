@@ -7,6 +7,7 @@ import Auth from '../../../../../components/Auth'
 import { BackLink } from '../../../../../components/BackLink'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
+import PoolTitle from '../../../../../components/PoolTitle'
 import SecondaryHeader from '../../../../../components/SecondaryHeader'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
@@ -46,13 +47,9 @@ class LoanIssuePage extends React.Component<Props> {
                   <Auth
                     tinlake={tinlake}
                     render={(auth) => (
-                      <Box>
-                        <SecondaryHeader>
-                          <Box direction="row" gap="small" align="center" margin={{ top: 'medium' }}>
-                            <BackLink href={'/assets'} />
-                            <Heading level="4">Lock NFT</Heading>
-                          </Box>
-                        </SecondaryHeader>
+                      <Box margin={{ top: 'medium' }}>
+                        <PoolTitle pool={pool} page={`Lock NFT`} parentPage="Assets" parentPageHref="/assets" />
+
                         <IssueLoan
                           tinlake={tinlake}
                           poolConfig={pool}

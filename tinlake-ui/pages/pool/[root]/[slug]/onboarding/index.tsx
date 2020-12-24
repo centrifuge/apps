@@ -25,7 +25,7 @@ class OnboardingPage extends React.Component<Props> {
     return (
       <WithFooter>
         <Head>
-          <title>Onboarding: {pool.metadata.name} | Tinlake | Centrifuge</title>
+          <title>Investor Onboarding: {pool.metadata.name} | Tinlake | Centrifuge</title>
         </Head>
         <Header
           ipfsPools={ipfsPools}

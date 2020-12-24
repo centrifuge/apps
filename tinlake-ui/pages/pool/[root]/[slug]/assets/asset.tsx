@@ -1,13 +1,13 @@
-import { Box, Heading } from 'grommet'
+import { Box } from 'grommet'
 import { GetStaticProps } from 'next'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import Head from 'next/head'
 import { withRouter } from 'next/router'
 import * as React from 'react'
 import Auth from '../../../../../components/Auth'
-import { BackLink } from '../../../../../components/BackLink'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
+import PoolTitle from '../../../../../components/PoolTitle'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
@@ -41,10 +41,8 @@ class LoanPage extends React.Component<Props> {
         <Container>
           <Box justify="center" direction="row">
             <Box width="xlarge" margin={{ top: 'medium' }}>
-              <Box direction="row" gap="small" align="center">
-                <BackLink href={'/assets'} />
-                <Heading level="4">Asset Details</Heading>
-              </Box>
+              <PoolTitle pool={pool} page={`Asset ${assetId}`} parentPage="Assets" parentPageHref="/assets" />
+
               <WithTinlake
                 addresses={pool.addresses}
                 contractConfig={pool.contractConfig}

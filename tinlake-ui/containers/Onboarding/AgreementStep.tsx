@@ -18,6 +18,7 @@ const DefaultTranche = 'senior'
 
 const KycStep: React.FC<Props> = (props: Props) => {
   const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
+  const kycStatus = onboarding.data?.kyc?.verified ? 'verified' : onboarding.data?.kyc?.created ? 'created' : 'none'
   const agreement = onboarding.data?.agreements.filter(
     (agreement: AgreementsStatus) => agreement.tranche === (props.tranche || DefaultTranche)
   )[0]
@@ -31,8 +32,8 @@ const KycStep: React.FC<Props> = (props: Props) => {
   return (
     <Step>
       <StepHeader>
-        <StepIcon inactive={agreementStatus === 'countersigned'} />
-        <StepTitle inactive={agreementStatus === 'countersigned'}>
+        <StepIcon inactive={kycStatus === 'none' || agreementStatus === 'countersigned'} />
+        <StepTitle inactive={kycStatus === 'none' || agreementStatus === 'countersigned'}>
           {agreementStatus === 'none'
             ? 'Sign the Subscription Agreement'
             : agreementStatus === 'countersigned'
@@ -40,7 +41,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
             : 'Subscription Agreement awaiting counter-signature'}
         </StepTitle>
       </StepHeader>
-      {agreementStatus === 'none' && agreement && !session && (
+      {kycStatus !== 'none' && agreementStatus === 'none' && agreement && !session && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '70%' }}>
             To complete the next step of signing the {agreement.name} for {props.activePool?.metadata.name}, you can
@@ -52,7 +53,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {agreementStatus === 'none' && agreement && session && (
+      {kycStatus !== 'none' && agreementStatus === 'none' && agreement && session && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             You can continue onboarding by signing the {agreement.name} for {props.activePool.metadata.name}.
@@ -78,14 +79,14 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {agreementStatus === 'signed' && agreement && (
+      {kycStatus !== 'none' && agreementStatus === 'signed' && agreement && (
         <StepBody>
           <Box pad={{ vertical: 'medium' }}>
             The issuer needs to counter-sign the {agreement.name} of {props.activePool.metadata.name}.
           </Box>
         </StepBody>
       )}
-      {agreementStatus === 'countersigned' && <StepBody inactive>&nbsp;</StepBody>}
+      {(kycStatus === 'none' || agreementStatus === 'countersigned') && <StepBody inactive>&nbsp;</StepBody>}
     </Step>
   )
 }

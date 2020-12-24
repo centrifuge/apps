@@ -4,11 +4,14 @@ import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Pool, UpcomingPool } from '../../config'
 import { PoolState } from '../../ducks/pool'
+import { PoolLink } from '../PoolLink'
 import { Label } from '../PoolList/styles'
 
 interface Props {
   pool: Pool | UpcomingPool
   page: string
+  parentPage?: string
+  parentPageHref?: string
 }
 
 const PoolTitle: React.FC<Props> = (props: Props) => {
@@ -24,7 +27,14 @@ const PoolTitle: React.FC<Props> = (props: Props) => {
       />
       <PageTitle>
         <PoolName>{props.pool.metadata.name}</PoolName>
-        <PageName>{props.page}</PageName>
+        <PageName>
+          {props.parentPage && props.parentPageHref && (
+            <>
+              <PoolLink href={props.parentPageHref}>{props.parentPage}</PoolLink> <Arrow>►</Arrow>{' '}
+            </>
+          )}
+          {props.page}
+        </PageName>
       </PageTitle>
       <PoolLabel>
         {props.pool.isUpcoming ? (
@@ -67,6 +77,23 @@ const PageName = styled.h1`
   font-size: 18px;
   font-weight: bold;
   margin: 0;
+
+  a {
+    color: #000;
+    text-decoration: none;
+
+    &:hover {
+      color: #0828be;
+    }
+  }
+`
+
+const Arrow = styled.span`
+  font-size: 13px;
+  position: relative;
+  top: -1px;
+  color: #979797;
+  margin: 0 4px;
 `
 
 const PoolLabel = styled.div`

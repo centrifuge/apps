@@ -27,7 +27,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
 
   return (
     <Box margin={{ top: 'medium' }}>
-      <PoolTitle pool={props.activePool} page="Investor Onboarding" />
+      <PoolTitle pool={props.activePool} page="Onboarding" parentPage="Investments" parentPageHref="/investments" />
       <Box pad="medium" elevation="small" round="xsmall" background="white" width="80%">
         <KycStep {...props} />
         <AgreementStep {...props} />

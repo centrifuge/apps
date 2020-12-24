@@ -47,7 +47,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
             />
           </Box>
           <div>
-            <Button primary label={`Start KYC now`} fill={false} />
+            <Button primary label={`Start KYC now`} href={onboarding.data?.kyc?.url} fill={false} />
           </div>
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>
