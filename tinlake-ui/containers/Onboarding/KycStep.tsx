@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useSelector } from 'react-redux'
 import { Pool } from '../../config'
 import { OnboardingState } from '../../ducks/onboarding'
-import { Step, StepHeader, StepIcon, StepTitle, StepBody } from './styles'
+import { Step, StepHeader, StepIcon, StepTitle, StepBody, FormFieldWithoutBorder } from './styles'
 
 interface Props {
   activePool: Pool
@@ -16,6 +16,7 @@ const KycStep: React.FC<Props> = () => {
   const kycStatus = onboarding.data?.kyc?.verified ? 'verified' : onboarding.data?.kyc?.created ? 'created' : 'none'
 
   const [checked, setChecked] = React.useState(false)
+  const [error, setError] = React.useState('')
 
   return (
     <Step>
@@ -39,14 +40,27 @@ const KycStep: React.FC<Props> = () => {
             pool’s issuer, signed through DocuSign. Once the issuer has countersigned, you are ready to invest.
           </Paragraph>
           <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
-            <CheckBox
-              checked={checked}
-              label="I accept the data privacy policy and that data is shared with Centrifuge and the issuer."
-              onChange={(event) => setChecked(event.target.checked)}
-            />
+            <FormFieldWithoutBorder error={error}>
+              <CheckBox
+                checked={checked}
+                label="I accept the data privacy policy and that data is shared with Centrifuge and the issuer."
+                onChange={(event) => setChecked(event.target.checked)}
+              />
+            </FormFieldWithoutBorder>
           </Box>
           <div>
-            <Button primary label={`Start KYC now`} href={onboarding.data?.kyc?.url} fill={false} />
+            <Button
+              primary
+              label={`Start KYC now`}
+              href={onboarding.data?.kyc?.url}
+              onClick={(event: any) => {
+                if (!checked) {
+                  event.preventDefault()
+                  setError('This needs to be checked to proceed.')
+                }
+              }}
+              fill={false}
+            />
           </div>
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>

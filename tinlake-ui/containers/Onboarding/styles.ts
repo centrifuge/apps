@@ -1,3 +1,4 @@
+import { FormField } from 'grommet'
 import styled from 'styled-components'
 
 export const Step = styled.div``
@@ -30,4 +31,16 @@ export const StepBody = styled.div<{ inactive?: boolean }>`
   padding: 2px 0 0 30px;
   border-left: 1px solid #000;
   border-left: ${(props) => (props.inactive ? '1px solid #bbb' : '1px solid #000')};
+`
+
+export const FormFieldWithoutBorder = styled(FormField)`
+  > div {
+    border-bottom-color: rgba(0, 0, 0, 0);
+    padding: 0;
+  }
+
+  > span {
+    margin: 12px 0 0 34px;
+    font-weight: bold;
+  }
 `

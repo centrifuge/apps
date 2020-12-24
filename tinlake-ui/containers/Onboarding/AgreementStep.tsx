@@ -6,7 +6,7 @@ import * as React from 'react'
 import { useSelector } from 'react-redux'
 import config, { Pool } from '../../config'
 import { OnboardingState } from '../../ducks/onboarding'
-import { Step, StepHeader, StepIcon, StepTitle, StepBody } from './styles'
+import { Step, StepHeader, StepIcon, StepTitle, StepBody, FormFieldWithoutBorder } from './styles'
 
 interface Props {
   activePool: Pool
@@ -25,6 +25,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
   const agreementStatus = agreement?.counterSigned ? 'countersigned' : agreement?.signed ? 'signed' : 'none'
 
   const [checked, setChecked] = React.useState(false)
+  const [error, setError] = React.useState('')
 
   const router = useRouter()
   const session = 'session' in router.query ? router.query.session : '' // TODO: check this on the API and display message if it has expired
@@ -59,20 +60,27 @@ const KycStep: React.FC<Props> = (props: Props) => {
             You can continue onboarding by signing the {agreement.name} for {props.activePool.metadata.name}.
           </Paragraph>
           <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
-            <CheckBox
-              checked={checked}
-              label="I accept that this is a US offering which is not solicited nor offered in my home country."
-              onChange={(event) => setChecked(event.target.checked)}
-            />
+            <FormFieldWithoutBorder error={error}>
+              <CheckBox
+                checked={checked}
+                label="I accept that this is a US offering which is not solicited nor offered in my home country."
+                onChange={(event) => setChecked(event.target.checked)}
+              />
+            </FormFieldWithoutBorder>
           </Box>
           <div>
             <Button
               primary
               label={`Sign ${agreement?.name}`}
-              disabled={!checked}
               href={`${config.onboardAPIHost}pools/${(props.activePool as Pool).addresses.ROOT_CONTRACT}/agreements/${
                 agreement?.id
               }/redirect?session=${session}`}
+              onClick={(event: any) => {
+                if (!checked) {
+                  event.preventDefault()
+                  setError('This needs to be checked to proceed.')
+                }
+              }}
               fill={false}
             />
           </div>
