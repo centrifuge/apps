@@ -23,8 +23,8 @@ const PoolTitle: React.FC<Props> = (props: Props) => {
         }
       />
       <PageTitle>
-        <PageName>{props.page}</PageName>
         <PoolName>{props.pool.metadata.name}</PoolName>
+        <PageName>{props.page}</PageName>
       </PageTitle>
       <PoolLabel>
         {props.pool.isUpcoming ? (
@@ -56,17 +56,17 @@ const PageTitle = styled.div`
   flex-direction: column;
 `
 
+const PoolName = styled.h2`
+  font-size: 13px;
+  font-weight: bold;
+  margin: 4px 0 0 0;
+  color: #979797;
+`
+
 const PageName = styled.h1`
   font-size: 18px;
   font-weight: bold;
   margin: 0;
-`
-
-const PoolName = styled.h2`
-  font-size: 13px;
-  font-weight: bold;
-  margin: 0;
-  color: #979797;
 `
 
 const PoolLabel = styled.div`
