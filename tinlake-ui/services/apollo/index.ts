@@ -261,6 +261,38 @@ class Apollo {
     return tinlakeLoans
   }
 
+  async getAssetData(root: string) {
+    let result
+    try {
+      // TODO: root should be root.toLowerCase() once we add lowercasing to the subgraph code (after AssemblyScript is updated)
+      result = await this.client.query({
+        query: gql`
+        {
+          dailyPoolDatas(where:{ pool: "${root}" }) {
+           day {
+            id
+          }
+            totalDebt
+          }
+        }
+        `,
+      })
+    } catch (err) {
+      console.error(`error occured while fetching asset data from apollo ${err}`)
+      return {
+        data: [],
+      }
+    }
+    const assetData = result.data.dailyPoolDatas.map((item: any) => {
+      return {
+        day: Number(item.day.id),
+        totalDebt: parseFloat(new BN(item.totalDebt).div(new BN(10).pow(new BN(18))).toString()),
+      }
+    })
+
+    return assetData
+  }
+
   async getProxies(user: string) {
     let result
     try {

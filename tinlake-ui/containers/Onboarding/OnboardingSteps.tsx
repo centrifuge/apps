@@ -14,6 +14,8 @@ interface Props {
   tinlake: ITinlake
 }
 
+export type Step = 'connect' | 'kyc' | 'agreement' | 'invest'
+
 const OnboardingSteps: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch()
 
@@ -24,6 +26,8 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
       dispatch(loadOnboardingStatus(props.activePool))
     }
   }, [address, props.activePool])
+
+  // const [activeStep, setActiveStep] = React.useState<Step>('connect')
 
   return (
     <Box margin={{ top: 'medium' }}>

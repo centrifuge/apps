@@ -12,9 +12,15 @@ export interface SortableLoan extends Loan {
   interestRateNum: number
 }
 
+export interface AssetData {
+  day: number
+  totalDebt: number
+}
+
 // Actions
 const LOAD = 'tinlake-ui/loans/LOAD'
 const RECEIVE = 'tinlake-ui/loans/RECEIVE'
+const RECEIVE_ASSET_DATA = 'tinlake-ui/loans/RECEIVE_ASSET_DATA'
 const LOAD_LOAN = 'tinlake-ui/loans/LOAD_LOAN'
 const LOAN_NOT_FOUND = 'tinlake-ui/loans/LOAN_NOT_FOUND'
 const RECEIVE_LOAN = 'tinlake-ui/loans/RECEIVE_LOAN'
@@ -22,6 +28,7 @@ const RECEIVE_LOAN = 'tinlake-ui/loans/RECEIVE_LOAN'
 export interface LoansState {
   loansState: null | 'loading' | 'found'
   loans: SortableLoan[]
+  assetData: AssetData[]
   loanState: null | 'loading' | 'not found' | 'found'
   loan: null | Loan
 }
@@ -29,6 +36,7 @@ export interface LoansState {
 const initialState: LoansState = {
   loansState: null,
   loans: [],
+  assetData: [],
   loanState: null,
   loan: null,
 }
@@ -42,6 +50,8 @@ export default function reducer(state: LoansState = initialState, action: AnyAct
       return { ...state, loansState: 'loading' }
     case RECEIVE:
       return { ...state, loansState: 'found', loans: action.loans }
+    case RECEIVE_ASSET_DATA:
+      return { ...state, assetData: action.data }
     case LOAD_LOAN:
       return { ...state, loanState: 'loading', loan: null }
     case LOAN_NOT_FOUND:
@@ -76,6 +86,16 @@ export function loadLoans(tinlake: any): ThunkAction<Promise<void>, LoansState, 
       const loans: any[] = []
       dispatch({ loans, type: RECEIVE })
     }
+  }
+}
+
+export function loadAssetData(tinlake: any): ThunkAction<Promise<void>, LoansState, undefined, Action> {
+  return async (dispatch) => {
+    const root = tinlake.contractAddresses['ROOT_CONTRACT']
+
+    const assetData = await Apollo.getAssetData(root)
+    console.log({ assetData })
+    dispatch({ data: assetData, type: RECEIVE_ASSET_DATA })
   }
 }
 

@@ -10,6 +10,9 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { toPrecision } from '../../../utils/toPrecision'
 import MaxReserveForm from './MaxReserveForm'
 import { Sidenote } from './styles'
+import { AreaChart, Area, XAxis, ResponsiveContainer } from 'recharts'
+import { AssetData, loadAssetData } from '../../../ducks/loans'
+import { dateToYMD } from '../../../utils/date'
 
 interface Props {
   activePool?: Pool
@@ -19,6 +22,8 @@ interface Props {
 const LoanOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined
+
+  const assetData = useSelector<any, AssetData[]>((state) => state.loans.assetData)
 
   const dispatch = useDispatch()
   const address = useSelector<any, string | null>((state) => state.auth.address)
@@ -37,6 +42,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     dispatch(loadPool(props.tinlake))
+    dispatch(loadAssetData(props.tinlake))
     updateIsBorrower()
   }, [address])
 
@@ -44,7 +50,8 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
 
   const [showMaxReserveForm, setShowMaxReserveForm] = React.useState(false)
 
-  return isBorrower || isAdmin ? (
+  // isBorrower || isAdmin
+  return (
     <Box margin={{ bottom: 'medium' }}>
       <Box direction="row" justify="between">
         <Box>
@@ -132,10 +139,41 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
             )}
           </Box>
         </Box>
+
+        <Box
+          width="540px"
+          height="200px"
+          pad="medium"
+          elevation="small"
+          round="xsmall"
+          margin={{ bottom: 'medium' }}
+          background="white"
+        >
+          <Heading level="5" margin={{ top: '0' }}>
+            Total Debt
+          </Heading>
+          <ResponsiveContainer>
+            <AreaChart data={assetData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#0828BE" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="day" tickFormatter={(val: number) => dateToYMD(val)} />
+              <Area
+                type="monotone"
+                dataKey="totalDebt"
+                stroke="#0828BE"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorPv)"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </Box>
       </Box>
     </Box>
-  ) : (
-    <>&nbsp;</>
   )
 }
 

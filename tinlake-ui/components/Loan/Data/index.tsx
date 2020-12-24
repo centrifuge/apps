@@ -2,13 +2,10 @@ import { baseToDisplay, feeToInterestRate, Loan } from '@centrifuge/tinlake-js'
 import { Box, FormField, TextInput } from 'grommet'
 import * as React from 'react'
 import NumberInput from '../../NumberInput'
+import { dateToYMD } from '../../../utils/date'
 
 interface Props {
   loan: Loan
-}
-
-const dateToYMD = (unix: number) => {
-  return new Date(unix * 1000).toLocaleDateString('en-US')
 }
 
 class LoanData extends React.Component<Props> {
