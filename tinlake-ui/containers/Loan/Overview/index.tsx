@@ -10,15 +10,31 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { toPrecision } from '../../../utils/toPrecision'
 import MaxReserveForm from './MaxReserveForm'
 import { Sidenote } from './styles'
-import { AreaChart, Area, XAxis, ResponsiveContainer } from 'recharts'
+import { AreaChart, Area, XAxis, Legend, ReferenceLine, Tooltip, ResponsiveContainer } from 'recharts'
 import { AssetData, loadAssetData } from '../../../ducks/loans'
-import { dateToYMD } from '../../../utils/date'
+import { dateToYMDShort } from '../../../utils/date'
+import { UintBase } from '../../../utils/ratios'
 
 interface Props {
   activePool?: Pool
   tinlake: ITinlake
   auth?: AuthState
 }
+
+const CustomTooltip = ({ active, payload }: any) => {
+  return active && payload ? (
+    <div className="custom-tooltip">
+      <p className="label">
+        {payload[0].value} {console.log(payload)}
+      </p>
+      {/* <p className="intro">{getIntroOfPage(label)}</p>
+        <p className="desc">Anything you want can be displayed here.</p> */}
+    </div>
+  ) : (
+    <>&nbsp;</>
+  )
+}
+
 const LoanOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined
@@ -142,32 +158,50 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
 
         <Box
           width="540px"
-          height="200px"
-          pad="medium"
+          height="250px"
+          // pad="medium"
           elevation="small"
           round="xsmall"
           margin={{ bottom: 'medium' }}
           background="white"
         >
-          <Heading level="5" margin={{ top: '0' }}>
-            Total Debt
-          </Heading>
+          {/* <Heading level="5" margin={{ top: 'medium', left: 'medium', bottom: '0' }}>
+            Asset Value &amp; Reserve
+          </Heading> */}
           <ResponsiveContainer>
-            <AreaChart data={assetData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <AreaChart data={assetData} margin={{ top: 20, right: 0, left: 0, bottom: 0 }}>
               <defs>
-                <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
                   <stop offset="95%" stopColor="#0828BE" stopOpacity={0} />
                 </linearGradient>
+                <linearGradient id="colorReserve" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#ccc" stopOpacity={0.2} />
+                  <stop offset="50%" stopColor="#ccc" stopOpacity={0} />
+                </linearGradient>
               </defs>
-              <XAxis dataKey="day" tickFormatter={(val: number) => dateToYMD(val)} />
+              {/* <XAxis dataKey="day" tickFormatter={(val: number) => dateToYMDShort(val)} /> */}
+              {/* <Tooltip content={<CustomTooltip />} /> */}
+              <Legend verticalAlign="top" align="center" />
               <Area
                 type="monotone"
-                dataKey="totalDebt"
+                stackId={1}
+                dataKey="assetValue"
                 stroke="#0828BE"
                 strokeWidth={2}
                 fillOpacity={1}
-                fill="url(#colorPv)"
+                fill="url(#colorAssetValue)"
+                name="Asset Value"
+              />
+              <Area
+                type="monotone"
+                stackId={1}
+                dataKey="reserve"
+                stroke="#ccc"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorReserve)"
+                name="Reserve"
               />
             </AreaChart>
           </ResponsiveContainer>

@@ -30,7 +30,8 @@ export interface SortableLoan extends Loan {
 
 export interface AssetData {
   day: number
-  totalDebt: number
+  assetValue: number
+  reserve: number
 }
 
 // Actions

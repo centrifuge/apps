@@ -272,7 +272,8 @@ class Apollo {
            day {
             id
           }
-            totalDebt
+            assetValue
+            reserve
           }
         }
         `,
@@ -286,7 +287,8 @@ class Apollo {
     const assetData = result.data.dailyPoolDatas.map((item: any) => {
       return {
         day: Number(item.day.id),
-        totalDebt: parseFloat(new BN(item.totalDebt).div(new BN(10).pow(new BN(18))).toString()),
+        assetValue: parseFloat(new BN(item.assetValue).div(UintBase).toString()),
+        reserve: parseFloat(new BN(item.reserve).div(UintBase).toString()),
       }
     })
 
