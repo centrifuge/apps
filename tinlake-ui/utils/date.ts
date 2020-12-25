@@ -8,8 +8,8 @@ export const dateToYMD = (unix: number) => {
 
 export const dateToYMDShort = (unix: number) => {
   return new Date(unix * 1000).toLocaleDateString('en-US', {
-    // year: '2-digit',
+    year: 'numeric',
     month: 'short',
-    // day: 'numeric',
+    day: 'numeric',
   })
 }

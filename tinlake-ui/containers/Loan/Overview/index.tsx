@@ -10,10 +10,47 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { toPrecision } from '../../../utils/toPrecision'
 import MaxReserveForm from './MaxReserveForm'
 import { Sidenote } from './styles'
-import { AreaChart, Area, XAxis, Legend, ReferenceLine, Tooltip, ResponsiveContainer } from 'recharts'
+import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts'
 import { AssetData, loadAssetData } from '../../../ducks/loans'
-import { dateToYMDShort } from '../../../utils/date'
-import { UintBase } from '../../../utils/ratios'
+import { dateToYMD, dateToYMDShort } from '../../../utils/date'
+
+import styled from 'styled-components'
+
+const ChartTooltip = styled.div`
+  padding: 12px 16px;
+  font-size: 12px;
+  background: #000;
+  opacity: 0.9;
+  color: #fff;
+  width: 220px;
+`
+
+const ChartTooltipTitle = styled.div`
+  font-weight: bold;
+`
+
+const ChartTooltipLine = styled.div`
+  display: flex;
+  flex-direction: row;
+  margin: 6px 0;
+`
+
+const ChartTooltipColor = styled.div<{ color?: string }>`
+  width: 8px;
+  height: 8px;
+  border-radius: 100%;
+  background: ${(props) => props.color};
+  display: inline-block;
+  margin-right: 8px;
+`
+
+const ChartTooltipKey = styled.div`
+  flex: 1;
+`
+const ChartTooltipValue = styled.div`
+  flex: 1;
+  text-align: right;
+`
 
 interface Props {
   activePool?: Pool
@@ -23,13 +60,21 @@ interface Props {
 
 const CustomTooltip = ({ active, payload }: any) => {
   return active && payload ? (
-    <div className="custom-tooltip">
-      <p className="label">
-        {payload[0].value} {console.log(payload)}
-      </p>
-      {/* <p className="intro">{getIntroOfPage(label)}</p>
-        <p className="desc">Anything you want can be displayed here.</p> */}
-    </div>
+    <ChartTooltip>
+      <ChartTooltipTitle>{dateToYMD(payload[0].payload.day)}</ChartTooltipTitle>
+      <ChartTooltipLine>
+        <ChartTooltipKey>
+          <ChartTooltipColor color="#0828BE" /> Asset Value:
+        </ChartTooltipKey>
+        <ChartTooltipValue>{addThousandsSeparators(payload[0].value)} DAI</ChartTooltipValue>
+      </ChartTooltipLine>
+      <ChartTooltipLine>
+        <ChartTooltipKey>
+          <ChartTooltipColor color="#ccc" /> Reserve:
+        </ChartTooltipKey>
+        <ChartTooltipValue>{addThousandsSeparators(payload[1].value)} DAI</ChartTooltipValue>
+      </ChartTooltipLine>
+    </ChartTooltip>
   ) : (
     <>&nbsp;</>
   )
@@ -157,19 +202,24 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
         </Box>
 
         <Box
-          width="540px"
-          height="250px"
+          width="480px"
+          height="200px"
           // pad="medium"
           elevation="small"
           round="xsmall"
           margin={{ bottom: 'medium' }}
           background="white"
         >
-          {/* <Heading level="5" margin={{ top: 'medium', left: 'medium', bottom: '0' }}>
-            Asset Value &amp; Reserve
-          </Heading> */}
+          <Box direction="row" justify="between">
+            <Heading level="5" margin={{ top: 'medium', left: 'medium', bottom: '0' }}>
+              Asset Value &amp; Reserve
+            </Heading>
+            <Heading level="5" margin={{ top: 'medium', right: 'medium' }} color="#9f9f9f">
+              {assetData.length > 0 && dateToYMDShort(assetData[0].day)} - present
+            </Heading>
+          </Box>
           <ResponsiveContainer>
-            <AreaChart data={assetData} margin={{ top: 20, right: 0, left: 0, bottom: 0 }}>
+            <AreaChart data={assetData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
@@ -180,9 +230,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                   <stop offset="50%" stopColor="#ccc" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              {/* <XAxis dataKey="day" tickFormatter={(val: number) => dateToYMDShort(val)} /> */}
-              {/* <Tooltip content={<CustomTooltip />} /> */}
-              <Legend verticalAlign="top" align="center" />
+              <Tooltip content={<CustomTooltip />} offset={20} />
               <Area
                 type="monotone"
                 stackId={1}
