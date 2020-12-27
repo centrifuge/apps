@@ -12,7 +12,7 @@ interface Props {
   active: boolean
 }
 
-const ConnectStep: React.FC<Props> = (props: Props) => {
+const ConnectStep: React.FC<Props> = () => {
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
   const dispatch = useDispatch()

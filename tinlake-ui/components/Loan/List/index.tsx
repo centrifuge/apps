@@ -8,7 +8,7 @@ import NumberDisplay from '../../../components/NumberDisplay'
 import { SortableLoan } from '../../../ducks/loans'
 import { hexToInt } from '../../../utils/etherscanLinkGenerator'
 import ChevronRight from '../../ChevronRight'
-import { dateToYMD } from '../../../utils/date'
+import { dateToYMD, daysBetween } from '../../../utils/date'
 
 interface Props extends WithRouterProps {
   loans: SortableLoan[]
@@ -16,7 +16,8 @@ interface Props extends WithRouterProps {
 }
 
 import styled from 'styled-components'
-const StatusLabel = styled.div<{ type: 'info' | 'success' | 'warning' }>`
+type LabelType = 'info' | 'success' | 'warning'
+const StatusLabel = styled.div<{ type: LabelType }>`
   background: ${(props) => (props.type === 'success' ? 'green' : props.type === 'warning' ? '#fcba59' : '#aaa')};
   opacity: 0.8;
   border-radius: 8px;
@@ -24,7 +25,7 @@ const StatusLabel = styled.div<{ type: 'info' | 'success' | 'warning' }>`
   font-size: 12px;
   color: #fff;
   font-weight: bold;
-  width: 100px;
+  width: 120px;
   text-align: center;
 `
 
@@ -37,6 +38,23 @@ class LoanList extends React.Component<Props> {
       `/pool/${root}/${slug}/assets/asset?assetId=${datum!.loanId}`,
       { shallow: true }
     )
+  }
+
+  getLabelType = (l: SortableLoan): LabelType => {
+    const days = daysBetween(new Date().getTime() / 1000, Number(l.maturityDate))
+    if (l.status === 'ongoing' && days <= 0) return 'warning'
+    return l.status === 'closed' ? 'success' : 'info'
+  }
+
+  getLabelText = (l: SortableLoan) => {
+    const days = daysBetween(new Date().getTime() / 1000, Number(l.maturityDate))
+    if (l.status === 'ongoing' && days === 0) return 'due today'
+    else if (l.status === 'ongoing' && days === 1) return 'due tomorrow'
+    else if (l.status === 'ongoing' && days > 1 && days <= 7)
+      return `due in ${daysBetween(new Date().getTime() / 1000, Number(l.maturityDate))} days`
+    else if (l.status === 'ongoing' && days < 0)
+      return `due ${daysBetween(new Date().getTime() / 1000, Number(l.maturityDate))} days ago`
+    return l.status
   }
 
   render() {
@@ -110,9 +128,9 @@ class LoanList extends React.Component<Props> {
                 header: 'Status',
                 property: 'status',
                 align: 'start',
-                size: '110px',
+                size: '130px',
                 render: (l: SortableLoan) => (
-                  <StatusLabel type={l.status === 'closed' ? 'success' : 'info'}>{l.status}</StatusLabel>
+                  <StatusLabel type={this.getLabelType(l)}>{this.getLabelText(l)}</StatusLabel>
                 ),
               },
               {

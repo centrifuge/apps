@@ -13,3 +13,7 @@ export const dateToYMDShort = (unix: number) => {
     day: 'numeric',
   })
 }
+
+export const daysBetween = (unixFrom: number, unixTo: number) => {
+  return Math.round((unixTo - unixFrom) / (60 * 60 * 24))
+}
