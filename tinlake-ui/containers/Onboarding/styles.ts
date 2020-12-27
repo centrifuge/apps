@@ -8,16 +8,17 @@ export const StepHeader = styled.div`
   flex-direction: row;
 `
 
-export const StepIcon = styled.div<{ inactive?: boolean }>`
+export const StepIcon = styled.div<{ inactive?: boolean; checked?: boolean }>`
   width: 40px;
   padding-top: 2px;
-  background: ${(props) => (props.inactive ? "url('/static/circle-inactive.svg')" : "url('/static/circle.svg')")};
+  background: ${(props) =>
+    props.checked
+      ? "url('/static/circle-checked.svg')"
+      : props.inactive
+      ? "url('/static/circle-inactive.svg')"
+      : "url('/static/circle.svg')"};
   background-repeat: no-repeat;
-
-  img {
-    width: 20px;
-    height: 20px;
-  }
+  background-size: 20px 20px;
 `
 
 export const StepTitle = styled.div<{ inactive?: boolean }>`

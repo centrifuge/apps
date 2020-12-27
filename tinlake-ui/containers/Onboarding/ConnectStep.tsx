@@ -24,8 +24,8 @@ const ConnectStep: React.FC<Props> = (props: Props) => {
   return (
     <Step>
       <StepHeader>
-        <StepIcon inactive={!props.active} />
-        <StepTitle inactive={!props.active}>Connect your wallet</StepTitle>
+        <StepIcon checked={!!address} />
+        <StepTitle>Connect your wallet</StepTitle>
       </StepHeader>
       {!address && (
         <StepBody>

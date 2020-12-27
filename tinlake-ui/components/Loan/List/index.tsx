@@ -8,11 +8,25 @@ import NumberDisplay from '../../../components/NumberDisplay'
 import { SortableLoan } from '../../../ducks/loans'
 import { hexToInt } from '../../../utils/etherscanLinkGenerator'
 import ChevronRight from '../../ChevronRight'
+import { dateToYMD } from '../../../utils/date'
 
 interface Props extends WithRouterProps {
   loans: SortableLoan[]
   userAddress: string
 }
+
+import styled from 'styled-components'
+const StatusLabel = styled.div<{ type: 'info' | 'success' | 'warning' }>`
+  background: ${(props) => (props.type === 'success' ? 'green' : props.type === 'warning' ? '#fcba59' : '#aaa')};
+  opacity: 0.8;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #fff;
+  font-weight: bold;
+  width: 100px;
+  text-align: center;
+`
 
 class LoanList extends React.Component<Props> {
   clickRow = ({ datum }: { datum?: SortableLoan; index?: number }) => {
@@ -56,18 +70,18 @@ class LoanList extends React.Component<Props> {
                 primary: true,
                 property: 'tokenId',
                 align: 'start',
-                size: '160px',
+                size: '440px',
                 render: (l: SortableLoan) => (
-                  <Box style={{ maxWidth: '150px' }}>
+                  <Box style={{ maxWidth: '200px' }}>
                     <DisplayField as={'span'} value={hexToInt(bnToHex(l.tokenId).toString())} />
                   </Box>
                 ),
               },
               {
-                header: 'Status',
-                property: 'status',
+                header: 'Maturity Date',
+                property: 'maturityDate',
                 align: 'end',
-                render: (l: SortableLoan) => l.status,
+                render: (l: SortableLoan) => (l.maturityDate && l.maturityDate > 0 ? dateToYMD(l.maturityDate) : '-'),
               },
               {
                 header: 'Amount (DAI)',
@@ -91,6 +105,15 @@ class LoanList extends React.Component<Props> {
                   ) : (
                     <NumberDisplay suffix=" %" precision={2} value={feeToInterestRate(l.interestRate)} />
                   ),
+              },
+              {
+                header: 'Status',
+                property: 'status',
+                align: 'start',
+                size: '110px',
+                render: (l: SortableLoan) => (
+                  <StatusLabel type={l.status === 'closed' ? 'success' : 'info'}>{l.status}</StatusLabel>
+                ),
               },
               {
                 header: '',

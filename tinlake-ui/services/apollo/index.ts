@@ -245,6 +245,7 @@ class Apollo {
               repaysAggregatedAmount
               nftId
               nftRegistry
+              maturityDate
             }
           }
         }
@@ -335,6 +336,7 @@ function toTinlakeLoans(loans: any[]): { data: Loan[] } {
       threshold: loan.threshold ? new BN(loan.threshold) : new BN(0),
       price: loan.price || new BN(0),
       status: getLoanStatus(loan),
+      maturityDate: loan.maturityDate,
     }
     tinlakeLoans.push(tinlakeLoan)
   })

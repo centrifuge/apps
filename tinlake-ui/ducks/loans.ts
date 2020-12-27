@@ -96,6 +96,7 @@ export function loadLoans(tinlake: any): ThunkAction<Promise<void>, LoansState, 
         debtNum: parseFloat(l.debt.toString()),
         principalNum: parseFloat(l.principal.toString()),
         interestRateNum: parseFloat(l.interestRate.toString()),
+        maturityDate: (l as any).maturityDate,
       }))
 
       dispatch({ loans, type: RECEIVE })

@@ -24,6 +24,7 @@ export type Loan = {
   proxyOwner?: string
   riskGroup?: number
   scoreCard?: ScoreCard
+  maturityDate?: number
 }
 
 export type Tranche = {

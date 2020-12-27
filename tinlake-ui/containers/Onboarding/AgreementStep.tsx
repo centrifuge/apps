@@ -27,7 +27,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
   return (
     <Step>
       <StepHeader>
-        <StepIcon inactive={!props.active} />
+        <StepIcon inactive={!props.active} checked={props.agreementStatus === 'countersigned'} />
         <StepTitle inactive={!props.active}>
           {props.agreementStatus === 'none'
             ? 'Sign the Subscription Agreement'
