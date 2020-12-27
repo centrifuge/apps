@@ -32,6 +32,8 @@ export interface AssetData {
   day: number
   assetValue: number
   reserve: number
+  seniorTokenPrice: number
+  juniorTokenPrice: number
 }
 
 // Actions
@@ -112,7 +114,6 @@ export function loadAssetData(tinlake: any): ThunkAction<Promise<void>, LoansSta
     const root = tinlake.contractAddresses['ROOT_CONTRACT']
 
     const assetData = await Apollo.getAssetData(root)
-    console.log({ assetData })
     dispatch({ data: assetData, type: RECEIVE_ASSET_DATA })
   }
 }

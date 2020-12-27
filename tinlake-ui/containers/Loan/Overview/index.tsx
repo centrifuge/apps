@@ -10,7 +10,7 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { toPrecision } from '../../../utils/toPrecision'
 import MaxReserveForm from './MaxReserveForm'
 import { Sidenote } from './styles'
-import { AreaChart, Area, Tooltip, XAxis, ResponsiveContainer } from 'recharts'
+import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts'
 import { AssetData, loadAssetData } from '../../../ducks/loans'
 import { dateToYMD, dateToYMDShort } from '../../../utils/date'
 

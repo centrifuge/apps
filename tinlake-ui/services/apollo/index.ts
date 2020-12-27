@@ -275,6 +275,8 @@ class Apollo {
           }
             assetValue
             reserve
+            seniorTokenPrice
+            juniorTokenPrice
           }
         }
         `,
@@ -290,6 +292,8 @@ class Apollo {
         day: Number(item.day.id),
         assetValue: parseFloat(new BN(item.assetValue).div(UintBase).toString()),
         reserve: parseFloat(new BN(item.reserve).div(UintBase).toString()),
+        seniorTokenPrice: parseFloat(new BN(item.seniorTokenPrice).div(UintBase).toString()) / 10 ** 9,
+        juniorTokenPrice: parseFloat(new BN(item.juniorTokenPrice).div(UintBase).toString()) / 10 ** 9,
       }
     })
 
