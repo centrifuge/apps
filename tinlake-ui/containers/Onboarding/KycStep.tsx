@@ -1,7 +1,6 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, CheckBox, Paragraph } from 'grommet'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
 import { Pool } from '../../config'
 import { OnboardingState } from '../../ducks/onboarding'
 import { Step, StepHeader, StepIcon, StepTitle, StepBody, FormFieldWithoutBorder } from './styles'
@@ -9,28 +8,28 @@ import { Step, StepHeader, StepIcon, StepTitle, StepBody, FormFieldWithoutBorder
 interface Props {
   activePool: Pool
   tinlake: ITinlake
+  active: boolean
+  onboarding: OnboardingState
+  kycStatus: 'none' | 'created' | 'verified'
 }
 
-const KycStep: React.FC<Props> = () => {
-  const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
-  const kycStatus = onboarding.data?.kyc?.verified ? 'verified' : onboarding.data?.kyc?.created ? 'created' : 'none'
-
+const KycStep: React.FC<Props> = (props: Props) => {
   const [checked, setChecked] = React.useState(false)
   const [error, setError] = React.useState('')
 
   return (
     <Step>
       <StepHeader>
-        <StepIcon inactive={kycStatus !== 'none'} />
-        <StepTitle inactive={kycStatus !== 'none'}>
-          {kycStatus === 'none'
+        <StepIcon inactive={!props.active} />
+        <StepTitle inactive={!props.active}>
+          {props.kycStatus === 'none'
             ? 'Verify KYC information'
-            : kycStatus === 'verified'
+            : props.kycStatus === 'verified'
             ? 'KYC status: verified'
             : 'KYC status: awaiting verification'}
         </StepTitle>
       </StepHeader>
-      {kycStatus === 'none' && (
+      {props.active && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             Tinlake has integrated Securitize.io’s automated KYC process for investor onboarding. This is a one time
@@ -52,7 +51,7 @@ const KycStep: React.FC<Props> = () => {
             <Button
               primary
               label={`Start KYC now`}
-              href={onboarding.data?.kyc?.url}
+              href={props.onboarding.data?.kyc?.url}
               onClick={(event: any) => {
                 if (!checked) {
                   event.preventDefault()
@@ -65,7 +64,7 @@ const KycStep: React.FC<Props> = () => {
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {kycStatus !== 'none' && <StepBody inactive>&nbsp;</StepBody>}
+      {!props.active && <StepBody inactive>&nbsp;</StepBody>}
     </Step>
   )
 }

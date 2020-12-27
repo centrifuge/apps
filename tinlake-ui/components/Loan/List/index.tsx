@@ -28,7 +28,14 @@ class LoanList extends React.Component<Props> {
   render() {
     const { loans } = this.props
     return (
-      <Box elevation="small" round="xsmall" pad={{ top: 'xsmall' }} margin={{ bottom: 'medium' }} background="white">
+      <Box
+        width="100%"
+        elevation="small"
+        round="xsmall"
+        pad={{ top: 'xsmall' }}
+        margin={{ bottom: 'medium' }}
+        background="white"
+      >
         {loans.length > 0 && (
           <DataTable
             style={{ tableLayout: 'auto' }}
@@ -38,12 +45,18 @@ class LoanList extends React.Component<Props> {
             sortable
             onClickRow={this.clickRow as any}
             columns={[
-              { header: <HeaderCell text={'Asset ID'}></HeaderCell>, property: 'loanId', align: 'end' },
+              {
+                header: 'Asset ID',
+                property: 'loanId',
+                align: 'center',
+                size: '140px',
+              },
               {
                 header: 'NFT ID',
                 primary: true,
                 property: 'tokenId',
-                align: 'end',
+                align: 'start',
+                size: '160px',
                 render: (l: SortableLoan) => (
                   <Box style={{ maxWidth: '150px' }}>
                     <DisplayField as={'span'} value={hexToInt(bnToHex(l.tokenId).toString())} />

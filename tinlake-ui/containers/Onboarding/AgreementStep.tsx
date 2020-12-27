@@ -3,7 +3,6 @@ import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, CheckBox, Paragraph } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
 import config, { Pool } from '../../config'
 import { OnboardingState } from '../../ducks/onboarding'
 import { Step, StepHeader, StepIcon, StepTitle, StepBody, FormFieldWithoutBorder } from './styles'
@@ -11,19 +10,14 @@ import { Step, StepHeader, StepIcon, StepTitle, StepBody, FormFieldWithoutBorder
 interface Props {
   activePool: Pool
   tinlake: ITinlake
+  active: boolean
   tranche?: 'senior' | 'junior'
+  onboarding: OnboardingState
+  agreement: AgreementsStatus | undefined
+  agreementStatus: 'none' | 'signed' | 'countersigned'
 }
 
-const DefaultTranche = 'senior'
-
 const KycStep: React.FC<Props> = (props: Props) => {
-  const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
-  const kycStatus = onboarding.data?.kyc?.verified ? 'verified' : onboarding.data?.kyc?.created ? 'created' : 'none'
-  const agreement = onboarding.data?.agreements.filter(
-    (agreement: AgreementsStatus) => agreement.tranche === (props.tranche || DefaultTranche)
-  )[0]
-  const agreementStatus = agreement?.counterSigned ? 'countersigned' : agreement?.signed ? 'signed' : 'none'
-
   const [checked, setChecked] = React.useState(false)
   const [error, setError] = React.useState('')
 
@@ -33,31 +27,31 @@ const KycStep: React.FC<Props> = (props: Props) => {
   return (
     <Step>
       <StepHeader>
-        <StepIcon inactive={kycStatus === 'none' || agreementStatus === 'countersigned'} />
-        <StepTitle inactive={kycStatus === 'none' || agreementStatus === 'countersigned'}>
-          {agreementStatus === 'none'
+        <StepIcon inactive={!props.active} />
+        <StepTitle inactive={!props.active}>
+          {props.agreementStatus === 'none'
             ? 'Sign the Subscription Agreement'
-            : agreementStatus === 'countersigned'
+            : props.agreementStatus === 'countersigned'
             ? 'Subscription Agreement signed'
             : 'Subscription Agreement awaiting counter-signature'}
         </StepTitle>
       </StepHeader>
-      {kycStatus !== 'none' && agreementStatus === 'none' && agreement && !session && (
+      {props.active && props.agreementStatus === 'none' && props.agreement && !session && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '70%' }}>
-            To complete the next step of signing the {agreement.name} for {props.activePool?.metadata.name}, you can
-            sign in again with your Securitize iD.
+            To complete the next step of signing the {props.agreement.name} for {props.activePool?.metadata.name}, you
+            can sign in again with your Securitize iD.
           </Paragraph>
           <div>
-            <Button primary label={'Sign in with Securitize'} href={onboarding.data?.kyc?.url} fill={false} />
+            <Button primary label={'Sign in with Securitize'} href={props.onboarding.data?.kyc?.url} fill={false} />
           </div>
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {kycStatus !== 'none' && agreementStatus === 'none' && agreement && session && (
+      {props.active && props.agreementStatus === 'none' && props.agreement && session && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
-            You can continue onboarding by signing the {agreement.name} for {props.activePool.metadata.name}.
+            You can continue onboarding by signing the {props.agreement.name} for {props.activePool.metadata.name}.
           </Paragraph>
           <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
             <FormFieldWithoutBorder error={error}>
@@ -71,9 +65,9 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <div>
             <Button
               primary
-              label={`Sign ${agreement?.name}`}
+              label={`Sign ${props.agreement?.name}`}
               href={`${config.onboardAPIHost}pools/${(props.activePool as Pool).addresses.ROOT_CONTRACT}/agreements/${
-                agreement?.id
+                props.agreement?.id
               }/redirect?session=${session}`}
               onClick={(event: any) => {
                 if (!checked) {
@@ -87,14 +81,14 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {kycStatus !== 'none' && agreementStatus === 'signed' && agreement && (
+      {props.active && props.agreementStatus === 'signed' && props.agreement && (
         <StepBody>
           <Box pad={{ vertical: 'medium' }}>
-            The issuer needs to counter-sign the {agreement.name} of {props.activePool.metadata.name}.
+            The issuer needs to counter-sign the {props.agreement.name} of {props.activePool.metadata.name}.
           </Box>
         </StepBody>
       )}
-      {(kycStatus === 'none' || agreementStatus === 'countersigned') && <StepBody inactive>&nbsp;</StepBody>}
+      {!props.active && <StepBody inactive>&nbsp;</StepBody>}
     </Step>
   )
 }
