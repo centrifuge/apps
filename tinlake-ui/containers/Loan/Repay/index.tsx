@@ -113,7 +113,7 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
           limitLabel={useBalanceAsMax ? 'Your balance' : 'Outstanding'}
           error={error}
           onChange={onChange}
-          disabled={!props.poolConfig.contractConfig?.partialRepay || status === 'unconfirmed' || status === 'pending'}
+          disabled={status === 'unconfirmed' || status === 'pending'}
         />
       </Box>
       <Box align="start">
