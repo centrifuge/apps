@@ -15,6 +15,8 @@ import { AssetData, loadAssetData } from '../../../ducks/loans'
 import { dateToYMD, dateToYMDShort } from '../../../utils/date'
 
 import styled from 'styled-components'
+import BN from 'bn.js'
+import { UintBase } from '../../../utils/ratios'
 
 const ChartTooltip = styled.div`
   padding: 12px 16px;
@@ -110,6 +112,15 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
   const isAdmin = props.auth?.permissions && (props.auth?.permissions as PermissionsV3).canSetMaxReserve
 
   const [showMaxReserveForm, setShowMaxReserveForm] = React.useState(false)
+
+  const assetDataWithToday = [
+    ...assetData,
+    {
+      reserve: parseFloat((poolData?.reserve || new BN(0)).div(UintBase).toString()),
+      assetValue: parseFloat((poolData?.netAssetValue || new BN(0)).div(UintBase).toString()),
+      day: Date.now() / 1000,
+    },
+  ]
 
   // isBorrower || isAdmin
   return (
@@ -215,11 +226,11 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
               Asset Value &amp; Reserve
             </Heading>
             <Heading level="5" margin={{ top: 'medium', right: 'medium' }} color="#9f9f9f">
-              {assetData.length > 0 && dateToYMDShort(assetData[0].day)} - present
+              {assetDataWithToday.length > 0 && dateToYMDShort(assetDataWithToday[0].day)} - present
             </Heading>
           </Box>
           <ResponsiveContainer>
-            <AreaChart data={assetData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+            <AreaChart data={assetDataWithToday} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
