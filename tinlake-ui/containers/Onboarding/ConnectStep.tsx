@@ -9,7 +9,6 @@ import { ensureAuthed } from '../../ducks/auth'
 interface Props {
   activePool: Pool
   tinlake: ITinlake
-  active: boolean
 }
 
 const ConnectStep: React.FC<Props> = () => {

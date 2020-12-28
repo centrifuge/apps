@@ -23,12 +23,9 @@ const KycStep: React.FC<Props> = (props: Props) => {
       <StepHeader>
         {props.kycStatus === 'created' && <Spinner />}
         {props.kycStatus !== 'created' && (
-          <StepIcon
-            inactive={!props.active && props.kycStatus === 'verified'}
-            checked={props.kycStatus === 'verified'}
-          />
+          <StepIcon inactive={!props.active} checked={props.kycStatus === 'verified'} />
         )}
-        <StepTitle inactive={!props.active && props.kycStatus === 'verified'}>
+        <StepTitle inactive={!props.active}>
           {props.kycStatus === 'none'
             ? 'Verify KYC information'
             : props.kycStatus === 'verified'
@@ -36,7 +33,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
             : 'KYC status: awaiting verification'}
         </StepTitle>
       </StepHeader>
-      {props.active && (
+      {props.active && props.kycStatus === 'none' && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             Tinlake has integrated Securitize.io’s automated KYC process for investor onboarding. This is a one time
@@ -71,7 +68,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {!props.active && <StepBody inactive>&nbsp;</StepBody>}
+      <StepBody inactive={!props.active}>&nbsp;</StepBody>
     </Step>
   )
 }
