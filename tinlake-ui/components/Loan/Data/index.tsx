@@ -9,6 +9,7 @@ import { AuthState } from '../../../ducks/auth'
 import LoanBorrow from '../../../containers/Loan/Borrow'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { dateToYMD } from '../../../utils/date'
+import LoanLabel from '../Label'
 
 interface Props {
   loan: Loan
@@ -33,15 +34,31 @@ const LoanData: React.FC<Props> = (props: Props) => {
                 <TableBody>
                   <TableRow>
                     <TableCell scope="row">Status</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>{status}</TableCell>
+                    <TableCell style={{ textAlign: 'end', float: 'right' }}>
+                      <LoanLabel loan={props.loan} />
+                    </TableCell>
                   </TableRow>
-                  {props.loan.nft && (props.loan.nft as any).maturityDate && (
-                    <TableRow>
-                      <TableCell scope="row">Maturity date</TableCell>
-                      <TableCell style={{ textAlign: 'end' }}>
-                        {dateToYMD((props.loan.nft as any).maturityDate)}
-                      </TableCell>
-                    </TableRow>
+                  {props.loan.nft && (
+                    <>
+                      {(props.loan.nft as any).maturityDate && (
+                        <TableRow>
+                          <TableCell scope="row">Maturity date</TableCell>
+                          <TableCell style={{ textAlign: 'end' }}>
+                            {dateToYMD((props.loan.nft as any).maturityDate)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                      <TableRow>
+                        <TableCell scope="row">Risk group</TableCell>
+                        <TableCell style={{ textAlign: 'end' }}>{(props.loan as any).riskGroup}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell scope="row">Financing fee</TableCell>
+                        <TableCell style={{ textAlign: 'end' }}>
+                          {toPrecision(feeToInterestRate(interestRate), 2)} %
+                        </TableCell>
+                      </TableRow>
+                    </>
                   )}
                 </TableBody>
               </Table>

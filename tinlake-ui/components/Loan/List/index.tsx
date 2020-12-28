@@ -9,34 +9,13 @@ import { SortableLoan } from '../../../ducks/loans'
 import { hexToInt } from '../../../utils/etherscanLinkGenerator'
 import ChevronRight from '../../ChevronRight'
 import { dateToYMD, daysBetween } from '../../../utils/date'
+import BN from 'bn.js'
+import LoanLabel from '../Label'
 
 interface Props extends WithRouterProps {
   loans: SortableLoan[]
   userAddress: string
 }
-
-import styled from 'styled-components'
-import BN from 'bn.js'
-type LabelType = 'plain' | 'info' | 'success' | 'warning'
-const StatusLabel = styled.div<{ type: LabelType }>`
-  background: ${(props) =>
-    props.type === 'success'
-      ? 'green'
-      : props.type === 'warning'
-      ? '#fcba59'
-      : props.type === 'plain'
-      ? 'transparent'
-      : '#aaa'};
-  border: ${(props) => (props.type === 'plain' ? '1px solid #ccc' : '1px solid transparent')};
-  opacity: 0.8;
-  border-radius: 8px;
-  padding: 4px 8px;
-  font-size: 12px;
-  color: ${(props) => (props.type === 'plain' ? '#888' : '#fff')};
-  font-weight: bold;
-  width: 120px;
-  text-align: center;
-`
 
 class LoanList extends React.Component<Props> {
   clickRow = ({ datum }: { datum?: SortableLoan; index?: number }) => {
@@ -47,25 +26,6 @@ class LoanList extends React.Component<Props> {
       `/pool/${root}/${slug}/assets/asset?assetId=${datum!.loanId}`,
       { shallow: true }
     )
-  }
-
-  getLabelType = (l: SortableLoan): LabelType => {
-    const days = daysBetween(new Date().getTime() / 1000, Number(l.maturityDate))
-    if (l.status === 'ongoing' && days <= 0) return 'warning'
-    if (l.status === 'closed') return 'success'
-    if (l.status === 'NFT locked') return 'plain'
-    return 'info'
-  }
-
-  getLabelText = (l: SortableLoan) => {
-    const days = daysBetween(new Date().getTime() / 1000, Number(l.maturityDate))
-    if (l.status === 'ongoing' && days === 0) return 'due today'
-    else if (l.status === 'ongoing' && days === 1) return 'due tomorrow'
-    else if (l.status === 'ongoing' && days > 1 && days <= 7)
-      return `due in ${daysBetween(new Date().getTime() / 1000, Number(l.maturityDate))} days`
-    else if (l.status === 'ongoing' && days < 0)
-      return `due ${daysBetween(new Date().getTime() / 1000, Number(l.maturityDate))} days ago`
-    return l.status
   }
 
   render() {
@@ -147,9 +107,7 @@ class LoanList extends React.Component<Props> {
                 property: 'status',
                 align: 'start',
                 size: '130px',
-                render: (l: SortableLoan) => (
-                  <StatusLabel type={this.getLabelType(l)}>{this.getLabelText(l)}</StatusLabel>
-                ),
+                render: (l: SortableLoan) => <LoanLabel loan={l} />,
               },
               {
                 header: '',
