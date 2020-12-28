@@ -81,3 +81,10 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, PoolsSta
     dispatch({ data: poolsData, type: RECEIVE_POOLS })
   }
 }
+
+export function loadPoolsDailyData(): ThunkAction<Promise<void>, PoolsState, undefined, Action> {
+  return async (dispatch) => {
+    const poolsDailyData = await Apollo.getPoolsDailyData()
+    console.log({ poolsDailyData })
+  }
+}

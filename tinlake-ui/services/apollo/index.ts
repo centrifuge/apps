@@ -317,6 +317,37 @@ class Apollo {
     return assetData
   }
 
+  async getPoolsDailyData() {
+    let result
+    try {
+      result = await this.client.query({
+        query: gql`
+          {
+            days {
+              id
+              assetValue
+              reserve
+            }
+          }
+        `,
+      })
+    } catch (err) {
+      console.error(`error occured while fetching pools daily data from apollo ${err}`)
+      return {
+        data: [],
+      }
+    }
+    const poolsDailyData = result.data.days.map((item: any) => {
+      return {
+        day: Number(item.id),
+        assetValue: parseFloat(new BN(item.assetValue).div(UintBase).toString()),
+        reserve: parseFloat(new BN(item.reserve).div(UintBase).toString()),
+      }
+    })
+
+    return poolsDailyData
+  }
+
   async getProxies(user: string) {
     let result
     try {
