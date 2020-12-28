@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import config from '../config'
 import { User } from '../repos/user.repo'
 import { DocusignAuthService } from './docusign-auth.service'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
@@ -31,7 +32,7 @@ export class DocusignService {
       status: 'sent',
     }
 
-    const url = `${process.env.DOCUSIGN_REST_API_HOST}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes?change_routing_order=true`
+    const url = `${config.docusign.restApiHost}/restapi/v2.1/accounts/${config.docusign.accountId}/envelopes?change_routing_order=true`
 
     const accessToken = await this.docusignAuthService.getAccessToken()
     const response = await fetch(url, {
@@ -53,7 +54,7 @@ export class DocusignService {
   }
 
   async getAgreementLink(envelopeId: string, user: User, returnUrl: string): Promise<string> {
-    const url = `${process.env.DOCUSIGN_REST_API_HOST}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes/${envelopeId}/views/recipient`
+    const url = `${config.docusign.restApiHost}/restapi/v2.1/accounts/${config.docusign.accountId}/envelopes/${envelopeId}/views/recipient`
 
     // TODO: email and userName here should be taken from Securitize
     const recipientViewRequest = {
@@ -85,7 +86,7 @@ export class DocusignService {
   }
 
   async getEnvelopeStatus(envelopeId: string): Promise<AgreementStatus> {
-    const url = `${process.env.DOCUSIGN_REST_API_HOST}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes/${envelopeId}/recipients`
+    const url = `${config.docusign.restApiHost}/restapi/v2.1/accounts/${config.docusign.accountId}/envelopes/${envelopeId}/recipients`
 
     const accessToken = await this.docusignAuthService.getAccessToken()
     const response = await fetch(url, {

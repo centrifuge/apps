@@ -64,7 +64,6 @@ export interface Pool extends BasePool {
   contractConfig?: {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
     SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
-    partialRepay?: boolean
   }
 }
 
@@ -125,7 +124,6 @@ const contractConfigSchema = yup.object().shape({
   SENIOR_OPERATOR: yup
     .mixed<'PROPORTIONAL_OPERATOR' | 'ALLOWANCE_OPERATOR'>()
     .oneOf(['PROPORTIONAL_OPERATOR', 'ALLOWANCE_OPERATOR']),
-  partialRepay: yup.bool(),
 })
 
 const securitizeDataSchema = yup.object().shape({

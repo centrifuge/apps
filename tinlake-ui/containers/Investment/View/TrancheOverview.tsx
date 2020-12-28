@@ -5,7 +5,9 @@ import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
-import { Pool } from '../../../config'
+import OnboardModal from '../../../components/OnboardModal'
+import config, { Pool } from '../../../config'
+import { ensureAuthed } from '../../../ducks/auth'
 import { loadPool, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
@@ -50,6 +52,10 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const [hasPendingCollection, setHasPendingCollection] = React.useState(false)
 
   const dispatch = useDispatch()
+
+  const connect = () => {
+    dispatch(ensureAuthed())
+  }
 
   // V3 TODO: this should probably move to actions and expose a single TrancheData object (or to a duck?)
   const updateTrancheData = async () => {
@@ -147,7 +153,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             </TableRow>
           </TableBody>
         </Table>
-        {trancheData?.inMemberlist === true && (
+        {address && trancheData?.inMemberlist === true && (
           <>
             {card === 'home' && (
               <>
@@ -212,14 +218,32 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             )}
           </>
         )}
-        {trancheData?.inMemberlist === false && (
+
+        {address && props.pool && trancheData?.inMemberlist === false && (
+          <Info>
+            {config.featureFlagNewOnboarding && <OnboardModal pool={props.pool} card tranche={props.tranche} />}
+            {!config.featureFlagNewOnboarding && (
+              <>
+                <Heading level="6" margin={{ bottom: 'xsmall' }}>
+                  Interested in investing?
+                </Heading>
+                If you want to learn more get started with your onboarding process.
+                <Box justify="end" margin={{ top: 'small' }}>
+                  <InvestAction pool={props.pool} />
+                </Box>
+              </>
+            )}
+          </Info>
+        )}
+
+        {!address && (
           <Info>
             <Heading level="6" margin={{ bottom: 'xsmall' }}>
               Interested in investing?
             </Heading>
-            If you want to learn more get started with your onboarding process.
-            <Box justify="end" margin={{ top: 'small' }}>
-              <InvestAction pool={props.pool} />
+            Connect your wallet to start the process.
+            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+              <Button primary label="Connect" onClick={connect} />
             </Box>
           </Info>
         )}

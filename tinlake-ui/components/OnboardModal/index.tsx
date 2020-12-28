@@ -1,21 +1,25 @@
 import { Spinner } from '@centrifuge/axis-spinner'
-import { AddressStatus } from '@centrifuge/onboard-api/src/controllers/types'
-import { Box, Button, Paragraph } from 'grommet'
+import { AgreementsStatus, Tranche } from '@centrifuge/onboard-api/src/controllers/types'
+import { Box, Button, CheckBox, Heading, Paragraph } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import config, { Pool, UpcomingPool } from '../../config'
 import { ensureAuthed } from '../../ducks/auth'
-import { PoolData as PoolDataV3, PoolState } from '../../ducks/pool'
+import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
 import { PoolsState } from '../../ducks/pools'
 import { PoolLink } from '../PoolLink'
 import { FormModal, InvestmentSteps } from './styles'
 
 interface Props {
-  anchor?: React.ReactNode
   pool: Pool | UpcomingPool
+  card?: boolean
+  tranche?: Tranche
 }
 
+const DefaultTranche: Tranche = 'senior'
+
+// TODO: the various conditions should be refactored to be more organised
 const OnboardModal: React.FC<Props> = (props: Props) => {
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
 
@@ -25,12 +29,8 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
   const router = useRouter()
   const dispatch = useDispatch()
 
+  const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
   const pools = useSelector<any, PoolsState>((state) => state.pools)
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolDataV3 | undefined
-
-  const [status, setStatus] = React.useState<AddressStatus | undefined>(undefined)
-  const [agreementLink, setAgreementLink] = React.useState<string | undefined>(undefined)
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
@@ -39,39 +39,32 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
     setModalIsOpen(false) // Hide this modal and focus on the modal for connecting your wallet
   }
 
-  const getOnboardingStatus = async () => {
-    if (address && props.pool && 'addresses' in props.pool) {
-      try {
-        const req = await fetch(
-          `${config.onboardAPIHost}pools/${props.pool?.addresses?.ROOT_CONTRACT}/addresses/${address}`
-        )
-        const body = await req.json()
-        setStatus(body)
-
-        if (body.agreements.length > 0 && 'session' in router.query) {
-          const req = await fetch(
-            `${config.onboardAPIHost}pools/${props.pool?.addresses?.ROOT_CONTRACT}/agreements/${body.agreements[0].id}/link?session=${router.query.session}`
-          )
-          const link = await req.text()
-          setAgreementLink(link)
-        }
-      } catch (e) {
-        console.error(e)
-      }
-    }
-  }
-
   const [addressIsLoading, setAddressIsLoading] = React.useState(true)
 
   React.useEffect(() => {
     if (address) {
       setAddressIsLoading(false)
-      getOnboardingStatus()
+      dispatch(loadOnboardingStatus(props.pool))
     }
-    if (address && !modalIsOpen && 'onb' in router.query && router.query.onb === '1') setModalIsOpen(true)
+
+    if (
+      address &&
+      !modalIsOpen &&
+      'onb' in router.query &&
+      router.query.onb === '1' &&
+      ('tranche' in router.query ? props.tranche === router.query.tranche : props.tranche === DefaultTranche)
+    )
+      setModalIsOpen(true)
   }, [address])
 
   const AddressLoadingDelay = 3000 // milliseconds
+
+  const session = 'session' in router.query ? router.query.session : '' // TODO: check this on the API and display message if it has expired
+  const kycStatus = onboarding.data?.kyc?.verified ? 'verified' : onboarding.data?.kyc?.created ? 'created' : 'none'
+  const agreement = onboarding.data?.agreements.filter((agreement: AgreementsStatus) =>
+    props.tranche ? agreement.tranche === props.tranche : DefaultTranche
+  )[0]
+  const agreementStatus = agreement?.counterSigned ? 'countersigned' : agreement?.signed ? 'signed' : 'none'
 
   React.useEffect(() => {
     setTimeout(() => {
@@ -80,34 +73,105 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
   }, [])
 
   React.useEffect(() => {
-    if (!modalIsOpen && 'onb' in router.query && router.query.onb === '1') {
+    if (
+      !modalIsOpen &&
+      'onb' in router.query &&
+      router.query.onb === '1' &&
+      ('tranche' in router.query ? props.tranche === router.query.tranche : props.tranche === DefaultTranche)
+    ) {
       setModalIsOpen(true)
     }
   }, [router.query])
 
   React.useEffect(() => {
-    getOnboardingStatus()
+    dispatch(loadOnboardingStatus(props.pool))
   }, [pools])
+
+  const [checked, setChecked] = React.useState(false)
 
   return (
     <>
-      {(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
+      {!props.card && kycStatus !== 'none' && (
         <Box margin={{ left: 'auto' }}>
           <PoolLink href={'/investments'}>
             <Button primary label="Invest" fill={false} />
           </PoolLink>
         </Box>
       )}
-      {!(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
+
+      {!props.card && kycStatus === 'none' && (
         <Box margin={{ left: 'auto' }}>
           <Button primary label="Get started" fill={false} onClick={onOpen} />
         </Box>
       )}
 
+      {props.card && kycStatus === 'none' && (
+        <>
+          <Heading level="6" margin={{ bottom: 'xsmall' }}>
+            Interested in investing?
+          </Heading>
+          If you want to learn more, get started with your onboarding process.
+          <Box direction="row" justify="end" margin={{ top: 'small' }}>
+            <Button primary label="Get started" fill={false} onClick={onOpen} />
+          </Box>
+        </>
+      )}
+
+      {props.card && kycStatus !== 'none' && agreementStatus === 'none' && (
+        <>
+          <Heading level="6" margin={{ bottom: 'xsmall' }}>
+            Sign up for this pool
+          </Heading>
+          {kycStatus === 'created' && (
+            <>
+              Your KYC status is pending, you can already continue onboarding as an investor by signing the{' '}
+              {agreement?.name} of {props.pool.metadata.name}.
+            </>
+          )}
+          {kycStatus === 'verified' && (
+            <>
+              {/* TODO: if non-US, then link this button to the Docusign doc directly */}
+              You can continue onboarding as an investor by signing the {agreement?.name} of {props.pool.metadata.name}.
+            </>
+          )}
+          <Box direction="row" justify="end" margin={{ top: 'small' }}>
+            <Button primary label={`Sign ${agreement?.name}`} fill={false} onClick={onOpen} />
+          </Box>
+        </>
+      )}
+
+      {props.card && kycStatus === 'created' && agreementStatus === 'countersigned' && (
+        <>
+          <Heading level="6" margin={{ bottom: 'xsmall' }}>
+            Awaiting verification
+          </Heading>
+          Your KYC status is pending.
+        </>
+      )}
+
+      {props.card && agreementStatus === 'signed' && (
+        <>
+          <Heading level="6" margin={{ bottom: 'xsmall' }}>
+            Awaiting counter-signature
+          </Heading>
+          The issuer needs to counter-sign the {agreement?.name} of {props.pool.metadata.name}.
+        </>
+      )}
+
+      {props.card && kycStatus === 'verified' && agreementStatus === 'countersigned' && (
+        <>
+          <Heading level="6" margin={{ bottom: 'xsmall' }}>
+            Awaiting whitelisting
+          </Heading>
+          You have completed all steps required for investing in this pool and we are currently processing your request
+          and whitelisting you as an investor.
+        </>
+      )}
+
       <FormModal
         opened={modalIsOpen}
         title={
-          !status?.kyc?.created
+          kycStatus === 'none'
             ? 'First time investor? Start your KYC process now.'
             : 'Continue onboarding as an investor'
         }
@@ -127,10 +191,11 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
               </Box>
             )}
 
-            {status?.kyc?.url && !status.kyc?.created && (
+            {kycStatus === 'none' && (
               <>
+                <InvestmentSteps src={'/static/onboarding/1.svg'} alt="Investment steps" />
                 <Paragraph
-                  margin={{ top: 'small', bottom: 'small', left: 'auto', right: 'auto' }}
+                  margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}
                   style={{ textAlign: 'center', width: '100%' }}
                 >
                   Tinlake has integrated Securitize.io’s automated KYC process for investor onboarding. This is a one
@@ -140,108 +205,121 @@ const OnboardModal: React.FC<Props> = (props: Props) => {
                   agreement with the pool’s issuer also provided through the Securitize dashboard and signed through
                   DocuSign. Once the issuer has countersigned, you are ready to invest.
                 </Paragraph>
-                <InvestmentSteps src={'/static/onboarding/1.svg'} alt="Investment steps" />
+                <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
+                  <CheckBox
+                    checked={checked}
+                    label="I accept the data privacy policy and that data is shared with Centrifuge and the issuer."
+                    onChange={(event) => setChecked(event.target.checked)}
+                  />
+                </Box>
                 <div>
-                  <Button primary label={`Start KYC now`} href={status.kyc?.url} fill={false} />
+                  <Button
+                    primary
+                    label={`Start KYC now`}
+                    href={onboarding.data?.kyc?.url}
+                    disabled={!checked}
+                    fill={false}
+                  />
                 </div>
               </>
             )}
 
-            {status?.kyc?.url &&
-              status.kyc?.created &&
-              !status.kyc?.verified &&
-              !status.agreements[0]?.signed &&
-              agreementLink && (
-                <>
-                  <Paragraph
-                    margin={{ top: 'small', bottom: 'small', left: 'auto', right: 'auto' }}
-                    style={{ textAlign: 'center', width: '80%' }}
-                  >
-                    Your KYC status is pending, you can already continue by signing the Subscription Agreement for{' '}
-                    {props.pool?.metadata.name}.
-                  </Paragraph>
-                  <InvestmentSteps src={'/static/onboarding/2.svg'} alt="Investment steps" />
-                  <div>
-                    <Button primary label={`Sign Subscription Agreement`} href={agreementLink} fill={false} />
-                  </div>
-                </>
-              )}
+            {agreementStatus === 'none' && agreement && session && (
+              <>
+                <Paragraph
+                  margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}
+                  style={{ textAlign: 'center', width: '50%' }}
+                >
+                  {kycStatus === 'verified'
+                    ? 'You have successfully completed KYC verification.'
+                    : 'Your KYC status is pending.'}{' '}
+                  You can continue onboarding by signing the {agreement.name} for {props.pool?.metadata.name}.
+                </Paragraph>
+                {/* <InvestmentSteps src={'/static/onboarding/2.svg'} alt="Investment steps" /> */}
+                <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
+                  <CheckBox
+                    checked={checked}
+                    label="I accept that this is an US offering which is not solicited nor offered in my home country."
+                    onChange={(event) => setChecked(event.target.checked)}
+                  />
+                </Box>
+                <div>
+                  <Button
+                    primary
+                    label={`Sign ${agreement?.name}`}
+                    disabled={!checked}
+                    href={`${config.onboardAPIHost}pools/${(props.pool as Pool).addresses.ROOT_CONTRACT}/agreements/${
+                      agreement?.id
+                    }/redirect?session=${session}`}
+                    fill={false}
+                  />
+                </div>
+              </>
+            )}
 
-            {status?.kyc?.url &&
-              status.kyc?.created &&
-              !status.kyc?.verified &&
-              !status.agreements[0]?.signed &&
-              !agreementLink && (
-                <>
-                  <Paragraph
-                    margin={{ top: 'small', bottom: 'small', left: 'auto', right: 'auto' }}
-                    style={{ textAlign: 'center', width: '80%' }}
-                  >
-                    Your KYC status is pending, you can sign in again with your Securitize iD in order to continue with
-                    the next step.
-                  </Paragraph>
-                  <InvestmentSteps src={'/static/onboarding/2.svg'} alt="Investment steps" />
-                  <div>
-                    <Button primary label={`Sign in with Securitize`} href={status.kyc?.url} fill={false} />
-                  </div>
-                </>
-              )}
+            {kycStatus !== 'none' && agreementStatus === 'none' && agreement && !session && (
+              <>
+                <Paragraph
+                  margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}
+                  style={{ textAlign: 'center', width: '50%' }}
+                >
+                  To complete the next step of signing the {agreement.name} for {props.pool?.metadata.name}, you can
+                  sign in again with your Securitize iD.
+                </Paragraph>
+                {/* <InvestmentSteps src={'/static/onboarding/2.svg'} alt="Investment steps" /> */}
+                <div>
+                  <Button primary label={`Sign in with Securitize`} href={onboarding.data?.kyc?.url} fill={false} />
+                </div>
+              </>
+            )}
 
-            {status?.kyc?.url &&
-              status.agreements.every((agreement) => agreement.signed) &&
-              !status.agreements.every((agreement) => agreement.counterSigned) && (
-                <>
-                  <Paragraph
-                    margin={{ top: 'small', bottom: 'small', left: 'auto', right: 'auto' }}
-                    style={{ textAlign: 'center', width: '80%' }}
-                  >
-                    Your KYC status is pending and you have signed the Subscription Agreement, which is pending a
-                    signature from the issuer of {props.pool?.metadata.name}.
-                  </Paragraph>
-                  <InvestmentSteps src={'/static/onboarding/3.svg'} alt="Investment steps" />
-                  <div>
-                    <Button primary label={`Waiting for issuer's signature`} disabled fill={false} />
-                  </div>
-                </>
-              )}
+            {kycStatus !== 'verified' && agreementStatus === 'signed' && (
+              <>
+                <Paragraph
+                  margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}
+                  style={{ textAlign: 'center', width: '50%' }}
+                >
+                  Your KYC status is pending and you have signed the Subscription Agreement, which is pending a
+                  signature from the issuer of {props.pool?.metadata.name}.
+                </Paragraph>
+                {/* <InvestmentSteps src={'/static/onboarding/3.svg'} alt="Investment steps" /> */}
+                <div>
+                  <Button primary label={`OK`} onClick={onClose} fill={false} />
+                </div>
+              </>
+            )}
 
-            {status?.kyc?.url &&
-              !status.kyc?.verified &&
-              status.agreements.length > 0 &&
-              status.agreements.every((agreement) => agreement.counterSigned) && (
-                <>
-                  <Paragraph
-                    margin={{ top: 'small', bottom: 'small', left: 'auto', right: 'auto' }}
-                    style={{ textAlign: 'center', width: '80%' }}
-                  >
-                    The Subscription Agreement has been signed by you and the issuer of {props.pool?.metadata.name}.
-                    Your KYC status is still pending.
-                  </Paragraph>
-                  <InvestmentSteps src={'/static/onboarding/3.svg'} alt="Investment steps" />
-                  <div>
-                    <Button primary label={`Waiting for KYC verification`} disabled fill={false} />
-                  </div>
-                </>
-              )}
+            {kycStatus !== 'verified' && agreementStatus === 'countersigned' && (
+              <>
+                <Paragraph
+                  margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}
+                  style={{ textAlign: 'center', width: '50%' }}
+                >
+                  The Subscription Agreement has been signed by you and the issuer of {props.pool?.metadata.name}. Your
+                  KYC status is still pending.
+                </Paragraph>
+                {/* <InvestmentSteps src={'/static/onboarding/3.svg'} alt="Investment steps" /> */}
+                <div>
+                  <Button primary label={`OK`} onClick={onClose} fill={false} />
+                </div>
+              </>
+            )}
 
-            {status?.kyc?.url &&
-              status.kyc?.verified &&
-              status.agreements.length > 0 &&
-              status.agreements.every((agreement) => agreement.counterSigned) && (
-                <>
-                  <Paragraph
-                    margin={{ top: 'small', bottom: 'small', left: 'auto', right: 'auto' }}
-                    style={{ textAlign: 'center', width: '80%' }}
-                  >
-                    You have completed onboarding successfuly for {props.pool?.metadata.name} and can now invest.
-                  </Paragraph>
-                  <div>
-                    <PoolLink href={'/investments'}>
-                      <Button primary label="Invest" fill={false} />
-                    </PoolLink>
-                  </div>
-                </>
-              )}
+            {kycStatus === 'verified' && agreementStatus === 'countersigned' && (
+              <>
+                <Paragraph
+                  margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}
+                  style={{ textAlign: 'center', width: '80%' }}
+                >
+                  You have completed onboarding successfuly for {props.pool?.metadata.name} and can now invest.
+                </Paragraph>
+                <div>
+                  <PoolLink href={'/investments'}>
+                    <Button primary label="Invest" fill={false} />
+                  </PoolLink>
+                </div>
+              </>
+            )}
           </Box>
         )}
       </FormModal>

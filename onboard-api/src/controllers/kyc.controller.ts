@@ -1,4 +1,5 @@
 import { BadRequestException, Controller, Get, Param, Query, Res } from '@nestjs/common'
+import config from '../config'
 import { AddressRepo } from '../repos/address.repo'
 import { AgreementRepo } from '../repos/agreement.repo'
 import { KycRepo } from '../repos/kyc.repo'
@@ -20,7 +21,7 @@ export class KycController {
   ) {}
 
   @Get('pools/:poolId/callback/:address/securitize')
-  async securitizeCallback(@Param() params, @Query() query, @Res({ passthrough: true }) res): Promise<any> {
+  async securitizeCallback(@Param() params, @Query() query, @Res({ passthrough: true }) res) {
     // Check input
     const pool = await this.poolService.get(params.poolId)
     if (!pool) throw new BadRequestException('Invalid pool')
@@ -43,17 +44,9 @@ export class KycController {
     const kyc = await this.kycRepo.upsertSecuritize(address.userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!kyc) throw new BadRequestException('Failed to create KYC entity')
 
-    await this.userRepo.setEmail(address.userId, investor.email)
+    await this.userRepo.update(address.userId, investor.email, investor.details.address.countryCode)
 
-    // Find or create the relevant agreement for this pool
-    // TODO: templateId should be based on the agreement required for the pool
-    const agreement = await this.agreementRepo.findOrCreate(
-      address.userId,
-      investor.email,
-      params.poolId,
-      process.env.DOCUSIGN_TEMPLATE_ID
-    )
-    if (!agreement) throw new BadRequestException('Failed to create agreement envelope')
+    await this.agreementRepo.createAgreementsForPool(params.poolId, address.userId, investor.email)
 
     // Create session and redirect user
     const session = this.sessionService.create(address.userId)
@@ -67,7 +60,7 @@ export class KycController {
     //   httpOnly: true,
     // })
 
-    const redirectUrl = `${process.env.TINLAKE_UI_HOST}pool/${params.poolId}/${pool.metadata.slug}?onb=1&session=${session}`
+    const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/investments?onb=1&session=${session}`
     return res.redirect(redirectUrl)
   }
 }
