@@ -1,4 +1,4 @@
-import { Box } from 'grommet'
+import { Box, Button } from 'grommet'
 import { GetStaticProps } from 'next'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import Head from 'next/head'
@@ -13,6 +13,7 @@ import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import LoanView from '../../../../../containers/Loan/View'
 import { menuItems } from '../../../../../menuItems'
+import ChevronRight from '../../../../../components/ChevronRight'
 
 interface Props extends WithRouterProps {
   root: string
@@ -41,7 +42,18 @@ class LoanPage extends React.Component<Props> {
         <Container>
           <Box justify="center" direction="row">
             <Box width="xlarge" margin={{ top: 'medium' }}>
-              <PoolTitle pool={pool} page={`Asset ${assetId}`} parentPage="Assets" parentPageHref="/assets" />
+              <PoolTitle
+                pool={pool}
+                page={`Asset ${assetId}`}
+                parentPage="Assets"
+                parentPageHref="/assets"
+                // rightContent={
+                //   <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
+                //     <Button secondary size="small" label="Previous" />
+                //     <ChevronRight />
+                //   </Box>
+                // }
+              />
 
               <WithTinlake
                 addresses={pool.addresses}

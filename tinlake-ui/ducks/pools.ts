@@ -25,25 +25,22 @@ export interface PoolData {
   totalRepaysAggregatedAmountNum: number
   weightedInterestRate: BN
   weightedInterestRateNum: number
-  seniorInterestRate: BN
+  seniorInterestRate?: BN
   seniorInterestRateNum: number
   order: number
   version: number
   totalFinancedCurrency: BN
   financingsCount?: number
   status?: PoolStatus
-  reserve: BN
-  assetValue: BN
+  reserve?: BN
+  assetValue?: BN
   juniorYield14Days: BN | null
   seniorYield14Days: BN | null
   icon: string | null
 }
 
 export interface PoolsData {
-  ongoingPools: number
   ongoingLoans: number
-  totalDebt: BN
-  totalRepaysAggregatedAmount: BN
   totalFinancedCurrency: BN
   totalValue: BN
   pools: PoolData[]
@@ -75,6 +72,11 @@ export default function reducer(state: PoolsState = initialState, action: AnyAct
 export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, PoolsState, undefined, Action> {
   return async (dispatch) => {
     dispatch({ type: LOAD_POOLS })
+    // Load ipfs data only
+    const initialPoolsData = await Apollo.getInitialPools(pools)
+    dispatch({ data: initialPoolsData, type: RECEIVE_POOLS })
+
+    // Load with subgraph data
     const poolsData = await Apollo.getPools(pools)
     dispatch({ data: poolsData, type: RECEIVE_POOLS })
   }

@@ -26,6 +26,8 @@ export interface SortableLoan extends Loan {
   debtNum: number
   principalNum: number
   interestRateNum: number
+  borrowsAggregatedAmountNum: number
+  repaysAggregatedAmountNum: number
 }
 
 export interface AssetData {
@@ -98,7 +100,9 @@ export function loadLoans(tinlake: any): ThunkAction<Promise<void>, LoansState, 
         debtNum: parseFloat(l.debt.toString()),
         principalNum: parseFloat(l.principal.toString()),
         interestRateNum: parseFloat(l.interestRate.toString()),
-        maturityDate: (l as any).maturityDate,
+        borrowsAggregatedAmountNum: parseFloat((l.borrowsAggregatedAmount || new BN(0)).toString()),
+        repaysAggregatedAmountNum: parseFloat((l.repaysAggregatedAmount || new BN(0)).toString()),
+        maturityDate: l.maturityDate,
       }))
 
       dispatch({ loans, type: RECEIVE })

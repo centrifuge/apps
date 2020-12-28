@@ -74,7 +74,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
         </Box>
       </Box>
       <Box basis="1/3">
-        {props.loan && (props.loan as any).riskGroup !== undefined && (props.loan as any).scoreCard && (
+        {/* {props.loan && (props.loan as any).riskGroup !== undefined && (props.loan as any).scoreCard && (
           <Box margin={{ bottom: 'medium' }}>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
@@ -115,7 +115,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
               </TableBody>
             </Table>
           </Box>
-        )}
+        )} */}
 
         {props.loan && props.loan.nft && props.auth?.address && (
           <NftData data={props.loan.nft} authedAddr={props.auth.address} />

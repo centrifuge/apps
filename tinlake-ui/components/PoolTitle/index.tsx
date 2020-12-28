@@ -12,6 +12,7 @@ interface Props {
   page: string
   parentPage?: string
   parentPageHref?: string
+  rightContent?: React.ReactNode
 }
 
 const PoolTitle: React.FC<Props> = (props: Props) => {
@@ -53,6 +54,7 @@ const PoolTitle: React.FC<Props> = (props: Props) => {
           {props.page}
         </PageName>
       </PageTitle>
+      {props.rightContent && <RightContent>{props.rightContent}</RightContent>}
     </Wrapper>
   )
 }
@@ -74,6 +76,7 @@ const Icon = styled.img`
 const PageTitle = styled.div`
   display: flex;
   flex-direction: column;
+  width: 100%;
 `
 
 const PoolName = styled.h2`
@@ -107,10 +110,11 @@ const Arrow = styled.span`
 `
 
 const PoolLabel = styled.div`
-<<<<<<< HEAD
-=======
-  display: inline-block;
->>>>>>> bf7be9368800df1d97cb8516c7e884c58b9ef83b
   margin-left: 8px;
   display: inline-block;
+`
+
+const RightContent = styled.div`
+  margin-left: auto;
+  flex: 1;
 `

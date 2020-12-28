@@ -16,14 +16,23 @@ interface Props extends WithRouterProps {
 }
 
 import styled from 'styled-components'
-type LabelType = 'info' | 'success' | 'warning'
+import BN from 'bn.js'
+type LabelType = 'plain' | 'info' | 'success' | 'warning'
 const StatusLabel = styled.div<{ type: LabelType }>`
-  background: ${(props) => (props.type === 'success' ? 'green' : props.type === 'warning' ? '#fcba59' : '#aaa')};
+  background: ${(props) =>
+    props.type === 'success'
+      ? 'green'
+      : props.type === 'warning'
+      ? '#fcba59'
+      : props.type === 'plain'
+      ? 'transparent'
+      : '#aaa'};
+  border: ${(props) => (props.type === 'plain' ? '1px solid #ccc' : '1px solid transparent')};
   opacity: 0.8;
   border-radius: 8px;
   padding: 4px 8px;
   font-size: 12px;
-  color: #fff;
+  color: ${(props) => (props.type === 'plain' ? '#888' : '#fff')};
   font-weight: bold;
   width: 120px;
   text-align: center;
@@ -43,7 +52,9 @@ class LoanList extends React.Component<Props> {
   getLabelType = (l: SortableLoan): LabelType => {
     const days = daysBetween(new Date().getTime() / 1000, Number(l.maturityDate))
     if (l.status === 'ongoing' && days <= 0) return 'warning'
-    return l.status === 'closed' ? 'success' : 'info'
+    if (l.status === 'closed') return 'success'
+    if (l.status === 'NFT locked') return 'plain'
+    return 'info'
   }
 
   getLabelText = (l: SortableLoan) => {
@@ -109,7 +120,14 @@ class LoanList extends React.Component<Props> {
                   <NumberDisplay
                     suffix=""
                     precision={0}
-                    value={baseToDisplay(l.debt.isZero() ? l.principal : l.debt, 18)}
+                    value={baseToDisplay(
+                      l.status === 'closed'
+                        ? l.repaysAggregatedAmount || new BN(0)
+                        : l.debt.isZero()
+                        ? l.principal
+                        : l.debt,
+                      18
+                    )}
                   />
                 ),
               },

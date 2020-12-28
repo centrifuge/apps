@@ -55,19 +55,21 @@ class Apollo {
       const totalDebt = (pool && new BN(pool.totalDebt)) || new BN('0')
       const totalRepaysAggregatedAmount = (pool && new BN(pool.totalRepaysAggregatedAmount)) || new BN('0')
       const weightedInterestRate = (pool && new BN(pool.weightedInterestRate)) || new BN('0')
-      const seniorInterestRate = (pool && pool.seniorInterestRate && new BN(pool.seniorInterestRate)) || new BN('0')
+      const seniorInterestRate = (pool && pool.seniorInterestRate && new BN(pool.seniorInterestRate)) || undefined
 
       const totalDebtNum = parseFloat(totalDebt.toString())
       const totalRepaysAggregatedAmountNum = parseFloat(totalRepaysAggregatedAmount.toString())
       const weightedInterestRateNum = parseFloat(weightedInterestRate.toString())
-      const seniorInterestRateNum = parseFloat(seniorInterestRate.toString())
+      const seniorInterestRateNum = parseFloat((seniorInterestRate || new BN(0)).toString())
 
       const ongoingLoans = (pool && pool.ongoingLoans.length) || 0 // TODO add count field to subgraph, inefficient to query all assets
       const totalFinancedCurrency = totalRepaysAggregatedAmount.add(totalDebt)
 
-      const reserve = (pool && new BN(pool.reserve)) || new BN('0')
-      const assetValue = (pool && new BN(pool.assetValue)) || new BN('0')
-      const poolValueNum = parseInt(reserve.div(UintBase).toString()) + parseInt(assetValue.div(UintBase).toString())
+      const reserve = (pool && new BN(pool.reserve)) || undefined
+      const assetValue = (pool && new BN(pool.assetValue)) || undefined
+      const poolValueNum =
+        parseInt((reserve || new BN(0)).div(UintBase).toString()) +
+        parseInt((assetValue || new BN(0)).div(UintBase).toString())
 
       const poolData = {
         reserve,
@@ -168,6 +170,24 @@ class Apollo {
     }))
   }
 
+  async getInitialPools(ipfsPools: IpfsPools): Promise<PoolsData> {
+    let pools = [
+      ...this.injectPoolData([], ipfsPools.active),
+      ...this.injectUpcomingPoolData(ipfsPools.upcoming),
+      ...this.injectArchivedPoolData(ipfsPools.archived),
+    ]
+
+    // TODO: get pool value with multicall, and use this to sort
+    pools = pools.sort((a, b) => a.name.localeCompare(b.name))
+
+    return {
+      pools,
+      ongoingLoans: 0,
+      totalFinancedCurrency: new BN(0),
+      totalValue: new BN(0),
+    }
+  }
+
   async getPools(ipfsPools: IpfsPools): Promise<PoolsData> {
     let result
     try {
@@ -208,12 +228,9 @@ class Apollo {
 
     return {
       pools,
-      ongoingPools: pools.filter((pool) => pool.ongoingLoans > 0).length,
       ongoingLoans: pools.reduce((p, c) => p + c.ongoingLoans, 0),
-      totalDebt: pools.reduce((p, c) => p.add(c.totalDebt), new BN(0)),
-      totalRepaysAggregatedAmount: pools.reduce((p, c) => p.add(c.totalRepaysAggregatedAmount), new BN(0)),
       totalFinancedCurrency: pools.reduce((p, c) => p.add(c.totalFinancedCurrency), new BN(0)),
-      totalValue: pools.reduce((p, c) => p.add(c.reserve).add(c.assetValue), new BN(0)),
+      totalValue: pools.reduce((p, c) => p.add(c.reserve || new BN(0)).add(c.assetValue || new BN(0)), new BN(0)),
     }
   }
 
@@ -341,6 +358,8 @@ function toTinlakeLoans(loans: any[]): { data: Loan[] } {
       price: loan.price || new BN(0),
       status: getLoanStatus(loan),
       maturityDate: loan.maturityDate,
+      borrowsAggregatedAmount: loan.borrowsAggregatedAmount,
+      repaysAggregatedAmount: loan.repaysAggregatedAmount,
     }
     tinlakeLoans.push(tinlakeLoan)
   })
