@@ -46,7 +46,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         direction="row"
         pad="medium"
       >
-        <Box pad={{ top: 'small' }} width="200px">
+        <Box pad={{ top: '8px' }} width="200px">
           <Cont>
             <TokenLogo src={`/static/dai.svg`} />
             <Value>
@@ -110,7 +110,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         background="white"
         margin={{ horizontal: '16px' }}
       >
-        <Cont>
+        <Cont style={{ marginTop: '8px' }}>
           <TokenLogo src={`/static/dai.svg`} />
           <Value>
             <NumberDisplay value={baseToDisplay(props.pools.totalFinancedCurrency, 18)} precision={0} />
