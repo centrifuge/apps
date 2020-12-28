@@ -87,25 +87,25 @@ const HelpMenu: React.FC<{}> = () => {
   return (
     <>
       <Wrapper
-        ref={ref}
         onClick={() => {
-          if (!justClosed) setOpen(true)
+          if (!justClosed) setOpen(!open)
           if (!hasPreloaded) loadImages()
         }}
       >
-        ?
+        <div ref={ref}>?</div>
       </Wrapper>
+
       {open && ref.current && (
         <Drop
-          style={{ margin: '0 40px 110px auto', width: '240px', right: 0 }}
           align={{ bottom: 'bottom', right: 'right' }}
+          style={{ margin: '0 40px 60px auto', width: '200px', right: 0 }}
           stretch={false}
           responsive
           target={ref.current}
           onClickOutside={onClickOutside}
           onEsc={() => setOpen(false)}
         >
-          <InnerMenu width="240px" elevation="small" round="xsmall" background="white">
+          <InnerMenu width="200px" elevation="small" round="xsmall" background="white">
             <Title>Need help?</Title>
             <MenuItem href="https://centrifuge.io/slack/" target="_blank" icon="slack">
               <Name>Slack</Name>
