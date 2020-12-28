@@ -1,25 +1,15 @@
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { Box } from 'grommet'
-import { WithRouterProps } from 'next/dist/client/with-router'
-import { useRouter, withRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { PoolsDailyData, PoolsData } from '../../ducks/pools'
 import NumberDisplay from '../NumberDisplay'
 import { Cont, Label, TokenLogo, Unit, Value } from './styles'
 import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts'
 import { useSelector } from 'react-redux'
-import {
-  ChartTooltip,
-  ChartTooltipColor,
-  ChartTooltipKey,
-  ChartTooltipLine,
-  ChartTooltipTitle,
-  ChartTooltipValue,
-} from '../../components/Chart/styles'
 import { dateToYMD } from '../../utils/date'
-import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 
-interface Props extends WithRouterProps {
+interface Props {
   pools: PoolsData
 }
 
@@ -134,19 +124,3 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
 }
 
 export default PoolsMetrics
-
-const CustomTooltip = ({ active, payload }: any) => {
-  return active && payload ? (
-    <ChartTooltip>
-      <ChartTooltipTitle>{dateToYMD(payload[0].payload.day)}</ChartTooltipTitle>
-      <ChartTooltipLine>
-        <ChartTooltipKey>
-          <ChartTooltipColor color="#0828BE" /> Current Value Locked:
-        </ChartTooltipKey>
-        <ChartTooltipValue>{addThousandsSeparators(payload[0].value)} DAI</ChartTooltipValue>
-      </ChartTooltipLine>
-    </ChartTooltip>
-  ) : (
-    <>&nbsp;</>
-  )
-}

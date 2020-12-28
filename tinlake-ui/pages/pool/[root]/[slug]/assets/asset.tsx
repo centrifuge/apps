@@ -1,4 +1,4 @@
-import { Box, Button } from 'grommet'
+import { Box } from 'grommet'
 import { GetStaticProps } from 'next'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import Head from 'next/head'
@@ -13,7 +13,6 @@ import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import LoanView from '../../../../../containers/Loan/View'
 import { menuItems } from '../../../../../menuItems'
-import ChevronRight from '../../../../../components/ChevronRight'
 
 interface Props extends WithRouterProps {
   root: string

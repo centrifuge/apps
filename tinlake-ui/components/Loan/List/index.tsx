@@ -8,7 +8,7 @@ import NumberDisplay from '../../../components/NumberDisplay'
 import { SortableLoan } from '../../../ducks/loans'
 import { hexToInt } from '../../../utils/etherscanLinkGenerator'
 import ChevronRight from '../../ChevronRight'
-import { dateToYMD, daysBetween } from '../../../utils/date'
+import { dateToYMD } from '../../../utils/date'
 import BN from 'bn.js'
 import LoanLabel from '../Label'
 

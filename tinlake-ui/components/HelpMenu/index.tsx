@@ -110,16 +110,16 @@ const HelpMenu: React.FC<{}> = () => {
             <MenuItem href="https://centrifuge.io/slack/" target="_blank" icon="slack">
               <Name>Slack</Name>
             </MenuItem>
-            <MenuItem href="https://t.me/centrifuge_chat" target="_blank" icon="telegram">
+            <MenuItem href="https://t.me/CentrifugeSupport" target="_blank" icon="telegram">
               <Name>Telegram</Name>
             </MenuItem>
-            <MenuItem href="mailto:hello@centrifuge.io" target="_blank" icon="email">
+            <MenuItem href="mailto:support@centrifuge.io" target="_blank" icon="email">
               <Name>Email</Name>
             </MenuItem>
             {/* <MenuItem>
               <Name>FAQ</Name>
             </MenuItem> */}
-            <MenuItem href="https://developer.centrifuge.io/" target="_blank" icon="documentation">
+            <MenuItem href="https://docs.centrifuge.io/" target="_blank" icon="documentation">
               <Name>Documentation</Name>
             </MenuItem>
           </InnerMenu>

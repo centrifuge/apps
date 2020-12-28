@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Box, Heading, Button, Table, TableBody, TableRow, TableCell } from 'grommet'
+import { Box, Button, Table, TableBody, TableRow, TableCell } from 'grommet'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import { Loan } from '@centrifuge/tinlake-js'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -22,7 +22,7 @@ type Card = 'data' | 'borrow' | 'repay'
 const LoanData: React.FC<Props> = (props: Props) => {
   const [card, setCard] = React.useState<Card>('data')
 
-  const { debt, principal, interestRate, status } = props.loan
+  const { debt, principal, interestRate } = props.loan
 
   return (
     <Box direction="row" justify="between">
