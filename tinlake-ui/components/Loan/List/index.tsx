@@ -146,7 +146,7 @@ class LoanList extends React.Component<Props> {
             ]}
           />
         )}
-        {loans.length === 0 && <Text>No assets have been originated.</Text>}
+        {loans.length === 0 && <Text margin="medium">No assets have been originated.</Text>}
       </Box>
     )
   }

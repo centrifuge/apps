@@ -20,8 +20,8 @@ const KycStep: React.FC<Props> = (props: Props) => {
   return (
     <Step>
       <StepHeader>
-        <StepIcon inactive={!props.active} checked={props.kycStatus === 'verified'} />
-        <StepTitle inactive={!props.active}>
+        <StepIcon inactive={!props.active && props.kycStatus === 'verified'} checked={props.kycStatus === 'verified'} />
+        <StepTitle inactive={!props.active && props.kycStatus === 'verified'}>
           {props.kycStatus === 'none'
             ? 'Verify KYC information'
             : props.kycStatus === 'verified'

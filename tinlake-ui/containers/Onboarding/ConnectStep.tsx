@@ -38,7 +38,7 @@ const ConnectStep: React.FC<Props> = () => {
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {address && <StepBody inactive>&nbsp;</StepBody>}
+      {address && <StepBody>&nbsp;</StepBody>}
     </Step>
   )
 }
