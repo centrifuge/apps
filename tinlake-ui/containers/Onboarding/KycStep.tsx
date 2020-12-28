@@ -3,6 +3,7 @@ import { Box, Button, CheckBox, Paragraph } from 'grommet'
 import * as React from 'react'
 import { Pool } from '../../config'
 import { OnboardingState } from '../../ducks/onboarding'
+import Spinner from './Spinner'
 import { Step, StepHeader, StepIcon, StepTitle, StepBody, FormFieldWithoutBorder } from './styles'
 
 interface Props {
@@ -20,7 +21,13 @@ const KycStep: React.FC<Props> = (props: Props) => {
   return (
     <Step>
       <StepHeader>
-        <StepIcon inactive={!props.active && props.kycStatus === 'verified'} checked={props.kycStatus === 'verified'} />
+        {props.kycStatus === 'created' && <Spinner />}
+        {props.kycStatus !== 'created' && (
+          <StepIcon
+            inactive={!props.active && props.kycStatus === 'verified'}
+            checked={props.kycStatus === 'verified'}
+          />
+        )}
         <StepTitle inactive={!props.active && props.kycStatus === 'verified'}>
           {props.kycStatus === 'none'
             ? 'Verify KYC information'

@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import config, { Pool } from '../../config'
 import { OnboardingState } from '../../ducks/onboarding'
+import Spinner from './Spinner'
 import { Step, StepHeader, StepIcon, StepTitle, StepBody, FormFieldWithoutBorder } from './styles'
 
 interface Props {
@@ -27,7 +28,10 @@ const KycStep: React.FC<Props> = (props: Props) => {
   return (
     <Step>
       <StepHeader>
-        <StepIcon inactive={!props.active} checked={props.agreementStatus === 'countersigned'} />
+        {props.agreementStatus === 'signed' && <Spinner />}
+        {props.agreementStatus !== 'signed' && (
+          <StepIcon inactive={!props.active} checked={props.agreementStatus === 'countersigned'} />
+        )}
         <StepTitle inactive={!props.active}>
           {props.agreementStatus === 'none'
             ? 'Sign the Subscription Agreement'
