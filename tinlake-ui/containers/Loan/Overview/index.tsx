@@ -13,46 +13,17 @@ import { Sidenote } from './styles'
 import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts'
 import { AssetData, loadAssetData } from '../../../ducks/loans'
 import { dateToYMD, dateToYMDShort } from '../../../utils/date'
+import {
+  ChartTooltip,
+  ChartTooltipColor,
+  ChartTooltipKey,
+  ChartTooltipLine,
+  ChartTooltipTitle,
+  ChartTooltipValue,
+} from '../../../components/Chart/styles'
 
-import styled from 'styled-components'
 import BN from 'bn.js'
 import { UintBase } from '../../../utils/ratios'
-
-const ChartTooltip = styled.div`
-  padding: 12px 16px;
-  font-size: 12px;
-  background: #000;
-  opacity: 0.9;
-  color: #fff;
-  width: 220px;
-`
-
-const ChartTooltipTitle = styled.div`
-  font-weight: bold;
-`
-
-const ChartTooltipLine = styled.div`
-  display: flex;
-  flex-direction: row;
-  margin: 6px 0;
-`
-
-const ChartTooltipColor = styled.div<{ color?: string }>`
-  width: 8px;
-  height: 8px;
-  border-radius: 100%;
-  background: ${(props) => props.color};
-  display: inline-block;
-  margin-right: 8px;
-`
-
-const ChartTooltipKey = styled.div`
-  flex: 1;
-`
-const ChartTooltipValue = styled.div`
-  flex: 1;
-  text-align: right;
-`
 
 interface Props {
   activePool?: Pool

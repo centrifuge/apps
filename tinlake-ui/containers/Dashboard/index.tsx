@@ -1,12 +1,12 @@
 import { Spinner } from '@centrifuge/axis-spinner'
 import { Box } from 'grommet'
 import * as React from 'react'
-import { connect, useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import PoolList from '../../components/PoolList'
 import PoolsMetrics from '../../components/PoolsMetrics'
 import TinlakeExplainer from '../../components/TinlakeExplainer'
 import { IpfsPools } from '../../config'
-import { loadPools, PoolsState } from '../../ducks/pools'
+import { loadPools, loadPoolsDailyData, PoolsState } from '../../ducks/pools'
 
 interface Props {
   ipfsPools: IpfsPools
@@ -18,6 +18,7 @@ const Dashboard: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     dispatch(loadPools(props.ipfsPools))
+    dispatch(loadPoolsDailyData())
   }, [])
 
   return (
@@ -42,4 +43,4 @@ const Dashboard: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { loadPools })(Dashboard)
+export default Dashboard

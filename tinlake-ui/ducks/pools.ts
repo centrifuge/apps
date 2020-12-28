@@ -9,6 +9,7 @@ import { PoolStatus } from './pool'
 // Actions
 const LOAD_POOLS = 'tinlake-ui/pools/LOAD_POOLS'
 const RECEIVE_POOLS = 'tinlake-ui/pools/RECEIVE_POOLS'
+const RECEIVE_POOLS_DAILY_DATA = 'tinlake-ui/pools/RECEIVE_POOLS_DAILY_DATA'
 
 export interface PoolData {
   id: string
@@ -46,14 +47,21 @@ export interface PoolsData {
   pools: PoolData[]
 }
 
+export interface PoolsDailyData {
+  day: number
+  poolValue: number
+}
+
 export interface PoolsState {
   state: null | 'loading' | 'found'
   data: null | PoolsData
+  poolsDailyData: PoolsDailyData[]
 }
 
 const initialState: PoolsState = {
   state: null,
   data: null,
+  poolsDailyData: [],
 }
 
 export default function reducer(state: PoolsState = initialState, action: AnyAction = { type: '' }): PoolsState {
@@ -64,6 +72,8 @@ export default function reducer(state: PoolsState = initialState, action: AnyAct
       return { ...state, state: 'loading' }
     case RECEIVE_POOLS:
       return { ...state, state: 'found', data: action.data }
+    case RECEIVE_POOLS_DAILY_DATA:
+      return { ...state, poolsDailyData: action.data }
     default:
       return state
   }
@@ -86,5 +96,6 @@ export function loadPoolsDailyData(): ThunkAction<Promise<void>, PoolsState, und
   return async (dispatch) => {
     const poolsDailyData = await Apollo.getPoolsDailyData()
     console.log({ poolsDailyData })
+    dispatch({ data: poolsDailyData, type: RECEIVE_POOLS_DAILY_DATA })
   }
 }
