@@ -27,7 +27,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
         )}
         <StepTitle inactive={!props.active}>
           {props.kycStatus === 'none'
-            ? 'Verify KYC information'
+            ? 'Submit KYC information'
             : props.kycStatus === 'verified'
             ? 'KYC status: verified'
             : 'KYC status: awaiting verification'}

@@ -17,13 +17,14 @@ const LoanLabel: React.FC<Props> = (props: Props) => {
   }
 
   const getLabelText = (l: Loan) => {
-    const days = daysBetween(new Date().getTime() / 1000, Number(l.maturityDate))
+    const today = new Date()
+    today.setUTCHours(0, 0, 0, 0)
+    const days = daysBetween(today.getTime() / 1000, Number(l.maturityDate))
+
     if (l.status === 'ongoing' && days === 0) return 'due today'
     else if (l.status === 'ongoing' && days === 1) return 'due tomorrow'
-    else if (l.status === 'ongoing' && days > 1 && days <= 5)
-      return `due in ${daysBetween(new Date().getTime() / 1000, Number(l.maturityDate))} days`
-    else if (l.status === 'ongoing' && days < 0)
-      return `due ${daysBetween(new Date().getTime() / 1000, Number(l.maturityDate))} days ago`
+    else if (l.status === 'ongoing' && days > 1 && days <= 5) return `due in ${days} days`
+    else if (l.status === 'ongoing' && days < 0) return `due ${Math.abs(days)} days ago`
     return l.status
   }
 

@@ -98,7 +98,7 @@ const HelpMenu: React.FC<{}> = () => {
       {open && ref.current && (
         <Drop
           align={{ bottom: 'bottom', right: 'right' }}
-          style={{ margin: '0 40px 60px auto', width: '200px', right: 0 }}
+          style={{ margin: '0 40px 60px auto', width: '220px', right: 0 }}
           stretch={false}
           responsive
           target={ref.current}
@@ -119,7 +119,11 @@ const HelpMenu: React.FC<{}> = () => {
             {/* <MenuItem>
               <Name>FAQ</Name>
             </MenuItem> */}
-            <MenuItem href="https://docs.centrifuge.io/" target="_blank" icon="documentation">
+            <MenuItem
+              href="https://docs.centrifuge.io/tinlake/overview/introduction/"
+              target="_blank"
+              icon="documentation"
+            >
               <Name>Documentation</Name>
             </MenuItem>
           </InnerMenu>
