@@ -8,6 +8,7 @@ import { createWatcher } from '@makerdao/multicall'
 import config from '../config'
 import { BigNumber } from 'ethers'
 import BN from 'bn.js'
+const web3 = require('web3-utils')
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
@@ -234,7 +235,7 @@ export function loadLoan(
 
         if (data.ownerOf) {
           const proxy = await Apollo.getProxyOwner(data.ownerOf.toString().toLowerCase())
-          if (proxy?.owner) data.borrower = proxy.owner
+          if (proxy?.owner) data.borrower = web3.toChecksumAddress(proxy.owner)
           dispatch({ loan: data, type: RECEIVE_LOAN })
         }
 
