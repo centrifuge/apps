@@ -1,5 +1,5 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { Box } from 'grommet'
+import { Box, Heading } from 'grommet'
 import * as React from 'react'
 import PoolTitle from '../../components/PoolTitle'
 import { Pool } from '../../config'
@@ -51,6 +51,10 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
   return (
     <Box margin={{ top: 'medium' }}>
       <PoolTitle pool={props.activePool} page="Onboarding" parentPage="Investments" parentPageHref="/investments" />
+      <Heading level="5" margin={{ bottom: 'medium' }} style={{ maxWidth: '100%' }}>
+        To invest in this this pool, start your onboarding process now.
+      </Heading>
+
       <Box pad="medium" elevation="small" round="xsmall" background="white" width="80%">
         <ConnectStep {...props} />
         <KycStep {...props} onboarding={onboarding} kycStatus={kycStatus} active={activeSteps >= 2} />
