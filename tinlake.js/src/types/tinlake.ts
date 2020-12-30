@@ -25,6 +25,7 @@ export type Loan = {
   riskGroup?: number
   scoreCard?: ScoreCard
   maturityDate?: number
+  financingDate?: number
   borrowsAggregatedAmount?: BN
   repaysAggregatedAmount?: BN
 }

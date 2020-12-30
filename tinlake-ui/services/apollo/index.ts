@@ -263,6 +263,7 @@ class Apollo {
               nftId
               nftRegistry
               maturityDate
+              financingDate
             }
           }
         }
@@ -388,6 +389,7 @@ function toTinlakeLoans(loans: any[]): { data: Loan[] } {
       price: loan.price || new BN(0),
       status: getLoanStatus(loan),
       maturityDate: loan.maturityDate,
+      financingDate: loan.financingDate,
       borrowsAggregatedAmount: loan.borrowsAggregatedAmount,
       repaysAggregatedAmount: loan.repaysAggregatedAmount,
     }

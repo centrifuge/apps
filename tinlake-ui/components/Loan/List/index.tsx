@@ -59,12 +59,19 @@ class LoanList extends React.Component<Props> {
                 primary: true,
                 property: 'tokenId',
                 align: 'start',
-                size: '440px',
+                size: '400px',
                 render: (l: SortableLoan) => (
                   <Box style={{ maxWidth: '200px' }}>
                     <DisplayField as={'span'} value={hexToInt(bnToHex(l.tokenId).toString())} />
                   </Box>
                 ),
+              },
+              {
+                header: 'Financing Date',
+                property: 'financingDate',
+                align: 'end',
+                render: (l: SortableLoan) =>
+                  l.financingDate && l.financingDate > 0 ? dateToYMD(l.financingDate) : '-',
               },
               {
                 header: 'Maturity Date',
