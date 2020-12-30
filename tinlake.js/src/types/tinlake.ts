@@ -28,6 +28,7 @@ export type Loan = {
   financingDate?: number
   borrowsAggregatedAmount?: BN
   repaysAggregatedAmount?: BN
+  borrower?: string
 }
 
 export type Tranche = {

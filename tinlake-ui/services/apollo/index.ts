@@ -371,6 +371,27 @@ class Apollo {
     const proxies = result.data.proxies.map((e: { id: string; owner: string }) => e.id)
     return { data: proxies }
   }
+
+  async getProxyOwner(proxyId: string): Promise<{ owner?: string } | null> {
+    let result
+    try {
+      result = await this.client.query({
+        query: gql`
+        {
+          proxies (where: {id:"${proxyId}"})
+            {
+              owner
+            }
+          }
+        `,
+      })
+    } catch (err) {
+      console.error(`no proxy found for id ${proxyId} ${err}`)
+      return null
+    }
+
+    return result.data.proxies.length > 0 ? result.data.proxies[0] : null
+  }
 }
 
 function toTinlakeLoans(loans: any[]): { data: Loan[] } {

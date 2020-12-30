@@ -232,6 +232,12 @@ export function loadLoan(
 
         dispatch({ loan: data, type: RECEIVE_LOAN })
 
+        if (data.ownerOf) {
+          const proxy = await Apollo.getProxyOwner(data.ownerOf.toString().toLowerCase())
+          if (proxy?.owner) data.borrower = proxy.owner
+          dispatch({ loan: data, type: RECEIVE_LOAN })
+        }
+
         if (!data.nft) {
           // TODO: load nft using multicall
           const nftData = await getNFT((data as any).registry, tinlake, `${data.tokenId}`)

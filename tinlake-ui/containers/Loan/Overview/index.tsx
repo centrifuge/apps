@@ -66,38 +66,27 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch()
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
-  // const updateIsBorrower = async () => {
-  //   if (address) {
-  //     const proxyAddress = await props.tinlake.checkProxyExists(address)
-  //     if (proxyAddress) setIsBorrower(true)
-  //     else {
-  //       setIsBorrower(props.auth?.permissions?.canSetMinimumJuniorRatio || false)
-  //     }
-  //   }
-  // }
-
-  // const [isBorrower, setIsBorrower] = React.useState(false)
-
   React.useEffect(() => {
     dispatch(loadPool(props.tinlake))
     dispatch(loadAssetData(props.tinlake))
-    // updateIsBorrower()
   }, [address])
 
   const isAdmin = props.auth?.permissions && (props.auth?.permissions as PermissionsV3).canSetMaxReserve
 
   const [showMaxReserveForm, setShowMaxReserveForm] = React.useState(false)
 
-  const assetDataWithToday = [
-    ...assetData,
-    {
-      reserve: parseFloat((poolData?.reserve || new BN(0)).div(UintBase).toString()),
-      assetValue: parseFloat((poolData?.netAssetValue || new BN(0)).div(UintBase).toString()),
-      day: Date.now() / 1000,
-    },
-  ]
+  const assetDataWithToday =
+    assetData.length > 0
+      ? [
+          ...assetData,
+          {
+            reserve: parseFloat((poolData?.reserve || new BN(0)).div(UintBase).toString()),
+            assetValue: parseFloat((poolData?.netAssetValue || new BN(0)).div(UintBase).toString()),
+            day: Date.now() / 1000,
+          },
+        ]
+      : []
 
-  // isBorrower || isAdmin
   return (
     <Box margin={{ bottom: 'medium' }}>
       <Box direction="row" justify="between">
@@ -123,15 +112,6 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                     </LoadingValue>
                   </Heading>
                 </Box>
-
-                {/* <Table margin={{ bottom: 'medium' }}>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell scope="row">Avg Financing Fee</TableCell>
-                        <TableCell style={{ textAlign: 'end' }}>7.43 %</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table> */}
 
                 <Table margin={{ bottom: 'small' }}>
                   <TableBody>
@@ -204,42 +184,44 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
               {assetDataWithToday.length > 0 && dateToYMDShort(assetDataWithToday[0].day)} - present
             </Heading>
           </Box>
-          <ResponsiveContainer>
-            <AreaChart data={assetDataWithToday} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#0828BE" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="colorReserve" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ccc" stopOpacity={0.2} />
-                  <stop offset="50%" stopColor="#ccc" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <Tooltip content={<CustomTooltip />} offset={20} />
-              {/* <XAxis dataKey="day" mirror tickFormatter={(val: number) => dateToYMDShort(val)} /> */}
-              <Area
-                type="monotone"
-                stackId={1}
-                dataKey="assetValue"
-                stroke="#0828BE"
-                strokeWidth={2}
-                fillOpacity={1}
-                fill="url(#colorAssetValue)"
-                name="Asset Value"
-              />
-              <Area
-                type="monotone"
-                stackId={1}
-                dataKey="reserve"
-                stroke="#ccc"
-                strokeWidth={2}
-                fillOpacity={1}
-                fill="url(#colorReserve)"
-                name="Reserve"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          {assetDataWithToday.length > 0 && (
+            <ResponsiveContainer>
+              <AreaChart data={assetDataWithToday} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#0828BE" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorReserve" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#ccc" stopOpacity={0.2} />
+                    <stop offset="50%" stopColor="#ccc" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <Tooltip content={<CustomTooltip />} offset={20} />
+                {/* <XAxis dataKey="day" mirror tickFormatter={(val: number) => dateToYMDShort(val)} /> */}
+                <Area
+                  type="monotone"
+                  stackId={1}
+                  dataKey="assetValue"
+                  stroke="#0828BE"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorAssetValue)"
+                  name="Asset Value"
+                />
+                <Area
+                  type="monotone"
+                  stackId={1}
+                  dataKey="reserve"
+                  stroke="#ccc"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorReserve)"
+                  name="Reserve"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
         </Box>
       </Box>
     </Box>

@@ -8,6 +8,8 @@ import { AuthState } from '../../../ducks/auth'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { dateToYMD } from '../../../utils/date'
 import LoanLabel from '../Label'
+import { DisplayField } from '@centrifuge/axis-display-field'
+import { getAddressLink } from '../../../utils/etherscanLinkGenerator'
 
 interface Props {
   loan: Loan
@@ -15,8 +17,17 @@ interface Props {
   auth?: AuthState
 }
 
+import styled from 'styled-components'
+const DisplayFieldWrapper = styled.div`
+  width: 100%;
+  max-width: 200px;
+  > div {
+    padding: 0;
+  }
+`
+
 const LoanData: React.FC<Props> = (props: Props) => {
-  const { debt, principal, interestRate } = props.loan
+  const { debt, principal, interestRate, borrower } = props.loan
 
   return (
     <Box gap="medium" pad="medium" elevation="small" round="xsmall" background="white" width="80%">
@@ -85,14 +96,32 @@ const LoanData: React.FC<Props> = (props: Props) => {
                     <TableCell style={{ textAlign: 'end' }}>{(props.loan as any).riskGroup}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell scope="row" border={{ color: 'transparent' }}>
-                      Financing fee
-                    </TableCell>
-                    <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+                    <TableCell scope="row">Financing fee</TableCell>
+                    <TableCell style={{ textAlign: 'end' }}>
                       {toPrecision(feeToInterestRate(interestRate), 2)} %
                     </TableCell>
                   </TableRow>
                 </>
+              )}
+              {borrower && (
+                <TableRow>
+                  <TableCell scope="row" border={{ color: 'transparent' }}>
+                    Borrower address
+                  </TableCell>
+                  <TableCell style={{ textAlign: 'end', float: 'right' }} border={{ color: 'transparent' }}>
+                    <DisplayFieldWrapper>
+                      <DisplayField
+                        copy={true}
+                        as={'span'}
+                        value={borrower}
+                        link={{
+                          href: getAddressLink(borrower),
+                          target: '_blank',
+                        }}
+                      />
+                    </DisplayFieldWrapper>
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>
