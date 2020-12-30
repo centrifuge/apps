@@ -71,7 +71,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
         </Box>
 
         <Box width="360px">
-          <Table margin={{ top: 'large' }}>
+          <Table>
             <TableBody>
               {/* <TableRow>
                 <TableCell scope="row">Status</TableCell>
