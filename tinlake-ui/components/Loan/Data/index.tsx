@@ -10,6 +10,7 @@ import LoanBorrow from '../../../containers/Loan/Borrow'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { dateToYMD } from '../../../utils/date'
 import LoanLabel from '../Label'
+import LoanRepay from '../../../containers/Loan/Repay'
 
 interface Props {
   loan: Loan
@@ -17,7 +18,7 @@ interface Props {
   auth?: AuthState
 }
 
-type Card = 'data' | 'borrow' | 'repay'
+export type Card = 'data' | 'borrow' | 'repay'
 
 const LoanData: React.FC<Props> = (props: Props) => {
   const [card, setCard] = React.useState<Card>('data')
@@ -28,66 +29,66 @@ const LoanData: React.FC<Props> = (props: Props) => {
     <Box direction="row" justify="between">
       <Box>
         <Box width="420px" pad="medium" elevation="small" round="xsmall" background="white">
-          {card === 'data' && (
-            <Box>
-              <Table margin={{ bottom: 'medium' }}>
-                <TableBody>
-                  <TableRow>
-                    <TableCell scope="row">Status</TableCell>
-                    <TableCell style={{ textAlign: 'end', float: 'right' }}>
-                      <LoanLabel loan={props.loan} />
-                    </TableCell>
-                  </TableRow>
-                  {props.loan.nft && (
-                    <>
-                      {(props.loan.nft as any).maturityDate && (
-                        <TableRow>
-                          <TableCell scope="row">Maturity date</TableCell>
-                          <TableCell style={{ textAlign: 'end' }}>
-                            {dateToYMD((props.loan.nft as any).maturityDate)}
-                          </TableCell>
-                        </TableRow>
-                      )}
+          <Box>
+            <Table margin={{ bottom: 'medium' }}>
+              <TableBody>
+                <TableRow>
+                  <TableCell scope="row">Status</TableCell>
+                  <TableCell style={{ textAlign: 'end', float: 'right' }}>
+                    <LoanLabel loan={props.loan} />
+                  </TableCell>
+                </TableRow>
+                {props.loan.nft && (
+                  <>
+                    {(props.loan.nft as any).maturityDate && (
                       <TableRow>
-                        <TableCell scope="row">Risk group</TableCell>
-                        <TableCell style={{ textAlign: 'end' }}>{(props.loan as any).riskGroup}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell scope="row">Financing fee</TableCell>
+                        <TableCell scope="row">Maturity date</TableCell>
                         <TableCell style={{ textAlign: 'end' }}>
-                          {toPrecision(feeToInterestRate(interestRate), 2)} %
+                          {dateToYMD((props.loan.nft as any).maturityDate)}
                         </TableCell>
                       </TableRow>
-                    </>
-                  )}
-                </TableBody>
-              </Table>
-              <Table margin={{ bottom: 'small' }}>
-                <TableBody>
-                  <TableRow>
-                    <TableCell scope="row">Available for Financing</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(principal, 18), 2))} DAI
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell scope="row" border={{ color: 'transparent' }}>
-                      Outstanding
-                    </TableCell>
-                    <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(debt, 18), 2))} DAI
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-
+                    )}
+                    <TableRow>
+                      <TableCell scope="row">Risk group</TableCell>
+                      <TableCell style={{ textAlign: 'end' }}>{(props.loan as any).riskGroup}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell scope="row">Financing fee</TableCell>
+                      <TableCell style={{ textAlign: 'end' }}>
+                        {toPrecision(feeToInterestRate(interestRate), 2)} %
+                      </TableCell>
+                    </TableRow>
+                  </>
+                )}
+              </TableBody>
+            </Table>
+            <Table margin={{ bottom: 'small' }}>
+              <TableBody>
+                <TableRow>
+                  <TableCell scope="row">Available for Financing</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(principal, 18), 2))} DAI
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell scope="row" border={{ color: 'transparent' }}>
+                    Outstanding
+                  </TableCell>
+                  <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(debt, 18), 2))} DAI
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+            {card === 'data' && (
               <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
                 <Button primary label="Finance Asset" onClick={() => setCard('borrow')} />
-                <Button primary label="Repay" onClick={() => setCard('repay')} disabled />
+                <Button primary label="Repay" onClick={() => setCard('repay')} />
               </Box>
-            </Box>
-          )}
-          {card === 'borrow' && <LoanBorrow loan={props.loan} tinlake={props.tinlake} />}
+            )}
+            {card === 'borrow' && <LoanBorrow loan={props.loan} tinlake={props.tinlake} setCard={setCard} />}
+            {card === 'repay' && <LoanRepay loan={props.loan} tinlake={props.tinlake} setCard={setCard} />}
+          </Box>
         </Box>
       </Box>
       <Box basis="1/3">

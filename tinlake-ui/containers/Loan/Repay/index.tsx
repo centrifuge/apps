@@ -5,16 +5,17 @@ import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
-import { Pool } from '../../../config'
+import { Card } from '../../../components/Loan/Data'
 import { ensureAuthed } from '../../../ducks/auth'
 import { loadLoan } from '../../../ducks/loans'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { Description } from '../../Investment/View/styles'
 
 interface Props extends TransactionProps {
-  poolConfig: Pool
   loan: Loan
   tinlake: ITinlake
+  setCard: (card: Card) => void
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>
   ensureAuthed?: () => Promise<void>
 }
@@ -103,20 +104,19 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Box basis={'1/3'} gap="medium" margin={{ right: 'large' }}>
-      <Box gap="medium" margin={{ right: 'small' }}>
-        <TokenInput
-          token="DAI"
-          label="Repay amount"
-          value={repayAmount}
-          maxValue={useBalanceAsMax ? balance : debt}
-          limitLabel={useBalanceAsMax ? 'Your balance' : 'Outstanding'}
-          error={error}
-          onChange={onChange}
-          disabled={status === 'unconfirmed' || status === 'pending'}
-        />
-      </Box>
-      <Box align="start">
+    <Box>
+      <Description>Please set the amount of DAI you want to repay.</Description>
+      <TokenInput
+        token="DAI"
+        value={repayAmount}
+        maxValue={useBalanceAsMax ? balance : debt}
+        limitLabel={useBalanceAsMax ? 'Your balance' : 'Outstanding'}
+        error={error}
+        onChange={onChange}
+        disabled={status === 'unconfirmed' || status === 'pending'}
+      />
+      <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
+        <Button label="Cancel" onClick={() => props.setCard('data')} />
         <Button
           onClick={repay}
           primary
