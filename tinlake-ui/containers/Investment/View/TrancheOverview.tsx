@@ -218,19 +218,22 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             )}
           </>
         )}
+        {props.pool &&
+          props.tranche === 'senior' &&
+          trancheData?.inMemberlist === false &&
+          config.featureFlagNewOnboarding && (
+            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+              <PoolLink href={'/onboarding'}>
+                <Anchor>
+                  <Button label="Invest" primary />
+                </Anchor>
+              </PoolLink>
+            </Box>
+          )}
 
-        {address && props.pool && trancheData?.inMemberlist === false && (
+        {!config.featureFlagNewOnboarding && props.pool && trancheData?.inMemberlist === false && (
           <>
-            {config.featureFlagNewOnboarding && (
-              <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-                <PoolLink href={'/onboarding'}>
-                  <Anchor>
-                    <Button label="Invest" primary />
-                  </Anchor>
-                </PoolLink>
-              </Box>
-            )}
-            {!config.featureFlagNewOnboarding && (
+            {address && (
               <Info>
                 <>
                   <Heading level="6" margin={{ bottom: 'xsmall' }}>
@@ -243,19 +246,19 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                 </>
               </Info>
             )}
-          </>
-        )}
 
-        {!address && (
-          <Info>
-            <Heading level="6" margin={{ bottom: 'xsmall' }}>
-              Interested in investing?
-            </Heading>
-            Connect your wallet to start the process.
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button primary label="Connect" onClick={connect} />
-            </Box>
-          </Info>
+            {!address && (
+              <Info>
+                <Heading level="6" margin={{ bottom: 'xsmall' }}>
+                  Interested in investing?
+                </Heading>
+                Connect your wallet to start the process.
+                <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                  <Button primary label="Connect" onClick={connect} />
+                </Box>
+              </Info>
+            )}
+          </>
         )}
       </Box>
     </Box>

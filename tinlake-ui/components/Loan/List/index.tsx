@@ -59,7 +59,7 @@ class LoanList extends React.Component<Props> {
                 primary: true,
                 property: 'tokenId',
                 align: 'start',
-                size: '300px',
+                size: '260px',
                 render: (l: SortableLoan) => (
                   <Box style={{ maxWidth: '200px' }}>
                     <DisplayField as={'span'} value={hexToInt(bnToHex(l.tokenId).toString())} />
