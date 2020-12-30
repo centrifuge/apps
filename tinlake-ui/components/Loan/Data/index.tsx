@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Box, Table, TableBody, TableRow, TableCell, Heading } from 'grommet'
+import { Box, Table, TableBody, TableRow, TableCell } from 'grommet'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import { Loan } from '@centrifuge/tinlake-js'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -19,20 +19,24 @@ const LoanData: React.FC<Props> = (props: Props) => {
   const { debt, principal, interestRate } = props.loan
 
   return (
-    <Box>
-      {/* <Heading level="5" margin={{ bottom: 'medium' }}>
-        Asset Details
-      </Heading> */}
-      <Box
-        width="80%"
-        direction="row"
-        justify="between"
-        gap="medium"
-        pad="medium"
-        elevation="small"
-        round="xsmall"
-        background="white"
-      >
+    <Box gap="medium" pad="medium" elevation="small" round="xsmall" background="white" width="80%">
+      <Box direction="row" margin={{ left: 'auto', right: 'auto' }}>
+        <span
+          style={{
+            marginRight: '24px',
+            color: '#999',
+            fontWeight: 'bold',
+            textTransform: 'uppercase',
+            position: 'relative',
+            top: '4px',
+            letterSpacing: '0.5px',
+          }}
+        >
+          Status:
+        </span>
+        <LoanLabel loan={props.loan} />
+      </Box>
+      <Box direction="row" justify="between">
         <Box width="360px">
           <Table>
             <TableBody>
@@ -67,14 +71,13 @@ const LoanData: React.FC<Props> = (props: Props) => {
         </Box>
 
         <Box width="360px">
-          <Table>
+          <Table margin={{ top: 'large' }}>
             <TableBody>
-              <TableRow>
+              {/* <TableRow>
                 <TableCell scope="row">Status</TableCell>
                 <TableCell style={{ textAlign: 'end', float: 'right', height: '21px !important' }}>
-                  <LoanLabel loan={props.loan} />
                 </TableCell>
-              </TableRow>
+              </TableRow> */}
               {props.loan.nft && (
                 <>
                   <TableRow>
@@ -82,8 +85,10 @@ const LoanData: React.FC<Props> = (props: Props) => {
                     <TableCell style={{ textAlign: 'end' }}>{(props.loan as any).riskGroup}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell scope="row">Financing fee</TableCell>
-                    <TableCell style={{ textAlign: 'end' }}>
+                    <TableCell scope="row" border={{ color: 'transparent' }}>
+                      Financing fee
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                       {toPrecision(feeToInterestRate(interestRate), 2)} %
                     </TableCell>
                   </TableRow>

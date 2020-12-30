@@ -51,27 +51,28 @@ class LoanView extends React.Component<Props> {
     return (
       <Box>
         <LoanData loan={loan!} auth={this.props.auth} tinlake={tinlake} />
-        {/* <LoanData loan={loan!} /> */}
         {loan && loan.status !== 'closed' && (
           <Box>
-            <>
-              <Heading level="5" margin={{ top: 'large', bottom: 'medium' }}>
-                Finance / Repay{' '}
-              </Heading>
-              <Box
-                width="80%"
-                justify="between"
-                gap="medium"
-                pad="medium"
-                elevation="small"
-                round="xsmall"
-                background="white"
-                direction="row"
-              >
-                <LoanBorrow loan={loan!} tinlake={tinlake} />
-                <LoanRepay loan={loan!} tinlake={tinlake} />
-              </Box>
-            </>
+            {hasBorrowerPermissions && (
+              <>
+                <Heading level="5" margin={{ top: 'large', bottom: 'medium' }}>
+                  Finance / Repay{' '}
+                </Heading>
+                <Box
+                  width="80%"
+                  justify="between"
+                  gap="medium"
+                  pad="medium"
+                  elevation="small"
+                  round="xsmall"
+                  background="white"
+                  direction="row"
+                >
+                  <LoanBorrow loan={loan!} tinlake={tinlake} />
+                  <LoanRepay loan={loan!} tinlake={tinlake} />
+                </Box>
+              </>
+            )}
           </Box>
         )}
         {loan && loan.nft && this.props.auth?.address && (
