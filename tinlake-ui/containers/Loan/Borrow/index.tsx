@@ -5,18 +5,15 @@ import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { Card } from '../../../components/Loan/Data'
 import { ensureAuthed } from '../../../ducks/auth'
 import { loadLoan } from '../../../ducks/loans'
 import { loadPool, PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { Description } from '../../Investment/View/styles'
 
 interface Props extends TransactionProps {
   loan: Loan
   tinlake: any
-  setCard: (card: Card) => void
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>
   loadPool?: (tinlake: any) => Promise<void>
   pool?: PoolState
@@ -98,23 +95,24 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Box>
-      <Description>
-        Please set the amount of DAI you want to finance the asset with. You can only finance an asset once.
-      </Description>
-      <TokenInput
-        token="DAI"
-        value={borrowAmount}
-        error={error}
-        maxValue={
-          new BN(availableFunds).gt(props.loan.principal) ? props.loan.principal.toString() : availableFunds.toString()
-        }
-        limitLabel={new BN(availableFunds).gt(props.loan.principal) ? 'Max financing amount' : 'Available funds'}
-        onChange={(newValue: string) => onChange(newValue)}
-        disabled={!borrowEnabled || status === 'unconfirmed' || status === 'pending'}
-      />
-      <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
-        <Button label="Cancel" onClick={() => props.setCard('data')} />
+    <Box width="360px" gap="medium">
+      <Box gap="medium" margin={{ right: 'small' }}>
+        <TokenInput
+          token="DAI"
+          label="Financing amount"
+          value={borrowAmount}
+          error={error}
+          maxValue={
+            new BN(availableFunds).gt(props.loan.principal)
+              ? props.loan.principal.toString()
+              : availableFunds.toString()
+          }
+          limitLabel={new BN(availableFunds).gt(props.loan.principal) ? 'Max financing amount' : 'Available funds'}
+          onChange={(newValue: string) => onChange(newValue)}
+          disabled={!borrowEnabled || status === 'unconfirmed' || status === 'pending'}
+        />
+      </Box>
+      <Box align="start">
         <Button
           onClick={borrow}
           primary
@@ -127,13 +125,13 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
             status === 'pending'
           }
         />
+        {isBlockedState && (
+          <Box margin={{ top: 'small' }}>
+            The Epoch for this pool has just been closed and orders are currently being computed. Until the next Epoch
+            opens, financing assets is not possible.
+          </Box>
+        )}
       </Box>
-      {isBlockedState && (
-        <Box margin={{ top: 'small' }}>
-          The Epoch for this pool has just been closed and orders are currently being computed. Until the next Epoch
-          opens, financing assets is not possible.
-        </Box>
-      )}
     </Box>
   )
 }

@@ -5,17 +5,15 @@ import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
-import { Card } from '../../../components/Loan/Data'
+import { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
 import { loadLoan } from '../../../ducks/loans'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { Description } from '../../Investment/View/styles'
 
 interface Props extends TransactionProps {
   loan: Loan
   tinlake: ITinlake
-  setCard: (card: Card) => void
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>
   ensureAuthed?: () => Promise<void>
 }
@@ -104,19 +102,20 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Box>
-      <Description>Please set the amount of DAI you want to repay.</Description>
-      <TokenInput
-        token="DAI"
-        value={repayAmount}
-        maxValue={useBalanceAsMax ? balance : debt}
-        limitLabel={useBalanceAsMax ? 'Your balance' : 'Outstanding'}
-        error={error}
-        onChange={onChange}
-        disabled={status === 'unconfirmed' || status === 'pending'}
-      />
-      <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
-        <Button label="Cancel" onClick={() => props.setCard('data')} />
+    <Box width="360px" gap="medium">
+      <Box gap="medium" margin={{ right: 'small' }}>
+        <TokenInput
+          token="DAI"
+          label="Repay amount"
+          value={repayAmount}
+          maxValue={useBalanceAsMax ? balance : debt}
+          limitLabel={useBalanceAsMax ? 'Your balance' : 'Outstanding'}
+          error={error}
+          onChange={onChange}
+          disabled={status === 'unconfirmed' || status === 'pending'}
+        />
+      </Box>
+      <Box align="start">
         <Button
           onClick={repay}
           primary

@@ -194,7 +194,8 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
         >
           <Box direction="row" justify="between">
             <Heading level="5" margin={{ top: 'medium', left: 'medium', bottom: '0' }}>
-              Asset Value &amp; Reserve
+              <span style={{ color: '#0828BE' }}>Pool Value</span>, Reserve &amp;{' '}
+              <span style={{ color: '#aaa' }}>Asset Value</span>
             </Heading>
             <Heading level="5" margin={{ top: 'medium', right: 'medium' }} color="#9f9f9f">
               {assetDataWithToday.length > 0 && dateToYMDShort(assetDataWithToday[0].day)} - present
@@ -204,12 +205,12 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
             <AreaChart data={assetDataWithToday} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#0828BE" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#ccc" stopOpacity={0.5} />
+                  <stop offset="60%" stopColor="#ccc" stopOpacity={0} />
                 </linearGradient>
-                <linearGradient id="colorReserve" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ccc" stopOpacity={0.2} />
-                  <stop offset="50%" stopColor="#ccc" stopOpacity={0} />
+                <linearGradient id="colorPoolValue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
+                  <stop offset="50%" stopColor="#0828BE" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <Tooltip content={<CustomTooltip />} offset={20} />
@@ -218,9 +219,9 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                 type="monotone"
                 stackId={1}
                 dataKey="assetValue"
-                stroke="#0828BE"
+                stroke="#ccc"
                 strokeWidth={2}
-                fillOpacity={1}
+                fillOpacity={0}
                 fill="url(#colorAssetValue)"
                 name="Asset Value"
               />
@@ -228,11 +229,11 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                 type="monotone"
                 stackId={1}
                 dataKey="reserve"
-                stroke="#ccc"
+                stroke="#0828BE"
                 strokeWidth={2}
                 fillOpacity={1}
-                fill="url(#colorReserve)"
-                name="Reserve"
+                fill="url(#colorPoolValue)"
+                name="Pool Value"
               />
             </AreaChart>
           </ResponsiveContainer>
