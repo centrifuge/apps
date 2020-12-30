@@ -1,6 +1,7 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import InvestAction from '../../../components/InvestAction'
@@ -31,11 +32,19 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const trancheData = props.tranche === 'senior' ? pool?.data?.senior : pool?.data?.junior
   const epochData = pool?.epoch || undefined
 
+  const router = useRouter()
+
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
 
   const [card, setCard] = React.useState<Card>('home')
+
+  React.useEffect(() => {
+    if ('invest' in router.query && router.query.invest === props.tranche) {
+      setCard('invest')
+    }
+  }, [router.query])
 
   const [balance, setBalance] = React.useState<string | undefined>(undefined)
   const [tokenPrice, setTokenPrice] = React.useState<string | undefined>(undefined)
@@ -218,20 +227,17 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             )}
           </>
         )}
-        {props.pool &&
-          props.tranche === 'senior' &&
-          trancheData?.inMemberlist === false &&
-          config.featureFlagNewOnboarding && (
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <PoolLink href={'/onboarding'}>
-                <Anchor>
-                  <Button label="Invest" primary />
-                </Anchor>
-              </PoolLink>
-            </Box>
-          )}
+        {props.pool && props.tranche === 'senior' && !trancheData?.inMemberlist && config.featureFlagNewOnboarding && (
+          <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+            <PoolLink href={'/onboarding'}>
+              <Anchor>
+                <Button label="Invest" primary />
+              </Anchor>
+            </PoolLink>
+          </Box>
+        )}
 
-        {!config.featureFlagNewOnboarding && props.pool && trancheData?.inMemberlist === false && (
+        {!config.featureFlagNewOnboarding && props.pool && !trancheData?.inMemberlist && (
           <>
             {address && (
               <Info>

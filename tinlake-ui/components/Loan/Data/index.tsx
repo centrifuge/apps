@@ -20,7 +20,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
 
   return (
     <Box gap="medium" pad="medium" elevation="small" round="xsmall" background="white" width="80%">
-      <Box direction="row" margin={{ left: 'auto', right: 'auto' }}>
+      <Box direction="row">
         <span
           style={{
             marginRight: '24px',

@@ -92,7 +92,9 @@ const KycStep: React.FC<Props> = (props: Props) => {
           </Box>
         </StepBody>
       )}
+      {/* TODO: or not whitelisted */}
       {!props.active && <StepBody inactive>&nbsp;</StepBody>}
+      {props.agreementStatus === 'countersigned' && <StepBody>&nbsp;</StepBody>}
     </Step>
   )
 }

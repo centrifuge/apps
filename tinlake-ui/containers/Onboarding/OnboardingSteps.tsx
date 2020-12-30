@@ -1,15 +1,16 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { Box, Heading } from 'grommet'
+import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import PoolTitle from '../../components/PoolTitle'
 import { Pool } from '../../config'
-import { Step, StepHeader, StepIcon, StepTitle } from './styles'
+import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 import KycStep from './KycStep'
 import AgreementStep from './AgreementStep'
 import { useDispatch, useSelector } from 'react-redux'
 import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
 import ConnectStep from './ConnectStep'
 import { AgreementsStatus } from '@centrifuge/onboard-api/src/controllers/types'
+import { PoolLink } from '../../components/PoolLink'
 
 interface Props {
   activePool: Pool
@@ -70,6 +71,18 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
             <StepIcon inactive={activeSteps < 4} />
             <StepTitle inactive={activeSteps < 4}>Invest in {props.activePool.metadata.name}</StepTitle>
           </StepHeader>
+          {activeSteps >= 4 && (
+            <StepBody>
+              <Box pad={{ vertical: 'medium' }}>You're now ready to invest in {props.activePool.metadata.name}!</Box>
+              <Box margin={{ bottom: 'medium' }}>
+                <div>
+                  <PoolLink href={{ pathname: '/investments', query: { invest: 'senior' } }}>
+                    <Button primary label={'Invest'} fill={false} />
+                  </PoolLink>
+                </div>
+              </Box>
+            </StepBody>
+          )}
         </Step>
       </Box>
     </Box>
