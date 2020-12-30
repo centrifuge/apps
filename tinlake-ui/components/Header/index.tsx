@@ -147,7 +147,7 @@ const Header: React.FC<Props> = (props: Props) => {
                 kycStatus={
                   onboarding.data?.kyc?.verified ? 'verified' : onboarding.data?.kyc?.created ? 'pending' : 'none'
                 }
-                showKycInfo={true}
+                showKycInfo={config.featureFlagNewOnboarding}
               />
             )}
           </div>
