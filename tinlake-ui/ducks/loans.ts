@@ -160,19 +160,6 @@ export function loadLoan(
         returns: [[`principal`, toBN]],
       },
       {
-        target: tinlake.contractAddresses.TITLE,
-        call: ['ownerOf(uint256)(address)', loanId],
-        returns: [
-          [
-            `ownerOf`,
-            (val: string | null) => {
-              if (!val) return ZERO_ADDRESS
-              return val
-            },
-          ],
-        ],
-      },
-      {
         target: tinlake.contractAddresses.PILE,
         call: ['rates(uint256)(uint256,uint256,uint256,uint48,uint256)', riskGroup],
         returns: [[`rates.pie`], [`rates.chi`], [`rates.interestRate`], [`rates.lastUpdated`], [`rates.fixedRate`]],
@@ -226,13 +213,15 @@ export function loadLoan(
           return prev
         }, prev)
 
+        data.ownerOf = await tinlake.getOwnerOfLoan(loanId)
+
         // TODO: load getOwnerOfCollateral using multicall
         if (
           (await tinlake.getOwnerOfCollateral(data.registry, data.tokenId)).toString() ===
           tinlake.contractAddresses.SHELF
         ) {
           data.status = 'ongoing'
-        } else if ((data.ownerOf as any) === ZERO_ADDRESS) {
+        } else if (data.ownerOf === ZERO_ADDRESS) {
           data.status = 'closed'
         } else {
           data.status = 'NFT locked'

@@ -13,7 +13,7 @@ export type Loan = {
   loanId: string
   registry: string
   tokenId: BN
-  ownerOf: BN
+  ownerOf: string
   principal: BN
   interestRate: BN
   debt: BN
