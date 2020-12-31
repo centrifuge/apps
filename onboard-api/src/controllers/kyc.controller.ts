@@ -37,14 +37,14 @@ export class KycController {
     // TODO: redirect to app?
     if (!kycInfo.providerAccountId) throw new BadRequestException('Code has already been used')
 
-    const investor = await this.securitizeService.getInvestor(kycInfo.digest.accessToken)
+    const investor = await this.securitizeService.getInvestor(kycInfo.digest)
     if (!investor) throw new BadRequestException('Failed to retrieve investor information from Securitize')
 
     // Update KYC and email records in our database
     const kyc = await this.kycRepo.upsertSecuritize(address.userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!kyc) throw new BadRequestException('Failed to create KYC entity')
 
-    await this.userRepo.update(address.userId, investor.email, investor.details.address.countryCode)
+    await this.userRepo.update(address.userId, investor.email, investor.fullName, investor.details.address.countryCode)
 
     await this.agreementRepo.createAgreementsForPool(params.poolId, address.userId, investor.email)
 

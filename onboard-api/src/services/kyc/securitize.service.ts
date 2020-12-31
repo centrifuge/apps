@@ -2,13 +2,15 @@ import { Injectable } from '@nestjs/common'
 import config from '../../config'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
+export interface SecuritizeDigest {
+  accessToken: string
+  refreshToken: string
+  expiration: string
+}
+
 export interface SecuritizeKYCInfo {
   providerAccountId: string
-  digest: {
-    accessToken: string
-    refreshToken: string
-    expiration: string
-  }
+  digest: SecuritizeDigest
 }
 
 @Injectable()
@@ -46,18 +48,40 @@ export class SecuritizeService {
   }
 
   // TODO: implement support for refreshing the access token
-  async getInvestor(accessToken: string): Promise<Investor> {
+  async getInvestor(digest: SecuritizeDigest): Promise<Investor> {
     const url = `${config.securitize.apiHost}v1/${config.securitize.clientId}/investor`
 
     const response = await fetch(url, {
       headers: {
-        'access-token': accessToken,
+        'access-token': digest.accessToken,
         Authorization: `${config.securitize.secret}`,
       },
     })
 
+    if (response.status === 401) {
+      // Access token has expired
+      console.log({ digest })
+      this.refreshAccessToken(digest.refreshToken)
+    }
+
     const investor = await response.json()
     return investor
+  }
+
+  private async refreshAccessToken(refreshToken: string): Promise<any> {
+    const url = `${config.securitize.apiHost}v1/${config.securitize.clientId}/oauth2/refresh`
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `${config.securitize.secret}`,
+      },
+      body: JSON.stringify({ refreshToken }),
+    })
+
+    const content = await response.json()
+    console.log({ content })
   }
 }
 

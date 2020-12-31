@@ -38,6 +38,11 @@ export class AddressController {
     const kyc = await this.kycRepo.find(address.userId)
     if (kyc) {
       // TODO: if not verified, check verified status
+      if (!kyc.verifiedAt) {
+        const investor = await this.securitizeService.getInvestor(kyc.digest)
+        console.log({ investor })
+      }
+
       const agreements = await this.agreementRepo.findByUserAndPool(address.userId, params.poolId, user.email)
 
       // TODO: this should be handled in a Connect webhook from Docusign

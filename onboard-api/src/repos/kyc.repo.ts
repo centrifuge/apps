@@ -9,7 +9,7 @@ export interface KycEntity {
   provider: string
   providerAccountId: string
   poolId?: string
-  digest: object
+  digest: SecuritizeDigest
   createdAt?: Date
   verifiedAt?: Date
 }

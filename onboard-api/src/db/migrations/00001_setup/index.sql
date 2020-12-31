@@ -3,6 +3,7 @@ create table if not exists users
 (
   id uuid primary key,
   email varchar(255),
+  full_name varchar(255),
   country_code character varying(5),
   created_at timestamp with time zone not null default now()
 );
