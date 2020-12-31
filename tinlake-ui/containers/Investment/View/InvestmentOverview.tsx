@@ -147,7 +147,8 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
         </Table>
 
         <Box margin={{ top: 'medium' }}>
-          {config.featureFlagNewOnboarding ? (
+          {'addresses' in props.selectedPool &&
+          config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
             <Box gap="small" justify="end" direction="row">
               {/* TODO: if already whitelisted, then go to investments page */}
               <PoolLink href={'/onboarding'}>

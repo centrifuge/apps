@@ -81,7 +81,8 @@ const Overview: React.FC<Props> = (props: Props) => {
 
           {isUpcoming && (
             <Box margin={{ top: 'medium' }}>
-              {config.featureFlagNewOnboarding ? (
+              {'addresses' in props.selectedPool &&
+              config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
                 <OnboardModal pool={props.selectedPool} />
               ) : (
                 <InvestAction pool={props.selectedPool} />

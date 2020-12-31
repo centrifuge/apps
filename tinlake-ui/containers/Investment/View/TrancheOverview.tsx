@@ -227,45 +227,54 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             )}
           </>
         )}
-        {props.pool && props.tranche === 'senior' && !trancheData?.inMemberlist && config.featureFlagNewOnboarding && (
-          <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-            <PoolLink href={'/onboarding'}>
-              <Anchor>
-                <Button label="Invest" primary />
-              </Anchor>
-            </PoolLink>
-          </Box>
-        )}
+        {props.pool &&
+          props.tranche === 'senior' &&
+          !trancheData?.inMemberlist &&
+          'addresses' in props.pool &&
+          config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT) && (
+            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+              <PoolLink href={'/onboarding'}>
+                <Anchor>
+                  <Button label="Invest" primary />
+                </Anchor>
+              </PoolLink>
+            </Box>
+          )}
 
-        {!config.featureFlagNewOnboarding && props.pool && !trancheData?.inMemberlist && (
-          <>
-            {address && (
-              <Info>
-                <>
+        {props.pool &&
+          !(
+            'addresses' in props.pool &&
+            config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT)
+          ) &&
+          !trancheData?.inMemberlist && (
+            <>
+              {address && (
+                <Info>
+                  <>
+                    <Heading level="6" margin={{ bottom: 'xsmall' }}>
+                      Interested in investing?
+                    </Heading>
+                    If you want to learn more get started with your onboarding process.
+                    <Box justify="end" margin={{ top: 'small' }}>
+                      <InvestAction pool={props.pool} />
+                    </Box>
+                  </>
+                </Info>
+              )}
+
+              {!address && (
+                <Info>
                   <Heading level="6" margin={{ bottom: 'xsmall' }}>
                     Interested in investing?
                   </Heading>
-                  If you want to learn more get started with your onboarding process.
-                  <Box justify="end" margin={{ top: 'small' }}>
-                    <InvestAction pool={props.pool} />
+                  Connect your wallet to start the process.
+                  <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                    <Button primary label="Connect" onClick={connect} />
                   </Box>
-                </>
-              </Info>
-            )}
-
-            {!address && (
-              <Info>
-                <Heading level="6" margin={{ bottom: 'xsmall' }}>
-                  Interested in investing?
-                </Heading>
-                Connect your wallet to start the process.
-                <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-                  <Button primary label="Connect" onClick={connect} />
-                </Box>
-              </Info>
-            )}
-          </>
-        )}
+                </Info>
+              )}
+            </>
+          )}
       </Box>
     </Box>
   )

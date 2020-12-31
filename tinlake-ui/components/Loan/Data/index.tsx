@@ -106,7 +106,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
               {borrower && (
                 <TableRow>
                   <TableCell scope="row" border={{ color: 'transparent' }}>
-                    Borrower address
+                    Financed by
                   </TableCell>
                   <TableCell style={{ textAlign: 'end', float: 'right' }} border={{ color: 'transparent' }}>
                     <DisplayFieldWrapper>

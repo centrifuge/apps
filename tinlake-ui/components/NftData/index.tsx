@@ -50,7 +50,7 @@ class NftData extends React.Component<Props> {
             </Box>
             <Box basis={'1/3'} gap="medium">
               <DisplayField
-                label={'NFT Owner'}
+                label={'NFT current owner'}
                 copy={true}
                 as={'span'}
                 value={nftOwner}
