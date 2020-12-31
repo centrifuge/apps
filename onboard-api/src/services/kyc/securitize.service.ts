@@ -48,7 +48,7 @@ export class SecuritizeService {
   }
 
   // TODO: implement support for refreshing the access token
-  async getInvestor(digest: SecuritizeDigest): Promise<Investor> {
+  async getInvestor(digest: SecuritizeDigest): Promise<Investor | undefined> {
     const url = `${config.securitize.apiHost}v1/${config.securitize.clientId}/investor`
 
     const response = await fetch(url, {
@@ -60,15 +60,20 @@ export class SecuritizeService {
 
     if (response.status === 401) {
       // Access token has expired
-      console.log({ digest })
-      this.refreshAccessToken(digest.refreshToken)
+      console.log('Access token has expired')
+      const newDigest = await this.refreshAccessToken(digest.refreshToken)
+      console.log({ newDigest })
+      if (!newDigest) return undefined
+
+      // TODO: store new digest
+      // TODO: Get investor again with new digest
     }
 
     const investor = await response.json()
     return investor
   }
 
-  private async refreshAccessToken(refreshToken: string): Promise<any> {
+  private async refreshAccessToken(refreshToken: string): Promise<SecuritizeDigest | undefined> {
     const url = `${config.securitize.apiHost}v1/${config.securitize.clientId}/oauth2/refresh`
 
     const response = await fetch(url, {
@@ -80,8 +85,17 @@ export class SecuritizeService {
       body: JSON.stringify({ refreshToken }),
     })
 
+    if (response.status === 401) {
+      // Refresh token has also expired
+      return undefined
+    }
+
     const content = await response.json()
-    console.log({ content })
+    return {
+      accessToken: content.accessToken,
+      refreshToken: content.refreshToken,
+      expiration: content.expiration,
+    }
   }
 }
 

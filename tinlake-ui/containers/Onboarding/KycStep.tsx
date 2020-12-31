@@ -11,7 +11,7 @@ interface Props {
   tinlake: ITinlake
   active: boolean
   onboarding: OnboardingState
-  kycStatus: 'none' | 'created' | 'verified'
+  kycStatus: 'none' | 'created' | 'verified' | 'requires-signin'
 }
 
 const KycStep: React.FC<Props> = (props: Props) => {
@@ -26,7 +26,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <StepIcon inactive={!props.active} checked={props.kycStatus === 'verified'} />
         )}
         <StepTitle inactive={!props.active}>
-          {props.kycStatus === 'none'
+          {props.kycStatus === 'none' || props.kycStatus === 'requires-signin'
             ? 'Submit KYC information'
             : props.kycStatus === 'verified'
             ? 'KYC status: verified'
@@ -68,7 +68,39 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>
       )}
-      <StepBody inactive={!props.active}>&nbsp;</StepBody>
+      {props.active && props.kycStatus === 'requires-signin' && (
+        <StepBody>
+          <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
+            To continue with onboarding, you need to sign in again with your Securitize iD.
+          </Paragraph>
+          <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
+            <FormFieldWithoutBorder error={error}>
+              <CheckBox
+                checked={checked}
+                label="I accept the data privacy policy and that data is shared with Centrifuge and the issuer."
+                onChange={(event) => setChecked(event.target.checked)}
+              />
+            </FormFieldWithoutBorder>
+          </Box>
+          <div>
+            <Button
+              primary
+              label={`Sign in with Securitize`}
+              href={props.onboarding.data?.kyc?.url}
+              onClick={(event: any) => {
+                if (!checked) {
+                  event.preventDefault()
+                  setError('This needs to be checked to proceed.')
+                }
+              }}
+              fill={false}
+            />
+          </div>
+          <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
+        </StepBody>
+      )}
+      {props.active && props.kycStatus === 'verified' && <StepBody>&nbsp;</StepBody>}
+      {!props.active && <StepBody inactive>&nbsp;</StepBody>}
     </Step>
   )
 }

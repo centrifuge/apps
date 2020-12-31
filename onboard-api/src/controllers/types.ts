@@ -3,6 +3,7 @@ export interface KycStatus {
   verified?: boolean
   us?: boolean
   url?: string
+  requiresSignin?: boolean
 }
 
 export type Tranche = 'senior' | 'junior'

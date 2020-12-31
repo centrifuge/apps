@@ -95,7 +95,6 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, PoolsSta
 export function loadPoolsDailyData(): ThunkAction<Promise<void>, PoolsState, undefined, Action> {
   return async (dispatch) => {
     const poolsDailyData = await Apollo.getPoolsDailyData()
-    console.log({ poolsDailyData })
     dispatch({ data: poolsDailyData, type: RECEIVE_POOLS_DAILY_DATA })
   }
 }

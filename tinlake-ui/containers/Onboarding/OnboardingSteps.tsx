@@ -26,7 +26,13 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
   const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
-  const kycStatus = onboarding.data?.kyc?.verified ? 'verified' : onboarding.data?.kyc?.created ? 'created' : 'none'
+  const kycStatus = onboarding.data?.kyc?.requiresSignin
+    ? 'requires-signin'
+    : onboarding.data?.kyc?.verified
+    ? 'verified'
+    : onboarding.data?.kyc?.created
+    ? 'created'
+    : 'none'
   const agreement = onboarding.data?.agreements.filter(
     (agreement: AgreementsStatus) => agreement.tranche === DefaultTranche
   )[0]
@@ -38,7 +44,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     }
 
     if (!address) setActiveSteps(1)
-    else if (kycStatus === 'none') setActiveSteps(2)
+    else if (kycStatus === 'none' || kycStatus === 'requires-signin') setActiveSteps(2)
     else if (agreementStatus === 'none') setActiveSteps(3)
     else if (kycStatus === 'created' && agreementStatus === 'signed') setActiveSteps(3)
     // TODO: what to do here?

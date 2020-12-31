@@ -41,6 +41,16 @@ export class AddressController {
       if (!kyc.verifiedAt) {
         const investor = await this.securitizeService.getInvestor(kyc.digest)
         console.log({ investor })
+
+        if (!investor) {
+          return {
+            kyc: {
+              url: authorizationLink,
+              requiresSignin: true,
+            },
+            agreements: [],
+          }
+        }
       }
 
       const agreements = await this.agreementRepo.findByUserAndPool(address.userId, params.poolId, user.email)
