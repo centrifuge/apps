@@ -58,6 +58,8 @@ export class SecuritizeService {
       },
     })
 
+    // await this.refreshAccessToken(digest.refreshToken)
+
     if (response.status === 401) {
       // Access token has expired
       console.log('Access token has expired')
@@ -85,12 +87,15 @@ export class SecuritizeService {
       body: JSON.stringify({ refreshToken }),
     })
 
+    console.log({ response })
+
     if (response.status === 401) {
       // Refresh token has also expired
       return undefined
     }
 
     const content = await response.json()
+    console.log({ content })
     return {
       accessToken: content.accessToken,
       refreshToken: content.refreshToken,

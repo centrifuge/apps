@@ -99,7 +99,9 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {props.active && props.kycStatus === 'verified' && <StepBody>&nbsp;</StepBody>}
+      {props.active && props.kycStatus !== 'none' && props.kycStatus !== 'requires-signin' && (
+        <StepBody>&nbsp;</StepBody>
+      )}
       {!props.active && <StepBody inactive>&nbsp;</StepBody>}
     </Step>
   )

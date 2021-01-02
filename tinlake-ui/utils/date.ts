@@ -6,6 +6,10 @@ export const dateToYMD = (unix: number) => {
   })
 }
 
+export const dateToYMDTechnical = (unix: number) => {
+  return new Date(unix * 1000).toLocaleDateString('en-US')
+}
+
 export const dateToYMDShort = (unix: number) => {
   return new Date(unix * 1000).toLocaleDateString('en-US', {
     year: 'numeric',

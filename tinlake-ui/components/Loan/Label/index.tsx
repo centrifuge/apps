@@ -44,7 +44,7 @@ const StatusLabel = styled.div<{ type: LabelType }>`
       ? 'transparent'
       : '#aaa'};
   border: ${(props) => (props.type === 'plain' ? '1px solid #ccc' : '1px solid transparent')};
-  opacity: 0.8;
+  opacity: 1;
   border-radius: 8px;
   padding: 4px 8px;
   font-size: 12px;
