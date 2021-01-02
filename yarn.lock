@@ -1909,8 +1909,10 @@ __metadata:
     "@nestjs/common": ^7.5.1
     "@nestjs/core": ^7.5.1
     "@nestjs/platform-express": ^7.5.1
+    "@nestjs/schedule": ^0.4.1
     "@nestjs/schematics": ^7.1.3
     "@types/cookie-parser": ^1
+    "@types/cron": ^1.7.2
     "@types/express": ^4.17.8
     "@types/node": ^14.14.10
     "@vercel/fetch-retry": ^5.0.3
@@ -3093,6 +3095,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nestjs/schedule@npm:^0.4.1":
+  version: 0.4.1
+  resolution: "@nestjs/schedule@npm:0.4.1"
+  dependencies:
+    cron: 1.7.2
+    uuid: 8.3.0
+  peerDependencies:
+    "@nestjs/common": ^6.10.11 || ^7.0.0
+    reflect-metadata: ^0.1.12
+  checksum: 2d794e82a4c2d0dbd52e2c2771e4611821e8d29b3987ba1bd827b9aa10d867bfd372f40ed2802c3cb96949f1a3f6a19b2bfebc8cebc7c4ec01d6ae046c568c2e
+  languageName: node
+  linkType: hard
+
 "@nestjs/schematics@npm:^7.1.0, @nestjs/schematics@npm:^7.1.3":
   version: 7.2.2
   resolution: "@nestjs/schematics@npm:7.2.2"
@@ -3727,6 +3742,16 @@ __metadata:
   dependencies:
     "@types/express": "*"
   checksum: a27ce8cddf829def0afd59f8da71bf4d8ed8a91ae312bbd75464d6abd8aca8dff7a558ba20aee89a528619fb1758815f57f80f945a640825487778765cda81d5
+  languageName: node
+  linkType: hard
+
+"@types/cron@npm:^1.7.2":
+  version: 1.7.2
+  resolution: "@types/cron@npm:1.7.2"
+  dependencies:
+    "@types/node": "*"
+    moment: ">=2.14.0"
+  checksum: 24628218d0645cfa82167451de1d38103bdc2e6ddb447a447ba2021b4c9da0d88cb51b39695ba51ddf31499ba4fd295694d702b5418871a255ef503c6eddc4be
   languageName: node
   linkType: hard
 
@@ -7735,6 +7760,15 @@ __metadata:
     safe-buffer: ^5.0.1
     sha.js: ^2.4.8
   checksum: 98957676a93081678a2a915ae14898d65aac9b5651ffa55b8888484dd9d79c06d3cb3f85b137cd833ab536d87adee17394bb2b0efc591ea0e34110266d5bcd75
+  languageName: node
+  linkType: hard
+
+"cron@npm:1.7.2":
+  version: 1.7.2
+  resolution: "cron@npm:1.7.2"
+  dependencies:
+    moment-timezone: ^0.5.x
+  checksum: 99e1343f5117f62dab6204d54a720943c97db187eb2d0c54d582ca829ac963f714fc1bd7cd9ac8139e7fc2a6bd9389020c9dc1cd6c60e8d5e460451b846f5391
   languageName: node
   linkType: hard
 
@@ -13850,7 +13884,16 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"moment@npm:^2.10.2":
+"moment-timezone@npm:^0.5.x":
+  version: 0.5.32
+  resolution: "moment-timezone@npm:0.5.32"
+  dependencies:
+    moment: ">= 2.9.0"
+  checksum: 1e5ff2335e310fabdebdde7c0d4b97062bb242c14926e8f79b06fdf8ad356db05d76f75add80ad1b33a68bcd330e265a1ca8b5bbdf1ea2a9c2b5df76d4e12d52
+  languageName: node
+  linkType: hard
+
+"moment@npm:>= 2.9.0, moment@npm:>=2.14.0, moment@npm:^2.10.2":
   version: 2.29.1
   resolution: "moment@npm:2.29.1"
   checksum: 86729013febf7160de5b93da69273dd304d674b0224f9544b3abd09a87671ddd2cdd57598261ce57588910d63747ffd5590965e83c790d8bf327083c0e0a06e0
@@ -19654,6 +19697,15 @@ typescript@^3.8.3:
   bin:
     uuid: dist/bin/uuid
   checksum: 25137594ba74b0ca8bcf582f8c7c2e7556efe621d5cf2459d0c713755cb67c8546768b2d05c62d65a890a44e213551010f169cfa7c6ace4adcdd1bdfab22a627
+  languageName: node
+  linkType: hard
+
+"uuid@npm:8.3.0":
+  version: 8.3.0
+  resolution: "uuid@npm:8.3.0"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: a2bdb8a3eb80a53506e9657e7e1f70d7600562bf43fa010a645fd1deb7de1686df61c496c6f9826bac4be8db4d1ac1b976dd6fdf3bd083207eec1674507936fb
   languageName: node
   linkType: hard
 

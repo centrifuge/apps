@@ -30,6 +30,7 @@ create table if not exists kyc (
     provider_account_id character varying(255) not null,
     digest jsonb,
     created_at timestamp with time zone not null default now(),
+    status character varying(20) not null default '''none'''::character varying,
     verified_at timestamp with time zone
 );
 

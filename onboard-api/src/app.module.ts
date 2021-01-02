@@ -13,13 +13,17 @@ import { DocusignService } from './services/docusign.service'
 import { SecuritizeService } from './services/kyc/securitize.service'
 import { PoolService } from './services/pool.service'
 import { SessionService } from './services/session.service'
+import { ScheduleModule } from '@nestjs/schedule'
+import { SyncService } from './services/sync.service'
 
+// TODO: separate into modules
 const databaseProviders = [DatabaseService, UserRepo, AddressRepo, KycRepo, AgreementRepo]
 const serviceProviders = [PoolService, SecuritizeService, DocusignService, DocusignAuthService, SessionService]
+const taskProviders = [SyncService]
 
 @Module({
-  imports: [],
+  imports: [ScheduleModule.forRoot()],
   controllers: [AppController, AddressController, KycController, AgreementController],
-  providers: [...databaseProviders, ...serviceProviders],
+  providers: [...databaseProviders, ...serviceProviders, ...taskProviders],
 })
 export class AppModule {}

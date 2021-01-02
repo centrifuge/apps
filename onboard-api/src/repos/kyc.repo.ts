@@ -12,6 +12,7 @@ export interface KycEntity {
   digest: SecuritizeDigest
   createdAt?: Date
   verifiedAt?: Date
+  status: 'none' | 'processing' | 'updates-required' | 'verified' | 'manual-review' | 'rejected' | 'expired'
 }
 
 export interface SecuritizeDigest {
@@ -33,6 +34,19 @@ export class KycRepo {
     `
 
     return data as KycEntity | undefined
+  }
+
+  async getProcessingInvestors(): Promise<KycEntity[]> {
+    const investors = await this.db.sql`
+      select *
+      from kyc
+      where kyc.created_at is not null
+      and kyc.verified_at is null
+    `
+
+    if (!investors) return []
+
+    return (investors as unknown) as KycEntity[]
   }
 
   async upsertSecuritize(
