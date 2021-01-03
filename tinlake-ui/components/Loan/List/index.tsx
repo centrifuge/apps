@@ -69,7 +69,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
       margin={{ bottom: 'medium' }}
       background="white"
     >
-      <div>
+      <div style={{ display: 'none' }}>
         <Button label="Export" primary onClick={saveAsCSV} />
       </div>
 

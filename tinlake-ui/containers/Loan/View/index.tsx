@@ -34,9 +34,9 @@ class LoanView extends React.Component<Props> {
   render() {
     const { loans, loanId, tinlake, auth } = this.props
     const { loan, loanState } = loans!
-    if (loanState === null || loanState === 'loading') {
-      return <Spinner height={'300px'} message={'Loading...'} />
-    }
+    // if (loanState === null || loanState === 'loading') {
+    //   return <Spinner height={'300px'} message={'Loading...'} />
+    // }
     if (loanState === 'not found') {
       return (
         <Alert margin="medium" type="error">
@@ -51,7 +51,7 @@ class LoanView extends React.Component<Props> {
     return (
       <Box>
         <LoanData loan={loan!} auth={this.props.auth} tinlake={tinlake} />
-        {loan && loan.status !== 'closed' && (
+        {loan?.status !== 'closed' && (
           <Box>
             {hasBorrowerPermissions && (
               <>
@@ -75,9 +75,7 @@ class LoanView extends React.Component<Props> {
             )}
           </Box>
         )}
-        {loan && loan.nft && this.props.auth?.address && (
-          <NftData data={loan.nft} authedAddr={this.props.auth.address} />
-        )}
+        {loan?.nft && this.props.auth?.address && <NftData data={loan.nft} authedAddr={this.props.auth.address} />}
       </Box>
     )
   }

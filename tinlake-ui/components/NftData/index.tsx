@@ -3,7 +3,6 @@ import { bnToHex, NFT } from '@centrifuge/tinlake-js'
 import { Box, Heading } from 'grommet'
 import * as React from 'react'
 import { getAddressLink, getNFTLink, hexToInt } from '../../utils/etherscanLinkGenerator'
-import Badge from '../Badge'
 
 interface Props {
   data: NFT
@@ -14,7 +13,6 @@ class NftData extends React.Component<Props> {
   render() {
     const {
       data: { registry, tokenId, nftOwner },
-      authedAddr,
     } = this.props
 
     return (
@@ -59,7 +57,6 @@ class NftData extends React.Component<Props> {
                   target: '_blank',
                 }}
               />
-              {authedAddr === nftOwner && <Badge text={'Me'} style={{ position: 'absolute', left: 100, top: 32 }} />}
             </Box>
           </Box>
         </Box>

@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
+import { KycRepo } from '../../repos/kyc.repo'
 import config from '../../config'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
@@ -15,6 +16,10 @@ export interface SecuritizeKYCInfo {
 
 @Injectable()
 export class SecuritizeService {
+  private readonly logger = new Logger(SecuritizeService.name)
+
+  constructor(private readonly kycRepo: KycRepo) {}
+
   getAuthorizationLink(poolId: string, address: string): string {
     const scope = `info%20details%20verification`
     const redirectUrl = `${config.onboardApiHost}pools/${poolId}/callback/${address}/securitize`
@@ -47,8 +52,8 @@ export class SecuritizeService {
     }
   }
 
-  // TODO: implement support for refreshing the access token
-  async getInvestor(digest: SecuritizeDigest): Promise<Investor | undefined> {
+  // dontRefresh is to prevent a recursive loop when the investor request keeps failing despite the access token being refreshed
+  async getInvestor(digest: SecuritizeDigest, dontRefresh?: boolean): Promise<Investor | undefined> {
     const url = `${config.securitize.apiHost}v1/${config.securitize.clientId}/investor`
 
     const response = await fetch(url, {
@@ -58,14 +63,15 @@ export class SecuritizeService {
       },
     })
 
-    // await this.refreshAccessToken(digest.refreshToken)
-
-    if (response.status === 401) {
+    if (!dontRefresh && response.status === 401) {
       // Access token has expired
-      console.log('Access token has expired')
+      this.logger.debug(`Access token has expired`)
       const newDigest = await this.refreshAccessToken(digest.refreshToken)
       console.log({ newDigest })
       if (!newDigest) return undefined
+
+      // this.kycRepo.upsertSecuritize(userId, providerAccountId, newDigest)
+      return this.getInvestor(newDigest, true)
 
       // TODO: store new digest
       // TODO: Get investor again with new digest
