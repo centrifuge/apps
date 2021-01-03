@@ -1,4 +1,3 @@
-import { Spinner } from '@centrifuge/axis-spinner'
 import { Box, Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
@@ -45,15 +44,15 @@ class LoanView extends React.Component<Props> {
       )
     }
 
-    const hasBorrowerPermissions =
-      loan && auth?.proxies?.map((proxy: string) => proxy.toLowerCase()).includes(loan.ownerOf.toString().toLowerCase())
+    const hasBorrowerPermissions = true
+    // loan && auth?.proxies?.map((proxy: string) => proxy.toLowerCase()).includes(loan.ownerOf.toString().toLowerCase())
 
     return (
       <Box>
         <LoanData loan={loan!} auth={this.props.auth} tinlake={tinlake} />
         {loan?.status !== 'closed' && (
           <Box>
-            {hasBorrowerPermissions && (
+            {loan && hasBorrowerPermissions && (
               <>
                 <Heading level="5" margin={{ top: 'large', bottom: 'medium' }}>
                   Finance / Repay{' '}
@@ -75,7 +74,7 @@ class LoanView extends React.Component<Props> {
             )}
           </Box>
         )}
-        {loan?.nft && this.props.auth?.address && <NftData data={loan.nft} authedAddr={this.props.auth.address} />}
+        <NftData data={loan?.nft} />
       </Box>
     )
   }

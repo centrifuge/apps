@@ -15,9 +15,13 @@ interface Props {
   rightContent?: React.ReactNode
 }
 
+const OversubscribedMargin = 100
+
 const PoolTitle: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
-  const isOversubscribed = (pool?.data && new BN(pool?.data.maxReserve).lte(new BN(pool?.data.reserve))) || false
+  const isOversubscribed =
+    (pool?.data && new BN(pool?.data.maxReserve).lte(new BN(pool?.data.reserve).add(new BN(OversubscribedMargin)))) ||
+    false
 
   // TODO: fix this somehow, otherwise the oversubscribed label isn't shown on pages which don't load the pool data
   // (but this requires injecting the tinlake prop everywhere we include the PoolTitle component)

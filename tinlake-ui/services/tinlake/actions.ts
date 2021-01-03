@@ -553,6 +553,10 @@ export async function repayFull(tinlake: ITinlake, loan: Loan): Promise<PendingT
   return tinlake.proxyRepayUnlockClose(proxy.toString(), loan.tokenId.toString(), loanId, loan.registry)
 }
 
+export const close = async (tinlake: ITinlake, loan: Loan): Promise<PendingTransaction> => {
+  return tinlake.close(loan.loanId)
+}
+
 export async function getInvestor(tinlake: ITinlake, address: string) {
   return tinlake.getInvestor(address)
 }

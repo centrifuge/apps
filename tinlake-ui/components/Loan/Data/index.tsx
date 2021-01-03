@@ -19,7 +19,6 @@ interface Props {
 
 import styled from 'styled-components'
 import { LoadingValue } from '../../LoadingValue'
-import Badge from '../../Badge'
 const DisplayFieldWrapper = styled.div`
   width: 100%;
   max-width: 200px;
