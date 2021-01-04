@@ -9,7 +9,10 @@ interface Props {
 
 const LoanLabel: React.FC<Props> = (props: Props) => {
   const getLabelType = (l: Loan): LabelType => {
-    const days = daysBetween(new Date().getTime() / 1000, Number(l.maturityDate))
+    const today = new Date()
+    today.setUTCHours(0, 0, 0, 0)
+    const days = daysBetween(today.getTime() / 1000, Number(l.maturityDate))
+
     if (l.status === 'ongoing' && days <= 5) return 'warning'
     if (l.status === 'closed') return 'info'
     if (l.status === 'NFT locked') return 'plain'

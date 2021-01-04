@@ -104,7 +104,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
                   Financed by
                 </TableCell>
                 <TableCell style={{ textAlign: 'end', float: 'right' }} border={{ color: 'transparent' }}>
-                  <LoadingValue done={props.loan?.borrower !== undefined} height={28}>
+                  <LoadingValue done={props.loan?.borrower !== undefined} height={24}>
                     {props.loan?.borrower && (
                       <DisplayFieldWrapper>
                         <DisplayField

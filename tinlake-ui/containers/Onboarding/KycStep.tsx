@@ -121,6 +121,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
         </StepBody>
       )}
       {props.active &&
+        !!props.kycStatus &&
         props.kycStatus !== 'none' &&
         props.kycStatus !== 'requires-signin' &&
         props.kycStatus !== 'updates-required' && <StepBody>&nbsp;</StepBody>}
