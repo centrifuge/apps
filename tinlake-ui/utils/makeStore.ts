@@ -7,7 +7,9 @@ import investmentsReducer from '../ducks/investments'
 import loansReducer from '../ducks/loans'
 import poolReducer from '../ducks/pool'
 import poolsReducer from '../ducks/pools'
+import rewardsReducer from '../ducks/rewards'
 import transactionReducer from '../ducks/transactions'
+import userRewardsReducer from '../ducks/userRewards'
 
 const sentryReduxEnhancer = config.enableErrorLogging ? Sentry.createReduxEnhancer({}) : {}
 
@@ -31,6 +33,8 @@ const makeStore = () => {
       pool: poolReducer,
       auth: authReducer,
       transactions: transactionReducer,
+      rewards: rewardsReducer,
+      userRewards: userRewardsReducer,
     }),
     composeEnhancers(applyMiddleware(thunk))
   )

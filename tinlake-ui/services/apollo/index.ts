@@ -7,6 +7,8 @@ import gql from 'graphql-tag'
 import fetch from 'node-fetch'
 import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
 import { PoolData, PoolsData } from '../../ducks/pools'
+import { RewardsData } from '../../ducks/rewards'
+import { UserRewardsData } from '../../ducks/userRewards'
 import { getPoolStatus } from '../../utils/pool'
 import { UintBase } from '../../utils/ratios'
 
@@ -260,6 +262,88 @@ class Apollo {
     const tinlakeLoans = (pool && toTinlakeLoans(pool.loans)) || []
     return tinlakeLoans
   }
+
+  async getRewards(): Promise<RewardsData | null> {
+    let result
+    try {
+      result = await this.client.query({
+        query: gql`
+          {
+            rewardDayTotals(first: 1, skip: 1, orderBy: id, orderDirection: desc) {
+              toDateAggregateValue
+            }
+          }
+        `,
+      })
+    } catch (err) {
+      console.error(`error occured while fetching total rewards from apollo ${err}`)
+      return null
+    }
+    if (!result.data?.rewardDayTotals[0]?.toDateAggregateValue) {
+      return null
+    }
+
+    return { toDateAggregateValue: result.data?.rewardDayTotals[0]?.toDateAggregateValue }
+  }
+
+  async getUserRewards(user: string): Promise<UserRewardsData | null> {
+    let result
+    try {
+      result = await this.client.query({
+        query: gql`
+        {
+          rewardBalances(where : {id: "${user}"}) {
+            claims {
+              centAddress
+              rewardsAccumulated
+            }
+            eligible
+            claimableRewards
+            totalRewards
+            nonZeroBalanceSince
+          }
+        }
+        `,
+      })
+    } catch (err) {
+      console.error(`error occurred while fetching user rewards for user ${user} from apollo ${err}`)
+      return null
+    }
+
+    const data = result.data?.rewardBalances[0]
+    if (!data) {
+      return null
+    }
+
+    return {
+      claims: data.claims,
+      eligible: data.eligible,
+      claimableRewards: data.claimableRewards,
+      totalRewards: data.totalRewards,
+      nonZeroBalanceSince: data.nonZeroBalanceSince,
+    }
+  }
+
+  // async getRewardsByUserToken(user: string) {
+  //   let result
+  //   try {
+  //     result = await this.client.query({
+  //       query: gql`
+  //       {
+  //         rewardByTokens(where : {account: "${user}"}) {
+  //           token
+  //           rewards
+  //         }
+  //       }
+  //       `,
+  //     })
+  //   } catch (err) {
+  //     console.error(`error occurred while fetching loans from apollo ${err}`)
+  //     return {
+  //       data: [],
+  //     }
+  //   }
+  // }
 
   async getProxies(user: string) {
     let result
