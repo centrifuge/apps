@@ -6,7 +6,7 @@ import { UserRepo } from '../repos/user.repo'
 import { DocusignService } from '../services/docusign.service'
 import { SecuritizeService } from '../services/kyc/securitize.service'
 import { PoolService } from '../services/pool.service'
-import { AddressStatus, AgreementsStatus } from './types'
+import { AddressStatus, AgreementsStatus, KycStatusLabel } from './types'
 
 @Controller()
 export class AddressController {
@@ -37,10 +37,10 @@ export class AddressController {
     const authorizationLink = this.securitizeService.getAuthorizationLink(params.poolId, params.address)
     const kyc = await this.kycRepo.find(address.userId)
     if (kyc) {
-      // TODO: if not verified, check verified status
+      let status: KycStatusLabel = kyc.status
+
       if (!kyc.verifiedAt) {
         const investor = await this.securitizeService.getInvestor(kyc.digest)
-        console.log({ investor })
 
         if (!investor) {
           return {
@@ -50,6 +50,11 @@ export class AddressController {
             },
             agreements: [],
           }
+        }
+
+        if (investor.verificationStatus !== kyc.status) {
+          this.kycRepo.setStatus('securitize', kyc.providerAccountId, investor.verificationStatus as KycStatusLabel)
+          status = investor.verificationStatus as KycStatusLabel
         }
       }
 
@@ -84,6 +89,7 @@ export class AddressController {
 
       return {
         kyc: {
+          status,
           url: authorizationLink,
           us: user.countryCode === 'US',
           created: kyc.createdAt !== null,

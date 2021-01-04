@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
+import { KycStatusLabel, Tranche } from 'src/controllers/types'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { KycEntity, KycRepo } from '../repos/kyc.repo'
 import { DocusignService } from './docusign.service'
@@ -24,14 +25,11 @@ export class SyncService {
     this.logger.debug(`Syncing ${processingInvestors.length} investors`)
     processingInvestors.forEach(async (kyc: KycEntity) => {
       const investor = await this.securitizeService.getInvestor(kyc.digest)
-      if (investor) {
-        console.log(`Investor status: ${investor.verificationStatus}`)
+      if (investor && investor.verificationStatus !== kyc.status) {
+        this.logger.debug(`Update investor ${kyc.userId} status to ${investor.verificationStatus}`)
+        this.kycRepo.setStatus('securitize', kyc.providerAccountId, investor.verificationStatus as KycStatusLabel)
 
-        if (investor.verificationStatus !== kyc.status) {
-          this.logger.debug(`Update investor status`)
-          // TODO
-        }
-
+        this.whitelist(kyc.userId)
         // TODO: update personal info?
       }
     })
@@ -45,7 +43,20 @@ export class SyncService {
     // TODO: use Promise.all
     agreements.forEach(async (agreement: Agreement) => {
       const status = await this.docusignService.getEnvelopeStatus(agreement.providerEnvelopeId)
-      console.log({ status })
+
+      if (!agreement.counterSignedAt && status.counterSigned) {
+        console.log(`Agreement ${agreement.id} has been counter-signed`)
+        this.agreementRepo.setCounterSigned(agreement.id)
+        this.whitelist(agreement.userId, agreement.tranche)
+      }
     })
   }
+
+  // If tranche is supplied, whitelist just for that tranche. Otherwise, try to whitelist for both
+  private async whitelist(userId, tranche?: Tranche) {
+    // TODO: check kyc status and agreement status
+    this.logger.debug(`Whitelist ${userId} for ${tranche || 'both tranches'}`)
+  }
+
+  // TODO: async syncInvestorBalances()
 }

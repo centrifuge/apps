@@ -44,15 +44,15 @@ class LoanView extends React.Component<Props> {
       )
     }
 
-    const hasBorrowerPermissions = true
-    // loan && auth?.proxies?.map((proxy: string) => proxy.toLowerCase()).includes(loan.ownerOf.toString().toLowerCase())
+    const hasBorrowerPermissions =
+      loan && auth?.proxies?.map((proxy: string) => proxy.toLowerCase()).includes(loan.ownerOf.toString().toLowerCase())
 
     return (
       <Box>
         <LoanData loan={loan!} auth={this.props.auth} tinlake={tinlake} />
         {loan?.status !== 'closed' && (
           <Box>
-            {loan && hasBorrowerPermissions && (
+            {hasBorrowerPermissions && (
               <>
                 <Heading level="5" margin={{ top: 'large', bottom: 'medium' }}>
                   Finance / Repay{' '}

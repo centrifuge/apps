@@ -1,3 +1,4 @@
+import { KycStatusLabel } from '@centrifuge/onboard-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, CheckBox, Paragraph } from 'grommet'
 import * as React from 'react'
@@ -11,7 +12,7 @@ interface Props {
   tinlake: ITinlake
   active: boolean
   onboarding: OnboardingState
-  kycStatus: 'none' | 'created' | 'verified' | 'requires-signin'
+  kycStatus: KycStatusLabel | 'requires-signin'
 }
 
 const KycStep: React.FC<Props> = (props: Props) => {
@@ -21,19 +22,19 @@ const KycStep: React.FC<Props> = (props: Props) => {
   return (
     <Step>
       <StepHeader>
-        {props.kycStatus === 'created' && <Spinner />}
-        {props.kycStatus !== 'created' && (
+        {props.kycStatus === 'processing' && <Spinner />}
+        {props.kycStatus !== 'processing' && (
           <StepIcon inactive={!props.active} checked={props.kycStatus === 'verified'} />
         )}
         <StepTitle inactive={!props.active}>
-          {props.kycStatus === 'none' || props.kycStatus === 'requires-signin'
+          {props.kycStatus === 'none' || props.kycStatus === 'requires-signin' || props.kycStatus === 'updates-required'
             ? 'Submit KYC information'
             : props.kycStatus === 'verified'
             ? 'KYC status: verified'
-            : 'KYC status: awaiting verification'}
+            : 'KYC status: processing'}
         </StepTitle>
       </StepHeader>
-      {props.active && props.kycStatus === 'none' && (
+      {props.active && (props.kycStatus === 'none' || props.kycStatus === 'updates-required') && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             Tinlake has integrated Securitize.io’s automated KYC process for investor onboarding. This is a one time
@@ -99,9 +100,10 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {props.active && props.kycStatus !== 'none' && props.kycStatus !== 'requires-signin' && (
-        <StepBody>&nbsp;</StepBody>
-      )}
+      {props.active &&
+        props.kycStatus !== 'none' &&
+        props.kycStatus !== 'requires-signin' &&
+        props.kycStatus !== 'updates-required' && <StepBody>&nbsp;</StepBody>}
       {!props.active && <StepBody inactive>&nbsp;</StepBody>}
     </Step>
   )
