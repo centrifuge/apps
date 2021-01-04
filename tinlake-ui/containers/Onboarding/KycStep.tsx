@@ -2,7 +2,7 @@ import { KycStatusLabel } from '@centrifuge/onboard-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, CheckBox, Paragraph } from 'grommet'
 import * as React from 'react'
-import { Pool } from '../../config'
+import config, { Pool } from '../../config'
 import { OnboardingState } from '../../ducks/onboarding'
 import Spinner from './Spinner'
 import { Step, StepHeader, StepIcon, StepTitle, StepBody, FormFieldWithoutBorder } from './styles'
@@ -12,7 +12,7 @@ interface Props {
   tinlake: ITinlake
   active: boolean
   onboarding: OnboardingState
-  kycStatus: KycStatusLabel | 'requires-signin'
+  kycStatus: KycStatusLabel | 'requires-signin' | undefined
 }
 
 const KycStep: React.FC<Props> = (props: Props) => {
@@ -27,14 +27,17 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <StepIcon inactive={!props.active} checked={props.kycStatus === 'verified'} />
         )}
         <StepTitle inactive={!props.active}>
-          {props.kycStatus === 'none' || props.kycStatus === 'requires-signin' || props.kycStatus === 'updates-required'
+          {!props.kycStatus ||
+          props.kycStatus === 'none' ||
+          props.kycStatus === 'requires-signin' ||
+          props.kycStatus === 'updates-required'
             ? 'Submit KYC information'
             : props.kycStatus === 'verified'
             ? 'KYC status: verified'
             : 'KYC status: processing'}
         </StepTitle>
       </StepHeader>
-      {props.active && (props.kycStatus === 'none' || props.kycStatus === 'updates-required') && (
+      {props.active && !props.kycStatus && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             Tinlake has integrated Securitize.io’s automated KYC process for investor onboarding. This is a one time
@@ -64,6 +67,23 @@ const KycStep: React.FC<Props> = (props: Props) => {
                 }
               }}
               fill={false}
+            />
+          </div>
+          <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
+        </StepBody>
+      )}
+      {props.active && (props.kycStatus === 'none' || props.kycStatus === 'updates-required') && (
+        <StepBody>
+          <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
+            To complete this step, submit your KYC information on Securitize.
+          </Paragraph>
+          <div>
+            <Button
+              primary
+              label={`Complete KYC on Securitize`}
+              href={`${config.onboardAPIHost}pools/${(props.activePool as Pool).addresses.ROOT_CONTRACT}/info-redirect`}
+              fill={false}
+              target="_blank"
             />
           </div>
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>

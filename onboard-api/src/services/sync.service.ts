@@ -17,7 +17,7 @@ export class SyncService {
     private readonly docusignService: DocusignService
   ) {}
 
-  @Cron(CronExpression.EVERY_10_SECONDS) // TODO: change to e.g. every 5 min
+  @Cron(CronExpression.EVERY_MINUTE) // TODO: change to e.g. every 5 min
   async syncKycStatus() {
     const processingInvestors = await this.kycRepo.getProcessingInvestors()
     if (processingInvestors.length === 0) return
@@ -35,7 +35,7 @@ export class SyncService {
     })
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS) // TODO: change to e.g. every 5 min
+  @Cron(CronExpression.EVERY_MINUTE) // TODO: change to e.g. every 5 min
   async syncAgreementStatus() {
     const agreements = await this.agreementRepo.getAwaitingCounterSignature()
     this.logger.debug(`Syncing ${agreements.length} agreements`)

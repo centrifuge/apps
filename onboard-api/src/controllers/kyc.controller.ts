@@ -55,4 +55,9 @@ export class KycController {
     const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?onb=1&session=${session}`
     return res.redirect(redirectUrl)
   }
+
+  @Get('pools/:poolId/info-redirect')
+  async updateInfoRedirect(@Res({ passthrough: true }) res) {
+    return res.redirect(config.securitize.idHost)
+  }
 }
