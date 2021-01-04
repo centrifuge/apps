@@ -28,7 +28,7 @@ const contractNames = [
   'SENIOR_TRANCHE',
   'COORDINATOR',
   'POOL_REGISTRY',
-  'TINLAKE_CLAIM_RAD',
+  'CLAIM_RAD',
 ] as const
 
 export type PendingTransaction = {
