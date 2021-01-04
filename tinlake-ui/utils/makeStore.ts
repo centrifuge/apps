@@ -3,6 +3,7 @@ import { applyMiddleware, combineReducers, compose, createStore } from 'redux'
 import thunk from 'redux-thunk'
 import config from '../config'
 import authReducer from '../ducks/auth'
+import centChainWalletReducer from '../ducks/centChainWallet'
 import investmentsReducer from '../ducks/investments'
 import loansReducer from '../ducks/loans'
 import poolReducer from '../ducks/pool'
@@ -35,6 +36,7 @@ const makeStore = () => {
       transactions: transactionReducer,
       rewards: rewardsReducer,
       userRewards: userRewardsReducer,
+      centChainWallet: centChainWalletReducer,
     }),
     composeEnhancers(applyMiddleware(thunk))
   )

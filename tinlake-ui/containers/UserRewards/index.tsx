@@ -1,4 +1,4 @@
-import { baseToDisplay } from '@centrifuge/tinlake-js'
+import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box } from 'grommet'
 import * as React from 'react'
@@ -6,15 +6,16 @@ import { useDispatch, useSelector } from 'react-redux'
 import { LoadingValue } from '../../components/LoadingValue'
 import NumberDisplay from '../../components/NumberDisplay'
 import { Cont, Label, TokenLogo, Unit, Value } from '../../components/PoolsMetrics/styles'
-import { IpfsPools } from '../../config'
 import { AuthState } from '../../ducks/auth'
 import { loadUserRewards, UserRewardsState } from '../../ducks/userRewards'
+import CentChainWallet from '../CentChainWallet'
+import SetCentAddress from '../SetCentAddress'
 
 interface Props {
-  ipfsPools: IpfsPools
+  tinlake: ITinlake
 }
 
-const UserRewards: React.FC<Props> = (props: Props) => {
+const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
   const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
   const dispatch = useDispatch()
 
@@ -35,7 +36,7 @@ const UserRewards: React.FC<Props> = (props: Props) => {
     )
   }
 
-  const data = userRewards.data
+  const data = userRewards.ethData
 
   return (
     <>
@@ -53,7 +54,7 @@ const UserRewards: React.FC<Props> = (props: Props) => {
             <TokenLogo src={`/static/rad.svg`} />
             <Value>
               <LoadingValue
-                done={userRewards?.state === 'found' && !!data}
+                done={userRewards?.ethState === 'found' && !!data}
                 render={() => <NumberDisplay value={baseToDisplay(data!.totalRewards, 18)} precision={4} />}
               ></LoadingValue>
             </Value>{' '}
@@ -73,7 +74,7 @@ const UserRewards: React.FC<Props> = (props: Props) => {
             <TokenLogo src={`/static/rad.svg`} />
             <Value>
               <LoadingValue
-                done={userRewards?.state === 'found' && !!data}
+                done={userRewards?.ethState === 'found' && !!data}
                 render={() => <NumberDisplay value={baseToDisplay(data!.claimableRewards, 18)} precision={4} />}
               ></LoadingValue>
             </Value>{' '}
@@ -82,8 +83,11 @@ const UserRewards: React.FC<Props> = (props: Props) => {
           <Label>Your Claimable Rewards</Label>
         </Box>
       </Box>
-      <h1>Your Centrifuge Chain Address</h1>
-      {data?.claims.length === 0 && <div>You have not yet set a Centrifuge Chain address. TODO</div>}
+      <h1>Claim Your Rewards</h1>
+      <h2>1. Connect Your Wallet</h2>
+      <CentChainWallet tinlake={tinlake} />
+      <h2>2. Set Your Centrifuge Chain Address</h2>
+      {data?.claims.length === 0 && <SetCentAddress tinlake={tinlake} />}
       {data?.claims.length === 1 && (
         <div>
           Your Centrifuge Chain address is set to {data.claims[0].centAddress}, which has accumulated{' '}
@@ -100,9 +104,15 @@ const UserRewards: React.FC<Props> = (props: Props) => {
           ))}
         </div>
       )}
-      <h1>Claim Your Rewards</h1>
+      <h2>3. Collect Rewards on Centrifuge Chain</h2>
       {data?.claims && data.claims.length > 0 && !data?.eligible && (
-        <div>You can not yet claim your rewards, please come back {comebackDate(data?.nonZeroBalanceSince)}</div>
+        <div>You can not yet collect your rewards, please come back {comebackDate(data?.nonZeroBalanceSince)}</div>
+      )}
+      {data?.claims && data.claims.length > 0 && data?.eligible && (
+        <div>
+          You can collect your rewards:
+          {/* TODO */}
+        </div>
       )}
     </>
   )

@@ -8,7 +8,7 @@ import fetch from 'node-fetch'
 import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
 import { PoolData, PoolsData } from '../../ducks/pools'
 import { RewardsData } from '../../ducks/rewards'
-import { UserRewardsData } from '../../ducks/userRewards'
+import { UserRewardsEthData } from '../../ducks/userRewards'
 import { getPoolStatus } from '../../utils/pool'
 import { UintBase } from '../../utils/ratios'
 
@@ -286,7 +286,7 @@ class Apollo {
     return { toDateAggregateValue: result.data?.rewardDayTotals[0]?.toDateAggregateValue }
   }
 
-  async getUserRewards(user: string): Promise<UserRewardsData | null> {
+  async getUserRewards(user: string): Promise<UserRewardsEthData | null> {
     let result
     try {
       result = await this.client.query({

@@ -90,6 +90,8 @@ interface Config {
   onboardAPIHost: string
   featureFlagNewOnboarding: boolean
   enableErrorLogging: boolean
+  centrifugeChainUrl: string
+  claimRADContractAddress: string
 }
 
 export interface IpfsPools {
@@ -304,6 +306,15 @@ const config: Config = {
     .string()
     .required('NEXT_PUBLIC_ONBOARD_API_HOST is required')
     .validateSync(process.env.NEXT_PUBLIC_ONBOARD_API_HOST),
+  centrifugeChainUrl: yup
+    .string()
+    .required('NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL is required')
+    .validateSync(process.env.NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL),
+  claimRADContractAddress: yup
+    .string()
+    .matches(/0x[0-9a-z]{64}/)
+    .required('NEXT_PUBLIC_CLAIM_RAD_CONTRACT_ADDRESS is required')
+    .validateSync(process.env.NEXT_PUBLIC_CLAIM_RAD_CONTRACT_ADDRESS),
   featureFlagNewOnboarding: yup.boolean().validateSync(process.env.NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING),
   enableErrorLogging: yup.boolean().validateSync(false),
 }

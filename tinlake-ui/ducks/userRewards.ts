@@ -3,18 +3,20 @@ import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import Apollo from '../services/apollo'
+import { accountIdToCentChainAddr } from '../services/centChain/accountIdToCentChainAddr'
 
 // Actions
 const LOAD_USER_REWARDS = 'tinlake-ui/user-rewards/LOAD_USER_REWARDS'
 const RECEIVE_USER_REWARDS = 'tinlake-ui/user-rewards/RECEIVE_USER_REWARDS'
 const LOAD_CENT_ADDR = 'tinlake-ui/user-rewards/LOAD_CENT_ADDR'
 const RECEIVE_CENT_ADDR = 'tinlake-ui/user-rewards/RECEIVE_CENT_ADDR'
+const RECEIVE_CENT_ADDR_EMPTY = 'tinlake-ui/user-rewards/RECEIVE_CENT_ADDR_EMPTY'
 
 // just used for readability
 type BigDecimalString = string
 type BigIntString = string
 
-export interface UserRewardsData {
+export interface UserRewardsEthData {
   claims: {
     centAddress: string
     rewardsAccumulated: BigDecimalString
@@ -26,18 +28,18 @@ export interface UserRewardsData {
 }
 
 export interface UserRewardsState {
-  centAddrState: null | 'loading' | 'found' | 'empty'
+  ethCentAddrState: null | 'loading' | 'found' | 'empty'
   // the Centrifuge Chain address set on Ethereum
-  centAddr: null | string
-  state: null | 'loading' | 'found'
-  data: null | UserRewardsData
+  ethCentAddr: null | string
+  ethState: null | 'loading' | 'found'
+  ethData: null | UserRewardsEthData
 }
 
 const initialState: UserRewardsState = {
-  centAddrState: null,
-  centAddr: null,
-  state: null,
-  data: null,
+  ethCentAddrState: null,
+  ethCentAddr: null,
+  ethState: null,
+  ethData: null,
 }
 
 export default function reducer(
@@ -48,17 +50,15 @@ export default function reducer(
     case HYDRATE:
       return { ...state, ...(action.payload.userRewards || {}) }
     case LOAD_USER_REWARDS:
-      return { ...state, state: 'loading' }
+      return { ...state, ethState: 'loading' }
     case RECEIVE_USER_REWARDS:
-      return { ...state, state: 'found', data: action.data }
+      return { ...state, ethState: 'found', ethData: action.data }
     case LOAD_CENT_ADDR:
-      return { ...state, centAddrState: 'loading' }
-    case RECEIVE_CENT_ADDR: {
-      if (action.data === '0x0000000000000000000000000000000000000000000000000000000000000000') {
-        return { ...state, centAddrState: 'empty', centAddr: null }
-      }
-      return { ...state, centAddrState: 'found', centAddr: action.data }
-    }
+      return { ...state, ethCentAddrState: 'loading' }
+    case RECEIVE_CENT_ADDR_EMPTY:
+      return { ...state, ethCentAddrState: 'empty', ethCentAddr: null }
+    case RECEIVE_CENT_ADDR:
+      return { ...state, ethCentAddrState: 'found', ethCentAddr: action.data }
     default:
       return state
   }
@@ -70,15 +70,12 @@ export function loadCentAddr(
 ): ThunkAction<Promise<void>, UserRewardsState, undefined, Action> {
   return async (dispatch) => {
     dispatch({ type: LOAD_CENT_ADDR })
-    const centAddr = await tinlake.getClaimRADAddress(ethAddr)
-    dispatch({ data: centAddr, type: RECEIVE_CENT_ADDR })
-  }
-}
-
-// TODO remove, just for debugging
-export function setCentAddr(addr: string): ThunkAction<Promise<void>, UserRewardsState, undefined, Action> {
-  return async (dispatch) => {
-    dispatch({ data: addr, type: RECEIVE_CENT_ADDR })
+    const accountId = await tinlake.getClaimRADAddress(ethAddr)
+    if (accountId === '0x0000000000000000000000000000000000000000000000000000000000000000') {
+      dispatch({ type: RECEIVE_CENT_ADDR_EMPTY })
+      return
+    }
+    dispatch({ data: accountIdToCentChainAddr(accountId), type: RECEIVE_CENT_ADDR })
   }
 }
 

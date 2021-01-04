@@ -5,14 +5,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import { LoadingValue } from '../../components/LoadingValue'
 import NumberDisplay from '../../components/NumberDisplay'
 import { Cont, Label, TokenLogo, Unit, Value } from '../../components/PoolsMetrics/styles'
-import { IpfsPools } from '../../config'
 import { loadRewards, RewardsState } from '../../ducks/rewards'
 
-interface Props {
-  ipfsPools: IpfsPools
-}
+interface Props {}
 
-const Rewards: React.FC<Props> = (props: Props) => {
+const Rewards: React.FC<Props> = (_: Props) => {
   const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
   const dispatch = useDispatch()
 
