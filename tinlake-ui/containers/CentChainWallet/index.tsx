@@ -1,14 +1,9 @@
-import { ITinlake } from '@centrifuge/tinlake-js'
 import { Button } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { CentChainWalletState, connect } from '../../ducks/centChainWallet'
 
-interface Props {
-  tinlake: ITinlake
-}
-
-const CentChainWallet: React.FC<Props> = ({ tinlake }: Props) => {
+const CentChainWallet: React.FC = () => {
   const dispatch = useDispatch()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
 

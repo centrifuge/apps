@@ -87,7 +87,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
       </Box>
       <h1>Claim Your Rewards</h1>
       <h2>1. Connect Your Wallet</h2>
-      <CentChainWallet tinlake={tinlake} />
+      <CentChainWallet />
       <h2>2. Set Your Centrifuge Chain Address</h2>
       {ethRewData?.claims.length === 0 &&
         ((ethCentAddrState === 'loading' && 'Your Centrifuge Chain address: loading') ||
