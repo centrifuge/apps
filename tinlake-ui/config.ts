@@ -312,7 +312,8 @@ const config: Config = {
     .validateSync(process.env.NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL),
   claimRADContractAddress: yup
     .string()
-    .matches(/0x[0-9a-z]{64}/)
+    .length(42)
+    .matches(/0x[0-9a-fA-F]{40}/)
     .required('NEXT_PUBLIC_CLAIM_RAD_CONTRACT_ADDRESS is required')
     .validateSync(process.env.NEXT_PUBLIC_CLAIM_RAD_CONTRACT_ADDRESS),
   featureFlagNewOnboarding: yup.boolean().validateSync(process.env.NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING),
