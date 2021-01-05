@@ -144,9 +144,7 @@ const Header: React.FC<Props> = (props: Props) => {
                 transactions={selectWalletTransactions(transactions)}
                 getAddressLink={getAddressLink}
                 style={{ padding: 0 }}
-                kycStatus={
-                  onboarding.data?.kyc?.verified ? 'verified' : onboarding.data?.kyc?.created ? 'pending' : 'none'
-                }
+                kycStatus={onboarding.data?.kyc?.status === 'verified' ? 'verified' : 'none'}
               />
             )}
           </div>

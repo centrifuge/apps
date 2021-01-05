@@ -2,10 +2,9 @@ import { ITinlake } from '@centrifuge/tinlake-js'
 import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import InvestAction from '../../components/InvestAction'
-import OnboardModal from '../../components/OnboardModal'
 import { PoolLink } from '../../components/PoolLink'
 import PoolTitle from '../../components/PoolTitle'
-import config, { Pool, UpcomingPool } from '../../config'
+import { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
 import { PoolState } from '../../ducks/pool'
 
@@ -81,12 +80,7 @@ const Overview: React.FC<Props> = (props: Props) => {
 
           {isUpcoming && (
             <Box margin={{ top: 'medium' }}>
-              {'addresses' in props.selectedPool &&
-              config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
-                <OnboardModal pool={props.selectedPool} />
-              ) : (
-                <InvestAction pool={props.selectedPool} />
-              )}
+              <InvestAction pool={props.selectedPool} />
             </Box>
           )}
         </Box>

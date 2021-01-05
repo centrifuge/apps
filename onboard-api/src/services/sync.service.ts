@@ -48,7 +48,7 @@ export class SyncService {
 
         await this.userRepo.update(kyc.userId, investor.email, investor.fullName, investor.details.address.countryCode)
 
-        if (investor.verificationStatus === 'verified') this.whitelist(kyc.userId)
+        this.whitelist(kyc.userId)
       }
     })
   }
@@ -72,13 +72,13 @@ export class SyncService {
 
   private async whitelist(userId, poolId?: string, tranche?: Tranche) {
     const kyc = await this.kycRepo.find(userId)
-    if (!kyc.verifiedAt || kyc.status !== 'verified') return
+    if (kyc.status !== 'verified' || (kyc.usaTaxResident && !kyc.accredited)) return
 
     // If tranche is supplied, whitelist just for that tranche. Otherwise, try to whitelist for both
-    const tranches = [tranche] || ['senior', 'junior']
+    const tranches = tranche === undefined ? ['senior', 'junior'] : [tranche]
     tranches.forEach(async (t: Tranche) => {
       // If poolId is supplied, whitelist just for that pool. Otherwise, try to whitelist for all pools
-      const poolIds = [poolId] || (await this.poolService.getIds())
+      const poolIds = poolId === undefined ? await this.poolService.getIds() : [poolId]
 
       poolIds.forEach(async (poolId: string) => {
         const agreements = await this.agreementRepo.findByUserPoolTranche(userId, poolId, t)

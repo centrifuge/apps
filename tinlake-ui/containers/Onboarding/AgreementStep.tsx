@@ -57,15 +57,17 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             You can continue onboarding by signing the {props.agreement.name} for {props.activePool.metadata.name}.
           </Paragraph>
-          <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
-            <FormFieldWithoutBorder error={error}>
-              <CheckBox
-                checked={checked}
-                label="I accept that this is a US offering which is not solicited nor offered in my home country."
-                onChange={(event) => setChecked(event.target.checked)}
-              />
-            </FormFieldWithoutBorder>
-          </Box>
+          {!props.onboarding.data?.kyc.isUsaTaxResident && (
+            <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
+              <FormFieldWithoutBorder error={error}>
+                <CheckBox
+                  checked={checked}
+                  label="I accept that this is a US offering which is not solicited nor offered in my home country."
+                  onChange={(event) => setChecked(event.target.checked)}
+                />
+              </FormFieldWithoutBorder>
+            </Box>
+          )}
           <div>
             <Button
               primary
@@ -74,7 +76,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
                 props.agreement?.id
               }/redirect?session=${session}`}
               onClick={(event: any) => {
-                if (!checked) {
+                if (props.onboarding.data?.kyc.isUsaTaxResident && !checked) {
                   event.preventDefault()
                   setError('This needs to be checked to proceed.')
                 }

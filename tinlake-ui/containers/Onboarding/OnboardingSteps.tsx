@@ -28,6 +28,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
   const address = useSelector<any, string | null>((state) => state.auth.address)
   const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
   const kycStatus = onboarding.data?.kyc?.requiresSignin ? 'requires-signin' : onboarding.data?.kyc?.status
+  const accreditationStatus = onboarding.data?.kyc?.isUsaTaxResident ? onboarding.data?.kyc?.accredited : true
   const agreement = (onboarding.data?.agreements || []).filter(
     (agreement: AgreementsStatus) => agreement.tranche === DefaultTranche
   )[0]
@@ -41,6 +42,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     if (!address) setActiveSteps(1)
     else if (!kycStatus || kycStatus === 'none' || kycStatus === 'requires-signin' || kycStatus === 'updates-required')
       setActiveSteps(2)
+    else if (kycStatus === 'verified' && !accreditationStatus) setActiveSteps(2)
     else if (agreementStatus === 'none') setActiveSteps(3)
     else if (kycStatus === 'processing' && agreementStatus === 'signed') setActiveSteps(3)
     // TODO: what to do here?
@@ -64,7 +66,13 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
         ) : (
           <>
             <ConnectStep {...props} />
-            <KycStep {...props} onboarding={onboarding} kycStatus={kycStatus} active={activeSteps >= 2} />
+            <KycStep
+              {...props}
+              onboarding={onboarding}
+              kycStatus={kycStatus}
+              accreditationStatus={accreditationStatus}
+              active={activeSteps >= 2}
+            />
             <AgreementStep
               {...props}
               onboarding={onboarding}

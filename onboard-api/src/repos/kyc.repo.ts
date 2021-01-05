@@ -11,7 +11,6 @@ export interface KycEntity {
   poolId?: string
   digest: SecuritizeDigest
   createdAt?: Date
-  verifiedAt?: Date
   status: KycStatusLabel
   accredited: boolean
   usaTaxResident: boolean
@@ -43,9 +42,10 @@ export class KycRepo {
       select *
       from kyc
       where kyc.created_at is not null
-      and kyc.verified_at is null
+      and kyc.status != 'verified'
+      or kyc.usa_tax_resident = TRUE
+      and kyc.accredited = FALSE
     `
-
     if (!investors) return []
 
     return (investors as unknown) as KycEntity[]
@@ -82,7 +82,7 @@ export class KycRepo {
     const [updatedKyc] = await this.db.sql`
       update kyc
       set status = ${status},
-      usa_tax_resident = ${usaTaxResident || false},
+      usa_tax_resident = ${usaTaxResident === undefined ? false : usaTaxResident},
       accredited = ${accredited === undefined ? false : accredited}
       where provider = ${provider}
       and provider_account_id = ${providerAccountId}

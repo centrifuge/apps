@@ -39,9 +39,8 @@ export class AddressController {
     if (kyc) {
       let status: KycStatusLabel = kyc.status
 
-      if (!kyc.verifiedAt) {
+      if (kyc.status !== 'verified' || (kyc.usaTaxResident && !kyc.accredited)) {
         const investor = await this.securitizeService.getInvestor(kyc.userId, kyc.providerAccountId, kyc.digest)
-        console.log({ investor })
 
         if (!investor) {
           return {
@@ -54,7 +53,13 @@ export class AddressController {
         }
 
         if (investor.verificationStatus !== kyc.status) {
-          this.kycRepo.setStatus('securitize', kyc.providerAccountId, investor.verificationStatus as KycStatusLabel)
+          this.kycRepo.setStatus(
+            'securitize',
+            kyc.providerAccountId,
+            investor.verificationStatus as KycStatusLabel,
+            investor.domainInvestorDetails.isUsaTaxResident,
+            investor.domainInvestorDetails.isAccredited
+          )
           status = investor.verificationStatus as KycStatusLabel
         }
       }
@@ -99,8 +104,6 @@ export class AddressController {
           url: authorizationLink,
           isUsaTaxResident: kyc.usaTaxResident,
           accredited: kyc.accredited,
-          created: kyc.createdAt !== null,
-          verified: kyc.verifiedAt !== null,
         },
         agreements: agreementLinks,
       }

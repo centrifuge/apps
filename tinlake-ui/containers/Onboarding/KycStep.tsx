@@ -13,6 +13,7 @@ interface Props {
   active: boolean
   onboarding: OnboardingState
   kycStatus: KycStatusLabel | 'requires-signin' | undefined
+  accreditationStatus: boolean
 }
 
 const KycStep: React.FC<Props> = (props: Props) => {
@@ -33,7 +34,9 @@ const KycStep: React.FC<Props> = (props: Props) => {
           props.kycStatus === 'updates-required'
             ? 'Submit KYC information'
             : props.kycStatus === 'verified'
-            ? 'KYC status: verified'
+            ? props.accreditationStatus
+              ? 'KYC status: verified'
+              : 'Submit accreditation info'
             : 'KYC status: processing'}
         </StepTitle>
       </StepHeader>
@@ -90,6 +93,24 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>
       )}
+      {props.active && props.kycStatus === 'verified' && !props.accreditationStatus && (
+        <StepBody>
+          <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
+            Your KYC submission has been verified, but you still need to finish accreditation as a US tax resident. To
+            complete this step, please finalize your accreditation information on Securitize.io.
+          </Paragraph>
+          <div>
+            <Button
+              primary
+              label={`Complete accreditation on Securitize`}
+              href={`${config.onboardAPIHost}pools/${(props.activePool as Pool).addresses.ROOT_CONTRACT}/info-redirect`}
+              fill={false}
+              target="_blank"
+            />
+          </div>
+          <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
+        </StepBody>
+      )}
       {props.active && props.kycStatus === 'requires-signin' && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
@@ -125,7 +146,8 @@ const KycStep: React.FC<Props> = (props: Props) => {
         !!props.kycStatus &&
         props.kycStatus !== 'none' &&
         props.kycStatus !== 'requires-signin' &&
-        props.kycStatus !== 'updates-required' && <StepBody>&nbsp;</StepBody>}
+        props.kycStatus !== 'updates-required' &&
+        props.accreditationStatus && <StepBody>&nbsp;</StepBody>}
       {!props.active && <StepBody inactive>&nbsp;</StepBody>}
     </Step>
   )

@@ -8,8 +8,6 @@ export type KycStatusLabel =
   | 'expired'
 
 export interface KycStatus {
-  created?: boolean
-  verified?: boolean
   isUsaTaxResident?: boolean
   url?: string
   status?: KycStatusLabel

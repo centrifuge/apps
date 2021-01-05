@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Get, Param, Query, Res } from '@nestjs/common'
+import { BadRequestException, Controller, Get, Logger, Param, Query, Res } from '@nestjs/common'
 import config from '../config'
 import { AddressRepo } from '../repos/address.repo'
 import { AgreementRepo } from '../repos/agreement.repo'
@@ -11,6 +11,8 @@ import { KycStatusLabel } from './types'
 
 @Controller()
 export class KycController {
+  private readonly logger = new Logger(KycController.name)
+
   constructor(
     private readonly securitizeService: SecuritizeService,
     private readonly addressRepo: AddressRepo,
@@ -36,7 +38,11 @@ export class KycController {
     // Get info from Securitize
     const kycInfo = await this.securitizeService.processAuthorizationCallback(query.code)
     // TODO: redirect to app?
-    if (!kycInfo.providerAccountId) throw new BadRequestException('Code has already been used')
+    if (!kycInfo.providerAccountId) {
+      this.logger.warn('Securitize code has already been used')
+      const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding`
+      return res.redirect(redirectUrl)
+    }
 
     const investor = await this.securitizeService.getInvestor(address.userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!investor) throw new BadRequestException('Failed to retrieve investor information from Securitize')
@@ -66,7 +72,7 @@ export class KycController {
     // Create session and redirect user
     const session = this.sessionService.create(address.userId)
 
-    const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?onb=1&session=${session}`
+    const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?session=${session}`
     return res.redirect(redirectUrl)
   }
 
