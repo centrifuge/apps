@@ -142,4 +142,17 @@ export class AgreementRepo {
 
     return updatedAgreement as Agreement | undefined
   }
+
+  async getAwaitingCounterSignature(): Promise<Agreement[]> {
+    const agreements = await this.db.sql`
+      select *
+      from agreements
+      where agreements.signed_at is not null
+      and agreements.counter_signed_at is null
+    `
+
+    if (!agreements) return []
+
+    return (agreements as unknown) as Agreement[]
+  }
 }

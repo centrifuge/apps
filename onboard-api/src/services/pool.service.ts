@@ -39,6 +39,8 @@ export class PoolService {
     const url = new URL(poolData[3], config.ipfsGateway)
     return url.href
   }
+
+  // TODO: addToMemberlist()
 }
 
 export interface Pool {

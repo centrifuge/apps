@@ -3,6 +3,7 @@ create table if not exists users
 (
   id uuid primary key,
   email varchar(255),
+  full_name varchar(255),
   country_code character varying(5),
   created_at timestamp with time zone not null default now()
 );
@@ -29,6 +30,7 @@ create table if not exists kyc (
     provider_account_id character varying(255) not null,
     digest jsonb,
     created_at timestamp with time zone not null default now(),
+    status character varying(20) NOT NULL DEFAULT 'none'::character varying,
     verified_at timestamp with time zone
 );
 

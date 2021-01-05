@@ -2,6 +2,7 @@ import { Modal } from '@centrifuge/axis-modal'
 import { Anchor, Box, Button, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import React from 'react'
+import HelpMenu from '../HelpMenu'
 
 const Footer: React.FC<{}> = () => {
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
@@ -54,6 +55,8 @@ const Footer: React.FC<{}> = () => {
           </Box>
         </Box>
       </Modal>
+
+      <HelpMenu />
     </Box>
   )
 }

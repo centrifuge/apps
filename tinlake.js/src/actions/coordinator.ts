@@ -14,9 +14,9 @@ const web3 = require('web3-utils')
 const uintToNumber = (uint: ethers.BigNumber) =>
   (uint as any)
     .toBN()
-    .div(new BN(10).pow(new BN(6)))
+    .div(new BN(10).pow(new BN(10)))
     .toNumber() /
-  10 ** 12
+  10 ** 8
 const fixed27ToNumber = (fixed27: ethers.BigNumber) =>
   (fixed27 as any)
     .toBN()
