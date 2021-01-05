@@ -25,7 +25,6 @@ export const saveAsCSV = (loans: SortableLoan[]) => {
         baseToDisplay(loan.principal || new BN(0), 18),
         baseToDisplay(loan.debt || new BN(0), 18),
         baseToDisplay(loan.repaysAggregatedAmount || new BN(0), 18),
-        loan.riskGroup,
         feeToInterestRate(loan.interestRate),
         loan.status,
       ]

@@ -135,7 +135,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
       </Box>
       {'export' in router.query && (
         <Box justify="end">
-          <ExportLink onClick={() => saveAsCSV(props.loans)}>Export asset list as CSV</ExportLink>
+          <ExportLink onClick={() => saveAsCSV(props.loans)}>Export Asset List as CSV</ExportLink>
         </Box>
       )}
     </>
