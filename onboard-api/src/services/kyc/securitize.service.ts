@@ -67,14 +67,13 @@ export class SecuritizeService {
       // Access token has expired
       this.logger.debug(`Access token has expired`)
       const newDigest = await this.refreshAccessToken(digest.refreshToken)
-      console.log({ newDigest })
       if (!newDigest) return undefined
+
+      this.logger.debug(`TODO: store new digest`)
+      // TODO: store new digest
 
       // this.kycRepo.upsertSecuritize(userId, providerAccountId, newDigest)
       return this.getInvestor(newDigest, true)
-
-      // TODO: store new digest
-      // TODO: Get investor again with new digest
     }
 
     const investor = await response.json()
@@ -93,15 +92,12 @@ export class SecuritizeService {
       body: JSON.stringify({ refreshToken }),
     })
 
-    console.log({ response })
-
     if (response.status === 401) {
       // Refresh token has also expired
       return undefined
     }
 
     const content = await response.json()
-    console.log({ content })
     return {
       accessToken: content.accessToken,
       refreshToken: content.refreshToken,

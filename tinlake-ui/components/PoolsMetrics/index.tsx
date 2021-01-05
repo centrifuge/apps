@@ -88,7 +88,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
                 </linearGradient>
               </defs>
               <Tooltip content={<></>} />
-              {/* <XAxis dataKey="day" mirror tickFormatter={(val: number) => dateToYMDShort(val)} /> */}
+              {/* <XAxis dataKey="day" mirror tickFormatter={(val: number) => dateToYMD(val)} /> */}
               <Area
                 type="monotone"
                 dataKey="poolValue"

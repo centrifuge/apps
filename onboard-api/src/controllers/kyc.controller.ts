@@ -44,7 +44,6 @@ export class KycController {
     const kyc = await this.kycRepo.upsertSecuritize(address.userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!kyc) throw new BadRequestException('Failed to create KYC entity')
 
-    console.log({ investor })
     await this.userRepo.update(address.userId, investor.email, investor.fullName, investor.details.address.countryCode)
 
     await this.agreementRepo.createAgreementsForPool(params.poolId, address.userId, investor.email)

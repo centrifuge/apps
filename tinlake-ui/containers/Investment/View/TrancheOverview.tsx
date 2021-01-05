@@ -230,8 +230,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         {props.pool &&
           props.tranche === 'senior' &&
           !trancheData?.inMemberlist &&
-          'addresses' in props.pool &&
-          config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT) && (
+          ('onboard' in router.query ||
+            ('addresses' in props.pool &&
+              config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT))) && (
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
               <PoolLink href={'/onboarding'}>
                 <Anchor>
@@ -243,8 +244,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
         {props.pool &&
           !(
-            'addresses' in props.pool &&
-            config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT)
+            'onboard' in router.query ||
+            ('addresses' in props.pool &&
+              config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT))
           ) &&
           !trancheData?.inMemberlist && (
             <>

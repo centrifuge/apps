@@ -89,6 +89,7 @@ interface Config {
   onboardAPIHost: string
   featureFlagNewOnboardingPools: string[]
   enableErrorLogging: boolean
+  multicallContractAddress: string
 }
 
 export interface IpfsPools {
@@ -273,6 +274,10 @@ const config: Config = {
   enableErrorLogging: yup.boolean().validateSync(false),
   // Loading a comma-separated string as a string array using yup proved hard/impossible
   featureFlagNewOnboardingPools: process.env.NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING?.split(',') || [],
+  multicallContractAddress: yup
+    .string()
+    .required('NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS is required')
+    .validateSync(process.env.NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS),
 }
 
 function between1e23and1e27(s: string): boolean {

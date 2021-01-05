@@ -12,7 +12,7 @@ import MaxReserveForm from './MaxReserveForm'
 import { Sidenote } from './styles'
 import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts'
 import { AssetData, loadAssetData } from '../../../ducks/loans'
-import { dateToYMD, dateToYMDShort } from '../../../utils/date'
+import { dateToYMD } from '../../../utils/date'
 import {
   ChartTooltip,
   ChartTooltipColor,
@@ -181,7 +181,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
               Pool Value
             </Heading>
             <Heading level="5" margin={{ top: 'medium', right: 'medium' }} color="#9f9f9f">
-              {assetDataWithToday.length > 0 && dateToYMDShort(assetDataWithToday[0].day)} - present
+              {assetDataWithToday.length > 0 && dateToYMD(assetDataWithToday[0].day)} - present
             </Heading>
           </Box>
           {assetDataWithToday.length > 0 && (
@@ -198,7 +198,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                   </linearGradient>
                 </defs>
                 <Tooltip content={<CustomTooltip />} offset={20} />
-                {/* <XAxis dataKey="day" mirror tickFormatter={(val: number) => dateToYMDShort(val)} /> */}
+                {/* <XAxis dataKey="day" mirror tickFormatter={(val: number) => dateToYMD(val)} /> */}
                 <Area
                   type="monotone"
                   stackId={1}

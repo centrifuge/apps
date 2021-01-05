@@ -7,9 +7,10 @@ import NumberDisplay from '../../../components/NumberDisplay'
 import { SortableLoan } from '../../../ducks/loans'
 import { hexToInt } from '../../../utils/etherscanLinkGenerator'
 import ChevronRight from '../../ChevronRight'
-import { dateToYMD, dateToYMDTechnical } from '../../../utils/date'
+import { dateToYMD } from '../../../utils/date'
 import BN from 'bn.js'
 import LoanLabel from '../Label'
+import { saveAsCSV } from '../../../utils/export'
 
 interface Props {
   loans: SortableLoan[]
@@ -29,37 +30,6 @@ const LoanList: React.FC<Props> = (props: Props) => {
     )
   }
 
-  const saveAsCSV = () => {
-    const rows = [
-      ['Asset ID', 'NFT ID', 'Financing Date', 'Maturity Date', 'Amount'],
-      ...props.loans.map((loan: SortableLoan) => {
-        return [
-          loan.loanId,
-          loan.tokenId,
-          dateToYMDTechnical(loan.financingDate || 0),
-          dateToYMDTechnical(loan.maturityDate || 0),
-          baseToDisplay(
-            loan.status === 'closed'
-              ? loan.repaysAggregatedAmount || new BN(0)
-              : loan.debt.isZero()
-              ? loan.principal
-              : loan.debt,
-            18
-          ),
-        ]
-      }),
-    ]
-
-    const csvContent = 'data:text/csv;charset=utf-8,' + rows.map((e) => e.join(',')).join('\n')
-    var encodedUri = encodeURI(csvContent)
-    var link = document.createElement('a')
-    link.setAttribute('href', encodedUri)
-    link.setAttribute('download', 'assets.csv')
-    document.body.appendChild(link) // Required for FF
-
-    link.click()
-  }
-
   return (
     <Box
       width="100%"
@@ -70,7 +40,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
       background="white"
     >
       <div style={{ display: 'none' }}>
-        <Button label="Export" primary onClick={saveAsCSV} />
+        <Button label="Export" primary onClick={() => saveAsCSV(props.loans)} />
       </div>
 
       {props.loans.length > 0 && (
