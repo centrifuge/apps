@@ -2,12 +2,12 @@ import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { Box } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
+import { useSelector } from 'react-redux'
+import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { PoolsDailyData, PoolsData } from '../../ducks/pools'
+import { dateToYMD } from '../../utils/date'
 import NumberDisplay from '../NumberDisplay'
 import { Cont, Label, TokenLogo, Unit, Value } from './styles'
-import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts'
-import { useSelector } from 'react-redux'
-import { dateToYMD } from '../../utils/date'
 
 interface Props {
   pools: PoolsData

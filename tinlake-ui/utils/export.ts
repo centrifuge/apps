@@ -1,25 +1,33 @@
-import { baseToDisplay } from '@centrifuge/tinlake-js'
+import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { SortableLoan } from '../ducks/loans'
 import { dateToYMDTechnical } from './date'
 
 export const saveAsCSV = (loans: SortableLoan[]) => {
   const rows = [
-    ['Asset ID', 'NFT ID', 'Financing Date', 'Maturity Date', 'Amount'],
+    [
+      'Asset ID',
+      'NFT ID',
+      'Financing Date',
+      'Maturity Date',
+      'Available for Financing',
+      'Outstanding',
+      'Repaid',
+      'Financing Fee',
+      'Status',
+    ],
     ...loans.map((loan: SortableLoan) => {
       return [
         loan.loanId,
         loan.tokenId,
         dateToYMDTechnical(loan.financingDate || 0),
         dateToYMDTechnical(loan.maturityDate || 0),
-        baseToDisplay(
-          loan.status === 'closed'
-            ? loan.repaysAggregatedAmount || new BN(0)
-            : loan.debt.isZero()
-            ? loan.principal
-            : loan.debt,
-          18
-        ),
+        baseToDisplay(loan.principal || new BN(0), 18),
+        baseToDisplay(loan.debt || new BN(0), 18),
+        baseToDisplay(loan.repaysAggregatedAmount || new BN(0), 18),
+        loan.riskGroup,
+        feeToInterestRate(loan.interestRate),
+        loan.status,
       ]
     }),
   ]

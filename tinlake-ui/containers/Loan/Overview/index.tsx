@@ -1,18 +1,9 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import { LoadingValue } from '../../../components/LoadingValue/index'
-import { Pool } from '../../../config'
-import { AuthState, PermissionsV3 } from '../../../ducks/auth'
-import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
-import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { toPrecision } from '../../../utils/toPrecision'
-import MaxReserveForm from './MaxReserveForm'
-import { Sidenote } from './styles'
-import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts'
-import { AssetData, loadAssetData } from '../../../ducks/loans'
-import { dateToYMD } from '../../../utils/date'
+import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts'
 import {
   ChartTooltip,
   ChartTooltipColor,
@@ -21,9 +12,17 @@ import {
   ChartTooltipTitle,
   ChartTooltipValue,
 } from '../../../components/Chart/styles'
-
-import BN from 'bn.js'
+import { LoadingValue } from '../../../components/LoadingValue/index'
+import { Pool } from '../../../config'
+import { AuthState, PermissionsV3 } from '../../../ducks/auth'
+import { AssetData, loadAssetData } from '../../../ducks/loans'
+import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
+import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { dateToYMD } from '../../../utils/date'
 import { UintBase } from '../../../utils/ratios'
+import { toPrecision } from '../../../utils/toPrecision'
+import MaxReserveForm from './MaxReserveForm'
+import { Sidenote } from './styles'
 
 interface Props {
   activePool?: Pool

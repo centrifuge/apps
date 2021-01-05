@@ -1,15 +1,15 @@
-import * as React from 'react'
-import { Box, Table, TableBody, TableRow, TableCell } from 'grommet'
-import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
-import { Loan } from '@centrifuge/tinlake-js'
-import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { toPrecision } from '../../../utils/toPrecision'
-import { AuthState } from '../../../ducks/auth'
-import { ITinlake } from '@centrifuge/tinlake-js'
-import { dateToYMD } from '../../../utils/date'
-import LoanLabel from '../Label'
 import { DisplayField } from '@centrifuge/axis-display-field'
+import { baseToDisplay, feeToInterestRate, ITinlake, Loan } from '@centrifuge/tinlake-js'
+import { Box, Table, TableBody, TableCell, TableRow } from 'grommet'
+import * as React from 'react'
+import styled from 'styled-components'
+import { AuthState } from '../../../ducks/auth'
+import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { dateToYMD } from '../../../utils/date'
 import { getAddressLink } from '../../../utils/etherscanLinkGenerator'
+import { toPrecision } from '../../../utils/toPrecision'
+import { LoadingValue } from '../../LoadingValue'
+import LoanLabel from '../Label'
 
 interface Props {
   loan: Loan
@@ -17,8 +17,6 @@ interface Props {
   auth?: AuthState
 }
 
-import styled from 'styled-components'
-import { LoadingValue } from '../../LoadingValue'
 const DisplayFieldWrapper = styled.div`
   width: 100%;
   max-width: 200px;

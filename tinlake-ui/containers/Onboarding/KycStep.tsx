@@ -5,7 +5,7 @@ import * as React from 'react'
 import config, { Pool } from '../../config'
 import { OnboardingState } from '../../ducks/onboarding'
 import Spinner from './Spinner'
-import { Step, StepHeader, StepIcon, StepTitle, StepBody, FormFieldWithoutBorder } from './styles'
+import { FormFieldWithoutBorder, Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
   activePool: Pool

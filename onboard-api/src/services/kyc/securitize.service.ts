@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { KycRepo } from '../../repos/kyc.repo'
 import config from '../../config'
+import { KycRepo } from '../../repos/kyc.repo'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 export interface SecuritizeDigest {

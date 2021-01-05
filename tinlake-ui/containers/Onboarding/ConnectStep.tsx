@@ -3,8 +3,8 @@ import { Box, Button, Paragraph } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Pool } from '../../config'
-import { Step, StepHeader, StepIcon, StepTitle, StepBody } from './styles'
 import { ensureAuthed } from '../../ducks/auth'
+import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
   activePool: Pool

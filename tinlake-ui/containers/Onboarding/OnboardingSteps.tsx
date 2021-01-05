@@ -1,16 +1,16 @@
+import { AgreementsStatus } from '@centrifuge/onboard-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { PoolLink } from '../../components/PoolLink'
 import PoolTitle from '../../components/PoolTitle'
 import { Pool } from '../../config'
-import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
-import KycStep from './KycStep'
-import AgreementStep from './AgreementStep'
-import { useDispatch, useSelector } from 'react-redux'
 import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
+import AgreementStep from './AgreementStep'
 import ConnectStep from './ConnectStep'
-import { AgreementsStatus } from '@centrifuge/onboard-api/src/controllers/types'
-import { PoolLink } from '../../components/PoolLink'
+import KycStep from './KycStep'
+import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
   activePool: Pool
