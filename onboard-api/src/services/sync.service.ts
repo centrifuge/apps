@@ -5,6 +5,7 @@ import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { KycEntity, KycRepo } from '../repos/kyc.repo'
 import { DocusignService } from './docusign.service'
 import { SecuritizeService } from './kyc/securitize.service'
+import { PoolService } from './pool.service'
 
 @Injectable()
 export class SyncService {
@@ -14,7 +15,8 @@ export class SyncService {
     private readonly kycRepo: KycRepo,
     private readonly agreementRepo: AgreementRepo,
     private readonly securitizeService: SecuritizeService,
-    private readonly docusignService: DocusignService
+    private readonly docusignService: DocusignService,
+    private readonly poolService: PoolService
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE) // TODO: change to e.g. every 5 min
@@ -47,16 +49,28 @@ export class SyncService {
       if (!agreement.counterSignedAt && status.counterSigned) {
         console.log(`Agreement ${agreement.id} has been counter-signed`)
         this.agreementRepo.setCounterSigned(agreement.id)
-        this.whitelist(agreement.userId, agreement.tranche)
+        this.whitelist(agreement.userId, agreement.poolId, agreement.tranche)
       }
     })
   }
 
-  // If tranche is supplied, whitelist just for that tranche. Otherwise, try to whitelist for both
-  private async whitelist(userId, tranche?: Tranche) {
-    // TODO: check kyc status and agreement status
-    this.logger.debug(`Whitelist ${userId} for ${tranche || 'both tranches'}`)
+  private async whitelist(userId, poolId?: string, tranche?: Tranche) {
+    const kyc = await this.kycRepo.find(userId)
+    if (!kyc.verifiedAt || kyc.status !== 'verified') return
+
+    // If tranche is supplied, whitelist just for that tranche. Otherwise, try to whitelist for both
+    const tranches = [tranche] || ['senior', 'junior']
+    tranches.forEach(async (t: Tranche) => {
+      // If poolId is supplied, whitelist just for that pool. Otherwise, try to whitelist for all pools
+      const poolIds = [poolId] || (await this.poolService.getIds())
+
+      poolIds.forEach(async (poolId: string) => {
+        const agreements = await this.agreementRepo.findByUserPoolTranche(userId, poolId, t)
+        const done = agreements.every((agreement: Agreement) => agreement.signedAt && agreement.counterSignedAt)
+        if (done) this.logger.debug(`Whitelist ${userId} for ${t} of pool ${poolId}`)
+      })
+    })
   }
 
-  // TODO: async syncInvestorBalances()
+  async syncInvestorBalances() {}
 }

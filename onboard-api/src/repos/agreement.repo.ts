@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common'
+import { PoolService, ProfileAgreement } from '../services/pool.service'
 import config from '../config'
 import { Tranche } from '../controllers/types'
 import { DocusignService } from '../services/docusign.service'
 import { uuidv4 } from '../utils/uuid'
 import { DatabaseService } from './db.service'
+import { profile } from 'console'
 
 export type Agreement = {
   id: string
@@ -19,7 +21,11 @@ export type Agreement = {
 
 @Injectable()
 export class AgreementRepo {
-  constructor(private readonly db: DatabaseService, private readonly docusignService: DocusignService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly docusignService: DocusignService,
+    private readonly poolService: PoolService
+  ) {}
 
   async find(id: string): Promise<Agreement | undefined> {
     const [agreement] = await this.db.sql`
@@ -41,7 +47,19 @@ export class AgreementRepo {
     return (agreements as unknown) as Agreement[]
   }
 
-  async findByUserAndPool(userId: string, poolId: string, email: string): Promise<Agreement[]> {
+  async findByUserPoolTranche(userId: string, poolId: string, tranche: Tranche): Promise<Agreement[]> {
+    const agreements = await this.db.sql`
+      select *
+      from agreements
+      where agreements.user_id = ${userId}
+      and agreements.pool_id = ${poolId}
+      and agreements.tranche = ${tranche}
+    `
+
+    return (agreements as unknown) as Agreement[]
+  }
+
+  async findByUserAndPool(userId: string, poolId: string, email: string, countryCode: string): Promise<Agreement[]> {
     const agreements = await this.db.sql`
       select *
       from agreements
@@ -50,7 +68,7 @@ export class AgreementRepo {
     `
 
     if (agreements.length === 0) {
-      return await this.createAgreementsForPool(poolId, userId, email)
+      return await this.createAgreementsForPool(poolId, userId, email, countryCode)
     }
 
     return (agreements as unknown) as Agreement[]
@@ -95,20 +113,34 @@ export class AgreementRepo {
   // Find or create the relevant agreement for this pool
   // TODO: templateId should be based on the agreement required for the pool
   // TODO: if US, then a, else b
-  async createAgreementsForPool(poolId: string, userId: string, email: string): Promise<Agreement[]> {
-    let agreements = []
-    const tranches = ['senior', 'junior']
+  async createAgreementsForPool(
+    poolId: string,
+    userId: string,
+    email: string,
+    countryCode: string
+  ): Promise<Agreement[]> {
+    const pool = await this.poolService.get(poolId)
+    if (!pool) throw new Error(`Cannot create agreements for pool ${poolId}`)
 
-    await tranches.forEach(async (tranche: Tranche) => {
-      console.log({ userId, email, poolId, tranche })
+    let agreements = []
+
+    await pool.profile.agreements.forEach(async (profileAgreement: ProfileAgreement) => {
+      console.log({ userId, email, poolId, countryCode })
+
+      if (
+        (countryCode === 'US' && profileAgreement.country === 'non-us') ||
+        (countryCode !== 'US' && profileAgreement.country === 'us')
+      )
+        return
+
       try {
         const agreement = await this.findOrCreate(
           userId,
           email,
           poolId,
-          tranche,
-          `${tranche === 'senior' ? 'DROP' : 'TIN'} Subscription Agreement`,
-          config.docusign.templateId
+          profileAgreement.tranche,
+          profileAgreement.name,
+          profileAgreement.providerTemplateId
         )
         agreements.push(agreement)
       } catch (e) {

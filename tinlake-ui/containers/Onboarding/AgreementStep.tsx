@@ -37,7 +37,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
             ? 'Sign the Subscription Agreement'
             : props.agreementStatus === 'countersigned'
             ? 'Subscription Agreement signed'
-            : 'Subscription Agreement awaiting counter-signature'}
+            : 'Subscription Agreement awaiting Issuer signature'}
         </StepTitle>
       </StepHeader>
       {props.active && props.agreementStatus === 'none' && props.agreement && !session && (
@@ -88,7 +88,8 @@ const KycStep: React.FC<Props> = (props: Props) => {
       {props.active && props.agreementStatus === 'signed' && props.agreement && (
         <StepBody>
           <Box pad={{ vertical: 'medium' }}>
-            The issuer needs to counter-sign the {props.agreement.name} of {props.activePool.metadata.name}.
+            The Issuer needs to counter-sign your {props.agreement.name} for {props.activePool.metadata.name} soon. When
+            KYC is passed, you will be ready to invest in this pool upon his signature.
           </Box>
         </StepBody>
       )}

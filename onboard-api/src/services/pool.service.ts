@@ -7,7 +7,7 @@ const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 @Injectable()
 export class PoolService {
   private readonly logger = new Logger(PoolService.name)
-  private pools: Pool[]
+  private pools: { [key: string]: Pool }
 
   provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
   registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, this.provider)
@@ -25,24 +25,26 @@ export class PoolService {
     return this.pools[poolId]
   }
 
+  getIds() {
+    return Object.keys(this.pools)
+  }
+
   private async loadFromIPFS() {
     const url = await this.assembleIpfsUrl()
     const response = await fetch(url)
-
     const pools = await response.json()
 
-    const poolsWithProfiles = await Promise.all(
+    let poolsWithProfiles = {}
+    await Promise.all(
       Object.values(pools).map(async (pool: Pool) => {
-        if (pool.addresses) {
-          const profile = await this.getPoolProfile(pool.addresses.ROOT_CONTRACT)
-          if (profile) return { ...pool, profile }
-          return pool
-        }
-        return pool
+        if (!pool.addresses) return
+
+        const profile = await this.getPoolProfile(pool.addresses.ROOT_CONTRACT)
+        if (profile) poolsWithProfiles[pool.addresses.ROOT_CONTRACT] = { ...pool, profile }
       })
     )
 
-    this.pools = poolsWithProfiles.filter((pool: Pool) => !!pool.profile)
+    this.pools = poolsWithProfiles
     this.logger.log(`Loaded ${Object.keys(this.pools).length} pools with profiles from IPFS`)
   }
 
@@ -52,6 +54,8 @@ export class PoolService {
     return url.href
   }
 
+  // TODO: this requires two requests per pool. At some point we should refactor the CLI to include
+  // these profile hashes directly in the all pools file, to reduce these requests to one per pool.
   private async getPoolProfile(poolId: string): Promise<Profile | undefined> {
     // Get pool metadata
     const poolData = await this.registry.find(poolId)

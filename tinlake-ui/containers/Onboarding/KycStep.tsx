@@ -44,13 +44,13 @@ const KycStep: React.FC<Props> = (props: Props) => {
             process to become an eligible investor for all Tinlake pools. Once Securitize has verified your
             documentation you will be provided with your “Securitize iD” which makes you eligible to invest in all open
             Tinlake pools. To invest in an individual pool you will be asked to sign the subscription agreement with the
-            pool’s issuer, signed through DocuSign. Once the issuer has countersigned, you are ready to invest.
+            pool’s issuer in the next step.
           </Paragraph>
           <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
             <FormFieldWithoutBorder error={error}>
               <CheckBox
                 checked={checked}
-                label="I accept the data privacy policy and that data is shared with Centrifuge and the issuer."
+                label="I accept the data privacy policy and that data is shared with Centrifuge and the Issuer."
                 onChange={(event) => setChecked(event.target.checked)}
               />
             </FormFieldWithoutBorder>
@@ -75,7 +75,8 @@ const KycStep: React.FC<Props> = (props: Props) => {
       {props.active && (props.kycStatus === 'none' || props.kycStatus === 'updates-required') && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
-            To complete this step, submit your KYC information on Securitize.
+            You have already started the onboarding process with Securitize. To complete this step, please finalize your
+            KYC information on Securitize.
           </Paragraph>
           <div>
             <Button

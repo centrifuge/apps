@@ -58,7 +58,12 @@ export class AddressController {
         }
       }
 
-      const agreements = await this.agreementRepo.findByUserAndPool(address.userId, params.poolId, user.email)
+      const agreements = await this.agreementRepo.findByUserAndPool(
+        address.userId,
+        params.poolId,
+        user.email,
+        user.countryCode
+      )
 
       // TODO: this should be handled in a Connect webhook from Docusign
       agreements.forEach(async (agreement: Agreement) => {
