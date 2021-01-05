@@ -1,17 +1,17 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { baseToDisplay, bnToHex, feeToInterestRate } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { Box, DataTable, Text } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
+import styled from 'styled-components'
 import NumberDisplay from '../../../components/NumberDisplay'
 import { SortableLoan } from '../../../ducks/loans'
-import { hexToInt } from '../../../utils/etherscanLinkGenerator'
-import ChevronRight from '../../ChevronRight'
 import { dateToYMD } from '../../../utils/date'
-import BN from 'bn.js'
-import LoanLabel from '../Label'
+import { hexToInt } from '../../../utils/etherscanLinkGenerator'
 import { saveAsCSV } from '../../../utils/export'
-import styled from 'styled-components'
+import ChevronRight from '../../ChevronRight'
+import LoanLabel from '../Label'
 
 interface Props {
   loans: SortableLoan[]

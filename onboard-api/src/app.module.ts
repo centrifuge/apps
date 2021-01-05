@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { ScheduleModule } from '@nestjs/schedule'
 import { AppController } from './app.controller'
 import { AddressController } from './controllers/address.controller'
 import { AgreementController } from './controllers/agreement.controller'
@@ -13,7 +14,6 @@ import { DocusignService } from './services/docusign.service'
 import { SecuritizeService } from './services/kyc/securitize.service'
 import { PoolService } from './services/pool.service'
 import { SessionService } from './services/session.service'
-import { ScheduleModule } from '@nestjs/schedule'
 import { SyncService } from './services/sync.service'
 
 // TODO: separate into modules

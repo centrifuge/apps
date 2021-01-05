@@ -1,7 +1,7 @@
 import { Drop } from 'grommet'
 import React from 'react'
 import { preload } from '../../utils/images'
-import { Wrapper, InnerMenu, Title, MenuItem, Name } from './styles'
+import { InnerMenu, MenuItem, Name, Title, Wrapper } from './styles'
 
 const HelpMenu: React.FC<{}> = () => {
   const ref = React.useRef<HTMLDivElement>(null)

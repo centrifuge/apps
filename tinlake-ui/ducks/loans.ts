@@ -1,13 +1,13 @@
 import { Loan } from '@centrifuge/tinlake-js'
+import { createWatcher } from '@makerdao/multicall'
+import BN from 'bn.js'
+import { BigNumber } from 'ethers'
 import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
-import Apollo from '../services/apollo'
-import { getNFT, addProxyDetails } from '../services/tinlake/actions'
-import { createWatcher } from '@makerdao/multicall'
 import config from '../config'
-import { BigNumber } from 'ethers'
-import BN from 'bn.js'
+import Apollo from '../services/apollo'
+import { addProxyDetails, getNFT } from '../services/tinlake/actions'
 const web3 = require('web3-utils')
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
