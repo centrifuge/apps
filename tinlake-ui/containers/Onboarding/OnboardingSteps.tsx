@@ -11,6 +11,7 @@ import AgreementStep from './AgreementStep'
 import ConnectStep from './ConnectStep'
 import KycStep from './KycStep'
 import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
+import { Spinner } from '@centrifuge/axis-spinner'
 
 interface Props {
   activePool: Pool
@@ -58,33 +59,41 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
       </Heading>
 
       <Box pad="medium" elevation="small" round="xsmall" background="white" width="80%">
-        <ConnectStep {...props} />
-        <KycStep {...props} onboarding={onboarding} kycStatus={kycStatus} active={activeSteps >= 2} />
-        <AgreementStep
-          {...props}
-          onboarding={onboarding}
-          agreement={agreement}
-          agreementStatus={agreementStatus}
-          active={activeSteps >= 3}
-        />
-        <Step>
-          <StepHeader>
-            <StepIcon inactive={activeSteps < 4} />
-            <StepTitle inactive={activeSteps < 4}>Invest in {props.activePool.metadata.name}</StepTitle>
-          </StepHeader>
-          {activeSteps >= 4 && (
-            <StepBody>
-              <Box pad={{ vertical: 'medium' }}>You're now ready to invest in {props.activePool.metadata.name}!</Box>
-              <Box margin={{ bottom: 'medium' }}>
-                <div>
-                  <PoolLink href={{ pathname: '/investments', query: { invest: 'senior' } }}>
-                    <Button primary label={'Invest'} fill={false} />
-                  </PoolLink>
-                </div>
-              </Box>
-            </StepBody>
-          )}
-        </Step>
+        {onboarding.state !== 'found' ? (
+          <Spinner height={'400px'} message={'Loading...'} />
+        ) : (
+          <>
+            <ConnectStep {...props} />
+            <KycStep {...props} onboarding={onboarding} kycStatus={kycStatus} active={activeSteps >= 2} />
+            <AgreementStep
+              {...props}
+              onboarding={onboarding}
+              agreement={agreement}
+              agreementStatus={agreementStatus}
+              active={activeSteps >= 3}
+            />
+            <Step>
+              <StepHeader>
+                <StepIcon inactive={activeSteps < 4} />
+                <StepTitle inactive={activeSteps < 4}>Invest in {props.activePool.metadata.name}</StepTitle>
+              </StepHeader>
+              {activeSteps >= 4 && (
+                <StepBody>
+                  <Box pad={{ vertical: 'medium' }}>
+                    You're now ready to invest in {props.activePool.metadata.name}!
+                  </Box>
+                  <Box margin={{ bottom: 'medium' }}>
+                    <div>
+                      <PoolLink href={{ pathname: '/investments', query: { invest: 'senior' } }}>
+                        <Button primary label={'Invest'} fill={false} />
+                      </PoolLink>
+                    </div>
+                  </Box>
+                </StepBody>
+              )}
+            </Step>
+          </>
+        )}
       </Box>
     </Box>
   )

@@ -88,8 +88,8 @@ const KycStep: React.FC<Props> = (props: Props) => {
       {props.active && props.agreementStatus === 'signed' && props.agreement && (
         <StepBody>
           <Box pad={{ vertical: 'medium' }}>
-            The Issuer needs to counter-sign your {props.agreement.name} for {props.activePool.metadata.name} soon. When
-            KYC is passed, you will be ready to invest in this pool upon his signature.
+            The Issuer needs to counter-sign your {props.agreement.name} for {props.activePool.metadata.name} soon. If
+            KYC is verified, you will be ready to invest in this pool upon his signature.
           </Box>
         </StepBody>
       )}

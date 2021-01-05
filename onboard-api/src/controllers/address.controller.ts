@@ -40,7 +40,8 @@ export class AddressController {
       let status: KycStatusLabel = kyc.status
 
       if (!kyc.verifiedAt) {
-        const investor = await this.securitizeService.getInvestor(kyc.digest)
+        const investor = await this.securitizeService.getInvestor(kyc.userId, kyc.providerAccountId, kyc.digest)
+        console.log({ investor })
 
         if (!investor) {
           return {
@@ -96,7 +97,8 @@ export class AddressController {
         kyc: {
           status,
           url: authorizationLink,
-          us: user.countryCode === 'US',
+          isUsaTaxResident: kyc.usaTaxResident,
+          accredited: kyc.accredited,
           created: kyc.createdAt !== null,
           verified: kyc.verifiedAt !== null,
         },

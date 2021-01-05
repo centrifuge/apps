@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { KycStatusLabel, Tranche } from 'src/controllers/types'
+import { UserRepo } from '../repos/user.repo'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { KycEntity, KycRepo } from '../repos/kyc.repo'
 import { DocusignService } from './docusign.service'
@@ -16,7 +17,8 @@ export class SyncService {
     private readonly agreementRepo: AgreementRepo,
     private readonly securitizeService: SecuritizeService,
     private readonly docusignService: DocusignService,
-    private readonly poolService: PoolService
+    private readonly poolService: PoolService,
+    private readonly userRepo: UserRepo
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE) // TODO: change to e.g. every 5 min
@@ -26,13 +28,27 @@ export class SyncService {
 
     this.logger.debug(`Syncing ${processingInvestors.length} investors`)
     processingInvestors.forEach(async (kyc: KycEntity) => {
-      const investor = await this.securitizeService.getInvestor(kyc.digest)
-      if (investor && investor.verificationStatus !== kyc.status) {
-        this.logger.debug(`Update investor ${kyc.userId} status to ${investor.verificationStatus}`)
-        this.kycRepo.setStatus('securitize', kyc.providerAccountId, investor.verificationStatus as KycStatusLabel)
+      const investor = await this.securitizeService.getInvestor(kyc.userId, kyc.providerAccountId, kyc.digest)
+      if (
+        (investor && investor.verificationStatus !== kyc.status) ||
+        investor.domainInvestorDetails.isAccredited !== kyc.accredited
+      ) {
+        this.logger.debug(
+          `Update investor ${kyc.userId} status to ${investor.verificationStatus}${
+            investor.domainInvestorDetails.isAccredited ? ' (accredited)' : ''
+          }`
+        )
+        this.kycRepo.setStatus(
+          'securitize',
+          kyc.providerAccountId,
+          investor.verificationStatus as KycStatusLabel,
+          investor.domainInvestorDetails.isUsaTaxResident,
+          investor.domainInvestorDetails.isAccredited
+        )
 
-        this.whitelist(kyc.userId)
-        // TODO: update personal info?
+        await this.userRepo.update(kyc.userId, investor.email, investor.fullName, investor.details.address.countryCode)
+
+        if (investor.verificationStatus === 'verified') this.whitelist(kyc.userId)
       }
     })
   }

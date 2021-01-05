@@ -31,7 +31,9 @@ create table if not exists kyc (
     digest jsonb,
     created_at timestamp with time zone not null default now(),
     status character varying(20) NOT NULL DEFAULT 'none'::character varying,
-    verified_at timestamp with time zone
+    usa_tax_resident boolean NOT NULL DEFAULT false,
+    accredited boolean NOT NULL DEFAULT false,
+    verified_at timestamp with time zone,
 );
 
 create unique index if not exists kyc_unique on kyc (provider, provider_account_id);

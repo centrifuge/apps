@@ -7,6 +7,7 @@ import { UserRepo } from '../repos/user.repo'
 import { SecuritizeService } from '../services/kyc/securitize.service'
 import { PoolService } from '../services/pool.service'
 import { SessionService } from '../services/session.service'
+import { KycStatusLabel } from './types'
 
 @Controller()
 export class KycController {
@@ -37,15 +38,24 @@ export class KycController {
     // TODO: redirect to app?
     if (!kycInfo.providerAccountId) throw new BadRequestException('Code has already been used')
 
-    const investor = await this.securitizeService.getInvestor(kycInfo.digest)
+    const investor = await this.securitizeService.getInvestor(address.userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!investor) throw new BadRequestException('Failed to retrieve investor information from Securitize')
 
-    // Update KYC and email records in our database
+    // Update KYC and user records in our database
     const kyc = await this.kycRepo.upsertSecuritize(address.userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!kyc) throw new BadRequestException('Failed to create KYC entity')
 
     await this.userRepo.update(address.userId, investor.email, investor.fullName, investor.details.address.countryCode)
 
+    this.kycRepo.setStatus(
+      'securitize',
+      kyc.providerAccountId,
+      investor.verificationStatus as KycStatusLabel,
+      investor.domainInvestorDetails.isUsaTaxResident,
+      investor.domainInvestorDetails.isAccredited
+    )
+
+    // Create agreements for this pool
     await this.agreementRepo.createAgreementsForPool(
       params.poolId,
       address.userId,

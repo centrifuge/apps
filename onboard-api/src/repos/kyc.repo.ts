@@ -13,6 +13,8 @@ export interface KycEntity {
   createdAt?: Date
   verifiedAt?: Date
   status: KycStatusLabel
+  accredited: boolean
+  usaTaxResident: boolean
 }
 
 export interface SecuritizeDigest {
@@ -70,10 +72,18 @@ export class KycRepo {
     return newKyc as KycEntity | undefined
   }
 
-  async setStatus(provider: string, providerAccountId: string, status: KycStatusLabel): Promise<KycEntity | undefined> {
+  async setStatus(
+    provider: string,
+    providerAccountId: string,
+    status: KycStatusLabel,
+    usaTaxResident?: boolean,
+    accredited?: boolean
+  ): Promise<KycEntity | undefined> {
     const [updatedKyc] = await this.db.sql`
       update kyc
-      set status = ${status}
+      set status = ${status},
+      usa_tax_resident = ${usaTaxResident || false},
+      accredited = ${accredited === undefined ? false : accredited}
       where provider = ${provider}
       and provider_account_id = ${providerAccountId}
 

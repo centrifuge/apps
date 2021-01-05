@@ -44,7 +44,7 @@ export class UserRepo {
       update users
       set email = ${email},
       full_name = ${fullName},
-      country_code = ${countryCode}
+      country_code = ${countryCode},
       where id = ${userId}
 
       returning *

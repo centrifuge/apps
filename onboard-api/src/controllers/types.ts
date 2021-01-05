@@ -10,9 +10,10 @@ export type KycStatusLabel =
 export interface KycStatus {
   created?: boolean
   verified?: boolean
-  us?: boolean
+  isUsaTaxResident?: boolean
   url?: string
   status?: KycStatusLabel
+  accredited?: boolean
   requiresSignin?: boolean
 }
 

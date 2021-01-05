@@ -25,7 +25,6 @@ export interface Config {
     accountId: string
     restApiHost: string
     accountApiHost: string
-    templateId: string
     rsaPrivateKey: string
   }
   securitize: {
@@ -61,7 +60,6 @@ const config: Config = {
     accountId: process.env.DOCUSIGN_ACCOUNT_ID,
     restApiHost: process.env.DOCUSIGN_REST_API_HOST,
     accountApiHost: process.env.DOCUSIGN_ACCOUNT_API_HOST,
-    templateId: process.env.DOCUSIGN_TEMPLATE_ID,
     rsaPrivateKey: process.env.DOCUSIGN_RSA_PRIVATE_KEY,
   },
   securitize: {
