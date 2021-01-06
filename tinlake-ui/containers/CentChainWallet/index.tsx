@@ -2,6 +2,7 @@ import { Button } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { CentChainWalletState, connect } from '../../ducks/centChainWallet'
+import { shortAddr } from '../../utils/shortAddr'
 
 const CentChainWallet: React.FC = () => {
   const dispatch = useDispatch()
@@ -41,9 +42,9 @@ const CentChainWallet: React.FC = () => {
       )}
       {cWallet.state === 'connected' && cWallet.accounts.length === 1 && (
         <div>
-          Connected with account "{cWallet.accounts[0].name}": {cWallet.accounts[0].addrCentChain} (this may show up as{' '}
-          {cWallet.accounts[0].addrInjected} in the Polkadot extension – change the display address format to
-          "Centrifuge Chain" to verify the address).
+          Connected with account "{cWallet.accounts[0].name}": {shortAddr(cWallet.accounts[0].addrCentChain)} (this may
+          show up as {shortAddr(cWallet.accounts[0].addrInjected)} in the Polkadot extension – change the display
+          address format to "Centrifuge Chain" to verify the address).
         </div>
       )}
     </>

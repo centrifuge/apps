@@ -11,6 +11,7 @@ import { RewardsData } from '../../ducks/rewards'
 import { UserRewardsEthData } from '../../ducks/userRewards'
 import { getPoolStatus } from '../../utils/pool'
 import { UintBase } from '../../utils/ratios'
+import { accountIdToCentChainAddr } from '../centChain/accountIdToCentChainAddr'
 
 const { tinlakeDataBackendUrl } = config
 const cache = new InMemoryCache()
@@ -293,12 +294,12 @@ class Apollo {
         query: gql`
         {
           rewardBalances(where : {id: "${user}"}) {
-            claims {
+            links {
               centAddress
               rewardsAccumulated
             }
-            eligible
-            claimableRewards
+            claimable
+    				linkableRewards
             totalRewards
             nonZeroBalanceSince
           }
@@ -316,9 +317,12 @@ class Apollo {
     }
 
     return {
-      claims: data.claims,
-      eligible: data.eligible,
-      claimableRewards: data.claimableRewards,
+      links: data.links.map((link: any) => ({
+        centAddress: accountIdToCentChainAddr(link.centAddress),
+        rewardsAccumulated: link.rewardsAccumulated,
+      })),
+      claimable: data.claimable,
+      linkableRewards: data.linkableRewards,
       totalRewards: data.totalRewards,
       nonZeroBalanceSince: data.nonZeroBalanceSince,
     }

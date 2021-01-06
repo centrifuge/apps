@@ -8,6 +8,8 @@ import NumberDisplay from '../../components/NumberDisplay'
 import { Cont, Label, TokenLogo, Unit, Value } from '../../components/PoolsMetrics/styles'
 import { AuthState } from '../../ducks/auth'
 import { loadCentAddr, loadUserRewards, UserRewardsState } from '../../ducks/userRewards'
+import { shortAddr } from '../../utils/shortAddr'
+import { toPrecision } from '../../utils/toPrecision'
 import CentChainWallet from '../CentChainWallet'
 import SetCentAddress from '../SetCentAddress'
 
@@ -77,56 +79,56 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
             <Value>
               <LoadingValue
                 done={userRewards?.ethState === 'found' && !!ethRewData}
-                render={() => <NumberDisplay value={baseToDisplay(ethRewData!.claimableRewards, 18)} precision={4} />}
+                render={() => <NumberDisplay value={baseToDisplay(ethRewData!.linkableRewards, 18)} precision={4} />}
               ></LoadingValue>
             </Value>{' '}
             <Unit>RAD</Unit>
           </Cont>
-          <Label>Your Claimable Rewards</Label>
+          <Label>Your Linkable Rewards</Label>
         </Box>
       </Box>
       <h1>Claim Your Rewards</h1>
       <h2>1. Connect Your Wallet</h2>
       <CentChainWallet />
       <h2>2. Set Your Centrifuge Chain Address</h2>
-      {ethRewData?.claims.length === 0 &&
+      {ethRewData?.links.length === 0 &&
         ((ethCentAddrState === 'loading' && 'Your Centrifuge Chain address: loading') ||
           (ethCentAddrState === 'empty' && <SetCentAddress tinlake={tinlake} />) ||
           (ethCentAddrState === 'found' && (
             <div>
               Your Centrifuge Chain address has been set to {ethCentAddr}. The information will automatically be relayed
               to Centrifuge Chain.
-              {ethRewData.eligible && 'Please come back tomorrow to collect your rewards.'}
+              {ethRewData.claimable && 'Please come back tomorrow to collect your rewards.'}
             </div>
           )))}
-      {ethRewData?.claims.length === 1 && (
+      {ethRewData?.links.length === 1 && (
         <div>
-          Your Centrifuge Chain address is set to {ethRewData.claims[0].centAddress}, which has accumulated{' '}
-          {ethRewData.claims[0].rewardsAccumulated} RAD
+          Your Centrifuge Chain address is set to {ethRewData.links[0].centAddress}, which has accumulated{' '}
+          {ethRewData.links[0].rewardsAccumulated} RAD
         </div>
       )}
-      {ethRewData?.claims && ethRewData.claims.length > 1 && (
+      {ethRewData?.links && ethRewData.links.length > 1 && (
         <div>
           You have set multiple Centrifuge Chain addresses:
-          {ethRewData.claims.map((c) => (
-            <div>
-              {c.centAddress} (has accumulated {c.rewardsAccumulated} RAD)
+          {ethRewData.links.map((c) => (
+            <div key={c.centAddress}>
+              {shortAddr(c.centAddress)} (has accumulated {toPrecision(baseToDisplay(c.rewardsAccumulated, 18), 4)} RAD)
             </div>
           ))}
         </div>
       )}
       <h2>3. Collect Rewards on Centrifuge Chain</h2>
-      {!ethRewData?.eligible && (
+      {!ethRewData?.claimable && (
         <div>
           You can not yet collect your rewards, please come back {comebackDate(ethRewData?.nonZeroBalanceSince)}
         </div>
       )}
-      {ethRewData?.eligible && (!ethRewData?.claims || ethRewData.claims.length === 0) && (
+      {ethRewData?.claimable && (!ethRewData?.links || ethRewData.links.length === 0) && (
         <div>You can collect your rewards, please finish step 2 above</div>
       )}
-      {ethRewData?.eligible && ethRewData.claims && ethRewData.claims.length > 0 && (
+      {ethRewData?.claimable && ethRewData.links && ethRewData.links.length > 0 && (
         <div>
-          You can collect your rewards:
+          You can collect your rewards: TODO
           {/* TODO */}
         </div>
       )}

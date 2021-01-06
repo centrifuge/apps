@@ -13,16 +13,17 @@ const RECEIVE_CENT_ADDR = 'tinlake-ui/user-rewards/RECEIVE_CENT_ADDR'
 const RECEIVE_CENT_ADDR_EMPTY = 'tinlake-ui/user-rewards/RECEIVE_CENT_ADDR_EMPTY'
 
 // just used for readability
+type AccountIDString = string
 type BigDecimalString = string
 type BigIntString = string
 
 export interface UserRewardsEthData {
-  claims: {
-    centAddress: string
+  links: {
+    centAddress: AccountIDString
     rewardsAccumulated: BigDecimalString
   }[]
-  eligible: boolean
-  claimableRewards: BigDecimalString
+  claimable: boolean
+  linkableRewards: BigDecimalString
   totalRewards: BigDecimalString
   nonZeroBalanceSince: BigIntString
 }
