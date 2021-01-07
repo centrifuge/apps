@@ -1,6 +1,5 @@
 -- users
-create table if not exists users
-(
+create table if not exists users (
   id uuid primary key,
   email varchar(255),
   full_name varchar(255),
@@ -33,8 +32,7 @@ create table if not exists kyc (
     created_at timestamp with time zone not null default now(),
     status character varying(20) not null default 'none'::character varying,
     usa_tax_resident boolean not null default false,
-    accredited boolean not null default false,
-    verified_at timestamp with time zone,
+    accredited boolean not null default false
 );
 
 create unique index if not exists kyc_unique on kyc (provider, provider_account_id);
@@ -62,7 +60,7 @@ create unique index if not exists agreements_unique on agreements (provider, pro
 create unique index if not exists agreements_unique_per_user on agreements (user_id, pool_id, tranche, provider_template_id);
 
 -- investments
-create table investments (
+create table if not exists investments (
     address_id uuid not null references addresses(id) on delete cascade on update cascade,
     pool_id character(42) not null,
     tranche character varying(10) not null default '''senior'''::character varying,
@@ -71,5 +69,5 @@ create table investments (
     updated_at timestamp with time zone not null default now()
 );
 
-create unique index investments_pkey on investments(user_id uuid_ops);
+create unique index if not exists investments_pkey on investments(address_id uuid_ops);
 create unique index if not exists investments_unique on investments (address_id, pool_id, tranche);
