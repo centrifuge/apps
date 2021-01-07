@@ -7,7 +7,7 @@ import { LoadingValue } from '../../components/LoadingValue'
 import NumberDisplay from '../../components/NumberDisplay'
 import { Cont, Label, TokenLogo, Unit, Value } from '../../components/PoolsMetrics/styles'
 import { AuthState } from '../../ducks/auth'
-import { loadCentAddr, loadUserRewards, UserRewardsState } from '../../ducks/userRewards'
+import { loadCentAddr, loadClaimsTree, loadUserRewards, UserRewardsState } from '../../ducks/userRewards'
 import { shortAddr } from '../../utils/shortAddr'
 import { toPrecision } from '../../utils/toPrecision'
 import CentChainWallet from '../CentChainWallet'
@@ -29,6 +29,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
     if (ethAddr) {
       dispatch(loadCentAddr(ethAddr, tinlake))
       dispatch(loadUserRewards(ethAddr))
+      dispatch(loadClaimsTree())
     }
   }, [ethAddr])
 

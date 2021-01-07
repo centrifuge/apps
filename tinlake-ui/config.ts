@@ -92,6 +92,7 @@ interface Config {
   enableErrorLogging: boolean
   centrifugeChainUrl: string
   claimRADContractAddress: string
+  rewardsTreeUrl: string
 }
 
 export interface IpfsPools {
@@ -316,6 +317,10 @@ const config: Config = {
     .matches(/0x[0-9a-fA-F]{40}/)
     .required('NEXT_PUBLIC_CLAIM_RAD_CONTRACT_ADDRESS is required')
     .validateSync(process.env.NEXT_PUBLIC_CLAIM_RAD_CONTRACT_ADDRESS),
+  rewardsTreeUrl: yup
+    .string()
+    .required('NEXT_PUBLIC_REWARDS_TREE_URL is required')
+    .validateSync(process.env.NEXT_PUBLIC_REWARDS_TREE_URL),
   featureFlagNewOnboarding: yup.boolean().validateSync(process.env.NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING),
   enableErrorLogging: yup.boolean().validateSync(false),
 }

@@ -129,3 +129,14 @@ export function loadCentClaimedRewards(): ThunkAction<
     dispatch({ data, type: RECEIVE_USER_REWARDS_CENT })
   }
 }
+
+export function loadClaimsTree(): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
+  return async (dispatch, getState) => {
+    const r = await fetch(config.rewardsTreeUrl)
+    if (!r.ok) {
+      throw new Error(`could not load rewards tree from ${config.rewardsTreeUrl}`)
+    }
+    const json = await r.json()
+    console.log('json', json)
+  }
+}
