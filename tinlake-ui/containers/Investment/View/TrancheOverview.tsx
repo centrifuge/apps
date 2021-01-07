@@ -1,11 +1,12 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
-import OnboardModal from '../../../components/OnboardModal'
+import { PoolLink } from '../../../components/PoolLink'
 import config, { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
 import { loadPool, PoolState } from '../../../ducks/pool'
@@ -31,11 +32,19 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const trancheData = props.tranche === 'senior' ? pool?.data?.senior : pool?.data?.junior
   const epochData = pool?.epoch || undefined
 
+  const router = useRouter()
+
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
 
   const [card, setCard] = React.useState<Card>('home')
+
+  React.useEffect(() => {
+    if ('invest' in router.query && router.query.invest === props.tranche) {
+      setCard('invest')
+    }
+  }, [router.query])
 
   const [balance, setBalance] = React.useState<string | undefined>(undefined)
   const [tokenPrice, setTokenPrice] = React.useState<string | undefined>(undefined)
@@ -218,35 +227,56 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             )}
           </>
         )}
-
-        {address && props.pool && trancheData?.inMemberlist === false && (
-          <Info>
-            {config.featureFlagNewOnboarding && <OnboardModal pool={props.pool} card tranche={props.tranche} />}
-            {!config.featureFlagNewOnboarding && (
-              <>
-                <Heading level="6" margin={{ bottom: 'xsmall' }}>
-                  Interested in investing?
-                </Heading>
-                If you want to learn more get started with your onboarding process.
-                <Box justify="end" margin={{ top: 'small' }}>
-                  <InvestAction pool={props.pool} />
-                </Box>
-              </>
-            )}
-          </Info>
-        )}
-
-        {!address && (
-          <Info>
-            <Heading level="6" margin={{ bottom: 'xsmall' }}>
-              Interested in investing?
-            </Heading>
-            Connect your wallet to start the process.
+        {props.pool &&
+          props.tranche === 'senior' &&
+          !trancheData?.inMemberlist &&
+          ('onboard' in router.query ||
+            ('addresses' in props.pool &&
+              config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT))) && (
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button primary label="Connect" onClick={connect} />
+              <PoolLink href={'/onboarding'}>
+                <Anchor>
+                  <Button label="Invest" primary />
+                </Anchor>
+              </PoolLink>
             </Box>
-          </Info>
-        )}
+          )}
+
+        {props.pool &&
+          !(
+            'onboard' in router.query ||
+            ('addresses' in props.pool &&
+              config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT))
+          ) &&
+          !trancheData?.inMemberlist && (
+            <>
+              {address && (
+                <Info>
+                  <>
+                    <Heading level="6" margin={{ bottom: 'xsmall' }}>
+                      Interested in investing?
+                    </Heading>
+                    If you want to learn more get started with your onboarding process.
+                    <Box justify="end" margin={{ top: 'small' }}>
+                      <InvestAction pool={props.pool} />
+                    </Box>
+                  </>
+                </Info>
+              )}
+
+              {!address && (
+                <Info>
+                  <Heading level="6" margin={{ bottom: 'xsmall' }}>
+                    Interested in investing?
+                  </Heading>
+                  Connect your wallet to start the process.
+                  <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                    <Button primary label="Connect" onClick={connect} />
+                  </Box>
+                </Info>
+              )}
+            </>
+          )}
       </Box>
     </Box>
   )

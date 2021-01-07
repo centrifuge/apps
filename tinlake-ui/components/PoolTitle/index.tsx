@@ -4,16 +4,28 @@ import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Pool, UpcomingPool } from '../../config'
 import { PoolState } from '../../ducks/pool'
+import { PoolLink } from '../PoolLink'
 import { Label } from '../PoolList/styles'
 
 interface Props {
   pool: Pool | UpcomingPool
   page: string
+  parentPage?: string
+  parentPageHref?: string
+  rightContent?: React.ReactNode
 }
 
 const PoolTitle: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const isOversubscribed = (pool?.data && new BN(pool?.data.maxReserve).lte(new BN(pool?.data.reserve))) || false
+
+  // TODO: fix this somehow, otherwise the oversubscribed label isn't shown on pages which don't load the pool data
+  // (but this requires injecting the tinlake prop everywhere we include the PoolTitle component)
+  // const dispatch = useDispatch()
+
+  // React.useEffect(() => {
+  //   dispatch(loadPool(props.tinlake))
+  // }, [props.pool])
 
   return (
     <Wrapper>
@@ -23,16 +35,26 @@ const PoolTitle: React.FC<Props> = (props: Props) => {
         }
       />
       <PageTitle>
-        <PageName>{props.page}</PageName>
-        <PoolName>{props.pool.metadata.name}</PoolName>
+        <PoolName>
+          {props.pool.metadata.name}
+          <PoolLabel>
+            {props.pool.isUpcoming ? (
+              <Label blue>Upcoming</Label>
+            ) : (
+              isOversubscribed && <Label orange>Oversubscribed</Label>
+            )}
+          </PoolLabel>
+        </PoolName>
+        <PageName>
+          {props.parentPage && props.parentPageHref && (
+            <>
+              <PoolLink href={props.parentPageHref}>{props.parentPage}</PoolLink> <Arrow>►</Arrow>{' '}
+            </>
+          )}
+          {props.page}
+        </PageName>
       </PageTitle>
-      <PoolLabel>
-        {props.pool.isUpcoming ? (
-          <Label blue>Upcoming</Label>
-        ) : (
-          isOversubscribed && <Label orange>Oversubscribed</Label>
-        )}
-      </PoolLabel>
+      {props.rightContent && <RightContent>{props.rightContent}</RightContent>}
     </Wrapper>
   )
 }
@@ -54,22 +76,45 @@ const Icon = styled.img`
 const PageTitle = styled.div`
   display: flex;
   flex-direction: column;
+  width: 100%;
+`
+
+const PoolName = styled.h2`
+  font-size: 13px;
+  font-weight: bold;
+  margin: 4px 0 0 0;
+  color: #979797;
 `
 
 const PageName = styled.h1`
   font-size: 18px;
   font-weight: bold;
   margin: 0;
+
+  a {
+    color: #000;
+    text-decoration: none;
+
+    &:hover {
+      color: rgb(39, 98, 255);
+    }
+  }
 `
 
-const PoolName = styled.h2`
+const Arrow = styled.span`
   font-size: 13px;
-  font-weight: bold;
-  margin: 0;
+  position: relative;
+  top: -1px;
   color: #979797;
+  margin: 0 4px;
 `
 
 const PoolLabel = styled.div`
-  margin-top: 4px;
   margin-left: 8px;
+  display: inline-block;
+`
+
+const RightContent = styled.div`
+  margin-left: auto;
+  flex: 1;
 `

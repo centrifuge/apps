@@ -9,6 +9,7 @@ import { PoolStatus } from './pool'
 // Actions
 const LOAD_POOLS = 'tinlake-ui/pools/LOAD_POOLS'
 const RECEIVE_POOLS = 'tinlake-ui/pools/RECEIVE_POOLS'
+const RECEIVE_POOLS_DAILY_DATA = 'tinlake-ui/pools/RECEIVE_POOLS_DAILY_DATA'
 
 export interface PoolData {
   id: string
@@ -25,38 +26,42 @@ export interface PoolData {
   totalRepaysAggregatedAmountNum: number
   weightedInterestRate: BN
   weightedInterestRateNum: number
-  seniorInterestRate: BN
+  seniorInterestRate?: BN
   seniorInterestRateNum: number
   order: number
   version: number
   totalFinancedCurrency: BN
   financingsCount?: number
   status?: PoolStatus
-  reserve: BN
-  assetValue: BN
+  reserve?: BN
+  assetValue?: BN
   juniorYield14Days: BN | null
   seniorYield14Days: BN | null
   icon: string | null
 }
 
 export interface PoolsData {
-  ongoingPools: number
   ongoingLoans: number
-  totalDebt: BN
-  totalRepaysAggregatedAmount: BN
   totalFinancedCurrency: BN
   totalValue: BN
   pools: PoolData[]
 }
 
+export interface PoolsDailyData {
+  day: number
+  poolValue: number
+}
+
 export interface PoolsState {
   state: null | 'loading' | 'found'
   data: null | PoolsData
+  poolsDailyData: PoolsDailyData[]
 }
 
 const initialState: PoolsState = {
   state: null,
   data: null,
+  poolsDailyData: [],
 }
 
 export default function reducer(state: PoolsState = initialState, action: AnyAction = { type: '' }): PoolsState {
@@ -67,6 +72,8 @@ export default function reducer(state: PoolsState = initialState, action: AnyAct
       return { ...state, state: 'loading' }
     case RECEIVE_POOLS:
       return { ...state, state: 'found', data: action.data }
+    case RECEIVE_POOLS_DAILY_DATA:
+      return { ...state, poolsDailyData: action.data }
     default:
       return state
   }
@@ -75,7 +82,19 @@ export default function reducer(state: PoolsState = initialState, action: AnyAct
 export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, PoolsState, undefined, Action> {
   return async (dispatch) => {
     dispatch({ type: LOAD_POOLS })
+    // Load ipfs data only
+    const initialPoolsData = await Apollo.getInitialPools(pools)
+    dispatch({ data: initialPoolsData, type: RECEIVE_POOLS })
+
+    // Load with subgraph data
     const poolsData = await Apollo.getPools(pools)
     dispatch({ data: poolsData, type: RECEIVE_POOLS })
+  }
+}
+
+export function loadPoolsDailyData(): ThunkAction<Promise<void>, PoolsState, undefined, Action> {
+  return async (dispatch) => {
+    const poolsDailyData = await Apollo.getPoolsDailyData()
+    dispatch({ data: poolsDailyData, type: RECEIVE_POOLS_DAILY_DATA })
   }
 }

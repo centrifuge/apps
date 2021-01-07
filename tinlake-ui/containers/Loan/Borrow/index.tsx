@@ -50,6 +50,21 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
     }
   }, [status])
 
+  const [closeStatus, , setCloseTxId] = useTransactionState()
+
+  const close = async () => {
+    await props.ensureAuthed!()
+
+    const txId = await props.createTransaction(`Close Asset ${props.loan.loanId}`, 'close', [props.tinlake, props.loan])
+    setCloseTxId(txId)
+  }
+
+  React.useEffect(() => {
+    if (closeStatus === 'succeeded') {
+      props.loadLoan && props.loadLoan(props.tinlake, props.loan.loanId)
+    }
+  }, [closeStatus])
+
   const ceilingSet = props.loan.principal.toString() !== '0'
   const availableFunds = (props.pool && props.pool.data && props.pool.data.availableFunds.toString()) || '0'
   const borrowedAlready = new BN(props.loan.debt).isZero() === false || props.loan.status !== 'NFT locked'
@@ -95,7 +110,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Box basis={'1/3'} gap="medium" margin={{ right: 'small' }}>
+    <Box width="360px" gap="medium">
       <Box gap="medium" margin={{ right: 'small' }}>
         <TokenInput
           token="DAI"
@@ -113,18 +128,26 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
         />
       </Box>
       <Box align="start">
-        <Button
-          onClick={borrow}
-          primary
-          label="Finance Asset"
-          disabled={
-            error !== undefined ||
-            new BN(borrowAmount).isZero() ||
-            !borrowEnabled ||
-            status === 'unconfirmed' ||
-            status === 'pending'
-          }
-        />
+        <Box direction="row" gap="small">
+          <Button
+            onClick={borrow}
+            primary
+            label="Finance Asset"
+            disabled={
+              error !== undefined ||
+              new BN(borrowAmount).isZero() ||
+              !borrowEnabled ||
+              status === 'unconfirmed' ||
+              status === 'pending'
+            }
+          />
+          <Button
+            onClick={close}
+            secondary
+            label="Close"
+            disabled={props.loan.status !== 'NFT locked' || status === 'unconfirmed' || status === 'pending'}
+          />
+        </Box>
         {isBlockedState && (
           <Box margin={{ top: 'small' }}>
             The Epoch for this pool has just been closed and orders are currently being computed. Until the next Epoch

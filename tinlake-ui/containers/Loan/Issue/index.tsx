@@ -131,7 +131,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
               {nftError}{' '}
             </Alert>
           )}
-          {nft && props.auth?.address && <NftData data={nft} authedAddr={props.auth.address} />}
+          {nft && <NftData data={nft} />}
         </Box>
       )}
     </Box>

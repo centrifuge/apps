@@ -5,14 +5,12 @@ import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
-import { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
 import { loadLoan } from '../../../ducks/loans'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 
 interface Props extends TransactionProps {
-  poolConfig: Pool
   loan: Loan
   tinlake: ITinlake
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>
@@ -103,7 +101,7 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Box basis={'1/3'} gap="medium" margin={{ right: 'large' }}>
+    <Box width="360px" gap="medium">
       <Box gap="medium" margin={{ right: 'small' }}>
         <TokenInput
           token="DAI"

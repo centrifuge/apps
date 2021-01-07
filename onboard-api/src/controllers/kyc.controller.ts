@@ -37,30 +37,26 @@ export class KycController {
     // TODO: redirect to app?
     if (!kycInfo.providerAccountId) throw new BadRequestException('Code has already been used')
 
-    const investor = await this.securitizeService.getInvestor(kycInfo.digest.accessToken)
+    const investor = await this.securitizeService.getInvestor(kycInfo.digest)
     if (!investor) throw new BadRequestException('Failed to retrieve investor information from Securitize')
 
     // Update KYC and email records in our database
     const kyc = await this.kycRepo.upsertSecuritize(address.userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!kyc) throw new BadRequestException('Failed to create KYC entity')
 
-    await this.userRepo.update(address.userId, investor.email, investor.details.address.countryCode)
+    await this.userRepo.update(address.userId, investor.email, investor.fullName, investor.details.address.countryCode)
 
     await this.agreementRepo.createAgreementsForPool(params.poolId, address.userId, investor.email)
 
     // Create session and redirect user
     const session = this.sessionService.create(address.userId)
 
-    // let thirtyDaysFromNow = new Date()
-    // thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30)
-
-    // res.cookie(SessionCookieName, session, {
-    //   path: '/',
-    //   expires: thirtyDaysFromNow,
-    //   httpOnly: true,
-    // })
-
-    const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/investments?onb=1&session=${session}`
+    const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?onb=1&session=${session}`
     return res.redirect(redirectUrl)
+  }
+
+  @Get('pools/:poolId/info-redirect')
+  async updateInfoRedirect(@Res({ passthrough: true }) res) {
+    return res.redirect(config.securitize.idHost)
   }
 }
