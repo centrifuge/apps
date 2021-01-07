@@ -41,6 +41,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
   }
 
   const ethRewData = userRewards.ethData
+  const centRewData = userRewards.centData
 
   return (
     <>
@@ -112,7 +113,14 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
           You have set multiple Centrifuge Chain addresses:
           {ethRewData.links.map((c) => (
             <div key={c.centAddress}>
-              {shortAddr(c.centAddress)} (has accumulated {toPrecision(baseToDisplay(c.rewardsAccumulated, 18), 4)} RAD)
+              {shortAddr(c.centAddress)} (has earned on Ethereum{' '}
+              {toPrecision(baseToDisplay(c.rewardsAccumulated, 18), 4)} RAD,{' '}
+              {centRewData === null
+                ? 'loading data from Centrifuge Chain...'
+                : `has claimed on Centrifuge Chain: ${toPrecision(
+                    baseToDisplay(centRewData.find((d) => d.accountID === c.centAccountId)?.claimed || '0', 18),
+                    4
+                  )} RAD)`}
             </div>
           ))}
         </div>

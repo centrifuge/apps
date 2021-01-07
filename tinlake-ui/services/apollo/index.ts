@@ -318,6 +318,7 @@ class Apollo {
 
     return {
       links: data.links.map((link: any) => ({
+        centAccountId: link.centAddress,
         centAddress: accountIdToCentChainAddr(link.centAddress),
         rewardsAccumulated: link.rewardsAccumulated,
       })),

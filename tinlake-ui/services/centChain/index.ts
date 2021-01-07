@@ -1,6 +1,9 @@
 import { ApiPromise, WsProvider } from '@polkadot/api'
+import { Signer } from '@polkadot/api/types'
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types'
 import config from '../../config'
+import { centChainAddrToAccountId } from './centChainAddrToAccountId'
+import { types } from './types'
 
 // const { Keyring } = require('@polkadot/keyring')
 
@@ -38,7 +41,7 @@ export class CentChain {
 
   public async init() {
     const wsProvider = new WsProvider(this.url)
-    this._api = await ApiPromise.create({ provider: wsProvider })
+    this._api = await ApiPromise.create({ provider: wsProvider, types })
     // const keyring = new Keyring({ type: 'sr25519' })
     // const alice = keyring.addFromUri('//Alice')
     // try {
@@ -59,6 +62,39 @@ export class CentChain {
 
   public async account(accountId: string) {
     return await (await this.api()).query.system.account(accountId)
+  }
+
+  public async claimedRADRewards(addr: string) {
+    const claimed = await (await this.api()).query.radClaims.accountBalances(centChainAddrToAccountId(addr))
+    console.log('received claimed rewards', { addr, claimed: claimed.toHuman() })
+    return claimed
+  }
+
+  public claimRADRewards(
+    claimer: { addr: string; signer: Signer },
+    amount: string,
+    sorted_hashes: string[]
+  ): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      const extrinsic = await (await this.api()).tx.radClaims.claim(
+        centChainAddrToAccountId(claimer.addr),
+        amount,
+        sorted_hashes
+      )
+      extrinsic
+        .signAndSend(claimer.addr, { signer: claimer.signer }, ({ status }) => {
+          if (status.isInBlock) {
+            console.log(`Completed at block hash #${status.asInBlock.toString()}`)
+            resolve()
+          } else {
+            console.log(`Current status: ${status.type}`)
+          }
+        })
+        .catch((error: any) => {
+          console.log(':( transaction failed', error)
+          reject(':( transaction failed')
+        })
+    })
   }
 }
 
