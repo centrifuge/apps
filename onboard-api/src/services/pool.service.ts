@@ -1,7 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { ethers } from 'ethers'
+import { Tranche } from '../controllers/types'
 import config from '../config'
 import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
+import contractAbiMemberlist from '../utils/Memberlist.abi'
+import { AddressEntity, AddressRepo } from '../repos/address.repo'
+import { InvestmentRepo } from '../repos/investment.repo'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 @Injectable()
@@ -12,7 +16,7 @@ export class PoolService {
   provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
   registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, this.provider)
 
-  constructor() {
+  constructor(private readonly addressRepo: AddressRepo, private readonly investmentRepo: InvestmentRepo) {
     this.loadFromIPFS()
   }
 
@@ -72,7 +76,34 @@ export class PoolService {
     return profile
   }
 
-  // TODO: addToMemberlist()
+  async addToMemberlist(userId: string, poolId: string, tranche: Tranche): Promise<any> {
+    const pool = await this.get(poolId)
+    if (!pool) throw new Error(`Failed to get pool ${poolId} when adding to memberlist`)
+
+    const addresses = await this.addressRepo.getByUser(userId)
+    addresses.forEach((address: AddressEntity) => {
+      // TODO: add to memberlist here
+
+      this.checkMemberlist(address, pool, tranche)
+    })
+  }
+
+  async checkMemberlist(address: AddressEntity, pool: Pool, tranche: Tranche): Promise<any> {
+    const memberlist = new ethers.Contract(
+      tranche === 'senior' ? pool.addresses.SENIOR_MEMBERLIST : pool.addresses.JUNIOR_MEMBERLIST,
+      contractAbiMemberlist,
+      this.provider
+    )
+
+    const isWhitelisted = await memberlist.hasMember(address.address)
+
+    if (isWhitelisted) {
+      this.logger.debug(`Add ${address.address} to ${pool.metadata.name} - ${tranche}`)
+      this.investmentRepo.upsert(address.id, pool.addresses.ROOT_CONTRACT, tranche, true)
+    } else {
+      this.logger.debug(`${address.address} is not yet a member of ${pool.metadata.name} - ${tranche}`)
+    }
+  }
 }
 
 export interface Pool {

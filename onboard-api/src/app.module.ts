@@ -7,6 +7,7 @@ import { KycController } from './controllers/kyc.controller'
 import { AddressRepo } from './repos/address.repo'
 import { AgreementRepo } from './repos/agreement.repo'
 import { DatabaseService } from './repos/db.service'
+import { InvestmentRepo } from './repos/investment.repo'
 import { KycRepo } from './repos/kyc.repo'
 import { UserRepo } from './repos/user.repo'
 import { DocusignAuthService } from './services/docusign-auth.service'
@@ -17,7 +18,7 @@ import { SessionService } from './services/session.service'
 import { SyncService } from './services/sync.service'
 
 // TODO: separate into modules
-const databaseProviders = [DatabaseService, UserRepo, AddressRepo, KycRepo, AgreementRepo]
+const databaseProviders = [DatabaseService, UserRepo, AddressRepo, KycRepo, AgreementRepo, InvestmentRepo]
 const serviceProviders = [PoolService, SecuritizeService, DocusignService, DocusignAuthService, SessionService]
 const taskProviders = [SyncService]
 

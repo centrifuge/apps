@@ -6,7 +6,7 @@ import { UserRepo } from '../repos/user.repo'
 import { DocusignService } from '../services/docusign.service'
 import { SecuritizeService } from '../services/kyc/securitize.service'
 import { PoolService } from '../services/pool.service'
-import { AddressStatus, AgreementsStatus, KycStatusLabel } from './types'
+import { AddressStatus, AgreementsStatus, KycStatusLabel, Tranche } from './types'
 
 @Controller()
 export class AddressController {
@@ -97,6 +97,13 @@ export class AddressController {
           }
         }
       )
+
+      // TODO: get whitelisted per tranche
+      // let whitelisted = {}
+      // const tranches = ['senior', 'junior']
+      // tranches.forEach((tranche: Tranche) => {
+
+      // })
 
       return {
         kyc: {

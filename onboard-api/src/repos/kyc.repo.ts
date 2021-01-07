@@ -2,26 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { KycStatusLabel } from 'src/controllers/types'
 import { DatabaseService } from './db.service'
 
-export type Blockchain = 'ethereum'
-export type Network = 'mainnet' | 'kovan'
-export interface KycEntity {
-  userId: string
-  provider: string
-  providerAccountId: string
-  poolId?: string
-  digest: SecuritizeDigest
-  createdAt?: Date
-  status: KycStatusLabel
-  accredited: boolean
-  usaTaxResident: boolean
-}
-
-export interface SecuritizeDigest {
-  accessToken: string
-  refreshToken: string
-  expiration: string
-}
-
 @Injectable()
 export class KycRepo {
   constructor(private readonly db: DatabaseService) {}
@@ -43,8 +23,7 @@ export class KycRepo {
       from kyc
       where kyc.created_at is not null
       and kyc.status != 'verified'
-      or kyc.usa_tax_resident = TRUE
-      and kyc.accredited = FALSE
+      or (kyc.usa_tax_resident = TRUE and kyc.accredited = FALSE)
     `
     if (!investors) return []
 
@@ -92,4 +71,24 @@ export class KycRepo {
 
     return updatedKyc as KycEntity | undefined
   }
+}
+
+export type Blockchain = 'ethereum'
+export type Network = 'mainnet' | 'kovan'
+export interface KycEntity {
+  userId: string
+  provider: string
+  providerAccountId: string
+  poolId?: string
+  digest: SecuritizeDigest
+  createdAt?: Date
+  status: KycStatusLabel
+  accredited: boolean
+  usaTaxResident: boolean
+}
+
+export interface SecuritizeDigest {
+  accessToken: string
+  refreshToken: string
+  expiration: string
 }

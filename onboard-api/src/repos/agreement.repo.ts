@@ -1,23 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { PoolService, ProfileAgreement } from '../services/pool.service'
-import config from '../config'
 import { Tranche } from '../controllers/types'
 import { DocusignService } from '../services/docusign.service'
 import { uuidv4 } from '../utils/uuid'
 import { DatabaseService } from './db.service'
-import { profile } from 'console'
-
-export type Agreement = {
-  id: string
-  userId: string
-  poolId: string
-  tranche: Tranche
-  name: string
-  provider: 'docusign'
-  providerEnvelopeId: string
-  signedAt: Date
-  counterSignedAt: Date
-}
 
 @Injectable()
 export class AgreementRepo {
@@ -187,4 +173,16 @@ export class AgreementRepo {
 
     return (agreements as unknown) as Agreement[]
   }
+}
+
+export type Agreement = {
+  id: string
+  userId: string
+  poolId: string
+  tranche: Tranche
+  name: string
+  provider: 'docusign'
+  providerEnvelopeId: string
+  signedAt: Date
+  counterSignedAt: Date
 }

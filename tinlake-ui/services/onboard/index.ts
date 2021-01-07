@@ -19,6 +19,11 @@ const wallets = [
     rpcUrl: config.rpcUrl,
     preferred: true,
   },
+  {
+    walletName: 'walletConnect',
+    infuraKey: config.infuraKey,
+    preferred: true,
+  },
 ]
 
 let onboard: API | null = null

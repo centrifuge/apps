@@ -24,6 +24,7 @@ export interface AgreementsStatus {
   tranche: Tranche
   signed?: boolean
   counterSigned?: boolean
+  whitelisted?: { [key in Tranche]: boolean }
 }
 
 export interface AddressStatus {
