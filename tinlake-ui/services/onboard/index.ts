@@ -6,23 +6,19 @@ import { networkNameToId } from '../../utils/networkNameResolver'
 const wallets = [
   {
     walletName: 'metamask',
-    preferred: true,
   },
   {
     walletName: 'portis',
     apiKey: config.portisApiKey,
     label: 'Login with Portis',
-    preferred: true,
   },
   {
     walletName: 'ledger',
     rpcUrl: config.rpcUrl,
-    preferred: true,
   },
   {
     walletName: 'walletConnect',
     infuraKey: config.infuraKey,
-    preferred: true,
   },
 ]
 
