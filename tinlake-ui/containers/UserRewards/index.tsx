@@ -7,7 +7,8 @@ import { LoadingValue } from '../../components/LoadingValue'
 import NumberDisplay from '../../components/NumberDisplay'
 import { Cont, Label, TokenLogo, Unit, Value } from '../../components/PoolsMetrics/styles'
 import { AuthState } from '../../ducks/auth'
-import { loadCentAddr, loadClaimsTree, loadUserRewards, UserRewardsState } from '../../ducks/userRewards'
+import { load, UserRewardsState } from '../../ducks/userRewards'
+import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
 import { shortAddr } from '../../utils/shortAddr'
 import { toPrecision } from '../../utils/toPrecision'
 import CentChainWallet from '../CentChainWallet'
@@ -21,15 +22,13 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
   const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
   const dispatch = useDispatch()
 
-  const { ethCentAddrState, ethCentAddr } = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
+  // const { ethCentAddrState, ethCentAddr } = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
 
   const { address: ethAddr } = useSelector<any, AuthState>((state: any) => state.auth)
 
   React.useEffect(() => {
     if (ethAddr) {
-      dispatch(loadCentAddr(ethAddr, tinlake))
-      dispatch(loadUserRewards(ethAddr))
-      dispatch(loadClaimsTree())
+      dispatch(load(ethAddr))
     }
   }, [ethAddr])
 
@@ -41,8 +40,9 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
     )
   }
 
-  const ethRewData = userRewards.ethData
-  const centRewData = userRewards.centData
+  const data = userRewards.data
+
+  console.log('data', data)
 
   return (
     <>
@@ -60,8 +60,8 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
             <TokenLogo src={`/static/rad.svg`} />
             <Value>
               <LoadingValue
-                done={userRewards?.ethState === 'found' && !!ethRewData}
-                render={() => <NumberDisplay value={baseToDisplay(ethRewData!.totalRewards, 18)} precision={4} />}
+                done={userRewards?.subgraphState === 'found' && !!data}
+                render={() => <NumberDisplay value={baseToDisplay(data!.totalEarnedRewards, 18)} precision={4} />}
               ></LoadingValue>
             </Value>{' '}
             <Unit>RAD</Unit>
@@ -80,62 +80,65 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
             <TokenLogo src={`/static/rad.svg`} />
             <Value>
               <LoadingValue
-                done={userRewards?.ethState === 'found' && !!ethRewData}
-                render={() => <NumberDisplay value={baseToDisplay(ethRewData!.linkableRewards, 18)} precision={4} />}
+                done={userRewards?.subgraphState === 'found' && !!data}
+                render={() => <NumberDisplay value={baseToDisplay(data!.unlinkedRewards, 18)} precision={4} />}
               ></LoadingValue>
             </Value>{' '}
             <Unit>RAD</Unit>
           </Cont>
-          <Label>Your Linkable Rewards</Label>
+          <Label>Your Unlinked Rewards</Label>
         </Box>
       </Box>
       <h1>Claim Your Rewards</h1>
       <h2>1. Connect Your Wallet</h2>
       <CentChainWallet />
       <h2>2. Set Your Centrifuge Chain Address</h2>
-      {ethRewData?.links.length === 0 &&
-        ((ethCentAddrState === 'loading' && 'Your Centrifuge Chain address: loading') ||
-          (ethCentAddrState === 'empty' && <SetCentAddress tinlake={tinlake} />) ||
-          (ethCentAddrState === 'found' && (
-            <div>
-              Your Centrifuge Chain address has been set to {ethCentAddr}. The information will automatically be relayed
-              to Centrifuge Chain.
-              {ethRewData.claimable && 'Please come back tomorrow to collect your rewards.'}
-            </div>
-          )))}
-      {ethRewData?.links.length === 1 && (
+      {data?.links?.length === 0 && <SetCentAddress tinlake={tinlake} />}
+      {data?.links?.length === 1 && (
         <div>
-          Your Centrifuge Chain address is set to {ethRewData.links[0].centAddress}, which has accumulated{' '}
-          {ethRewData.links[0].rewardsAccumulated} RAD
+          Your Centrifuge Chain address is set to {shortAddr(accountIdToCentChainAddr(data.links[0].centAccountID))}{' '}
+          (AccountID {shortAddr(data.links[0].centAccountID)}), which has earned on Ethereum{' '}
+          {toPrecision(baseToDisplay(data.links[0].earned, 18), 4)} RAD
+          {data.links[0].claimable
+            ? `, of which ${toPrecision(
+                baseToDisplay(data.links[0].claimable, 18),
+                4
+              )} RAD are claimable on Centrifuge Chain`
+            : ` [claimable on Centrifuge Chain loading...]`}
+          {data.links[0].claimed
+            ? `, of which ${toPrecision(
+                baseToDisplay(data.links[0].claimed, 18),
+                4
+              )} RAD have been claimed on Centrifuge Chain`
+            : ` [claimed on Centrifuge Chain loading...]`}
         </div>
       )}
-      {ethRewData?.links && ethRewData.links.length > 1 && (
+      {data?.links && data.links.length > 1 && (
         <div>
           You have set multiple Centrifuge Chain addresses:
-          {ethRewData.links.map((c) => (
-            <div key={c.centAddress}>
-              {shortAddr(c.centAddress)} (has earned on Ethereum{' '}
-              {toPrecision(baseToDisplay(c.rewardsAccumulated, 18), 4)} RAD,{' '}
-              {centRewData === null
-                ? 'loading data from Centrifuge Chain...'
-                : `has claimed on Centrifuge Chain: ${toPrecision(
-                    baseToDisplay(centRewData.find((d) => d.accountID === c.centAccountId)?.claimed || '0', 18),
-                    4
-                  )} RAD)`}
+          {data.links.map((c) => (
+            <div key={c.centAccountID}>
+              {shortAddr(accountIdToCentChainAddr(c.centAccountID))} (AccountID {shortAddr(c.centAccountID)}, has earned
+              on Ethereum {toPrecision(baseToDisplay(c.earned, 18), 4)} RAD
+              {c.claimable
+                ? `, of which ${toPrecision(baseToDisplay(c.claimable, 18), 4)} RAD are claimable on Centrifuge Chain`
+                : ` [claimable on Centrifuge Chain loading...]`}
+              {c.claimed
+                ? `, of which ${toPrecision(baseToDisplay(c.claimed, 18), 4)} RAD have been claimed on Centrifuge Chain`
+                : ` [claimed on Centrifuge Chain loading...]`}
+              )
             </div>
           ))}
         </div>
       )}
       <h2>3. Collect Rewards on Centrifuge Chain</h2>
-      {!ethRewData?.claimable && (
-        <div>
-          You can not yet collect your rewards, please come back {comebackDate(ethRewData?.nonZeroBalanceSince)}
-        </div>
+      {!data?.claimable && (
+        <div>You can not yet collect your rewards, please come back {comebackDate(data?.nonZeroInvestmentSince)}</div>
       )}
-      {ethRewData?.claimable && (!ethRewData?.links || ethRewData.links.length === 0) && (
+      {data?.claimable && data.links.length === 0 && (
         <div>You can collect your rewards, please finish step 2 above</div>
       )}
-      {ethRewData?.claimable && ethRewData.links && ethRewData.links.length > 0 && (
+      {data?.claimable && data.links.length > 0 && (
         <div>
           You can collect your rewards: TODO
           {/* TODO */}

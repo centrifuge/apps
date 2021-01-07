@@ -1,12 +1,10 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Button } from 'grommet'
 import * as React from 'react'
-import { connect, useDispatch, useSelector } from 'react-redux'
+import { connect, useSelector } from 'react-redux'
 import Alert from '../../components/Alert'
-import { AuthState } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
-import { loadCentAddr } from '../../ducks/userRewards'
 import { centChainAddrToAccountId } from '../../services/centChain/centChainAddrToAccountId'
 import { isCentChainAddr } from '../../services/centChain/isCentChainAddr'
 import { shortAddr } from '../../utils/shortAddr'
@@ -16,16 +14,7 @@ interface Props extends TransactionProps {
 }
 
 const SetCentAddress: React.FC<Props> = ({ createTransaction, tinlake }: Props) => {
-  const dispatch = useDispatch()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
-  const auth = useSelector<any, AuthState>((state: any) => state.auth)
-  const { address: ethAddr } = auth
-
-  React.useEffect(() => {
-    if (ethAddr) {
-      dispatch(loadCentAddr(ethAddr, tinlake))
-    }
-  }, [ethAddr])
 
   const [status, , setTxId] = useTransactionState()
 
@@ -42,12 +31,6 @@ const SetCentAddress: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
     )
     setTxId(txId)
   }
-
-  React.useEffect(() => {
-    if (ethAddr && status === 'succeeded') {
-      dispatch(loadCentAddr(ethAddr, tinlake))
-    }
-  }, [status])
 
   const disabled =
     status === 'unconfirmed' || status === 'pending' || !!(walletCentAddr && !isCentChainAddr(walletCentAddr))

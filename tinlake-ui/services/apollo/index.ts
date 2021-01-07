@@ -8,10 +8,9 @@ import fetch from 'node-fetch'
 import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
 import { PoolData, PoolsData } from '../../ducks/pools'
 import { RewardsData } from '../../ducks/rewards'
-import { UserRewardsEthData } from '../../ducks/userRewards'
+import { UserRewardsData } from '../../ducks/userRewards'
 import { getPoolStatus } from '../../utils/pool'
 import { UintBase } from '../../utils/ratios'
-import { accountIdToCentChainAddr } from '../centChain/accountIdToCentChainAddr'
 
 const { tinlakeDataBackendUrl } = config
 const cache = new InMemoryCache()
@@ -287,7 +286,7 @@ class Apollo {
     return { toDateAggregateValue: result.data?.rewardDayTotals[0]?.toDateAggregateValue }
   }
 
-  async getUserRewards(user: string): Promise<UserRewardsEthData | null> {
+  async getUserRewards(user: string): Promise<UserRewardsData | null> {
     let result
     try {
       result = await this.client.query({
@@ -316,17 +315,23 @@ class Apollo {
       return null
     }
 
-    return {
-      links: data.links.map((link: any) => ({
-        centAccountId: link.centAddress,
-        centAddress: accountIdToCentChainAddr(link.centAddress),
-        rewardsAccumulated: link.rewardsAccumulated,
-      })),
+    const transformed: UserRewardsData = {
+      nonZeroInvestmentSince: data.nonZeroBalanceSince,
       claimable: data.claimable,
-      linkableRewards: data.linkableRewards,
-      totalRewards: data.totalRewards,
-      nonZeroBalanceSince: data.nonZeroBalanceSince,
+      totalEarnedRewards: data.totalRewards,
+      unlinkedRewards: data.linkableRewards,
+      links: (data.links as any[]).map((link: any) => ({
+        centAccountID: link.centAddress,
+        earned: link.rewardsAccumulated,
+        claimable: null,
+        claimed: null,
+      })),
+      totalClaimableRewards: null,
+      totalClaimedRewards: null,
+      totalUnclaimedClaimableRewards: null,
     }
+
+    return transformed
   }
 
   // async getRewardsByUserToken(user: string) {
