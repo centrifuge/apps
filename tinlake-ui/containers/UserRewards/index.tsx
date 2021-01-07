@@ -1,6 +1,7 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { LoadingValue } from '../../components/LoadingValue'
@@ -23,8 +24,6 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
   const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
   const dispatch = useDispatch()
 
-  // const { ethCentAddrState, ethCentAddr } = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
-
   const { address: ethAddr } = useSelector<any, AuthState>((state: any) => state.auth)
 
   React.useEffect(() => {
@@ -33,21 +32,26 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
     }
   }, [ethAddr])
 
+  const {
+    query: { debug },
+  } = useRouter()
+
   if (!ethAddr) {
     return (
-      <Box margin={{ top: 'medium' }} direction="row">
-        Please connect with your Ethereum Wallet to see user rewards
-      </Box>
+      <div>
+        <h1>Your Rewards</h1>
+        <Box margin={{ top: 'medium' }} direction="row">
+          Please connect with your Ethereum Wallet to see your rewards.
+        </Box>
+      </div>
     )
   }
 
   const data = userRewards.data
 
-  console.log('data', data)
-
   return (
-    <>
-      <h1>Your Rewards on Ethereum</h1>
+    <div>
+      <h1>Your Rewards</h1>
       <Box margin={{ top: 'medium' }} direction="row">
         <Box
           width="256px"
@@ -67,87 +71,72 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
             </Value>{' '}
             <Unit>RAD</Unit>
           </Cont>
-          <Label>Your Total Rewards</Label>
-        </Box>
-        <Box
-          width="256px"
-          pad="medium"
-          elevation="small"
-          round="xsmall"
-          background="white"
-          margin={{ horizontal: '16px' }}
-        >
-          <Cont>
-            <TokenLogo src={`/static/rad.svg`} />
-            <Value>
-              <LoadingValue
-                done={userRewards?.subgraphState === 'found' && !!data}
-                render={() => <NumberDisplay value={baseToDisplay(data!.unlinkedRewards, 18)} precision={4} />}
-              ></LoadingValue>
-            </Value>{' '}
-            <Unit>RAD</Unit>
-          </Cont>
-          <Label>Your Unlinked Rewards</Label>
+          <Label>Rewards You Earned So Far</Label>
         </Box>
       </Box>
-      <h1>Claim Your Rewards</h1>
-      <h2>1. Connect Your Wallet</h2>
-      <CentChainWallet />
-      <h2>2. Set Your Centrifuge Chain Address</h2>
-      {data?.links?.length === 0 && <SetCentAddress tinlake={tinlake} />}
+      <h1>Collect Your Rewards</h1>
+      Collect your rewards on Centrifuge Chain.
+      <h2>1. Set Rewards Recipient</h2>
+      {data?.links?.length === 0 && (
+        <>
+          <CentChainWallet />
+          <SetCentAddress tinlake={tinlake} />
+        </>
+      )}
       {data?.links?.length === 1 && (
         <div>
-          Your Centrifuge Chain address is set to {shortAddr(accountIdToCentChainAddr(data.links[0].centAccountID))}{' '}
-          (AccountID {shortAddr(data.links[0].centAccountID)}), which has earned on Ethereum{' '}
-          {toPrecision(baseToDisplay(data.links[0].earned, 18), 4)} RAD
-          {data.links[0].claimable
-            ? `, of which ${toPrecision(
-                baseToDisplay(data.links[0].claimable, 18),
-                4
-              )} RAD are claimable on Centrifuge Chain`
-            : ` [claimable on Centrifuge Chain loading...]`}
-          {data.links[0].claimed
-            ? `, of which ${toPrecision(
-                baseToDisplay(data.links[0].claimed, 18),
-                4
-              )} RAD have been claimed on Centrifuge Chain`
-            : ` [claimed on Centrifuge Chain loading...]`}
+          Centrifuge Chain address {shortAddr(accountIdToCentChainAddr(data.links[0].centAccountID))} has been set as
+          rewards recipient.
+          {debug && (
+            <>
+              (AccountID {shortAddr(data.links[0].centAccountID)}, earned on Ethereum:{' '}
+              {toPrecision(baseToDisplay(data.links[0].earned, 18), 4)} RAD, claimable on Centrifuge Chain:
+              {data.links[0].claimable
+                ? `${toPrecision(baseToDisplay(data.links[0].claimable, 18), 4)} RAD`
+                : `[loading...]`}
+              , claimed on Centrifuge Chain:{' '}
+              {data.links[0].claimed
+                ? `${toPrecision(baseToDisplay(data.links[0].claimed, 18), 4)} RAD`
+                : `[loading...]`}
+              )
+            </>
+          )}
         </div>
       )}
       {data?.links && data.links.length > 1 && (
         <div>
-          You have set multiple Centrifuge Chain addresses:
+          Multiple Centrifuge Chain addresses have been set as rewards recipients. The last one is active and will
+          receive future rewards:
           {data.links.map((c) => (
             <div key={c.centAccountID}>
-              {shortAddr(accountIdToCentChainAddr(c.centAccountID))} (AccountID {shortAddr(c.centAccountID)}, has earned
-              on Ethereum {toPrecision(baseToDisplay(c.earned, 18), 4)} RAD
-              {c.claimable
-                ? `, of which ${toPrecision(baseToDisplay(c.claimable, 18), 4)} RAD are claimable on Centrifuge Chain`
-                : ` [claimable on Centrifuge Chain loading...]`}
-              {c.claimed
-                ? `, of which ${toPrecision(baseToDisplay(c.claimed, 18), 4)} RAD have been claimed on Centrifuge Chain`
-                : ` [claimed on Centrifuge Chain loading...]`}
-              )
+              {shortAddr(accountIdToCentChainAddr(c.centAccountID))} has earned{' '}
+              {toPrecision(baseToDisplay(c.earned, 18), 4)} RAD
+              {debug && (
+                <>
+                  (AccountID {shortAddr(c.centAccountID)}, claimable on Centrifuge Chain:{' '}
+                  {c.claimable ? `${toPrecision(baseToDisplay(c.claimable, 18), 4)} RAD` : `[loading...]`}, claimed on
+                  Centrifuge Chain: {c.claimed ? `${toPrecision(baseToDisplay(c.claimed, 18), 4)} RAD` : `[loading...]`}
+                  )
+                </>
+              )}
             </div>
           ))}
         </div>
       )}
-      <h2>3. Collect Rewards on Centrifuge Chain</h2>
+      <h2>2. Collect Your Rewards on Centrifuge Chain</h2>
       {!data?.claimable && (
-        <div>You can not yet collect your rewards, please come back {comebackDate(data?.nonZeroInvestmentSince)}</div>
+        <div>You can not yet collect your rewards, please come back {comebackDate(data?.nonZeroInvestmentSince)}.</div>
       )}
       {data?.claimable && data.links.length === 0 && (
-        <div>You can collect your rewards, please finish step 2 above</div>
+        <div>You can collect your rewards, please set your reward recipient above.</div>
       )}
       {data?.claimable && data.links.length > 0 && (
-        <div>
-          You can collect your rewards: TODO
-          {/* TODO */}
-        </div>
+        <>
+          <CentChainWallet />
+          <CollectRewards />
+        </>
       )}
-      <h2>3b. Collect Rewards on Centrifuge Chain</h2>
-      <CollectRewards />
-    </>
+    </div>
   )
 }
 

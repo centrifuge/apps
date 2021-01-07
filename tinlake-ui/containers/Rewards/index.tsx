@@ -36,7 +36,7 @@ const Rewards: React.FC<Props> = (_: Props) => {
           </Value>{' '}
           <Unit>RAD</Unit>
         </Cont>
-        <Label>Total Rewards Across Users</Label>
+        <Label>Rewards Earned by All Users</Label>
       </Box>
       <Box pad={{ vertical: 'medium' }} />
     </Box>

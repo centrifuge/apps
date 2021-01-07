@@ -58,8 +58,8 @@ export interface UserRewardsLink {
 
 export interface UserRewardsCollectionData {
   centAccountID: string
-  collectable: BigIntString | null
-  collected: BigIntString | null
+  collectable: BigIntString | null // From stored tree of rewards in rad-rewards-trees GCP bucket. Once per day, all Cent Chain account IDs and their respective earned rewards will be put into a merkle tree, the root is stored on Centrifuge Chain and the tree leaves are uploaded to GCP. `null` if data has not been received yet.
+  collected: BigIntString | null // From Centrifuge Chain. Amount that has already been claimed by a user on Centrifuge Chain. `null` if data has not been received yet.
 }
 
 const initialState: UserRewardsState = {

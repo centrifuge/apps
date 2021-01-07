@@ -41,13 +41,14 @@ const SetCentAddress: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
         <Alert type="error">{walletCentAddr} is not a valid Centrifuge Chain address.</Alert>
       )}
       {walletCentAddr && (
-        <>
-          <Button
-            label={`Set ${shortAddr(walletCentAddr)} as your reward claim address`}
-            disabled={disabled}
-            onClick={() => set(walletCentAddr)}
-          />
-        </>
+        <div>
+          You can now set the connected Centrifuge Chain address {shortAddr(walletCentAddr)} as the receiver of all your
+          RAD rewards. Please make sure you have stored your private key/seed mnemonic in a secure place. If you loose
+          access to this account, your rewards will be lost.
+          <div>
+            <Button label={`Set reward address`} disabled={disabled} onClick={() => set(walletCentAddr)} />
+          </div>
+        </div>
       )}
     </>
   )

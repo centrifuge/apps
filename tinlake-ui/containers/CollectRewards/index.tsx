@@ -1,6 +1,7 @@
-import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Button } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
@@ -12,11 +13,9 @@ import { centChainAddrToAccountId } from '../../services/centChain/centChainAddr
 import { shortAddr } from '../../utils/shortAddr'
 import { toPrecision } from '../../utils/toPrecision'
 
-interface Props {
-  tinlake: ITinlake
-}
+interface Props {}
 
-const CollectRewards: React.FC<Props> = ({ tinlake }: Props) => {
+const CollectRewards: React.FC<Props> = ({}: Props) => {
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
   const { collectionData, collectionState } = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
   const dispatch = useDispatch()
@@ -50,29 +49,62 @@ const CollectRewards: React.FC<Props> = ({ tinlake }: Props) => {
     setStatus('succeeded')
   }
 
+  const {
+    query: { debug },
+  } = useRouter()
+
   if (centAccountID === null) {
-    return 'Please connect your wallet to proceed'
+    return null
   }
+
+  if (
+    collectionState === null ||
+    collectionState === 'loading' ||
+    collectionData === null ||
+    collectionData?.collectable === null ||
+    collectionData?.collected === null
+  ) {
+    return <div>Loading collectable rewards...</div>
+  }
+
+  const uncollected =
+    collectionData && collectionData?.collectable !== null && collectionData?.collected !== null
+      ? new BN(collectionData?.collectable).sub(new BN(collectionData?.collected))
+      : null
+
   return (
     <>
-      Your connected Centrifuge Chain address {shortAddr(accountIdToCentChainAddr(centAccountID))}{' '}
-      {shortAddr(centAccountID)} has:
-      <ul>
-        <li>
-          Collectable: {collectionState === 'loading' && 'loading...'}{' '}
-          {collectionData?.collectable && `${toPrecision(baseToDisplay(collectionData.collectable, 18), 4)} RAD`}
-        </li>
-        <li>
-          Collected: {collectionState === 'loading' && 'loading...'}{' '}
-          {collectionData?.collected && `${toPrecision(baseToDisplay(collectionData.collected, 18), 4)} RAD`}
-        </li>
-      </ul>
-      {collectionState === 'found' && !new BN(collectionData?.collectable || 0).isZero() && (
-        <Button
-          label={`Collect RAD rewards`}
-          disabled={status === 'unconfirmed' || status === 'pending'}
-          onClick={collect}
-        />
+      {uncollected && !uncollected?.isZero() ? (
+        <>
+          <div>🎉 You have {toPrecision(baseToDisplay(uncollected, 18), 4)} uncollected RAD rewards.</div>
+          <Button label={`Collect`} disabled={status === 'unconfirmed' || status === 'pending'} onClick={collect} />
+        </>
+      ) : (
+        <div>
+          👍 You have collected all your rewards. If you still have active investments, please come back tomorrow.
+        </div>
+      )}
+      {!new BN(collectionData.collected).isZero() && (
+        <div>
+          🏆 You have collected so far
+          {toPrecision(baseToDisplay(collectionData.collected, 18), 4)} RAD as rewards.
+        </div>
+      )}
+      {debug && (
+        <>
+          <div>
+            Centrifuge Chain Address: {shortAddr(accountIdToCentChainAddr(centAccountID))} (Account ID{' '}
+            {shortAddr(centAccountID)})
+          </div>
+          <div>
+            Collectable on Subgraph:
+            {`${toPrecision(baseToDisplay(collectionData.collectable, 18), 4)} RAD`}
+          </div>
+          <div>
+            Collected on Centrifuge Chain:
+            {`${toPrecision(baseToDisplay(collectionData.collected, 18), 4)} RAD`}
+          </div>
+        </>
       )}
     </>
   )

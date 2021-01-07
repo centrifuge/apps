@@ -1,3 +1,4 @@
+import { Tooltip } from '@centrifuge/axis-tooltip'
 import { Button } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -13,41 +14,46 @@ const CentChainWallet: React.FC = () => {
   }
 
   return (
-    <>
+    <div>
       {cWallet.error && (
-        <div>
+        <>
           Please{' '}
           <a href="https://polkadot.js.org/extension/" target="_blank">
             install the Polkadot extension for your browser
           </a>{' '}
           and authorize Tinlake to connect to it.
-        </div>
+        </>
       )}
       {cWallet.state === 'disconnected' && (
-        <div>
-          Connect your wallet to get started:
+        <>
           <Button secondary label="Connect" onClick={onConnect} />
-        </div>
+        </>
       )}
-      {cWallet.state === 'connecting' && <div>Connecting...</div>}
-      {cWallet.state === 'connected' && <div>Connected, woohoo!</div>}
+      {cWallet.state === 'connecting' && <>Connecting...</>}
       {cWallet.state === 'connected' && cWallet.accounts.length === 0 && (
-        <div>Please add an account to the Polkadot extension.</div>
+        <>Please add an account to the Polkadot extension.</>
       )}
       {cWallet.state === 'connected' && cWallet.accounts.length > 1 && (
-        <div>
+        <>
           You currently have {cWallet.accounts.length} in your Polkadot extension, but can only use one on this page.
           Please hide all accounts except the one you want to use in your Polkadot extension.
-        </div>
+        </>
       )}
       {cWallet.state === 'connected' && cWallet.accounts.length === 1 && (
-        <div>
-          Connected with account "{cWallet.accounts[0].name}": {shortAddr(cWallet.accounts[0].addrCentChain)} (this may
-          show up as {shortAddr(cWallet.accounts[0].addrInjected)} in the Polkadot extension – change the display
-          address format to "Centrifuge Chain" to verify the address).
-        </div>
+        <>
+          Connected with Centrifuge Chain address{' '}
+          <Tooltip
+            title="Unexpected Address?"
+            description={
+              'Your address may show up as {shortAddr(cWallet.accounts[0].addrInjected)} in the Polkadot extension. In the extension settings, change the display address format to "Centrifuge Chain".'
+            }
+          >
+            {shortAddr(cWallet.accounts[0].addrCentChain)}
+          </Tooltip>{' '}
+          ("{cWallet.accounts[0].name}")
+        </>
       )}
-    </>
+    </div>
   )
 }
 
