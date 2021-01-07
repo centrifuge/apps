@@ -12,6 +12,7 @@ import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCe
 import { shortAddr } from '../../utils/shortAddr'
 import { toPrecision } from '../../utils/toPrecision'
 import CentChainWallet from '../CentChainWallet'
+import CollectRewards from '../CollectRewards'
 import SetCentAddress from '../SetCentAddress'
 
 interface Props {
@@ -144,6 +145,8 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
           {/* TODO */}
         </div>
       )}
+      <h2>3b. Collect Rewards on Centrifuge Chain</h2>
+      <CollectRewards />
     </>
   )
 }

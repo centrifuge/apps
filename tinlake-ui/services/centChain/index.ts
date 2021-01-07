@@ -42,15 +42,6 @@ export class CentChain {
   public async init() {
     const wsProvider = new WsProvider(this.url)
     this._api = await ApiPromise.create({ provider: wsProvider, types })
-    // const keyring = new Keyring({ type: 'sr25519' })
-    // const alice = keyring.addFromUri('//Alice')
-    // try {
-    //   console.log('waiting')
-    //   await storeProofRoot(api, alice, hexToU8a('0xb86441971a590bb28da204c422f8f90e5bdbe4eed7149c489be23b534f8eff6b'))
-    //   console.log('done waiting')
-    // } finally {
-    //   await wsProvider.disconnect()
-    // }
   }
 
   async api(): Promise<ApiPromise> {
@@ -76,16 +67,33 @@ export class CentChain {
     sorted_hashes: string[]
   ): Promise<void> {
     return new Promise(async (resolve, reject) => {
-      const extrinsic = await (await this.api()).tx.radClaims.claim(
-        centChainAddrToAccountId(claimer.addr),
-        amount,
-        sorted_hashes
-      )
+      const api = await this.api()
+      const extrinsic = await api.tx.radClaims.claim(centChainAddrToAccountId(claimer.addr), amount, sorted_hashes)
       extrinsic
-        .signAndSend(claimer.addr, { signer: claimer.signer }, ({ status }) => {
-          if (status.isInBlock) {
-            console.log(`Completed at block hash #${status.asInBlock.toString()}`)
+        .signAndSend(claimer.addr, { signer: claimer.signer }, ({ status, dispatchError }) => {
+          // status would still be set, but in the case of error we can shortcut
+          // to just check it (so an error would indicate InBlock or Finalized)
+          if (dispatchError) {
+            if (dispatchError.isModule) {
+              // for module errors, we have the section indexed, lookup
+              const decoded = api.registry.findMetaError(dispatchError.asModule)
+              const { documentation, name, section } = decoded
+
+              console.log(`error, rejecting with: ${section}.${name}: ${documentation.join(' ')}`)
+              reject(`${section}.${name}: ${documentation.join(' ')}`)
+              return
+            } else {
+              // Other, CannotLookup, BadOrigin, no extra info
+              console.log(`error, rejecting with: ${dispatchError.toString()}`)
+              reject(dispatchError.toString())
+              return
+            }
+          }
+
+          if (status.isBroadcast) {
+            console.log(`Finalized at block hash #${status.asBroadcast.toString()}`)
             resolve()
+            return
           } else {
             console.log(`Current status: ${status.type}`)
           }

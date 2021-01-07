@@ -1,6 +1,6 @@
 export const types = {
   // substrate
-  AccountInfo: 'AccountInfoWithRefCount',
+  // AccountInfo: 'AccountInfoWithRefCount',
   Address: 'LookupSource',
   LookupSource: 'IndicesLookupSource',
   Multiplier: 'Fixed64',

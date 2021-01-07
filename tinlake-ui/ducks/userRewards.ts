@@ -10,6 +10,8 @@ const LOAD_SUBGRAPH = 'tinlake-ui/user-rewards/LOAD_SUBGRAPH'
 const RECEIVE_SUBGRAPH = 'tinlake-ui/user-rewards/RECEIVE_SUBGRAPH'
 const LOAD_CENT_CHAIN = 'tinlake-ui/user-rewards/LOAD_CENT_CHAIN'
 const RECEIVE_CENT_CHAIN = 'tinlake-ui/user-rewards/RECEIVE_CENT_CHAIN'
+const LOAD_CENT_CHAIN_CONNECTED = 'tinlake-ui/user-rewards/LOAD_CENT_CHAIN_CONNECTED'
+const RECEIVE_CENT_CHAIN_CONNECTED = 'tinlake-ui/user-rewards/RECEIVE_CENT_CHAIN_CONNECTED'
 const LOAD_GCP = 'tinlake-ui/user-rewards/LOAD_GCP'
 const RECEIVE_GCP = 'tinlake-ui/user-rewards/RECEIVE_GCP'
 
@@ -23,6 +25,8 @@ export interface UserRewardsState {
   centChainState: null | 'loading' | 'found'
   gcpState: null | 'loading' | 'found'
   data: null | UserRewardsData
+  collectionState: null | 'loading' | 'found'
+  collectionData: null | UserRewardsCollectionData
 }
 
 // Process to earn and claim rewards:
@@ -47,8 +51,15 @@ export interface UserRewardsData {
 export interface UserRewardsLink {
   centAccountID: AccountIDString // From subgraph. Cent Chain account that has been linked and can receive any funds
   earned: BigDecimalString // From subgraph. Amount of rewards that have been collected on Ethereum and have been assigned to this link/Cent Chain account. Any new rewards earned by any user will be added to the latest link once per day.
+  // TODO: the following are wrong if there are multiple Ethereum addresses linked to the same Cent Chain account. Remove them into the separate state UserRewardsCollectedData, and rename UserRewardsData into EarnedData
   claimable: BigDecimalString | null // From stored tree of rewards in rad-rewards-trees GCP bucket. Once per day, all Cent Chain account IDs and their respective earned rewards will be put into a merkle tree, the root is stored on Centrifuge Chain and the tree leaves are uploaded to GCP. `null` if data has not been received yet.
   claimed: BigDecimalString | null // From Centrifuge Chain. Amount that has already been claimed by a user on Centrifuge Chain. `null` if data has not been received yet.
+}
+
+export interface UserRewardsCollectionData {
+  centAccountID: string
+  collectable: BigIntString | null
+  collected: BigIntString | null
 }
 
 const initialState: UserRewardsState = {
@@ -56,6 +67,8 @@ const initialState: UserRewardsState = {
   centChainState: null,
   gcpState: null,
   data: null,
+  collectionState: null,
+  collectionData: null,
 }
 
 export default function reducer(
@@ -79,6 +92,21 @@ export default function reducer(
           ? { ...state.data, links: state.data.links.map((l, i) => ({ ...l, claimed: action.data[i] })) }
           : null,
       }
+    case LOAD_CENT_CHAIN_CONNECTED:
+      return {
+        ...state,
+        collectionState: 'loading',
+        collectionData: { centAccountID: action.centAccountID, collectable: null, collected: null },
+      }
+    case RECEIVE_CENT_CHAIN_CONNECTED:
+      return {
+        ...state,
+        collectionState: 'found',
+        collectionData: {
+          ...state.collectionData!,
+          collected: action.data,
+        },
+      }
     case LOAD_GCP:
       return { ...state, gcpState: 'loading' }
     case RECEIVE_GCP:
@@ -92,9 +120,18 @@ export default function reducer(
                 ...l,
                 claimable:
                   (action.data as { accountID: string; balance: string }[]).find(
-                    (h: any) => h.accountID === l.centAccountID
+                    (ad) => ad.accountID === l.centAccountID
                   )?.balance || '0',
               })),
+            }
+          : null,
+        collectionData: state.collectionData
+          ? {
+              ...state.collectionData,
+              collectable:
+                (action.data as { accountID: string; balance: string }[]).find(
+                  (ad) => ad.accountID === state.collectionData?.centAccountID
+                )?.balance || '0',
             }
           : null,
       }
@@ -139,8 +176,22 @@ export function loadCentChain(): ThunkAction<Promise<void>, { userRewards: UserR
   }
 }
 
-export function loadClaimsTree(): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
+export function loadCentChainConnected(
+  centAccountID: string
+): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
   return async (dispatch, getState) => {
+    dispatch({ type: LOAD_CENT_CHAIN_CONNECTED, centAccountID })
+    const data = await centChainService().claimedRADRewards(centAccountID)
+    const state = await getState()
+    dispatch({ data, type: RECEIVE_CENT_CHAIN_CONNECTED })
+    if (state.userRewards.collectionData?.collectable === null) {
+      dispatch(loadClaimsTree())
+    }
+  }
+}
+
+export function loadClaimsTree(): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
+  return async (dispatch) => {
     dispatch({ type: LOAD_GCP })
     const r = await fetch(config.rewardsTreeUrl)
     if (!r.ok) {
