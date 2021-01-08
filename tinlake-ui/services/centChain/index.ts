@@ -1,5 +1,4 @@
 import { ApiPromise, WsProvider } from '@polkadot/api'
-import { Signer } from '@polkadot/api/types'
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types'
 import config from '../../config'
 import { centChainAddrToAccountId } from './centChainAddrToAccountId'
@@ -61,16 +60,12 @@ export class CentChain {
     return claimed
   }
 
-  public claimRADRewards(
-    claimer: { addr: string; signer: Signer },
-    amount: string,
-    sorted_hashes: string[]
-  ): Promise<void> {
+  public claimRADRewards(claimerAccountID: string, amount: string, proof: string[]): Promise<void> {
     return new Promise(async (resolve, reject) => {
       const api = await this.api()
-      const extrinsic = await api.tx.radClaims.claim(centChainAddrToAccountId(claimer.addr), amount, sorted_hashes)
+      const extrinsic = api.tx.radClaims.claim(claimerAccountID, amount, proof)
       extrinsic
-        .signAndSend(claimer.addr, { signer: claimer.signer }, ({ status, dispatchError }) => {
+        .send(({ status, dispatchError }) => {
           // status would still be set, but in the case of error we can shortcut
           // to just check it (so an error would indicate InBlock or Finalized)
           if (dispatchError) {
@@ -78,29 +73,28 @@ export class CentChain {
               // for module errors, we have the section indexed, lookup
               const decoded = api.registry.findMetaError(dispatchError.asModule)
               const { documentation, name, section } = decoded
-
-              console.log(`error, rejecting with: ${section}.${name}: ${documentation.join(' ')}`)
-              reject(`${section}.${name}: ${documentation.join(' ')}`)
+              reject(`claim error name: ${section}.${name}: ${documentation.join(' ')}`)
               return
             } else {
               // Other, CannotLookup, BadOrigin, no extra info
-              console.log(`error, rejecting with: ${dispatchError.toString()}`)
-              reject(dispatchError.toString())
+              reject(`claim error other: ${dispatchError.toString()}`)
               return
             }
           }
 
-          if (status.isBroadcast) {
-            console.log(`Finalized at block hash #${status.asBroadcast.toString()}`)
+          if (status.isFinalized) {
             resolve()
             return
+          }
+
+          if (status.isBroadcast) {
+            console.log(`claim broadcast at block hash #${status.asBroadcast.toString()}`)
           } else {
-            console.log(`Current status: ${status.type}`)
+            console.log(`claim status: ${status.type}`)
           }
         })
         .catch((error: any) => {
-          console.log(':( transaction failed', error)
-          reject(':( transaction failed')
+          reject(`claim transaction failed: ${error}`)
         })
     })
   }

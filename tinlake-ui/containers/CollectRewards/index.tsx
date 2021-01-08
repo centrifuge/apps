@@ -4,6 +4,7 @@ import { Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import Alert from '../../components/Alert'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
 import { TransactionStatus } from '../../ducks/transactions'
 import { loadCentChainConnected, UserRewardsState } from '../../ducks/userRewards'
@@ -29,24 +30,25 @@ const CollectRewards: React.FC<Props> = ({}: Props) => {
   }, [centAccountID])
 
   const [status, setStatus] = React.useState<null | TransactionStatus>(null)
+  const [error, setError] = React.useState<null | string>(null)
   const collect = async () => {
     const acc = cWallet.accounts[0]
     if (!acc) {
       return
     }
     setStatus('pending')
-    const { web3FromSource } = await import('@polkadot/extension-dapp')
-    const injector = await web3FromSource(acc.source)
-    // TODO
-    await centChainService().claimRADRewards(
-      {
-        addr: acc.addrCentChain,
-        signer: injector.signer,
-      },
-      collectionData?.collectable!,
-      []
-    )
-    setStatus('succeeded')
+    setError(null)
+    try {
+      await centChainService().claimRADRewards(
+        centChainAddrToAccountId(acc.addrCentChain),
+        collectionData?.collectable!,
+        []
+      )
+      setStatus('succeeded')
+    } catch (e) {
+      setStatus('failed')
+      setError(e)
+    }
   }
 
   const {
@@ -76,12 +78,24 @@ const CollectRewards: React.FC<Props> = ({}: Props) => {
     <>
       {uncollected && !uncollected?.isZero() ? (
         <>
-          <div>🎉 You have {toPrecision(baseToDisplay(uncollected, 18), 4)} uncollected RAD rewards.</div>
-          <Button label={`Collect`} disabled={status === 'unconfirmed' || status === 'pending'} onClick={collect} />
+          {(status === null || status === 'unconfirmed' || status === 'failed' || status === 'pending') && (
+            <>
+              <div>🎉 You have {toPrecision(baseToDisplay(uncollected, 18), 4)} uncollected RAD rewards.</div>
+              <Button label={`Collect`} disabled={status === 'unconfirmed' || status === 'pending'} onClick={collect} />
+            </>
+          )}
+          {status === 'succeeded' && (
+            <Alert type="success">
+              You have collected {toPrecision(baseToDisplay(uncollected, 18), 4)} RAD. If you still have active
+              investments, please come back tomorrow or at a later time to collect more.
+            </Alert>
+          )}
+          {status === 'failed' && error && <Alert type="error">Error collecting rewards. {error}</Alert>}
         </>
       ) : (
         <div>
-          👍 You have collected all your rewards. If you still have active investments, please come back tomorrow.
+          👍 You have collected all your rewards. If you still have active investments, please come back tomorrow or at
+          a later time.
         </div>
       )}
       {!new BN(collectionData.collected).isZero() && (
