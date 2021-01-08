@@ -17,6 +17,7 @@ import { toPrecision } from '../../utils/toPrecision'
 interface Props {}
 
 const CollectRewards: React.FC<Props> = ({}: Props) => {
+  const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
   const { collectionData, collectionState } = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
   const dispatch = useDispatch()
@@ -81,6 +82,13 @@ const CollectRewards: React.FC<Props> = ({}: Props) => {
           {(status === null || status === 'unconfirmed' || status === 'failed' || status === 'pending') && (
             <>
               <div>🎉 You have {toPrecision(baseToDisplay(uncollected, 18), 4)} uncollected RAD rewards.</div>
+              {uncollected.gt(new BN(userRewards.data?.totalEarnedRewards || '0')) && (
+                <div>
+                  Your uncollected rewards on this address can be higher than the rewards you earned on the connected
+                  Ethereum address, e. g. if you have set this Centrifuge Chain address as recipient for multiple
+                  Ethereum addresses.
+                </div>
+              )}
               <Button label={`Collect`} disabled={status === 'unconfirmed' || status === 'pending'} onClick={collect} />
             </>
           )}
@@ -99,10 +107,18 @@ const CollectRewards: React.FC<Props> = ({}: Props) => {
         </div>
       )}
       {!new BN(collectionData.collected).isZero() && (
-        <div>
-          🏆 You have collected so far
-          {toPrecision(baseToDisplay(collectionData.collected, 18), 4)} RAD as rewards.
-        </div>
+        <>
+          <div>
+            🏆 You have collected so far
+            {toPrecision(baseToDisplay(collectionData.collected, 18), 4)} RAD as rewards.
+          </div>
+          {new BN(collectionData.collected).gt(new BN(userRewards.data?.totalEarnedRewards || '0')) && (
+            <div>
+              Your collected rewards on this address can be higher than the rewards you earned on the connected Ethereum
+              address, e. g. if you have set this Centrifuge Chain address as recipient for multiple Ethereum addresses.
+            </div>
+          )}
+        </>
       )}
       {debug && (
         <>
