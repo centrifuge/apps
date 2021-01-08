@@ -60,6 +60,8 @@ export interface Pool extends BasePool {
     ACTIONS: string
     PROXY_REGISTRY: string
     COLLATERAL_NFT: string
+    SENIOR_TOKEN: string
+    JUNIOR_TOKEN: string
   }
   contractConfig?: {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
