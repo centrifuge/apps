@@ -47,7 +47,12 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     else if (kycStatus === 'processing' && agreementStatus === 'signed') setActiveSteps(3)
     // TODO: what to do here?
     else if (kycStatus === 'processing' && agreementStatus === 'countersigned') setActiveSteps(2)
-    else if (kycStatus === 'verified' && agreementStatus === 'signed') setActiveSteps(3)
+    else if (
+      kycStatus === 'verified' &&
+      (agreementStatus === 'signed' ||
+        (onboarding.data?.kyc?.isWhitelisted && !onboarding.data?.kyc?.isWhitelisted[DefaultTranche]))
+    )
+      setActiveSteps(3)
     else setActiveSteps(4) // TODO: what to do here,
   }, [address, props.activePool, kycStatus, agreementStatus])
 

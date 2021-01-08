@@ -17,6 +17,25 @@ export class InvestmentRepo {
 
     return data as InvestmentEntity | undefined
   }
+
+  async getWhitelistStatus(addressId: string, poolId: string): Promise<{ [key in Tranche]: boolean }> {
+    const data = await this.db.sql`
+      select *
+      from investments
+      where investments.address_id = ${addressId}
+      and investments.pool_id = ${poolId}
+    `
+
+    let isWhitelisted = { senior: false, junior: false }
+    data.forEach((row: InvestmentEntity) => {
+      if (row.isWhitelisted) {
+        isWhitelisted[row.tranche] = true
+      }
+    })
+
+    return isWhitelisted
+  }
+
   async upsert(
     addressId: string,
     poolId: string,

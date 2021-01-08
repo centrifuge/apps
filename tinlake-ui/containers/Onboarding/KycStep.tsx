@@ -4,7 +4,6 @@ import { Box, Button, CheckBox, Paragraph } from 'grommet'
 import * as React from 'react'
 import config, { Pool } from '../../config'
 import { OnboardingState } from '../../ducks/onboarding'
-import Spinner from './Spinner'
 import { FormFieldWithoutBorder, Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
@@ -23,7 +22,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
   return (
     <Step>
       <StepHeader>
-        {props.kycStatus === 'processing' && <Spinner />}
+        {props.kycStatus === 'processing' && <StepIcon pending />}
         {props.kycStatus !== 'processing' && (
           <StepIcon inactive={!props.active} checked={props.kycStatus === 'verified'} />
         )}
@@ -72,7 +71,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
               fill={false}
             />
           </div>
-          <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
+          <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
         </StepBody>
       )}
       {props.active && (props.kycStatus === 'none' || props.kycStatus === 'updates-required') && (

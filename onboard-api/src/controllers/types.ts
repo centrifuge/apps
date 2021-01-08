@@ -11,6 +11,7 @@ export interface KycStatus {
   isUsaTaxResident?: boolean
   url?: string
   status?: KycStatusLabel
+  isWhitelisted?: { [key in Tranche]: boolean }
   accredited?: boolean
   requiresSignin?: boolean
 }
@@ -24,7 +25,6 @@ export interface AgreementsStatus {
   tranche: Tranche
   signed?: boolean
   counterSigned?: boolean
-  whitelisted?: { [key in Tranche]: boolean }
 }
 
 export interface AddressStatus {

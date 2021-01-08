@@ -1,4 +1,5 @@
 import { BadRequestException, Controller, Get, Param } from '@nestjs/common'
+import { InvestmentRepo } from '../repos/investment.repo'
 import { AddressRepo } from '../repos/address.repo'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { KycRepo } from '../repos/kyc.repo'
@@ -17,7 +18,8 @@ export class AddressController {
     private readonly agreementRepo: AgreementRepo,
     private readonly docusignService: DocusignService,
     private readonly poolService: PoolService,
-    private readonly userRepo: UserRepo
+    private readonly userRepo: UserRepo,
+    private readonly investmentRepo: InvestmentRepo
   ) {}
 
   @Get('pools/:poolId/addresses/:address')
@@ -85,7 +87,6 @@ export class AddressController {
         }
       })
 
-      // TODO: this is a hack, we shouldn't need to retrieve them twice
       const agreementLinks = agreements.map(
         (agreement: Agreement): AgreementsStatus => {
           return {
@@ -98,16 +99,12 @@ export class AddressController {
         }
       )
 
-      // TODO: get whitelisted per tranche
-      // let whitelisted = {}
-      // const tranches = ['senior', 'junior']
-      // tranches.forEach((tranche: Tranche) => {
-
-      // })
+      const isWhitelisted = await this.investmentRepo.getWhitelistStatus(address.id, params.poolId)
 
       return {
         kyc: {
           status,
+          isWhitelisted,
           url: authorizationLink,
           isUsaTaxResident: kyc.usaTaxResident,
           accredited: kyc.accredited,

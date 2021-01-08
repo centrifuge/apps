@@ -5,7 +5,6 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import config, { Pool } from '../../config'
 import { OnboardingState } from '../../ducks/onboarding'
-import Spinner from './Spinner'
 import { FormFieldWithoutBorder, Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
@@ -28,7 +27,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
   return (
     <Step>
       <StepHeader>
-        {props.agreementStatus === 'signed' && <Spinner />}
+        {props.agreementStatus === 'signed' && <StepIcon pending />}
         {props.agreementStatus !== 'signed' && (
           <StepIcon inactive={!props.active} checked={props.agreementStatus === 'countersigned'} />
         )}
@@ -49,7 +48,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <div>
             <Button primary label={'Sign in with Securitize'} href={props.onboarding.data?.kyc?.url} fill={false} />
           </div>
-          <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
+          <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
         </StepBody>
       )}
       {props.active && props.agreementStatus === 'none' && props.agreement && session && (
@@ -76,7 +75,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
                 props.agreement?.id
               }/redirect?session=${session}`}
               onClick={(event: any) => {
-                if (props.onboarding.data?.kyc.isUsaTaxResident && !checked) {
+                if (!props.onboarding.data?.kyc.isUsaTaxResident && !checked) {
                   event.preventDefault()
                   setError('This needs to be checked to proceed.')
                 }
@@ -84,7 +83,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
               fill={false}
             />
           </div>
-          <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
+          <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
         </StepBody>
       )}
       {props.active && props.agreementStatus === 'signed' && props.agreement && (
