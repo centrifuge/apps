@@ -7,7 +7,6 @@ import Header from '../components/Header'
 import WithFooter from '../components/WithFooter'
 import WithTinlake from '../components/WithTinlake'
 import config, { IpfsPools, loadPoolsFromIPFS } from '../config'
-import Rewards from '../containers/Rewards'
 import UserRewards from '../containers/UserRewards'
 
 interface Props {
@@ -25,17 +24,7 @@ const RewardsPage: React.FC<Props> = (props: Props) => {
               addresses={{
                 CLAIM_RAD: config.claimRADContractAddress,
               }}
-              render={(tinlake) => (
-                <Auth
-                  tinlake={tinlake}
-                  render={() => (
-                    <>
-                      <Rewards />
-                      <UserRewards tinlake={tinlake} />
-                    </>
-                  )}
-                />
-              )}
+              render={(tinlake) => <Auth tinlake={tinlake} render={() => <UserRewards tinlake={tinlake} />} />}
             />
           </Box>
         </Box>
