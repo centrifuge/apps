@@ -2044,6 +2044,7 @@ __metadata:
     http-proxy-middleware: 1.0.5
     husky: 4.2.5
     jest: 26.6.3
+    merkletreejs: ^0.2.12
     netlify-lambda: 2.0.1
     next: 9.5.5
     next-redux-wrapper: 6.0.0
@@ -7040,6 +7041,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"buffer-reverse@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "buffer-reverse@npm:1.0.1"
+  checksum: 2eacc5ffeeffb9605218782b3b74ad34cc75717e973a5166443be6a9debac796ad668923cb34cdc506c5cef5ca2fead6460ec46cd586401113a0fb7100dad5ce
+  languageName: node
+  linkType: hard
+
 "buffer-to-arraybuffer@npm:^0.0.5":
   version: 0.0.5
   resolution: "buffer-to-arraybuffer@npm:0.0.5"
@@ -8172,6 +8180,13 @@ __metadata:
   version: 1.2.6
   resolution: "crypto-es@npm:1.2.6"
   checksum: 0c0bd9b407887641c0cc48d5b484d24639f75a05c48a161575486b067be1f57a0fb1d1fcff1de41ab28b5e942af733aed84ccb2c516dfc463c75fd1ab6478b4a
+  languageName: node
+  linkType: hard
+
+"crypto-js@npm:^3.1.9-1":
+  version: 3.3.0
+  resolution: "crypto-js@npm:3.3.0"
+  checksum: 7cf8de489f9f25084a3b22cc6e944e2e11e03b6374777a7a554739ee27e3b35d5dfdac490e0a66bc191c9ecbbea13ad716f59345657335b39d95f9bc19c40ac5
   languageName: node
   linkType: hard
 
@@ -11801,7 +11816,7 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
-"is-buffer@npm:^2.0.2, is-buffer@npm:~2.0.3":
+"is-buffer@npm:^2.0.2, is-buffer@npm:^2.0.3, is-buffer@npm:~2.0.3":
   version: 2.0.5
   resolution: "is-buffer@npm:2.0.5"
   checksum: 1a6dc68206e834887d3b0d8e8ec6c95e0d780314479526a5a2cf458838d1bc441a105c4cebf95d8cc16e383238f66c41761ec622f6154043186e3d9439d56970
@@ -13765,6 +13780,13 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
+"merkle-lib@npm:^2.0.10":
+  version: 2.0.10
+  resolution: "merkle-lib@npm:2.0.10"
+  checksum: 9b142633d687291d7e9dc6afd7c44499dc380725b066ada5320e37d1e6376c2b1e736f3800a76f4aff074a2b66d9aa5de3b5ddc457acf1311a3c0624cd0d1275
+  languageName: node
+  linkType: hard
+
 "merkle-patricia-tree@npm:^2.1.2, merkle-patricia-tree@npm:^2.3.2":
   version: 2.3.2
   resolution: "merkle-patricia-tree@npm:2.3.2"
@@ -13778,6 +13800,19 @@ fsevents@~2.1.2:
     rlp: ^2.0.0
     semaphore: ">=1.0.1"
   checksum: 2ac240fda04a6cb50d5dd03f705ffb5b1b83da6d815751a6e91eece17eb1ddae29f4631bcf6cce8b934377db908cf30d215d239f86602979dccdcea3fe962d45
+  languageName: node
+  linkType: hard
+
+"merkletreejs@npm:^0.2.12":
+  version: 0.2.12
+  resolution: "merkletreejs@npm:0.2.12"
+  dependencies:
+    buffer-reverse: ^1.0.1
+    crypto-js: ^3.1.9-1
+    is-buffer: ^2.0.3
+    merkle-lib: ^2.0.10
+    treeify: ^1.1.0
+  checksum: 8742913c15f4a9cd924f6e890e4424986ea8ac4689314bbcff54fcdca0433ef6cd95b4db3eec59ee0c0157a7740271841d653dece87a35324f8a2660a5898d0a
   languageName: node
   linkType: hard
 
@@ -18922,6 +18957,13 @@ resolve@~1.17.0:
   bin:
     tree-kill: cli.js
   checksum: 967643efa4a231868232ea9d046c3ba7494ea6061fbb1e661c699b43ca0f0a14dad0782a631d915959d562830035166bab80ed726f9fe33b838af8a7516624ed
+  languageName: node
+  linkType: hard
+
+"treeify@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "treeify@npm:1.1.0"
+  checksum: 78db62f564d025ffd9ec0f89e9195ee343298db0eb2d54cd84bce2b7460d347a1d3ea14a75a7f04d3c45b87aa9eb4b0c8ecd7ab4fba9b456cf29c4c895f4fc1d
   languageName: node
   linkType: hard
 
