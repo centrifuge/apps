@@ -1,4 +1,4 @@
-import { bnToU8a, hexToU8a } from '@polkadot/util'
+import { bnToU8a, hexToU8a, u8aConcat } from '@polkadot/util'
 import { blake2AsU8a } from '@polkadot/util-crypto/blake2'
 import BN from 'bn.js'
 import MerkleTree from 'merkletreejs'
@@ -49,5 +49,5 @@ function hashBlake2b(bytes: string | Uint8Array) {
 }
 
 export function hashLeaf(accountID: string, balance: BN): Buffer {
-  return hashBlake2b(Buffer.concat([hexToU8a(accountID), bnToU8a(balance, 128, true)]))
+  return hashBlake2b(u8aConcat(hexToU8a(accountID), bnToU8a(balance, 128, true)))
 }
