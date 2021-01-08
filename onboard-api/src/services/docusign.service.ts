@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import config from '../config'
 import { User } from '../repos/user.repo'
 import { DocusignAuthService } from './docusign-auth.service'
+import { PoolService } from './pool.service'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 const InvestorRoleName = 'Investor'
@@ -9,9 +10,12 @@ const IssuerRoleName = 'Issuer'
 
 @Injectable()
 export class DocusignService {
-  constructor(private readonly docusignAuthService: DocusignAuthService) {}
+  constructor(private readonly docusignAuthService: DocusignAuthService, private readonly poolService: PoolService) {}
 
-  async createAgreement(userId: string, email: string, templateId: string): Promise<string> {
+  async createAgreement(poolId: string, userId: string, email: string, templateId: string): Promise<string> {
+    const pool = await this.poolService.get(poolId)
+    if (!pool) throw new Error(`Failed to find pool ${poolId}`)
+
     const envelopeDefinition = {
       templateId: templateId,
       templateRoles: [
@@ -23,8 +27,8 @@ export class DocusignService {
           routingOrder: 1,
         },
         {
-          email: 'jeroen+issuer@centrifuge.io',
-          name: 'Issuer 1',
+          email: pool.profile.issuer.email,
+          name: pool.profile.issuer.name,
           roleName: IssuerRoleName,
           routingOrder: 2,
         },
@@ -60,7 +64,7 @@ export class DocusignService {
     const recipientViewRequest = {
       authenticationMethod: 'none',
       email: user.email,
-      userName: 'Investor 1',
+      userName: user.fullName,
       roleName: InvestorRoleName,
       clientUserId: user.id,
       returnUrl: returnUrl,

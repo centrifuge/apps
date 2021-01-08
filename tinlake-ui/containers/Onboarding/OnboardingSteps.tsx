@@ -28,10 +28,13 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
   const address = useSelector<any, string | null>((state) => state.auth.address)
   const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
   const kycStatus = onboarding.data?.kyc?.requiresSignin ? 'requires-signin' : onboarding.data?.kyc?.status
-  const accreditationStatus = onboarding.data?.kyc?.isUsaTaxResident ? onboarding.data?.kyc?.accredited : true
+  const accreditationStatus = onboarding.data?.kyc?.isUsaTaxResident ? onboarding.data?.kyc?.accredited || false : true
   const agreement = (onboarding.data?.agreements || []).filter(
     (agreement: AgreementsStatus) => agreement.tranche === DefaultTranche
   )[0]
+  const whitelistStatus = onboarding.data?.kyc?.isWhitelisted
+    ? onboarding.data?.kyc?.isWhitelisted[DefaultTranche]
+    : false
   const agreementStatus = agreement?.counterSigned ? 'countersigned' : agreement?.signed ? 'signed' : 'none'
 
   React.useEffect(() => {
@@ -47,12 +50,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     else if (kycStatus === 'processing' && agreementStatus === 'signed') setActiveSteps(3)
     // TODO: what to do here?
     else if (kycStatus === 'processing' && agreementStatus === 'countersigned') setActiveSteps(2)
-    else if (
-      kycStatus === 'verified' &&
-      (agreementStatus === 'signed' ||
-        (onboarding.data?.kyc?.isWhitelisted && !onboarding.data?.kyc?.isWhitelisted[DefaultTranche]))
-    )
-      setActiveSteps(3)
+    else if ((kycStatus === 'verified' && agreementStatus === 'signed') || !whitelistStatus) setActiveSteps(3)
     else setActiveSteps(4) // TODO: what to do here,
   }, [address, props.activePool, kycStatus, agreementStatus])
 
@@ -83,6 +81,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
               onboarding={onboarding}
               agreement={agreement}
               agreementStatus={agreementStatus}
+              whitelistStatus={whitelistStatus}
               active={activeSteps >= 3}
             />
             <Step>

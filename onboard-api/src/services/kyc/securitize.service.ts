@@ -117,7 +117,7 @@ export interface Investor {
   tfaEnabled: boolean
   language: string
   email: string
-  verificationStatus: string
+  verificationStatus: 'none' | 'processing' | 'updates-required' | 'verified' | 'manual-review' | 'rejected' | 'expired'
   details: {
     tax: any[]
     address: {

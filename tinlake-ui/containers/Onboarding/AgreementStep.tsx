@@ -15,6 +15,7 @@ interface Props {
   onboarding: OnboardingState
   agreement: AgreementsStatus | undefined
   agreementStatus: 'none' | 'signed' | 'countersigned'
+  whitelistStatus: boolean
 }
 
 const KycStep: React.FC<Props> = (props: Props) => {
@@ -27,14 +28,17 @@ const KycStep: React.FC<Props> = (props: Props) => {
   return (
     <Step>
       <StepHeader>
-        {props.agreementStatus === 'signed' && <StepIcon pending />}
-        {props.agreementStatus !== 'signed' && (
-          <StepIcon inactive={!props.active} checked={props.agreementStatus === 'countersigned'} />
+        {(props.agreementStatus === 'signed' || props.whitelistStatus === false) && <StepIcon pending />}
+        {!(props.agreementStatus === 'signed' || props.whitelistStatus === false) && (
+          <StepIcon
+            inactive={!props.active}
+            checked={props.agreementStatus === 'countersigned' && props.whitelistStatus !== true}
+          />
         )}
         <StepTitle inactive={!props.active}>
           {props.agreementStatus === 'none'
             ? 'Sign the Subscription Agreement'
-            : props.agreementStatus === 'countersigned'
+            : props.agreementStatus === 'countersigned' && props.whitelistStatus === true
             ? 'Subscription Agreement signed'
             : 'Subscription Agreement awaiting Issuer signature'}
         </StepTitle>
@@ -86,17 +90,17 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {props.active && props.agreementStatus === 'signed' && props.agreement && (
+      {props.active && props.agreement && (props.agreementStatus === 'signed' || props.whitelistStatus === false) && (
         <StepBody>
           <Box pad={{ vertical: 'medium' }}>
-            The Issuer needs to counter-sign your {props.agreement.name} for {props.activePool.metadata.name} soon. If
-            KYC is verified, you will be ready to invest in this pool upon his signature.
+            The Issuer will counter-sign your {props.agreement.name} for {props.activePool.metadata.name} soon. If KYC
+            is verified, you will be ready to invest in this pool upon his signature.
           </Box>
         </StepBody>
       )}
       {/* TODO: or not whitelisted */}
       {!props.active && <StepBody inactive>&nbsp;</StepBody>}
-      {props.agreementStatus === 'countersigned' && <StepBody>&nbsp;</StepBody>}
+      {props.agreementStatus === 'countersigned' && props.whitelistStatus === true && <StepBody>&nbsp;</StepBody>}
     </Step>
   )
 }

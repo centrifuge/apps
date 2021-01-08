@@ -56,7 +56,7 @@ export class KycController {
     this.kycRepo.setStatus(
       'securitize',
       kyc.providerAccountId,
-      investor.verificationStatus as KycStatusLabel,
+      investor.verificationStatus === 'manual-review' ? 'processing' : investor.verificationStatus,
       investor.domainInvestorDetails.isUsaTaxResident,
       investor.domainInvestorDetails.isAccredited
     )

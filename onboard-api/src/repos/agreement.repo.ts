@@ -79,7 +79,7 @@ export class AgreementRepo {
 
     if (!existingAgreement) {
       const id = uuidv4()
-      const envelopeId = await this.docusignService.createAgreement(userId, email, templateId)
+      const envelopeId = await this.docusignService.createAgreement(poolId, userId, email, templateId)
 
       const [newAgreement] = await this.db.sql`
         insert into agreements (
