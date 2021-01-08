@@ -89,6 +89,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
           rewards recipient.
           {debug && (
             <>
+              {' '}
               (AccountID {shortAddr(data.links[0].centAccountID)}, earned on Ethereum:{' '}
               {toPrecision(baseToDisplay(data.links[0].earned, 18), 4)} RAD, claimable on Centrifuge Chain:
               {data.links[0].claimable
@@ -113,6 +114,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
               {toPrecision(baseToDisplay(c.earned, 18), 4)} RAD
               {debug && (
                 <>
+                  {' '}
                   (AccountID {shortAddr(c.centAccountID)}, claimable on Centrifuge Chain:{' '}
                   {c.claimable ? `${toPrecision(baseToDisplay(c.claimable, 18), 4)} RAD` : `[loading...]`}, claimed on
                   Centrifuge Chain: {c.claimed ? `${toPrecision(baseToDisplay(c.claimed, 18), 4)} RAD` : `[loading...]`}

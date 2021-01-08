@@ -44,9 +44,9 @@ const CentChainWallet: React.FC = () => {
           Connected with Centrifuge Chain address{' '}
           <Tooltip
             title="Unexpected Address?"
-            description={
-              'Your address may show up as {shortAddr(cWallet.accounts[0].addrInjected)} in the Polkadot extension. In the extension settings, change the display address format to "Centrifuge Chain".'
-            }
+            description={`Your address may show up as ${shortAddr(
+              cWallet.accounts[0].addrInjected
+            )} in the Polkadot extension. In the extension settings, change the display address format to "Centrifuge Chain" to see your address in the right format.`}
           >
             {shortAddr(cWallet.accounts[0].addrCentChain)}
           </Tooltip>{' '}
