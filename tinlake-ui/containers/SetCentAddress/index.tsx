@@ -1,7 +1,9 @@
+import { Tooltip } from '@centrifuge/axis-tooltip'
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { Button } from 'grommet'
+import { Box, Button, FormField, TextInput } from 'grommet'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
+import styled from 'styled-components'
 import Alert from '../../components/Alert'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
@@ -37,17 +39,33 @@ const SetCentAddress: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
 
   return (
     <>
-      {walletCentAddr && !isCentChainAddr(walletCentAddr) && (
+      {walletCentAddr && !isCentChainAddr(walletCentAddr || '') && (
         <Alert type="error">{walletCentAddr} is not a valid Centrifuge Chain address.</Alert>
       )}
       {walletCentAddr && (
         <div>
-          You can now set the connected Centrifuge Chain address {shortAddr(walletCentAddr)} as the receiver of all your
-          RAD rewards. Please make sure you have stored your private key/seed mnemonic in a secure place. If you loose
-          access to this account, your rewards will be lost.
-          <div>
-            <Button label={`Set reward address`} disabled={disabled} onClick={() => set(walletCentAddr)} />
-          </div>
+          You can now set your Centrifuge Chain address as the receiver of all your RAD rewards. Please make sure you
+          use the right account, since this step cannot be undone.
+          <FormField label="Your Centrifuge Chain address" margin={{ top: 'large', bottom: 'small' }} width="420px">
+            <TextInput value={walletCentAddr} disabled={true} />
+          </FormField>
+          <Tooltip
+            title="Unexpected/wrong address?"
+            description={`Your address may show up as ${shortAddr(
+              cWallet.accounts[0].addrInjected
+            )} in the Polkadot extension. In the extension settings, change the display address format to "Centrifuge Chain" to see your address in the right format.`}
+          >
+            <Small>Unexpected/wrong address?</Small>
+          </Tooltip>
+          <Box>
+            <Button
+              primary
+              label={`Set reward address`}
+              onClick={() => set(walletCentAddr)}
+              margin={{ left: 'auto', top: 'medium' }}
+              disabled={disabled}
+            />
+          </Box>
         </div>
       )}
     </>
@@ -55,3 +73,7 @@ const SetCentAddress: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
 }
 
 export default connect((state) => state, { createTransaction })(SetCentAddress)
+
+const Small = styled.small`
+  font-size: 11px;
+`
