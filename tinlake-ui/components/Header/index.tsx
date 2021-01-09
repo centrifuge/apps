@@ -6,12 +6,14 @@ import Link from 'next/link'
 import Router, { NextRouter, withRouter } from 'next/router'
 import React from 'react'
 import { connect, useSelector } from 'react-redux'
+import styled from 'styled-components'
 import { PoolSelector } from '../../components/PoolSelector'
 import config, { IpfsPools } from '../../config'
 import { AuthState, clear, ensureAuthed } from '../../ducks/auth'
 import { OnboardingState } from '../../ducks/onboarding'
 import { selectWalletTransactions, TransactionState } from '../../ducks/transactions'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
+import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 
 const { isDemo } = config
 export interface MenuItem {
@@ -114,11 +116,7 @@ const Header: React.FC<Props> = (props: Props) => {
             </Link>
           </div>
           {poolTitle && <PoolSelector title={poolTitle} ipfsPools={props.ipfsPools} />}
-          <Box
-            flex="grow"
-            basis="auto"
-            style={{ height: 32, padding: '0 16px 0 32px', borderRight: '1px solid #D8D8D8' }}
-          >
+          <Box flex="grow" basis="auto" style={{ height: 32, padding: '0 16px 0 32px' }}>
             {filtMenuItems.length > 0 && (
               <NavBar
                 border={false}
@@ -133,6 +131,18 @@ const Header: React.FC<Props> = (props: Props) => {
               />
             )}
           </Box>
+          {address && (
+            <Portfolio pad={{ right: '14px' }} style={{ borderRight: '1px solid #D8D8D8' }}>
+              <AxisTooltip title="View your portfolio" cursor="pointer">
+                <Link href="/portfolio">
+                  <Box direction="row">
+                    <TokenLogo src={`/static/DAI.svg`} />
+                    <Holdings>157.293</Holdings>
+                  </Box>
+                </Link>
+              </AxisTooltip>
+            </Portfolio>
+          )}
           <div style={{ flex: '0 0 auto', paddingLeft: 16 }}>
             {!address && <Button onClick={connectAccount} label="Connect" />}
             {address && (
@@ -153,5 +163,24 @@ const Header: React.FC<Props> = (props: Props) => {
     </Box>
   )
 }
+
+const Portfolio = styled(Box)`
+  cursor: pointer;
+`
+
+const TokenLogo = styled.img`
+  display: inline-block;
+  margin: 0 8px 0 0;
+  width: 16px;
+  height: 16px;
+  position: relative;
+  top: 2px;
+`
+
+const Holdings = styled.div`
+  font-weight: bold;
+  letter-spacing: 0.2px;
+  font-size: 13px;
+`
 
 export default connect((state) => state, { ensureAuthed, clear })(withRouter(Header))

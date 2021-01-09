@@ -9,10 +9,8 @@ import {
   Desc,
   Header,
   HeaderCol,
-  HeaderSub,
   HeaderTitle,
   Icon,
-  Label,
   Name,
   Number,
   PoolRow,
@@ -26,10 +24,27 @@ import { IpfsPools, Pool } from '../../config'
 import { PoolData } from '../../ducks/pools'
 import BN from 'bn.js'
 import { Cont, Label as MetricLabel, Value, TokenLogo } from '../../components/PoolsMetrics/styles'
+import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
+import { Token } from 'graphql'
+import { UintBase } from '../../utils/ratios'
 
 interface Props {
   ipfsPools: IpfsPools
 }
+
+const data = [
+  { name: 'Group A', value: 400 },
+  { name: 'Group B', value: 300 },
+  { name: 'Group C', value: 300 },
+  { name: 'Group D', value: 200 },
+]
+
+interface AssetClass {
+  name: string
+  balance: number
+}
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']
 
 const Portfolio: React.FC<Props> = (props: Props) => {
   const router = useRouter()
@@ -42,6 +57,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     dispatch(loadPools(props.ipfsPools))
+    if (address) dispatch(loadPortfolio(address))
   }, [])
 
   React.useEffect(() => {
@@ -66,18 +82,56 @@ const Portfolio: React.FC<Props> = (props: Props) => {
     return { pool: ipfsPool, data }
   }
 
-  const dropBalance = portfolio.data.reduce((prev: BN, tokenBalance: TokenBalance) => {
-    return tokenBalance.token.symbol.substr(-3) === 'DRP' ? prev.add(tokenBalance.balance) : prev
-  }, new BN(0))
+  const clickToken = (tokenBalance: TokenBalance) => {
+    const pool = getPool(tokenBalance)
+    if (!pool) return
 
-  const tinBalance = portfolio.data.reduce((prev: BN, tokenBalance: TokenBalance) => {
-    return tokenBalance.token.symbol.substr(-3) === 'TIN' ? prev.add(tokenBalance.balance) : prev
-  }, new BN(0))
+    router.push('/pool/[root]/[slug]/investments', `/pool/${pool.data.id}/${pool.pool.metadata.slug}/investments`, {
+      shallow: true,
+    })
+  }
+  const totalDropValue =
+    portfolio.data?.reduce((prev: BN, tokenBalance: TokenBalance) => {
+      return tokenBalance.token.symbol.substr(-3) === 'DRP'
+        ? prev.add(
+            tokenBalance.balance
+              .mul(getPool(tokenBalance)?.data['seniorTokenPrice'] || new BN(0))
+              .div(new BN(10).pow(new BN(27)))
+          )
+        : prev
+    }, new BN(0)) || new BN(0)
+
+  const totalTinValue =
+    portfolio.data?.reduce((prev: BN, tokenBalance: TokenBalance) => {
+      return tokenBalance.token.symbol.substr(-3) === 'TIN'
+        ? prev.add(
+            tokenBalance.balance
+              .mul(getPool(tokenBalance)?.data['juniorTokenPrice'] || new BN(0))
+              .div(new BN(10).pow(new BN(27)))
+          )
+        : prev
+    }, new BN(0)) || new BN(0)
+
+  // const assetClasses: AssetClass[] =
+  //   portfolio.data
+  //     ?.filter((tokenBalance: TokenBalance) => !tokenBalance.balance.isZero())
+  //     .reduce((prev: AssetClass[], tokenBalance: TokenBalance) => {
+  //       const pool = getPool(tokenBalance)
+  //       if (!pool) return prev
+
+  //       return [
+  //         ...prev,
+  //         {
+  //           name: pool.pool.metadata.asset,
+  //           balance: parseFloat(tokenBalance.balance.div(UintBase).toString()),
+  //         },
+  //       ]
+  //     }, [] as AssetClass[]) || []
 
   return (
     <Box margin={{ top: 'large' }}>
       <Heading level="4">Portfolio of {address ? shorten(address, 4) : ''}</Heading>
-      <Box direction="row" gap="large" margin={{ bottom: 'small' }} justify="center">
+      <Box direction="row" gap="small" margin={{ bottom: 'large' }} justify="center">
         <Box
           width="256px"
           pad="medium"
@@ -87,12 +141,12 @@ const Portfolio: React.FC<Props> = (props: Props) => {
           margin={{ horizontal: '16px' }}
         >
           <Cont>
-            <TokenLogo src={`/static/DROP_final.svg`} />
+            <TokenLogo src={`/static/DAI.svg`} />
             <Value>
-              <NumberDisplay value={baseToDisplay(dropBalance, 18)} precision={0} />
+              <NumberDisplay value={baseToDisplay(totalDropValue, 18)} precision={0} />
             </Value>{' '}
           </Cont>
-          <MetricLabel>Total DROP Balance</MetricLabel>
+          <MetricLabel>Total DROP Value (DAI)</MetricLabel>
         </Box>
         <Box
           width="256px"
@@ -103,80 +157,118 @@ const Portfolio: React.FC<Props> = (props: Props) => {
           margin={{ horizontal: '16px' }}
         >
           <Cont>
-            <TokenLogo src={`/static/TIN_final.svg`} />
+            <TokenLogo src={`/static/DAI.svg`} />
             <Value>
-              <NumberDisplay value={baseToDisplay(tinBalance, 18)} precision={0} />
+              <NumberDisplay value={baseToDisplay(totalTinValue, 18)} precision={0} />
             </Value>{' '}
           </Cont>
-          <MetricLabel>Total TIN Balance</MetricLabel>
+          <MetricLabel>Total TIN Value (DAI)</MetricLabel>
         </Box>
       </Box>
 
-      <Header>
-        <Desc>
-          <HeaderTitle>Token</HeaderTitle>
-        </Desc>
-        <HeaderCol>
-          <HeaderTitle>Current Balance</HeaderTitle>
-        </HeaderCol>
-        <HeaderCol>
-          <HeaderTitle>Current Price</HeaderTitle>
-        </HeaderCol>
-        {/* <HeaderCol>
-          <HeaderTitle>Initial Investment (DAI)</HeaderTitle>
-        </HeaderCol>
-        <HeaderCol>
-          <HeaderTitle>Pending Investment (DAI)</HeaderTitle>
-        </HeaderCol> */}
-      </Header>
-      {portfolio.data
-        ?.filter((tokenBalance: TokenBalance) => !tokenBalance.balance.isZero())
-        .map((tokenBalance: TokenBalance) => (
-          <PoolRow key={tokenBalance.token.id}>
-            <Icon
-              src={tokenBalance.token.symbol.substr(-3) === 'DRP' ? '/static/DROP_final.svg' : '/static/TIN_final.svg'}
-            />
-            <Desc>
-              <Name>{tokenBalance.token.symbol}</Name>
-              <Type>{getPool(tokenBalance)?.pool.metadata.name}</Type>
-            </Desc>
-            <DataCol>
-              <NumberDisplay
-                precision={0}
-                render={(v) =>
-                  v === '0' ? (
-                    <Dash>-</Dash>
-                  ) : (
-                    <>
-                      <Number>{v}</Number>
-                    </>
-                  )
-                }
-                value={baseToDisplay(tokenBalance.balance, 18)}
-              />
-            </DataCol>
+      {/* <Box width="256px" height="220px">
+        <ResponsiveContainer>
+          <PieChart>
+            <Pie nameKey="name" dataKey="balance" data={assetClasses} fill="#8884d8" label>
+              {assetClasses.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </Box> */}
 
-            <DataCol>
-              <NumberDisplay
-                precision={4}
-                render={(v) =>
-                  v === '0' ? (
-                    <Dash>-</Dash>
-                  ) : (
-                    <>
-                      <Number>{v}</Number>
-                    </>
-                  )
-                }
-                value={baseToDisplay(
-                  getPool(tokenBalance)?.data[
-                    tokenBalance.token.symbol.substr(-3) === 'DRP' ? 'seniorTokenPrice' : 'juniorTokenPrice'
-                  ] || new BN(0),
-                  27
-                )}
-              />
-            </DataCol>
-            {/* <DataCol>
+      {portfolio.data?.filter((tokenBalance: TokenBalance) => !tokenBalance.balance.isZero()).length > 0 && (
+        <>
+          <Header>
+            <Desc>
+              <HeaderTitle>Token</HeaderTitle>
+            </Desc>
+            <HeaderCol>
+              <HeaderTitle>Current Balance</HeaderTitle>
+            </HeaderCol>
+            <HeaderCol>
+              <HeaderTitle>Current Price</HeaderTitle>
+            </HeaderCol>
+            <HeaderCol>
+              <HeaderTitle>Current Value</HeaderTitle>
+            </HeaderCol>
+          </Header>
+          {portfolio.data
+            ?.filter((tokenBalance: TokenBalance) => !tokenBalance.balance.isZero())
+            .map((tokenBalance: TokenBalance) => (
+              <PoolRow key={tokenBalance.token.id} onClick={() => clickToken(tokenBalance)}>
+                <Icon
+                  src={
+                    tokenBalance.token.symbol.substr(-3) === 'DRP' ? '/static/DROP_final.svg' : '/static/TIN_final.svg'
+                  }
+                />
+                <Desc>
+                  <Name>{tokenBalance.token.symbol}</Name>
+                  <Type>{getPool(tokenBalance)?.pool.metadata.name}</Type>
+                </Desc>
+                <DataCol>
+                  <NumberDisplay
+                    precision={0}
+                    render={(v) =>
+                      v === '0' ? (
+                        <Dash>-</Dash>
+                      ) : (
+                        <>
+                          <Number>{v}</Number>
+                        </>
+                      )
+                    }
+                    value={baseToDisplay(tokenBalance.balance, 18)}
+                  />
+                </DataCol>
+
+                <DataCol>
+                  <NumberDisplay
+                    precision={4}
+                    render={(v) =>
+                      v === '0' ? (
+                        <Dash>-</Dash>
+                      ) : (
+                        <>
+                          <Number>{v}</Number>
+                        </>
+                      )
+                    }
+                    value={baseToDisplay(
+                      getPool(tokenBalance)?.data[
+                        tokenBalance.token.symbol.substr(-3) === 'DRP' ? 'seniorTokenPrice' : 'juniorTokenPrice'
+                      ] || new BN(0),
+                      27
+                    )}
+                  />
+                </DataCol>
+
+                <DataCol>
+                  <NumberDisplay
+                    precision={0}
+                    render={(v) =>
+                      v === '0' ? (
+                        <Dash>-</Dash>
+                      ) : (
+                        <>
+                          <Number>{v}</Number> <Unit>DAI</Unit>
+                        </>
+                      )
+                    }
+                    value={baseToDisplay(
+                      tokenBalance.balance
+                        .mul(
+                          getPool(tokenBalance)?.data[
+                            tokenBalance.token.symbol.substr(-3) === 'TIN' ? 'juniorTokenPrice' : 'seniorTokenPrice'
+                          ] || new BN(0)
+                        )
+                        .div(new BN(10).pow(new BN(27))),
+                      18
+                    )}
+                  />
+                </DataCol>
+                {/* <DataCol>
               <NumberDisplay
                 precision={0}
                 render={(v) =>
@@ -206,8 +298,15 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                 value={baseToDisplay(tokenBalance.pendingSupplyCurrency, 18)}
               />
             </DataCol> */}
-          </PoolRow>
-        ))}
+              </PoolRow>
+            ))}
+        </>
+      )}
+      {portfolio.data?.filter((tokenBalance: TokenBalance) => !tokenBalance.balance.isZero()).length === 0 && (
+        <Box elevation="small" round="xsmall" pad={'medium'} background="white">
+          No token holdings found.
+        </Box>
+      )}
     </Box>
   )
 }
