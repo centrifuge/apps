@@ -1,17 +1,18 @@
 import { Injectable } from '@nestjs/common'
+import { KycStatusLabel } from 'src/controllers/types'
 import { DatabaseService } from './db.service'
 
 export type Blockchain = 'ethereum'
 export type Network = 'mainnet' | 'kovan'
-
 export interface KycEntity {
   userId: string
   provider: string
   providerAccountId: string
   poolId?: string
-  digest: object
+  digest: SecuritizeDigest
   createdAt?: Date
   verifiedAt?: Date
+  status: KycStatusLabel
 }
 
 export interface SecuritizeDigest {
@@ -35,6 +36,19 @@ export class KycRepo {
     return data as KycEntity | undefined
   }
 
+  async getProcessingInvestors(): Promise<KycEntity[]> {
+    const investors = await this.db.sql`
+      select *
+      from kyc
+      where kyc.created_at is not null
+      and kyc.verified_at is null
+    `
+
+    if (!investors) return []
+
+    return (investors as unknown) as KycEntity[]
+  }
+
   async upsertSecuritize(
     userId: string,
     providerAccountId: string,
@@ -54,5 +68,18 @@ export class KycRepo {
     `
 
     return newKyc as KycEntity | undefined
+  }
+
+  async setStatus(provider: string, providerAccountId: string, status: KycStatusLabel): Promise<KycEntity | undefined> {
+    const [updatedKyc] = await this.db.sql`
+      update kyc
+      set status = ${status}
+      where provider = ${provider}
+      and provider_account_id = ${providerAccountId}
+
+      returning *
+    `
+
+    return updatedKyc as KycEntity | undefined
   }
 }

@@ -7,7 +7,6 @@ import gql from 'graphql-tag'
 import fetch from 'node-fetch'
 import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
 import { PoolData, PoolsData } from '../../ducks/pools'
-import { RewardsData } from '../../ducks/rewards'
 import { UserRewardsData } from '../../ducks/userRewards'
 import { getPoolStatus } from '../../utils/pool'
 import { UintBase } from '../../utils/ratios'
@@ -57,19 +56,21 @@ class Apollo {
       const totalDebt = (pool && new BN(pool.totalDebt)) || new BN('0')
       const totalRepaysAggregatedAmount = (pool && new BN(pool.totalRepaysAggregatedAmount)) || new BN('0')
       const weightedInterestRate = (pool && new BN(pool.weightedInterestRate)) || new BN('0')
-      const seniorInterestRate = (pool && pool.seniorInterestRate && new BN(pool.seniorInterestRate)) || new BN('0')
+      const seniorInterestRate = (pool && pool.seniorInterestRate && new BN(pool.seniorInterestRate)) || undefined
 
       const totalDebtNum = parseFloat(totalDebt.toString())
       const totalRepaysAggregatedAmountNum = parseFloat(totalRepaysAggregatedAmount.toString())
       const weightedInterestRateNum = parseFloat(weightedInterestRate.toString())
-      const seniorInterestRateNum = parseFloat(seniorInterestRate.toString())
+      const seniorInterestRateNum = parseFloat((seniorInterestRate || new BN(0)).toString())
 
       const ongoingLoans = (pool && pool.ongoingLoans.length) || 0 // TODO add count field to subgraph, inefficient to query all assets
       const totalFinancedCurrency = totalRepaysAggregatedAmount.add(totalDebt)
 
-      const reserve = (pool && new BN(pool.reserve)) || new BN('0')
-      const assetValue = (pool && new BN(pool.assetValue)) || new BN('0')
-      const poolValueNum = parseInt(reserve.div(UintBase).toString()) + parseInt(assetValue.div(UintBase).toString())
+      const reserve = (pool && new BN(pool.reserve)) || undefined
+      const assetValue = (pool && new BN(pool.assetValue)) || undefined
+      const poolValueNum =
+        parseInt((reserve || new BN(0)).div(UintBase).toString()) +
+        parseInt((assetValue || new BN(0)).div(UintBase).toString())
 
       const poolData = {
         reserve,
@@ -170,6 +171,24 @@ class Apollo {
     }))
   }
 
+  async getInitialPools(ipfsPools: IpfsPools): Promise<PoolsData> {
+    let pools = [
+      ...this.injectPoolData([], ipfsPools.active),
+      ...this.injectUpcomingPoolData(ipfsPools.upcoming),
+      ...this.injectArchivedPoolData(ipfsPools.archived),
+    ]
+
+    // TODO: get pool value with multicall, and use this to sort
+    pools = pools.sort((a, b) => a.name.localeCompare(b.name))
+
+    return {
+      pools,
+      ongoingLoans: 0,
+      totalFinancedCurrency: new BN(0),
+      totalValue: new BN(0),
+    }
+  }
+
   async getPools(ipfsPools: IpfsPools): Promise<PoolsData> {
     let result
     try {
@@ -210,12 +229,9 @@ class Apollo {
 
     return {
       pools,
-      ongoingPools: pools.filter((pool) => pool.ongoingLoans > 0).length,
       ongoingLoans: pools.reduce((p, c) => p + c.ongoingLoans, 0),
-      totalDebt: pools.reduce((p, c) => p.add(c.totalDebt), new BN(0)),
-      totalRepaysAggregatedAmount: pools.reduce((p, c) => p.add(c.totalRepaysAggregatedAmount), new BN(0)),
       totalFinancedCurrency: pools.reduce((p, c) => p.add(c.totalFinancedCurrency), new BN(0)),
-      totalValue: pools.reduce((p, c) => p.add(c.reserve).add(c.assetValue), new BN(0)),
+      totalValue: pools.reduce((p, c) => p.add(c.reserve || new BN(0)).add(c.assetValue || new BN(0)), new BN(0)),
     }
   }
 
@@ -247,6 +263,8 @@ class Apollo {
               repaysAggregatedAmount
               nftId
               nftRegistry
+              maturityDate
+              financingDate
             }
           }
         }
@@ -258,32 +276,9 @@ class Apollo {
         data: [],
       }
     }
-    const pool = result.data.pools[0]
+    const pool = result.data?.pools[0]
     const tinlakeLoans = (pool && toTinlakeLoans(pool.loans)) || []
     return tinlakeLoans
-  }
-
-  async getRewards(): Promise<RewardsData | null> {
-    let result
-    try {
-      result = await this.client.query({
-        query: gql`
-          {
-            rewardDayTotals(first: 1, skip: 1, orderBy: id, orderDirection: desc) {
-              toDateAggregateValue
-            }
-          }
-        `,
-      })
-    } catch (err) {
-      console.error(`error occured while fetching total rewards from apollo ${err}`)
-      return null
-    }
-    if (!result.data?.rewardDayTotals[0]?.toDateAggregateValue) {
-      return null
-    }
-
-    return { toDateAggregateValue: result.data?.rewardDayTotals[0]?.toDateAggregateValue }
   }
 
   async getUserRewards(user: string): Promise<UserRewardsData | null> {
@@ -354,6 +349,78 @@ class Apollo {
   //     }
   //   }
   // }
+  async getAssetData(root: string) {
+    let result
+    try {
+      // TODO: root should be root.toLowerCase() once we add lowercasing to the subgraph code (after AssemblyScript is updated)
+      result = await this.client.query({
+        query: gql`
+        {
+          dailyPoolDatas(where:{ pool: "${root}" }) {
+           day {
+            id
+          }
+            assetValue
+            reserve
+            seniorTokenPrice
+            juniorTokenPrice
+          }
+        }
+        `,
+      })
+    } catch (err) {
+      console.error(`error occured while fetching asset data from apollo ${err}`)
+      return {
+        data: [],
+      }
+    }
+    const assetData = result.data.dailyPoolDatas.map((item: any) => {
+      return {
+        day: Number(item.day.id),
+        assetValue: parseFloat(new BN(item.assetValue).div(UintBase).toString()),
+        reserve: parseFloat(new BN(item.reserve).div(UintBase).toString()),
+        seniorTokenPrice: parseFloat(new BN(item.seniorTokenPrice).div(UintBase).toString()) / 10 ** 9,
+        juniorTokenPrice: parseFloat(new BN(item.juniorTokenPrice).div(UintBase).toString()) / 10 ** 9,
+      }
+    })
+
+    return assetData
+  }
+
+  async getPoolsDailyData() {
+    let result
+    try {
+      result = await this.client.query({
+        query: gql`
+          {
+            days {
+              id
+              assetValue
+              reserve
+            }
+          }
+        `,
+      })
+    } catch (err) {
+      console.error(`error occured while fetching pools daily data from apollo ${err}`)
+      return {
+        data: [],
+      }
+    }
+    const poolsDailyData = result.data.days.map((item: any) => {
+      return {
+        day: Number(item.id),
+        poolValue: parseFloat(
+          new BN(item.assetValue)
+            .add(new BN(item.reserve))
+            .div(UintBase)
+            .toString()
+        ),
+      }
+    })
+
+    return poolsDailyData
+  }
 
   async getProxies(user: string) {
     let result
@@ -378,6 +445,27 @@ class Apollo {
     const proxies = result.data.proxies.map((e: { id: string; owner: string }) => e.id)
     return { data: proxies }
   }
+
+  async getProxyOwner(proxyId: string): Promise<{ owner?: string } | null> {
+    let result
+    try {
+      result = await this.client.query({
+        query: gql`
+        {
+          proxies (where: {id:"${proxyId}"})
+            {
+              owner
+            }
+          }
+        `,
+      })
+    } catch (err) {
+      console.error(`no proxy found for id ${proxyId} ${err}`)
+      return null
+    }
+
+    return result.data.proxies.length > 0 ? result.data.proxies[0] : null
+  }
 }
 
 function toTinlakeLoans(loans: any[]): { data: Loan[] } {
@@ -395,6 +483,10 @@ function toTinlakeLoans(loans: any[]): { data: Loan[] } {
       threshold: loan.threshold ? new BN(loan.threshold) : new BN(0),
       price: loan.price || new BN(0),
       status: getLoanStatus(loan),
+      maturityDate: loan.maturityDate,
+      financingDate: loan.financingDate,
+      borrowsAggregatedAmount: loan.borrowsAggregatedAmount,
+      repaysAggregatedAmount: loan.repaysAggregatedAmount,
     }
     tinlakeLoans.push(tinlakeLoan)
   })
@@ -414,7 +506,7 @@ function getLoanStatus(loan: any) {
   if (loan.debt && loan.debt !== '0') {
     return 'ongoing'
   }
-  return 'opened'
+  return 'NFT locked'
 }
 
 export default new Apollo()

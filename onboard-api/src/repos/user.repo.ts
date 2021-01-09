@@ -5,6 +5,7 @@ import { DatabaseService } from './db.service'
 export type User = {
   id: string
   email?: string
+  countryCode?: string
 }
 
 @Injectable()
@@ -37,10 +38,12 @@ export class UserRepo {
     return user as User | undefined
   }
 
-  async setEmail(userId: string, email: string): Promise<User | undefined> {
+  async update(userId: string, email: string, fullName: string, countryCode: string): Promise<User | undefined> {
     const [updatedUser] = await this.db.sql`
       update users
-      set email = ${email}
+      set email = ${email},
+      full_name = ${fullName},
+      country_code = ${countryCode}
       where id = ${userId}
 
       returning *

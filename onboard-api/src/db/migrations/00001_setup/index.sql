@@ -3,6 +3,8 @@ create table if not exists users
 (
   id uuid primary key,
   email varchar(255),
+  full_name varchar(255),
+  country_code character varying(5),
   created_at timestamp with time zone not null default now()
 );
 
@@ -28,6 +30,7 @@ create table if not exists kyc (
     provider_account_id character varying(255) not null,
     digest jsonb,
     created_at timestamp with time zone not null default now(),
+    status character varying(20) NOT NULL DEFAULT 'none'::character varying,
     verified_at timestamp with time zone
 );
 
@@ -40,6 +43,8 @@ create table if not exists agreements (
     id uuid primary key,
     user_id uuid not null references users(id) on delete cascade on update cascade,
     pool_id character(42) not null,
+    tranche character varying(20) NOT NULL DEFAULT '''senior'''::character varying,
+    name character varying(100) NOT NULL DEFAULT ''::character varying,
     provider character varying(100) not null,
     provider_template_id character varying(100) not null,
     provider_envelope_id character varying(100) not null,
@@ -51,4 +56,4 @@ create table if not exists agreements (
 create unique index if not exists agreements_pkey on agreements(id uuid_ops);
 create index if not exists agreements_user_id_lookup on agreements(user_id uuid_ops);
 create unique index if not exists agreements_unique on agreements (provider, provider_envelope_id);
-create unique index if not exists agreements_unique_per_user on agreements (user_id, pool_id, provider_template_id);
+create unique index if not exists agreements_unique_per_user on agreements (user_id, pool_id, tranche, provider_template_id);

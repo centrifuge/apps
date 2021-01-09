@@ -3,7 +3,7 @@ import { signDaiPermit, signERC2612Permit } from 'eth-permit'
 import { Constructor, PendingTransaction, TinlakeParams } from '../Tinlake'
 import { DaiPermitMessage, ERC2612PermitMessage, PermitMessage } from '../types/tinlake'
 
-const DaiTokenAddress = '0x6b175474e89094c44da98b954eedeac495271d0f'
+const DaiTokenAddresses = ['0x6b175474e89094c44da98b954eedeac495271d0f', '0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa']
 const maxUint256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
 
 export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Base: ActionBase) {
@@ -36,7 +36,10 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
       const trancheAddress =
         tranche === 'senior' ? this.contract('SENIOR_TRANCHE').address : this.contract('JUNIOR_TRANCHE').address
 
-      if (this.contractAddresses['TINLAKE_CURRENCY'] === DaiTokenAddress) {
+      if (
+        this.contractAddresses['TINLAKE_CURRENCY'] &&
+        DaiTokenAddresses.includes(this.contractAddresses['TINLAKE_CURRENCY'])
+      ) {
         return await signDaiPermit(
           this.legacyWeb3Provider,
           this.contract('TINLAKE_CURRENCY').address,
@@ -76,7 +79,10 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     submitSeniorSupplyOrderWithPermit = async (amount: string, permit: PermitMessage) => {
-      if (this.contractAddresses['TINLAKE_CURRENCY'] === DaiTokenAddress) {
+      if (
+        this.contractAddresses['TINLAKE_CURRENCY'] &&
+        DaiTokenAddresses.includes(this.contractAddresses['TINLAKE_CURRENCY'])
+      ) {
         const daiPermit = permit as DaiPermitMessage
 
         return this.pending(
@@ -175,7 +181,10 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     }
 
     submitJuniorSupplyOrderWithPermit = async (amount: string, permit: PermitMessage) => {
-      if (this.contractAddresses['TINLAKE_CURRENCY'] === DaiTokenAddress) {
+      if (
+        this.contractAddresses['TINLAKE_CURRENCY'] &&
+        DaiTokenAddresses.includes(this.contractAddresses['TINLAKE_CURRENCY'])
+      ) {
         const daiPermit = permit as DaiPermitMessage
 
         return this.pending(

@@ -64,7 +64,6 @@ export interface Pool extends BasePool {
   contractConfig?: {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
     SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
-    partialRepay?: boolean
   }
 }
 
@@ -88,11 +87,12 @@ interface Config {
   portisApiKey: string
   gasLimit: number
   onboardAPIHost: string
-  featureFlagNewOnboarding: boolean
+  featureFlagNewOnboardingPools: string[]
   enableErrorLogging: boolean
   centrifugeChainUrl: string
   claimRADContractAddress: string
   rewardsTreeUrl: string
+  multicallContractAddress: string
 }
 
 export interface IpfsPools {
@@ -128,7 +128,6 @@ const contractConfigSchema = yup.object().shape({
   SENIOR_OPERATOR: yup
     .mixed<'PROPORTIONAL_OPERATOR' | 'ALLOWANCE_OPERATOR'>()
     .oneOf(['PROPORTIONAL_OPERATOR', 'ALLOWANCE_OPERATOR']),
-  partialRepay: yup.bool(),
 })
 
 const securitizeDataSchema = yup.object().shape({
@@ -321,8 +320,13 @@ const config: Config = {
     .string()
     .required('NEXT_PUBLIC_REWARDS_TREE_URL is required')
     .validateSync(process.env.NEXT_PUBLIC_REWARDS_TREE_URL),
-  featureFlagNewOnboarding: yup.boolean().validateSync(process.env.NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING),
   enableErrorLogging: yup.boolean().validateSync(false),
+  // Loading a comma-separated string as a string array using yup proved hard/impossible
+  featureFlagNewOnboardingPools: process.env.NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING?.split(',') || [],
+  multicallContractAddress: yup
+    .string()
+    .required('NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS is required')
+    .validateSync(process.env.NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS),
 }
 
 function between1e23and1e27(s: string): boolean {

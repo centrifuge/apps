@@ -1,69 +1,103 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { baseToDisplay, bnToHex, feeToInterestRate } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { Box, DataTable, Text } from 'grommet'
-import { WithRouterProps } from 'next/dist/client/with-router'
-import { withRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import * as React from 'react'
+import styled from 'styled-components'
 import NumberDisplay from '../../../components/NumberDisplay'
 import { SortableLoan } from '../../../ducks/loans'
+import { dateToYMD } from '../../../utils/date'
 import { hexToInt } from '../../../utils/etherscanLinkGenerator'
+import { saveAsCSV } from '../../../utils/export'
 import ChevronRight from '../../ChevronRight'
+import LoanLabel from '../Label'
 
-interface Props extends WithRouterProps {
+interface Props {
   loans: SortableLoan[]
   userAddress: string
 }
 
-class LoanList extends React.Component<Props> {
-  clickRow = ({ datum }: { datum?: SortableLoan; index?: number }) => {
-    const { root, slug } = this.props.router.query
+const LoanList: React.FC<Props> = (props: Props) => {
+  const router = useRouter()
 
-    this.props.router.push(
+  const clickRow = ({ datum }: { datum?: SortableLoan; index?: number }) => {
+    const { root, slug } = router.query
+
+    router.push(
       `/pool/[root]/[slug]/assets/asset?assetId=${datum!.loanId}`,
       `/pool/${root}/${slug}/assets/asset?assetId=${datum!.loanId}`,
       { shallow: true }
     )
   }
 
-  render() {
-    const { loans } = this.props
-    return (
-      <Box pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
-        {loans.length > 0 && (
+  return (
+    <>
+      <Box
+        width="100%"
+        elevation="small"
+        round="xsmall"
+        pad={{ top: 'xsmall' }}
+        margin={{ bottom: 'medium' }}
+        background="white"
+      >
+        {props.loans.length > 0 && (
           <DataTable
             style={{ tableLayout: 'auto' }}
-            data={loans}
+            data={props.loans}
             sort={{ direction: 'desc', property: 'loanId' }}
             pad="xsmall"
             sortable
-            onClickRow={this.clickRow as any}
+            onClickRow={clickRow as any}
             columns={[
-              { header: <HeaderCell text={'Asset ID'}></HeaderCell>, property: 'loanId', align: 'end' },
+              {
+                header: 'Asset ID',
+                property: 'loanId',
+                align: 'center',
+                size: '140px',
+              },
               {
                 header: 'NFT ID',
                 primary: true,
                 property: 'tokenId',
-                align: 'end',
+                align: 'start',
+                size: '260px',
                 render: (l: SortableLoan) => (
-                  <Box style={{ maxWidth: '150px' }}>
+                  <Box style={{ maxWidth: '200px' }}>
                     <DisplayField as={'span'} value={hexToInt(bnToHex(l.tokenId).toString())} />
                   </Box>
                 ),
               },
               {
-                header: 'Outstanding (DAI)',
-                property: 'debtNum',
+                header: 'Financing Date',
+                property: 'financingDate',
                 align: 'end',
-                render: (l: SortableLoan) => (
-                  <NumberDisplay suffix="" precision={0} value={baseToDisplay(l.debt, 18)} />
-                ),
+                render: (l: SortableLoan) =>
+                  l.financingDate && l.financingDate > 0 ? dateToYMD(l.financingDate) : '-',
               },
               {
-                header: 'Available for Financing (DAI)',
-                property: 'principalNum',
+                header: 'Maturity Date',
+                property: 'maturityDate',
+                align: 'end',
+                render: (l: SortableLoan) => (l.maturityDate && l.maturityDate > 0 ? dateToYMD(l.maturityDate) : '-'),
+              },
+              {
+                header: 'Amount (DAI)',
+                property: 'amountNum',
                 align: 'end',
                 render: (l: SortableLoan) => (
-                  <NumberDisplay suffix="" precision={0} value={baseToDisplay(l.principal, 18)} />
+                  <NumberDisplay
+                    suffix=""
+                    precision={0}
+                    value={baseToDisplay(
+                      l.status === 'closed'
+                        ? l.repaysAggregatedAmount || new BN(0)
+                        : l.debt.isZero()
+                        ? l.principal
+                        : l.debt,
+                      18
+                    )}
+                  />
                 ),
               },
               {
@@ -80,8 +114,9 @@ class LoanList extends React.Component<Props> {
               {
                 header: 'Status',
                 property: 'status',
-                align: 'end',
-                render: (l: SortableLoan) => l.status,
+                align: 'start',
+                size: '130px',
+                render: (l: SortableLoan) => <LoanLabel loan={l} />,
               },
               {
                 header: '',
@@ -96,15 +131,35 @@ class LoanList extends React.Component<Props> {
             ]}
           />
         )}
-        {loans.length === 0 && <Text>No assets have been originated.</Text>}
+        {props.loans.length === 0 && <Text margin="medium">No assets have been originated.</Text>}
       </Box>
-    )
-  }
+      {'export' in router.query && (
+        <Box justify="end">
+          <ExportLink onClick={() => saveAsCSV(props.loans)}>Export Asset List as CSV</ExportLink>
+        </Box>
+      )}
+    </>
+  )
 }
+
 const HeaderCell = (props: { text: string }) => (
   <Box pad={{ left: 'small' }}>
     <Text>{props.text}</Text>
   </Box>
 )
 
-export default withRouter<Props>(LoanList)
+const ExportLink = styled.a`
+  color: #333;
+  text-decoration: underline;
+  margin: 0 16px 12px 0;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: right;
+
+  &:hover,
+  &:focus {
+    color: #000;
+  }
+`
+
+export default LoanList

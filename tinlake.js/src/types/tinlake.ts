@@ -13,7 +13,7 @@ export type Loan = {
   loanId: string
   registry: string
   tokenId: BN
-  ownerOf: BN
+  ownerOf: string
   principal: BN
   interestRate: BN
   debt: BN
@@ -24,6 +24,11 @@ export type Loan = {
   proxyOwner?: string
   riskGroup?: number
   scoreCard?: ScoreCard
+  maturityDate?: number
+  financingDate?: number
+  borrowsAggregatedAmount?: BN
+  repaysAggregatedAmount?: BN
+  borrower?: string
 }
 
 export type Tranche = {

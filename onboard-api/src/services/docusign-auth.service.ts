@@ -1,5 +1,6 @@
 import { JwtUtils } from '@connectedcars/jwtutils'
 import { Injectable, Logger } from '@nestjs/common'
+import config from '../config'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 const HourInSeconds = 60 * 60
@@ -13,7 +14,7 @@ export class DocusignAuthService {
   expiresAt: number | undefined = undefined
 
   getAuthorizationLink(): string {
-    return `${process.env.DOCUSIGN_ACCOUNT_API_HOST}oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.ONBOARD_API_HOST}docusign/callback`
+    return `${config.docusign.accountApiHost}oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${config.docusign.integrationKey}&redirect_uri=${config.onboardApiHost}docusign/callback`
   }
 
   async getAccessToken(): Promise<string> {
@@ -27,7 +28,7 @@ export class DocusignAuthService {
   async getUserInfo(): Promise<any> {
     const accessToken = await this.getAccessToken()
 
-    const response = await fetch(`${process.env.DOCUSIGN_ACCOUNT_API_HOST}oauth/userinfo`, {
+    const response = await fetch(`${config.docusign.accountApiHost}oauth/userinfo`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -39,7 +40,7 @@ export class DocusignAuthService {
   private async createAccessToken(): Promise<string> {
     const jwt = this.getJWT()
 
-    const response = await fetch(`${process.env.DOCUSIGN_ACCOUNT_API_HOST}oauth/token`, {
+    const response = await fetch(`${config.docusign.accountApiHost}oauth/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -66,15 +67,15 @@ export class DocusignAuthService {
     const unixNow = Math.floor(Date.now() / 1000)
 
     const body = {
-      iss: process.env.DOCUSIGN_INTEGRATION_KEY,
-      sub: process.env.DOCUSIGN_API_USERNAME,
+      iss: config.docusign.integrationKey,
+      sub: config.docusign.apiUsername,
       aud: 'account-d.docusign.com',
       iat: unixNow,
       exp: unixNow + HourInSeconds,
       scope: 'signature impersonation',
     }
 
-    const privateKey = process.env.DOCUSIGN_RSA_PRIVATE_KEY.replace(/\\n/g, '\n')
+    const privateKey = config.docusign.rsaPrivateKey.replace(/\\n/g, '\n')
     const jwt = JwtUtils.encode(privateKey, header, body)
 
     return jwt

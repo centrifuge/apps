@@ -11,10 +11,7 @@ import { Fixed27Base, seniorToJuniorRatio } from '../utils/ratios'
 
 const multicallConfig = {
   rpcUrl: config.rpcUrl,
-  multicallAddress:
-    config.network === 'Mainnet'
-      ? '0xeefba1e63905ef1d7acba5a8513c70307c1ce441'
-      : '0x2cc8688c5f75e365aaeeb4ea8d6a480405a48d2a',
+  multicallAddress: config.multicallContractAddress,
   interval: 60000,
 }
 
@@ -302,8 +299,8 @@ export function loadPool(
           data.junior!.pendingInvestments || new BN(0)
         )
 
-        data.senior!.address = tinlake.contractAddresses['JUNIOR_TOKEN']
-        data.junior!.address = tinlake.contractAddresses['SENIOR_TOKEN']
+        data.senior!.address = tinlake.contractAddresses['SENIOR_TOKEN']
+        data.junior!.address = tinlake.contractAddresses['JUNIOR_TOKEN']
 
         const juniorRedemptionsCurrency = (data.junior?.pendingRedemptions || new BN(0))
           .mul(data.junior?.tokenPrice || new BN(0))

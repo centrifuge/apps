@@ -22,7 +22,7 @@ const Overview: React.FC<Props> = (props: Props) => {
     <Box margin={{ bottom: 'large', top: 'medium' }}>
       {!isUpcoming && (
         <>
-          <PoolTitle pool={props.selectedPool} page="Pool Overview" />
+          <PoolTitle pool={props.selectedPool} page="Overview" />
           <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />
         </>
       )}
@@ -81,7 +81,8 @@ const Overview: React.FC<Props> = (props: Props) => {
 
           {isUpcoming && (
             <Box margin={{ top: 'medium' }}>
-              {config.featureFlagNewOnboarding ? (
+              {'addresses' in props.selectedPool &&
+              config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
                 <OnboardModal pool={props.selectedPool} />
               ) : (
                 <InvestAction pool={props.selectedPool} />

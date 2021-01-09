@@ -65,7 +65,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       return new BN(res[2].toString())
     }
 
-    getOwnerOfLoan = async (loanId: string): Promise<any> => {
+    getOwnerOfLoan = async (loanId: string): Promise<string> => {
       let address
       try {
         address = await this.contract('TITLE').ownerOf(loanId)
@@ -82,7 +82,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       if ((await this.getOwnerOfLoan(loanId)) === ZERO_ADDRESS) {
         return 'closed'
       }
-      return 'opened'
+      return 'NFT locked'
     }
 
     getLoan = async (loanId: string): Promise<Loan | null> => {
@@ -335,7 +335,7 @@ export type IAnalyticsActions = {
   getRiskGroup(loanId: string): Promise<BN>
   getScoreCard(loanId: string): Promise<ScoreCard>
   getInterestRate(loanId: string): Promise<BN>
-  getOwnerOfLoan(loanId: string): Promise<BN>
+  getOwnerOfLoan(loanId: string): Promise<string>
   getOwnerOfCollateral(nftRegistryAddr: string, tokenId: string): Promise<BN>
   existsSenior(): boolean
   getJuniorReserve(): Promise<BN>

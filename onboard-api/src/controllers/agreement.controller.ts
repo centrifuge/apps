@@ -7,9 +7,10 @@ import {
   Param,
   Post,
   Query,
-  Req,
+  Res,
   UnauthorizedException,
 } from '@nestjs/common'
+import config from '../config'
 import { AgreementRepo } from '../repos/agreement.repo'
 import { UserRepo } from '../repos/user.repo'
 import { DocusignService } from '../services/docusign.service'
@@ -26,8 +27,8 @@ export class AgreementController {
     private readonly sessionService: SessionService
   ) {}
 
-  @Get('pools/:poolId/agreements/:agreementId/link')
-  async getAgreementLink(@Param() params, @Req() req, @Query() query): Promise<string> {
+  @Get('pools/:poolId/agreements/:agreementId/redirect')
+  async redirectToAgreement(@Param() params, @Query() query, @Res({ passthrough: true }) res) {
     if (!query.session) throw new BadRequestException('Missing session')
 
     const agreement = await this.agreementRepo.find(params.agreementId)
@@ -43,8 +44,10 @@ export class AgreementController {
     const pool = await this.poolService.get(params.poolId)
     if (!pool) throw new BadRequestException('Invalid pool')
 
-    const returnUrl = `${process.env.TINLAKE_UI_HOST}pool/${params.poolId}/${pool.metadata.slug}?onb=1`
-    return this.docusignService.getAgreementLink(agreement.providerEnvelopeId, user, returnUrl)
+    const returnUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?onb=1&tranche=${agreement.tranche}&session=${query.session}`
+    const link = await this.docusignService.getAgreementLink(agreement.providerEnvelopeId, user, returnUrl)
+
+    return res.redirect(link)
   }
 
   @Post('docusign/connect')
