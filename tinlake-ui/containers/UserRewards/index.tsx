@@ -256,7 +256,7 @@ const Head = ({ children }: React.PropsWithChildren<{}>) => (
   </Heading>
 )
 
-const Explainer = () => (
+const Explainer = ({ step }: { step: 1 | 2 }) => (
   <Box
     background="#eee"
     pad="medium"
@@ -274,8 +274,10 @@ const Explainer = () => (
     used to stake value and on-chain governance. Find more information about RAD here.
     <br />
     <br />
-    Connect your Ethereum account that has held your Tinlake investment to get started. You cannot claim rewards if you
-    have not invested in Tinlake yet.
+    {step === 1 &&
+      'Connect your Ethereum account that has held your Tinlake investment to get started. You cannot claim rewards if you have not invested in Tinlake yet.'}
+    {step === 2 &&
+      'To collect your RAD rewards first link you ETH address to your Centrifuge Chain account. This is a one time step. If you do not have a Centrifuge Chain account yet, install the Polkadot browser extension and create an account.'}
   </Box>
 )
 
