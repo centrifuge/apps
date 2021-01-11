@@ -83,8 +83,9 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
             </Box>
             <Card>
               <Box pad="medium">
-                <Head>Connect Your Wallet</Head>
-                Please connect with your Ethereum Wallet to see your rewards.
+                <Head>Connect your Ethereum Account</Head>
+                Please connect with the Etereum Account that is holding your Tinlake investment to start collecting your
+                RAD rewards.
                 <Button primary label="Connect" margin={{ left: 'auto', top: 'large' }} onClick={connect} />
               </Box>
             </Card>
@@ -264,8 +265,17 @@ const Explainer = () => (
     width="360px"
     style={{ color: '#555555' }}
   >
-    Investors can invest into this Tinlake pool through two tokens that are backed by collateral locked by the Asset
-    Originator: TIN and DROP. Both tokens represent the liquidity deposited into Tinlake and accrue interest over time.
+    Radial (RAD) Rewards are earned based on your Tinlake investments and apply to all pools in Tinlake. They are
+    calculated based on the total amount invested on a per day basis. You have to stay invested for at least 60 days to
+    qualify for Rewards.
+    <br />
+    <br />
+    Your Radial Rewards are earned in Tinlake on Etereum but collected and held on Centrifuge Chain where RAD can be
+    used to stake value and on-chain governance. Find more information about RAD here.
+    <br />
+    <br />
+    Connect your Ethereum account that has held your Tinlake investment to get started. You cannot claim rewards if you
+    have not invested in Tinlake yet.
   </Box>
 )
 
