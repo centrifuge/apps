@@ -142,6 +142,7 @@ export default CollectRewards
 
 const RewardStripe = ({ uncollected, children }: React.PropsWithChildren<{ uncollected: BN }>) => (
   <Cont direction="row" pad={{ vertical: 'small', horizontal: 'medium' }}>
+    <TokenLogo src="/static/rad-black.svg" />
     <Box>
       <Label>Your uncollected rewards</Label>
       <Number>{toPrecision(baseToDisplay(uncollected, 18), 0)} RAD</Number>
@@ -153,6 +154,14 @@ const RewardStripe = ({ uncollected, children }: React.PropsWithChildren<{ uncol
 const Cont = styled(Box)`
   background: #fcba59;
   border-radius: 0 0 6px 6px;
+`
+
+const TokenLogo = styled.img`
+  margin: 0 14px 0 0;
+  width: 24px;
+  height: 24px;
+  position: relative;
+  top: 12px;
 `
 
 const Label = styled.div`
