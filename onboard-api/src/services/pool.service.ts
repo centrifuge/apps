@@ -53,6 +53,7 @@ export class PoolService {
   }
 
   private async assembleIpfsUrl(): Promise<string> {
+    console.log(`Calling pools(0) on ${config.poolRegistry} to ${config.rpcUrl}`)
     const poolData = await this.registry.pools(0)
     const url = new URL(poolData[3], config.ipfsGateway)
     return url.href

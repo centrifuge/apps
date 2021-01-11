@@ -24,27 +24,20 @@ import { IpfsPools, Pool } from '../../config'
 import { PoolData } from '../../ducks/pools'
 import BN from 'bn.js'
 import { Cont, Label as MetricLabel, Value, TokenLogo } from '../../components/PoolsMetrics/styles'
-import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
-import { Token } from 'graphql'
-import { UintBase } from '../../utils/ratios'
+// import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
+// import { Token } from 'graphql'
+// import { UintBase } from '../../utils/ratios'
 
 interface Props {
   ipfsPools: IpfsPools
 }
 
-const data = [
-  { name: 'Group A', value: 400 },
-  { name: 'Group B', value: 300 },
-  { name: 'Group C', value: 300 },
-  { name: 'Group D', value: 200 },
-]
+// interface AssetClass {
+//   name: string
+//   balance: number
+// }
 
-interface AssetClass {
-  name: string
-  balance: number
-}
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']
+// const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']
 
 const Portfolio: React.FC<Props> = (props: Props) => {
   const router = useRouter()
