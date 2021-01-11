@@ -104,7 +104,15 @@ const CollectRewards: React.FC<Props> = ({ activeLink }: Props) => {
             <>
               <br />
               <br />
-              🏆 You have collected so far {toPrecision(baseToDisplay(activeLink.claimed, 18), 4)} RAD as rewards.
+              🏆 You have collected so far{' '}
+              {toPrecision(
+                baseToDisplay(
+                  (data?.links || []).reduce((p, l) => p.add(new BN(l.claimed || '0')), new BN(0)),
+                  18
+                ),
+                4
+              )}{' '}
+              RAD as rewards.
             </>
             {new BN(activeLink.claimed).gt(new BN(data?.totalEarnedRewards || '0')) && (
               <>

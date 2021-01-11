@@ -275,7 +275,8 @@ const RewardRecipients = ({ recipients }: { recipients: UserRewardsLink[] }) => 
       <Recipient key={r.centAccountID}>
         <Addr active={i === 0}>{shortAddr(accountIdToCentChainAddr(r.centAccountID))}</Addr>
         <Status active={i === 0}>
-          {i === 0 ? 'Active' : 'Inactive'} | {toPrecision(baseToDisplay(r.earned, 18), 0)} RAD
+          {i === 0 ? 'Active' : 'Inactive'} |{' '}
+          {r.claimed ? `${toPrecision(baseToDisplay(r.claimed, 18), 0)} RAD` : 'loading...'}
         </Status>
       </Recipient>
     ))}
