@@ -8,8 +8,9 @@ const LOAD_REWARDS = 'tinlake-ui/rewards/LOAD_REWARDS'
 const RECEIVE_REWARDS = 'tinlake-ui/rewards/RECEIVE_REWARDS'
 
 export interface RewardsData {
-  toDateAggregateValue: string | null
-  rewardRate: string | null
+  toDateRewardAggregateValue: string
+  rewardRate: string
+  todayReward: string
 }
 
 export interface RewardsState {

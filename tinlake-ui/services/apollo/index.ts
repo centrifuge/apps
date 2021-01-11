@@ -291,6 +291,7 @@ class Apollo {
             rewardDayTotals(first: 1, skip: 1, orderBy: id, orderDirection: desc) {
               rewardRate
               toDateRewardAggregateValue
+              todayReward
             }
           }
         `,
@@ -304,7 +305,13 @@ class Apollo {
       return null
     }
 
-    return { toDateAggregateValue: data.toDateAggregateValue, rewardRate: data.rewardRate }
+    console.log({ data })
+
+    return {
+      toDateRewardAggregateValue: data.toDateRewardAggregateValue,
+      rewardRate: data.rewardRate,
+      todayReward: data.todayReward,
+    }
   }
 
   async getUserRewards(user: string): Promise<UserRewardsData | null> {

@@ -31,11 +31,12 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
   const { address: ethAddr } = useSelector<any, AuthState>((state: any) => state.auth)
   const dispatch = useDispatch()
-
+  React.useEffect(() => {
+    dispatch(loadRewards())
+  }, [])
   React.useEffect(() => {
     if (ethAddr) {
       dispatch(load(ethAddr))
-      dispatch(loadRewards())
     }
   }, [ethAddr])
 
@@ -55,13 +56,39 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
 
       <Box direction="row" align="start">
         {!ethAddr && (
-          <Card>
-            <Box pad="medium">
-              <Head>Connect Your Wallet</Head>
-              Please connect with your Ethereum Wallet to see your rewards.
-              <Button primary label="Connect" margin={{ left: 'auto', top: 'large' }} onClick={connect} />
+          <Box>
+            <Box margin={{ top: 'medium' }} direction="row">
+              <Box
+                pad="medium"
+                elevation="small"
+                round="xsmall"
+                background="white"
+                margin={{ bottom: 'large' }}
+                direction="row"
+              >
+                <Metric
+                  loading={rewards?.state !== 'found' || !rewards.data}
+                  value={baseToDisplay(new Decimal(rewards.data?.toDateRewardAggregateValue || '0').toFixed(0), 18)}
+                  label="Total Rewards Earned Across All Investors"
+                  token="RAD"
+                  borderRight
+                />
+                <Metric
+                  loading={rewards?.state !== 'found' || !rewards.data}
+                  value={baseToDisplay(new Decimal(rewards.data?.todayReward || '0').toFixed(0), 18)}
+                  label="Rewards Earned Today By All Investors"
+                  token="RAD"
+                />
+              </Box>
             </Box>
-          </Card>
+            <Card>
+              <Box pad="medium">
+                <Head>Connect Your Wallet</Head>
+                Please connect with your Ethereum Wallet to see your rewards.
+                <Button primary label="Connect" margin={{ left: 'auto', top: 'large' }} onClick={connect} />
+              </Box>
+            </Card>
+          </Box>
         )}
 
         {ethAddr && (
@@ -98,7 +125,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                 />
                 <Metric
                   loading={userRewards?.subgraphState !== 'found' || !data}
-                  value={baseToDisplay((data?.totalEarnedRewards || '0').split('.')[0], 18)}
+                  value={baseToDisplay(new Decimal(data?.totalEarnedRewards || '0').toFixed(0), 18)}
                   label="Your Earned Rewards"
                   token="RAD"
                 />
