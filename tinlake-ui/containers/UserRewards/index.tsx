@@ -130,17 +130,30 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                     {debug && (
                       <Alert type="info">
                         <h3>Debug: Earnings</h3>
-                        <ul></ul>
-                        {data.links.map((c) => (
-                          <li key={c.centAccountID}>
-                            {shortAddr(accountIdToCentChainAddr(c.centAccountID))} has earned{' '}
-                            {toPrecision(baseToDisplay(c.earned, 18), 4)} RAD (AccountID {shortAddr(c.centAccountID)},
-                            claimable on Centrifuge Chain:{' '}
-                            {c.claimable ? `${toPrecision(baseToDisplay(c.claimable, 18), 4)} RAD` : `[loading...]`},
-                            claimed on Centrifuge Chain:{' '}
-                            {c.claimed ? `${toPrecision(baseToDisplay(c.claimed, 18), 4)} RAD` : `[loading...]`})
-                          </li>
-                        ))}
+                        <ul>
+                          {data.links.map((c, i) => (
+                            <li key={c.centAccountID}>
+                              Link {i + 1} {i === data.links.length - 1 && '(Active)'}
+                              <ul>
+                                <li>
+                                  Centrifuge Chain Address: {shortAddr(accountIdToCentChainAddr(c.centAccountID))}
+                                </li>
+                                <li>Centrifuge Chain Account ID: {shortAddr(c.centAccountID)}</li>
+                                <li>Earned (from Subgraph): {toPrecision(baseToDisplay(c.earned, 18), 4)} RAD</li>
+                                <li>
+                                  Collectable (from GCP):{' '}
+                                  {c.claimable
+                                    ? `${toPrecision(baseToDisplay(c.claimable, 18), 4)} RAD`
+                                    : `[loading...]`}
+                                </li>
+                                <li>
+                                  Collected (from Centrifuge Chain):{' '}
+                                  {c.claimed ? `${toPrecision(baseToDisplay(c.claimed, 18), 4)} RAD` : `[loading...]`}
+                                </li>
+                              </ul>
+                            </li>
+                          ))}
+                        </ul>
                       </Alert>
                     )}
 
@@ -153,7 +166,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                   </Box>
                   <RewardRecipients recipients={data?.links} />
                 </Box>
-                {data?.claimable && <CollectRewards />}
+                {data?.claimable && <CollectRewards activeLink={data.links[data.links.length - 1]} />}
               </Card>
             )}
           </Box>

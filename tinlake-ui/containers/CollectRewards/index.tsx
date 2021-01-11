@@ -6,41 +6,23 @@ import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import Alert from '../../components/Alert'
-import { CentChainWalletState } from '../../ducks/centChainWallet'
 import { TransactionStatus } from '../../ducks/transactions'
-import { loadCentChain, loadCentChainConnected, UserRewardsState } from '../../ducks/userRewards'
+import { loadCentChain, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { centChainService } from '../../services/centChain'
-import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
-import { centChainAddrToAccountId } from '../../services/centChain/centChainAddrToAccountId'
 import { createBufferProofFromClaim, createTree, newClaim } from '../../utils/radRewardProofs'
-import { shortAddr } from '../../utils/shortAddr'
 import { toPrecision } from '../../utils/toPrecision'
-import CentChainWalletDialog from '../CentChainWalletDialog'
 
-interface Props {}
+interface Props {
+  activeLink: UserRewardsLink
+}
 
-const CollectRewards: React.FC<Props> = ({}: Props) => {
-  const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
-  const { data, collectionData, collectionState, claims } = useSelector<any, UserRewardsState>(
-    (state: any) => state.userRewards
-  )
+const CollectRewards: React.FC<Props> = ({ activeLink }: Props) => {
+  const { data, claims } = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
   const dispatch = useDispatch()
-
-  const centAccountID = cWallet.accounts[0] ? centChainAddrToAccountId(cWallet.accounts[0].addrCentChain) : null
-
-  React.useEffect(() => {
-    if (centAccountID) {
-      dispatch(loadCentChainConnected(centAccountID))
-    }
-  }, [centAccountID])
 
   const [status, setStatus] = React.useState<null | TransactionStatus>(null)
   const [error, setError] = React.useState<null | string>(null)
   const collect = async () => {
-    const acc = cWallet.accounts[0]
-    if (!acc) {
-      return
-    }
     setStatus('pending')
     setError(null)
 
@@ -48,7 +30,7 @@ const CollectRewards: React.FC<Props> = ({}: Props) => {
       throw new Error('claims must exist to collect')
     }
 
-    const claim = claims?.find((c) => c.accountID === centChainAddrToAccountId(acc.addrCentChain))
+    const claim = claims?.find((c) => c.accountID === activeLink.centAccountID)
 
     if (!claim) {
       throw new Error('claim must exist to collect')
@@ -59,7 +41,7 @@ const CollectRewards: React.FC<Props> = ({}: Props) => {
 
     try {
       await centChainService().claimRADRewards(claim.accountID, claim.balance, proof)
-      await Promise.all([dispatch(loadCentChainConnected(centAccountID!)), dispatch(loadCentChain())])
+      await dispatch(loadCentChain())
       setStatus('succeeded')
     } catch (e) {
       setStatus('failed')
@@ -71,28 +53,13 @@ const CollectRewards: React.FC<Props> = ({}: Props) => {
     query: { debug },
   } = useRouter()
 
-  if (centAccountID === null) {
-    // TODO replace this with using linked cent address as opposed to connected.
-    return (
-      <Box pad="medium">
-        <CentChainWalletDialog />
-      </Box>
-    )
-  }
-
-  if (
-    collectionState === null ||
-    collectionState === 'loading' ||
-    collectionData === null ||
-    collectionData?.collectable === null ||
-    collectionData?.collected === null
-  ) {
+  if (activeLink.claimable === null || activeLink.claimed === null || claims === null) {
     return <Box pad="medium">Loading collectable rewards...</Box>
   }
 
   const uncollected =
-    collectionData && collectionData?.collectable !== null && collectionData?.collected !== null
-      ? new BN(collectionData?.collectable).sub(new BN(collectionData?.collected))
+    activeLink.claimable !== null && activeLink.claimed !== null
+      ? new BN(activeLink.claimable).sub(new BN(activeLink.claimed))
       : null
 
   return (
@@ -132,14 +99,14 @@ const CollectRewards: React.FC<Props> = ({}: Props) => {
             at a later time to collect more rewards.
           </>
         )}
-        {!new BN(collectionData.collected).isZero() && (
+        {!new BN(activeLink.claimed).isZero() && (
           <>
             <>
               <br />
               <br />
-              🏆 You have collected so far {toPrecision(baseToDisplay(collectionData.collected, 18), 4)} RAD as rewards.
+              🏆 You have collected so far {toPrecision(baseToDisplay(activeLink.claimed, 18), 4)} RAD as rewards.
             </>
-            {new BN(collectionData.collected).gt(new BN(data?.totalEarnedRewards || '0')) && (
+            {new BN(activeLink.claimed).gt(new BN(data?.totalEarnedRewards || '0')) && (
               <>
                 <br />
                 <br />
@@ -149,25 +116,6 @@ const CollectRewards: React.FC<Props> = ({}: Props) => {
               </>
             )}
           </>
-        )}
-        {debug && (
-          <Alert type="info">
-            <h3>Debug: Collection</h3>
-            <ul>
-              <li>
-                Centrifuge Chain Address: {shortAddr(accountIdToCentChainAddr(centAccountID))} (Account ID{' '}
-                {shortAddr(centAccountID)})
-              </li>
-              <li>
-                Collectable on Subgraph:
-                {`${toPrecision(baseToDisplay(collectionData.collectable, 18), 4)} RAD`}
-              </li>
-              <li>
-                Collected on Centrifuge Chain:
-                {`${toPrecision(baseToDisplay(collectionData.collected, 18), 4)} RAD`}
-              </li>
-            </ul>
-          </Alert>
         )}
       </Box>
       <RewardStripe uncollected={uncollected || new BN(0)}>
