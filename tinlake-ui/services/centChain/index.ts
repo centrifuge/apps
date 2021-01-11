@@ -60,7 +60,7 @@ export class CentChain {
     return claimed
   }
 
-  public claimRADRewards(claimerAccountID: string, amount: string, proof: string[]): Promise<void> {
+  public claimRADRewards(claimerAccountID: string, amount: string, proof: Uint8Array[]): Promise<void> {
     return new Promise(async (resolve, reject) => {
       const api = await this.api()
       const extrinsic = api.tx.radClaims.claim(claimerAccountID, amount, proof)

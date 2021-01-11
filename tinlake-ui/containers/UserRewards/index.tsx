@@ -77,7 +77,12 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                   <Value>
                     <LoadingValue
                       done={userRewards?.subgraphState === 'found' && !!data}
-                      render={() => <NumberDisplay value={baseToDisplay(data!.totalEarnedRewards, 18)} precision={4} />}
+                      render={() => (
+                        <NumberDisplay
+                          value={baseToDisplay(data!.totalEarnedRewards.split('.')[0], 18)}
+                          precision={4}
+                        />
+                      )}
                     ></LoadingValue>
                   </Value>{' '}
                   <Unit>RAD</Unit>
@@ -148,7 +153,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                   </Box>
                   <RewardRecipients recipients={data?.links} />
                 </Box>
-                {(true || data?.claimable) && <CollectRewards />}
+                {data?.claimable && <CollectRewards />}
               </Card>
             )}
           </Box>

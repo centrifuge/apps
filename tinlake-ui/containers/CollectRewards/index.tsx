@@ -8,11 +8,11 @@ import styled from 'styled-components'
 import Alert from '../../components/Alert'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
 import { TransactionStatus } from '../../ducks/transactions'
-import { loadCentChainConnected, UserRewardsState } from '../../ducks/userRewards'
+import { loadCentChain, loadCentChainConnected, UserRewardsState } from '../../ducks/userRewards'
 import { centChainService } from '../../services/centChain'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
 import { centChainAddrToAccountId } from '../../services/centChain/centChainAddrToAccountId'
-import { createHexProofFromClaim, createTree, newClaim } from '../../utils/radRewardProofs'
+import { createBufferProofFromClaim, createTree, newClaim } from '../../utils/radRewardProofs'
 import { shortAddr } from '../../utils/shortAddr'
 import { toPrecision } from '../../utils/toPrecision'
 import CentChainWalletDialog from '../CentChainWalletDialog'
@@ -55,10 +55,11 @@ const CollectRewards: React.FC<Props> = ({}: Props) => {
     }
 
     const tree = createTree(claims.map((c) => newClaim(c)))
-    const proof = createHexProofFromClaim(tree, newClaim(claim))
+    const proof = createBufferProofFromClaim(tree, newClaim(claim))
 
     try {
       await centChainService().claimRADRewards(claim.accountID, claim.balance, proof)
+      await Promise.all([dispatch(loadCentChainConnected(centAccountID!)), dispatch(loadCentChain())])
       setStatus('succeeded')
     } catch (e) {
       setStatus('failed')
@@ -134,8 +135,9 @@ const CollectRewards: React.FC<Props> = ({}: Props) => {
         {!new BN(collectionData.collected).isZero() && (
           <>
             <>
-              🏆 You have collected so far
-              {toPrecision(baseToDisplay(collectionData.collected, 18), 4)} RAD as rewards.
+              <br />
+              <br />
+              🏆 You have collected so far {toPrecision(baseToDisplay(collectionData.collected, 18), 4)} RAD as rewards.
             </>
             {new BN(collectionData.collected).gt(new BN(data?.totalEarnedRewards || '0')) && (
               <>
