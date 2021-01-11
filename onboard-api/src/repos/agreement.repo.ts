@@ -108,30 +108,31 @@ export class AgreementRepo {
     const pool = await this.poolService.get(poolId)
     if (!pool) throw new Error(`Cannot create agreements for pool ${poolId}`)
 
-    let agreements = []
-
-    await pool.profile.agreements.forEach(async (profileAgreement: ProfileAgreement) => {
-      if (
-        (countryCode === 'US' && profileAgreement.country === 'non-us') ||
-        (countryCode !== 'US' && profileAgreement.country === 'us')
-      )
-        return
-
-      try {
-        const agreement = await this.findOrCreate(
-          userId,
-          email,
-          poolId,
-          profileAgreement.tranche,
-          profileAgreement.name,
-          profileAgreement.providerTemplateId
+    console.log(`Creating agreements for ${poolId}`)
+    const agreements = await Promise.all(
+      pool.profile.agreements.map(async (profileAgreement: ProfileAgreement) => {
+        if (
+          (countryCode === 'US' && profileAgreement.country === 'non-us') ||
+          (countryCode !== 'US' && profileAgreement.country === 'us')
         )
-        agreements.push(agreement)
-      } catch (e) {
-        console.error(e)
-      }
-    })
+          return
 
+        try {
+          return await this.findOrCreate(
+            userId,
+            email,
+            poolId,
+            profileAgreement.tranche,
+            profileAgreement.name,
+            profileAgreement.providerTemplateId
+          )
+        } catch (e) {
+          console.error(e)
+        }
+      })
+    )
+
+    console.log(`Created ${agreements.length} agreements for ${poolId}`)
     return agreements
   }
 

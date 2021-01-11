@@ -59,7 +59,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
       setActiveSteps(3)
       // TODO: remove this at some point. This is a hack to check again
       // if there's an agreement, after a second of loading the page.
-      if (!agreement) setTimeout(() => dispatch(loadOnboardingStatus(props.activePool)), 1000)
+      if (!agreement) setTimeout(() => dispatch(loadOnboardingStatus(props.activePool)), 3000)
     } else if (kycStatus === 'processing' && agreementStatus === 'signed') setActiveSteps(3)
     else if (kycStatus === 'processing' && agreementStatus === 'countersigned') setActiveSteps(2)
     else if ((kycStatus === 'verified' && agreementStatus === 'signed') || !whitelistStatus) setActiveSteps(3)
