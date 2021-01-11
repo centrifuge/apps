@@ -7,7 +7,9 @@ import {
   Param,
   Post,
   Query,
+  Req,
   Res,
+  Request,
   UnauthorizedException,
 } from '@nestjs/common'
 import config from '../config'
@@ -54,9 +56,10 @@ export class AgreementController {
   }
 
   @Post('docusign/connect')
-  async postDocusignConnect(@Body() body): Promise<string> {
+  async postDocusignConnect(@Body() body, @Req() req: Request): Promise<string> {
     console.log('Received Docusign Connect message')
     console.log(body)
+    console.log(req)
     return 'OK'
   }
 }

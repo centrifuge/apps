@@ -56,8 +56,9 @@ export class SyncService {
   @Cron(CronExpression.EVERY_MINUTE) // TODO: change to e.g. every 5 min
   async syncAgreementStatus() {
     const agreements = await this.agreementRepo.getAwaitingCounterSignature()
-    this.logger.debug(`Syncing ${agreements.length} agreements`)
+    if (agreements.length === 0) return
 
+    this.logger.debug(`Syncing ${agreements.length} agreements`)
     // TODO: use Promise.all
     agreements.forEach(async (agreement: Agreement) => {
       const status = await this.docusignService.getEnvelopeStatus(agreement.providerEnvelopeId)
