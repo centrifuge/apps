@@ -1,4 +1,4 @@
-import { Box, Heading } from 'grommet'
+import { Box } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -88,24 +88,12 @@ const Portfolio: React.FC<Props> = (props: Props) => {
   }
   const totalDropValue =
     portfolio.data?.reduce((prev: BN, tokenBalance: TokenBalance) => {
-      return tokenBalance.token.symbol.substr(-3) === 'DRP'
-        ? prev.add(
-            tokenBalance.balance
-              .mul(getPool(tokenBalance)?.data['seniorTokenPrice'] || new BN(0))
-              .div(new BN(10).pow(new BN(27)))
-          )
-        : prev
+      return tokenBalance.token.symbol.substr(-3) === 'DRP' ? prev.add(tokenBalance.value) : prev
     }, new BN(0)) || new BN(0)
 
   const totalTinValue =
     portfolio.data?.reduce((prev: BN, tokenBalance: TokenBalance) => {
-      return tokenBalance.token.symbol.substr(-3) === 'TIN'
-        ? prev.add(
-            tokenBalance.balance
-              .mul(getPool(tokenBalance)?.data['juniorTokenPrice'] || new BN(0))
-              .div(new BN(10).pow(new BN(27)))
-          )
-        : prev
+      return tokenBalance.token.symbol.substr(-3) === 'TIN' ? prev.add(tokenBalance.value) : prev
     }, new BN(0)) || new BN(0)
 
   // const assetClasses: AssetClass[] =
@@ -212,9 +200,10 @@ const Portfolio: React.FC<Props> = (props: Props) => {
             .map((tokenBalance: TokenBalance) => (
               <PoolRow key={tokenBalance.token.id} onClick={() => clickToken(tokenBalance)}>
                 <Icon
-                  src={
-                    tokenBalance.token.symbol.substr(-3) === 'DRP' ? '/static/DROP_final.svg' : '/static/TIN_final.svg'
-                  }
+                  src={getPool(tokenBalance)?.pool.metadata.media?.icon?.replace(
+                    'icon',
+                    tokenBalance.token.symbol.substr(-3) === 'DRP' ? 'drop' : 'tin'
+                  )}
                 />
                 <Desc>
                   <Name>{tokenBalance.token.symbol}</Name>
@@ -269,16 +258,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                         </>
                       )
                     }
-                    value={baseToDisplay(
-                      tokenBalance.balance
-                        .mul(
-                          getPool(tokenBalance)?.data[
-                            tokenBalance.token.symbol.substr(-3) === 'TIN' ? 'juniorTokenPrice' : 'seniorTokenPrice'
-                          ] || new BN(0)
-                        )
-                        .div(new BN(10).pow(new BN(27))),
-                      18
-                    )}
+                    value={baseToDisplay(tokenBalance.value, 18)}
                   />
                 </DataCol>
                 {/* <DataCol>
@@ -323,8 +303,5 @@ const Portfolio: React.FC<Props> = (props: Props) => {
     </Box>
   )
 }
-
-const shorten = (addr: string, visibleChars: number) =>
-  addr.substr(0, visibleChars) + '...' + addr.substr(addr.length - visibleChars)
 
 export default Portfolio

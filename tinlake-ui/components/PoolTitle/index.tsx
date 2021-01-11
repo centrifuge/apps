@@ -7,7 +7,6 @@ import { PoolState } from '../../ducks/pool'
 import { PoolLink } from '../PoolLink'
 import { Label } from '../PoolList/styles'
 import { LinkPrevious } from 'grommet-icons'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 
 interface Props {

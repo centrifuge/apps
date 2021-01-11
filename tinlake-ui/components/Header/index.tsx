@@ -156,8 +156,8 @@ const Header: React.FC<Props> = (props: Props) => {
               />
             )}
           </Box>
-          {address && (
-            <Portfolio pad={{ left: '14px', right: '14px' }} style={{ borderRight: '1px solid #D8D8D8' }}>
+          {address && !portfolioValue.isZero() && (
+            <Portfolio pad={{ left: '14px', right: '14px' }}>
               <AxisTooltip title="View your investment portfolio" cursor="pointer">
                 <Link href="/portfolio">
                   <Box>
@@ -165,7 +165,7 @@ const Header: React.FC<Props> = (props: Props) => {
                       <TokenLogo src={`/static/DAI.svg`} />
                       <Box>
                         <Holdings>{addThousandsSeparators(toPrecision(baseToDisplay(portfolioValue, 18), 0))}</Holdings>
-                        <Desc>Portfolio Value</Desc>
+                        <Desc>My Portfolio</Desc>
                       </Box>
                     </Box>
                   </Box>
@@ -173,7 +173,7 @@ const Header: React.FC<Props> = (props: Props) => {
               </AxisTooltip>
             </Portfolio>
           )}
-          <div style={{ flex: '0 0 auto', paddingLeft: 16 }}>
+          <div style={{ flex: '0 0 auto', paddingLeft: 16, borderLeft: '1px solid #D8D8D8' }}>
             {!auth?.address && <Button onClick={connectAccount} label="Connect" />}
             {auth?.address && (
               <Web3Wallet
