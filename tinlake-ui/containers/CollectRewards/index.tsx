@@ -121,8 +121,8 @@ const CollectRewards: React.FC<Props> = ({ activeLink }: Props) => {
       <RewardStripe uncollected={uncollected || new BN(0)}>
         <Button
           margin={{ left: 'auto' }}
-          label={`Collect`}
-          disabled={!!uncollected && !uncollected.isZero() && (status === 'unconfirmed' || status === 'pending')}
+          label={status === 'unconfirmed' || status === 'pending' ? `Collecting...` : `Collect`}
+          disabled={(!!uncollected && uncollected.isZero()) || status === 'unconfirmed' || status === 'pending'}
           onClick={collect}
         />
       </RewardStripe>

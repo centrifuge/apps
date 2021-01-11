@@ -42,10 +42,14 @@ export interface UserRewardsState {
  */
 export interface UserRewardsData {
   /**
+   * From subgraph. Currently invested amount across all pools
+   */
+  currentActiveInvestmentAmount: BigIntString
+  /**
    * From subgraph. If null, the user has not had any investments yet. If the user invested any amount, this number will
    * be a timestamp (in seconds).
    */
-  nonZeroInvestmentSince: BigIntString
+  nonZeroInvestmentSince: BigIntString | null
   /**
    * From subgraph. Determines whether investment was long enough on Ethereum yet for rewards to be claimable.
    */

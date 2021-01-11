@@ -9,6 +9,7 @@ import loansReducer from '../ducks/loans'
 import onboardingReducer from '../ducks/onboarding'
 import poolReducer from '../ducks/pool'
 import poolsReducer from '../ducks/pools'
+import rewardsReducer from '../ducks/rewards'
 import transactionReducer from '../ducks/transactions'
 import userRewardsReducer from '../ducks/userRewards'
 
@@ -35,6 +36,7 @@ const makeStore = () => {
       auth: authReducer,
       transactions: transactionReducer,
       userRewards: userRewardsReducer,
+      rewards: rewardsReducer,
       centChainWallet: centChainWalletReducer,
       onboarding: onboardingReducer,
     }),

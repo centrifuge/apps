@@ -1,5 +1,6 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import { Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
@@ -11,6 +12,7 @@ import NumberDisplay from '../../components/NumberDisplay'
 import { Cont, Label, TokenLogo, Unit, Value } from '../../components/PoolsMetrics/styles'
 import { AuthState, ensureAuthed } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
+import { loadRewards, RewardsState } from '../../ducks/rewards'
 import { load, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
 import { shortAddr } from '../../utils/shortAddr'
@@ -25,14 +27,15 @@ interface Props {
 
 const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
   const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
+  const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
-  const dispatch = useDispatch()
-
   const { address: ethAddr } = useSelector<any, AuthState>((state: any) => state.auth)
+  const dispatch = useDispatch()
 
   React.useEffect(() => {
     if (ethAddr) {
       dispatch(load(ethAddr))
+      dispatch(loadRewards())
     }
   }, [ethAddr])
 
@@ -65,29 +68,40 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
           <Box>
             <Box margin={{ top: 'medium' }} direction="row">
               <Box
-                width="256px"
                 pad="medium"
                 elevation="small"
                 round="xsmall"
                 background="white"
-                margin={{ right: '16px', bottom: 'large' }}
+                margin={{ bottom: 'large' }}
+                direction="row"
               >
-                <Cont>
-                  <TokenLogo src={`/static/rad.svg`} />
-                  <Value>
-                    <LoadingValue
-                      done={userRewards?.subgraphState === 'found' && !!data}
-                      render={() => (
-                        <NumberDisplay
-                          value={baseToDisplay(data!.totalEarnedRewards.split('.')[0], 18)}
-                          precision={4}
-                        />
-                      )}
-                    ></LoadingValue>
-                  </Value>{' '}
-                  <Unit>RAD</Unit>
-                </Cont>
-                <Label>Your Earned Rewards</Label>
+                <Metric
+                  loading={userRewards?.subgraphState !== 'found' || !data}
+                  value={baseToDisplay(data?.currentActiveInvestmentAmount || '0', 18)}
+                  label="Your Current Investment Value"
+                  token="DAI"
+                  borderRight
+                />
+                <Metric
+                  loading={
+                    rewards?.state !== 'found' || !rewards.data || userRewards?.subgraphState !== 'found' || !data
+                  }
+                  value={baseToDisplay(
+                    new Decimal(rewards.data?.rewardRate || '0')
+                      .mul(data?.currentActiveInvestmentAmount || '0')
+                      .toFixed(0),
+                    18
+                  )}
+                  label="Your Daily Rewards"
+                  token="RAD"
+                  borderRight
+                />
+                <Metric
+                  loading={userRewards?.subgraphState !== 'found' || !data}
+                  value={baseToDisplay((data?.totalEarnedRewards || '0').split('.')[0], 18)}
+                  label="Your Earned Rewards"
+                  token="RAD"
+                />
               </Box>
             </Box>
 
@@ -265,3 +279,33 @@ const Status = styled.div<{ active: boolean }>`
   line-height: 14px;
   color: ${({ active }) => (active ? '#2762ff' : '#d8d8d8')};
 `
+
+const Metric = ({
+  token,
+  loading,
+  precision,
+  value,
+  label,
+  borderRight,
+}: {
+  token: 'DAI' | 'RAD'
+  loading?: boolean
+  value: string
+  precision?: number
+  label: string
+  borderRight?: boolean
+}) => (
+  <Box pad={{ horizontal: 'medium' }} style={{ borderRight: borderRight ? '1px solid #dadada' : undefined }}>
+    <Cont>
+      <TokenLogo src={{ DAI: `/static/dai.svg`, RAD: `/static/rad.svg` }[token]} />
+      <Value>
+        <LoadingValue
+          done={!loading}
+          render={() => <NumberDisplay value={value} precision={precision || 0} />}
+        ></LoadingValue>
+      </Value>{' '}
+      <Unit>{{ DAI: 'DAI', RAD: 'RAD' }[token]}</Unit>
+    </Cont>
+    <Label>{label}</Label>
+  </Box>
+)

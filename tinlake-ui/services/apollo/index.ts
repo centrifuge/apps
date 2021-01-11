@@ -7,6 +7,7 @@ import gql from 'graphql-tag'
 import fetch from 'node-fetch'
 import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
 import { PoolData, PoolsData } from '../../ducks/pools'
+import { RewardsData } from '../../ducks/rewards'
 import { UserRewardsData } from '../../ducks/userRewards'
 import { getPoolStatus } from '../../utils/pool'
 import { UintBase } from '../../utils/ratios'
@@ -281,13 +282,38 @@ class Apollo {
     return tinlakeLoans
   }
 
+  async getRewards(): Promise<RewardsData | null> {
+    let result
+    try {
+      result = await this.client.query({
+        query: gql`
+          {
+            rewardDayTotals(first: 1, skip: 1, orderBy: id, orderDirection: desc) {
+              rewardRate
+              toDateRewardAggregateValue
+            }
+          }
+        `,
+      })
+    } catch (err) {
+      console.error(`error occured while fetching total rewards from apollo ${err}`)
+      return null
+    }
+    const data = result.data?.rewardDayTotals[0]
+    if (!data) {
+      return null
+    }
+
+    return { toDateAggregateValue: data.toDateAggregateValue, rewardRate: data.rewardRate }
+  }
+
   async getUserRewards(user: string): Promise<UserRewardsData | null> {
     let result
     try {
       result = await this.client.query({
         query: gql`
         {
-          rewardBalances(where : {id: "${user}"}) {
+          rewardBalances(where: {id: "${user}"}) {
             links {
               centAddress
               rewardsAccumulated
@@ -297,6 +323,9 @@ class Apollo {
             totalRewards
             nonZeroBalanceSince
           }
+          accounts(where: {id: "${user}"}) {
+            currentActiveInvestmentAmount
+          }
         }
         `,
       })
@@ -305,25 +334,24 @@ class Apollo {
       return null
     }
 
-    const data = result.data?.rewardBalances[0]
-    if (!data) {
+    const rewardBalance = result.data?.rewardBalances[0]
+    const account = result.data?.accounts[0]
+    if (!rewardBalance || !account) {
       return null
     }
 
     const transformed: UserRewardsData = {
-      nonZeroInvestmentSince: data.nonZeroBalanceSince,
-      claimable: data.claimable,
-      totalEarnedRewards: data.totalRewards,
-      unlinkedRewards: data.linkableRewards,
-      links: (data.links as any[]).map((link: any) => ({
+      currentActiveInvestmentAmount: account.currentActiveInvestmentAmount,
+      nonZeroInvestmentSince: rewardBalance.nonZeroBalanceSince,
+      claimable: rewardBalance.claimable,
+      totalEarnedRewards: rewardBalance.totalRewards,
+      unlinkedRewards: rewardBalance.linkableRewards,
+      links: (rewardBalance.links as any[]).map((link: any) => ({
         centAccountID: link.centAddress,
         earned: link.rewardsAccumulated,
         claimable: null,
         claimed: null,
       })),
-      totalClaimableRewards: null,
-      totalClaimedRewards: null,
-      totalUnclaimedClaimableRewards: null,
     }
 
     return transformed
