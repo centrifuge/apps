@@ -37,12 +37,15 @@ export class AgreementController {
     const user = await this.userRepo.find(agreement.userId)
     if (!user) throw new BadRequestException('User for this agreement does not exist')
 
-    // TODO: actually implement this verification
-    const verifiedSession = this.sessionService.verify(query.session, user.id)
-    if (!verifiedSession) throw new UnauthorizedException('Invalid session')
-
     const pool = await this.poolService.get(params.poolId)
     if (!pool) throw new BadRequestException('Invalid pool')
+
+    const verifiedSession = this.sessionService.verify(query.session, user.id)
+    if (!verifiedSession) {
+      const returnUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?tranche=${agreement.tranche}`
+      console.error(`Invalid session for user ${user.id}`)
+      return res.redirect(returnUrl)
+    }
 
     const returnUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?tranche=${agreement.tranche}&session=${query.session}`
     const link = await this.docusignService.getAgreementLink(agreement.providerEnvelopeId, user, returnUrl)

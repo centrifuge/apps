@@ -25,11 +25,13 @@ const KycStep: React.FC<Props> = (props: Props) => {
   const router = useRouter()
   const session = 'session' in router.query ? router.query.session : '' // TODO: check this on the API and display message if it has expired
 
+  const awaitingWhitelisting = props.agreementStatus === 'countersigned' && props.whitelistStatus === false
+
   return (
     <Step>
       <StepHeader>
-        {(props.agreementStatus === 'signed' || props.whitelistStatus === false) && <StepIcon pending />}
-        {!(props.agreementStatus === 'signed' || props.whitelistStatus === false) && (
+        {(props.agreementStatus === 'signed' || awaitingWhitelisting) && <StepIcon pending />}
+        {!(props.agreementStatus === 'signed' || awaitingWhitelisting) && (
           <StepIcon
             inactive={!props.active}
             checked={props.agreementStatus === 'countersigned' && props.whitelistStatus !== true}
@@ -90,7 +92,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {props.active && props.agreement && (props.agreementStatus === 'signed' || props.whitelistStatus === false) && (
+      {props.active && props.agreement && awaitingWhitelisting && (
         <StepBody>
           <Box pad={{ vertical: 'medium' }}>
             The Issuer will counter-sign your {props.agreement.name} for {props.activePool.metadata.name} soon. If KYC

@@ -5,13 +5,14 @@ import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { PoolLink } from '../../components/PoolLink'
 import PoolTitle from '../../components/PoolTitle'
-import { Pool } from '../../config'
+import config, { Pool } from '../../config'
 import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
 import AgreementStep from './AgreementStep'
 import ConnectStep from './ConnectStep'
 import KycStep from './KycStep'
 import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 import { Spinner } from '@centrifuge/axis-spinner'
+import { useRouter } from 'next/router'
 
 interface Props {
   activePool: Pool
@@ -21,6 +22,11 @@ interface Props {
 export type Step = 'connect' | 'kyc' | 'agreement' | 'invest'
 
 const DefaultTranche = 'senior'
+
+const deleteMyAccount = async (address: string, session: string) => {
+  await fetch(`${config.onboardAPIHost}addresses/${address}?session=${session}`, { method: 'DELETE' })
+  window.location.reload()
+}
 
 const OnboardingSteps: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch()
@@ -36,6 +42,9 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     ? onboarding.data?.kyc?.isWhitelisted[DefaultTranche]
     : false
   const agreementStatus = agreement?.counterSigned ? 'countersigned' : agreement?.signed ? 'signed' : 'none'
+
+  const router = useRouter()
+  const session = 'session' in router.query ? router.query.session : ''
 
   React.useEffect(() => {
     if (address) {
@@ -104,6 +113,19 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
                 </StepBody>
               )}
             </Step>
+
+            {address && kycStatus && session && config.isDemo && (
+              <Box margin={{ top: 'medium' }}>
+                <div>
+                  <Button
+                    label="Delete my account"
+                    primary
+                    size="small"
+                    onClick={() => deleteMyAccount(address, session)}
+                  />
+                </div>
+              </Box>
+            )}
           </>
         )}
       </Box>

@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Get, Param } from '@nestjs/common'
+import { BadRequestException, Controller, Delete, Get, Param, Query, UnauthorizedException } from '@nestjs/common'
 import { InvestmentRepo } from '../repos/investment.repo'
 import { AddressRepo } from '../repos/address.repo'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
@@ -7,7 +7,8 @@ import { UserRepo } from '../repos/user.repo'
 import { DocusignService } from '../services/docusign.service'
 import { SecuritizeService } from '../services/kyc/securitize.service'
 import { PoolService } from '../services/pool.service'
-import { AddressStatus, AgreementsStatus, KycStatusLabel, Tranche } from './types'
+import { AddressStatus, AgreementsStatus, KycStatusLabel } from './types'
+import { SessionService } from '../services/session.service'
 
 @Controller()
 export class AddressController {
@@ -19,7 +20,8 @@ export class AddressController {
     private readonly docusignService: DocusignService,
     private readonly poolService: PoolService,
     private readonly userRepo: UserRepo,
-    private readonly investmentRepo: InvestmentRepo
+    private readonly investmentRepo: InvestmentRepo,
+    private readonly sessionService: SessionService
   ) {}
 
   @Get('pools/:poolId/addresses/:address')
@@ -119,5 +121,17 @@ export class AddressController {
       },
       agreements: [],
     }
+  }
+
+  // TODO: this is a temporary method to delete users only on kovan. Should be removed or implemented properly at some point
+  @Delete('addresses/:address')
+  async deleteMyAccount(@Param() params, @Query() query): Promise<any> {
+    const user = await this.userRepo.findByAddress(params.address)
+    if (!user) throw new BadRequestException('Invalid user')
+
+    const verifiedSession = this.sessionService.verify(query.session, user.id)
+    if (!verifiedSession) throw new UnauthorizedException('Invalid session')
+
+    this.userRepo.delete(params.address, 'ethereum', 'kovan')
   }
 }

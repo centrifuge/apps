@@ -23,6 +23,16 @@ export class UserRepo {
     return data as User | undefined
   }
 
+  async findByAddress(address: string): Promise<User | undefined> {
+    const [data] = await this.db.sql`
+    select users.*
+    from users
+    inner join addresses on addresses.address = ${address}
+    `
+
+    return data as User | undefined
+  }
+
   async create(): Promise<User | undefined> {
     const id = uuidv4()
 
@@ -51,5 +61,19 @@ export class UserRepo {
     `
 
     return updatedUser as User | undefined
+  }
+
+  async delete(address: string, blockchain: string, network: string): Promise<boolean> {
+    await this.db.sql`
+      delete from users
+      where users.id IN (
+        select addresses.user_id
+        from addresses
+        where addresses.blockchain = ${blockchain}
+        and addresses.network = ${network}
+        and addresses.address = ${address}
+      )`
+
+    return true
   }
 }

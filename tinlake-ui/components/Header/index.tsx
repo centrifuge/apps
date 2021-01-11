@@ -131,7 +131,7 @@ const Header: React.FC<Props> = (props: Props) => {
               />
             )}
           </Box>
-          {address && (
+          {/* {address && (
             <Portfolio pad={{ right: '14px' }} style={{ borderRight: '1px solid #D8D8D8' }}>
               <AxisTooltip title="View your portfolio" cursor="pointer">
                 <Link href="/portfolio">
@@ -142,7 +142,7 @@ const Header: React.FC<Props> = (props: Props) => {
                 </Link>
               </AxisTooltip>
             </Portfolio>
-          )}
+          )} */}
           <div style={{ flex: '0 0 auto', paddingLeft: 16 }}>
             {!address && <Button onClick={connectAccount} label="Connect" />}
             {address && (

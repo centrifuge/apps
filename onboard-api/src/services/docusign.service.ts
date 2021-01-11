@@ -21,7 +21,7 @@ export class DocusignService {
       templateRoles: [
         {
           email,
-          name: 'Investor 1',
+          name: 'Investor',
           roleName: InvestorRoleName,
           clientUserId: userId,
           routingOrder: 1,
@@ -35,6 +35,8 @@ export class DocusignService {
       ],
       status: 'sent',
     }
+
+    console.log({ envelopeDefinition })
 
     const url = `${config.docusign.restApiHost}/restapi/v2.1/accounts/${config.docusign.accountId}/envelopes?change_routing_order=true`
 
@@ -64,11 +66,13 @@ export class DocusignService {
     const recipientViewRequest = {
       authenticationMethod: 'none',
       email: user.email,
-      userName: user.fullName,
+      userName: 'Investor',
       roleName: InvestorRoleName,
       clientUserId: user.id,
       returnUrl: returnUrl,
     }
+
+    console.log({ recipientViewRequest })
 
     const accessToken = await this.docusignAuthService.getAccessToken()
     const response = await fetch(url, {
@@ -101,6 +105,7 @@ export class DocusignService {
     })
 
     const content = await response.json()
+    console.log({ signers: content.signers })
     const investor = content.signers.find((signer: any) => signer.roleName === InvestorRoleName)
     const issuer = content.signers.find((signer: any) => signer.roleName === IssuerRoleName)
 
