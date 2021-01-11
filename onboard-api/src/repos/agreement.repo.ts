@@ -111,8 +111,6 @@ export class AgreementRepo {
     let agreements = []
 
     await pool.profile.agreements.forEach(async (profileAgreement: ProfileAgreement) => {
-      console.log({ userId, email, poolId, countryCode })
-
       if (
         (countryCode === 'US' && profileAgreement.country === 'non-us') ||
         (countryCode !== 'US' && profileAgreement.country === 'us')

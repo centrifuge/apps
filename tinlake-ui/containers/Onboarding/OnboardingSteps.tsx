@@ -113,22 +113,22 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
                 </StepBody>
               )}
             </Step>
-
-            {address && kycStatus && session && config.isDemo && (
-              <Box margin={{ top: 'medium' }}>
-                <div>
-                  <Button
-                    label="Delete my account"
-                    primary
-                    size="small"
-                    onClick={() => deleteMyAccount(address, session)}
-                  />
-                </div>
-              </Box>
-            )}
           </>
         )}
       </Box>
+
+      {address && kycStatus && session && config.isDemo && (
+        <Box margin={{ top: 'medium', left: 'auto', right: '20%' }}>
+          <div>
+            <Button
+              label="Delete my account"
+              secondary
+              size="small"
+              onClick={() => deleteMyAccount(address, session as string)}
+            />
+          </div>
+        </Box>
+      )}
     </Box>
   )
 }

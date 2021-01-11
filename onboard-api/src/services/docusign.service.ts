@@ -36,8 +36,6 @@ export class DocusignService {
       status: 'sent',
     }
 
-    console.log({ envelopeDefinition })
-
     const url = `${config.docusign.restApiHost}/restapi/v2.1/accounts/${config.docusign.accountId}/envelopes?change_routing_order=true`
 
     const accessToken = await this.docusignAuthService.getAccessToken()
@@ -72,8 +70,6 @@ export class DocusignService {
       returnUrl: returnUrl,
     }
 
-    console.log({ recipientViewRequest })
-
     const accessToken = await this.docusignAuthService.getAccessToken()
     const response = await fetch(url, {
       method: 'POST',
@@ -105,7 +101,6 @@ export class DocusignService {
     })
 
     const content = await response.json()
-    console.log({ signers: content.signers })
     const investor = content.signers.find((signer: any) => signer.roleName === InvestorRoleName)
     const issuer = content.signers.find((signer: any) => signer.roleName === IssuerRoleName)
 
