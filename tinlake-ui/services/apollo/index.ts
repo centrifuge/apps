@@ -305,8 +305,6 @@ class Apollo {
       return null
     }
 
-    console.log({ data })
-
     return {
       toDateRewardAggregateValue: data.toDateRewardAggregateValue,
       rewardRate: data.rewardRate,

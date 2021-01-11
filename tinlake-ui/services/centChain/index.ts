@@ -56,7 +56,6 @@ export class CentChain {
 
   public async claimedRADRewards(addr: string) {
     const claimed = await (await this.api()).query.radClaims.accountBalances(centChainAddrToAccountId(addr))
-    console.log('received claimed rewards', { addr, claimed: claimed.toHuman() })
     return claimed
   }
 
