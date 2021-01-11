@@ -342,7 +342,14 @@ class Apollo {
     const rewardBalance = result.data?.rewardBalances[0]
     const account = result.data?.accounts[0]
     if (!rewardBalance || !account) {
-      return null
+      return {
+        currentActiveInvestmentAmount: '0',
+        nonZeroInvestmentSince: null,
+        claimable: false,
+        totalEarnedRewards: '0',
+        unlinkedRewards: '0',
+        links: [],
+      }
     }
 
     const transformed: UserRewardsData = {
