@@ -6,16 +6,22 @@ import { Pool, UpcomingPool } from '../../config'
 import { PoolState } from '../../ducks/pool'
 import { PoolLink } from '../PoolLink'
 import { Label } from '../PoolList/styles'
+import { LinkPrevious } from 'grommet-icons'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 interface Props {
-  pool: Pool | UpcomingPool
+  pool?: Pool | UpcomingPool
   page: string
   parentPage?: string
   parentPageHref?: string
   rightContent?: React.ReactNode
+  return?: boolean
 }
 
 const PoolTitle: React.FC<Props> = (props: Props) => {
+  const router = useRouter()
+
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const isOversubscribed = (pool?.data && new BN(pool?.data.maxReserve).lte(new BN(pool?.data.reserve))) || false
 
@@ -29,22 +35,32 @@ const PoolTitle: React.FC<Props> = (props: Props) => {
 
   return (
     <Wrapper>
-      <Icon
-        src={
-          props.pool.metadata.media?.icon || 'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'
-        }
-      />
+      {props.return && (
+        <BackLink onClick={() => router.back()}>
+          <LinkPrevious style={{ cursor: 'pointer' }} />
+        </BackLink>
+      )}
+      {!props.return && (
+        <Icon
+          src={
+            props.pool?.metadata.media?.icon || 'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'
+          }
+        />
+      )}
       <PageTitle>
-        <PoolName>
-          {props.pool.metadata.name}
-          <PoolLabel>
-            {props.pool.isUpcoming ? (
-              <Label blue>Upcoming</Label>
-            ) : (
-              isOversubscribed && <Label orange>Oversubscribed</Label>
-            )}
-          </PoolLabel>
-        </PoolName>
+        {props.pool && (
+          <PoolName>
+            {props.pool.metadata.name}
+            <PoolLabel>
+              {props.pool.isUpcoming ? (
+                <Label blue>Upcoming</Label>
+              ) : (
+                isOversubscribed && <Label orange>Oversubscribed</Label>
+              )}
+            </PoolLabel>
+          </PoolName>
+        )}
+        {!props.pool && <PoolName>Tinlake</PoolName>}
         <PageName>
           {props.parentPage && props.parentPageHref && (
             <>
@@ -65,6 +81,15 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: row;
   margin: 12px 0 36px 8px;
+`
+
+const BackLink = styled.div`
+  margin: 14px 20px 0 18px;
+
+  > svg {
+    width: 18px;
+    height: 18px;
+  }
 `
 
 const Icon = styled.img`

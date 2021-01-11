@@ -27,6 +27,9 @@ import { Cont, Label as MetricLabel, Value, TokenLogo } from '../../components/P
 // import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
 // import { Token } from 'graphql'
 // import { UintBase } from '../../utils/ratios'
+import { DisplayField } from '@centrifuge/axis-display-field'
+import { getAddressLink } from '../../utils/etherscanLinkGenerator'
+import PoolTitle from '../../components/PoolTitle'
 
 interface Props {
   ipfsPools: IpfsPools
@@ -122,8 +125,25 @@ const Portfolio: React.FC<Props> = (props: Props) => {
   //     }, [] as AssetClass[]) || []
 
   return (
-    <Box margin={{ top: 'large' }}>
-      <Heading level="4">Portfolio of {address ? shorten(address, 4) : ''}</Heading>
+    <Box margin={{ top: 'medium' }}>
+      <Box margin={{ bottom: 'medium' }}>
+        <Box direction="row" justify="between">
+          <PoolTitle page="Investment Portfolio" return />
+          {address && address !== connectedAddress && (
+            <Box margin={{ top: 'medium' }}>
+              <DisplayField
+                copy={true}
+                as={'span'}
+                value={address}
+                link={{
+                  href: getAddressLink(address),
+                  target: '_blank',
+                }}
+              />
+            </Box>
+          )}
+        </Box>
+      </Box>
       <Box direction="row" gap="small" margin={{ bottom: 'large' }} justify="center">
         <Box
           width="256px"

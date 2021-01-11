@@ -14,6 +14,7 @@ export interface TokenBalance {
     symbol: string
   }
   balance: BN
+  value: BN
   supplyAmount: BN
   pendingSupplyCurrency: BN
 }

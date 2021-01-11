@@ -365,6 +365,7 @@ class Apollo {
               symbol
             }
             balance
+            value
             supplyAmount
             pendingSupplyCurrency
           }
@@ -378,10 +379,19 @@ class Apollo {
       }
     }
 
+    console.log(result.data)
+
     return result.data.tokenBalances.map(
-      (tokenBalance: { token: any; balance: string; supplyAmount: string; pendingSupplyCurrency: string }) => {
+      (tokenBalance: {
+        token: any
+        value: string
+        balance: string
+        supplyAmount: string
+        pendingSupplyCurrency: string
+      }) => {
         return {
           token: tokenBalance.token,
+          value: new BN(tokenBalance.value),
           balance: new BN(tokenBalance.balance),
           supplyAmount: new BN(tokenBalance.supplyAmount),
           pendingSupplyCurrency: new BN(tokenBalance.pendingSupplyCurrency),

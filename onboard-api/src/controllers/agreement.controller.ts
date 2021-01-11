@@ -15,7 +15,7 @@ import {
 import config from '../config'
 import { AgreementRepo } from '../repos/agreement.repo'
 import { UserRepo } from '../repos/user.repo'
-import { DocusignService } from '../services/docusign.service'
+import { DocusignService, InvestorRoleName, IssuerRoleName } from '../services/docusign.service'
 import { PoolService } from '../services/pool.service'
 import { SessionService } from '../services/session.service'
 
@@ -56,10 +56,20 @@ export class AgreementController {
   }
 
   @Post('docusign/connect')
-  async postDocusignConnect(@Body() body, @Req() req: Request): Promise<string> {
+  async postDocusignConnect(@Body() body): Promise<string> {
     console.log('Received Docusign Connect message')
     console.log(body)
-    console.log(req)
+
+    const content = JSON.parse(body)
+    const investor = content.recipients.signers.find((signer: any) => signer.roleName === InvestorRoleName)
+    const issuer = content.recipients.signers.find((signer: any) => signer.roleName === IssuerRoleName)
+
+    const status = {
+      signed: investor?.status === 'completed',
+      counterSigned: issuer?.status === 'completed',
+    }
+    console.log({ status })
+
     return 'OK'
   }
 }
