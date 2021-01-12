@@ -84,7 +84,7 @@ class Apollo {
         totalRepaysAggregatedAmountNum,
         weightedInterestRateNum,
         seniorInterestRateNum,
-        order: poolValueNum,
+        order: poolValueNum === 0 ? orderSummandPoolUpcoming : poolValueNum,
         isUpcoming: false,
         isArchived: false,
         isOversubscribed: (pool && new BN(pool.maxReserve).lte(new BN(pool.reserve))) || false,
