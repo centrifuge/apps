@@ -55,7 +55,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
         RAD Rewards
       </Heading>
 
-      <Box direction="row" align="start">
+      <Box direction="row" align="start" justify="between">
         {!ethAddr && (
           <Box>
             <Box margin={{ top: 'medium' }} direction="row">
@@ -166,9 +166,9 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
 
             {data?.links && data.links.length > 0 && (
               <Card>
-                <Box direction="row" pad={{ horizontal: 'medium', top: 'medium', bottom: 'none' }}>
+                <Box direction="row" pad={{ horizontal: 'medium', top: 'medium', bottom: 'medium' }}>
                   <Box flex={true}>
-                    <Head>Claim Your Rewards</Head>
+                    <Head>Claim Your RAD Rewards</Head>
 
                     {debug && (
                       <Alert type="info">
@@ -200,12 +200,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                       </Alert>
                     )}
 
-                    {!data?.claimable && (
-                      <>
-                        You can not yet claim your rewards, please come back{' '}
-                        {comebackDate(data?.nonZeroInvestmentSince)}
-                      </>
-                    )}
+                    {!data?.claimable && comebackDate(data?.nonZeroInvestmentSince)}
                   </Box>
                   <RewardRecipients recipients={data?.links} />
                 </Box>
@@ -227,7 +222,7 @@ const days = 24 * 60 * 60
 
 function comebackDate(nonZero: string | null | undefined) {
   if (!nonZero || new BN(nonZero).isZero()) {
-    return 'after investing in a Tinlake pool and waiting for 60 days.'
+    return 'You can not yet claim your rewards, please come back after investing in a Tinlake pool and waiting for 60 days.'
   }
 
   const start = new BN(nonZero)
@@ -240,9 +235,10 @@ function comebackDate(nonZero: string | null | undefined) {
     .addn(1)
     .toString()
 
-  return `in ${
-    diff === '1' ? '1 day' : diff + ' days'
-  } on ${targetDate}. Your first eligible investment was made on ${startDate}.`
+  return `You have not been invested for the minimum holding period of 60 days and thus do not qualify for RAD rewards `
+    + `yet. Your first eligible investment was made ${startDate} so you can return in ${
+      diff === '1' ? '1 day' : diff + ' days'} on ${targetDate} to claim your RAD rewards.`
+
 }
 
 const Card = ({ children }: React.PropsWithChildren<{}>) => (
@@ -262,7 +258,7 @@ const Explainer = () => (
     background="#eee"
     pad="medium"
     round="xsmall"
-    margin={{ left: 'auto' }}
+    margin={{ left: '24px' }}
     width="360px"
     style={{ color: '#555555' }}
   >

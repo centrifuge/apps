@@ -1,11 +1,12 @@
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import { Box, Button } from 'grommet'
-import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import Alert from '../../components/Alert'
+import { RewardsState } from '../../ducks/rewards'
 import { TransactionStatus } from '../../ducks/transactions'
 import { loadCentChain, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { centChainService } from '../../services/centChain'
@@ -18,6 +19,7 @@ interface Props {
 
 const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
   const { data, claims } = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
+  const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
   const dispatch = useDispatch()
 
   const [status, setStatus] = React.useState<null | TransactionStatus>(null)
@@ -49,10 +51,6 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
     }
   }
 
-  const {
-    query: { debug },
-  } = useRouter()
-
   if (activeLink.claimable === null || activeLink.claimed === null || claims === null) {
     return <Box pad="medium">Loading claimable rewards...</Box>
   }
@@ -64,12 +62,13 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
 
   return (
     <>
-      <Box pad="medium">
+      <Box pad={{ horizontal: 'medium', bottom: 'medium' }}>
         {unclaimed && !unclaimed?.isZero() ? (
           <>
             {(status === null || status === 'unconfirmed' || status === 'failed' || status === 'pending') && (
               <>
-                🎉 You have {toDynamicPrecision(baseToDisplay(unclaimed, 18))} unclaimed RAD rewards.
+                🎉 You have {toDynamicPrecision(baseToDisplay(unclaimed, 18))} unclaimed RAD rewards. Claim now to stake
+                value and participate in on-chain governance.
                 {unclaimed.gt(new BN(data?.totalEarnedRewards || '0')) && (
                   <>
                     <br />
@@ -95,8 +94,16 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
           </>
         ) : (
           <>
-            👍 You have claimed all your rewards. If you still have active investments, please come back tomorrow or at
-            a later time to claim more rewards.
+            👍 You have claimed all your RAD rewards. As long as you stay invested, your investment keeps earning{' '}
+            {rewards.data?.rewardRate &&
+              data?.currentActiveInvestmentAmount &&
+              toDynamicPrecision(
+                baseToDisplay(
+                  new Decimal(rewards.data?.rewardRate).mul(data?.currentActiveInvestmentAmount).toFixed(0),
+                  18
+                )
+              )}{' '}
+            RAD on a daily basis.
           </>
         )}
         {!new BN(activeLink.claimed).isZero() && (
