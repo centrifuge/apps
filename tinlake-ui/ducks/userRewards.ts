@@ -33,12 +33,12 @@ export interface UserRewardsState {
  * 3. To claim rewards, user needs to link a Cent Chain account to the Ethereum address. If there is none, any rewards
  *    are in `unlinkedRewards`. If there is a link, rewards will be fully assigned to the (last) linked Cent Chain
  *    account.
- * 4. For those linked rewards to be collectable on Cent Chain, the amounts and balances (we call them together
- *    `claims`) are put once per day into a merkle tree, which's root will be stored on Cent Chain, and which's leaves
- *    will be uploaded to GCP into a storage bucket. Once the rewards are in the bucket and the root hash are stored on
- *    Cent Chain, they become collectable.
- * 5. User can now collect the rewards on Cent Chain.
- * 6. Collected rewards can be queried from cent chain.
+ * 4. For those linked rewards to be claimable on Cent Chain, the amounts and balances (we call them together `claims`)
+ *    are put once per day into a merkle tree, which's root will be stored on Cent Chain, and which's leaves will be
+ *    uploaded to GCP into a storage bucket. Once the rewards are in the bucket and the root hash are stored on Cent
+ *    Chain, they become claimable.
+ * 5. User can now claim the rewards on Cent Chain.
+ * 6. Claimed rewards can be queried from cent chain.
  */
 export interface UserRewardsData {
   /**
@@ -62,12 +62,12 @@ export interface UserRewardsData {
   unlinkedRewards: BigDecimalString
   /**
    * From subgraph. Rewards earned on Ethereum across all links for this Ethereum address so far, might be claimable,
-   * might have been collected. Should equal the sum of links.earned and unlinkedRewards
+   * might have been claimed. Should equal the sum of links.earned and unlinkedRewards
    */
   totalEarnedRewards: BigDecimalString
   /**
    * From multiple data sources. Contains information about a specific Centrifuge Chain account linked to the ethereum
-   * account, including collectable and collected amounts.
+   * account, including claimable and claimed amounts.
    */
   links: UserRewardsLink[]
 }
@@ -78,7 +78,7 @@ export interface UserRewardsLink {
    */
   centAccountID: AccountIDString
   /**
-   * From subgraph. Amount of rewards that have been collected on Ethereum and have been assigned to this link/Cent
+   * From subgraph. Amount of rewards that have been claimed on Ethereum and have been assigned to this link/Cent
    * Chain account. Any new rewards earned by any user will be added to the latest link once per day.
    */
   earned: BigDecimalString

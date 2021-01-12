@@ -2,11 +2,13 @@ import { Tooltip } from '@centrifuge/axis-tooltip'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, FormField, TextInput } from 'grommet'
 import * as React from 'react'
-import { connect, useSelector } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import Alert from '../../components/Alert'
+import { AuthState } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
+import { loadSubgraph } from '../../ducks/userRewards'
 import { centChainAddrToAccountId } from '../../services/centChain/centChainAddrToAccountId'
 import { isCentChainAddr } from '../../services/centChain/isCentChainAddr'
 import { shortAddr } from '../../utils/shortAddr'
@@ -17,6 +19,8 @@ interface Props extends TransactionProps {
 
 const SetCentAddress: React.FC<Props> = ({ createTransaction, tinlake }: Props) => {
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
+  const { address: ethAddr } = useSelector<any, AuthState>((state: any) => state.auth)
+  const dispatch = useDispatch()
 
   const [status, , setTxId] = useTransactionState()
 
@@ -34,6 +38,16 @@ const SetCentAddress: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
     setTxId(txId)
   }
 
+  React.useEffect(() => {
+    if (status === 'succeeded') {
+      if (!ethAddr) {
+        throw new Error('ethAddr is required to update cent chain account')
+      }
+      dispatch(loadSubgraph(ethAddr))
+      // TODO poll, subgraph might be slower
+    }
+  }, [status])
+
   const disabled =
     status === 'unconfirmed' || status === 'pending' || !!(walletCentAddr && !isCentChainAddr(walletCentAddr))
 
@@ -44,8 +58,8 @@ const SetCentAddress: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
       )}
       {walletCentAddr && (
         <div>
-          You can now set your Centrifuge Chain address as the receiver of all your RAD rewards. Please make sure you
-          use the right account, since this step cannot be undone.
+          Link your Centrifuge Chain account to your wallet you are using for investing in Tinlake pools to claim your
+          rewards. <strong>Please make sure you use the correct account as this step can not be undone.</strong>
           <FormField label="Your Centrifuge Chain address" margin={{ top: 'large', bottom: 'small' }} width="420px">
             <TextInput value={walletCentAddr} disabled={true} />
           </FormField>
@@ -60,7 +74,7 @@ const SetCentAddress: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
           <Box>
             <Button
               primary
-              label={`Set reward address`}
+              label={status === 'unconfirmed' || status === 'pending' ? `Linking account` : `Link account`}
               onClick={() => set(walletCentAddr)}
               margin={{ left: 'auto', top: 'medium' }}
               disabled={disabled}

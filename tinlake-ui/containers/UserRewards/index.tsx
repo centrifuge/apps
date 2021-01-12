@@ -16,9 +16,10 @@ import { loadRewards, RewardsState } from '../../ducks/rewards'
 import { load, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
 import { shortAddr } from '../../utils/shortAddr'
+import { dynamicPrecision, toDynamicPrecision } from '../../utils/toDynamicPrecision'
 import { toPrecision } from '../../utils/toPrecision'
 import CentChainWalletDialog from '../CentChainWalletDialog'
-import CollectRewards from '../CollectRewards'
+import ClaimRewards from '../ClaimRewards'
 import SetCentAddress from '../SetCentAddress'
 
 interface Props {
@@ -84,8 +85,8 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
             <Card>
               <Box pad="medium">
                 <Head>Connect your Ethereum Account</Head>
-                Please connect with the Etereum Account that is holding your Tinlake investment to start collecting your
-                RAD rewards.
+                Please connect with the Ethereum Account that is holding your Tinlake investment to see your RAD
+                rewards.
                 <Button primary label="Connect" margin={{ left: 'auto', top: 'large' }} onClick={connect} />
               </Box>
             </Card>
@@ -139,8 +140,8 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                   <Card>
                     <Box pad="medium">
                       <Head>Link Your Centrifuge Chain Account</Head>
-                      Your RAD rewards are earned on Ethereum, but owned on Centrifuge Chain. Link your Ethereum address
-                      to a Centrifuge Chain account to collect your rewards.
+                      Your RAD Rewards are earned in Tinlake on Ethereum but claimed and held on Centrifuge Chain. Link
+                      your ETH address to a Centrifuge Chain account to collet your rewards.
                       <br />
                       <br />
                       <CentChainWalletDialog />
@@ -153,7 +154,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                     <Box pad="medium">
                       <Head>Link Your Centrifuge Chain Account</Head>
                       Your RAD rewards are earned on Ethereum, but owned on Centrifuge Chain. Link your Ethereum address
-                      to a Centrifuge Chain account to collect your rewards.
+                      to a Centrifuge Chain account to claim your rewards.
                       <br />
                       <br />
                       <SetCentAddress tinlake={tinlake} />
@@ -167,7 +168,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
               <Card>
                 <Box direction="row" pad={{ horizontal: 'medium', top: 'medium', bottom: 'none' }}>
                   <Box flex={true}>
-                    <Head>Collect Your Rewards</Head>
+                    <Head>Claim Your Rewards</Head>
 
                     {debug && (
                       <Alert type="info">
@@ -183,13 +184,13 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                                 <li>Centrifuge Chain Account ID: {shortAddr(c.centAccountID)}</li>
                                 <li>Earned (from Subgraph): {toPrecision(baseToDisplay(c.earned, 18), 4)} RAD</li>
                                 <li>
-                                  Collectable (from GCP):{' '}
+                                  Claimable (from GCP):{' '}
                                   {c.claimable
                                     ? `${toPrecision(baseToDisplay(c.claimable, 18), 4)} RAD`
                                     : `[loading...]`}
                                 </li>
                                 <li>
-                                  Collected (from Centrifuge Chain):{' '}
+                                  Claimed (from Centrifuge Chain):{' '}
                                   {c.claimed ? `${toPrecision(baseToDisplay(c.claimed, 18), 4)} RAD` : `[loading...]`}
                                 </li>
                               </ul>
@@ -201,14 +202,14 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
 
                     {!data?.claimable && (
                       <>
-                        You can not yet collect your rewards, please come back{' '}
+                        You can not yet claim your rewards, please come back{' '}
                         {comebackDate(data?.nonZeroInvestmentSince)}
                       </>
                     )}
                   </Box>
                   <RewardRecipients recipients={data?.links} />
                 </Box>
-                {data?.claimable && <CollectRewards activeLink={data.links[data.links.length - 1]} />}
+                {data?.claimable && <ClaimRewards activeLink={data.links[data.links.length - 1]} />}
               </Card>
             )}
           </Box>
@@ -256,7 +257,7 @@ const Head = ({ children }: React.PropsWithChildren<{}>) => (
   </Heading>
 )
 
-const Explainer = ({ step }: { step: 1 | 2 }) => (
+const Explainer = () => (
   <Box
     background="#eee"
     pad="medium"
@@ -270,14 +271,8 @@ const Explainer = ({ step }: { step: 1 | 2 }) => (
     qualify for Rewards.
     <br />
     <br />
-    Your Radial Rewards are earned in Tinlake on Etereum but collected and held on Centrifuge Chain where RAD can be
-    used to stake value and on-chain governance. Find more information about RAD here.
-    <br />
-    <br />
-    {step === 1 &&
-      'Connect your Ethereum account that has held your Tinlake investment to get started. You cannot claim rewards if you have not invested in Tinlake yet.'}
-    {step === 2 &&
-      'To collect your RAD rewards first link you ETH address to your Centrifuge Chain account. This is a one time step. If you do not have a Centrifuge Chain account yet, install the Polkadot browser extension and create an account.'}
+    Your Radial Rewards are earned in Tinlake on Etereum but claimed and held on Centrifuge Chain where RAD can be used
+    to stake value and on-chain governance. Find more information about RAD here.
   </Box>
 )
 
@@ -288,7 +283,7 @@ const RewardRecipients = ({ recipients }: { recipients: UserRewardsLink[] }) => 
         <Addr active={i === 0}>{shortAddr(accountIdToCentChainAddr(r.centAccountID))}</Addr>
         <Status active={i === 0}>
           {i === 0 ? 'Active' : 'Inactive'} |{' '}
-          {r.claimed ? `${toPrecision(baseToDisplay(r.claimed, 18), 0)} RAD` : 'loading...'}
+          {r.claimed ? `${toDynamicPrecision(baseToDisplay(r.claimed, 18))} RAD` : 'loading...'}
         </Status>
       </Recipient>
     ))}
@@ -341,7 +336,9 @@ const Metric = ({
       <Value>
         <LoadingValue
           done={!loading}
-          render={() => <NumberDisplay value={value} precision={precision || 0} />}
+          render={() => (
+            <NumberDisplay value={value} precision={precision || (token === 'RAD' ? dynamicPrecision(value) : 0)} />
+          )}
         ></LoadingValue>
       </Value>{' '}
       <Unit>{{ DAI: 'DAI', RAD: 'RAD' }[token]}</Unit>

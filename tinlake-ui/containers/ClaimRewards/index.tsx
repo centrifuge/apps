@@ -10,30 +10,30 @@ import { TransactionStatus } from '../../ducks/transactions'
 import { loadCentChain, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { centChainService } from '../../services/centChain'
 import { createBufferProofFromClaim, createTree, newClaim } from '../../utils/radRewardProofs'
-import { toPrecision } from '../../utils/toPrecision'
+import { toDynamicPrecision } from '../../utils/toDynamicPrecision'
 
 interface Props {
   activeLink: UserRewardsLink
 }
 
-const CollectRewards: React.FC<Props> = ({ activeLink }: Props) => {
+const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
   const { data, claims } = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
   const dispatch = useDispatch()
 
   const [status, setStatus] = React.useState<null | TransactionStatus>(null)
   const [error, setError] = React.useState<null | string>(null)
-  const collect = async () => {
+  const claim = async () => {
     setStatus('pending')
     setError(null)
 
     if (!claims) {
-      throw new Error('claims must exist to collect')
+      throw new Error('claims must exist to claim')
     }
 
     const claim = claims?.find((c) => c.accountID === activeLink.centAccountID)
 
     if (!claim) {
-      throw new Error('claim must exist to collect')
+      throw new Error('claim must exist to claim')
     }
 
     const tree = createTree(claims.map((c) => newClaim(c)))
@@ -54,10 +54,10 @@ const CollectRewards: React.FC<Props> = ({ activeLink }: Props) => {
   } = useRouter()
 
   if (activeLink.claimable === null || activeLink.claimed === null || claims === null) {
-    return <Box pad="medium">Loading collectable rewards...</Box>
+    return <Box pad="medium">Loading claimable rewards...</Box>
   }
 
-  const uncollected =
+  const unclaimed =
     activeLink.claimable !== null && activeLink.claimed !== null
       ? new BN(activeLink.claimable).sub(new BN(activeLink.claimed))
       : null
@@ -65,16 +65,16 @@ const CollectRewards: React.FC<Props> = ({ activeLink }: Props) => {
   return (
     <>
       <Box pad="medium">
-        {uncollected && !uncollected?.isZero() ? (
+        {unclaimed && !unclaimed?.isZero() ? (
           <>
             {(status === null || status === 'unconfirmed' || status === 'failed' || status === 'pending') && (
               <>
-                🎉 You have {toPrecision(baseToDisplay(uncollected, 18), 4)} uncollected RAD rewards.
-                {uncollected.gt(new BN(data?.totalEarnedRewards || '0')) && (
+                🎉 You have {toDynamicPrecision(baseToDisplay(unclaimed, 18))} unclaimed RAD rewards.
+                {unclaimed.gt(new BN(data?.totalEarnedRewards || '0')) && (
                   <>
                     <br />
                     <br />
-                    Your uncollected rewards on this address can be higher than the rewards you earned on the connected
+                    Your unclaimed rewards on this address can be higher than the rewards you earned on the connected
                     Ethereum address, e. g. if you have set this Centrifuge Chain address as recipient for multiple
                     Ethereum addresses.
                   </>
@@ -83,20 +83,20 @@ const CollectRewards: React.FC<Props> = ({ activeLink }: Props) => {
             )}
             {status === 'succeeded' && (
               <Alert type="success" style={{ marginTop: 24 }}>
-                You have collected {toPrecision(baseToDisplay(uncollected, 18), 4)} RAD. If you still have active
-                investments, please come back tomorrow or at a later time to collect more rewards.
+                You have claimed {toDynamicPrecision(baseToDisplay(unclaimed, 18))} RAD. If you still have active
+                investments, please come back tomorrow or at a later time to claim more rewards.
               </Alert>
             )}
             {status === 'failed' && error && (
               <Alert type="error" style={{ marginTop: 24 }}>
-                Error collecting rewards. {error}
+                Error claiming rewards. {error}
               </Alert>
             )}
           </>
         ) : (
           <>
-            👍 You have collected all your rewards. If you still have active investments, please come back tomorrow or
-            at a later time to collect more rewards.
+            👍 You have claimed all your rewards. If you still have active investments, please come back tomorrow or at
+            a later time to claim more rewards.
           </>
         )}
         {!new BN(activeLink.claimed).isZero() && (
@@ -104,13 +104,12 @@ const CollectRewards: React.FC<Props> = ({ activeLink }: Props) => {
             <>
               <br />
               <br />
-              🏆 You have collected so far{' '}
-              {toPrecision(
+              🏆 You have claimed so far{' '}
+              {toDynamicPrecision(
                 baseToDisplay(
                   (data?.links || []).reduce((p, l) => p.add(new BN(l.claimed || '0')), new BN(0)),
                   18
-                ),
-                4
+                )
               )}{' '}
               RAD as rewards.
             </>
@@ -118,34 +117,34 @@ const CollectRewards: React.FC<Props> = ({ activeLink }: Props) => {
               <>
                 <br />
                 <br />
-                Your collected rewards on this address can be higher than the rewards you earned on the connected
-                Ethereum address, e. g. if you have set this Centrifuge Chain address as recipient for multiple Ethereum
+                Your claimed rewards on this address can be higher than the rewards you earned on the connected Ethereum
+                address, e. g. if you have set this Centrifuge Chain address as recipient for multiple Ethereum
                 addresses.
               </>
             )}
           </>
         )}
       </Box>
-      <RewardStripe uncollected={uncollected || new BN(0)}>
+      <RewardStripe unclaimed={unclaimed || new BN(0)}>
         <Button
           margin={{ left: 'auto' }}
-          label={status === 'unconfirmed' || status === 'pending' ? `Collecting...` : `Collect`}
-          disabled={(!!uncollected && uncollected.isZero()) || status === 'unconfirmed' || status === 'pending'}
-          onClick={collect}
+          label={status === 'unconfirmed' || status === 'pending' ? `Claiming...` : `Claim`}
+          disabled={(!!unclaimed && unclaimed.isZero()) || status === 'unconfirmed' || status === 'pending'}
+          onClick={claim}
         />
       </RewardStripe>
     </>
   )
 }
 
-export default CollectRewards
+export default ClaimRewards
 
-const RewardStripe = ({ uncollected, children }: React.PropsWithChildren<{ uncollected: BN }>) => (
+const RewardStripe = ({ unclaimed, children }: React.PropsWithChildren<{ unclaimed: BN }>) => (
   <Cont direction="row" pad={{ vertical: 'small', horizontal: 'medium' }}>
     <TokenLogo src="/static/rad-black.svg" />
     <Box>
-      <Label>Your uncollected rewards</Label>
-      <Number>{toPrecision(baseToDisplay(uncollected, 18), 0)} RAD</Number>
+      <Label>Your unclaimed rewards</Label>
+      <Number>{toDynamicPrecision(baseToDisplay(unclaimed, 18))} RAD</Number>
     </Box>
     {children}
   </Cont>
