@@ -61,7 +61,6 @@ export class KycController {
       investor.domainInvestorDetails.isAccredited
     )
 
-    console.log(`Start creating agreements`)
     // Create agreements for this pool
     await this.agreementRepo.createAgreementsForPool(
       params.poolId,
@@ -69,7 +68,6 @@ export class KycController {
       investor.email,
       investor.details.address.countryCode
     )
-    console.log(`Done creating agreements`)
 
     // Create session and redirect user
     const session = this.sessionService.create(address.userId)

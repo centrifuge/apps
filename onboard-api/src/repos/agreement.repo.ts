@@ -108,7 +108,6 @@ export class AgreementRepo {
     const pool = await this.poolService.get(poolId)
     if (!pool) throw new Error(`Cannot create agreements for pool ${poolId}`)
 
-    console.log(`Creating agreements for ${poolId}`)
     const agreements = await Promise.all(
       pool.profile.agreements.map(async (profileAgreement: ProfileAgreement) => {
         if (
@@ -132,7 +131,6 @@ export class AgreementRepo {
       })
     )
 
-    console.log(`Created ${agreements.length} agreements for ${poolId}`)
     return agreements
   }
 

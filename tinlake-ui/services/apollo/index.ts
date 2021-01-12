@@ -379,7 +379,7 @@ class Apollo {
       }
     }
 
-    console.log(result.data)
+    if (!result.data) return []
 
     return result.data.tokenBalances.map(
       (tokenBalance: {

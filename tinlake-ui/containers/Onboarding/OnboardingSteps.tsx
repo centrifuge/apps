@@ -47,9 +47,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
   const session = 'session' in router.query ? router.query.session : ''
 
   React.useEffect(() => {
-    if (address) {
-      dispatch(loadOnboardingStatus(props.activePool))
-    }
+    dispatch(loadOnboardingStatus(props.activePool))
 
     if (!address) setActiveSteps(1)
     else if (!kycStatus || kycStatus === 'none' || kycStatus === 'requires-signin' || kycStatus === 'updates-required')
@@ -69,11 +67,11 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     <Box margin={{ top: 'medium' }}>
       <PoolTitle pool={props.activePool} page="Onboarding" parentPage="Investments" parentPageHref="/investments" />
       <Heading level="5" margin={{ bottom: 'medium' }} style={{ maxWidth: '100%' }}>
-        To invest in this this pool, start your onboarding process now.
+        To invest in this pool, start your onboarding process now.
       </Heading>
 
       <Box pad="medium" elevation="small" round="xsmall" background="white" width="80%">
-        {onboarding.state !== 'found' ? (
+        {address && onboarding.state !== 'found' ? (
           <Spinner height={'400px'} message={'Loading...'} />
         ) : (
           <>

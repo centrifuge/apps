@@ -25,6 +25,8 @@ const KycStep: React.FC<Props> = (props: Props) => {
   const router = useRouter()
   const session = 'session' in router.query ? router.query.session : '' // TODO: check this on the API and display message if it has expired
 
+  const poolName = props.activePool.metadata.shortName || props.activePool.metadata.name
+
   const awaitingWhitelisting = props.agreementStatus === 'countersigned' && props.whitelistStatus === false
 
   return (
@@ -39,17 +41,17 @@ const KycStep: React.FC<Props> = (props: Props) => {
         )}
         <StepTitle inactive={!props.active}>
           {props.agreementStatus === 'none'
-            ? 'Sign the Subscription Agreement'
+            ? `Sign the Subscription Agreement`
             : props.agreementStatus === 'countersigned' && props.whitelistStatus === true
-            ? 'Subscription Agreement signed'
-            : 'Subscription Agreement awaiting Issuer signature'}
+            ? `${props.agreement?.name} signed`
+            : `${props.agreement?.name} awaiting Issuer signature`}
         </StepTitle>
       </StepHeader>
       {props.active && props.agreementStatus === 'none' && props.agreement && !session && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '70%' }}>
-            To complete the next step of signing the {props.agreement.name} for {props.activePool?.metadata.name}, you
-            can sign in again with your Securitize iD.
+            To complete the next step of signing the {props.agreement.name} for {poolName}, you can sign in again with
+            your Securitize iD.
           </Paragraph>
           <div>
             <Button primary label={'Sign in with Securitize'} href={props.onboarding.data?.kyc?.url} fill={false} />
@@ -60,7 +62,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
       {props.active && props.agreementStatus === 'none' && props.agreement && session && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
-            You can continue onboarding by signing the {props.agreement.name} for {props.activePool.metadata.name}.
+            Finalize onboarding by signing the {props.agreement.name} for {poolName}.
           </Paragraph>
           {!props.onboarding.data?.kyc.isUsaTaxResident && (
             <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
@@ -76,7 +78,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <div>
             <Button
               primary
-              label={`Sign ${props.agreement?.name}`}
+              label={`Sign Subscription Agreement`}
               href={`${config.onboardAPIHost}pools/${(props.activePool as Pool).addresses.ROOT_CONTRACT}/agreements/${
                 props.agreement?.id
               }/redirect?session=${session}`}
@@ -92,11 +94,11 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {props.active && props.agreement && awaitingWhitelisting && (
+      {props.active && props.agreement && (props.agreementStatus === 'signed' || awaitingWhitelisting) && (
         <StepBody>
           <Box pad={{ vertical: 'medium' }}>
-            The Issuer will counter-sign your {props.agreement.name} for {props.activePool.metadata.name} soon. If KYC
-            is verified, you will be ready to invest in this pool upon his signature.
+            The Issuer will counter-sign your {props.agreement.name} for {poolName} soon. If KYC is verified, you will
+            be ready to invest in this pool upon his signature.
           </Box>
         </StepBody>
       )}
