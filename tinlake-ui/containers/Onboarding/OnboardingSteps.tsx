@@ -70,7 +70,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
         To invest in this pool, start your onboarding process now.
       </Heading>
 
-      <Box pad="medium" elevation="small" round="xsmall" background="white" width="80%">
+      <Box pad="medium" elevation="small" round="xsmall" background="white">
         {address && onboarding.state !== 'found' ? (
           <Spinner height={'400px'} message={'Loading...'} />
         ) : (
@@ -116,7 +116,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
       </Box>
 
       {address && kycStatus && session && config.isDemo && (
-        <Box margin={{ top: 'medium', left: 'auto', right: '20%' }}>
+        <Box margin={{ top: 'medium', left: 'auto' }}>
           <div>
             <Button
               label="Delete my account"

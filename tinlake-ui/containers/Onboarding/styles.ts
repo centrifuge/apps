@@ -47,3 +47,26 @@ export const FormFieldWithoutBorder = styled(FormField)`
     font-weight: bold;
   }
 `
+
+export const LegalCopy = styled.div`
+  max-height: 600px;
+  overflow: scroll;
+  margin: 20px 0;
+  background: #efefef;
+  padding: 0 20px;
+  border-radius: 10px;
+
+  > p {
+    font-size: 13px;
+    text-align: justify;
+  }
+
+  ul {
+    padding-inline-start: 30px;
+
+    li {
+      padding-left: 10px;
+      margin-bottom: 10px;
+    }
+  }
+`
