@@ -49,7 +49,6 @@ export default function reducer(
     case DISCONNECT:
       return { ...state, state: 'disconnected' }
     case INJECT_ACCOUNTS:
-      console.log('injnecting', action)
       return { ...state, accounts: action.accounts || [] }
     default:
       return state

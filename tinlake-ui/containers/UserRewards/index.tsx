@@ -235,10 +235,12 @@ function comebackDate(nonZero: string | null | undefined) {
     .addn(1)
     .toString()
 
-  return `You have not been invested for the minimum holding period of 60 days and thus do not qualify for RAD rewards `
-    + `yet. Your first eligible investment was made ${startDate} so you can return in ${
-      diff === '1' ? '1 day' : diff + ' days'} on ${targetDate} to claim your RAD rewards.`
-
+  return (
+    `You have not been invested for the minimum holding period of 60 days and thus do not qualify for RAD rewards ` +
+    `yet. Your first eligible investment was made ${startDate} so you can return in ${
+      diff === '1' ? '1 day' : diff + ' days'
+    } on ${targetDate} to claim your RAD rewards.`
+  )
 }
 
 const Card = ({ children }: React.PropsWithChildren<{}>) => (

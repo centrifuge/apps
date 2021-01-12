@@ -3,10 +3,29 @@ import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Alert from '../../components/Alert'
 import { CentChainWalletState, connect } from '../../ducks/centChainWallet'
+import { usePolkadotExtensionInstalled } from '../../utils/usePolkadotExtensionInstalled'
 
 const CentChainWalletDialog: React.FC = () => {
+  const polkadotExtensionInstalled = usePolkadotExtensionInstalled()
   const dispatch = useDispatch()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
+
+  if (!polkadotExtensionInstalled) {
+    return (
+      <>
+        Please install the Polkadot browser extension to get started and reload this page.
+        <Box direction="row" margin={{ top: 'medium' }}>
+          <Button
+            primary
+            label="Install Browser Extension"
+            href="https://polkadot.js.org/extension/"
+            target="_blank"
+            margin={{ left: 'auto' }}
+          />
+        </Box>
+      </>
+    )
+  }
 
   const onConnect = async () => {
     await dispatch(connect())
@@ -16,8 +35,7 @@ const CentChainWalletDialog: React.FC = () => {
     <div>
       {(cWallet.state === 'disconnected' || cWallet.state === 'connecting') && (
         <>
-          {/* TODO Separate, use `Link your ETH address to a Centrifuge Chain account to start claiming your rewards.` in second stap */}
-          Please install the Polkadot browser extension to get started.
+          Link your ETH address to a Centrifuge Chain account to start claiming your rewards.
           {cWallet.error && (
             <Alert type="error" margin={{ vertical: 'medium' }}>
               Unable to link your wallet. Please make sure you have the extension installed and authorized the Tinlake
@@ -26,17 +44,10 @@ const CentChainWalletDialog: React.FC = () => {
           )}
           <Box direction="row" margin={{ top: 'medium' }}>
             <Button
-              secondary
-              label="Install Browser Extension"
-              href="https://polkadot.js.org/extension/"
-              target="_blank"
-              margin={{ left: 'auto' }}
-            />
-            <Button
               primary
               label="Link Wallet"
               onClick={onConnect}
-              margin={{ left: 'small' }}
+              margin={{ left: 'auto' }}
               disabled={cWallet.state === 'connecting'}
             />
           </Box>
