@@ -82,15 +82,16 @@ const KycStep: React.FC<Props> = (props: Props) => {
                   checked={checked}
                   label={
                     <div style={{ lineHeight: '2em' }}>
-                      I DO consent to the transfer of my personal data to the issuer I have identified and to
-                      Securitize's and Centrifuge's Privacy Policy and Terms and Conditions.&nbsp;View full&nbsp;
+                      Consent to the transfer of my personal data to the issuer I have identified and to Securitize’s
+                      <br />
+                      and Centrifuge’s Privacy Policy and Terms and Conditions.&nbsp;
                       <Anchor
                         onClick={(event: any) => {
                           openModal()
                           event.preventDefault()
                         }}
                         style={{ display: 'inline' }}
-                        label="Terms and Conditions"
+                        label="View more"
                       />
                       .
                     </div>
@@ -131,7 +132,15 @@ const KycStep: React.FC<Props> = (props: Props) => {
       {!props.active && <StepBody inactive>&nbsp;</StepBody>}
       {props.agreementStatus === 'countersigned' && props.whitelistStatus === true && <StepBody>&nbsp;</StepBody>}
 
-      <Modal opened={modalIsOpen} title={'Terms and Conditions'} titleIcon={<StatusInfoIcon />} onClose={closeModal}>
+      <Modal
+        opened={modalIsOpen}
+        title={
+          'Consent to the transfer of my personal data to the issuer I have identified and to Securitize’s and Centrifuge’s Privacy Policy and Terms and Conditions.'
+        }
+        headingProps={{ style: { maxWidth: '100%', display: 'flex' } }}
+        titleIcon={<StatusInfoIcon />}
+        onClose={closeModal}
+      >
         <LegalCopy>
           <Paragraph margin={{ top: 'medium' }}>
             Your Securitize I.D. enables you (the investor) to direct Securitize to disclose your personal data to

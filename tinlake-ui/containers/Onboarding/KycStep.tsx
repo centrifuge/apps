@@ -67,15 +67,15 @@ const KycStep: React.FC<Props> = (props: Props) => {
                 checked={checked}
                 label={
                   <div>
-                    Share personal information with Securitize, which Securitize may transfer to Centrifuge and issuers
-                    chosen by you (the investor).&nbsp;View full&nbsp;
+                    Consent to share personal information with Securitize, which Securitize may transfer to Centrifuge
+                    and issuers chosen by the you (the investor). &nbsp;
                     <Anchor
                       onClick={(event: any) => {
                         openModal()
                         event.preventDefault()
                       }}
                       style={{}}
-                      label="KYC Terms of Service"
+                      label="View more"
                     />
                     .
                   </div>
@@ -176,7 +176,15 @@ const KycStep: React.FC<Props> = (props: Props) => {
         props.accreditationStatus && <StepBody>&nbsp;</StepBody>}
       {!props.active && <StepBody inactive>&nbsp;</StepBody>}
 
-      <Modal opened={modalIsOpen} title={'KYC Terms of Service'} titleIcon={<StatusInfoIcon />} onClose={closeModal}>
+      <Modal
+        opened={modalIsOpen}
+        title={
+          'Consent to share personal information with Securitize, which Securitize may transfer to Centrifuge and issuers chosen by the you (the investor).'
+        }
+        headingProps={{ style: { maxWidth: '100%', display: 'flex' } }}
+        titleIcon={<StatusInfoIcon />}
+        onClose={closeModal}
+      >
         <LegalCopy>
           <Paragraph margin={{ top: 'medium' }}>
             The investor onboarding and due diligence process, also known as KYC (Know Your Customer) will be performed
