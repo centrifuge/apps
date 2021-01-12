@@ -84,7 +84,7 @@ class Apollo {
         totalRepaysAggregatedAmountNum,
         weightedInterestRateNum,
         seniorInterestRateNum,
-        order: poolValueNum,
+        order: poolValueNum === 0 ? orderSummandPoolUpcoming : poolValueNum,
         isUpcoming: false,
         isArchived: false,
         isOversubscribed: (pool && new BN(pool.maxReserve).lte(new BN(pool.reserve))) || false,
@@ -216,6 +216,7 @@ class Apollo {
     } catch (err) {
       throw new Error(`error occured while fetching assets from apollo ${err}`)
     }
+
     let pools = result.data?.pools
       ? [
           ...this.injectPoolData(result.data.pools, ipfsPools.active),
@@ -275,6 +276,8 @@ class Apollo {
         data: [],
       }
     }
+    if (!result.data?.pools) return { data: [] }
+
     const pool = result.data.pools[0]
     const tinlakeLoans = (pool && toTinlakeLoans(pool.loans)) || []
     return tinlakeLoans
@@ -341,12 +344,7 @@ class Apollo {
     const poolsDailyData = result.data.days.map((item: any) => {
       return {
         day: Number(item.id),
-        poolValue: parseFloat(
-          new BN(item.assetValue)
-            .add(new BN(item.reserve))
-            .div(UintBase)
-            .toString()
-        ),
+        poolValue: parseFloat(new BN(item.assetValue).add(new BN(item.reserve)).div(UintBase).toString()),
       }
     })
 
