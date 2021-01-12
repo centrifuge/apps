@@ -175,7 +175,7 @@ export function loadSubgraph(
   address: string
 ): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
   return async (dispatch) => {
-    dispatch({ type: LOAD_SUBGRAPH })
+    dispatch({ type: LOAD_SUBGRAPH, address })
     const data = await Apollo.getUserRewards(address)
     dispatch({ data, type: RECEIVE_SUBGRAPH })
   }

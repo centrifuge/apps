@@ -318,7 +318,7 @@ class Apollo {
       result = await this.client.query({
         query: gql`
         {
-          rewardBalances(where: {id: "${user}"}) {
+          rewardBalances(where: {id: "${user.toLowerCase()}"}) {
             links {
               centAddress
               rewardsAccumulated
@@ -328,7 +328,7 @@ class Apollo {
             totalRewards
             nonZeroBalanceSince
           }
-          accounts(where: {id: "${user}"}) {
+          accounts(where: {id: "${user.toLowerCase()}"}) {
             currentActiveInvestmentAmount
           }
         }
