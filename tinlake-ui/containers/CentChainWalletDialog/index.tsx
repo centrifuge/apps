@@ -13,7 +13,7 @@ const CentChainWalletDialog: React.FC = () => {
   if (!polkadotExtensionInstalled) {
     return (
       <>
-        Please install the Polkadot browser extension to get started and reload this page.
+        Please install the Polkadot Wallet browser extension to get started and reload this page.
         <Box direction="row" margin={{ top: 'medium' }}>
           <Button
             primary
@@ -35,7 +35,7 @@ const CentChainWalletDialog: React.FC = () => {
     <div>
       {(cWallet.state === 'disconnected' || cWallet.state === 'connecting') && (
         <>
-          Link your ETH address to a Centrifuge Chain account to start claiming your rewards.
+          Start linking your ETH address to a Centrifuge Chain account by connecting your Polkadot Wallet.
           {cWallet.error && (
             <Alert type="error" margin={{ vertical: 'medium' }}>
               Unable to link your wallet. Please make sure you have the extension installed and authorized the Tinlake
@@ -45,7 +45,7 @@ const CentChainWalletDialog: React.FC = () => {
           <Box direction="row" margin={{ top: 'medium' }}>
             <Button
               primary
-              label="Link Wallet"
+              label="Connect Centrifuge Chain Wallet"
               onClick={onConnect}
               margin={{ left: 'auto' }}
               disabled={cWallet.state === 'connecting'}
