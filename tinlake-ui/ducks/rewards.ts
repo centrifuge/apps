@@ -36,8 +36,14 @@ export default function reducer(state: RewardsState = initialState, action: AnyA
   }
 }
 
-export function loadRewards(): ThunkAction<Promise<void>, RewardsState, undefined, Action> {
-  return async (dispatch) => {
+/**
+ * Loads rewards if they have not been loaded yet
+ */
+export function maybeLoadRewards(): ThunkAction<Promise<void>, { rewards: RewardsState }, undefined, Action> {
+  return async (dispatch, getState) => {
+    if (getState().rewards.data) {
+      return
+    }
     dispatch({ type: LOAD_REWARDS })
     const data = await Apollo.getRewards()
     dispatch({ data, type: RECEIVE_REWARDS })

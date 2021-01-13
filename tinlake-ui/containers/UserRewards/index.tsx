@@ -12,7 +12,7 @@ import NumberDisplay from '../../components/NumberDisplay'
 import { Cont, Label, TokenLogo, Unit, Value } from '../../components/PoolsMetrics/styles'
 import { AuthState, ensureAuthed } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
-import { loadRewards, RewardsState } from '../../ducks/rewards'
+import { maybeLoadRewards, RewardsState } from '../../ducks/rewards'
 import { load, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
 import { shortAddr } from '../../utils/shortAddr'
@@ -33,7 +33,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
   const { address: ethAddr } = useSelector<any, AuthState>((state: any) => state.auth)
   const dispatch = useDispatch()
   React.useEffect(() => {
-    dispatch(loadRewards())
+    dispatch(maybeLoadRewards())
   }, [])
   React.useEffect(() => {
     if (ethAddr) {

@@ -55,7 +55,7 @@ export default function reducer(
   }
 }
 
-export function connect(): ThunkAction<Promise<void>, CentChainWalletState, undefined, Action> {
+export function connect(): ThunkAction<Promise<void>, { centChainWallet: CentChainWalletState }, undefined, Action> {
   return async (dispatch) => {
     dispatch({ type: CONNECT })
     try {
@@ -81,7 +81,7 @@ export function connect(): ThunkAction<Promise<void>, CentChainWalletState, unde
   }
 }
 
-export function disconnect(): ThunkAction<Promise<void>, CentChainWalletState, undefined, Action> {
+export function disconnect(): ThunkAction<Promise<void>, { centChainWallet: CentChainWalletState }, undefined, Action> {
   return async (dispatch) => {
     dispatch({ type: DISCONNECT })
     await centChainService().disconnect()

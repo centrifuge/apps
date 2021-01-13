@@ -79,7 +79,7 @@ export default function reducer(state: PoolsState = initialState, action: AnyAct
   }
 }
 
-export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, PoolsState, undefined, Action> {
+export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools: PoolsState }, undefined, Action> {
   return async (dispatch) => {
     dispatch({ type: LOAD_POOLS })
     // Load ipfs data only
@@ -92,7 +92,7 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, PoolsSta
   }
 }
 
-export function loadPoolsDailyData(): ThunkAction<Promise<void>, PoolsState, undefined, Action> {
+export function loadPoolsDailyData(): ThunkAction<Promise<void>, { pools: PoolsState }, undefined, Action> {
   return async (dispatch) => {
     const poolsDailyData = await Apollo.getPoolsDailyData()
     dispatch({ data: poolsDailyData, type: RECEIVE_POOLS_DAILY_DATA })
