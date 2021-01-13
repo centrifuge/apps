@@ -218,6 +218,7 @@ class Apollo {
     } catch (err) {
       throw new Error(`error occured while fetching assets from apollo ${err}`)
     }
+
     let pools = result.data?.pools
       ? [
           ...this.injectPoolData(result.data.pools, ipfsPools.active),
@@ -277,7 +278,9 @@ class Apollo {
         data: [],
       }
     }
-    const pool = result.data?.pools[0]
+    if (!result.data?.pools) return { data: [] }
+
+    const pool = result.data.pools[0]
     const tinlakeLoans = (pool && toTinlakeLoans(pool.loans)) || []
     return tinlakeLoans
   }
