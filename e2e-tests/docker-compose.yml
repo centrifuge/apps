@@ -1,0 +1,55 @@
+version: '3'
+
+volumes:
+  ipfs:
+  data:
+
+services:
+  parity:
+    image: parity/parity:v2.7.2-stable
+    container_name: parity
+    user: "1000:1000"
+    volumes: 
+      - ./config/chain.json:/home/parity/.local/share/io.parity.ethereum/chain.json
+      - ./config/config.toml:/home/parity/.local/share/io.parity.ethereum/config.toml
+    command: --config /home/parity/.local/share/io.parity.ethereum/config.toml
+    restart: always
+    ports:
+      - 8545:8545
+      - 8546:8546
+      - 30303:30303
+      - 30303:30303/udp
+
+  db:
+    image: postgres:12.2-alpine
+    container_name: db
+    env_file:
+      - .env
+    volumes:
+      - ./config/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
+      - data:/var/lib/postgresql/data
+
+  ipfs:
+    image: ipfs/go-ipfs:v0.4.23
+    container_name: ipfs
+    ports:
+      - "5001:5001"
+    volumes:
+      - ipfs:/data/ipfs
+
+  graph:
+    image: graphprotocol/graph-node:v0.19.2
+    container_name: graph
+    depends_on:
+      - db
+      - ipfs
+      - parity
+    ports:
+      - "8020:8020"
+    environment:
+      - ethereum=DevelopmentChain:http://parity:8545
+      - ipfs=ipfs:5001
+      - postgres_db=${POSTGRES_DB}
+      - postgres_host=db:5432
+      - postgres_pass=${POSTGRES_PASSWORD}
+      - postgres_user=${POSTGRES_USER}
