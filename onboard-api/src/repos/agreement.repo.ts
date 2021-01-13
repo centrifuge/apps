@@ -23,7 +23,7 @@ export class AgreementRepo {
     return agreement as Agreement | undefined
   }
 
-  async findByUser(userId: string): Promise<Agreement[]> {
+  async getByUser(userId: string): Promise<Agreement[]> {
     const agreements = await this.db.sql`
       select *
       from agreements
@@ -33,7 +33,7 @@ export class AgreementRepo {
     return (agreements as unknown) as Agreement[]
   }
 
-  async findByUserPoolTranche(userId: string, poolId: string, tranche: Tranche): Promise<Agreement[]> {
+  async getByUserPoolTranche(userId: string, poolId: string, tranche: Tranche): Promise<Agreement[]> {
     const agreements = await this.db.sql`
       select *
       from agreements
@@ -45,7 +45,20 @@ export class AgreementRepo {
     return (agreements as unknown) as Agreement[]
   }
 
-  async findByUserAndPool(userId: string, poolId: string, email: string, countryCode: string): Promise<Agreement[]> {
+  async getCompletedAgreementsByUserPool(userId: string, poolId: string): Promise<Agreement[]> {
+    const agreements = await this.db.sql`
+      select *
+      from agreements
+      where user_id = ${userId}
+      and pool_id = ${poolId}
+      and signed_at is not null
+      and counter_signed_at is not null
+    `
+
+    return (agreements as unknown) as Agreement[]
+  }
+
+  async getByUserAndPool(userId: string, poolId: string, email: string, countryCode: string): Promise<Agreement[]> {
     const agreements = await this.db.sql`
       select *
       from agreements

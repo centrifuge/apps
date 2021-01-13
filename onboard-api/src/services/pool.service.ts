@@ -4,6 +4,7 @@ import { Tranche } from '../controllers/types'
 import config from '../config'
 import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
 import contractAbiMemberlist from '../utils/Memberlist.abi'
+import contractAbiMemberAdmin from '../utils/MemberAdmin.abi'
 import { AddressEntity, AddressRepo } from '../repos/address.repo'
 import { InvestmentRepo } from '../repos/investment.repo'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
@@ -14,6 +15,7 @@ export class PoolService {
   private pools: { [key: string]: Pool }
 
   provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+  signer = new ethers.Wallet(config.signerPrivateKey).connect(this.provider)
   registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, this.provider)
 
   constructor(private readonly addressRepo: AddressRepo, private readonly investmentRepo: InvestmentRepo) {
@@ -80,28 +82,37 @@ export class PoolService {
     const pool = await this.get(poolId)
     if (!pool) throw new Error(`Failed to get pool ${poolId} when adding to memberlist`)
 
-    const addresses = await this.addressRepo.getByUser(userId)
-    addresses.forEach((address: AddressEntity) => {
-      // TODO: add to memberlist here
+    const memberAdmin = new ethers.Contract(config.memberAdminContractAddress, contractAbiMemberAdmin, this.signer)
+    const memberlistAddress = tranche === 'senior' ? pool.addresses.SENIOR_MEMBERLIST : pool.addresses.JUNIOR_MEMBERLIST
 
-      this.checkMemberlist(address, pool, tranche)
+    const validUntilDate = new Date()
+    validUntilDate.setFullYear(validUntilDate.getFullYear() + 100) // 100 years
+    const validUntil = Math.round(validUntilDate.getTime() / 1000)
+
+    const addresses = await this.addressRepo.getByUser(userId)
+    addresses.forEach(async (address: AddressEntity) => {
+      try {
+        const tx = await memberAdmin.updateMember(memberlistAddress, address.address, validUntil)
+        this.logger.log(`Submitted tx to add ${address.address} to ${memberlistAddress}: ${tx.hash}`)
+        await this.provider.waitForTransaction(tx.hash)
+
+        this.checkMemberlist(memberlistAddress, address, pool, tranche)
+      } catch (e) {
+        console.error(`Failed to add ${address.address} to ${memberlistAddress}: ${e}`)
+      }
     })
   }
 
-  async checkMemberlist(address: AddressEntity, pool: Pool, tranche: Tranche): Promise<any> {
-    const memberlist = new ethers.Contract(
-      tranche === 'senior' ? pool.addresses.SENIOR_MEMBERLIST : pool.addresses.JUNIOR_MEMBERLIST,
-      contractAbiMemberlist,
-      this.provider
-    )
+  async checkMemberlist(memberlistAddrss: string, address: AddressEntity, pool: Pool, tranche: Tranche): Promise<any> {
+    const memberlist = new ethers.Contract(memberlistAddrss, contractAbiMemberlist, this.provider)
 
     const isWhitelisted = await memberlist.hasMember(address.address)
 
     if (isWhitelisted) {
-      this.logger.debug(`Add ${address.address} to ${pool.metadata.name} - ${tranche}`)
+      this.logger.log(`${address.address} is a member of ${pool.metadata.name} - ${tranche}`)
       this.investmentRepo.upsert(address.id, pool.addresses.ROOT_CONTRACT, tranche, true)
     } else {
-      this.logger.debug(`${address.address} is not yet a member of ${pool.metadata.name} - ${tranche}`)
+      this.logger.log(`${address.address} is not a member of ${pool.metadata.name} - ${tranche}`)
     }
   }
 }

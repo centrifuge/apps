@@ -21,7 +21,7 @@ export class SyncService {
     private readonly userRepo: UserRepo
   ) {}
 
-  @Cron(CronExpression.EVERY_MINUTE) // TODO: change to e.g. every 5 min
+  @Cron(CronExpression.EVERY_10_SECONDS) // TODO: change to e.g. every 5 min
   async syncKycStatus() {
     const processingInvestors = await this.kycRepo.getProcessingInvestors()
     if (processingInvestors.length === 0) return
@@ -53,7 +53,7 @@ export class SyncService {
     })
   }
 
-  @Cron(CronExpression.EVERY_MINUTE) // TODO: change to e.g. every 5 min
+  @Cron(CronExpression.EVERY_10_SECONDS) // TODO: change to e.g. every 5 min
   async syncAgreementStatus() {
     const agreements = await this.agreementRepo.getAwaitingCounterSignature()
     if (agreements.length === 0) return
@@ -64,32 +64,38 @@ export class SyncService {
       const status = await this.docusignService.getEnvelopeStatus(agreement.providerEnvelopeId)
 
       if (!agreement.counterSignedAt && status.counterSigned) {
-        console.log(`Agreement ${agreement.id} has been counter-signed`)
+        this.logger.log(`Agreement ${agreement.id} has been counter-signed`)
         this.agreementRepo.setCounterSigned(agreement.id)
         this.whitelist(agreement.userId, agreement.poolId, agreement.tranche)
       }
     })
   }
 
-  @Cron(CronExpression.EVERY_MINUTE) // TODO: change to e.g. every 5 min
-  async syncWhitelistStatus() {
-    // TODO: get non whitelisted, kyced, accredited, agreement signed addresses
-    // TOOD: per tranche, check whitelist status
-  }
+  // @Cron(CronExpression.EVERY_10_SECONDS) // TODO: change to e.g. every 5 min
+  // async syncWhitelistStatus() {
+  // TODO: get non whitelisted, kyced, accredited, agreement signed addresses
+  // TOOD: per tranche, check whitelist status
+  // }
 
   private async whitelist(userId, poolId?: string, tranche?: Tranche) {
     const kyc = await this.kycRepo.find(userId)
     if (kyc.status !== 'verified' || (kyc.usaTaxResident && !kyc.accredited)) return
 
     // If tranche is supplied, whitelist just for that tranche. Otherwise, try to whitelist for both
-    const tranches = tranche === undefined ? ['senior', 'junior'] : [tranche]
-    // TODO: if second case, check if agreements for both tranches have been signed & countersigned
+    let tranches = []
+    if (tranche === undefined) {
+      const agreements = await this.agreementRepo.getCompletedAgreementsByUserPool(userId, poolId)
+      tranches = agreements.map((agreement: Agreement) => agreement.tranche)
+    } else {
+      tranches = [tranche]
+    }
+
     tranches.forEach(async (t: Tranche) => {
       // If poolId is supplied, whitelist just for that pool. Otherwise, try to whitelist for all pools
       const poolIds = poolId === undefined ? await this.poolService.getIds() : [poolId]
 
       poolIds.forEach(async (poolId: string) => {
-        const agreements = await this.agreementRepo.findByUserPoolTranche(userId, poolId, t)
+        const agreements = await this.agreementRepo.getByUserPoolTranche(userId, poolId, t)
         const done = agreements.every((agreement: Agreement) => agreement.signedAt && agreement.counterSignedAt)
         if (done) {
           this.poolService.addToMemberlist(userId, poolId, t)

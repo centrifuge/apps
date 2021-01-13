@@ -13,6 +13,8 @@ export interface Config {
   onboardApiHost: string
   rpcUrl: string
   poolRegistry: string
+  memberAdminContractAddress: string
+  signerPrivateKey: string
   sessions: {
     privateKey: string
     privateKeyPassword: string
@@ -48,6 +50,8 @@ const config: Config = {
   onboardApiHost: process.env.ONBOARD_API_HOST,
   rpcUrl: process.env.RPC_URL,
   poolRegistry: process.env.POOL_REGISTRY,
+  memberAdminContractAddress: process.env.MEMBER_ADMIN_CONTRACT_ADDRESS,
+  signerPrivateKey: process.env.SIGNER_PRIVATE_KEY,
   sessions: {
     privateKey: process.env.SESSIONS_PRIVATE_KEY,
     privateKeyPassword: process.env.SESSIONS_PRIVATE_KEY_PASSWORD,

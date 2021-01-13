@@ -82,9 +82,8 @@ const KycStep: React.FC<Props> = (props: Props) => {
                   checked={checked}
                   label={
                     <div style={{ lineHeight: '2em' }}>
-                      Consent to the transfer of my personal data to the issuer I have identified and to Securitize’s
-                      <br />
-                      and Centrifuge’s Privacy Policy and Terms and Conditions.&nbsp;
+                      Consent to the transfer of my personal data to the issuer and to Securitize’s and Centrifuge’s
+                      Privacy Policy and Terms and Conditions.&nbsp;
                       <Anchor
                         onClick={(event: any) => {
                           openModal()

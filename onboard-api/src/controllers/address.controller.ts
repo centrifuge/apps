@@ -68,7 +68,7 @@ export class AddressController {
         }
       }
 
-      const agreements = await this.agreementRepo.findByUserAndPool(
+      const agreements = await this.agreementRepo.getByUserAndPool(
         address.userId,
         params.poolId,
         user.email,

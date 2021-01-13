@@ -21,7 +21,6 @@ export class DocusignAuthService {
     const hasExpired = this.expiresAt && Date.now() >= this.expiresAt + 10 * 1000 // Add 10s buffer
     if (!this.accessToken || hasExpired) return this.createAccessToken()
 
-    this.logger.log('Re-using access token for Docusign')
     return this.accessToken
   }
 
@@ -52,8 +51,6 @@ export class DocusignAuthService {
 
     this.accessToken = data['access_token']
     this.expiresAt = Date.now() + HourInMilliseconds
-
-    this.logger.log('Created new access token for Docusign')
 
     return this.accessToken
   }
