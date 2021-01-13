@@ -52,7 +52,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
   return (
     <>
       <Heading level="5" margin={{ top: 'large' }}>
-        RAD Rewards
+        Claim Your RAD Rewards
       </Heading>
 
       <Box direction="row" align="start" justify="between">
@@ -267,7 +267,7 @@ const RewardRecipients = ({ recipients }: { recipients: UserRewardsLink[] }) => 
       <Recipient key={r.centAccountID}>
         <Addr active={i === 0}>{shortAddr(accountIdToCentChainAddr(r.centAccountID))}</Addr>
         <Status active={i === 0}>
-          {recipients.length > 0 && (i === 0 ? 'Active | ' : 'Inactive | ')}
+          {recipients.length > 1 && (i === 0 ? 'Active | ' : 'Inactive | ')}
           {r.claimed ? `Claimed ${toDynamicPrecision(baseToDisplay(r.claimed, 18))} RAD` : 'loading...'}
         </Status>
       </Recipient>

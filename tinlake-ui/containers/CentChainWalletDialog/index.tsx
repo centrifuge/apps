@@ -1,4 +1,5 @@
 import { Box, Button } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Alert from '../../components/Alert'
@@ -9,19 +10,26 @@ const CentChainWalletDialog: React.FC = () => {
   const polkadotExtensionInstalled = usePolkadotExtensionInstalled()
   const dispatch = useDispatch()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
+  const [clickedInstall, setClickInstall] = React.useState(false)
+  const router = useRouter()
 
   if (!polkadotExtensionInstalled) {
     return (
       <>
         Please install the Polkadot Wallet browser extension to get started and reload this page.
         <Box direction="row" margin={{ top: 'medium' }}>
-          <Button
-            primary
-            label="Install Browser Extension"
-            href="https://polkadot.js.org/extension/"
-            target="_blank"
-            margin={{ left: 'auto' }}
-          />
+          {!clickedInstall ? (
+            <Button
+              primary
+              label="Install Browser Extension"
+              href="https://polkadot.js.org/extension/"
+              onClick={() => setClickInstall(true)}
+              target="_blank"
+              margin={{ left: 'auto' }}
+            />
+          ) : (
+            <Button primary label="Reload Page" onClick={router.reload} margin={{ left: 'auto' }} />
+          )}
         </Box>
       </>
     )
