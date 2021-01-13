@@ -267,7 +267,7 @@ const RewardRecipients = ({ recipients }: { recipients: UserRewardsLink[] }) => 
       <Recipient key={r.centAccountID}>
         <Addr active={i === 0}>{shortAddr(accountIdToCentChainAddr(r.centAccountID))}</Addr>
         <Status active={i === 0}>
-          {recipients.length > 0 && (i === 0 ? 'Active' : 'Inactive')}
+          {recipients.length > 0 && (i === 0 ? 'Active | ' : 'Inactive | ')}
           {r.claimed ? `Claimed ${toDynamicPrecision(baseToDisplay(r.claimed, 18))} RAD` : 'loading...'}
         </Status>
       </Recipient>
@@ -276,7 +276,7 @@ const RewardRecipients = ({ recipients }: { recipients: UserRewardsLink[] }) => 
 )
 
 const RewardRecipientsCont = styled.div`
-  width: 100px;
+  width: 130px;
   margin-left: 24px;
 `
 
@@ -285,6 +285,7 @@ const Recipient = styled.div`
 `
 
 const Addr = styled.div<{ active: boolean }>`
+  text-align: right;
   font-size: 14px;
   font-weight: 500;
   height: 16px;
@@ -293,6 +294,7 @@ const Addr = styled.div<{ active: boolean }>`
 `
 
 const Status = styled.div<{ active: boolean }>`
+  text-align: right;
   font-size: 10px;
   font-weight: bold;
   height: 14px;
