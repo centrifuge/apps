@@ -47,7 +47,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
         {!(props.agreementStatus === 'signed' || awaitingWhitelisting) && (
           <StepIcon
             inactive={!props.active}
-            checked={props.agreementStatus === 'countersigned' && props.whitelistStatus !== true}
+            checked={props.agreementStatus === 'countersigned' && props.whitelistStatus === true}
           />
         )}
         <StepTitle inactive={!props.active}>

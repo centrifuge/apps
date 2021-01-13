@@ -101,7 +101,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
                   <Box pad={{ vertical: 'medium' }}>
                     You're now ready to invest in {props.activePool.metadata.name}!
                   </Box>
-                  <Box margin={{ bottom: 'medium' }}>
+                  <Box>
                     <div>
                       <PoolLink href={{ pathname: '/investments', query: { invest: 'senior' } }}>
                         <Button primary label={'Invest'} fill={false} />
