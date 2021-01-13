@@ -16,6 +16,8 @@ interface PropsWithRender {
 }
 
 const Wrapper = styled.div<{ width?: number; verticalMargin?: number; alignRight?: boolean }>`
+  display: inline-block;
+  vertical-align: middle;
   background: #eee;
   border-radius: 6px;
   width: ${(props) => (props.width ? `${props.width}px` : '80px')};
