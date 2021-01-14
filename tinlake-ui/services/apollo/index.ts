@@ -3,6 +3,7 @@ import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory'
 import { ApolloClient, DefaultOptions } from 'apollo-client'
 import { createHttpLink } from 'apollo-link-http'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import gql from 'graphql-tag'
 import fetch from 'node-fetch'
 import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
@@ -309,9 +310,9 @@ class Apollo {
     }
 
     return {
-      toDateRewardAggregateValue: data.toDateRewardAggregateValue,
-      rewardRate: data.rewardRate,
-      todayReward: data.todayReward,
+      toDateRewardAggregateValue: new BN(new Decimal(data.toDateRewardAggregateValue).toFixed(0)),
+      rewardRate: new Decimal(data.rewardRate),
+      todayReward: new BN(new Decimal(data.todayReward).toFixed(0)),
     }
   }
 
@@ -346,24 +347,24 @@ class Apollo {
     const account = result.data?.accounts[0]
     if (!rewardBalance || !account) {
       return {
-        currentActiveInvestmentAmount: '0',
+        currentActiveInvestmentAmount: new BN(0),
         nonZeroInvestmentSince: null,
         claimable: false,
-        totalEarnedRewards: '0',
-        unlinkedRewards: '0',
+        totalEarnedRewards: new BN(0),
+        unlinkedRewards: new BN(0),
         links: [],
       }
     }
 
     const transformed: UserRewardsData = {
-      currentActiveInvestmentAmount: account.currentActiveInvestmentAmount,
-      nonZeroInvestmentSince: rewardBalance.nonZeroBalanceSince,
+      currentActiveInvestmentAmount: new BN(account.currentActiveInvestmentAmount),
+      nonZeroInvestmentSince: new BN(rewardBalance.nonZeroBalanceSince),
       claimable: rewardBalance.claimable,
-      totalEarnedRewards: rewardBalance.totalRewards,
-      unlinkedRewards: rewardBalance.linkableRewards,
+      totalEarnedRewards: new BN(rewardBalance.totalRewards),
+      unlinkedRewards: new BN(rewardBalance.linkableRewards),
       links: (rewardBalance.links as any[]).map((link: any) => ({
         centAccountID: link.centAddress,
-        earned: link.rewardsAccumulated,
+        earned: new BN(link.rewardsAccumulated),
         claimable: null,
         claimed: null,
       })),

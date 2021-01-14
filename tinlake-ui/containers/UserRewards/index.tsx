@@ -1,6 +1,5 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import Decimal from 'decimal.js-light'
 import { Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
@@ -68,14 +67,14 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
           >
             <Metric
               loading={rewards?.state !== 'found' || !rewards.data}
-              value={baseToDisplay(new Decimal(rewards.data?.todayReward || '0').toFixed(0), 18)}
+              value={baseToDisplay(rewards.data?.todayReward || '0', 18)}
               label="Total Rewards Earned Today"
               token="RAD"
               borderRight
             />
             <Metric
               loading={rewards?.state !== 'found' || !rewards.data}
-              value={baseToDisplay(new Decimal(rewards.data?.toDateRewardAggregateValue || '0').toFixed(0), 18)}
+              value={baseToDisplay(rewards.data?.toDateRewardAggregateValue || '0', 18)}
               label="Total Rewards Earned"
               token="RAD"
             />
@@ -101,9 +100,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
               <Metric
                 loading={rewards?.state !== 'found' || !rewards.data || userRewards?.subgraphState !== 'found' || !data}
                 value={baseToDisplay(
-                  new Decimal(rewards.data?.rewardRate || '0')
-                    .mul(data?.currentActiveInvestmentAmount || '0')
-                    .toFixed(0),
+                  rewards.data?.rewardRate?.mul(data?.currentActiveInvestmentAmount.toString() || 0).toString() || '0',
                   18
                 )}
                 label="Your Daily Rewards"
@@ -112,7 +109,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
               />
               <Metric
                 loading={userRewards?.subgraphState !== 'found' || !data}
-                value={baseToDisplay(new Decimal(data?.totalEarnedRewards || '0').toFixed(0), 18)}
+                value={baseToDisplay(data?.totalEarnedRewards || '0', 18)}
                 label="Your Earned Rewards"
                 token="RAD"
               />
@@ -210,8 +207,8 @@ export default UserRewards
 
 const days = 24 * 60 * 60
 
-function comebackDate(nonZero: string | null | undefined) {
-  if (!nonZero || new BN(nonZero).isZero()) {
+function comebackDate(nonZero: BN | null | undefined) {
+  if (!nonZero || nonZero.isZero()) {
     return 'You can not yet claim your rewards, please come back after investing in a Tinlake pool and waiting for 60 days.'
   }
 

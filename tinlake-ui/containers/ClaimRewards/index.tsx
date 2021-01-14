@@ -1,6 +1,5 @@
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import Decimal from 'decimal.js-light'
 import { Box, Button } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -56,9 +55,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
   }
 
   const unclaimed =
-    activeLink.claimable !== null && activeLink.claimed !== null
-      ? new BN(activeLink.claimable).sub(new BN(activeLink.claimed))
-      : null
+    activeLink.claimable !== null && activeLink.claimed !== null ? activeLink.claimable.sub(activeLink.claimed) : null
 
   return (
     <>
@@ -69,7 +66,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
               <>
                 🎉 You have {toDynamicPrecision(baseToDisplay(unclaimed, 18))} unclaimed RAD rewards. Claim now to stake
                 value and participate in on-chain governance.
-                {unclaimed.gt(new BN(data?.totalEarnedRewards || '0')) && (
+                {unclaimed.gt(data?.totalEarnedRewards || new BN(0)) && (
                   <>
                     <br />
                     <br />
@@ -99,14 +96,14 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
               data?.currentActiveInvestmentAmount &&
               toDynamicPrecision(
                 baseToDisplay(
-                  new Decimal(rewards.data?.rewardRate).mul(data?.currentActiveInvestmentAmount).toFixed(0),
+                  rewards.data?.rewardRate.mul(data?.currentActiveInvestmentAmount.toString()).toFixed(0),
                   18
                 )
               )}{' '}
             RAD on a daily basis.
           </>
         )}
-        {!new BN(activeLink.claimed).isZero() && (
+        {!activeLink.claimed.isZero() && (
           <>
             <>
               <br />
@@ -114,13 +111,13 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
               🏆 You have claimed so far{' '}
               {toDynamicPrecision(
                 baseToDisplay(
-                  (data?.links || []).reduce((p, l) => p.add(new BN(l.claimed || '0')), new BN(0)),
+                  (data?.links || []).reduce((p, l) => p.add(l.claimed || new BN(0)), new BN(0)),
                   18
                 )
               )}{' '}
               RAD as rewards.
             </>
-            {new BN(activeLink.claimed).gt(new BN(data?.totalEarnedRewards || '0')) && (
+            {activeLink.claimed.gt(data?.totalEarnedRewards || new BN(0)) && (
               <>
                 <br />
                 <br />
@@ -132,7 +129,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
           </>
         )}
       </Box>
-      <RewardStripe unclaimed={unclaimed || new BN(0)}>
+      <RewardStripe unclaimed={unclaimed}>
         <Button
           margin={{ left: 'auto' }}
           label={status === 'unconfirmed' || status === 'pending' ? `Claiming...` : `Claim`}
@@ -146,12 +143,12 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
 
 export default ClaimRewards
 
-const RewardStripe = ({ unclaimed, children }: React.PropsWithChildren<{ unclaimed: BN }>) => (
+const RewardStripe = ({ unclaimed, children }: React.PropsWithChildren<{ unclaimed: BN | null }>) => (
   <Cont direction="row" pad={{ vertical: 'small', horizontal: 'medium' }}>
     <TokenLogo src="/static/rad-black.svg" />
     <Box>
       <Label>Your unclaimed rewards</Label>
-      <Number>{toDynamicPrecision(baseToDisplay(unclaimed, 18))} RAD</Number>
+      <Number>{toDynamicPrecision(baseToDisplay(unclaimed || '0', 18))} RAD</Number>
     </Box>
     {children}
   </Cont>

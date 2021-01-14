@@ -1,5 +1,4 @@
 import { baseToDisplay } from '@centrifuge/tinlake-js'
-import Decimal from 'decimal.js-light'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
@@ -29,7 +28,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
     dispatch(maybeLoadRewards())
   }, [])
 
-  const totalRewardsEarned = baseToDisplay(new Decimal(rewards.data?.toDateRewardAggregateValue || '0').toFixed(0), 18)
+  const totalRewardsEarned = baseToDisplay(rewards.data?.toDateRewardAggregateValue || '0', 18)
 
   const goToRewards = () => router.push('/rewards')
 

@@ -1,3 +1,4 @@
+import BN from 'bn.js'
 import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
@@ -15,8 +16,6 @@ const RECEIVE_CLAIMS = 'tinlake-ui/user-rewards/RECEIVE_CLAIMS'
 
 // just used for readability
 type AccountIDString = string
-type BigDecimalString = string
-type BigIntString = string
 
 export interface UserRewardsState {
   subgraphState: null | 'loading' | 'found'
@@ -44,12 +43,12 @@ export interface UserRewardsData {
   /**
    * From subgraph. Currently invested amount across all pools
    */
-  currentActiveInvestmentAmount: BigIntString
+  currentActiveInvestmentAmount: BN
   /**
    * From subgraph. If null, the user has not had any investments yet. If the user invested any amount, this number will
    * be a timestamp (in seconds).
    */
-  nonZeroInvestmentSince: BigIntString | null
+  nonZeroInvestmentSince: BN | null
   /**
    * From subgraph. Determines whether investment was long enough on Ethereum yet for rewards to be claimable.
    */
@@ -59,12 +58,12 @@ export interface UserRewardsData {
    * at any time. If claimable is true, they will be immediately assigned to a linked Cent Chain account. If claimable
    * is false, they will remain unlinked until they become claimable.
    */
-  unlinkedRewards: BigDecimalString
+  unlinkedRewards: BN
   /**
    * From subgraph. Rewards earned on Ethereum across all links for this Ethereum account so far, might be claimable,
    * might have been claimed. Should equal the sum of links.earned and unlinkedRewards
    */
-  totalEarnedRewards: BigDecimalString
+  totalEarnedRewards: BN
   /**
    * From multiple data sources. Contains information about a specific Centrifuge Chain account linked to the ethereum
    * account, including claimable and claimed amounts.
@@ -81,20 +80,20 @@ export interface UserRewardsLink {
    * From subgraph. Amount of rewards that have been claimed on Ethereum and have been assigned to this link/Cent
    * Chain account. Any new rewards earned by any user will be added to the latest link once per day.
    */
-  earned: BigDecimalString
+  earned: BN
   /**
    * From stored list of reward claims in rad-rewards-trees GCP bucket. Once per day, all Cent Chain account IDs and
    * their respective earned rewards will be put into a merkle tree, the root is stored on Centrifuge Chain and the tree
    * leaves are uploaded to GCP. `null` if data has not been received yet. NOTE: claimable can be higher than earned
    * here, since the same Centrifuge Chain account can be used by multiple Ethereum accounts.
    */
-  claimable: BigDecimalString | null
+  claimable: BN | null
   /**
    * From Centrifuge Chain. Amount that has already been claimed by a user on Centrifuge Chain. `null` if data has not
    * been received yet. NOTE: claimed can be higher than earned here, since the same Centrifuge Chain account can be
    * used by multiple Ethereum accounts.
    */
-  claimed: BigDecimalString | null
+  claimed: BN | null
 }
 
 export interface RewardClaim {
@@ -134,7 +133,7 @@ export default function reducer(
         ...state,
         centChainState: 'found',
         data: state.data
-          ? { ...state.data, links: state.data.links.map((l, i) => ({ ...l, claimed: action.data[i] })) }
+          ? { ...state.data, links: state.data.links.map((l, i) => ({ ...l, claimed: new BN(action.data[i]) })) }
           : null,
       }
     case LOAD_CLAIMS:
@@ -150,7 +149,7 @@ export default function reducer(
               ...state.data,
               links: state.data.links.map((l) => ({
                 ...l,
-                claimable: claims.find((ad) => ad.accountID === l.centAccountID)?.balance || '0',
+                claimable: new BN(claims.find((ad) => ad.accountID === l.centAccountID)?.balance || 0),
               })),
             }
           : null,

@@ -1,3 +1,5 @@
+import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
@@ -8,9 +10,9 @@ const LOAD_REWARDS = 'tinlake-ui/rewards/LOAD_REWARDS'
 const RECEIVE_REWARDS = 'tinlake-ui/rewards/RECEIVE_REWARDS'
 
 export interface RewardsData {
-  toDateRewardAggregateValue: string
-  rewardRate: string
-  todayReward: string
+  toDateRewardAggregateValue: BN
+  rewardRate: Decimal
+  todayReward: BN
 }
 
 export interface RewardsState {
