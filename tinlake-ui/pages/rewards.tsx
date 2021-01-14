@@ -1,5 +1,6 @@
 import { Box } from 'grommet'
 import { GetStaticProps } from 'next'
+import Head from 'next/head'
 import * as React from 'react'
 import Auth from '../components/Auth'
 import Container from '../components/Container'
@@ -16,6 +17,9 @@ interface Props {
 const RewardsPage: React.FC<Props> = (props: Props) => {
   return (
     <WithFooter>
+      <Head>
+        <title>RAD Rewards | Tinlake | Centrifuge</title>
+      </Head>
       <Header selectedRoute={''} menuItems={[]} ipfsPools={props.ipfsPools} />
       <Container style={{ backgroundColor: '#f9f9f9' }}>
         <Box justify="center" direction="row">
