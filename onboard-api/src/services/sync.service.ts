@@ -104,5 +104,6 @@ export class SyncService {
     })
   }
 
-  async syncInvestorBalances() {}
+  // @Cron(CronExpression.EVERY_HOUR)
+  // async syncInvestorBalances() {}
 }

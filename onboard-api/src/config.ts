@@ -22,7 +22,6 @@ export interface Config {
   }
   docusign: {
     integrationKey: string
-    secretKey: string
     apiUsername: string
     accountId: string
     restApiHost: string
@@ -59,7 +58,6 @@ const config: Config = {
   },
   docusign: {
     integrationKey: process.env.DOCUSIGN_INTEGRATION_KEY,
-    secretKey: process.env.DOCUSIGN_SECRET_KEY,
     apiUsername: process.env.DOCUSIGN_API_USERNAME,
     accountId: process.env.DOCUSIGN_ACCOUNT_ID,
     restApiHost: process.env.DOCUSIGN_REST_API_HOST,
