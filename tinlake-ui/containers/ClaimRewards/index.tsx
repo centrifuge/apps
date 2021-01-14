@@ -73,9 +73,9 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
                   <>
                     <br />
                     <br />
-                    Your unclaimed rewards on this address can be higher than the rewards you earned on the connected
-                    Ethereum address, e. g. if you have set this Centrifuge Chain address as recipient for multiple
-                    Ethereum addresses.
+                    Your unclaimed rewards on this account can be higher than the rewards you earned on the connected
+                    Ethereum account, e. g. if you have set this Centrifuge Chain account as recipient for multiple
+                    Ethereum accounts.
                   </>
                 )}
               </>
@@ -124,9 +124,9 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
               <>
                 <br />
                 <br />
-                Your claimed rewards on this address can be higher than the rewards you earned on the connected Ethereum
-                address, e. g. if you have set this Centrifuge Chain address as recipient for multiple Ethereum
-                addresses.
+                Your claimed rewards on this account can be higher than the rewards you earned on the connected Ethereum
+                account, e. g. if you have set this Centrifuge Chain account as recipient for multiple Ethereum
+                accounts.
               </>
             )}
           </>

@@ -17,7 +17,7 @@ interface Props extends TransactionProps {
   tinlake: ITinlake
 }
 
-const SetCentAddress: React.FC<Props> = ({ createTransaction, tinlake }: Props) => {
+const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) => {
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
   const { address: ethAddr } = useSelector<any, AuthState>((state: any) => state.auth)
   const dispatch = useDispatch()
@@ -86,7 +86,7 @@ const SetCentAddress: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
   )
 }
 
-export default connect((state) => state, { createTransaction })(SetCentAddress)
+export default connect((state) => state, { createTransaction })(SetCentAccount)
 
 const Small = styled.small`
   font-size: 11px;

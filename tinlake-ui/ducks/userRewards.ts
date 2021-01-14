@@ -28,9 +28,9 @@ export interface UserRewardsState {
 
 /**
  * Process to earn and claim rewards:
- * 1. User earns rewards on Ethereum for any investments on that Ethereum address `totalEarnedRewards`
+ * 1. User earns rewards on Ethereum for any investments on that Ethereum account `totalEarnedRewards`
  * 2. After holding a non zero investements for 60 days, those rewards become `claimable`
- * 3. To claim rewards, user needs to link a Cent Chain account to the Ethereum address. If there is none, any rewards
+ * 3. To claim rewards, user needs to link a Cent Chain account to the Ethereum account. If there is none, any rewards
  *    are in `unlinkedRewards`. If there is a link, rewards will be fully assigned to the (last) linked Cent Chain
  *    account.
  * 4. For those linked rewards to be claimable on Cent Chain, the amounts and balances (we call them together `claims`)
@@ -61,7 +61,7 @@ export interface UserRewardsData {
    */
   unlinkedRewards: BigDecimalString
   /**
-   * From subgraph. Rewards earned on Ethereum across all links for this Ethereum address so far, might be claimable,
+   * From subgraph. Rewards earned on Ethereum across all links for this Ethereum account so far, might be claimable,
    * might have been claimed. Should equal the sum of links.earned and unlinkedRewards
    */
   totalEarnedRewards: BigDecimalString
@@ -74,7 +74,7 @@ export interface UserRewardsData {
 
 export interface UserRewardsLink {
   /**
-   * From subgraph. Cent Chain account that has been linked to this Ethereum address and can receive rewards
+   * From subgraph. Cent Chain account that has been linked to this Ethereum account and can receive rewards
    */
   centAccountID: AccountIDString
   /**
@@ -86,13 +86,13 @@ export interface UserRewardsLink {
    * From stored list of reward claims in rad-rewards-trees GCP bucket. Once per day, all Cent Chain account IDs and
    * their respective earned rewards will be put into a merkle tree, the root is stored on Centrifuge Chain and the tree
    * leaves are uploaded to GCP. `null` if data has not been received yet. NOTE: claimable can be higher than earned
-   * here, since the same Centrifuge Chain account can be used by multiple Ethereum addresses.
+   * here, since the same Centrifuge Chain account can be used by multiple Ethereum accounts.
    */
   claimable: BigDecimalString | null
   /**
    * From Centrifuge Chain. Amount that has already been claimed by a user on Centrifuge Chain. `null` if data has not
    * been received yet. NOTE: claimed can be higher than earned here, since the same Centrifuge Chain account can be
-   * used by multiple Ethereum addresses.
+   * used by multiple Ethereum accounts.
    */
   claimed: BigDecimalString | null
 }
@@ -162,21 +162,21 @@ export default function reducer(
 }
 
 export function load(
-  address: string
+  ethAddr: string
 ): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
   return async (dispatch) => {
-    await dispatch(loadSubgraph(address)) // block, need data for next two loads
+    await dispatch(loadSubgraph(ethAddr)) // block, need data for next two loads
     dispatch(loadCentChain())
     dispatch(maybeLoadAndApplyClaims())
   }
 }
 
 export function loadSubgraph(
-  address: string
+  ethAddr: string
 ): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
   return async (dispatch) => {
-    dispatch({ type: LOAD_SUBGRAPH, address })
-    const data = await Apollo.getUserRewards(address)
+    dispatch({ type: LOAD_SUBGRAPH, ethAddr })
+    const data = await Apollo.getUserRewards(ethAddr)
     dispatch({ data, type: RECEIVE_SUBGRAPH })
   }
 }

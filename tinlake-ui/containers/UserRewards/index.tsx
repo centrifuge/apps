@@ -20,7 +20,7 @@ import { dynamicPrecision, toDynamicPrecision } from '../../utils/toDynamicPreci
 import { toPrecision } from '../../utils/toPrecision'
 import CentChainWalletDialog from '../CentChainWalletDialog'
 import ClaimRewards from '../ClaimRewards'
-import SetCentAddress from '../SetCentAddress'
+import SetCentAccount from '../SetCentAccount'
 
 interface Props {
   tinlake: ITinlake
@@ -148,11 +148,11 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                 <Card>
                   <Box pad="medium">
                     <Head>Link Your Centrifuge Chain Account</Head>
-                    Your RAD rewards are earned on Ethereum, but owned on Centrifuge Chain. Link your Ethereum address
+                    Your RAD rewards are earned on Ethereum, but owned on Centrifuge Chain. Link your Ethereum account
                     to a Centrifuge Chain account to claim your rewards.
                     <br />
                     <br />
-                    <SetCentAddress tinlake={tinlake} />
+                    <SetCentAccount tinlake={tinlake} />
                   </Box>
                 </Card>
               )}
