@@ -120,23 +120,22 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         pad="medium"
         elevation="small"
         round="xsmall"
-        background="#FCBA59"
         margin={{ horizontal: '16px' }}
         direction="row"
         justify="center"
       >
         <Box>
           <Cont style={{ marginTop: '8px' }}>
-            <TokenLogo src={`/static/rad-black.svg`} />
+            <TokenLogo src={`/static/rad.svg`} />
             <Value>
               <NumberDisplay value={totalRewardsEarned} precision={dynamicPrecision(totalRewardsEarned)} />
             </Value>{' '}
             <Unit>RAD</Unit>
           </Cont>
-          <Label style={{ color: 'black' }}>Total Rewards Earned</Label>
+          <Label>Total Rewards Earned</Label>
         </Box>
         <Box margin={{ left: 'medium' }} justify="center">
-          <Button label="Claim Rewards" secondary onClick={goToRewards} />
+          <Button label="Claim Rewards" primary onClick={goToRewards} color="#FCBA59" />
         </Box>
       </Box>
     </>
