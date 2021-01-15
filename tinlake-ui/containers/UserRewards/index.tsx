@@ -162,7 +162,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
 
                   {debug && (
                     <Alert type="info">
-                      <h3>Debug: Earnings</h3>
+                      <h3>Debug:</h3>
                       <ul>
                         {data.links.map((c, i) => (
                           <li key={c.centAccountID}>
@@ -296,15 +296,17 @@ const Explainer = ({ router }: { router: NextRouter }) => (
 
 const RewardRecipients = ({ recipients }: { recipients: UserRewardsLink[] }) => (
   <RewardRecipientsCont>
-    {recipients.reverse().map((r, i) => (
-      <Recipient key={r.centAccountID}>
-        <Addr active={i === 0}>{shortAddr(accountIdToCentChainAddr(r.centAccountID))}</Addr>
-        <Status active={i === 0}>
-          {recipients.length > 1 && (i === 0 ? 'Active | ' : 'Inactive | ')}
-          {r.claimed ? `Claimed ${toDynamicPrecision(baseToDisplay(r.claimed, 18))} RAD` : 'loading...'}
-        </Status>
-      </Recipient>
-    ))}
+    {recipients
+      .map((r, i) => (
+        <Recipient key={r.centAccountID}>
+          <Addr active={i === 0}>{shortAddr(accountIdToCentChainAddr(r.centAccountID))}</Addr>
+          <Status active={i === 0}>
+            {recipients.length > 1 && (i === 0 ? 'Active | ' : 'Inactive | ')}
+            {r.claimed ? `Claimed ${toDynamicPrecision(baseToDisplay(r.claimed, 18))} RAD` : 'loading...'}
+          </Status>
+        </Recipient>
+      ))
+      .reverse()}
   </RewardRecipientsCont>
 )
 
