@@ -1,6 +1,6 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Button, Heading } from 'grommet'
+import { Anchor, Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -39,6 +39,8 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
       dispatch(load(ethAddr))
     }
   }, [ethAddr])
+  const [showLink, setShowLink] = React.useState(false)
+  const router = useRouter()
 
   const {
     query: { debug },
@@ -127,34 +129,55 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
             </Card>
           )}
 
-          {ethAddr && data?.links && data.links.length === 0 && (
-            <>
-              {!(cWallet.state === 'connected' && cWallet.accounts.length === 1) && (
-                <Card>
-                  <Box pad="medium">
-                    <Head>Link Your Centrifuge Chain Account</Head>
-                    Your RAD Rewards are earned in Tinlake on Ethereum but claimed and held on Centrifuge Chain.
-                    <br />
-                    <br />
-                    <CentChainWalletDialog />
-                  </Box>
-                </Card>
-              )}
+          {ethAddr &&
+            data?.links &&
+            data.links.length === 0 &&
+            (data?.totalEarnedRewards?.isZero() && !showLink ? (
+              <Card>
+                <Box pad="medium">
+                  <Head>Start Investing to Earn Rewards</Head>
+                  You currently have no active investments. To earn rewards, please start investing in Tinlake pools.
+                  <br />
+                  <br />
+                  <Anchor onClick={() => setShowLink(true)} style={{ fontSize: 11 }}>
+                    Link your Centrifuge Chain account as reward recipient
+                  </Anchor>
+                  <Button
+                    label="Explore Pools"
+                    primary
+                    onClick={() => router.push('/')}
+                    margin={{ left: 'auto', top: 'medium' }}
+                  />
+                </Box>
+              </Card>
+            ) : (
+              <>
+                {!(cWallet.state === 'connected' && cWallet.accounts.length === 1) && (
+                  <Card>
+                    <Box pad="medium">
+                      <Head>Link Your Centrifuge Chain Account</Head>
+                      Your RAD Rewards are earned in Tinlake on Ethereum but claimed and held on Centrifuge Chain.
+                      <br />
+                      <br />
+                      <CentChainWalletDialog />
+                    </Box>
+                  </Card>
+                )}
 
-              {cWallet.state === 'connected' && cWallet.accounts.length === 1 && (
-                <Card>
-                  <Box pad="medium">
-                    <Head>Link Your Centrifuge Chain Account</Head>
-                    Your RAD rewards are earned on Ethereum, but owned on Centrifuge Chain. Link your Ethereum account
-                    to a Centrifuge Chain account to claim your rewards.
-                    <br />
-                    <br />
-                    <SetCentAccount tinlake={tinlake} />
-                  </Box>
-                </Card>
-              )}
-            </>
-          )}
+                {cWallet.state === 'connected' && cWallet.accounts.length === 1 && (
+                  <Card>
+                    <Box pad="medium">
+                      <Head>Link Your Centrifuge Chain Account</Head>
+                      Your RAD rewards are earned on Ethereum, but owned on Centrifuge Chain. Link your Ethereum account
+                      to a Centrifuge Chain account to claim your rewards.
+                      <br />
+                      <br />
+                      <SetCentAccount tinlake={tinlake} />
+                    </Box>
+                  </Card>
+                )}
+              </>
+            ))}
 
           {ethAddr && data?.links && data.links.length > 0 && (
             <Card>
