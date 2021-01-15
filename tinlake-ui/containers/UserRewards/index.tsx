@@ -1,7 +1,7 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Anchor, Box, Button, Heading } from 'grommet'
-import { useRouter } from 'next/router'
+import { NextRouter, useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
@@ -58,30 +58,6 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
 
       <Box direction="row" align="start" justify="between">
         <Box flex>
-          <Box
-            pad="medium"
-            elevation="small"
-            round="xsmall"
-            background="white"
-            margin={{ bottom: 'large' }}
-            direction="row"
-            justify="center"
-          >
-            <Metric
-              loading={rewards?.state !== 'found' || !rewards.data}
-              value={baseToDisplay(rewards.data?.todayReward || '0', 18)}
-              label="Total Rewards Earned Today"
-              token="RAD"
-              borderRight
-            />
-            <Metric
-              loading={rewards?.state !== 'found' || !rewards.data}
-              value={baseToDisplay(rewards.data?.toDateRewardAggregateValue || '0', 18)}
-              label="Total Rewards Earned"
-              token="RAD"
-            />
-          </Box>
-
           {ethAddr && (
             <Box
               pad="medium"
@@ -218,8 +194,37 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
             </Card>
           )}
         </Box>
+        <ColRight>
+          <Card margin={{ bottom: 'large' }}>
+            <Box direction="row" background="#FCBA59" style={{ borderRadius: '6px 6px 0 0' }} pad="24px">
+              <TokenLogoBig src="/static/rad-black.svg" />
+              <h3 style={{ margin: 0 }}>System-wide Rewards</h3>
+            </Box>
+            <MetricRow
+              loading={rewards?.state !== 'found' || !rewards.data}
+              value={baseToDisplay(rewards.data?.todayReward || '0', 18)}
+              label="Rewards Earned Today"
+              token="RAD"
+              borderBottom
+            />
+            <MetricRow
+              loading={rewards?.state !== 'found' || !rewards.data}
+              value={rewards.data?.rewardRate.mul(10000).toFixed(0) || ''}
+              label="Daily Reward Rate"
+              token="RAD"
+              suffix={<span style={{ fontSize: 10, color: '#777777' }}> / 10k DAI</span>}
+              borderBottom
+            />
+            <MetricRow
+              loading={rewards?.state !== 'found' || !rewards.data}
+              value={baseToDisplay(rewards.data?.toDateRewardAggregateValue || '0', 18)}
+              label="Total Rewards Earned"
+              token="RAD"
+            />
+          </Card>
 
-        <Explainer />
+          <Explainer router={router} />
+        </ColRight>
       </Box>
     </>
   )
@@ -252,8 +257,8 @@ function comebackDate(nonZero: BN | null | undefined) {
   )
 }
 
-const Card = ({ children }: React.PropsWithChildren<{}>) => (
-  <Box width="100%" pad="none" elevation="small" round="xsmall" background="white">
+const Card = ({ children, ...rest }: React.PropsWithChildren<any>) => (
+  <Box width="100%" pad="none" elevation="small" round="xsmall" background="white" {...rest}>
     {children}
   </Box>
 )
@@ -264,19 +269,28 @@ const Head = ({ children }: React.PropsWithChildren<{}>) => (
   </Heading>
 )
 
-const Explainer = () => (
-  <Box
-    background="#eee"
-    pad="medium"
-    round="xsmall"
-    margin={{ left: 'xlarge' }}
-    width="360px"
-    style={{ color: '#555555' }}
-  >
-    Radial (RAD) Rewards are earned based on your Tinlake investments and apply to all pools in Tinlake.
+const ColRight = ({ children }: React.PropsWithChildren<{}>) => (
+  <Box margin={{ left: 'xlarge' }} width="360px">
+    {children}
+  </Box>
+)
+
+const Explainer = ({ router }: { router: NextRouter }) => (
+  <Box background="#eee" pad="medium" round="xsmall" style={{ color: '#555555' }}>
+    Radial (RAD) Rewards are earned on Ethereum based on your Tinlake investments but claimed and owned on Centrifuge
+    Chain.
     <br />
     <br />
-    Find more information about RAD here.
+    <Box direction="row" justify="between" align="center">
+      <Anchor
+        href="https://medium.com/centrifuge/start-earning-radial-rad-rewards-for-tinlake-cbd98fcd8330"
+        target="_blank"
+        style={{ textDecoration: 'none' }}
+      >
+        <PlayIcon src="/static/play-circle.svg" /> Read blog post
+      </Anchor>
+      <Button label="Explore Pools" secondary onClick={() => router.push('/')} margin={{ left: 'auto' }} />
+    </Box>
   </Box>
 )
 
@@ -336,7 +350,7 @@ const Metric = ({
   label: string
   borderRight?: boolean
 }) => (
-  <Box pad={{ horizontal: 'medium' }} style={{ borderRight: borderRight ? '1px solid #dadada' : undefined }}>
+  <Box pad={{ horizontal: 'medium' }} style={{ borderRight: borderRight ? '1px solid #f2f2f2' : undefined }}>
     <Cont>
       <TokenLogo src={{ DAI: `/static/dai.svg`, RAD: `/static/rad.svg` }[token]} />
       <Value>
@@ -352,3 +366,66 @@ const Metric = ({
     <Label>{label}</Label>
   </Box>
 )
+
+const TokenLogoBig = styled.img`
+  margin: 0 20px 0 0;
+  width: 24px;
+  height: 24px;
+`
+
+const MetricRow = ({
+  token,
+  loading,
+  precision,
+  value,
+  label,
+  borderBottom,
+  suffix,
+}: {
+  token: 'DAI' | 'RAD'
+  loading?: boolean
+  value: string
+  precision?: number
+  label: string
+  borderBottom?: boolean
+  suffix?: React.ReactNode
+}) => (
+  <Box
+    margin={{ horizontal: 'medium' }}
+    pad={{ vertical: 'small' }}
+    style={{ borderBottom: borderBottom ? '1px solid #f2f2f2' : undefined }}
+    direction="row"
+    justify="between"
+  >
+    <Box>{label}</Box>
+    <Box direction="row">
+      <TokenLogoSmall src={{ DAI: `/static/dai.svg`, RAD: `/static/rad.svg` }[token]} />
+      <div style={{ fontWeight: 500 }}>
+        <LoadingValue
+          done={!loading}
+          maxWidth={60}
+          alignRight
+          render={() => (
+            <NumberDisplay value={value} precision={precision || (token === 'RAD' ? dynamicPrecision(value) : 0)} />
+          )}
+        ></LoadingValue>{' '}
+        {{ DAI: 'DAI', RAD: 'RAD' }[token]}
+        {suffix}
+      </div>
+    </Box>
+  </Box>
+)
+
+const TokenLogoSmall = styled.img`
+  margin: 0 6px 0 0;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  top: 1px;
+`
+
+const PlayIcon = styled.img`
+  height: 24px;
+  width: 24px;
+  vertical-align: middle;
+`

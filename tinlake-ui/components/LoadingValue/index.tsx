@@ -5,12 +5,14 @@ interface PropsWithChildren {
   done: boolean
   children: React.ReactNode
   height?: number
+  maxWidth?: number
   alignRight?: boolean
 }
 
 interface PropsWithRender {
   done: boolean
   height?: number
+  maxWidth?: number
   alignRight?: boolean
   render: () => React.ReactNode
 }
@@ -29,10 +31,10 @@ const Wrapper = styled.div<{ width?: number; verticalMargin?: number; alignRight
 `
 
 export const LoadingValue = (props: PropsWithChildren | PropsWithRender) => {
-  const [width, setWidth] = React.useState(randomWidth())
+  const [width, setWidth] = React.useState(randomWidth(props.maxWidth))
 
   React.useEffect(() => {
-    !props.done && setWidth(randomWidth())
+    !props.done && setWidth(randomWidth(props.maxWidth))
   }, [props.done])
 
   return props.done ? (
@@ -48,8 +50,8 @@ export const LoadingValue = (props: PropsWithChildren | PropsWithRender) => {
   )
 }
 
-const randomWidth = () => {
-  return 60 + Math.round(Math.random() * 60)
+const randomWidth = (max: number = 120) => {
+  return Math.round(max / 2 + Math.random() * (max / 2))
 }
 
 function isPropsWithRender(props: PropsWithChildren | PropsWithRender): props is PropsWithRender {
