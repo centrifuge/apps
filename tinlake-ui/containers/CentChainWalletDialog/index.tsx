@@ -80,12 +80,6 @@ const CentChainWalletDialog: React.FC = () => {
           Please create or add an account in the Polkadot extension to proceed.
         </Alert>
       )}
-      {cWallet.state === 'connected' && cWallet.accounts.length > 1 && (
-        <Alert type="info" margin={{ vertical: 'none' }}>
-          You currently have {cWallet.accounts.length} accounts in your Polkadot extension, but Tinlake can only use
-          one. Please hide all accounts except the one you want to use in your Polkadot extension.
-        </Alert>
-      )}
     </div>
   )
 }

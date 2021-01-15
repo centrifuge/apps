@@ -152,7 +152,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
               </Card>
             ) : (
               <>
-                {!(cWallet.state === 'connected' && cWallet.accounts.length === 1) && (
+                {!(cWallet.state === 'connected' && cWallet.accounts.length >= 1) && (
                   <Card>
                     <Box pad="medium">
                       <Head>Link Your Centrifuge Chain Account</Head>
@@ -164,7 +164,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                   </Card>
                 )}
 
-                {cWallet.state === 'connected' && cWallet.accounts.length === 1 && (
+                {cWallet.state === 'connected' && cWallet.accounts.length >= 1 && (
                   <Card>
                     <Box pad="medium">
                       <Head>Link Your Centrifuge Chain Account</Head>
