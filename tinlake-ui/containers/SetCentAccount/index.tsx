@@ -8,7 +8,7 @@ import Alert from '../../components/Alert'
 import { AuthState } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
-import { loadSubgraph } from '../../ducks/userRewards'
+import { loadCentChain, loadSubgraph } from '../../ducks/userRewards'
 import { centChainAddrToAccountId } from '../../services/centChain/centChainAddrToAccountId'
 import { isCentChainAddr } from '../../services/centChain/isCentChainAddr'
 import { shortAddr } from '../../utils/shortAddr'
@@ -16,6 +16,8 @@ import { shortAddr } from '../../utils/shortAddr'
 interface Props extends TransactionProps {
   tinlake: ITinlake
 }
+
+let interval: number | null = null
 
 const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) => {
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
@@ -31,7 +33,7 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
       return
     }
     const txId = await createTransaction(
-      `Set reward claim address: ${shortAddr(walletCentAddr)}`,
+      `Set reward claim account: ${shortAddr(walletCentAddr)}`,
       'updateClaimRADAddress',
       [tinlake, centChainAddrToAccountId(addr)]
     )
@@ -43,13 +45,37 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
       if (!ethAddr) {
         throw new Error('ethAddr is required to update cent chain account')
       }
+
+      // poll changes
       dispatch(loadSubgraph(ethAddr))
-      // TODO poll, subgraph might be slower
+      if (!interval) {
+        interval = setInterval(async () => {
+          await dispatch(loadSubgraph(ethAddr))
+          dispatch(loadCentChain())
+        }, 2000)
+      }
+    }
+    return () => {
+      if (interval) {
+        clearInterval(interval)
+        interval = null
+      }
     }
   }, [status])
 
   const disabled =
     status === 'unconfirmed' || status === 'pending' || !!(walletCentAddr && !isCentChainAddr(walletCentAddr))
+
+  if (status === 'succeeded') {
+    return (
+      <div>
+        Your Centrifuge Chain account has been successfully linked to your Ethereum account.
+        <br />
+        <br />
+        It may take a few minutes for that information to load. This page will automatically refresh once done.
+      </div>
+    )
+  }
 
   return (
     <>
