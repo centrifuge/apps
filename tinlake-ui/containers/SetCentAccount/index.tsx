@@ -85,8 +85,8 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
 
   return (
     <div>
-      Link your Centrifuge Chain account to your wallet you are using for investing in Tinlake pools to claim your
-      rewards. <strong>Please make sure you use the correct account as this step can not be undone.</strong>
+      Link your Centrifuge Chain account to your Ethereum account you are using for investing in Tinlake pools to claim
+      your rewards. <strong>Please make sure you use the correct account as this step can not be undone.</strong>
       <br />
       <br />
       <div>

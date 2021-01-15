@@ -168,8 +168,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                   <Card>
                     <Box pad="medium">
                       <Head>Link Your Centrifuge Chain Account</Head>
-                      Your RAD rewards are earned on Ethereum, but owned on Centrifuge Chain. Link your Ethereum account
-                      to a Centrifuge Chain account to claim your rewards.
+                      Your RAD rewards are earned on Ethereum, but owned on Centrifuge Chain.
                       <br />
                       <br />
                       <SetCentAccount tinlake={tinlake} />
