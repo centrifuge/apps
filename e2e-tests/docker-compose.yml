@@ -10,10 +10,9 @@ services:
     container_name: parity
     user: "1000:1000"
     volumes: 
-      - ./config/chain.json:/home/parity/.local/share/io.parity.ethereum/chain.json
-      - ./config/config.toml:/home/parity/.local/share/io.parity.ethereum/config.toml
+      - ./parity/chain.json:/home/parity/.local/share/io.parity.ethereum/chain.json
+      - ./parity/config.toml:/home/parity/.local/share/io.parity.ethereum/config.toml
     command: --config /home/parity/.local/share/io.parity.ethereum/config.toml
-    restart: always
     ports:
       - 8545:8545
       - 8546:8546
@@ -26,7 +25,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./config/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
+      - ./db/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
       - data:/var/lib/postgresql/data
 
   ipfs:
