@@ -57,7 +57,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
             </Value>{' '}
             <Unit>DAI</Unit>
           </Cont>
-          <Label>{hoveredDay ? `Value Locked on ${dateToYMD(hoveredDay)}` : 'Current Value Locked'}</Label>
+          <Label>{hoveredDay ? `TVL on ${dateToYMD(hoveredDay)}` : 'Total Value Locked'}</Label>
         </Box>
         <Box
           width="200px"

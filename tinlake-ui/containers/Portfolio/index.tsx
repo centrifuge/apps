@@ -242,9 +242,10 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                       )
                     }
                     value={baseToDisplay(
-                      getPool(tokenBalance)?.data[
-                        tokenBalance.token.symbol.substr(-3) === 'DRP' ? 'seniorTokenPrice' : 'juniorTokenPrice'
-                      ] || new BN(0),
+                      tokenBalance.value
+                        .mul(new BN(10).pow(new BN(7)))
+                        .div(tokenBalance.balance)
+                        .mul(new BN(10).pow(new BN(20))),
                       27
                     )}
                   />
