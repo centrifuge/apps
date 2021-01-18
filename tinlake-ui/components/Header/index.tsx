@@ -11,7 +11,9 @@ import config, { IpfsPools } from '../../config'
 import { AuthState, clear, ensureAuthed } from '../../ducks/auth'
 import { OnboardingState } from '../../ducks/onboarding'
 import { selectWalletTransactions, TransactionState } from '../../ducks/transactions'
+import { load } from '../../ducks/userRewards'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
+import { WalletRewards } from '../WalletRewards'
 
 const { isDemo } = config
 export interface MenuItem {
@@ -147,6 +149,7 @@ const Header: React.FC<Props> = (props: Props) => {
                 kycStatus={
                   onboarding.data?.kyc?.verified ? 'verified' : onboarding.data?.kyc?.created ? 'pending' : 'none'
                 }
+                extension={<WalletRewards address={address} />}
               />
             )}
           </div>
@@ -156,4 +159,4 @@ const Header: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { ensureAuthed, clear })(withRouter(Header))
+export default connect((state) => state, { ensureAuthed, clear, load })(withRouter(Header))
