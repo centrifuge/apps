@@ -1,3 +1,4 @@
+import { Tooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Button } from 'grommet'
@@ -64,15 +65,23 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
           <>
             {(status === null || status === 'unconfirmed' || status === 'failed' || status === 'pending') && (
               <>
-                🎉 You have {toDynamicPrecision(baseToDisplay(unclaimed, 18))} unclaimed RAD rewards. Claim now to stake
-                value and participate in on-chain governance.
-                {unclaimed.gt(data?.totalEarnedRewards || new BN(0)) && (
+                🎉 You can claim {toDynamicPrecision(baseToDisplay(unclaimed, 18))} unclaimed RAD rewards. Claim now to
+                stake value and participate in on-chain governance.
+                {unclaimed!.gt(data?.totalEarnedRewards || new BN(0)) && (
                   <>
                     <br />
                     <br />
-                    Your unclaimed rewards on this account can be higher than the rewards you earned on the connected
-                    Ethereum account, e. g. if you have set this Centrifuge Chain account as recipient for multiple
-                    Ethereum accounts.
+                    <Tooltip
+                      title="Your unclaimed rewards are higher than the rewards on the connected Ethereum account. Learn why..."
+                      description={`Your unclaimed rewards on this Centrifuge Chain account can be higher than the rewards you earned on the connected
+                      Ethereum account if you have set this Centrifuge Chain account as recipient for multiple
+                      Ethereum accounts.`}
+                    >
+                      <Small>
+                        Your unclaimed rewards are higher than the rewards on the connected Ethereum account. Learn
+                        why...
+                      </Small>
+                    </Tooltip>
                   </>
                 )}
               </>
@@ -91,7 +100,14 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
           </>
         ) : (
           <>
-            👍 You have claimed all your RAD rewards. As long as you stay invested, your investment keeps earning{' '}
+            🏆 You have claimed all your{' '}
+            {toDynamicPrecision(
+              baseToDisplay(
+                (data?.links || []).reduce((p, l) => p.add(l.claimed || new BN(0)), new BN(0)),
+                18
+              )
+            )}{' '}
+            RAD rewards. Stay invested to continue earning{' '}
             {rewards.data?.rewardRate &&
               data?.currentActiveInvestmentAmount &&
               toDynamicPrecision(
@@ -100,30 +116,21 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
                   18
                 )
               )}{' '}
-            RAD on a daily basis.
-          </>
-        )}
-        {!activeLink.claimed.isZero() && (
-          <>
-            <>
-              <br />
-              <br />
-              🏆 You have claimed so far{' '}
-              {toDynamicPrecision(
-                baseToDisplay(
-                  (data?.links || []).reduce((p, l) => p.add(l.claimed || new BN(0)), new BN(0)),
-                  18
-                )
-              )}{' '}
-              RAD as rewards.
-            </>
+            RAD daily.
             {activeLink.claimed.gt(data?.totalEarnedRewards || new BN(0)) && (
               <>
                 <br />
                 <br />
-                Your claimed rewards on this account can be higher than the rewards you earned on the connected Ethereum
-                account, e. g. if you have set this Centrifuge Chain account as recipient for multiple Ethereum
-                accounts.
+                <Tooltip
+                  title="Your claimed rewards are higher than the rewards on the connected Ethereum account. Learn why..."
+                  description={`Your claimed rewards on this Centrifuge Chain account can be higher than the rewards you earned on the connected Ethereum
+                      account if you have set this Centrifuge Chain account as recipient for multiple Ethereum
+                      accounts.`}
+                >
+                  <Small>
+                    Your claimed rewards are higher than the rewards on the connected Ethereum account. Learn why...
+                  </Small>
+                </Tooltip>
               </>
             )}
           </>
@@ -179,4 +186,8 @@ const Number = styled.div`
   font-weight: 500;
   height: 32px;
   line-height: 32px;
+`
+
+const Small = styled.small`
+  font-size: 11px;
 `

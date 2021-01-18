@@ -115,12 +115,13 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         </Box>
       </Box>
       <Box
-        width="440px"
-        pad="medium"
+        width="430px"
         elevation="small"
         round="xsmall"
+        background="white"
         margin={{ horizontal: '16px' }}
         direction="row"
+        pad="medium"
         justify="center"
       >
         <Box>

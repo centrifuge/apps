@@ -30,20 +30,20 @@ const CentChainWalletDialog: React.FC = () => {
   if (!polkadotExtensionInstalled) {
     return (
       <>
-        Please install the Polkadot Wallet browser extension to get started and reload this page.
-        <Box direction="row" margin={{ top: 'medium' }}>
-          {!clickedInstall ? (
-            <Button
-              primary
-              label="Install Browser Extension"
-              href="https://polkadot.js.org/extension/"
-              onClick={() => setClickInstall(true)}
-              target="_blank"
-              margin={{ left: 'auto' }}
-            />
-          ) : (
-            <Button primary label="Reload Page" onClick={router.reload} margin={{ left: 'auto' }} />
-          )}
+        Your RAD Rewards are earned on Ethereum but claimed and owned on Centrifuge Chain.
+        <br />
+        <br />
+        Please first install the Polkadot Wallet extension to get started. Please reload this page after you have
+        installed the extension.
+        <Box direction="row" justify="end" margin={{ top: 'medium' }}>
+          <Button
+            primary={!clickedInstall}
+            label="Install Browser Extension"
+            href="https://polkadot.js.org/extension/"
+            onClick={() => setClickInstall(true)}
+            target="_blank"
+          />
+          {clickedInstall && <Button primary label="Reload Page" onClick={router.reload} margin={{ left: '24px' }} />}
         </Box>
       </>
     )
@@ -76,9 +76,14 @@ const CentChainWalletDialog: React.FC = () => {
         </>
       )}
       {cWallet.state === 'connected' && cWallet.accounts.length === 0 && (
-        <Alert type="info" margin={{ vertical: 'none' }}>
-          Please create or add an account in the Polkadot extension to proceed.
-        </Alert>
+        <>
+          You haven’t created an account yet in your Polkadot extension.
+          <br />
+          <br />
+          <Alert type="info" margin={{ vertical: 'none' }}>
+            Please create or add an account in the Polkadot extension to proceed.
+          </Alert>
+        </>
       )}
     </div>
   )

@@ -52,7 +52,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
   const data = userRewards.data
 
   return (
-    <>
+    <Box margin={{ top: 'medium' }}>
       <PoolTitle page="Claim Your RAD Rewards" return />
 
       <Box direction="row" align="start" justify="between">
@@ -97,8 +97,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
             <Card>
               <Box pad="medium">
                 <Head>Connect your Ethereum Account</Head>
-                Please connect with the Ethereum Account that is holding your Tinlake investment to see your RAD
-                rewards.
+                Please connect with the Ethereum Account holding your Tinlake investment to claim your RAD rewards.
                 <Button primary label="Connect" margin={{ left: 'auto', top: 'large' }} onClick={connect} />
               </Box>
             </Card>
@@ -111,11 +110,12 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
               <Card>
                 <Box pad="medium">
                   <Head>Start Investing to Earn Rewards</Head>
-                  You currently have no active investments. To earn rewards, please start investing in Tinlake pools.
+                  You don’t have any active Tinlake investments. To start earning RAD rewards, start investing in
+                  Tinlake now.
                   <br />
                   <br />
                   <Anchor onClick={() => setShowLink(true)} style={{ fontSize: 11 }}>
-                    Link your Centrifuge Chain account as reward recipient
+                    I still want to already link my Centrifuge Chain account
                   </Anchor>
                   <Button
                     label="Explore Pools"
@@ -131,9 +131,6 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                   <Card>
                     <Box pad="medium">
                       <Head>Link Your Centrifuge Chain Account</Head>
-                      Your RAD Rewards are earned in Tinlake on Ethereum but claimed and held on Centrifuge Chain.
-                      <br />
-                      <br />
                       <CentChainWalletDialog />
                     </Box>
                   </Card>
@@ -225,7 +222,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
           <Explainer router={router} />
         </ColRight>
       </Box>
-    </>
+    </Box>
   )
 }
 
@@ -249,8 +246,8 @@ function comebackDate(nonZero: BN | null | undefined) {
     .toString()
 
   return (
-    `You have not been invested for the minimum holding period of 60 days and thus do not qualify for RAD rewards ` +
-    `yet. Your first eligible investment was made ${startDate} so you can return in ${
+    `You cannot claim your RAD rewards yet. RAD rewards can only be claimed after a minimum investment period of 60 ` +
+    `days. Your first eligible investment was made ${startDate}. Please come back in ${
       diff === '1' ? '1 day' : diff + ' days'
     } on ${targetDate} to claim your RAD rewards.`
   )
@@ -276,20 +273,24 @@ const ColRight = ({ children }: React.PropsWithChildren<{}>) => (
 
 const Explainer = ({ router }: { router: NextRouter }) => (
   <Box background="#eee" pad="medium" round="xsmall" style={{ color: '#555555' }}>
-    Radial (RAD) Rewards are earned on Ethereum based on your Tinlake investments but claimed and owned on Centrifuge
-    Chain.
-    <br />
-    <br />
-    <Box direction="row" justify="between" align="center">
-      <Anchor
-        href="https://medium.com/centrifuge/start-earning-radial-rad-rewards-for-tinlake-cbd98fcd8330"
-        target="_blank"
-        style={{ textDecoration: 'none' }}
-      >
-        <PlayIcon src="/static/play-circle.svg" /> Read blog post
-      </Anchor>
-      <Button label="Explore Pools" secondary onClick={() => router.push('/')} margin={{ left: 'auto' }} />
+    <Box direction="row" pad={'0 0 14px'}>
+      <HelpIcon src="/static/help-circle.svg" />
+      <h3 style={{ margin: 0 }}>How it works</h3>
     </Box>
+    Radial (RAD) Rewards are earned on Ethereum based on your Tinlake investments but claimed and owned on Centrifuge
+    Chain. To claim your rewards you need to link your Tinlake investment account to a Centrifuge Chain account
+    receiving and holding your RAD.
+    <br />
+    <br />
+    <Anchor
+      href="https://medium.com/centrifuge/start-earning-radial-rad-rewards-for-tinlake-cbd98fcd8330"
+      target="_blank"
+    >
+      How are RAD rewards calculated?
+    </Anchor>
+    <Anchor href="https://centrifuge.io/products/chain/" target="_blank">
+      What is Centrifuge Chain?
+    </Anchor>
   </Box>
 )
 
@@ -425,8 +426,8 @@ const TokenLogoSmall = styled.img`
   top: 1px;
 `
 
-const PlayIcon = styled.img`
-  height: 24px;
+const HelpIcon = styled.img`
+  margin: 0 20px 0 0;
   width: 24px;
-  vertical-align: middle;
+  height: 24px;
 `
