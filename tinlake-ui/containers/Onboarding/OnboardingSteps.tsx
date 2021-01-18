@@ -4,7 +4,7 @@ import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { PoolLink } from '../../components/PoolLink'
-import PoolTitle from '../../components/PoolTitle'
+import PageTitle from '../../components/PageTitle'
 import config, { Pool } from '../../config'
 import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
 import AgreementStep from './AgreementStep'
@@ -65,7 +65,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
 
   return (
     <Box margin={{ top: 'medium' }}>
-      <PoolTitle pool={props.activePool} page="Onboarding" parentPage="Investments" parentPageHref="/investments" />
+      <PageTitle pool={props.activePool} page="Onboarding" parentPage="Investments" parentPageHref="/investments" />
       <Heading level="5" margin={{ bottom: 'medium' }} style={{ maxWidth: '100%' }}>
         To invest in this pool, start your onboarding process now.
       </Heading>

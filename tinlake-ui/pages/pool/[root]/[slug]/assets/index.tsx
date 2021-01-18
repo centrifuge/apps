@@ -7,7 +7,7 @@ import Auth from '../../../../../components/Auth'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
 import { PoolLink } from '../../../../../components/PoolLink'
-import PoolTitle from '../../../../../components/PoolTitle'
+import PageTitle from '../../../../../components/PageTitle'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
@@ -48,7 +48,7 @@ class LoanListPage extends React.Component<Props> {
                     render={(auth) => (
                       <Box>
                         <Box direction="row" margin={{ top: 'medium' }} justify="between">
-                          <PoolTitle pool={this.props.pool} page="Assets" />
+                          <PageTitle pool={this.props.pool} page="Assets" />
 
                           <Box pad={{ top: 'small' }}>
                             <PoolLink href={'/assets/issue'}>

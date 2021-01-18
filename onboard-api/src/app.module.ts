@@ -16,10 +16,18 @@ import { SecuritizeService } from './services/kyc/securitize.service'
 import { PoolService } from './services/pool.service'
 import { SessionService } from './services/session.service'
 import { SyncService } from './services/sync.service'
+import { MemberlistService } from './services/memberlist.service'
 
 // TODO: separate into modules
 const databaseProviders = [DatabaseService, UserRepo, AddressRepo, KycRepo, AgreementRepo, InvestmentRepo]
-const serviceProviders = [PoolService, SecuritizeService, DocusignService, DocusignAuthService, SessionService]
+const serviceProviders = [
+  PoolService,
+  SecuritizeService,
+  DocusignService,
+  DocusignAuthService,
+  SessionService,
+  MemberlistService,
+]
 const taskProviders = [SyncService]
 
 @Module({

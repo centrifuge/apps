@@ -4,7 +4,6 @@ import { AddressRepo } from '../repos/address.repo'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
-import { DocusignService } from '../services/docusign.service'
 import { SecuritizeService } from '../services/kyc/securitize.service'
 import { PoolService } from '../services/pool.service'
 import { AddressStatus, AgreementsStatus, KycStatusLabel } from './types'
@@ -17,7 +16,6 @@ export class AddressController {
     private readonly securitizeService: SecuritizeService,
     private readonly kycRepo: KycRepo,
     private readonly agreementRepo: AgreementRepo,
-    private readonly docusignService: DocusignService,
     private readonly poolService: PoolService,
     private readonly userRepo: UserRepo,
     private readonly investmentRepo: InvestmentRepo,
@@ -74,20 +72,6 @@ export class AddressController {
         user.email,
         user.countryCode
       )
-
-      // TODO: this should be handled in a Connect webhook from Docusign
-      agreements.forEach(async (agreement: Agreement) => {
-        if (!agreement.signedAt || !agreement.counterSignedAt) {
-          const status = await this.docusignService.getEnvelopeStatus(agreement.providerEnvelopeId)
-          if (!agreement.signedAt && status.signed) {
-            await this.agreementRepo.setSigned(agreement.id)
-          }
-
-          if (!agreement.counterSignedAt && status.counterSigned) {
-            await this.agreementRepo.setCounterSigned(agreement.id)
-          }
-        }
-      })
 
       const agreementLinks = agreements.map(
         (agreement: Agreement): AgreementsStatus => {

@@ -18,7 +18,7 @@ interface Props {
   return?: boolean
 }
 
-const PoolTitle: React.FC<Props> = (props: Props) => {
+const PageTitle: React.FC<Props> = (props: Props) => {
   const router = useRouter()
 
   const pool = useSelector<any, PoolState>((state) => state.pool)
@@ -46,7 +46,7 @@ const PoolTitle: React.FC<Props> = (props: Props) => {
           }
         />
       )}
-      <PageTitle>
+      <Title>
         {props.pool && (
           <PoolName>
             {props.pool.metadata.name}
@@ -68,13 +68,13 @@ const PoolTitle: React.FC<Props> = (props: Props) => {
           )}
           {props.page}
         </PageName>
-      </PageTitle>
+      </Title>
       {props.rightContent && <RightContent>{props.rightContent}</RightContent>}
     </Wrapper>
   )
 }
 
-export default PoolTitle
+export default PageTitle
 
 const Wrapper = styled.div`
   display: flex;
@@ -97,7 +97,7 @@ const Icon = styled.img`
   margin: 4px 16px 0 0;
 `
 
-const PageTitle = styled.div`
+const Title = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;

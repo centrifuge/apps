@@ -6,7 +6,7 @@ import { PoolService } from './pool.service'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 export const InvestorRoleName = 'Investor'
-export const IssuerRoleName = 'Issuer'
+export const IssuerRoleName = 'Self'
 
 @Injectable()
 export class DocusignService {

@@ -1,10 +1,11 @@
 -- users
 create table if not exists users (
-  id uuid primary key,
-  email varchar(255),
-  full_name varchar(255),
-  country_code character varying(5),
-  created_at timestamp with time zone not null default now()
+    id uuid primary key,
+    email varchar(255),
+    full_name character varying(255),
+    entity_name character varying(255),
+    country_code character varying(5),
+    created_at timestamp with time zone not null default now()
 );
 
 create unique index if not exists users_pkey on users(id uuid_ops);

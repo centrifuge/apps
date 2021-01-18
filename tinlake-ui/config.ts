@@ -13,6 +13,8 @@ interface SecuritizeData {
 interface PoolMedia {
   logo?: string
   icon?: string
+  drop?: string
+  tin?: string
 }
 
 interface PoolMetadata {

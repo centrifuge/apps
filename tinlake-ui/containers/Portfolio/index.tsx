@@ -1,4 +1,4 @@
-import { Box } from 'grommet'
+import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -29,7 +29,8 @@ import { Cont, Label as MetricLabel, Value, TokenLogo } from '../../components/P
 // import { UintBase } from '../../utils/ratios'
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
-import PoolTitle from '../../components/PoolTitle'
+import PageTitle from '../../components/PageTitle'
+import Link from 'next/link'
 
 interface Props {
   ipfsPools: IpfsPools
@@ -63,7 +64,8 @@ const Portfolio: React.FC<Props> = (props: Props) => {
   const getPool = (tokenBalance: TokenBalance) => {
     const ipfsPool = props.ipfsPools.active.find((pool: Pool) => {
       return (
-        pool.addresses.JUNIOR_TOKEN === tokenBalance.token.id || pool.addresses.SENIOR_TOKEN === tokenBalance.token.id
+        pool.addresses.JUNIOR_TOKEN.toLowerCase() === tokenBalance.token.id.toLowerCase() ||
+        pool.addresses.SENIOR_TOKEN.toLowerCase() === tokenBalance.token.id.toLowerCase()
       )
     })
 
@@ -116,7 +118,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
     <Box margin={{ top: 'medium' }}>
       <Box margin={{ bottom: 'medium' }}>
         <Box direction="row" justify="between">
-          <PoolTitle page="Investment Portfolio" return />
+          <PageTitle page="My Investment Portfolio" return />
           {address && address !== connectedAddress && (
             <Box margin={{ top: 'medium' }}>
               <DisplayField
@@ -142,7 +144,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
           margin={{ horizontal: '16px' }}
         >
           <Cont>
-            <TokenLogo src={`/static/DAI.svg`} />
+            <TokenLogo src={`/static/DROP_final.svg`} />
             <Value>
               <NumberDisplay value={baseToDisplay(totalDropValue, 18)} precision={0} />
             </Value>{' '}
@@ -158,7 +160,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
           margin={{ horizontal: '16px' }}
         >
           <Cont>
-            <TokenLogo src={`/static/DAI.svg`} />
+            <TokenLogo src={`/static/TIN_final.svg`} />
             <Value>
               <NumberDisplay value={baseToDisplay(totalTinValue, 18)} precision={0} />
             </Value>{' '}
@@ -200,14 +202,15 @@ const Portfolio: React.FC<Props> = (props: Props) => {
             .map((tokenBalance: TokenBalance) => (
               <PoolRow key={tokenBalance.token.id} onClick={() => clickToken(tokenBalance)}>
                 <Icon
-                  src={getPool(tokenBalance)?.pool.metadata.media?.icon?.replace(
-                    'icon',
-                    tokenBalance.token.symbol.substr(-3) === 'DRP' ? 'drop' : 'tin'
-                  )}
+                  src={
+                    getPool(tokenBalance)?.pool.metadata.media![
+                      tokenBalance.token.symbol.substr(-3) === 'DRP' ? 'drop' : 'tin'
+                    ]
+                  }
                 />
                 <Desc>
-                  <Name>{tokenBalance.token.symbol}</Name>
-                  <Type>{getPool(tokenBalance)?.pool.metadata.name}</Type>
+                  <Name>{getPool(tokenBalance)?.pool.metadata.name}</Name>
+                  <Type>{tokenBalance.token.symbol}</Type>
                 </Desc>
                 <DataCol>
                   <NumberDisplay
@@ -293,12 +296,26 @@ const Portfolio: React.FC<Props> = (props: Props) => {
             </DataCol> */}
               </PoolRow>
             ))}
+
+          <Box margin={{ top: 'medium', left: 'auto', right: 'auto' }}>
+            <Link href="/">
+              <Button label="Explore more investment opportunities" secondary size="small" />
+            </Link>
+          </Box>
         </>
       )}
       {portfolio.data?.filter((tokenBalance: TokenBalance) => !tokenBalance.balance.isZero()).length === 0 && (
-        <Box elevation="small" round="xsmall" pad={'medium'} background="white">
-          No token holdings found.
-        </Box>
+        <>
+          <Box elevation="small" round="xsmall" pad={'medium'} background="white">
+            No token holdings found.
+          </Box>
+
+          <Box margin={{ top: 'medium', left: 'auto', right: 'auto' }}>
+            <Link href="/">
+              <Button label="Explore investment opportunities" secondary size="small" />
+            </Link>
+          </Box>
+        </>
       )}
     </Box>
   )

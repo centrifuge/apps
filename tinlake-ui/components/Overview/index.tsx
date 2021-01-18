@@ -3,7 +3,7 @@ import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } f
 import * as React from 'react'
 import InvestAction from '../../components/InvestAction'
 import { PoolLink } from '../../components/PoolLink'
-import PoolTitle from '../../components/PoolTitle'
+import PageTitle from '../PageTitle'
 import { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
 import { PoolState } from '../../ducks/pool'
@@ -21,7 +21,7 @@ const Overview: React.FC<Props> = (props: Props) => {
     <Box margin={{ bottom: 'large', top: 'medium' }}>
       {!isUpcoming && (
         <>
-          <PoolTitle pool={props.selectedPool} page="Overview" />
+          <PageTitle pool={props.selectedPool} page="Overview" />
           <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />
         </>
       )}

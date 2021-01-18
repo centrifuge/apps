@@ -23,6 +23,17 @@ export class AgreementRepo {
     return agreement as Agreement | undefined
   }
 
+  async findByProvider(provider: 'docusign', providerEnvelopeId: string): Promise<Agreement | undefined> {
+    const [agreement] = await this.db.sql`
+      select *
+      from agreements
+      where agreements.provider = ${provider}
+      and agreements.provider_envelope_id = ${providerEnvelopeId}
+    `
+
+    return agreement as Agreement | undefined
+  }
+
   async getByUser(userId: string): Promise<Agreement[]> {
     const agreements = await this.db.sql`
       select *

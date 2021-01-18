@@ -119,13 +119,19 @@ export interface Investor {
   email: string
   verificationStatus: 'none' | 'processing' | 'updates-required' | 'verified' | 'manual-review' | 'rejected' | 'expired'
   details: {
+    firstName?: string
+    middleName?: string
+    lastName?: string
     tax: any[]
-    address: {
-      countryCode: string
+    address?: {
+      countryCode?: string
     }
   }
   domainInvestorDetails: {
+    taxInfo: any
     isUsaTaxResident: boolean
     isAccredited: boolean
+    investorFullName?: string
+    entityName?: string
   }
 }
