@@ -239,7 +239,7 @@ function comebackDate(nonZero: BN | null | undefined) {
     return 'You can not yet claim your rewards, please come back after investing in a Tinlake pool and waiting for 60 days.'
   }
 
-  const start = new BN(nonZero)
+  const start = nonZero
   const startDate = new Date(start.toNumber() * 1000).toLocaleDateString()
   const target = start.addn(61 * days)
   const targetDate = new Date(target.toNumber() * 1000).toLocaleDateString()

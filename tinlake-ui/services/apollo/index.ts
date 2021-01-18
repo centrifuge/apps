@@ -358,7 +358,7 @@ class Apollo {
 
     const transformed: UserRewardsData = {
       currentActiveInvestmentAmount: new BN(account.currentActiveInvestmentAmount),
-      nonZeroInvestmentSince: new BN(rewardBalance.nonZeroBalanceSince),
+      nonZeroInvestmentSince: rewardBalance.nonZeroBalanceSince && new BN(rewardBalance.nonZeroBalanceSince),
       claimable: rewardBalance.claimable,
       totalEarnedRewards: new BN(rewardBalance.totalRewards),
       unlinkedRewards: new BN(rewardBalance.linkableRewards),
