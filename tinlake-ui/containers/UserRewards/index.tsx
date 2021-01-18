@@ -196,7 +196,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
         </Box>
         <ColRight>
           <Card margin={{ bottom: 'large' }}>
-            <Box direction="row" background="#FCBA59" style={{ borderRadius: '6px 6px 0 0' }} pad="24px">
+            <Box direction="row" background="#FCBA59" style={{ borderRadius: '6px 6px 0 0' }} pad={'14px 24px'}>
               <TokenLogoBig src="/static/rad-black.svg" />
               <h3 style={{ margin: 0 }}>System-wide Rewards</h3>
             </Box>
