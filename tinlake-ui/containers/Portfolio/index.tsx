@@ -199,6 +199,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
           </Header>
           {portfolio.data
             ?.filter((tokenBalance: TokenBalance) => !tokenBalance.balance.isZero())
+            .sort((a: TokenBalance, b: TokenBalance) => parseFloat(b.value.sub(a.value).toString()))
             .map((tokenBalance: TokenBalance) => (
               <PoolRow key={tokenBalance.token.id} onClick={() => clickToken(tokenBalance)}>
                 <Icon
