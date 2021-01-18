@@ -1,7 +1,7 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Anchor, Box, Button, Heading } from 'grommet'
-import { NextRouter, useRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
@@ -219,7 +219,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
             />
           </Card>
 
-          <Explainer router={router} />
+          <Explainer />
         </ColRight>
       </Box>
     </Box>
@@ -271,7 +271,7 @@ const ColRight = ({ children }: React.PropsWithChildren<{}>) => (
   </Box>
 )
 
-const Explainer = ({ router }: { router: NextRouter }) => (
+const Explainer = () => (
   <Box background="#eee" pad="medium" round="xsmall" style={{ color: '#555555' }}>
     <Box direction="row" pad={'0 0 14px'}>
       <HelpIcon src="/static/help-circle.svg" />
