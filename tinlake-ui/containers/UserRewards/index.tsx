@@ -417,14 +417,6 @@ const MetricRow = ({
   </Box>
 )
 
-const TokenLogoSmall = styled.img`
-  margin: 0 6px 0 0;
-  width: 20px;
-  height: 20px;
-  position: relative;
-  top: 1px;
-`
-
 const HelpIcon = styled.img`
   margin: 0 20px 0 0;
   width: 24px;
