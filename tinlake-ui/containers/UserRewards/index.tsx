@@ -115,7 +115,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                   <br />
                   <br />
                   <Anchor onClick={() => setShowLink(true)} style={{ fontSize: 11 }}>
-                    I still want to already link my Centrifuge Chain account
+                    Link Centrifuge Chain account
                   </Anchor>
                   <Button
                     label="Explore Pools"
@@ -140,7 +140,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                   <Card>
                     <Box pad="medium">
                       <Head>Link Your Centrifuge Chain Account</Head>
-                      Your RAD rewards are earned on Ethereum, but owned on Centrifuge Chain.
+                      Your RAD rewards are earned on Ethereum, but claimed on Centrifuge Chain.
                       <br />
                       <br />
                       <SetCentAccount tinlake={tinlake} />
@@ -401,7 +401,6 @@ const MetricRow = ({
   >
     <Box>{label}</Box>
     <Box direction="row">
-      <TokenLogoSmall src={{ DAI: `/static/dai.svg`, RAD: `/static/rad.svg` }[token]} />
       <div style={{ fontWeight: 500 }}>
         <LoadingValue
           done={!loading}

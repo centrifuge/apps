@@ -65,8 +65,8 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
           <>
             {(status === null || status === 'unconfirmed' || status === 'failed' || status === 'pending') && (
               <>
-                🎉 You can claim {toDynamicPrecision(baseToDisplay(unclaimed, 18))} unclaimed RAD rewards. Claim now to
-                stake value and participate in on-chain governance.
+                🎉 You can claim {toDynamicPrecision(baseToDisplay(unclaimed, 18))} RAD rewards. Claim now to stake RAD
+                and participate in on-chain governance.
                 {unclaimed!.gt(data?.totalEarnedRewards || new BN(0)) && (
                   <>
                     <br />
@@ -154,7 +154,7 @@ const RewardStripe = ({ unclaimed, children }: React.PropsWithChildren<{ unclaim
   <Cont direction="row" pad={{ vertical: 'small', horizontal: 'medium' }}>
     <TokenLogo src="/static/rad-black.svg" />
     <Box>
-      <Label>Your unclaimed rewards</Label>
+      <Label>Claimable rewards</Label>
       <Number>{toDynamicPrecision(baseToDisplay(unclaimed || '0', 18))} RAD</Number>
     </Box>
     {children}

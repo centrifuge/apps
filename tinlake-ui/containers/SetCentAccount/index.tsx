@@ -36,7 +36,7 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
       return
     }
     const txId = await createTransaction(
-      `Set reward claim account: ${shortAddr(selectedCentAcc.addrCentChain)}`,
+      `Link account ${shortAddr(selectedCentAcc.addrCentChain)}`,
       'updateClaimRADAddress',
       [tinlake, centChainAddrToAccountId(selectedCentAcc.addrCentChain)]
     )
@@ -85,7 +85,7 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
 
   return (
     <div>
-      Select the Centrifuge Chain account you want to link to your Ethereum account below.
+      Select the Centrifuge Chain account you want to link to your Ethereum account below.{' '}
       <strong>This step cannot be undone. Please make sure to link the correct account.</strong>
       <br />
       <br />

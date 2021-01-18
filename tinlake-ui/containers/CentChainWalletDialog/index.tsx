@@ -1,4 +1,4 @@
-import { Box, Button } from 'grommet'
+import { Anchor, Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -30,7 +30,7 @@ const CentChainWalletDialog: React.FC = () => {
   if (!polkadotExtensionInstalled) {
     return (
       <>
-        Your RAD Rewards are earned on Ethereum but claimed and owned on Centrifuge Chain.
+        Your RAD Rewards are earned on Ethereum but claimed on Centrifuge Chain.
         <br />
         <br />
         Please first install the Polkadot Wallet extension to get started. Please reload this page after you have
@@ -82,6 +82,11 @@ const CentChainWalletDialog: React.FC = () => {
           <br />
           <Alert type="info" margin={{ vertical: 'none' }}>
             Please create or add an account in the Polkadot extension to proceed.
+            <br />
+            <br />
+            <Anchor href="https://docs.centrifuge.io/chain/get-started/account/" target="_blank">
+              Learn how to create an account.
+            </Anchor>
           </Alert>
         </>
       )}
