@@ -301,11 +301,11 @@ const config: Config = {
     .validateSync(networkUrlToName(process.env.NEXT_PUBLIC_RPC_URL || '')),
   portisApiKey: yup
     .string()
-    .required()
+    .required('NEXT_PUBLIC_PORTIS_KEY is required')
     .validateSync(process.env.NEXT_PUBLIC_PORTIS_KEY),
   infuraKey: yup
     .string()
-    .required()
+    .required('NEXT_PUBLIC_INFURA_KEY is required')
     .validateSync(process.env.NEXT_PUBLIC_INFURA_KEY),
   gasLimit: yup
     .number()
