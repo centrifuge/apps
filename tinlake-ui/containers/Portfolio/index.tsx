@@ -24,24 +24,15 @@ import { IpfsPools, Pool } from '../../config'
 import { PoolData } from '../../ducks/pools'
 import BN from 'bn.js'
 import { Cont, Label as MetricLabel, Value, TokenLogo } from '../../components/PoolsMetrics/styles'
-// import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
-// import { Token } from 'graphql'
-// import { UintBase } from '../../utils/ratios'
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import PageTitle from '../../components/PageTitle'
 import Link from 'next/link'
+import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 
 interface Props {
   ipfsPools: IpfsPools
 }
-
-// interface AssetClass {
-//   name: string
-//   balance: number
-// }
-
-// const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']
 
 const Portfolio: React.FC<Props> = (props: Props) => {
   const router = useRouter()
@@ -98,22 +89,6 @@ const Portfolio: React.FC<Props> = (props: Props) => {
       return tokenBalance.token.symbol.substr(-3) === 'TIN' ? prev.add(tokenBalance.value) : prev
     }, new BN(0)) || new BN(0)
 
-  // const assetClasses: AssetClass[] =
-  //   portfolio.data
-  //     ?.filter((tokenBalance: TokenBalance) => !tokenBalance.balance.isZero())
-  //     .reduce((prev: AssetClass[], tokenBalance: TokenBalance) => {
-  //       const pool = getPool(tokenBalance)
-  //       if (!pool) return prev
-
-  //       return [
-  //         ...prev,
-  //         {
-  //           name: pool.pool.metadata.asset,
-  //           balance: parseFloat(tokenBalance.balance.div(UintBase).toString()),
-  //         },
-  //       ]
-  //     }, [] as AssetClass[]) || []
-
   return (
     <Box margin={{ top: 'medium' }}>
       <Box margin={{ bottom: 'medium' }}>
@@ -148,8 +123,9 @@ const Portfolio: React.FC<Props> = (props: Props) => {
             <Value>
               <NumberDisplay value={baseToDisplay(totalDropValue, 18)} precision={0} />
             </Value>{' '}
+            <Unit>DAI</Unit>
           </Cont>
-          <MetricLabel>Total DROP Value (DAI)</MetricLabel>
+          <MetricLabel>Total DROP Value</MetricLabel>
         </Box>
         <Box
           width="256px"
@@ -164,22 +140,11 @@ const Portfolio: React.FC<Props> = (props: Props) => {
             <Value>
               <NumberDisplay value={baseToDisplay(totalTinValue, 18)} precision={0} />
             </Value>{' '}
+            <Unit>DAI</Unit>
           </Cont>
-          <MetricLabel>Total TIN Value (DAI)</MetricLabel>
+          <MetricLabel>Total TIN Value</MetricLabel>
         </Box>
       </Box>
-
-      {/* <Box width="256px" height="220px">
-        <ResponsiveContainer>
-          <PieChart>
-            <Pie nameKey="name" dataKey="balance" data={assetClasses} fill="#8884d8" label>
-              {assetClasses.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-      </Box> */}
 
       {portfolio.data?.filter((tokenBalance: TokenBalance) => !tokenBalance.balance.isZero()).length > 0 && (
         <>
@@ -191,7 +156,9 @@ const Portfolio: React.FC<Props> = (props: Props) => {
               <HeaderTitle>Current Balance</HeaderTitle>
             </HeaderCol>
             <HeaderCol>
-              <HeaderTitle>Current Price</HeaderTitle>
+              <HeaderTitle>
+                <AxisTooltip title="Token prices for this overview are updated daily">Current Price</AxisTooltip>
+              </HeaderTitle>
             </HeaderCol>
             <HeaderCol>
               <HeaderTitle>Current Value</HeaderTitle>
@@ -266,36 +233,6 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                     value={baseToDisplay(tokenBalance.value, 18)}
                   />
                 </DataCol>
-                {/* <DataCol>
-              <NumberDisplay
-                precision={0}
-                render={(v) =>
-                  v === '0' ? (
-                    <Dash>-</Dash>
-                  ) : (
-                    <>
-                      <Number>{v}</Number> <Unit>DAI</Unit>
-                    </>
-                  )
-                }
-                value={baseToDisplay(tokenBalance.supplyAmount, 18)}
-              />
-            </DataCol>
-            <DataCol>
-              <NumberDisplay
-                precision={0}
-                render={(v) =>
-                  v === '0' ? (
-                    <Dash>-</Dash>
-                  ) : (
-                    <>
-                      <Number>{v}</Number> <Unit>DAI</Unit>
-                    </>
-                  )
-                }
-                value={baseToDisplay(tokenBalance.pendingSupplyCurrency, 18)}
-              />
-            </DataCol> */}
               </PoolRow>
             ))}
 
