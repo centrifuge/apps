@@ -1,7 +1,7 @@
 import { Tooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Button } from 'grommet'
+import { Anchor, Box, Button } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
@@ -22,6 +22,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
   const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
   const dispatch = useDispatch()
 
+  const [claimExtHash, setClaimExtHash] = React.useState<null | string>(null)
   const [status, setStatus] = React.useState<null | TransactionStatus>(null)
   const [error, setError] = React.useState<null | string>(null)
   const claim = async () => {
@@ -42,7 +43,8 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
     const proof = createBufferProofFromClaim(tree, newClaim(claim))
 
     try {
-      await centChainService().claimRADRewards(claim.accountID, claim.balance, proof)
+      const hash = await centChainService().claimRADRewards(claim.accountID, claim.balance, proof)
+      setClaimExtHash(hash)
       await dispatch(loadCentChain())
       setStatus('succeeded')
     } catch (e) {
@@ -62,42 +64,37 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
     <>
       <Box pad={{ horizontal: 'medium', bottom: 'medium' }}>
         {unclaimed && !unclaimed?.isZero() ? (
-          <>
-            {(status === null || status === 'unconfirmed' || status === 'failed' || status === 'pending') && (
-              <>
-                🎉 You can claim {toDynamicPrecision(baseToDisplay(unclaimed, 18))} RAD rewards. Claim now to stake RAD
-                and participate in on-chain governance.
-                {unclaimed!.gt(data?.totalEarnedRewards || new BN(0)) && (
-                  <>
-                    <br />
-                    <br />
-                    <Tooltip
-                      title="Your unclaimed rewards are higher than the rewards on the connected Ethereum account. Learn why..."
-                      description={`Your unclaimed rewards on this Centrifuge Chain account can be higher than the rewards you earned on the connected
+          (status === null || status === 'unconfirmed' || status === 'failed' || status === 'pending') && (
+            <>
+              🎉 You can claim {toDynamicPrecision(baseToDisplay(unclaimed, 18))} RAD rewards. Claim now to stake RAD
+              and participate in on-chain governance.
+              {claimExtHash && (
+                <>
+                  <br />
+                  <br />
+                  <Anchor href={`https://centrifuge.subscan.io/extrinsic/${claimExtHash}`} target="_blank">
+                    View claim transaction on Subscan
+                  </Anchor>
+                </>
+              )}
+              {unclaimed!.gt(data?.totalEarnedRewards || new BN(0)) && (
+                <>
+                  <br />
+                  <br />
+                  <Tooltip
+                    title="Your unclaimed rewards are higher than the rewards on the connected Ethereum account. Learn why..."
+                    description={`Your unclaimed rewards on this Centrifuge Chain account can be higher than the rewards you earned on the connected
                       Ethereum account if you have set this Centrifuge Chain account as recipient for multiple
                       Ethereum accounts.`}
-                    >
-                      <Small>
-                        Your unclaimed rewards are higher than the rewards on the connected Ethereum account. Learn
-                        why...
-                      </Small>
-                    </Tooltip>
-                  </>
-                )}
-              </>
-            )}
-            {status === 'succeeded' && (
-              <Alert type="success" style={{ marginTop: 24 }}>
-                You have claimed {toDynamicPrecision(baseToDisplay(unclaimed, 18))} RAD. If you still have active
-                investments, please come back tomorrow or at a later time to claim more rewards.
-              </Alert>
-            )}
-            {status === 'failed' && error && (
-              <Alert type="error" style={{ marginTop: 24 }}>
-                Error claiming rewards. {error}
-              </Alert>
-            )}
-          </>
+                  >
+                    <Small>
+                      Your unclaimed rewards are higher than the rewards on the connected Ethereum account. Learn why...
+                    </Small>
+                  </Tooltip>
+                </>
+              )}
+            </>
+          )
         ) : (
           <>
             🏆 You have claimed all your{' '}
@@ -107,7 +104,18 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
                 18
               )
             )}{' '}
-            RAD rewards. Stay invested to continue earning{' '}
+            RAD rewards.{' '}
+            {status === 'succeeded' && claimExtHash && (
+              <>
+                <br />
+                <br />
+                <Anchor href={`https://centrifuge.subscan.io/extrinsic/${claimExtHash}`} target="_blank">
+                  View claim transaction on Subscan
+                </Anchor>
+                <br />
+              </>
+            )}
+            Stay invested to continue earning{' '}
             {rewards.data?.rewardRate &&
               data?.currentActiveInvestmentAmount &&
               toDynamicPrecision(
@@ -134,6 +142,11 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
               </>
             )}
           </>
+        )}
+        {status === 'failed' && error && (
+          <Alert type="error" style={{ marginTop: 24 }}>
+            Error claiming rewards. {error}
+          </Alert>
         )}
       </Box>
       <RewardStripe unclaimed={unclaimed}>
