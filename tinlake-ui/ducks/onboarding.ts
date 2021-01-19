@@ -8,6 +8,7 @@ import { AuthState } from './auth'
 // Actions
 const LOAD_STATUS = 'tinlake-ui/onboarding/LOAD_STATUS'
 const RECEIVE_STATUS = 'tinlake-ui/onboarding/RECEIVE_STATUS'
+const CLEAR_STATUS = 'tinlake-ui/onboarding/CLEAR_STATUS'
 
 export interface OnboardingState {
   state: null | 'loading' | 'found'
@@ -28,6 +29,8 @@ export default function reducer(
       return { ...state, ...(action.payload.data || {}) }
     case LOAD_STATUS:
       return { ...state, state: 'loading' }
+    case CLEAR_STATUS:
+      return { ...state, state: null, data: null }
     case RECEIVE_STATUS:
       return { ...state, state: 'found', data: action.data }
     default:
@@ -52,6 +55,8 @@ export function loadOnboardingStatus(
       const req = await fetch(`${config.onboardAPIHost}pools/${poolId}/addresses/${address}`)
       const body = await req.json()
       dispatch({ type: RECEIVE_STATUS, data: body })
+    } else {
+      dispatch({ type: CLEAR_STATUS })
     }
   }
 }

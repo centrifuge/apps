@@ -96,6 +96,7 @@ export default function reducer(state: PoolState = initialState, action: AnyActi
 }
 
 let watcher: any = createWatcher([], multicallConfig)
+watcher.onError((err: Error) => console.error(`Pool multicall error: ${err}`))
 
 let prevAddress: string | undefined = undefined
 

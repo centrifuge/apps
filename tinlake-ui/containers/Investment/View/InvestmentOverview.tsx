@@ -57,7 +57,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const maxJuniorRatio = poolData ? parseRatio(poolData.maxJuniorRatio) : undefined
 
   React.useEffect(() => {
-    // sign()
     dispatch(loadLoans(props.tinlake))
   }, [props.selectedPool])
 

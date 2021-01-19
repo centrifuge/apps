@@ -93,7 +93,10 @@ class PoolList extends React.Component<Props> {
                 <Name>
                   {p.name}{' '}
                   {p.isUpcoming ||
-                  (p.seniorInterestRate && p.seniorInterestRate.isZero() === false && p.totalDebt.isZero()) ? (
+                  (p.seniorInterestRate &&
+                    p.seniorInterestRate.isZero() === false &&
+                    p.assetValue?.isZero() &&
+                    p.reserve?.isZero()) ? (
                     <Label blue>Upcoming</Label>
                   ) : p.isArchived ? (
                     <Label>Archived</Label>

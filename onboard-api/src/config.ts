@@ -13,6 +13,8 @@ export interface Config {
   onboardApiHost: string
   rpcUrl: string
   poolRegistry: string
+  memberAdminContractAddress: string
+  signerPrivateKey: string
   sessions: {
     privateKey: string
     privateKeyPassword: string
@@ -20,12 +22,10 @@ export interface Config {
   }
   docusign: {
     integrationKey: string
-    secretKey: string
     apiUsername: string
     accountId: string
     restApiHost: string
     accountApiHost: string
-    templateId: string
     rsaPrivateKey: string
   }
   securitize: {
@@ -49,6 +49,8 @@ const config: Config = {
   onboardApiHost: process.env.ONBOARD_API_HOST,
   rpcUrl: process.env.RPC_URL,
   poolRegistry: process.env.POOL_REGISTRY,
+  memberAdminContractAddress: process.env.MEMBER_ADMIN_CONTRACT_ADDRESS,
+  signerPrivateKey: process.env.SIGNER_PRIVATE_KEY,
   sessions: {
     privateKey: process.env.SESSIONS_PRIVATE_KEY,
     privateKeyPassword: process.env.SESSIONS_PRIVATE_KEY_PASSWORD,
@@ -56,12 +58,10 @@ const config: Config = {
   },
   docusign: {
     integrationKey: process.env.DOCUSIGN_INTEGRATION_KEY,
-    secretKey: process.env.DOCUSIGN_SECRET_KEY,
     apiUsername: process.env.DOCUSIGN_API_USERNAME,
     accountId: process.env.DOCUSIGN_ACCOUNT_ID,
     restApiHost: process.env.DOCUSIGN_REST_API_HOST,
     accountApiHost: process.env.DOCUSIGN_ACCOUNT_API_HOST,
-    templateId: process.env.DOCUSIGN_TEMPLATE_ID,
     rsaPrivateKey: process.env.DOCUSIGN_RSA_PRIVATE_KEY,
   },
   securitize: {
