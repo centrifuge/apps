@@ -7,7 +7,7 @@ import styled from 'styled-components'
 import { AuthState } from '../../ducks/auth'
 import { CentChainWalletState, InjectedAccount } from '../../ducks/centChainWallet'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
-import { loadCentChain, loadSubgraph } from '../../ducks/userRewards'
+import { loadSubgraph } from '../../ducks/userRewards'
 import { centChainAddrToAccountId } from '../../services/centChain/centChainAddrToAccountId'
 import { isCentChainAddr } from '../../services/centChain/isCentChainAddr'
 import { shortAddr } from '../../utils/shortAddr'
@@ -53,18 +53,21 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
       dispatch(loadSubgraph(ethAddr))
       if (!interval) {
         interval = setInterval(async () => {
-          await dispatch(loadSubgraph(ethAddr))
-          dispatch(loadCentChain())
+          dispatch(loadSubgraph(ethAddr))
         }, 2000)
       }
     }
-    return () => {
+  }, [status, ethAddr])
+
+  React.useEffect(
+    () => () => {
       if (interval) {
         clearInterval(interval)
         interval = null
       }
-    }
-  }, [status])
+    },
+    [ethAddr]
+  )
 
   const disabled =
     status === 'unconfirmed' ||

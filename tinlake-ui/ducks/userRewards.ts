@@ -164,8 +164,7 @@ export function load(
   ethAddr: string
 ): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
   return async (dispatch) => {
-    await dispatch(loadSubgraph(ethAddr)) // block, need data for next two loads
-    dispatch(loadCentChain())
+    await dispatch(loadSubgraph(ethAddr)) // block, need data for next load
     dispatch(maybeLoadAndApplyClaims())
   }
 }
@@ -177,6 +176,7 @@ export function loadSubgraph(
     dispatch({ type: LOAD_SUBGRAPH, ethAddr })
     const data = await Apollo.getUserRewards(ethAddr)
     dispatch({ data, type: RECEIVE_SUBGRAPH })
+    await dispatch(loadCentChain())
   }
 }
 

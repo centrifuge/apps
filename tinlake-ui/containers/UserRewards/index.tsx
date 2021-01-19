@@ -68,14 +68,14 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
               justify="center"
             >
               <Metric
-                loading={userRewards?.subgraphState !== 'found' || !data}
+                loading={!data}
                 value={baseToDisplay(data?.currentActiveInvestmentAmount || '0', 18)}
                 label="Your Investment"
                 token="DAI"
                 borderRight
               />
               <Metric
-                loading={rewards?.state !== 'found' || !rewards.data || userRewards?.subgraphState !== 'found' || !data}
+                loading={!rewards.data || !data}
                 value={baseToDisplay(
                   rewards.data?.rewardRate?.mul(data?.currentActiveInvestmentAmount.toString() || 0).toString() || '0',
                   18
@@ -85,7 +85,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                 borderRight
               />
               <Metric
-                loading={userRewards?.subgraphState !== 'found' || !data}
+                loading={!data}
                 value={baseToDisplay(data?.totalEarnedRewards || '0', 18)}
                 label="Your Earned Rewards"
                 token="RAD"
@@ -140,9 +140,6 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                   <Card>
                     <Box pad="medium">
                       <Head>Link Your Centrifuge Chain Account</Head>
-                      Your RAD rewards are earned on Ethereum, but claimed on Centrifuge Chain.
-                      <br />
-                      <br />
                       <SetCentAccount tinlake={tinlake} />
                     </Box>
                   </Card>
@@ -197,14 +194,14 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
               <h3 style={{ margin: 0 }}>System-wide Rewards</h3>
             </Box>
             <MetricRow
-              loading={rewards?.state !== 'found' || !rewards.data}
+              loading={!rewards.data}
               value={baseToDisplay(rewards.data?.todayReward || '0', 18)}
               label="Rewards Earned Today"
               token="RAD"
               borderBottom
             />
             <MetricRow
-              loading={rewards?.state !== 'found' || !rewards.data}
+              loading={!rewards.data}
               value={rewards.data?.rewardRate.mul(10000).toFixed(0) || ''}
               label="Daily Reward Rate"
               token="RAD"
@@ -212,7 +209,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
               borderBottom
             />
             <MetricRow
-              loading={rewards?.state !== 'found' || !rewards.data}
+              loading={!rewards.data}
               value={baseToDisplay(rewards.data?.toDateRewardAggregateValue || '0', 18)}
               label="Total Rewards Earned"
               token="RAD"
@@ -277,9 +274,9 @@ const Explainer = () => (
       <HelpIcon src="/static/help-circle.svg" />
       <h3 style={{ margin: 0 }}>How it works</h3>
     </Box>
-    Radial (RAD) Rewards are earned on Ethereum based on your Tinlake investments but claimed and owned on Centrifuge
-    Chain. To claim your rewards you need to link your Tinlake investment account to a Centrifuge Chain account
-    receiving and holding your RAD.
+    Radial (RAD) Rewards are earned on Ethereum based on your Tinlake investments but claimed on Centrifuge Chain. To
+    claim your rewards you need to link your Tinlake investment account to a Centrifuge Chain account receiving and
+    holding your RAD.
     <br />
     <br />
     <Anchor

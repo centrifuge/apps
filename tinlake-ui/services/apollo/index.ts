@@ -343,31 +343,33 @@ class Apollo {
       return null
     }
 
-    const rewardBalance = result.data?.rewardBalances[0]
-    const account = result.data?.accounts[0]
-    if (!rewardBalance || !account) {
-      return {
-        currentActiveInvestmentAmount: new BN(0),
-        nonZeroInvestmentSince: null,
-        claimable: false,
-        totalEarnedRewards: new BN(0),
-        unlinkedRewards: new BN(0),
-        links: [],
-      }
+    const transformed: UserRewardsData = {
+      currentActiveInvestmentAmount: new BN(0),
+      nonZeroInvestmentSince: null,
+      claimable: false,
+      totalEarnedRewards: new BN(0),
+      unlinkedRewards: new BN(0),
+      links: [],
     }
 
-    const transformed: UserRewardsData = {
-      currentActiveInvestmentAmount: new BN(account.currentActiveInvestmentAmount),
-      nonZeroInvestmentSince: rewardBalance.nonZeroBalanceSince && new BN(rewardBalance.nonZeroBalanceSince),
-      claimable: rewardBalance.claimable,
-      totalEarnedRewards: new BN(rewardBalance.totalRewards),
-      unlinkedRewards: new BN(rewardBalance.linkableRewards),
-      links: (rewardBalance.links as any[]).map((link: any) => ({
+    const account = result.data?.accounts[0]
+    if (account) {
+      transformed.currentActiveInvestmentAmount = new BN(account.currentActiveInvestmentAmount)
+    }
+
+    const rewardBalance = result.data?.rewardBalances[0]
+    if (rewardBalance) {
+      transformed.nonZeroInvestmentSince =
+        rewardBalance.nonZeroBalanceSince && new BN(rewardBalance.nonZeroBalanceSince)
+      transformed.claimable = rewardBalance.claimable
+      transformed.totalEarnedRewards = new BN(rewardBalance.totalRewards)
+      transformed.unlinkedRewards = new BN(rewardBalance.linkableRewards)
+      transformed.links = (rewardBalance.links as any[]).map((link: any) => ({
         centAccountID: link.centAddress,
         earned: new BN(link.rewardsAccumulated),
         claimable: null,
         claimed: null,
-      })),
+      }))
     }
 
     return transformed
