@@ -362,11 +362,11 @@ class Apollo {
       transformed.nonZeroInvestmentSince =
         rewardBalance.nonZeroBalanceSince && new BN(rewardBalance.nonZeroBalanceSince)
       transformed.claimable = rewardBalance.claimable
-      transformed.totalEarnedRewards = new BN(rewardBalance.totalRewards)
-      transformed.unlinkedRewards = new BN(rewardBalance.linkableRewards)
+      transformed.totalEarnedRewards = new BN(new Decimal(rewardBalance.totalRewards).toFixed(0))
+      transformed.unlinkedRewards = new BN(new Decimal(rewardBalance.linkableRewards).toFixed(0))
       transformed.links = (rewardBalance.links as any[]).map((link: any) => ({
         centAccountID: link.centAddress,
-        earned: new BN(link.rewardsAccumulated),
+        earned: new BN(new Decimal(link.rewardsAccumulated).toFixed(0)),
         claimable: null,
         claimed: null,
       }))
