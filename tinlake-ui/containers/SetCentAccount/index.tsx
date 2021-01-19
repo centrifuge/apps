@@ -37,7 +37,7 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
     }
     const txId = await createTransaction(
       `Link account ${shortAddr(selectedCentAcc.addrCentChain)}`,
-      'updateClaimRADAddress',
+      'updateClaimRADAccountID',
       [tinlake, centChainAddrToAccountId(selectedCentAcc.addrCentChain)]
     )
     setTxId(txId)
