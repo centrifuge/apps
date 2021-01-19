@@ -2,25 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { KycStatusLabel } from 'src/controllers/types'
 import { DatabaseService } from './db.service'
 
-export type Blockchain = 'ethereum'
-export type Network = 'mainnet' | 'kovan'
-export interface KycEntity {
-  userId: string
-  provider: string
-  providerAccountId: string
-  poolId?: string
-  digest: SecuritizeDigest
-  createdAt?: Date
-  verifiedAt?: Date
-  status: KycStatusLabel
-}
-
-export interface SecuritizeDigest {
-  accessToken: string
-  refreshToken: string
-  expiration: string
-}
-
 @Injectable()
 export class KycRepo {
   constructor(private readonly db: DatabaseService) {}
@@ -41,9 +22,9 @@ export class KycRepo {
       select *
       from kyc
       where kyc.created_at is not null
-      and kyc.verified_at is null
+      and kyc.status != 'verified'
+      or (kyc.usa_tax_resident = TRUE and kyc.accredited = FALSE)
     `
-
     if (!investors) return []
 
     return (investors as unknown) as KycEntity[]
@@ -70,10 +51,18 @@ export class KycRepo {
     return newKyc as KycEntity | undefined
   }
 
-  async setStatus(provider: string, providerAccountId: string, status: KycStatusLabel): Promise<KycEntity | undefined> {
+  async setStatus(
+    provider: string,
+    providerAccountId: string,
+    status: KycStatusLabel,
+    usaTaxResident?: boolean,
+    accredited?: boolean
+  ): Promise<KycEntity | undefined> {
     const [updatedKyc] = await this.db.sql`
       update kyc
-      set status = ${status}
+      set status = ${status},
+      usa_tax_resident = ${usaTaxResident === undefined ? false : usaTaxResident},
+      accredited = ${accredited === undefined ? false : accredited}
       where provider = ${provider}
       and provider_account_id = ${providerAccountId}
 
@@ -82,4 +71,24 @@ export class KycRepo {
 
     return updatedKyc as KycEntity | undefined
   }
+}
+
+export type Blockchain = 'ethereum'
+export type Network = 'mainnet' | 'kovan'
+export interface KycEntity {
+  userId: string
+  provider: string
+  providerAccountId: string
+  poolId?: string
+  digest: SecuritizeDigest
+  createdAt?: Date
+  status: KycStatusLabel
+  accredited: boolean
+  usaTaxResident: boolean
+}
+
+export interface SecuritizeDigest {
+  accessToken: string
+  refreshToken: string
+  expiration: string
 }

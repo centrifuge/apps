@@ -8,6 +8,7 @@ import loansReducer from '../ducks/loans'
 import onboardingReducer from '../ducks/onboarding'
 import poolReducer from '../ducks/pool'
 import poolsReducer from '../ducks/pools'
+import portfolioReducer from '../ducks/portfolio'
 import transactionReducer from '../ducks/transactions'
 
 const sentryReduxEnhancer = config.enableErrorLogging ? Sentry.createReduxEnhancer({}) : {}
@@ -33,6 +34,7 @@ const makeStore = () => {
       auth: authReducer,
       transactions: transactionReducer,
       onboarding: onboardingReducer,
+      portfolio: portfolioReducer,
     }),
     composeEnhancers(applyMiddleware(thunk))
   )

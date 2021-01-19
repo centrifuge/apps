@@ -53,7 +53,12 @@ export class SecuritizeService {
   }
 
   // dontRefresh is to prevent a recursive loop when the investor request keeps failing despite the access token being refreshed
-  async getInvestor(digest: SecuritizeDigest, dontRefresh?: boolean): Promise<Investor | undefined> {
+  async getInvestor(
+    userId: string,
+    providerAccountId: string,
+    digest: SecuritizeDigest,
+    dontRefresh?: boolean
+  ): Promise<Investor | undefined> {
     const url = `${config.securitize.apiHost}v1/${config.securitize.clientId}/investor`
 
     const response = await fetch(url, {
@@ -65,15 +70,14 @@ export class SecuritizeService {
 
     if (!dontRefresh && response.status === 401) {
       // Access token has expired
-      this.logger.debug(`Access token has expired`)
       const newDigest = await this.refreshAccessToken(digest.refreshToken)
-      if (!newDigest) return undefined
+      if (!newDigest) {
+        this.logger.warn(`Failed to refresh access token for ${userId}`)
+        return undefined
+      }
 
-      this.logger.debug(`TODO: store new digest`)
-      // TODO: store new digest
-
-      // this.kycRepo.upsertSecuritize(userId, providerAccountId, newDigest)
-      return this.getInvestor(newDigest, true)
+      this.kycRepo.upsertSecuritize(userId, providerAccountId, newDigest)
+      return this.getInvestor(userId, providerAccountId, newDigest, true)
     }
 
     const investor = await response.json()
@@ -113,11 +117,21 @@ export interface Investor {
   tfaEnabled: boolean
   language: string
   email: string
-  verificationStatus: string
+  verificationStatus: 'none' | 'processing' | 'updates-required' | 'verified' | 'manual-review' | 'rejected' | 'expired'
   details: {
+    firstName?: string
+    middleName?: string
+    lastName?: string
     tax: any[]
-    address: {
-      countryCode: string
+    address?: {
+      countryCode?: string
     }
+  }
+  domainInvestorDetails: {
+    taxInfo: any
+    isUsaTaxResident: boolean
+    isAccredited: boolean
+    investorFullName?: string
+    entityName?: string
   }
 }

@@ -5,6 +5,9 @@ import { DatabaseService } from './db.service'
 export type User = {
   id: string
   email?: string
+  firstName?: string
+  middleName?: string
+  lastName?: string
   countryCode?: string
 }
 
@@ -17,6 +20,16 @@ export class UserRepo {
       select *
       from users
       where users.id = ${userId}
+    `
+
+    return data as User | undefined
+  }
+
+  async findByAddress(address: string): Promise<User | undefined> {
+    const [data] = await this.db.sql`
+    select users.*
+    from users
+    inner join addresses on addresses.address = ${address}
     `
 
     return data as User | undefined
@@ -38,17 +51,38 @@ export class UserRepo {
     return user as User | undefined
   }
 
-  async update(userId: string, email: string, fullName: string, countryCode: string): Promise<User | undefined> {
+  async update(
+    userId: string,
+    email: string,
+    countryCode: string,
+    fullName?: string,
+    entityName?: string
+  ): Promise<User | undefined> {
     const [updatedUser] = await this.db.sql`
       update users
       set email = ${email},
-      full_name = ${fullName},
-      country_code = ${countryCode}
+      country_code = ${countryCode},
+      full_name = ${fullName || ''},
+      entity_name = ${entityName || ''}
       where id = ${userId}
 
       returning *
     `
 
     return updatedUser as User | undefined
+  }
+
+  async delete(address: string, blockchain: string, network: string): Promise<boolean> {
+    await this.db.sql`
+      delete from users
+      where users.id IN (
+        select addresses.user_id
+        from addresses
+        where addresses.blockchain = ${blockchain}
+        and addresses.network = ${network}
+        and addresses.address = ${address}
+      )`
+
+    return true
   }
 }

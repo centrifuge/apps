@@ -1,11 +1,12 @@
-import { BadRequestException, Controller, Get, Param } from '@nestjs/common'
+import { BadRequestException, Controller, Delete, Get, Param, Query, UnauthorizedException } from '@nestjs/common'
 import { AddressRepo } from '../repos/address.repo'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
+import { InvestmentRepo } from '../repos/investment.repo'
 import { KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
-import { DocusignService } from '../services/docusign.service'
 import { SecuritizeService } from '../services/kyc/securitize.service'
 import { PoolService } from '../services/pool.service'
+import { SessionService } from '../services/session.service'
 import { AddressStatus, AgreementsStatus, KycStatusLabel } from './types'
 
 @Controller()
@@ -15,9 +16,10 @@ export class AddressController {
     private readonly securitizeService: SecuritizeService,
     private readonly kycRepo: KycRepo,
     private readonly agreementRepo: AgreementRepo,
-    private readonly docusignService: DocusignService,
     private readonly poolService: PoolService,
-    private readonly userRepo: UserRepo
+    private readonly userRepo: UserRepo,
+    private readonly investmentRepo: InvestmentRepo,
+    private readonly sessionService: SessionService
   ) {}
 
   @Get('pools/:poolId/addresses/:address')
@@ -39,8 +41,8 @@ export class AddressController {
     if (kyc) {
       let status: KycStatusLabel = kyc.status
 
-      if (!kyc.verifiedAt) {
-        const investor = await this.securitizeService.getInvestor(kyc.digest)
+      if (kyc.status !== 'verified' || (kyc.usaTaxResident && !kyc.accredited)) {
+        const investor = await this.securitizeService.getInvestor(kyc.userId, kyc.providerAccountId, kyc.digest)
 
         if (!investor) {
           return {
@@ -53,28 +55,24 @@ export class AddressController {
         }
 
         if (investor.verificationStatus !== kyc.status) {
-          this.kycRepo.setStatus('securitize', kyc.providerAccountId, investor.verificationStatus as KycStatusLabel)
-          status = investor.verificationStatus as KycStatusLabel
+          this.kycRepo.setStatus(
+            'securitize',
+            kyc.providerAccountId,
+            investor.verificationStatus === 'manual-review' ? 'processing' : investor.verificationStatus,
+            investor.domainInvestorDetails.isUsaTaxResident,
+            investor.domainInvestorDetails.isAccredited
+          )
+          status = investor.verificationStatus === 'manual-review' ? 'processing' : investor.verificationStatus
         }
       }
 
-      const agreements = await this.agreementRepo.findByUserAndPool(address.userId, params.poolId, user.email)
+      const agreements = await this.agreementRepo.getByUserAndPool(
+        address.userId,
+        params.poolId,
+        user.email,
+        user.countryCode
+      )
 
-      // TODO: this should be handled in a Connect webhook from Docusign
-      agreements.forEach(async (agreement: Agreement) => {
-        if (!agreement.signedAt || !agreement.counterSignedAt) {
-          const status = await this.docusignService.getEnvelopeStatus(agreement.providerEnvelopeId)
-          if (!agreement.signedAt && status.signed) {
-            await this.agreementRepo.setSigned(agreement.id)
-          }
-
-          if (!agreement.counterSignedAt && status.counterSigned) {
-            await this.agreementRepo.setCounterSigned(agreement.id)
-          }
-        }
-      })
-
-      // TODO: this is a hack, we shouldn't need to retrieve them twice
       const agreementLinks = agreements.map(
         (agreement: Agreement): AgreementsStatus => {
           return {
@@ -87,13 +85,15 @@ export class AddressController {
         }
       )
 
+      const isWhitelisted = await this.investmentRepo.getWhitelistStatus(address.id, params.poolId)
+
       return {
         kyc: {
           status,
+          isWhitelisted,
           url: authorizationLink,
-          us: user.countryCode === 'US',
-          created: kyc.createdAt !== null,
-          verified: kyc.verifiedAt !== null,
+          isUsaTaxResident: kyc.usaTaxResident,
+          accredited: kyc.accredited,
         },
         agreements: agreementLinks,
       }
@@ -105,5 +105,17 @@ export class AddressController {
       },
       agreements: [],
     }
+  }
+
+  // TODO: this is a temporary method to delete users only on kovan. Should be removed or implemented properly at some point
+  @Delete('addresses/:address')
+  async deleteMyAccount(@Param() params, @Query() query): Promise<any> {
+    const user = await this.userRepo.findByAddress(params.address)
+    if (!user) throw new BadRequestException('Invalid user')
+
+    const verifiedSession = this.sessionService.verify(query.session, user.id)
+    if (!verifiedSession) throw new UnauthorizedException('Invalid session')
+
+    this.userRepo.delete(params.address, 'ethereum', 'kovan')
   }
 }
