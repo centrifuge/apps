@@ -102,17 +102,16 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
               <>
                 <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
                   <Heading level="5" margin={'0'}>
-                    Outstanding Volume
+                    Asset Value
                   </Heading>
                   <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
                     <LoadingValue done={poolData?.outstandingVolume !== undefined} height={22}>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.outstandingVolume || '0', 18), 0))}{' '}
-                      DAI
+                      {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))} DAI
                     </LoadingValue>
                   </Heading>
                 </Box>
 
-                <Table margin={{ bottom: 'small' }}>
+                <Table margin={{ bottom: '0' }}>
                   <TableBody>
                     <TableRow>
                       <TableCell
@@ -136,16 +135,36 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                       </TableCell>
                     </TableRow>
                     <TableRow>
+                      <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+                        <span>Available funds for financing</span>
+                      </TableCell>
+                      <TableCell style={{ textAlign: 'end' }}>
+                        <LoadingValue done={poolData?.reserve !== undefined}>
+                          {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.availableFunds || '0', 18), 0))}{' '}
+                          DAI
+                        </LoadingValue>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
                       <TableCell
                         scope="row"
                         style={{ alignItems: 'start', justifyContent: 'center' }}
                         border={{ color: 'transparent' }}
+                        pad={{ top: '15px' }}
                       >
-                        <span>Available funds for financing</span>
+                        <span>Repaid this epoch</span>
                       </TableCell>
-                      <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+                      <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }} pad={{ top: '15px' }}>
                         <LoadingValue done={poolData?.reserve !== undefined}>
-                          {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.availableFunds || '0', 18), 0))}{' '}
+                          {addThousandsSeparators(
+                            toPrecision(
+                              baseToDisplay(
+                                (poolData?.reserve || new BN(0)).sub(poolData?.availableFunds || new BN(0)),
+                                18
+                              ),
+                              0
+                            )
+                          )}{' '}
                           DAI
                         </LoadingValue>
                       </TableCell>

@@ -34,7 +34,7 @@ const ConnectStep: React.FC<Props> = () => {
           <div>
             <Button primary label={`Connect`} onClick={connect} fill={false} />
           </div>
-          <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
+          <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
         </StepBody>
       )}
       {address && <StepBody>&nbsp;</StepBody>}

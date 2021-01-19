@@ -9,7 +9,7 @@ import Alert from '../../components/Alert'
 import { LoadingValue } from '../../components/LoadingValue'
 import NumberDisplay from '../../components/NumberDisplay'
 import { Cont, Label, TokenLogo, Unit, Value } from '../../components/PoolsMetrics/styles'
-import PoolTitle from '../../components/PoolTitle'
+import PageTitle from '../../components/PageTitle'
 import { AuthState, ensureAuthed } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
 import { maybeLoadRewards, RewardsState } from '../../ducks/rewards'
@@ -54,7 +54,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
 
   return (
     <Box margin={{ top: 'medium' }}>
-      <PoolTitle page="Claim Your RAD Rewards" return />
+      <PageTitle page="Claim Your RAD Rewards" return />
 
       <Box direction="row" align="start" justify="between">
         <Box flex>

@@ -10,6 +10,7 @@ import onboardingReducer from '../ducks/onboarding'
 import poolReducer from '../ducks/pool'
 import poolsReducer from '../ducks/pools'
 import rewardsReducer from '../ducks/rewards'
+import portfolioReducer from '../ducks/portfolio'
 import transactionReducer from '../ducks/transactions'
 import userRewardsReducer from '../ducks/userRewards'
 
@@ -39,6 +40,7 @@ const makeStore = () => {
       rewards: rewardsReducer,
       centChainWallet: centChainWalletReducer,
       onboarding: onboardingReducer,
+      portfolio: portfolioReducer,
     }),
     composeEnhancers(applyMiddleware(thunk))
   )

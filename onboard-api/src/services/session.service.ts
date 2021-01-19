@@ -18,14 +18,16 @@ export class SessionService {
       alg: 'RS256',
       typ: 'JWT',
     }
+
     const unixNow = Math.floor(Date.now() / 1000)
+    const oneHour = 60 * 60
 
     const body = {
       sub: userId,
       aud: config.onboardApiHost,
       iss: 'https://jwt.io/',
       iat: unixNow,
-      exp: unixNow + 600,
+      exp: unixNow + oneHour,
     }
 
     const privateKey = config.sessions.privateKey.replace(/\\n/g, '\n')

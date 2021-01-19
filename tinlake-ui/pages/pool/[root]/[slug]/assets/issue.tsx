@@ -6,7 +6,7 @@ import * as React from 'react'
 import Auth from '../../../../../components/Auth'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
-import PoolTitle from '../../../../../components/PoolTitle'
+import PageTitle from '../../../../../components/PageTitle'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
@@ -46,7 +46,7 @@ class LoanIssuePage extends React.Component<Props> {
                     tinlake={tinlake}
                     render={(auth) => (
                       <Box margin={{ top: 'medium' }}>
-                        <PoolTitle pool={pool} page={`Lock NFT`} parentPage="Assets" parentPageHref="/assets" />
+                        <PageTitle pool={pool} page={`Lock NFT`} parentPage="Assets" parentPageHref="/assets" />
 
                         <IssueLoan
                           tinlake={tinlake}

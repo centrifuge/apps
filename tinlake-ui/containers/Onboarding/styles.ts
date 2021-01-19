@@ -8,11 +8,13 @@ export const StepHeader = styled.div`
   flex-direction: row;
 `
 
-export const StepIcon = styled.div<{ inactive?: boolean; checked?: boolean }>`
+export const StepIcon = styled.div<{ inactive?: boolean; checked?: boolean; pending?: boolean }>`
   width: 40px;
   padding-top: 2px;
   background: ${(props) =>
-    props.checked
+    props.pending
+      ? "url('/static/clock.svg')"
+      : props.checked
       ? "url('/static/circle-checked.svg')"
       : props.inactive
       ? "url('/static/circle-inactive.svg')"
@@ -28,7 +30,7 @@ export const StepTitle = styled.div<{ inactive?: boolean }>`
 `
 
 export const StepBody = styled.div<{ inactive?: boolean }>`
-  margin: 20px 20px 20px 10px;
+  margin: 10px 20px 10px 10px;
   padding: 2px 0 0 30px;
   border-left: 1px solid #000;
   border-left: ${(props) => (props.inactive ? '1px solid #bbb' : '1px solid #000')};
@@ -43,5 +45,28 @@ export const FormFieldWithoutBorder = styled(FormField)`
   > span {
     margin: 12px 0 0 34px;
     font-weight: bold;
+  }
+`
+
+export const LegalCopy = styled.div`
+  max-height: 600px;
+  overflow: scroll;
+  margin: 20px 0;
+  background: #efefef;
+  padding: 0 20px;
+  border-radius: 10px;
+
+  > p {
+    font-size: 13px;
+    text-align: justify;
+  }
+
+  ul {
+    padding-inline-start: 30px;
+
+    li {
+      padding-left: 10px;
+      margin-bottom: 10px;
+    }
   }
 `

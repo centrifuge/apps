@@ -56,11 +56,11 @@ const HelpMenu: React.FC<{}> = () => {
         >
           <InnerMenu width="200px" elevation="small" round="xsmall" background="white">
             <Title>Need help?</Title>
-            <MenuItem href="https://centrifuge.io/slack/" target="_blank" icon="slack">
-              <Name>Slack</Name>
-            </MenuItem>
             <MenuItem href="https://t.me/CentrifugeSupport" target="_blank" icon="telegram">
               <Name>Telegram</Name>
+            </MenuItem>
+            <MenuItem href="https://centrifuge.io/slack/" target="_blank" icon="slack">
+              <Name>Slack</Name>
             </MenuItem>
             <MenuItem href="mailto:support@centrifuge.io" target="_blank" icon="email">
               <Name>Email</Name>
