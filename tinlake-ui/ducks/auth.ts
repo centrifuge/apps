@@ -332,7 +332,7 @@ export function loadProxies(): ThunkAction<Promise<void>, { auth: AuthState }, u
   }
 }
 
-export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+export function loadPermissions(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     // If no addresses are loaded, we are not in a pool, and can't check permisions (nor do we need to)
     if (Object.keys(tinlake.contractAddresses).length === 0) return
@@ -348,7 +348,7 @@ export function loadPermissions(tinlake: any): ThunkAction<Promise<void>, { auth
       return
     }
 
-    if (!tinlake.canQueryPermissions) {
+    if (!tinlake.canQueryPermissions()) {
       return
     }
 

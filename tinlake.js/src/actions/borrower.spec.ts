@@ -5,15 +5,17 @@ import testConfig from '../test/config'
 import { createTinlake, TestProvider } from '../test/utils'
 import { ITinlake } from '../types/tinlake'
 
-const adminAccount = ethers.Wallet.createRandom()
+const testProvider = new TestProvider(testConfig)
+
+const adminAccount = testProvider.createRandomAccount()
+const lenderAccount = testProvider.createRandomAccount()
 let borrowerAccount: ethers.Wallet
 
 // user with super powers can fund and rely accounts
 let governanceTinlake: ITinlake
 let adminTinlake: ITinlake
 let borrowerTinlake: ITinlake
-
-const testProvider = new TestProvider(testConfig)
+let lenderTinlake: ITinlake
 
 const { SUCCESS_STATUS, FAUCET_AMOUNT, contractAddresses } = testConfig
 
@@ -21,9 +23,10 @@ describe.skip('borrower tests', async () => {
   before(async () => {
     governanceTinlake = createTinlake(testConfig.godAccount, testConfig)
     adminTinlake = createTinlake(adminAccount, testConfig)
+    lenderTinlake = createTinlake(lenderAccount, testConfig)
 
-    // fund borrowerAccount with ETH
-    await testProvider.fundAccountWithETH(adminAccount.address, FAUCET_AMOUNT)
+    await testProvider.fundAccountWithETH(adminAccount, FAUCET_AMOUNT)
+    await testProvider.fundAccountWithETH(lenderAccount, FAUCET_AMOUNT)
 
     // supply tranche with money
     const amount = '50'
@@ -31,9 +34,18 @@ describe.skip('borrower tests', async () => {
   })
 
   beforeEach(async () => {
-    borrowerAccount = ethers.Wallet.createRandom()
+    borrowerAccount = testProvider.createRandomAccount()
     borrowerTinlake = createTinlake(borrowerAccount, testConfig)
-    await testProvider.fundAccountWithETH(borrowerAccount.address, FAUCET_AMOUNT)
+    await testProvider.fundAccountWithETH(borrowerAccount, FAUCET_AMOUNT)
+  })
+
+  afterEach(async () => {
+    await testProvider.refundETHFromAccount(borrowerAccount)
+  })
+
+  after(async () => {
+    await testProvider.refundETHFromAccount(adminAccount)
+    await testProvider.refundETHFromAccount(lenderAccount)
   })
 
   it('success: issue loan from a minted collateral NFT', async () => {
@@ -176,11 +188,8 @@ async function mintIssueBorrow(usr: string, tinlake: ITinlake, amount: string) {
 }
 
 async function fundTranche(amount: string) {
-  const lenderAccount = ethers.Wallet.createRandom()
-  const lenderTinlake = createTinlake(lenderAccount, testConfig)
-
   // fund lender accoutn with eth
-  await testProvider.fundAccountWithETH(lenderAccount.address, FAUCET_AMOUNT)
+  await testProvider.fundAccountWithETH(lenderAccount, FAUCET_AMOUNT)
 
   // make admin adress ward on tranche operator
   const relyTx = await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['JUNIOR_OPERATOR'])

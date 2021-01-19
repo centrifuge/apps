@@ -8,10 +8,10 @@ import { ITinlake } from '../types/tinlake'
 let lenderAccount: Wallet
 let lenderTinlake: ITinlake
 
-const adminAccount = ethers.Wallet.createRandom()
+const testProvider = new TestProvider(testConfig)
+const adminAccount = testProvider.createRandomAccount()
 let adminTinlake: ITinlake
 let governanceTinlake: ITinlake
-const testProvider = new TestProvider(testConfig)
 
 const { SUCCESS_STATUS, FAUCET_AMOUNT, FAIL_STATUS, contractAddresses } = testConfig
 
@@ -21,7 +21,7 @@ describe.skip('lender functions', async () => {
     governanceTinlake = createTinlake(testConfig.godAccount, testConfig)
 
     // fund lender & admin accounts with currency
-    await testProvider.fundAccountWithETH(adminAccount.address, FAUCET_AMOUNT)
+    await testProvider.fundAccountWithETH(adminAccount, FAUCET_AMOUNT)
 
     // rely admin on junior operator
     const relyTx = await governanceTinlake.relyAddress(adminAccount.address, contractAddresses['JUNIOR_OPERATOR'])
@@ -29,9 +29,17 @@ describe.skip('lender functions', async () => {
   })
 
   beforeEach(async () => {
-    lenderAccount = ethers.Wallet.createRandom()
+    lenderAccount = testProvider.createRandomAccount()
     lenderTinlake = createTinlake(lenderAccount, testConfig)
-    return await testProvider.fundAccountWithETH(lenderAccount.address, FAUCET_AMOUNT)
+    return await testProvider.fundAccountWithETH(lenderAccount, FAUCET_AMOUNT)
+  })
+
+  afterEach(async () => {
+    await testProvider.refundETHFromAccount(lenderAccount)
+  })
+
+  after(async () => {
+    await testProvider.refundETHFromAccount(adminAccount)
   })
 
   it('success: supply junior', async () => {

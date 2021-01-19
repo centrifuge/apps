@@ -1,7 +1,10 @@
+import assert from 'assert'
 import { ethers } from 'ethers'
 import Tinlake from '..'
-import { ITinlake } from '../types/tinlake'
+import { ITinlake, PendingTransaction } from '../types/tinlake'
 import { ProviderConfig } from './config'
+import testConfig from './config'
+const { SUCCESS_STATUS } = testConfig
 
 export class TestProvider {
   public provider: ethers.providers.Provider
@@ -15,14 +18,24 @@ export class TestProvider {
     this.transactionTimeout = transactionTimeout
   }
 
-  async fundAccountWithETH(usr: string, amount: string) {
-    const transaction = {
-      to: usr,
-      value: ethers.BigNumber.from(amount),
-    }
+  createRandomAccount(): ethers.Wallet {
+    return ethers.Wallet.createRandom().connect(this.provider)
+  }
 
-    const res = await this.wallet.sendTransaction(transaction)
-    await this.provider.waitForTransaction(res.hash!)
+  async fundAccountWithETH(account: ethers.Wallet, amount: string) {
+    console.log(`funding account ${account.address} with ${amount} ETH`)
+    await transferEth(this.wallet, account.address, ethers.BigNumber.from(amount))
+    console.log(`funded account ${account.address} with ${amount} ETH`)
+  }
+
+  async refundETHFromAccount(account: ethers.Wallet) {
+    const balance = await account.provider.getBalance(account.address)
+    console.log(`refunding from account ${account.address} with ${balance.toString()} ETH`)
+    const gasPrice = await account.provider.getGasPrice()
+    const gasLimit = 21000 // simple transfer default, if recipient runs no logic
+    const refundAmt = balance.sub(gasPrice.mul(gasLimit))
+    await transferEth(account, this.wallet.address, refundAmt, { gasPrice, gasLimit })
+    console.log(`refunded from account ${account.address} ${refundAmt.toString()} ETH (balance - gas)`)
   }
 }
 
@@ -39,4 +52,23 @@ export function createTinlake(wallet: ethers.Wallet, testConfig: ProviderConfig)
   })
 
   return tinlake
+}
+
+export async function transferEth(
+  from: ethers.Wallet,
+  to: string,
+  value: ethers.BigNumber,
+  options?: ethers.utils.Deferrable<ethers.providers.TransactionRequest>
+) {
+  const res = await from.sendTransaction({
+    to,
+    value,
+    ...options,
+  })
+  await from.provider.waitForTransaction(res.hash!)
+}
+
+export async function assertTxSuccess(tinlake: ITinlake, transaction: PendingTransaction) {
+  const transactionResult = await tinlake.getTransactionReceipt(transaction)
+  assert.strictEqual(transactionResult.status, SUCCESS_STATUS)
 }

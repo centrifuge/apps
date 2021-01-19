@@ -1,10 +1,6 @@
-import Tinlake, { ITinlake } from '@centrifuge/tinlake-js'
+import Tinlake, { ContractAddresses, ITinlake } from '@centrifuge/tinlake-js'
 import { ethers } from 'ethers'
 import config from '../../config'
-
-type ContractAddresses = {
-  [key: string]: string
-}
 
 let tinlake: ITinlake | null = null
 let currentAddresses: null | ContractAddresses = null

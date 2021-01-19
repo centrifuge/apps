@@ -1,16 +1,11 @@
-import { ITinlake } from '@centrifuge/tinlake-js'
+import { ContractAddresses, ITinlake } from '@centrifuge/tinlake-js'
 import * as React from 'react'
 import { initTinlake } from '../../services/tinlake'
 
 interface Props {
   render: (tinlake: ITinlake) => React.ReactElement
   version?: 2 | 3
-  addresses?: {
-    ROOT_CONTRACT: string
-    ACTIONS: string
-    PROXY_REGISTRY: string
-    COLLATERAL_NFT: string
-  }
+  addresses?: ContractAddresses
   contractConfig?: {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
     SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'

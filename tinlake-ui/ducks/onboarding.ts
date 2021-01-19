@@ -3,6 +3,7 @@ import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import config, { Pool, UpcomingPool } from '../config'
+import { AuthState } from './auth'
 
 // Actions
 const LOAD_STATUS = 'tinlake-ui/onboarding/LOAD_STATUS'
@@ -38,7 +39,9 @@ export default function reducer(
 }
 
 // TODO: support upcoming pools without root contract id
-export function loadOnboardingStatus(pool: Pool | UpcomingPool): ThunkAction<Promise<void>, any, undefined, Action> {
+export function loadOnboardingStatus(
+  pool: Pool | UpcomingPool
+): ThunkAction<Promise<void>, { auth: AuthState; onboarding: OnboardingState }, undefined, Action> {
   return async (dispatch, getState) => {
     // TOOD: fix ignoring upcoming pools
     if (!('addresses' in pool)) return
