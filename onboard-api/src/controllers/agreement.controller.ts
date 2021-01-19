@@ -3,18 +3,18 @@ import {
   Body,
   Controller,
   Get,
+  Logger,
   NotFoundException,
   Param,
   Post,
   Query,
   Res,
-  Logger,
 } from '@nestjs/common'
-import { MemberlistService } from '../services/memberlist.service'
 import config from '../config'
 import { AgreementRepo } from '../repos/agreement.repo'
 import { UserRepo } from '../repos/user.repo'
 import { DocusignService, InvestorRoleName, IssuerRoleName } from '../services/docusign.service'
+import { MemberlistService } from '../services/memberlist.service'
 import { PoolService } from '../services/pool.service'
 import { SessionService } from '../services/session.service'
 

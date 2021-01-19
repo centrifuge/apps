@@ -1,8 +1,14 @@
+import { DisplayField } from '@centrifuge/axis-display-field'
+import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { Box, Button } from 'grommet'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { loadPortfolio, PortfolioState, TokenBalance } from '../../ducks/portfolio'
+import NumberDisplay from '../../components/NumberDisplay'
+import PageTitle from '../../components/PageTitle'
 import {
   Dash,
   DataCol,
@@ -17,18 +23,11 @@ import {
   Type,
   Unit,
 } from '../../components/PoolList/styles'
-import NumberDisplay from '../../components/NumberDisplay'
-import { baseToDisplay } from '@centrifuge/tinlake-js'
-import { loadPools, PoolsState } from '../../ducks/pools'
+import { Cont, Label as MetricLabel, TokenLogo, Value } from '../../components/PoolsMetrics/styles'
 import { IpfsPools, Pool } from '../../config'
-import { PoolData } from '../../ducks/pools'
-import BN from 'bn.js'
-import { Cont, Label as MetricLabel, Value, TokenLogo } from '../../components/PoolsMetrics/styles'
-import { DisplayField } from '@centrifuge/axis-display-field'
+import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
+import { loadPortfolio, PortfolioState, TokenBalance } from '../../ducks/portfolio'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
-import PageTitle from '../../components/PageTitle'
-import Link from 'next/link'
-import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 
 interface Props {
   ipfsPools: IpfsPools

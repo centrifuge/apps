@@ -1,13 +1,13 @@
+import { Modal } from '@centrifuge/axis-modal'
 import { AgreementsStatus } from '@centrifuge/onboard-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Anchor, Box, Button, CheckBox, Heading, Paragraph } from 'grommet'
+import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import config, { Pool } from '../../config'
 import { OnboardingState } from '../../ducks/onboarding'
-import { FormFieldWithoutBorder, Step, StepBody, StepHeader, StepIcon, StepTitle, LegalCopy } from './styles'
-import { Modal } from '@centrifuge/axis-modal'
-import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
+import { FormFieldWithoutBorder, LegalCopy, Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
   activePool: Pool

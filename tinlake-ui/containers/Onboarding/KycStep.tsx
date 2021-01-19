@@ -1,12 +1,12 @@
+import { Modal } from '@centrifuge/axis-modal'
 import { KycStatusLabel } from '@centrifuge/onboard-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Anchor, Box, Button, CheckBox, Paragraph } from 'grommet'
+import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import * as React from 'react'
 import config, { Pool } from '../../config'
 import { OnboardingState } from '../../ducks/onboarding'
 import { FormFieldWithoutBorder, LegalCopy, Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
-import { Modal } from '@centrifuge/axis-modal'
-import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 
 interface Props {
   activePool: Pool

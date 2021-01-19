@@ -8,8 +8,8 @@ import loansReducer from '../ducks/loans'
 import onboardingReducer from '../ducks/onboarding'
 import poolReducer from '../ducks/pool'
 import poolsReducer from '../ducks/pools'
-import transactionReducer from '../ducks/transactions'
 import portfolioReducer from '../ducks/portfolio'
+import transactionReducer from '../ducks/transactions'
 
 const sentryReduxEnhancer = config.enableErrorLogging ? Sentry.createReduxEnhancer({}) : {}
 

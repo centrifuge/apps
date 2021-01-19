@@ -7,7 +7,6 @@ import { UserRepo } from '../repos/user.repo'
 import { SecuritizeService } from '../services/kyc/securitize.service'
 import { PoolService } from '../services/pool.service'
 import { SessionService } from '../services/session.service'
-import { KycStatusLabel } from './types'
 
 @Controller()
 export class KycController {

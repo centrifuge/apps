@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { ethers } from 'ethers'
-import { Tranche } from '../controllers/types'
 import config from '../config'
-import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
-import contractAbiMemberlist from '../utils/Memberlist.abi'
-import contractAbiMemberAdmin from '../utils/MemberAdmin.abi'
+import { Tranche } from '../controllers/types'
 import { AddressEntity, AddressRepo } from '../repos/address.repo'
 import { InvestmentRepo } from '../repos/investment.repo'
+import contractAbiMemberAdmin from '../utils/MemberAdmin.abi'
+import contractAbiMemberlist from '../utils/Memberlist.abi'
+import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 @Injectable()

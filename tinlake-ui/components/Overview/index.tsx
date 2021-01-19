@@ -3,10 +3,10 @@ import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } f
 import * as React from 'react'
 import InvestAction from '../../components/InvestAction'
 import { PoolLink } from '../../components/PoolLink'
-import PageTitle from '../PageTitle'
 import { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
 import { PoolState } from '../../ducks/pool'
+import PageTitle from '../PageTitle'
 
 interface Props {
   pool?: PoolState

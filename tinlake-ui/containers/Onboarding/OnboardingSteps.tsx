@@ -1,18 +1,18 @@
+import { Spinner } from '@centrifuge/axis-spinner'
 import { AgreementsStatus } from '@centrifuge/onboard-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, Heading } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { PoolLink } from '../../components/PoolLink'
 import PageTitle from '../../components/PageTitle'
+import { PoolLink } from '../../components/PoolLink'
 import config, { Pool } from '../../config'
 import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
 import AgreementStep from './AgreementStep'
 import ConnectStep from './ConnectStep'
 import KycStep from './KycStep'
 import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
-import { Spinner } from '@centrifuge/axis-spinner'
-import { useRouter } from 'next/router'
 
 interface Props {
   activePool: Pool

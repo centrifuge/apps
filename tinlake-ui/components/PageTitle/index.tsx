@@ -1,4 +1,6 @@
 import BN from 'bn.js'
+import { LinkPrevious } from 'grommet-icons'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import styled from 'styled-components'
@@ -6,8 +8,6 @@ import { Pool, UpcomingPool } from '../../config'
 import { PoolState } from '../../ducks/pool'
 import { PoolLink } from '../PoolLink'
 import { Label } from '../PoolList/styles'
-import { LinkPrevious } from 'grommet-icons'
-import { useRouter } from 'next/router'
 
 interface Props {
   pool?: Pool | UpcomingPool
