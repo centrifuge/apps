@@ -5,6 +5,7 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { load, UserRewardsState } from '../../ducks/userRewards'
+import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { toDynamicPrecision } from '../../utils/toDynamicPrecision'
 
 export const WalletRewards = ({ address }: { address: string }) => {
@@ -27,7 +28,10 @@ export const WalletRewards = ({ address }: { address: string }) => {
       <TokenLogo src="/static/rad-black.svg" />
       <Box>
         <Label>Your rewards</Label>
-        <Number>{toDynamicPrecision(baseToDisplay(userRewards.data?.totalEarnedRewards || '0', 18))} RAD</Number>
+        <Number>
+          {addThousandsSeparators(toDynamicPrecision(baseToDisplay(userRewards.data?.totalEarnedRewards || '0', 18)))}{' '}
+          RAD
+        </Number>
       </Box>
       <Button secondary onClick={() => router.push('/rewards')} label="Claim RAD" margin={{ left: 'auto' }} />
     </Cont>

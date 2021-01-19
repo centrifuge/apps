@@ -10,6 +10,7 @@ import { RewardsState } from '../../ducks/rewards'
 import { TransactionStatus } from '../../ducks/transactions'
 import { loadCentChain, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { centChainService } from '../../services/centChain'
+import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { createBufferProofFromClaim, createTree, newClaim } from '../../utils/radRewardProofs'
 import { toDynamicPrecision } from '../../utils/toDynamicPrecision'
 
@@ -66,8 +67,8 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
         {unclaimed && !unclaimed?.isZero() ? (
           (status === null || status === 'unconfirmed' || status === 'failed' || status === 'pending') && (
             <>
-              🎉 You can claim {toDynamicPrecision(baseToDisplay(unclaimed, 18))} RAD rewards. Claim now to stake RAD
-              and participate in on-chain governance.
+              🎉 You can claim {addThousandsSeparators(toDynamicPrecision(baseToDisplay(unclaimed, 18)))} RAD rewards.
+              Claim now to stake RAD and participate in on-chain governance.
               {claimExtHash && (
                 <>
                   <br />
@@ -98,10 +99,12 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
         ) : (
           <>
             🏆 You have claimed all your{' '}
-            {toDynamicPrecision(
-              baseToDisplay(
-                (data?.links || []).reduce((p, l) => p.add(l.claimed || new BN(0)), new BN(0)),
-                18
+            {addThousandsSeparators(
+              toDynamicPrecision(
+                baseToDisplay(
+                  (data?.links || []).reduce((p, l) => p.add(l.claimed || new BN(0)), new BN(0)),
+                  18
+                )
               )
             )}{' '}
             RAD rewards.{' '}
@@ -118,10 +121,12 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
             Stay invested to continue earning{' '}
             {rewards.data?.rewardRate &&
               data?.currentActiveInvestmentAmount &&
-              toDynamicPrecision(
-                baseToDisplay(
-                  rewards.data?.rewardRate.mul(data?.currentActiveInvestmentAmount.toString()).toFixed(0),
-                  18
+              addThousandsSeparators(
+                toDynamicPrecision(
+                  baseToDisplay(
+                    rewards.data?.rewardRate.mul(data?.currentActiveInvestmentAmount.toString()).toFixed(0),
+                    18
+                  )
                 )
               )}{' '}
             RAD daily.
@@ -168,7 +173,7 @@ const RewardStripe = ({ unclaimed, children }: React.PropsWithChildren<{ unclaim
     <TokenLogo src="/static/rad-black.svg" />
     <Box>
       <Label>Claimable rewards</Label>
-      <Number>{toDynamicPrecision(baseToDisplay(unclaimed || '0', 18))} RAD</Number>
+      <Number>{addThousandsSeparators(toDynamicPrecision(baseToDisplay(unclaimed || '0', 18)))} RAD</Number>
     </Box>
     {children}
   </Cont>

@@ -15,6 +15,7 @@ import { CentChainWalletState } from '../../ducks/centChainWallet'
 import { maybeLoadRewards, RewardsState } from '../../ducks/rewards'
 import { load, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
+import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { shortAddr } from '../../utils/shortAddr'
 import { dynamicPrecision, toDynamicPrecision } from '../../utils/toDynamicPrecision'
 import { toPrecision } from '../../utils/toPrecision'
@@ -299,7 +300,9 @@ const RewardRecipients = ({ recipients }: { recipients: UserRewardsLink[] }) => 
           <Addr active={i === 0}>{shortAddr(accountIdToCentChainAddr(r.centAccountID))}</Addr>
           <Status active={i === 0}>
             {recipients.length > 1 && (i === 0 ? 'Active | ' : 'Inactive | ')}
-            {r.claimed ? `Claimed ${toDynamicPrecision(baseToDisplay(r.claimed, 18))} RAD` : 'loading...'}
+            {r.claimed
+              ? `Claimed ${addThousandsSeparators(toDynamicPrecision(baseToDisplay(r.claimed, 18)))} RAD`
+              : 'loading...'}
           </Status>
         </Recipient>
       ))
