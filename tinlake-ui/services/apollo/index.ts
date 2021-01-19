@@ -95,6 +95,8 @@ class Apollo {
         version: Number(pool?.version || 3),
         juniorYield14Days: (pool?.juniorYield14Days && new BN(pool.juniorYield14Days)) || null,
         seniorYield14Days: (pool?.seniorYield14Days && new BN(pool.seniorYield14Days)) || null,
+        juniorTokenPrice: (pool?.juniorTokenPrice && new BN(pool.juniorTokenPrice)) || null,
+        seniorTokenPrice: (pool?.seniorTokenPrice && new BN(pool.seniorTokenPrice)) || null,
         icon: poolConfig.metadata.media?.icon || null,
       }
 
@@ -209,6 +211,8 @@ class Apollo {
               assetValue
               juniorYield14Days
               seniorYield14Days
+              juniorTokenPrice
+              seniorTokenPrice
             }
           }
         `,
@@ -354,6 +358,53 @@ class Apollo {
     })
 
     return poolsDailyData
+  }
+
+  async getPortfolio(address: string) {
+    let result
+    try {
+      result = await this.client.query({
+        query: gql`
+        {
+          tokenBalances(where: { owner: "${address.toLowerCase()}" }) {
+            token {
+              id
+              symbol
+            }
+            balance
+            value
+            supplyAmount
+            pendingSupplyCurrency
+          }
+        }
+        `,
+      })
+    } catch (err) {
+      console.error(`error occured while fetching portfolio data from apollo ${err}`)
+      return {
+        data: [],
+      }
+    }
+
+    if (!result.data) return []
+
+    return result.data.tokenBalances.map(
+      (tokenBalance: {
+        token: any
+        value: string
+        balance: string
+        supplyAmount: string
+        pendingSupplyCurrency: string
+      }) => {
+        return {
+          token: tokenBalance.token,
+          value: new BN(tokenBalance.value),
+          balance: new BN(tokenBalance.balance),
+          supplyAmount: new BN(tokenBalance.supplyAmount),
+          pendingSupplyCurrency: new BN(tokenBalance.pendingSupplyCurrency),
+        }
+      }
+    )
   }
 
   async getProxies(user: string) {

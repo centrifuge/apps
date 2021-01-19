@@ -1,10 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { KycStatusLabel, Tranche } from 'src/controllers/types'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { KycEntity, KycRepo } from '../repos/kyc.repo'
+import { UserRepo } from '../repos/user.repo'
 import { DocusignService } from './docusign.service'
 import { SecuritizeService } from './kyc/securitize.service'
+import { MemberlistService } from './memberlist.service'
 
 @Injectable()
 export class SyncService {
@@ -14,49 +15,75 @@ export class SyncService {
     private readonly kycRepo: KycRepo,
     private readonly agreementRepo: AgreementRepo,
     private readonly securitizeService: SecuritizeService,
-    private readonly docusignService: DocusignService
+    private readonly docusignService: DocusignService,
+    private readonly memberlistService: MemberlistService,
+    private readonly userRepo: UserRepo
   ) {}
 
-  @Cron(CronExpression.EVERY_MINUTE) // TODO: change to e.g. every 5 min
+  @Cron(CronExpression.EVERY_30_MINUTES) // TODO: change to e.g. every 5 min
   async syncKycStatus() {
     const processingInvestors = await this.kycRepo.getProcessingInvestors()
     if (processingInvestors.length === 0) return
 
     this.logger.debug(`Syncing ${processingInvestors.length} investors`)
     processingInvestors.forEach(async (kyc: KycEntity) => {
-      const investor = await this.securitizeService.getInvestor(kyc.digest)
-      if (investor && investor.verificationStatus !== kyc.status) {
-        this.logger.debug(`Update investor ${kyc.userId} status to ${investor.verificationStatus}`)
-        this.kycRepo.setStatus('securitize', kyc.providerAccountId, investor.verificationStatus as KycStatusLabel)
+      const investor = await this.securitizeService.getInvestor(kyc.userId, kyc.providerAccountId, kyc.digest)
+      console.log(investor.domainInvestorDetails.taxInfo)
 
-        this.whitelist(kyc.userId)
-        // TODO: update personal info?
+      await this.userRepo.update(
+        kyc.userId,
+        investor.email,
+        investor.details.address.countryCode,
+        investor.domainInvestorDetails?.investorFullName,
+        investor.domainInvestorDetails?.entityName
+      )
+
+      if (
+        (investor && investor.verificationStatus !== kyc.status) ||
+        investor.domainInvestorDetails.isAccredited !== kyc.accredited
+      ) {
+        this.logger.debug(
+          `Update investor ${kyc.userId} status to ${investor.verificationStatus}${
+            investor.domainInvestorDetails.isAccredited ? ' (accredited)' : ''
+          }`
+        )
+        this.kycRepo.setStatus(
+          'securitize',
+          kyc.providerAccountId,
+          investor.verificationStatus === 'manual-review' ? 'processing' : investor.verificationStatus,
+          investor.domainInvestorDetails.isUsaTaxResident,
+          investor.domainInvestorDetails.isAccredited
+        )
+
+        this.memberlistService.update(kyc.userId)
       }
     })
   }
 
-  @Cron(CronExpression.EVERY_MINUTE) // TODO: change to e.g. every 5 min
+  @Cron(CronExpression.EVERY_30_MINUTES) // TODO: change to e.g. every 5 min
   async syncAgreementStatus() {
     const agreements = await this.agreementRepo.getAwaitingCounterSignature()
-    this.logger.debug(`Syncing ${agreements.length} agreements`)
+    if (agreements.length === 0) return
 
+    this.logger.debug(`Syncing ${agreements.length} agreements`)
     // TODO: use Promise.all
     agreements.forEach(async (agreement: Agreement) => {
       const status = await this.docusignService.getEnvelopeStatus(agreement.providerEnvelopeId)
 
       if (!agreement.counterSignedAt && status.counterSigned) {
-        console.log(`Agreement ${agreement.id} has been counter-signed`)
+        this.logger.log(`Agreement ${agreement.id} has been counter-signed`)
         this.agreementRepo.setCounterSigned(agreement.id)
-        this.whitelist(agreement.userId, agreement.tranche)
+        this.memberlistService.update(agreement.userId, agreement.poolId, agreement.tranche)
       }
     })
   }
 
-  // If tranche is supplied, whitelist just for that tranche. Otherwise, try to whitelist for both
-  private async whitelist(userId, tranche?: Tranche) {
-    // TODO: check kyc status and agreement status
-    this.logger.debug(`Whitelist ${userId} for ${tranche || 'both tranches'}`)
-  }
+  // @Cron(CronExpression.EVERY_30_MINUTES) // TODO: change to e.g. every 5 min
+  // async syncWhitelistStatus() {
+  // TODO: get non whitelisted, kyced, accredited, agreement signed addresses
+  // TOOD: per tranche, check whitelist status
+  // }
 
-  // TODO: async syncInvestorBalances()
+  // @Cron(CronExpression.EVERY_HOUR)
+  // async syncInvestorBalances() {}
 }

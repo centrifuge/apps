@@ -13,6 +13,8 @@ interface SecuritizeData {
 interface PoolMedia {
   logo?: string
   icon?: string
+  drop?: string
+  tin?: string
 }
 
 interface PoolMetadata {
@@ -60,6 +62,8 @@ export interface Pool extends BasePool {
     ACTIONS: string
     PROXY_REGISTRY: string
     COLLATERAL_NFT: string
+    SENIOR_TOKEN: string
+    JUNIOR_TOKEN: string
   }
   contractConfig?: {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
@@ -85,6 +89,7 @@ interface Config {
   isDemo: boolean
   network: 'Mainnet' | 'Kovan'
   portisApiKey: string
+  infuraKey: string
   gasLimit: number
   onboardAPIHost: string
   featureFlagNewOnboardingPools: string[]
@@ -295,6 +300,10 @@ const config: Config = {
     .string()
     .required()
     .validateSync(process.env.NEXT_PUBLIC_PORTIS_KEY),
+  infuraKey: yup
+    .string()
+    .required()
+    .validateSync(process.env.NEXT_PUBLIC_INFURA_KEY),
   gasLimit: yup
     .number()
     .required('gasLimit is required')

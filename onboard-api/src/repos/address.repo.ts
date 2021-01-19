@@ -1,23 +1,13 @@
 import { Injectable } from '@nestjs/common'
+import { uuidv4 } from '../utils/uuid'
 import { DatabaseService } from './db.service'
 import { UserRepo } from './user.repo'
-
-export type Blockchain = 'ethereum'
-export type Network = 'mainnet' | 'kovan'
-
-export type Address = {
-  userId: string
-  blockchain: Blockchain
-  network: Network
-  address: string
-  createdAt: Date
-}
 
 @Injectable()
 export class AddressRepo {
   constructor(private readonly db: DatabaseService, private readonly userRepo: UserRepo) {}
 
-  async find(blockchain: Blockchain, network: Network, address: string): Promise<Address | undefined> {
+  async find(blockchain: Blockchain, network: Network, address: string): Promise<AddressEntity | undefined> {
     const [data] = await this.db.sql`
       select *
       from addresses
@@ -26,10 +16,22 @@ export class AddressRepo {
       and lower(addresses.address) = ${address.toLowerCase()}
     `
 
-    return data as Address | undefined
+    return data as AddressEntity | undefined
   }
 
-  async findOrCreate(blockchain: Blockchain, network: Network, address: string): Promise<Address> {
+  async getByUser(userId: string): Promise<AddressEntity[]> {
+    const data = await this.db.sql`
+      select *
+      from addresses
+      where addresses.user_id = ${userId}
+    `
+
+    if (!data) return []
+
+    return (data as unknown) as AddressEntity[]
+  }
+
+  async findOrCreate(blockchain: Blockchain, network: Network, address: string): Promise<AddressEntity> {
     const [data] = await this.db.sql`
       select *
       from addresses
@@ -40,22 +42,35 @@ export class AddressRepo {
 
     if (!data) {
       const user = await this.userRepo.create()
+      const id = uuidv4()
 
       const [newAddress] = await this.db.sql`
         insert into addresses (
-          user_id, blockchain, network, address
+          id, user_id, blockchain, network, address
         ) values (
-          ${[user.id, blockchain, network, address]}
+          ${[id, user.id, blockchain, network, address]}
         )
 
         returning *
       `
 
-      return newAddress as Address
+      return newAddress as AddressEntity
     }
 
-    return data as Address
+    return data as AddressEntity
   }
 
   // TODO: addAddressForExistingUser(user: User, blockchain: Blockchain, network: Network, address: string)
+}
+
+export type Blockchain = 'ethereum'
+export type Network = 'mainnet' | 'kovan'
+
+export type AddressEntity = {
+  id: string
+  userId: string
+  blockchain: Blockchain
+  network: Network
+  address: string
+  createdAt: Date
 }
