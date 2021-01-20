@@ -86,8 +86,7 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
         your Ethereum account.
         <br />
         <br />
-        It will take a few hours for that information to load. Please come back tomorrow.
-        {/* TODO replace with: It may take a few minutes for that information to load. This page will automatically refresh once done. */}
+        It may take a few minutes for that information to load. This page will automatically refresh once done.
         <br />
         <br />
         <Tooltip
