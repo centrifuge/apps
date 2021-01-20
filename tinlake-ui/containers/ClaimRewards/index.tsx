@@ -91,7 +91,8 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
                   </Tooltip>
                 </>
               )}
-              {claimExtHash && (
+              {/* TODO re-enable once subscan has fixed the issue that unsigned extrinsics are not linkable */}
+              {claimExtHash && false && (
                 <>
                   <br />
                   <br />
@@ -120,7 +121,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
           )
         ) : (
           <>
-            🏆 You have claimed all your{' '}
+            🏆 You have claimed{' '}
             {addThousandsSeparators(
               toDynamicPrecision(
                 baseToDisplay(
@@ -129,8 +130,9 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
                 )
               )
             )}{' '}
-            RAD rewards.{' '}
-            {status === 'succeeded' && claimExtHash && (
+            RAD in rewards.{' '}
+            {/* TODO re-enable once subscan has fixed the issue that unsigned extrinsics are not linkable */}
+            {status === 'succeeded' && claimExtHash && false && (
               <>
                 <br />
                 <br />
