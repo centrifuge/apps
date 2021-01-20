@@ -86,13 +86,12 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
         your Ethereum account.
         <br />
         <br />
-        It will take a few hours for that information to load. Please come back tomorrow.
-        {/* TODO replace with: It may take a few minutes for that information to load. This page will automatically refresh once done. */}
+        It may take a few minutes for that information to load. This page will automatically refresh once done.
         <br />
         <br />
         <Tooltip
           title="Why so slow?"
-          description={`Communication between the Ethereum blockchain and our Centrifuge Chain is semi-automated. Every link transaction on Ethereum will be observed by a relayer, a proof will be generated, and that proof will be committed on Centrfiuge Chain. This process is triggered manually right now. We are working to speed this up to a delay of a maximum of minutes.`}
+          description={`Communication between the Ethereum blockchain and our Centrifuge Chain is semi-automated. Every link transaction on Ethereum will be observed by a relayer, a proof will be generated, and that proof will be committed on Centrfiuge Chain. This process is running only once per day.`}
         >
           <Small>Why so slow?</Small>
         </Tooltip>

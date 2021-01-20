@@ -2,7 +2,6 @@ import { Tooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Anchor, Box, Button } from 'grommet'
-import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
@@ -55,10 +54,6 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
     }
   }
 
-  const {
-    query: { allowClaim },
-  } = useRouter()
-
   if (activeLink.claimable === null || activeLink.claimed === null || claims === null) {
     return <Box pad="medium">Loading claimable rewards...</Box>
   }
@@ -72,26 +67,10 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
         {unclaimed && !unclaimed?.isZero() ? (
           (status === null || status === 'unconfirmed' || status === 'failed' || status === 'pending') && (
             <>
-              🎉 You can claim {addThousandsSeparators(toDynamicPrecision(baseToDisplay(unclaimed, 18)))} RAD rewards.{' '}
-              {/* TODO remove this, just temporary. */}
-              {allowClaim ? (
-                'Claim now to stake RAD and participate in on-chain governance.'
-              ) : (
-                <>
-                  <br />
-                  <br />
-                  It will take a few hours until you can claim your rewards. Please come back tomorrow.
-                  <br />
-                  <br />
-                  <Tooltip
-                    title="Why do I have to wait?"
-                    description={`Communication between the Ethereum blockchain and our Centrifuge Chain is semi-automated. Earned rewards will be observed by a relayer, a proof will be generated, and that proof will be committed on Centrfiuge Chain. This process is triggered manually right now. We are working to speed this up to a delay of a maximum of minutes.`}
-                  >
-                    <Small>Why do I have to wait?</Small>
-                  </Tooltip>
-                </>
-              )}
-              {claimExtHash && (
+              🎉 You can claim {addThousandsSeparators(toDynamicPrecision(baseToDisplay(unclaimed, 18)))} RAD rewards.
+              Claim now to stake RAD and participate in on-chain governance.
+              {/* TODO re-enable once subscan has fixed the issue that unsigned extrinsics are not linkable */}
+              {claimExtHash && false && (
                 <>
                   <br />
                   <br />
@@ -120,7 +99,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
           )
         ) : (
           <>
-            🏆 You have claimed all your{' '}
+            🏆 You have claimed{' '}
             {addThousandsSeparators(
               toDynamicPrecision(
                 baseToDisplay(
@@ -129,8 +108,9 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
                 )
               )
             )}{' '}
-            RAD rewards.{' '}
-            {status === 'succeeded' && claimExtHash && (
+            RAD in rewards.{' '}
+            {/* TODO re-enable once subscan has fixed the issue that unsigned extrinsics are not linkable */}
+            {status === 'succeeded' && claimExtHash && false && (
               <>
                 <br />
                 <br />
@@ -180,9 +160,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
         <Button
           margin={{ left: 'auto' }}
           label={status === 'unconfirmed' || status === 'pending' ? `Claiming...` : `Claim`}
-          disabled={
-            !allowClaim || (!!unclaimed && unclaimed.isZero()) || status === 'unconfirmed' || status === 'pending'
-          }
+          disabled={(!!unclaimed && unclaimed.isZero()) || status === 'unconfirmed' || status === 'pending'}
           onClick={claim}
         />
       </RewardStripe>

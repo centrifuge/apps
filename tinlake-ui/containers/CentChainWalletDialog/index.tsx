@@ -11,7 +11,6 @@ const CentChainWalletDialog: React.FC = () => {
   const dispatch = useDispatch()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
   const [clickedInstall, setClickInstall] = React.useState(false)
-  const [triedAutoConnect, setTriedAutoConnect] = React.useState(false)
   const router = useRouter()
 
   const onConnect = async () => {
@@ -22,7 +21,6 @@ const CentChainWalletDialog: React.FC = () => {
     if (polkadotExtensionInstalled) {
       ;(async () => {
         await dispatch(connect())
-        setTriedAutoConnect(true)
       })()
     }
   }, [polkadotExtensionInstalled])
@@ -47,10 +45,6 @@ const CentChainWalletDialog: React.FC = () => {
         </Box>
       </>
     )
-  }
-
-  if (!triedAutoConnect) {
-    return null
   }
 
   return (
