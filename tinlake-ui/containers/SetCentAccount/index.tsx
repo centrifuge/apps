@@ -91,7 +91,7 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
         <br />
         <Tooltip
           title="Why so slow?"
-          description={`Communication between the Ethereum blockchain and our Centrifuge Chain is semi-automated. Every link transaction on Ethereum will be observed by a relayer, a proof will be generated, and that proof will be committed on Centrfiuge Chain. This process is triggered manually right now. We are working to speed this up to a delay of a maximum of minutes.`}
+          description={`Communication between the Ethereum blockchain and our Centrifuge Chain is semi-automated. Every link transaction on Ethereum will be observed by a relayer, a proof will be generated, and that proof will be committed on Centrfiuge Chain. This process is running only once per day.`}
         >
           <Small>Why so slow?</Small>
         </Tooltip>
