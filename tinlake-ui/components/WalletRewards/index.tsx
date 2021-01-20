@@ -33,7 +33,9 @@ export const WalletRewards = ({ address }: { address: string }) => {
           RAD
         </Number>
       </Box>
-      <Button secondary onClick={() => router.push('/rewards')} label="Claim RAD" margin={{ left: 'auto' }} />
+      {router.route !== '/rewards' && (
+        <Button secondary onClick={() => router.push('/rewards')} label="Claim RAD" margin={{ left: 'auto' }} />
+      )}
     </Cont>
   )
 }

@@ -7,7 +7,8 @@ import styled from 'styled-components'
 import { AuthState } from '../../ducks/auth'
 import { CentChainWalletState, InjectedAccount } from '../../ducks/centChainWallet'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
-import { loadSubgraph } from '../../ducks/userRewards'
+import { loadEthLink, loadSubgraph, UserRewardsState } from '../../ducks/userRewards'
+import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
 import { centChainAddrToAccountId } from '../../services/centChain/centChainAddrToAccountId'
 import { isCentChainAddr } from '../../services/centChain/isCentChainAddr'
 import { shortAddr } from '../../utils/shortAddr'
@@ -19,6 +20,7 @@ interface Props extends TransactionProps {
 let interval: number | null = null
 
 const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) => {
+  const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
   const { address: ethAddr } = useSelector<any, AuthState>((state: any) => state.auth)
   const [selectedCentAcc, selectCentAcc] = React.useState<InjectedAccount>()
@@ -50,6 +52,7 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
       }
 
       // poll changes
+      dispatch(loadEthLink(ethAddr, tinlake))
       dispatch(loadSubgraph(ethAddr))
       if (!interval) {
         interval = setInterval(async () => {
@@ -59,32 +62,49 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
     }
   }, [status, ethAddr])
 
-  React.useEffect(
-    () => () => {
+  React.useEffect(() => {
+    if (ethAddr) {
+      dispatch(loadEthLink(ethAddr, tinlake))
+    }
+
+    return function cleanup() {
       if (interval) {
         clearInterval(interval)
         interval = null
       }
-    },
-    [ethAddr]
-  )
+    }
+  }, [ethAddr])
+
+  if (userRewards.ethLinkState !== 'found') {
+    return null
+  }
+
+  if (userRewards.ethLinkState === 'found' && userRewards.ethLink) {
+    return (
+      <div>
+        Your Centrifuge Chain account {accountIdToCentChainAddr(userRewards.ethLink)} has been successfully linked to
+        your Ethereum account.
+        <br />
+        <br />
+        It will take a few hours for that information to load. Please come back tomorrow.
+        {/* TODO replace with: It may take a few minutes for that information to load. This page will automatically refresh once done. */}
+        <br />
+        <br />
+        <Tooltip
+          title="Why so slow?"
+          description={`Communication between the Ethereum blockchain and our Centrifuge Chain is semi-automated. Every link transaction on Ethereum will be observed by a relayer, a proof will be generated, and that proof will be committed on Centrfiuge Chain. This process is triggered manually right now. We are working to speed this up to a delay of a maximum of minutes.`}
+        >
+          <Small>Why so slow?</Small>
+        </Tooltip>
+      </div>
+    )
+  }
 
   const disabled =
     status === 'unconfirmed' ||
     status === 'pending' ||
     !selectedCentAcc ||
     !isCentChainAddr(selectedCentAcc.addrCentChain)
-
-  if (status === 'succeeded') {
-    return (
-      <div>
-        Your Centrifuge Chain account has been successfully linked to your Ethereum account.
-        <br />
-        <br />
-        It may take a few minutes for that information to load. This page will automatically refresh once done.
-      </div>
-    )
-  }
 
   return (
     <div>

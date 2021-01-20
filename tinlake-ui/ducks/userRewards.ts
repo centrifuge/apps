@@ -1,3 +1,4 @@
+import { ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
@@ -9,6 +10,8 @@ import { centChainService } from '../services/centChain'
 // Actions
 const LOAD_SUBGRAPH = 'tinlake-ui/user-rewards/LOAD_SUBGRAPH'
 const RECEIVE_SUBGRAPH = 'tinlake-ui/user-rewards/RECEIVE_SUBGRAPH'
+const LOAD_ETH_LINK = 'tinlake-ui/user-rewards/LOAD_ETH_LINK'
+const RECEIVE_ETH_LINK = 'tinlake-ui/user-rewards/RECEIVE_ETH_LINK'
 const LOAD_CENT_CHAIN = 'tinlake-ui/user-rewards/LOAD_CENT_CHAIN'
 const RECEIVE_CENT_CHAIN = 'tinlake-ui/user-rewards/RECEIVE_CENT_CHAIN'
 const LOAD_CLAIMS = 'tinlake-ui/user-rewards/LOAD_CLAIMS'
@@ -23,6 +26,8 @@ export interface UserRewardsState {
   data: null | UserRewardsData
   claimsState: null | 'loading' | 'found'
   claims: null | RewardClaim[]
+  ethLinkState: null | 'loading' | 'found'
+  ethLink: null | string
 }
 
 /**
@@ -113,6 +118,8 @@ const initialState: UserRewardsState = {
   data: null,
   claimsState: null,
   claims: null,
+  ethLinkState: null,
+  ethLink: null,
 }
 
 export default function reducer(
@@ -155,6 +162,10 @@ export default function reducer(
           : null,
       }
     }
+    case LOAD_ETH_LINK:
+      return { ...state, ethLink: null, ethLinkState: 'loading' }
+    case RECEIVE_ETH_LINK:
+      return { ...state, ethLink: action.link, ethLinkState: 'found' }
     default:
       return state
   }
@@ -177,6 +188,20 @@ export function loadSubgraph(
     const data = await Apollo.getUserRewards(ethAddr)
     dispatch({ data, type: RECEIVE_SUBGRAPH })
     await dispatch(loadCentChain())
+  }
+}
+
+export function loadEthLink(
+  ethAddr: string,
+  tinlake: ITinlake
+): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
+  return async (dispatch) => {
+    dispatch({ type: LOAD_ETH_LINK, ethAddr })
+    let link: null | string = await tinlake.getClaimRADAccountID(ethAddr)
+    if (link === '0x0000000000000000000000000000000000000000000000000000000000000000') {
+      link = null
+    }
+    dispatch({ type: RECEIVE_ETH_LINK, link })
   }
 }
 
