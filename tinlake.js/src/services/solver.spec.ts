@@ -36,65 +36,63 @@ describe('solver tests', async () => {
       }
 
       const result = await calculateOptimalSolution(state, orderState, weights)
-      assert.strictEqual(result.feasible, true)
+      assert.strictEqual(result.isFeasible, true)
       assert.strictEqual(result.vars.tinRedeem.toString(), uint(100).toString())
       assert.strictEqual(result.vars.dropRedeem.toString(), uint(300).toString())
       assert.strictEqual(result.vars.tinInvest.toString(), uint(125).toString())
       assert.strictEqual(result.vars.dropInvest.toString(), uint(400).toString())
     })
 
-    // it('should return an optimal solution when limited by the max reserve', async () => {
-    //   // The gap between the maxReserve and reserve is 300, so 300 tokens can be invested.
-    //   const state = {
-    //     netAssetValue: 800,
-    //     reserve: 200,
-    //     seniorAsset: 800,
-    //     minTinRatio: 0.0,
-    //     maxTinRatio: 1.0,
-    //     maxReserve: 500,
-    //   }
+    it('should return an optimal solution when limited by the max reserve', async () => {
+      // The gap between the maxReserve and reserve is 300, so 300 tokens can be invested.
+      const state = {
+        netAssetValue: uint(800),
+        reserve: uint(200),
+        seniorAsset: uint(800),
+        minTinRatio: f27(0.0),
+        maxTinRatio: f27(1.0),
+        maxReserve: uint(500),
+      }
 
-    //   // 50 is redeemed, so 300+50=350 can be invested.
-    //   const orderState = {
-    //     tinRedeemOrder: 0,
-    //     dropRedeemOrder: 50,
-    //     tinInvestOrder: 200,
-    //     dropInvestOrder: 200,
-    //   }
+      // 50 is redeemed, so 300+50=350 can be invested.
+      const orderState = {
+        tinRedeemOrder: uint(0),
+        dropRedeemOrder: uint(50),
+        tinInvestOrder: uint(200),
+        dropInvestOrder: uint(200),
+      }
 
-    //   const result = await calculateOptimalSolution(state, orderState, weights)
+      const result = await calculateOptimalSolution(state, orderState, weights)
 
-    //   // The full redeem is possible, while only 350/400 of total invest orders are possible.
-    //   // TIN investments have preference over DROP investments, so the full TIN invest order is fulfilled, while the tin invest order is limited by 150.
-    //   assert.equal(result.status, 5)
-    //   assert.equal(result.z > 0, true)
-    //   assert.equal(result.vars.tinRedeem, 0)
-    //   assert.equal(result.vars.dropRedeem, 50)
-    //   assert.equal(result.vars.tinInvest, 200)
-    //   assert.equal(result.vars.dropInvest, 150)
-    // })
+      // The full redeem is possible, while only 350/400 of total invest orders are possible.
+      // TIN investments have preference over DROP investments, so the full TIN invest order is fulfilled, while the tin invest order is limited by 150.
+      assert.strictEqual(result.isFeasible, true)
+      assert.strictEqual(result.vars.tinRedeem.toString(), uint(0).toString())
+      assert.strictEqual(result.vars.dropRedeem.toString(), uint(50).toString())
+      assert.strictEqual(result.vars.tinInvest.toString(), uint(200).toString())
+      assert.strictEqual(result.vars.dropInvest.toString(), uint(150).toString())
+    })
 
-    // it('should return no feasible solution if the input state is unhealthy', async () => {
-    //   const state = {
-    //     netAssetValue: 800,
-    //     reserve: 200,
-    //     seniorAsset: 800,
-    //     minTinRatio: 0.01,
-    //     maxTinRatio: 0.01,
-    //     maxReserve: 500,
-    //   }
+    it('should return no feasible solution if the input state is unhealthy', async () => {
+      const state = {
+        netAssetValue: uint(800),
+        reserve: uint(200),
+        seniorAsset: uint(800),
+        minTinRatio: f27(0.01),
+        maxTinRatio: f27(0.01),
+        maxReserve: uint(500),
+      }
 
-    //   const orderState = {
-    //     tinRedeemOrder: 100,
-    //     dropRedeemOrder: 200,
-    //     tinInvestOrder: 300,
-    //     dropInvestOrder: 400,
-    //   }
+      const orderState = {
+        tinRedeemOrder: uint(100),
+        dropRedeemOrder: uint(200),
+        tinInvestOrder: uint(300),
+        dropInvestOrder: uint(400),
+      }
 
-    //   const result = await calculateOptimalSolution(state, orderState, weights)
-    //   assert.equal(result.status, 4)
-    //   assert.equal(result.z, 0)
-    // })
+      const result = await calculateOptimalSolution(state, orderState, weights)
+      assert.strictEqual(result.isFeasible, false)
+    })
 
     // it('should return a feasible solution if the input state is unhealthy, but a feasible solution can be found using the orders', async () => {
     //   const state = {

@@ -1,4 +1,5 @@
 import BN from 'bn.js'
+// import { CLP } from 'clp-wasm'
 
 export const calculateOptimalSolution = async (
   state: State,
@@ -42,8 +43,14 @@ export const calculateOptimalSolution = async (
     `
 
     const output = clp.solve(lp)
+    console.log({ output })
 
     const outputToBN = (str: string) => new BN(str.split('.')[0])
+
+    const isFeasible = output.infeasibilityRay
+      .map((ray: string) => outputToBN(ray.split('.')[0]))
+      .every((ray: BN) => ray.isZero())
+
     const vars = {
       tinRedeem: outputToBN(output.solution[2]),
       dropRedeem: outputToBN(output.solution[3]),
@@ -51,7 +58,7 @@ export const calculateOptimalSolution = async (
       dropInvest: outputToBN(output.solution[1]),
     }
 
-    return { vars, feasible: true }
+    return { isFeasible, vars }
   })
 }
 
@@ -113,7 +120,7 @@ export interface SolverSolution {
 }
 
 export interface SolverResult {
-  feasible: boolean
+  isFeasible: boolean
   vars: SolverSolution
   error?: string
 }
