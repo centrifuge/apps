@@ -10,10 +10,10 @@ const f27 = (num: number) => {
 }
 
 const weights = {
-  seniorRedeem: uint(1000000),
-  juniorRedeem: uint(100000),
-  juniorSupply: uint(10000),
-  seniorSupply: uint(1000),
+  dropRedeem: uint(1000000),
+  tinRedeem: uint(100000),
+  tinInvest: uint(10000),
+  dropInvest: uint(1000),
 }
 
 describe('solver tests', async () => {
@@ -29,10 +29,10 @@ describe('solver tests', async () => {
       }
 
       const orderState = {
-        tinRedeemOrder: uint(100),
-        dropRedeemOrder: uint(300),
-        tinInvestOrder: uint(200),
-        dropInvestOrder: uint(400),
+        tinRedeem: uint(100),
+        dropRedeem: uint(300),
+        tinInvest: uint(200),
+        dropInvest: uint(400),
       }
 
       const result = await calculateOptimalSolution(state, orderState, weights)
@@ -56,10 +56,10 @@ describe('solver tests', async () => {
 
       // 50 is redeemed, so 300+50=350 can be invested.
       const orderState = {
-        tinRedeemOrder: uint(0),
-        dropRedeemOrder: uint(50),
-        tinInvestOrder: uint(200),
-        dropInvestOrder: uint(200),
+        tinRedeem: uint(0),
+        dropRedeem: uint(50),
+        tinInvest: uint(200),
+        dropInvest: uint(200),
       }
 
       const result = await calculateOptimalSolution(state, orderState, weights)
@@ -84,10 +84,10 @@ describe('solver tests', async () => {
       }
 
       const orderState = {
-        tinRedeemOrder: uint(100),
-        dropRedeemOrder: uint(200),
-        tinInvestOrder: uint(300),
-        dropInvestOrder: uint(400),
+        tinRedeem: uint(100),
+        dropRedeem: uint(200),
+        tinInvest: uint(300),
+        dropInvest: uint(400),
       }
 
       const result = await calculateOptimalSolution(state, orderState, weights)
@@ -105,10 +105,10 @@ describe('solver tests', async () => {
     //   }
 
     //   const orderState = {
-    //     tinRedeemOrder: 10000,
-    //     dropRedeemOrder: 10000,
-    //     tinInvestOrder: 10000,
-    //     dropInvestOrder: 10000,
+    //     tinRedeem: 10000,
+    //     dropRedeem: 10000,
+    //     tinInvest: 10000,
+    //     dropInvest: 10000,
     //   }
 
     //   const result = await calculateOptimalSolution(state, orderState, weights)
@@ -132,10 +132,10 @@ describe('solver tests', async () => {
     //   }
 
     //   const orderState = {
-    //     dropRedeemOrder: 0,
-    //     tinRedeemOrder: 16.3842626848564,
-    //     tinInvestOrder: 0,
-    //     dropInvestOrder: 37.9167594426433,
+    //     dropRedeem: 0,
+    //     tinRedeem: 16.3842626848564,
+    //     tinInvest: 0,
+    //     dropInvest: 37.9167594426433,
     //   }
 
     //   const result = await calculateOptimalSolution(state, orderState, weights)

@@ -1,11 +1,7 @@
 import BN from 'bn.js'
 // import { CLP } from 'clp-wasm'
 
-export const calculateOptimalSolution = async (
-  state: State,
-  orders: OrderState,
-  weights: SolverWeights
-): Promise<any> => {
+export const calculateOptimalSolution = async (state: State, orders: Orders, weights: SolverWeights): Promise<any> => {
   return require('clp-wasm/clp-wasm').then((clp: any) => {
     const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
     const maxDropRatio = e27.sub(state.minTinRatio)
@@ -22,23 +18,31 @@ export const calculateOptimalSolution = async (
       .add(minDropRatio.mul(state.reserve))
       .sub(state.seniorAsset.mul(e27))
 
-    const varWeights = [weights.juniorSupply, weights.seniorSupply, weights.juniorRedeem, weights.seniorRedeem]
+    const varWeights = [
+      parseFloat(weights.tinInvest.toString()),
+      parseFloat(weights.dropInvest.toString()),
+      parseFloat(weights.tinRedeem.toString()),
+      parseFloat(weights.dropRedeem.toString()),
+    ]
     const minTINRatioLbCoeffs = [maxDropRatio, state.minTinRatio.neg(), maxDropRatio.neg(), state.minTinRatio]
     const maxTINRatioLbCoeffs = [minDropRatio.neg(), state.maxTinRatio, minDropRatio, state.maxTinRatio.neg()]
 
     const lp = `
       Maximize
-      ${linearExpression(varWeights)}
+        ${linearExpression(varWeights)}
+
       Subject To
-      reserve: ${linearExpression([1, 1, -1, -1])} <= ${state.reserve}
-      maxReserve: ${linearExpression([1, 1, -1, -1])} >= ${state.reserve.sub(state.maxReserve)}
-      minTINRatioLb: ${linearExpression(minTINRatioLbCoeffs)} >= ${minTINRatioLb}
-      maxTINRatioLb: ${linearExpression(maxTINRatioLbCoeffs)} >= ${maxTINRatioLb}
+        reserve: ${linearExpression([1, 1, -1, -1])} <= ${state.reserve}
+        maxReserve: ${linearExpression([1, 1, -1, -1])} >= ${state.reserve.sub(state.maxReserve)}
+        minTINRatioLb: ${linearExpression(minTINRatioLbCoeffs)} >= ${minTINRatioLb}
+        maxTINRatioLb: ${linearExpression(maxTINRatioLbCoeffs)} >= ${maxTINRatioLb}
+
       Bounds
-      0 <= tinInvest  <= ${orders.tinInvestOrder}
-      0 <= dropInvest <= ${orders.dropInvestOrder}
-      0 <= tinRedeem  <= ${orders.tinRedeemOrder}
-      0 <= dropRedeem <= ${orders.dropRedeemOrder}
+        0 <= tinInvest  <= ${orders.tinInvest}
+        0 <= dropInvest <= ${orders.dropInvest}
+        0 <= tinRedeem  <= ${orders.tinRedeem}
+        0 <= dropRedeem <= ${orders.dropRedeem}
+
       End
     `
 
@@ -50,6 +54,30 @@ export const calculateOptimalSolution = async (
     const isFeasible = output.infeasibilityRay
       .map((ray: string) => outputToBN(ray.split('.')[0]))
       .every((ray: BN) => ray.isZero())
+
+    if (!isFeasible) {
+      // If it's not possible to go into a healthy state, calculate the best possible solution
+
+      // TODO: if min tin ratio broken
+      //         tin.supply = max.order, drop.redeem = max.order, tin.redeem = 0, drop.supply = 0
+      // TODO: else if max tin ratio broken
+      //         tin.supply = 0, drop.redeem = 0, tin.redeem = max.order, drop.supply = max.order
+
+      if (state.reserve >= state.maxReserve) {
+        const dropRedeem = BN.min(orders.dropRedeem, state.reserve) // Limited either by the order or the reserve
+        const tinRedeem = BN.min(orders.tinRedeem, state.reserve.sub(dropRedeem)) // Limited either by the order or what's remaining of the reserve after the DROP redemptions
+
+        return {
+          isFeasible: false,
+          vars: {
+            tinRedeem: tinRedeem,
+            dropRedeem: dropRedeem,
+            tinInvest: new BN(0),
+            dropInvest: new BN(0),
+          },
+        }
+      }
+    }
 
     const vars = {
       tinRedeem: outputToBN(output.solution[2]),
@@ -98,18 +126,18 @@ export interface State {
   maxReserve: BN
 }
 
-export interface OrderState {
-  tinRedeemOrder: BN
-  dropRedeemOrder: BN
-  tinInvestOrder: BN
-  dropInvestOrder: BN
+export interface Orders {
+  tinRedeem: BN
+  dropRedeem: BN
+  tinInvest: BN
+  dropInvest: BN
 }
 
 export interface SolverWeights {
-  seniorRedeem: BN
-  juniorRedeem: BN
-  juniorSupply: BN
-  seniorSupply: BN
+  dropRedeem: BN
+  tinRedeem: BN
+  tinInvest: BN
+  dropInvest: BN
 }
 
 export interface SolverSolution {
