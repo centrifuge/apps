@@ -34,27 +34,22 @@ export const calculateOptimalSolution = async (
     const lp = `
       Maximize
         ${linearExpression(varWeights)}
-
       Subject To
         reserve: ${linearExpression([1, 1, -1, -1])} <= ${state.reserve}
         maxReserve: ${linearExpression([1, 1, -1, -1])} >= ${state.reserve.sub(state.maxReserve)}
         minTINRatioLb: ${linearExpression(minTINRatioLbCoeffs)} >= ${minTINRatioLb}
         maxTINRatioLb: ${linearExpression(maxTINRatioLbCoeffs)} >= ${maxTINRatioLb}
-
       Bounds
         0 <= tinInvest  <= ${orders.tinInvest}
         0 <= dropInvest <= ${orders.dropInvest}
         0 <= tinRedeem  <= ${orders.tinRedeem}
         0 <= dropRedeem <= ${orders.dropRedeem}
-
       End
     `
 
     const output = clp.solve(lp)
-    console.log({ output })
 
     const outputToBN = (str: string) => new BN(str.split('.')[0])
-
     const isFeasible = output.infeasibilityRay
       .map((ray: string) => outputToBN(ray.split('.')[0]))
       .every((ray: BN) => ray.isZero())

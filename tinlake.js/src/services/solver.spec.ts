@@ -10,10 +10,10 @@ const f27 = (num: number) => {
 }
 
 const weights = {
-  dropRedeem: uint(1000000),
-  tinRedeem: uint(100000),
-  tinInvest: uint(10000),
-  dropInvest: uint(1000),
+  dropRedeem: new BN(1000000),
+  tinRedeem: new BN(100000),
+  tinInvest: new BN(10000),
+  dropInvest: new BN(1000),
 }
 
 describe('solver tests', async () => {
