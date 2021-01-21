@@ -1,165 +1,119 @@
-/**
- * The limitations are:
- * - only input variables (those in state or orderState) can be on the right side of the constraint (the bnds key)
- * - only output variables ([dropRedeem,tinRedeem,tinInvest,dropInvest]) can be on the left side of the constraint (the vars key)
- * - variables can have coefficients, but there's no option for brackets or other more advanced equation forms
- *   (e.g. it's limited to a * x_1 + b * x_2 + ..., where [a,b] are coefficients and [x_1,x_2] are variables)
- * - larger than or equals, less than or equals, and equals constraints are all allowed ([<=,>=,=])
- */
+import BN from 'bn.js'
+
 export const calculateOptimalSolution = async (
   state: State,
-  orderState: OrderState,
+  orders: OrderState,
   weights: SolverWeights
-): Promise<SolverResult> => {
-  return require('glpk.js').then((glpk: any) => {
-    const lp = {
-      name: 'LP',
-      objective: {
-        // Maximize: dropRedeem > tinRedeem > tinInvest > dropInvest
-        direction: glpk.GLP_MAX,
-        name: 'obj',
-        vars: [
-          { name: 'dropRedeem', coef: weights.seniorRedeem },
-          { name: 'tinRedeem', coef: weights.juniorRedeem },
-          { name: 'tinInvest', coef: weights.juniorSupply },
-          { name: 'dropInvest', coef: weights.seniorSupply },
-        ],
-      },
-      subjectTo: [
-        {
-          name: 'currencyAvailable',
-          vars: [
-            { name: 'tinInvest', coef: 1.0 },
-            { name: 'dropInvest', coef: 1.0 },
-            { name: 'tinRedeem', coef: -1.0 },
-            { name: 'dropRedeem', coef: -1.0 },
-          ],
-          bnds: { type: glpk.GLP_LO, ub: 0.0, lb: -state.reserve },
-        },
-        {
-          name: 'dropRedeemOrder',
-          vars: [{ name: 'dropRedeem', coef: 1.0 }],
-          bnds: { type: glpk.GLP_UP, ub: orderState.dropRedeemOrder, lb: 0.0 },
-        },
-        {
-          name: 'tinRedeemOrder',
-          vars: [{ name: 'tinRedeem', coef: 1.0 }],
-          bnds: { type: glpk.GLP_UP, ub: orderState.tinRedeemOrder, lb: 0.0 },
-        },
-        {
-          name: 'dropInvestOrder',
-          vars: [{ name: 'dropInvest', coef: 1.0 }],
-          bnds: { type: glpk.GLP_UP, ub: orderState.dropInvestOrder, lb: 0.0 },
-        },
-        {
-          name: 'tinInvestOrder',
-          vars: [{ name: 'tinInvest', coef: 1.0 }],
-          bnds: { type: glpk.GLP_UP, ub: orderState.tinInvestOrder, lb: 0.0 },
-        },
-        {
-          name: 'maxReserve',
-          vars: [
-            { name: 'tinRedeem', coef: -1.0 },
-            { name: 'dropRedeem', coef: -1.0 },
-            { name: 'tinInvest', coef: 1.0 },
-            { name: 'dropInvest', coef: 1.0 },
-          ],
-          bnds: { type: glpk.GLP_UP, ub: state.maxReserve - state.reserve, lb: 0.0 },
-        },
-        /**
-         * The next tow constraints were rewritten from the original equations in the epoch model.
-         * For one, minTINRatio was rewritten as a lower bound, which means both sides were multiplied by -1.
-         * Secondly, all output vars were moved to the left side, while all input vars were moved to the right side.
-         *
-         * E.g. for dropRedeem, in the epoch model there's both -I4*(1-B7) and +I4.
-         * So: -I4*(1-B7) + I4 = -0.8 I4 + 1.0 I4 = 0.2 I4 = minTinRatio * dropRedeem.
-         */
-        {
-          name: 'minTINRatio',
-          vars: [
-            { name: 'tinRedeem', coef: -(1 - state.minTinRatio) },
-            { name: 'dropRedeem', coef: state.minTinRatio },
-            { name: 'tinInvest', coef: 1 - state.minTinRatio },
-            { name: 'dropInvest', coef: -state.minTinRatio },
-          ],
-          bnds: {
-            type: glpk.GLP_LO,
-            ub: 0.0,
-            lb:
-              -(1 - state.minTinRatio) * state.netAssetValue -
-              (1 - state.minTinRatio) * state.reserve +
-              state.seniorAsset,
-          },
-        },
-        {
-          name: 'maxTINRatio',
-          vars: [
-            { name: 'tinInvest', coef: -(1 - state.maxTinRatio) },
-            { name: 'dropInvest', coef: state.maxTinRatio },
-            { name: 'tinRedeem', coef: 1 - state.maxTinRatio },
-            { name: 'dropRedeem', coef: -state.maxTinRatio },
-          ],
-          bnds: {
-            type: glpk.GLP_LO,
-            ub: 0.0,
-            lb:
-              (1 - state.maxTinRatio) * state.netAssetValue +
-              (1 - state.maxTinRatio) * state.reserve -
-              state.seniorAsset,
-          },
-        },
-      ],
+): Promise<any> => {
+  return require('clp-wasm/clp-wasm').then((clp: any) => {
+    const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
+    const maxDropRatio = e27.sub(state.minTinRatio)
+    const minDropRatio = e27.sub(state.maxTinRatio)
+
+    const minTINRatioLb = maxDropRatio
+      .neg()
+      .mul(state.netAssetValue)
+      .sub(maxDropRatio.mul(state.reserve))
+      .add(state.seniorAsset.mul(e27))
+
+    const maxTINRatioLb = minDropRatio
+      .mul(state.netAssetValue)
+      .add(minDropRatio.mul(state.reserve))
+      .sub(state.seniorAsset.mul(e27))
+
+    const varWeights = [weights.juniorSupply, weights.seniorSupply, weights.juniorRedeem, weights.seniorRedeem]
+    const minTINRatioLbCoeffs = [maxDropRatio, state.minTinRatio.neg(), maxDropRatio.neg(), state.minTinRatio]
+    const maxTINRatioLbCoeffs = [minDropRatio.neg(), state.maxTinRatio, minDropRatio, state.maxTinRatio.neg()]
+
+    const lp = `
+      Maximize
+      ${linearExpression(varWeights)}
+      Subject To
+      reserve: ${linearExpression([1, 1, -1, -1])} <= ${state.reserve}
+      maxReserve: ${linearExpression([1, 1, -1, -1])} >= ${state.reserve.sub(state.maxReserve)}
+      minTINRatioLb: ${linearExpression(minTINRatioLbCoeffs)} >= ${minTINRatioLb}
+      maxTINRatioLb: ${linearExpression(maxTINRatioLbCoeffs)} >= ${maxTINRatioLb}
+      Bounds
+      0 <= tinInvest  <= ${orders.tinInvestOrder}
+      0 <= dropInvest <= ${orders.dropInvestOrder}
+      0 <= tinRedeem  <= ${orders.tinRedeemOrder}
+      0 <= dropRedeem <= ${orders.dropRedeemOrder}
+      End
+    `
+
+    const output = clp.solve(lp)
+
+    const outputToBN = (str: string) => new BN(str.split('.')[0])
+    const vars = {
+      tinRedeem: outputToBN(output.solution[2]),
+      dropRedeem: outputToBN(output.solution[3]),
+      tinInvest: outputToBN(output.solution[0]),
+      dropInvest: outputToBN(output.solution[1]),
     }
 
-    try {
-      const output = glpk.solve(lp, glpk.GLP_MSG_ERR)
-      return output.result
-    } catch (e) {
-      console.error(`Error caught during solver execution: ${e}`)
-
-      return {
-        z: 0,
-        status: 0,
-        vars: {},
-        error: e,
-      }
-    }
+    return { vars, feasible: true }
   })
 }
 
+const nameValToStr = (name: string, coef: BN | number, first: boolean) => {
+  const coefNum = typeof coef !== 'number' ? coef : parseFloat(coef.toString())
+  let str = ''
+  if (first && coefNum == 1) return name
+  if (coefNum === 1) {
+    str += '+'
+  } else if (coefNum == -1) {
+    str += '-'
+  } else {
+    str += coefNum
+  }
+  str += ' ' + name
+  return str
+}
+
+const linearExpression = (coefs: (BN | number)[]) => {
+  const varNames = ['tinInvest', 'dropInvest', 'tinRedeem', 'dropRedeem']
+  let str = ''
+  let first = true
+  const n = varNames.length
+  for (let i = 0; i < n; ++i) {
+    str += nameValToStr(varNames[i], coefs[i], first) + ' '
+    first = false
+  }
+  return str
+}
+
 export interface State {
-  netAssetValue: number
-  reserve: number
-  seniorAsset: number
-  minTinRatio: number
-  maxTinRatio: number
-  maxReserve: number
+  netAssetValue: BN
+  reserve: BN
+  seniorAsset: BN
+  minTinRatio: BN
+  maxTinRatio: BN
+  maxReserve: BN
 }
 
 export interface OrderState {
-  tinRedeemOrder: number
-  dropRedeemOrder: number
-  tinInvestOrder: number
-  dropInvestOrder: number
+  tinRedeemOrder: BN
+  dropRedeemOrder: BN
+  tinInvestOrder: BN
+  dropInvestOrder: BN
 }
 
 export interface SolverWeights {
-  seniorRedeem: number
-  juniorRedeem: number
-  juniorSupply: number
-  seniorSupply: number
+  seniorRedeem: BN
+  juniorRedeem: BN
+  juniorSupply: BN
+  seniorSupply: BN
 }
 
 export interface SolverSolution {
-  tinRedeem: number
-  dropRedeem: number
-  tinInvest: number
-  dropInvest: number
+  tinRedeem: BN
+  dropRedeem: BN
+  tinInvest: BN
+  dropInvest: BN
 }
 
 export interface SolverResult {
-  z: number
-  status: number
+  feasible: boolean
   vars: SolverSolution
   error?: string
 }
