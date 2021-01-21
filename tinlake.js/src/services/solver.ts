@@ -74,8 +74,8 @@ export const calculateOptimalSolution = async (
         return {
           isFeasible: false,
           vars: {
-            tinRedeem: tinRedeem,
-            dropRedeem: dropRedeem,
+            tinRedeem,
+            dropRedeem,
             tinInvest: new BN(0),
             dropInvest: new BN(0),
           },
@@ -97,15 +97,15 @@ export const calculateOptimalSolution = async (
 const nameValToStr = (name: string, coef: BN | number, first: boolean) => {
   const coefNum = typeof coef !== 'number' ? coef : parseFloat(coef.toString())
   let str = ''
-  if (first && coefNum == 1) return name
+  if (first && coefNum === 1) return name
   if (coefNum === 1) {
     str += '+'
-  } else if (coefNum == -1) {
+  } else if (coefNum === -1) {
     str += '-'
   } else {
     str += coefNum
   }
-  str += ' ' + name
+  str += ` ${name}`
   return str
 }
 
@@ -114,8 +114,8 @@ const linearExpression = (coefs: (BN | number)[]) => {
   let str = ''
   let first = true
   const n = varNames.length
-  for (let i = 0; i < n; ++i) {
-    str += nameValToStr(varNames[i], coefs[i], first) + ' '
+  for (let i = 0; i < n; i += 1) {
+    str += `${nameValToStr(varNames[i], coefs[i], first)} `
     first = false
   }
   return str
