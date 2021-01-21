@@ -1,28 +1,7 @@
 import BN from 'bn.js'
-import { ethers } from 'ethers'
-import { calculateOptimalSolution, OrderState, SolverWeights, State } from '../services/solver'
+import { calculateOptimalSolution, Orders, SolverWeights, State } from '../services/solver'
 import { Constructor, PendingTransaction, TinlakeParams } from '../Tinlake'
 const web3 = require('web3-utils')
-
-/**
- * We divide all uint values by 10**5, in order to convert them to valid JS numbers, and then by 10**13. This induces some loss
- * precision, but since we are currently using DAI as the ERC20 token, this isn't a big problem. We are also dividing the
- * ratios by 10**20, then converting them to numbers, and then dividing again by 10**7. This ultimately divides
- * the ratios by 10**27, which is the precision of these values on contract. However, BN.js doesn't support decimals,
- * so we basically limit the ratios to 7 decimals here.
- */
-const uintToNumber = (uint: ethers.BigNumber) =>
-  (uint as any)
-    .toBN()
-    .div(new BN(10).pow(new BN(10)))
-    .toNumber() /
-  10 ** 8
-const fixed27ToNumber = (fixed27: ethers.BigNumber) =>
-  (fixed27 as any)
-    .toBN()
-    .div(new BN(10).pow(new BN(20)))
-    .toNumber() /
-  10 ** 7
 
 const numberToUint = (num: number): string => {
   return new BN(num * 10 ** 12).mul(new BN(10).pow(new BN(6))).toString()
@@ -31,28 +10,29 @@ const numberToUint = (num: number): string => {
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
     getEpochState = async () => {
+      const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
       const coordinator = this.contract('COORDINATOR')
       const assessor = this.contract('ASSESSOR')
 
-      const reserve = uintToNumber(await coordinator.epochReserve())
-      const netAssetValue = uintToNumber(await coordinator.epochNAV())
-      const seniorAsset = uintToNumber(await coordinator.epochSeniorAsset())
-      const minTinRatio = 1.0 - fixed27ToNumber(await assessor.maxSeniorRatio())
-      const maxTinRatio = 1.0 - fixed27ToNumber(await assessor.minSeniorRatio())
-      const maxReserve = uintToNumber(await assessor.maxReserve())
+      const reserve = await this.toBN(coordinator.epochReserve())
+      const netAssetValue = await this.toBN(coordinator.epochNAV())
+      const seniorAsset = await this.toBN(coordinator.epochSeniorAsset())
+      const minTinRatio = e27.sub(await this.toBN(assessor.maxSeniorRatio()))
+      const maxTinRatio = e27.sub(await this.toBN(assessor.minSeniorRatio()))
+      const maxReserve = await this.toBN(assessor.maxReserve())
 
       return { reserve, netAssetValue, seniorAsset, minTinRatio, maxTinRatio, maxReserve }
     }
 
-    getOrderState = async () => {
+    getOrders = async () => {
       const coordinator = this.contract('COORDINATOR')
       const orderState = await coordinator.order()
 
       return {
-        dropRedeemOrder: uintToNumber(orderState.seniorRedeem),
-        tinRedeemOrder: uintToNumber(orderState.juniorRedeem),
-        tinInvestOrder: uintToNumber(orderState.juniorSupply),
-        dropInvestOrder: uintToNumber(orderState.seniorSupply),
+        dropRedeem: await this.toBN(orderState.seniorRedeem),
+        tinRedeem: await this.toBN(orderState.juniorRedeem),
+        tinInvest: await this.toBN(orderState.juniorSupply),
+        dropInvest: await this.toBN(orderState.seniorSupply),
       }
     }
 
@@ -60,10 +40,10 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const coordinator = this.contract('COORDINATOR')
 
       return {
-        seniorRedeem: (await this.toBN(coordinator.weightSeniorRedeem())).toNumber(),
-        juniorRedeem: (await this.toBN(coordinator.weightJuniorRedeem())).toNumber(),
-        juniorSupply: (await this.toBN(coordinator.weightJuniorSupply())).toNumber(),
-        seniorSupply: (await this.toBN(coordinator.weightSeniorSupply())).toNumber(),
+        dropRedeem: await this.toBN(coordinator.weightSeniorRedeem()),
+        tinRedeem: await this.toBN(coordinator.weightJuniorRedeem()),
+        tinInvest: await this.toBN(coordinator.weightJuniorSupply()),
+        dropInvest: await this.toBN(coordinator.weightSeniorSupply()),
       }
     }
 
@@ -89,29 +69,24 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       }
       console.log('Retrieving epoch state')
       const state = await this.getEpochState()
-      console.log('Retrieving order state')
-      const orderState = await this.getOrderState()
+      console.log('Retrieving orders')
+      const orders = await this.getOrders()
       console.log('Retrieving solver weights')
       const weights = await this.getSolverWeights()
 
       console.log('State', state)
-      console.log('Order state', orderState)
+      console.log('Orders', orders)
       console.log('Solver weights', weights)
 
-      const solution = await calculateOptimalSolution(state, orderState, weights)
+      const solution = await calculateOptimalSolution(state, orders, weights)
       console.log('Solution found', solution)
-
-      // Status 4 is a solution with all zeros, status 5 is a non-zero solution
-      if (solution.status !== 4 && solution.status !== 5) {
-        throw new Error('Solution could not be found for the current epoch')
-      }
 
       const validationScore = (
         await coordinator.validate(
-          numberToUint(solution.vars.dropRedeem),
-          numberToUint(solution.vars.tinRedeem),
-          numberToUint(solution.vars.tinInvest),
-          numberToUint(solution.vars.dropInvest)
+          solution.vars.dropRedeem,
+          solution.vars.tinRedeem,
+          solution.vars.tinInvest,
+          solution.vars.dropInvest
         )
       )
         .toBN()
@@ -122,10 +97,10 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       }
 
       const submissionTx = coordinator.submitSolution(
-        numberToUint(solution.vars.dropRedeem),
-        numberToUint(solution.vars.tinRedeem),
-        numberToUint(solution.vars.tinInvest),
-        numberToUint(solution.vars.dropInvest),
+        solution.vars.dropRedeem,
+        solution.vars.tinRedeem,
+        solution.vars.tinInvest,
+        solution.vars.dropInvest,
         this.overrides
       )
 
@@ -231,7 +206,7 @@ export type EpochState =
 
 export type ICoordinatorActions = {
   getEpochState(): Promise<State>
-  getOrderState(): Promise<OrderState>
+  getOrders(): Promise<Orders>
   getSolverWeights(): Promise<SolverWeights>
   solveEpoch(): Promise<PendingTransaction>
   executeEpoch(): Promise<PendingTransaction>
