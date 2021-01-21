@@ -2,7 +2,11 @@ version: '3'
 
 volumes:
   ipfs:
+    labels: 
+      - "${PROJECT}=ipfs"
   data:
+    labels: 
+      - "${PROJECT}=data"
 
 services:
   parity:
@@ -25,7 +29,6 @@ services:
     env_file:
       - .env
     volumes:
-      - ./db/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh
       - data:/var/lib/postgresql/data
 
   ipfs:
@@ -52,3 +55,10 @@ services:
       - postgres_host=db:5432
       - postgres_pass=${POSTGRES_PASSWORD}
       - postgres_user=${POSTGRES_USER}
+
+  contracts:
+    build:
+      context: contracts/
+    container_name: contracts
+    depends_on:
+      - parity
