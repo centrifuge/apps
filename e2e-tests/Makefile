@@ -1,23 +1,30 @@
+PROJECT ?= tinlake
+
 # Common docker-compose method and arguments
-COMPOSE = docker-compose -f docker-compose.yml -p tinlake
+COMPOSE = docker-compose -f docker-compose.yml -p ${PROJECT}
 
 # Tasks
+
+.PHONY: build
 build: ## Build containers
-    $(COMPOSE) build
+	$(COMPOSE) build
 
+.PHONY: up
 up: ## Start containers in background
-    $(COMPOSE) up -d
+	$(COMPOSE) up -d
 
+.PHONY: down
 down: ## Stop containers
-    $(COMPOSE) down
+	$(COMPOSE) down
 
+.PHONY: logs
 logs: ## Follow container logs
-    $(COMPOSE) logs -f --tail 100
+	$(COMPOSE) logs -f --tail 100
 
+.PHONY: clean
 clean: ## Remove volumes
-    docker volume prune
+	docker volume prune --filter label=${PROJECT}
 
+.PHONY: start
 ## Prune all volumes and start containers
 start: | clean up
-
-.PHONY: build up down logs clean start
