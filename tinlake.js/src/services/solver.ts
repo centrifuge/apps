@@ -35,8 +35,8 @@ export const calculateOptimalSolution = async (
       Maximize
         ${linearExpression(varWeights)}
       Subject To
-        reserve: ${linearExpression([1, 1, -1, -1])} <= ${state.reserve}
-        maxReserve: ${linearExpression([1, 1, -1, -1])} >= ${state.reserve.sub(state.maxReserve)}
+        reserve: ${linearExpression([1, 1, -1, -1])} >= ${state.reserve}
+        maxReserve: ${linearExpression([1, 1, -1, -1])} <= ${state.maxReserve.sub(state.reserve)}
         minTINRatioLb: ${linearExpression(minTINRatioLbCoeffs)} >= ${minTINRatioLb}
         maxTINRatioLb: ${linearExpression(maxTINRatioLbCoeffs)} >= ${maxTINRatioLb}
       Bounds
@@ -50,9 +50,7 @@ export const calculateOptimalSolution = async (
     const output = clp.solve(lp)
 
     const outputToBN = (str: string) => new BN(str.split('.')[0])
-    const isFeasible = output.infeasibilityRay
-      .map((ray: string) => outputToBN(ray.split('.')[0]))
-      .every((ray: BN) => ray.isZero())
+    const isFeasible = output.infeasibilityRay.length == 0
 
     if (!isFeasible) {
       // If it's not possible to go into a healthy state, calculate the best possible solution
@@ -90,15 +88,22 @@ export const calculateOptimalSolution = async (
 }
 
 const nameValToStr = (name: string, coef: BN | number, first: boolean) => {
-  const coefNum = typeof coef !== 'number' ? coef : parseFloat(coef.toString())
+  const ONE = new BN(1)
+  const ZERO = new BN(0)
+  const coefBN = new BN(coef)
+  if (coefBN.eq(ZERO)) {
+    return ''
+  }
   let str = ''
-  if (first && coefNum === 1) return name
-  if (coefNum === 1) {
+  if (first && coefBN.eq(ONE)) {
+    return name
+  }
+  if (coefBN.eq(ONE)) {
     str += '+'
-  } else if (coefNum === -1) {
+  } else if (coefBN.eq(ONE.neg())) {
     str += '-'
   } else {
-    str += coefNum
+    str += (coefBN.gt(ZERO) ? '+' : '') + coefBN.toString()
   }
   str += ` ${name}`
   return str

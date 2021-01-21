@@ -6,7 +6,8 @@ const uint = (num: number) => {
   return new BN(num).mul(new BN(10).pow(new BN(18)))
 }
 const f27 = (num: number) => {
-  return new BN(num).mul(new BN(10).pow(new BN(27)))
+  const res = 8
+  return new BN(num * Math.pow(10, res)).mul(new BN(10).pow(new BN(27-res)))
 }
 
 const weights = {
@@ -16,8 +17,8 @@ const weights = {
   dropInvest: new BN(1000),
 }
 
-describe('solver tests', async () => {
-  describe('solver', async () => {
+describe('solver tests', () => {
+  describe('solver', () => {
     it('should return an optimal solution when limited by the max TIN ratio', async () => {
       const state = {
         netAssetValue: uint(800),
@@ -38,8 +39,8 @@ describe('solver tests', async () => {
       const result = await calculateOptimalSolution(state, orderState, weights)
       assert.strictEqual(result.isFeasible, true)
       assert.strictEqual(result.vars.tinRedeem.toString(), uint(100).toString())
-      assert.strictEqual(result.vars.dropRedeem.toString(), uint(300).toString())
-      assert.strictEqual(result.vars.tinInvest.toString(), uint(125).toString())
+      assert.strictEqual(result.vars.dropRedeem.toString(), uint(240).toString())
+      assert.strictEqual(result.vars.tinInvest.toString(), uint(140).toString())
       assert.strictEqual(result.vars.dropInvest.toString(), uint(400).toString())
     })
 
