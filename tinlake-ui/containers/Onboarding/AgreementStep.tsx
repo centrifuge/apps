@@ -105,8 +105,8 @@ const KycStep: React.FC<Props> = (props: Props) => {
               primary
               label={`Sign Subscription Agreement`}
               href={`${config.onboardAPIHost}pools/${(props.activePool as Pool).addresses.ROOT_CONTRACT}/agreements/${
-                props.agreement?.id
-              }/redirect?session=${session}`}
+                props.agreement?.provider
+              }/${props.agreement?.providerTemplateId}/redirect?session=${session}`}
               onClick={(event: any) => {
                 if (!props.onboarding.data?.kyc.isUsaTaxResident && !checked) {
                   event.preventDefault()

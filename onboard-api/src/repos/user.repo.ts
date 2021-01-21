@@ -2,15 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { uuidv4 } from '../utils/uuid'
 import { DatabaseService } from './db.service'
 
-export type User = {
-  id: string
-  email?: string
-  firstName?: string
-  middleName?: string
-  lastName?: string
-  countryCode?: string
-}
-
 @Injectable()
 export class UserRepo {
   constructor(private readonly db: DatabaseService) {}
@@ -85,4 +76,11 @@ export class UserRepo {
 
     return true
   }
+}
+
+export type User = {
+  id: string
+  email?: string
+  fullName?: string
+  countryCode?: string
 }

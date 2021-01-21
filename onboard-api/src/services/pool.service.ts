@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import { ethers } from 'ethers'
 import config from '../config'
 import { Tranche } from '../controllers/types'
@@ -52,6 +53,11 @@ export class PoolService {
 
     this.pools = poolsWithProfiles
     this.logger.log(`Loaded ${Object.keys(this.pools).length} pools with profiles from IPFS`)
+  }
+
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async sync() {
+    await this.loadFromIPFS()
   }
 
   private async assembleIpfsUrl(): Promise<string> {

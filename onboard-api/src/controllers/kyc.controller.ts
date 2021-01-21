@@ -47,6 +47,9 @@ export class KycController {
     if (!investor) throw new BadRequestException('Failed to retrieve investor information from Securitize')
 
     // Update KYC and user records in our database
+    // TODO: check if this provider and providerAccountId is already linked to a different userId
+    // if so, add this address to that user
+
     const kyc = await this.kycRepo.upsertSecuritize(address.userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!kyc) throw new BadRequestException('Failed to create KYC entity')
 
@@ -66,13 +69,13 @@ export class KycController {
       investor.domainInvestorDetails.isAccredited
     )
 
-    // Create agreements for this pool
-    await this.agreementRepo.createAgreementsForPool(
-      params.poolId,
-      address.userId,
-      investor.email,
-      investor.details.address.countryCode
-    )
+    // // Create agreements for this pool
+    // await this.agreementRepo.createAgreementsForPool(
+    //   params.poolId,
+    //   address.userId,
+    //   investor.email,
+    //   investor.details.address.countryCode
+    // )
 
     // Create session and redirect user
     const session = this.sessionService.create(address.userId)
