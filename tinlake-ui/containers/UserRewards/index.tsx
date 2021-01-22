@@ -297,9 +297,9 @@ const RewardRecipients = ({ recipients }: { recipients: UserRewardsLink[] }) => 
     {recipients
       .map((r, i) => (
         <Recipient key={r.centAccountID}>
-          <Addr active={i === 0}>{shortAddr(accountIdToCentChainAddr(r.centAccountID))}</Addr>
-          <Status active={i === 0}>
-            {recipients.length > 1 && (i === 0 ? 'Active | ' : 'Inactive | ')}
+          <Addr active={i === recipients.length - 1}>{shortAddr(accountIdToCentChainAddr(r.centAccountID))}</Addr>
+          <Status active={i === recipients.length - 1}>
+            {recipients.length > 1 && (i === recipients.length - 1 ? 'Active | ' : 'Inactive | ')}
             {r.claimed
               ? `Claimed ${addThousandsSeparators(toDynamicPrecision(baseToDisplay(r.claimed, 18)))} RAD`
               : 'loading...'}
