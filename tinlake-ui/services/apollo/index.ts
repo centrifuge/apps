@@ -336,9 +336,6 @@ class Apollo {
             totalRewards
             nonZeroBalanceSince
           }
-          accounts(where: {id: "${user.toLowerCase()}"}) {
-            currentActiveInvestmentAmount
-          }
         }
         `,
       })
@@ -348,17 +345,11 @@ class Apollo {
     }
 
     const transformed: UserRewardsData = {
-      currentActiveInvestmentAmount: new BN(0),
       nonZeroInvestmentSince: null,
       claimable: false,
       totalEarnedRewards: new BN(0),
       unlinkedRewards: new BN(0),
       links: [],
-    }
-
-    const account = result.data?.accounts[0]
-    if (account) {
-      transformed.currentActiveInvestmentAmount = new BN(account.currentActiveInvestmentAmount)
     }
 
     const rewardBalance = result.data?.rewardBalances[0]

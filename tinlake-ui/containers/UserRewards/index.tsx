@@ -12,6 +12,7 @@ import PageTitle from '../../components/PageTitle'
 import { Cont, Label, TokenLogo, Unit, Value } from '../../components/PoolsMetrics/styles'
 import { AuthState, ensureAuthed } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
+import { PortfolioState } from '../../ducks/portfolio'
 import { maybeLoadRewards, RewardsState } from '../../ducks/rewards'
 import { load, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
@@ -29,6 +30,7 @@ interface Props {
 
 const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
   const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
+  const { totalValue: portfolioValue } = useSelector<any, PortfolioState>((state) => state.portfolio)
   const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
   const { address: ethAddr } = useSelector<any, AuthState>((state: any) => state.auth)
@@ -69,16 +71,16 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
               justify="center"
             >
               <Metric
-                loading={!data}
-                value={baseToDisplay(data?.currentActiveInvestmentAmount || '0', 18)}
+                loading={!data || !portfolioValue}
+                value={baseToDisplay(portfolioValue || '0', 18)}
                 label="Your Investment"
                 token="DAI"
                 borderRight
               />
               <Metric
-                loading={!rewards.data || !data}
+                loading={!rewards.data || !data || !portfolioValue}
                 value={baseToDisplay(
-                  rewards.data?.rewardRate?.mul(data?.currentActiveInvestmentAmount.toString() || 0).toString() || '0',
+                  rewards.data?.rewardRate?.mul(portfolioValue?.toString() || 0).toString() || '0',
                   18
                 )}
                 label="Your Daily Rewards"

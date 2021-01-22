@@ -46,10 +46,6 @@ export interface UserRewardsState {
  */
 export interface UserRewardsData {
   /**
-   * From subgraph. Currently invested amount across all pools
-   */
-  currentActiveInvestmentAmount: BN
-  /**
    * From subgraph. If null, the user has not had any investments yet. If the user invested any amount, this number will
    * be a timestamp (in seconds).
    */
