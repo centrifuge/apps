@@ -22,11 +22,13 @@ export interface TokenBalance {
 export interface PortfolioState {
   state: null | 'loading' | 'found'
   data: TokenBalance[]
+  totalValue: null | BN
 }
 
 const initialState: PortfolioState = {
   state: null,
   data: [],
+  totalValue: null,
 }
 
 export default function reducer(
@@ -39,7 +41,15 @@ export default function reducer(
     case LOAD_PORTFOLIO:
       return { ...state, state: 'loading' }
     case RECEIVE_PORTFOLIO:
-      return { ...state, state: 'found', data: action.data }
+      return {
+        ...state,
+        state: 'found',
+        data: action.data,
+        totalValue:
+          action.data?.reduce((prev: BN, tokenBalance: TokenBalance) => {
+            return prev.add(tokenBalance.value)
+          }, new BN(0)) || new BN(0),
+      }
     default:
       return state
   }
