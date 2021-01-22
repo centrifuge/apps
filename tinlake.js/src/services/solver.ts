@@ -35,7 +35,7 @@ export const calculateOptimalSolution = async (
       Maximize
         ${linearExpression(varWeights)}
       Subject To
-        reserve: ${linearExpression([1, 1, -1, -1])} >= ${state.reserve}
+        reserve: ${linearExpression([1, 1, -1, -1])} >= ${state.reserve.neg()}
         maxReserve: ${linearExpression([1, 1, -1, -1])} <= ${state.maxReserve.sub(state.reserve)}
         minTINRatioLb: ${linearExpression(minTINRatioLbCoeffs)} >= ${minTINRatioLb}
         maxTINRatioLb: ${linearExpression(maxTINRatioLbCoeffs)} >= ${maxTINRatioLb}

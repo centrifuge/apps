@@ -7,7 +7,7 @@ const uint = (num: number) => {
 }
 const f27 = (num: number) => {
   const res = 8
-  return new BN(num * Math.pow(10, res)).mul(new BN(10).pow(new BN(27-res)))
+  return new BN(num * Math.pow(10, res)).mul(new BN(10).pow(new BN(27 - res)))
 }
 
 const weights = {
@@ -39,9 +39,34 @@ describe('solver tests', () => {
       const result = await calculateOptimalSolution(state, orderState, weights)
       assert.strictEqual(result.isFeasible, true)
       assert.strictEqual(result.vars.tinRedeem.toString(), uint(100).toString())
-      assert.strictEqual(result.vars.dropRedeem.toString(), uint(240).toString())
-      assert.strictEqual(result.vars.tinInvest.toString(), uint(140).toString())
+      assert.strictEqual(result.vars.dropRedeem.toString(), uint(300).toString())
+      assert.strictEqual(result.vars.tinInvest.toString(), uint(125).toString())
       assert.strictEqual(result.vars.dropInvest.toString(), uint(400).toString())
+    })
+
+    it('should return an optimal solution when limited by the reserve', async () => {
+      const state = {
+        netAssetValue: uint(800),
+        reserve: uint(200),
+        seniorAsset: uint(400),
+        minTinRatio: f27(0.0),
+        maxTinRatio: f27(1.0),
+        maxReserve: uint(10000),
+      }
+
+      const orderState = {
+        tinRedeem: uint(0),
+        dropRedeem: uint(300),
+        tinInvest: uint(0),
+        dropInvest: uint(0),
+      }
+
+      const result = await calculateOptimalSolution(state, orderState, weights)
+      assert.strictEqual(result.isFeasible, true)
+      assert.strictEqual(result.vars.tinRedeem.toString(), uint(0).toString())
+      assert.strictEqual(result.vars.dropRedeem.toString(), uint(200).toString())
+      assert.strictEqual(result.vars.tinInvest.toString(), uint(0).toString())
+      assert.strictEqual(result.vars.dropInvest.toString(), uint(0).toString())
     })
 
     it('should return an optimal solution when limited by the max reserve', async () => {
