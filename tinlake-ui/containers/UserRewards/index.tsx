@@ -14,7 +14,7 @@ import { AuthState, ensureAuthed } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
 import { PortfolioState } from '../../ducks/portfolio'
 import { maybeLoadRewards, RewardsState } from '../../ducks/rewards'
-import { load, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
+import { maybeLoadUserRewards, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { shortAddr } from '../../utils/shortAddr'
@@ -40,7 +40,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
   }, [])
   React.useEffect(() => {
     if (ethAddr) {
-      dispatch(load(ethAddr))
+      dispatch(maybeLoadUserRewards(ethAddr))
     }
   }, [ethAddr])
   const [showLink, setShowLink] = React.useState(false)

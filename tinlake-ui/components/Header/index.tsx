@@ -15,7 +15,6 @@ import { AuthState, clear, ensureAuthed } from '../../ducks/auth'
 import { OnboardingState } from '../../ducks/onboarding'
 import { loadPortfolio, PortfolioState } from '../../ducks/portfolio'
 import { selectWalletTransactions, TransactionState } from '../../ducks/transactions'
-import { load } from '../../ducks/userRewards'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import { toPrecision } from '../../utils/toPrecision'
@@ -193,7 +192,7 @@ const Header: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { ensureAuthed, clear, load })(withRouter(Header))
+export default connect((state) => state, { ensureAuthed, clear })(withRouter(Header))
 
 const Portfolio = styled(Box)`
   cursor: pointer;

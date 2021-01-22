@@ -167,12 +167,24 @@ export default function reducer(
   }
 }
 
-export function load(
+export function maybeLoadUserRewards(
+  ethAddr: string
+): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
+  return async (dispatch, getState) => {
+    const { userRewards } = getState()
+    if (userRewards.subgraphState !== null) {
+      return
+    }
+    await dispatch(loadUserRewards(ethAddr))
+  }
+}
+
+export function loadUserRewards(
   ethAddr: string
 ): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
   return async (dispatch) => {
     await dispatch(loadSubgraph(ethAddr)) // block, need data for next load
-    dispatch(maybeLoadAndApplyClaims())
+    await dispatch(maybeLoadAndApplyClaims())
   }
 }
 
