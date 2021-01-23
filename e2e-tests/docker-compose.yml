@@ -58,7 +58,16 @@ services:
 
   contracts:
     build:
-      context: contracts/
+      context: ./contracts
+      args:
+        ETH_FROM: 0x${ETH_FROM}
+        ETH_GAS: ${ETH_GAS}
     container_name: contracts
     depends_on:
       - parity
+      - graph
+    environment:
+      - ETH_RPC_URL=http://parity:8545
+      - ETH_KEYSTORE=/app/keystore
+      - ETH_PASSWORD=/app/password
+    command: ./deploy.sh
