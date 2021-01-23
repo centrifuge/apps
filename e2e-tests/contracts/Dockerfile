@@ -29,10 +29,23 @@ WORKDIR /app
 
 RUN git clone https://github.com/dapphub/ds-token.git
 
+RUN mkdir keystore
+
+COPY keyfile.json ./keystore
+
+COPY password .
+
 WORKDIR /app/ds-token
 
 RUN dapp update
 
 RUN dapp build
 
-RUN ls -l out
+ARG ETH_FROM 
+ENV ETH_FROM $ETH_FROM
+ARG ETH_GAS
+ENV ETH_GAS $ETH_GAS
+
+COPY deploy.sh .
+
+
