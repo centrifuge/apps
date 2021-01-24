@@ -1,12 +1,12 @@
 import BN from 'bn.js'
-// import { CLP } from 'clp-wasm'
+import { CLP } from 'clp-wasm'
 
 export const calculateOptimalSolution = async (
   state: State,
   orders: Orders,
   weights: SolverWeights
 ): Promise<SolverResult> => {
-  return require('clp-wasm/clp-wasm').then((clp: any) => {
+  return require('clp-wasm/clp-wasm').then((clp: CLP) => {
     const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
     const maxTinRatio = e27.sub(state.minDropRatio)
     const minTinRatio = e27.sub(state.maxDropRatio)

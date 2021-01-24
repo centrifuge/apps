@@ -3,25 +3,20 @@ import { calculateOptimalSolution, Orders, SolverWeights, State } from '../servi
 import { Constructor, PendingTransaction, TinlakeParams } from '../Tinlake'
 const web3 = require('web3-utils')
 
-const numberToUint = (num: number): string => {
-  return new BN(num * 10 ** 12).mul(new BN(10).pow(new BN(6))).toString()
-}
-
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
     getEpochState = async () => {
-      const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
       const coordinator = this.contract('COORDINATOR')
       const assessor = this.contract('ASSESSOR')
 
       const reserve = await this.toBN(coordinator.epochReserve())
       const netAssetValue = await this.toBN(coordinator.epochNAV())
       const seniorAsset = await this.toBN(coordinator.epochSeniorAsset())
-      const minTinRatio = e27.sub(await this.toBN(assessor.maxSeniorRatio()))
-      const maxTinRatio = e27.sub(await this.toBN(assessor.minSeniorRatio()))
+      const minDropRatio = await this.toBN(assessor.minSeniorRatio())
+      const maxDropRatio = await this.toBN(assessor.maxSeniorRatio())
       const maxReserve = await this.toBN(assessor.maxReserve())
 
-      return { reserve, netAssetValue, seniorAsset, minTinRatio, maxTinRatio, maxReserve }
+      return { reserve, netAssetValue, seniorAsset, minDropRatio, maxDropRatio, maxReserve }
     }
 
     getOrders = async () => {
@@ -29,10 +24,10 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const orderState = await coordinator.order()
 
       return {
-        dropRedeem: await this.toBN(orderState.seniorRedeem),
-        tinRedeem: await this.toBN(orderState.juniorRedeem),
-        tinInvest: await this.toBN(orderState.juniorSupply),
         dropInvest: await this.toBN(orderState.seniorSupply),
+        dropRedeem: await this.toBN(orderState.seniorRedeem),
+        tinInvest: await this.toBN(orderState.juniorSupply),
+        tinRedeem: await this.toBN(orderState.juniorRedeem),
       }
     }
 
@@ -40,10 +35,10 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const coordinator = this.contract('COORDINATOR')
 
       return {
-        dropRedeem: await this.toBN(coordinator.weightSeniorRedeem()),
-        tinRedeem: await this.toBN(coordinator.weightJuniorRedeem()),
-        tinInvest: await this.toBN(coordinator.weightJuniorSupply()),
         dropInvest: await this.toBN(coordinator.weightSeniorSupply()),
+        dropRedeem: await this.toBN(coordinator.weightSeniorRedeem()),
+        tinInvest: await this.toBN(coordinator.weightJuniorSupply()),
+        tinRedeem: await this.toBN(coordinator.weightJuniorRedeem()),
       }
     }
 
@@ -79,28 +74,17 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       console.log('Solver weights', weights)
 
       const solution = await calculateOptimalSolution(state, orders, weights)
-      console.log('Solution found', solution)
 
-      const validationScore = (
-        await coordinator.validate(
-          solution.vars.dropRedeem,
-          solution.vars.tinRedeem,
-          solution.vars.tinInvest,
-          solution.vars.dropInvest
-        )
-      )
-        .toBN()
-        .toNumber()
-
-      if (validationScore !== 0) {
-        console.error(`Solution is not valid: ${validationScore}`)
+      if (!solution.isFeasible) {
+        throw new Error('Failed to find a solution')
       }
 
+      console.log('Solution found', solution)
       const submissionTx = coordinator.submitSolution(
-        solution.vars.dropRedeem,
-        solution.vars.tinRedeem,
-        solution.vars.tinInvest,
-        solution.vars.dropInvest,
+        solution.dropInvest,
+        solution.dropRedeem,
+        solution.tinInvest,
+        solution.tinRedeem,
         this.overrides
       )
 

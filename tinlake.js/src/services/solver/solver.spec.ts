@@ -22,7 +22,7 @@ const weights = {
 }
 
 const problems = glob.sync('src/services/solver/problems/*.json')
-describe('solver dynamic tests', () => {
+describe('solver tests', () => {
   problems.forEach((problemPath: string) => {
     const problem = JSON.parse(fs.readFileSync(problemPath, 'utf8'))
     const name = problemPath.split('/').slice(-1)[0].split('.').slice(0, -1).join('.')
