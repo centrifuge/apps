@@ -45,10 +45,11 @@ describe('solver dynamic tests', () => {
       }
 
       const expected = {
-        dropInvest: objToNum(problem.solution.dropInvest),
-        dropRedeem: objToNum(problem.solution.dropRedeem),
-        tinInvest: objToNum(problem.solution.tinInvest),
-        tinRedeem: objToNum(problem.solution.tinRedeem),
+        dropInvest: problem.solution.dropInvest ? objToNum(problem.solution.dropInvest) : new BN(0),
+        dropRedeem: problem.solution.dropRedeem ? objToNum(problem.solution.dropRedeem) : new BN(0),
+        tinInvest: problem.solution.tinInvest ? objToNum(problem.solution.tinInvest) : new BN(0),
+        tinRedeem: problem.solution.tinRedeem ? objToNum(problem.solution.tinRedeem) : new BN(0),
+        isFeasible: 'isFeasible' in problem.solution ? problem.solution.isFeasible : true,
       }
 
       const result = await calculateOptimalSolution(state, orders, weights)
@@ -56,6 +57,7 @@ describe('solver dynamic tests', () => {
       // Log inputs and outputs if one of the asserts fails
       if (
         DebugMode ||
+        result.isFeasible !== expected.isFeasible ||
         result.vars.dropInvest.toString() !== expected.dropInvest.toString() ||
         result.vars.dropRedeem.toString() !== expected.dropRedeem.toString() ||
         result.vars.tinInvest.toString() !== expected.tinInvest.toString() ||
@@ -78,9 +80,11 @@ describe('solver dynamic tests', () => {
         Object.keys(result.vars).forEach((key: string) => {
           console.log(`\t${key}: ${result.vars[key].toString()}`)
         })
+        console.log(`\tisFeasible: ${result.isFeasible.toString()}`)
         console.log()
       }
 
+      assert.strictEqual(result.isFeasible, expected.isFeasible, 'isFeasible does not match')
       assert.strictEqual(result.vars.dropInvest.toString(), expected.dropInvest.toString(), 'dropInvest is not correct')
       assert.strictEqual(result.vars.dropRedeem.toString(), expected.dropRedeem.toString(), 'dropRedeem is not correct')
       assert.strictEqual(result.vars.tinInvest.toString(), expected.tinInvest.toString(), 'tinInvest is not correct')

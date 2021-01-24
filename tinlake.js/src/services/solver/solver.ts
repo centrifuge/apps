@@ -65,22 +65,32 @@ export const calculateOptimalSolution = async (
         const tinRedeem = BN.min(orders.tinRedeem, state.reserve.sub(dropRedeem)) // Limited either by the order or what's remaining of the reserve after the DROP redemptions
 
         return {
-          isFeasible: false,
+          isFeasible: true,
           vars: {
-            tinRedeem,
+            dropInvest: new BN(0),
             dropRedeem,
             tinInvest: new BN(0),
+            tinRedeem,
+          },
+        }
+      } else {
+        return {
+          isFeasible: false,
+          vars: {
             dropInvest: new BN(0),
+            dropRedeem: new BN(0),
+            tinInvest: new BN(0),
+            tinRedeem: new BN(0),
           },
         }
       }
     }
 
     const vars = {
-      tinRedeem: outputToBN(output.solution[2]),
+      dropInvest: outputToBN(output.solution[1]),
       dropRedeem: outputToBN(output.solution[3]),
       tinInvest: outputToBN(output.solution[0]),
-      dropInvest: outputToBN(output.solution[1]),
+      tinRedeem: outputToBN(output.solution[2]),
     }
 
     return { isFeasible, vars }
@@ -153,6 +163,6 @@ export interface SolverSolution {
 
 export interface SolverResult {
   isFeasible: boolean
-  vars: SolverSolution
+  vars?: SolverSolution
   error?: string
 }
