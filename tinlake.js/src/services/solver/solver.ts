@@ -66,34 +66,29 @@ export const calculateOptimalSolution = async (
 
         return {
           isFeasible: true,
-          vars: {
-            dropInvest: new BN(0),
-            dropRedeem,
-            tinInvest: new BN(0),
-            tinRedeem,
-          },
+          dropInvest: new BN(0),
+          dropRedeem,
+          tinInvest: new BN(0),
+          tinRedeem,
         }
       } else {
         return {
           isFeasible: false,
-          vars: {
-            dropInvest: new BN(0),
-            dropRedeem: new BN(0),
-            tinInvest: new BN(0),
-            tinRedeem: new BN(0),
-          },
+          dropInvest: new BN(0),
+          dropRedeem: new BN(0),
+          tinInvest: new BN(0),
+          tinRedeem: new BN(0),
         }
       }
     }
 
-    const vars = {
+    return {
+      isFeasible,
       dropInvest: outputToBN(output.solution[1]),
       dropRedeem: outputToBN(output.solution[3]),
       tinInvest: outputToBN(output.solution[0]),
       tinRedeem: outputToBN(output.solution[2]),
     }
-
-    return { isFeasible, vars }
   })
 }
 
@@ -163,6 +158,9 @@ export interface SolverSolution {
 
 export interface SolverResult {
   isFeasible: boolean
-  vars?: SolverSolution
+  tinRedeem: BN
+  dropRedeem: BN
+  tinInvest: BN
+  dropInvest: BN
   error?: string
 }

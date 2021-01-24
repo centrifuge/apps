@@ -58,10 +58,10 @@ describe('solver dynamic tests', () => {
       if (
         DebugMode ||
         result.isFeasible !== expected.isFeasible ||
-        result.vars.dropInvest.toString() !== expected.dropInvest.toString() ||
-        result.vars.dropRedeem.toString() !== expected.dropRedeem.toString() ||
-        result.vars.tinInvest.toString() !== expected.tinInvest.toString() ||
-        result.vars.tinRedeem.toString() !== expected.tinRedeem.toString()
+        result.dropInvest.toString() !== expected.dropInvest.toString() ||
+        result.dropRedeem.toString() !== expected.dropRedeem.toString() ||
+        result.tinInvest.toString() !== expected.tinInvest.toString() ||
+        result.tinRedeem.toString() !== expected.tinRedeem.toString()
       ) {
         if (problem.explanation) console.log(`${problem.explanation}\n`)
         console.log(`\n\t- State`)
@@ -77,18 +77,17 @@ describe('solver dynamic tests', () => {
           console.log(`\t${key}: ${expected[key].toString()}`)
         })
         console.log(`\n\t- Actual output`)
-        Object.keys(result.vars).forEach((key: string) => {
-          console.log(`\t${key}: ${result.vars[key].toString()}`)
+        Object.keys(result).forEach((key: string) => {
+          console.log(`\t${key}: ${result[key].toString()}`)
         })
-        console.log(`\tisFeasible: ${result.isFeasible.toString()}`)
         console.log()
       }
 
       assert.strictEqual(result.isFeasible, expected.isFeasible, 'isFeasible does not match')
-      assert.strictEqual(result.vars.dropInvest.toString(), expected.dropInvest.toString(), 'dropInvest is not correct')
-      assert.strictEqual(result.vars.dropRedeem.toString(), expected.dropRedeem.toString(), 'dropRedeem is not correct')
-      assert.strictEqual(result.vars.tinInvest.toString(), expected.tinInvest.toString(), 'tinInvest is not correct')
-      assert.strictEqual(result.vars.tinRedeem.toString(), expected.tinRedeem.toString(), 'tinRedeem is not correct')
+      assert.strictEqual(result.dropInvest.toString(), expected.dropInvest.toString(), 'dropInvest is not correct')
+      assert.strictEqual(result.dropRedeem.toString(), expected.dropRedeem.toString(), 'dropRedeem is not correct')
+      assert.strictEqual(result.tinInvest.toString(), expected.tinInvest.toString(), 'tinInvest is not correct')
+      assert.strictEqual(result.tinRedeem.toString(), expected.tinRedeem.toString(), 'tinRedeem is not correct')
     })
   })
 })
