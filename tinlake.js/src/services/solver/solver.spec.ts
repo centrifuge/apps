@@ -4,6 +4,8 @@ import { calculateOptimalSolution } from './solver'
 import glob from 'glob'
 import fs from 'fs'
 
+const DebugMode: boolean = false
+
 const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
 
 const objToNum = (jsonNumber: { base: number; value: number; add?: number } | string) => {
@@ -23,8 +25,9 @@ const problems = glob.sync('src/services/solver/problems/*.json')
 describe('solver dynamic tests', () => {
   problems.forEach((problemPath: string) => {
     const problem = JSON.parse(fs.readFileSync(problemPath, 'utf8'))
+    const name = problemPath.split('/').slice(-1)[0].split('.').slice(0, -1).join('.')
 
-    it(`Should solve the ${problemPath} test case`, async () => {
+    it(`Should solve the ${name} test case`, async () => {
       const state = {
         netAssetValue: objToNum(problem.state.netAssetValue),
         reserve: objToNum(problem.state.reserve),
@@ -41,50 +44,47 @@ describe('solver dynamic tests', () => {
         tinRedeem: objToNum(problem.orders.tinRedeem),
       }
 
+      const expected = {
+        dropInvest: objToNum(problem.solution.dropInvest),
+        dropRedeem: objToNum(problem.solution.dropRedeem),
+        tinInvest: objToNum(problem.solution.tinInvest),
+        tinRedeem: objToNum(problem.solution.tinRedeem),
+      }
+
       const result = await calculateOptimalSolution(state, orders, weights)
 
       // Log inputs and outputs if one of the asserts fails
       if (
-        result.vars.dropInvest.toString() !== objToNum(problem.orders.dropInvest).toString() ||
-        result.vars.dropRedeem.toString() !== objToNum(problem.orders.dropRedeem).toString() ||
-        result.vars.tinInvest.toString() !== objToNum(problem.orders.tinInvest).toString() ||
-        result.vars.tinRedeem.toString() !== objToNum(problem.orders.tinRedeem).toString()
+        DebugMode ||
+        result.vars.dropInvest.toString() !== expected.dropInvest.toString() ||
+        result.vars.dropRedeem.toString() !== expected.dropRedeem.toString() ||
+        result.vars.tinInvest.toString() !== expected.tinInvest.toString() ||
+        result.vars.tinRedeem.toString() !== expected.tinRedeem.toString()
       ) {
-        console.log(`\n\t- Input: State`)
+        if (problem.explanation) console.log(`${problem.explanation}\n`)
+        console.log(`\n\t- State`)
         Object.keys(state).forEach((key: string) => {
           console.log(`\t${key}: ${state[key].toString()}`)
         })
-        console.log(`\n\t- Input: Orders`)
+        console.log(`\n\t- Orders`)
         Object.keys(orders).forEach((key: string) => {
           console.log(`\t${key}: ${orders[key].toString()}`)
         })
-        console.log(`\n\t- Output`)
+        console.log(`\n\t- Expected output`)
+        Object.keys(expected).forEach((key: string) => {
+          console.log(`\t${key}: ${expected[key].toString()}`)
+        })
+        console.log(`\n\t- Actual output`)
         Object.keys(result.vars).forEach((key: string) => {
           console.log(`\t${key}: ${result.vars[key].toString()}`)
         })
         console.log()
       }
 
-      assert.strictEqual(
-        result.vars.dropInvest.toString(),
-        objToNum(problem.orders.dropInvest).toString(),
-        'dropInvest is not correct'
-      )
-      assert.strictEqual(
-        result.vars.dropRedeem.toString(),
-        objToNum(problem.orders.dropRedeem).toString(),
-        'dropRedeem is not correct'
-      )
-      assert.strictEqual(
-        result.vars.tinInvest.toString(),
-        objToNum(problem.orders.tinInvest).toString(),
-        'tinInvest is not correct'
-      )
-      assert.strictEqual(
-        result.vars.tinRedeem.toString(),
-        objToNum(problem.orders.tinRedeem).toString(),
-        'tinRedeem is not correct'
-      )
+      assert.strictEqual(result.vars.dropInvest.toString(), expected.dropInvest.toString(), 'dropInvest is not correct')
+      assert.strictEqual(result.vars.dropRedeem.toString(), expected.dropRedeem.toString(), 'dropRedeem is not correct')
+      assert.strictEqual(result.vars.tinInvest.toString(), expected.tinInvest.toString(), 'tinInvest is not correct')
+      assert.strictEqual(result.vars.tinRedeem.toString(), expected.tinRedeem.toString(), 'tinRedeem is not correct')
     })
   })
 })
