@@ -1,5 +1,5 @@
 import BN from 'bn.js'
-import { calculateOptimalSolution, Orders, SolverWeights, State } from '../services/solver'
+import { calculateOptimalSolution, Orders, SolverWeights, State } from '../services/solver/solver'
 import { Constructor, PendingTransaction, TinlakeParams } from '../Tinlake'
 const web3 = require('web3-utils')
 

@@ -8,18 +8,18 @@ export const calculateOptimalSolution = async (
 ): Promise<SolverResult> => {
   return require('clp-wasm/clp-wasm').then((clp: any) => {
     const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
-    const maxDropRatio = e27.sub(state.minTinRatio)
-    const minDropRatio = e27.sub(state.maxTinRatio)
+    const maxTinRatio = e27.sub(state.minDropRatio)
+    const minTinRatio = e27.sub(state.maxDropRatio)
 
-    const minTINRatioLb = maxDropRatio
+    const minTINRatioLb = state.maxDropRatio
       .neg()
       .mul(state.netAssetValue)
-      .sub(maxDropRatio.mul(state.reserve))
+      .sub(state.maxDropRatio.mul(state.reserve))
       .add(state.seniorAsset.mul(e27))
 
-    const maxTINRatioLb = minDropRatio
+    const maxTINRatioLb = state.minDropRatio
       .mul(state.netAssetValue)
-      .add(minDropRatio.mul(state.reserve))
+      .add(state.minDropRatio.mul(state.reserve))
       .sub(state.seniorAsset.mul(e27))
 
     const varWeights = [
@@ -28,8 +28,8 @@ export const calculateOptimalSolution = async (
       parseFloat(weights.tinRedeem.toString()),
       parseFloat(weights.dropRedeem.toString()),
     ]
-    const minTINRatioLbCoeffs = [maxDropRatio, state.minTinRatio.neg(), maxDropRatio.neg(), state.minTinRatio]
-    const maxTINRatioLbCoeffs = [minDropRatio.neg(), state.maxTinRatio, minDropRatio, state.maxTinRatio.neg()]
+    const minTINRatioLbCoeffs = [state.maxDropRatio, minTinRatio.neg(), state.maxDropRatio.neg(), minTinRatio]
+    const maxTINRatioLbCoeffs = [state.minDropRatio.neg(), maxTinRatio, state.minDropRatio, maxTinRatio.neg()]
 
     const lp = `
       Maximize
@@ -125,8 +125,8 @@ export interface State {
   netAssetValue: BN
   reserve: BN
   seniorAsset: BN
-  minTinRatio: BN
-  maxTinRatio: BN
+  minDropRatio: BN
+  maxDropRatio: BN
   maxReserve: BN
 }
 
