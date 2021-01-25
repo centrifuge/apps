@@ -44,6 +44,16 @@
     }
   },
   "solution": {
-    "isFeasible": false
+    "isFeasible": true,
+    "dropInvest": {
+      "base": 18,
+      "value": 400
+    },
+    "dropRedeem": "0",
+    "tinInvest": "0",
+    "tinRedeem": {
+      "base": 18,
+      "value": 100
+    }
   }
 }
