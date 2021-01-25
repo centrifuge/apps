@@ -60,17 +60,6 @@ export const calculateOptimalSolution = async (
         .div(state.netAssetValue.add(state.reserve))
 
       if (currentSeniorRatio.lte(state.minDropRatio)) {
-        const tinInvest = orders.tinInvest
-        const dropRedeem = BN.min(orders.dropRedeem, state.reserve.add(tinInvest))
-
-        return {
-          isFeasible: true,
-          tinInvest,
-          dropRedeem,
-          dropInvest: new BN(0),
-          tinRedeem: new BN(0),
-        }
-      } else if (currentSeniorRatio.gte(state.maxDropRatio)) {
         const dropInvest = orders.dropInvest
         const tinRedeem = BN.min(orders.tinRedeem, state.reserve.add(dropInvest))
 
@@ -80,6 +69,17 @@ export const calculateOptimalSolution = async (
           tinRedeem,
           tinInvest: new BN(0),
           dropRedeem: new BN(0),
+        }
+      } else if (currentSeniorRatio.gte(state.maxDropRatio)) {
+        const tinInvest = orders.tinInvest
+        const dropRedeem = BN.min(orders.dropRedeem, state.reserve.add(tinInvest))
+
+        return {
+          isFeasible: true,
+          tinInvest,
+          dropRedeem,
+          dropInvest: new BN(0),
+          tinRedeem: new BN(0),
         }
       } else if (state.reserve.gte(state.maxReserve)) {
         const dropRedeem = BN.min(orders.dropRedeem, state.reserve) // Limited either by the order or the reserve
