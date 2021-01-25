@@ -69,11 +69,20 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       console.log('Retrieving solver weights')
       const weights = await this.getSolverWeights()
 
-      console.log('State', state)
-      console.log('Orders', orders)
-      console.log('Solver weights', weights)
-
+      console.log(`\n\t- State`)
+      Object.keys(state).forEach((key: string) => {
+        console.log(`\t${key}: ${(state as any)[key].toString()}`)
+      })
+      console.log(`\n\t- Orders`)
+      Object.keys(orders).forEach((key: string) => {
+        console.log(`\t${key}: ${(orders as any)[key].toString()}`)
+      })
       const solution = await calculateOptimalSolution(state, orders, weights)
+
+      console.log(`\n\t- Solution`)
+      Object.keys(solution).forEach((key: string) => {
+        console.log(`\t${key}: ${(solution as any)[key].toString()}`)
+      })
 
       if (!solution.isFeasible) {
         throw new Error('Failed to find a solution')

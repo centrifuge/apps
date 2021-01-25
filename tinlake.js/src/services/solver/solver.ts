@@ -55,21 +55,42 @@ export const calculateOptimalSolution = async (
     if (!isFeasible) {
       // If it's not possible to go into a healthy state, calculate the best possible solution
 
-      // TODO: if min tin ratio broken
-      //         tin.supply = max.order, drop.redeem = max.order, tin.redeem = 0, drop.supply = 0
-      // TODO: else if max tin ratio broken
-      //         tin.supply = 0, drop.redeem = 0, tin.redeem = max.order, drop.supply = max.order
+      const currentSeniorRatio = state.seniorAsset
+        .mul(new BN(10).pow(new BN(27)))
+        .div(state.netAssetValue.add(state.reserve))
 
-      if (state.reserve >= state.maxReserve) {
+      if (currentSeniorRatio.lte(state.minDropRatio)) {
+        const tinInvest = orders.tinInvest
+        const dropRedeem = BN.min(orders.dropRedeem, state.reserve.add(tinInvest))
+
+        return {
+          isFeasible: true,
+          tinInvest,
+          dropRedeem,
+          dropInvest: new BN(0),
+          tinRedeem: new BN(0),
+        }
+      } else if (currentSeniorRatio.gte(state.maxDropRatio)) {
+        const dropInvest = orders.dropInvest
+        const tinRedeem = BN.min(orders.tinRedeem, state.reserve.add(dropInvest))
+
+        return {
+          isFeasible: true,
+          dropInvest,
+          tinRedeem,
+          tinInvest: new BN(0),
+          dropRedeem: new BN(0),
+        }
+      } else if (state.reserve.gte(state.maxReserve)) {
         const dropRedeem = BN.min(orders.dropRedeem, state.reserve) // Limited either by the order or the reserve
         const tinRedeem = BN.min(orders.tinRedeem, state.reserve.sub(dropRedeem)) // Limited either by the order or what's remaining of the reserve after the DROP redemptions
 
         return {
           isFeasible: true,
-          dropInvest: new BN(0),
-          dropRedeem,
-          tinInvest: new BN(0),
           tinRedeem,
+          dropRedeem,
+          dropInvest: new BN(0),
+          tinInvest: new BN(0),
         }
       } else {
         return {

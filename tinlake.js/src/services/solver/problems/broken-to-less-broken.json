@@ -14,11 +14,11 @@
     },
     "minTinRatio": {
       "base": 27,
-      "value": 0.01
+      "value": 0.0
     },
     "maxTinRatio": {
       "base": 27,
-      "value": 0.01
+      "value": 1.0
     },
     "maxReserve": {
       "base": 18,
