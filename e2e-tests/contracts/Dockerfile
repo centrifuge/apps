@@ -31,9 +31,9 @@ RUN git clone https://github.com/dapphub/ds-token.git
 
 RUN mkdir keystore
 
-COPY keyfile.json ./keystore
+COPY dev-keyfile.json ./keystore
 
-COPY password .
+COPY dev-password .
 
 WORKDIR /app/ds-token
 
