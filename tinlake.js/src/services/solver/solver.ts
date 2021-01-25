@@ -53,11 +53,8 @@ export const calculateOptimalSolution = async (
     const isFeasible = output.infeasibilityRay.length == 0
 
     if (!isFeasible) {
-      // If it's not possible to go into a healthy state, calculate the best possible solution
-
-      const currentSeniorRatio = state.seniorAsset
-        .mul(new BN(10).pow(new BN(27)))
-        .div(state.netAssetValue.add(state.reserve))
+      // If it's not possible to go into a healthy state, calculate the best possible solution to break the constraints less
+      const currentSeniorRatio = state.seniorAsset.mul(e27).div(state.netAssetValue.add(state.reserve))
 
       if (currentSeniorRatio.lte(state.minDropRatio)) {
         const dropInvest = orders.dropInvest
