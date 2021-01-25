@@ -1937,15 +1937,17 @@ __metadata:
   dependencies:
     "@types/assert": ^1.4.2
     "@types/bn.js": ^4.11.6
+    "@types/glob": ^7
     "@types/mocha": ^5.2.7
     "@types/node": ^13.11.0
     "@types/web3-eth-abi": ^1.0.0
     bignumber.js: ^9.0.0
-    clp-wasm: ^0.0.7
+    clp-wasm: ^0.0.9
     decimal.js-light: 2.5.1
     declaration-bundler-webpack-plugin: ^1.0.3
     dotenv: ^8.2.0
     eth-permit: ^0.1.7
+    glob: ^7.1.6
     glpk.js: 3.1.2
     husky: ^4.2.3
     mocha: ^6.1.4
@@ -4198,6 +4200,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/glob@npm:^7":
+  version: 7.1.3
+  resolution: "@types/glob@npm:7.1.3"
+  dependencies:
+    "@types/minimatch": "*"
+    "@types/node": "*"
+  checksum: 633bf1dda9a30899b233ed6b97c75cdd59f2ee856a12240c85474ce6889e26b3b3520b62de56f6bb61824af0ef51b311a0cae305f27ba0de8ddc4898a3673d42
+  languageName: node
+  linkType: hard
+
 "@types/graceful-fs@npm:^4.1.2":
   version: 4.1.4
   resolution: "@types/graceful-fs@npm:4.1.4"
@@ -4321,6 +4333,13 @@ __metadata:
   version: 2.0.3
   resolution: "@types/mime@npm:2.0.3"
   checksum: 6df548a912494f8579d548cd883be0425f30eaa2922283335c405e270600f49045a06d766460c0f0edabb41dff570c614d174d3c52215de3bddd11f190ec9ae9
+  languageName: node
+  linkType: hard
+
+"@types/minimatch@npm:*":
+  version: 3.0.3
+  resolution: "@types/minimatch@npm:3.0.3"
+  checksum: 672ccdac197e8176eed1a9441d0caf8a29a90eb139b1cefdd4c9e71b1c48f5c749f5d101a2d85da15c6259214ebda95072835021407d60330a731a2672964b82
   languageName: node
   linkType: hard
 
@@ -7715,12 +7734,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"clp-wasm@npm:^0.0.7":
-  version: 0.0.7
-  resolution: "clp-wasm@npm:0.0.7"
+"clp-wasm@npm:^0.0.9":
+  version: 0.0.9
+  resolution: "clp-wasm@npm:0.0.9"
   peerDependencies:
     typescript: ">= 3.8.3"
-  checksum: 5f8331c34efb7b1580b0dff6f5a480fe42028aba2d18443e1804e238d0b0d4c6a0a354bbb4a43b87358aab5ced795e2b56502cce8002e86264e99dd30f7d6466
+  checksum: 05ca0864a0b3b56039cfb63a52d690543e036a9f55c30765148b0dfccf5b9e544f9c2f4c27b203454236e946e9a481e6226e7f3b04decddf9c8c0eb2eacc3892
   languageName: node
   linkType: hard
 

@@ -1,25 +1,25 @@
 import BN from 'bn.js'
-// import { CLP } from 'clp-wasm'
+import { CLP } from 'clp-wasm'
 
 export const calculateOptimalSolution = async (
   state: State,
   orders: Orders,
   weights: SolverWeights
 ): Promise<SolverResult> => {
-  return require('clp-wasm/clp-wasm').then((clp: any) => {
+  return require('clp-wasm/clp-wasm').then((clp: CLP) => {
     const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
-    const maxDropRatio = e27.sub(state.minTinRatio)
-    const minDropRatio = e27.sub(state.maxTinRatio)
+    const maxTinRatio = e27.sub(state.minDropRatio)
+    const minTinRatio = e27.sub(state.maxDropRatio)
 
-    const minTINRatioLb = maxDropRatio
+    const minTINRatioLb = state.maxDropRatio
       .neg()
       .mul(state.netAssetValue)
-      .sub(maxDropRatio.mul(state.reserve))
+      .sub(state.maxDropRatio.mul(state.reserve))
       .add(state.seniorAsset.mul(e27))
 
-    const maxTINRatioLb = minDropRatio
+    const maxTINRatioLb = state.minDropRatio
       .mul(state.netAssetValue)
-      .add(minDropRatio.mul(state.reserve))
+      .add(state.minDropRatio.mul(state.reserve))
       .sub(state.seniorAsset.mul(e27))
 
     const varWeights = [
@@ -28,8 +28,8 @@ export const calculateOptimalSolution = async (
       parseFloat(weights.tinRedeem.toString()),
       parseFloat(weights.dropRedeem.toString()),
     ]
-    const minTINRatioLbCoeffs = [maxDropRatio, state.minTinRatio.neg(), maxDropRatio.neg(), state.minTinRatio]
-    const maxTINRatioLbCoeffs = [minDropRatio.neg(), state.maxTinRatio, minDropRatio, state.maxTinRatio.neg()]
+    const minTINRatioLbCoeffs = [state.maxDropRatio, minTinRatio.neg(), state.maxDropRatio.neg(), minTinRatio]
+    const maxTINRatioLbCoeffs = [state.minDropRatio.neg(), maxTinRatio, state.minDropRatio, maxTinRatio.neg()]
 
     const lp = `
       Maximize
@@ -53,37 +53,60 @@ export const calculateOptimalSolution = async (
     const isFeasible = output.infeasibilityRay.length == 0
 
     if (!isFeasible) {
-      // If it's not possible to go into a healthy state, calculate the best possible solution
+      // If it's not possible to go into a healthy state, calculate the best possible solution to break the constraints less
+      const currentSeniorRatio = state.seniorAsset.mul(e27).div(state.netAssetValue.add(state.reserve))
 
-      // TODO: if min tin ratio broken
-      //         tin.supply = max.order, drop.redeem = max.order, tin.redeem = 0, drop.supply = 0
-      // TODO: else if max tin ratio broken
-      //         tin.supply = 0, drop.redeem = 0, tin.redeem = max.order, drop.supply = max.order
+      if (currentSeniorRatio.lte(state.minDropRatio)) {
+        const dropInvest = orders.dropInvest
+        const tinRedeem = BN.min(orders.tinRedeem, state.reserve.add(dropInvest))
 
-      if (state.reserve >= state.maxReserve) {
+        return {
+          isFeasible: true,
+          dropInvest,
+          tinRedeem,
+          tinInvest: new BN(0),
+          dropRedeem: new BN(0),
+        }
+      } else if (currentSeniorRatio.gte(state.maxDropRatio)) {
+        const tinInvest = orders.tinInvest
+        const dropRedeem = BN.min(orders.dropRedeem, state.reserve.add(tinInvest))
+
+        return {
+          isFeasible: true,
+          tinInvest,
+          dropRedeem,
+          dropInvest: new BN(0),
+          tinRedeem: new BN(0),
+        }
+      } else if (state.reserve.gte(state.maxReserve)) {
         const dropRedeem = BN.min(orders.dropRedeem, state.reserve) // Limited either by the order or the reserve
         const tinRedeem = BN.min(orders.tinRedeem, state.reserve.sub(dropRedeem)) // Limited either by the order or what's remaining of the reserve after the DROP redemptions
 
         return {
+          isFeasible: true,
+          tinRedeem,
+          dropRedeem,
+          dropInvest: new BN(0),
+          tinInvest: new BN(0),
+        }
+      } else {
+        return {
           isFeasible: false,
-          vars: {
-            tinRedeem,
-            dropRedeem,
-            tinInvest: new BN(0),
-            dropInvest: new BN(0),
-          },
+          dropInvest: new BN(0),
+          dropRedeem: new BN(0),
+          tinInvest: new BN(0),
+          tinRedeem: new BN(0),
         }
       }
     }
 
-    const vars = {
-      tinRedeem: outputToBN(output.solution[2]),
+    return {
+      isFeasible,
+      dropInvest: outputToBN(output.solution[1]),
       dropRedeem: outputToBN(output.solution[3]),
       tinInvest: outputToBN(output.solution[0]),
-      dropInvest: outputToBN(output.solution[1]),
+      tinRedeem: outputToBN(output.solution[2]),
     }
-
-    return { isFeasible, vars }
   })
 }
 
@@ -125,8 +148,8 @@ export interface State {
   netAssetValue: BN
   reserve: BN
   seniorAsset: BN
-  minTinRatio: BN
-  maxTinRatio: BN
+  minDropRatio: BN
+  maxDropRatio: BN
   maxReserve: BN
 }
 
@@ -153,6 +176,9 @@ export interface SolverSolution {
 
 export interface SolverResult {
   isFeasible: boolean
-  vars: SolverSolution
+  tinRedeem: BN
+  dropRedeem: BN
+  tinInvest: BN
+  dropInvest: BN
   error?: string
 }
