@@ -3,7 +3,7 @@
     "netAssetValue": "365473113407522126410895",
     "reserve": "0",
     "seniorAsset": "335033173933665770970205",
-    "minTinRatio": "920000000000000000000000000",
+    "minTinRatio": "80000000000000000000000000",
     "maxTinRatio": "1000000000000000000000000000",
     "maxReserve": "300000000000000000000000"
   },
@@ -15,7 +15,7 @@
   },
   "solution": {
     "isFeasible": true,
-    "dropInvest": "3289134979169288568308107",
+    "dropInvest": "20023810936479815777094",
     "dropRedeem": "0",
     "tinInvest": "0",
     "tinRedeem": "0"

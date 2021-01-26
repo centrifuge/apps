@@ -6,7 +6,7 @@ export const calculateOptimalSolution = async (
   orders: Orders,
   weights: SolverWeights
 ): Promise<SolverResult> => {
-  return require('clp-wasm/clp-wasm').then((clp: CLP) => {
+  return require('clp-wasm/clp-wasm.all').then((clp: CLP) => {
     const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
     const maxTinRatio = e27.sub(state.minDropRatio)
     const minTinRatio = e27.sub(state.maxDropRatio)
@@ -47,10 +47,25 @@ export const calculateOptimalSolution = async (
       End
     `
 
-    const output = clp.solve(lp)
+    const output = clp.solve(lp, 0)
 
-    const outputToBN = (str: string) => new BN(str.split('.')[0])
-    const isFeasible = output.infeasibilityRay.length == 0
+    const solutionVector = output.solution.map((x) => new BN(clp.bnRound(x)))
+    const linearEval = (coefs: (BN | number)[], vars: (BN | number)[]) => {
+      let res = new BN(0)
+      if (vars.length != 4 || coefs.length != 4) throw new Error('Invalid sequences here')
+      for (let i = 0; i < 4; i++) {
+        res = res.add(new BN(vars[i]).mul(new BN(coefs[i])))
+      }
+      return res
+    }
+    const debugConstraints = `
+    reserve: ${linearEval([1, 1, -1, -1], solutionVector)} >= ${state.reserve.neg()}
+    maxReserve: ${linearEval([1, 1, -1, -1], solutionVector)} <= ${state.maxReserve.sub(state.reserve)}
+    minTINRatioLb: ${linearEval(minTINRatioLbCoeffs, solutionVector)} >= ${minTINRatioLb}
+    maxTINRatioLb: ${linearEval(maxTINRatioLbCoeffs, solutionVector)} >= ${maxTINRatioLb}`
+    // console.log(debugConstraints)
+
+    const isFeasible = output.infeasibilityRay.length == 0 && output.integerSolution
     if (!isFeasible) {
       // If it's not possible to go into a healthy state, calculate the best possible solution to break the constraints less
       const currentSeniorRatio = state.seniorAsset.mul(e27).div(state.netAssetValue.add(state.reserve))
@@ -101,10 +116,10 @@ export const calculateOptimalSolution = async (
 
     return {
       isFeasible,
-      dropInvest: outputToBN(output.solution[1]),
-      dropRedeem: outputToBN(output.solution[3]),
-      tinInvest: outputToBN(output.solution[0]),
-      tinRedeem: outputToBN(output.solution[2]),
+      dropInvest: solutionVector[1],
+      dropRedeem: solutionVector[3],
+      tinInvest: solutionVector[0],
+      tinRedeem: solutionVector[2],
     }
   })
 }
