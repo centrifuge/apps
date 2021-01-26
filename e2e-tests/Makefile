@@ -15,7 +15,7 @@ up: ## Start containers in background
 
 .PHONY: down
 down: ## Stop containers
-	$(COMPOSE) down
+	$(COMPOSE) down -v
 
 .PHONY: logs
 logs: ## Follow container logs

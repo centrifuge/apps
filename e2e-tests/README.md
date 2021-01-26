@@ -13,6 +13,13 @@ Run a specific feature file: `yarn test -- features/[name].feature`
 
 Run a specific scenario: `yarn test -- --name "[scenario_name]"`
 
+## Usage with docker-compose
+To build: `make build`
+
+To start containers: `make up`
+
+To tear down containers and volumes: `make down`
+
 ## Debugging
 
 1. Set `devtools: true` in `features/support/browser-actions.ts`
