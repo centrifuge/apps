@@ -207,7 +207,11 @@ export class AgreementRepo {
     return (agreements as unknown) as Agreement[]
   }
 
-  async getStatusForProfileAgreements(profileAgreements: AgreementsStatus[]): Promise<AgreementsStatus[]> {
+  async getStatusForProfileAgreements(
+    userId: string,
+    poolId: string,
+    profileAgreements: AgreementsStatus[]
+  ): Promise<AgreementsStatus[]> {
     let agreements = profileAgreements.reduce((prev: {}, profileAgreement: Agreement) => {
       return { ...prev, [profileAgreement.providerTemplateId]: profileAgreement }
     }, {})
@@ -215,7 +219,9 @@ export class AgreementRepo {
     const dbAgreements = await this.db.sql`
       select *
       from agreements
-      where agreements.provider = 'docusign'
+      where agreements.user_id = ${userId}
+      and agreements.pool_id = ${poolId}
+      and agreements.provider = 'docusign'
       and agreements.provider_template_id in (${profileAgreements.map((pa) => pa.providerTemplateId)})
     `
     dbAgreements.forEach((dbAgreement: Agreement) => {

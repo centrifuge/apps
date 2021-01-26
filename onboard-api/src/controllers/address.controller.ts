@@ -83,7 +83,11 @@ export class AddressController {
         })
 
       // Retrieve
-      const agreementLinks = await this.agreementRepo.getStatusForProfileAgreements(profileAgreements)
+      const agreementLinks = await this.agreementRepo.getStatusForProfileAgreements(
+        user.id,
+        params.poolId,
+        profileAgreements
+      )
 
       const isWhitelisted = await this.investmentRepo.getWhitelistStatus(address.id, params.poolId)
 
