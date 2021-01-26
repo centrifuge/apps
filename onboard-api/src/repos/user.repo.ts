@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { Tranche } from 'src/controllers/types'
 import { uuidv4 } from '../utils/uuid'
 import { DatabaseService } from './db.service'
 
@@ -42,6 +43,24 @@ export class UserRepo {
     return user as User | undefined
   }
 
+  async linkToPool(userId: string, poolId: string, tranche: 'senior' | 'junior'): Promise<UserPool | undefined> {
+    const [user] = await this.db.sql`
+      insert into user_pools (
+        user_id,
+        pool_id,
+        tranche
+      ) values (
+        ${userId},
+        ${poolId},
+        ${tranche}
+      )
+
+      returning *
+    `
+
+    return user as UserPool | undefined
+  }
+
   async update(
     userId: string,
     email: string,
@@ -83,4 +102,11 @@ export type User = {
   email?: string
   fullName?: string
   countryCode?: string
+}
+
+export type UserPool = {
+  userId: string
+  poolId: string
+  tranche: Tranche
+  createdAt: Date
 }

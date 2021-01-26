@@ -1,7 +1,6 @@
 import { BadRequestException, Controller, Get, Logger, Param, Query, Res } from '@nestjs/common'
 import config from '../config'
 import { AddressRepo } from '../repos/address.repo'
-import { AgreementRepo } from '../repos/agreement.repo'
 import { KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
 import { SecuritizeService } from '../services/kyc/securitize.service'
@@ -17,7 +16,6 @@ export class KycController {
     private readonly addressRepo: AddressRepo,
     private readonly kycRepo: KycRepo,
     private readonly userRepo: UserRepo,
-    private readonly agreementRepo: AgreementRepo,
     private readonly poolService: PoolService,
     private readonly sessionService: SessionService
   ) {}
@@ -69,13 +67,8 @@ export class KycController {
       investor.domainInvestorDetails.isAccredited
     )
 
-    // // Create agreements for this pool
-    // await this.agreementRepo.createAgreementsForPool(
-    //   params.poolId,
-    //   address.userId,
-    //   investor.email,
-    //   investor.details.address.countryCode
-    // )
+    // Link user to pool/tranche so we know which pools a user has shown interest in
+    await this.userRepo.linkToPool(address.userId, params.poolId, params.tranche || 'senior')
 
     // Create session and redirect user
     const session = this.sessionService.create(address.userId)
