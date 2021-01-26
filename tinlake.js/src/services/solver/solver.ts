@@ -51,7 +51,6 @@ export const calculateOptimalSolution = async (
 
     const outputToBN = (str: string) => new BN(str.split('.')[0])
     const isFeasible = output.infeasibilityRay.length == 0
-
     if (!isFeasible) {
       // If it's not possible to go into a healthy state, calculate the best possible solution to break the constraints less
       const currentSeniorRatio = state.seniorAsset.mul(e27).div(state.netAssetValue.add(state.reserve))
