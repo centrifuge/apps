@@ -47,7 +47,6 @@ export class AgreementController {
     const user = await this.userRepo.find(verifiedSession.sub)
     if (!user) throw new BadRequestException('User for this agreement does not exist')
 
-    // TOOD: find profile agremeent
     const profileAgreement = pool.profile?.agreements.find(
       (pa) => pa.provider === params.provider && pa.providerTemplateId === pa.providerTemplateId
     )
