@@ -37,6 +37,8 @@ export class PoolService {
   }
 
   private async loadFromIPFS() {
+    const prevPools = Object.values(this.pools)
+
     const url = await this.assembleIpfsUrl()
     const response = await fetch(url)
     const pools = await response.json()
@@ -52,7 +54,8 @@ export class PoolService {
     )
 
     this.pools = poolsWithProfiles
-    this.logger.log(`Loaded ${Object.keys(this.pools).length} pools with profiles from IPFS`)
+    const newPools = Object.values(poolsWithProfiles).filter((pool: Pool) => !prevPools.includes(pool))
+    if (newPools.length > 0) this.logger.log(`Loaded ${Object.keys(this.pools).length} pools with profiles from IPFS`)
   }
 
   @Cron(CronExpression.EVERY_5_MINUTES)
