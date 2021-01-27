@@ -55,6 +55,7 @@ export class PoolService {
 
     this.pools = poolsWithProfiles
     const newPools = Object.values(poolsWithProfiles).filter((pool: Pool) => !prevPools.includes(pool))
+
     if (newPools.length > 0) this.logger.log(`Loaded ${Object.keys(this.pools).length} pools with profiles from IPFS`)
   }
 
