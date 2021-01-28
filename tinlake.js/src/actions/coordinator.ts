@@ -90,10 +90,10 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
       console.log('Solution found', solution)
       const submissionTx = coordinator.submitSolution(
-        solution.dropInvest,
-        solution.dropRedeem,
-        solution.tinInvest,
-        solution.tinRedeem,
+        solution.dropRedeem.toString(),
+        solution.tinRedeem.toString(),
+        solution.tinInvest.toString(),
+        solution.dropInvest.toString(),
         this.overrides
       )
 

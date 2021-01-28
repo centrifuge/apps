@@ -10,7 +10,7 @@
   ],
   "dependencies": {
     "bignumber.js": "^9.0.0",
-    "clp-wasm": "^0.0.9",
+    "clp-wasm": "^0.0.13",
     "decimal.js-light": "2.5.1",
     "dotenv": "^8.2.0",
     "eth-permit": "^0.1.7",

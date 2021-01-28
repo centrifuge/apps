@@ -47,22 +47,22 @@ export const calculateOptimalSolution = async (
       End
     `
 
-    const output = clp.solve(lp, 0)
+    const output = (clp as any).solve(lp, 0)
 
-    const solutionVector = output.solution.map((x) => new BN(clp.bnRound(x)))
-    const linearEval = (coefs: (BN | number)[], vars: (BN | number)[]) => {
-      let res = new BN(0)
-      if (vars.length != 4 || coefs.length != 4) throw new Error('Invalid sequences here')
-      for (let i = 0; i < 4; i++) {
-        res = res.add(new BN(vars[i]).mul(new BN(coefs[i])))
-      }
-      return res
-    }
-    const debugConstraints = `
-    reserve: ${linearEval([1, 1, -1, -1], solutionVector)} >= ${state.reserve.neg()}
-    maxReserve: ${linearEval([1, 1, -1, -1], solutionVector)} <= ${state.maxReserve.sub(state.reserve)}
-    minTINRatioLb: ${linearEval(minTINRatioLbCoeffs, solutionVector)} >= ${minTINRatioLb}
-    maxTINRatioLb: ${linearEval(maxTINRatioLbCoeffs, solutionVector)} >= ${maxTINRatioLb}`
+    const solutionVector = output.solution.map((x: string) => new BN(clp.bnRound(x)))
+    // const linearEval = (coefs: (BN | number)[], vars: (BN | number)[]) => {
+    //   let res = new BN(0)
+    //   if (vars.length != 4 || coefs.length != 4) throw new Error('Invalid sequences here')
+    //   for (let i = 0; i < 4; i++) {
+    //     res = res.add(new BN(vars[i]).mul(new BN(coefs[i])))
+    //   }
+    //   return res
+    // }
+    // const debugConstraints = `
+    // reserve: ${linearEval([1, 1, -1, -1], solutionVector)} >= ${state.reserve.neg()}
+    // maxReserve: ${linearEval([1, 1, -1, -1], solutionVector)} <= ${state.maxReserve.sub(state.reserve)}
+    // minTINRatioLb: ${linearEval(minTINRatioLbCoeffs, solutionVector)} >= ${minTINRatioLb}
+    // maxTINRatioLb: ${linearEval(maxTINRatioLbCoeffs, solutionVector)} >= ${maxTINRatioLb}`
     // console.log(debugConstraints)
 
     const isFeasible = output.infeasibilityRay.length == 0 && output.integerSolution

@@ -1942,7 +1942,7 @@ __metadata:
     "@types/node": ^13.11.0
     "@types/web3-eth-abi": ^1.0.0
     bignumber.js: ^9.0.0
-    clp-wasm: ^0.0.9
+    clp-wasm: ^0.0.13
     decimal.js-light: 2.5.1
     declaration-bundler-webpack-plugin: ^1.0.3
     dotenv: ^8.2.0
@@ -7734,12 +7734,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"clp-wasm@npm:^0.0.9":
-  version: 0.0.9
-  resolution: "clp-wasm@npm:0.0.9"
+"clp-wasm@npm:^0.0.13":
+  version: 0.0.13
+  resolution: "clp-wasm@npm:0.0.13"
   peerDependencies:
     typescript: ">= 3.8.3"
-  checksum: 05ca0864a0b3b56039cfb63a52d690543e036a9f55c30765148b0dfccf5b9e544f9c2f4c27b203454236e946e9a481e6226e7f3b04decddf9c8c0eb2eacc3892
+  checksum: 850964e796cec9d236ac711015e0def666ccf6baaa0eaa549f9d82c194a08daa19d2f5c1536e382e661a911edc948de4691b89b4c9373a569f445ac6f914ffa0
   languageName: node
   linkType: hard
 
