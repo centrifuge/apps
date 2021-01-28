@@ -2,7 +2,6 @@ import { NavBar } from '@centrifuge/axis-nav-bar'
 import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 import { Web3Wallet } from '@centrifuge/axis-web3-wallet'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
-import BN from 'bn.js'
 import { Box, Button, Image } from 'grommet'
 import { Close as CloseIcon, Menu as MenuIcon, User as UserIcon } from 'grommet-icons'
 import Link from 'next/link'
@@ -14,11 +13,12 @@ import { PoolSelector } from '../../components/PoolSelector'
 import config, { IpfsPools } from '../../config'
 import { AuthState, clear, ensureAuthed } from '../../ducks/auth'
 import { OnboardingState } from '../../ducks/onboarding'
-import { loadPortfolio, PortfolioState, TokenBalance } from '../../ducks/portfolio'
+import { loadPortfolio, PortfolioState } from '../../ducks/portfolio'
 import { selectWalletTransactions, TransactionState } from '../../ducks/transactions'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import { toPrecision } from '../../utils/toPrecision'
+import { WalletRewards } from '../WalletRewards'
 
 const { isDemo } = config
 export interface MenuItem {
@@ -59,11 +59,6 @@ const Header: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     if (address) dispatch(loadPortfolio(address))
   }, [address])
-
-  const portfolioValue =
-    portfolio?.data?.reduce((prev: BN, tokenBalance: TokenBalance) => {
-      return prev.add(tokenBalance.value)
-    }, new BN(0)) || new BN(0)
 
   const connectAccount = async () => {
     try {
@@ -156,7 +151,7 @@ const Header: React.FC<Props> = (props: Props) => {
               />
             )}
           </Box>
-          {address && !portfolioValue.isZero() && (
+          {address && portfolio.totalValue && !portfolio.totalValue.isZero() && (
             <Portfolio pad={{ left: '14px', right: '14px' }}>
               <AxisTooltip title="View your investment portfolio" cursor="pointer">
                 <Link href="/portfolio">
@@ -164,7 +159,9 @@ const Header: React.FC<Props> = (props: Props) => {
                     <Box direction="row">
                       <TokenLogo src={`/static/DAI.svg`} />
                       <Box>
-                        <Holdings>{addThousandsSeparators(toPrecision(baseToDisplay(portfolioValue, 18), 0))}</Holdings>
+                        <Holdings>
+                          {addThousandsSeparators(toPrecision(baseToDisplay(portfolio.totalValue, 18), 0))}
+                        </Holdings>
                         <Desc>Portfolio Value</Desc>
                       </Box>
                     </Box>
@@ -174,10 +171,10 @@ const Header: React.FC<Props> = (props: Props) => {
             </Portfolio>
           )}
           <div style={{ flex: '0 0 auto', paddingLeft: 16, borderLeft: '1px solid #D8D8D8' }}>
-            {!auth?.address && <Button onClick={connectAccount} label="Connect" />}
-            {auth?.address && (
+            {!address && <Button onClick={connectAccount} label="Connect" />}
+            {address && (
               <Web3Wallet
-                address={auth?.address}
+                address={address}
                 providerName={providerName}
                 networkName={network}
                 onDisconnect={clear}
@@ -185,6 +182,7 @@ const Header: React.FC<Props> = (props: Props) => {
                 getAddressLink={getAddressLink}
                 style={{ padding: 0 }}
                 kycStatus={onboarding.data?.kyc?.status === 'verified' ? 'verified' : 'none'}
+                extension={<WalletRewards address={address} />}
               />
             )}
           </div>
@@ -193,6 +191,8 @@ const Header: React.FC<Props> = (props: Props) => {
     </Box>
   )
 }
+
+export default connect((state) => state, { ensureAuthed, clear })(withRouter(Header))
 
 const Portfolio = styled(Box)`
   cursor: pointer;
@@ -219,5 +219,3 @@ const Desc = styled.div`
   font-size: 10px;
   color: #bbb;
 `
-
-export default connect((state) => state, { ensureAuthed, clear })(withRouter(Header))

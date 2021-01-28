@@ -5,9 +5,9 @@ import { createTinlake, TestProvider } from '../test/utils'
 import { ITinlake } from '../types/tinlake'
 
 const testProvider = new TestProvider(testConfig)
-const adminAccount = ethers.Wallet.createRandom()
-const borrowerAccount = ethers.Wallet.createRandom()
-const lenderAccount = ethers.Wallet.createRandom()
+const adminAccount = testProvider.createRandomAccount()
+const borrowerAccount = testProvider.createRandomAccount()
+const lenderAccount = testProvider.createRandomAccount()
 const { SUCCESS_STATUS, FAUCET_AMOUNT, contractAddresses } = testConfig
 let adminTinlake: ITinlake
 let governanceTinlake: ITinlake
@@ -18,8 +18,13 @@ describe.skip('admin tests', async () => {
     // fund admin account with eth
     adminTinlake = createTinlake(adminAccount, testConfig)
     governanceTinlake = createTinlake(testConfig.godAccount, testConfig)
-    await testProvider.fundAccountWithETH(adminAccount.address, FAUCET_AMOUNT)
-    await testProvider.fundAccountWithETH(borrowerAccount.address, FAUCET_AMOUNT)
+    await testProvider.fundAccountWithETH(adminAccount, FAUCET_AMOUNT)
+    await testProvider.fundAccountWithETH(borrowerAccount, FAUCET_AMOUNT)
+  })
+
+  after(async () => {
+    await testProvider.refundETHFromAccount(adminAccount)
+    await testProvider.refundETHFromAccount(borrowerAccount)
   })
 
   // ------------ admin tests lender-site -------------

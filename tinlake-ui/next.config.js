@@ -7,6 +7,17 @@ module.exports = {
     // Further custom configuration here
     return {
       ...config,
+      module: {
+        ...config.module,
+        rules: [
+          ...config.module.rules,
+          {
+            test: /\.mjs$/,
+            include: /node_modules/,
+            type: 'javascript/auto',
+          },
+        ],
+      },
       node: {
         fs: 'empty',
         child_process: 'empty',
@@ -16,5 +27,5 @@ module.exports = {
   },
   experimental: {
     exportTrailingSlash: false,
-  }
+  },
 }

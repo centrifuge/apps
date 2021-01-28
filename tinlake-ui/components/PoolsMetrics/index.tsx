@@ -1,11 +1,13 @@
 import { baseToDisplay } from '@centrifuge/tinlake-js'
-import { Box } from 'grommet'
+import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { PoolsDailyData, PoolsData } from '../../ducks/pools'
+import { maybeLoadRewards, RewardsState } from '../../ducks/rewards'
 import { dateToYMD } from '../../utils/date'
+import { dynamicPrecision } from '../../utils/toDynamicPrecision'
 import NumberDisplay from '../NumberDisplay'
 import { Cont, Label, TokenLogo, Unit, Value } from './styles'
 
@@ -19,6 +21,16 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
 
   const [hoveredPoolValue, setHoveredPoolValue] = React.useState<number | undefined>(undefined)
   const [hoveredDay, setHoveredDay] = React.useState<number | undefined>(undefined)
+
+  const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
+  const dispatch = useDispatch()
+  React.useEffect(() => {
+    dispatch(maybeLoadRewards())
+  }, [])
+
+  const totalRewardsEarned = baseToDisplay(rewards.data?.toDateRewardAggregateValue || '0', 18)
+
+  const goToRewards = () => router.push('/rewards')
 
   return (
     <>
@@ -103,21 +115,28 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         </Box>
       </Box>
       <Box
-        width="256px"
-        pad="medium"
+        width="430px"
         elevation="small"
         round="xsmall"
         background="white"
         margin={{ horizontal: '16px' }}
+        direction="row"
+        pad="medium"
+        justify="center"
       >
-        <Cont style={{ marginTop: '8px' }}>
-          <TokenLogo src={`/static/dai.svg`} />
-          <Value>
-            <NumberDisplay value={baseToDisplay(props.pools.totalFinancedCurrency, 18)} precision={0} />
-          </Value>{' '}
-          <Unit>DAI</Unit>
-        </Cont>
-        <Label>Total Financed to Date</Label>
+        <Box>
+          <Cont style={{ marginTop: '8px' }}>
+            <TokenLogo src={`/static/rad.svg`} />
+            <Value>
+              <NumberDisplay value={totalRewardsEarned} precision={dynamicPrecision(totalRewardsEarned)} />
+            </Value>{' '}
+            <Unit>RAD</Unit>
+          </Cont>
+          <Label>Total Rewards Earned</Label>
+        </Box>
+        <Box margin={{ left: 'medium' }} justify="center">
+          <Button label="Claim Rewards" primary onClick={goToRewards} color="#FCBA59" />
+        </Box>
       </Box>
     </>
   )

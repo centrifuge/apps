@@ -94,6 +94,9 @@ interface Config {
   onboardAPIHost: string
   featureFlagNewOnboardingPools: string[]
   enableErrorLogging: boolean
+  centrifugeChainUrl: string
+  claimRADContractAddress: string
+  rewardsTreeUrl: string
   multicallContractAddress: string
 }
 
@@ -298,11 +301,11 @@ const config: Config = {
     .validateSync(networkUrlToName(process.env.NEXT_PUBLIC_RPC_URL || '')),
   portisApiKey: yup
     .string()
-    .required()
+    .required('NEXT_PUBLIC_PORTIS_KEY is required')
     .validateSync(process.env.NEXT_PUBLIC_PORTIS_KEY),
   infuraKey: yup
     .string()
-    .required()
+    .required('NEXT_PUBLIC_INFURA_KEY is required')
     .validateSync(process.env.NEXT_PUBLIC_INFURA_KEY),
   gasLimit: yup
     .number()
@@ -312,6 +315,20 @@ const config: Config = {
     .string()
     .required('NEXT_PUBLIC_ONBOARD_API_HOST is required')
     .validateSync(process.env.NEXT_PUBLIC_ONBOARD_API_HOST),
+  centrifugeChainUrl: yup
+    .string()
+    .required('NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL is required')
+    .validateSync(process.env.NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL),
+  claimRADContractAddress: yup
+    .string()
+    .length(42)
+    .matches(/0x[0-9a-fA-F]{40}/)
+    .required('NEXT_PUBLIC_CLAIM_RAD_CONTRACT_ADDRESS is required')
+    .validateSync(process.env.NEXT_PUBLIC_CLAIM_RAD_CONTRACT_ADDRESS),
+  rewardsTreeUrl: yup
+    .string()
+    .required('NEXT_PUBLIC_REWARDS_TREE_URL is required')
+    .validateSync(process.env.NEXT_PUBLIC_REWARDS_TREE_URL),
   enableErrorLogging: yup.boolean().validateSync(false),
   // Loading a comma-separated string as a string array using yup proved hard/impossible
   featureFlagNewOnboardingPools: process.env.NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING?.split(',') || [],
