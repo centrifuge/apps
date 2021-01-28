@@ -49,7 +49,7 @@ services:
     ports:
       - "8020:8020"
     environment:
-      - ethereum=mainnet:http://parity:8545
+      - ethereum=${NETWORK_NAME}:http://parity:8545
       - ipfs=ipfs:5001
       - postgres_db=${POSTGRES_DB}
       - postgres_host=db:5432
