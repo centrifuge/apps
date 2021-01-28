@@ -19,6 +19,7 @@ import contractAbiNFT from './test/SimpleNFT.abi.json'
 import contractAbiRoot from './TinlakeRoot.abi.json'
 import contractAbiTitle from './Title.abi.json'
 import contractAbiTranche from './Tranche.abi.json'
+import contractAbiClaimRAD from './ClaimRAD.abi.json'
 
 export default {
   COLLATERAL_NFT: contractAbiNFT,
@@ -46,4 +47,5 @@ export default {
   JUNIOR_TRANCHE: contractAbiTranche,
   SENIOR_TRANCHE: contractAbiTranche,
   POOL_REGISTRY: contractAbiPoolRegistry,
+  CLAIM_RAD: contractAbiClaimRAD,
 } as ContractAbis

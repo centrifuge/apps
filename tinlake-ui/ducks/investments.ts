@@ -38,7 +38,7 @@ export function loadInvestor(
   tinlake: any,
   address: string,
   refresh = false
-): ThunkAction<Promise<void>, InvestorState, undefined, Action> {
+): ThunkAction<Promise<void>, { investments: InvestorState }, undefined, Action> {
   return async (dispatch) => {
     if (!refresh) {
       dispatch({ type: LOAD_INVESTOR })

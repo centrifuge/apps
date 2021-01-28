@@ -84,7 +84,6 @@ const Wrapper = styled.div`
 
 const BackLink = styled.div`
   margin: 14px 20px 0 18px;
-
   > svg {
     width: 18px;
     height: 18px;
@@ -114,11 +113,9 @@ const PageName = styled.h1`
   font-size: 18px;
   font-weight: bold;
   margin: 0;
-
   a {
     color: #000;
     text-decoration: none;
-
     &:hover {
       color: rgb(39, 98, 255);
     }

@@ -6,13 +6,17 @@ const web3 = require('web3-utils')
 export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IAdminActions {
     canQueryPermissions = () => {
+      const isLoadedHasWards = (name: ContractName) => !!this.contractAddresses[name] && !!this.contract(name)?.wards
+
       return (
-        !!this.contract('FEED')?.wards &&
-        !!this.contract('ASSESSOR')?.wards &&
-        !!this.contract('JUNIOR_OPERATOR')?.wards &&
-        !!this.contract('SENIOR_OPERATOR')?.wards &&
-        !!this.contract('JUNIOR_MEMBERLIST')?.wards &&
-        !!this.contract('SENIOR_MEMBERLIST')?.wards
+        isLoadedHasWards('FEED') &&
+        isLoadedHasWards('ASSESSOR') &&
+        isLoadedHasWards('ASSESSOR_ADMIN') &&
+        isLoadedHasWards('JUNIOR_OPERATOR') &&
+        isLoadedHasWards('SENIOR_OPERATOR') &&
+        isLoadedHasWards('JUNIOR_MEMBERLIST') &&
+        isLoadedHasWards('SENIOR_MEMBERLIST') &&
+        isLoadedHasWards('COLLECTOR')
       )
     }
 
@@ -151,6 +155,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
 export type IAdminActions = {
   isWard(user: string, contractName: ContractName): Promise<BN>
+  canQueryPermissions(): boolean
   canUpdateNftFeed(user: string): Promise<boolean>
   canSetRiskScore(user: string): Promise<boolean>
   canSetSeniorTrancheInterest(user: string): Promise<boolean>

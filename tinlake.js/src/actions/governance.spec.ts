@@ -5,8 +5,10 @@ import { createTinlake, TestProvider } from '../test/utils'
 import { ContractName } from '../Tinlake'
 import { ITinlake } from '../types/tinlake'
 
+const testProvider = new TestProvider(testConfig)
+
 // god account = governance address for the tinlake test deployment
-const userAccount = ethers.Wallet.createRandom()
+const userAccount = testProvider.createRandomAccount()
 let governanceTinlake: ITinlake
 
 const { SUCCESS_STATUS, FAIL_STATUS, FAUCET_AMOUNT } = testConfig
@@ -17,6 +19,17 @@ describe('governance tests', async () => {
   })
 
   describe('grant permissions', async () => {
+    let randomAccount: ethers.Wallet
+
+    before(async () => {
+      randomAccount = testProvider.createRandomAccount()
+      await testProvider.fundAccountWithETH(randomAccount, FAUCET_AMOUNT)
+    })
+
+    after(async () => {
+      await testProvider.refundETHFromAccount(randomAccount)
+    })
+
     it('success: rely account on the ceiling contract', async () => {
       // rely user account on the ceiling contract
       await relyAddress(userAccount.address, 'CEILING')
@@ -33,10 +46,6 @@ describe('governance tests', async () => {
     })
 
     it('fail: account has no governance permissions', async () => {
-      const randomAccount = ethers.Wallet.createRandom()
-      const testProvider = new TestProvider(testConfig)
-      await testProvider.fundAccountWithETH(randomAccount.address, FAUCET_AMOUNT)
-
       const randomTinlake = createTinlake(randomAccount, testConfig)
 
       const tx = await randomTinlake.relyAddress(userAccount.address, testConfig.contractAddresses['PILE'])

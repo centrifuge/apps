@@ -3,10 +3,13 @@ import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory'
 import { ApolloClient, DefaultOptions } from 'apollo-client'
 import { createHttpLink } from 'apollo-link-http'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import gql from 'graphql-tag'
 import fetch from 'node-fetch'
 import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
-import { PoolData, PoolsData } from '../../ducks/pools'
+import { PoolData, PoolsDailyData, PoolsData } from '../../ducks/pools'
+import { RewardsData } from '../../ducks/rewards'
+import { UserRewardsData } from '../../ducks/userRewards'
 import { getPoolStatus } from '../../utils/pool'
 import { UintBase } from '../../utils/ratios'
 
@@ -287,6 +290,106 @@ class Apollo {
     return tinlakeLoans
   }
 
+  async getRewards(): Promise<RewardsData | null> {
+    let result
+    try {
+      result = await this.client.query({
+        query: gql`
+          {
+            rewardDayTotals(first: 1, skip: 1, orderBy: id, orderDirection: desc) {
+              rewardRate
+              toDateRewardAggregateValue
+              todayReward
+            }
+          }
+        `,
+      })
+    } catch (err) {
+      console.error(`error occured while fetching total rewards from apollo ${err}`)
+      return null
+    }
+    const data = result.data?.rewardDayTotals[0]
+    if (!data) {
+      return null
+    }
+
+    return {
+      toDateRewardAggregateValue: new BN(new Decimal(data.toDateRewardAggregateValue).toFixed(0)),
+      rewardRate: new Decimal(data.rewardRate),
+      todayReward: new BN(new Decimal(data.todayReward).toFixed(0)),
+    }
+  }
+
+  async getUserRewards(user: string): Promise<UserRewardsData | null> {
+    let result
+    try {
+      result = await this.client.query({
+        query: gql`
+        {
+          rewardBalances(where: {id: "${user.toLowerCase()}"}) {
+            links {
+              centAddress
+              rewardsAccumulated
+            }
+            claimable
+    				linkableRewards
+            totalRewards
+            nonZeroBalanceSince
+          }
+        }
+        `,
+      })
+    } catch (err) {
+      console.error(`error occurred while fetching user rewards for user ${user} from apollo ${err}`)
+      return null
+    }
+
+    const transformed: UserRewardsData = {
+      nonZeroInvestmentSince: null,
+      claimable: false,
+      totalEarnedRewards: new BN(0),
+      unlinkedRewards: new BN(0),
+      links: [],
+    }
+
+    const rewardBalance = result.data?.rewardBalances[0]
+    if (rewardBalance) {
+      transformed.nonZeroInvestmentSince =
+        rewardBalance.nonZeroBalanceSince && new BN(rewardBalance.nonZeroBalanceSince)
+      transformed.claimable = rewardBalance.claimable
+      transformed.totalEarnedRewards = new BN(new Decimal(rewardBalance.totalRewards).toFixed(0))
+      transformed.unlinkedRewards = new BN(new Decimal(rewardBalance.linkableRewards).toFixed(0))
+      transformed.links = (rewardBalance.links as any[]).map((link: any) => ({
+        centAccountID: link.centAddress,
+        earned: new BN(new Decimal(link.rewardsAccumulated).toFixed(0)),
+        claimable: null,
+        claimed: null,
+      }))
+    }
+
+    return transformed
+  }
+
+  // async getRewardsByUserToken(user: string) {
+  //   let result
+  //   try {
+  //     result = await this.client.query({
+  //       query: gql`
+  //       {
+  //         rewardByTokens(where : {account: "${user}"}) {
+  //           token
+  //           rewards
+  //         }
+  //       }
+  //       `,
+  //     })
+  //   } catch (err) {
+  //     console.error(`error occurred while fetching loans from apollo ${err}`)
+  //     return {
+  //       data: [],
+  //     }
+  //   }
+  // }
   async getAssetData(root: string) {
     let result
     try {
@@ -331,7 +434,7 @@ class Apollo {
       result = await this.client.query({
         query: gql`
           {
-            days {
+            days(orderBy: id, orderDirection: desc, first: 90) {
               id
               assetValue
               reserve
@@ -345,17 +448,14 @@ class Apollo {
         data: [],
       }
     }
-    const poolsDailyData = result.data.days.map((item: any) => {
-      return {
-        day: Number(item.id),
-        poolValue: parseFloat(
-          new BN(item.assetValue)
-            .add(new BN(item.reserve))
-            .div(UintBase)
-            .toString()
-        ),
-      }
-    })
+    const poolsDailyData = result.data.days
+      .map((item: any) => {
+        return {
+          day: Number(item.id),
+          poolValue: parseFloat(new BN(item.assetValue).add(new BN(item.reserve)).div(UintBase).toString()),
+        }
+      })
+      .sort((a: PoolsDailyData, b: PoolsDailyData) => a.day - b.day)
 
     return poolsDailyData
   }
