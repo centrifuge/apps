@@ -38,7 +38,7 @@ jobs:
       - run: yarn build
       
       # Test (only the solver tests)
-      - run: yarn test --grep 'solver'
+      - run: yarn test --grep solver
 
   deploy:
     runs-on: ubuntu-latest
