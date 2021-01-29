@@ -1,0 +1,34 @@
+name: 'dennis2.0'
+on: 
+  pull_request:
+    paths:
+    - 'dennis2.0/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Setup
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12'
+
+      # Cache
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+
+      - uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - run: yarn install
+
+      # Build
+      - run: yarn run build
+        working-directory: ./dennis2.0

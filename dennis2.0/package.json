@@ -6,7 +6,8 @@
   "main": "bin/index.js",
   "types": "bin/index.d.ts",
   "scripts": {
-    "start": "ts-node-dev src/index.ts"
+    "start": "ts-node-dev src/index.ts",
+    "build": "tsc --outDir bin"
   },
   "dependencies": {
     "@centrifuge/tinlake-js": "workspace:*",
