@@ -6,6 +6,7 @@ import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import Alert from '../../components/Alert'
+import { PortfolioState } from '../../ducks/portfolio'
 import { RewardsState } from '../../ducks/rewards'
 import { TransactionStatus } from '../../ducks/transactions'
 import { loadCentChain, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
@@ -20,6 +21,7 @@ interface Props {
 
 const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
   const { data, claims } = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
+  const { totalValue: portfolioValue } = useSelector<any, PortfolioState>((state) => state.portfolio)
   const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
   const dispatch = useDispatch()
 
@@ -122,13 +124,10 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
             )}
             Stay invested to continue earning{' '}
             {rewards.data?.rewardRate &&
-              data?.currentActiveInvestmentAmount &&
+              portfolioValue &&
               addThousandsSeparators(
                 toDynamicPrecision(
-                  baseToDisplay(
-                    rewards.data?.rewardRate.mul(data?.currentActiveInvestmentAmount.toString()).toFixed(0),
-                    18
-                  )
+                  baseToDisplay(rewards.data?.rewardRate.mul(portfolioValue.toString()).toFixed(0), 18)
                 )
               )}{' '}
             RAD daily.
