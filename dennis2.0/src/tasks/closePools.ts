@@ -22,7 +22,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
 
     if (state === 'can-be-closed') {
       const orders = await tinlake.getOrders()
-      const orderSum = Object.values(orders).reduce((prev, order) => prev.add(order), new BN('0'))
+      const orderSum: any = Object.values(orders).reduce((prev: any, order) => prev.add(order), new BN('0'))
 
       if (orderSum.isZero()) {
         console.log(`There are no orders for ${name} yet, not closing`)
