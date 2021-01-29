@@ -50,8 +50,8 @@ export const calculateOptimalSolution = async (
     const output = (clp as any).solve(lp, 0)
 
     const solutionVector = output.solution.map((x: string) => new BN(clp.bnRound(x)))
-
     const isFeasible = output.infeasibilityRay.length === 0 && output.integerSolution
+
     if (!isFeasible) {
       // If it's not possible to go into a healthy state, calculate the best possible solution to break the constraints less
       const currentSeniorRatio = state.seniorAsset.mul(e27).div(state.netAssetValue.add(state.reserve))
