@@ -1,8 +1,8 @@
 import assert from 'assert'
 import BN from 'bn.js'
-import { calculateOptimalSolution } from './solver'
-import glob from 'glob'
 import fs from 'fs'
+import glob from 'glob'
+import { calculateOptimalSolution } from './solver'
 
 const DebugMode: boolean = false
 
@@ -25,7 +25,12 @@ const problems = glob.sync('src/services/solver/problems/*.json')
 describe('solver tests', () => {
   problems.forEach((problemPath: string) => {
     const problem = JSON.parse(fs.readFileSync(problemPath, 'utf8'))
-    const name = problemPath.split('/').slice(-1)[0].split('.').slice(0, -1).join('.')
+    const name = problemPath
+      .split('/')
+      .slice(-1)[0]
+      .split('.')
+      .slice(0, -1)
+      .join('.')
 
     it(`Should solve the ${name} test case`, async () => {
       const state = {

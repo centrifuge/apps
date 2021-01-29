@@ -1,6 +1,6 @@
 import assert from 'assert'
 import BN from 'bn.js'
-import { ethers, Wallet } from 'ethers'
+import { Wallet } from 'ethers'
 import testConfig from '../test/config'
 import { createTinlake, TestProvider } from '../test/utils'
 import { ITinlake } from '../types/tinlake'

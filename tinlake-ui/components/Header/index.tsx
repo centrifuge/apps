@@ -17,10 +17,10 @@ import { OnboardingState } from '../../ducks/onboarding'
 import { loadPortfolio, PortfolioState, TokenBalance } from '../../ducks/portfolio'
 import { selectWalletTransactions, TransactionState } from '../../ducks/transactions'
 import { load } from '../../ducks/userRewards'
-import { WalletRewards } from '../WalletRewards'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import { toPrecision } from '../../utils/toPrecision'
+import { WalletRewards } from '../WalletRewards'
 
 const { isDemo } = config
 export interface MenuItem {
