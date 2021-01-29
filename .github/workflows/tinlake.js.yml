@@ -9,7 +9,7 @@ defaults:
     working-directory: tinlake.js
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     
     steps:
@@ -36,6 +36,9 @@ jobs:
       # Run
       - run: yarn lint
       - run: yarn build
+      
+      # Test (only the solver tests)
+      - run: yarn test --grep 'solver'
 
   deploy:
     runs-on: ubuntu-latest
