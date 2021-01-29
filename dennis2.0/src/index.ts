@@ -11,9 +11,8 @@ const signer = new ethers.Wallet(config.signerPrivateKey).connect(provider)
 let pools: PoolMap = {}
 
 const run = async () => {
-  console.log('Running dennis2.0 automation tasks')
+  console.log('Booting Dennis 2.0')
   pools = await loadFromIPFS(provider)
-  console.log(`Retrieved ${Object.keys(pools).length} pools`)
 
   await closePools(pools, provider, signer)
 

@@ -4,18 +4,18 @@ import { ethers } from 'ethers'
 import { PoolMap } from '../util/ipfs'
 
 export const closePools = async (pools: PoolMap, provider: ethers.providers.Provider, signer: ethers.Signer) => {
-  console.log('Closing pools')
+  console.log('Checking if any pools can be closed or executed')
   for (let pool of Object.values(pools)) {
     if (!pool.addresses) return
     const tinlake: ITinlake = new Tinlake({ provider, signer, contractAddresses: pool.addresses })
     const state = await tinlake.getCurrentEpochState()
-    console.log(`Pool ${pool.metadata.shortName || pool.metadata.name}: ${state}`)
+    const name = pool.metadata.shortName || pool.metadata.name
 
     if (state === 'open') return
 
     if (state === 'challenge-period-ended') {
       const executeTx = await tinlake.executeEpoch()
-      console.log(`Executing epoch with tx: ${executeTx.hash}`)
+      console.log(`Executing ${name} with tx: ${executeTx.hash}`)
       await tinlake.getTransactionReceipt(executeTx)
       return
     }
@@ -25,7 +25,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
       const orderSum = Object.values(orders).reduce((prev, order) => prev.add(order), new BN('0'))
 
       if (orderSum.isZero()) {
-        console.log(`No orders for ${pool.metadata.name} yet, not closing`)
+        console.log(`There are no orders for ${name} yet, not closing`)
         return
       }
 
@@ -33,7 +33,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
     }
 
     const solveTx = await tinlake.solveEpoch()
-    console.log(`Closing & solving epoch with tx: ${solveTx.hash}`)
+    console.log(`Closing & solving ${name} with tx: ${solveTx.hash}`)
     await tinlake.getTransactionReceipt(solveTx)
   }
 }
