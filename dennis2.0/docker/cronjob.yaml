@@ -1,0 +1,26 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: dennis2.0
+  namespace: default
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: dennis2.0
+              image: centrifugeio/dennis2.0:latest
+              imagePullPolicy: IfNotPresent
+              args:
+                - /bin/sh
+                - -c
+                - "yarn run exec -c config.json run all"
+              env:
+                - name: CENT_SLACK_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: dennis2.0
+                      key: slacktoken
+          restartPolicy: Never
