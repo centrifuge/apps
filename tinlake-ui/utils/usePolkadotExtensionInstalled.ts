@@ -8,7 +8,7 @@ let interval: number | null = null
  * currently only works in one mounted component.
  */
 export const usePolkadotExtensionInstalled = () => {
-  let [installed, setInstalled] = React.useState<boolean>(false)
+  const [installed, setInstalled] = React.useState<boolean>(false)
 
   React.useEffect(() => {
     if (interval !== null) {

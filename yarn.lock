@@ -1937,14 +1937,17 @@ __metadata:
   dependencies:
     "@types/assert": ^1.4.2
     "@types/bn.js": ^4.11.6
+    "@types/glob": ^7
     "@types/mocha": ^5.2.7
     "@types/node": ^13.11.0
     "@types/web3-eth-abi": ^1.0.0
     bignumber.js: ^9.0.0
+    clp-wasm: ^0.0.13
     decimal.js-light: 2.5.1
     declaration-bundler-webpack-plugin: ^1.0.3
     dotenv: ^8.2.0
     eth-permit: ^0.1.7
+    glob: ^7.1.6
     glpk.js: 3.1.2
     husky: ^4.2.3
     mocha: ^6.1.4
@@ -4197,6 +4200,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/glob@npm:^7":
+  version: 7.1.3
+  resolution: "@types/glob@npm:7.1.3"
+  dependencies:
+    "@types/minimatch": "*"
+    "@types/node": "*"
+  checksum: 633bf1dda9a30899b233ed6b97c75cdd59f2ee856a12240c85474ce6889e26b3b3520b62de56f6bb61824af0ef51b311a0cae305f27ba0de8ddc4898a3673d42
+  languageName: node
+  linkType: hard
+
 "@types/graceful-fs@npm:^4.1.2":
   version: 4.1.4
   resolution: "@types/graceful-fs@npm:4.1.4"
@@ -4320,6 +4333,13 @@ __metadata:
   version: 2.0.3
   resolution: "@types/mime@npm:2.0.3"
   checksum: 6df548a912494f8579d548cd883be0425f30eaa2922283335c405e270600f49045a06d766460c0f0edabb41dff570c614d174d3c52215de3bddd11f190ec9ae9
+  languageName: node
+  linkType: hard
+
+"@types/minimatch@npm:*":
+  version: 3.0.3
+  resolution: "@types/minimatch@npm:3.0.3"
+  checksum: 672ccdac197e8176eed1a9441d0caf8a29a90eb139b1cefdd4c9e71b1c48f5c749f5d101a2d85da15c6259214ebda95072835021407d60330a731a2672964b82
   languageName: node
   linkType: hard
 
@@ -7711,6 +7731,15 @@ __metadata:
   version: 2.1.2
   resolution: "clone@npm:2.1.2"
   checksum: 85232d66015d2d703dc59812e30049931d97c7815bf70569ae4fb7a66be257f46fcf47040e4e7050966ca195a9e615d59d73ba9e39fc37eedba1a76865f27ab1
+  languageName: node
+  linkType: hard
+
+"clp-wasm@npm:^0.0.13":
+  version: 0.0.13
+  resolution: "clp-wasm@npm:0.0.13"
+  peerDependencies:
+    typescript: ">= 3.8.3"
+  checksum: 850964e796cec9d236ac711015e0def666ccf6baaa0eaa549f9d82c194a08daa19d2f5c1536e382e661a911edc948de4691b89b4c9373a569f445ac6f914ffa0
   languageName: node
   linkType: hard
 

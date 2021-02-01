@@ -1,8 +1,7 @@
 import assert from 'assert'
-import { ethers } from 'ethers'
 import { randomHex } from 'web3-utils'
 import testConfig from '../test/config'
-import { createTinlake, TestProvider, assertTxSuccess } from '../test/utils'
+import { assertTxSuccess, createTinlake, TestProvider } from '../test/utils'
 import { ITinlake } from '../types/tinlake'
 
 const testProvider = new TestProvider(testConfig)
