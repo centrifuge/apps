@@ -71,8 +71,8 @@ class Apollo {
       const reserve = (pool && new BN(pool.reserve)) || undefined
       const assetValue = (pool && new BN(pool.assetValue)) || undefined
       const poolValueNum =
-        parseInt((reserve || new BN(0)).div(UintBase).toString()) +
-        parseInt((assetValue || new BN(0)).div(UintBase).toString())
+        parseInt((reserve || new BN(0)).div(UintBase).toString(), 10) +
+        parseInt((assetValue || new BN(0)).div(UintBase).toString(), 10)
 
       const poolData = {
         reserve,
@@ -452,12 +452,7 @@ class Apollo {
       .map((item: any) => {
         return {
           day: Number(item.id),
-          poolValue: parseFloat(
-            new BN(item.assetValue)
-              .add(new BN(item.reserve))
-              .div(UintBase)
-              .toString()
-          ),
+          poolValue: parseFloat(new BN(item.assetValue).add(new BN(item.reserve)).div(UintBase).toString()),
         }
       })
       .sort((a: PoolsDailyData, b: PoolsDailyData) => a.day - b.day)

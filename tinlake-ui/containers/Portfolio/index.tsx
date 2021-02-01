@@ -67,7 +67,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
 
     if (!data) return undefined
 
-    return { pool: ipfsPool, data }
+    return { data, pool: ipfsPool }
   }
 
   const clickToken = (tokenBalance: TokenBalance) => {
