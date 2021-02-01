@@ -246,7 +246,7 @@ function comebackDate(nonZero: BN | null | undefined) {
   return (
     `You cannot claim your RAD rewards yet. RAD rewards can only be claimed after a minimum investment period of 60 ` +
     `days. Your first eligible investment was made ${startDate}. Please come back in ${
-      diff === '1' ? '1 day' : diff + ' days'
+      diff === '1' ? '1 day' : `${diff} days`
     } on ${targetDate} to claim your RAD rewards.`
   )
 }

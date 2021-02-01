@@ -31,9 +31,9 @@ export const saveAsCSV = (loans: SortableLoan[]) => {
     }),
   ]
 
-  const csvContent = 'data:text/csv;charset=utf-8,' + rows.map((e) => e.join(',')).join('\n')
-  var encodedUri = encodeURI(csvContent)
-  var link = document.createElement('a')
+  const csvContent = `data:text/csv;charset=utf-8, ${rows.map((e) => e.join(',')).join('\n')}`
+  const encodedUri = encodeURI(csvContent)
+  const link = document.createElement('a')
   link.setAttribute('href', encodedUri)
   link.setAttribute('download', 'assets.csv')
   document.body.appendChild(link) // Required for FF

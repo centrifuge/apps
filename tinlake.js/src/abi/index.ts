@@ -2,6 +2,7 @@ import { ContractAbis } from '../Tinlake'
 import contractAbiActions from './Actions.abi.json'
 import contractAbiAssessor from './Assessor.abi.json'
 import contractAbiAssessorAdmin from './AssessorAdmin.abi.json'
+import contractAbiClaimRAD from './ClaimRAD.abi.json'
 import contractAbiCollector from './Collector.abi.json'
 import contractAbiDistributor from './Distributor.abi.json'
 import contractAbiEpochCoordinator from './EpochCoordinator.abi.json'
@@ -19,7 +20,6 @@ import contractAbiNFT from './test/SimpleNFT.abi.json'
 import contractAbiRoot from './TinlakeRoot.abi.json'
 import contractAbiTitle from './Title.abi.json'
 import contractAbiTranche from './Tranche.abi.json'
-import contractAbiClaimRAD from './ClaimRAD.abi.json'
 
 export default {
   COLLATERAL_NFT: contractAbiNFT,

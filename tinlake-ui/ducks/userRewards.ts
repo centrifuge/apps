@@ -149,8 +149,8 @@ export default function reducer(
       const claims = action.data as RewardClaim[]
       return {
         ...state,
-        claimsState: 'found',
         claims,
+        claimsState: 'found',
         data: state.data
           ? {
               ...state.data,
@@ -184,7 +184,7 @@ export function loadSubgraph(
   ethAddr: string
 ): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
   return async (dispatch) => {
-    dispatch({ type: LOAD_SUBGRAPH, ethAddr })
+    dispatch({ ethAddr, type: LOAD_SUBGRAPH })
     const data = await Apollo.getUserRewards(ethAddr)
     dispatch({ data, type: RECEIVE_SUBGRAPH })
     await dispatch(loadCentChain())
@@ -196,12 +196,12 @@ export function loadEthLink(
   tinlake: ITinlake
 ): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
   return async (dispatch) => {
-    dispatch({ type: LOAD_ETH_LINK, ethAddr })
+    dispatch({ ethAddr, type: LOAD_ETH_LINK })
     let link: null | string = await tinlake.getClaimRADAccountID(ethAddr)
     if (link === '0x0000000000000000000000000000000000000000000000000000000000000000') {
       link = null
     }
-    dispatch({ type: RECEIVE_ETH_LINK, link })
+    dispatch({ link, type: RECEIVE_ETH_LINK })
   }
 }
 
@@ -244,7 +244,8 @@ export function maybeLoadAndApplyClaims(): ThunkAction<
     const { userRewards } = await getState()
     if (userRewards.claimsState === 'loading') {
       return
-    } else if (userRewards.claimsState === 'found') {
+    }
+    if (userRewards.claimsState === 'found') {
       dispatch({ data: userRewards.claims, type: RECEIVE_CLAIMS })
     } else {
       dispatch(loadClaims())

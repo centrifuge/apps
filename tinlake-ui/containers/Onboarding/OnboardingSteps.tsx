@@ -50,9 +50,14 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     dispatch(loadOnboardingStatus(props.activePool))
 
     if (!address) setActiveSteps(1)
-    else if (!kycStatus || kycStatus === 'none' || kycStatus === 'requires-signin' || kycStatus === 'updates-required')
+    else if (
+      !kycStatus ||
+      kycStatus === 'none' ||
+      kycStatus === 'requires-signin' ||
+      kycStatus === 'updates-required'
+    ) {
       setActiveSteps(2)
-    else if (kycStatus === 'verified' && !accreditationStatus) setActiveSteps(2)
+    } else if (kycStatus === 'verified' && !accreditationStatus) setActiveSteps(2)
     else if (agreementStatus === 'none') setActiveSteps(3)
     else if (kycStatus === 'processing' && agreementStatus === 'signed') setActiveSteps(3)
     // TODO: what to do here?
