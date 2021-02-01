@@ -5,6 +5,7 @@ import config from './config'
 import CronExpression from './util/CronExpression'
 import { ethers } from 'ethers'
 import { closePools } from './tasks/closePools'
+import { pushNotificationToSlack } from './util/slack'
 
 const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
 const signer = new ethers.Wallet(config.signerPrivateKey).connect(provider)

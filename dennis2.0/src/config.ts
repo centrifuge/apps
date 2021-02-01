@@ -5,6 +5,7 @@ export interface Config {
   rpcUrl: string
   poolRegistry: string
   signerPrivateKey: string
+  slackWebhookUrl: string
 }
 
 const config: Config = {
@@ -12,6 +13,7 @@ const config: Config = {
   rpcUrl: process.env.RPC_URL,
   poolRegistry: process.env.POOL_REGISTRY,
   signerPrivateKey: process.env.SIGNER_PRIVATE_KEY,
+  slackWebhookUrl: process.env.SLACK_WEBHOOK_URL,
 }
 
 export default config
