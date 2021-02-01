@@ -2,8 +2,7 @@ import assert from 'assert'
 import { ethers } from 'ethers'
 import Tinlake from '..'
 import { ITinlake, PendingTransaction } from '../types/tinlake'
-import { ProviderConfig } from './config'
-import testConfig from './config'
+import testConfig, { ProviderConfig } from './config'
 const { SUCCESS_STATUS } = testConfig
 
 export class TestProvider {

@@ -1,5 +1,4 @@
 import assert from 'assert'
-import { ethers } from 'ethers'
 import testConfig from '../test/config'
 import { createTinlake, TestProvider } from '../test/utils'
 import { ITinlake } from '../types/tinlake'

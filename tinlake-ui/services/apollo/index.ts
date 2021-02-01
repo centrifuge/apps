@@ -67,7 +67,8 @@ class Apollo {
 
       const reserve = (pool && new BN(pool.reserve)) || new BN('0')
       const assetValue = (pool && new BN(pool.assetValue)) || new BN('0')
-      const poolValueNum = parseInt(reserve.div(UintBase).toString()) + parseInt(assetValue.div(UintBase).toString())
+      const poolValueNum =
+        parseInt(reserve.div(UintBase).toString(), 10) + parseInt(assetValue.div(UintBase).toString(), 10)
 
       const poolData = {
         reserve,

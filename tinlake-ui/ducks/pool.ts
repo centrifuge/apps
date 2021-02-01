@@ -98,7 +98,7 @@ export default function reducer(state: PoolState = initialState, action: AnyActi
   }
 }
 
-let watcher: any = createWatcher([], multicallConfig)
+const watcher: any = createWatcher([], multicallConfig)
 
 let prevAddress: string | undefined = undefined
 
@@ -315,7 +315,7 @@ export function loadPool(
 
         data.totalRedemptionsCurrency = juniorRedemptionsCurrency.add(seniorRedemptionsCurrency)
 
-        dispatch({ data: data, type: RECEIVE_POOL })
+        dispatch({ data, type: RECEIVE_POOL })
       })
 
       watcher.start()
