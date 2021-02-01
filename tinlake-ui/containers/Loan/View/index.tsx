@@ -1,4 +1,3 @@
-import { Spinner } from '@centrifuge/axis-spinner'
 import { Box, Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
@@ -32,11 +31,11 @@ class LoanView extends React.Component<Props> {
   }
 
   render() {
-    const { poolConfig, loans, loanId, tinlake, auth } = this.props
+    const { loans, loanId, tinlake, auth } = this.props
     const { loan, loanState } = loans!
-    if (loanState === null || loanState === 'loading') {
-      return <Spinner height={'300px'} message={'Loading...'} />
-    }
+    // if (loanState === null || loanState === 'loading') {
+    //   return <Spinner height={'300px'} message={'Loading...'} />
+    // }
     if (loanState === 'not found') {
       return (
         <Alert margin="medium" type="error">
@@ -50,27 +49,32 @@ class LoanView extends React.Component<Props> {
 
     return (
       <Box>
-        <LoanData loan={loan!} />
-        {loan && loan.status !== 'closed' && (
+        <LoanData loan={loan!} auth={this.props.auth} tinlake={tinlake} />
+        {loan?.status !== 'closed' && (
           <Box>
             {hasBorrowerPermissions && (
               <>
                 <Heading level="5" margin={{ top: 'large', bottom: 'medium' }}>
                   Finance / Repay{' '}
                 </Heading>
-                <Box margin={{ bottom: 'medium' }} pad="medium" elevation="small" round="xsmall" background="white">
-                  <Box direction="row">
-                    <LoanBorrow loan={loan!} tinlake={tinlake} />
-                    <LoanRepay poolConfig={poolConfig} loan={loan!} tinlake={tinlake} />
-                  </Box>
+                <Box
+                  width="80%"
+                  justify="between"
+                  gap="medium"
+                  pad="medium"
+                  elevation="small"
+                  round="xsmall"
+                  background="white"
+                  direction="row"
+                >
+                  <LoanBorrow loan={loan!} tinlake={tinlake} />
+                  <LoanRepay loan={loan!} tinlake={tinlake} />
                 </Box>
               </>
             )}
           </Box>
         )}
-        {loan && loan.nft && this.props.auth?.address && (
-          <NftData data={loan.nft} authedAddr={this.props.auth.address} />
-        )}
+        <NftData data={loan?.nft} />
       </Box>
     )
   }

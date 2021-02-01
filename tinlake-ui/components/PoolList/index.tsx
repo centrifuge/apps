@@ -1,9 +1,11 @@
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { Box } from 'grommet'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import Router, { withRouter } from 'next/router'
 import * as React from 'react'
 import { PoolData } from '../../ducks/pools'
+import { LoadingValue } from '../LoadingValue'
 import NumberDisplay from '../NumberDisplay'
 import {
   Dash,
@@ -90,7 +92,11 @@ class PoolList extends React.Component<Props> {
               <Desc>
                 <Name>
                   {p.name}{' '}
-                  {p.isUpcoming ? (
+                  {p.isUpcoming ||
+                  (p.seniorInterestRate &&
+                    p.seniorInterestRate.isZero() === false &&
+                    p.assetValue?.isZero() &&
+                    p.reserve?.isZero()) ? (
                     <Label blue>Upcoming</Label>
                   ) : p.isArchived ? (
                     <Label>Archived</Label>
@@ -115,29 +121,33 @@ class PoolList extends React.Component<Props> {
               )}
 
               <DataCol>
-                <NumberDisplay
-                  precision={0}
-                  render={(v) =>
-                    v === '0' ? (
-                      <Dash>-</Dash>
-                    ) : (
-                      <>
-                        <Number>{v}</Number> <Unit>DAI</Unit>
-                      </>
-                    )
-                  }
-                  value={baseToDisplay(p.reserve.add(p.assetValue), 18)}
-                />
+                <LoadingValue done={p.reserve !== undefined && p.assetValue !== undefined} height={28}>
+                  <NumberDisplay
+                    precision={0}
+                    render={(v) =>
+                      v === '0' ? (
+                        <Dash>-</Dash>
+                      ) : (
+                        <>
+                          <Number>{v}</Number> <Unit>DAI</Unit>
+                        </>
+                      )
+                    }
+                    value={baseToDisplay((p.reserve || new BN(0)).add(p.assetValue || new BN(0)), 18)}
+                  />
+                </LoadingValue>
               </DataCol>
               <DataCol>
-                <NumberDisplay
-                  render={(v) => (
-                    <>
-                      <Number>{v}</Number> <Unit>%</Unit>
-                    </>
-                  )}
-                  value={feeToInterestRate(p.seniorInterestRate)}
-                />
+                <LoadingValue done={p.seniorInterestRate !== undefined} height={28}>
+                  <NumberDisplay
+                    render={(v) => (
+                      <>
+                        <Number>{v}</Number> <Unit>%</Unit>
+                      </>
+                    )}
+                    value={feeToInterestRate(p.seniorInterestRate || new BN(0))}
+                  />
+                </LoadingValue>
               </DataCol>
               {showAll && (
                 <>

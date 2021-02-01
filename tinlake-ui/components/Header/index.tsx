@@ -1,16 +1,26 @@
 import { NavBar } from '@centrifuge/axis-nav-bar'
+import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 import { Web3Wallet } from '@centrifuge/axis-web3-wallet'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { Box, Button, Image } from 'grommet'
 import { Close as CloseIcon, Menu as MenuIcon, User as UserIcon } from 'grommet-icons'
 import Link from 'next/link'
-import Router, { NextRouter, withRouter } from 'next/router'
+import Router, { NextRouter, useRouter, withRouter } from 'next/router'
 import React from 'react'
-import { connect } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
+import styled from 'styled-components'
 import { PoolSelector } from '../../components/PoolSelector'
 import config, { IpfsPools } from '../../config'
 import { AuthState, clear, ensureAuthed } from '../../ducks/auth'
+import { OnboardingState } from '../../ducks/onboarding'
+import { loadPortfolio, PortfolioState, TokenBalance } from '../../ducks/portfolio'
 import { selectWalletTransactions, TransactionState } from '../../ducks/transactions'
+import { load } from '../../ducks/userRewards'
+import { WalletRewards } from '../WalletRewards'
+import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
+import { toPrecision } from '../../utils/toPrecision'
 
 const { isDemo } = config
 export interface MenuItem {
@@ -34,6 +44,29 @@ interface Props {
 }
 
 const Header: React.FC<Props> = (props: Props) => {
+  const { poolTitle, selectedRoute, menuItems, transactions, auth, clear } = props
+
+  const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
+  const portfolio = useSelector<any, PortfolioState>((state) => state.portfolio)
+
+  const router = useRouter()
+  const connectedAddress = useSelector<any, string | null>((state) => state.auth.address)
+  const address = 'address' in router.query ? (router.query.address as string) : connectedAddress
+  const dispatch = useDispatch()
+
+  React.useEffect(() => {
+    if (address) dispatch(loadPortfolio(address))
+  }, [])
+
+  React.useEffect(() => {
+    if (address) dispatch(loadPortfolio(address))
+  }, [address])
+
+  const portfolioValue =
+    portfolio?.data?.reduce((prev: BN, tokenBalance: TokenBalance) => {
+      return prev.add(tokenBalance.value)
+    }, new BN(0)) || new BN(0)
+
   const connectAccount = async () => {
     try {
       await props.ensureAuthed!()
@@ -65,8 +98,7 @@ const Header: React.FC<Props> = (props: Props) => {
     Router.push(item.route, undefined, { shallow: true })
   }
 
-  const { poolTitle, selectedRoute, menuItems, transactions, auth, clear } = props
-  const { address, network, providerName } = auth!
+  const { network, providerName } = auth!
   const logoUrl = (isDemo && '/static/demo_logo.svg') || '/static/logo.svg'
 
   const theme = {
@@ -111,11 +143,7 @@ const Header: React.FC<Props> = (props: Props) => {
             </Link>
           </div>
           {poolTitle && <PoolSelector title={poolTitle} ipfsPools={props.ipfsPools} />}
-          <Box
-            flex="grow"
-            basis="auto"
-            style={{ height: 32, padding: '0 16px 0 32px', borderRight: '1px solid #D8D8D8' }}
-          >
+          <Box flex="grow" basis="auto" style={{ height: 32, padding: '0 16px 0 32px' }}>
             {filtMenuItems.length > 0 && (
               <NavBar
                 border={false}
@@ -130,7 +158,24 @@ const Header: React.FC<Props> = (props: Props) => {
               />
             )}
           </Box>
-          <div style={{ flex: '0 0 auto', paddingLeft: 16 }}>
+          {address && !portfolioValue.isZero() && (
+            <Portfolio pad={{ left: '14px', right: '14px' }}>
+              <AxisTooltip title="View your investment portfolio" cursor="pointer">
+                <Link href="/portfolio">
+                  <Box>
+                    <Box direction="row">
+                      <TokenLogo src={`/static/DAI.svg`} />
+                      <Box>
+                        <Holdings>{addThousandsSeparators(toPrecision(baseToDisplay(portfolioValue, 18), 0))}</Holdings>
+                        <Desc>Portfolio Value</Desc>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Link>
+              </AxisTooltip>
+            </Portfolio>
+          )}
+          <div style={{ flex: '0 0 auto', paddingLeft: 16, borderLeft: '1px solid #D8D8D8' }}>
             {!address && <Button onClick={connectAccount} label="Connect" />}
             {address && (
               <Web3Wallet
@@ -141,6 +186,8 @@ const Header: React.FC<Props> = (props: Props) => {
                 transactions={selectWalletTransactions(transactions)}
                 getAddressLink={getAddressLink}
                 style={{ padding: 0 }}
+                kycStatus={onboarding.data?.kyc?.status === 'verified' ? 'verified' : 'none'}
+                extension={<WalletRewards address={address} />}
               />
             )}
           </div>
@@ -150,4 +197,30 @@ const Header: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { ensureAuthed, clear })(withRouter(Header))
+export default connect((state) => state, { ensureAuthed, clear, load })(withRouter(Header))
+
+const Portfolio = styled(Box)`
+  cursor: pointer;
+`
+
+const TokenLogo = styled.img`
+  display: inline-block;
+  margin: 0 8px 0 0;
+  width: 16px;
+  height: 16px;
+  position: relative;
+  top: 8px;
+`
+
+const Holdings = styled.div`
+  font-weight: bold;
+  font-size: 13px;
+`
+
+const Desc = styled.div`
+  height: 12px;
+  line-height: 12px;
+  font-weight: 500;
+  font-size: 10px;
+  color: #bbb;
+`

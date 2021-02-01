@@ -2,12 +2,11 @@ import { ITinlake } from '@centrifuge/tinlake-js'
 import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import InvestAction from '../../components/InvestAction'
-import OnboardModal from '../../components/OnboardModal'
 import { PoolLink } from '../../components/PoolLink'
-import PoolTitle from '../../components/PoolTitle'
-import config, { Pool, UpcomingPool } from '../../config'
+import { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
 import { PoolState } from '../../ducks/pool'
+import PageTitle from '../PageTitle'
 
 interface Props {
   pool?: PoolState
@@ -22,7 +21,7 @@ const Overview: React.FC<Props> = (props: Props) => {
     <Box margin={{ bottom: 'large', top: 'medium' }}>
       {!isUpcoming && (
         <>
-          <PoolTitle pool={props.selectedPool} page="Pool Overview" />
+          <PageTitle pool={props.selectedPool} page="Overview" />
           <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />
         </>
       )}
@@ -81,11 +80,7 @@ const Overview: React.FC<Props> = (props: Props) => {
 
           {isUpcoming && (
             <Box margin={{ top: 'medium' }}>
-              {config.featureFlagNewOnboarding ? (
-                <OnboardModal pool={props.selectedPool} />
-              ) : (
-                <InvestAction pool={props.selectedPool} />
-              )}
+              <InvestAction pool={props.selectedPool} />
             </Box>
           )}
         </Box>

@@ -3,11 +3,16 @@ import { applyMiddleware, combineReducers, compose, createStore } from 'redux'
 import thunk from 'redux-thunk'
 import config from '../config'
 import authReducer from '../ducks/auth'
+import centChainWalletReducer from '../ducks/centChainWallet'
 import investmentsReducer from '../ducks/investments'
 import loansReducer from '../ducks/loans'
+import onboardingReducer from '../ducks/onboarding'
 import poolReducer from '../ducks/pool'
 import poolsReducer from '../ducks/pools'
+import rewardsReducer from '../ducks/rewards'
+import portfolioReducer from '../ducks/portfolio'
 import transactionReducer from '../ducks/transactions'
+import userRewardsReducer from '../ducks/userRewards'
 
 const sentryReduxEnhancer = config.enableErrorLogging ? Sentry.createReduxEnhancer({}) : {}
 
@@ -31,6 +36,11 @@ const makeStore = () => {
       pool: poolReducer,
       auth: authReducer,
       transactions: transactionReducer,
+      userRewards: userRewardsReducer,
+      rewards: rewardsReducer,
+      centChainWallet: centChainWalletReducer,
+      onboarding: onboardingReducer,
+      portfolio: portfolioReducer,
     }),
     composeEnhancers(applyMiddleware(thunk))
   )

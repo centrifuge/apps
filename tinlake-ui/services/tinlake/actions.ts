@@ -201,7 +201,7 @@ export async function getLoan(tinlake: ITinlake, loanId: string): Promise<Loan |
   return loan
 }
 
-async function addProxyDetails(tinlake: ITinlake, loan: Loan) {
+export async function addProxyDetails(tinlake: ITinlake, loan: Loan) {
   try {
     loan.proxyOwner = (await tinlake.getProxyOwnerByLoan(loan.loanId)).toString()
   } catch (e) {}
@@ -553,6 +553,10 @@ export async function repayFull(tinlake: ITinlake, loan: Loan): Promise<PendingT
   return tinlake.proxyRepayUnlockClose(proxy.toString(), loan.tokenId.toString(), loanId, loan.registry)
 }
 
+export const close = async (tinlake: ITinlake, loan: Loan): Promise<PendingTransaction> => {
+  return tinlake.close(loan.loanId)
+}
+
 export async function getInvestor(tinlake: ITinlake, address: string) {
   return tinlake.getInvestor(address)
 }
@@ -567,6 +571,10 @@ export async function setMaxJuniorRatio(tinlake: ITinlake, ratio: string): Promi
 
 export async function setMaxReserve(tinlake: ITinlake, ratio: string): Promise<PendingTransaction> {
   return tinlake.setMaximumReserve(ratio)
+}
+
+export async function updateClaimRADAccountID(tinlake: ITinlake, centAddress: string): Promise<PendingTransaction> {
+  return tinlake.updateClaimRADAccountID(centAddress)
 }
 
 function loggedError(error: any, message: string, id: string): PendingTransaction {

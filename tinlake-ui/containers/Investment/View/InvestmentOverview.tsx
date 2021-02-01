@@ -1,11 +1,11 @@
 import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
-import OnboardModal from '../../../components/OnboardModal'
+import { PoolLink } from '../../../components/PoolLink'
 import { TINRatioBar } from '../../../components/TINRatioBar/index'
 import { Tooltip } from '../../../components/Tooltip'
 import config, { Pool, UpcomingPool } from '../../../config'
@@ -57,7 +57,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const maxJuniorRatio = poolData ? parseRatio(poolData.maxJuniorRatio) : undefined
 
   React.useEffect(() => {
-    // sign()
     dispatch(loadLoans(props.tinlake))
   }, [props.selectedPool])
 
@@ -147,8 +146,16 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
         </Table>
 
         <Box margin={{ top: 'medium' }}>
-          {config.featureFlagNewOnboarding ? (
-            <OnboardModal pool={props.selectedPool} />
+          {'addresses' in props.selectedPool &&
+          config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
+            <Box gap="small" justify="end" direction="row">
+              {/* TODO: if already whitelisted, then go to investments page */}
+              <PoolLink href={'/onboarding'}>
+                <Anchor>
+                  <Button label="Invest" primary />
+                </Anchor>
+              </PoolLink>
+            </Box>
           ) : (
             <InvestAction pool={props.selectedPool} />
           )}
@@ -175,7 +182,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           <Box direction="row" margin={{ top: '0', bottom: '0' }}>
             <Heading level="5" margin={'0'}>
               <TokenLogo src={`/static/DROP_final.svg`} />
-              <Tooltip id="dropValue">DROP Value</Tooltip>
+              <Tooltip id="dropValue">DROP Tranche</Tooltip>
             </Heading>
             <Box margin={{ left: 'auto' }}>
               <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
@@ -227,7 +234,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           <Box direction="row" margin={{ top: '0', bottom: '0' }}>
             <Heading level="5" margin={'0'}>
               <TokenLogo src={`/static/TIN_final.svg`} />
-              <Tooltip id="tinValue">TIN Value</Tooltip>
+              <Tooltip id="tinValue">TIN Tranche</Tooltip>
             </Heading>
             <Box margin={{ left: 'auto' }}>
               <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>

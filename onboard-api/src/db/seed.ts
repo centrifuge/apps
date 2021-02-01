@@ -1,11 +1,12 @@
-import { config } from 'dotenv'
+import { config as dotenvConfig } from 'dotenv'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as postgres from 'postgres'
+import config from '../config'
 
-config()
+dotenvConfig()
 
-const connectionString = `postgres://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`
+const connectionString = `postgres://${config.db.username}:${config.db.password}@${config.db.host}:${config.db.port}/${config.db.name}`
 
 const sql = postgres(connectionString)
 const seedFolder = path.join(__dirname, 'seeds')

@@ -1,29 +1,34 @@
 import { Injectable } from '@nestjs/common'
+import config from '../config'
 import { User } from '../repos/user.repo'
 import { DocusignAuthService } from './docusign-auth.service'
+import { PoolService } from './pool.service'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
-const InvestorRoleName = 'Investor'
-const IssuerRoleName = 'Issuer'
+export const InvestorRoleName = 'Investor'
+export const IssuerRoleName = 'Self'
 
 @Injectable()
 export class DocusignService {
-  constructor(private readonly docusignAuthService: DocusignAuthService) {}
+  constructor(private readonly docusignAuthService: DocusignAuthService, private readonly poolService: PoolService) {}
 
-  async createAgreement(userId: string, email: string, templateId: string): Promise<string> {
+  async createAgreement(poolId: string, userId: string, email: string, templateId: string): Promise<string> {
+    const pool = await this.poolService.get(poolId)
+    if (!pool) throw new Error(`Failed to find pool ${poolId}`)
+
     const envelopeDefinition = {
       templateId: templateId,
       templateRoles: [
         {
           email,
-          name: 'Investor 1',
+          name: 'Investor',
           roleName: InvestorRoleName,
           clientUserId: userId,
           routingOrder: 1,
         },
         {
-          email: 'jeroen+issuer@centrifuge.io',
-          name: 'Issuer 1',
+          email: pool.profile.issuer.email,
+          name: pool.profile.issuer.name,
           roleName: IssuerRoleName,
           routingOrder: 2,
         },
@@ -31,7 +36,7 @@ export class DocusignService {
       status: 'sent',
     }
 
-    const url = `${process.env.DOCUSIGN_REST_API_HOST}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes?change_routing_order=true`
+    const url = `${config.docusign.restApiHost}/restapi/v2.1/accounts/${config.docusign.accountId}/envelopes?change_routing_order=true`
 
     const accessToken = await this.docusignAuthService.getAccessToken()
     const response = await fetch(url, {
@@ -53,13 +58,13 @@ export class DocusignService {
   }
 
   async getAgreementLink(envelopeId: string, user: User, returnUrl: string): Promise<string> {
-    const url = `${process.env.DOCUSIGN_REST_API_HOST}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes/${envelopeId}/views/recipient`
+    const url = `${config.docusign.restApiHost}/restapi/v2.1/accounts/${config.docusign.accountId}/envelopes/${envelopeId}/views/recipient`
 
     // TODO: email and userName here should be taken from Securitize
     const recipientViewRequest = {
       authenticationMethod: 'none',
       email: user.email,
-      userName: 'Investor 1',
+      userName: 'Investor',
       roleName: InvestorRoleName,
       clientUserId: user.id,
       returnUrl: returnUrl,
@@ -85,7 +90,7 @@ export class DocusignService {
   }
 
   async getEnvelopeStatus(envelopeId: string): Promise<AgreementStatus> {
-    const url = `${process.env.DOCUSIGN_REST_API_HOST}/restapi/v2.1/accounts/${process.env.DOCUSIGN_ACCOUNT_ID}/envelopes/${envelopeId}/recipients`
+    const url = `${config.docusign.restApiHost}/restapi/v2.1/accounts/${config.docusign.accountId}/envelopes/${envelopeId}/recipients`
 
     const accessToken = await this.docusignAuthService.getAccessToken()
     const response = await fetch(url, {

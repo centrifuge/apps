@@ -58,7 +58,7 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
           onClick={() => props.setShowMaxReserveForm(false)}
           disabled={status === 'pending' || status === 'unconfirmed'}
         />
-        <Button primary label="Save" onClick={save} disabled={status === 'pending' || status === 'unconfirmed'} />
+        <Button primary label="Set" onClick={save} disabled={status === 'pending' || status === 'unconfirmed'} />
       </Box>
     </Box>
   )

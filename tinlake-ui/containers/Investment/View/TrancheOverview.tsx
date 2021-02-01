@@ -1,11 +1,14 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
-import { Pool } from '../../../config'
+import { PoolLink } from '../../../components/PoolLink'
+import config, { Pool } from '../../../config'
+import { ensureAuthed } from '../../../ducks/auth'
 import { loadPool, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
@@ -29,11 +32,19 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const trancheData = props.tranche === 'senior' ? pool?.data?.senior : pool?.data?.junior
   const epochData = pool?.epoch || undefined
 
+  const router = useRouter()
+
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
 
   const [card, setCard] = React.useState<Card>('home')
+
+  React.useEffect(() => {
+    if ('invest' in router.query && router.query.invest === props.tranche) {
+      setCard('invest')
+    }
+  }, [router.query])
 
   const [balance, setBalance] = React.useState<string | undefined>(undefined)
   const [tokenPrice, setTokenPrice] = React.useState<string | undefined>(undefined)
@@ -50,6 +61,10 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const [hasPendingCollection, setHasPendingCollection] = React.useState(false)
 
   const dispatch = useDispatch()
+
+  const connect = () => {
+    dispatch(ensureAuthed())
+  }
 
   // V3 TODO: this should probably move to actions and expose a single TrancheData object (or to a duck?)
   const updateTrancheData = async () => {
@@ -147,7 +162,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             </TableRow>
           </TableBody>
         </Table>
-        {trancheData?.inMemberlist === true && (
+        {address && trancheData?.inMemberlist === true && (
           <>
             {card === 'home' && (
               <>
@@ -208,21 +223,60 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             {card === 'redeem' && <RedeemCard {...props} setCard={setCard} updateTrancheData={updateTrancheData} />}
 
             {trancheData?.token && trancheData.token.length > 0 && trancheData.token.length < 7 && (
-              <AddWalletLink onClick={addToWallet}>Add {trancheData?.token} to your wallet</AddWalletLink>
+              <AddWalletLink onClick={addToWallet}>Display {trancheData?.token} in your wallet</AddWalletLink>
             )}
           </>
         )}
-        {trancheData?.inMemberlist === false && (
-          <Info>
-            <Heading level="6" margin={{ bottom: 'xsmall' }}>
-              Interested in investing?
-            </Heading>
-            If you want to learn more get started with your onboarding process.
-            <Box justify="end" margin={{ top: 'small' }}>
-              <InvestAction pool={props.pool} />
+        {props.pool &&
+          props.tranche === 'senior' &&
+          !trancheData?.inMemberlist &&
+          ('onboard' in router.query ||
+            ('addresses' in props.pool &&
+              config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT))) && (
+            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+              <PoolLink href={'/onboarding'}>
+                <Anchor>
+                  <Button label="Invest" primary />
+                </Anchor>
+              </PoolLink>
             </Box>
-          </Info>
-        )}
+          )}
+
+        {props.pool &&
+          !(
+            'onboard' in router.query ||
+            ('addresses' in props.pool &&
+              config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT))
+          ) &&
+          !trancheData?.inMemberlist && (
+            <>
+              {address && (
+                <Info>
+                  <>
+                    <Heading level="6" margin={{ bottom: 'xsmall' }}>
+                      Interested in investing?
+                    </Heading>
+                    If you want to learn more get started with your onboarding process.
+                    <Box justify="end" margin={{ top: 'small' }}>
+                      <InvestAction pool={props.pool} />
+                    </Box>
+                  </>
+                </Info>
+              )}
+
+              {!address && (
+                <Info>
+                  <Heading level="6" margin={{ bottom: 'xsmall' }}>
+                    Interested in investing?
+                  </Heading>
+                  Connect your wallet to start the process.
+                  <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                    <Button primary label="Connect" onClick={connect} />
+                  </Box>
+                </Info>
+              )}
+            </>
+          )}
       </Box>
     </Box>
   )

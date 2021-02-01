@@ -1,13 +1,12 @@
-import { Box, Heading } from 'grommet'
+import { Box } from 'grommet'
 import { GetStaticProps } from 'next'
 import withRouter, { WithRouterProps } from 'next/dist/client/with-router'
 import Head from 'next/head'
 import * as React from 'react'
 import Auth from '../../../../../components/Auth'
-import { BackLink } from '../../../../../components/BackLink'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
-import SecondaryHeader from '../../../../../components/SecondaryHeader'
+import PageTitle from '../../../../../components/PageTitle'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
@@ -46,13 +45,9 @@ class LoanIssuePage extends React.Component<Props> {
                   <Auth
                     tinlake={tinlake}
                     render={(auth) => (
-                      <Box>
-                        <SecondaryHeader>
-                          <Box direction="row" gap="small" align="center" margin={{ top: 'medium' }}>
-                            <BackLink href={'/assets'} />
-                            <Heading level="4">Lock NFT</Heading>
-                          </Box>
-                        </SecondaryHeader>
+                      <Box margin={{ top: 'medium' }}>
+                        <PageTitle pool={pool} page={`Lock NFT`} parentPage="Assets" parentPageHref="/assets" />
+
                         <IssueLoan
                           tinlake={tinlake}
                           poolConfig={pool}

@@ -13,6 +13,8 @@ interface SecuritizeData {
 interface PoolMedia {
   logo?: string
   icon?: string
+  drop?: string
+  tin?: string
 }
 
 interface PoolMetadata {
@@ -60,11 +62,12 @@ export interface Pool extends BasePool {
     ACTIONS: string
     PROXY_REGISTRY: string
     COLLATERAL_NFT: string
+    SENIOR_TOKEN: string
+    JUNIOR_TOKEN: string
   }
   contractConfig?: {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
     SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'
-    partialRepay?: boolean
   }
 }
 
@@ -86,10 +89,15 @@ interface Config {
   isDemo: boolean
   network: 'Mainnet' | 'Kovan'
   portisApiKey: string
+  infuraKey: string
   gasLimit: number
   onboardAPIHost: string
-  featureFlagNewOnboarding: boolean
+  featureFlagNewOnboardingPools: string[]
   enableErrorLogging: boolean
+  centrifugeChainUrl: string
+  claimRADContractAddress: string
+  rewardsTreeUrl: string
+  multicallContractAddress: string
 }
 
 export interface IpfsPools {
@@ -125,7 +133,6 @@ const contractConfigSchema = yup.object().shape({
   SENIOR_OPERATOR: yup
     .mixed<'PROPORTIONAL_OPERATOR' | 'ALLOWANCE_OPERATOR'>()
     .oneOf(['PROPORTIONAL_OPERATOR', 'ALLOWANCE_OPERATOR']),
-  partialRepay: yup.bool(),
 })
 
 const securitizeDataSchema = yup.object().shape({
@@ -294,8 +301,12 @@ const config: Config = {
     .validateSync(networkUrlToName(process.env.NEXT_PUBLIC_RPC_URL || '')),
   portisApiKey: yup
     .string()
-    .required()
+    .required('NEXT_PUBLIC_PORTIS_KEY is required')
     .validateSync(process.env.NEXT_PUBLIC_PORTIS_KEY),
+  infuraKey: yup
+    .string()
+    .required('NEXT_PUBLIC_INFURA_KEY is required')
+    .validateSync(process.env.NEXT_PUBLIC_INFURA_KEY),
   gasLimit: yup
     .number()
     .required('gasLimit is required')
@@ -304,8 +315,27 @@ const config: Config = {
     .string()
     .required('NEXT_PUBLIC_ONBOARD_API_HOST is required')
     .validateSync(process.env.NEXT_PUBLIC_ONBOARD_API_HOST),
-  featureFlagNewOnboarding: yup.boolean().validateSync(process.env.NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING),
+  centrifugeChainUrl: yup
+    .string()
+    .required('NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL is required')
+    .validateSync(process.env.NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL),
+  claimRADContractAddress: yup
+    .string()
+    .length(42)
+    .matches(/0x[0-9a-fA-F]{40}/)
+    .required('NEXT_PUBLIC_CLAIM_RAD_CONTRACT_ADDRESS is required')
+    .validateSync(process.env.NEXT_PUBLIC_CLAIM_RAD_CONTRACT_ADDRESS),
+  rewardsTreeUrl: yup
+    .string()
+    .required('NEXT_PUBLIC_REWARDS_TREE_URL is required')
+    .validateSync(process.env.NEXT_PUBLIC_REWARDS_TREE_URL),
   enableErrorLogging: yup.boolean().validateSync(false),
+  // Loading a comma-separated string as a string array using yup proved hard/impossible
+  featureFlagNewOnboardingPools: process.env.NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING?.split(',') || [],
+  multicallContractAddress: yup
+    .string()
+    .required('NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS is required')
+    .validateSync(process.env.NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS),
 }
 
 function between1e23and1e27(s: string): boolean {
