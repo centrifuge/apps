@@ -253,7 +253,6 @@ export function maybeLoadAndApplyClaims(): ThunkAction<
     if (userRewards.claimsState === 'loading') {
       return
     }
-
     if (userRewards.claimsState === 'found') {
       dispatch({ data: userRewards.claims, type: RECEIVE_CLAIMS })
     } else {

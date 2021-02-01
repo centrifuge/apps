@@ -82,7 +82,6 @@ export class CentChain {
               reject(`claim error name: ${section}.${name}: ${documentation.join(' ')}`)
               return
             }
-
             // Other, CannotLookup, BadOrigin, no extra info
             reject(`claim error other: ${dispatchError.toString()}`)
             return

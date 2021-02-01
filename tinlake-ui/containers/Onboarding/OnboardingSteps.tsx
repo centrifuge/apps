@@ -49,9 +49,8 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     dispatch(loadOnboardingStatus(props.activePool))
 
-    if (!address) {
-      setActiveSteps(1)
-    } else if (
+    if (!address) setActiveSteps(1)
+    else if (
       !kycStatus ||
       kycStatus === 'none' ||
       kycStatus === 'requires-signin' ||
