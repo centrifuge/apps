@@ -7,7 +7,7 @@ import Decimal from 'decimal.js-light'
 import gql from 'graphql-tag'
 import fetch from 'node-fetch'
 import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
-import { PoolData, PoolsData } from '../../ducks/pools'
+import { PoolData, PoolsDailyData, PoolsData } from '../../ducks/pools'
 import { RewardsData } from '../../ducks/rewards'
 import { UserRewardsData } from '../../ducks/userRewards'
 import { getPoolStatus } from '../../utils/pool'
@@ -71,8 +71,8 @@ class Apollo {
       const reserve = (pool && new BN(pool.reserve)) || undefined
       const assetValue = (pool && new BN(pool.assetValue)) || undefined
       const poolValueNum =
-        parseInt((reserve || new BN(0)).div(UintBase).toString()) +
-        parseInt((assetValue || new BN(0)).div(UintBase).toString())
+        parseInt((reserve || new BN(0)).div(UintBase).toString(), 10) +
+        parseInt((assetValue || new BN(0)).div(UintBase).toString(), 10)
 
       const poolData = {
         reserve,
@@ -336,9 +336,6 @@ class Apollo {
             totalRewards
             nonZeroBalanceSince
           }
-          accounts(where: {id: "${user.toLowerCase()}"}) {
-            currentActiveInvestmentAmount
-          }
         }
         `,
       })
@@ -348,17 +345,11 @@ class Apollo {
     }
 
     const transformed: UserRewardsData = {
-      currentActiveInvestmentAmount: new BN(0),
       nonZeroInvestmentSince: null,
       claimable: false,
       totalEarnedRewards: new BN(0),
       unlinkedRewards: new BN(0),
       links: [],
-    }
-
-    const account = result.data?.accounts[0]
-    if (account) {
-      transformed.currentActiveInvestmentAmount = new BN(account.currentActiveInvestmentAmount)
     }
 
     const rewardBalance = result.data?.rewardBalances[0]
@@ -443,7 +434,7 @@ class Apollo {
       result = await this.client.query({
         query: gql`
           {
-            days {
+            days(orderBy: id, orderDirection: desc, first: 90) {
               id
               assetValue
               reserve
@@ -457,17 +448,19 @@ class Apollo {
         data: [],
       }
     }
-    const poolsDailyData = result.data.days.map((item: any) => {
-      return {
-        day: Number(item.id),
-        poolValue: parseFloat(
-          new BN(item.assetValue)
-            .add(new BN(item.reserve))
-            .div(UintBase)
-            .toString()
-        ),
-      }
-    })
+    const poolsDailyData = result.data.days
+      .map((item: any) => {
+        return {
+          day: Number(item.id),
+          poolValue: parseFloat(
+            new BN(item.assetValue)
+              .add(new BN(item.reserve))
+              .div(UintBase)
+              .toString()
+          ),
+        }
+      })
+      .sort((a: PoolsDailyData, b: PoolsDailyData) => a.day - b.day)
 
     return poolsDailyData
   }

@@ -1,8 +1,8 @@
 import assert from 'assert'
 import BN from 'bn.js'
-import { calculateOptimalSolution } from './solver'
-import glob from 'glob'
 import fs from 'fs'
+import glob from 'glob'
+import { calculateOptimalSolution } from './solver'
 
 const DebugMode: boolean = false
 

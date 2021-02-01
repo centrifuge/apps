@@ -119,7 +119,7 @@ export function loadAssetData(tinlake: any): ThunkAction<Promise<void>, { loans:
     dispatch({ data: assetData, type: RECEIVE_ASSET_DATA })
   }
 }
-let watcher: any = createWatcher([], multicallConfig)
+const watcher: any = createWatcher([], multicallConfig)
 
 export function loadLoan(
   tinlake: any,

@@ -50,7 +50,7 @@ describe('Proofs', () => {
       accountID: '0xd6c50e8575dd364b5cbdde6610356e9a02a3ee0c42f7f867cce4ca9d36f1d87b',
       balance: new BN('1001000000000000000000', 10),
     }
-    let claims: Claim[] = [claim0, claim1, claim2, claim3, claim4, claim5, claim6, claim7, claim8, claim9]
+    const claims: Claim[] = [claim0, claim1, claim2, claim3, claim4, claim5, claim6, claim7, claim8, claim9]
     const tree = createTree(claims)
 
     const leaf = hashLeaf(claim0.accountID, claim0.balance)

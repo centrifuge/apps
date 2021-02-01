@@ -50,22 +50,8 @@ export const calculateOptimalSolution = async (
     const output = (clp as any).solve(lp, 0)
 
     const solutionVector = output.solution.map((x: string) => new BN(clp.bnRound(x)))
-    // const linearEval = (coefs: (BN | number)[], vars: (BN | number)[]) => {
-    //   let res = new BN(0)
-    //   if (vars.length != 4 || coefs.length != 4) throw new Error('Invalid sequences here')
-    //   for (let i = 0; i < 4; i++) {
-    //     res = res.add(new BN(vars[i]).mul(new BN(coefs[i])))
-    //   }
-    //   return res
-    // }
-    // const debugConstraints = `
-    // reserve: ${linearEval([1, 1, -1, -1], solutionVector)} >= ${state.reserve.neg()}
-    // maxReserve: ${linearEval([1, 1, -1, -1], solutionVector)} <= ${state.maxReserve.sub(state.reserve)}
-    // minTINRatioLb: ${linearEval(minTINRatioLbCoeffs, solutionVector)} >= ${minTINRatioLb}
-    // maxTINRatioLb: ${linearEval(maxTINRatioLbCoeffs, solutionVector)} >= ${maxTINRatioLb}`
-    // console.log(debugConstraints)
+    const isFeasible = output.infeasibilityRay.length === 0 && output.integerSolution
 
-    const isFeasible = output.infeasibilityRay.length == 0 && output.integerSolution
     if (!isFeasible) {
       // If it's not possible to go into a healthy state, calculate the best possible solution to break the constraints less
       const currentSeniorRatio = state.seniorAsset.mul(e27).div(state.netAssetValue.add(state.reserve))
@@ -75,42 +61,46 @@ export const calculateOptimalSolution = async (
         const tinRedeem = BN.min(orders.tinRedeem, state.reserve.add(dropInvest))
 
         return {
-          isFeasible: true,
           dropInvest,
           tinRedeem,
+          isFeasible: true,
           tinInvest: new BN(0),
           dropRedeem: new BN(0),
         }
-      } else if (currentSeniorRatio.gte(state.maxDropRatio)) {
+      }
+
+      if (currentSeniorRatio.gte(state.maxDropRatio)) {
         const tinInvest = orders.tinInvest
         const dropRedeem = BN.min(orders.dropRedeem, state.reserve.add(tinInvest))
 
         return {
-          isFeasible: true,
           tinInvest,
           dropRedeem,
+          isFeasible: true,
           dropInvest: new BN(0),
           tinRedeem: new BN(0),
         }
-      } else if (state.reserve.gte(state.maxReserve)) {
+      }
+
+      if (state.reserve.gte(state.maxReserve)) {
         const dropRedeem = BN.min(orders.dropRedeem, state.reserve) // Limited either by the order or the reserve
         const tinRedeem = BN.min(orders.tinRedeem, state.reserve.sub(dropRedeem)) // Limited either by the order or what's remaining of the reserve after the DROP redemptions
 
         return {
-          isFeasible: true,
           tinRedeem,
           dropRedeem,
+          isFeasible: true,
           dropInvest: new BN(0),
           tinInvest: new BN(0),
         }
-      } else {
-        return {
-          isFeasible: false,
-          dropInvest: new BN(0),
-          dropRedeem: new BN(0),
-          tinInvest: new BN(0),
-          tinRedeem: new BN(0),
-        }
+      }
+
+      return {
+        isFeasible: false,
+        dropInvest: new BN(0),
+        dropRedeem: new BN(0),
+        tinInvest: new BN(0),
+        tinRedeem: new BN(0),
       }
     }
 

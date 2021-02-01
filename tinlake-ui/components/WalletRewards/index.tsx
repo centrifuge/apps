@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
-import { load, UserRewardsState } from '../../ducks/userRewards'
+import { maybeLoadUserRewards, UserRewardsState } from '../../ducks/userRewards'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { toDynamicPrecision } from '../../utils/toDynamicPrecision'
 
@@ -13,7 +13,7 @@ export const WalletRewards = ({ address }: { address: string }) => {
   const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
   React.useEffect(() => {
     if (address) {
-      dispatch(load(address))
+      dispatch(maybeLoadUserRewards(address))
     }
   }, [address])
 
