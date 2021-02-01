@@ -81,7 +81,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
                   </Anchor>
                 </>
               )}
-              {unclaimed!.gt(data?.totalEarnedRewards || new BN(0)) && (
+              {unclaimed.gt(data?.totalEarnedRewards || new BN(0)) && (
                 <>
                   <br />
                   <br />
