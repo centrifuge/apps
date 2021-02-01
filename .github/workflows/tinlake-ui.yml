@@ -40,32 +40,32 @@ jobs:
       - run: yarn lint
       - run: yarn export
             
-  test:
-    runs-on: ubuntu-latest
+  # test:
+  #   runs-on: ubuntu-latest
 
-    steps:
-      # Setup
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
-        with:
-          node-version: '12'
+  #   steps:
+  #     # Setup
+  #     - uses: actions/checkout@v2
+  #     - uses: actions/setup-node@v2-beta
+  #       with:
+  #         node-version: '12'
 
-      # Cache
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+  #     # Cache
+  #     - name: Get yarn cache directory path
+  #       id: yarn-cache-dir-path
+  #       run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
 
-      - uses: actions/cache@v2
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-      - run: yarn install
+  #     - uses: actions/cache@v2
+  #       id: yarn-cache
+  #       with:
+  #         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+  #         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-yarn-
+  #     - run: yarn install
 
-      # Run
-      - run: yarn test
+  #     # Run
+  #     - run: yarn test
           
 env:
   NEXT_PUBLIC_PORTIS_KEY: "bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f"
@@ -79,3 +79,6 @@ env:
   NEXT_PUBLIC_POOL_REGISTRY: "0x8FE85CeAe6157C1dfcDD1c5ec99361c9722d97de"
   NEXT_PUBLIC_IPFS_GATEWAY: "https://cloudflare-ipfs.com/ipfs/"
   NEXT_PUBLIC_INFURA_KEY: ${{ secrets.NEXT_PUBLIC_INFURA_KEY }}
+  NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL: "wss://fullnode.centrifuge.io"
+  NEXT_PUBLIC_CLAIM_RAD_CONTRACT_ADDRESS: "0x297237e17F327f8e5C8dEd78b15761A7D513353b"
+  NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS: "0x2cc8688c5f75e365aaeeb4ea8d6a480405a48d2a"
