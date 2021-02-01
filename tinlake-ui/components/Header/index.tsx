@@ -2,7 +2,6 @@ import { NavBar } from '@centrifuge/axis-nav-bar'
 import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 import { Web3Wallet } from '@centrifuge/axis-web3-wallet'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
-import BN from 'bn.js'
 import { Box, Button, Image } from 'grommet'
 import { Close as CloseIcon, Menu as MenuIcon, User as UserIcon } from 'grommet-icons'
 import Link from 'next/link'
@@ -14,9 +13,8 @@ import { PoolSelector } from '../../components/PoolSelector'
 import config, { IpfsPools } from '../../config'
 import { AuthState, clear, ensureAuthed } from '../../ducks/auth'
 import { OnboardingState } from '../../ducks/onboarding'
-import { loadPortfolio, PortfolioState, TokenBalance } from '../../ducks/portfolio'
+import { loadPortfolio, PortfolioState } from '../../ducks/portfolio'
 import { selectWalletTransactions, TransactionState } from '../../ducks/transactions'
-import { load } from '../../ducks/userRewards'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import { toPrecision } from '../../utils/toPrecision'
@@ -61,11 +59,6 @@ const Header: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     if (address) dispatch(loadPortfolio(address))
   }, [address])
-
-  const portfolioValue =
-    portfolio?.data?.reduce((prev: BN, tokenBalance: TokenBalance) => {
-      return prev.add(tokenBalance.value)
-    }, new BN(0)) || new BN(0)
 
   const connectAccount = async () => {
     try {
@@ -158,7 +151,7 @@ const Header: React.FC<Props> = (props: Props) => {
               />
             )}
           </Box>
-          {address && !portfolioValue.isZero() && (
+          {address && portfolio.totalValue && !portfolio.totalValue.isZero() && (
             <Portfolio pad={{ left: '14px', right: '14px' }}>
               <AxisTooltip title="View your investment portfolio" cursor="pointer">
                 <Link href="/portfolio">
@@ -166,7 +159,9 @@ const Header: React.FC<Props> = (props: Props) => {
                     <Box direction="row">
                       <TokenLogo src={`/static/DAI.svg`} />
                       <Box>
-                        <Holdings>{addThousandsSeparators(toPrecision(baseToDisplay(portfolioValue, 18), 0))}</Holdings>
+                        <Holdings>
+                          {addThousandsSeparators(toPrecision(baseToDisplay(portfolio.totalValue, 18), 0))}
+                        </Holdings>
                         <Desc>Portfolio Value</Desc>
                       </Box>
                     </Box>
@@ -197,7 +192,7 @@ const Header: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { ensureAuthed, clear, load })(withRouter(Header))
+export default connect((state) => state, { ensureAuthed, clear })(withRouter(Header))
 
 const Portfolio = styled(Box)`
   cursor: pointer;

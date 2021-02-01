@@ -57,13 +57,19 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
       kycStatus === 'updates-required'
     ) {
       setActiveSteps(2)
-    } else if (kycStatus === 'verified' && !accreditationStatus) setActiveSteps(2)
-    else if (agreementStatus === 'none') setActiveSteps(3)
-    else if (kycStatus === 'processing' && agreementStatus === 'signed') setActiveSteps(3)
-    // TODO: what to do here?
-    else if (kycStatus === 'processing' && agreementStatus === 'countersigned') setActiveSteps(2)
-    else if ((kycStatus === 'verified' && agreementStatus === 'signed') || !whitelistStatus) setActiveSteps(3)
-    else setActiveSteps(4) // TODO: what to do here
+    } else if (kycStatus === 'verified' && !accreditationStatus) {
+      setActiveSteps(2)
+    } else if (agreementStatus === 'none') {
+      setActiveSteps(3)
+    } else if (kycStatus === 'processing' && agreementStatus === 'signed') {
+      setActiveSteps(3)
+    } else if (kycStatus === 'processing' && agreementStatus === 'countersigned') {
+      setActiveSteps(2)
+    } else if ((kycStatus === 'verified' && agreementStatus === 'signed') || !whitelistStatus) {
+      setActiveSteps(3)
+    } else {
+      setActiveSteps(4)
+    }
   }, [address, props.activePool, kycStatus, agreementStatus])
 
   const [activeSteps, setActiveSteps] = React.useState(0)

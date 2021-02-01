@@ -3,6 +3,7 @@ import { ethers } from 'ethers'
 import Tinlake from '..'
 import { ITinlake, PendingTransaction } from '../types/tinlake'
 import testConfig, { ProviderConfig } from './config'
+
 const { SUCCESS_STATUS } = testConfig
 
 export class TestProvider {
