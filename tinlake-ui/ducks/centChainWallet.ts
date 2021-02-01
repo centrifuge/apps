@@ -18,7 +18,7 @@ export interface InjectedAccount {
   name: string | undefined
   source: string
   addrInjected: string // this is the address as received from the extension. It seems that it always comes as the default Substrat SS58 encoded address, no matter what is set on the extension.
-  addrCentChain: string // this is the same public key as in addrInjected, but transformed to the Cetnrifuge Chain network prefix.
+  addrCentChain: string // this is the same public key as in addrInjected, but transformed to the Centrifuge Chain network prefix.
 }
 
 export interface CentChainWalletState {
