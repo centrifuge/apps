@@ -1,34 +1,30 @@
-import { mount } from 'enzyme';
-import { createMemoryHistory } from 'history';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { MemoryRouter, Router } from 'react-router';
-import { PageError } from '../../components/PageError';
-import {
-  defaultContacts,
-  defaultSchemas,
-  defaultUser,
-} from '../../test-utilities/default-data';
-import { withAllProvidersAndContexts } from '../../test-utilities/test-providers';
-import CreateDocument from '../CreateDocument';
-import DocumentForm from '../DocumentForm';
-import { FundingAgreements } from '../FundingAgreements';
-import { Nfts } from '../Nfts';
-import routes from '../routes';
+import { mount } from 'enzyme'
+import { createMemoryHistory } from 'history'
+import React from 'react'
+import { act } from 'react-dom/test-utils'
+import { MemoryRouter, Router } from 'react-router'
+import { PageError } from '../../components/PageError'
+import { defaultContacts, defaultSchemas, defaultUser } from '../../test-utilities/default-data'
+import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
+import CreateDocument from '../CreateDocument'
+import DocumentForm from '../DocumentForm'
+import { FundingAgreements } from '../FundingAgreements'
+import { Nfts } from '../Nfts'
+import routes from '../routes'
 
-jest.mock('../../http-client');
-const httpClient = require('../../http-client').httpClient;
+jest.mock('../../http-client')
+const httpClient = require('../../http-client').httpClient
 
 describe('Create Document', () => {
   beforeEach(() => {
-    httpClient.contacts.list.mockImplementation(async data => {
-      return { data: defaultContacts };
-    });
+    httpClient.contacts.list.mockImplementation(async (data) => {
+      return { data: defaultContacts }
+    })
 
-    httpClient.schemas.list.mockImplementation(async data => {
-      return { data: defaultSchemas };
-    });
-  });
+    httpClient.schemas.list.mockImplementation(async (data) => {
+      return { data: defaultSchemas }
+    })
+  })
 
   it('Should load the data and render the page', async () => {
     await act(async () => {
@@ -40,29 +36,29 @@ describe('Create Document', () => {
           {
             ...defaultUser,
             schemas: [defaultSchemas[0].name],
-          },
-        ),
-      );
+          }
+        )
+      )
 
       //Wait for use effect and update the dom of the component
-      await new Promise(r => setTimeout(r, 0));
-      component.update();
-      const documentForm = component.find(DocumentForm);
+      await new Promise((r) => setTimeout(r, 0))
+      component.update()
+      const documentForm = component.find(DocumentForm)
       // THe user has only one schema set
-      expect(documentForm.prop('schemas')).toEqual([defaultSchemas[0]]);
-      expect(documentForm.prop('mode')).toEqual('create');
-      expect(documentForm.prop('contacts')).toEqual(defaultContacts);
+      expect(documentForm.prop('schemas')).toEqual([defaultSchemas[0]])
+      expect(documentForm.prop('mode')).toEqual('create')
+      expect(documentForm.prop('contacts')).toEqual(defaultContacts)
 
-      expect(documentForm.find(Nfts).length).toBe(0);
-      expect(documentForm.find(FundingAgreements).length).toBe(0);
-    });
-  });
+      expect(documentForm.find(Nfts).length).toBe(0)
+      expect(documentForm.find(FundingAgreements).length).toBe(0)
+    })
+  })
 
   it('Should render an error if it fails to load schemas', async () => {
-    const error = new Error('Can not load lists');
-    httpClient.schemas.list.mockImplementation(async data => {
-      throw error;
-    });
+    const error = new Error('Can not load lists')
+    httpClient.schemas.list.mockImplementation(async (data) => {
+      throw error
+    })
 
     await act(async () => {
       const component = mount(
@@ -73,24 +69,24 @@ describe('Create Document', () => {
           {
             ...defaultUser,
             schemas: [defaultSchemas[0].name],
-          },
-        ),
-      );
+          }
+        )
+      )
 
       //Wait for use effect and update the dom of the component
-      await new Promise(r => setTimeout(r, 0));
-      component.update();
-      const pageError = component.find(PageError);
+      await new Promise((r) => setTimeout(r, 0))
+      component.update()
+      const pageError = component.find(PageError)
       // THe user has only one schema set
-      expect(pageError.prop('error')).toEqual(error);
-    });
-  });
+      expect(pageError.prop('error')).toEqual(error)
+    })
+  })
 
   it('Should render an error if it fails to load contacts', async () => {
-    const error = new Error('Can not load contacts');
-    httpClient.contacts.list.mockImplementation(async data => {
-      throw error;
-    });
+    const error = new Error('Can not load contacts')
+    httpClient.contacts.list.mockImplementation(async (data) => {
+      throw error
+    })
 
     await act(async () => {
       const component = mount(
@@ -101,25 +97,25 @@ describe('Create Document', () => {
           {
             ...defaultUser,
             schemas: [defaultSchemas[0].name],
-          },
-        ),
-      );
+          }
+        )
+      )
 
       //Wait for use effect and update the dom of the component
-      await new Promise(r => setTimeout(r, 0));
-      component.update();
-      const pageError = component.find(PageError);
+      await new Promise((r) => setTimeout(r, 0))
+      component.update()
+      const pageError = component.find(PageError)
       // THe user has only one schema set
-      expect(pageError.prop('error')).toEqual(error);
-    });
-  });
+      expect(pageError.prop('error')).toEqual(error)
+    })
+  })
 
   it('Should create a document', async () => {
-    const history = createMemoryHistory();
+    const history = createMemoryHistory()
 
-    httpClient.documents.create.mockImplementation(async data => {
-      return { data: { _id: 'new_document' } };
-    });
+    httpClient.documents.create.mockImplementation(async (data) => {
+      return { data: { _id: 'new_document' } }
+    })
 
     await act(async () => {
       const component = mount(
@@ -130,21 +126,21 @@ describe('Create Document', () => {
           {
             ...defaultUser,
             schemas: [defaultSchemas[0].name],
-          },
-        ),
-      );
+          }
+        )
+      )
 
       //Wait for use effect and update the dom of the component
-      await new Promise(r => setTimeout(r, 0));
-      component.update();
-      const documentForm = component.find(DocumentForm);
+      await new Promise((r) => setTimeout(r, 0))
+      component.update()
+      const documentForm = component.find(DocumentForm)
       await documentForm.prop('onSubmit')({
         attributes: {},
-      });
-      component.update();
-      expect(history.location.pathname).toBe(routes.index);
-    });
-  });
+      })
+      component.update()
+      expect(history.location.pathname).toBe(routes.index)
+    })
+  })
 
   // TODO: we silently fail right now if document creation fails
-});
+})

@@ -1,9 +1,9 @@
-import { User } from '@centrifuge/gateway-lib/models/user';
-import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import * as speakeasy from 'speakeasy';
-import { promisify } from 'util';
-import { DatabaseService } from '../database/database.service';
+import { User } from '@centrifuge/gateway-lib/models/user'
+import { Injectable } from '@nestjs/common'
+import * as bcrypt from 'bcrypt'
+import * as speakeasy from 'speakeasy'
+import { promisify } from 'util'
+import { DatabaseService } from '../database/database.service'
 
 @Injectable()
 export class AuthService {
@@ -18,20 +18,14 @@ export class AuthService {
    * @return {Promise<User|null>} promise - a promise with the validation results. If successful
    * will return the user, otherwise it returns null.
    */
-  async validateUser(
-    emailValue: string,
-    passwordValue: string,
-  ): Promise<User | null> {
+  async validateUser(emailValue: string, passwordValue: string): Promise<User | null> {
     const databaseUser: User = await this.database.users.findOne({
       email: emailValue,
-    });
-    if (!databaseUser || !databaseUser.enabled) return null;
-    const passwordMatch = await promisify(bcrypt.compare)(
-      passwordValue,
-      databaseUser.password,
-    );
+    })
+    if (!databaseUser || !databaseUser.enabled) return null
+    const passwordMatch = await promisify(bcrypt.compare)(passwordValue, databaseUser.password)
 
-    return passwordMatch ? databaseUser : null;
+    return passwordMatch ? databaseUser : null
   }
 
   /**
@@ -44,25 +38,18 @@ export class AuthService {
    * @return {Promise<User|null>} promise - a promise with the validation results. If successful
    * will return the user, otherwise it returns null.
    */
-  async validateUserWithToken(
-    emailValue: string,
-    passwordValue: string,
-    tokenValue: string,
-  ): Promise<User | null> {
+  async validateUserWithToken(emailValue: string, passwordValue: string, tokenValue: string): Promise<User | null> {
     const databaseUser: User = await this.database.users.findOne({
       email: emailValue,
-    });
+    })
     if (!databaseUser || !databaseUser.enabled || !databaseUser.secret) {
-      return null;
+      return null
     }
 
-    const passwordMatch = await promisify(bcrypt.compare)(
-      passwordValue,
-      databaseUser.password,
-    );
+    const passwordMatch = await promisify(bcrypt.compare)(passwordValue, databaseUser.password)
 
     if (!passwordMatch) {
-      return null;
+      return null
     }
 
     const isTokenValid = speakeasy.totp.verify({
@@ -70,7 +57,7 @@ export class AuthService {
       encoding: 'base32',
       token: tokenValue,
       window: 20,
-    });
-    return isTokenValid ? databaseUser : null;
+    })
+    return isTokenValid ? databaseUser : null
   }
 }

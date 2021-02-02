@@ -1,15 +1,15 @@
-import { Box } from 'grommet';
-import React from 'react';
-import styled, { withTheme } from 'styled-components';
+import { Box } from 'grommet'
+import React from 'react'
+import styled, { withTheme } from 'styled-components'
 
 const StyledSecondaryHeader = styled(Box)`
   position: sticky;
   top: 72px;
   z-index: 2;
-`;
+`
 
-export const SecondaryHeader = withTheme(props => {
-  const { children, ...rest } = props;
+export const SecondaryHeader = withTheme((props) => {
+  const { children, ...rest } = props
 
   return (
     <StyledSecondaryHeader
@@ -22,5 +22,5 @@ export const SecondaryHeader = withTheme(props => {
     >
       {children}
     </StyledSecondaryHeader>
-  );
-});
+  )
+})

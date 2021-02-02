@@ -1,5 +1,5 @@
-import { Text } from 'grommet';
-import React from 'react';
+import { Text } from 'grommet'
+import React from 'react'
 
 export enum FUNDING_STATUS {
   NO_STATUS = '',
@@ -13,18 +13,18 @@ export enum FUNDING_STATUS {
   FUNDED = 'Funded',
 }
 
-export const FundingStatus = props => {
-  const { value } = props;
-  let color = '';
+export const FundingStatus = (props) => {
+  const { value } = props
+  let color = ''
   switch (value) {
     case FUNDING_STATUS.REPAID:
-      color = 'status-ok';
-      break;
+      color = 'status-ok'
+      break
     case FUNDING_STATUS.REPAYING_FUNDING:
     case FUNDING_STATUS.SENDING_FUNDING:
     case FUNDING_STATUS.PENDING:
-      color = 'status-warning';
+      color = 'status-warning'
   }
 
-  return <Text color={color}>{value}</Text>;
-};
+  return <Text color={color}>{value}</Text>
+}

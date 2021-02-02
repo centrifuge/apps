@@ -1,66 +1,53 @@
-import { User } from '@centrifuge/gateway-lib/models/user';
-import { Formik } from 'formik';
-import { Box, Button, FormField, Text, TextInput } from 'grommet';
-import React from 'react';
-import { Link } from 'react-router-dom';
-import routes from './routes';
+import { User } from '@centrifuge/gateway-lib/models/user'
+import { Formik } from 'formik'
+import { Box, Button, FormField, Text, TextInput } from 'grommet'
+import React from 'react'
+import { Link } from 'react-router-dom'
+import routes from './routes'
 
 interface LoginProps {
-  onSubmit: (values: any) => void;
-  error?: Error;
+  onSubmit: (values: any) => void
+  error?: Error
 }
 
 class LoginForm extends React.Component<LoginProps> {
-  onSubmit = values => {
-    this.props.onSubmit(values as User);
-  };
+  onSubmit = (values) => {
+    this.props.onSubmit(values as User)
+  }
 
   render() {
-    const user = new User();
-    const { error } = this.props;
+    const user = new User()
+    const { error } = this.props
 
     return (
       <Formik
         initialValues={user}
-        validate={values => {
-          const errors = {};
+        validate={(values) => {
+          const errors = {}
           // Parse Values and do errors
-          return errors;
+          return errors
         }}
-        onSubmit={values => {
-          this.onSubmit(values);
+        onSubmit={(values) => {
+          this.onSubmit(values)
         }}
       >
         {({ values, errors, handleChange, handleSubmit }) => (
           <form
-            onSubmit={event => {
-              event.preventDefault();
-              handleSubmit(event);
+            onSubmit={(event) => {
+              event.preventDefault()
+              handleSubmit(event)
             }}
           >
             <Box gap="small">
               <FormField label="Email" error={errors.email}>
-                <TextInput
-                  name="email"
-                  value={values.email || ''}
-                  onChange={handleChange}
-                />
+                <TextInput name="email" value={values.email || ''} onChange={handleChange} />
               </FormField>
 
               <FormField label="Password" error={errors.password}>
-                <TextInput
-                  type="password"
-                  name="password"
-                  value={values.password || ''}
-                  onChange={handleChange}
-                />
+                <TextInput type="password" name="password" value={values.password || ''} onChange={handleChange} />
               </FormField>
 
-              {error && (
-                <Text color={'status-error'}>
-                  Failed to login! Wrong username or password!
-                </Text>
-              )}
+              {error && <Text color={'status-error'}>Failed to login! Wrong username or password!</Text>}
 
               <Text>
                 Not registered yet? <Link to={routes.register}>Register</Link>
@@ -72,8 +59,8 @@ class LoginForm extends React.Component<LoginProps> {
           </form>
         )}
       </Formik>
-    );
+    )
   }
 }
 
-export default LoginForm;
+export default LoginForm

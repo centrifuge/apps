@@ -1,12 +1,8 @@
-import { Organization } from '@centrifuge/gateway-lib/models/organization';
-import {
-  TwoFaType,
-  User,
-  UserWithOrg,
-} from '@centrifuge/gateway-lib/models/user';
-import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
-import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators';
-import { MailerService } from '@nestjs-modules/mailer';
+import { Organization } from '@centrifuge/gateway-lib/models/organization'
+import { TwoFaType, User, UserWithOrg } from '@centrifuge/gateway-lib/models/user'
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
+import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators'
+import { MailerService } from '@nestjs-modules/mailer'
 import {
   Body,
   Controller,
@@ -20,42 +16,42 @@ import {
   Request,
   Response,
   UseGuards,
-} from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import * as speakeasy from 'speakeasy';
-import { promisify } from 'util';
-import { UserAuthGuard } from '../auth/admin.auth.guard';
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
-import config from '../config';
-import { DatabaseService } from '../database/database.service';
+} from '@nestjs/common'
+import * as bcrypt from 'bcrypt'
+import * as speakeasy from 'speakeasy'
+import { promisify } from 'util'
+import { UserAuthGuard } from '../auth/admin.auth.guard'
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service'
+import config from '../config'
+import { DatabaseService } from '../database/database.service'
 
 @Controller()
 export class UsersController {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly centrifugeService: CentrifugeService,
-    private readonly mailerService: MailerService,
+    private readonly mailerService: MailerService
   ) {}
 
   @Post(ROUTES.USERS.loginTentative)
   @HttpCode(200)
   async loginTentative(@Request() req): Promise<User> {
-    let { user } = req;
+    let { user } = req
     if (user.twoFAType !== TwoFaType.APP) {
       if (!user.secret) {
-        const secret = speakeasy.generateSecret();
+        const secret = speakeasy.generateSecret()
         user = await this.upsertUser(
           {
             ...req.user,
             secret,
           },
-          false,
-        );
+          false
+        )
       }
       const token = speakeasy.totp({
         secret: user.secret.base32,
         encoding: 'base32',
-      });
+      })
 
       try {
         await this.mailerService.sendMail({
@@ -66,24 +62,24 @@ export class UsersController {
             username: user.name,
             token,
           },
-        });
+        })
       } catch (e) {
-        console.log(e);
+        console.log(e)
       }
     }
-    return user;
+    return user
   }
 
   @Post(ROUTES.USERS.login)
   @HttpCode(200)
   async login(@Body() user: User, @Request() req): Promise<User> {
-    return req.user;
+    return req.user
   }
 
   @Get(ROUTES.USERS.logout)
   async logout(@Request() req, @Response() res) {
-    req.logout();
-    return res.redirect('/');
+    req.logout()
+    return res.redirect('/')
   }
 
   @Get(ROUTES.USERS.base)
@@ -92,20 +88,20 @@ export class UsersController {
     return await this.databaseService.users
       .getCursor({})
       .sort({ createdAt: -1 })
-      .exec();
+      .exec()
   }
 
   @Post(ROUTES.USERS.base)
   async register(@Body() user: User) {
     const existingUser: User = await this.databaseService.users.findOne({
       email: user.email.toLocaleLowerCase(),
-    });
+    })
 
     if (!user.password || !user.password.trim()) {
-      throw new MethodNotAllowedException('Password is mandatory');
+      throw new MethodNotAllowedException('Password is mandatory')
     }
     if (!isPasswordValid(user.password)) {
-      throw new MethodNotAllowedException('Password format is not valid');
+      throw new MethodNotAllowedException('Password format is not valid')
     }
 
     if (config.inviteOnly) {
@@ -116,14 +112,14 @@ export class UsersController {
             password: await promisify(bcrypt.hash)(user.password, 10),
             enabled: true,
           },
-          false,
-        );
+          false
+        )
       } else {
-        throw new MethodNotAllowedException('Email taken!');
+        throw new MethodNotAllowedException('Email taken!')
       }
     } else {
       if (existingUser) {
-        throw new MethodNotAllowedException('Email taken!');
+        throw new MethodNotAllowedException('Email taken!')
       }
       return this.upsertUser(
         {
@@ -132,8 +128,8 @@ export class UsersController {
           enabled: true,
           invited: false,
         },
-        true,
-      );
+        true
+      )
     }
   }
 
@@ -141,14 +137,14 @@ export class UsersController {
   @UseGuards(UserAuthGuard)
   async invite(@Body() user: Partial<User>) {
     if (!config.inviteOnly) {
-      throw new MethodNotAllowedException('Invite functionality not enabled!');
+      throw new MethodNotAllowedException('Invite functionality not enabled!')
     }
     const userExists = await this.databaseService.users.findOne({
       email: user.email,
-    });
+    })
 
     if (userExists) {
-      throw new MethodNotAllowedException('User already invited!');
+      throw new MethodNotAllowedException('User already invited!')
     }
 
     const newUser = this.upsertUser(
@@ -166,8 +162,8 @@ export class UsersController {
         schemas: user.schemas,
         permissions: user.permissions,
       },
-      true,
-    );
+      true
+    )
 
     try {
       await this.mailerService.sendMail({
@@ -179,12 +175,12 @@ export class UsersController {
           username: user.name,
           email: encodeURIComponent(user.email),
         },
-      });
+      })
     } catch (e) {
-      console.log(e);
+      console.log(e)
     }
 
-    return newUser;
+    return newUser
   }
 
   @Put(ROUTES.USERS.base)
@@ -195,13 +191,13 @@ export class UsersController {
       $not: {
         _id: user._id,
       },
-    });
+    })
 
     if (otherUserWithEmail) {
-      throw new MethodNotAllowedException('Email taken!');
+      throw new MethodNotAllowedException('Email taken!')
     }
 
-    return await this.upsertUser(user, false);
+    return await this.upsertUser(user, false)
   }
 
   @Delete(`${ROUTES.USERS.base}/:id`)
@@ -209,33 +205,24 @@ export class UsersController {
   async remove(@Param() params): Promise<number> {
     return await this.databaseService.users.remove({
       _id: params.id,
-    });
+    })
   }
 
   private async upsertUser(user: UserWithOrg, upsert: boolean = false) {
     // Create centrifuge identity in case user does not have one
     if (!user.account) {
       if (!user.organizationName) {
-        throw new MethodNotAllowedException('Organization name is mandatory!');
+        throw new MethodNotAllowedException('Organization name is mandatory!')
       }
-      const generatedAccount = await this.centrifugeService.accounts.generateAccount(
-        config.admin.chain,
-      );
+      const generatedAccount = await this.centrifugeService.accounts.generateAccount(config.admin.chain)
 
-      const newOrg = new Organization(
-        user.organizationName,
-        generatedAccount.identity_id.toLowerCase(),
-      );
-      await this.databaseService.organizations.insert(newOrg);
-      delete user.organizationName;
-      user.account = newOrg.account;
+      const newOrg = new Organization(user.organizationName, generatedAccount.identity_id.toLowerCase())
+      await this.databaseService.organizations.insert(newOrg)
+      delete user.organizationName
+      user.account = newOrg.account
     }
 
-    const result: User = await this.databaseService.users.updateById(
-      user._id,
-      user,
-      upsert,
-    );
-    return result;
+    const result: User = await this.databaseService.users.updateById(user._id, user, upsert)
+    return result
   }
 }

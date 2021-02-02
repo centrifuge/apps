@@ -1,6 +1,6 @@
-import { Controller, Get, Render, Request, Response } from '@nestjs/common';
-import { AppService } from './app.service';
-import config from './config';
+import { Controller, Get, Render, Request, Response } from '@nestjs/common'
+import { AppService } from './app.service'
+import config from './config'
 
 @Controller()
 export class AppController {
@@ -12,6 +12,6 @@ export class AppController {
     return {
       preloaderState: this.appService.preloadReduxStore(req.user),
       ethNetwork: config.ethNetwork,
-    };
+    }
   }
 }

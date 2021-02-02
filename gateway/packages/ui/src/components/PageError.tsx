@@ -1,22 +1,18 @@
-import { AxiosError } from 'axios';
-import { Box, Heading, Paragraph } from 'grommet';
-import React, { FunctionComponent } from 'react';
+import { AxiosError } from 'axios'
+import { Box, Heading, Paragraph } from 'grommet'
+import React, { FunctionComponent } from 'react'
 
 type Props = {
-  error: Error | AxiosError;
-};
+  error: Error | AxiosError
+}
 export const PageError: FunctionComponent<Props> = ({ error }) => {
-  let title = 'Error';
-  let message = error.message || 'Something is terribly wrong';
+  let title = 'Error'
+  let message = error.message || 'Something is terribly wrong'
   if (error.hasOwnProperty('isAxiosError')) {
-    const axiosError = error as AxiosError;
-    title = axiosError!.response!.status
-      ? axiosError!.response!.status.toString()
-      : title;
+    const axiosError = error as AxiosError
+    title = axiosError!.response!.status ? axiosError!.response!.status.toString() : title
     message =
-      (axiosError!.response!.data && axiosError!.response!.data.message) ||
-      axiosError!.response!.statusText ||
-      message;
+      (axiosError!.response!.data && axiosError!.response!.data.message) || axiosError!.response!.statusText || message
   }
 
   return (
@@ -34,5 +30,5 @@ export const PageError: FunctionComponent<Props> = ({ error }) => {
 
       <Paragraph>{message}</Paragraph>
     </Box>
-  );
-};
+  )
+}

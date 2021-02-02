@@ -1,6 +1,6 @@
-import { Contact } from '@centrifuge/gateway-lib/models/contact';
-import { User } from '@centrifuge/gateway-lib/models/user';
-import { Formik } from 'formik';
+import { Contact } from '@centrifuge/gateway-lib/models/contact'
+import { User } from '@centrifuge/gateway-lib/models/user'
+import { Formik } from 'formik'
 import {
   Anchor,
   Box,
@@ -14,38 +14,38 @@ import {
   TableRow,
   Text,
   TextInput,
-} from 'grommet';
-import React from 'react';
-import { SecondaryHeader } from '../components/SecondaryHeader';
+} from 'grommet'
+import React from 'react'
+import { SecondaryHeader } from '../components/SecondaryHeader'
 
 type Props = {
-  loggedInUser: User;
-  contacts?: (Contact & { isEditing?: boolean })[];
-  createContact: (contact: Contact) => void;
-  updateContact: (contact: Contact) => void;
-};
+  loggedInUser: User
+  contacts?: (Contact & { isEditing?: boolean })[]
+  createContact: (contact: Contact) => void
+  updateContact: (contact: Contact) => void
+}
 
 type State = {
-  submitted: boolean;
-  newContact?: Contact;
-  contacts: (Contact & { isEditing?: boolean })[];
-};
+  submitted: boolean
+  newContact?: Contact
+  contacts: (Contact & { isEditing?: boolean })[]
+}
 
 //TODO This should contain only the list and the actions/modals should be view contacts
 
 export default class ContactList extends React.Component<Props, State> {
-  displayName = 'Contacts';
+  displayName = 'Contacts'
 
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       submitted: false,
       contacts: props.contacts ? [...props.contacts] : [],
-    };
+    }
   }
 
   renderRow(contact: Contact) {
-    const { loggedInUser } = this.props;
+    const { loggedInUser } = this.props
     return (
       <TableRow key={contact._id}>
         <TableCell>
@@ -57,14 +57,13 @@ export default class ContactList extends React.Component<Props, State> {
               <Text>{contact.address}</Text>
             </Box>
             <Box fill direction="row" gap="small">
-              {contact!.address!.toLowerCase() !==
-                loggedInUser.account.toLowerCase() && (
+              {contact!.address!.toLowerCase() !== loggedInUser.account.toLowerCase() && (
                 <Anchor
                   label={'Edit'}
                   onClick={() => {
                     // @ts-ignore
-                    contact.isEditing = true;
-                    this.setState({ contacts: this.state.contacts });
+                    contact.isEditing = true
+                    this.setState({ contacts: this.state.contacts })
                   }}
                 />
               )}
@@ -72,105 +71,81 @@ export default class ContactList extends React.Component<Props, State> {
           </Box>
         </TableCell>
       </TableRow>
-    );
+    )
   }
 
   onAddNewClick = () => {
     this.setState({
       newContact: {},
-    });
-  };
+    })
+  }
 
-  onContactSave = values => {
-    const { name, address, _id } = values;
+  onContactSave = (values) => {
+    const { name, address, _id } = values
     if (_id) {
-      this.props.updateContact({ name, address, _id });
-      const contactsUpdated = this.state.contacts.map(contact => {
+      this.props.updateContact({ name, address, _id })
+      const contactsUpdated = this.state.contacts.map((contact) => {
         if (_id === contact._id) {
-          contact.isEditing = false;
+          contact.isEditing = false
         }
 
-        return contact;
-      });
+        return contact
+      })
 
-      this.setState({ contacts: contactsUpdated });
+      this.setState({ contacts: contactsUpdated })
     } else {
-      this.props.createContact({ name, address });
-      this.setState({ newContact: undefined });
+      this.props.createContact({ name, address })
+      this.setState({ newContact: undefined })
     }
-  };
+  }
 
   renderCreateEditRow = (contact?) => {
     return (
       <TableRow>
         <TableCell>
           <Formik
-            validate={values => {
-              const errors = {};
+            validate={(values) => {
+              const errors = {}
               // Parse Values and do errors
-              return errors;
+              return errors
             }}
             initialValues={contact}
-            onSubmit={values => {
-              this.onContactSave(values);
+            onSubmit={(values) => {
+              this.onContactSave(values)
             }}
           >
-            {({
-              values,
-              errors,
-              handleChange,
-              handleSubmit,
-              setFieldValue,
-            }) => (
+            {({ values, errors, handleChange, handleSubmit, setFieldValue }) => (
               <form
                 style={{ width: '100%' }}
-                onSubmit={event => {
-                  event.preventDefault();
-                  this.setState({ submitted: true });
-                  handleSubmit();
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  this.setState({ submitted: true })
+                  handleSubmit()
                 }}
               >
                 <Box direction="row" align="start" fill gap="xsmall">
                   <Box fill>
                     <FormField error={errors.name}>
-                      <TextInput
-                        name="name"
-                        value={values.name || ''}
-                        onChange={handleChange}
-                      />
+                      <TextInput name="name" value={values.name || ''} onChange={handleChange} />
                     </FormField>
                   </Box>
                   <Box fill>
                     <FormField error={errors.password}>
-                      <TextInput
-                        name="address"
-                        value={values.address || ''}
-                        onChange={handleChange}
-                      />
+                      <TextInput name="address" value={values.address || ''} onChange={handleChange} />
                     </FormField>
                   </Box>
-                  <Box
-                    fill
-                    direction="row"
-                    gap="xsmall"
-                    justify="start"
-                    align="center"
-                  >
+                  <Box fill direction="row" gap="xsmall" justify="start" align="center">
                     <Box>
-                      <Button
-                        type="submit"
-                        primary
-                        label={contact ? 'Update' : 'Add'}
-                      />
+                      <Button type="submit" primary label={contact ? 'Update' : 'Add'} />
                     </Box>
                     <Box>
                       <Button
                         onClick={() => {
                           if (contact) {
-                            contact.isEditing = false;
-                            this.setState({ contacts: this.state.contacts });
+                            contact.isEditing = false
+                            this.setState({ contacts: this.state.contacts })
                           } else {
-                            this.setState({ newContact: undefined });
+                            this.setState({ newContact: undefined })
                           }
                         }}
                         label="Cancel"
@@ -183,20 +158,15 @@ export default class ContactList extends React.Component<Props, State> {
           </Formik>
         </TableCell>
       </TableRow>
-    );
-  };
+    )
+  }
 
   render() {
     return (
       <Box fill>
         <SecondaryHeader>
           <Heading level="3">Contacts</Heading>
-          <Button
-            primary
-            onClick={this.onAddNewClick}
-            label="Add Contact"
-            disabled={!!this.state.newContact}
-          />
+          <Button primary onClick={this.onAddNewClick} label="Add Contact" disabled={!!this.state.newContact} />
         </SecondaryHeader>
 
         <Box pad={{ horizontal: 'medium' }}>
@@ -220,15 +190,13 @@ export default class ContactList extends React.Component<Props, State> {
             </TableHeader>
             <TableBody>
               {this.state.newContact && this.renderCreateEditRow()}
-              {this.state.contacts.map(contact =>
-                contact.isEditing
-                  ? this.renderCreateEditRow(contact)
-                  : this.renderRow(contact),
+              {this.state.contacts.map((contact) =>
+                contact.isEditing ? this.renderCreateEditRow(contact) : this.renderRow(contact)
               )}
             </TableBody>
           </Table>
         </Box>
       </Box>
-    );
+    )
   }
 }

@@ -1,21 +1,14 @@
-import { Modal } from '@centrifuge/axis-modal';
-import { AxisTheme } from '@centrifuge/axis-theme';
-import { mount, shallow } from 'enzyme';
-import React from 'react';
-import { serializeSnapshot } from '../../test-utilities/serialize';
-import {
-  withAxis,
-  withNotificationContext,
-} from '../../test-utilities/test-providers';
-import {
-  NOTIFICATION,
-  NotificationConsumer,
-  NotificationProvider,
-} from '../NotificationContext';
+import { Modal } from '@centrifuge/axis-modal'
+import { AxisTheme } from '@centrifuge/axis-theme'
+import { mount, shallow } from 'enzyme'
+import React from 'react'
+import { serializeSnapshot } from '../../test-utilities/serialize'
+import { withAxis, withNotificationContext } from '../../test-utilities/test-providers'
+import { NOTIFICATION, NotificationConsumer, NotificationProvider } from '../NotificationContext'
 
-const setProviders = component => {
-  return withAxis(withNotificationContext(component));
-};
+const setProviders = (component) => {
+  return withAxis(withNotificationContext(component))
+}
 
 describe('NotificationContext', () => {
   it('Should not crash', () => {
@@ -23,13 +16,13 @@ describe('NotificationContext', () => {
       setProviders(
         <NotificationConsumer>
           {({ notify }) => {
-            return <p>Test render</p>;
+            return <p>Test render</p>
           }}
-        </NotificationConsumer>,
-      ),
-    );
-    expect(serializeSnapshot(tree)).toMatchSnapshot();
-  });
+        </NotificationConsumer>
+      )
+    )
+    expect(serializeSnapshot(tree)).toMatchSnapshot()
+  })
 
   it('Should render a default popup', () => {
     const tree = mount(
@@ -42,17 +35,17 @@ describe('NotificationContext', () => {
                   notify({
                     title: 'Title',
                     message: 'Messsge',
-                  });
+                  })
                 }}
               ></button>
-            );
+            )
           }}
-        </NotificationConsumer>,
-      ),
-    );
-    tree.find('button').simulate('click');
-    expect(serializeSnapshot(tree.find(Modal))).toMatchSnapshot();
-  });
+        </NotificationConsumer>
+      )
+    )
+    tree.find('button').simulate('click')
+    expect(serializeSnapshot(tree.find(Modal))).toMatchSnapshot()
+  })
 
   it('Should render a warning popup', () => {
     const tree = mount(
@@ -66,17 +59,17 @@ describe('NotificationContext', () => {
                     title: 'Title',
                     message: 'Messsge',
                     type: NOTIFICATION.WARNING,
-                  });
+                  })
                 }}
               ></button>
-            );
+            )
           }}
-        </NotificationConsumer>,
-      ),
-    );
-    tree.find('button').simulate('click');
-    expect(serializeSnapshot(tree.find(Modal))).toMatchSnapshot();
-  });
+        </NotificationConsumer>
+      )
+    )
+    tree.find('button').simulate('click')
+    expect(serializeSnapshot(tree.find(Modal))).toMatchSnapshot()
+  })
 
   it('Should render a success popup', () => {
     const tree = mount(
@@ -90,17 +83,17 @@ describe('NotificationContext', () => {
                     title: 'Title',
                     message: 'Messsge',
                     type: NOTIFICATION.SUCCESS,
-                  });
+                  })
                 }}
               ></button>
-            );
+            )
           }}
-        </NotificationConsumer>,
-      ),
-    );
-    tree.find('button').simulate('click');
-    expect(serializeSnapshot(tree.find(Modal))).toMatchSnapshot();
-  });
+        </NotificationConsumer>
+      )
+    )
+    tree.find('button').simulate('click')
+    expect(serializeSnapshot(tree.find(Modal))).toMatchSnapshot()
+  })
 
   it('Should render a error popup', () => {
     const tree = mount(
@@ -114,17 +107,17 @@ describe('NotificationContext', () => {
                     title: 'Title',
                     message: 'Messsge',
                     type: NOTIFICATION.ERROR,
-                  });
+                  })
                 }}
               ></button>
-            );
+            )
           }}
-        </NotificationConsumer>,
-      ),
-    );
-    tree.find('button').simulate('click');
-    expect(serializeSnapshot(tree.find(Modal))).toMatchSnapshot();
-  });
+        </NotificationConsumer>
+      )
+    )
+    tree.find('button').simulate('click')
+    expect(serializeSnapshot(tree.find(Modal))).toMatchSnapshot()
+  })
 
   it('Should set the proper label for the confirm button', () => {
     const tree = mount(
@@ -139,17 +132,17 @@ describe('NotificationContext', () => {
                       title: 'Title',
                       message: 'Messsge',
                       confirmLabel: 'Crazy Label',
-                    });
+                    })
                   }}
                 ></button>
-              );
+              )
             }}
           </NotificationConsumer>
         </NotificationProvider>
-      </AxisTheme>,
-    );
+      </AxisTheme>
+    )
 
-    tree.find('button').simulate('click');
-    expect(serializeSnapshot(tree.find(Modal))).toMatchSnapshot();
-  });
-});
+    tree.find('button').simulate('click')
+    expect(serializeSnapshot(tree.find(Modal))).toMatchSnapshot()
+  })
+})

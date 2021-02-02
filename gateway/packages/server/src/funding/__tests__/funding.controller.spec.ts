@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { SessionGuard } from '../../auth/SessionGuard';
-import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module';
-import { databaseServiceProvider } from '../../database/database.providers';
-import { DatabaseService } from '../../database/database.service';
-import { FundingController } from '../funding.controller';
+import { Test, TestingModule } from '@nestjs/testing'
+import { SessionGuard } from '../../auth/SessionGuard'
+import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module'
+import { databaseServiceProvider } from '../../database/database.providers'
+import { DatabaseService } from '../../database/database.service'
+import { FundingController } from '../funding.controller'
 
 describe('Funding controller', () => {
   const invoice: any = {
@@ -13,30 +13,26 @@ describe('Funding controller', () => {
     number: '999',
     sender_company_name: 'cinderella',
     bill_to_company_name: 'step mother',
-  };
-  let insertedInvoice: any = {};
+  }
+  let insertedInvoice: any = {}
 
-  let fundingModule: TestingModule;
+  let fundingModule: TestingModule
 
   beforeEach(async () => {
     fundingModule = await Test.createTestingModule({
       controllers: [FundingController],
-      providers: [
-        SessionGuard,
-        centrifugeServiceProvider,
-        databaseServiceProvider,
-      ],
-    }).compile();
+      providers: [SessionGuard, centrifugeServiceProvider, databaseServiceProvider],
+    }).compile()
 
-    const databaseService = fundingModule.get<DatabaseService>(DatabaseService);
+    const databaseService = fundingModule.get<DatabaseService>(DatabaseService)
     insertedInvoice = await databaseService.documents.insert({
       header: {
         document_id: '0x39393939',
       },
       data: { ...invoice },
       ownerId: 'user_id',
-    });
-  });
+    })
+  })
 
   describe('create', () => {
     it('should return the created funding agreement', async () => {
@@ -53,15 +49,13 @@ describe('Funding controller', () => {
         repayment_amount: '0',
         currency: 'USD',
         nft_address: '0xe444',
-      };
+      }
 
-      const fundingController = fundingModule.get<FundingController>(
-        FundingController,
-      );
+      const fundingController = fundingModule.get<FundingController>(FundingController)
 
       const result = await fundingController.create(fundingRequest, {
         user: { _id: 'user_id', account: '0xCentrifugeId' },
-      });
+      })
 
       expect(result).toEqual({
         header: {
@@ -79,24 +73,22 @@ describe('Funding controller', () => {
           },
           signatures: ['signature_data_1'],
         },
-      });
-    });
-  });
+      })
+    })
+  })
 
   describe('sign', () => {
     it('should return the signed funding agreement', async () => {
       const fundingRequest = {
         document_id: '0x39393939',
         agreement_id: 'agreement_id',
-      };
+      }
 
-      const fundingController = fundingModule.get<FundingController>(
-        FundingController,
-      );
+      const fundingController = fundingModule.get<FundingController>(FundingController)
 
       const result = await fundingController.sign(fundingRequest, {
         user: { _id: 'user_id', account: '0xCentrifugeId' },
-      });
+      })
       expect(result).toEqual({
         header: {
           job_id: 'some_job_id',
@@ -113,7 +105,7 @@ describe('Funding controller', () => {
           },
           signatures: ['signature_data_1'],
         },
-      });
-    });
-  });
-});
+      })
+    })
+  })
+})

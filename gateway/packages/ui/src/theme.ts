@@ -1,5 +1,5 @@
-import { axisThemeConfig } from '@centrifuge/axis-theme';
-import { css } from 'styled-components';
+import { axisThemeConfig } from '@centrifuge/axis-theme'
+import { css } from 'styled-components'
 
 export const theme = {
   ...axisThemeConfig,
@@ -26,4 +26,4 @@ export const theme = {
       `,
     },
   },
-};
+}

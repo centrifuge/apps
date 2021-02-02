@@ -1,18 +1,8 @@
-import { Contact } from '@centrifuge/gateway-lib/models/contact';
-import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Put,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import { SessionGuard } from '../auth/SessionGuard';
-import { DatabaseService } from '../database/database.service';
+import { Contact } from '@centrifuge/gateway-lib/models/contact'
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
+import { BadRequestException, Body, Controller, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common'
+import { SessionGuard } from '../auth/SessionGuard'
+import { DatabaseService } from '../database/database.service'
 
 @Controller(ROUTES.CONTACTS)
 @UseGuards(SessionGuard)
@@ -29,17 +19,13 @@ export class ContactsController {
    */
   async create(@Req() request, @Body() contact: Contact) {
     try {
-      Contact.validate(contact);
+      Contact.validate(contact)
     } catch (err) {
-      throw new BadRequestException(err.message);
+      throw new BadRequestException(err.message)
     }
 
-    const newContact = new Contact(
-      contact.name.trim(),
-      contact.address.toLowerCase().trim(),
-      request.user._id,
-    );
-    return await this.databaseService.contacts.insert(newContact);
+    const newContact = new Contact(contact.name.trim(), contact.address.toLowerCase().trim(), request.user._id)
+    return await this.databaseService.contacts.insert(newContact)
   }
 
   @Get()
@@ -55,7 +41,7 @@ export class ContactsController {
         ownerId: request.user._id,
       })
       .sort({ updatedAt: -1 })
-      .exec();
+      .exec()
   }
 
   @Put(':id')
@@ -67,14 +53,10 @@ export class ContactsController {
    * @param {Request} request - the http request
    * @return {Promise<Contact>} result
    */
-  async updateById(
-    @Param() params,
-    @Body() updateContactObject: Contact,
-    @Req() request,
-  ) {
+  async updateById(@Param() params, @Body() updateContactObject: Contact, @Req() request) {
     return this.databaseService.contacts.update(
       { _id: params.id, ownerId: request.user._id },
-      { ...updateContactObject, ownerId: request.user._id },
-    );
+      { ...updateContactObject, ownerId: request.user._id }
+    )
   }
 }

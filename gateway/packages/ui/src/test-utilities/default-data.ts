@@ -1,8 +1,8 @@
-import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator';
-import { Contact } from '@centrifuge/gateway-lib/models/contact';
-import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document';
-import { AttrTypes } from '@centrifuge/gateway-lib/models/schema';
-import { User } from '@centrifuge/gateway-lib/models/user';
+import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
+import { Contact } from '@centrifuge/gateway-lib/models/contact'
+import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document'
+import { AttrTypes } from '@centrifuge/gateway-lib/models/schema'
+import { User } from '@centrifuge/gateway-lib/models/user'
 
 export const defaultUser: User = {
   name: 'Default User',
@@ -19,7 +19,7 @@ export const defaultUser: User = {
   enabled: true,
   permissions: [],
   schemas: ['first_schema', 'second_schema'],
-};
+}
 
 export const defaultContacts: Contact[] = [
   {
@@ -34,25 +34,13 @@ export const defaultContacts: Contact[] = [
     name: 'Third Contact',
     address: '0x44a0579754D6c94e7bB2c26bFA7394311Cc50Ccb',
   },
-];
+]
 
 export const defaultCollaborators = [
-  new Collaborator(
-    defaultContacts[0].address || '',
-    defaultContacts[0].name || '',
-    DOCUMENT_ACCESS.WRITE,
-  ),
-  new Collaborator(
-    defaultContacts[1].address || '',
-    defaultContacts[1].name || '',
-    DOCUMENT_ACCESS.READ,
-  ),
-  new Collaborator(
-    defaultContacts[2].address || '',
-    defaultContacts[2].name || '',
-    DOCUMENT_ACCESS.WRITE,
-  ),
-];
+  new Collaborator(defaultContacts[0].address || '', defaultContacts[0].name || '', DOCUMENT_ACCESS.WRITE),
+  new Collaborator(defaultContacts[1].address || '', defaultContacts[1].name || '', DOCUMENT_ACCESS.READ),
+  new Collaborator(defaultContacts[2].address || '', defaultContacts[2].name || '', DOCUMENT_ACCESS.WRITE),
+]
 
 export const defaultSchemas = [
   {
@@ -133,4 +121,4 @@ export const defaultSchemas = [
       },
     ],
   },
-];
+]

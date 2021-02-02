@@ -1,33 +1,33 @@
-import { User } from '@centrifuge/gateway-lib/models/user';
-import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators';
-import { Formik } from 'formik';
-import { Box, Button, FormField, Text, TextInput } from 'grommet';
-import React from 'react';
-import { Link } from 'react-router-dom';
-import * as Yup from 'yup';
-import routes from './routes';
+import { User } from '@centrifuge/gateway-lib/models/user'
+import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators'
+import { Formik } from 'formik'
+import { Box, Button, FormField, Text, TextInput } from 'grommet'
+import React from 'react'
+import { Link } from 'react-router-dom'
+import * as Yup from 'yup'
+import routes from './routes'
 
 interface RegisterProps {
-  email: string;
-  error?: Error;
-  onSubmit: (values: any) => void;
+  email: string
+  error?: Error
+  onSubmit: (values: any) => void
 }
 
 class RegisterForm extends React.Component<RegisterProps> {
-  state = { submitted: false };
+  state = { submitted: false }
 
-  onSubmit = values => {
-    this.props.onSubmit(values as User);
-  };
+  onSubmit = (values) => {
+    this.props.onSubmit(values as User)
+  }
 
   render() {
-    const { submitted } = this.state;
-    const { email, error } = this.props;
+    const { submitted } = this.state
+    const { email, error } = this.props
     const user = {
       email: email || '',
       password: '',
       passwordConfirm: '',
-    };
+    }
 
     const registrationValidation = Yup.object({
       email: Yup.string()
@@ -38,14 +38,14 @@ class RegisterForm extends React.Component<RegisterProps> {
         .test({
           name: 'password_format',
           test: function(this, value) {
-            return isPasswordValid(value);
+            return isPasswordValid(value)
           },
           message: 'Password format not valid',
         }),
       passwordConfirm: Yup.string()
         .oneOf([Yup.ref('password')], 'Password does not match')
         .required('Password confirm is required'),
-    });
+    })
 
     return (
       <Formik
@@ -53,24 +53,20 @@ class RegisterForm extends React.Component<RegisterProps> {
         validationSchema={registrationValidation}
         validateOnBlur={submitted}
         validateOnChange={submitted}
-        onSubmit={values => {
-          this.onSubmit(values);
+        onSubmit={(values) => {
+          this.onSubmit(values)
         }}
       >
         {({ values, errors, handleChange, handleSubmit }) => (
           <form
-            onSubmit={event => {
-              this.setState({ submitted: true });
-              handleSubmit(event);
+            onSubmit={(event) => {
+              this.setState({ submitted: true })
+              handleSubmit(event)
             }}
           >
             <Box gap="small">
               <FormField label="Email" error={errors.email}>
-                <TextInput
-                  name="email"
-                  value={values.email}
-                  onChange={handleChange}
-                />
+                <TextInput name="email" value={values.email} onChange={handleChange} />
               </FormField>
 
               <FormField
@@ -80,17 +76,9 @@ class RegisterForm extends React.Component<RegisterProps> {
                   'Must have at least eight characters, one uppercase letter, one lowercase letter, one number and one special character'
                 }
               >
-                <TextInput
-                  type="password"
-                  name="password"
-                  value={values.password}
-                  onChange={handleChange}
-                />
+                <TextInput type="password" name="password" value={values.password} onChange={handleChange} />
               </FormField>
-              <FormField
-                label="Confirm Password"
-                error={errors.passwordConfirm}
-              >
+              <FormField label="Confirm Password" error={errors.passwordConfirm}>
                 <TextInput
                   type="password"
                   name="passwordConfirm"
@@ -112,8 +100,8 @@ class RegisterForm extends React.Component<RegisterProps> {
           </form>
         )}
       </Formik>
-    );
+    )
   }
 }
 
-export default RegisterForm;
+export default RegisterForm

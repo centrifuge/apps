@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext } from '@nestjs/common';
+import { CanActivate, ExecutionContext } from '@nestjs/common'
 
 /**
  * Guard against non-authenticated users by using the saved session state
@@ -10,9 +10,9 @@ export class SessionGuard implements CanActivate {
    * @returns {boolean} userAuthenticated
    */
   canActivate(context: ExecutionContext): boolean {
-    const httpContext = context.switchToHttp();
-    const request = httpContext.getRequest();
+    const httpContext = context.switchToHttp()
+    const request = httpContext.getRequest()
 
-    return !!request.user;
+    return !!request.user
   }
 }

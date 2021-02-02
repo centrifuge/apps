@@ -15,21 +15,18 @@ export enum TRANSFER_DETAILS_STATUS {
   SETTLED = 'settled',
 }
 
-export const getFundingStatus = fundingAgreement => {
+export const getFundingStatus = (fundingAgreement) => {
   if (
     fundingAgreement.signatures &&
     Array.isArray(fundingAgreement.signatures) &&
-    fundingAgreement.signatures.find(signature => {
-      return (
-        signature.value.toLowerCase() ===
-        fundingAgreement.funder_id.value.toLowerCase()
-      );
+    fundingAgreement.signatures.find((signature) => {
+      return signature.value.toLowerCase() === fundingAgreement.funder_id.value.toLowerCase()
     })
   ) {
-    return FUNDING_STATUS.ACCEPTED;
+    return FUNDING_STATUS.ACCEPTED
   } else if (fundingAgreement.funder_id) {
-    return FUNDING_STATUS.PENDING;
+    return FUNDING_STATUS.PENDING
   } else {
-    return FUNDING_STATUS.NO_STATUS;
+    return FUNDING_STATUS.NO_STATUS
   }
-};
+}

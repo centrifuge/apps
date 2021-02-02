@@ -1,6 +1,6 @@
 export let testingHelpers = {
   currentGeneratedAccount: null,
-};
+}
 
 export class MockCentrifugeService {
   invoices = {
@@ -22,7 +22,7 @@ export class MockCentrifugeService {
         attributes: {
           'funding[0].test': true,
         },
-      };
+      }
     }),
     createInvoice: jest.fn((auth, data) => {
       return {
@@ -30,7 +30,7 @@ export class MockCentrifugeService {
           job_id: 'some_job_id',
         },
         ...data,
-      };
+      }
     }),
     updateInvoice: jest.fn((auth, documentId, data) => {
       return {
@@ -38,7 +38,7 @@ export class MockCentrifugeService {
           job_id: 'some_job_id',
         },
         ...data,
-      };
+      }
     }),
 
     invoiceUnpaidNft: jest.fn((auth, payload) => {
@@ -47,10 +47,10 @@ export class MockCentrifugeService {
           header: {
             job_id: 'some_job_id',
           },
-        });
-      });
+        })
+      })
     }),
-  };
+  }
   purchaseOrders = {
     createPurchaseOrder: jest.fn((auth, data) => data),
     getPurchaseOrder: jest.fn((auth, document_id) => {
@@ -67,10 +67,10 @@ export class MockCentrifugeService {
         data: {
           currency: 'USD',
         },
-      };
+      }
     }),
     updatePurchaseOrder: jest.fn((auth, id, data) => data),
-  };
+  }
   funding = {
     createFundingAgreement: jest.fn((account, document_id, payload) => {
       return new Promise((resolve, reject) => {
@@ -84,9 +84,9 @@ export class MockCentrifugeService {
               ...payload.data,
             },
           },
-        };
-        resolve(result);
-      });
+        }
+        resolve(result)
+      })
     }),
 
     getFundingAgreement: jest.fn((document_id, agreement_id, account) => {
@@ -107,7 +107,7 @@ export class MockCentrifugeService {
             borrower_id: '0x2222',
           },
         },
-      };
+      }
     }),
     signFundingAgreement: jest.fn((account, document_id, agreement_id) => {
       return new Promise((resolve, reject) => {
@@ -127,11 +127,11 @@ export class MockCentrifugeService {
             },
             signatures: ['signature_data_1'],
           },
-        };
-        resolve(result);
-      });
+        }
+        resolve(result)
+      })
     }),
-  };
+  }
   transfer = {
     createTransferDetail: jest.fn((document_id, payload) => {
       return new Promise((resolve, reject) => {
@@ -140,9 +140,9 @@ export class MockCentrifugeService {
             job_id: 'some_job_id',
           },
           ...payload,
-        };
-        resolve(result);
-      });
+        }
+        resolve(result)
+      })
     }),
     updateTransferDetail: jest.fn((document_id, payload) => {
       return new Promise((resolve, reject) => {
@@ -151,9 +151,9 @@ export class MockCentrifugeService {
             job_id: 'some_job_id',
           },
           ...payload,
-        };
-        resolve(result);
-      });
+        }
+        resolve(result)
+      })
     }),
     listTransferDetails: jest.fn((document_id, payload) => {
       return new Promise((resolve, reject) => {
@@ -162,11 +162,11 @@ export class MockCentrifugeService {
             job_id: 'some_job_id',
           },
           ...payload,
-        };
-        resolve(result);
-      });
+        }
+        resolve(result)
+      })
     }),
-  };
+  }
 
   nft = {
     mintNft: jest.fn((auth, registry, payload) => {
@@ -176,9 +176,9 @@ export class MockCentrifugeService {
             job_id: 'some_job_id',
           },
           ...payload,
-        };
-        resolve(result);
-      });
+        }
+        resolve(result)
+      })
     }),
     transferNft: jest.fn((account, registry_address, token_id, body) => {
       return new Promise((resolve, reject) => {
@@ -189,21 +189,21 @@ export class MockCentrifugeService {
           registry_address,
           token_id,
           to: body.to,
-        });
-      });
+        })
+      })
     }),
-  };
+  }
 
-  nftBeta = this.nft;
+  nftBeta = this.nft
 
   accounts = {
     generateAccount: jest.fn(() => {
-      testingHelpers.currentGeneratedAccount = '0x' + new Date().getTime();
+      testingHelpers.currentGeneratedAccount = '0x' + new Date().getTime()
       return {
         identity_id: testingHelpers.currentGeneratedAccount,
-      };
+      }
     }),
-  };
+  }
   documents = {
     getDocument: jest.fn((account_id, document_id) => {
       return {
@@ -230,7 +230,7 @@ export class MockCentrifugeService {
         },
         scheme: 'iUSDF2ax31e',
         ownerId: 'user_id',
-      };
+      }
     }),
     createDocumentV2: jest.fn((authid, data) => {
       return {
@@ -238,7 +238,7 @@ export class MockCentrifugeService {
           job_id: 'some_job_id',
         },
         ...data,
-      };
+      }
     }),
     commitDocumentV2: jest.fn((authid, data) => {
       return {
@@ -246,7 +246,7 @@ export class MockCentrifugeService {
           job_id: 'some_job_id',
         },
         ...data,
-      };
+      }
     }),
     updateDocument: jest.fn((authid, docid, data) => {
       return {
@@ -254,7 +254,7 @@ export class MockCentrifugeService {
           job_id: 'some_job_id',
         },
         ...data,
-      };
+      }
     }),
     updateDocumentV2: jest.fn((authid, data, docid) => {
       return {
@@ -262,8 +262,8 @@ export class MockCentrifugeService {
           job_id: 'some_job_id',
         },
         ...data,
-      };
+      }
     }),
-  };
-  pullForJobComplete = () => true;
+  }
+  pullForJobComplete = () => true
 }

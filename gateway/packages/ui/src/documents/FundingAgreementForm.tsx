@@ -1,34 +1,26 @@
-import { DateInput } from '@centrifuge/axis-date-input';
-import { NumberInput } from '@centrifuge/axis-number-input';
-import { SearchSelect } from '@centrifuge/axis-search-select';
-import {
-  Contact,
-  getContactByAddress,
-} from '@centrifuge/gateway-lib/models/contact';
-import { FundingAgreement } from '@centrifuge/gateway-lib/models/funding-request';
-import {
-  dateToString,
-  extractDate,
-  getCurrencyFormat,
-  getPercentFormat,
-} from '@centrifuge/gateway-lib/utils/formaters';
-import { Formik } from 'formik';
-import { Box, Button, FormField, TextInput } from 'grommet';
-import React from 'react';
-import * as Yup from 'yup';
-import { ViewModeFormContainer } from '../components/ViewModeFormContainer';
+import { DateInput } from '@centrifuge/axis-date-input'
+import { NumberInput } from '@centrifuge/axis-number-input'
+import { SearchSelect } from '@centrifuge/axis-search-select'
+import { Contact, getContactByAddress } from '@centrifuge/gateway-lib/models/contact'
+import { FundingAgreement } from '@centrifuge/gateway-lib/models/funding-request'
+import { dateToString, extractDate, getCurrencyFormat, getPercentFormat } from '@centrifuge/gateway-lib/utils/formaters'
+import { Formik } from 'formik'
+import { Box, Button, FormField, TextInput } from 'grommet'
+import React from 'react'
+import * as Yup from 'yup'
+import { ViewModeFormContainer } from '../components/ViewModeFormContainer'
 
 type Props = {
-  onSubmit: (fundingRequest: FundingAgreement) => void;
-  onDiscard: () => void;
-  contacts: Contact[];
-  today: Date;
-  isViewMode: boolean;
-  fundingAgreement: FundingAgreement;
-};
+  onSubmit: (fundingRequest: FundingAgreement) => void
+  onDiscard: () => void
+  contacts: Contact[]
+  today: Date
+  isViewMode: boolean
+  fundingAgreement: FundingAgreement
+}
 // TODO use function components here
 export default class FundingRequestForm extends React.Component<Props> {
-  displayName = 'CreateEditInvoice';
+  displayName = 'CreateEditInvoice'
   static defaultProps = {
     onSubmit: (fundingAgreement: FundingAgreement) => {
       // do nothing by default
@@ -39,24 +31,24 @@ export default class FundingRequestForm extends React.Component<Props> {
     isViewMode: false,
     today: new Date(),
     contacts: [],
-  };
+  }
 
-  state = { submitted: false };
+  state = { submitted: false }
 
   onSubmit = (values: FundingAgreement) => {
-    return this.props.onSubmit({ ...values });
-  };
+    return this.props.onSubmit({ ...values })
+  }
 
   onDiscard = () => {
-    this.props.onDiscard();
-  };
+    this.props.onDiscard()
+  }
 
   render() {
-    const { submitted } = this.state;
-    const { fundingAgreement, contacts, today, isViewMode } = this.props;
-    const columnGap = 'medium';
-    const sectionGap = 'large';
-    const percentParts = getPercentFormat();
+    const { submitted } = this.state
+    const { fundingAgreement, contacts, today, isViewMode } = this.props
+    const columnGap = 'medium'
+    const sectionGap = 'large'
+    const percentParts = getPercentFormat()
 
     const fundingRequestValidation = Yup.object().shape({
       funder_id: Yup.string().required('This field is required'),
@@ -71,7 +63,7 @@ export default class FundingRequestForm extends React.Component<Props> {
       repayment_due_date: Yup.date()
         .typeError('Wrong date format')
         .required('This field is required'),
-    });
+    })
 
     return (
       <Box pad={{ top: 'large', bottom: 'large' }}>
@@ -81,36 +73,27 @@ export default class FundingRequestForm extends React.Component<Props> {
           validateOnBlur={submitted}
           validateOnChange={submitted}
           onSubmit={(values, { setSubmitting }) => {
-            this.onSubmit(values);
-            setSubmitting(true);
+            this.onSubmit(values)
+            setSubmitting(true)
           }}
         >
-          {({
-            values,
-            errors,
-            handleChange,
-            setFieldValue,
-            handleSubmit,
-            submitForm,
-          }) => {
-            let days, amount, financeFee;
+          {({ values, errors, handleChange, setFieldValue, handleSubmit, submitForm }) => {
+            let days, amount, financeFee
             // convert string to float
-            const additionalFee = 0;
-            const daysPerYear = 360;
-            const apr = parseFloat(values.apr);
+            const additionalFee = 0
+            const daysPerYear = 360
+            const apr = parseFloat(values.apr)
 
             // Calculate days for loan
-            const repaymentDate = new Date(values.repayment_due_date);
-            const diff = repaymentDate.getTime() - today.getTime();
+            const repaymentDate = new Date(values.repayment_due_date)
+            const diff = repaymentDate.getTime() - today.getTime()
 
-            days = Math.round(diff / (1000 * 60 * 60 * 24));
+            days = Math.round(diff / (1000 * 60 * 60 * 24))
 
-            amount = parseFloat(values.amount);
-            const periodicInterestRate = apr * (days / daysPerYear);
-            let repaymentAmount = parseFloat(
-              additionalFee + (amount * (1 + periodicInterestRate)).toFixed(2),
-            );
-            financeFee = parseFloat((repaymentAmount - amount).toFixed(2));
+            amount = parseFloat(values.amount)
+            const periodicInterestRate = apr * (days / daysPerYear)
+            let repaymentAmount = parseFloat(additionalFee + (amount * (1 + periodicInterestRate)).toFixed(2))
+            financeFee = parseFloat((repaymentAmount - amount).toFixed(2))
 
             /* Invoice Style
                let financeRate, feeAmount, financeFee;
@@ -120,21 +103,17 @@ export default class FundingRequestForm extends React.Component<Props> {
               financeFee = parseFloat(((repaymentAmount * financeRate + feeAmount) || 0).toFixed(2));
               amount = repaymentAmount - financeFee;*/
 
-            if (isNaN(repaymentAmount)) repaymentAmount = 0;
-            if (isNaN(days)) days = 0;
-            values.days = days.toString();
-            values.fee = financeFee.toString();
-            values.repayment_amount = repaymentAmount.toString();
+            if (isNaN(repaymentAmount)) repaymentAmount = 0
+            if (isNaN(days)) days = 0
+            values.days = days.toString()
+            values.fee = financeFee.toString()
+            values.repayment_amount = repaymentAmount.toString()
 
-            const currencyFormat = getCurrencyFormat(values.currency);
+            const currencyFormat = getCurrencyFormat(values.currency)
 
             return (
               <Box direction="column" gap={sectionGap}>
-                <ViewModeFormContainer
-                  isViewMode={isViewMode}
-                  direction="column"
-                  gap={sectionGap}
-                >
+                <ViewModeFormContainer isViewMode={isViewMode} direction="column" gap={sectionGap}>
                   <Box gap={columnGap}>
                     <Box direction="row" gap={columnGap}>
                       <Box basis="1/2">
@@ -145,12 +124,9 @@ export default class FundingRequestForm extends React.Component<Props> {
                             labelKey={'name'}
                             valueKey={'address'}
                             options={contacts}
-                            value={getContactByAddress(
-                              values!.funder_id,
-                              contacts,
-                            )}
-                            onChange={selected => {
-                              setFieldValue('funder_id', selected.address);
+                            value={getContactByAddress(values!.funder_id, contacts)}
+                            onChange={(selected) => {
+                              setFieldValue('funder_id', selected.address)
                             }}
                           />
                         </FormField>
@@ -172,17 +148,14 @@ export default class FundingRequestForm extends React.Component<Props> {
                   <Box gap={columnGap}>
                     <Box direction="row" gap={columnGap}>
                       <Box basis="1/2">
-                        <FormField
-                          label={`Finance amount`}
-                          error={errors!.amount}
-                        >
+                        <FormField label={`Finance amount`} error={errors!.amount}>
                           <NumberInput
                             {...currencyFormat}
                             name="amount"
                             disabled={isViewMode}
                             value={values!.amount}
                             onChange={({ value }) => {
-                              setFieldValue('amount', value);
+                              setFieldValue('amount', value)
                             }}
                           />
                         </FormField>
@@ -196,7 +169,7 @@ export default class FundingRequestForm extends React.Component<Props> {
                             {...percentParts}
                             value={parseFloat(values.apr) * 100}
                             onChange={({ value }) => {
-                              setFieldValue('apr', value / 100);
+                              setFieldValue('apr', value / 100)
                             }}
                           />
                         </FormField>
@@ -207,29 +180,19 @@ export default class FundingRequestForm extends React.Component<Props> {
                     <Box direction="row" gap={columnGap}>
                       <Box basis="1/2">
                         <FormField label="Funding date">
-                          <DateInput
-                            name={'funding_date'}
-                            disabled={true}
-                            value={extractDate(today)}
-                          />
+                          <DateInput name={'funding_date'} disabled={true} value={extractDate(today)} />
                         </FormField>
                       </Box>
 
                       <Box basis="1/2">
-                        <FormField
-                          label="Repayment due date"
-                          error={errors!.repayment_due_date}
-                        >
+                        <FormField label="Repayment due date" error={errors!.repayment_due_date}>
                           <DateInput
                             disabled={isViewMode}
                             name="repayment_due_date"
                             type="date"
                             value={extractDate(values!.repayment_due_date)}
-                            onChange={date => {
-                              setFieldValue(
-                                'repayment_due_date',
-                                dateToString(date),
-                              );
+                            onChange={(date) => {
+                              setFieldValue('repayment_due_date', dateToString(date))
                             }}
                           />
                         </FormField>
@@ -239,24 +202,13 @@ export default class FundingRequestForm extends React.Component<Props> {
                   <Box gap={columnGap}>
                     <Box direction="row" gap={columnGap}>
                       <Box basis="1/2">
-                        <FormField
-                          label={`Interest amount`}
-                          error={errors!.fee}
-                        >
-                          <NumberInput
-                            {...currencyFormat}
-                            name={'fee'}
-                            disabled={true}
-                            value={values.fee}
-                          />
+                        <FormField label={`Interest amount`} error={errors!.fee}>
+                          <NumberInput {...currencyFormat} name={'fee'} disabled={true} value={values.fee} />
                         </FormField>
                       </Box>
 
                       <Box basis="1/2">
-                        <FormField
-                          label={`Repayment amount`}
-                          error={errors!.repayment_amount}
-                        >
+                        <FormField label={`Repayment amount`} error={errors!.repayment_amount}>
                           <NumberInput
                             {...currencyFormat}
                             name="repayment_amount"
@@ -278,19 +230,14 @@ export default class FundingRequestForm extends React.Component<Props> {
                     </FormField>
                   </Box>
                 </ViewModeFormContainer>
-                <Box
-                  direction="row"
-                  justify={'end'}
-                  gap="medium"
-                  margin={{ top: 'medium' }}
-                >
+                <Box direction="row" justify={'end'} gap="medium" margin={{ top: 'medium' }}>
                   <Button onClick={this.onDiscard} label="Discard" />
 
                   {!isViewMode && (
                     <Button
                       onClick={() => {
-                        this.setState({ submitted: true });
-                        submitForm();
+                        this.setState({ submitted: true })
+                        submitForm()
                       }}
                       primary
                       label="Request"
@@ -298,10 +245,10 @@ export default class FundingRequestForm extends React.Component<Props> {
                   )}
                 </Box>
               </Box>
-            );
+            )
           }}
         </Formik>
       </Box>
-    );
+    )
   }
 }

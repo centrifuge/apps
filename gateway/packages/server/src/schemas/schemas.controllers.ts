@@ -1,5 +1,5 @@
-import { Schema } from '@centrifuge/gateway-lib/models/schema';
-import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
 import {
   BadRequestException,
   Body,
@@ -11,9 +11,9 @@ import {
   Put,
   Query,
   UseGuards,
-} from '@nestjs/common';
-import { SessionGuard } from '../auth/SessionGuard';
-import { DatabaseService } from '../database/database.service';
+} from '@nestjs/common'
+import { SessionGuard } from '../auth/SessionGuard'
+import { DatabaseService } from '../database/database.service'
 
 @Controller(ROUTES.SCHEMAS)
 @UseGuards(SessionGuard)
@@ -28,7 +28,7 @@ export class SchemasController {
    * @return {Promise<Schema>} result
    */
   async create(@Body() schema: Schema) {
-    let newSchema: Schema;
+    let newSchema: Schema
     try {
       newSchema = new Schema(
         schema.name,
@@ -36,21 +36,18 @@ export class SchemasController {
         schema.registries,
         schema.collaborators,
         schema.template,
-        schema.formFeatures,
-      );
+        schema.formFeatures
+      )
     } catch (err) {
-      throw new BadRequestException(err.message);
+      throw new BadRequestException(err.message)
     }
 
     const schemaFromDB = await this.databaseService.schemas.findOne({
       name: newSchema.name,
-    });
-    if (schemaFromDB)
-      throw new ConflictException(
-        `Schema with name ${newSchema.name} exists in the database`,
-      );
+    })
+    if (schemaFromDB) throw new ConflictException(`Schema with name ${newSchema.name} exists in the database`)
 
-    return await this.databaseService.schemas.insert(newSchema);
+    return await this.databaseService.schemas.insert(newSchema)
   }
 
   @Get()
@@ -62,18 +59,18 @@ export class SchemasController {
   async get(@Query() params?) {
     // Support nested queries
     params &&
-      Object.keys(params).forEach(key => {
+      Object.keys(params).forEach((key) => {
         try {
-          params[key] = JSON.parse(params[key]);
+          params[key] = JSON.parse(params[key])
         } catch (e) {
           // Don't throw and error as the values is string
         }
-      });
+      })
 
     return await this.databaseService.schemas
       .getCursor(params)
       .sort({ createdAt: -1 })
-      .exec();
+      .exec()
   }
 
   @Get(':id')
@@ -86,7 +83,7 @@ export class SchemasController {
   async getById(@Param() params) {
     return await this.databaseService.schemas.findOne({
       _id: params.id,
-    });
+    })
   }
 
   @Put(':id')
@@ -100,14 +97,14 @@ export class SchemasController {
   async update(@Param() params, @Body() update: Schema) {
     const oldSchema = await this.databaseService.schemas.findOne({
       _id: params.id,
-    });
+    })
     try {
-      Schema.validateDiff(oldSchema, update);
-      Schema.validate(update);
+      Schema.validateDiff(oldSchema, update)
+      Schema.validate(update)
     } catch (err) {
-      throw new BadRequestException(err.message);
+      throw new BadRequestException(err.message)
     }
-    const { name, attributes, registries, formFeatures, label } = update;
+    const { name, attributes, registries, formFeatures, label } = update
     return await this.databaseService.schemas.updateById(params.id, {
       $set: {
         name,
@@ -116,7 +113,7 @@ export class SchemasController {
         registries,
         formFeatures,
       },
-    });
+    })
   }
 
   @Put(':id/archive')
@@ -131,7 +128,7 @@ export class SchemasController {
       $set: {
         archived: true,
       },
-    });
+    })
   }
 
   @Put(':id/restore')
@@ -146,6 +143,6 @@ export class SchemasController {
       $set: {
         archived: false,
       },
-    });
+    })
   }
 }

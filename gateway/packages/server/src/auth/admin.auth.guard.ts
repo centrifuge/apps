@@ -1,14 +1,12 @@
-import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants';
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants'
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common'
+import { Observable } from 'rxjs'
 
 @Injectable()
 export class UserAuthGuard implements CanActivate {
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    const request = context.switchToHttp().getRequest();
-    return this.validateRequest(request);
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+    const request = context.switchToHttp().getRequest()
+    return this.validateRequest(request)
   }
 
   /**
@@ -18,8 +16,8 @@ export class UserAuthGuard implements CanActivate {
    */
   async validateRequest(request) {
     if (request.user.permissions.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
-      return true;
+      return true
     }
-    return false;
+    return false
   }
 }

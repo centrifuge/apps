@@ -1,12 +1,12 @@
-import { User } from '@centrifuge/gateway-lib/models/user';
-import { Injectable } from '@nestjs/common';
-import { PassportSerializer } from '@nestjs/passport';
-import { DatabaseService } from '../database/database.service';
+import { User } from '@centrifuge/gateway-lib/models/user'
+import { Injectable } from '@nestjs/common'
+import { PassportSerializer } from '@nestjs/passport'
+import { DatabaseService } from '../database/database.service'
 
 @Injectable()
 export class CookieSerializer extends PassportSerializer {
   constructor(private readonly databaseService: DatabaseService) {
-    super();
+    super()
   }
 
   /**
@@ -22,7 +22,7 @@ export class CookieSerializer extends PassportSerializer {
    * @param {CookieSerializer~serializeUserCallback} done
    */
   serializeUser(user: User, done: Function): void {
-    done(null, user.email);
+    done(null, user.email)
   }
 
   /**
@@ -42,11 +42,11 @@ export class CookieSerializer extends PassportSerializer {
     try {
       const user = await this.databaseService.users.findOne({
         email,
-      });
+      })
 
-      return done(null, user);
+      return done(null, user)
     } catch (err) {
-      done(err);
+      done(err)
     }
   }
 }

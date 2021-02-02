@@ -1,103 +1,86 @@
-import { SearchSelect } from '@centrifuge/axis-search-select';
-import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator';
-import {
-  Contact,
-  getContactByAddress,
-} from '@centrifuge/gateway-lib/models/contact';
-import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document';
-import { Formik } from 'formik';
-import { Box, Button, FormField, RadioButton } from 'grommet';
-import React from 'react';
-import * as Yup from 'yup';
-import { ViewModeFormContainer } from '../components/ViewModeFormContainer';
+import { SearchSelect } from '@centrifuge/axis-search-select'
+import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
+import { Contact, getContactByAddress } from '@centrifuge/gateway-lib/models/contact'
+import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document'
+import { Formik } from 'formik'
+import { Box, Button, FormField, RadioButton } from 'grommet'
+import React from 'react'
+import * as Yup from 'yup'
+import { ViewModeFormContainer } from '../components/ViewModeFormContainer'
 
 type Props = {
-  onSubmit: (data: Collaborator) => void;
-  onDiscard: () => void;
-  contacts: Contact[];
-  submitLabel: string;
-  viewMode?: boolean;
-  selectedCollaborator?: Collaborator;
-};
+  onSubmit: (data: Collaborator) => void
+  onDiscard: () => void
+  contacts: Contact[]
+  submitLabel: string
+  viewMode?: boolean
+  selectedCollaborator?: Collaborator
+}
 
 // TODO use function components here
 export default class CollaboratorForm extends React.Component<Props> {
-  state = { submitted: false };
+  state = { submitted: false }
 
   onSubmit = (values: any) => {
     return this.props.onSubmit({
       ...this.props.selectedCollaborator,
       ...values,
-    });
-  };
+    })
+  }
 
   onDiscard = () => {
-    this.props.onDiscard();
-  };
+    this.props.onDiscard()
+  }
 
   render() {
-    const { submitted } = this.state;
-    const {
-      contacts,
-      selectedCollaborator,
-      viewMode,
-      submitLabel,
-    } = this.props;
-    const columnGap = 'medium';
-    const sectionGap = 'large';
+    const { submitted } = this.state
+    const { contacts, selectedCollaborator, viewMode, submitLabel } = this.props
+    const columnGap = 'medium'
+    const sectionGap = 'large'
 
     const formValidation = Yup.object().shape({
       name: Yup.string().required('This field is required'),
       address: Yup.string().required('This field is required'),
       access: Yup.string().required('This field is required'),
-    });
+    })
 
     const initialValues = selectedCollaborator || {
       name: '',
       address: '',
       access: '',
-    };
+    }
 
     return (
-      <ViewModeFormContainer
-        isViewMode={viewMode}
-        pad={{ top: 'large', bottom: 'large' }}
-      >
+      <ViewModeFormContainer isViewMode={viewMode} pad={{ top: 'large', bottom: 'large' }}>
         <Formik
           validationSchema={formValidation}
           initialValues={initialValues}
           validateOnBlur={submitted}
           validateOnChange={submitted}
           onSubmit={(values, { setSubmitting }) => {
-            this.onSubmit(values);
-            setSubmitting(true);
+            this.onSubmit(values)
+            setSubmitting(true)
           }}
         >
           {({ values, errors, handleChange, setFieldValue, submitForm }) => {
-            const selectedContact = getContactByAddress(
-              values.address,
-              contacts,
-            ) || {
+            const selectedContact = getContactByAddress(values.address, contacts) || {
               name: '',
               address: '',
-            };
+            }
             return (
               <>
                 <Box direction="column" gap={sectionGap}>
                   <Box gap={columnGap}>
-                    <FormField
-                      label="Collaborator"
-                      error={errors.name || errors.address}
-                    >
+                    <FormField label="Collaborator" error={errors.name || errors.address}>
                       <SearchSelect
                         name={'collaborator'}
                         disabled={viewMode}
                         labelKey={'name'}
                         options={contacts}
                         value={selectedContact}
-                        onChange={selected => {
-                          setFieldValue('name', selected.name);
-                          setFieldValue('address', selected.address);
+                        onChange={(selected) => {
+                          setFieldValue('name', selected.name)
+                          setFieldValue('address', selected.address)
                         }}
                       />
                     </FormField>
@@ -124,19 +107,14 @@ export default class CollaboratorForm extends React.Component<Props> {
                   </Box>
                 </Box>
 
-                <Box
-                  direction="row"
-                  justify={'end'}
-                  gap="medium"
-                  margin={{ top: 'medium' }}
-                >
+                <Box direction="row" justify={'end'} gap="medium" margin={{ top: 'medium' }}>
                   <Button onClick={this.onDiscard} label="Discard" />
 
                   {!viewMode && (
                     <Button
                       onClick={() => {
-                        this.setState({ submitted: true });
-                        submitForm();
+                        this.setState({ submitted: true })
+                        submitForm()
                       }}
                       primary
                       label={submitLabel}
@@ -144,10 +122,10 @@ export default class CollaboratorForm extends React.Component<Props> {
                   )}
                 </Box>
               </>
-            );
+            )
           }}
         </Formik>
       </ViewModeFormContainer>
-    );
+    )
   }
 }

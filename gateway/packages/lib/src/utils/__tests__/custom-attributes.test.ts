@@ -1,18 +1,16 @@
-import { flatten, unflatten, unflattenRaw } from '../custom-attributes';
+import { flatten, unflatten, unflattenRaw } from '../custom-attributes'
 
 describe('Custom Attributes', () => {
   const attr = {
     'test.amount': {
       key: '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
       type: 'bytes',
-      value:
-        '0xf7d228ac54b71f4954b69310a946acbd5fd23dc00ebb25a61010554e2f2aa962',
+      value: '0xf7d228ac54b71f4954b69310a946acbd5fd23dc00ebb25a61010554e2f2aa962',
     },
     'test.date': {
       key: '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
       type: 'bytes',
-      value:
-        '0xf7d228ac54b71f4954b69310a946acbd5fd23dc00ebb25a61010554e2f2aa962',
+      value: '0xf7d228ac54b71f4954b69310a946acbd5fd23dc00ebb25a61010554e2f2aa962',
     },
     funding_agreement: {
       key: '0x1ce137e03b3981e8db640fe12b33fe5fe445155f1c2eb9f22baa2ae3df49bd38',
@@ -22,8 +20,7 @@ describe('Custom Attributes', () => {
     'funding_agreement[0].agreement_id': {
       key: '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
       type: 'bytes',
-      value:
-        '0xf7d228ac54b71f4954b69310a946acbd5fd23dc00ebb25a61010554e2f2aa962',
+      value: '0xf7d228ac54b71f4954b69310a946acbd5fd23dc00ebb25a61010554e2f2aa962',
     },
     'funding_agreement[0].amount': {
       key: '0x38ed5f156745e6b3ecf3cbf732b76d4119c4ddf9c074b51d328d42569b713171',
@@ -63,8 +60,7 @@ describe('Custom Attributes', () => {
     'funding_agreement[0].nft_address': {
       key: '0xaca17fa02ad44c4a982f320377cb289985f6eb5d1e9ea80118bc9721da732461',
       type: 'bytes',
-      value:
-        '0x4cec515e900f4e04eb06cfce64348c605b4439c941f173140f0dc178e8f24d74',
+      value: '0x4cec515e900f4e04eb06cfce64348c605b4439c941f173140f0dc178e8f24d74',
     },
     'funding_agreement[0].repayment_amount': {
       key: '0x028568263c48c17b3276c92e2eeb82745056f4527de87dce01bbc4718ffdd1f4',
@@ -119,8 +115,7 @@ describe('Custom Attributes', () => {
     'transfer_details[0].settlement_reference': {
       key: '0xf4bc932cae4a999394f4a7eb79ecffbc6261b46325fd76ac88d5396bd3f58c6a',
       type: 'bytes',
-      value:
-        '0x8dd141fce0c9673dc5904207fb97b4d32c99370bc5ce662d0b471f2e79c30a96',
+      value: '0x8dd141fce0c9673dc5904207fb97b4d32c99370bc5ce662d0b471f2e79c30a96',
     },
     'transfer_details[0].status': {
       key: '0x9cd20c510ad78a96d24bb3008a738a663161b82ccf8f798a04245f3e5f4d9ca5',
@@ -130,8 +125,7 @@ describe('Custom Attributes', () => {
     'transfer_details[0].transfer_id': {
       key: '0xbd68ec29bcd78dccd8aa6d2a7900af2b2fcc6fa2b6c7d67f143841d2557a007d',
       type: 'bytes',
-      value:
-        '0x449ec9685c71fc972eb429f6694bd3629615bb14a8fdcaad47a3dddbd2dd7869',
+      value: '0x449ec9685c71fc972eb429f6694bd3629615bb14a8fdcaad47a3dddbd2dd7869',
     },
     'transfer_details[0].transfer_type': {
       key: '0x9d2d81b3b66d11ebbfe624a24dd6ffe1eb001aa223e59151dd88a1884a4b46e7',
@@ -166,8 +160,7 @@ describe('Custom Attributes', () => {
     'transfer_details[1].settlement_reference': {
       key: '0x107aee981f613089f4b1f45dec3e410c32f3d0fb148fce2fed6a560d4a95efec',
       type: 'bytes',
-      value:
-        '0x8dd141fce0c9673dc5904207fb97b4d32c99370bc5ce662d0b471f2e79c30a96',
+      value: '0x8dd141fce0c9673dc5904207fb97b4d32c99370bc5ce662d0b471f2e79c30a96',
     },
     'transfer_details[1].status': {
       key: '0x67e1938405a04b115da92a5270cf081c148211f98f91635efc9a878854835a24',
@@ -177,55 +170,48 @@ describe('Custom Attributes', () => {
     'transfer_details[1].transfer_id': {
       key: '0x159dec36fefad30e9b452cbbb439ed1cab0cf476e50dee59a33aba6b3703eeba',
       type: 'bytes',
-      value:
-        '0xcea26f6083e3c90a20bf6e96356a8ed24f045ea1c2f5c18fbe4bf48ea88f8d10',
+      value: '0xcea26f6083e3c90a20bf6e96356a8ed24f045ea1c2f5c18fbe4bf48ea88f8d10',
     },
     'transfer_details[1].transfer_type': {
       key: '0x2ec3d1622e993ae22d6322e1802e3342158059cd72561c1b42d1f6ca89b533a3',
       type: 'string',
       value: 'crypto',
     },
-  };
+  }
 
   it('Should unflatten the custom attributes with iterables', () => {
-    const unflattened = unflatten(attr);
-    expect(Array.isArray(unflattened.transfer_details)).toEqual(true);
-    expect(Array.isArray(unflattened.funding_agreement)).toEqual(true);
-    expect(Array.isArray(unflattened.funding_agreement[0].signatures)).toEqual(
-      true,
-    );
+    const unflattened = unflatten(attr)
+    expect(Array.isArray(unflattened.transfer_details)).toEqual(true)
+    expect(Array.isArray(unflattened.funding_agreement)).toEqual(true)
+    expect(Array.isArray(unflattened.funding_agreement[0].signatures)).toEqual(true)
     expect(unflattened.test.amount).toEqual({
       key: '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
       type: 'bytes',
-      value:
-        '0xf7d228ac54b71f4954b69310a946acbd5fd23dc00ebb25a61010554e2f2aa962',
-    });
-  });
+      value: '0xf7d228ac54b71f4954b69310a946acbd5fd23dc00ebb25a61010554e2f2aa962',
+    })
+  })
 
   it('Should unflattenRaw the custom attributes and have only objects', () => {
-    const unflattened = unflattenRaw(attr);
-    expect(Array.isArray(unflattened.transfer_details)).toEqual(false);
-    expect(Array.isArray(unflattened.funding_agreement)).toEqual(false);
-    expect(Array.isArray(unflattened.funding_agreement[0].signatures)).toEqual(
-      false,
-    );
+    const unflattened = unflattenRaw(attr)
+    expect(Array.isArray(unflattened.transfer_details)).toEqual(false)
+    expect(Array.isArray(unflattened.funding_agreement)).toEqual(false)
+    expect(Array.isArray(unflattened.funding_agreement[0].signatures)).toEqual(false)
     expect(unflattened.test.amount).toEqual({
       key: '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
       type: 'bytes',
-      value:
-        '0xf7d228ac54b71f4954b69310a946acbd5fd23dc00ebb25a61010554e2f2aa962',
-    });
-  });
+      value: '0xf7d228ac54b71f4954b69310a946acbd5fd23dc00ebb25a61010554e2f2aa962',
+    })
+  })
 
   it('Should flatten a back to the original object ', () => {
-    const unflattened: any = unflatten(attr);
-    const flattened = flatten(unflattened);
-    expect(flatten(flattened)).toEqual(attr);
-  });
+    const unflattened: any = unflatten(attr)
+    const flattened = flatten(unflattened)
+    expect(flatten(flattened)).toEqual(attr)
+  })
 
   it('Should flatten a back a raw unflattening to the original object ', () => {
-    const unflattened: any = unflattenRaw(attr);
-    const flattened = flatten(unflattened);
-    expect(flatten(flattened)).toEqual(attr);
-  });
-});
+    const unflattened: any = unflattenRaw(attr)
+    const flattened = flatten(unflattened)
+    expect(flatten(flattened)).toEqual(attr)
+  })
+})

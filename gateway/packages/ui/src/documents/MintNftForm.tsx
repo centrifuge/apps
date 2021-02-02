@@ -1,39 +1,39 @@
-import { DisplayField } from '@centrifuge/axis-display-field';
-import { SearchSelect } from '@centrifuge/axis-search-select';
-import { Registry } from '@centrifuge/gateway-lib/models/schema';
-import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan';
-import { isValidAddress } from 'ethereumjs-util';
-import { Formik } from 'formik';
-import { Box, Button, FormField, TextInput } from 'grommet';
-import React from 'react';
-import * as Yup from 'yup';
+import { DisplayField } from '@centrifuge/axis-display-field'
+import { SearchSelect } from '@centrifuge/axis-search-select'
+import { Registry } from '@centrifuge/gateway-lib/models/schema'
+import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan'
+import { isValidAddress } from 'ethereumjs-util'
+import { Formik } from 'formik'
+import { Box, Button, FormField, TextInput } from 'grommet'
+import React from 'react'
+import * as Yup from 'yup'
 
 type Props = {
-  onSubmit: (data: MintNftFormData) => void;
-  onDiscard: () => void;
-  registries: Registry[];
-};
+  onSubmit: (data: MintNftFormData) => void
+  onDiscard: () => void
+  registries: Registry[]
+}
 
 export interface MintNftFormData {
-  registry: Registry | undefined;
-  deposit_address: string;
+  registry: Registry | undefined
+  deposit_address: string
 }
 
 // TODO use function components here
 export default class MintNftForm extends React.Component<Props> {
-  state = { submitted: false };
+  state = { submitted: false }
 
   onSubmit = (values: any) => {
-    return this.props.onSubmit({ ...values });
-  };
+    return this.props.onSubmit({ ...values })
+  }
 
   onDiscard = () => {
-    this.props.onDiscard();
-  };
+    this.props.onDiscard()
+  }
 
   render() {
-    const { submitted } = this.state;
-    const { registries } = this.props;
+    const { submitted } = this.state
+    const { registries } = this.props
 
     const formValidation = Yup.object().shape({
       registry: Yup.object().shape({
@@ -47,19 +47,19 @@ export default class MintNftForm extends React.Component<Props> {
               return this.createError({
                 path: this.path,
                 message: 'This is field is required',
-              });
+              })
             else {
               if (!isValidAddress(value))
                 return this.createError({
                   path: this.path,
                   message: 'Not a valid account address',
-                });
+                })
             }
           }
-          return true;
+          return true
         },
       }),
-    });
+    })
 
     const initialValues: MintNftFormData = {
       registry: {
@@ -70,7 +70,7 @@ export default class MintNftForm extends React.Component<Props> {
         proofs: registries[0].proofs,
       },
       deposit_address: '',
-    };
+    }
 
     return (
       <Box pad={{ top: 'large', bottom: 'large' }}>
@@ -80,8 +80,8 @@ export default class MintNftForm extends React.Component<Props> {
           validateOnBlur={submitted}
           validateOnChange={submitted}
           onSubmit={(values, { setSubmitting }) => {
-            this.onSubmit(values);
-            setSubmitting(true);
+            this.onSubmit(values)
+            setSubmitting(true)
           }}
         >
           {({ values, errors, handleChange, setFieldValue, submitForm }) => {
@@ -90,22 +90,15 @@ export default class MintNftForm extends React.Component<Props> {
                 <Box direction="column" gap="large">
                   <Box direction="row">
                     <Box>
-                      <FormField
-                        label="Registry"
-                        error={
-                          errors!.registry
-                            ? (errors!.registry as any)!.address
-                            : ''
-                        }
-                      >
+                      <FormField label="Registry" error={errors!.registry ? (errors!.registry as any)!.address : ''}>
                         <SearchSelect
                           name="registry"
                           labelKey={'label'}
                           valueKey={'address'}
                           options={registries}
                           value={values.registry}
-                          onChange={selected => {
-                            setFieldValue('registry', selected);
+                          onChange={(selected) => {
+                            setFieldValue('registry', selected)
                           }}
                         />
                       </FormField>
@@ -122,40 +115,28 @@ export default class MintNftForm extends React.Component<Props> {
                       />
                     </Box>
                   </Box>
-                  <FormField
-                    label="Deposit address"
-                    error={errors.deposit_address}
-                  >
-                    <TextInput
-                      name="deposit_address"
-                      value={values!.deposit_address}
-                      onChange={handleChange}
-                    />
+                  <FormField label="Deposit address" error={errors.deposit_address}>
+                    <TextInput name="deposit_address" value={values!.deposit_address} onChange={handleChange} />
                   </FormField>
                 </Box>
 
-                <Box
-                  direction="row"
-                  justify={'end'}
-                  gap="medium"
-                  margin={{ top: 'medium' }}
-                >
+                <Box direction="row" justify={'end'} gap="medium" margin={{ top: 'medium' }}>
                   <Button onClick={this.onDiscard} label="Discard" />
 
                   <Button
                     onClick={() => {
-                      this.setState({ submitted: true });
-                      submitForm();
+                      this.setState({ submitted: true })
+                      submitForm()
                     }}
                     primary
                     label="Mint"
                   />
                 </Box>
               </>
-            );
+            )
           }}
         </Formik>
       </Box>
-    );
+    )
   }
 }

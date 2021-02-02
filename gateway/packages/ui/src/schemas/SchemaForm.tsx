@@ -1,41 +1,41 @@
-import { Schema } from '@centrifuge/gateway-lib/models/schema';
-import { Formik } from 'formik';
-import { Box, Button, FormField, Paragraph, TextArea } from 'grommet';
-import React from 'react';
-import * as Yup from 'yup';
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
+import { Formik } from 'formik'
+import { Box, Button, FormField, Paragraph, TextArea } from 'grommet'
+import React from 'react'
+import * as Yup from 'yup'
 
 type Props = {
-  selectedSchema: Schema;
-  submitLabel: string;
-  infoParagraph: string;
-  readonly: boolean;
-  onDiscard: () => void;
-  onSubmit: (schema) => void;
-};
+  selectedSchema: Schema
+  submitLabel: string
+  infoParagraph: string
+  readonly: boolean
+  onDiscard: () => void
+  onSubmit: (schema) => void
+}
 
 type State = {
-  submitted: boolean;
-};
+  submitted: boolean
+}
 
 export default class SchemaForm extends React.Component<Props, State> {
   state = {
     submitted: false,
-  };
+  }
 
   onSubmit = (schemaJsonString: string) => {
-    const { selectedSchema } = this.props;
+    const { selectedSchema } = this.props
     this.props.onSubmit({
       _id: selectedSchema._id,
       ...JSON.parse(schemaJsonString),
-    });
-  };
+    })
+  }
 
   render() {
-    const { submitted } = this.state;
-    const { selectedSchema, infoParagraph, submitLabel, readonly } = this.props;
+    const { submitted } = this.state
+    const { selectedSchema, infoParagraph, submitLabel, readonly } = this.props
     const defaultValues = {
       json: Schema.toEditableJson(selectedSchema),
-    };
+    }
 
     const jsonValidation = Yup.object().shape({
       json: Yup.string()
@@ -43,38 +43,38 @@ export default class SchemaForm extends React.Component<Props, State> {
         .test({
           name: 'test-json',
           test: function(this, value) {
-            let test;
+            let test
             try {
-              test = JSON.parse(value);
+              test = JSON.parse(value)
             } catch (e) {
               return this.createError({
                 path: this.path,
                 message: 'Schema is not a valid JSON object',
-              });
+              })
             }
 
             try {
-              Schema.validate(test);
+              Schema.validate(test)
             } catch (e) {
-              return this.createError({ path: this.path, message: e.message });
+              return this.createError({ path: this.path, message: e.message })
             }
             // If selected schema has _id set we diff for changes
             // It can be considered in EditMode
             if (selectedSchema._id) {
               try {
-                Schema.validateDiff(selectedSchema, test);
+                Schema.validateDiff(selectedSchema, test)
               } catch (e) {
                 return this.createError({
                   path: this.path,
                   message: e.message,
-                });
+                })
               }
             }
 
-            return true;
+            return true
           },
         }),
-    });
+    })
 
     return (
       <Box pad={{ vertical: 'medium' }}>
@@ -85,15 +85,15 @@ export default class SchemaForm extends React.Component<Props, State> {
           validateOnChange={submitted}
           validationSchema={jsonValidation}
           onSubmit={(values, { setSubmitting }) => {
-            this.onSubmit(values.json);
-            setSubmitting(true);
+            this.onSubmit(values.json)
+            setSubmitting(true)
           }}
         >
           {({ values, errors, setValues, handleChange, handleSubmit }) => (
             <form
-              onSubmit={event => {
-                this.setState({ submitted: true });
-                handleSubmit(event);
+              onSubmit={(event) => {
+                this.setState({ submitted: true })
+                handleSubmit(event)
               }}
             >
               <Box gap={'medium'}>
@@ -117,15 +117,13 @@ export default class SchemaForm extends React.Component<Props, State> {
 
                 <Box direction="row" justify={'end'} gap={'medium'}>
                   <Button label="Discard" onClick={this.props.onDiscard} />
-                  {!readonly && (
-                    <Button type="submit" primary label={submitLabel} />
-                  )}
+                  {!readonly && <Button type="submit" primary label={submitLabel} />}
                 </Box>
               </Box>
             </form>
           )}
         </Formik>
       </Box>
-    );
+    )
   }
 }

@@ -1,33 +1,33 @@
-import { isValidAddress } from 'ethereumjs-util';
-import { differenceWith, groupBy, isString } from 'lodash';
-import { Collaborator } from './collaborator';
+import { isValidAddress } from 'ethereumjs-util'
+import { differenceWith, groupBy, isString } from 'lodash'
+import { Collaborator } from './collaborator'
 
 export interface Attribute {
-  name: string;
-  label: string;
-  section?: string;
-  options?: string[];
-  placeholder?: string;
-  defaultValue?: string;
-  multiplier?: number;
+  name: string
+  label: string
+  section?: string
+  options?: string[]
+  placeholder?: string
+  defaultValue?: string
+  multiplier?: number
   type:
     | AttrTypes.STRING
     | AttrTypes.TIMESTAMP
     | AttrTypes.INTEGER
     | AttrTypes.BYTES
     | AttrTypes.DECIMAL
-    | AttrTypes.PERCENT;
-  subtype?: AttrSubtypes.SIGNED;
-  fieldWriteAccess?: string;
+    | AttrTypes.PERCENT
+  subtype?: AttrSubtypes.SIGNED
+  fieldWriteAccess?: string
 }
 
 export interface Registry {
-  label: string;
-  tinlakePool?: string;
-  address: string;
-  asset_manager_address: string;
-  proofs: Array<string>;
-  oracle_address: string;
+  label: string
+  tinlakePool?: string
+  address: string
+  asset_manager_address: string
+  proofs: Array<string>
+  oracle_address: string
 }
 
 export enum AttrTypes {
@@ -44,31 +44,31 @@ export enum AttrSubtypes {
 }
 
 export interface FormFeatures {
-  columnNo?: number;
-  comments?: boolean;
-  fundingAgreement?: boolean;
-  defaultSection?: string;
+  columnNo?: number
+  comments?: boolean
+  fundingAgreement?: boolean
+  defaultSection?: string
 }
 
 const generateAttributeError = (identifier, message) => {
-  return new Error(`Error on attributes for '${identifier}': ${message}`);
-};
+  return new Error(`Error on attributes for '${identifier}': ${message}`)
+}
 
 const generateRegistryError = (identifier, message) => {
-  return new Error(`Error with ${identifier}: ${message}`);
-};
+  return new Error(`Error with ${identifier}: ${message}`)
+}
 
 const generateFormFeaturesError = (message) => {
-  return new Error(`Error on formFeatures: ${message}`);
-};
+  return new Error(`Error on formFeatures: ${message}`)
+}
 
 const generateDiffError = (identifier, message) => {
-  return new Error(`Error on diff for '${identifier}': ${message}`);
-};
+  return new Error(`Error on diff for '${identifier}': ${message}`)
+}
 
 const propertyUnset = (obj: object, prop: string) => {
-  return !obj[prop] || !obj[prop].toString().trim();
-};
+  return !obj[prop] || !obj[prop].toString().trim()
+}
 
 export enum DiffErrors {
   NAME_CHANGE_FORBIDEN = 'Changing schema name is not allowed. Create a new one instead',
@@ -128,9 +128,9 @@ export class Schema {
     readonly formFeatures?: FormFeatures,
     readonly archived?: boolean,
     readonly _id?: string,
-    readonly label?: string,
+    readonly label?: string
   ) {
-    Schema.validate(this);
+    Schema.validate(this)
   }
 
   public static getDefaultValues(): Schema {
@@ -146,8 +146,7 @@ export class Schema {
       registries: [
         {
           label: 'registry_name',
-          tinlakePool:
-            'https://kovan.staging.tinlake.centrifuge.io/0xbb53072d054de55d56dbb4ee95840de3262e4097',
+          tinlakePool: 'https://kovan.staging.tinlake.centrifuge.io/0xbb53072d054de55d56dbb4ee95840de3262e4097',
           address: '0x0000000000000000000000000000000000000000',
           asset_manager_address: '0x0000000000000000000000000000000000000000',
           oracle_address: '0x0000000000000000000000000000000000000000',
@@ -162,7 +161,7 @@ export class Schema {
         comments: true,
         defaultSection: 'Attributes',
       },
-    };
+    }
   }
 
   /**
@@ -170,15 +169,7 @@ export class Schema {
    * @param schema Schema
    */
   public static toEditableJson(schema: Schema): string {
-    const {
-      name,
-      attributes,
-      registries,
-      template,
-      collaborators,
-      formFeatures,
-      label,
-    } = schema;
+    const { name, attributes, registries, template, collaborators, formFeatures, label } = schema
     return JSON.stringify(
       {
         name,
@@ -190,8 +181,8 @@ export class Schema {
         formFeatures,
       },
       null,
-      2,
-    );
+      2
+    )
   }
 
   /**
@@ -202,20 +193,19 @@ export class Schema {
    * @param nextSchema Schema
    */
   public static validateDiff(prevSchema: Schema, nextSchema: Schema) {
-    if (prevSchema.name !== nextSchema.name)
-      throw new Error(DiffErrors.NAME_CHANGE_FORBIDEN);
+    if (prevSchema.name !== nextSchema.name) throw new Error(DiffErrors.NAME_CHANGE_FORBIDEN)
 
     const diffedAttributes = differenceWith(
       prevSchema.attributes,
       nextSchema.attributes,
       (a: Attribute, b: Attribute) => {
-        return a.type === b.type && a.name === b.name;
-      },
-    );
+        return a.type === b.type && a.name === b.name
+      }
+    )
 
     if (diffedAttributes.length > 0) {
-      const identifier = diffedAttributes.map((a) => a.name).join(',');
-      throw generateDiffError(identifier, DiffErrors.ATTRIBUTE_CHANGE_FORBIDEN);
+      const identifier = diffedAttributes.map((a) => a.name).join(',')
+      throw generateDiffError(identifier, DiffErrors.ATTRIBUTE_CHANGE_FORBIDEN)
     }
   }
 
@@ -226,10 +216,10 @@ export class Schema {
    */
   public static validateSchemaProps(schema: any) {
     if (propertyUnset(schema, 'name')) {
-      throw new Error(SchemaPropsErrors.NAME_FORMAT);
+      throw new Error(SchemaPropsErrors.NAME_FORMAT)
     }
     if (!propertyUnset(schema, 'label') && !isString(schema.label)) {
-      throw new Error(SchemaPropsErrors.LABEL_VALUE_FORMAT);
+      throw new Error(SchemaPropsErrors.LABEL_VALUE_FORMAT)
     }
   }
 
@@ -240,70 +230,46 @@ export class Schema {
    */
   public static validateRegistries(registries: Registry[] | undefined) {
     // Do not throw errors if the prop is undefined, null, false, empty string
-    if (!registries) return;
+    if (!registries) return
 
     if (!Array.isArray(registries)) {
-      throw new Error(RegistriesErrors.REGISTRIES_FORMAT);
+      throw new Error(RegistriesErrors.REGISTRIES_FORMAT)
     }
     registries.forEach((registry) => {
       if (propertyUnset(registry, 'label')) {
-        throw generateRegistryError(
-          'registry label',
-          RegistriesErrors.LABEL_PROP_MISSING,
-        );
+        throw generateRegistryError('registry label', RegistriesErrors.LABEL_PROP_MISSING)
       }
 
       if (propertyUnset(registry, 'address')) {
-        throw generateRegistryError(
-          'registry address',
-          RegistriesErrors.ADDRESS_PROP_MISSING,
-        );
+        throw generateRegistryError('registry address', RegistriesErrors.ADDRESS_PROP_MISSING)
       }
 
       if (propertyUnset(registry, 'asset_manager_address')) {
-        throw generateRegistryError(
-          'registry asset manager',
-          RegistriesErrors.ASSET_MANAGER_ADDRESS_MISSING,
-        );
+        throw generateRegistryError('registry asset manager', RegistriesErrors.ASSET_MANAGER_ADDRESS_MISSING)
       }
 
-      let validRegistry = isValidAddress(registry.address);
+      let validRegistry = isValidAddress(registry.address)
       if (!validRegistry) {
         throw generateRegistryError(
           `registry asset manager address ${registry.asset_manager_address}`,
-          RegistriesErrors.ADDRESS_FORMAT,
-        );
+          RegistriesErrors.ADDRESS_FORMAT
+        )
       }
 
-      let validAssetManager = isValidAddress(registry.asset_manager_address);
+      let validAssetManager = isValidAddress(registry.asset_manager_address)
       if (!validAssetManager) {
-        throw generateRegistryError(
-          `registry address ${registry.address}`,
-          RegistriesErrors.ADDRESS_FORMAT,
-        );
+        throw generateRegistryError(`registry address ${registry.address}`, RegistriesErrors.ADDRESS_FORMAT)
       }
 
-      let validOracle =
-        !propertyUnset(registry, 'oracle_address') &&
-        isValidAddress(registry.oracle_address);
+      let validOracle = !propertyUnset(registry, 'oracle_address') && isValidAddress(registry.oracle_address)
       if (!validOracle) {
-        throw generateRegistryError(
-          `oracle address ${registry.oracle_address}`,
-          RegistriesErrors.ADDRESS_FORMAT,
-        );
+        throw generateRegistryError(`oracle address ${registry.oracle_address}`, RegistriesErrors.ADDRESS_FORMAT)
       }
 
-      if (
-        !registry.proofs ||
-        !Array.isArray(registry.proofs) ||
-        !registry.proofs.length
-      ) {
-        throw generateRegistryError(
-          'registry proofs array',
-          RegistriesErrors.PROOF_ARRAY_MISSING,
-        );
+      if (!registry.proofs || !Array.isArray(registry.proofs) || !registry.proofs.length) {
+        throw generateRegistryError('registry proofs array', RegistriesErrors.PROOF_ARRAY_MISSING)
       }
-    });
+    })
   }
 
   /**
@@ -315,15 +281,15 @@ export class Schema {
    */
   public static validateCollaborators(collaborators: Collaborator[]) {
     // Do not throw errors if the prop is undefined, null, false, empty string
-    if (!collaborators) return;
+    if (!collaborators) return
 
     if (!Array.isArray(collaborators)) {
-      throw new Error(RegistriesErrors.COLLABORATORS_FORMAT);
+      throw new Error(RegistriesErrors.COLLABORATORS_FORMAT)
     }
 
     collaborators.forEach((collaborator) => {
-      Collaborator.validate(collaborator);
-    });
+      Collaborator.validate(collaborator)
+    })
   }
 
   /**
@@ -337,139 +303,76 @@ export class Schema {
     if (attributes && Array.isArray(attributes) && attributes.length > 0) {
       const refID = attributes.filter((attr) => {
         if (propertyUnset(attr, 'name'))
-          throw generateAttributeError(
-            JSON.stringify(attr),
-            AttributesErrors.NAME_PROP_MISSING,
-          );
-        if (propertyUnset(attr, 'label'))
-          throw generateAttributeError(
-            attr.name,
-            AttributesErrors.LABEL_PROP_MISSING,
-          );
-        if (propertyUnset(attr, 'type'))
-          throw generateAttributeError(
-            attr.name,
-            AttributesErrors.TYPE_PROP_MISSING,
-          );
+          throw generateAttributeError(JSON.stringify(attr), AttributesErrors.NAME_PROP_MISSING)
+        if (propertyUnset(attr, 'label')) throw generateAttributeError(attr.name, AttributesErrors.LABEL_PROP_MISSING)
+        if (propertyUnset(attr, 'type')) throw generateAttributeError(attr.name, AttributesErrors.TYPE_PROP_MISSING)
 
-        const supportedTypes = Object.values(AttrTypes);
+        const supportedTypes = Object.values(AttrTypes)
         if (supportedTypes.indexOf(attr.type) < 0)
-          throw generateAttributeError(
-            attr.name,
-            AttributesErrors.TYPE_NOT_SUPPORTED,
-          );
+          throw generateAttributeError(attr.name, AttributesErrors.TYPE_NOT_SUPPORTED)
 
         if (attr.hasOwnProperty('options')) {
-          if (!Array.isArray(attr.options))
-            throw generateAttributeError(
-              attr.name,
-              AttributesErrors.OPTIONS_BAD_FORMAT,
-            );
-          if (attr.options.length < 1)
-            throw generateAttributeError(
-              attr.name,
-              AttributesErrors.OPTIONS_EMPTY,
-            );
+          if (!Array.isArray(attr.options)) throw generateAttributeError(attr.name, AttributesErrors.OPTIONS_BAD_FORMAT)
+          if (attr.options.length < 1) throw generateAttributeError(attr.name, AttributesErrors.OPTIONS_EMPTY)
           if (attr.type === AttrTypes.TIMESTAMP)
-            throw generateAttributeError(
-              attr.name,
-              AttributesErrors.OPTIONS_NOT_FOR_TIMESTAMP,
-            );
+            throw generateAttributeError(attr.name, AttributesErrors.OPTIONS_NOT_FOR_TIMESTAMP)
         }
 
         if (attr.hasOwnProperty('multiplier')) {
           if (typeof attr.multiplier !== 'number')
-            throw generateAttributeError(
-              attr.name,
-              AttributesErrors.MULTIPLIER_FORMAT,
-            );
+            throw generateAttributeError(attr.name, AttributesErrors.MULTIPLIER_FORMAT)
           if ([AttrTypes.DECIMAL, AttrTypes.INTEGER].indexOf(attr.type) === -1)
-            throw generateAttributeError(
-              attr.name,
-              AttributesErrors.MULTIPLIER_ONLY_ON_NUMBERS,
-            );
+            throw generateAttributeError(attr.name, AttributesErrors.MULTIPLIER_ONLY_ON_NUMBERS)
         }
 
         if (attr.name === 'comments') {
-          throw generateAttributeError(
-            attr.name,
-            AttributesErrors.COMMENTS_RESERVED,
-          );
+          throw generateAttributeError(attr.name, AttributesErrors.COMMENTS_RESERVED)
         }
 
         // eslint-disable-next-line
-        const regex = /\.?([^.\[\]]+)|\[(\d+)\]/g;
-        const nestedAttrsMatches = attr.name.match(regex);
+        const regex = /\.?([^.\[\]]+)|\[(\d+)\]/g
+        const nestedAttrsMatches = attr.name.match(regex)
         if (!nestedAttrsMatches || nestedAttrsMatches.length > 1)
-          throw generateAttributeError(
-            attr.name,
-            AttributesErrors.NESTED_ATTRIBUTES_NOT_SUPPORTED,
-          );
+          throw generateAttributeError(attr.name, AttributesErrors.NESTED_ATTRIBUTES_NOT_SUPPORTED)
 
         //Make sure defaultValue is a string
-        if (
-          attr.hasOwnProperty('defaultValue') &&
-          !isString(attr.defaultValue)
-        ) {
-          throw generateAttributeError(
-            attr.name,
-            AttributesErrors.DEFAULT_VALUE_FORMAT,
-          );
+        if (attr.hasOwnProperty('defaultValue') && !isString(attr.defaultValue)) {
+          throw generateAttributeError(attr.name, AttributesErrors.DEFAULT_VALUE_FORMAT)
         }
         //Make sure placeholder is a string
         if (attr.hasOwnProperty('placeholder') && !isString(attr.placeholder)) {
-          throw generateAttributeError(
-            attr.name,
-            AttributesErrors.PLACEHOLDER_FORMAT,
-          );
+          throw generateAttributeError(attr.name, AttributesErrors.PLACEHOLDER_FORMAT)
         }
 
         //Make sure subtype belongs to AttrSubtypes
-        const supportedSubtypes = Object.values(AttrSubtypes);
+        const supportedSubtypes = Object.values(AttrSubtypes)
         // @ts-ignore
-        if (
-          attr.hasOwnProperty('subtype') &&
-          supportedSubtypes.indexOf(attr.subtype!) < 0
-        )
-          throw generateAttributeError(
-            attr.name,
-            AttributesErrors.SUBTYPE_NOT_SUPPORTED,
-          );
+        if (attr.hasOwnProperty('subtype') && supportedSubtypes.indexOf(attr.subtype!) < 0)
+          throw generateAttributeError(attr.name, AttributesErrors.SUBTYPE_NOT_SUPPORTED)
 
         //Make sure fieldWriteAccess is a valid string representing an eth address
         if (
           attr.hasOwnProperty('fieldWriteAccess') &&
-          !(
-            isString(attr.fieldWriteAccess) &&
-            isValidAddress(attr.fieldWriteAccess || '')
-          )
+          !(isString(attr.fieldWriteAccess) && isValidAddress(attr.fieldWriteAccess || ''))
         ) {
-          throw generateAttributeError(
-            attr.name,
-            AttributesErrors.FIELD_WRITE_ACCESS_FORMAT,
-          );
+          throw generateAttributeError(attr.name, AttributesErrors.FIELD_WRITE_ACCESS_FORMAT)
         }
 
-        return attr.name === 'reference_id';
-      });
+        return attr.name === 'reference_id'
+      })
       if (refID.length === 0) {
-        throw new Error(AttributesErrors.REFERENCE_ID_MISSING);
+        throw new Error(AttributesErrors.REFERENCE_ID_MISSING)
       }
     } else {
-      throw new Error(AttributesErrors.ATTRIBUTES_FORMAT);
+      throw new Error(AttributesErrors.ATTRIBUTES_FORMAT)
     }
 
     // Group attributes by name
-    const grupupedByName: Attribute[][] = Object.values(
-      groupBy(attributes, (a) => a.name),
-    );
+    const grupupedByName: Attribute[][] = Object.values(groupBy(attributes, (a) => a.name))
     // check if the matrix has more than one column
     for (let group of grupupedByName) {
       if (group.length > 1) {
-        throw generateAttributeError(
-          group[0].name,
-          AttributesErrors.ATTRIBUTES_UNIQUE_NAMES,
-        );
+        throw generateAttributeError(group[0].name, AttributesErrors.ATTRIBUTES_UNIQUE_NAMES)
       }
     }
   }
@@ -482,36 +385,21 @@ export class Schema {
    */
   public static validateFormFeatures(formFeatures: FormFeatures | undefined) {
     // Do not throw errors if the prop is undefined, null, false, empty string
-    if (!formFeatures) return;
+    if (!formFeatures) return
     if (
       formFeatures.hasOwnProperty('columnNo') &&
-      (!formFeatures.columnNo ||
-        !Number.isInteger(formFeatures.columnNo) ||
-        formFeatures.columnNo < 1)
+      (!formFeatures.columnNo || !Number.isInteger(formFeatures.columnNo) || formFeatures.columnNo < 1)
     )
-      throw generateFormFeaturesError(FormFeaturesErrors.COLUMN_NO_FORMAT);
+      throw generateFormFeaturesError(FormFeaturesErrors.COLUMN_NO_FORMAT)
 
-    if (
-      formFeatures.hasOwnProperty('comments') &&
-      typeof formFeatures.comments !== 'boolean'
-    )
-      throw generateFormFeaturesError(FormFeaturesErrors.COMMENTS_FORMAT);
+    if (formFeatures.hasOwnProperty('comments') && typeof formFeatures.comments !== 'boolean')
+      throw generateFormFeaturesError(FormFeaturesErrors.COMMENTS_FORMAT)
 
-    if (
-      formFeatures.hasOwnProperty('formFeatures') &&
-      typeof formFeatures.comments !== 'boolean'
-    )
-      throw generateFormFeaturesError(
-        FormFeaturesErrors.FUNDING_AGREEMENT_FORMAT,
-      );
+    if (formFeatures.hasOwnProperty('formFeatures') && typeof formFeatures.comments !== 'boolean')
+      throw generateFormFeaturesError(FormFeaturesErrors.FUNDING_AGREEMENT_FORMAT)
 
-    if (
-      formFeatures.hasOwnProperty('defaultSection') &&
-      !isString(formFeatures.defaultSection)
-    )
-      throw generateFormFeaturesError(
-        FormFeaturesErrors.DEFAULT_SECTION_FORMAT,
-      );
+    if (formFeatures.hasOwnProperty('defaultSection') && !isString(formFeatures.defaultSection))
+      throw generateFormFeaturesError(FormFeaturesErrors.DEFAULT_SECTION_FORMAT)
   }
 
   /**
@@ -519,10 +407,10 @@ export class Schema {
    * @param schema Schema
    */
   public static validate(schema: Schema) {
-    Schema.validateSchemaProps(schema);
-    Schema.validateRegistries(schema.registries);
-    Schema.validateCollaborators(schema.collaborators);
-    Schema.validateAttributes(schema.attributes);
-    Schema.validateFormFeatures(schema.formFeatures);
+    Schema.validateSchemaProps(schema)
+    Schema.validateRegistries(schema.registries)
+    Schema.validateCollaborators(schema.collaborators)
+    Schema.validateAttributes(schema.attributes)
+    Schema.validateFormFeatures(schema.formFeatures)
   }
 }

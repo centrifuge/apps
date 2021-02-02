@@ -1,5 +1,5 @@
-import { User } from '@centrifuge/gateway-lib/models/user';
-import { Injectable } from '@nestjs/common';
+import { User } from '@centrifuge/gateway-lib/models/user'
+import { Injectable } from '@nestjs/common'
 
 @Injectable()
 export class AppService {
@@ -11,6 +11,6 @@ export class AppService {
           loggedInUser: user || null,
         },
       },
-    });
+    })
   }
 }

@@ -1,47 +1,32 @@
-import {
-  UserapiFundingRequest,
-  UserapiFundingResponse,
-} from '@centrifuge/gateway-lib/centrifuge-node-client';
-import {
-  FundingRequest,
-  FundingSignatureRequest,
-} from '@centrifuge/gateway-lib/models/funding-request';
-import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
-import { Body, Controller, Post, Request } from '@nestjs/common';
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
-import { DatabaseService } from '../database/database.service';
+import { UserapiFundingRequest, UserapiFundingResponse } from '@centrifuge/gateway-lib/centrifuge-node-client'
+import { FundingRequest, FundingSignatureRequest } from '@centrifuge/gateway-lib/models/funding-request'
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
+import { Body, Controller, Post, Request } from '@nestjs/common'
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service'
+import { DatabaseService } from '../database/database.service'
 
 @Controller()
 export class FundingController {
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly centrifugeService: CentrifugeService,
+    private readonly centrifugeService: CentrifugeService
   ) {}
 
   @Post(ROUTES.FUNDING.sign)
-  async sign(
-    @Body() payload: FundingSignatureRequest,
-    @Request() req,
-  ): Promise<UserapiFundingResponse | null> {
+  async sign(@Body() payload: FundingSignatureRequest, @Request() req): Promise<UserapiFundingResponse | null> {
     const signatureResponse = await this.centrifugeService.funding.signFundingAgreement(
       req.user.account,
       payload.document_id,
-      payload.agreement_id,
-    );
+      payload.agreement_id
+    )
 
-    await this.centrifugeService.pullForJobComplete(
-      signatureResponse.header.job_id,
-      req.user.account,
-    );
+    await this.centrifugeService.pullForJobComplete(signatureResponse.header.job_id, req.user.account)
 
-    return signatureResponse;
+    return signatureResponse
   }
 
   @Post(ROUTES.FUNDING.base)
-  async create(
-    @Body() fundingRequest: FundingRequest,
-    @Request() req,
-  ): Promise<UserapiFundingResponse | null> {
+  async create(@Body() fundingRequest: FundingRequest, @Request() req): Promise<UserapiFundingResponse | null> {
     const payload: UserapiFundingRequest = {
       data: {
         amount: fundingRequest.amount.toString(),
@@ -54,31 +39,24 @@ export class FundingController {
         borrower_id: req.user.account.toString(),
         funder_id: fundingRequest.funder_id.toString(),
       },
-    };
+    }
 
-    if (fundingRequest.nft_address)
-      payload.data.nft_address = fundingRequest.nft_address;
+    if (fundingRequest.nft_address) payload.data.nft_address = fundingRequest.nft_address
 
     const fundingResponse = await this.centrifugeService.funding.createFundingAgreement(
       req.user.account,
       fundingRequest.document_id,
-      payload,
-    );
+      payload
+    )
 
-    await this.centrifugeService.pullForJobComplete(
-      fundingResponse.header.job_id,
-      req.user.account,
-    );
+    await this.centrifugeService.pullForJobComplete(fundingResponse.header.job_id, req.user.account)
     const signatureResponse = await this.centrifugeService.funding.signFundingAgreement(
       req.user.account,
       fundingRequest.document_id,
-      fundingResponse.data.funding.agreement_id,
-    );
-    await this.centrifugeService.pullForJobComplete(
-      signatureResponse.header.job_id,
-      req.user.account,
-    );
+      fundingResponse.data.funding.agreement_id
+    )
+    await this.centrifugeService.pullForJobComplete(signatureResponse.header.job_id, req.user.account)
 
-    return signatureResponse;
+    return signatureResponse
   }
 }
