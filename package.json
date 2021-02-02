@@ -4,7 +4,11 @@
     "e2e-tests",
     "onboard-api",
     "tinlake-ui",
-    "tinlake.js"
+    "tinlake.js",
+    "gateway",
+    "gateway/packages/lib",
+    "gateway/packages/ui",
+    "gateway/packages/server"
   ],
   "devDependencies": {
     "@types/concurrently": "^5",
