@@ -1,28 +1,19 @@
-import { mount, shallow } from 'enzyme';
-import React from 'react';
-import { Spinner } from '@centrifuge/axis-spinner';
-import { Modal } from '@centrifuge/axis-modal';
-import { defaultContacts } from '../../test-utilities/default-data';
-import { NumberInput } from '@centrifuge/axis-number-input';
-import { DateInput } from '@centrifuge/axis-date-input';
 import { SearchSelect } from '@centrifuge/axis-search-select';
-import { withAxis } from '../../test-utilities/test-providers';
-import { RadioButton } from 'grommet';
-import CollaboratorForm from '../CollaboratorForm';
-import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document';
 import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator';
-
+import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document';
+import { mount } from 'enzyme';
+import { RadioButton } from 'grommet';
+import React from 'react';
+import { defaultContacts } from '../../test-utilities/default-data';
+import { withAxis } from '../../test-utilities/test-providers';
+import CollaboratorForm from '../CollaboratorForm';
 
 describe('Collaborator Form', () => {
+  const onSubmit = jest.fn(data => {});
 
-  const onSubmit = jest.fn((data) => {
-  });
-
-  const onDiscard = jest.fn(() => {
-  });
+  const onDiscard = jest.fn(() => {});
 
   const submitLabel = 'Anything you feel like';
-
 
   it('Should render and empty form', async () => {
     const component = mount(
@@ -31,11 +22,14 @@ describe('Collaborator Form', () => {
           submitLabel={submitLabel}
           onSubmit={onSubmit}
           onDiscard={onDiscard}
-          contacts={defaultContacts}/>,
+          contacts={defaultContacts}
+        />,
       ),
     );
 
-    const collaboratorField = component.find({ name: 'collaborator' }).find(SearchSelect);
+    const collaboratorField = component
+      .find({ name: 'collaborator' })
+      .find(SearchSelect);
     const accessOptions = component.find({ name: 'access' }).find(RadioButton);
     const options = collaboratorField.prop('options');
     expect(options).toBe(defaultContacts);
@@ -47,14 +41,14 @@ describe('Collaborator Form', () => {
   });
 
   it('Should not submit the form because of validation', async () => {
-
     const component = mount(
       withAxis(
         <CollaboratorForm
           submitLabel={submitLabel}
           onSubmit={onSubmit}
           onDiscard={onDiscard}
-          contacts={defaultContacts}/>,
+          contacts={defaultContacts}
+        />,
       ),
     );
     const submit = component.find({ label: submitLabel }).find('button');
@@ -62,11 +56,9 @@ describe('Collaborator Form', () => {
     // Form validator are async so we need wait a little
     await new Promise(r => setTimeout(r, 0));
     expect(onSubmit).toHaveBeenCalledTimes(0);
-
   });
 
   it('Should edit and submit the form ', async () => {
-
     const selectedCollaborator = {
       ...defaultContacts[0],
       access: DOCUMENT_ACCESS.WRITE,
@@ -79,11 +71,14 @@ describe('Collaborator Form', () => {
           submitLabel={submitLabel}
           onSubmit={onSubmit}
           onDiscard={onDiscard}
-          contacts={defaultContacts}/>,
+          contacts={defaultContacts}
+        />,
       ),
     );
 
-    const collaboratorField = component.find({ name: 'collaborator' }).find(SearchSelect);
+    const collaboratorField = component
+      .find({ name: 'collaborator' })
+      .find(SearchSelect);
     collaboratorField.prop('onChange')(defaultContacts[1]);
 
     const submit = component.find({ label: submitLabel }).find('button');
@@ -95,27 +90,21 @@ describe('Collaborator Form', () => {
       ...defaultContacts[1],
       access: DOCUMENT_ACCESS.WRITE,
     });
-
   });
 
-
   it('Should discard the form', async () => {
-
     const component = mount(
       withAxis(
         <CollaboratorForm
           submitLabel={submitLabel}
           onSubmit={onSubmit}
           onDiscard={onDiscard}
-          contacts={defaultContacts}/>,
+          contacts={defaultContacts}
+        />,
       ),
     );
     const discard = component.find({ label: 'Discard' }).find('button');
     discard.simulate('click');
     expect(onDiscard).toHaveBeenCalledTimes(1);
-
   });
-
 });
-
-

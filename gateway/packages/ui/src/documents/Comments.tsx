@@ -1,14 +1,13 @@
-import React, { FunctionComponent } from 'react';
+import { Document } from '@centrifuge/gateway-lib/models/document';
+import { connect, FormikContext } from 'formik';
 import { FormField, Grid, TextArea } from 'grommet';
 import { get } from 'lodash';
-import { connect, FormikContext } from 'formik';
-import { Document } from '@centrifuge/gateway-lib/models/document';
+import React, { FunctionComponent } from 'react';
 import { Section } from '../components/Section';
 
 type Props = OuterProps & {
-  formik: FormikContext<Document>
+  formik: FormikContext<Document>;
 };
-
 
 interface OuterProps {
   columnGap: string;
@@ -16,35 +15,28 @@ interface OuterProps {
 }
 
 const Comments: FunctionComponent<Props> = (props: Props) => {
-
   const {
     columnGap,
     isViewMode,
-    formik: {
-      values,
-      errors,
-      handleChange,
-    },
+    formik: { values, errors, handleChange },
   } = props;
-
 
   const key = `attributes.comments.value`;
 
-  return <Section title="Comments">
-    <Grid gap={columnGap}>
-      <FormField
-        key={key}
-        error={get(errors, key)}
-      >
+  return (
+    <Section title="Comments">
+      <Grid gap={columnGap}>
+        <FormField key={key} error={get(errors, key)}>
           <TextArea
             disabled={isViewMode}
             value={get(values, key)}
             name={`${key}`}
             onChange={handleChange}
           />
-      </FormField>
-    </Grid>
-  </Section>;
+        </FormField>
+      </Grid>
+    </Section>
+  );
 };
 
 export default connect<OuterProps>(Comments);

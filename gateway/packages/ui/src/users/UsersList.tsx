@@ -1,32 +1,32 @@
+import { DisplayField } from '@centrifuge/axis-display-field';
+import { Modal } from '@centrifuge/axis-modal';
+import { Organization } from '@centrifuge/gateway-lib/models/organization';
+import { Schema } from '@centrifuge/gateway-lib/models/schema';
+import { User, UserWithOrg } from '@centrifuge/gateway-lib/models/user';
+import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants';
+import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan';
+import { formatDate } from '@centrifuge/gateway-lib/utils/formaters';
+import { mapSchemaNames } from '@centrifuge/gateway-lib/utils/schema-utils';
+import { AxiosError } from 'axios';
+import { Anchor, Box, Button, Heading, Text } from 'grommet';
 import React, {
   FunctionComponent,
   useCallback,
   useContext,
   useEffect,
 } from 'react';
-import { Anchor, Box, Button, Heading, Text } from 'grommet';
-import { User, UserWithOrg } from '@centrifuge/gateway-lib/models/user';
-import { Modal } from '@centrifuge/axis-modal';
-import UserForm from './UserForm';
-import { formatDate } from '@centrifuge/gateway-lib/utils/formaters';
-import { Preloader } from '../components/Preloader';
-import { SecondaryHeader } from '../components/SecondaryHeader';
-import { DisplayField } from '@centrifuge/axis-display-field';
-import { Schema } from '@centrifuge/gateway-lib/models/schema';
-import { mapSchemaNames } from '@centrifuge/gateway-lib/utils/schema-utils';
-import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants';
-import { httpClient } from '../http-client';
-import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan';
-import { PageError } from '../components/PageError';
-import { useMergeState } from '../hooks';
+import { AppContext } from '../App';
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
 import {
   NOTIFICATION,
   NotificationContext,
 } from '../components/NotificationContext';
-import { AxiosError } from 'axios';
-import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
-import { Organization } from '@centrifuge/gateway-lib/models/organization';
-import { AppContext } from '../App';
+import { PageError } from '../components/PageError';
+import { Preloader } from '../components/Preloader';
+import { SecondaryHeader } from '../components/SecondaryHeader';
+import { useMergeState } from '../hooks';
+import { httpClient } from '../http-client';
+import UserForm from './UserForm';
 
 type State = {
   loadingMessage: string | null;
@@ -300,7 +300,10 @@ const UsersList: FunctionComponent = () => {
               <Box direction="row" gap="small">
                 <Anchor label={'Edit'} onClick={() => openUserForm(data)} />
                 {user?.email !== data.email && (
-                  <Anchor label={'Delete'} onClick={() => confirmUserDelete(data)} />
+                  <Anchor
+                    label={'Delete'}
+                    onClick={() => confirmUserDelete(data)}
+                  />
                 )}
               </Box>
             ),
@@ -342,14 +345,17 @@ const UsersList: FunctionComponent = () => {
         title={'Delete User'}
         onClose={closeDeleteConfirmation}
       >
-        <Box margin={{ vertical: 'medium' }} >
-          <p>Are you sure you want to delete user <strong>{selectedUser.name}</strong>?</p>
+        <Box margin={{ vertical: 'medium' }}>
+          <p>
+            Are you sure you want to delete user{' '}
+            <strong>{selectedUser.name}</strong>?
+          </p>
         </Box>
-        <Box  direction="row" justify={'between'} gap={'medium'}>
+        <Box direction="row" justify={'between'} gap={'medium'}>
           <Button label="Discard" onClick={closeDeleteConfirmation} />
           <Button
             type="submit"
-            onClick={() =>onUserDelete(selectedUser)}
+            onClick={() => onUserDelete(selectedUser)}
             primary
             label={'Delete user'}
           />

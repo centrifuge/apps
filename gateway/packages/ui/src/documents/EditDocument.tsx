@@ -1,37 +1,38 @@
+import {
+  Contact,
+  extendContactsWithUsers,
+} from '@centrifuge/gateway-lib/models/contact';
+import {
+  Document,
+  documentIsEditable,
+} from '@centrifuge/gateway-lib/models/document';
+import { Schema } from '@centrifuge/gateway-lib/models/schema';
+import { canWriteToDoc } from '@centrifuge/gateway-lib/models/user';
+import { AxiosError } from 'axios';
+import { Box, Button, Heading } from 'grommet';
+import { LinkPrevious } from 'grommet-icons';
 import React, {
   FunctionComponent,
   useCallback,
   useContext,
   useEffect,
 } from 'react';
-import { Link } from 'react-router-dom';
-
-import DocumentForm from './DocumentForm';
 import { Redirect, RouteComponentProps, withRouter } from 'react-router';
-import { Box, Button, Heading } from 'grommet';
-import { LinkPrevious } from 'grommet-icons';
-import { canWriteToDoc } from '@centrifuge/gateway-lib/models/user';
-import { Preloader } from '../components/Preloader';
-import {
-  Document,
-  documentIsEditable,
-} from '@centrifuge/gateway-lib/models/document';
-import { SecondaryHeader } from '../components/SecondaryHeader';
-import { Schema } from '@centrifuge/gateway-lib/models/schema';
-import { Contact } from '@centrifuge/gateway-lib/models/contact';
-import { httpClient } from '../http-client';
+import { Link } from 'react-router-dom';
 import { AppContext } from '../App';
-import { useMergeState } from '../hooks';
-import { PageError } from '../components/PageError';
-import documentRoutes from './routes';
 import {
   NOTIFICATION,
   NotificationContext,
 } from '../components/NotificationContext';
-import { AxiosError } from 'axios';
+import { PageError } from '../components/PageError';
+import { Preloader } from '../components/Preloader';
+import { SecondaryHeader } from '../components/SecondaryHeader';
+import { useMergeState } from '../hooks';
+import { httpClient } from '../http-client';
+import DocumentForm from './DocumentForm';
 import { FundingAgreements } from './FundingAgreements';
 import { Nfts } from './Nfts';
-import { extendContactsWithUsers } from '@centrifuge/gateway-lib/models/contact';
+import documentRoutes from './routes';
 
 type Props = RouteComponentProps<{ id: string }>;
 
@@ -102,10 +103,10 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
     });
     try {
       /*
-      * We need to create a new version when updating a doc.
-      * TODO this might need to change if we do not auto commit anymore
-      * */
-      newDoc.document_id = newDoc!.header!.document_id
+       * We need to create a new version when updating a doc.
+       * TODO this might need to change if we do not auto commit anymore
+       * */
+      newDoc.document_id = newDoc!.header!.document_id;
       document = (await httpClient.documents.create(newDoc)).data;
       setState({
         loadingMessage: null,
@@ -117,7 +118,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
     }
 
     try {
-      await httpClient.documents.commit(document._id!)
+      await httpClient.documents.commit(document._id!);
     } catch (e) {
       displayModalError(e, 'Failed to commit document');
     }

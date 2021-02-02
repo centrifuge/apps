@@ -1,23 +1,23 @@
-import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { AxisTheme } from '@centrifuge/axis-theme';
-import { NOTIFICATION, NotificationConsumer, NotificationProvider } from '../NotificationContext';
-import { mount, shallow } from 'enzyme';
 import { Modal } from '@centrifuge/axis-modal';
+import { AxisTheme } from '@centrifuge/axis-theme';
+import { mount, shallow } from 'enzyme';
+import React from 'react';
 import { serializeSnapshot } from '../../test-utilities/serialize';
-import { withAxis, withNotificationContext } from '../../test-utilities/test-providers';
+import {
+  withAxis,
+  withNotificationContext,
+} from '../../test-utilities/test-providers';
+import {
+  NOTIFICATION,
+  NotificationConsumer,
+  NotificationProvider,
+} from '../NotificationContext';
 
-
-const setProviders = (component) => {
-  return withAxis(
-    withNotificationContext(
-      component,
-    ),
-  );
+const setProviders = component => {
+  return withAxis(withNotificationContext(component));
 };
 
 describe('NotificationContext', () => {
-
   it('Should not crash', () => {
     const tree = shallow(
       setProviders(
@@ -31,21 +31,21 @@ describe('NotificationContext', () => {
     expect(serializeSnapshot(tree)).toMatchSnapshot();
   });
 
-
   it('Should render a default popup', () => {
-
     const tree = mount(
       setProviders(
         <NotificationConsumer>
           {({ notify }) => {
-            return <button onClick={() => {
-              notify(
-                {
-                  title: 'Title',
-                  message: 'Messsge',
-                },
-              );
-            }}></button>;
+            return (
+              <button
+                onClick={() => {
+                  notify({
+                    title: 'Title',
+                    message: 'Messsge',
+                  });
+                }}
+              ></button>
+            );
           }}
         </NotificationConsumer>,
       ),
@@ -59,15 +59,17 @@ describe('NotificationContext', () => {
       setProviders(
         <NotificationConsumer>
           {({ notify }) => {
-            return <button onClick={() => {
-              notify(
-                {
-                  title: 'Title',
-                  message: 'Messsge',
-                  type: NOTIFICATION.WARNING,
-                },
-              );
-            }}></button>;
+            return (
+              <button
+                onClick={() => {
+                  notify({
+                    title: 'Title',
+                    message: 'Messsge',
+                    type: NOTIFICATION.WARNING,
+                  });
+                }}
+              ></button>
+            );
           }}
         </NotificationConsumer>,
       ),
@@ -76,21 +78,22 @@ describe('NotificationContext', () => {
     expect(serializeSnapshot(tree.find(Modal))).toMatchSnapshot();
   });
 
-
   it('Should render a success popup', () => {
     const tree = mount(
       setProviders(
         <NotificationConsumer>
           {({ notify }) => {
-            return <button onClick={() => {
-              notify(
-                {
-                  title: 'Title',
-                  message: 'Messsge',
-                  type: NOTIFICATION.SUCCESS,
-                },
-              );
-            }}></button>;
+            return (
+              <button
+                onClick={() => {
+                  notify({
+                    title: 'Title',
+                    message: 'Messsge',
+                    type: NOTIFICATION.SUCCESS,
+                  });
+                }}
+              ></button>
+            );
           }}
         </NotificationConsumer>,
       ),
@@ -104,15 +107,17 @@ describe('NotificationContext', () => {
       setProviders(
         <NotificationConsumer>
           {({ notify }) => {
-            return <button onClick={() => {
-              notify(
-                {
-                  title: 'Title',
-                  message: 'Messsge',
-                  type: NOTIFICATION.ERROR,
-                },
-              );
-            }}></button>;
+            return (
+              <button
+                onClick={() => {
+                  notify({
+                    title: 'Title',
+                    message: 'Messsge',
+                    type: NOTIFICATION.ERROR,
+                  });
+                }}
+              ></button>
+            );
           }}
         </NotificationConsumer>,
       ),
@@ -127,25 +132,24 @@ describe('NotificationContext', () => {
         <NotificationProvider>
           <NotificationConsumer>
             {({ notify }) => {
-
-              return <button onClick={() => {
-                notify(
-                  {
-                    title: 'Title',
-                    message: 'Messsge',
-                    confirmLabel: 'Crazy Label',
-                  },
-                );
-              }}></button>;
+              return (
+                <button
+                  onClick={() => {
+                    notify({
+                      title: 'Title',
+                      message: 'Messsge',
+                      confirmLabel: 'Crazy Label',
+                    });
+                  }}
+                ></button>
+              );
             }}
           </NotificationConsumer>
         </NotificationProvider>
-      </AxisTheme>
-      ,
+      </AxisTheme>,
     );
 
     tree.find('button').simulate('click');
     expect(serializeSnapshot(tree.find(Modal))).toMatchSnapshot();
   });
-
 });

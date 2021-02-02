@@ -1,8 +1,6 @@
 import { FUNDING_STATUS, getFundingStatus } from '../status';
 
-
 describe('Funding Status', () => {
-
   it('Should return NO_STATUS', function() {
     const fundingAgreement = {};
     expect(getFundingStatus(fundingAgreement)).toBe(FUNDING_STATUS.NO_STATUS);
@@ -22,12 +20,12 @@ describe('Funding Status', () => {
       funder_id: {
         value: '0x44444',
       },
-      signatures: [{
-        value: '0x44444',
-      }],
+      signatures: [
+        {
+          value: '0x44444',
+        },
+      ],
     };
     expect(getFundingStatus(fundingAgreement)).toBe(FUNDING_STATUS.ACCEPTED);
   });
-
-
 });

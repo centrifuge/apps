@@ -1,17 +1,17 @@
 import { Test } from '@nestjs/testing';
-
-import { AuthService } from '../auth.service';
-import { User } from '../../../../lib/models/user';
+import * as speakeasy from 'speakeasy';
+import { User } from '@centrifuge/gateway-lib/models/user';
 import { databaseServiceProvider } from '../../database/database.providers';
 import { DatabaseService } from '../../database/database.service';
-import * as speakeasy from 'speakeasy';
+import { AuthService } from '../auth.service';
 
 describe('LocalStrategy', () => {
   const secret = speakeasy.generateSecret();
   const unhashedPassword = 'my_password';
-  const hashedPassword = '$2b$12$qI.Lyik/2lJvLwfK74xFee7mOVWyKm0K20YPv4zlfis2dNOh2LJdO';
+  const hashedPassword =
+    '$2b$12$qI.Lyik/2lJvLwfK74xFee7mOVWyKm0K20YPv4zlfis2dNOh2LJdO';
   const mockUser: User = {
-    ...(new User()),
+    ...new User(),
     name: 'my_username',
     _id: 'user_id',
     email: 'test@test.test',
@@ -37,7 +37,7 @@ describe('LocalStrategy', () => {
     authService = module.get<AuthService>(AuthService);
   });
 
-  describe('validateUser',  () => {
+  describe('validateUser', () => {
     it('should return user if credentials are valid', async () => {
       const result = await authService.validateUser(
         mockUser.email,
@@ -64,9 +64,9 @@ describe('LocalStrategy', () => {
       );
       expect(result).toBe(null);
     });
-  })
+  });
 
-  describe('validateUserWithToken',  () => {
+  describe('validateUserWithToken', () => {
     it('should return user if credentials and token are valid', async () => {
       const token = speakeasy.totp({
         secret: mockUser.secret.base32,
@@ -93,7 +93,7 @@ describe('LocalStrategy', () => {
         'random password',
         token,
       );
-      expect(result).toBe(null)
+      expect(result).toBe(null);
     });
 
     it('should return null  if email is not valid', async () => {
@@ -106,7 +106,7 @@ describe('LocalStrategy', () => {
         unhashedPassword,
         token,
       );
-      expect(result).toBe(null)
+      expect(result).toBe(null);
     });
 
     it('should return null  if token is not valid', async () => {
@@ -117,7 +117,5 @@ describe('LocalStrategy', () => {
       );
       expect(result).toBe(null);
     });
-  })
-
-
+  });
 });

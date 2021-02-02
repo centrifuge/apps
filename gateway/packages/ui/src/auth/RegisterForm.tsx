@@ -1,11 +1,11 @@
+import { User } from '@centrifuge/gateway-lib/models/user';
+import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators';
+import { Formik } from 'formik';
+import { Box, Button, FormField, Text, TextInput } from 'grommet';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Button, FormField, Text, TextInput } from 'grommet';
-import { User } from '@centrifuge/gateway-lib/models/user';
-import routes from './routes';
-import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators';
+import routes from './routes';
 
 interface RegisterProps {
   email: string;
@@ -48,77 +48,70 @@ class RegisterForm extends React.Component<RegisterProps> {
     });
 
     return (
-          <Formik
-            initialValues={user}
-            validationSchema={registrationValidation}
-            validateOnBlur={submitted}
-            validateOnChange={submitted}
-            onSubmit={values => {
-              this.onSubmit(values);
+      <Formik
+        initialValues={user}
+        validationSchema={registrationValidation}
+        validateOnBlur={submitted}
+        validateOnChange={submitted}
+        onSubmit={values => {
+          this.onSubmit(values);
+        }}
+      >
+        {({ values, errors, handleChange, handleSubmit }) => (
+          <form
+            onSubmit={event => {
+              this.setState({ submitted: true });
+              handleSubmit(event);
             }}
           >
-            {({ values, errors, handleChange, handleSubmit }) => (
-              <form
-                onSubmit={event => {
-                  this.setState({ submitted: true });
-                  handleSubmit(event);
-                }}
+            <Box gap="small">
+              <FormField label="Email" error={errors.email}>
+                <TextInput
+                  name="email"
+                  value={values.email}
+                  onChange={handleChange}
+                />
+              </FormField>
+
+              <FormField
+                label="Password"
+                error={errors.password}
+                info={
+                  'Must have at least eight characters, one uppercase letter, one lowercase letter, one number and one special character'
+                }
               >
-                <Box gap="small">
-                  <FormField label="Email" error={errors.email}>
-                    <TextInput
-                      name="email"
-                      value={values.email}
-                      onChange={handleChange}
-                    />
-                  </FormField>
+                <TextInput
+                  type="password"
+                  name="password"
+                  value={values.password}
+                  onChange={handleChange}
+                />
+              </FormField>
+              <FormField
+                label="Confirm Password"
+                error={errors.passwordConfirm}
+              >
+                <TextInput
+                  type="password"
+                  name="passwordConfirm"
+                  value={values.passwordConfirm}
+                  onChange={handleChange}
+                />
+              </FormField>
 
-                  <FormField
-                    label="Password"
-                    error={errors.password}
-                    info={
-                      'Must have at least eight characters, one uppercase letter, one lowercase letter, one number and one special character'
-                    }
-                  >
-                    <TextInput
-                      type="password"
-                      name="password"
-                      value={values.password}
-                      onChange={handleChange}
-                    />
-                  </FormField>
-                  <FormField
-                    label="Confirm Password"
-                    error={errors.passwordConfirm}
-                  >
-                    <TextInput
-                      type="password"
-                      name="passwordConfirm"
-                      value={values.passwordConfirm}
-                      onChange={handleChange}
-                    />
-                  </FormField>
+              <Text>
+                Already registered? <Link to={routes.index}>Log in</Link>
+              </Text>
 
-                  <Text>
-                    Already registered? <Link to={routes.index}>Log in</Link>
-                  </Text>
+              {error && <Text color={'status-error'}>Failed to Register!</Text>}
 
-                  {error && (
-                    <Text color={'status-error'}>Failed to Register!</Text>
-                  )}
-
-                  <Box direction="row" height="50px">
-                    <Button
-                      type="submit"
-                      primary
-                      label="Register"
-                      fill={true}
-                    />
-                  </Box>
-                </Box>
-              </form>
-            )}
-          </Formik>
+              <Box direction="row" height="50px">
+                <Button type="submit" primary label="Register" fill={true} />
+              </Box>
+            </Box>
+          </form>
+        )}
+      </Formik>
     );
   }
 }

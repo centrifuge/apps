@@ -1,8 +1,7 @@
-import { DOCUMENT_ACCESS } from './document';
 import { isValidAddress } from 'ethereumjs-util';
+import { DOCUMENT_ACCESS } from './document';
 
 export class Collaborator {
-
   constructor(
     readonly address: string,
     readonly name: string,
@@ -34,8 +33,9 @@ export enum CollaboratorErrors {
   ADDRESS_FORMAT = 'Collaborator address property must be a valid eth address',
 }
 
-export const collaboratorsToAccessList = (collaborators: Collaborator[], access: string) => {
-  return collaborators.filter(
-    c => c.access === access,
-  ).map(c => c.address);
+export const collaboratorsToAccessList = (
+  collaborators: Collaborator[],
+  access: string,
+) => {
+  return collaborators.filter(c => c.access === access).map(c => c.address);
 };

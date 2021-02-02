@@ -1,7 +1,6 @@
 export let testingHelpers = {
-  currentGeneratedAccount: null
-}
-
+  currentGeneratedAccount: null,
+};
 
 export class MockCentrifugeService {
   invoices = {
@@ -45,33 +44,31 @@ export class MockCentrifugeService {
     invoiceUnpaidNft: jest.fn((auth, payload) => {
       return new Promise((resolve, reject) => {
         resolve({
-            header: {
-              job_id: 'some_job_id',
-            },
+          header: {
+            job_id: 'some_job_id',
           },
-        );
+        });
       });
     }),
   };
   purchaseOrders = {
     createPurchaseOrder: jest.fn((auth, data) => data),
     getPurchaseOrder: jest.fn((auth, document_id) => {
-        return {
-          header: {
-            document_id,
-            nfts: [
-              {
-                token_id: 'token_id',
-                owner: 'owner',
-              },
-            ],
-          },
-          data: {
-            currency: 'USD',
-          },
-        };
-      },
-    ),
+      return {
+        header: {
+          document_id,
+          nfts: [
+            {
+              token_id: 'token_id',
+              owner: 'owner',
+            },
+          ],
+        },
+        data: {
+          currency: 'USD',
+        },
+      };
+    }),
     updatePurchaseOrder: jest.fn((auth, id, data) => data),
   };
   funding = {
@@ -111,9 +108,8 @@ export class MockCentrifugeService {
           },
         },
       };
-
     }),
-    signFundingAgreement: jest.fn((account,document_id, agreement_id, ) => {
+    signFundingAgreement: jest.fn((account, document_id, agreement_id) => {
       return new Promise((resolve, reject) => {
         const result = {
           header: {
@@ -173,7 +169,6 @@ export class MockCentrifugeService {
   };
 
   nft = {
-
     mintNft: jest.fn((auth, registry, payload) => {
       return new Promise((resolve, reject) => {
         const result = {
@@ -188,14 +183,13 @@ export class MockCentrifugeService {
     transferNft: jest.fn((account, registry_address, token_id, body) => {
       return new Promise((resolve, reject) => {
         resolve({
-            header: {
-              job_id: 'some_job_id',
-            },
-            registry_address,
-            token_id,
-            to: body.to,
+          header: {
+            job_id: 'some_job_id',
           },
-        );
+          registry_address,
+          token_id,
+          to: body.to,
+        });
       });
     }),
   };
@@ -204,39 +198,36 @@ export class MockCentrifugeService {
 
   accounts = {
     generateAccount: jest.fn(() => {
-      testingHelpers.currentGeneratedAccount = '0x' +(new Date()).getTime()
-      return  (
-
-        {
-          identity_id: testingHelpers.currentGeneratedAccount,
-        })
-    })
+      testingHelpers.currentGeneratedAccount = '0x' + new Date().getTime();
+      return {
+        identity_id: testingHelpers.currentGeneratedAccount,
+      };
+    }),
   };
   documents = {
     getDocument: jest.fn((account_id, document_id) => {
       return {
         header: {
           document_id: document_id,
-          nfts: [{ 'owner': 'owner', 'token_id': 'token_id' }],
+          nfts: [{ owner: 'owner', token_id: 'token_id' }],
         },
         read_access: ['0x111'],
         write_access: ['0x222'],
-        data: { 'currency': 'USD' },
-        attributes:
-          {
-            animal_type: {
-              type: 'string',
-              value: 'iguana',
-            },
-            number_of_legs: {
-              type: 'decimal',
-              value: '4',
-            },
-            diet: {
-              type: 'string',
-              value: 'insects',
-            },
+        data: { currency: 'USD' },
+        attributes: {
+          animal_type: {
+            type: 'string',
+            value: 'iguana',
           },
+          number_of_legs: {
+            type: 'decimal',
+            value: '4',
+          },
+          diet: {
+            type: 'string',
+            value: 'insects',
+          },
+        },
         scheme: 'iUSDF2ax31e',
         ownerId: 'user_id',
       };

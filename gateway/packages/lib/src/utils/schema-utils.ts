@@ -1,13 +1,21 @@
 import { Schema } from '../models/schema';
 
-export const mapSchemaNames = (nameList: string[], schemas: Schema[]): Schema[] => {
-  const map = nameList.map(name => {
-    return schemas.find(schema => schema.name === name);
-  }).filter(i => i);
+export const mapSchemaNames = (
+  nameList: string[],
+  schemas: Schema[],
+): Schema[] => {
+  const map = nameList
+    .map(name => {
+      return schemas.find(schema => schema.name === name);
+    })
+    .filter(i => i);
   return map as Schema[];
 };
 
-export const getSchemaByName = (name: string, schemas: Schema[]): Schema | undefined => {
+export const getSchemaByName = (
+  name: string,
+  schemas: Schema[],
+): Schema | undefined => {
   return schemas.find(schema => schema.name === name);
 };
 
@@ -16,5 +24,5 @@ export const getSchemaByName = (name: string, schemas: Schema[]): Schema | undef
 // does not have a label it will return the name
 export const getSchemaLabel = (name: string, schemas: Schema[]): string => {
   const schema = schemas.find(schema => schema.name === name);
-  return schema ? (schema.label || schema.name) : '';
+  return schema ? schema.label || schema.name : '';
 };

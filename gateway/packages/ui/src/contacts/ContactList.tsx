@@ -1,4 +1,6 @@
-import React from 'react';
+import { Contact } from '@centrifuge/gateway-lib/models/contact';
+import { User } from '@centrifuge/gateway-lib/models/user';
+import { Formik } from 'formik';
 import {
   Anchor,
   Box,
@@ -13,29 +15,25 @@ import {
   Text,
   TextInput,
 } from 'grommet';
-import { Contact } from '@centrifuge/gateway-lib/models/contact';
-import { Formik } from 'formik';
+import React from 'react';
 import { SecondaryHeader } from '../components/SecondaryHeader';
-import { User } from '@centrifuge/gateway-lib/models/user';
 
-type Props =  {
+type Props = {
   loggedInUser: User;
   contacts?: (Contact & { isEditing?: boolean })[];
   createContact: (contact: Contact) => void;
   updateContact: (contact: Contact) => void;
-}
+};
 
 type State = {
-  submitted: boolean
+  submitted: boolean;
   newContact?: Contact;
   contacts: (Contact & { isEditing?: boolean })[];
-}
-
+};
 
 //TODO This should contain only the list and the actions/modals should be view contacts
 
-export default class ContactList extends React.Component<Props,
-  State> {
+export default class ContactList extends React.Component<Props, State> {
   displayName = 'Contacts';
 
   constructor(props) {
@@ -47,7 +45,7 @@ export default class ContactList extends React.Component<Props,
   }
 
   renderRow(contact: Contact) {
-    const {loggedInUser} = this.props;
+    const { loggedInUser } = this.props;
     return (
       <TableRow key={contact._id}>
         <TableCell>
@@ -59,14 +57,17 @@ export default class ContactList extends React.Component<Props,
               <Text>{contact.address}</Text>
             </Box>
             <Box fill direction="row" gap="small">
-              {contact!.address!.toLowerCase() !== loggedInUser.account.toLowerCase() && <Anchor
-                label={'Edit'}
-                onClick={() => {
-                  // @ts-ignore
-                  contact.isEditing = true;
-                  this.setState({ contacts: this.state.contacts });
-                }}
-              />}
+              {contact!.address!.toLowerCase() !==
+                loggedInUser.account.toLowerCase() && (
+                <Anchor
+                  label={'Edit'}
+                  onClick={() => {
+                    // @ts-ignore
+                    contact.isEditing = true;
+                    this.setState({ contacts: this.state.contacts });
+                  }}
+                />
+              )}
             </Box>
           </Box>
         </TableCell>
@@ -103,7 +104,6 @@ export default class ContactList extends React.Component<Props,
     return (
       <TableRow>
         <TableCell>
-
           <Formik
             validate={values => {
               const errors = {};
@@ -111,82 +111,75 @@ export default class ContactList extends React.Component<Props,
               return errors;
             }}
             initialValues={contact}
-            onSubmit={(values) => {
+            onSubmit={values => {
               this.onContactSave(values);
             }}
           >
-            {
-              ({
-                 values,
-                 errors,
-                 handleChange,
-                 handleSubmit,
-                 setFieldValue,
-               }) => (
-                <form style={{ width: '100%' }}
-                      onSubmit={event => {
-                        event.preventDefault();
-                        this.setState({ submitted: true });
-                        handleSubmit();
-                      }}
-                >
-
-                  <Box direction="row" align="start" fill gap="xsmall">
-                    <Box fill>
-                      <FormField
-                        error={errors.name}
-                      >
-                        <TextInput
-                          name="name"
-                          value={values.name || ''}
-                          onChange={handleChange}
-                        />
-                      </FormField>
-
+            {({
+              values,
+              errors,
+              handleChange,
+              handleSubmit,
+              setFieldValue,
+            }) => (
+              <form
+                style={{ width: '100%' }}
+                onSubmit={event => {
+                  event.preventDefault();
+                  this.setState({ submitted: true });
+                  handleSubmit();
+                }}
+              >
+                <Box direction="row" align="start" fill gap="xsmall">
+                  <Box fill>
+                    <FormField error={errors.name}>
+                      <TextInput
+                        name="name"
+                        value={values.name || ''}
+                        onChange={handleChange}
+                      />
+                    </FormField>
+                  </Box>
+                  <Box fill>
+                    <FormField error={errors.password}>
+                      <TextInput
+                        name="address"
+                        value={values.address || ''}
+                        onChange={handleChange}
+                      />
+                    </FormField>
+                  </Box>
+                  <Box
+                    fill
+                    direction="row"
+                    gap="xsmall"
+                    justify="start"
+                    align="center"
+                  >
+                    <Box>
+                      <Button
+                        type="submit"
+                        primary
+                        label={contact ? 'Update' : 'Add'}
+                      />
                     </Box>
-                    <Box fill>
-                      <FormField
-                        error={errors.password}
-                      >
-                        <TextInput
-                          name="address"
-                          value={values.address || ''}
-                          onChange={handleChange}
-                        />
-                      </FormField>
-                    </Box>
-                    <Box
-                      fill
-                      direction="row"
-                      gap="xsmall"
-                      justify="start"
-                      align="center"
-                    >
-                      <Box>
-                        <Button
-                          type="submit"
-                          primary
-                          label={contact ? 'Update' : 'Add'}
-                        />
-                      </Box>
-                      <Box>
-                        <Button
-                          onClick={() => {
-                            if (contact) {
-                              contact.isEditing = false;
-                              this.setState({ contacts: this.state.contacts });
-                            } else {
-                              this.setState({ newContact: undefined });
-                            }
-                          }}
-                          label="Cancel"
-                        />
-                      </Box>
+                    <Box>
+                      <Button
+                        onClick={() => {
+                          if (contact) {
+                            contact.isEditing = false;
+                            this.setState({ contacts: this.state.contacts });
+                          } else {
+                            this.setState({ newContact: undefined });
+                          }
+                        }}
+                        label="Cancel"
+                      />
                     </Box>
                   </Box>
-                </form>
-              )
-            }
+                </Box>
+              </form>
+            )}
           </Formik>
         </TableCell>
       </TableRow>
@@ -206,7 +199,7 @@ export default class ContactList extends React.Component<Props,
           />
         </SecondaryHeader>
 
-        <Box pad={{horizontal:"medium"}}>
+        <Box pad={{ horizontal: 'medium' }}>
           <Table>
             <TableHeader>
               <TableRow>

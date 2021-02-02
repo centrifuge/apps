@@ -1,43 +1,41 @@
-import { mount, shallow } from 'enzyme';
-import React from 'react';
-import { Spinner } from '@centrifuge/axis-spinner';
-import CreateDocument from '../CreateDocument';
-import { MemoryRouter,Router } from 'react-router';
-import { defaultContacts, defaultSchemas, defaultUser } from '../../test-utilities/default-data';
-import { act } from 'react-dom/test-utils';
-import { withAllProvidersAndContexts } from '../../test-utilities/test-providers';
-import DocumentForm from '../DocumentForm';
-import { Preloader } from '../../components/Preloader';
-import { PageError } from '../../components/PageError';
+import { mount } from 'enzyme';
 import { createMemoryHistory } from 'history';
-import {Modal} from '@centrifuge/axis-modal';
-import routes from '../routes';
-import { Heading, Paragraph } from 'grommet';
-import { Nfts } from '../Nfts';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { MemoryRouter, Router } from 'react-router';
+import { PageError } from '../../components/PageError';
+import {
+  defaultContacts,
+  defaultSchemas,
+  defaultUser,
+} from '../../test-utilities/default-data';
+import { withAllProvidersAndContexts } from '../../test-utilities/test-providers';
+import CreateDocument from '../CreateDocument';
+import DocumentForm from '../DocumentForm';
 import { FundingAgreements } from '../FundingAgreements';
+import { Nfts } from '../Nfts';
+import routes from '../routes';
 
 jest.mock('../../http-client');
 const httpClient = require('../../http-client').httpClient;
 
 describe('Create Document', () => {
-
   beforeEach(() => {
-    httpClient.contacts.list.mockImplementation(async (data) => {
+    httpClient.contacts.list.mockImplementation(async data => {
       return { data: defaultContacts };
     });
 
-    httpClient.schemas.list.mockImplementation(async (data) => {
+    httpClient.schemas.list.mockImplementation(async data => {
       return { data: defaultSchemas };
     });
   });
 
   it('Should load the data and render the page', async () => {
-
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
           <MemoryRouter>
-            <CreateDocument/>
+            <CreateDocument />
           </MemoryRouter>,
           {
             ...defaultUser,
@@ -58,14 +56,11 @@ describe('Create Document', () => {
       expect(documentForm.find(Nfts).length).toBe(0);
       expect(documentForm.find(FundingAgreements).length).toBe(0);
     });
-
   });
 
-
   it('Should render an error if it fails to load schemas', async () => {
-
     const error = new Error('Can not load lists');
-    httpClient.schemas.list.mockImplementation(async (data) => {
+    httpClient.schemas.list.mockImplementation(async data => {
       throw error;
     });
 
@@ -73,7 +68,7 @@ describe('Create Document', () => {
       const component = mount(
         withAllProvidersAndContexts(
           <MemoryRouter>
-            <CreateDocument/>
+            <CreateDocument />
           </MemoryRouter>,
           {
             ...defaultUser,
@@ -89,13 +84,11 @@ describe('Create Document', () => {
       // THe user has only one schema set
       expect(pageError.prop('error')).toEqual(error);
     });
-
   });
 
   it('Should render an error if it fails to load contacts', async () => {
-
     const error = new Error('Can not load contacts');
-    httpClient.contacts.list.mockImplementation(async (data) => {
+    httpClient.contacts.list.mockImplementation(async data => {
       throw error;
     });
 
@@ -103,7 +96,7 @@ describe('Create Document', () => {
       const component = mount(
         withAllProvidersAndContexts(
           <MemoryRouter>
-            <CreateDocument/>
+            <CreateDocument />
           </MemoryRouter>,
           {
             ...defaultUser,
@@ -119,22 +112,20 @@ describe('Create Document', () => {
       // THe user has only one schema set
       expect(pageError.prop('error')).toEqual(error);
     });
-
   });
-
 
   it('Should create a document', async () => {
     const history = createMemoryHistory();
 
-    httpClient.documents.create.mockImplementation(async (data) => {
-      return { data: {_id:'new_document' }};
+    httpClient.documents.create.mockImplementation(async data => {
+      return { data: { _id: 'new_document' } };
     });
 
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
           <Router history={history}>
-            <CreateDocument/>
+            <CreateDocument />
           </Router>,
           {
             ...defaultUser,
@@ -157,5 +148,3 @@ describe('Create Document', () => {
 
   // TODO: we silently fail right now if document creation fails
 });
-
-

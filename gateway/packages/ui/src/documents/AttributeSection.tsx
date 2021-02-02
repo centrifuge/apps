@@ -1,5 +1,5 @@
-import React, { FunctionComponent } from 'react';
 import { Grid } from 'grommet';
+import React, { FunctionComponent } from 'react';
 import { Section } from '../components/Section';
 import AttributeField from './AttributeField';
 

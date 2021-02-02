@@ -1,8 +1,8 @@
+import { User } from '@centrifuge/gateway-lib/models/user';
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { promisify } from 'util';
 import * as speakeasy from 'speakeasy';
-import { User } from '@centrifuge/gateway-lib/models/user';
+import { promisify } from 'util';
 import { DatabaseService } from '../database/database.service';
 
 @Injectable()

@@ -1,19 +1,14 @@
-import { mount, shallow } from 'enzyme';
-import React from 'react';
+import { Schema } from '@centrifuge/gateway-lib/models/schema';
+import { mount } from 'enzyme';
 import { Paragraph, TextArea } from 'grommet';
+import React from 'react';
 import { withAxis } from '../../test-utilities/test-providers';
 import SchemaForm from '../SchemaForm';
-import { Schema } from '@centrifuge/gateway-lib/models/schema';
-
 
 describe('Schema Form', () => {
+  const onSubmit = jest.fn(() => {});
 
-
-  const onSubmit = jest.fn(() => {
-  });
-
-  const onDiscard = jest.fn(() => {
-  });
+  const onDiscard = jest.fn(() => {});
 
   beforeEach(() => {
     onSubmit.mockClear();
@@ -34,15 +29,19 @@ describe('Schema Form', () => {
           infoParagraph={info}
           readonly={false}
           onDiscard={onDiscard}
-          onSubmit={onSubmit}/>,
+          onSubmit={onSubmit}
+        />,
       ),
     );
 
     expect(component.find(Paragraph).text()).toEqual(info);
-    expect(component.find({ label: submitLabel }).find('button').length).toEqual(1);
-    expect(component.find(TextArea).prop('defaultValue')).toEqual(Schema.toEditableJson(schema));
+    expect(
+      component.find({ label: submitLabel }).find('button').length,
+    ).toEqual(1);
+    expect(component.find(TextArea).prop('defaultValue')).toEqual(
+      Schema.toEditableJson(schema),
+    );
   });
-
 
   it('should not submit the form because of form validation', async () => {
     const schema = Schema.getDefaultValues();
@@ -54,7 +53,8 @@ describe('Schema Form', () => {
           infoParagraph={info}
           readonly={false}
           onDiscard={onDiscard}
-          onSubmit={onSubmit}/>,
+          onSubmit={onSubmit}
+        />,
       ),
     );
 
@@ -63,36 +63,34 @@ describe('Schema Form', () => {
     expect(onSubmit).toHaveBeenCalledTimes(0);
   });
 
-
   it('should  submit the form', async () => {
-    const schema: any =
+    const schema: any = {
+      name: 'TestAssetNFT',
+      attributes: [
         {
-          "name": "TestAssetNFT",
-          "attributes": [
-            {
-              "name": "reference_id",
-              "label": "Reference ID",
-              "type": "string"
-            },
+          name: 'reference_id',
+          label: 'Reference ID',
+          type: 'string',
+        },
+      ],
+      registries: [
+        {
+          label: 'TestAssetNFT',
+          address: '0xc2c202c512786742A6A5C85C071ed140d03eF87c',
+          asset_manager_address: '0x75d05e5a0EC4c6424b093c89425f1443991daf09',
+          oracle_address: '0x75d05e5a0EC4c6424b093c89425f1443991daf09',
+          proofs: [
+            'cd_tree.attributes[0xe24e7917d4fcaf79095539ac23af9f6d5c80ea8b0d95c9cd860152bff8fdab17].byte_val',
           ],
-          "registries": [
-            {
-              "label": "TestAssetNFT",
-              "address": "0xc2c202c512786742A6A5C85C071ed140d03eF87c",
-              "asset_manager_address": "0x75d05e5a0EC4c6424b093c89425f1443991daf09",
-              "oracle_address": "0x75d05e5a0EC4c6424b093c89425f1443991daf09",
-              "proofs": [
-                "cd_tree.attributes[0xe24e7917d4fcaf79095539ac23af9f6d5c80ea8b0d95c9cd860152bff8fdab17].byte_val",
-              ]
-            }
-          ],
-          "formFeatures": {
-            "fundingAgreement": false,
-            "columnNo": 2,
-            "comments": true,
-            "defaultSection": "Attributes"
-          }
-        };
+        },
+      ],
+      formFeatures: {
+        fundingAgreement: false,
+        columnNo: 2,
+        comments: true,
+        defaultSection: 'Attributes',
+      },
+    };
 
     schema.name = 'test-schema';
 
@@ -104,7 +102,8 @@ describe('Schema Form', () => {
           infoParagraph={info}
           readonly={false}
           onDiscard={onDiscard}
-          onSubmit={onSubmit}/>,
+          onSubmit={onSubmit}
+        />,
       ),
     );
 
@@ -117,7 +116,6 @@ describe('Schema Form', () => {
     });
   });
 
-
   it('should discard the form', async () => {
     const schema = Schema.getDefaultValues();
     const component = mount(
@@ -128,7 +126,8 @@ describe('Schema Form', () => {
           infoParagraph={info}
           readonly={false}
           onDiscard={onDiscard}
-          onSubmit={onSubmit}/>,
+          onSubmit={onSubmit}
+        />,
       ),
     );
 
@@ -138,7 +137,6 @@ describe('Schema Form', () => {
   });
 
   it('Should have all fields disabled in readonly/view mode', async () => {
-
     const schema = Schema.getDefaultValues();
 
     const component = mount(
@@ -149,11 +147,10 @@ describe('Schema Form', () => {
           infoParagraph={info}
           readonly={true}
           onDiscard={onDiscard}
-          onSubmit={onSubmit}/>,
+          onSubmit={onSubmit}
+        />,
       ),
     );
     expect(component.find({ readOnly: true }).find(TextArea).length).toBe(1);
   });
 });
-
-

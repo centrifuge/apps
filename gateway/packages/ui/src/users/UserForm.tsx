@@ -1,4 +1,15 @@
-import React from 'react';
+import { MultipleSelect } from '@centrifuge/axis-multiple-select';
+import { SearchSelect } from '@centrifuge/axis-search-select';
+import { Organization } from '@centrifuge/gateway-lib/models/organization';
+import { Schema } from '@centrifuge/gateway-lib/models/schema';
+import {
+  TwoFaType,
+  User,
+  UserWithOrg,
+} from '@centrifuge/gateway-lib/models/user';
+import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants';
+import { mapSchemaNames } from '@centrifuge/gateway-lib/utils/schema-utils';
+import { Formik } from 'formik';
 import {
   Box,
   Button,
@@ -8,20 +19,9 @@ import {
   Text,
   TextInput,
 } from 'grommet';
-import {
-  TwoFaType,
-  User,
-  UserWithOrg,
-} from '@centrifuge/gateway-lib/models/user';
-import * as Yup from 'yup';
-import { Formik } from 'formik';
-import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants';
-import { MultipleSelect } from '@centrifuge/axis-multiple-select';
-import { Schema } from '@centrifuge/gateway-lib/models/schema';
-import { mapSchemaNames } from '@centrifuge/gateway-lib/utils/schema-utils';
-import { Organization } from '@centrifuge/gateway-lib/models/organization';
-import { SearchSelect } from '@centrifuge/axis-search-select';
+import React from 'react';
 import { Link } from 'react-router-dom';
+import * as Yup from 'yup';
 import routes from '../routes';
 
 type InviteProps = {
@@ -43,11 +43,11 @@ export default class UserForm extends React.Component<InviteProps> {
     const { user, schemas, organizations } = this.props;
     const { submitted, newOrg } = this.state;
 
-    const twoFAOptions = Object.values(TwoFaType)
+    const twoFAOptions = Object.values(TwoFaType);
     const twoFALabels = {
       [TwoFaType.APP]: 'Authenticator App',
-      [TwoFaType.EMAIL]: 'Email'
-    }
+      [TwoFaType.EMAIL]: 'Email',
+    };
 
     const userValidation = Yup.object().shape({
       organizationName:
@@ -191,11 +191,11 @@ export default class UserForm extends React.Component<InviteProps> {
                     name="twoFAType"
                     options={twoFAOptions}
                     value={values!.twoFAType}
-                    labelKey={(item) => {
-                      return twoFALabels[item]
+                    labelKey={item => {
+                      return twoFALabels[item];
                     }}
                     onChange={event => {
-                      console.info(event.option)
+                      console.info(event.option);
                       setFieldValue('twoFAType', event.option);
                     }}
                   />

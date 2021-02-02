@@ -1,15 +1,13 @@
-import React from 'react';
-import { mount } from 'enzyme';
-import { BrowserRouter } from 'react-router-dom';
-import AttributeField from '../AttributeField';
-import { Attribute, AttrTypes } from '@centrifuge/gateway-lib/models/schema';
-import { NumberInput } from '@centrifuge/axis-number-input';
 import { DateInput } from '@centrifuge/axis-date-input';
+import { NumberInput } from '@centrifuge/axis-number-input';
+import { Attribute, AttrTypes } from '@centrifuge/gateway-lib/models/schema';
+import { mount } from 'enzyme';
 import { Select, TextInput } from 'grommet';
+import React from 'react';
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers';
+import AttributeField from '../AttributeField';
 
 describe('AttributeField', () => {
-
   it('Should render a DECIMAL ', () => {
     const attr: Attribute = {
       name: 'some_name',
@@ -17,8 +15,7 @@ describe('AttributeField', () => {
       label: 'Some Input label',
     };
     const component = mount(
-      withAllProvidersAndContexts(
-        <AttributeField attr={attr}/>),
+      withAllProvidersAndContexts(<AttributeField attr={attr} />),
     );
     const input = component.find(NumberInput);
     expect(input.prop('disabled')).toBeUndefined();
@@ -28,7 +25,8 @@ describe('AttributeField', () => {
 
     const disabled = mount(
       withAllProvidersAndContexts(
-        <AttributeField attr={attr} isViewMode={true}/>),
+        <AttributeField attr={attr} isViewMode={true} />,
+      ),
     );
 
     expect(disabled.find(NumberInput).prop('disabled')).not.toBeUndefined();
@@ -41,8 +39,7 @@ describe('AttributeField', () => {
       label: 'Some Input label',
     };
     const component = mount(
-      withAllProvidersAndContexts(
-        <AttributeField attr={attr}/>),
+      withAllProvidersAndContexts(<AttributeField attr={attr} />),
     );
     const input = component.find(NumberInput);
     expect(input.prop('disabled')).toBeUndefined();
@@ -53,11 +50,11 @@ describe('AttributeField', () => {
 
     const disabled = mount(
       withAllProvidersAndContexts(
-        <AttributeField attr={attr} isViewMode={true}/>),
+        <AttributeField attr={attr} isViewMode={true} />,
+      ),
     );
 
     expect(disabled.find(NumberInput).prop('disabled')).not.toBeUndefined();
-
   });
 
   it('Should render a PERCENT ', () => {
@@ -67,8 +64,7 @@ describe('AttributeField', () => {
       label: 'Some Input label',
     };
     const component = mount(
-      withAllProvidersAndContexts(
-        <AttributeField attr={attr}/>),
+      withAllProvidersAndContexts(<AttributeField attr={attr} />),
     );
     const input = component.find(NumberInput);
     expect(input.prop('disabled')).toBeUndefined();
@@ -80,11 +76,11 @@ describe('AttributeField', () => {
 
     const disabled = mount(
       withAllProvidersAndContexts(
-        <AttributeField attr={attr} isViewMode={true}/>),
+        <AttributeField attr={attr} isViewMode={true} />,
+      ),
     );
 
     expect(disabled.find(NumberInput).prop('disabled')).not.toBeUndefined();
-
   });
 
   it('Should render a STRING ', () => {
@@ -94,8 +90,7 @@ describe('AttributeField', () => {
       label: 'Some Input label',
     };
     const component = mount(
-      withAllProvidersAndContexts(
-        <AttributeField attr={attr}/>),
+      withAllProvidersAndContexts(<AttributeField attr={attr} />),
     );
     const input = component.find(TextInput);
     expect(input.prop('disabled')).toBeUndefined();
@@ -105,11 +100,11 @@ describe('AttributeField', () => {
 
     const disabled = mount(
       withAllProvidersAndContexts(
-        <AttributeField attr={attr} isViewMode={true}/>),
+        <AttributeField attr={attr} isViewMode={true} />,
+      ),
     );
 
     expect(disabled.find(TextInput).prop('disabled')).not.toBeUndefined();
-
   });
 
   it('Should render a BYTES ', () => {
@@ -119,8 +114,7 @@ describe('AttributeField', () => {
       label: 'Some Input label',
     };
     const component = mount(
-      withAllProvidersAndContexts(
-        <AttributeField attr={attr}/>),
+      withAllProvidersAndContexts(<AttributeField attr={attr} />),
     );
     const input = component.find(TextInput);
     expect(input.prop('disabled')).toBeUndefined();
@@ -130,11 +124,11 @@ describe('AttributeField', () => {
 
     const disabled = mount(
       withAllProvidersAndContexts(
-        <AttributeField attr={attr} isViewMode={true}/>),
+        <AttributeField attr={attr} isViewMode={true} />,
+      ),
     );
 
     expect(disabled.find(TextInput).prop('disabled')).not.toBeUndefined();
-
   });
 
   it('Should render a TIMESTAMP ', () => {
@@ -144,8 +138,7 @@ describe('AttributeField', () => {
       label: 'Some Input label',
     };
     const component = mount(
-      withAllProvidersAndContexts(
-        <AttributeField attr={attr}/>),
+      withAllProvidersAndContexts(<AttributeField attr={attr} />),
     );
     const input = component.find(DateInput);
     expect(input.prop('disabled')).toBeUndefined();
@@ -155,11 +148,11 @@ describe('AttributeField', () => {
 
     const disabled = mount(
       withAllProvidersAndContexts(
-        <AttributeField attr={attr} isViewMode={true}/>),
+        <AttributeField attr={attr} isViewMode={true} />,
+      ),
     );
 
     expect(disabled.find(DateInput).prop('disabled')).not.toBeUndefined();
-
   });
 
   it('Should render Select with options instead of input ', () => {
@@ -167,15 +160,10 @@ describe('AttributeField', () => {
       name: 'some_name',
       type: AttrTypes.STRING,
       label: 'Some Input label',
-      options: [
-        '1',
-        '2',
-        '3',
-      ],
+      options: ['1', '2', '3'],
     };
     const component = mount(
-      withAllProvidersAndContexts(
-        <AttributeField attr={attr}/>),
+      withAllProvidersAndContexts(<AttributeField attr={attr} />),
     );
     const input = component.find(Select);
     expect(input.prop('disabled')).toBeUndefined();
@@ -185,12 +173,10 @@ describe('AttributeField', () => {
 
     const disabled = mount(
       withAllProvidersAndContexts(
-        <AttributeField attr={attr} isViewMode={true}/>),
+        <AttributeField attr={attr} isViewMode={true} />,
+      ),
     );
 
     expect(disabled.find(Select).prop('disabled')).not.toBeUndefined();
-
   });
-
-})
-;
+});

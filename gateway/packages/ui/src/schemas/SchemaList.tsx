@@ -1,17 +1,25 @@
-import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react';
-import { Anchor, Box, Button, CheckBox, Heading, Text } from 'grommet';
 import { Modal } from '@centrifuge/axis-modal';
 import { Schema } from '@centrifuge/gateway-lib/models/schema';
-import { SecondaryHeader } from '../components/SecondaryHeader';
 import { formatDate } from '@centrifuge/gateway-lib/utils/formaters';
-import { Preloader } from '../components/Preloader';
-import SchemaForm from './SchemaForm';
-import { httpClient } from '../http-client';
-import { useMergeState } from '../hooks';
-import { NOTIFICATION, NotificationContext } from '../components/NotificationContext';
-import { PageError } from '../components/PageError';
 import { AxiosError } from 'axios';
+import { Anchor, Box, Button, CheckBox, Heading, Text } from 'grommet';
+import React, {
+  FunctionComponent,
+  useCallback,
+  useContext,
+  useEffect,
+} from 'react';
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
+import {
+  NOTIFICATION,
+  NotificationContext,
+} from '../components/NotificationContext';
+import { PageError } from '../components/PageError';
+import { Preloader } from '../components/Preloader';
+import { SecondaryHeader } from '../components/SecondaryHeader';
+import { useMergeState } from '../hooks';
+import { httpClient } from '../http-client';
+import SchemaForm from './SchemaForm';
 
 type State = {
   schemas: Schema[];
@@ -20,8 +28,8 @@ type State = {
   showArchive: boolean;
   formMode: FormModes;
   openedSchemaForm: boolean;
-  error: any,
-}
+  error: any;
+};
 
 /**
  * Holds the Schema form modes
@@ -66,12 +74,9 @@ const formModePropMapping = {
       title: 'View Schema',
     },
   },
-
 };
 
-
 const SchemaList: FunctionComponent = () => {
-
   const [
     {
       loadingMessage,
@@ -82,7 +87,8 @@ const SchemaList: FunctionComponent = () => {
       showArchive,
       error,
     },
-    setState] = useMergeState<State>({
+    setState,
+  ] = useMergeState<State>({
     loadingMessage: 'Loading',
     schemas: [],
     selectedSchema: null,
@@ -94,39 +100,37 @@ const SchemaList: FunctionComponent = () => {
 
   const notification = useContext(NotificationContext);
 
-  const displayPageError = useCallback((error) => {
-    setState({
-      loadingMessage: null,
-      error,
-    });
-  }, [setState]);
-
+  const displayPageError = useCallback(
+    error => {
+      setState({
+        loadingMessage: null,
+        error,
+      });
+    },
+    [setState],
+  );
 
   const loadData = useCallback(async () => {
     setState({
       loadingMessage: 'Loading',
     });
     try {
-
       const schemas = (await httpClient.schemas.list()).data;
 
       setState({
         loadingMessage: null,
         schemas,
       });
-
     } catch (e) {
       displayPageError(e);
     }
   }, [setState, displayPageError]);
-
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
   const handleSubmit = async (schema: Schema) => {
-
     const context: any = {};
     if (selectedSchema && (selectedSchema as Schema)._id) {
       context.errorTitle = 'Failed to update schema';
@@ -158,11 +162,11 @@ const SchemaList: FunctionComponent = () => {
         message: (e as AxiosError)!.response!.data.message,
       });
     }
-
   };
 
   const archiveSchema = async (schema: Schema) => {
-    if (!schema._id) throw new Error('Can not archive a schema that does not have _id set');
+    if (!schema._id)
+      throw new Error('Can not archive a schema that does not have _id set');
     setState({
       loadingMessage: 'Archiving schema',
       selectedSchema: null,
@@ -184,7 +188,8 @@ const SchemaList: FunctionComponent = () => {
   };
 
   const restoreSchema = async (schema: Schema) => {
-    if (!schema._id) throw new Error('Can not restore a schema that does not have _id set');
+    if (!schema._id)
+      throw new Error('Can not restore a schema that does not have _id set');
     setState({
       loadingMessage: 'Restoring schema',
       selectedSchema: null,
@@ -217,7 +222,7 @@ const SchemaList: FunctionComponent = () => {
     });
   };
 
-  const viewSchema = (data) => {
+  const viewSchema = data => {
     setState({
       selectedSchema: data,
       formMode: FormModes.VIEW,
@@ -225,7 +230,7 @@ const SchemaList: FunctionComponent = () => {
     });
   };
 
-  const editSchema = (data) => {
+  const editSchema = data => {
     setState({
       selectedSchema: data,
       formMode: FormModes.EDIT,
@@ -233,8 +238,7 @@ const SchemaList: FunctionComponent = () => {
     });
   };
 
-  const renderSchemas = (data) => {
-
+  const renderSchemas = data => {
     return (
       <DataTableWithDynamicHeight
         data={data}
@@ -244,13 +248,11 @@ const SchemaList: FunctionComponent = () => {
           {
             property: 'name',
             header: 'Name',
-            render: data =>
-              data.name ? <Text>{data.name}</Text> : null,
+            render: data => (data.name ? <Text>{data.name}</Text> : null),
           },
           {
             property: 'label',
             header: 'Label',
-
           },
           {
             property: 'createdAt',
@@ -269,7 +271,6 @@ const SchemaList: FunctionComponent = () => {
             sortable: false,
             header: 'Actions',
             render: data => {
-
               let actions = [
                 <Anchor
                   key={'view'}
@@ -277,7 +278,8 @@ const SchemaList: FunctionComponent = () => {
                   onClick={() => {
                     viewSchema(data);
                   }}
-                />];
+                />,
+              ];
 
               if (!data.archived) {
                 actions = [
@@ -295,7 +297,8 @@ const SchemaList: FunctionComponent = () => {
                     onClick={() => {
                       archiveSchema(data);
                     }}
-                  />];
+                  />,
+                ];
               } else {
                 actions = [
                   ...actions,
@@ -305,11 +308,14 @@ const SchemaList: FunctionComponent = () => {
                     onClick={() => {
                       restoreSchema(data);
                     }}
-                  />];
+                  />,
+                ];
               }
-              return <Box direction="row" gap="small">
-                {actions}
-              </Box>;
+              return (
+                <Box direction="row" gap="small">
+                  {actions}
+                </Box>
+              );
             },
           },
         ]}
@@ -317,14 +323,11 @@ const SchemaList: FunctionComponent = () => {
     );
   };
 
-
   if (loadingMessage) {
-    return <Preloader message={loadingMessage}/>;
+    return <Preloader message={loadingMessage} />;
   }
 
-  if (error)
-    return <PageError error={error}/>;
-
+  if (error) return <PageError error={error} />;
 
   return (
     <Box fill>
@@ -334,16 +337,10 @@ const SchemaList: FunctionComponent = () => {
           <CheckBox
             label={'Show Archived'}
             checked={showArchive}
-            onChange={(event) => setState({ showArchive: event.target.checked })}
-
+            onChange={event => setState({ showArchive: event.target.checked })}
           />
-          <Button
-            primary
-            onClick={createSchema}
-            label="Create Schema"
-          />
+          <Button primary onClick={createSchema} label="Create Schema" />
         </Box>
-
       </SecondaryHeader>
       <Modal
         opened={openedSchemaForm}
@@ -361,14 +358,11 @@ const SchemaList: FunctionComponent = () => {
       </Modal>
       <Box pad={{ horizontal: 'medium' }}>
         {renderSchemas(
-          schemas.filter(
-            schema => showArchive === !!schema.archived,
-          ),
+          schemas.filter(schema => showArchive === !!schema.archived),
         )}
       </Box>
     </Box>
   );
-
 };
 
 export default SchemaList;

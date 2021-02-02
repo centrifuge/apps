@@ -1,15 +1,15 @@
-import { UsersController } from '../users.controller';
-import { databaseServiceProvider } from '../../database/database.providers';
-import { User, UserWithOrg } from '../../../../lib/models/user';
-import config from '../../config';
-import { Test, TestingModule } from '@nestjs/testing';
-import { SessionGuard } from '../../auth/SessionGuard';
-import { DatabaseService } from '../../database/database.service';
-import { PERMISSIONS } from '../../../../lib/utils/constants';
-import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module';
-import { testingHelpers } from '../../mocks/centrifuge-client.mock';
 import { MailerService } from '@nestjs-modules/mailer';
+import { Test, TestingModule } from '@nestjs/testing';
+import { User, UserWithOrg } from '@centrifuge/gateway-lib/models/user';
+import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants';
+import { SessionGuard } from '../../auth/SessionGuard';
+import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module';
+import config from '../../config';
+import { databaseServiceProvider } from '../../database/database.providers';
+import { DatabaseService } from '../../database/database.service';
+import { testingHelpers } from '../../mocks/centrifuge-client.mock';
 import { MailerServiceMock } from '../../mocks/mailer-service.mock';
+import { UsersController } from '../users.controller';
 
 describe('Users controller', () => {
   let invitedUser: User;
@@ -402,9 +402,7 @@ describe('Users controller', () => {
     };
 
     const insertedUser = await usersController.invite(newUser);
-    const result = await usersController.remove(
-      { id: insertedUser._id }
-    );
+    const result = await usersController.remove({ id: insertedUser._id });
     expect(result).toBe(1);
   });
 });

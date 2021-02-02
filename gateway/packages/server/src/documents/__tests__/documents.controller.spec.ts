@@ -1,17 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { Document } from '../../../../lib/models/document';
-import { SessionGuard } from '../../auth/SessionGuard';
-import { databaseServiceProvider } from '../../database/database.providers';
-import { DatabaseService } from '../../database/database.service';
-import { DocumentsController } from '../documents.controller';
-import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module';
-import { CentrifugeService } from '../../centrifuge-client/centrifuge.service';
 import {
   V2CreateDocumentRequest,
   V2SignedAttributeRequest,
 } from '@centrifuge/gateway-lib/centrifuge-node-client';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Document } from '@centrifuge/gateway-lib/models/document';
+import { SessionGuard } from '../../auth/SessionGuard';
+import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module';
+import { CentrifugeService } from '../../centrifuge-client/centrifuge.service';
+import { databaseServiceProvider } from '../../database/database.providers';
+import { DatabaseService } from '../../database/database.service';
+import { DocumentsController } from '../documents.controller';
 import TypeEnum = V2SignedAttributeRequest.TypeEnum;
-import { RegistriesErrors } from '@centrifuge/gateway-lib/models/schema';
 
 describe('DocumentsController', () => {
   let documentsModule: TestingModule;

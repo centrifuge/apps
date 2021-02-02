@@ -1,18 +1,20 @@
-import { mount, shallow } from 'enzyme';
+import { extendContactsWithUsers } from '@centrifuge/gateway-lib/models/contact';
+import { mount } from 'enzyme';
 import React from 'react';
-import { Spinner } from '@centrifuge/axis-spinner';
-import { ViewDocument } from '../ViewDocument';
-import { MemoryRouter } from 'react-router';
-import { defaultContacts, defaultSchemas, defaultUser } from '../../test-utilities/default-data';
 import { act } from 'react-dom/test-utils';
+import { MemoryRouter } from 'react-router';
+import { PageError } from '../../components/PageError';
+import { Preloader } from '../../components/Preloader';
+import {
+  defaultContacts,
+  defaultSchemas,
+  defaultUser,
+} from '../../test-utilities/default-data';
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers';
 import DocumentForm from '../DocumentForm';
-import { Modal } from '@centrifuge/axis-modal';
-import { Preloader } from '../../components/Preloader';
-import { extendContactsWithUsers } from '@centrifuge/gateway-lib/models/contact';
-import { PageError } from '../../components/PageError';
-import { Nfts } from '../Nfts';
 import { FundingAgreements } from '../FundingAgreements';
+import { Nfts } from '../Nfts';
+import { ViewDocument } from '../ViewDocument';
 
 jest.mock('../../http-client');
 const httpClient = require('../../http-client').httpClient;
@@ -20,10 +22,9 @@ const httpClient = require('../../http-client').httpClient;
 const ViewDocumentDynamicProps: any = ViewDocument;
 
 describe('View Document', () => {
-
   let location = '';
 
-  const push = (path) => {
+  const push = path => {
     location = path;
   };
   const document = {
@@ -46,15 +47,15 @@ describe('View Document', () => {
     },
   };
   beforeEach(() => {
-    httpClient.contacts.list.mockImplementation(async (data) => {
+    httpClient.contacts.list.mockImplementation(async data => {
       return { data: defaultContacts };
     });
 
-    httpClient.schemas.list.mockImplementation(async (data) => {
+    httpClient.schemas.list.mockImplementation(async data => {
       return { data: defaultSchemas };
     });
 
-    httpClient.documents.getById.mockImplementation(async (id) => {
+    httpClient.documents.getById.mockImplementation(async id => {
       return {
         data: document,
       };
@@ -62,20 +63,18 @@ describe('View Document', () => {
   });
 
   it('Should render the preloader', async () => {
-
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
           <MemoryRouter>
             <ViewDocumentDynamicProps
-              history={
-                push
-              }
+              history={push}
               match={{
                 params: {
                   id: '100',
                 },
-              }}/>
+              }}
+            />
           </MemoryRouter>,
           {
             ...defaultUser,
@@ -89,24 +88,21 @@ describe('View Document', () => {
       expect(preloader.length).toEqual(1);
       expect(preloader.prop('message')).toEqual('Loading');
     });
-
   });
 
   it('Should load the data and render the page', async () => {
-
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
           <MemoryRouter>
             <ViewDocumentDynamicProps
-              history={
-                push
-              }
+              history={push}
               match={{
                 params: {
                   id: '100',
                 },
-              }}/>
+              }}
+            />
           </MemoryRouter>,
           {
             ...defaultUser,
@@ -120,7 +116,9 @@ describe('View Document', () => {
       component.update();
       const documentForm = component.find(DocumentForm);
 
-      const extendedContacts = extendContactsWithUsers(defaultContacts, [defaultUser]);
+      const extendedContacts = extendContactsWithUsers(defaultContacts, [
+        defaultUser,
+      ]);
       // Edit does not filter schemas based on the user because
       // you should still edit a document you have even if you can not create a new one
       expect(documentForm.prop('schemas')).toEqual(defaultSchemas);
@@ -130,14 +128,11 @@ describe('View Document', () => {
 
       expect(documentForm.find(Nfts).prop('viewMode')).toBe(true);
       expect(documentForm.find(FundingAgreements).prop('viewMode')).toBe(true);
-
     });
-
   });
 
   it('Should not render funding agreements', async () => {
-
-    httpClient.documents.getById.mockImplementation(async (id) => {
+    httpClient.documents.getById.mockImplementation(async id => {
       return {
         data: {
           ...document,
@@ -159,14 +154,13 @@ describe('View Document', () => {
         withAllProvidersAndContexts(
           <MemoryRouter>
             <ViewDocumentDynamicProps
-              history={
-                push
-              }
+              history={push}
               match={{
                 params: {
                   id: '100',
                 },
-              }}/>
+              }}
+            />
           </MemoryRouter>,
           {
             ...defaultUser,
@@ -181,14 +175,11 @@ describe('View Document', () => {
       const documentForm = component.find(DocumentForm);
       expect(documentForm.find(FundingAgreements).length).toBe(0);
     });
-
   });
 
-
   it('Should render an error if it fails to load schemas', async () => {
-
     const error = new Error('Can not load lists');
-    httpClient.schemas.list.mockImplementation(async (data) => {
+    httpClient.schemas.list.mockImplementation(async data => {
       throw error;
     });
 
@@ -197,14 +188,13 @@ describe('View Document', () => {
         withAllProvidersAndContexts(
           <MemoryRouter>
             <ViewDocumentDynamicProps
-              history={
-                push
-              }
+              history={push}
               match={{
                 params: {
                   id: '100',
                 },
-              }}/>
+              }}
+            />
           </MemoryRouter>,
           {
             ...defaultUser,
@@ -220,13 +210,11 @@ describe('View Document', () => {
       // THe user has only one schema set
       expect(pageError.prop('error')).toEqual(error);
     });
-
   });
 
   it('Should render an error if it fails to load contacts', async () => {
-
     const error = new Error('Can not load contacts');
-    httpClient.contacts.list.mockImplementation(async (data) => {
+    httpClient.contacts.list.mockImplementation(async data => {
       throw error;
     });
 
@@ -235,14 +223,13 @@ describe('View Document', () => {
         withAllProvidersAndContexts(
           <MemoryRouter>
             <ViewDocumentDynamicProps
-              history={
-                push
-              }
+              history={push}
               match={{
                 params: {
                   id: '100',
                 },
-              }}/>
+              }}
+            />
           </MemoryRouter>,
           {
             ...defaultUser,
@@ -258,13 +245,11 @@ describe('View Document', () => {
       // THe user has only one schema set
       expect(pageError.prop('error')).toEqual(error);
     });
-
   });
 
   it('Should render an error if it fails to load the document', async () => {
-
     const error = new Error('Can not load document');
-    httpClient.documents.getById.mockImplementation(async (data) => {
+    httpClient.documents.getById.mockImplementation(async data => {
       throw error;
     });
 
@@ -273,14 +258,13 @@ describe('View Document', () => {
         withAllProvidersAndContexts(
           <MemoryRouter>
             <ViewDocumentDynamicProps
-              history={
-                push
-              }
+              history={push}
               match={{
                 params: {
                   id: '100',
                 },
-              }}/>
+              }}
+            />
           </MemoryRouter>,
           {
             ...defaultUser,
@@ -296,10 +280,5 @@ describe('View Document', () => {
       // THe user has only one schema set
       expect(pageError.prop('error')).toEqual(error);
     });
-
   });
-
-
 });
-
-

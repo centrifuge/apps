@@ -1,18 +1,4 @@
 import {
-  Body,
-  Controller,
-  MethodNotAllowedException,
-  Get,
-  NotFoundException,
-  Param,
-  Post,
-  Put,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import { DatabaseService } from '../database/database.service';
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
-import {
   CoreapiAttributeResponse,
   CoreapiCreateDocumentRequest,
   CoreapiDocumentResponse,
@@ -23,11 +9,25 @@ import {
   DocumentStatus,
   NftStatus,
 } from '@centrifuge/gateway-lib/models/document';
-import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
-import { SessionGuard } from '../auth/SessionGuard';
-import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes';
-import { merge } from 'lodash';
 import { User } from '@centrifuge/gateway-lib/models/user';
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
+import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes';
+import {
+  Body,
+  Controller,
+  Get,
+  MethodNotAllowedException,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { merge } from 'lodash';
+import { SessionGuard } from '../auth/SessionGuard';
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
+import { DatabaseService } from '../database/database.service';
 import TypeEnum = CoreapiAttributeResponse.TypeEnum;
 import SchemeEnum = CoreapiDocumentResponse.SchemeEnum;
 
@@ -253,7 +253,7 @@ export class DocumentsController {
     try {
       const docFromNode = await this.centrifugeService.documents.getDocument(
         request.user.account,
-        document.header.document_id
+        document.header.document_id,
       );
 
       docFromNode.attributes = {

@@ -34,8 +34,8 @@ export const unflattenRaw = function(data): any {
     let cur = result;
     let key = '';
     let m;
-    while (m = regex.exec(k)) {
-      cur = cur[key] || (cur[key] = (m[2] ? [] : {}));
+    while ((m = regex.exec(k))) {
+      cur = cur[key] || (cur[key] = m[2] ? [] : {});
       key = m[2] || m[1];
     }
     cur[key] = { ...data[k] };
@@ -54,28 +54,36 @@ export const unflatten = function(data): any {
 };
 
 // Checks if object is an DocumentAttribute. Works for both Iterable and nonIterable DocumentAttributes
-export const isDocumentAttribute = (obj) => {
-  return (obj.hasOwnProperty('key') && obj.hasOwnProperty('type') && obj.hasOwnProperty('value'));
+export const isDocumentAttribute = obj => {
+  return (
+    obj.hasOwnProperty('key') &&
+    obj.hasOwnProperty('type') &&
+    obj.hasOwnProperty('value')
+  );
 };
 
-export const isArrayLikeDocumentAttribute = (obj) => {
+export const isArrayLikeDocumentAttribute = obj => {
   return isDocumentAttribute(obj) && obj.hasOwnProperty('0');
-}
-
+};
 
 // Converts and array like Document Attribute to an array making it iterable
 // ignores not isArrayLikeDocumentAttribute objects
 // it is recursive on all the items in the array
-export const toIterableDocumentAttribute = (documentAttribute: CoreapiAttributeResponse) => {
-  if (!isArrayLikeDocumentAttribute(documentAttribute) ) return documentAttribute;
+export const toIterableDocumentAttribute = (
+  documentAttribute: CoreapiAttributeResponse,
+) => {
+  if (!isArrayLikeDocumentAttribute(documentAttribute))
+    return documentAttribute;
   const keys = Object.keys(documentAttribute);
   keys.sort();
   const iterable = [];
   for (let key of keys) {
-    if(Number.isInteger(parseInt(key))) {
+    if (Number.isInteger(parseInt(key))) {
       iterable[key] = {};
       for (let p in documentAttribute[key]) {
-        iterable[key][p] = toIterableDocumentAttribute(documentAttribute[key][p]);
+        iterable[key][p] = toIterableDocumentAttribute(
+          documentAttribute[key][p],
+        );
       }
     } else {
       iterable[key] = documentAttribute[key];
@@ -85,7 +93,9 @@ export const toIterableDocumentAttribute = (documentAttribute: CoreapiAttributeR
 };
 
 // Converts an Iterable Document Attribute to an array like object.
-export const toUniterableDocumentAttribute = (documentAttribute: CoreapiAttributeResponse) => {
+export const toUniterableDocumentAttribute = (
+  documentAttribute: CoreapiAttributeResponse,
+) => {
   if (!Array.isArray(documentAttribute)) return documentAttribute;
   let notIterable = {};
   for (let key in documentAttribute) {
@@ -93,5 +103,4 @@ export const toUniterableDocumentAttribute = (documentAttribute: CoreapiAttribut
   }
 
   return notIterable;
-
 };

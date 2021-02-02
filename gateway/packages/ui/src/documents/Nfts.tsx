@@ -1,21 +1,21 @@
-import React, { FunctionComponent } from 'react';
-import { useMergeState } from '../hooks';
-import { httpClient } from '../http-client';
+import { DisplayField } from '@centrifuge/axis-display-field';
 import { Modal } from '@centrifuge/axis-modal';
+import { CoreapiNFT } from '@centrifuge/gateway-lib/centrifuge-node-client';
 import { Document, NftStatus } from '@centrifuge/gateway-lib/models/document';
+import { Registry } from '@centrifuge/gateway-lib/models/schema';
+import { Contact } from '@centrifuge/gateway-lib/src/models/contact';
 import {
   getAddressLink,
   getNFTLink,
   hexToInt,
 } from '@centrifuge/gateway-lib/utils/etherscan';
-import { Section } from '../components/Section';
 import { Anchor, Box, Button, Paragraph } from 'grommet';
-import { DisplayField } from '@centrifuge/axis-display-field';
-import { Registry } from '@centrifuge/gateway-lib/models/schema';
-import MintNftForm, { MintNftFormData } from './MintNftForm';
-import { Contact } from '@centrifuge/gateway-lib/src/models/contact';
-import { CoreapiNFT } from '@centrifuge/gateway-lib/centrifuge-node-client';
+import React, { FunctionComponent } from 'react';
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
+import { Section } from '../components/Section';
+import { useMergeState } from '../hooks';
+import { httpClient } from '../http-client';
+import MintNftForm, { MintNftFormData } from './MintNftForm';
 
 type Props = {
   onAsyncStart?: (message: string) => void;

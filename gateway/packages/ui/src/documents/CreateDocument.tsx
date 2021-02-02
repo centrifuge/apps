@@ -1,30 +1,30 @@
+import { Contact } from '@centrifuge/gateway-lib/models/contact';
+import { Document } from '@centrifuge/gateway-lib/models/document';
+import { Schema } from '@centrifuge/gateway-lib/models/schema';
+import { HARDCODED_FIELDS } from '@centrifuge/gateway-lib/utils/constants';
+import { mapSchemaNames } from '@centrifuge/gateway-lib/utils/schema-utils';
+import { AxiosError } from 'axios';
+import { Box, Button, Heading } from 'grommet';
+import { LinkPrevious } from 'grommet-icons';
 import React, {
   FunctionComponent,
   useCallback,
   useContext,
   useEffect,
 } from 'react';
-import { Link } from 'react-router-dom';
-import DocumentForm from './DocumentForm';
 import { RouteComponentProps, withRouter } from 'react-router';
-import { Box, Button, Heading } from 'grommet';
-import { LinkPrevious } from 'grommet-icons';
-import { SecondaryHeader } from '../components/SecondaryHeader';
-import documentRoutes from './routes';
-import { Schema } from '@centrifuge/gateway-lib/models/schema';
-import { Contact } from '@centrifuge/gateway-lib/models/contact';
-import { Document } from '@centrifuge/gateway-lib/models/document';
-import { httpClient } from '../http-client';
-import { mapSchemaNames } from '@centrifuge/gateway-lib/utils/schema-utils';
+import { Link } from 'react-router-dom';
+import { AppContext } from '../App';
 import {
   NOTIFICATION,
   NotificationContext,
 } from '../components/NotificationContext';
-import { AppContext } from '../App';
-import { useMergeState } from '../hooks';
 import { PageError } from '../components/PageError';
-import { AxiosError } from 'axios';
-import { HARDCODED_FIELDS } from '@centrifuge/gateway-lib/utils/constants';
+import { SecondaryHeader } from '../components/SecondaryHeader';
+import { useMergeState } from '../hooks';
+import { httpClient } from '../http-client';
+import DocumentForm from './DocumentForm';
+import documentRoutes from './routes';
 
 type Props = RouteComponentProps;
 
@@ -112,13 +112,13 @@ export const CreateDocument: FunctionComponent<Props> = props => {
 
       if (document.template && document.template !== '') {
         /*
-        * When a document has a template if we update template rules are lost
-        * A temp workaround is to commit and create a new version.
-        * The extra commit is necessary because you can create a new version
-        * only for committed docs.
-        * TODO this should be changed
-        * */
-        await httpClient.documents.commit(createResult._id!)
+         * When a document has a template if we update template rules are lost
+         * A temp workaround is to commit and create a new version.
+         * The extra commit is necessary because you can create a new version
+         * only for committed docs.
+         * TODO this should be changed
+         * */
+        await httpClient.documents.commit(createResult._id!);
         await httpClient.documents.create({
           ...document,
           document_id: createResult?.header!.document_id,
@@ -127,14 +127,14 @@ export const CreateDocument: FunctionComponent<Props> = props => {
             [HARDCODED_FIELDS.ASSET_IDENTIFIER]: {
               type: 'bytes',
               value: createResult.header!.document_id,
-            } as any
-          }
+            } as any,
+          },
         });
       } else {
         /*
-        * Update v2 replaces the entire document we make sure we do not lose
-        * any fields when adding the ASSET_IDENTIFIER
-        * */
+         * Update v2 replaces the entire document we make sure we do not lose
+         * any fields when adding the ASSET_IDENTIFIER
+         * */
         const toUpdate = {
           ...createResult,
           attributes: {
@@ -143,14 +143,10 @@ export const CreateDocument: FunctionComponent<Props> = props => {
               type: 'bytes',
               value: createResult.header!.document_id,
             } as any,
-          }
-
+          },
         };
-        await httpClient.documents.update(toUpdate)
+        await httpClient.documents.update(toUpdate);
       }
-
-
-
     } catch (e) {
       notification.alert({
         type: NOTIFICATION.ERROR,

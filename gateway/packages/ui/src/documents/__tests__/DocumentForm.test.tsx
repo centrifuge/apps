@@ -1,25 +1,21 @@
-import React from 'react';
-import { mount } from 'enzyme';
-import DocumentForm from '../DocumentForm';
-import { BrowserRouter } from 'react-router-dom';
-import { AttrTypes } from '@centrifuge/gateway-lib/models/schema';
 import { SearchSelect } from '@centrifuge/axis-search-select';
-import { Section } from '../../components/Section';
-import Attributes from '../Attributes';
-import { ViewModeFormContainer } from '../../components/ViewModeFormContainer';
+import { mount } from 'enzyme';
 import { SelectContainer } from 'grommet/components/Select/SelectContainer';
-import Comments from '../Comments';
-import { withAllProvidersAndContexts } from '../../test-utilities/test-providers';
+import React from 'react';
+import { Section } from '../../components/Section';
+import { ViewModeFormContainer } from '../../components/ViewModeFormContainer';
 import { defaultSchemas } from '../../test-utilities/default-data';
+import { withAllProvidersAndContexts } from '../../test-utilities/test-providers';
+import Attributes from '../Attributes';
+import Comments from '../Comments';
+import DocumentForm from '../DocumentForm';
 
 describe('DocumentForm', () => {
-
   const documents = [
     {
       _id: 'first_id',
       createdAt: new Date('2019-07-09T10:54:59.900Z'),
       attributes: {
-
         ['_schema']: {
           key:
             '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
@@ -38,8 +34,7 @@ describe('DocumentForm', () => {
           key:
             '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
           type: 'string',
-          value: 'some cust' +
-            'omer',
+          value: 'some cust' + 'omer',
         },
 
         ['percent']: {
@@ -60,10 +55,7 @@ describe('DocumentForm', () => {
       _id: 'second_id',
       createdAt: new Date('2019-07-09T10:54:59.900Z'),
       header: {
-        read_access: [
-          '0x111',
-          '0xNotInContacts',
-        ],
+        read_access: ['0x111', '0xNotInContacts'],
         nfts: [
           {
             owner: '0xD77C534AED04D7Ce34Cd425073a033dB4FBe6a9d',
@@ -78,7 +70,6 @@ describe('DocumentForm', () => {
         ],
       },
       attributes: {
-
         ['reference_id']: {
           key:
             '0x9ed63b1df0c1b6dc14b777a767ccb0562b7a0adf6f51bf0d90476f6833005f9a',
@@ -103,7 +94,6 @@ describe('DocumentForm', () => {
     },
   ];
 
-
   const contacts = [
     {
       name: 'My Contact',
@@ -111,20 +101,16 @@ describe('DocumentForm', () => {
     },
   ];
 
-
-
-
-  const onSubmit = jest.fn(() => {
-  });
-
+  const onSubmit = jest.fn(() => {});
 
   it('Should render the Document details and the Collaborators', () => {
-
     const documentForm = mount(
       withAllProvidersAndContexts(
-        <DocumentForm document={{}}
-                      schemas={defaultSchemas}
-                      onSubmit={onSubmit}/>,
+        <DocumentForm
+          document={{}}
+          schemas={defaultSchemas}
+          onSubmit={onSubmit}
+        />,
       ),
     );
 
@@ -137,18 +123,18 @@ describe('DocumentForm', () => {
   it('Should render the form with a selected schema and attributes', () => {
     const documentForm = mount(
       withAllProvidersAndContexts(
-        <DocumentForm document={documents[0]}
-                      selectedSchema={defaultSchemas[0]}
-                      schemas={defaultSchemas}
-                      onSubmit={onSubmit}/>,
+        <DocumentForm
+          document={documents[0]}
+          selectedSchema={defaultSchemas[0]}
+          schemas={defaultSchemas}
+          onSubmit={onSubmit}
+        />,
       ),
     );
     expect(documentForm.find(Attributes).length).toEqual(1);
   });
 
-
   it('Should render a header and child sections', () => {
-
     const MyCustomHeader = () => {
       return <div>My Custom header</div>;
     };
@@ -159,13 +145,15 @@ describe('DocumentForm', () => {
 
     const documentForm = mount(
       withAllProvidersAndContexts(
-        <DocumentForm document={{}}
-                      schemas={defaultSchemas}
-                      renderHeader={() => <MyCustomHeader/>}
-                      onSubmit={onSubmit}>
-          <MyCustomSection/>
-          <MyCustomSection/>
-          <MyCustomSection/>
+        <DocumentForm
+          document={{}}
+          schemas={defaultSchemas}
+          renderHeader={() => <MyCustomHeader />}
+          onSubmit={onSubmit}
+        >
+          <MyCustomSection />
+          <MyCustomSection />
+          <MyCustomSection />
         </DocumentForm>,
       ),
     );
@@ -173,86 +161,105 @@ describe('DocumentForm', () => {
     expect(documentForm.find(MyCustomSection).length).toEqual(3);
   });
 
-
   it('Should have schema select disabled and have form in view mode', () => {
     const documentForm = mount(
       withAllProvidersAndContexts(
-        <DocumentForm document={documents[0]}
-                      selectedSchema={defaultSchemas[0]}
-                      mode={'view'}
-                      schemas={defaultSchemas}
-                      onSubmit={onSubmit}/>,
+        <DocumentForm
+          document={documents[0]}
+          selectedSchema={defaultSchemas[0]}
+          mode={'view'}
+          schemas={defaultSchemas}
+          onSubmit={onSubmit}
+        />,
       ),
     );
-    expect(documentForm.find(ViewModeFormContainer).prop('isViewMode')).toEqual(true);
-    expect(documentForm.find(Section).first().find(SearchSelect).prop('disabled')).not.toBeUndefined();
-
+    expect(documentForm.find(ViewModeFormContainer).prop('isViewMode')).toEqual(
+      true,
+    );
+    expect(
+      documentForm
+        .find(Section)
+        .first()
+        .find(SearchSelect)
+        .prop('disabled'),
+    ).not.toBeUndefined();
   });
-
 
   it('Should have schema select disabled in edit mode', () => {
     const documentForm = mount(
       withAllProvidersAndContexts(
-        <DocumentForm document={documents[0]}
-                      selectedSchema={defaultSchemas[0]}
-                      mode={'edit'}
-                      schemas={defaultSchemas}
-                      onSubmit={onSubmit}/>,
+        <DocumentForm
+          document={documents[0]}
+          selectedSchema={defaultSchemas[0]}
+          mode={'edit'}
+          schemas={defaultSchemas}
+          onSubmit={onSubmit}
+        />,
       ),
     );
-    expect(documentForm.find(Section).first().find(SearchSelect).prop('disabled')).not.toBeUndefined();
-
+    expect(
+      documentForm
+        .find(Section)
+        .first()
+        .find(SearchSelect)
+        .prop('disabled'),
+    ).not.toBeUndefined();
   });
 
   it('Should render attributes section if document has a _schema attribute defined', () => {
-
     const documentForm = mount(
       withAllProvidersAndContexts(
-        <DocumentForm document={documents[0]}
-                      schemas={defaultSchemas}
-                      onSubmit={onSubmit}/>,
+        <DocumentForm
+          document={documents[0]}
+          schemas={defaultSchemas}
+          onSubmit={onSubmit}
+        />,
       ),
     );
     expect(documentForm.find(Attributes).length).toEqual(1);
-
   });
 
-
   it('Should select a schema and render schema attributes when selecting a schema', () => {
-
     const documentForm = mount(
       withAllProvidersAndContexts(
-        <DocumentForm document={documents[1]}
-                      schemas={defaultSchemas}
-                      onSubmit={onSubmit}/>,
+        <DocumentForm
+          document={documents[1]}
+          schemas={defaultSchemas}
+          onSubmit={onSubmit}
+        />,
       ),
     );
     expect(documentForm.find(Attributes).length).toEqual(0);
-    documentForm.find(Section).first().find(SearchSelect).simulate('click');
-    documentForm.find(SelectContainer).first().find('button').first().simulate('click');
+    documentForm
+      .find(Section)
+      .first()
+      .find(SearchSelect)
+      .simulate('click');
+    documentForm
+      .find(SelectContainer)
+      .first()
+      .find('button')
+      .first()
+      .simulate('click');
     expect(documentForm.find(Attributes).length).toEqual(1);
-
   });
-
 
   it('Should render comments', () => {
     const documentForm = mount(
       withAllProvidersAndContexts(
-        <DocumentForm document={documents[0]}
-                      selectedSchema={{
-                        ...defaultSchemas[0],
-                        formFeatures: {
-                          comments: true,
-                        },
-
-                      }}
-                      schemas={defaultSchemas}
-                      onSubmit={onSubmit}/>,
+        <DocumentForm
+          document={documents[0]}
+          selectedSchema={{
+            ...defaultSchemas[0],
+            formFeatures: {
+              comments: true,
+            },
+          }}
+          schemas={defaultSchemas}
+          onSubmit={onSubmit}
+        />,
       ),
     );
     expect(documentForm.find(Comments).length).toEqual(1);
-
   });
-
-})
-;
+});

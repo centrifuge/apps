@@ -6,5 +6,5 @@ export default {
   index,
   register: `/register`,
   invite: `${index}/invite`,
-  logout: ROUTES.USERS.logout
+  logout: ROUTES.USERS.logout,
 };

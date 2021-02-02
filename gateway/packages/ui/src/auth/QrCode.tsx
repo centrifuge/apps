@@ -1,7 +1,7 @@
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import { User } from '@centrifuge/gateway-lib/models/user';
 import { Box } from 'grommet';
 import QRCode from 'qrcode';
-import { User } from '@centrifuge/gateway-lib/models/user';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import TwoFAForm from './TwoFAForm';
 
@@ -16,8 +16,8 @@ const QrImage = styled.img`
 `;
 const Stepper = styled.ol`
   margin: 0px;
-  padding:0px;
-  list-style-position:inside;
+  padding: 0px;
+  list-style-position: inside;
 `;
 
 const Step = styled.li`
@@ -39,14 +39,17 @@ const QrCode: FunctionComponent<Props> = (props: Props) => {
     <>
       <h2>2 Factor Authentication Setup</h2>
       <Stepper>
-      <Step>Install Authentificator App on your mobile phone (e.g Google Authentificator or Authy)</Step>
-      <Step>Add new account in your app</Step>
-      <Step>Scan the QR Code</Step>
-      <Box align={'center'}>
-        <QrImage src={qrCode} />
-      </Box>
+        <Step>
+          Install Authentificator App on your mobile phone (e.g Google
+          Authentificator or Authy)
+        </Step>
+        <Step>Add new account in your app</Step>
+        <Step>Scan the QR Code</Step>
+        <Box align={'center'}>
+          <QrImage src={qrCode} />
+        </Box>
 
-      <Step>Input the generated security code</Step>
+        <Step>Input the generated security code</Step>
       </Stepper>
       <TwoFAForm user={user!} error={error} onSubmit={onSubmit} />
     </>

@@ -1,15 +1,14 @@
 export interface IFundingAgreement {
-  funder_id: string,
-  agreement_id?: string,
-  amount: string,
-  days: string,
-  apr: string,
-  fee: string,
-  repayment_due_date: string,
-  repayment_amount: string,
-  currency: string
+  funder_id: string;
+  agreement_id?: string;
+  amount: string;
+  days: string;
+  apr: string;
+  fee: string;
+  repayment_due_date: string;
+  repayment_amount: string;
+  currency: string;
 }
-
 
 export class FundingAgreement implements IFundingAgreement {
   public funder_id: string = '';
@@ -24,7 +23,6 @@ export class FundingAgreement implements IFundingAgreement {
   public nft_address: string = '';
 }
 
-
 export class FundingSignatureRequest {
   public document_id: string;
   public agreement_id: string;
@@ -33,4 +31,3 @@ export class FundingSignatureRequest {
 export class FundingRequest extends FundingAgreement {
   public document_id: string;
 }
-

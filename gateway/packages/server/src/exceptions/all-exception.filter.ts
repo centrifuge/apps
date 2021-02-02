@@ -1,14 +1,15 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpStatus,
+} from '@nestjs/common';
 import { AppService } from '../app.service';
 import config from '../config';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
-
-  constructor(
-    private readonly appService: AppService,
-  ) {
-  }
+  constructor(private readonly appService: AppService) {}
 
   /**
    * Handles all exceptions thrown inside the application

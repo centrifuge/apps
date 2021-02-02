@@ -1,22 +1,22 @@
-import React from 'react';
-import { Box, FormField, ResponsiveContext } from 'grommet';
-import { Formik } from 'formik';
-import * as Yup from 'yup';
-import { Document } from '@centrifuge/gateway-lib/models/document';
-import { AttrTypes, Schema } from '@centrifuge/gateway-lib/models/schema';
 import { SearchSelect } from '@centrifuge/axis-search-select';
 import { Contact } from '@centrifuge/gateway-lib/models/contact';
-import Comments from './Comments';
-import Attributes from './Attributes';
-import { ViewModeFormContainer } from '../components/ViewModeFormContainer';
-import Collaborators from './Collaborators';
+import { Document } from '@centrifuge/gateway-lib/models/document';
+import { AttrTypes, Schema } from '@centrifuge/gateway-lib/models/schema';
+import { HARDCODED_FIELDS } from '@centrifuge/gateway-lib/utils/constants';
 import {
   applySchemaRules,
   revertSchemaRules,
 } from '@centrifuge/gateway-lib/utils/document-mutations';
-import { HARDCODED_FIELDS } from '@centrifuge/gateway-lib/utils/constants';
-import AttributeSection from './AttributeSection';
+import { Formik } from 'formik';
+import { Box, FormField, ResponsiveContext } from 'grommet';
 import { cloneDeep } from 'lodash';
+import React from 'react';
+import * as Yup from 'yup';
+import { ViewModeFormContainer } from '../components/ViewModeFormContainer';
+import Attributes from './Attributes';
+import AttributeSection from './AttributeSection';
+import Collaborators from './Collaborators';
+import Comments from './Comments';
 
 // TODO use function components here
 type Props = {

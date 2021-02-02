@@ -1,3 +1,10 @@
+import { CoreapiMintNFTRequest } from '@centrifuge/gateway-lib/centrifuge-node-client';
+import {
+  DocumentRequest,
+  NftStatus,
+} from '@centrifuge/gateway-lib/models/document';
+import { MintNftRequest } from '@centrifuge/gateway-lib/models/nfts';
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
 import {
   Body,
   Controller,
@@ -7,16 +14,9 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { DatabaseService } from '../database/database.service';
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
-import { CoreapiMintNFTRequest } from '@centrifuge/gateway-lib/centrifuge-node-client';
-import {
-  DocumentRequest,
-  NftStatus,
-} from '@centrifuge/gateway-lib/models/document';
-import { MintNftRequest } from '@centrifuge/gateway-lib/models/nfts';
-import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
 import { SessionGuard } from '../auth/SessionGuard';
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
+import { DatabaseService } from '../database/database.service';
 
 @Controller(ROUTES.NFTS)
 @UseGuards(SessionGuard)

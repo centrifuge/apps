@@ -5,6 +5,5 @@ import { SchemasController } from './schemas.controllers';
 @Module({
   controllers: [SchemasController],
   imports: [DatabaseModule],
-
 })
 export class SchemasModule {}

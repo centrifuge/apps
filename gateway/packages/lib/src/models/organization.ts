@@ -5,8 +5,7 @@ export class Organization {
     readonly name?: string,
     readonly account?: string,
     readonly _id?: string,
-  ) {
-  }
+  ) {}
 
   public static validate(org: Organization) {
     if (!org.name) {

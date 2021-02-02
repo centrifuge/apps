@@ -1,29 +1,33 @@
+import { Organization } from '@centrifuge/gateway-lib/models/organization';
+import {
+  TwoFaType,
+  User,
+  UserWithOrg,
+} from '@centrifuge/gateway-lib/models/user';
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
+import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators';
+import { MailerService } from '@nestjs-modules/mailer';
 import {
   Body,
   Controller,
   Delete,
-  MethodNotAllowedException,
   Get,
-  HttpCode, Param,
+  HttpCode,
+  MethodNotAllowedException,
+  Param,
   Post,
   Put,
   Request,
   Response,
   UseGuards,
 } from '@nestjs/common';
-
-import * as speakeasy from 'speakeasy';
 import * as bcrypt from 'bcrypt';
+import * as speakeasy from 'speakeasy';
 import { promisify } from 'util';
-import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
-import { TwoFaType, User, UserWithOrg } from '@centrifuge/gateway-lib/models/user';
-import { DatabaseService } from '../database/database.service';
-import config from '../config';
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { UserAuthGuard } from '../auth/admin.auth.guard';
-import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators';
-import { Organization } from '@centrifuge/gateway-lib/models/organization';
-import { MailerService } from '@nestjs-modules/mailer';
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
+import config from '../config';
+import { DatabaseService } from '../database/database.service';
 
 @Controller()
 export class UsersController {
@@ -37,7 +41,7 @@ export class UsersController {
   @HttpCode(200)
   async loginTentative(@Request() req): Promise<User> {
     let { user } = req;
-    if(user.twoFAType !== TwoFaType.APP) {
+    if (user.twoFAType !== TwoFaType.APP) {
       if (!user.secret) {
         const secret = speakeasy.generateSecret();
         user = await this.upsertUser(
@@ -85,7 +89,8 @@ export class UsersController {
   @Get(ROUTES.USERS.base)
   @UseGuards(UserAuthGuard)
   async getAllUsers(@Request() request) {
-    return await this.databaseService.users.getCursor({})
+    return await this.databaseService.users
+      .getCursor({})
       .sort({ createdAt: -1 })
       .exec();
   }
@@ -201,7 +206,7 @@ export class UsersController {
 
   @Delete(`${ROUTES.USERS.base}/:id`)
   @UseGuards(UserAuthGuard)
-  async remove( @Param() params): Promise<number> {
+  async remove(@Param() params): Promise<number> {
     return await this.databaseService.users.remove({
       _id: params.id,
     });

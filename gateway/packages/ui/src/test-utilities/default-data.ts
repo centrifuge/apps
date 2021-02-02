@@ -1,8 +1,8 @@
-import { User } from '@centrifuge/gateway-lib/models/user';
-import { Contact } from '@centrifuge/gateway-lib/models/contact';
-import { AttrTypes } from '@centrifuge/gateway-lib/models/schema';
 import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator';
+import { Contact } from '@centrifuge/gateway-lib/models/contact';
 import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document';
+import { AttrTypes } from '@centrifuge/gateway-lib/models/schema';
+import { User } from '@centrifuge/gateway-lib/models/user';
 
 export const defaultUser: User = {
   name: 'Default User',
@@ -11,8 +11,8 @@ export const defaultUser: User = {
     centrifuge_chain_account: {
       id: 'testid',
       secret: 'testsecret',
-      ss_58_address: 'testaddress'
-    }
+      ss_58_address: 'testaddress',
+    },
   },
   email: 'default@user.com',
   invited: true,
@@ -34,16 +34,25 @@ export const defaultContacts: Contact[] = [
     name: 'Third Contact',
     address: '0x44a0579754D6c94e7bB2c26bFA7394311Cc50Ccb',
   },
-
 ];
-
 
 export const defaultCollaborators = [
-  new Collaborator(defaultContacts[0].address || '', defaultContacts[0].name || '', DOCUMENT_ACCESS.WRITE),
-  new Collaborator(defaultContacts[1].address || '', defaultContacts[1].name || '', DOCUMENT_ACCESS.READ),
-  new Collaborator(defaultContacts[2].address || '', defaultContacts[2].name || '', DOCUMENT_ACCESS.WRITE),
+  new Collaborator(
+    defaultContacts[0].address || '',
+    defaultContacts[0].name || '',
+    DOCUMENT_ACCESS.WRITE,
+  ),
+  new Collaborator(
+    defaultContacts[1].address || '',
+    defaultContacts[1].name || '',
+    DOCUMENT_ACCESS.READ,
+  ),
+  new Collaborator(
+    defaultContacts[2].address || '',
+    defaultContacts[2].name || '',
+    DOCUMENT_ACCESS.WRITE,
+  ),
 ];
-
 
 export const defaultSchemas = [
   {
@@ -53,19 +62,13 @@ export const defaultSchemas = [
         label: 'First Registry',
         address: '0x414C30A8824D4Ed8479e0d58F35A629C671a8db1',
         asset_manager_address: '0x414C30A8824D4Ed8479e0d58F35A629C671a8db1',
-        proofs: [
-          'firstRegistryFirstProof',
-          'firstRegistrySecondProof',
-        ],
+        proofs: ['firstRegistryFirstProof', 'firstRegistrySecondProof'],
       },
       {
         label: 'Second Registry',
         address: '0x414C30A8824D4Ed8479e0d58F35A629C671a8db1',
         asset_manager_address: '0x414C30A8824D4Ed8479e0d58F35A629C671a8db1',
-        proofs: [
-          'secondRegistryFirstProof',
-          'secondRegistrySecondProof',
-        ],
+        proofs: ['secondRegistryFirstProof', 'secondRegistrySecondProof'],
       },
     ],
     collaborators: [],
@@ -131,4 +134,3 @@ export const defaultSchemas = [
     ],
   },
 ];
-

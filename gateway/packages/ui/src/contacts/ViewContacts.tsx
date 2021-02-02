@@ -1,43 +1,42 @@
-import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react';
 import { Contact } from '@centrifuge/gateway-lib/models/contact';
-import ContactList from './ContactList';
-import { Preloader } from '../components/Preloader';
-import { httpClient } from '../http-client';
+import React, {
+  FunctionComponent,
+  useCallback,
+  useContext,
+  useEffect,
+} from 'react';
 import { AppContext } from '../App';
-import { useMergeState } from '../hooks';
 import { PageError } from '../components/PageError';
+import { Preloader } from '../components/Preloader';
+import { useMergeState } from '../hooks';
+import { httpClient } from '../http-client';
+import ContactList from './ContactList';
 
-type State  = {
-  loading: boolean,
-  error: any,
-  contacts: Contact[]
-}
+type State = {
+  loading: boolean;
+  error: any;
+  contacts: Contact[];
+};
 
 const ViewContacts: FunctionComponent = () => {
-
-  const [
-    {
-      loading,
-      contacts,
-      error,
-    },
-    setState] = useMergeState<State>({
+  const [{ loading, contacts, error }, setState] = useMergeState<State>({
     loading: true,
     error: null,
     contacts: [],
   });
 
-
   const { user } = useContext(AppContext);
 
-
-  const displayPageError = useCallback((error) => {
-    setState({
-      loading: false,
-      error,
-      contacts: [],
-    });
-  }, [setState]);
+  const displayPageError = useCallback(
+    error => {
+      setState({
+        loading: false,
+        error,
+        contacts: [],
+      });
+    },
+    [setState],
+  );
 
   const createContact = async (contact: Contact) => {
     setState({
@@ -82,12 +81,11 @@ const ViewContacts: FunctionComponent = () => {
     loadContacts();
   }, [setState, loadContacts]);
 
-
   if (loading) {
-    return <Preloader message="Loading"/>;
+    return <Preloader message="Loading" />;
   }
 
-  if (error) return <PageError error={error}/>;
+  if (error) return <PageError error={error} />;
 
   return (
     <ContactList
@@ -97,8 +95,6 @@ const ViewContacts: FunctionComponent = () => {
       updateContact={updateContact}
     />
   );
-
 };
-
 
 export default ViewContacts;

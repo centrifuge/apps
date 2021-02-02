@@ -1,15 +1,15 @@
-import React, { FunctionComponent, useContext, useState } from 'react';
-
-import RegisterForm from './RegisterForm';
-import { RouteComponentProps, withRouter } from 'react-router';
 import { TwoFaType, User } from '@centrifuge/gateway-lib/models/user';
-import { httpClient } from '../http-client';
-import { parse } from 'query-string';
-import QrCode from './QrCode';
-import TwoFAForm from './TwoFAForm';
-import { AppContext } from '../App';
-import routes from '../routes';
 import { Box } from 'grommet';
+import { parse } from 'query-string';
+import React, { FunctionComponent, useContext, useState } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router';
+import { AppContext } from '../App';
+import { httpClient } from '../http-client';
+import routes from '../routes';
+import QrCode from './QrCode';
+import RegisterForm from './RegisterForm';
+import TwoFAForm from './TwoFAForm';
+
 type Props = {
   register: (user: User) => void;
   isRegistering: boolean;

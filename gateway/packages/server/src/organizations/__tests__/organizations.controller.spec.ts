@@ -1,10 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Organization } from '@centrifuge/gateway-lib/models/organization';
 import { HttpException } from '@nestjs/common';
-import { OrganizationsController } from '../organizations.controller';
+import { Test, TestingModule } from '@nestjs/testing';
 import { SessionGuard } from '../../auth/SessionGuard';
 import { databaseServiceProvider } from '../../database/database.providers';
 import { DatabaseService } from '../../database/database.service';
-import { Organization } from '@centrifuge/gateway-lib/models/organization';
+import { OrganizationsController } from '../organizations.controller';
 
 // tslint:disable-next-line:no-var-requires
 const delay = require('util').promisify(setTimeout);

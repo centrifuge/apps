@@ -31,8 +31,7 @@ Strategy.prototype.authenticate = function(req, options) {
     lookup(req.body, this._passwordField) ||
     lookup(req.query, this._passwordField);
   const token =
-    lookup(req.body, this._tokenField) ||
-    lookup(req.query, this._tokenField);
+    lookup(req.body, this._tokenField) || lookup(req.query, this._tokenField);
 
   if (!username || !password) {
     return this.fail(

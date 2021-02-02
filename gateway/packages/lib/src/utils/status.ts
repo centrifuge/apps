@@ -8,21 +8,22 @@ export enum FUNDING_STATUS {
   REPAYING_FUNDING = 'Repaying',
   SENDING_FUNDING = 'Funding',
   FUNDED = 'Funded',
-
 }
-
 
 export enum TRANSFER_DETAILS_STATUS {
   OPENED = 'opened',
   SETTLED = 'settled',
 }
 
-export const getFundingStatus = (fundingAgreement) => {
+export const getFundingStatus = fundingAgreement => {
   if (
     fundingAgreement.signatures &&
     Array.isArray(fundingAgreement.signatures) &&
     fundingAgreement.signatures.find(signature => {
-      return signature.value.toLowerCase() === fundingAgreement.funder_id.value.toLowerCase();
+      return (
+        signature.value.toLowerCase() ===
+        fundingAgreement.funder_id.value.toLowerCase()
+      );
     })
   ) {
     return FUNDING_STATUS.ACCEPTED;
@@ -32,4 +33,3 @@ export const getFundingStatus = (fundingAgreement) => {
     return FUNDING_STATUS.NO_STATUS;
   }
 };
-

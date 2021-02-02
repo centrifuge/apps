@@ -1,8 +1,8 @@
-import React from 'react';
+import { Schema } from '@centrifuge/gateway-lib/models/schema';
 import { Formik } from 'formik';
 import { Box, Button, FormField, Paragraph, TextArea } from 'grommet';
+import React from 'react';
 import * as Yup from 'yup';
-import { Schema } from '@centrifuge/gateway-lib/models/schema';
 
 type Props = {
   selectedSchema: Schema;
@@ -11,11 +11,11 @@ type Props = {
   readonly: boolean;
   onDiscard: () => void;
   onSubmit: (schema) => void;
-}
+};
 
 type State = {
   submitted: boolean;
-}
+};
 
 export default class SchemaForm extends React.Component<Props, State> {
   state = {
@@ -42,12 +42,15 @@ export default class SchemaForm extends React.Component<Props, State> {
         .required('Schema is required')
         .test({
           name: 'test-json',
-          test: (function(this, value) {
+          test: function(this, value) {
             let test;
             try {
               test = JSON.parse(value);
             } catch (e) {
-              return this.createError({ path: this.path, message: 'Schema is not a valid JSON object' });
+              return this.createError({
+                path: this.path,
+                message: 'Schema is not a valid JSON object',
+              });
             }
 
             try {
@@ -58,16 +61,18 @@ export default class SchemaForm extends React.Component<Props, State> {
             // If selected schema has _id set we diff for changes
             // It can be considered in EditMode
             if (selectedSchema._id) {
-
               try {
                 Schema.validateDiff(selectedSchema, test);
               } catch (e) {
-                return this.createError({ path: this.path, message: e.message });
+                return this.createError({
+                  path: this.path,
+                  message: e.message,
+                });
               }
             }
 
             return true;
-          }),
+          },
         }),
     });
 
@@ -79,65 +84,46 @@ export default class SchemaForm extends React.Component<Props, State> {
           validateOnBlur={submitted}
           validateOnChange={submitted}
           validationSchema={jsonValidation}
-          onSubmit={ (values, { setSubmitting }) => {
+          onSubmit={(values, { setSubmitting }) => {
             this.onSubmit(values.json);
             setSubmitting(true);
           }}
         >
-          {
-            ({
-               values,
-               errors,
-               setValues,
-               handleChange,
-               handleSubmit,
-             }) => (
-              <form
-                onSubmit={event => {
-                  this.setState({ submitted: true });
-                  handleSubmit(event);
-                }}>
+          {({ values, errors, setValues, handleChange, handleSubmit }) => (
+            <form
+              onSubmit={event => {
+                this.setState({ submitted: true });
+                handleSubmit(event);
+              }}
+            >
+              <Box gap={'medium'}>
+                {infoParagraph && <Paragraph>{infoParagraph}</Paragraph>}
 
-                <Box gap={'medium'}>
-                  {infoParagraph && <Paragraph>
-                    {infoParagraph}
-                  </Paragraph>}
+                <FormField error={errors!.json}>
+                  <TextArea
+                    style={{
+                      maxHeight: '492px',
+                      height: 'calc(100vh - 400px)',
+                    }}
+                    readOnly={readonly}
+                    spellCheck={false}
+                    fill={true}
+                    id={'json'}
+                    resize={false}
+                    defaultValue={values.json}
+                    onChange={handleChange}
+                  />
+                </FormField>
 
-                    <FormField
-                      error={errors!.json}
-                    >
-                       <TextArea
-                         style={{
-                           maxHeight:'492px',
-                           height:'calc(100vh - 400px)',
-
-                         }}
-                         readOnly={readonly}
-                         spellCheck={false}
-                         fill={true}
-                         id={'json'}
-                         resize={false}
-                         defaultValue={values.json}
-                         onChange={handleChange}
-                       />
-                    </FormField>
-
-                  <Box direction="row" justify={'end'} gap={'medium'}>
-                    <Button
-                      label="Discard"
-                      onClick={this.props.onDiscard}
-                    />
-                    {!readonly && <Button
-                      type="submit"
-                      primary
-                      label={submitLabel}
-                    />}
-                  </Box>
+                <Box direction="row" justify={'end'} gap={'medium'}>
+                  <Button label="Discard" onClick={this.props.onDiscard} />
+                  {!readonly && (
+                    <Button type="submit" primary label={submitLabel} />
+                  )}
                 </Box>
-
-              </form>
-            )
-          }
+              </Box>
+            </form>
+          )}
         </Formik>
       </Box>
     );

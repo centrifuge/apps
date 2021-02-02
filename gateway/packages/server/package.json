@@ -30,12 +30,12 @@
     "url": "https://github.com/centrifuge/gateway.git)/issues"
   },
   "dependencies": {
-    "@centrifuge/gateway-lib": "*",
     "@nestjs-modules/mailer": "^1.4.2",
     "@nestjs/common": "6.3.0",
     "@nestjs/core": "6.3.0",
     "@nestjs/passport": "6.2.0",
     "@nestjs/platform-express": "6.3.0",
+    "@centrifuge/gateway-lib": "workspace:*",
     "bcrypt": "5.0.0",
     "bignumber.js": "^9.0.0",
     "cross-env": "7.0.2",

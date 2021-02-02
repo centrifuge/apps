@@ -1,32 +1,32 @@
+import {
+  canLoadDocument,
+  Document,
+  documentHasNFTs,
+} from '@centrifuge/gateway-lib/models/document';
+import { Schema } from '@centrifuge/gateway-lib/models/schema';
+import { canCreateDocuments } from '@centrifuge/gateway-lib/models/user';
+import { hexToInt } from '@centrifuge/gateway-lib/utils/etherscan';
+import { formatDate } from '@centrifuge/gateway-lib/utils/formaters';
+import { getSchemaLabel } from '@centrifuge/gateway-lib/utils/schema-utils';
+import { Box, Button, Heading } from 'grommet';
+import { FormNext } from 'grommet-icons';
 import React, {
   FunctionComponent,
   useCallback,
   useContext,
   useEffect,
 } from 'react';
-import { Link } from 'react-router-dom';
-import { Box, Button, Heading } from 'grommet';
-import documentRoutes from './routes';
 import { RouteComponentProps, withRouter } from 'react-router';
-import {
-  Document,
-  canLoadDocument,
-  documentHasNFTs
-} from '@centrifuge/gateway-lib/models/document';
-import { SecondaryHeader } from '../components/SecondaryHeader';
-import { canCreateDocuments } from '@centrifuge/gateway-lib/models/user';
-import { Preloader } from '../components/Preloader';
-import { formatDate } from '@centrifuge/gateway-lib/utils/formaters';
-import { httpClient } from '../http-client';
+import { Link } from 'react-router-dom';
 import { AppContext } from '../App';
-import { useMergeState } from '../hooks';
-import { PageError } from '../components/PageError';
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
-import { Schema } from '@centrifuge/gateway-lib/models/schema';
-import { getSchemaLabel } from '@centrifuge/gateway-lib/utils/schema-utils';
-import { FormNext } from 'grommet-icons';
+import { PageError } from '../components/PageError';
+import { Preloader } from '../components/Preloader';
+import { SecondaryHeader } from '../components/SecondaryHeader';
 import { POLLING_INTERVAL } from '../constants';
-import { hexToInt } from '@centrifuge/gateway-lib/utils/etherscan';
+import { useMergeState } from '../hooks';
+import { httpClient } from '../http-client';
+import documentRoutes from './routes';
 
 type Props = RouteComponentProps;
 
@@ -111,7 +111,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
     loadData();
     return () => {
       clearTimeout(timeoutRef);
-    }
+    };
   }, [loadData]);
 
   if (loadingMessage) {
@@ -172,11 +172,13 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               header: 'NFT ID',
               sortable: true,
               render: datum => {
-                if(documentHasNFTs(datum)) {
-                    return datum.header.nfts.map(nft => hexToInt(nft.token_id)).join(', ')
+                if (documentHasNFTs(datum)) {
+                  return datum.header.nfts
+                    .map(nft => hexToInt(nft.token_id))
+                    .join(', ');
                 }
                 return datum.nft_status;
-              }
+              },
             },
             {
               header: '',
@@ -185,7 +187,13 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               sortable: false,
               size: '36px',
               render: datum => {
-                return canLoadDocument(datum) ? <Box><FormNext /></Box> : <></>;
+                return canLoadDocument(datum) ? (
+                  <Box>
+                    <FormNext />
+                  </Box>
+                ) : (
+                  <></>
+                );
               },
             },
           ]}

@@ -1,12 +1,11 @@
-import React from 'react';
-import { Box, Button, FormField, Text, TextInput } from 'grommet';
-
 import { User } from '@centrifuge/gateway-lib/models/user';
 import { Formik } from 'formik';
+import { Box, Button, FormField, Text, TextInput } from 'grommet';
+import React from 'react';
 
 interface LoginProps {
   user: User;
-  info?:string;
+  info?: string;
   onSubmit: (values: any) => void;
   error?: Error;
 }
@@ -57,7 +56,12 @@ class TwoFAForm extends React.Component<LoginProps> {
               )}
 
               <Box direction="row" height="50px">
-                <Button type="submit" primary label={"Verify your security code"} fill={true} />
+                <Button
+                  type="submit"
+                  primary
+                  label={'Verify your security code'}
+                  fill={true}
+                />
               </Box>
             </Box>
           </form>

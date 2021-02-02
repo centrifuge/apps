@@ -1,39 +1,37 @@
-import { formatCurrency, formatDate, formatPercent, getCurrencyFormat, getPercentFormat } from '../formaters';
+import {
+  formatCurrency,
+  formatDate,
+  formatPercent,
+  getCurrencyFormat,
+  getPercentFormat,
+} from '../formaters';
 
 describe('Formatters', () => {
   it('Should return the correct currency parts', () => {
-    expect(getCurrencyFormat('USD')).toEqual(
-      {
-        thousandSeparator: ',',
-        decimalSeparator: '.',
-        precision: 2,
-        prefix: '$',
-      },
-    );
+    expect(getCurrencyFormat('USD')).toEqual({
+      thousandSeparator: ',',
+      decimalSeparator: '.',
+      precision: 2,
+      prefix: '$',
+    });
 
-    expect(getCurrencyFormat('EUR')).toEqual(
-      {
-        thousandSeparator: ',',
-        decimalSeparator: '.',
-        precision: 2,
-        prefix: '€',
-      },
-    );
+    expect(getCurrencyFormat('EUR')).toEqual({
+      thousandSeparator: ',',
+      decimalSeparator: '.',
+      precision: 2,
+      prefix: '€',
+    });
   });
 
-
   it('Should return the correct percent parts', () => {
-    expect(getPercentFormat()).toEqual(
-      {
-        thousandSeparator: ',',
-        decimalSeparator: '.',
-        precision: 2,
-        suffix: '%',
-        fixedDecimalScale: true,
-        decimalScale: 2,
-
-      },
-    );
+    expect(getPercentFormat()).toEqual({
+      thousandSeparator: ',',
+      decimalSeparator: '.',
+      precision: 2,
+      suffix: '%',
+      fixedDecimalScale: true,
+      decimalScale: 2,
+    });
   });
 
   it('Should format currency the correct way', () => {

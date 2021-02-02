@@ -1,6 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException } from '@nestjs/common';
-import { AttributesErrors, AttrTypes, DiffErrors, RegistriesErrors, Schema } from '../../../../lib/models/schema';
+import { Test, TestingModule } from '@nestjs/testing';
+import {
+  AttributesErrors,
+  AttrTypes,
+  DiffErrors,
+  RegistriesErrors,
+  Schema,
+} from '@centrifuge/gateway-lib/models/schema';
 import { SessionGuard } from '../../auth/SessionGuard';
 import { databaseServiceProvider } from '../../database/database.providers';
 import { DatabaseService } from '../../database/database.service';
@@ -29,18 +35,14 @@ describe('SchemasController', () => {
         label: 'reference_id',
         type: AttrTypes.STRING,
       },
-    ]
-    ,
+    ],
     registries: [
       {
         label: 'BEST_ANIMALS_NFT',
         address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
         asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
         oracle_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
-        proofs: [
-          'attributes.animals.wingspans',
-          'header.document_id',
-        ],
+        proofs: ['attributes.animals.wingspans', 'header.document_id'],
       },
     ],
     template: '',
@@ -61,17 +63,17 @@ describe('SchemasController', () => {
 
     schemaModule = await Test.createTestingModule({
       controllers: [SchemasController],
-      providers: [
-        SessionGuard,
-        databaseServiceProvider,
-      ],
+      providers: [SessionGuard, databaseServiceProvider],
     }).compile();
 
     const databaseService = schemaModule.get<DatabaseService>(DatabaseService);
 
     databaseSpies.spyInsert = jest.spyOn(databaseService.schemas, 'insert');
     databaseSpies.spyUpdate = jest.spyOn(databaseService.schemas, 'update');
-    databaseSpies.spyGetCursor = jest.spyOn(databaseService.schemas, 'getCursor');
+    databaseSpies.spyGetCursor = jest.spyOn(
+      databaseService.schemas,
+      'getCursor',
+    );
     databaseSpies.spyGetAll = jest.spyOn(databaseService.schemas, 'find');
   });
 
@@ -81,9 +83,7 @@ describe('SchemasController', () => {
         SchemasController,
       );
 
-      const result = await schemasController.create(
-        schemaToCreate,
-      );
+      const result = await schemasController.create(schemaToCreate);
 
       expect(result).toMatchObject({
         name: schemaToCreate.name,
@@ -93,9 +93,11 @@ describe('SchemasController', () => {
 
       expect(databaseSpies.spyInsert).toHaveBeenCalledTimes(1);
       try {
-        await schemasController.create(schemaToCreate)
+        await schemasController.create(schemaToCreate);
       } catch (err) {
-        expect(err.message.message).toMatch(`Schema with name ${schemaToCreate.name} exists in the database`)
+        expect(err.message.message).toMatch(
+          `Schema with name ${schemaToCreate.name} exists in the database`,
+        );
       }
     });
 
@@ -119,7 +121,8 @@ describe('SchemasController', () => {
             {
               label: 'test registry',
               address: '0x111',
-              asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
+              asset_manager_address:
+                '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
               oracle_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
             },
           ],
@@ -150,7 +153,8 @@ describe('SchemasController', () => {
           registries: [
             {
               address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
-              asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
+              asset_manager_address:
+                '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
               oracle_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
               label: 'sdsds',
               proofs: ['sss', 'saaass'],
@@ -158,7 +162,9 @@ describe('SchemasController', () => {
           ],
         } as Schema);
       } catch (err) {
-        expect(err.message.message).toEqual(AttributesErrors.REFERENCE_ID_MISSING);
+        expect(err.message.message).toEqual(
+          AttributesErrors.REFERENCE_ID_MISSING,
+        );
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
       }
@@ -182,7 +188,8 @@ describe('SchemasController', () => {
           registries: [
             {
               address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
-              asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
+              asset_manager_address:
+                '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
               oracle_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
               label: 'sdsds',
               proofs: ['sss', 'saaass'],
@@ -190,7 +197,9 @@ describe('SchemasController', () => {
           ],
         } as Schema);
       } catch (err) {
-        expect(err.message.message).toMatch(AttributesErrors.NESTED_ATTRIBUTES_NOT_SUPPORTED);
+        expect(err.message.message).toMatch(
+          AttributesErrors.NESTED_ATTRIBUTES_NOT_SUPPORTED,
+        );
         expect(err.message.message).toMatch('document.qualities');
         expect(err.status).toEqual(400);
         expect(err instanceof HttpException).toEqual(true);
@@ -230,11 +239,14 @@ describe('SchemasController', () => {
         await schemasController.create(newSchema);
       }
 
-      const find1 = await schemasController.get({ 'name': 'increment_0', 'registries.0.label': 'increment_0' });
+      const find1 = await schemasController.get({
+        name: 'increment_0',
+        'registries.0.label': 'increment_0',
+      });
       expect(find1.length).toEqual(1);
 
       const find2 = await schemasController.get({
-        'name': { $in: ['increment_0', 'increment_1'] },
+        name: { $in: ['increment_0', 'increment_1'] },
         'registries.0.label': { $in: ['increment_0', 'increment_1'] },
       });
       expect(find2.length).toEqual(2);
@@ -253,7 +265,9 @@ describe('SchemasController', () => {
         ...schemaToCreate,
         name: Math.random().toString(),
       });
-      const result: Schema = await schemasController.archive({ id: newSchema._id });
+      const result: Schema = await schemasController.archive({
+        id: newSchema._id,
+      });
       expect(result.archived).toEqual(true);
     });
 
@@ -267,7 +281,9 @@ describe('SchemasController', () => {
         archived: true,
         name: Math.random().toString(),
       });
-      const result: Schema = await schemasController.restore({ id: newSchema._id });
+      const result: Schema = await schemasController.restore({
+        id: newSchema._id,
+      });
       expect(result.archived).toEqual(false);
     });
   });
@@ -278,9 +294,7 @@ describe('SchemasController', () => {
         SchemasController,
       );
 
-      const result = await schemasController.create(
-        schemaToCreate,
-      );
+      const result = await schemasController.create(schemaToCreate);
 
       const updateSchemaObject = {
         ...result,
@@ -295,10 +309,7 @@ describe('SchemasController', () => {
         ],
       } as Schema;
 
-      await schemasController.update(
-        { id: result._id },
-        updateSchemaObject,
-      );
+      await schemasController.update({ id: result._id }, updateSchemaObject);
 
       expect(databaseSpies.spyUpdate).toHaveBeenCalledTimes(1);
       expect(databaseSpies.spyUpdate).toHaveBeenCalledWith(
@@ -308,19 +319,30 @@ describe('SchemasController', () => {
         {
           $set: {
             formFeatures: undefined,
-            attributes: [{ label: 'ReferenceId', name: 'reference_id', type: 'string' }, {
-              label: 'wingspans',
-              type: 'string',
-              name: 'animal_wingspan',
-            }, { name: 'animal_reference_id', label: 'reference_id', type: 'string' }],
+            attributes: [
+              { label: 'ReferenceId', name: 'reference_id', type: 'string' },
+              {
+                label: 'wingspans',
+                type: 'string',
+                name: 'animal_wingspan',
+              },
+              {
+                name: 'animal_reference_id',
+                label: 'reference_id',
+                type: 'string',
+              },
+            ],
             name: 'bestAnimals',
-            registries: [{
-              address: '0x87c574FB2DF0EaA2dAf5fc4a8A16dd3Ce39011B1',
-              asset_manager_address: '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
-              oracle_address: '0x0000000000000000000000000000000000000000',
-              label: 'animal_registry',
-              proofs: ['attributes.wingspan'],
-            }],
+            registries: [
+              {
+                address: '0x87c574FB2DF0EaA2dAf5fc4a8A16dd3Ce39011B1',
+                asset_manager_address:
+                  '0x3Ba4280217e78a0EaEA612c1502FC2e92A7FE5D7',
+                oracle_address: '0x0000000000000000000000000000000000000000',
+                label: 'animal_registry',
+                proofs: ['attributes.wingspan'],
+              },
+            ],
           },
         },
         {
@@ -330,7 +352,9 @@ describe('SchemasController', () => {
       );
 
       const updated = await schemasController.getById({ id: result._id });
-      expect(updated!.registries[0].address).toEqual(updateSchemaObject.registries[0].address);
+      expect(updated!.registries[0].address).toEqual(
+        updateSchemaObject.registries[0].address,
+      );
 
       const updateSchemaObject2 = {
         _id: result._id,
@@ -340,10 +364,7 @@ describe('SchemasController', () => {
       } as Schema;
 
       try {
-        await schemasController.update(
-          { id: result._id },
-          updateSchemaObject2,
-        );
+        await schemasController.update({ id: result._id }, updateSchemaObject2);
       } catch (err) {
         expect(err.message.message).toEqual(DiffErrors.NAME_CHANGE_FORBIDEN);
         expect(err.status).toEqual(400);

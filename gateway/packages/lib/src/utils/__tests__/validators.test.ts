@@ -1,8 +1,6 @@
 import { isPasswordValid } from '../validators';
 
-
 describe('Validators', () => {
-
   it('Password validator', function() {
     expect(isPasswordValid('Password')).toBe(false);
     expect(isPasswordValid('Passwor')).toBe(false);
@@ -10,7 +8,4 @@ describe('Validators', () => {
     expect(isPasswordValid('!@#$%^&*(')).toBe(false);
     expect(isPasswordValid('$Passw0rd')).toBe(true);
   });
-
-
-
 });

@@ -1,14 +1,13 @@
-import React, { FunctionComponent, useContext, useState } from 'react';
-
-import LoginForm from './LoginForm';
-import { Redirect, RouteComponentProps, withRouter } from 'react-router';
 import { TwoFaType, User } from '@centrifuge/gateway-lib/models/user';
-import routes from '../routes';
 import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants';
+import { Box } from 'grommet';
+import React, { FunctionComponent, useContext, useState } from 'react';
+import { Redirect, RouteComponentProps, withRouter } from 'react-router';
 import { AppContext } from '../App';
 import { httpClient } from '../http-client';
+import routes from '../routes';
+import LoginForm from './LoginForm';
 import TwoFAForm from './TwoFAForm';
-import { Box } from 'grommet';
 
 type Props = {} & RouteComponentProps;
 
@@ -28,10 +27,11 @@ const LoginPage: FunctionComponent<Props> = props => {
 
   const loginTentative = async (loginCandidate: User) => {
     try {
-      const result = (await httpClient.user.loginTentative(loginCandidate)).data;
+      const result = (await httpClient.user.loginTentative(loginCandidate))
+        .data;
       setLoginCandidate({
         ...result,
-        ...loginCandidate
+        ...loginCandidate,
       });
       setError(undefined);
     } catch (e) {
@@ -51,15 +51,13 @@ const LoginPage: FunctionComponent<Props> = props => {
     ) {
       return <Redirect to={routes.documents.index} />;
     }
-
   }
 
-  const getInfo = (loginCandidate) => {
+  const getInfo = loginCandidate => {
     return loginCandidate.twoFAType === TwoFaType.APP
       ? 'Open the Authenticator App on your mobile phone and enter in the generated security code for Gateway in the form below.'
       : 'We just sent you a message with your security code via email. Enter the code in the form below to verify your identity.';
-
-  }
+  };
 
   return (
     <Box align="center" justify="center">
@@ -70,11 +68,16 @@ const LoginPage: FunctionComponent<Props> = props => {
         margin="medium"
         pad="medium"
       >
-      {loginCandidate ? (
-        <TwoFAForm info={getInfo(loginCandidate)} user={loginCandidate} error={error} onSubmit={login} />
-      ) : (
-        <LoginForm error={error} onSubmit={loginTentative} />
-      )}
+        {loginCandidate ? (
+          <TwoFAForm
+            info={getInfo(loginCandidate)}
+            user={loginCandidate}
+            error={error}
+            onSubmit={login}
+          />
+        ) : (
+          <LoginForm error={error} onSubmit={loginTentative} />
+        )}
       </Box>
     </Box>
   );

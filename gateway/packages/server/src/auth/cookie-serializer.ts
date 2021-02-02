@@ -1,13 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { PassportSerializer } from '@nestjs/passport';
 import { User } from '@centrifuge/gateway-lib/models/user';
+import { Injectable } from '@nestjs/common';
+import { PassportSerializer } from '@nestjs/passport';
 import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class CookieSerializer extends PassportSerializer {
-  constructor(
-    private readonly databaseService: DatabaseService,
-  ) {
+  constructor(private readonly databaseService: DatabaseService) {
     super();
   }
 

@@ -1,16 +1,23 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
-import { SessionGuard } from '../auth/SessionGuard';
 import { Contact } from '@centrifuge/gateway-lib/models/contact';
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { SessionGuard } from '../auth/SessionGuard';
 import { DatabaseService } from '../database/database.service';
 
 @Controller(ROUTES.CONTACTS)
 @UseGuards(SessionGuard)
 export class ContactsController {
-  constructor(
-    private readonly databaseService: DatabaseService,
-  ) {
-  }
+  constructor(private readonly databaseService: DatabaseService) {}
 
   @Post()
   /**
@@ -43,9 +50,12 @@ export class ContactsController {
    * @return {Promise<Contact[]>} result
    */
   async get(@Req() request) {
-    return this.databaseService.contacts.getCursor({
-      ownerId: request.user._id,
-    }).sort({ updatedAt: -1 }).exec();
+    return this.databaseService.contacts
+      .getCursor({
+        ownerId: request.user._id,
+      })
+      .sort({ updatedAt: -1 })
+      .exec();
   }
 
   @Put(':id')
