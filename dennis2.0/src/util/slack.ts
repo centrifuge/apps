@@ -10,9 +10,8 @@ export const pushNotificationToSlack = async (
   const header = {
     type: 'section',
     text: {
-      type: 'plain_text',
+      type: 'mrkdwn',
       text: title,
-      emoji: true,
     },
     ...(externalLink
       ? {
@@ -21,7 +20,6 @@ export const pushNotificationToSlack = async (
             text: {
               type: 'plain_text',
               text: externalLink.title,
-              emoji: true,
             },
             value: 'click_me_123',
             url: externalLink.url,
@@ -37,14 +35,14 @@ export const pushNotificationToSlack = async (
       text: {
         type: 'mrkdwn',
         text: `${
-          event.level === 'error' ? ':no_entry_sign:' : event.level === 'warning' ? ':warning:' : ':information_source:'
+          event.level === 'error' ? ':no_entry_sign:' : event.level === 'warning' ? ':warning:' : ':white_check_mark:'
         } ${event.message}`,
       },
     }
   })
 
-  await fetch(config.slackWebhookUrl, {
-    method: 'POST', // or 'PUT'
+  const response = await fetch(config.slackWebhookUrl, {
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -52,6 +50,11 @@ export const pushNotificationToSlack = async (
       blocks: [header, ...formattedEvents],
     }),
   })
+
+  if (!response.ok) {
+    const body = await response.text()
+    console.error(`${response.statusText}: ${body}`)
+  }
 }
 
 export type NotificationEvent = {

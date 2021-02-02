@@ -1,7 +1,8 @@
 import Tinlake, { baseToDisplay, ITinlake, toPrecision, addThousandsSeparators } from '@centrifuge/tinlake-js'
-import { Orders } from '@centrifuge/tinlake-js/dist/services/solver/solver'
+import { Orders, State } from '@centrifuge/tinlake-js/dist/services/solver/solver'
 const BN = require('bn.js')
 import { ethers } from 'ethers'
+import config from '../config'
 import { PoolMap } from '../util/ipfs'
 import { NotificationEvent, pushNotificationToSlack } from '../util/slack'
 
@@ -11,6 +12,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
     if (!pool.addresses) return
     const tinlake: ITinlake = new Tinlake({ provider, signer, contractAddresses: pool.addresses })
     const id = await tinlake.getCurrentEpochId()
+    const epochState = await tinlake.getEpochState()
     const state = await tinlake.getCurrentEpochState()
     const name = pool.metadata.shortName || pool.metadata.name
 
@@ -22,10 +24,15 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
       console.log(`Executing ${name} with tx: ${executeTx.hash}`)
       await tinlake.getTransactionReceipt(executeTx)
 
-      pushNotificationToSlack(`I just executed epoch ${id} for ${name}.`, formatEvents(orders), {
-        title: 'View on Etherscan',
-        url: `https://kovan.etherscan.io/tx/${executeTx.hash}`,
-      })
+      const currentTinRatio = parseRatio(await tinlake.getCurrentJuniorRatio())
+      pushNotificationToSlack(
+        `I just executed epoch ${id} for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${pool.metadata.slug}|${name}>*.`,
+        formatEvents(epochState, orders, currentTinRatio),
+        {
+          title: 'View on Etherscan',
+          url: `https://kovan.etherscan.io/tx/${executeTx.hash}`,
+        }
+      )
 
       return
     }
@@ -46,30 +53,53 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
     await tinlake.getTransactionReceipt(solveTx)
 
     // TODO: only push notification if immediately executed as well
-    pushNotificationToSlack(`I just closed epoch ${id} for ${name}.`, formatEvents(orders), {
-      title: 'View on Etherscan',
-      url: `https://kovan.etherscan.io/tx/${solveTx.hash}`,
-    })
+    const currentTinRatio = parseRatio(await tinlake.getCurrentJuniorRatio())
+    pushNotificationToSlack(
+      `I just closed epoch ${id} for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${pool.metadata.slug}|${name}>*.`,
+      formatEvents(epochState, orders, currentTinRatio),
+      {
+        title: 'View on Etherscan',
+        url: `https://kovan.etherscan.io/tx/${solveTx.hash}`,
+      }
+    )
   }
 }
 
-const formatEvents = (orders: Orders): NotificationEvent[] => {
+const formatEvents = (state: State, fulfilledOrders: Orders, currentTinRatio: number): NotificationEvent[] => {
+  const minTinRatio = parseRatio(new BN(10).pow(new BN(27)).sub(state.maxDropRatio))
+  // const reserveRatio = state.reserve.div(state.reserve.add(state.netAssetValue)).mul(new BN(100))
+
   return [
     {
       level: 'info',
       message: `DROP received ${addThousandsSeparators(
-        toPrecision(baseToDisplay(orders.dropInvest, 18), 0)
+        toPrecision(baseToDisplay(fulfilledOrders.dropInvest, 18), 0)
       )} DAI in investments and  ${addThousandsSeparators(
-        toPrecision(baseToDisplay(orders.dropRedeem, 18), 0)
+        toPrecision(baseToDisplay(fulfilledOrders.dropRedeem, 18), 0)
       )} DAI was redeemed.`,
     },
     {
       level: 'info',
       message: `TIN received ${addThousandsSeparators(
-        toPrecision(baseToDisplay(orders.tinInvest, 18), 0)
+        toPrecision(baseToDisplay(fulfilledOrders.tinInvest, 18), 0)
       )} DAI in investments and  ${addThousandsSeparators(
-        toPrecision(baseToDisplay(orders.tinRedeem, 18), 0)
+        toPrecision(baseToDisplay(fulfilledOrders.tinRedeem, 18), 0)
       )} DAI was redeemed.`,
     },
+    {
+      level: 'warning',
+      message: `The reserve is ${addThousandsSeparators(
+        toPrecision(baseToDisplay(state.reserve, 18), 0)
+      )} DAI out of ${addThousandsSeparators(toPrecision(baseToDisplay(state.maxReserve, 18), 0))} DAI.`,
+    },
+    {
+      level: 'warning',
+      message: `The TIN risk buffer is ${Math.round(100 * currentTinRatio)} % (min: ${100 * minTinRatio} %).`,
+    },
   ]
+}
+
+const parseRatio = (num: typeof BN): number => {
+  const base = new BN(10).pow(new BN(20))
+  return num.div(base).toNumber() / 10 ** 7
 }

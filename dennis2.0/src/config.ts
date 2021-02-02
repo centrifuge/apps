@@ -6,6 +6,7 @@ export interface Config {
   poolRegistry: string
   signerPrivateKey: string
   slackWebhookUrl: string
+  tinlakeUiHost: string
 }
 
 const config: Config = {
@@ -14,6 +15,7 @@ const config: Config = {
   poolRegistry: process.env.POOL_REGISTRY,
   signerPrivateKey: process.env.SIGNER_PRIVATE_KEY,
   slackWebhookUrl: process.env.SLACK_WEBHOOK_URL,
+  tinlakeUiHost: process.env.TINLAKE_UI_HOST,
 }
 
 export default config
