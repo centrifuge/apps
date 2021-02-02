@@ -1,65 +1,54 @@
-import { DisplayField } from '@centrifuge/axis-display-field';
-import { Modal } from '@centrifuge/axis-modal';
-import { CoreapiNFT } from '@centrifuge/gateway-lib/centrifuge-node-client';
-import { Document, NftStatus } from '@centrifuge/gateway-lib/models/document';
-import { Registry } from '@centrifuge/gateway-lib/models/schema';
-import { Contact } from '@centrifuge/gateway-lib/src/models/contact';
-import {
-  getAddressLink,
-  getNFTLink,
-  hexToInt,
-} from '@centrifuge/gateway-lib/utils/etherscan';
-import { Anchor, Box, Button, Paragraph } from 'grommet';
-import React, { FunctionComponent } from 'react';
-import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
-import { Section } from '../components/Section';
-import { useMergeState } from '../hooks';
-import { httpClient } from '../http-client';
-import MintNftForm, { MintNftFormData } from './MintNftForm';
+import { DisplayField } from '@centrifuge/axis-display-field'
+import { Modal } from '@centrifuge/axis-modal'
+import { CoreapiNFT } from '@centrifuge/gateway-lib/centrifuge-node-client'
+import { Document, NftStatus } from '@centrifuge/gateway-lib/models/document'
+import { Registry } from '@centrifuge/gateway-lib/models/schema'
+import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
+import { getAddressLink, getNFTLink, hexToInt } from '@centrifuge/gateway-lib/utils/etherscan'
+import { Anchor, Box, Button, Paragraph } from 'grommet'
+import React, { FunctionComponent } from 'react'
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
+import { Section } from '../components/Section'
+import { useMergeState } from '../hooks'
+import { httpClient } from '../http-client'
+import MintNftForm, { MintNftFormData } from './MintNftForm'
 
 type Props = {
-  onAsyncStart?: (message: string) => void;
-  onAsyncComplete?: (data) => void;
-  onAsyncError?: (error, title?: string) => void;
-  onMintStart?: () => void;
-  document: Document;
-  contacts: Contact[];
-  registries: Registry[];
-  viewMode: boolean;
-};
+  onAsyncStart?: (message: string) => void
+  onAsyncComplete?: (data) => void
+  onAsyncError?: (error, title?: string) => void
+  onMintStart?: () => void
+  document: Document
+  contacts: Contact[]
+  registries: Registry[]
+  viewMode: boolean
+}
 
 type State = {
-  mintModalOpened: boolean;
-  transferModalOpened: boolean;
-  selectedNft: CoreapiNFT | null;
-};
+  mintModalOpened: boolean
+  transferModalOpened: boolean
+  selectedNft: CoreapiNFT | null
+}
 
-export const Nfts: FunctionComponent<Props> = props => {
+export const Nfts: FunctionComponent<Props> = (props) => {
   const [{ mintModalOpened }, setState] = useMergeState<State>({
     mintModalOpened: false,
     transferModalOpened: false,
     selectedNft: null,
-  });
+  })
 
-  const {
-    onAsyncComplete,
-    onAsyncError,
-    onMintStart,
-    document,
-    registries,
-    viewMode,
-  } = {
-    onAsyncComplete: data => {},
+  const { onAsyncComplete, onAsyncError, onMintStart, document, registries, viewMode } = {
+    onAsyncComplete: (data) => {},
     onAsyncError: (error, title?: string) => {},
     onMintStart: () => {},
     ...props,
-  };
+  }
 
   const mintNFT = async (id: string, data: MintNftFormData) => {
-    closeModal();
+    closeModal()
 
     try {
-      onMintStart();
+      onMintStart()
       onAsyncComplete(
         (
           await httpClient.nfts.mint({
@@ -70,68 +59,53 @@ export const Nfts: FunctionComponent<Props> = props => {
             asset_manager_address: data.registry!.asset_manager_address,
             oracle_address: data.registry!.oracle_address,
           })
-        ).data,
-      );
+        ).data
+      )
     } catch (e) {
-      onAsyncError(e, 'Failed to mint NFT');
+      onAsyncError(e, 'Failed to mint NFT')
     }
-  };
+  }
 
   const openMintModal = () => {
-    setState({ mintModalOpened: true });
-  };
+    setState({ mintModalOpened: true })
+  }
 
   const closeModal = () => {
     setState({
       mintModalOpened: false,
       transferModalOpened: false,
-    });
-  };
+    })
+  }
 
-  const assembleDeepLink = (
-    tokenId: string,
-    registry: string,
-    tinlakePool: string,
-  ) => {
-    const address = `${tinlakePool}/assets/issue?tokenId=${tokenId}&registry=${registry}`;
+  const assembleDeepLink = (tokenId: string, registry: string, tinlakePool: string) => {
+    const address = `${tinlakePool}/assets/issue?tokenId=${tokenId}&registry=${registry}`
 
-    return <Anchor label={'Open Loan'} target={'_blank'} href={address} />;
-  };
+    return <Anchor label={'Open Loan'} target={'_blank'} href={address} />
+  }
 
   const renderNftActions = (datum: any, registries: Registry[]) => {
-    let actions;
+    let actions
     if (registries[0].tinlakePool) {
       actions = (
         <Box direction="row" gap="small">
-          {assembleDeepLink(
-            hexToInt(datum.token_id),
-            datum.registry,
-            registries[0].tinlakePool,
-          )}
+          {assembleDeepLink(hexToInt(datum.token_id), datum.registry, registries[0].tinlakePool)}
         </Box>
-      );
+      )
     } else {
-      actions = [];
+      actions = []
     }
-    return actions;
-  };
+    return actions
+  }
 
   const renderNodeUrl = () => {
     return window['__ETH_NETWORK__'] === 'kovan'
       ? getAddressLink('0x44a0579754D6c94e7bB2c26bFA7394311Cc50Ccb')
-      : getAddressLink('0x3ba4280217e78a0eaea612c1502fc2e92a7fe5d7');
-  };
+      : getAddressLink('0x3ba4280217e78a0eaea612c1502fc2e92a7fe5d7')
+  }
 
   const mintActions = !viewMode
-    ? [
-        <Button
-          key="mint-nft"
-          onClick={openMintModal}
-          primary={true}
-          label={'Mint NFT'}
-        />,
-      ]
-    : [];
+    ? [<Button key="mint-nft" onClick={openMintModal} primary={true} label={'Mint NFT'} />]
+    : []
 
   const renderNftSection = () => {
     return (
@@ -145,45 +119,45 @@ export const Nfts: FunctionComponent<Props> = props => {
             {
               property: 'token_id',
               header: 'Token ID',
-              render: datum => (
+              render: (datum) => (
                 <DisplayField
                   copy={true}
                   as={'span'}
                   link={{
-                    href: getNFTLink(datum.token_id, datum.registry),
+                    href: getNFTLink((datum as CoreapiNFT).token_id!, (datum as CoreapiNFT).registry!),
                     target: '_blank',
                   }}
-                  value={hexToInt(datum.token_id)}
+                  value={hexToInt((datum as CoreapiNFT).token_id!)}
                 />
               ),
             },
             {
               property: 'registry',
               header: 'Registry',
-              render: datum => (
+              render: (datum) => (
                 <DisplayField
                   copy={true}
                   as={'span'}
                   link={{
-                    href: getAddressLink(datum.registry),
+                    href: getAddressLink((datum as CoreapiNFT).registry!),
                     target: '_blank',
                   }}
-                  value={datum.registry}
+                  value={(datum as CoreapiNFT).registry!}
                 />
               ),
             },
             {
               property: 'owner',
               header: 'Owner',
-              render: datum => (
+              render: (datum) => (
                 <DisplayField
                   copy={true}
                   as={'span'}
                   link={{
-                    href: getAddressLink(datum.owner),
+                    href: getAddressLink((datum as CoreapiNFT).owner!),
                     target: '_blank',
                   }}
-                  value={datum.owner}
+                  value={(datum as CoreapiNFT).owner!}
                 />
               ),
             },
@@ -191,8 +165,8 @@ export const Nfts: FunctionComponent<Props> = props => {
               property: '_id',
               header: 'Actions',
               sortable: false,
-              render: datum => {
-                return renderNftActions(datum, registries);
+              render: (datum) => {
+                return renderNftActions(datum, registries)
               },
             },
           ]}
@@ -201,17 +175,15 @@ export const Nfts: FunctionComponent<Props> = props => {
         {!document!.header!.nfts &&
           (document.nft_status === NftStatus.Minting ? (
             <Paragraph color={'dark-2'}>
-              There are no NFTs minted on this document yet. Pending
-              transactions can be found {<a href={renderNodeUrl()}>here.</a>}
+              There are no NFTs minted on this document yet. Pending transactions can be found{' '}
+              {<a href={renderNodeUrl()}>here.</a>}
             </Paragraph>
           ) : (
-            <Paragraph color={'dark-2'}>
-              There are no NFTs minted on this document yet.
-            </Paragraph>
+            <Paragraph color={'dark-2'}>There are no NFTs minted on this document yet.</Paragraph>
           ))}
       </Section>
-    );
-  };
+    )
+  }
 
   return (
     <>
@@ -224,7 +196,7 @@ export const Nfts: FunctionComponent<Props> = props => {
       >
         <MintNftForm
           //        @ts-ignore
-          onSubmit={data => mintNFT(document.header!.document_id!, data)}
+          onSubmit={(data) => mintNFT(document.header!.document_id!, data)}
           onDiscard={closeModal}
           registries={registries}
         />
@@ -232,5 +204,5 @@ export const Nfts: FunctionComponent<Props> = props => {
 
       {renderNftSection()}
     </>
-  );
-};
+  )
+}

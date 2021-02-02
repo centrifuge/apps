@@ -1,35 +1,27 @@
-import { Modal } from '@centrifuge/axis-modal';
-import { Schema } from '@centrifuge/gateway-lib/models/schema';
-import { formatDate } from '@centrifuge/gateway-lib/utils/formaters';
-import { AxiosError } from 'axios';
-import { Anchor, Box, Button, CheckBox, Heading, Text } from 'grommet';
-import React, {
-  FunctionComponent,
-  useCallback,
-  useContext,
-  useEffect,
-} from 'react';
-import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
-import {
-  NOTIFICATION,
-  NotificationContext,
-} from '../components/NotificationContext';
-import { PageError } from '../components/PageError';
-import { Preloader } from '../components/Preloader';
-import { SecondaryHeader } from '../components/SecondaryHeader';
-import { useMergeState } from '../hooks';
-import { httpClient } from '../http-client';
-import SchemaForm from './SchemaForm';
+import { Modal } from '@centrifuge/axis-modal'
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
+import { formatDate } from '@centrifuge/gateway-lib/utils/formaters'
+import { AxiosError } from 'axios'
+import { Anchor, Box, Button, CheckBox, Heading, Text } from 'grommet'
+import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react'
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
+import { NOTIFICATION, NotificationContext } from '../components/NotificationContext'
+import { PageError } from '../components/PageError'
+import { Preloader } from '../components/Preloader'
+import { SecondaryHeader } from '../components/SecondaryHeader'
+import { useMergeState } from '../hooks'
+import { httpClient } from '../http-client'
+import SchemaForm from './SchemaForm'
 
 type State = {
-  schemas: Schema[];
-  loadingMessage: string | null;
-  selectedSchema: Schema | null;
-  showArchive: boolean;
-  formMode: FormModes;
-  openedSchemaForm: boolean;
-  error: any;
-};
+  schemas: Schema[]
+  loadingMessage: string | null
+  selectedSchema: Schema | null
+  showArchive: boolean
+  formMode: FormModes
+  openedSchemaForm: boolean
+  error: any
+}
 
 /**
  * Holds the Schema form modes
@@ -74,19 +66,11 @@ const formModePropMapping = {
       title: 'View Schema',
     },
   },
-};
+}
 
 const SchemaList: FunctionComponent = () => {
   const [
-    {
-      loadingMessage,
-      selectedSchema,
-      schemas,
-      formMode,
-      openedSchemaForm,
-      showArchive,
-      error,
-    },
+    { loadingMessage, selectedSchema, schemas, formMode, openedSchemaForm, showArchive, error },
     setState,
   ] = useMergeState<State>({
     loadingMessage: 'Loading',
@@ -96,149 +80,147 @@ const SchemaList: FunctionComponent = () => {
     openedSchemaForm: false,
     showArchive: false,
     error: null,
-  });
+  })
 
-  const notification = useContext(NotificationContext);
+  const notification = useContext(NotificationContext)
 
   const displayPageError = useCallback(
-    error => {
+    (error) => {
       setState({
         loadingMessage: null,
         error,
-      });
+      })
     },
-    [setState],
-  );
+    [setState]
+  )
 
   const loadData = useCallback(async () => {
     setState({
       loadingMessage: 'Loading',
-    });
+    })
     try {
-      const schemas = (await httpClient.schemas.list()).data;
+      const schemas = (await httpClient.schemas.list()).data
 
       setState({
         loadingMessage: null,
         schemas,
-      });
+      })
     } catch (e) {
-      displayPageError(e);
+      displayPageError(e)
     }
-  }, [setState, displayPageError]);
+  }, [setState, displayPageError])
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    loadData()
+  }, [loadData])
 
   const handleSubmit = async (schema: Schema) => {
-    const context: any = {};
+    const context: any = {}
     if (selectedSchema && (selectedSchema as Schema)._id) {
-      context.errorTitle = 'Failed to update schema';
-      context.loadingMessage = 'Updating schema';
-      context.method = 'update';
+      context.errorTitle = 'Failed to update schema'
+      context.loadingMessage = 'Updating schema'
+      context.method = 'update'
     } else {
-      context.errorTitle = 'Failed to create schema';
-      context.loadingMessage = 'creating schema';
-      context.method = 'create';
+      context.errorTitle = 'Failed to create schema'
+      context.loadingMessage = 'creating schema'
+      context.method = 'create'
     }
 
     setState({
       loadingMessage: context.loadingMessage,
       selectedSchema: null,
       openedSchemaForm: false,
-    });
+    })
 
     try {
-      await httpClient.schemas[context.method](schema);
-      await loadData();
+      await httpClient.schemas[context.method](schema)
+      await loadData()
     } catch (e) {
       setState({
         loadingMessage: null,
-      });
+      })
 
       notification.alert({
         type: NOTIFICATION.ERROR,
         title: context.errorTitle,
         message: (e as AxiosError)!.response!.data.message,
-      });
+      })
     }
-  };
+  }
 
   const archiveSchema = async (schema: Schema) => {
-    if (!schema._id)
-      throw new Error('Can not archive a schema that does not have _id set');
+    if (!schema._id) throw new Error('Can not archive a schema that does not have _id set')
     setState({
       loadingMessage: 'Archiving schema',
       selectedSchema: null,
-    });
+    })
     try {
-      await httpClient.schemas.archive(schema._id);
-      loadData();
+      await httpClient.schemas.archive(schema._id)
+      loadData()
     } catch (e) {
       setState({
         loadingMessage: null,
-      });
+      })
 
       notification.alert({
         type: NOTIFICATION.ERROR,
         title: 'Failed to archive schema',
         message: (e as AxiosError)!.response!.data.message,
-      });
+      })
     }
-  };
+  }
 
   const restoreSchema = async (schema: Schema) => {
-    if (!schema._id)
-      throw new Error('Can not restore a schema that does not have _id set');
+    if (!schema._id) throw new Error('Can not restore a schema that does not have _id set')
     setState({
       loadingMessage: 'Restoring schema',
       selectedSchema: null,
-    });
+    })
     try {
-      await httpClient.schemas.restore(schema._id);
-      loadData();
+      await httpClient.schemas.restore(schema._id)
+      loadData()
     } catch (e) {
       setState({
         loadingMessage: null,
-      });
+      })
 
       notification.alert({
         type: NOTIFICATION.ERROR,
         title: 'Failed to restore schema',
         message: (e as AxiosError)!.response!.data.message,
-      });
+      })
     }
-  };
+  }
 
   const closeSchemaModal = () => {
-    setState({ selectedSchema: null, openedSchemaForm: false });
-  };
+    setState({ selectedSchema: null, openedSchemaForm: false })
+  }
 
   const createSchema = () => {
     setState({
       selectedSchema: null,
       formMode: FormModes.CREATE,
       openedSchemaForm: true,
-    });
-  };
+    })
+  }
 
-  const viewSchema = data => {
+  const viewSchema = (data) => {
     setState({
       selectedSchema: data,
       formMode: FormModes.VIEW,
       openedSchemaForm: true,
-    });
-  };
+    })
+  }
 
-  const editSchema = data => {
+  const editSchema = (data) => {
     setState({
       selectedSchema: data,
       formMode: FormModes.EDIT,
       openedSchemaForm: true,
-    });
-  };
+    })
+  }
 
-  const renderSchemas = data => {
+  const renderSchemas = (data) => {
     return (
       <DataTableWithDynamicHeight
         data={data}
@@ -248,7 +230,7 @@ const SchemaList: FunctionComponent = () => {
           {
             property: 'name',
             header: 'Name',
-            render: data => (data.name ? <Text>{data.name}</Text> : null),
+            render: (data) => ((data as Schema).name ? <Text>{(data as Schema).name}</Text> : null),
           },
           {
             property: 'label',
@@ -257,48 +239,46 @@ const SchemaList: FunctionComponent = () => {
           {
             property: 'createdAt',
             header: 'Date added',
-            render: data =>
-              data.createdAt ? <Text>{formatDate(data.createdAt)}</Text> : null,
+            render: (data) => ((data as any).createdAt ? <Text>{formatDate((data as any).createdAt)}</Text> : null),
           },
           {
             property: 'updatedAt',
             header: 'Date updated',
-            render: data =>
-              data.updatedAt ? <Text>{formatDate(data.updatedAt)}</Text> : null,
+            render: (data) => ((data as any).updatedAt ? <Text>{formatDate((data as any).updatedAt)}</Text> : null),
           },
           {
             property: 'actions',
             sortable: false,
             header: 'Actions',
-            render: data => {
+            render: (data) => {
               let actions = [
                 <Anchor
                   key={'view'}
                   label={'View'}
                   onClick={() => {
-                    viewSchema(data);
+                    viewSchema(data)
                   }}
                 />,
-              ];
+              ]
 
-              if (!data.archived) {
+              if (!(data as Schema).archived) {
                 actions = [
                   ...actions,
                   <Anchor
                     key={'edit'}
                     label={'Edit'}
                     onClick={() => {
-                      editSchema(data);
+                      editSchema(data)
                     }}
                   />,
                   <Anchor
                     key={'archive'}
                     label={'Archive'}
                     onClick={() => {
-                      archiveSchema(data);
+                      archiveSchema(data as Schema)
                     }}
                   />,
-                ];
+                ]
               } else {
                 actions = [
                   ...actions,
@@ -306,28 +286,28 @@ const SchemaList: FunctionComponent = () => {
                     key={'restore'}
                     label={'Restore'}
                     onClick={() => {
-                      restoreSchema(data);
+                      restoreSchema(data as Schema)
                     }}
                   />,
-                ];
+                ]
               }
               return (
                 <Box direction="row" gap="small">
                   {actions}
                 </Box>
-              );
+              )
             },
           },
         ]}
       />
-    );
-  };
-
-  if (loadingMessage) {
-    return <Preloader message={loadingMessage} />;
+    )
   }
 
-  if (error) return <PageError error={error} />;
+  if (loadingMessage) {
+    return <Preloader message={loadingMessage} />
+  }
+
+  if (error) return <PageError error={error} />
 
   return (
     <Box fill>
@@ -337,7 +317,7 @@ const SchemaList: FunctionComponent = () => {
           <CheckBox
             label={'Show Archived'}
             checked={showArchive}
-            onChange={event => setState({ showArchive: event.target.checked })}
+            onChange={(event) => setState({ showArchive: event.target.checked })}
           />
           <Button primary onClick={createSchema} label="Create Schema" />
         </Box>
@@ -357,12 +337,10 @@ const SchemaList: FunctionComponent = () => {
         />
       </Modal>
       <Box pad={{ horizontal: 'medium' }}>
-        {renderSchemas(
-          schemas.filter(schema => showArchive === !!schema.archived),
-        )}
+        {renderSchemas(schemas.filter((schema) => showArchive === !!schema.archived))}
       </Box>
     </Box>
-  );
-};
+  )
+}
 
-export default SchemaList;
+export default SchemaList

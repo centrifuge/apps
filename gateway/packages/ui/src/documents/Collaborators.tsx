@@ -1,39 +1,39 @@
-import { DisplayField } from '@centrifuge/axis-display-field';
-import { Modal } from '@centrifuge/axis-modal';
-import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator';
+import { DisplayField } from '@centrifuge/axis-display-field'
+import { Modal } from '@centrifuge/axis-modal'
+import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
 import {
   createDocumentCollaborators,
   Document,
   getDocumentCollaborators,
-} from '@centrifuge/gateway-lib/models/document';
-import { canWriteToDoc } from '@centrifuge/gateway-lib/models/user';
-import { Contact } from '@centrifuge/gateway-lib/src/models/contact';
-import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan';
-import { connect, FormikContext } from 'formik';
-import { Anchor, Box, Button, Paragraph, Text } from 'grommet';
-import { UserAdd } from 'grommet-icons';
-import React, { FunctionComponent } from 'react';
-import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
-import { Section } from '../components/Section';
-import { useMergeState } from '../hooks';
-import CollaboratorForm from './CollaboratorForm';
+} from '@centrifuge/gateway-lib/models/document'
+import { canWriteToDoc } from '@centrifuge/gateway-lib/models/user'
+import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
+import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan'
+import { connect, FormikContext } from 'formik'
+import { Anchor, Box, Button, Paragraph, Text } from 'grommet'
+import { UserAdd } from 'grommet-icons'
+import React, { FunctionComponent } from 'react'
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
+import { Section } from '../components/Section'
+import { useMergeState } from '../hooks'
+import CollaboratorForm from './CollaboratorForm'
 
 interface OuterProps {
-  contacts: Contact[];
-  collaborators: Collaborator[];
-  viewMode: boolean;
-  addCollaboratorToPayload: (collaborators: Array<any>) => void;
+  contacts: Contact[]
+  collaborators: Collaborator[]
+  viewMode: boolean
+  addCollaboratorToPayload: (collaborators: Array<any>) => void
 }
 
 type Props = OuterProps & {
-  formik: FormikContext<Document>;
-};
+  formik: FormikContext<Document>
+}
 
 type State = {
-  collaboratorModelOpened: boolean;
-  formMode: FormModes;
-  selectedCollaborator?: Collaborator;
-};
+  collaboratorModelOpened: boolean
+  formMode: FormModes
+  selectedCollaborator?: Collaborator
+}
 
 /**
  * Holds the Schema form modes
@@ -76,16 +76,13 @@ const formModePropMapping = {
       title: 'View collaborator',
     },
   },
-};
+}
 
-export const Collaborators: FunctionComponent<Props> = props => {
-  const [
-    { collaboratorModelOpened, selectedCollaborator, formMode },
-    setState,
-  ] = useMergeState<State>({
+export const Collaborators: FunctionComponent<Props> = (props) => {
+  const [{ collaboratorModelOpened, selectedCollaborator, formMode }, setState] = useMergeState<State>({
     collaboratorModelOpened: false,
     formMode: FormModes.ADD,
-  });
+  })
 
   const {
     addCollaboratorToPayload,
@@ -93,29 +90,22 @@ export const Collaborators: FunctionComponent<Props> = props => {
     contacts,
     collaborators,
     formik: { values, setFieldValue },
-  } = props;
+  } = props
 
   // Merge schema collaborators with available contacts
-  let contactsInstance = getDocumentCollaborators(
-    values,
-    contacts.concat(collaborators),
-  );
+  let contactsInstance = getDocumentCollaborators(values, contacts.concat(collaborators))
 
   // Schema provided collaborators cannot replace used contacts
   // The unique criteria is the address
   if (collaborators) {
     contactsInstance = contactsInstance.concat(
       collaborators.filter(
-        collaborator =>
-          !contactsInstance.find(
-            contact =>
-              collaborator.address.toLowerCase() ===
-              contact.address.toLowerCase(),
-          ),
-      ),
-    );
+        (collaborator) =>
+          !contactsInstance.find((contact) => collaborator.address.toLowerCase() === contact.address.toLowerCase())
+      )
+    )
 
-    addCollaboratorToPayload(contactsInstance);
+    addCollaboratorToPayload(contactsInstance)
   }
 
   const openCollaboratorFormInAddMode = () => {
@@ -123,8 +113,8 @@ export const Collaborators: FunctionComponent<Props> = props => {
       selectedCollaborator: undefined,
       formMode: FormModes.ADD,
       collaboratorModelOpened: true,
-    });
-  };
+    })
+  }
 
   const lastUpdatedBy = (collaborator: Collaborator) => {
     return (
@@ -132,59 +122,59 @@ export const Collaborators: FunctionComponent<Props> = props => {
       values.header &&
       values.header.author &&
       values.header.author.toLowerCase() === collaborator.address.toLowerCase()
-    );
-  };
+    )
+  }
 
-  const openCollaboratorFormInViewMode = selectedCollaborator => {
+  const openCollaboratorFormInViewMode = (selectedCollaborator) => {
     setState({
       selectedCollaborator,
       formMode: FormModes.VIEW,
       collaboratorModelOpened: true,
-    });
-  };
+    })
+  }
 
-  const openCollaboratorFormInEditMode = selectedCollaborator => {
+  const openCollaboratorFormInEditMode = (selectedCollaborator) => {
     setState({
       selectedCollaborator,
       formMode: FormModes.EDIT,
       collaboratorModelOpened: true,
-    });
-  };
+    })
+  }
 
   const closeModal = () => {
     setState({
       collaboratorModelOpened: false,
-    });
-  };
+    })
+  }
 
   const removeCollaborator = (collaborator: Collaborator) => {
     updateCollaborators(
-      contactsInstance.filter(c => {
-        return c.address.toLowerCase() !== collaborator.address.toLowerCase();
-      }) as Collaborator[],
-    );
-  };
+      contactsInstance.filter((c) => {
+        return c.address.toLowerCase() !== collaborator.address.toLowerCase()
+      }) as Collaborator[]
+    )
+  }
 
   const addCollaborator = (collaborator: Collaborator) => {
     //first we need to remove collaborator from other access lists
     setState({
       collaboratorModelOpened: false,
-    });
+    })
     updateCollaborators([
-      ...contactsInstance.filter(c => {
-        return c.address.toLowerCase() !== collaborator.address.toLowerCase();
+      ...contactsInstance.filter((c) => {
+        return c.address.toLowerCase() !== collaborator.address.toLowerCase()
       }),
       collaborator,
-    ] as Collaborator[]);
-  };
+    ] as Collaborator[])
+  }
 
   const updateCollaborators = (collaborators: Collaborator[]) => {
-    const accessLists = createDocumentCollaborators(collaborators);
+    const accessLists = createDocumentCollaborators(collaborators)
     setFieldValue('header', {
       ...values.header,
       ...accessLists,
-    });
-  };
+    })
+  }
 
   const collaboratorActions = !viewMode
     ? [
@@ -196,7 +186,7 @@ export const Collaborators: FunctionComponent<Props> = props => {
           label={'Add collaborator'}
         />,
       ]
-    : [];
+    : []
 
   const renderCollaborators = () => {
     return (
@@ -204,36 +194,32 @@ export const Collaborators: FunctionComponent<Props> = props => {
         <DataTableWithDynamicHeight
           size={'360px'}
           sortable={true}
-          data={contactsInstance}
+          data={contactsInstance as any}
           primaryKey={'address'}
           columns={[
             {
               property: 'name',
               header: 'Name',
-              render: (datum: Collaborator) => {
-                return (
-                  <Text>
-                    {datum.name}
-                    {lastUpdatedBy(datum) && (
-                      <Text weight={'bold'}> (Last update)</Text>
-                    )}
-                  </Text>
-                );
-              },
+              render: (datum: unknown) => (
+                <Text>
+                  {(datum as Collaborator).name}
+                  {lastUpdatedBy(datum as Collaborator) && <Text weight={'bold'}> (Last update)</Text>}
+                </Text>
+              ),
             },
             {
               sortable: false,
               property: 'address',
               header: 'Address',
-              render: (datum: Collaborator) => (
+              render: (datum: unknown) => (
                 <DisplayField
                   copy={true}
                   as={'span'}
                   link={{
-                    href: getAddressLink(datum.address),
+                    href: getAddressLink((datum as Collaborator).address),
                     target: '_blank',
                   }}
-                  value={datum.address}
+                  value={(datum as Collaborator).address}
                 />
               ),
             },
@@ -245,46 +231,42 @@ export const Collaborators: FunctionComponent<Props> = props => {
               property: '_id',
               header: 'Actions',
               sortable: false,
-              render: (datum: Collaborator) => {
-                return (
+              render: (datum: unknown) => (
+                <>
                   <Box className={'actions'} direction="row" gap="small">
                     <Anchor
                       label={'View'}
                       onClick={() => {
-                        openCollaboratorFormInViewMode(datum);
+                        openCollaboratorFormInViewMode(datum as Collaborator)
                       }}
                     />
                     {!viewMode &&
-                      canWriteToDoc({ account: datum.address }, values) && [
+                      canWriteToDoc({ account: (datum as Collaborator).address }, values) && [
                         <Anchor
                           key={'edit-anchor'}
                           label={'Edit'}
                           onClick={() => {
-                            openCollaboratorFormInEditMode(datum);
+                            openCollaboratorFormInEditMode(datum as Collaborator)
                           }}
                         />,
                         <Anchor
                           key={'remove-anchor'}
                           label={'Remove'}
                           onClick={() => {
-                            removeCollaborator(datum);
+                            removeCollaborator(datum as Collaborator)
                           }}
                         />,
                       ]}
                   </Box>
-                );
-              },
+                </>
+              ),
             },
           ]}
         />
-        {!contactsInstance.length && (
-          <Paragraph color={'dark-2'}>
-            There are no collaborators agreements yet.
-          </Paragraph>
-        )}
+        {!contactsInstance.length && <Paragraph color={'dark-2'}>There are no collaborators agreements yet.</Paragraph>}
       </Section>
-    );
-  };
+    )
+  }
 
   return (
     <>
@@ -307,7 +289,7 @@ export const Collaborators: FunctionComponent<Props> = props => {
 
       {renderCollaborators()}
     </>
-  );
-};
+  )
+}
 
-export default connect<OuterProps>(Collaborators);
+export default connect<OuterProps>(Collaborators)
