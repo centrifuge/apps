@@ -1,0 +1,36 @@
+{
+  "name": "centrifuge-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start:prod": "nodemon",
+    "pretest": "yarn workspace @centrifuge/gateway-lib run build ",
+    "test": "cross-env CI=true yarn workspaces run test ",
+    "start": "yarn workspace @centrifuge/gateway-lib run start & yarn workspace @centrifuge/gateway-server run start & yarn workspace @centrifuge/gateway-ui run start",
+    "build": "yarn workspaces run build",
+    "postbuild": "yarn run move:assets",
+    "move:assets": "yarn run move:email-templates && yarn run move:ui",
+    "move:ui": "rm -rf ./build && rsync -a packages/ui/build .",
+    "move:email-templates": "rm -rf ./email-templates && rsync -a packages/server/email-templates ."
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "workspaces": [
+    "packages/lib",
+    "packages/ui",
+    "packages/server"
+  ],
+  "jest": {
+    "snapshotSerializers": [
+      "enzyme-to-json/serializer"
+    ]
+  },
+  "proxy": "http://localhost:3002"
+}

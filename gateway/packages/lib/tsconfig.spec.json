@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "strict": false,
+    "strictPropertyInitialization": false,
+    "noImplicitAny": false,
+
+    "noLib": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "suppressExcessPropertyErrors": true,
+    "strictFunctionTypes": false,
+    "lib": [
+      "es2015",
+    ]
+  }
+}
