@@ -64,4 +64,5 @@ jobs:
       - run: yarn install
 
       # Run
+      - run: yarn workspace @centrifuge/gateway-lib run build
       - run: yarn test
