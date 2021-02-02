@@ -71,7 +71,7 @@ describe('Schema validations', () => {
           {
             name: 'test',
             label: 'test',
-          },
+          } as any,
         ]);
       }).toThrow(AttributesErrors.TYPE_PROP_MISSING);
     });

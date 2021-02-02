@@ -58,7 +58,7 @@ const generateRegistryError = (identifier, message) => {
   return new Error(`Error with ${identifier}: ${message}`);
 };
 
-const generateFormFeaturesError = message => {
+const generateFormFeaturesError = (message) => {
   return new Error(`Error on formFeatures: ${message}`);
 };
 
@@ -214,7 +214,7 @@ export class Schema {
     );
 
     if (diffedAttributes.length > 0) {
-      const identifier = diffedAttributes.map(a => a.name).join(',');
+      const identifier = diffedAttributes.map((a) => a.name).join(',');
       throw generateDiffError(identifier, DiffErrors.ATTRIBUTE_CHANGE_FORBIDEN);
     }
   }
@@ -245,7 +245,7 @@ export class Schema {
     if (!Array.isArray(registries)) {
       throw new Error(RegistriesErrors.REGISTRIES_FORMAT);
     }
-    registries.forEach(registry => {
+    registries.forEach((registry) => {
       if (propertyUnset(registry, 'label')) {
         throw generateRegistryError(
           'registry label',
@@ -321,7 +321,7 @@ export class Schema {
       throw new Error(RegistriesErrors.COLLABORATORS_FORMAT);
     }
 
-    collaborators.forEach(collaborator => {
+    collaborators.forEach((collaborator) => {
       Collaborator.validate(collaborator);
     });
   }
@@ -335,7 +335,7 @@ export class Schema {
    */
   public static validateAttributes(attributes: Attribute[]) {
     if (attributes && Array.isArray(attributes) && attributes.length > 0) {
-      const refID = attributes.filter(attr => {
+      const refID = attributes.filter((attr) => {
         if (propertyUnset(attr, 'name'))
           throw generateAttributeError(
             JSON.stringify(attr),
@@ -429,7 +429,7 @@ export class Schema {
         // @ts-ignore
         if (
           attr.hasOwnProperty('subtype') &&
-          supportedSubtypes.indexOf(attr.subtype) < 0
+          supportedSubtypes.indexOf(attr.subtype!) < 0
         )
           throw generateAttributeError(
             attr.name,
@@ -461,7 +461,7 @@ export class Schema {
 
     // Group attributes by name
     const grupupedByName: Attribute[][] = Object.values(
-      groupBy(attributes, a => a.name),
+      groupBy(attributes, (a) => a.name),
     );
     // check if the matrix has more than one column
     for (let group of grupupedByName) {
