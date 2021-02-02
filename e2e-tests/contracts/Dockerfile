@@ -4,7 +4,7 @@ RUN apt-get update && \
     apt-get -y install curl build-essential automake autoconf git jq
 
 # add user
-RUN useradd -d /home/app/ -m -G sudo app
+RUN useradd -d /home/app -m -G sudo app
 RUN mkdir -m 0755 /app
 RUN chown app /app
 RUN mkdir -m 0755 /nix
@@ -17,17 +17,15 @@ RUN curl -L https://nixos.org/nix/install | sh
 
 ENV PATH="/home/app/.nix-profile/bin:${PATH}"
 ENV NIX_PATH="/home/app//.nix-defexpr/channels/"
-#ENV NIX_PROFILES="/nix/var/nix/profiles/default /home/app//.nix-profile"
-#ENV NIX_SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt"
-
-RUN nix-env -f https://github.com/dapphub/dapptools/archive/master.tar.gz -iA solc-static-versions.solc_0_5_15
 
 # install dapp tools
-RUN curl https://dapp.tools/install | sh
+RUN nix-env -iA dapp hevm seth solc ethsign -f https://api.github.com/repos/dapphub/dapptools/tarball/dapp/0.28.0
+
+RUN nix-env -iA solc-static-versions.solc_0_5_15 -f https://github.com/dapphub/dapptools/archive/master.tar.gz 
 
 WORKDIR /app
 
-RUN git clone https://github.com/dapphub/ds-token.git
+RUN git clone --branch config-from-env https://github.com/ana0/tinlake-deploy.git
 
 RUN mkdir keystore
 
@@ -35,16 +33,11 @@ COPY dev-keyfile.json ./keystore
 
 COPY dev-password .
 
-WORKDIR /app/ds-token
+WORKDIR /app/tinlake-deploy
 
-RUN dapp update
+RUN git submodule update --init --recursive
 
-RUN dapp build
-
-ARG ETH_FROM 
-ENV ETH_FROM $ETH_FROM
-ARG ETH_GAS
-ENV ETH_GAS $ETH_GAS
+RUN make build
 
 COPY deploy.sh .
 

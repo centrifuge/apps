@@ -1,4 +1,6 @@
 #!/bin/bash
 set -e
 
-dapp create DSToken 0x0000000000000000000000000000000000000000000000000000000000000042 --verbose
+make test-config
+
+make deploy
