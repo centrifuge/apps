@@ -55,11 +55,6 @@ services:
       - postgres_host=db:5432
       - postgres_pass=${POSTGRES_PASSWORD}
       - postgres_user=${POSTGRES_USER}
-    healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:8020"]
-        interval: 30s
-        timeout: 10s
-        retries: 5
 
   contracts:
     build:
