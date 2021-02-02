@@ -42,8 +42,8 @@ const LoanData: React.FC<Props> = (props: Props) => {
         >
           Status:
         </span>
-        <LoadingValue done={!!props.loan} height={28} alignRight={false}>
-          {props.loan && <LoanLabel loan={props.loan} />}
+        <LoadingValue value={props.loan} height={28} alignRight={false}>
+          {(loan) => <LoanLabel loan={loan} />}
         </LoadingValue>
       </Box>
       <Box direction="row" justify="between">
@@ -53,16 +53,19 @@ const LoanData: React.FC<Props> = (props: Props) => {
               <TableRow>
                 <TableCell scope="row">Available for Financing</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={props.loan?.principal !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(props.loan?.principal || 0, 18), 2))} DAI
+                  <LoadingValue value={props.loan?.principal}>
+                    {(principal) => `${addThousandsSeparators(toPrecision(baseToDisplay(principal, 18), 2))} DAI`}
+                  </LoadingValue>
+                  <LoadingValue value={props.loan?.principal}>
+                    {(principal) => `${addThousandsSeparators(toPrecision(baseToDisplay(principal, 18), 2))} DAI`}
                   </LoadingValue>
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell scope="row">Outstanding</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={props.loan?.debt !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(props.loan?.debt || 0, 18), 2))} DAI
+                  <LoadingValue value={props.loan?.debt}>
+                    {(debt) => `${addThousandsSeparators(toPrecision(baseToDisplay(debt, 18), 2))} DAI`}
                   </LoadingValue>
                 </TableCell>
               </TableRow>
@@ -71,8 +74,8 @@ const LoanData: React.FC<Props> = (props: Props) => {
                   Maturity date
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                  <LoadingValue done={props.loan?.nft?.maturityDate !== undefined}>
-                    {dateToYMD(props.loan?.nft?.maturityDate || 0)}
+                  <LoadingValue value={props.loan?.nft?.maturityDate}>
+                    {(maturityDate) => dateToYMD(maturityDate)}
                   </LoadingValue>
                 </TableCell>
               </TableRow>
@@ -86,14 +89,14 @@ const LoanData: React.FC<Props> = (props: Props) => {
               <TableRow>
                 <TableCell scope="row">Risk group</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={props.loan?.riskGroup !== undefined}>{props.loan?.riskGroup}</LoadingValue>
+                  <LoadingValue value={props.loan?.riskGroup}>{(riskGroup) => riskGroup}</LoadingValue>
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell scope="row">Financing fee</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={props.loan?.interestRate !== undefined}>
-                    {toPrecision(feeToInterestRate(props.loan?.interestRate || 0), 2)} %
+                  <LoadingValue value={props.loan?.interestRate}>
+                    {(interestRate) => `${toPrecision(feeToInterestRate(interestRate), 2)} %`}
                   </LoadingValue>
                 </TableCell>
               </TableRow>
@@ -102,15 +105,15 @@ const LoanData: React.FC<Props> = (props: Props) => {
                   Financed by
                 </TableCell>
                 <TableCell style={{ textAlign: 'end', float: 'right' }} border={{ color: 'transparent' }}>
-                  <LoadingValue done={props.loan?.borrower !== undefined} height={24}>
-                    {props.loan?.borrower && (
+                  <LoadingValue value={props.loan?.borrower} height={24}>
+                    {(borrower) => (
                       <DisplayFieldWrapper>
                         <DisplayField
                           copy={true}
                           as={'span'}
-                          value={props.loan?.borrower}
+                          value={borrower}
                           link={{
-                            href: getAddressLink(props.loan?.borrower),
+                            href: getAddressLink(borrower),
                             target: '_blank',
                           }}
                         />

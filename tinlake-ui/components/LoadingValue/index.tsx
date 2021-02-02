@@ -1,19 +1,12 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-interface BaseProps {
-  done: boolean
+interface Props<T> {
+  value: T | undefined | null
+  children: (v: T) => React.ReactNode
   maxWidth?: number
   alignRight?: boolean
   height?: number
-}
-
-interface PropsWithChildren extends BaseProps {
-  children: React.ReactNode
-}
-
-interface PropsWithRender extends BaseProps {
-  render: () => React.ReactNode
 }
 
 const Wrapper = styled.div<{ width?: number; verticalMargin?: number; alignRight?: boolean }>`
@@ -29,20 +22,20 @@ const Wrapper = styled.div<{ width?: number; verticalMargin?: number; alignRight
       : `2px 0 2px ${props.alignRight ? 'auto' : '0'}`};
 `
 
-export const LoadingValue = (props: PropsWithChildren | PropsWithRender) => {
-  const [width, setWidth] = React.useState(randomWidth(props.maxWidth))
+export const LoadingValue = <T,>({ value, children, maxWidth, alignRight, height }: Props<T>) => {
+  const [width, setWidth] = React.useState(randomWidth(maxWidth))
 
   React.useEffect(() => {
-    !props.done && setWidth(randomWidth(props.maxWidth))
-  }, [props.done])
+    !value && setWidth(randomWidth(maxWidth))
+  }, [value])
 
-  return props.done ? (
-    <>{isPropsWithRender(props) ? props.render() : props.children}</>
+  return value ? (
+    <>{children(value)}</>
   ) : (
     <Wrapper
       width={width}
-      verticalMargin={((props.height || 21) - 21) / 2}
-      alignRight={props.alignRight === undefined ? true : props.alignRight}
+      verticalMargin={((height || 21) - 21) / 2}
+      alignRight={alignRight === undefined ? true : alignRight}
     >
       &nbsp;
     </Wrapper>
@@ -51,8 +44,4 @@ export const LoadingValue = (props: PropsWithChildren | PropsWithRender) => {
 
 const randomWidth = (max: number = 120) => {
   return Math.round(max / 2 + Math.random() * (max / 2))
-}
-
-function isPropsWithRender(props: PropsWithChildren | PropsWithRender): props is PropsWithRender {
-  return (props as PropsWithRender).render !== undefined
 }

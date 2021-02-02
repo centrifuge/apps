@@ -21,16 +21,16 @@ const NftData: React.FC<Props> = (props: Props) => {
             <LoadingValue
               alignRight={false}
               height={49}
-              done={props.data?.tokenId !== undefined && props.data?.registry !== undefined}
+              value={props.data && { tokenId: props.data?.tokenId, registry: props.data?.registry }}
             >
-              {props.data?.tokenId && props.data?.registry && (
+              {({ tokenId, registry }) => (
                 <DisplayField
                   label={'NFT ID'}
                   copy={true}
                   as={'span'}
-                  value={hexToInt(bnToHex(props.data.tokenId).toString())}
+                  value={hexToInt(bnToHex(tokenId).toString())}
                   link={{
-                    href: getNFTLink(hexToInt(bnToHex(props.data.tokenId).toString()), props.data.registry),
+                    href: getNFTLink(hexToInt(bnToHex(tokenId).toString()), registry),
                     target: '_blank',
                   }}
                 />
@@ -38,15 +38,15 @@ const NftData: React.FC<Props> = (props: Props) => {
             </LoadingValue>
           </Box>
           <Box basis={'1/3'} gap="medium">
-            <LoadingValue alignRight={false} height={49} done={props.data?.registry !== undefined}>
-              {props.data?.registry && (
+            <LoadingValue alignRight={false} height={49} value={props.data?.registry}>
+              {(registry) => (
                 <DisplayField
                   label={'NFT registry'}
                   copy={true}
                   as={'span'}
-                  value={props.data.registry}
+                  value={registry}
                   link={{
-                    href: getAddressLink(props.data.registry),
+                    href: getAddressLink(registry),
                     target: '_blank',
                   }}
                 />
@@ -54,15 +54,15 @@ const NftData: React.FC<Props> = (props: Props) => {
             </LoadingValue>
           </Box>
           <Box basis={'1/3'} gap="medium">
-            <LoadingValue alignRight={false} height={49} done={props.data?.nftOwner !== undefined}>
-              {props.data?.nftOwner && (
+            <LoadingValue alignRight={false} height={49} value={props.data?.nftOwner}>
+              {(nftOwner) => (
                 <DisplayField
                   label={'NFT current owner'}
                   copy={true}
                   as={'span'}
-                  value={props.data.nftOwner}
+                  value={nftOwner}
                   link={{
-                    href: getAddressLink(props.data.nftOwner),
+                    href: getAddressLink(nftOwner),
                     target: '_blank',
                   }}
                 />

@@ -34,22 +34,24 @@ const Archived: React.FC<Props> = (props: Props) => {
                 <TableRow>
                   <TableCell scope="row">Total Financed</TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={totalFinanced !== undefined}>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(totalFinanced || '0', 18), 0))} DAI
+                    <LoadingValue value={totalFinanced}>
+                      {(totalFinanced) =>
+                        `${addThousandsSeparators(toPrecision(baseToDisplay(totalFinanced, 18), 0))} DAI`
+                      }
                     </LoadingValue>
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">Total Financings</TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={totalFinancings !== undefined}>{totalFinancings}</LoadingValue>
+                    <LoadingValue value={totalFinancings}>{(totalFinancings) => totalFinancings}</LoadingValue>
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">DROP APR</TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={seniorInterest !== undefined}>
-                      {toPrecision(feeToInterestRate(seniorInterest || '0'), 2)} %
+                    <LoadingValue value={seniorInterest}>
+                      {(seniorInterest) => `${toPrecision(feeToInterestRate(seniorInterest), 2)} %`}
                     </LoadingValue>
                   </TableCell>
                 </TableRow>
