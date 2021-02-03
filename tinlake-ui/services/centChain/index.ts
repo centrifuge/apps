@@ -40,7 +40,7 @@ export class CentChain {
 
   public async init() {
     const wsProvider = new WsProvider(this.url)
-    this._api = await ApiPromise.create({ provider: wsProvider, types })
+    this._api = await ApiPromise.create({ types, provider: wsProvider })
   }
 
   async api(): Promise<ApiPromise> {
@@ -81,11 +81,10 @@ export class CentChain {
               const { documentation, name, section } = decoded
               reject(`claim error name: ${section}.${name}: ${documentation.join(' ')}`)
               return
-            } else {
-              // Other, CannotLookup, BadOrigin, no extra info
-              reject(`claim error other: ${dispatchError.toString()}`)
-              return
             }
+            // Other, CannotLookup, BadOrigin, no extra info
+            reject(`claim error other: ${dispatchError.toString()}`)
+            return
           }
 
           if (status.isFinalized) {

@@ -219,17 +219,20 @@ export function processTransaction(
         hasCompleted = true
         outcomeTx.status = 'failed'
         outcomeTx.failedReason = tx.error
-        if (tx.transactionhash) outcomeTx.hash = tx.transactionhash
+        if (tx.transactionhash) {
+          outcomeTx.hash = tx.transactionhash
+        }
 
-        if (config.enableErrorLogging)
+        if (config.enableErrorLogging) {
           Sentry.captureMessage(`Transaction failed: ${unconfirmedTx.actionName}`, { extra: { tx: outcomeTx } })
+        }
       }
     } catch (error) {
       console.error(`Transaction error: ${unconfirmedTx.actionName})`, error)
 
-      if (config.enableErrorLogging)
+      if (config.enableErrorLogging) {
         Sentry.captureMessage(`Transaction error: ${unconfirmedTx.actionName}): ${error.toString()}`)
-
+      }
       outcomeTx.status = 'failed'
 
       if (errorMessageRegex.test(error.toString())) {

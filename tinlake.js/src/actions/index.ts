@@ -1,13 +1,13 @@
 import Admin, { IAdminActions } from './admin'
 import Analytics, { IAnalyticsActions } from './analytics'
 import Borrower, { IBorrowerActions } from './borrower'
+import ClaimRAD, { IClaimRADActions } from './claimRAD'
 import Collateral, { ICollateralActions } from './collateral'
 import Coordinator, { ICoordinatorActions } from './coordinator'
 import Currency, { ICurrencyActions } from './currency'
 import Governance, { IGovernanceActions } from './governance'
 import Lender, { ILenderActions } from './lender'
 import Proxy, { IProxyActions } from './proxy'
-import ClaimRAD, { IClaimRADActions } from './claimRAD'
 
 export default {
   Admin,

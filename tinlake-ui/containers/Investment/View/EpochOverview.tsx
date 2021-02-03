@@ -267,7 +267,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                     }
                   />
                 )}
-                {epochData?.state === 'in-submission-period' && <Button label={`Run solver`} primary disabled={true} />}
+                {epochData?.state === 'in-submission-period' && <Button label={`Run solver`} primary onClick={solve} />}
                 {epochData?.state === 'in-challenge-period' && (
                   <Button label={`Execute epoch ${epochData?.id}`} primary disabled={true} />
                 )}
