@@ -10,16 +10,17 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
   console.log('Checking if any pools can be closed or executed')
   for (let pool of Object.values(pools)) {
     if (!pool.addresses) return
-    const tinlake: ITinlake = new Tinlake({ provider, signer, contractAddresses: pool.addresses })
+    const tinlake: any = new Tinlake({ provider, signer, contractAddresses: pool.addresses })
     const id = await tinlake.getCurrentEpochId()
-    const epochState = await tinlake.getEpochState()
     const state = await tinlake.getCurrentEpochState()
     const name = pool.metadata.shortName || pool.metadata.name
 
     if (state === 'open') return
 
-    const orders = await tinlake.getOrders()
     if (state === 'challenge-period-ended') {
+      const epochState = await tinlake.getEpochState()
+      const orders = await tinlake.getOrders()
+
       const executeTx = await tinlake.executeEpoch()
       console.log(`Executing ${name} with tx: ${executeTx.hash}`)
       await tinlake.getTransactionReceipt(executeTx)
@@ -37,31 +38,42 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
       return
     }
 
+    const epochState = await tinlake.getEpochState(false) // TODO: should be true
+    const orders = await tinlake.getOrders(true)
+
     if (state === 'can-be-closed') {
       const orderSum: any = Object.values(orders).reduce((prev: any, order) => prev.add(order), new BN('0'))
 
-      if (orderSum.isZero()) {
+      if (orderSum.lte(new BN(10).pow(new BN(18)))) {
         console.log(`There are no orders for ${name} yet, not closing`)
         return
       }
 
+      const solution = await tinlake.runSolver(epochState, orders)
+      const solutionSum: any = Object.values(solution).reduce((prev: any, result) => prev.add(result), new BN('0'))
+
+      const fulfillment = solutionSum.mul(new BN('10').pow(new BN('18'))).div(orderSum)
+      console.log(`fulfillment: ${fulfillment.toString()}`)
+
+      return
+
       // TODO: calculate if a non zero solution can be found, and if not, return here
     }
 
-    const solveTx = await tinlake.solveEpoch()
-    console.log(`Closing & solving ${name} with tx: ${solveTx.hash}`)
-    await tinlake.getTransactionReceipt(solveTx)
+    // const solveTx = await tinlake.solveEpoch()
+    // console.log(`Closing & solving ${name} with tx: ${solveTx.hash}`)
+    // await tinlake.getTransactionReceipt(solveTx)
 
-    // TODO: only push notification if immediately executed as well
-    const currentTinRatio = parseRatio(await tinlake.getCurrentJuniorRatio())
-    pushNotificationToSlack(
-      `I just closed epoch ${id} for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${pool.metadata.slug}|${name}>*.`,
-      formatEvents(epochState, orders, currentTinRatio),
-      {
-        title: 'View on Etherscan',
-        url: `https://kovan.etherscan.io/tx/${solveTx.hash}`,
-      }
-    )
+    // // TODO: only push notification if immediately executed as well
+    // const currentTinRatio = parseRatio(await tinlake.getCurrentJuniorRatio())
+    // pushNotificationToSlack(
+    //   `I just closed epoch ${id} for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${pool.metadata.slug}|${name}>*.`,
+    //   formatEvents(epochState, orders, currentTinRatio),
+    //   {
+    //     title: 'View on Etherscan',
+    //     url: `https://kovan.etherscan.io/tx/${solveTx.hash}`,
+    //   }
+    // )
   }
 }
 
