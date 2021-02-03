@@ -13,7 +13,7 @@ const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 @Injectable()
 export class PoolService {
   private readonly logger = new Logger(PoolService.name)
-  private pools: { [key: string]: Pool }
+  private pools: { [key: string]: Pool } = {}
 
   provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
   signer = new ethers.Wallet(config.signerPrivateKey).connect(this.provider)
