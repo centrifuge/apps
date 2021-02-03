@@ -18,7 +18,7 @@ export class DocusignAuthService {
   }
 
   async getAccessToken(): Promise<string> {
-    const hasExpired = this.expiresAt && Date.now() >= this.expiresAt + 10 * 1000 // Add 10s buffer
+    const hasExpired = this.expiresAt && Date.now() >= this.expiresAt - 60 * 1000 // Substract 1min buffer (so refresh the access token 1 min before it expires)
     if (!this.accessToken || hasExpired) {
       console.log(`Docusign access token has expired`)
       return this.createAccessToken()
