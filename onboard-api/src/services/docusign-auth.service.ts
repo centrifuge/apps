@@ -19,7 +19,12 @@ export class DocusignAuthService {
 
   async getAccessToken(): Promise<string> {
     const hasExpired = this.expiresAt && Date.now() >= this.expiresAt + 10 * 1000 // Add 10s buffer
-    if (!this.accessToken || hasExpired) return this.createAccessToken()
+    if (!this.accessToken || hasExpired) {
+      console.log(`Docusign access token has expired`)
+      return this.createAccessToken()
+    }
+
+    console.log(`Docusign access token is being reused`)
 
     return this.accessToken
   }
@@ -50,7 +55,8 @@ export class DocusignAuthService {
     const data = await response.json()
 
     this.accessToken = data['access_token']
-    this.expiresAt = Date.now() + HourInMilliseconds
+    console.log(`Docusign access token expires in ${data['expires_in']}`)
+    this.expiresAt = Date.now() + data['expires_in'] * 1000
 
     return this.accessToken
   }
