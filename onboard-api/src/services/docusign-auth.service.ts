@@ -53,6 +53,7 @@ export class DocusignAuthService {
     })
 
     const data = await response.json()
+    console.log(data)
 
     this.accessToken = data['access_token']
     console.log(`Docusign access token expires in ${data['expires_in']}`)
@@ -69,10 +70,12 @@ export class DocusignAuthService {
 
     const unixNow = Math.floor(Date.now() / 1000)
 
+    console.log(new URL(config.docusign.accountApiHost).hostname)
+
     const body = {
       iss: config.docusign.integrationKey,
       sub: config.docusign.apiUsername,
-      aud: 'account-d.docusign.com',
+      aud: new URL(config.docusign.accountApiHost).hostname,
       iat: unixNow,
       exp: unixNow + HourInSeconds,
       scope: 'signature impersonation',
