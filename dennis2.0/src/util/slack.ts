@@ -34,7 +34,7 @@ export const pushNotificationToSlack = async (
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `:${event.icon}: ${event.message}`,
+        text: `${event.icon ? `:${event.icon}:` : ''} ${event.message}`,
       },
     }
   })
@@ -57,7 +57,7 @@ export const pushNotificationToSlack = async (
 
 export type NotificationEvent = {
   message: string
-  icon: string
+  icon?: string
 }
 
 export type NotificationExternalLink = {

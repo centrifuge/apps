@@ -133,6 +133,20 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return solution
     }
 
+    scoreSolution = async (solution: SolverResult) => {
+      const weights = await this.getSolverWeights()
+      return solution.dropInvest
+        .mul(weights.dropInvest)
+        .add(solution.dropRedeem.mul(weights.dropRedeem))
+        .add(solution.tinInvest.mul(weights.tinInvest))
+        .add(solution.tinRedeem.mul(weights.tinRedeem))
+    }
+
+    bestSubmissionScore = async () => {
+      const coordinator = this.contract('COORDINATOR')
+      return await this.toBN(coordinator.bestSubScore())
+    }
+
     executeEpoch = async () => {
       const coordinator = this.contract('COORDINATOR')
       if ((await this.getCurrentEpochState()) !== 'challenge-period-ended') {
@@ -247,6 +261,8 @@ export type ICoordinatorActions = {
   setMinimumEpochTime(minEpochTime: string): Promise<PendingTransaction>
   setMinimumChallengeTime(minChallengeTime: string): Promise<PendingTransaction>
   runSolver(state: State, orders: Orders): Promise<SolverResult>
+  scoreSolution(solution: SolverResult): Promise<BN>
+  bestSubmissionScore(): Promise<BN>
 }
 
 export default CoordinatorActions
