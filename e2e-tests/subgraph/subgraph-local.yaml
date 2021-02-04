@@ -1,0 +1,251 @@
+specVersion: 0.0.2
+description: Tinlake Local
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Block
+    network: ${NETWORK_NAME}
+    source:
+      address: "0xF84737c2c808b6Da4FEefa53328DDD493f443350"
+      abi: Pile
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Pile
+          file: ./abis/Pile.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Reserve
+          file: ./abis/Reserve.json
+        - name: NavFeed
+          file: ./abis/NavFeed.json
+        - name: NftFeed
+          file: ./abis/NftFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: PoolRegistry
+          file: ./abis/PoolRegistry.json
+        - name: Tranche
+          file: ./abis/Tranche.json
+      blockHandlers:
+        - handler: handleBlock
+      file: ./src/mappings/Block.ts
+
+  # Proxy registry across pools
+  - kind: ethereum/contract
+    name: ProxyRegistry
+    network: ${NETWORK_NAME}
+    source:
+      address: "0x45de42e18F4688A82Fe01c76d305c14055F01EB9"
+      abi: ProxyRegistry
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: ProxyRegistry
+          file: ./abis/ProxyRegistry.json
+      eventHandlers:
+        - event: Created(indexed address,indexed address,address,uint256)
+          handler: handleCreateProxy
+      file: ./src/mappings/ProxyRegistry.ts
+
+  # Pool registry
+  - kind: ethereum/contract
+    name: PoolRegistry
+    network: ${NETWORK_NAME}
+    source:
+      address: "0xCF396Ff8f2CcF74E88b4dF60AB5dc20902d91553"
+      abi: PoolRegistry
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: PoolRegistry
+          file: ./abis/PoolRegistry.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+      eventHandlers:
+        - event: PoolCreated(address,bool,string,string)
+          handler: handlePoolCreated
+        - event: PoolUpdated(address,bool,string,string)
+          handler: handlePoolUpdated
+      file: ./src/mappings/PoolRegistry.ts
+
+  - kind: ethereum/contract
+    name: Claim
+    network: ${NETWORK_NAME}
+    source: 
+      address: "0xe0b00E9CA4192e3cb0c7418d380Db7B6F1875C5a"
+      abi: TinlakeClaimRAD
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - RewardLink
+      abis:
+        - name: TinlakeClaimRAD
+          file: ./abis/TinlakeClaimRAD.json
+      eventHandlers:
+        - event: Claimed(address,bytes32)
+          handler: handleClaimed
+      file: ./src/mappings/TinlakeClaimRAD.ts
+
+templates:
+  - kind: ethereum/contract
+    name: Coordinator
+    network: ${NETWORK_NAME}
+    source:
+      abi: Coordinator
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+      abis:
+        - name: Coordinator
+          file: ./abis/Coordinator.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+        - name: Pile
+          file: ./abis/Pile.json
+      callHandlers:
+        - function: executeEpoch()
+          handler: handleCoordinatorExecuteEpoch
+      file: ./src/mappings/Coordinator.ts
+  - kind: ethereum/contract
+    name: Assessor
+    network: ${NETWORK_NAME}
+    source:
+      abi: Assessor
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+      abis:
+        - name: Assessor
+          file: ./abis/Assessor.json
+      callHandlers:
+        - function: file(bytes32,uint256)
+          handler: handleAssessorFile
+      file: ./src/mappings/Assessor.ts
+  - kind: ethereum/contract
+    name: Shelf
+    network: ${NETWORK_NAME}
+    source:
+      abi: Shelf
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+        - name: NavFeed
+          file: ./abis/NavFeed.json
+      callHandlers:
+        - function: issue(address,uint256)
+          handler: handleShelfIssue
+        - function: close(uint256)
+          handler: handleShelfClose
+        - function: borrow(uint256,uint256)
+          handler: handleShelfBorrow
+        - function: repay(uint256,uint256)
+          handler: handleShelfRepay
+      file: ./src/mappings/Shelf.ts
+  - kind: ethereum/contract
+    name: NftFeed
+    network: ${NETWORK_NAME}
+    source:
+      abi: NftFeed
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Loan
+      abis:
+        - name: NftFeed
+          file: ./abis/NftFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+      callHandlers:
+        - function: update(bytes32,uint256,uint256)
+          handler: handleNftFeedUpdate
+        - function: update(bytes32,uint256)
+          handler: handleNftFeedUpdate
+      file: ./src/mappings/NftFeed.ts
+  - kind: ethereum/contract
+    name: Token
+    network: ${NETWORK_NAME}
+    source:
+      abi: ERC20
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Transfer
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleERC20Transfer
+      file: ./src/mappings/ERC20.ts
+  - kind: ethereum/contract
+    name: Tranche
+    network: ${NETWORK_NAME}
+    source:
+      abi: Tranche
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - TokenBalance
+      abis:
+        - name: Tranche
+          file: ./abis/Tranche.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      callHandlers:
+        - function: supplyOrder(address,uint256)
+          handler: handleSupplyOrder
+      file: ./src/mappings/Tranche.ts
