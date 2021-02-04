@@ -34,9 +34,7 @@ export const pushNotificationToSlack = async (
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `${
-          event.level === 'error' ? ':no_entry_sign:' : event.level === 'warning' ? ':warning:' : ':white_check_mark:'
-        } ${event.message}`,
+        text: `:${event.icon}: ${event.message}`,
       },
     }
   })
@@ -59,7 +57,7 @@ export const pushNotificationToSlack = async (
 
 export type NotificationEvent = {
   message: string
-  level: 'info' | 'warning' | 'error'
+  icon: string
 }
 
 export type NotificationExternalLink = {

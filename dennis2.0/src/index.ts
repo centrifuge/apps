@@ -5,7 +5,7 @@ import config from './config'
 import CronExpression from './util/CronExpression'
 import { ethers } from 'ethers'
 import { closePools } from './tasks/closePools'
-import { pushNotificationToSlack } from './util/slack'
+import { executePools } from './tasks/executePools'
 
 const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
 const signer = new ethers.Wallet(config.signerPrivateKey).connect(provider)
@@ -16,6 +16,7 @@ const run = async () => {
   pools = await loadFromIPFS(provider)
 
   await closePools(pools, provider, signer)
+  await executePools(pools, provider, signer)
 
   let cronJobs: Map<string, CronJob> = new Map<string, CronJob>()
 
@@ -25,11 +26,17 @@ const run = async () => {
   })
   cronJobs.set('retrievePools', retrievePoolsTask)
 
-  let closePoolsTask = new CronJob(CronExpression.EVERY_5_MINUTES, async () => {
-    // Close/execute pool epochs every 5 minutes
+  let closePoolsTask = new CronJob(CronExpression.EVERY_12_HOURS, async () => {
+    // Close pool epochs every 5 minutes
     await closePools(pools, provider, signer)
   })
   cronJobs.set('closePools', closePoolsTask)
+
+  let executePoolsTask = new CronJob(CronExpression.EVERY_5_MINUTES, async () => {
+    // Execute pool epochs every 5 minutes
+    await executePools(pools, provider, signer)
+  })
+  cronJobs.set('executePools', executePoolsTask)
 
   cronJobs.forEach((task, _) => task.start())
 }

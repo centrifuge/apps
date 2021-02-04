@@ -8,14 +8,15 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
     getEpochState = async (beforeClosing?: boolean) => {
       const coordinator = this.contract('COORDINATOR')
       const assessor = this.contract('ASSESSOR')
+      const feed = this.contract('FEED')
 
       // If beforeClosing is true, calculate the values as if the epoch would be closed now
       const reserve = await this.toBN(
         beforeClosing ? this.contract('RESERVE').totalBalance() : coordinator.epochReserve()
       )
-      const netAssetValue = await this.toBN(beforeClosing ? assessor.calcUpdateNAV() : coordinator.epochNAV())
+      const netAssetValue = await this.toBN(beforeClosing ? feed.approximatedNAV() : coordinator.epochNAV())
       const seniorAsset = beforeClosing
-        ? (await this.toBN(assessor.seniorDebt())).add(await this.toBN(assessor.seniorBalance()))
+        ? (await this.toBN(assessor.seniorDebt_())).add(await this.toBN(assessor.seniorBalance_()))
         : await this.toBN(coordinator.epochSeniorAsset())
 
       const minDropRatio = await this.toBN(assessor.minSeniorRatio())
@@ -26,9 +27,6 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
     }
 
     getOrders = async (beforeClosing?: boolean) => {
-      const coordinator = this.contract('COORDINATOR')
-      const orderState = await coordinator.order()
-
       if (beforeClosing) {
         const seniorTranche = this.contract('SENIOR_TRANCHE')
         const juniorTranche = this.contract('JUNIOR_TRANCHE')
@@ -41,6 +39,8 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
           tinRedeem: await this.toBN(juniorTranche.totalRedeem()),
         }
       }
+      const coordinator = this.contract('COORDINATOR')
+      const orderState = await coordinator.order()
 
       return {
         dropInvest: await this.toBN(orderState.seniorSupply),
