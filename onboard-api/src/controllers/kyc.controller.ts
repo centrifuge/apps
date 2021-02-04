@@ -41,18 +41,23 @@ export class KycController {
       return res.redirect(redirectUrl)
     }
 
-    const investor = await this.securitizeService.getInvestor(address.userId, kycInfo.providerAccountId, kycInfo.digest)
+    // Update KYC and user records in our database
+    const existingKyc = await this.kycRepo.findByProvider('securitize', kycInfo.providerAccountId)
+    if (existingKyc && existingKyc.userId !== address.userId) {
+      console.log(`${existingKyc.userId} !== ${address.userId}`)
+      // If this provider account is already linked to a diffferent user, then add this address to that user
+      await this.addressRepo.linkToNewUser(address.id, existingKyc.userId)
+    }
+    const userId = existingKyc?.userId || address.userId
+
+    const investor = await this.securitizeService.getInvestor(userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!investor) throw new BadRequestException('Failed to retrieve investor information from Securitize')
 
-    // Update KYC and user records in our database
-    // TODO: check if this provider and providerAccountId is already linked to a different userId
-    // if so, add this address to that user
-
-    const kyc = await this.kycRepo.upsertSecuritize(address.userId, kycInfo.providerAccountId, kycInfo.digest)
+    const kyc = await this.kycRepo.upsertSecuritize(userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!kyc) throw new BadRequestException('Failed to create KYC entity')
 
     await this.userRepo.update(
-      address.userId,
+      userId,
       investor.email,
       investor.details.address.countryCode,
       investor.domainInvestorDetails?.investorFullName,
@@ -68,10 +73,10 @@ export class KycController {
     )
 
     // Link user to pool/tranche so we know which pools a user has shown interest in
-    await this.userRepo.linkToPool(address.userId, params.poolId, params.tranche || 'senior')
+    await this.userRepo.linkToPool(userId, params.poolId, params.tranche || 'senior')
 
     // Create session and redirect user
-    const session = this.sessionService.create(address.userId)
+    const session = this.sessionService.create(userId)
 
     const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?session=${session}`
     return res.redirect(redirectUrl)

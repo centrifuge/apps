@@ -2588,7 +2588,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@centrifuge/gateway-lib@*, @centrifuge/gateway-lib@workspace:gateway/packages/lib":
+"@centrifuge/gateway-lib@workspace:*, @centrifuge/gateway-lib@workspace:gateway/packages/lib":
   version: 0.0.0-use.local
   resolution: "@centrifuge/gateway-lib@workspace:gateway/packages/lib"
   dependencies:
@@ -2609,7 +2609,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@centrifuge/gateway-server@workspace:gateway/packages/server"
   dependencies:
-    "@centrifuge/gateway-lib": "*"
+    "@centrifuge/gateway-lib": "workspace:*"
     "@nestjs-modules/mailer": ^1.4.2
     "@nestjs/common": 6.3.0
     "@nestjs/core": 6.3.0
@@ -2665,7 +2665,7 @@ __metadata:
     "@centrifuge/axis-spinner": ^0.4.2-develop.a1231ee.147
     "@centrifuge/axis-theme": ^0.4.2-develop.a1231ee.147
     "@centrifuge/axis-utils": ^0.4.2-develop.a1231ee.147
-    "@centrifuge/gateway-lib": "*"
+    "@centrifuge/gateway-lib": "workspace:*"
     "@types/jest": 26.0.14
     "@types/react-dom": ^16.9.8
     "@types/react-router": ^4.3.1

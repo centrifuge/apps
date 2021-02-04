@@ -20,7 +20,7 @@ export class SyncService {
     private readonly userRepo: UserRepo
   ) {}
 
-  @Cron(CronExpression.EVERY_30_MINUTES) // TODO: change to e.g. every 5 min
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async syncKycStatus() {
     const processingInvestors = await this.kycRepo.getProcessingInvestors()
     if (processingInvestors.length === 0) return
@@ -60,7 +60,7 @@ export class SyncService {
     })
   }
 
-  @Cron(CronExpression.EVERY_30_MINUTES) // TODO: change to e.g. every 5 min
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async syncAgreementStatus() {
     const agreements = await this.agreementRepo.getAwaitingCounterSignature()
     if (agreements.length === 0) return

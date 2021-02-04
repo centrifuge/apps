@@ -11,7 +11,6 @@ export interface KycStatus {
 
 export type Tranche = 'senior' | 'junior'
 
-// TODO: remove whether it's been created
 export interface AgreementsStatus {
   name: string
   tranche: Tranche
@@ -25,4 +24,5 @@ export interface AgreementsStatus {
 export interface AddressStatus {
   kyc: KycStatus
   agreements: AgreementsStatus[]
+  linkedAddresses: string[]
 }

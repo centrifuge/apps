@@ -50,7 +50,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
             checked={props.agreementStatus === 'countersigned' && props.whitelistStatus === true}
           />
         )}
-        <StepTitle inactive={!props.active}>
+        <StepTitle inactive={!props.active && !awaitingWhitelisting}>
           {props.agreementStatus === 'none'
             ? `Sign the Subscription Agreement`
             : props.agreementStatus === 'countersigned' && props.whitelistStatus === true
@@ -119,6 +119,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
         </StepBody>
       )}
+      {console.log(props)}
       {props.active && props.agreement && (props.agreementStatus === 'signed' || awaitingWhitelisting) && (
         <StepBody>
           <Box pad={{ vertical: 'medium' }}>

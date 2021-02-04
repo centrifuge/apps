@@ -99,6 +99,7 @@ export class PoolService {
     validUntilDate.setFullYear(validUntilDate.getFullYear() + 100) // 100 years
     const validUntil = Math.round(validUntilDate.getTime() / 1000)
 
+    // TODO: this should also filter by blockchain and network
     const addresses = await this.addressRepo.getByUser(userId)
     addresses.forEach(async (address: AddressEntity) => {
       try {

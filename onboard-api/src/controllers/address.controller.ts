@@ -1,5 +1,5 @@
 import { BadRequestException, Controller, Delete, Get, Param, Query, UnauthorizedException } from '@nestjs/common'
-import { AddressRepo } from '../repos/address.repo'
+import { AddressEntity, AddressRepo } from '../repos/address.repo'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { InvestmentRepo } from '../repos/investment.repo'
 import { KycRepo } from '../repos/kyc.repo'
@@ -51,6 +51,7 @@ export class AddressController {
               requiresSignin: true,
             },
             agreements: [],
+            linkedAddresses: [],
           }
         }
 
@@ -91,6 +92,14 @@ export class AddressController {
 
       const isWhitelisted = await this.investmentRepo.getWhitelistStatus(address.id, params.poolId)
 
+      // TODO: this should also filter by blockchain and network
+      const addresses = await this.addressRepo.getByUser(address.userId)
+      const otherAddresses = addresses
+        .map((a: AddressEntity) => a.address)
+        .filter((a) => {
+          return a !== address.address
+        })
+
       return {
         kyc: {
           status,
@@ -100,6 +109,7 @@ export class AddressController {
           accredited: kyc.accredited,
         },
         agreements: agreementLinks,
+        linkedAddresses: otherAddresses,
       }
     }
 
@@ -108,6 +118,7 @@ export class AddressController {
         url: authorizationLink,
       },
       agreements: [],
+      linkedAddresses: [],
     }
   }
 

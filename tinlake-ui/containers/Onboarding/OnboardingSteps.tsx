@@ -9,6 +9,7 @@ import PageTitle from '../../components/PageTitle'
 import { PoolLink } from '../../components/PoolLink'
 import config, { Pool } from '../../config'
 import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
+import { ExplainerCard } from '../Investment/View/styles'
 import AgreementStep from './AgreementStep'
 import ConnectStep from './ConnectStep'
 import KycStep from './KycStep'
@@ -61,6 +62,8 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
       setActiveSteps(2)
     } else if (agreementStatus === 'none') {
       setActiveSteps(3)
+    } else if (kycStatus === 'processing' && !whitelistStatus) {
+      setActiveSteps(3)
     } else if (kycStatus === 'processing' && agreementStatus === 'signed') {
       setActiveSteps(3)
     } else if (kycStatus === 'processing' && agreementStatus === 'countersigned') {
@@ -86,6 +89,11 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
           <Spinner height={'400px'} message={'Loading...'} />
         ) : (
           <>
+            {onboarding.data?.linkedAddresses && onboarding.data?.linkedAddresses.length > 0 && (
+              <ExplainerCard>This account is linked to {onboarding.data?.linkedAddresses.join(', ')}.</ExplainerCard>
+            )}
+            <br />
+
             <ConnectStep {...props} />
             <KycStep
               {...props}

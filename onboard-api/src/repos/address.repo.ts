@@ -60,7 +60,17 @@ export class AddressRepo {
     return data as AddressEntity
   }
 
-  // TODO: addAddressForExistingUser(user: User, blockchain: Blockchain, network: Network, address: string)
+  async linkToNewUser(addressId: string, newUserId: string): Promise<AddressEntity | undefined> {
+    const [updatedAddress] = await this.db.sql`
+      update addresses
+      set user_id = ${newUserId}
+      where addresses.id = ${addressId}
+
+      returning *
+    `
+
+    return updatedAddress as AddressEntity | undefined
+  }
 }
 
 export type Blockchain = 'ethereum'
