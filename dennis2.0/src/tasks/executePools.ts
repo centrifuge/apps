@@ -2,7 +2,7 @@ import Tinlake, { addThousandsSeparators, baseToDisplay, toPrecision } from '@ce
 const BN = require('bn.js')
 import { ethers } from 'ethers'
 import config from '../config'
-import { formatEvents, parseRatio } from '../util/formatEvents'
+import { parseRatio } from '../util/formatEvents'
 import { PoolMap } from '../util/ipfs'
 import { pushNotificationToSlack } from '../util/slack'
 
@@ -10,15 +10,13 @@ export const executePools = async (pools: PoolMap, provider: ethers.providers.Pr
   console.log('Checking if any pools can be executed')
 
   for (let pool of Object.values(pools)) {
-    if (!pool.addresses) return
+    if (!pool.addresses) continue
     const tinlake: any = new Tinlake({ provider, signer, contractAddresses: pool.addresses })
     const id = await tinlake.getCurrentEpochId()
     const state = await tinlake.getCurrentEpochState()
     const name = pool.metadata.shortName || pool.metadata.name
 
-    console.log(`pool ${name}: ${state}`)
-
-    if (state !== 'challenge-period-ended') return
+    if (state !== 'challenge-period-ended') continue
 
     const epochState = await tinlake.getEpochState()
     const orders = await tinlake.getOrders()

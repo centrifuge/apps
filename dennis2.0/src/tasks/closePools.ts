@@ -11,13 +11,13 @@ const e18 = new BN('10').pow(new BN('18'))
 export const closePools = async (pools: PoolMap, provider: ethers.providers.Provider, signer: ethers.Signer) => {
   console.log('Checking if any pools can be closed')
   for (let pool of Object.values(pools)) {
-    if (!pool.addresses) return
+    if (!pool.addresses) continue
     const tinlake: any = new Tinlake({ provider, signer, contractAddresses: pool.addresses })
     const id = await tinlake.getCurrentEpochId()
     const state = await tinlake.getCurrentEpochState()
     const name = pool.metadata.shortName || pool.metadata.name
 
-    if (state !== 'can-be-closed') return
+    if (state !== 'can-be-closed') continue
 
     const epochState = await tinlake.getEpochState(true)
     const orders = await tinlake.getOrders(true)
@@ -26,7 +26,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
 
     if (orderSum.lte(e18)) {
       console.log(`There are no orders for ${name} yet, not closing`)
-      return
+      continue
     }
 
     const solution = await tinlake.runSolver(epochState, orders)
@@ -62,6 +62,9 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
         `Epoch ${id} for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${pool.metadata.slug}|${name}>* can be closed.`,
         [
           {
+            message: `Approximately ${parseFloat(fulfillment.toString()) / 100}% of all orders could be fulfilled.`,
+          },
+          {
             icon: 'drop',
             message: `There are ${addThousandsSeparators(
               toPrecision(baseToDisplay(orders.dropInvest, 18), 0)
@@ -77,7 +80,6 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
               toPrecision(baseToDisplay(orders.tinRedeem, 18), 0)
             )} DAI in TIN redemptions locked.`,
           },
-          { message: `Approximately ${parseFloat(fulfillment.toString()) / 100}% of all orders could be fulfilled.` },
           {
             icon: 'moneybag',
             message: `The current reserve is ${addThousandsSeparators(

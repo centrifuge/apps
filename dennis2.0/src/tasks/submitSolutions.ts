@@ -8,13 +8,13 @@ import { pushNotificationToSlack } from '../util/slack'
 export const submitSolutions = async (pools: PoolMap, provider: ethers.providers.Provider, signer: ethers.Signer) => {
   console.log('Checking if any solutions can be submitted')
   for (let pool of Object.values(pools)) {
-    if (!pool.addresses) return
+    if (!pool.addresses) continue
     const tinlake: any = new Tinlake({ provider, signer, contractAddresses: pool.addresses })
     const id = await tinlake.getCurrentEpochId()
     const state = await tinlake.getCurrentEpochState()
     const name = pool.metadata.shortName || pool.metadata.name
 
-    if (!(state === 'in-submission-period' || state === 'in-challenge-period')) return
+    if (!(state === 'in-submission-period' || state === 'in-challenge-period')) continue
 
     const epochState = await tinlake.getEpochState(false)
     const orders = await tinlake.getOrders(false)
