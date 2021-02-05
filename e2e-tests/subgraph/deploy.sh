@@ -10,5 +10,5 @@ done
   
 >&2 echo "Graph is up - deploying subgraph"
 
-./node_modules/.bin/graph create --node ${GRAPH_HOST}:8020 ${PROJECT}/erc20-subgraph
-./node_modules/.bin/graph deploy --node ${GRAPH_HOST}:8020 --ipfs ${IPFS_HOST} ${PROJECT}/erc20-subgraph
+./node_modules/.bin/graph create --node ${GRAPH_HOST}:8020 centrifuge/${PROJECT}
+./node_modules/.bin/graph deploy --node ${GRAPH_HOST}:8020 --ipfs ${IPFS_HOST} centrifuge/${PROJECT}

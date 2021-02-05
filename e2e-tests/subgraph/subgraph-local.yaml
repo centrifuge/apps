@@ -97,7 +97,7 @@ dataSources:
     network: ${NETWORK_NAME}
     source: 
       address: "0xe0b00E9CA4192e3cb0c7418d380Db7B6F1875C5a"
-      abi: TinlakeClaimRAD
+      abi: TinlakeClaimRad
       startBlock: 0
     mapping:
       kind: ethereum/events
@@ -106,8 +106,8 @@ dataSources:
       entities:
         - RewardLink
       abis:
-        - name: TinlakeClaimRAD
-          file: ./abis/TinlakeClaimRAD.json
+        - name: TinlakeClaimRad
+          file: ./abis/TinlakeClaimRad.json
       eventHandlers:
         - event: Claimed(address,bytes32)
           handler: handleClaimed
