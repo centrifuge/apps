@@ -72,7 +72,9 @@ services:
 
   subgraph:
     build:
-      context: ./subgraph
+      context: subgraph
+      args: 
+        NETWORK_NAME: ${NETWORK_NAME}
     container_name: subgraph
     depends_on:
       - ipfs
@@ -81,5 +83,4 @@ services:
       - GRAPH_HOST=http://graph
       - IPFS_HOST=http://ipfs:5001
       - PROJECT=${PROJECT}
-      - NETWORK_NAME=${NETWORK_NAME}
     command: "./deploy.sh"

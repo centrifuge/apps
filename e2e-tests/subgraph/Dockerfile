@@ -2,16 +2,25 @@ FROM node:14.15.4-alpine3.10
 
 RUN apk add libsecret-dev git curl make g++
 
-RUN git clone https://github.com/ana0/erc20-subgraph.git
+RUN git clone --branch compile-errors https://github.com/ana0/tinlake-subgraph.git
 
-WORKDIR erc20-subgraph
+WORKDIR tinlake-subgraph
 
 RUN npm i
 
+# this silences a few errors related to deploying without an accesstoken
 RUN npm install keytar
 
-RUN npm run codegen
+COPY subgraph-local.yaml .
 
-RUN npm run build
+# make the build args available as env vars
+ARG NETWORK_NAME
+ENV NETWORK_NAME $NETWORK_NAME
+
+RUN cat subgraph-local.yaml | envsubst > subgraph.yaml
+
+RUN ./node_modules/.bin/graph codegen ./subgraph.yaml
+
+RUN ./node_modules/.bin/graph build ./subgraph.yaml
 
 COPY deploy.sh .
