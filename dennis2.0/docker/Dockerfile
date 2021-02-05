@@ -8,6 +8,7 @@ COPY *.yml *.json yarn.lock ./
 COPY .yarn/plugins ./.yarn/plugins/
 COPY .yarn/releases ./.yarn/releases/
 COPY dennis2.0 ./dennis2.0/
+COPY tinlake.js ./tinlake.js/
 
 RUN yarn set version berry
 RUN yarn install
