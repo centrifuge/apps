@@ -51,9 +51,9 @@
     },
     "dropRedeem": {
       "base": 18,
-      "value": 10000
+      "value": 0
     },
-    "tinInvest": "9808080808080808080808",
+    "tinInvest": "0",
     "tinRedeem": {
       "base": 18,
       "value": 10000
