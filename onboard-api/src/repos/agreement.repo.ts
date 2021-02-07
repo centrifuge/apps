@@ -55,6 +55,16 @@ export class AgreementRepo {
     return (agreements as unknown) as Agreement[]
   }
 
+  async getByUserIds(userIds: string[]): Promise<Agreement[]> {
+    const agreements = await this.db.sql`
+      select *
+      from agreements
+      where agreements.user_id in (${userIds})
+    `
+
+    return (agreements as unknown) as Agreement[]
+  }
+
   async getByUserPoolTranche(userId: string, poolId: string, tranche: Tranche): Promise<Agreement[]> {
     const agreements = await this.db.sql`
       select *
@@ -171,9 +181,10 @@ export class AgreementRepo {
       and agreements.provider = 'docusign'
       and agreements.provider_template_id in (${profileAgreements.map((pa) => pa.providerTemplateId)})
     `
+
     dbAgreements.forEach((dbAgreement: Agreement) => {
-      agreements[dbAgreement.providerTemplateId].signed = dbAgreement.signedAt !== undefined
-      agreements[dbAgreement.providerTemplateId].counterSigned = dbAgreement.counterSignedAt !== undefined
+      agreements[dbAgreement.providerTemplateId].signed = !!dbAgreement.signedAt
+      agreements[dbAgreement.providerTemplateId].counterSigned = !!dbAgreement.counterSignedAt
     })
 
     return Object.values(agreements)

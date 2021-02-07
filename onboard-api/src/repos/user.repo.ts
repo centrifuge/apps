@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { Tranche } from 'src/controllers/types'
 import { uuidv4 } from '../utils/uuid'
 import { DatabaseService } from './db.service'
+import { KycEntity } from './kyc.repo'
 
 @Injectable()
 export class UserRepo {
@@ -19,12 +20,23 @@ export class UserRepo {
 
   async findByAddress(address: string): Promise<User | undefined> {
     const [data] = await this.db.sql`
-    select users.*
-    from users
-    inner join addresses on addresses.address = ${address}
+      select users.*
+      from users
+      inner join addresses on addresses.address = ${address}
     `
 
     return data as User | undefined
+  }
+
+  async getWithKycAndAgreement(poolId: string): Promise<UserWithKyc[]> {
+    const data = await this.db.sql`
+      select users.*, kyc.provider, kyc.provider_account_id, kyc.created_at, kyc.status, kyc.usa_tax_resident, kyc.accredited
+      from users
+      left join kyc on kyc.user_id = users.id
+      inner join user_pools on user_pools.user_id = users.id and user_pools.pool_id = ${poolId}
+    `
+
+    return (data as unknown) as UserWithKyc[]
   }
 
   async create(): Promise<User | undefined> {
@@ -111,3 +123,5 @@ export type UserPool = {
   tranche: Tranche
   createdAt: Date
 }
+
+export type UserWithKyc = Omit<KycEntity, 'digest'> & User
