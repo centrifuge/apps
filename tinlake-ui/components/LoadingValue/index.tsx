@@ -1,19 +1,18 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-interface PropsWithChildren {
+interface BaseProps {
   done: boolean
-  children: React.ReactNode
-  height?: number
   maxWidth?: number
   alignRight?: boolean
+  height?: number
 }
 
-interface PropsWithRender {
-  done: boolean
-  height?: number
-  maxWidth?: number
-  alignRight?: boolean
+interface PropsWithChildren extends BaseProps {
+  children: React.ReactNode
+}
+
+interface PropsWithRender extends BaseProps {
   render: () => React.ReactNode
 }
 
