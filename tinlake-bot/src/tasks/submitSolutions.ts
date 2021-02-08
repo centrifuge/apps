@@ -1,9 +1,6 @@
-import Tinlake, { addThousandsSeparators, baseToDisplay, toPrecision } from '@centrifuge/tinlake-js'
+import Tinlake from '@centrifuge/tinlake-js'
 import { ethers } from 'ethers'
-import config from '../config'
-import { formatEvents, parseRatio } from '../util/formatEvents'
 import { PoolMap } from '../util/ipfs'
-import { pushNotificationToSlack } from '../util/slack'
 
 export const submitSolutions = async (pools: PoolMap, provider: ethers.providers.Provider, signer: ethers.Signer) => {
   console.log('Checking if any solutions can be submitted')
@@ -27,34 +24,6 @@ export const submitSolutions = async (pools: PoolMap, provider: ethers.providers
       const solveTx = await tinlake.solveEpoch()
       console.log(`Solving ${name} with tx: ${solveTx.hash}`)
       await tinlake.getTransactionReceipt(solveTx)
-
-      pushNotificationToSlack(
-        `I just submitted a solution for epoch ${id - 1} for *<${config.tinlakeUiHost}pool/${
-          pool.addresses.ROOT_CONTRACT
-        }/${pool.metadata.slug}|${name}>*.`,
-        [
-          {
-            icon: 'drop',
-            message: `DROP would receive ${addThousandsSeparators(
-              toPrecision(baseToDisplay(solution.dropInvest, 18), 0)
-            )} DAI in investments and ${addThousandsSeparators(
-              toPrecision(baseToDisplay(solution.dropRedeem, 18), 0)
-            )} DAI in redemptions.`,
-          },
-          {
-            icon: 'tin',
-            message: `DROP would receive ${addThousandsSeparators(
-              toPrecision(baseToDisplay(solution.tinInvest, 18), 0)
-            )} DAI in investments and ${addThousandsSeparators(
-              toPrecision(baseToDisplay(solution.tinRedeem, 18), 0)
-            )} DAI in redemptions.`,
-          },
-        ],
-        {
-          title: 'View on Etherscan',
-          url: `https://kovan.etherscan.io/tx/${solveTx.hash}`,
-        }
-      )
     } else {
       console.log(`${solutionScore.toString()} is not better than ${bestScore.toString()}`)
     }
