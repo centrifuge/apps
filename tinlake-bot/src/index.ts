@@ -16,7 +16,7 @@ const run = async () => {
   const signer = await ethers.Wallet.fromEncryptedJson(config.signerEncryptedJson, config.signerPassword)
   const signerWithProvider = signer.connect(provider)
 
-  console.log('Booting Dennis 2.0')
+  console.log(`Booting Dennis 2.0 as ${signer.address}`)
   pools = await loadFromIPFS(provider)
 
   await closePools(pools, provider, signerWithProvider)
