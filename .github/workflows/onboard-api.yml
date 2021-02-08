@@ -1,5 +1,8 @@
 name: 'onboard-api'
 on: 
+  push:
+    branches:
+      - main
   pull_request:
     paths:
     - 'onboard-api/**'
