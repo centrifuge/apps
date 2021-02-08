@@ -119,7 +119,6 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {console.log(props)}
       {props.active && props.agreement && (props.agreementStatus === 'signed' || awaitingWhitelisting) && (
         <StepBody>
           <Box pad={{ vertical: 'medium' }}>

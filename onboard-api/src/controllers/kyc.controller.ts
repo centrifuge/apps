@@ -44,7 +44,6 @@ export class KycController {
     // Update KYC and user records in our database
     const existingKyc = await this.kycRepo.findByProvider('securitize', kycInfo.providerAccountId)
     if (existingKyc && existingKyc.userId !== address.userId) {
-      console.log(`${existingKyc.userId} !== ${address.userId}`)
       // If this provider account is already linked to a diffferent user, then add this address to that user
       await this.addressRepo.linkToNewUser(address.id, existingKyc.userId)
     }
@@ -52,7 +51,6 @@ export class KycController {
 
     const investor = await this.securitizeService.getInvestor(userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!investor) throw new BadRequestException('Failed to retrieve investor information from Securitize')
-    console.log({ investor })
 
     const kyc = await this.kycRepo.upsertSecuritize(userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!kyc) throw new BadRequestException('Failed to create KYC entity')
