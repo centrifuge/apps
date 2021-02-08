@@ -9,7 +9,7 @@
     "start": "yarn build:deps && ts-node-dev src/index.ts",
     "start:prod": "node bin/index.js",
     "build": "yarn build:deps && tsc --outDir bin",
-    "build:deps": "cd ../tinlake.js && yarn build && cd ../tinlake-ui"
+    "build:deps": "cd ../tinlake.js && yarn build && cd ../tinlake-bot"
   },
   "dependencies": {
     "@centrifuge/tinlake-js": "workspace:*",
