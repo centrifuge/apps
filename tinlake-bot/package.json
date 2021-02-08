@@ -1,5 +1,5 @@
 {
-  "name": "@centrifuge/dennis2.0",
+  "name": "@centrifuge/tinlake-bot",
   "private": true,
   "version": "1.0.0",
   "description": "Tinlake pool automation bot",

@@ -1,7 +1,7 @@
 {
   "private": true,
   "workspaces": [
-    "dennis2.0",
+    "tinlake-bot",
     "e2e-tests",
     "onboard-api",
     "tinlake-ui",

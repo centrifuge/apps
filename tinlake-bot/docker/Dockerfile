@@ -7,14 +7,14 @@ WORKDIR /app
 COPY *.yml *.json yarn.lock ./
 COPY .yarn/plugins ./.yarn/plugins/
 COPY .yarn/releases ./.yarn/releases/
-COPY dennis2.0 ./dennis2.0/
+COPY tinlake-bot ./tinlake-bot/
 COPY tinlake.js ./tinlake.js/
 
 RUN yarn set version berry
 RUN yarn install
 
-RUN yarn workspace @centrifuge/dennis2.0 build
+RUN yarn workspace @centrifuge/tinlake-bot build
 
 EXPOSE 3300
 
-CMD ["yarn", "workspace", "@centrifuge/dennis2.0", "start:prod"]
+CMD ["yarn", "workspace", "@centrifuge/tinlake-bot", "start:prod"]
