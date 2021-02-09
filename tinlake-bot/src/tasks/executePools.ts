@@ -104,9 +104,6 @@ export const executePools = async (pools: PoolMap, provider: ethers.providers.Pr
               },
             ],
           },
-          {
-            type: 'divider',
-          },
         ],
         {
           title: 'View on Etherscan',
