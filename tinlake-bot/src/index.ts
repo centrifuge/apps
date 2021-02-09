@@ -19,10 +19,6 @@ const run = async () => {
   console.log(`Booting Dennis 2.0 as ${signer.address}`)
   pools = await loadFromIPFS(provider)
 
-  await closePools(pools, provider, signerWithProvider)
-  await submitSolutions(pools, provider, signerWithProvider)
-  await executePools(pools, provider, signerWithProvider)
-
   let cronJobs: Map<string, CronJob> = new Map<string, CronJob>()
 
   let retrievePoolsTask = new CronJob(CronExpression.EVERY_30_MINUTES, async () => {
