@@ -5,12 +5,14 @@ const web3 = require('web3-utils')
 
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
+    /**
+     * @param beforeClosing if true, calculate the values as if the epoch would be closed now
+     */
     getEpochState = async (beforeClosing?: boolean) => {
       const coordinator = this.contract('COORDINATOR')
       const assessor = this.contract('ASSESSOR')
       const feed = this.contract('FEED')
 
-      // If beforeClosing is true, calculate the values as if the epoch would be closed now
       const reserve = await this.toBN(
         beforeClosing ? this.contract('RESERVE').totalBalance() : coordinator.epochReserve()
       )
@@ -26,6 +28,9 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return { reserve, netAssetValue, seniorAsset, minDropRatio, maxDropRatio, maxReserve }
     }
 
+    /**
+     * @param beforeClosing if true, calculate the values as if the epoch would be closed now
+     */
     getOrders = async (beforeClosing?: boolean) => {
       if (beforeClosing) {
         const seniorTranche = this.contract('SENIOR_TRANCHE')
