@@ -59,4 +59,4 @@ jobs:
           context: .
           file: ./tinlake-bot/docker/Dockerfile
           push: true
-          tags: centrifugeio/tinlake-bot:${{ steps.tag.outputs.TAG_NAME }}
+          tags: centrifugeio/tinlake-bot:latest
