@@ -31,10 +31,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
       }
 
       const solution = await tinlake.runSolver(epochState, orders)
-      const solutionSum = solution.dropInvest
-        .add(solution.dropRedeem)
-        .add(solution.tinInvest)
-        .add(solution.tinRedeem)
+      const solutionSum = solution.dropInvest.add(solution.dropRedeem).add(solution.tinInvest).add(solution.tinRedeem)
 
       const fulfillment = solutionSum
         .mul(e18)
@@ -63,40 +60,57 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
         const tinRatio = e27.sub(epochState.seniorAsset.mul(e27).div(epochState.netAssetValue.add(epochState.reserve)))
         const minTinRatio = e27.sub(epochState.maxDropRatio)
         pushNotificationToSlack(
-          `Epoch ${id} for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${pool.metadata.slug}|${name}>* can be closed.`,
+          `Epoch ${id} for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${
+            pool.metadata.slug
+          }|${name}>* can be closed. ${parseFloat(fulfillment.toString()) / 100}% of all orders could be fulfilled.`,
           [
             {
-              message: `Approximately ${parseFloat(fulfillment.toString()) / 100}% of all orders could be fulfilled.`,
+              type: 'section',
+              fields: [
+                {
+                  type: 'mrkdwn',
+                  text: `*DROP investments*\n${addThousandsSeparators(
+                    toPrecision(baseToDisplay(orders.dropInvest, 18), 0)
+                  )} DAI`,
+                },
+                {
+                  type: 'mrkdwn',
+                  text: `*DROP redemptions*\n${addThousandsSeparators(
+                    toPrecision(baseToDisplay(orders.dropRedeem, 18), 0)
+                  )} DAI`,
+                },
+                {
+                  type: 'mrkdwn',
+                  text: `*TIN investments*\n${addThousandsSeparators(
+                    toPrecision(baseToDisplay(orders.tinInvest, 18), 0)
+                  )} DAI`,
+                },
+                {
+                  type: 'mrkdwn',
+                  text: `*TIN redemptions*\n${addThousandsSeparators(
+                    toPrecision(baseToDisplay(orders.tinRedeem, 18), 0)
+                  )} DAI`,
+                },
+              ],
             },
             {
-              icon: 'drop',
-              message: `There are ${addThousandsSeparators(
-                toPrecision(baseToDisplay(orders.dropInvest, 18), 0)
-              )} DAI in DROP investments and ${addThousandsSeparators(
-                toPrecision(baseToDisplay(orders.dropRedeem, 18), 0)
-              )} DAI in DROP redemptions locked.`,
-            },
-            {
-              icon: 'tin',
-              message: `There are ${addThousandsSeparators(
-                toPrecision(baseToDisplay(orders.tinInvest, 18), 0)
-              )} DAI in TIN investments and ${addThousandsSeparators(
-                toPrecision(baseToDisplay(orders.tinRedeem, 18), 0)
-              )} DAI in TIN redemptions locked.`,
-            },
-            {
-              icon: 'moneybag',
-              message: `The current reserve is ${addThousandsSeparators(
-                toPrecision(baseToDisplay(epochState.reserve, 18), 0)
-              )} DAI out of ${addThousandsSeparators(
-                toPrecision(baseToDisplay(epochState.maxReserve, 18), 0)
-              )} DAI max.`,
-            },
-            {
-              icon: 'hand',
-              message: `The current TIN risk buffer is ${Math.round(parseRatio(tinRatio) * 100)}% (min: ${Math.round(
-                parseRatio(minTinRatio) * 100
-              )}%).`,
+              type: 'context',
+              elements: [
+                {
+                  type: 'mrkdwn',
+                  text: `:moneybag: The current reserve is ${addThousandsSeparators(
+                    toPrecision(baseToDisplay(epochState.reserve, 18), 0)
+                  )} DAI out of ${addThousandsSeparators(
+                    toPrecision(baseToDisplay(epochState.maxReserve, 18), 0)
+                  )} DAI max.`,
+                },
+                {
+                  type: 'mrkdwn',
+                  text: `:hand: The current TIN risk buffer is ${Math.round(
+                    parseRatio(tinRatio) * 100
+                  )}% (min: ${Math.round(parseRatio(minTinRatio) * 100)}%).`,
+                },
+              ],
             },
           ]
         )

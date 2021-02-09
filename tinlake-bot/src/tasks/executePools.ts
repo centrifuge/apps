@@ -53,36 +53,59 @@ export const executePools = async (pools: PoolMap, provider: ethers.providers.Pr
         }|${name}>*.`,
         [
           {
-            icon: 'drop',
-            message: `DROP received ${addThousandsSeparators(
-              toPrecision(baseToDisplay(solution.dropInvest, 18), 0)
-            )} DAI in investments and ${addThousandsSeparators(
-              toPrecision(baseToDisplay(solution.dropRedeem, 18), 0)
-            )} DAI in redemptions.`,
+            type: 'section',
+            fields: [
+              {
+                type: 'mrkdwn',
+                text: `*DROP investments*\n${addThousandsSeparators(
+                  toPrecision(baseToDisplay(solution.dropInvest, 18), 0)
+                )} DAI`,
+              },
+              {
+                type: 'mrkdwn',
+                text: `*DROP redemptions*\n${addThousandsSeparators(
+                  toPrecision(baseToDisplay(solution.dropRedeem, 18), 0)
+                )} DAI`,
+              },
+              {
+                type: 'mrkdwn',
+                text: `*TIN investments*\n${addThousandsSeparators(
+                  toPrecision(baseToDisplay(solution.tinInvest, 18), 0)
+                )} DAI`,
+              },
+              {
+                type: 'mrkdwn',
+                text: `*TIN redemptions*\n${addThousandsSeparators(
+                  toPrecision(baseToDisplay(solution.tinRedeem, 18), 0)
+                )} DAI`,
+              },
+            ],
           },
           {
-            icon: 'tin',
-            message: `TIN received ${addThousandsSeparators(
-              toPrecision(baseToDisplay(solution.tinInvest, 18), 0)
-            )} DAI in investments and ${addThousandsSeparators(
-              toPrecision(baseToDisplay(solution.tinRedeem, 18), 0)
-            )} DAI in redemptions.`,
+            type: 'context',
+            elements: [
+              {
+                type: 'mrkdwn',
+                text: `:vertical_traffic_light: The new cash drag is ${parseFloat(cashdrag.toString()) / 100}%.`,
+              },
+              {
+                type: 'mrkdwn',
+                text: `:moneybag: The new reserve is ${addThousandsSeparators(
+                  toPrecision(baseToDisplay(newReserve, 18), 0)
+                )} DAI out of ${addThousandsSeparators(
+                  toPrecision(baseToDisplay(epochState.maxReserve, 18), 0)
+                )} DAI max.`,
+              },
+              {
+                type: 'mrkdwn',
+                text: `:hand: The new TIN risk buffer is ${Math.round(
+                  parseRatio(newTinRatio) * 100
+                )}% (min: ${Math.round(parseRatio(minTinRatio) * 100)}%).`,
+              },
+            ],
           },
           {
-            icon: 'vertical_traffic_light',
-            message: `The new cash drag is ${parseFloat(cashdrag.toString()) / 100}%.`,
-          },
-          {
-            icon: 'moneybag',
-            message: `The new reserve is ${addThousandsSeparators(
-              toPrecision(baseToDisplay(newReserve, 18), 0)
-            )} DAI out of ${addThousandsSeparators(toPrecision(baseToDisplay(epochState.maxReserve, 18), 0))} DAI max.`,
-          },
-          {
-            icon: 'hand',
-            message: `The new TIN risk buffer is ${Math.round(parseRatio(newTinRatio) * 100)}% (min: ${Math.round(
-              parseRatio(minTinRatio) * 100
-            )}%).`,
+            type: 'divider',
           },
         ],
         {

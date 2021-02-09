@@ -4,7 +4,7 @@ const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 // TODO: add typing
 export const pushNotificationToSlack = async (
   title: string,
-  events: NotificationEvent[],
+  blocks: any[],
   externalLink?: NotificationExternalLink
 ) => {
   const header = {
@@ -29,23 +29,13 @@ export const pushNotificationToSlack = async (
       : {}),
   }
 
-  const formattedEvents = events.map((event: NotificationEvent) => {
-    return {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `${event.icon ? `:${event.icon}:` : ''} ${event.message}`,
-      },
-    }
-  })
-
   const response = await fetch(config.slackWebhookUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      blocks: [header, ...formattedEvents],
+      blocks: [header, ...blocks],
     }),
   })
 
