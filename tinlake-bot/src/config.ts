@@ -8,6 +8,7 @@ export interface Config {
   signerPassword: string
   slackWebhookUrl: string
   tinlakeUiHost: string
+  etherscanUrl: string
 }
 
 const config: Config = {
@@ -18,6 +19,7 @@ const config: Config = {
   signerPassword: process.env.SIGNER_PASSWORD,
   slackWebhookUrl: process.env.SLACK_WEBHOOK_URL,
   tinlakeUiHost: process.env.TINLAKE_UI_HOST,
+  etherscanUrl: process.env.ETHERSCAN_URL,
 }
 
 export default config
