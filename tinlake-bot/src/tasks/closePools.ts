@@ -1,10 +1,10 @@
 import Tinlake, { addThousandsSeparators, baseToDisplay, toPrecision } from '@centrifuge/tinlake-js'
-const BN = require('bn.js')
 import { ethers } from 'ethers'
 import config from '../config'
 import { formatEvents, parseRatio } from '../util/formatEvents'
 import { PoolMap } from '../util/ipfs'
 import { pushNotificationToSlack } from '../util/slack'
+const BN = require('bn.js')
 
 const e18 = new BN('10').pow(new BN('18'))
 
@@ -31,7 +31,10 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
       }
 
       const solution = await tinlake.runSolver(epochState, orders)
-      const solutionSum = solution.dropInvest.add(solution.dropRedeem).add(solution.tinInvest).add(solution.tinRedeem)
+      const solutionSum = solution.dropInvest
+        .add(solution.dropRedeem)
+        .add(solution.tinInvest)
+        .add(solution.tinRedeem)
 
       const fulfillment = solutionSum
         .mul(e18)

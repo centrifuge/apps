@@ -1,7 +1,7 @@
 import { addThousandsSeparators, baseToDisplay, toPrecision } from '@centrifuge/tinlake-js'
 import { Orders, State } from '@centrifuge/tinlake-js/dist/services/solver/solver'
-const BN = require('bn.js')
 import { NotificationEvent } from './slack'
+const BN = require('bn.js')
 
 export const formatEvents = (
   state: State,

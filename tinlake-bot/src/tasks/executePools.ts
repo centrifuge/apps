@@ -1,10 +1,10 @@
 import Tinlake, { addThousandsSeparators, baseToDisplay, toPrecision } from '@centrifuge/tinlake-js'
-const BN = require('bn.js')
 import { ethers } from 'ethers'
 import config from '../config'
 import { parseRatio } from '../util/formatEvents'
 import { PoolMap } from '../util/ipfs'
 import { pushNotificationToSlack } from '../util/slack'
+const BN = require('bn.js')
 
 export const executePools = async (pools: PoolMap, provider: ethers.providers.Provider, signer: ethers.Signer) => {
   console.log('Checking if any pools can be executed')

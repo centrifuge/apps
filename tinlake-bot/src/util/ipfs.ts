@@ -1,8 +1,7 @@
 import { ethers } from 'ethers'
-const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
-
-import contractAbiPoolRegistry from './PoolRegistry.abi'
 import config from '../config'
+import contractAbiPoolRegistry from './PoolRegistry.abi'
+const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 export const loadFromIPFS = async (rpcProvider: ethers.providers.JsonRpcProvider): Promise<PoolMap> => {
   const url = await assembleIpfsUrl(rpcProvider)

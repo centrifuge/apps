@@ -1,12 +1,11 @@
 import { CronJob } from 'cron'
-
-import { loadFromIPFS, PoolMap } from './util/ipfs'
-import config from './config'
-import CronExpression from './util/CronExpression'
 import { ethers } from 'ethers'
+import config from './config'
 import { closePools } from './tasks/closePools'
 import { executePools } from './tasks/executePools'
 import { submitSolutions } from './tasks/submitSolutions'
+import CronExpression from './util/CronExpression'
+import { loadFromIPFS, PoolMap } from './util/ipfs'
 
 const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
 let pools: PoolMap = {}
