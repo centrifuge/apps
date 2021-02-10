@@ -86,15 +86,11 @@ export const executePools = async (pools: PoolMap, provider: ethers.providers.Pr
             elements: [
               {
                 type: 'mrkdwn',
-                text: `:vertical_traffic_light: The new cash drag is ${parseFloat(cashdrag.toString()) / 100}%.`,
-              },
-              {
-                type: 'mrkdwn',
                 text: `:moneybag: The new reserve is ${addThousandsSeparators(
                   toPrecision(baseToDisplay(newReserve, 18), 0)
                 )} DAI out of ${addThousandsSeparators(
                   toPrecision(baseToDisplay(epochState.maxReserve, 18), 0)
-                )} DAI max.`,
+                )} DAI max. The cash drag is ${parseFloat(cashdrag.toString()) / 100}%.`,
               },
               {
                 type: 'mrkdwn',

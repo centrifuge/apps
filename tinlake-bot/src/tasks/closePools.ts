@@ -38,17 +38,82 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
         .div(orderSum)
         .div(new BN('10').pow(new BN('14')))
 
-      if (solutionSum === orderSum) {
+      if (solutionSum.eq(orderSum)) {
         // If 100% fulfillment is possible, close the epoch
 
         const solveTx = await tinlake.solveEpoch()
         console.log(`Closing & solving ${name} with tx: ${solveTx.hash}`)
         await tinlake.getTransactionReceipt(solveTx)
 
-        const currentTinRatio = parseRatio(await tinlake.getCurrentJuniorRatio())
+        const e18 = new BN('10').pow(new BN('18'))
+        const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
+        const newSeniorAsset = epochState.seniorAsset.add(solution.dropInvest).sub(solution.dropRedeem)
+        const newReserve = epochState.reserve
+          .add(solution.dropInvest)
+          .add(solution.tinInvest)
+          .sub(solution.dropRedeem)
+          .sub(solution.tinRedeem)
+
+        const newTinRatio = e27.sub(newSeniorAsset.mul(e27).div(epochState.netAssetValue.add(newReserve)))
+        const minTinRatio = e27.sub(epochState.maxDropRatio)
+
+        const cashdrag = newReserve
+          .mul(e18)
+          .div(newReserve.add(epochState.netAssetValue))
+          .div(new BN('10').pow(new BN('14')))
+
         pushNotificationToSlack(
           `I just closed epoch ${id} for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${pool.metadata.slug}|${name}>*.`,
-          formatEvents(epochState, orders, false, currentTinRatio),
+          [
+            {
+              type: 'section',
+              fields: [
+                {
+                  type: 'mrkdwn',
+                  text: `*DROP investments*\n${addThousandsSeparators(
+                    toPrecision(baseToDisplay(solution.dropInvest, 18), 0)
+                  )} DAI`,
+                },
+                {
+                  type: 'mrkdwn',
+                  text: `*DROP redemptions*\n${addThousandsSeparators(
+                    toPrecision(baseToDisplay(solution.dropRedeem, 18), 0)
+                  )} DAI`,
+                },
+                {
+                  type: 'mrkdwn',
+                  text: `*TIN investments*\n${addThousandsSeparators(
+                    toPrecision(baseToDisplay(solution.tinInvest, 18), 0)
+                  )} DAI`,
+                },
+                {
+                  type: 'mrkdwn',
+                  text: `*TIN redemptions*\n${addThousandsSeparators(
+                    toPrecision(baseToDisplay(solution.tinRedeem, 18), 0)
+                  )} DAI`,
+                },
+              ],
+            },
+            {
+              type: 'context',
+              elements: [
+                {
+                  type: 'mrkdwn',
+                  text: `:moneybag: The new reserve is ${addThousandsSeparators(
+                    toPrecision(baseToDisplay(newReserve, 18), 0)
+                  )} DAI out of ${addThousandsSeparators(
+                    toPrecision(baseToDisplay(epochState.maxReserve, 18), 0)
+                  )} DAI max. The cash drag is ${parseFloat(cashdrag.toString()) / 100}%.`,
+                },
+                {
+                  type: 'mrkdwn',
+                  text: `:hand: The new TIN risk buffer is ${Math.round(
+                    parseRatio(newTinRatio) * 100
+                  )}% (min: ${Math.round(parseRatio(minTinRatio) * 100)}%).`,
+                },
+              ],
+            },
+          ],
           {
             title: 'View on Etherscan',
             url: `${config.etherscanUrl}/tx/${solveTx.hash}`,
