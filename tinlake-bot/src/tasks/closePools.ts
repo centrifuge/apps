@@ -38,29 +38,28 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
         .div(orderSum)
         .div(new BN('10').pow(new BN('14')))
 
+      const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
+      const newSeniorAsset = epochState.seniorAsset.add(solution.dropInvest).sub(solution.dropRedeem)
+      const newReserve = epochState.reserve
+        .add(solution.dropInvest)
+        .add(solution.tinInvest)
+        .sub(solution.dropRedeem)
+        .sub(solution.tinRedeem)
+
+      const newTinRatio = e27.sub(newSeniorAsset.mul(e27).div(epochState.netAssetValue.add(newReserve)))
+      const minTinRatio = e27.sub(epochState.maxDropRatio)
+
+      const cashdrag = newReserve
+        .mul(e18)
+        .div(newReserve.add(epochState.netAssetValue))
+        .div(new BN('10').pow(new BN('14')))
+
       if (solutionSum.eq(orderSum)) {
         // If 100% fulfillment is possible, close the epoch
 
         const solveTx = await tinlake.solveEpoch()
         console.log(`Closing & solving ${name} with tx: ${solveTx.hash}`)
         await tinlake.getTransactionReceipt(solveTx)
-
-        const e18 = new BN('10').pow(new BN('18'))
-        const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
-        const newSeniorAsset = epochState.seniorAsset.add(solution.dropInvest).sub(solution.dropRedeem)
-        const newReserve = epochState.reserve
-          .add(solution.dropInvest)
-          .add(solution.tinInvest)
-          .sub(solution.dropRedeem)
-          .sub(solution.tinRedeem)
-
-        const newTinRatio = e27.sub(newSeniorAsset.mul(e27).div(epochState.netAssetValue.add(newReserve)))
-        const minTinRatio = e27.sub(epochState.maxDropRatio)
-
-        const cashdrag = newReserve
-          .mul(e18)
-          .div(newReserve.add(epochState.netAssetValue))
-          .div(new BN('10').pow(new BN('14')))
 
         pushNotificationToSlack(
           `I just closed epoch ${id} for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${pool.metadata.slug}|${name}>*.`,
@@ -99,6 +98,12 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
               elements: [
                 {
                   type: 'mrkdwn',
+                  text: `:cyclone: The new pool value is ${addThousandsSeparators(
+                    toPrecision(baseToDisplay(newReserve.add(epochState.netAssetValue), 18), 0)
+                  )} DAI.`,
+                },
+                {
+                  type: 'mrkdwn',
                   text: `:moneybag: The new reserve is ${addThousandsSeparators(
                     toPrecision(baseToDisplay(newReserve, 18), 0)
                   )} DAI out of ${addThousandsSeparators(
@@ -110,12 +115,6 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
                   text: `:hand: The new TIN risk buffer is ${Math.round(
                     parseRatio(newTinRatio) * 100
                   )}% (min: ${Math.round(parseRatio(minTinRatio) * 100)}%).`,
-                },
-                {
-                  type: 'mrkdwn',
-                  text: `:cyclone: The new pool value is ${addThousandsSeparators(
-                    toPrecision(baseToDisplay(newReserve.add(epochState.netAssetValue), 18), 0)
-                  )} DAI.`,
                 },
               ],
             },
@@ -171,23 +170,23 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
               elements: [
                 {
                   type: 'mrkdwn',
+                  text: `:cyclone: The current pool value is ${addThousandsSeparators(
+                    toPrecision(baseToDisplay(epochState.reserve.add(epochState.netAssetValue), 18), 0)
+                  )} DAI.`,
+                },
+                {
+                  type: 'mrkdwn',
                   text: `:moneybag: The current reserve is ${addThousandsSeparators(
                     toPrecision(baseToDisplay(epochState.reserve, 18), 0)
                   )} DAI out of ${addThousandsSeparators(
                     toPrecision(baseToDisplay(epochState.maxReserve, 18), 0)
-                  )} DAI max.`,
+                  )} DAI max. The cash drag is ${parseFloat(cashdrag.toString()) / 100}%.`,
                 },
                 {
                   type: 'mrkdwn',
                   text: `:hand: The current TIN risk buffer is ${Math.round(
                     parseRatio(tinRatio) * 100
                   )}% (min: ${Math.round(parseRatio(minTinRatio) * 100)}%).`,
-                },
-                {
-                  type: 'mrkdwn',
-                  text: `:cyclone: The current pool value is ${addThousandsSeparators(
-                    toPrecision(baseToDisplay(epochState.reserve.add(epochState.netAssetValue), 18), 0)
-                  )} DAI.`,
                 },
               ],
             },
