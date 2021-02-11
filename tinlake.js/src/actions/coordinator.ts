@@ -3,6 +3,8 @@ import { calculateOptimalSolution, Orders, SolverResult, SolverWeights, State } 
 import { Constructor, PendingTransaction, TinlakeParams } from '../Tinlake'
 const web3 = require('web3-utils')
 
+const e27 = new BN(10).pow(new BN(27))
+
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
     /**
@@ -35,13 +37,23 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       if (beforeClosing) {
         const seniorTranche = this.contract('SENIOR_TRANCHE')
         const juniorTranche = this.contract('JUNIOR_TRANCHE')
+        const assessor = this.contract('ASSESSOR')
+        const feed = this.contract('FEED')
 
-        // TODO: redeem values should be multiplied by token price
+        const epochNAV = await this.toBN(feed.currentNAV())
+        const epochReserve = await this.toBN(this.contract('RESERVE').totalBalance())
+        const epochSeniorTokenPrice = await this.toBN(
+          assessor['calcSeniorTokenPrice(uint256,uint256)'](epochNAV.toString(), epochReserve.toString())
+        )
+        const epochJuniorTokenPrice = await this.toBN(
+          assessor['calcJuniorTokenPrice(uint256,uint256)'](epochNAV.toString(), epochReserve.toString())
+        )
+
         return {
           dropInvest: await this.toBN(seniorTranche.totalSupply()),
-          dropRedeem: await this.toBN(seniorTranche.totalRedeem()),
+          dropRedeem: (await this.toBN(seniorTranche.totalRedeem())).mul(epochSeniorTokenPrice).div(e27),
           tinInvest: await this.toBN(juniorTranche.totalSupply()),
-          tinRedeem: await this.toBN(juniorTranche.totalRedeem()),
+          tinRedeem: (await this.toBN(juniorTranche.totalRedeem())).mul(epochJuniorTokenPrice).div(e27),
         }
       }
       const coordinator = this.contract('COORDINATOR')

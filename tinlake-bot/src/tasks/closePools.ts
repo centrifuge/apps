@@ -78,7 +78,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
                   type: 'mrkdwn',
                   text: `*DROP redemptions*\n${addThousandsSeparators(
                     toPrecision(baseToDisplay(solution.dropRedeem, 18), 0)
-                  )} DAI`,
+                  )} DROP`,
                 },
                 {
                   type: 'mrkdwn',
@@ -90,7 +90,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
                   type: 'mrkdwn',
                   text: `*TIN redemptions*\n${addThousandsSeparators(
                     toPrecision(baseToDisplay(solution.tinRedeem, 18), 0)
-                  )} DAI`,
+                  )} TIN`,
                 },
               ],
             },
@@ -150,7 +150,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
                   type: 'mrkdwn',
                   text: `*DROP redemptions*\n${addThousandsSeparators(
                     toPrecision(baseToDisplay(orders.dropRedeem, 18), 0)
-                  )} DAI`,
+                  )} DROP`,
                 },
                 {
                   type: 'mrkdwn',
@@ -162,7 +162,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
                   type: 'mrkdwn',
                   text: `*TIN redemptions*\n${addThousandsSeparators(
                     toPrecision(baseToDisplay(orders.tinRedeem, 18), 0)
-                  )} DAI`,
+                  )} TIN`,
                 },
               ],
             },

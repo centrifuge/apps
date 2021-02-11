@@ -65,7 +65,7 @@ export const executePools = async (pools: PoolMap, provider: ethers.providers.Pr
                 type: 'mrkdwn',
                 text: `*DROP redemptions*\n${addThousandsSeparators(
                   toPrecision(baseToDisplay(solution.dropRedeem, 18), 0)
-                )} DAI`,
+                )} DROP`,
               },
               {
                 type: 'mrkdwn',
@@ -77,7 +77,7 @@ export const executePools = async (pools: PoolMap, provider: ethers.providers.Pr
                 type: 'mrkdwn',
                 text: `*TIN redemptions*\n${addThousandsSeparators(
                   toPrecision(baseToDisplay(solution.tinRedeem, 18), 0)
-                )} DAI`,
+                )} TIN`,
               },
             ],
           },
