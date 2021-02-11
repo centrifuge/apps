@@ -98,6 +98,12 @@ export const executePools = async (pools: PoolMap, provider: ethers.providers.Pr
                   parseRatio(newTinRatio) * 100
                 )}% (min: ${Math.round(parseRatio(minTinRatio) * 100)}%).`,
               },
+              {
+                type: 'mrkdwn',
+                text: `:cyclone: The new pool value is ${addThousandsSeparators(
+                  toPrecision(baseToDisplay(newReserve.add(epochState.netAssetValue), 18), 0)
+                )} DAI.`,
+              },
             ],
           },
         ],

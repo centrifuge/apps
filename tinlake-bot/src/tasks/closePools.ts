@@ -111,6 +111,12 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
                     parseRatio(newTinRatio) * 100
                   )}% (min: ${Math.round(parseRatio(minTinRatio) * 100)}%).`,
                 },
+                {
+                  type: 'mrkdwn',
+                  text: `:cyclone: The new pool value is ${addThousandsSeparators(
+                    toPrecision(baseToDisplay(newReserve.add(epochState.netAssetValue), 18), 0)
+                  )} DAI.`,
+                },
               ],
             },
           ],
@@ -127,7 +133,9 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
         pushNotificationToSlack(
           `Epoch ${id} for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${
             pool.metadata.slug
-          }|${name}>* can be closed. ${parseFloat(fulfillment.toString()) / 100}% of all orders could be fulfilled.`,
+          }|${name}>* has orders locked and can be manually closed. ${
+            parseFloat(fulfillment.toString()) / 100
+          }% of all orders could be fulfilled.`,
           [
             {
               type: 'section',
@@ -174,6 +182,12 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
                   text: `:hand: The current TIN risk buffer is ${Math.round(
                     parseRatio(tinRatio) * 100
                   )}% (min: ${Math.round(parseRatio(minTinRatio) * 100)}%).`,
+                },
+                {
+                  type: 'mrkdwn',
+                  text: `:cyclone: The current pool value is ${addThousandsSeparators(
+                    toPrecision(baseToDisplay(epochState.reserve.add(epochState.netAssetValue), 18), 0)
+                  )} DAI.`,
                 },
               ],
             },

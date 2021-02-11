@@ -71,7 +71,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
       if ((await coordinator.submissionPeriod()) === false) {
         // The epoch is can be closed, but is not closed yet
-        const closeTx = await coordinator.closeEpoch({ ...this.overrides, gasLimit: 1000000 })
+        const closeTx = await coordinator.closeEpoch({ ...this.overrides, gasLimit: 2000000 })
         const closeResult = await this.getTransactionReceipt(closeTx)
 
         if (closeResult.status === 0) {
