@@ -26,6 +26,7 @@
     "@types/mocha": "^5.2.7",
     "@types/node": "^13.11.0",
     "@types/web3-eth-abi": "^1.0.0",
+    "buffer": "^6.0.3",
     "declaration-bundler-webpack-plugin": "^1.0.3",
     "glob": "^7.1.6",
     "husky": "^4.2.3",

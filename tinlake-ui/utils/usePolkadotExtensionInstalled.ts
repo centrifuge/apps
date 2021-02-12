@@ -1,6 +1,6 @@
 import React from 'react'
 
-let interval: number | null = null
+let interval: ReturnType<typeof setTimeout> | null = null
 
 /**
  * React hook that checks in an interval whether the polkadot browser extension is installed, returning false as long as

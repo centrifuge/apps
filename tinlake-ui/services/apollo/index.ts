@@ -370,26 +370,6 @@ class Apollo {
     return transformed
   }
 
-  // async getRewardsByUserToken(user: string) {
-  //   let result
-  //   try {
-  //     result = await this.client.query({
-  //       query: gql`
-  //       {
-  //         rewardByTokens(where : {account: "${user}"}) {
-  //           token
-  //           rewards
-  //         }
-  //       }
-  //       `,
-  //     })
-  //   } catch (err) {
-  //     console.error(`error occurred while fetching loans from apollo ${err}`)
-  //     return {
-  //       data: [],
-  //     }
-  //   }
-  // }
   async getAssetData(root: string) {
     let result
     try {

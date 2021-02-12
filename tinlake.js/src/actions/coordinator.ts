@@ -1,17 +1,28 @@
 import BN from 'bn.js'
-import { calculateOptimalSolution, Orders, SolverWeights, State } from '../services/solver/solver'
+import { calculateOptimalSolution, Orders, SolverResult, SolverWeights, State } from '../services/solver/solver'
 import { Constructor, PendingTransaction, TinlakeParams } from '../Tinlake'
 const web3 = require('web3-utils')
 
+const e27 = new BN(10).pow(new BN(27))
+
 export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements ICoordinatorActions {
-    getEpochState = async () => {
+    /**
+     * @param beforeClosing if true, calculate the values as if the epoch would be closed now
+     */
+    getEpochState = async (beforeClosing?: boolean) => {
       const coordinator = this.contract('COORDINATOR')
       const assessor = this.contract('ASSESSOR')
+      const feed = this.contract('FEED')
 
-      const reserve = await this.toBN(coordinator.epochReserve())
-      const netAssetValue = await this.toBN(coordinator.epochNAV())
-      const seniorAsset = await this.toBN(coordinator.epochSeniorAsset())
+      const reserve = await this.toBN(
+        beforeClosing ? this.contract('RESERVE').totalBalance() : coordinator.epochReserve()
+      )
+      const netAssetValue = await this.toBN(beforeClosing ? feed.approximatedNAV() : coordinator.epochNAV())
+      const seniorAsset = beforeClosing
+        ? (await this.toBN(assessor.seniorDebt_())).add(await this.toBN(assessor.seniorBalance_()))
+        : await this.toBN(coordinator.epochSeniorAsset())
+
       const minDropRatio = await this.toBN(assessor.minSeniorRatio())
       const maxDropRatio = await this.toBN(assessor.maxSeniorRatio())
       const maxReserve = await this.toBN(assessor.maxReserve())
@@ -19,7 +30,32 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return { reserve, netAssetValue, seniorAsset, minDropRatio, maxDropRatio, maxReserve }
     }
 
-    getOrders = async () => {
+    /**
+     * @param beforeClosing if true, calculate the values as if the epoch would be closed now
+     */
+    getOrders = async (beforeClosing?: boolean) => {
+      if (beforeClosing) {
+        const seniorTranche = this.contract('SENIOR_TRANCHE')
+        const juniorTranche = this.contract('JUNIOR_TRANCHE')
+        const assessor = this.contract('ASSESSOR')
+        const feed = this.contract('FEED')
+
+        const epochNAV = await this.toBN(feed.currentNAV())
+        const epochReserve = await this.toBN(this.contract('RESERVE').totalBalance())
+        const epochSeniorTokenPrice = await this.toBN(
+          assessor['calcSeniorTokenPrice(uint256,uint256)'](epochNAV.toString(), epochReserve.toString())
+        )
+        const epochJuniorTokenPrice = await this.toBN(
+          assessor['calcJuniorTokenPrice(uint256,uint256)'](epochNAV.toString(), epochReserve.toString())
+        )
+
+        return {
+          dropInvest: await this.toBN(seniorTranche.totalSupply()),
+          dropRedeem: (await this.toBN(seniorTranche.totalRedeem())).mul(epochSeniorTokenPrice).div(e27),
+          tinInvest: await this.toBN(juniorTranche.totalSupply()),
+          tinRedeem: (await this.toBN(juniorTranche.totalRedeem())).mul(epochJuniorTokenPrice).div(e27),
+        }
+      }
       const coordinator = this.contract('COORDINATOR')
       const orderState = await coordinator.order()
 
@@ -47,7 +83,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
       if ((await coordinator.submissionPeriod()) === false) {
         // The epoch is can be closed, but is not closed yet
-        const closeTx = await coordinator.closeEpoch({ ...this.overrides, gasLimit: 700000 })
+        const closeTx = await coordinator.closeEpoch({ ...this.overrides, gasLimit: 2000000 })
         const closeResult = await this.getTransactionReceipt(closeTx)
 
         if (closeResult.status === 0) {
@@ -66,7 +102,29 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const state = await this.getEpochState()
       console.log('Retrieving orders')
       const orders = await this.getOrders()
-      console.log('Retrieving solver weights')
+
+      const solution = await this.runSolver(state, orders)
+      Object.keys(solution).forEach((key: string) => {
+        console.log(`\t${key}: ${(solution as any)[key].toString()}`)
+      })
+
+      if (!solution.isFeasible) {
+        throw new Error('Failed to find a solution')
+      }
+
+      console.log('Solution found', solution)
+      const submissionTx = coordinator.submitSolution(
+        solution.dropRedeem.toString(),
+        solution.tinRedeem.toString(),
+        solution.tinInvest.toString(),
+        solution.dropInvest.toString(),
+        this.overrides
+      )
+
+      return this.pending(submissionTx)
+    }
+
+    runSolver = async (state: State, orders: Orders) => {
       const weights = await this.getSolverWeights()
 
       console.log(`\n\t- State`)
@@ -89,15 +147,21 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       }
 
       console.log('Solution found', solution)
-      const submissionTx = coordinator.submitSolution(
-        solution.dropRedeem.toString(),
-        solution.tinRedeem.toString(),
-        solution.tinInvest.toString(),
-        solution.dropInvest.toString(),
-        this.overrides
-      )
+      return solution
+    }
 
-      return this.pending(submissionTx)
+    scoreSolution = async (solution: SolverResult) => {
+      const weights = await this.getSolverWeights()
+      return solution.dropInvest
+        .mul(weights.dropInvest)
+        .add(solution.dropRedeem.mul(weights.dropRedeem))
+        .add(solution.tinInvest.mul(weights.tinInvest))
+        .add(solution.tinRedeem.mul(weights.tinRedeem))
+    }
+
+    bestSubmissionScore = async () => {
+      const coordinator = this.contract('COORDINATOR')
+      return await this.toBN(coordinator.bestSubScore())
     }
 
     executeEpoch = async () => {
@@ -106,7 +170,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         throw new Error('Current epoch is still in the challenge period')
       }
 
-      return this.pending(coordinator.executeEpoch(this.overrides))
+      return this.pending(coordinator.executeEpoch({ ...this.overrides, gasLimit: 500000 }))
     }
 
     getCurrentEpochId = async () => {
@@ -198,8 +262,8 @@ export type EpochState =
   | 'challenge-period-ended'
 
 export type ICoordinatorActions = {
-  getEpochState(): Promise<State>
-  getOrders(): Promise<Orders>
+  getEpochState(beforeClosing?: boolean): Promise<State>
+  getOrders(beforeClosing?: boolean): Promise<Orders>
   getSolverWeights(): Promise<SolverWeights>
   solveEpoch(): Promise<PendingTransaction>
   executeEpoch(): Promise<PendingTransaction>
@@ -213,6 +277,9 @@ export type ICoordinatorActions = {
   getCurrentEpochState(): Promise<EpochState>
   setMinimumEpochTime(minEpochTime: string): Promise<PendingTransaction>
   setMinimumChallengeTime(minChallengeTime: string): Promise<PendingTransaction>
+  runSolver(state: State, orders: Orders): Promise<SolverResult>
+  scoreSolution(solution: SolverResult): Promise<BN>
+  bestSubmissionScore(): Promise<BN>
 }
 
 export default CoordinatorActions
