@@ -80,7 +80,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
               <Metric
                 loading={!rewards.data || !data || !portfolioValue}
                 value={baseToDisplay(
-                  rewards.data?.rewardRate?.mul(portfolioValue?.toString() || 0).toString() || '0',
+                  rewards.data?.rewardRate?.mul(portfolioValue?.toString() || 0).toFixed(0) || '0',
                   18
                 )}
                 label="Your Daily Rewards"
@@ -353,23 +353,26 @@ const Metric = ({
   precision?: number
   label: string
   borderRight?: boolean
-}) => (
-  <Box pad={{ horizontal: 'medium' }} style={{ borderRight: borderRight ? '1px solid #f2f2f2' : undefined }}>
-    <Cont>
-      <TokenLogo src={{ DAI: `/static/dai.svg`, RAD: `/static/rad.svg` }[token]} />
-      <Value>
-        <LoadingValue
-          done={!loading}
-          render={() => (
-            <NumberDisplay value={value} precision={precision || (token === 'RAD' ? dynamicPrecision(value) : 0)} />
-          )}
-        ></LoadingValue>
-      </Value>{' '}
-      <Unit>{{ DAI: 'DAI', RAD: 'RAD' }[token]}</Unit>
-    </Cont>
-    <Label>{label}</Label>
-  </Box>
-)
+}) => {
+  console.log('showing metric for', label, value, precision)
+  return (
+    <Box pad={{ horizontal: 'medium' }} style={{ borderRight: borderRight ? '1px solid #f2f2f2' : undefined }}>
+      <Cont>
+        <TokenLogo src={{ DAI: `/static/dai.svg`, RAD: `/static/rad.svg` }[token]} />
+        <Value>
+          <LoadingValue
+            done={!loading}
+            render={() => (
+              <NumberDisplay value={value} precision={precision || (token === 'RAD' ? dynamicPrecision(value) : 0)} />
+            )}
+          ></LoadingValue>
+        </Value>{' '}
+        <Unit>{{ DAI: 'DAI', RAD: 'RAD' }[token]}</Unit>
+      </Cont>
+      <Label>{label}</Label>
+    </Box>
+  )
+}
 
 const TokenLogoBig = styled.img`
   margin: 0 20px 0 0;
