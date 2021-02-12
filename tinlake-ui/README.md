@@ -22,3 +22,20 @@ To build tinlake.js and start the NextJs server and serve the Netlify lambdas lo
 ```shell
 yarn start
 ```
+
+### Debugging
+
+There are a few flags you can use in your url query string to debug Tinlake:
+
+#### General
+
+`?debug_eth_address=0x..` allows you to view the state of the UI for any Ethereum address
+
+#### Dashboard/Pool list
+
+`?showAll=true` allows you to view additional metrics for pools
+`?showArchived=true` allows you to view archived pools
+
+#### Rewards
+
+`?debug=true` allows you to get additional data on the rewards for the connected user

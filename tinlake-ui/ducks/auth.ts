@@ -131,9 +131,15 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
     const { auth } = getState()
     let onboard = getOnboard()
 
+    const urlParams = new URLSearchParams(window.location.search)
+    const debugAddress = urlParams.get('debug_eth_address')
+
     // onboard is already initialized, only ensure values are correct and return
     if (onboard) {
-      const { address, network, wallet } = onboard.getState()
+      const state = onboard.getState()
+      const { network, wallet } = state
+      const address = debugAddress || state.address
+
       if (address !== auth.address) {
         dispatch(setAddressAndLoadData(tinlake, address))
       }
@@ -165,7 +171,7 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
         // TODO: when you switch your account in Metamask, this address hook get called, but the wallet subscription
         // is not always being called. We should investigate whether this is an issue with the bnc-onboard library or
         // our usage/implementation of the library.
-        dispatch(setAddressAndLoadData(tinlake, address))
+        dispatch(setAddressAndLoadData(tinlake, debugAddress || address))
       },
       network: (network) => {
         const networkName = networkIdToName(network)
