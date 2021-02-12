@@ -17,7 +17,7 @@ interface Props extends TransactionProps {
   tinlake: ITinlake
 }
 
-let interval: number | null = null
+let interval: ReturnType<typeof setTimeout> | null = null
 
 const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) => {
   const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
