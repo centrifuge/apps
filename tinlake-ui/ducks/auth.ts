@@ -132,7 +132,7 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
     let onboard = getOnboard()
 
     const urlParams = new URLSearchParams(window.location.search)
-    let debugAddress = urlParams.get('debug_eth_address')
+    const debugAddress = urlParams.get('debug_eth_address')
 
     // onboard is already initialized, only ensure values are correct and return
     if (onboard) {
