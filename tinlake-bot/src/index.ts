@@ -1,6 +1,7 @@
 import { CronJob } from 'cron'
 import { ethers } from 'ethers'
 import config from './config'
+import { checkDueAssets } from './tasks/checkDueAssets'
 import { closePools } from './tasks/closePools'
 import { executePools } from './tasks/executePools'
 import { submitSolutions } from './tasks/submitSolutions'
@@ -17,6 +18,8 @@ const run = async () => {
 
   console.log(`Booting Dennis 2.0 as ${signer.address}`)
   pools = await loadFromIPFS(provider)
+
+  await checkDueAssets(pools)
 
   let cronJobs: Map<string, CronJob> = new Map<string, CronJob>()
 
@@ -43,6 +46,12 @@ const run = async () => {
     await executePools(pools, provider, signerWithProvider)
   })
   cronJobs.set('executePools', executePoolsTask)
+
+  let checkDueAssetsTask = new CronJob('0 14 * * *', async () => {
+    // Check due assets every day at 3pm CET (2pm UTC)
+    await checkDueAssets(pools)
+  })
+  cronJobs.set('checkDueAssets', checkDueAssetsTask)
 
   cronJobs.forEach((task, _) => task.start())
 }
