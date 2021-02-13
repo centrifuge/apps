@@ -26,8 +26,8 @@ const run = async () => {
   })
   cronJobs.set('retrievePools', retrievePoolsTask)
 
-  let closePoolsTask = new CronJob('0 14 * * *', async () => {
-    // Close pool epochs every day at 3pm CET (2pm UTC)
+  let closePoolsTask = new CronJob('0 9 * * *', async () => {
+    // Close pool epochs every day at 10am CET (9am UTC)
     await closePools(pools, provider, signerWithProvider)
   })
   cronJobs.set('closePools', closePoolsTask)
