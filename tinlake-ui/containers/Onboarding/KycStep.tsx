@@ -1,4 +1,3 @@
-import { Modal } from '@centrifuge/axis-modal'
 import { KycStatusLabel } from '@centrifuge/onboard-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, CheckBox, Paragraph } from 'grommet'
