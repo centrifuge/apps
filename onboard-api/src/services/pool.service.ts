@@ -21,7 +21,7 @@ export class PoolService {
 
   constructor(private readonly addressRepo: AddressRepo, private readonly investmentRepo: InvestmentRepo) {
     this.loadFromIPFS()
-    console.log(`Using wallet at ${this.signer.address}`)
+    this.logger.log(`Using wallet at ${this.signer.address}`)
   }
 
   async get(poolId: string) {

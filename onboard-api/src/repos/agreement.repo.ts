@@ -56,6 +56,8 @@ export class AgreementRepo {
   }
 
   async getByUserIds(userIds: string[]): Promise<Agreement[]> {
+    if (userIds.length === 0) return []
+
     const agreements = await this.db.sql`
       select *
       from agreements

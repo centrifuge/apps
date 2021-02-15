@@ -105,7 +105,6 @@ export class AgreementController {
       signed: investor?.status === 'completed',
       counterSigned: issuer?.status === 'completed',
     }
-    console.log({ status })
 
     if (!agreement.signedAt && status.signed) {
       await this.agreementRepo.setSigned(agreement.id)

@@ -34,6 +34,7 @@ export class UserRepo {
       from users
       left join kyc on kyc.user_id = users.id
       inner join user_pools on user_pools.user_id = users.id and user_pools.pool_id = ${poolId}
+      group by users.id, kyc.user_id, kyc.provider, kyc.provider_account_id, kyc.digest, kyc.created_at, kyc.status, kyc.usa_tax_resident, kyc.accredited
     `
 
     return (data as unknown) as UserWithKyc[]

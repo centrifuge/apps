@@ -7,6 +7,7 @@ import { UserRepo, UserWithKyc } from '../repos/user.repo'
 export class UserController {
   constructor(private readonly agreementRepo: AgreementRepo, private readonly userRepo: UserRepo) {}
 
+  // TODO: add authentication to this endpoint
   @Get('users/:poolId')
   async getUsers(@Param() params) {
     return {}
