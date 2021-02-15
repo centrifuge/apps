@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { Agreement, AgreementRepo } from '../repos/agreement.repo'
+import { AgreementRepo } from '../repos/agreement.repo'
 import { KycEntity, KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
 import { DocusignService } from './docusign.service'

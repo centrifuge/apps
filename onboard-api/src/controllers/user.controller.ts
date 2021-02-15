@@ -1,5 +1,4 @@
-import { Controller, Get, Logger, Param, Query } from '@nestjs/common'
-import { SessionService } from '../services/session.service'
+import { Controller, Get, Param } from '@nestjs/common'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { UserRepo, UserWithKyc } from '../repos/user.repo'
 

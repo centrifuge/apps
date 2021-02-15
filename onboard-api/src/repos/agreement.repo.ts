@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { AgreementsStatus, Tranche } from '../controllers/types'
 import { DocusignService } from '../services/docusign.service'
-import { PoolService, ProfileAgreement } from '../services/pool.service'
+import { PoolService } from '../services/pool.service'
 import { uuidv4 } from '../utils/uuid'
 import { DatabaseService } from './db.service'
 

@@ -1,13 +1,13 @@
 import { BadRequestException, Controller, Delete, Get, Param, Query, UnauthorizedException } from '@nestjs/common'
 import { AddressEntity, AddressRepo } from '../repos/address.repo'
-import { Agreement, AgreementRepo } from '../repos/agreement.repo'
+import { AgreementRepo } from '../repos/agreement.repo'
 import { InvestmentRepo } from '../repos/investment.repo'
 import { KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
 import { SecuritizeService } from '../services/kyc/securitize.service'
 import { PoolService, ProfileAgreement } from '../services/pool.service'
 import { SessionService } from '../services/session.service'
-import { AddressStatus, AgreementsStatus, KycStatusLabel } from './types'
+import { AddressStatus, KycStatusLabel } from './types'
 
 @Controller()
 export class AddressController {
