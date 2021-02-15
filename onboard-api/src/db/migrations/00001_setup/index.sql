@@ -72,3 +72,11 @@ create table if not exists investments (
 
 create unique index if not exists investments_pkey on investments(address_id uuid_ops);
 create unique index if not exists investments_unique on investments (address_id, pool_id, tranche);
+
+-- user_pools
+create table if not exists user_pools (
+    user_id uuid references users(id) on delete cascade on update cascade,
+    pool_id character(42) not null,
+    tranche character varying(10),
+    created_at timestamp with time zone not null default now()
+);

@@ -22,7 +22,7 @@ export class SessionService {
     const unixNow = Math.floor(Date.now() / 1000)
     const oneHour = 60 * 60
 
-    const body = {
+    const body: SessionPayload = {
       sub: userId,
       aud: config.onboardApiHost,
       iss: 'https://jwt.io/',
@@ -36,13 +36,20 @@ export class SessionService {
     return jwt
   }
 
-  verify(session: string, userId: string): boolean {
+  verify(session: string): SessionPayload | undefined {
     try {
-      const decodedJwtBody = JwtUtils.decode(session, this.pubKeys, [config.onboardApiHost])
-      return decodedJwtBody.sub === userId
+      return JwtUtils.decode(session, this.pubKeys, [config.onboardApiHost])
     } catch (e) {
       console.error(e)
-      return false
+      return undefined
     }
   }
+}
+
+export interface SessionPayload {
+  sub: string
+  aud: string
+  iss: string
+  iat: number
+  exp: number
 }

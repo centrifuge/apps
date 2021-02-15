@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { Agreement, AgreementRepo } from '../repos/agreement.repo'
+import { AgreementRepo } from '../repos/agreement.repo'
 import { KycEntity, KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
 import { DocusignService } from './docusign.service'
@@ -20,7 +20,7 @@ export class SyncService {
     private readonly userRepo: UserRepo
   ) {}
 
-  @Cron(CronExpression.EVERY_30_MINUTES) // TODO: change to e.g. every 5 min
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async syncKycStatus() {
     const processingInvestors = await this.kycRepo.getProcessingInvestors()
     if (processingInvestors.length === 0) return
@@ -60,14 +60,14 @@ export class SyncService {
     })
   }
 
-  @Cron(CronExpression.EVERY_30_MINUTES) // TODO: change to e.g. every 5 min
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async syncAgreementStatus() {
     const agreements = await this.agreementRepo.getAwaitingCounterSignature()
     if (agreements.length === 0) return
 
     this.logger.debug(`Syncing ${agreements.length} agreements`)
-    // TODO: use Promise.all
-    agreements.forEach(async (agreement: Agreement) => {
+    // Synchronous, one by one, so the docusign access token doesn't get overwritten because multiple requests create multiple access tokens in parallel
+    for (let agreement of agreements) {
       const status = await this.docusignService.getEnvelopeStatus(agreement.providerEnvelopeId)
 
       if (!agreement.counterSignedAt && status.counterSigned) {
@@ -75,7 +75,7 @@ export class SyncService {
         this.agreementRepo.setCounterSigned(agreement.id)
         this.memberlistService.update(agreement.userId, agreement.poolId, agreement.tranche)
       }
-    })
+    }
   }
 
   // @Cron(CronExpression.EVERY_30_MINUTES) // TODO: change to e.g. every 5 min

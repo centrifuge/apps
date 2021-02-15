@@ -1,13 +1,13 @@
 import { BadRequestException, Controller, Delete, Get, Param, Query, UnauthorizedException } from '@nestjs/common'
-import { AddressRepo } from '../repos/address.repo'
-import { Agreement, AgreementRepo } from '../repos/agreement.repo'
+import { AddressEntity, AddressRepo } from '../repos/address.repo'
+import { AgreementRepo } from '../repos/agreement.repo'
 import { InvestmentRepo } from '../repos/investment.repo'
 import { KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
 import { SecuritizeService } from '../services/kyc/securitize.service'
-import { PoolService } from '../services/pool.service'
+import { PoolService, ProfileAgreement } from '../services/pool.service'
 import { SessionService } from '../services/session.service'
-import { AddressStatus, AgreementsStatus, KycStatusLabel } from './types'
+import { AddressStatus, KycStatusLabel } from './types'
 
 @Controller()
 export class AddressController {
@@ -51,6 +51,7 @@ export class AddressController {
               requiresSignin: true,
             },
             agreements: [],
+            linkedAddresses: [],
           }
         }
 
@@ -66,26 +67,38 @@ export class AddressController {
         }
       }
 
-      const agreements = await this.agreementRepo.getByUserAndPool(
-        address.userId,
-        params.poolId,
-        user.email,
-        user.countryCode
-      )
-
-      const agreementLinks = agreements.map(
-        (agreement: Agreement): AgreementsStatus => {
+      // Filter profile agreements by country
+      const profileAgreements = pool.profile?.agreements
+        .filter((pa: ProfileAgreement) => {
+          return (
+            (user.countryCode === 'US' && pa.country === 'non-us') || (user.countryCode !== 'US' && pa.country === 'us')
+          )
+        })
+        .map((pa: ProfileAgreement) => {
           return {
-            name: agreement.name,
-            tranche: agreement.tranche,
-            id: agreement.id,
-            signed: agreement.signedAt !== null,
-            counterSigned: agreement.counterSignedAt !== null,
+            name: pa.name,
+            tranche: pa.tranche,
+            provider: pa.provider,
+            providerTemplateId: pa.providerTemplateId,
           }
-        }
+        })
+
+      // Retrieve
+      const agreementLinks = await this.agreementRepo.getStatusForProfileAgreements(
+        user.id,
+        params.poolId,
+        profileAgreements
       )
 
       const isWhitelisted = await this.investmentRepo.getWhitelistStatus(address.id, params.poolId)
+
+      // TODO: this should also filter by blockchain and network
+      const addresses = await this.addressRepo.getByUser(address.userId)
+      const otherAddresses = addresses
+        .map((a: AddressEntity) => a.address)
+        .filter((a) => {
+          return a !== address.address
+        })
 
       return {
         kyc: {
@@ -96,6 +109,7 @@ export class AddressController {
           accredited: kyc.accredited,
         },
         agreements: agreementLinks,
+        linkedAddresses: otherAddresses,
       }
     }
 
@@ -104,6 +118,7 @@ export class AddressController {
         url: authorizationLink,
       },
       agreements: [],
+      linkedAddresses: [],
     }
   }
 
@@ -113,8 +128,8 @@ export class AddressController {
     const user = await this.userRepo.findByAddress(params.address)
     if (!user) throw new BadRequestException('Invalid user')
 
-    const verifiedSession = this.sessionService.verify(query.session, user.id)
-    if (!verifiedSession) throw new UnauthorizedException('Invalid session')
+    const verifiedSession = this.sessionService.verify(query.session)
+    if (!verifiedSession || verifiedSession.sub !== user.id) throw new UnauthorizedException('Invalid session')
 
     this.userRepo.delete(params.address, 'ethereum', 'kovan')
   }

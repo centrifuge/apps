@@ -12,7 +12,13 @@ export const IssuerRoleName = 'Self'
 export class DocusignService {
   constructor(private readonly docusignAuthService: DocusignAuthService, private readonly poolService: PoolService) {}
 
-  async createAgreement(poolId: string, userId: string, email: string, templateId: string): Promise<string> {
+  async createAgreement(
+    poolId: string,
+    userId: string,
+    fullName: string,
+    email: string,
+    templateId: string
+  ): Promise<string> {
     const pool = await this.poolService.get(poolId)
     if (!pool) throw new Error(`Failed to find pool ${poolId}`)
 
@@ -21,7 +27,7 @@ export class DocusignService {
       templateRoles: [
         {
           email,
-          name: 'Investor',
+          name: fullName,
           roleName: InvestorRoleName,
           clientUserId: userId,
           routingOrder: 1,
@@ -64,7 +70,7 @@ export class DocusignService {
     const recipientViewRequest = {
       authenticationMethod: 'none',
       email: user.email,
-      userName: 'Investor',
+      userName: user.entityName || user.fullName,
       roleName: InvestorRoleName,
       clientUserId: user.id,
       returnUrl: returnUrl,
