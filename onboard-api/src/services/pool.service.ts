@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import { ethers } from 'ethers'
 import config from '../config'
 import { Tranche } from '../controllers/types'
@@ -12,7 +13,7 @@ const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 @Injectable()
 export class PoolService {
   private readonly logger = new Logger(PoolService.name)
-  private pools: { [key: string]: Pool }
+  private pools: { [key: string]: Pool } = {}
 
   provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
   signer = new ethers.Wallet(config.signerPrivateKey).connect(this.provider)
@@ -20,6 +21,7 @@ export class PoolService {
 
   constructor(private readonly addressRepo: AddressRepo, private readonly investmentRepo: InvestmentRepo) {
     this.loadFromIPFS()
+    this.logger.log(`Using wallet at ${this.signer.address}`)
   }
 
   async get(poolId: string) {
@@ -36,6 +38,8 @@ export class PoolService {
   }
 
   private async loadFromIPFS() {
+    const prevPools = Object.values(this.pools)
+
     const url = await this.assembleIpfsUrl()
     const response = await fetch(url)
     const pools = await response.json()
@@ -51,7 +55,14 @@ export class PoolService {
     )
 
     this.pools = poolsWithProfiles
-    this.logger.log(`Loaded ${Object.keys(this.pools).length} pools with profiles from IPFS`)
+    const newPools = Object.values(poolsWithProfiles).filter((pool: Pool) => !prevPools.includes(pool))
+
+    if (newPools.length > 0) this.logger.log(`Loaded ${Object.keys(this.pools).length} pools with profiles from IPFS`)
+  }
+
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async sync() {
+    await this.loadFromIPFS()
   }
 
   private async assembleIpfsUrl(): Promise<string> {
@@ -89,6 +100,7 @@ export class PoolService {
     validUntilDate.setFullYear(validUntilDate.getFullYear() + 100) // 100 years
     const validUntil = Math.round(validUntilDate.getTime() / 1000)
 
+    // TODO: this should also filter by blockchain and network
     const addresses = await this.addressRepo.getByUser(userId)
     addresses.forEach(async (address: AddressEntity) => {
       try {

@@ -4,6 +4,7 @@ import { AppController } from './app.controller'
 import { AddressController } from './controllers/address.controller'
 import { AgreementController } from './controllers/agreement.controller'
 import { KycController } from './controllers/kyc.controller'
+import { UserController } from './controllers/user.controller'
 import { AddressRepo } from './repos/address.repo'
 import { AgreementRepo } from './repos/agreement.repo'
 import { DatabaseService } from './repos/db.service'
@@ -32,7 +33,7 @@ const taskProviders = [SyncService]
 
 @Module({
   imports: [ScheduleModule.forRoot()],
-  controllers: [AppController, AddressController, KycController, AgreementController],
+  controllers: [AppController, AddressController, KycController, AgreementController, UserController],
   providers: [...databaseProviders, ...serviceProviders, ...taskProviders],
 })
 export class AppModule {}

@@ -18,8 +18,10 @@ export class DocusignAuthService {
   }
 
   async getAccessToken(): Promise<string> {
-    const hasExpired = this.expiresAt && Date.now() >= this.expiresAt + 10 * 1000 // Add 10s buffer
-    if (!this.accessToken || hasExpired) return this.createAccessToken()
+    const hasExpired = this.expiresAt && Date.now() >= this.expiresAt - 60 * 1000 // Substract 1min buffer (so refresh the access token 1 min before it expires)
+    if (!this.accessToken || hasExpired) {
+      return this.createAccessToken()
+    }
 
     return this.accessToken
   }
@@ -50,7 +52,7 @@ export class DocusignAuthService {
     const data = await response.json()
 
     this.accessToken = data['access_token']
-    this.expiresAt = Date.now() + HourInMilliseconds
+    this.expiresAt = Date.now() + data['expires_in'] * 1000
 
     return this.accessToken
   }
@@ -66,7 +68,7 @@ export class DocusignAuthService {
     const body = {
       iss: config.docusign.integrationKey,
       sub: config.docusign.apiUsername,
-      aud: 'account-d.docusign.com',
+      aud: new URL(config.docusign.accountApiHost).hostname,
       iat: unixNow,
       exp: unixNow + HourInSeconds,
       scope: 'signature impersonation',

@@ -1,7 +1,6 @@
 import { BadRequestException, Controller, Get, Logger, Param, Query, Res } from '@nestjs/common'
 import config from '../config'
 import { AddressRepo } from '../repos/address.repo'
-import { AgreementRepo } from '../repos/agreement.repo'
 import { KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
 import { SecuritizeService } from '../services/kyc/securitize.service'
@@ -17,7 +16,6 @@ export class KycController {
     private readonly addressRepo: AddressRepo,
     private readonly kycRepo: KycRepo,
     private readonly userRepo: UserRepo,
-    private readonly agreementRepo: AgreementRepo,
     private readonly poolService: PoolService,
     private readonly sessionService: SessionService
   ) {}
@@ -43,15 +41,22 @@ export class KycController {
       return res.redirect(redirectUrl)
     }
 
-    const investor = await this.securitizeService.getInvestor(address.userId, kycInfo.providerAccountId, kycInfo.digest)
+    // Update KYC and user records in our database
+    const existingKyc = await this.kycRepo.findByProvider('securitize', kycInfo.providerAccountId)
+    if (existingKyc && existingKyc.userId !== address.userId) {
+      // If this provider account is already linked to a diffferent user, then add this address to that user
+      await this.addressRepo.linkToNewUser(address.id, existingKyc.userId)
+    }
+    const userId = existingKyc?.userId || address.userId
+
+    const investor = await this.securitizeService.getInvestor(userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!investor) throw new BadRequestException('Failed to retrieve investor information from Securitize')
 
-    // Update KYC and user records in our database
-    const kyc = await this.kycRepo.upsertSecuritize(address.userId, kycInfo.providerAccountId, kycInfo.digest)
+    const kyc = await this.kycRepo.upsertSecuritize(userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!kyc) throw new BadRequestException('Failed to create KYC entity')
 
     await this.userRepo.update(
-      address.userId,
+      userId,
       investor.email,
       investor.details.address.countryCode,
       investor.domainInvestorDetails?.investorFullName,
@@ -66,16 +71,11 @@ export class KycController {
       investor.domainInvestorDetails.isAccredited
     )
 
-    // Create agreements for this pool
-    await this.agreementRepo.createAgreementsForPool(
-      params.poolId,
-      address.userId,
-      investor.email,
-      investor.details.address.countryCode
-    )
+    // Link user to pool/tranche so we know which pools a user has shown interest in
+    await this.userRepo.linkToPool(userId, params.poolId, params.tranche || 'senior')
 
     // Create session and redirect user
-    const session = this.sessionService.create(address.userId)
+    const session = this.sessionService.create(userId)
 
     const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?session=${session}`
     return res.redirect(redirectUrl)

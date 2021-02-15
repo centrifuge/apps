@@ -11,11 +11,12 @@ export interface KycStatus {
 
 export type Tranche = 'senior' | 'junior'
 
-// TODO: remove whether it's been created
 export interface AgreementsStatus {
   name: string
-  id: string
   tranche: Tranche
+  provider: 'docusign'
+  providerTemplateId: string
+  id?: string
   signed?: boolean
   counterSigned?: boolean
 }
@@ -23,4 +24,5 @@ export interface AgreementsStatus {
 export interface AddressStatus {
   kyc: KycStatus
   agreements: AgreementsStatus[]
+  linkedAddresses: string[]
 }

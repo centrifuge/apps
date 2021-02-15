@@ -17,6 +17,17 @@ export class KycRepo {
     return data as KycEntity | undefined
   }
 
+  async findByProvider(provider: 'securitize', providerAccountId: string): Promise<KycEntity | undefined> {
+    const [data] = await this.db.sql`
+      select *
+      from kyc
+      where kyc.provider = ${provider}
+      and kyc.provider_account_id = ${providerAccountId}
+    `
+
+    return data as KycEntity | undefined
+  }
+
   async getProcessingInvestors(): Promise<KycEntity[]> {
     const investors = await this.db.sql`
       select *

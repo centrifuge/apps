@@ -31,25 +31,36 @@ export class AgreementController {
     private readonly memberlistService: MemberlistService
   ) {}
 
-  @Get('pools/:poolId/agreements/:agreementId/redirect')
+  @Get('pools/:poolId/agreements/:provider/:providerTemplateId/redirect')
   async redirectToAgreement(@Param() params, @Query() query, @Res({ passthrough: true }) res) {
-    if (!query.session) throw new BadRequestException('Missing session')
-
-    const agreement = await this.agreementRepo.find(params.agreementId)
-    if (!agreement) throw new NotFoundException(`Agreement ${params.agreementId} not found`)
-
-    const user = await this.userRepo.find(agreement.userId)
-    if (!user) throw new BadRequestException('User for this agreement does not exist')
-
     const pool = await this.poolService.get(params.poolId)
     if (!pool) throw new BadRequestException('Invalid pool')
 
-    const verifiedSession = this.sessionService.verify(query.session, user.id)
+    if (!query.session) throw new BadRequestException('Missing session')
+    const verifiedSession = this.sessionService.verify(query.session)
     if (!verifiedSession) {
-      const returnUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?tranche=${agreement.tranche}`
-      console.error(`Invalid session for user ${user.id}`)
+      const returnUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding`
+      console.error(`Invalid session`)
       return res.redirect(returnUrl)
     }
+
+    const user = await this.userRepo.find(verifiedSession.sub)
+    if (!user) throw new BadRequestException('User for this agreement does not exist')
+
+    const profileAgreement = pool.profile?.agreements.find(
+      (pa) => pa.provider === params.provider && pa.providerTemplateId === pa.providerTemplateId
+    )
+    if (!profileAgreement) throw new BadRequestException('Profile agreement cannot be found')
+
+    const agreement = await this.agreementRepo.findOrCreate(
+      user.id,
+      user.email,
+      user.entityName || user.fullName,
+      params.poolId,
+      profileAgreement.tranche,
+      profileAgreement.name,
+      profileAgreement.providerTemplateId
+    )
 
     const returnUrl = `${config.onboardApiHost}pools/${params.poolId}/agreements/${agreement.id}/callback`
     const link = await this.docusignService.getAgreementLink(agreement.providerEnvelopeId, user, returnUrl)
@@ -79,8 +90,8 @@ export class AgreementController {
   }
 
   @Post('docusign/connect')
-  async postDocusignConnect(@Body() body): Promise<string> {
-    const content = JSON.parse(body)
+  async postDocusignConnect(@Body() content: DocusignConnectDto): Promise<string> {
+    console.log(content)
     const envelopeId = content.envelopeId
     console.log(`Received Docusign Connect message for envelope ID ${envelopeId}`)
 
@@ -94,7 +105,6 @@ export class AgreementController {
       signed: investor?.status === 'completed',
       counterSigned: issuer?.status === 'completed',
     }
-    console.log({ status })
 
     if (!agreement.signedAt && status.signed) {
       await this.agreementRepo.setSigned(agreement.id)
@@ -106,5 +116,18 @@ export class AgreementController {
     }
 
     return 'OK'
+  }
+}
+
+interface SignerDto {
+  roleName: string
+  status: string
+}
+
+interface DocusignConnectDto {
+  envelopeId: string
+  status: string
+  recipients: {
+    signers: SignerDto[]
   }
 }
