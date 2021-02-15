@@ -13,6 +13,7 @@ import { ExplainerCard } from '../Investment/View/styles'
 import AgreementStep from './AgreementStep'
 import ConnectStep from './ConnectStep'
 import KycStep from './KycStep'
+import LinkStep from './LinkStep'
 import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
@@ -51,27 +52,24 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     dispatch(loadOnboardingStatus(props.activePool))
 
     if (!address) setActiveSteps(1)
-    else if (
-      !kycStatus ||
-      kycStatus === 'none' ||
-      kycStatus === 'requires-signin' ||
-      kycStatus === 'updates-required'
-    ) {
+    else if (!kycStatus) {
       setActiveSteps(2)
+    } else if (kycStatus === 'none' || kycStatus === 'requires-signin' || kycStatus === 'updates-required') {
+      setActiveSteps(3)
     } else if (kycStatus === 'verified' && !accreditationStatus) {
-      setActiveSteps(2)
+      setActiveSteps(3)
     } else if (agreementStatus === 'none') {
-      setActiveSteps(3)
-    } else if (kycStatus === 'processing' && !whitelistStatus) {
-      setActiveSteps(3)
-    } else if (kycStatus === 'processing' && agreementStatus === 'signed') {
-      setActiveSteps(3)
-    } else if (kycStatus === 'processing' && agreementStatus === 'countersigned') {
-      setActiveSteps(2)
-    } else if ((kycStatus === 'verified' && agreementStatus === 'signed') || !whitelistStatus) {
-      setActiveSteps(3)
-    } else {
       setActiveSteps(4)
+    } else if (kycStatus === 'processing' && !whitelistStatus) {
+      setActiveSteps(4)
+    } else if (kycStatus === 'processing' && agreementStatus === 'signed') {
+      setActiveSteps(4)
+    } else if (kycStatus === 'processing' && agreementStatus === 'countersigned') {
+      setActiveSteps(3)
+    } else if ((kycStatus === 'verified' && agreementStatus === 'signed') || !whitelistStatus) {
+      setActiveSteps(4)
+    } else {
+      setActiveSteps(5)
     }
   }, [address, props.activePool, kycStatus, agreementStatus])
 
@@ -96,12 +94,13 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
             )}
 
             <ConnectStep {...props} />
+            <LinkStep {...props} onboarding={onboarding} linked={!!kycStatus} active={activeSteps >= 2} />
             <KycStep
               {...props}
               onboarding={onboarding}
               kycStatus={kycStatus}
               accreditationStatus={accreditationStatus}
-              active={activeSteps >= 2}
+              active={activeSteps >= 3}
             />
             <AgreementStep
               {...props}
@@ -109,14 +108,14 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
               agreement={agreement}
               agreementStatus={agreementStatus}
               whitelistStatus={whitelistStatus}
-              active={activeSteps >= 3}
+              active={activeSteps >= 4}
             />
             <Step>
               <StepHeader>
-                <StepIcon inactive={activeSteps < 4} />
-                <StepTitle inactive={activeSteps < 4}>Invest in {props.activePool.metadata.name}</StepTitle>
+                <StepIcon inactive={activeSteps < 5} />
+                <StepTitle inactive={activeSteps < 5}>Invest in {props.activePool.metadata.name}</StepTitle>
               </StepHeader>
-              {activeSteps >= 4 && (
+              {activeSteps >= 5 && (
                 <StepBody>
                   <Box pad={{ vertical: 'medium' }}>
                     You're now ready to invest in {props.activePool.metadata.name}!

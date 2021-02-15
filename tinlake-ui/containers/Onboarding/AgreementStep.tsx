@@ -82,7 +82,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
                   checked={checked}
                   label={
                     <div style={{ lineHeight: '2em' }}>
-                      Consent to the transfer of my personal data to the issuer and to Securitize’s and Centrifuge’s
+                      I consent to the transfer of my personal data to the issuer and to Securitize’s and Centrifuge’s
                       Privacy Policy and Terms and Conditions.&nbsp;
                       <Anchor
                         onClick={(event: any) => {
@@ -123,7 +123,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
         <StepBody>
           <Box pad={{ vertical: 'medium' }}>
             The Issuer will counter-sign your {props.agreement.name} for {poolName} soon. If KYC is verified, you will
-            be ready to invest in this pool upon his signature.
+            be ready to invest in this pool upon their signature.
           </Box>
         </StepBody>
       )}
