@@ -1,6 +1,6 @@
 import {
   BadRequestException,
-  Body,
+  Request,
   Controller,
   Get,
   Logger,
@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Query,
+  Req,
   Res,
 } from '@nestjs/common'
 import config from '../config'
@@ -90,9 +91,9 @@ export class AgreementController {
   }
 
   @Post('docusign/connect')
-  async postDocusignConnect(@Body() body): Promise<string> {
-    console.log(body)
-    const content = JSON.parse(body)
+  async postDocusignConnect(@Request() req): Promise<string> {
+    console.log(req.body)
+    const content = JSON.parse(req.body)
     const envelopeId = content.envelopeId
     console.log(`Received Docusign Connect message for envelope ID ${envelopeId}`)
 
