@@ -70,9 +70,7 @@ export class AddressController {
       // Filter profile agreements by country
       const profileAgreements = pool.profile?.agreements
         .filter((pa: ProfileAgreement) => {
-          return (
-            (user.countryCode === 'US' && pa.country === 'non-us') || (user.countryCode !== 'US' && pa.country === 'us')
-          )
+          return kyc.usaTaxResident ? pa.country === 'us' : pa.country === 'non-us'
         })
         .map((pa: ProfileAgreement) => {
           return {

@@ -60,6 +60,7 @@ export class SyncService {
     })
   }
 
+  // TODO: We should reduce this to less often once we confirm Docusign Connect works well, as then this is really just a backup plan
   @Cron(CronExpression.EVERY_30_MINUTES)
   async syncAgreementStatus() {
     const agreements = await this.agreementRepo.getAwaitingCounterSignature()
