@@ -7,6 +7,7 @@ export interface Config {
   signerEncryptedJson: string
   signerPassword: string
   slackWebhookUrl: string
+  slackApiToken: string
   tinlakeUiHost: string
   etherscanUrl: string
   tinlakeDataBackendUrl: string
@@ -19,6 +20,7 @@ const config: Config = {
   signerEncryptedJson: process.env.SIGNER_ENCRYPTED_JSON,
   signerPassword: process.env.SIGNER_PASSWORD,
   slackWebhookUrl: process.env.SLACK_WEBHOOK_URL,
+  slackApiToken: process.env.SLACK_API_TOKEN,
   tinlakeUiHost: process.env.TINLAKE_UI_HOST,
   etherscanUrl: process.env.ETHERSCAN_URL,
   tinlakeDataBackendUrl: process.env.TINLAKE_DATA_BACKEND_URL,
