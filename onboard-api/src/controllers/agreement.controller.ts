@@ -48,7 +48,7 @@ export class AgreementController {
     if (!user) throw new BadRequestException('User for this agreement does not exist')
 
     const profileAgreement = pool.profile?.agreements.find(
-      (pa) => pa.provider === params.provider && pa.providerTemplateId === pa.providerTemplateId
+      (pa) => pa.provider === params.provider && pa.providerTemplateId === params.providerTemplateId
     )
     if (!profileAgreement) throw new BadRequestException('Profile agreement cannot be found')
 
