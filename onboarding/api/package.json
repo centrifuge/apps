@@ -1,5 +1,5 @@
 {
-  "name": "@centrifuge/onboard-api",
+  "name": "@centrifuge/onboarding-api",
   "private": true,
   "version": "1.0.0",
   "description": "API for the onboarding system of Tinlake",

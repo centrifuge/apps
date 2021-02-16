@@ -12,8 +12,8 @@ COPY onboard-api ./onboard-api/
 RUN yarn set version berry
 RUN yarn install
 
-RUN yarn workspace @centrifuge/onboard-api build
+RUN yarn workspace @centrifuge/onboarding-api build
 
 EXPOSE 3100
 
-CMD ["yarn", "workspace", "@centrifuge/onboard-api", "start:prod"]
+CMD ["yarn", "workspace", "@centrifuge/onboarding-api", "start:prod"]
