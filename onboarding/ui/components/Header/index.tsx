@@ -1,4 +1,3 @@
-import { NavBar } from '@centrifuge/axis-nav-bar'
 import { Box, Image } from 'grommet'
 import Link from 'next/link'
 

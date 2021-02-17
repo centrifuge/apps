@@ -1,8 +1,8 @@
+import { AgreementMap } from '@centrifuge/onboarding-api/src/controllers/user.controller'
+import { Box } from 'grommet'
 import * as React from 'react'
 import styled from 'styled-components'
-import { Box } from 'grommet'
 import Header from '../components/Header'
-import { AgreementMap } from '@centrifuge/onboarding-api/src/controllers/user.controller'
 // import countryCodeToFlagEmoji from 'country-code-to-flag-emoji'
 
 interface Props {
