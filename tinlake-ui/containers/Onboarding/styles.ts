@@ -70,3 +70,9 @@ export const LegalCopy = styled.div`
     }
   }
 `
+
+export const HelpIcon = styled.img`
+  margin: 0 20px 0 0;
+  width: 24px;
+  height: 24px;
+`

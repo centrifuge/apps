@@ -1,20 +1,31 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { Tranche } from 'src/controllers/types'
+import { Tranche } from '../controllers/types'
+import { UserRepo } from '../repos/user.repo'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { KycRepo } from '../repos/kyc.repo'
 import { PoolService } from './pool.service'
+import config from '../config'
 
 @Injectable()
 export class MemberlistService {
   private readonly logger = new Logger(MemberlistService.name)
 
   constructor(
+    private readonly userRepo: UserRepo,
     private readonly kycRepo: KycRepo,
     private readonly agreementRepo: AgreementRepo,
     private readonly poolService: PoolService
   ) {}
 
   async update(userId, poolId?: string, tranche?: Tranche) {
+    const user = await this.userRepo.find(userId)
+    if (config.globalRestrictedCountries.includes(user.countryCode)) {
+      console.error(`User ${userId} is based in ${user.countryCode}, which is restricted globally.`)
+      return
+    }
+
+    // TODO: get profile for pool, check if profile.restrictedCountryCodes.includes(user.countryCode)
+
     const kyc = await this.kycRepo.find(userId)
     if (kyc.status !== 'verified' || (kyc.usaTaxResident && !kyc.accredited)) return
 

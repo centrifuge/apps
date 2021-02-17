@@ -104,7 +104,7 @@ export class PoolService {
     const addresses = await this.addressRepo.getByUser(userId)
     addresses.forEach(async (address: AddressEntity) => {
       try {
-        const tx = await memberAdmin.updateMember(memberlistAddress, address.address, validUntil)
+        const tx = await memberAdmin.updateMember(memberlistAddress, address.address, validUntil, { gasLimit: 1000000 })
         this.logger.log(`Submitted tx to add ${address.address} to ${memberlistAddress}: ${tx.hash}`)
         await this.provider.waitForTransaction(tx.hash)
 

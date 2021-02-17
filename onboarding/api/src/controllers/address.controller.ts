@@ -1,4 +1,5 @@
 import { BadRequestException, Controller, Delete, Get, Param, Query, UnauthorizedException } from '@nestjs/common'
+import config from 'src/config'
 import { AddressEntity, AddressRepo } from '../repos/address.repo'
 import { AgreementRepo } from '../repos/agreement.repo'
 import { InvestmentRepo } from '../repos/investment.repo'
@@ -98,7 +99,12 @@ export class AddressController {
           return a !== address.address
         })
 
+      // Check country restrictions
+      // TODO: add check for pool.profile.restrictedCountryCodes
+      const restricted = config.globalRestrictedCountries.includes(user.countryCode)
+
       return {
+        restricted,
         kyc: {
           status,
           isWhitelisted,
