@@ -45,7 +45,7 @@
     "@centrifuge/axis-tooltip": "0.4.2-develop.6d6e183.148",
     "@centrifuge/axis-utils": "0.4.2-develop.109",
     "@centrifuge/axis-web3-wallet": "0.0.3-develop.a14b10c.151",
-    "@centrifuge/onboard-api": "workspace:*",
+    "@centrifuge/onboarding-api": "workspace:*",
     "@centrifuge/tinlake-js": "workspace:*",
     "@centrifuge/tinlake-pools-kovan": "0.0.1-develop.6",
     "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.20",
