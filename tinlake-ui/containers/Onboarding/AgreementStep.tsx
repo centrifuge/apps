@@ -1,5 +1,5 @@
 import { Modal } from '@centrifuge/axis-modal'
-import { AgreementsStatus } from '@centrifuge/onboard-api/src/controllers/types'
+import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Anchor, Box, Button, CheckBox, Heading, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
@@ -50,7 +50,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
             checked={props.agreementStatus === 'countersigned' && props.whitelistStatus === true}
           />
         )}
-        <StepTitle inactive={!props.active}>
+        <StepTitle inactive={!props.active && !awaitingWhitelisting}>
           {props.agreementStatus === 'none'
             ? `Sign the Subscription Agreement`
             : props.agreementStatus === 'countersigned' && props.whitelistStatus === true
@@ -82,7 +82,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
                   checked={checked}
                   label={
                     <div style={{ lineHeight: '2em' }}>
-                      Consent to the transfer of my personal data to the issuer and to Securitize’s and Centrifuge’s
+                      I consent to the transfer of my personal data to the issuer and to Securitize’s and Centrifuge’s
                       Privacy Policy and Terms and Conditions.&nbsp;
                       <Anchor
                         onClick={(event: any) => {
@@ -105,8 +105,8 @@ const KycStep: React.FC<Props> = (props: Props) => {
               primary
               label={`Sign Subscription Agreement`}
               href={`${config.onboardAPIHost}pools/${(props.activePool as Pool).addresses.ROOT_CONTRACT}/agreements/${
-                props.agreement?.id
-              }/redirect?session=${session}`}
+                props.agreement?.provider
+              }/${props.agreement?.providerTemplateId}/redirect?session=${session}`}
               onClick={(event: any) => {
                 if (!props.onboarding.data?.kyc.isUsaTaxResident && !checked) {
                   event.preventDefault()
@@ -123,7 +123,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
         <StepBody>
           <Box pad={{ vertical: 'medium' }}>
             The Issuer will counter-sign your {props.agreement.name} for {poolName} soon. If KYC is verified, you will
-            be ready to invest in this pool upon his signature.
+            be ready to invest in this pool upon their signature.
           </Box>
         </StepBody>
       )}
