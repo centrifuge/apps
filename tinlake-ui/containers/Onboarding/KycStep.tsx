@@ -1,4 +1,4 @@
-import { KycStatusLabel } from '@centrifuge/onboard-api/src/controllers/types'
+import { KycStatusLabel } from '@centrifuge/onboarding-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, CheckBox, Paragraph } from 'grommet'
 import * as React from 'react'

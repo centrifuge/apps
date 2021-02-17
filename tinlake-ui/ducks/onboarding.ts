@@ -1,4 +1,4 @@
-import { AddressStatus } from '@centrifuge/onboard-api/src/controllers/types'
+import { AddressStatus } from '@centrifuge/onboarding-api/src/controllers/types'
 import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'

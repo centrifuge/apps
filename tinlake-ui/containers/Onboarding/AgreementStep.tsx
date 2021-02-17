@@ -1,5 +1,5 @@
 import { Modal } from '@centrifuge/axis-modal'
-import { AgreementsStatus } from '@centrifuge/onboard-api/src/controllers/types'
+import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Anchor, Box, Button, CheckBox, Heading, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'

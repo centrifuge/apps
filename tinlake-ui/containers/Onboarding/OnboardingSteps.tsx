@@ -1,5 +1,5 @@
 import { Spinner } from '@centrifuge/axis-spinner'
-import { AgreementsStatus } from '@centrifuge/onboard-api/src/controllers/types'
+import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
