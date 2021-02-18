@@ -78,10 +78,6 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
   return (
     <Box margin={{ top: 'medium' }}>
       <PageTitle pool={props.activePool} page="Onboarding" parentPage="Investments" parentPageHref="/investments" />
-      {/* <Heading level="5" margin={{ bottom: 'medium' }} style={{ maxWidth: '100%' }}>
-        To invest in this pool, start your onboarding process now.
-      </Heading> */}
-
       <Box direction="row" gap="medium">
         <Box pad="medium" elevation="small" round="xsmall" background="white" basis="2/3">
           {address && onboarding.state !== 'found' ? (
