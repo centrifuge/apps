@@ -91,7 +91,6 @@ export class AgreementController {
 
   @Post('docusign/connect')
   async postDocusignConnect(@Body() content: DocusignConnectDto): Promise<string> {
-    console.log(content)
     const envelopeId = content.envelopeId
     console.log(`Received Docusign Connect message for envelope ID ${envelopeId}`)
 

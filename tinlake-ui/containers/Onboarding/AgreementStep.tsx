@@ -24,6 +24,9 @@ const KycStep: React.FC<Props> = (props: Props) => {
   const [checked, setChecked] = React.useState(false)
   const [error, setError] = React.useState('')
 
+  const [nonSolicitationChecked, setNonSolicitationChecked] = React.useState(false)
+  const [nonSolicitationError, setNonSolicitationError] = React.useState('')
+
   const router = useRouter()
   const session = 'session' in router.query ? router.query.session : '' // TODO: check this on the API and display message if it has expired
 
@@ -39,6 +42,17 @@ const KycStep: React.FC<Props> = (props: Props) => {
   const closeModal = () => {
     setModalIsOpen(false)
   }
+
+  const [nonSolicitationModalIsOpen, setNonSolicitationModalIsOpen] = React.useState(false)
+
+  const openNonSolicitationModal = () => {
+    setNonSolicitationModalIsOpen(true)
+  }
+  const closeNonSolicitationModal = () => {
+    setNonSolicitationModalIsOpen(false)
+  }
+
+  const isRestricted = props.onboarding.data?.restrictedGlobal || props.onboarding.data?.restrictedPool
 
   return (
     <Step>
@@ -70,7 +84,33 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {props.active && props.agreementStatus === 'none' && props.agreement && session && (
+      {props.active && isRestricted && (
+        <StepBody>
+          {props.onboarding.data?.restrictedGlobal && (
+            <Paragraph>
+              You are located in or are a resident of a country that is blocked from investment in Tinlake for
+              regulatory reasons. Please find more information on regulatory restrictions{' '}
+              <a href="https://centrifuge.hackmd.io/@rQf339bfSHi_a3rLcEuoaQ/BkdzEs5WO" target="_blank">
+                here
+              </a>
+              .
+            </Paragraph>
+          )}
+          {!props.onboarding.data?.restrictedGlobal && (
+            <Paragraph>
+              You are located in or are a resident of a country that has been blocked by the issuer for regulatory
+              reasons, e.g. missing tax treaties or sanctions. Please explore other pools and find more information on
+              regulatory restrictions{' '}
+              <a href="https://centrifuge.hackmd.io/@rQf339bfSHi_a3rLcEuoaQ/BkdzEs5WO" target="_blank">
+                here
+              </a>
+              .
+            </Paragraph>
+          )}
+          <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
+        </StepBody>
+      )}
+      {props.active && !isRestricted && props.agreementStatus === 'none' && props.agreement && session && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             Finalize onboarding by signing the {props.agreement.name} for {poolName}.
@@ -98,6 +138,29 @@ const KycStep: React.FC<Props> = (props: Props) => {
                   onChange={(event) => setChecked(event.target.checked)}
                 />
               </FormFieldWithoutBorder>
+
+              <FormFieldWithoutBorder error={nonSolicitationError}>
+                <CheckBox
+                  checked={nonSolicitationChecked}
+                  label={
+                    <div style={{ lineHeight: '2em' }}>
+                      I confirm that I am requesting the subscription agreement and further investment information
+                      without having being solicited or approached, directly or indirectly by [issuer_name] or any
+                      affiliate.&nbsp;
+                      <Anchor
+                        onClick={(event: any) => {
+                          openNonSolicitationModal()
+                          event.preventDefault()
+                        }}
+                        style={{ display: 'inline' }}
+                        label="View more"
+                      />
+                      .
+                    </div>
+                  }
+                  onChange={(event) => setNonSolicitationChecked(event.target.checked)}
+                />
+              </FormFieldWithoutBorder>
             </Box>
           )}
           <div>
@@ -108,9 +171,13 @@ const KycStep: React.FC<Props> = (props: Props) => {
                 props.agreement?.provider
               }/${props.agreement?.providerTemplateId}/redirect?session=${session}`}
               onClick={(event: any) => {
-                if (!props.onboarding.data?.kyc.isUsaTaxResident && !checked) {
+                if (!checked) {
                   event.preventDefault()
                   setError('This needs to be checked to proceed.')
+                }
+                if (!nonSolicitationChecked) {
+                  event.preventDefault()
+                  setNonSolicitationError('This needs to be checked to proceed.')
                 }
               }}
               fill={false}
@@ -119,14 +186,17 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {props.active && props.agreement && (props.agreementStatus === 'signed' || awaitingWhitelisting) && (
-        <StepBody>
-          <Box pad={{ vertical: 'medium' }}>
-            The Issuer will counter-sign your {props.agreement.name} for {poolName} soon. If KYC is verified, you will
-            be ready to invest in this pool upon their signature.
-          </Box>
-        </StepBody>
-      )}
+      {props.active &&
+        !isRestricted &&
+        props.agreement &&
+        (props.agreementStatus === 'signed' || awaitingWhitelisting) && (
+          <StepBody>
+            <Box pad={{ vertical: 'medium' }}>
+              The Issuer will counter-sign your {props.agreement.name} for {poolName} soon. If KYC is verified, you will
+              be ready to invest in this pool upon their signature.
+            </Box>
+          </StepBody>
+        )}
       {/* TODO: or not whitelisted */}
       {!props.active && <StepBody inactive>&nbsp;</StepBody>}
       {props.agreementStatus === 'countersigned' && props.whitelistStatus === true && <StepBody>&nbsp;</StepBody>}
@@ -296,6 +366,34 @@ const KycStep: React.FC<Props> = (props: Props) => {
         <Box direction="row" justify="end">
           <Box basis={'1/5'}>
             <Button primary onClick={closeModal} label="OK" fill={true} />
+          </Box>
+        </Box>
+      </Modal>
+
+      <Modal
+        opened={nonSolicitationModalIsOpen}
+        title={
+          'Confirmation that your are requesting the subscription agreement and further investment information without having being solicited or approached by the issuer.'
+        }
+        headingProps={{ style: { maxWidth: '100%', display: 'flex' } }}
+        titleIcon={<StatusInfoIcon />}
+        onClose={closeNonSolicitationModal}
+      >
+        <LegalCopy>
+          <Paragraph margin={{ top: 'medium' }}>
+            You are located in or are a resident of a country where the cross-border marketing of securities or
+            investments is restricted. However, you can still register. If you are still interested in more information
+            about [issuer_name] (Executive Summary, Subscription Documents, Contacts and other offering materials) tick
+            the box and continue. By doing so, you are confirming that you are requesting this information without
+            having been being solicited or approached, directly or indirectly by [issuer_name] or any affiliate of or
+            other person acting as agent or otherwise on behalf of [issuer_name] including but not limited to
+            Centrifuge.
+          </Paragraph>
+        </LegalCopy>
+
+        <Box direction="row" justify="end">
+          <Box basis={'1/5'}>
+            <Button primary onClick={closeNonSolicitationModal} label="OK" fill={true} />
           </Box>
         </Box>
       </Modal>

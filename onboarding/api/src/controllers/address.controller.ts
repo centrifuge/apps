@@ -101,10 +101,10 @@ export class AddressController {
 
       // Check country restrictions
       // TODO: add check for pool.profile.restrictedCountryCodes
-      const restricted = config.globalRestrictedCountries.includes(user.countryCode)
+      const restrictedGlobal = config.globalRestrictedCountries.includes(user.countryCode)
 
       return {
-        restricted,
+        restrictedGlobal,
         kyc: {
           status,
           isWhitelisted,

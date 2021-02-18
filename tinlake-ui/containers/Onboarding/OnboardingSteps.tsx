@@ -138,25 +138,28 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
           <Box background="#eee" pad="medium" round="xsmall" style={{ color: '#555555' }}>
             <Box direction="row" pad={'0 0 14px'}>
               <HelpIcon src="/static/help-circle.svg" />
-              <h3 style={{ margin: 0 }}>How to invest</h3>
+              <h3 style={{ margin: 0 }}>How onboarding works</h3>
             </Box>
-            Pools have real world legal structure (SPVs). Investing requires KYC plus singing subdoc. There are certain
-            investment restrictions per pool. Minimum amount, ususall 10k or 5k. Residents from some countries may be
-            blocked [link list of sanctioned countries]
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell scope="row" border={{ color: 'transparent' }}>
-                    <Box direction="row">Minimum investment</Box>
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                    10.000 DAI
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-            <Anchor href="https://docs.centrifuge.io/tinlake/userguide/investing/" target="_blank">
-              Read the User Guide
+            Tinlake pools are backed by real-world assets. Financing those assets on-chain requires a legal structure
+            that give the investors a legal claim on the assets. <br /> <br />
+            The underlying legal structure requires investors to
+            <ol style={{ paddingLeft: '30px', listStyleType: 'lower-roman' }}>
+              <li>Clear standard KYC checks;</li>
+              <li>Sign a subscription agreement with the pools issuer.</li>
+            </ol>
+            Currently, the underlying legal structures may also impose some restrictions on investments. E.g. most pools
+            require a minimum investment amount of 5.000 to 10.000 DAI. Residents of some countries may also be excluded
+            from investing.
+            <br />
+            <br />
+            <Anchor href="https://centrifuge.hackmd.io/QXUCI0wRSLepfABBivNruw?view" target="_blank">
+              Read the onboarding guide
+            </Anchor>
+            <Anchor
+              href="https://centrifuge.hackmd.io/QXUCI0wRSLepfABBivNruw?view#List-of-currently-blocked-countries"
+              target="_blank"
+            >
+              See list of excluded countries
             </Anchor>
           </Box>
         </Box>

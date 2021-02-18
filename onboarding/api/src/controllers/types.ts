@@ -24,6 +24,7 @@ export interface AgreementsStatus {
 export interface AddressStatus {
   kyc: KycStatus
   agreements: AgreementsStatus[]
-  restricted?: boolean
+  restrictedGlobal?: boolean
+  restrictedPool?: boolean
   linkedAddresses: string[]
 }
