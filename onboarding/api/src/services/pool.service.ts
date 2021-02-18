@@ -83,9 +83,10 @@ export class PoolService {
     if (!pool.profile) return undefined
 
     // Get pool profile
-    const profileUrl = new URL(pool.profile, config.ipfsGateway)
+    const profileUrl = `https://raw.githubusercontent.com/centrifuge/tinlake-pools-mainnet/ad6028818b0f570e2e8465f296f16d66a28359df/profiles/${poolId}.json`
     const profileResponse = await fetch(profileUrl)
     const profile = await profileResponse.json()
+    console.log(profile)
     return profile
   }
 
@@ -149,5 +150,8 @@ export interface Profile {
   issuer: {
     name: string
     email: string
+    usBased: true
   }
+  restrictedCountryCodes: string[]
+  minInvestmentCurrency: string
 }

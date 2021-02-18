@@ -8,11 +8,13 @@ export const StepHeader = styled.div`
   flex-direction: row;
 `
 
-export const StepIcon = styled.div<{ inactive?: boolean; checked?: boolean; pending?: boolean }>`
+export const StepIcon = styled.div<{ inactive?: boolean; checked?: boolean; pending?: boolean; failed?: boolean }>`
   width: 40px;
   padding-top: 2px;
   background: ${(props) =>
-    props.pending
+    props.failed
+      ? "url('/static/circle-failed.svg')"
+      : props.pending
       ? "url('/static/clock.svg')"
       : props.checked
       ? "url('/static/circle-checked.svg')"

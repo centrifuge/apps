@@ -1,7 +1,7 @@
 import { Spinner } from '@centrifuge/axis-spinner'
 import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { Anchor, Box, Button, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Anchor, Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'

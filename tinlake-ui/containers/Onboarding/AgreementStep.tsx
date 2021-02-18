@@ -3,6 +3,7 @@ import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/typ
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Anchor, Box, Button, CheckBox, Heading, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import config, { Pool } from '../../config'
@@ -62,6 +63,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <StepIcon
             inactive={!props.active}
             checked={props.agreementStatus === 'countersigned' && props.whitelistStatus === true}
+            failed={isRestricted}
           />
         )}
         <StepTitle inactive={!props.active && !awaitingWhitelisting}>
@@ -72,7 +74,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
             : `${props.agreement?.name} awaiting Issuer signature`}
         </StepTitle>
       </StepHeader>
-      {props.active && props.agreementStatus === 'none' && props.agreement && !session && (
+      {props.active && !isRestricted && props.agreementStatus === 'none' && props.agreement && !session && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '70%' }}>
             To complete the next step of signing the {props.agreement.name} for {poolName}, you can sign in again with
@@ -97,15 +99,18 @@ const KycStep: React.FC<Props> = (props: Props) => {
             </Paragraph>
           )}
           {!props.onboarding.data?.restrictedGlobal && (
-            <Paragraph>
-              You are located in or are a resident of a country that has been blocked by the issuer for regulatory
-              reasons, e.g. missing tax treaties or sanctions. Please explore other pools and find more information on
-              regulatory restrictions{' '}
-              <a href="https://centrifuge.hackmd.io/@rQf339bfSHi_a3rLcEuoaQ/BkdzEs5WO" target="_blank">
-                here
-              </a>
-              .
-            </Paragraph>
+            <>
+              <Paragraph>
+                You are located in or are a resident of a country that has been blocked by the issuer for regulatory
+                reasons, e.g. missing tax treaties or sanctions. Find more information on regulatory restrictions{' '}
+                <a href="https://centrifuge.hackmd.io/@rQf339bfSHi_a3rLcEuoaQ/BkdzEs5WO" target="_blank">
+                  here
+                </a>
+                .
+              </Paragraph>
+              <Link href="/">
+              <Button label="Explore other pools" primary /></Link>
+            </>
           )}
           <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
         </StepBody>
