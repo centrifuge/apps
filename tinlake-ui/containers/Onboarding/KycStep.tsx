@@ -1,10 +1,10 @@
 import { KycStatusLabel } from '@centrifuge/onboarding-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { Box, Button, CheckBox, Paragraph } from 'grommet'
+import { Box, Button, Paragraph } from 'grommet'
 import * as React from 'react'
 import config, { Pool } from '../../config'
 import { OnboardingState } from '../../ducks/onboarding'
-import { FormFieldWithoutBorder, Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
+import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
   activePool: Pool
@@ -18,9 +18,6 @@ interface Props {
 const RequiresInputStates = ['none', 'updates-required', 'rejected', 'expired']
 
 const KycStep: React.FC<Props> = (props: Props) => {
-  const [checked, setChecked] = React.useState(false)
-  const [error, setError] = React.useState('')
-
   return (
     <Step>
       <StepHeader>
@@ -82,28 +79,8 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             To continue with onboarding, you need to sign in again with your Securitize iD.
           </Paragraph>
-          <Box margin={{ left: 'auto', right: 'auto', bottom: 'medium' }}>
-            <FormFieldWithoutBorder error={error}>
-              <CheckBox
-                checked={checked}
-                label="I accept the data privacy policy and that data is shared with Centrifuge and the issuer."
-                onChange={(event) => setChecked(event.target.checked)}
-              />
-            </FormFieldWithoutBorder>
-          </Box>
           <div>
-            <Button
-              primary
-              label={`Sign in with Securitize`}
-              href={props.onboarding.data?.kyc?.url}
-              onClick={(event: any) => {
-                if (!checked) {
-                  event.preventDefault()
-                  setError('This needs to be checked to proceed.')
-                }
-              }}
-              fill={false}
-            />
+            <Button primary label={`Sign in with Securitize`} href={props.onboarding.data?.kyc?.url} fill={false} />
           </div>
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>

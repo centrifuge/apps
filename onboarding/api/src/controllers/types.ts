@@ -26,5 +26,6 @@ export interface AddressStatus {
   agreements: AgreementsStatus[]
   restrictedGlobal?: boolean
   restrictedPool?: boolean
+  showNonSolicitationNotice?: boolean
   linkedAddresses: string[]
 }

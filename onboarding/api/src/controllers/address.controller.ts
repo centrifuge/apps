@@ -100,13 +100,19 @@ export class AddressController {
         })
 
       // Check country restrictions
-      // TODO: add check for pool.profile.restrictedCountryCodes
       const restrictedGlobal = config.globalRestrictedCountries.includes(user.countryCode)
-      const restrictedPool = pool.profile.restrictedCountryCodes.includes(user.countryCode)
+      const restrictedPool = pool.profile.issuer.restrictedCountryCodes?.includes(user.countryCode)
+      const showNonSolicitationNotice =
+        pool.profile.issuer.nonSolicitationNotice === 'non-us'
+          ? !kyc.usaTaxResident
+          : pool.profile.issuer.nonSolicitationNotice === 'all'
+          ? true
+          : false
 
       return {
         restrictedGlobal,
         restrictedPool,
+        showNonSolicitationNotice,
         kyc: {
           status,
           isWhitelisted,

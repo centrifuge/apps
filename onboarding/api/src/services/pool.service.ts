@@ -146,12 +146,12 @@ export interface ProfileAgreement {
 }
 
 export interface Profile {
-  agreements: ProfileAgreement[] // TODO: add typing
+  agreements: ProfileAgreement[]
   issuer: {
     name: string
     email: string
-    usBased: true
+    restrictedCountryCodes?: string[]
+    minInvestmentCurrency?: string
+    nonSolicitationNotice?: 'none' | 'non-us' | 'all'
   }
-  restrictedCountryCodes: string[]
-  minInvestmentCurrency: string
 }

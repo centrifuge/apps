@@ -25,9 +25,6 @@ const KycStep: React.FC<Props> = (props: Props) => {
   const [checked, setChecked] = React.useState(false)
   const [error, setError] = React.useState('')
 
-  const [nonSolicitationChecked, setNonSolicitationChecked] = React.useState(false)
-  const [nonSolicitationError, setNonSolicitationError] = React.useState('')
-
   const router = useRouter()
   const session = 'session' in router.query ? router.query.session : '' // TODO: check this on the API and display message if it has expired
 
@@ -109,7 +106,8 @@ const KycStep: React.FC<Props> = (props: Props) => {
                 .
               </Paragraph>
               <Link href="/">
-              <Button label="Explore other pools" primary /></Link>
+                <Button label="Explore other pools" primary />
+              </Link>
             </>
           )}
           <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
@@ -120,38 +118,16 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             Finalize onboarding by signing the {props.agreement.name} for {poolName}.
           </Paragraph>
-          {!props.onboarding.data?.kyc.isUsaTaxResident && (
+          {props.onboarding.data?.showNonSolicitationNotice && (
             <Box margin={{ right: 'auto', bottom: 'medium' }}>
               <FormFieldWithoutBorder error={error}>
                 <CheckBox
                   checked={checked}
                   label={
-                    <div style={{ lineHeight: '2em' }}>
-                      I consent to the transfer of my personal data to the issuer and to Securitize’s and Centrifuge’s
-                      Privacy Policy and Terms and Conditions.&nbsp;
-                      <Anchor
-                        onClick={(event: any) => {
-                          openModal()
-                          event.preventDefault()
-                        }}
-                        style={{ display: 'inline' }}
-                        label="View more"
-                      />
-                      .
-                    </div>
-                  }
-                  onChange={(event) => setChecked(event.target.checked)}
-                />
-              </FormFieldWithoutBorder>
-
-              <FormFieldWithoutBorder error={nonSolicitationError}>
-                <CheckBox
-                  checked={nonSolicitationChecked}
-                  label={
-                    <div style={{ lineHeight: '2em' }}>
+                    <div style={{ lineHeight: '24px' }}>
                       I confirm that I am requesting the subscription agreement and further investment information
-                      without having being solicited or approached, directly or indirectly by [issuer_name] or any
-                      affiliate.&nbsp;
+                      without having being solicited or approached, directly or indirectly by the issuer of{' '}
+                      {props.activePool.metadata.shortName || props.activePool.metadata.name} or any affiliate.&nbsp;
                       <Anchor
                         onClick={(event: any) => {
                           openNonSolicitationModal()
@@ -163,7 +139,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
                       .
                     </div>
                   }
-                  onChange={(event) => setNonSolicitationChecked(event.target.checked)}
+                  onChange={(event) => setChecked(event.target.checked)}
                 />
               </FormFieldWithoutBorder>
             </Box>
@@ -176,13 +152,9 @@ const KycStep: React.FC<Props> = (props: Props) => {
                 props.agreement?.provider
               }/${props.agreement?.providerTemplateId}/redirect?session=${session}`}
               onClick={(event: any) => {
-                if (!checked) {
+                if (props.onboarding.data?.showNonSolicitationNotice && !checked) {
                   event.preventDefault()
                   setError('This needs to be checked to proceed.')
-                }
-                if (!nonSolicitationChecked) {
-                  event.preventDefault()
-                  setNonSolicitationError('This needs to be checked to proceed.')
                 }
               }}
               fill={false}
