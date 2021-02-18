@@ -105,9 +105,9 @@ export class AddressController {
       const showNonSolicitationNotice =
         pool.profile.issuer.nonSolicitationNotice === 'non-us'
           ? !kyc.usaTaxResident
-          : pool.profile.issuer.nonSolicitationNotice === 'all'
-          ? true
-          : false
+          : pool.profile.issuer.nonSolicitationNotice === 'none'
+          ? false
+          : true
 
       return {
         restrictedGlobal,

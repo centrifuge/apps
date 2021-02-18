@@ -83,7 +83,7 @@ export class PoolService {
     if (!pool.profile) return undefined
 
     // Get pool profile
-    const profileUrl = `https://raw.githubusercontent.com/centrifuge/tinlake-pools-mainnet/ad6028818b0f570e2e8465f296f16d66a28359df/profiles/${poolId}.json`
+    const profileUrl = `https://raw.githubusercontent.com/centrifuge/tinlake-pools-mainnet/main/profiles/${poolId}.json`
     const profileResponse = await fetch(profileUrl)
     const profile = await profileResponse.json()
     console.log(profile)
