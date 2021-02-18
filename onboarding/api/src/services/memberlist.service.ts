@@ -23,9 +23,6 @@ export class MemberlistService {
       console.error(`User ${userId} is based in ${user.countryCode}, which is restricted globally.`)
       return
     }
-
-    // TODO: get profile for pool, check if profile.restrictedCountryCodes.includes(user.countryCode)
-
     const kyc = await this.kycRepo.find(userId)
     if (kyc.status !== 'verified' || (kyc.usaTaxResident && !kyc.accredited)) return
 
@@ -43,6 +40,12 @@ export class MemberlistService {
       const poolIds = poolId === undefined ? await this.poolService.getIds() : [poolId]
 
       poolIds.forEach(async (poolId: string) => {
+        const pool = await this.poolService.get(poolId)
+        if (!pool || pool?.profile.issuer.restrictedCountryCodes?.includes(user.countryCode)) {
+          console.error(`User ${userId} is based in ${user.countryCode}, which is restricted for pool ${poolId}.`)
+          return
+        }
+
         const agreements = await this.agreementRepo.getByUserPoolTranche(userId, poolId, t)
         const done = agreements.every((agreement: Agreement) => agreement.signedAt && agreement.counterSignedAt)
         if (done) {
