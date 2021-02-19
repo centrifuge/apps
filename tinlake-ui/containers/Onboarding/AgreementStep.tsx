@@ -64,7 +64,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
       </StepHeader>
       {props.active && !isRestricted && props.agreementStatus === 'none' && props.agreement && !session && (
         <StepBody>
-          <Paragraph margin={{ bottom: 'medium' }} style={{ width: '70%' }}>
+          <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             To complete the next step of signing the {props.agreement.name} for {poolName}, you can sign in again with
             your Securitize iD.
           </Paragraph>
