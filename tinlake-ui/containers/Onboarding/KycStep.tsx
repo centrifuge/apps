@@ -23,7 +23,11 @@ const KycStep: React.FC<Props> = (props: Props) => {
       <StepHeader>
         {props.kycStatus === 'processing' && <StepIcon pending />}
         {props.kycStatus !== 'processing' && (
-          <StepIcon inactive={!props.active} checked={props.kycStatus === 'verified'} />
+          <StepIcon
+            inactive={!props.active}
+            checked={props.kycStatus === 'verified'}
+            failed={props.kycStatus === 'rejected'}
+          />
         )}
         <StepTitle inactive={!props.active}>
           {!props.kycStatus ||
@@ -31,6 +35,8 @@ const KycStep: React.FC<Props> = (props: Props) => {
           props.kycStatus === 'requires-signin' ||
           props.kycStatus === 'updates-required'
             ? 'Submit KYC information'
+            : props.kycStatus === 'rejected'
+            ? 'KYC rejected'
             : props.kycStatus === 'verified'
             ? props.accreditationStatus
               ? 'KYC status: verified'
@@ -38,21 +44,34 @@ const KycStep: React.FC<Props> = (props: Props) => {
             : 'KYC status: processing'}
         </StepTitle>
       </StepHeader>
-      {props.active && props.kycStatus && RequiresInputStates.includes(props.kycStatus) && (
+      {props.active &&
+        props.kycStatus &&
+        (props.kycStatus === 'none' || props.kycStatus === 'updates-required' || props.kycStatus === 'expired') && (
+          <StepBody>
+            <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
+              Submit your KYC information through Securitize for verification. This is a one time process to become an
+              eligible investor for all Tinlake pools.
+            </Paragraph>
+            <div>
+              <Button
+                primary
+                label={`Complete KYC on Securitize`}
+                href={`${config.onboardAPIHost}pools/${
+                  (props.activePool as Pool).addresses.ROOT_CONTRACT
+                }/info-redirect`}
+                fill={false}
+                target="_blank"
+              />
+            </div>
+            <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
+          </StepBody>
+        )}
+      {props.active && props.kycStatus && props.kycStatus === 'rejected' && (
         <StepBody>
-          <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
-            Submit your KYC information through Securitize for verification. This is a one time process to become an
-            eligible investor for all Tinlake pools.
+          <Paragraph style={{ width: '100%' }}>
+            Your KYC application was declined, please reach out to{' '}
+            <a href="mailto:support@centrifuge.io">support@centrifuge.io</a> for help.
           </Paragraph>
-          <div>
-            <Button
-              primary
-              label={`Complete KYC on Securitize`}
-              href={`${config.onboardAPIHost}pools/${(props.activePool as Pool).addresses.ROOT_CONTRACT}/info-redirect`}
-              fill={false}
-              target="_blank"
-            />
-          </div>
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>
       )}
@@ -90,6 +109,8 @@ const KycStep: React.FC<Props> = (props: Props) => {
         props.kycStatus !== 'none' &&
         props.kycStatus !== 'requires-signin' &&
         props.kycStatus !== 'updates-required' &&
+        props.kycStatus !== 'rejected' &&
+        props.kycStatus !== 'expired' &&
         props.accreditationStatus && <StepBody>&nbsp;</StepBody>}
       {!props.active && <StepBody inactive>&nbsp;</StepBody>}
     </Step>

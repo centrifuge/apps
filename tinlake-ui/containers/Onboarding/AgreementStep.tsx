@@ -182,10 +182,13 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Paragraph margin={{ top: 'medium' }}>
             You are located in or are a resident of a country where the cross-border marketing of securities or
             investments is restricted. However, you can still register. If you are still interested in more information
-            about [issuer_name] (Executive Summary, Subscription Documents, Contacts and other offering materials) tick
-            the box and continue. By doing so, you are confirming that you are requesting this information without
-            having been being solicited or approached, directly or indirectly by [issuer_name] or any affiliate of or
-            other person acting as agent or otherwise on behalf of [issuer_name] including but not limited to
+            about the issuer of {props.activePool.metadata.shortName || props.activePool.metadata.name} (Executive
+            Summary, Subscription Documents, Contacts and other offering materials), tick the box and continue. By doing
+            so, you are confirming that you are requesting this information without having been being solicited or
+            approached, directly or indirectly by the issuer of{' '}
+            {props.activePool.metadata.shortName || props.activePool.metadata.name} or any affiliate of or other person
+            acting as agent or otherwise on behalf of the issuer of{' '}
+            {props.activePool.metadata.shortName || props.activePool.metadata.name} including but not limited to
             Centrifuge.
           </Paragraph>
         </LegalCopy>

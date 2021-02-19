@@ -54,7 +54,13 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     if (!address) setActiveSteps(1)
     else if (!kycStatus) {
       setActiveSteps(2)
-    } else if (kycStatus === 'none' || kycStatus === 'requires-signin' || kycStatus === 'updates-required') {
+    } else if (
+      kycStatus === 'none' ||
+      kycStatus === 'requires-signin' ||
+      kycStatus === 'updates-required' ||
+      kycStatus === 'rejected' ||
+      kycStatus === 'expired'
+    ) {
       setActiveSteps(3)
     } else if (kycStatus === 'verified' && !accreditationStatus) {
       setActiveSteps(3)
@@ -79,56 +85,60 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     <Box margin={{ top: 'medium' }}>
       <PageTitle pool={props.activePool} page="Onboarding" parentPage="Investments" parentPageHref="/investments" />
       <Box direction="row" gap="medium">
-        <Box pad="medium" elevation="small" round="xsmall" background="white" basis="2/3">
-          {address && onboarding.state !== 'found' ? (
-            <Spinner height={'400px'} message={'Loading...'} />
-          ) : (
-            <>
-              {onboarding.data?.linkedAddresses && onboarding.data?.linkedAddresses.length > 0 && (
-                <ExplainerCard margin={{ bottom: 'medium' }}>
-                  This account is linked to {onboarding.data?.linkedAddresses.join(', ')}.
-                </ExplainerCard>
-              )}
-
-              <ConnectStep {...props} />
-              <LinkStep {...props} onboarding={onboarding} linked={!!kycStatus} active={activeSteps >= 2} />
-              <KycStep
-                {...props}
-                onboarding={onboarding}
-                kycStatus={kycStatus}
-                accreditationStatus={accreditationStatus}
-                active={activeSteps >= 3}
-              />
-              <AgreementStep
-                {...props}
-                onboarding={onboarding}
-                agreement={agreement}
-                agreementStatus={agreementStatus}
-                whitelistStatus={whitelistStatus}
-                active={activeSteps >= 4}
-              />
-              <Step>
-                <StepHeader>
-                  <StepIcon inactive={activeSteps < 5} />
-                  <StepTitle inactive={activeSteps < 5}>Invest in {props.activePool.metadata.name}</StepTitle>
-                </StepHeader>
-                {activeSteps >= 5 && (
-                  <StepBody>
-                    <Box pad={{ vertical: 'medium' }}>
-                      You're now ready to invest in {props.activePool.metadata.name}!
-                    </Box>
-                    <Box>
-                      <div>
-                        <PoolLink href={{ pathname: '/investments', query: { invest: 'senior' } }}>
-                          <Button primary label={'Invest'} fill={false} />
-                        </PoolLink>
-                      </div>
-                    </Box>
-                  </StepBody>
+        <Box basis="2/3">
+          <Box pad="medium" elevation="small" round="xsmall" background="white">
+            {address && onboarding.state !== 'found' ? (
+              <Spinner height={'400px'} message={'Loading...'} />
+            ) : (
+              <>
+                {onboarding.data?.linkedAddresses && onboarding.data?.linkedAddresses.length > 0 && (
+                  <ExplainerCard margin={{ bottom: 'medium' }}>
+                    This account is linked to {onboarding.data?.linkedAddresses.join(', ')}.
+                  </ExplainerCard>
                 )}
-              </Step>
-            </>
-          )}
+
+                <ConnectStep {...props} />
+                <LinkStep {...props} onboarding={onboarding} linked={!!kycStatus} active={activeSteps >= 2} />
+                <KycStep
+                  {...props}
+                  onboarding={onboarding}
+                  kycStatus={kycStatus}
+                  accreditationStatus={accreditationStatus}
+                  active={activeSteps >= 3}
+                />
+                <AgreementStep
+                  {...props}
+                  onboarding={onboarding}
+                  agreement={agreement}
+                  agreementStatus={agreementStatus}
+                  whitelistStatus={whitelistStatus}
+                  active={activeSteps >= 4}
+                />
+                <Step>
+                  <StepHeader>
+                    <StepIcon inactive={activeSteps < 5} />
+                    <StepTitle inactive={activeSteps < 5}>
+                      Ready to invest in {props.activePool.metadata.name}
+                    </StepTitle>
+                  </StepHeader>
+                  {activeSteps >= 5 && (
+                    <StepBody>
+                      <Box pad={{ vertical: 'medium' }}>
+                        You have completed onboarding and are now ready to invest in {props.activePool.metadata.name}!
+                      </Box>
+                      <Box>
+                        <div>
+                          <PoolLink href={{ pathname: '/investments', query: { invest: 'senior' } }}>
+                            <Button primary label={'Invest'} fill={false} />
+                          </PoolLink>
+                        </div>
+                      </Box>
+                    </StepBody>
+                  )}
+                </Step>
+              </>
+            )}
+          </Box>
         </Box>
         <Box basis="1/3">
           <Box background="#eee" pad="medium" round="xsmall" style={{ color: '#555555' }}>

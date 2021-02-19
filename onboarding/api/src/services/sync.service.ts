@@ -28,7 +28,6 @@ export class SyncService {
     this.logger.debug(`Syncing ${processingInvestors.length} investors`)
     processingInvestors.forEach(async (kyc: KycEntity) => {
       const investor = await this.securitizeService.getInvestor(kyc.userId, kyc.providerAccountId, kyc.digest)
-      console.log(investor.domainInvestorDetails.taxInfo)
 
       await this.userRepo.update(
         kyc.userId,

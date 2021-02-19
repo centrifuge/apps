@@ -71,8 +71,6 @@ export class PoolService {
     return url.href
   }
 
-  // TODO: this requires two requests per pool. At some point we should refactor the CLI to include
-  // these profile hashes directly in the all pools file, to reduce these requests to one per pool.
   private async getPoolProfile(poolId: string): Promise<Profile | undefined> {
     // Get pool metadata
     const poolData = await this.registry.find(poolId)
@@ -80,13 +78,11 @@ export class PoolService {
     const response = await fetch(url)
     const pool = await response.json()
 
-    if (!pool.profile) return undefined
-
     // Get pool profile
     const profileUrl = `https://raw.githubusercontent.com/centrifuge/tinlake-pools-mainnet/main/profiles/${poolId}.json`
     const profileResponse = await fetch(profileUrl)
+    if (!profileResponse.ok) return undefined
     const profile = await profileResponse.json()
-    console.log(profile)
     return profile
   }
 
