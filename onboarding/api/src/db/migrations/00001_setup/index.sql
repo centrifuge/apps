@@ -62,6 +62,7 @@ create unique index if not exists agreements_unique_per_tranche on agreements (u
 
 -- investments
 create table if not exists investments (
+    id uuid primary key,
     address_id uuid not null references addresses(id) on delete cascade on update cascade,
     pool_id character(42) not null,
     tranche character varying(10) not null default '''senior'''::character varying,
@@ -70,7 +71,7 @@ create table if not exists investments (
     updated_at timestamp with time zone not null default now()
 );
 
-create unique index if not exists investments_pkey on investments(address_id uuid_ops);
+create unique index if not exists investments_pkey on investments(id uuid_ops);
 create unique index if not exists investments_unique on investments (address_id, pool_id, tranche);
 
 -- user_pools

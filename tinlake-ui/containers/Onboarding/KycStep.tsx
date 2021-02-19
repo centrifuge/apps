@@ -15,8 +15,6 @@ interface Props {
   accreditationStatus: boolean
 }
 
-const RequiresInputStates = ['none', 'updates-required', 'rejected', 'expired']
-
 const KycStep: React.FC<Props> = (props: Props) => {
   return (
     <Step>
