@@ -48,6 +48,7 @@ export const executePools = async (pools: PoolMap, provider: ethers.providers.Pr
         .div(new BN('10').pow(new BN('14')))
 
       pushNotificationToSlack(
+        pool,
         `I just executed epoch ${id - 1} for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${
           pool.metadata.slug
         }|${name}>*.`,

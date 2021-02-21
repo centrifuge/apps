@@ -38,6 +38,7 @@ export const checkDueAssets = async (pools: PoolMap) => {
       console.log(`${name}: ${loans.length}`)
 
       pushNotificationToSlack(
+        pool,
         `There ${loans.length > 1 ? 'are' : 'is'} ${loans.length} ${
           loans.length > 1 ? 'assets' : 'asset'
         } due in the next few days for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${
