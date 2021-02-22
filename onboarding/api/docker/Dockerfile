@@ -7,7 +7,7 @@ WORKDIR /app
 COPY *.yml *.json yarn.lock ./
 COPY .yarn/plugins ./.yarn/plugins/
 COPY .yarn/releases ./.yarn/releases/
-COPY onboard-api ./onboard-api/
+COPY onboarding/api ./onboarding/api/
 
 RUN yarn set version berry
 RUN yarn install

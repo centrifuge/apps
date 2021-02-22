@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { uuidv4 } from 'src/utils/uuid'
 import { Tranche } from '../controllers/types'
 import { DatabaseService } from './db.service'
 
@@ -44,9 +45,9 @@ export class InvestmentRepo {
   ): Promise<InvestmentEntity | undefined> {
     const [newInvestment] = await this.db.sql`
       insert into investments (
-        address_id, pool_id, tranche, is_whitelisted, updated_at
+        id, address_id, pool_id, tranche, is_whitelisted, updated_at
       ) values (
-        ${[addressId, poolId, tranche, isWhitelisted, new Date()]}
+        ${[uuidv4(), addressId, poolId, tranche, isWhitelisted, new Date()]}
       )
       on conflict (address_id, pool_id, tranche) 
         do 
@@ -61,6 +62,7 @@ export class InvestmentRepo {
 }
 
 export interface InvestmentEntity {
+  id: string
   addressId: string
   poolId: string
   tranche: Tranche

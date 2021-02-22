@@ -8,11 +8,13 @@ export const StepHeader = styled.div`
   flex-direction: row;
 `
 
-export const StepIcon = styled.div<{ inactive?: boolean; checked?: boolean; pending?: boolean }>`
+export const StepIcon = styled.div<{ inactive?: boolean; checked?: boolean; pending?: boolean; failed?: boolean }>`
   width: 40px;
   padding-top: 2px;
   background: ${(props) =>
-    props.pending
+    props.failed
+      ? "url('/static/circle-failed.svg')"
+      : props.pending
       ? "url('/static/clock.svg')"
       : props.checked
       ? "url('/static/circle-checked.svg')"
@@ -69,4 +71,10 @@ export const LegalCopy = styled.div`
       margin-bottom: 10px;
     }
   }
+`
+
+export const HelpIcon = styled.img`
+  margin: 0 20px 0 0;
+  width: 24px;
+  height: 24px;
 `

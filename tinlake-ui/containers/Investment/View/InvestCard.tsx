@@ -20,7 +20,7 @@ interface Props extends TransactionProps {
   updateTrancheData: () => void
 }
 
-const MinInvestment = new BN(config.network === 'Mainnet' ? 10000 : 10).mul(new BN(10).pow(new BN(18))) // 10k DAI
+const MinInvestment = new BN(config.network === 'Mainnet' ? 5000 : 10).mul(new BN(10).pow(new BN(18))) // 5k DAI
 
 const InvestCard: React.FC<Props> = (props: Props) => {
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
@@ -86,7 +86,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
   const onChange = (newValue: string) => {
     setDaiValue(newValue)
     if (disableLimit === false && hasInvested === false && new BN(newValue).lt(MinInvestment)) {
-      setError(`Minimum investment: ${config.network === 'Mainnet' ? '10.000' : '10'} DAI`)
+      setError(`Minimum investment: ${config.network === 'Mainnet' ? '5.000' : '10'} DAI`)
     } else if (limit && new BN(newValue).gt(new BN(limit))) {
       setError('Amount larger than balance')
     } else if (new BN(newValue).isZero()) {

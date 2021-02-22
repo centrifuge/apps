@@ -15,6 +15,7 @@ export interface Config {
   poolRegistry: string
   memberAdminContractAddress: string
   signerPrivateKey: string
+  globalRestrictedCountries: string[]
   sessions: {
     privateKey: string
     privateKeyPassword: string
@@ -51,6 +52,7 @@ const config: Config = {
   poolRegistry: process.env.POOL_REGISTRY,
   memberAdminContractAddress: process.env.MEMBER_ADMIN_CONTRACT_ADDRESS,
   signerPrivateKey: process.env.SIGNER_PRIVATE_KEY,
+  globalRestrictedCountries: (process.env.GLOBAL_RESTRICTED_COUNTRIES || '').split(','),
   sessions: {
     privateKey: process.env.SESSIONS_PRIVATE_KEY,
     privateKeyPassword: process.env.SESSIONS_PRIVATE_KEY_PASSWORD,
