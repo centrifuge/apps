@@ -149,12 +149,20 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           {'addresses' in props.selectedPool &&
           config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
             <Box gap="small" justify="end" direction="row">
-              {/* TODO: if already whitelisted, then go to investments page */}
-              <PoolLink href={'/onboarding'}>
-                <Anchor>
-                  <Button label="Invest" primary />
-                </Anchor>
-              </PoolLink>
+              {(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
+                <PoolLink href={'/investments'}>
+                  <Anchor>
+                    <Button label="Invest" primary />
+                  </Anchor>
+                </PoolLink>
+              )}
+              {!(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
+                <PoolLink href={'/onboarding'}>
+                  <Anchor>
+                    <Button label="Invest" primary />
+                  </Anchor>
+                </PoolLink>
+              )}
             </Box>
           ) : (
             <InvestAction pool={props.selectedPool} />
