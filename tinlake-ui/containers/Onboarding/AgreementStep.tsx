@@ -59,7 +59,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
             ? `Sign the Subscription Agreement`
             : props.agreementStatus === 'countersigned' && props.whitelistStatus === true
             ? `${props.agreement?.name} signed`
-            : `${props.agreement?.name} awaiting Issuer signature`}
+            : `${props.agreement?.name} status: awaiting Issuer signature`}
         </StepTitle>
       </StepHeader>
       {props.active && !isRestricted && props.agreementStatus === 'none' && props.agreement && !session && (

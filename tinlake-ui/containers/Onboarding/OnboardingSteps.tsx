@@ -1,7 +1,7 @@
 import { Spinner } from '@centrifuge/axis-spinner'
 import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { Anchor, Box, Button } from 'grommet'
+import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -15,7 +15,7 @@ import ConnectStep from './ConnectStep'
 import InfoBox from './InfoBox'
 import KycStep from './KycStep'
 import LinkStep from './LinkStep'
-import { HelpIcon, Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
+import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
   activePool: Pool
