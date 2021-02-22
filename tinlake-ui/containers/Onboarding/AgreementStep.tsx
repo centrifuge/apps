@@ -66,7 +66,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             Start the final step of signing the {props.agreement.name} for {poolName} by signing in with your Securitize
-            iD.
+            iD. Note that the minimum investment amount for this pool is 5.000 DAI.
           </Paragraph>
           <div>
             <Button primary label={'Sign in with Securitize'} href={props.onboarding.data?.kyc?.url} fill={false} />

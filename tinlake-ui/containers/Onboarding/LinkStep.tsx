@@ -37,8 +37,8 @@ const LinkStep: React.FC<Props> = (props: Props) => {
       {props.active && !props.linked && (
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
-            Tinlake has integrated Securitize’s automated KYC process for investor onboarding. Please first link an
-            existing Securitize account to your connected Ethereum address or set-up a new Securitize account. This is a
+            Tinlake has integrated Securitize’s automated KYC process for investor onboarding. Please set-up a new
+            Securitize account or link an existing Securitize account to your connected Ethereum address. This is a
             one-time step.
           </Paragraph>
           <Box margin={{ top: 'medium', left: 'auto', right: 'auto', bottom: 'medium' }}>
