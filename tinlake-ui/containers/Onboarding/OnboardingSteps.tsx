@@ -53,7 +53,9 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     dispatch(loadOnboardingStatus(props.activePool))
 
     if (!address) setActiveSteps(1)
-    else if (!kycStatus) {
+    else if (whitelistStatus === true) {
+      setActiveSteps(5)
+    } else if (!kycStatus) {
       setActiveSteps(2)
     } else if (
       kycStatus === 'none' ||
