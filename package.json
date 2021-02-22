@@ -3,7 +3,8 @@
   "workspaces": [
     "tinlake-bot",
     "e2e-tests",
-    "onboard-api",
+    "onboarding/api",
+    "onboarding/ui",
     "tinlake-ui",
     "tinlake.js",
     "gateway",
@@ -29,8 +30,8 @@
     "format:run": "cd $INIT_CWD && prettier --write \"./**/*.{ts,tsx}\"",
     "format:check": "cd $INIT_CWD && prettier --check \"./**/*.{ts,tsx}\"",
     "publish:develop": "yarn workspaces foreach run prepublish && lerna publish --canary --preid develop.$(git rev-parse --short HEAD) --yes --force-publish",
-    "onboard-api": "yarn workspace @centrifuge/onboard-api start",
+    "onboarding-api": "yarn workspace @centrifuge/onboarding-api start",
     "tinlake-ui": "yarn workspace @centrifuge/tinlake-ui start",
-    "start": "concurrently --kill-others-on-fail \"yarn onboard-api\"  \"yarn tinlake-ui\" -p name -n \"onboard-api,tinlake-ui\""
+    "start": "concurrently --kill-others-on-fail \"yarn onboarding-api\"  \"yarn tinlake-ui\" -p name -n \"onboarding-api,tinlake-ui\""
   }
 }

@@ -1,7 +1,7 @@
 import { Spinner } from '@centrifuge/axis-spinner'
-import { AgreementsStatus } from '@centrifuge/onboard-api/src/controllers/types'
+import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { Box, Button, Heading } from 'grommet'
+import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -12,6 +12,7 @@ import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
 import { ExplainerCard } from '../Investment/View/styles'
 import AgreementStep from './AgreementStep'
 import ConnectStep from './ConnectStep'
+import InfoBox from './InfoBox'
 import KycStep from './KycStep'
 import LinkStep from './LinkStep'
 import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
@@ -54,7 +55,13 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     if (!address) setActiveSteps(1)
     else if (!kycStatus) {
       setActiveSteps(2)
-    } else if (kycStatus === 'none' || kycStatus === 'requires-signin' || kycStatus === 'updates-required') {
+    } else if (
+      kycStatus === 'none' ||
+      kycStatus === 'requires-signin' ||
+      kycStatus === 'updates-required' ||
+      kycStatus === 'rejected' ||
+      kycStatus === 'expired'
+    ) {
       setActiveSteps(3)
     } else if (kycStatus === 'verified' && !accreditationStatus) {
       setActiveSteps(3)
@@ -78,60 +85,65 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
   return (
     <Box margin={{ top: 'medium' }}>
       <PageTitle pool={props.activePool} page="Onboarding" parentPage="Investments" parentPageHref="/investments" />
-      <Heading level="5" margin={{ bottom: 'medium' }} style={{ maxWidth: '100%' }}>
-        To invest in this pool, start your onboarding process now.
-      </Heading>
+      <Box direction="row" gap="medium">
+        <Box basis="2/3">
+          <Box pad="medium" elevation="small" round="xsmall" background="white">
+            {address && onboarding.state !== 'found' ? (
+              <Spinner height={'400px'} message={'Loading...'} />
+            ) : (
+              <>
+                {onboarding.data?.linkedAddresses && onboarding.data?.linkedAddresses.length > 0 && (
+                  <ExplainerCard margin={{ bottom: 'medium' }}>
+                    This account is linked to {onboarding.data?.linkedAddresses.join(', ')}.
+                  </ExplainerCard>
+                )}
 
-      <Box pad="medium" elevation="small" round="xsmall" background="white">
-        {address && onboarding.state !== 'found' ? (
-          <Spinner height={'400px'} message={'Loading...'} />
-        ) : (
-          <>
-            {onboarding.data?.linkedAddresses && onboarding.data?.linkedAddresses.length > 0 && (
-              <ExplainerCard margin={{ bottom: 'medium' }}>
-                This account is linked to {onboarding.data?.linkedAddresses.join(', ')}.
-              </ExplainerCard>
+                <ConnectStep {...props} />
+                <LinkStep {...props} onboarding={onboarding} linked={!!kycStatus} active={activeSteps >= 2} />
+                <KycStep
+                  {...props}
+                  onboarding={onboarding}
+                  kycStatus={kycStatus}
+                  accreditationStatus={accreditationStatus}
+                  active={activeSteps >= 3}
+                />
+                <AgreementStep
+                  {...props}
+                  onboarding={onboarding}
+                  agreement={agreement}
+                  agreementStatus={agreementStatus}
+                  whitelistStatus={whitelistStatus}
+                  active={activeSteps >= 4}
+                />
+                <Step>
+                  <StepHeader>
+                    <StepIcon inactive={activeSteps < 5} />
+                    <StepTitle inactive={activeSteps < 5}>
+                      Ready to invest in {props.activePool.metadata.name}
+                    </StepTitle>
+                  </StepHeader>
+                  {activeSteps >= 5 && (
+                    <StepBody>
+                      <Box pad={{ vertical: 'medium' }}>
+                        You have completed onboarding and are now ready to invest in {props.activePool.metadata.name}!
+                      </Box>
+                      <Box>
+                        <div>
+                          <PoolLink href={{ pathname: '/investments', query: { invest: 'senior' } }}>
+                            <Button primary label={'Invest'} fill={false} />
+                          </PoolLink>
+                        </div>
+                      </Box>
+                    </StepBody>
+                  )}
+                </Step>
+              </>
             )}
-
-            <ConnectStep {...props} />
-            <LinkStep {...props} onboarding={onboarding} linked={!!kycStatus} active={activeSteps >= 2} />
-            <KycStep
-              {...props}
-              onboarding={onboarding}
-              kycStatus={kycStatus}
-              accreditationStatus={accreditationStatus}
-              active={activeSteps >= 3}
-            />
-            <AgreementStep
-              {...props}
-              onboarding={onboarding}
-              agreement={agreement}
-              agreementStatus={agreementStatus}
-              whitelistStatus={whitelistStatus}
-              active={activeSteps >= 4}
-            />
-            <Step>
-              <StepHeader>
-                <StepIcon inactive={activeSteps < 5} />
-                <StepTitle inactive={activeSteps < 5}>Invest in {props.activePool.metadata.name}</StepTitle>
-              </StepHeader>
-              {activeSteps >= 5 && (
-                <StepBody>
-                  <Box pad={{ vertical: 'medium' }}>
-                    You're now ready to invest in {props.activePool.metadata.name}!
-                  </Box>
-                  <Box>
-                    <div>
-                      <PoolLink href={{ pathname: '/investments', query: { invest: 'senior' } }}>
-                        <Button primary label={'Invest'} fill={false} />
-                      </PoolLink>
-                    </div>
-                  </Box>
-                </StepBody>
-              )}
-            </Step>
-          </>
-        )}
+          </Box>
+        </Box>
+        <Box basis="1/3">
+          <InfoBox activePool={props.activePool} />
+        </Box>
       </Box>
 
       {address && kycStatus && session && config.isDemo && (

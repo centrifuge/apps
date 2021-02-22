@@ -20,7 +20,7 @@ interface Props extends TransactionProps {
   updateTrancheData: () => void
 }
 
-const MinInvestment = new BN(config.network === 'Mainnet' ? 10000 : 10).mul(new BN(10).pow(new BN(18))) // 10k DAI
+const MinInvestment = new BN(config.network === 'Mainnet' ? 5000 : 10).mul(new BN(10).pow(new BN(18))) // 5k DAI
 
 const InvestCard: React.FC<Props> = (props: Props) => {
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'

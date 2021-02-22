@@ -7,13 +7,13 @@ WORKDIR /app
 COPY *.yml *.json yarn.lock ./
 COPY .yarn/plugins ./.yarn/plugins/
 COPY .yarn/releases ./.yarn/releases/
-COPY onboard-api ./onboard-api/
+COPY onboarding/api ./onboarding/api/
 
 RUN yarn set version berry
 RUN yarn install
 
-RUN yarn workspace @centrifuge/onboard-api build
+RUN yarn workspace @centrifuge/onboarding-api build
 
 EXPOSE 3100
 
-CMD ["yarn", "workspace", "@centrifuge/onboard-api", "start:prod"]
+CMD ["yarn", "workspace", "@centrifuge/onboarding-api", "start:prod"]
