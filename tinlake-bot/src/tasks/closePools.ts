@@ -59,7 +59,6 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
 
         const solveTx = await tinlake.solveEpoch()
         console.log(`Closing & solving ${name} with tx: ${solveTx.hash}`)
-        await tinlake.getTransactionReceipt(solveTx)
 
         pushNotificationToSlack(
           pool,

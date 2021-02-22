@@ -31,7 +31,9 @@ export const pushNotificationToSlack = async (
       : {}),
   }
 
-  console.log(`Posting to ${pool.profile?.bot?.channelId || config.defaultSlackChannelId}`)
+  console.log(
+    `Posting to ${pool.profile?.bot?.channelId ? `channel ${pool.profile?.bot?.channelId}` : 'the default channel'}`
+  )
   const response = await fetch('https://slack.com/api/chat.postMessage', {
     method: 'POST',
     headers: {

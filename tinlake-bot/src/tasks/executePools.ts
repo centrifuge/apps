@@ -26,7 +26,6 @@ export const executePools = async (pools: PoolMap, provider: ethers.providers.Pr
 
       const executeTx = await tinlake.executeEpoch()
       console.log(`Executing ${name} with tx: ${executeTx.hash}`)
-      await tinlake.getTransactionReceipt(executeTx)
 
       // TODO: calculate actual fulfilled orders rather than requested orders (instead of running the solver)
 

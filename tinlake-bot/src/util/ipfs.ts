@@ -15,6 +15,7 @@ export const loadFromIPFS = async (rpcProvider: ethers.providers.JsonRpcProvider
 
       const profile = await getPoolProfile(pool.addresses.ROOT_CONTRACT)
       if (profile) poolsWithProfiles[pool.addresses.ROOT_CONTRACT] = { ...pool, profile }
+      else poolsWithProfiles[pool.addresses.ROOT_CONTRACT] = pool
     })
   )
 
