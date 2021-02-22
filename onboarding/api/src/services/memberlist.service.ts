@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { Tranche } from 'src/controllers/types'
+import config from '../config'
+import { Tranche } from '../controllers/types'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { KycRepo } from '../repos/kyc.repo'
+import { UserRepo } from '../repos/user.repo'
 import { PoolService } from './pool.service'
 
 @Injectable()
@@ -9,12 +11,18 @@ export class MemberlistService {
   private readonly logger = new Logger(MemberlistService.name)
 
   constructor(
+    private readonly userRepo: UserRepo,
     private readonly kycRepo: KycRepo,
     private readonly agreementRepo: AgreementRepo,
     private readonly poolService: PoolService
   ) {}
 
   async update(userId, poolId?: string, tranche?: Tranche) {
+    const user = await this.userRepo.find(userId)
+    if (config.globalRestrictedCountries.includes(user.countryCode)) {
+      console.error(`User ${userId} is based in ${user.countryCode}, which is restricted globally.`)
+      return
+    }
     const kyc = await this.kycRepo.find(userId)
     if (kyc.status !== 'verified' || (kyc.usaTaxResident && !kyc.accredited)) return
 
@@ -32,6 +40,12 @@ export class MemberlistService {
       const poolIds = poolId === undefined ? await this.poolService.getIds() : [poolId]
 
       poolIds.forEach(async (poolId: string) => {
+        const pool = await this.poolService.get(poolId)
+        if (!pool || pool?.profile.issuer.restrictedCountryCodes?.includes(user.countryCode)) {
+          console.error(`User ${userId} is based in ${user.countryCode}, which is restricted for pool ${poolId}.`)
+          return
+        }
+
         const agreements = await this.agreementRepo.getByUserPoolTranche(userId, poolId, t)
         const done = agreements.every((agreement: Agreement) => agreement.signedAt && agreement.counterSignedAt)
         if (done) {

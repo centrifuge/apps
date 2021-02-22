@@ -1,4 +1,5 @@
 import { BadRequestException, Controller, Delete, Get, Param, Query, UnauthorizedException } from '@nestjs/common'
+import config from 'src/config'
 import { AddressEntity, AddressRepo } from '../repos/address.repo'
 import { AgreementRepo } from '../repos/agreement.repo'
 import { InvestmentRepo } from '../repos/investment.repo'
@@ -70,9 +71,7 @@ export class AddressController {
       // Filter profile agreements by country
       const profileAgreements = pool.profile?.agreements
         .filter((pa: ProfileAgreement) => {
-          return (
-            (user.countryCode === 'US' && pa.country === 'non-us') || (user.countryCode !== 'US' && pa.country === 'us')
-          )
+          return kyc.usaTaxResident ? pa.country === 'us' : pa.country === 'non-us'
         })
         .map((pa: ProfileAgreement) => {
           return {
@@ -100,7 +99,20 @@ export class AddressController {
           return a !== address.address
         })
 
+      // Check country restrictions
+      const restrictedGlobal = config.globalRestrictedCountries.includes(user.countryCode)
+      const restrictedPool = pool.profile.issuer.restrictedCountryCodes?.includes(user.countryCode)
+      const showNonSolicitationNotice =
+        pool.profile.issuer.nonSolicitationNotice === 'non-us'
+          ? !kyc.usaTaxResident
+          : pool.profile.issuer.nonSolicitationNotice === 'none'
+          ? false
+          : true
+
       return {
+        restrictedGlobal,
+        restrictedPool,
+        showNonSolicitationNotice,
         kyc: {
           status,
           isWhitelisted,
