@@ -1,8 +1,8 @@
 import { BadRequestException, Controller, Get, Param, Res } from '@nestjs/common'
-import { DocusignAuthService } from './services/docusign-auth.service'
-const countries = require('i18n-iso-countries')
 import config from './config'
+import { DocusignAuthService } from './services/docusign-auth.service'
 import { PoolService } from './services/pool.service'
+const countries = require('i18n-iso-countries')
 
 @Controller()
 export class AppController {

@@ -1,10 +1,9 @@
-import { Anchor, Box, Button } from 'grommet'
-import * as React from 'react'
-import { Pool } from '../../config'
-import { HelpIcon } from './styles'
-import config from '../../config'
 import { Modal } from '@centrifuge/axis-modal'
+import { Anchor, Box, Button } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
+import * as React from 'react'
+import config, { Pool } from '../../config'
+import { HelpIcon } from './styles'
 
 interface Props {
   activePool: Pool
@@ -55,9 +54,8 @@ const InfoBox: React.FC<Props> = (props: Props) => {
       <Anchor onClick={() => openModal()}>See list of excluded countries</Anchor>
       <Modal
         opened={modalIsOpen}
-        title={`List of excluded countries for ${
-          props.activePool.metadata.shortName || props.activePool.metadata.name
-        }.`}
+        title={`List of excluded countries for ${props.activePool.metadata.shortName ||
+          props.activePool.metadata.name}.`}
         headingProps={{ style: { maxWidth: '100%', display: 'flex' } }}
         titleIcon={<StatusInfoIcon />}
         onClose={closeModal}

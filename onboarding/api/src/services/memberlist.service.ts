@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common'
+import config from '../config'
 import { Tranche } from '../controllers/types'
-import { UserRepo } from '../repos/user.repo'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { KycRepo } from '../repos/kyc.repo'
+import { UserRepo } from '../repos/user.repo'
 import { PoolService } from './pool.service'
-import config from '../config'
 
 @Injectable()
 export class MemberlistService {
