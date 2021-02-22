@@ -28,7 +28,6 @@ export class SyncService {
     this.logger.debug(`Syncing ${processingInvestors.length} investors`)
     processingInvestors.forEach(async (kyc: KycEntity) => {
       const investor = await this.securitizeService.getInvestor(kyc.userId, kyc.providerAccountId, kyc.digest)
-      console.log(investor.domainInvestorDetails.taxInfo)
 
       await this.userRepo.update(
         kyc.userId,
@@ -60,7 +59,8 @@ export class SyncService {
     })
   }
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  // This is just a backup option, it should already be covered by the Docusign Connect integration
+  @Cron(CronExpression.EVERY_HOUR)
   async syncAgreementStatus() {
     const agreements = await this.agreementRepo.getAwaitingCounterSignature()
     if (agreements.length === 0) return

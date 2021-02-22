@@ -2471,6 +2471,7 @@ __metadata:
     concurrently: ^5.3.0
     cookie-parser: ^1.4.5
     ethers: 5.0.23
+    i18n-iso-countries: ^6.5.0
     postgres: 2.0.0-beta.2
     postgres-shift: ^0.0.4
     prettier-plugin-organize-imports: ^1.1.1
@@ -12970,6 +12971,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"diacritics@npm:1.3.0":
+  version: 1.3.0
+  resolution: "diacritics@npm:1.3.0"
+  checksum: 89191c856f1a95966992fc7158bc121c06f9b19ef2d20b7beb60818e6cb10058d61d11a547c70ee421664b023d1c86507d8f09f51f393469bdcec46338d05c0c
+  languageName: node
+  linkType: hard
+
 "dicer@npm:0.2.5":
   version: 0.2.5
   resolution: "dicer@npm:0.2.5"
@@ -17431,6 +17439,15 @@ fsevents@~2.1.2:
     husky-run: bin/run.js
     husky-upgrade: lib/upgrader/bin.js
   checksum: 1ac4fb51ffd93547ec861f185d86bdbfbac8ee24ce60417d531dbe5222e33fc754436e87e4e2b37a44dcefdc78c151f9ba4ac57c05773f5c36377cc4eb73732b
+  languageName: node
+  linkType: hard
+
+"i18n-iso-countries@npm:^6.5.0":
+  version: 6.5.0
+  resolution: "i18n-iso-countries@npm:6.5.0"
+  dependencies:
+    diacritics: 1.3.0
+  checksum: 8822babb6f186c6bbf771868c6f288a363be417730b4b5e1956a6f9c7a32a6c9b0c1353f72f9d2e33236380ea7faebf92d16b4eac26619d586caee224420edf6
   languageName: node
   linkType: hard
 

@@ -71,8 +71,6 @@ export class PoolService {
     return url.href
   }
 
-  // TODO: this requires two requests per pool. At some point we should refactor the CLI to include
-  // these profile hashes directly in the all pools file, to reduce these requests to one per pool.
   private async getPoolProfile(poolId: string): Promise<Profile | undefined> {
     // Get pool metadata
     const poolData = await this.registry.find(poolId)
@@ -80,11 +78,10 @@ export class PoolService {
     const response = await fetch(url)
     const pool = await response.json()
 
-    if (!pool.profile) return undefined
-
     // Get pool profile
-    const profileUrl = new URL(pool.profile, config.ipfsGateway)
+    const profileUrl = `https://raw.githubusercontent.com/centrifuge/tinlake-pools-mainnet/main/profiles/${poolId}.json`
     const profileResponse = await fetch(profileUrl)
+    if (!profileResponse.ok) return undefined
     const profile = await profileResponse.json()
     return profile
   }
@@ -104,7 +101,7 @@ export class PoolService {
     const addresses = await this.addressRepo.getByUser(userId)
     addresses.forEach(async (address: AddressEntity) => {
       try {
-        const tx = await memberAdmin.updateMember(memberlistAddress, address.address, validUntil)
+        const tx = await memberAdmin.updateMember(memberlistAddress, address.address, validUntil, { gasLimit: 1000000 })
         this.logger.log(`Submitted tx to add ${address.address} to ${memberlistAddress}: ${tx.hash}`)
         await this.provider.waitForTransaction(tx.hash)
 
@@ -145,9 +142,12 @@ export interface ProfileAgreement {
 }
 
 export interface Profile {
-  agreements: ProfileAgreement[] // TODO: add typing
+  agreements: ProfileAgreement[]
   issuer: {
     name: string
     email: string
+    restrictedCountryCodes?: string[]
+    minInvestmentCurrency?: string
+    nonSolicitationNotice?: 'none' | 'non-us' | 'all'
   }
 }
