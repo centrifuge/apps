@@ -1,9 +1,12 @@
-import { Controller, Get, Res } from '@nestjs/common'
+import { BadRequestException, Controller, Get, Param, Res } from '@nestjs/common'
 import { DocusignAuthService } from './services/docusign-auth.service'
+const countries = require('i18n-iso-countries')
+import config from './config'
+import { PoolService } from './services/pool.service'
 
 @Controller()
 export class AppController {
-  constructor(private readonly docusignAuthService: DocusignAuthService) {}
+  constructor(private readonly docusignAuthService: DocusignAuthService, private readonly poolService: PoolService) {}
 
   @Get()
   getRoot(): string {
@@ -21,4 +24,27 @@ export class AppController {
     await this.docusignAuthService.getAccessToken()
     return 'Callback received'
   }
+
+  @Get('pools/:poolId/restricted-countries')
+  async getRestrictedCountries(@Param() params): Promise<RestrictedCountry[]> {
+    const codeToName = countries.getNames('en', { select: 'official' })
+
+    const global = config.globalRestrictedCountries.map((code: string) => {
+      return { code, name: codeToName[code] }
+    })
+
+    const pool = await this.poolService.get(params.poolId)
+    if (!pool) throw new BadRequestException('Invalid pool')
+
+    const poolLevel = pool.profile.issuer.restrictedCountryCodes.map((code: string) => {
+      return { code, name: codeToName[code] }
+    })
+
+    return [...global, ...poolLevel]
+  }
+}
+
+export interface RestrictedCountry {
+  code: string
+  name: string
 }
