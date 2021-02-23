@@ -3,6 +3,10 @@ FROM ubuntu
 RUN apt-get update && \
     apt-get -y install curl build-essential automake autoconf git jq
 
+RUN curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh 
+RUN bash nodesource_setup.sh
+RUN apt-get install nodejs
+
 # add user
 RUN useradd -d /home/app -m -G sudo app
 RUN mkdir -m 0755 /app
@@ -28,11 +32,21 @@ RUN git clone --branch config-from-env https://github.com/ana0/tinlake-deploy.gi
 RUN git clone https://github.com/centrifuge/tinlake-proxy
 RUN git clone https://github.com/centrifuge/tinlake-pools-cli
 RUN git clone https://github.com/centrifuge/tinlake-claim-rad
+RUN git clone https://github.com/centrifuge/privacy-enabled-erc721.git
+RUN git clone https://github.com/centrifuge/centrifuge-ethereum-contracts.git
 
 # add the keys that were pre-funded in parity config
 RUN mkdir keystore
 COPY dev-keyfile.json ./keystore
 COPY dev-password .
+
+# npm install for the contracts using node
+WORKDIR /app/centrifuge-ethereum-contracts
+RUN npm install
+COPY truffle.js .
+COPY deployIdentity.js .
+
+WORKDIR /app
 
 COPY deploy.sh .
 
