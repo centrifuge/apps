@@ -9,3 +9,6 @@ base_path = "./"
 interface = "all"
 # Allows Cross-Origin Requests from domain 'all'.
 cors = ["all"]
+
+[footprint]
+tracing = "on"
