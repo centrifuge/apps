@@ -68,6 +68,7 @@ services:
       - ETH_PASSWORD=/app/dev-password
       - ETH_FROM=${ETH_FROM}
       - ETH_GAS=${ETH_GAS}
+      - ETH_PRIVATE_KEY=${ETH_ADMIN_PRIVATE_KEY}
     command: ./deploy.sh
 
   subgraph:
