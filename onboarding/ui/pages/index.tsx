@@ -101,6 +101,13 @@ const Card = styled(Box)`
   display: flex;
   flex-direction: row;
   text-align: left;
+  transition: all 100ms linear 0s;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 2px 6px;
+    transform: scale(1.01);
+  }
 `
 
 const InvestorName = styled.div``
