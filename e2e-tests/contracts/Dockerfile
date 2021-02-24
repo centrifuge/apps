@@ -50,4 +50,4 @@ WORKDIR /app
 
 COPY deploy.sh .
 
-
+RUN ls -l
