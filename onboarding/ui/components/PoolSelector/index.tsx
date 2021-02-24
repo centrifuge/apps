@@ -22,6 +22,7 @@ interface Props {
   title: string
 }
 
+// TODO: this should be an axis component
 export const PoolSelector: React.FC<Props> = (props: Props) => {
   const router = useRouter()
 
@@ -44,12 +45,8 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
     setSearchQuery(event.currentTarget.value)
   }
 
-  const getLivePools = () => {
-    return props.pools.filter((p) => !p.isArchived).sort((a, b) => b.order - a.order) || []
-  }
-
   const filterPools = () => {
-    const livePools = getLivePools()
+    const livePools = props.pools
     if (!livePools) {
       return []
     }
@@ -101,7 +98,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
         >
           <Wrapper>
             <PoolList>
-              {getLivePools().length >= 6 && (
+              {props.pools.length >= 6 && (
                 <SearchField>
                   <TextInput
                     placeholder="Search"
@@ -115,8 +112,13 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
               )}
               {filterPools().map((pool: PoolData) => (
                 <PoolLink key={pool.id} active={pool.name === props.title} onClick={() => navigateToPool(pool)}>
-                  <Icon src={pool.icon || 'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'} />
-                  {pool.name}
+                  <Icon
+                    src={
+                      pool.metadata.media.icon ||
+                      'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'
+                    }
+                  />
+                  {pool.metadata.name}
                 </PoolLink>
               ))}
             </PoolList>

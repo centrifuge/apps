@@ -29,6 +29,11 @@ export class SyncService {
     processingInvestors.forEach(async (kyc: KycEntity) => {
       const investor = await this.securitizeService.getInvestor(kyc.userId, kyc.providerAccountId, kyc.digest)
 
+      if (!investor) {
+        this.logger.warn(`Failed to retrieve investor ${kyc.userId}`)
+        return
+      }
+
       await this.userRepo.update(
         kyc.userId,
         investor.email,

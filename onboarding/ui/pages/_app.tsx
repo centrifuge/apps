@@ -3,8 +3,11 @@ import App from 'next/app'
 import Head from 'next/head'
 import React from 'react'
 import { StyledApp } from '../components/StyledApp'
+const countries = require('i18n-iso-countries')
 
 require('regenerator-runtime/runtime')
+
+countries.registerLocale(require('i18n-iso-countries/langs/en.json'))
 
 class MyApp extends App {
   static async getInitialProps({ Component, ctx }: { Component: any; ctx: any }) {

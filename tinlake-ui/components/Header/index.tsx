@@ -13,6 +13,7 @@ import { PoolSelector } from '../../components/PoolSelector'
 import config, { IpfsPools } from '../../config'
 import { AuthState, clear, ensureAuthed } from '../../ducks/auth'
 import { OnboardingState } from '../../ducks/onboarding'
+import { loadPools, PoolsState } from '../../ducks/pools'
 import { loadPortfolio, PortfolioState } from '../../ducks/portfolio'
 import { selectWalletTransactions, TransactionState } from '../../ducks/transactions'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
@@ -59,6 +60,12 @@ const Header: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     if (address) dispatch(loadPortfolio(address))
   }, [address])
+
+  React.useEffect(() => {
+    dispatch(loadPools(props.ipfsPools))
+  }, [router.query])
+
+  const pools = useSelector<any, PoolsState>((state: any) => state.pools)
 
   const connectAccount = async () => {
     try {
@@ -135,7 +142,7 @@ const Header: React.FC<Props> = (props: Props) => {
               </a>
             </Link>
           </div>
-          {poolTitle && <PoolSelector title={poolTitle} ipfsPools={props.ipfsPools} />}
+          {poolTitle && pools.data?.pools && <PoolSelector title={poolTitle} pools={pools.data?.pools} />}
           <Box flex="grow" basis="auto" style={{ height: 32, padding: '0 16px 0 32px' }}>
             {filtMenuItems.length > 0 && (
               <NavBar

@@ -8,13 +8,14 @@
     "serve": "next start"
   },
   "dependencies": {
-    "@centrifuge/axis-nav-bar": "^0.3.2-develop.47",
-    "@centrifuge/axis-theme": "^0.3.1",
-    "@centrifuge/axis-web3-wallet": "^0.0.2-develop.68",
+    "@centrifuge/axis-modal": "0.1.1-develop.57",
+    "@centrifuge/axis-nav-bar": "0.4.2-develop.109",
+    "@centrifuge/axis-theme": "0.4.2-develop.145",
+    "@centrifuge/axis-web3-wallet": "0.0.3-develop.a14b10c.151",
     "@centrifuge/onboarding-api": "workspace:*",
-    "country-code-to-flag-emoji": "^1.1.0",
     "grommet": "^2.16.3",
     "grommet-icons": "^4.5.0",
+    "i18n-iso-countries": "^6.5.0",
     "next": "^10.0.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",

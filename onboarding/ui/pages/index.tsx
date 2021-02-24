@@ -1,15 +1,15 @@
 import { AgreementMap } from '@centrifuge/onboarding-api/src/controllers/user.controller'
-import { Box } from 'grommet'
 import * as React from 'react'
 import styled from 'styled-components'
 import Header from '../components/Header'
-// import countryCodeToFlagEmoji from 'country-code-to-flag-emoji'
+import UserBoard from '../containers/UserBoard'
 
 interface Props {
   onboardingApiHost: string
 }
 
 const App: React.FC<Props> = (props: Props) => {
+  // TODO: move this into a duck
   const [agreementMap, setAgreementMap] = React.useState({} as AgreementMap)
 
   React.useEffect(() => {
@@ -25,43 +25,17 @@ const App: React.FC<Props> = (props: Props) => {
 
   return (
     <Wrapper>
-      <Header />
-
-      <Content>
-        <Columns>
-          {Object.keys(agreementMap).map((col: string) => (
-            <Column key={col}>
-              <ColumnTitle>{col}</ColumnTitle>
-              <Cards>
-                {agreementMap[col].map(({ user }) => (
-                  <Card
-                    key={user.id}
-                    pad="medium"
-                    elevation="small"
-                    round="xsmall"
-                    margin={{ bottom: 'medium' }}
-                    background="white"
-                  >
-                    <InvestorName>{user.entityName || user.fullName}</InvestorName>
-                    <Flag>
-                      <img src={`https://www.countryflags.io/${user.countryCode}/flat/24.png`} />
-                    </Flag>
-                  </Card>
-                ))}
-              </Cards>
-            </Column>
-          ))}
-        </Columns>
-      </Content>
+      <Header onboardingApiHost={props.onboardingApiHost} />
+      <UserBoard users={agreementMap} onboardingApiHost={props.onboardingApiHost} />
     </Wrapper>
   )
 }
 
-export async function getStaticProps(context: any) {
+export async function getStaticProps() {
   return {
     props: {
       onboardingApiHost: process.env.ONBOARDING_API_HOST,
-    }, // will be passed to the page component as props
+    },
   }
 }
 
@@ -70,50 +44,6 @@ const Wrapper = styled.div`
   height: 100%;
   width: 100%;
   margin: 0;
-`
-
-const Content = styled.div`
-  margin: 40px;
-  text-align: center;
-`
-
-const Columns = styled.div`
-  display: inline-flex;
-  margin: 0 auto;
-`
-
-const Column = styled.div`
-  width: 260px;
-  margin: 0 20px 0 0;
-`
-
-const ColumnTitle = styled.div`
-  color: #777777;
-  margin: 0 0 20px 20px;
-  font-weight: bold;
-  font-size: 14px;
-  text-align: left;
-`
-
-const Cards = styled.div``
-
-const Card = styled(Box)`
-  display: flex;
-  flex-direction: row;
-  text-align: left;
-  transition: all 100ms linear 0s;
-  cursor: pointer;
-
-  &:hover {
-    box-shadow: rgba(0, 0, 0, 0.24) 0px 2px 6px;
-    transform: scale(1.01);
-  }
-`
-
-const InvestorName = styled.div``
-
-const Flag = styled.div`
-  margin-left: 10px;
 `
 
 export default App

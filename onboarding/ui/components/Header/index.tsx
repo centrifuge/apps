@@ -1,9 +1,25 @@
+import * as React from 'react'
 import { Box, Image } from 'grommet'
 import Link from 'next/link'
+import { PoolSelector } from '../PoolSelector'
 
-interface Props {}
+interface Props {
+  onboardingApiHost: string
+}
 
-const Header: React.FC<Props> = () => {
+const Header: React.FC<Props> = (props: Props) => {
+  const [pools, setPools] = React.useState([])
+
+  React.useEffect(() => {
+    async function getPools() {
+      const res = await fetch(`${props.onboardingApiHost}pools`)
+      const body = await res.json()
+      setPools(body)
+    }
+
+    getPools()
+  }, [])
+
   return (
     <Box
       style={{ position: 'sticky', top: 0, height: '56px', zIndex: 2, boxShadow: '0 0 4px 0px #00000075' }}
@@ -34,6 +50,7 @@ const Header: React.FC<Props> = () => {
               </a>
             </Link>
           </div>
+          <PoolSelector title={'Fortunafi Series 1'} pools={pools} />
         </Box>
       </Box>
     </Box>

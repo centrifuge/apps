@@ -37,6 +37,10 @@ export class PoolService {
     return Object.keys(this.pools)
   }
 
+  getAll() {
+    return Object.values(this.pools)
+  }
+
   private async loadFromIPFS() {
     const prevPools = Object.values(this.pools)
 

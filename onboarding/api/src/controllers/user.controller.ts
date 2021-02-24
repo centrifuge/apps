@@ -1,17 +1,24 @@
 import { Controller, Get, Param } from '@nestjs/common'
+import { PoolService } from 'src/services/pool.service'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
 import { UserRepo, UserWithKyc } from '../repos/user.repo'
 
 @Controller()
 export class UserController {
-  constructor(private readonly agreementRepo: AgreementRepo, private readonly userRepo: UserRepo) {}
+  constructor(
+    private readonly agreementRepo: AgreementRepo,
+    private readonly userRepo: UserRepo,
+    private readonly poolService: PoolService
+  ) {}
 
   // TODO: add authentication to this endpoint
   @Get('users/:poolId')
   async getUsers(@Param() params) {
-    return {}
+    // return {}
 
     const usersWithKyc: UserWithKyc[] = await this.userRepo.getWithKycAndAgreement(params.poolId)
+
+    // TODO: filter by pool
     const agreements = await this.agreementRepo.getByUserIds(usersWithKyc.map((user) => user.id))
     const agreementsByUserId: AgreementList = agreements.reduce((prev: AgreementList, a: Agreement) => {
       if (prev[a.userId]) return { ...prev, [a.userId]: [...prev[a.userId], a] }
@@ -19,7 +26,13 @@ export class UserController {
     }, {})
 
     // TODO: these states need to be fixed
-    let groups = { Interested: [], 'Soft-circled': [], 'Awaiting counter-signature': [], Whitelisted: [] }
+    let groups = {
+      Interested: [],
+      'Soft-circled': [],
+      'Awaiting counter-signature': [],
+      Whitelisted: [],
+      Invested: [],
+    }
     usersWithKyc.forEach((user: UserWithKyc) => {
       const agreements = user.id in agreementsByUserId ? agreementsByUserId[user.id] : []
       if (agreements.length === 0 && user.status !== 'none') groups['Soft-circled'].push({ user, agreements })
@@ -31,6 +44,12 @@ export class UserController {
     })
 
     return groups
+  }
+
+  // TODO: move to a more sensible controller
+  @Get('pools')
+  async getPools() {
+    return this.poolService.getAll()
   }
 }
 
