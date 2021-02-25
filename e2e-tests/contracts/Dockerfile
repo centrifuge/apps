@@ -1,4 +1,4 @@
-FROM isthisa/tinlake_contracts:v0.1.1
+FROM isthisa/tinlake_contracts:v0.1.2
 
 # clone all needed contracts
 RUN git clone --branch config-from-env https://github.com/ana0/tinlake-deploy.git
@@ -23,4 +23,4 @@ WORKDIR /app
 
 COPY deploy.sh .
 
-RUN ls -l
+RUN ls
