@@ -7,7 +7,7 @@ dataSources:
     name: Block
     network: ${NETWORK_NAME}
     source:
-      address: "0xF84737c2c808b6Da4FEefa53328DDD493f443350"
+      address: "0xf128Ca3262b20240Dd2148b41661E38AAbB24642"
       abi: Pile
       startBlock: 0
     mapping:
