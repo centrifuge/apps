@@ -24,6 +24,6 @@ WORKDIR /app
 
 COPY deploy.sh .
 
-RUN chmod +X deploy.sh
-
-RUN ls -l
+USER root
+RUN chmod +x deploy.sh
+USER app
