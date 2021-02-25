@@ -1,5 +1,6 @@
 const mainnetPools = require('@centrifuge/tinlake-pools-mainnet')
 const kovanPools = require('@centrifuge/tinlake-pools-kovan')
+const localPools = require('../subgraph/pools-metadata.js')
 require('dotenv').config()
 
 export interface Config {
@@ -18,7 +19,7 @@ export interface Config {
 }
 
 const network = process.env.ETH_NETWORK || 'kovan'
-const networkConfigs = network === 'mainnet' ? mainnetPools : kovanPools
+const networkConfigs = network === 'mainnet' ? mainnetPools : network === 'kovan' ? kovanPools : localPools
 
 const pool = networkConfigs.find(
   (pool: Pool) => pool.addresses.ROOT_CONTRACT.toLowerCase() === process.env.POOL_ID?.toLowerCase()

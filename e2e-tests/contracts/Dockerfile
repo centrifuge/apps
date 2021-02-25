@@ -6,6 +6,7 @@ RUN git clone https://github.com/centrifuge/tinlake-proxy
 RUN git clone https://github.com/centrifuge/tinlake-pools-cli
 RUN git clone https://github.com/centrifuge/tinlake-claim-rad
 RUN git clone https://github.com/centrifuge/privacy-enabled-erc721.git
+RUN git clone  https://github.com/centrifuge/tinlake-actions.git
 RUN git clone https://github.com/centrifuge/centrifuge-ethereum-contracts.git
 
 # add the keys that were pre-funded in parity config
@@ -22,5 +23,7 @@ COPY deployIdentity.js .
 WORKDIR /app
 
 COPY deploy.sh .
+
+RUN chmod +X deploy.sh
 
 RUN ls -l
