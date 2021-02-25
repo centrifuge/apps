@@ -6,10 +6,13 @@ export DAPP_SOLC_VERSION=0.5.15
 create_contract () {
     REPO=$1
     CONTRACT=$2
-    ARGS=${@:3} # pass in any additional args to dapp create
+    BRANCH=$3
+    ARGS=${@:4} # pass in any additional args to dapp create
 
     cd $REPO
-    git submodule update --init --recursive >/dev/null
+    git fetch --all >/dev/null 2>&1
+    git checkout $BRANCH >/dev/null 2>&1
+    git submodule update --init --recursive >/dev/null 2>&1
     dapp build >/dev/null
     ADDRESS=$(dapp create "$CONTRACT" $ARGS)
     cd ..
@@ -25,9 +28,10 @@ create_contracts_npm () {
     cd ..
 }
 
-PROXY_REGISTRY=$(create_contract tinlake-proxy ProxyRegistry)
-POOLS_REGISTRY=$(create_contract tinlake-pools-cli PoolRegistry)
-TINLAKE_CLAIM_RAD=$(create_contract tinlake-claim-rad TinlakeClaimRAD)
+PROXY_REGISTRY=$(create_contract tinlake-proxy ProxyRegistry master)
+POOLS_REGISTRY=$(create_contract tinlake-pools-cli PoolRegistry main)
+TINLAKE_CLAIM_RAD=$(create_contract tinlake-claim-rad TinlakeClaimRAD main)
+TINLAKE_ACTIONS=$(create_contract tinlake-actions Actions fix/rollback)
 
 # deploy contracts using truffle migrate
 create_contracts_npm centrifuge-ethereum-contracts parity
@@ -43,11 +47,12 @@ ANCHOR=$(jq -r '.networks."17".address' centrifuge-ethereum-contracts/build/cont
 IDENTITY_FACTORY=$(jq -r '.networks."17".address' centrifuge-ethereum-contracts/build/contracts/IdentityFactory.json)
 
 # deploy nft registry contract using the address from centrifuge-ethereum-contract
-NFT_REGISTRY=$(create_contract privacy-enabled-erc721 NFT \"Name\" \"SYM\" $ANCHOR $IDENTITY $IDENTITY_FACTORY)
+NFT_REGISTRY=$(create_contract privacy-enabled-erc721 NFT master \"Name\" \"SYM\" $ANCHOR $IDENTITY $IDENTITY_FACTORY)
 
 echo "PROXY_REGISTRY : " $PROXY_REGISTRY
 echo "POOLS_REGISTRY : " $POOLS_REGISTRY
 echo "TINLAKE_CLAIM_RAD : " $TINLAKE_CLAIM_RAD
+echo "TINLAKE_ACTIONS : " $TINLAKE_ACTIONS
 echo "ANCHOR : " $ANCHOR
 echo "IDENTITY_FACTORY : " $IDENTITY_FACTORY
 echo "IDENTITY : " $IDENTITY
