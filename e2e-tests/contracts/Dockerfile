@@ -23,4 +23,4 @@ WORKDIR /app
 
 COPY deploy.sh .
 
-RUN ls
+RUN ls -l
