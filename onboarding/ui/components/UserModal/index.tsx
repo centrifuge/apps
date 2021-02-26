@@ -35,12 +35,6 @@ const UserModal: React.FC<Props> = (props: Props) => {
                   {props.user.accredited ? 'Yes' : props.user.usaTaxResident ? 'No' : 'N/A'}
                 </TableCell>
               </TableRow>
-            </TableBody>
-          </Table>
-
-          <Heading level="5">Agreements</Heading>
-          <Table>
-            <TableBody>
               {props.agreements.map((agreement: Agreement) => (
                 <TableRow>
                   <TableCell scope="row">{agreement.name}</TableCell>

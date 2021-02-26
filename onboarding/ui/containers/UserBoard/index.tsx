@@ -5,6 +5,7 @@ import { Box } from 'grommet'
 import * as React from 'react'
 import styled from 'styled-components'
 import UserModal from '../../components/UserModal'
+import { useKeyboardEvent } from '../../utils/hooks'
 
 interface Props {
   onboardingApiHost: string
@@ -16,7 +17,13 @@ const UserBoard: React.FC<Props> = (props: Props) => {
   const [activeUser, setActiveUser] = React.useState(undefined as UserWithKyc | undefined)
   const [activeAgreements, setActiveAgreements] = React.useState([] as Agreement[])
 
-  const openModal = (user: UserWithKyc, agreements: Agreement[]) => {
+  const [focusedCol, setFocusedCol] = React.useState('Interested')
+  const [focusedIndex, setFocusedIndex] = React.useState(0)
+
+  const openModal = (user: UserWithKyc, agreements: Agreement[], col: string, index: number) => {
+    setFocusedCol(col)
+    setFocusedIndex(index)
+
     setActiveUser(user)
     setActiveAgreements(agreements)
     setModalIsOpen(true)
@@ -37,6 +44,11 @@ const UserBoard: React.FC<Props> = (props: Props) => {
     })
   }
 
+  useKeyboardEvent('ArrowDown', () => {
+    console.log(`${focusedIndex} => ${focusedIndex + 1}`)
+    setFocusedIndex(focusedIndex + 1)
+  })
+
   return (
     <Content>
       <Columns>
@@ -46,20 +58,21 @@ const UserBoard: React.FC<Props> = (props: Props) => {
               <div>{col}</div> <ColMetric>{props.users[col].length}</ColMetric>
             </ColumnTitle>
             <Cards>
-              {sortInvestors(col, props.users[col]).map(({ user, agreements }) => (
+              {sortInvestors(col, props.users[col]).map(({ user, agreements }, index: number) => (
                 <Card
                   key={user.id}
-                  pad="medium"
+                  pad="small"
                   elevation="small"
                   round="xsmall"
                   margin={{ bottom: 'medium' }}
                   background="white"
-                  onClick={() => openModal(user, agreements)}
+                  onClick={() => openModal(user, agreements, col, index)}
+                  focused={focusedCol === col && focusedIndex === index}
                 >
-                  <InvestorName>{user.entityName || user.fullName}</InvestorName>
                   <Flag>
-                    <img src={`https://www.countryflags.io/${user.countryCode}/flat/24.png`} />
+                    <img src={`/flags/${user.countryCode}.svg`} />
                   </Flag>
+                  <InvestorName>{user.entityName || user.fullName}</InvestorName>
 
                   <TimeAgo>
                     {col === 'Awaiting counter-signature' && timeAgo(agreements[0].signedAt)}
@@ -121,15 +134,16 @@ const ColMetric = styled.div`
 
 const Cards = styled.div``
 
-const Card = styled(Box)`
+const Card = styled(Box)<{ focused?: boolean }>`
   display: flex;
   flex-direction: row;
   text-align: left;
   transition: all 100ms linear 0s;
   cursor: pointer;
+  margin-bottom: 10px;
+  box-shadow: ${(props) => (props.focused ? '0 0 2px 2px #2762ff' : '0')};
 
   &:hover {
-    box-shadow: rgba(0, 0, 0, 0.24) 0px 2px 6px;
     transform: scale(1.01);
   }
 `
@@ -137,13 +151,12 @@ const Card = styled(Box)`
 const InvestorName = styled.div``
 
 const Flag = styled.div`
-  margin-left: 10px;
+  margin-right: 10px;
+  margin-left: 4px;
+  width: 20px;
 
   img {
-    width: 18px;
-    height: 18px;
-    position: relative;
-    top: 2px;
+    height: 10px;
   }
 `
 
@@ -151,6 +164,7 @@ const TimeAgo = styled.div`
   margin-left: auto;
   font-size: 12px;
   color: #666;
+  margin-right: 2px;
 `
 
 export default UserBoard
