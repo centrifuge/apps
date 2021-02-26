@@ -144,30 +144,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             </TableRow>
           </TableBody>
         </Table>
-
-        <Box margin={{ top: 'medium' }}>
-          {'addresses' in props.selectedPool &&
-          config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
-            <Box gap="small" justify="end" direction="row">
-              {(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
-                <PoolLink href={'/investments'}>
-                  <Anchor>
-                    <Button label="Invest" primary />
-                  </Anchor>
-                </PoolLink>
-              )}
-              {!(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
-                <PoolLink href={'/onboarding'}>
-                  <Anchor>
-                    <Button label="Invest" primary />
-                  </Anchor>
-                </PoolLink>
-              )}
-            </Box>
-          ) : (
-            <InvestAction pool={props.selectedPool} />
-          )}
-        </Box>
       </Box>
 
       <BalanceSheetDiagram direction="row">

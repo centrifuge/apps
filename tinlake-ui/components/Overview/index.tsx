@@ -7,6 +7,7 @@ import { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
 import { PoolState } from '../../ducks/pool'
 import PageTitle from '../PageTitle'
+import OverviewHeader from './OverviewHeader'
 
 interface Props {
   pool?: PoolState
@@ -22,7 +23,7 @@ const Overview: React.FC<Props> = (props: Props) => {
       {!isUpcoming && (
         <>
           <PageTitle pool={props.selectedPool} page="Overview" />
-          <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />
+          <OverviewHeader selectedPool={props.selectedPool} />
         </>
       )}
 
@@ -36,6 +37,7 @@ const Overview: React.FC<Props> = (props: Props) => {
         elevation="small"
         round="xsmall"
         pad="medium"
+        margin={{ bottom: 'large' }}
         background="white"
       >
         <Box basis="1/2">
@@ -85,6 +87,8 @@ const Overview: React.FC<Props> = (props: Props) => {
           )}
         </Box>
       </Box>
+      <Heading level="4">Pool Balance</Heading>
+      <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />
     </Box>
   )
 }
