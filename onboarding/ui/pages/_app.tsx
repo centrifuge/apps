@@ -4,6 +4,8 @@ import Head from 'next/head'
 import React from 'react'
 import { StyledApp } from '../components/StyledApp'
 const countries = require('i18n-iso-countries')
+import { createWrapper } from 'next-redux-wrapper'
+import makeStore from '../utils/makeStore'
 
 require('regenerator-runtime/runtime')
 
@@ -32,4 +34,6 @@ class MyApp extends App {
   }
 }
 
-export default MyApp
+const wrapper = createWrapper(makeStore, { debug: false })
+
+export default wrapper.withRedux(MyApp)

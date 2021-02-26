@@ -1,8 +1,9 @@
-import { AgreementMap } from '@centrifuge/onboarding-api/src/controllers/user.controller'
 import * as React from 'react'
+import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import Header from '../components/Header'
 import UserBoard from '../containers/UserBoard'
+import { UsersState } from '../ducks/users'
 
 interface Props {
   onboardingApiHost: string
@@ -10,24 +11,14 @@ interface Props {
 }
 
 const App: React.FC<Props> = (props: Props) => {
-  // TODO: move this into a duck
-  const [agreementMap, setAgreementMap] = React.useState({} as AgreementMap)
-
-  React.useEffect(() => {
-    async function fetchUsers() {
-      const res = await fetch(`${props.onboardingApiHost}users/0x4B6CA198d257D755A5275648D471FE09931b764A`)
-      const body = await res.json()
-      setAgreementMap(body)
-      console.log(body)
-    }
-
-    fetchUsers()
-  }, [])
+  const users = useSelector((state: { users: UsersState }) => state.users.data)
 
   return (
     <Wrapper>
       <Header onboardingApiHost={props.onboardingApiHost} />
-      <UserBoard users={agreementMap} onboardingApiHost={props.onboardingApiHost} etherscanUrl={props.etherscanUrl} />
+      {users && (
+        <UserBoard onboardingApiHost={props.onboardingApiHost} etherscanUrl={props.etherscanUrl} users={users} />
+      )}
     </Wrapper>
   )
 }

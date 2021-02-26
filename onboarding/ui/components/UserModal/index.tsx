@@ -21,11 +21,14 @@ const UserModal: React.FC<Props> = (props: Props) => {
   useHotkeys(
     'ctrl+e, command+e',
     () => {
+      console.log('command e')
+      console.log({ user, addresses })
       if (props.isOpen && user && addresses.length > 0) {
+        console.log('open')
         openInNewTab(`${props.etherscanUrl}/address/${addresses[0].address}`)
       }
     },
-    [user, addresses]
+    [props.isOpen, user, addresses]
   )
 
   useHotkeys(
@@ -35,7 +38,7 @@ const UserModal: React.FC<Props> = (props: Props) => {
         openInNewTab(`mailto:${user.email}`)
       }
     },
-    [user, addresses]
+    [props.isOpen, user, addresses]
   )
 
   return (
@@ -52,6 +55,10 @@ const UserModal: React.FC<Props> = (props: Props) => {
               <TableRow>
                 <TableCell scope="row">KYC Status</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>{ucfirst(user.status)}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell scope="row">US tax resident</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>{user.usaTaxResident ? 'Yes' : 'No'}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell scope="row">Accredited Investor</TableCell>
@@ -71,19 +78,6 @@ const UserModal: React.FC<Props> = (props: Props) => {
                   </TableCell>
                 </TableRow>
               ))}
-
-              {addresses.map((address: AddressEntity) => (
-                <TableRow>
-                  <TableCell scope="row">
-                    {ucfirst(address.blockchain)} {ucfirst(address.network)}
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>
-                    <a href={`${props.etherscanUrl}/address/${address.address}`} target="_blank">
-                      {shorten(address.address, 4)}
-                    </a>
-                  </TableCell>
-                </TableRow>
-              ))}
             </TableBody>
           </Table>
         </Box>
@@ -94,12 +88,6 @@ const UserModal: React.FC<Props> = (props: Props) => {
               <TableRow>
                 <TableCell scope="row">Type</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>{user.entityName ? 'Entity' : 'Individual'}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell scope="row">Email address</TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
-                  <a href={`mailto:${user.email}`}>{user.email}</a>
-                </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell scope="row">Country</TableCell>
@@ -113,13 +101,23 @@ const UserModal: React.FC<Props> = (props: Props) => {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell scope="row" border={{ color: 'transparent' }}>
-                  US tax resident
-                </TableCell>
-                <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                  {user.usaTaxResident ? 'Yes' : 'No'}
+                <TableCell scope="row">Email address</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  <a href={`mailto:${user.email}`}>{user.email}</a>
                 </TableCell>
               </TableRow>
+              {addresses.map((address: AddressEntity) => (
+                <TableRow>
+                  <TableCell scope="row">
+                    {ucfirst(address.blockchain)} {ucfirst(address.network)} address
+                  </TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>
+                    <a href={`${props.etherscanUrl}/address/${address.address}`} target="_blank">
+                      {shorten(address.address, 4)}
+                    </a>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </Box>

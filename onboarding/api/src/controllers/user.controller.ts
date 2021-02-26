@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common'
+import { Controller, Get, NotFoundException, Param } from '@nestjs/common'
 import { AddressEntity, AddressRepo } from '../repos/address.repo'
 import { PoolService } from '../services/pool.service'
 import { Agreement, AgreementRepo } from '../repos/agreement.repo'
@@ -17,6 +17,9 @@ export class UserController {
   @Get('users/:poolId')
   async getUsers(@Param() params) {
     // return {}
+
+    const pool = this.poolService.get(params.poolId)
+    if (!pool) throw new NotFoundException(`Pool ${params.poolId} not found`)
 
     const usersWithKyc: UserWithKyc[] = await this.userRepo.getWithKycAndAgreement(params.poolId)
 
@@ -38,6 +41,7 @@ export class UserController {
     let groups = {
       Interested: [],
       'Submitted KYC': [],
+      'Awaiting signature': [],
       'Awaiting counter-signature': [],
       'Signed, awaiting KYC': [],
       'Ready to invest': [],
@@ -52,7 +56,9 @@ export class UserController {
 
       if (agreements.length === 0 && user.status !== 'none') groups['Submitted KYC'].push(userWithRelations)
       else if (agreements.length === 0) groups['Interested'].push(userWithRelations)
-      else if (agreements[0].counterSignedAt && user.status !== 'verified')
+      else if ((user.status === 'verified' && agreements.length === 0) || !agreements[0].signedAt) {
+        groups['Awaiting signature'].push(userWithRelations)
+      } else if (agreements[0].counterSignedAt && user.status !== 'verified')
         groups['Signed, awaiting KYC'].push(userWithRelations)
       else if (agreements[0].counterSignedAt) groups['Ready to invest'].push(userWithRelations)
       else if (agreements[0].signedAt) groups['Awaiting counter-signature'].push(userWithRelations)

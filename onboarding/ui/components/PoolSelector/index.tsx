@@ -1,8 +1,9 @@
+import { Pool } from '@centrifuge/onboarding-api/src/services/pool.service'
 import { Drop, TextInput } from 'grommet'
 import { FormDown, FormSearch } from 'grommet-icons'
-import { useRouter } from 'next/router'
 import * as React from 'react'
-import { PoolData } from '../../ducks/pools'
+import { useDispatch, useSelector } from 'react-redux'
+import { loadInvestors, UsersState } from '../../ducks/users'
 import {
   Button,
   Caret,
@@ -18,13 +19,14 @@ import {
 } from './styles'
 
 interface Props {
-  pools: PoolData[]
+  pools: Pool[] // TODO: add type
   title: string
 }
 
 // TODO: this should be an axis component
 export const PoolSelector: React.FC<Props> = (props: Props) => {
-  const router = useRouter()
+  const dispatch = useDispatch()
+  const activePool = useSelector((state: { users: UsersState }) => state.users.activePool)
 
   const poolRef = React.useRef<HTMLDivElement>(null)
 
@@ -53,19 +55,19 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
     if (searchQuery.trim().length === 0) {
       return livePools
     }
-    return livePools.filter((pool: PoolData) => pool.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+    return livePools.filter((pool: Pool) => pool.metadata.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
   }
 
-  const navigateToPool = (pool: PoolData) => {
-    if (pool.isUpcoming) {
-      router.push('/pool/[slug]', `/pool/${pool.slug}`)
-    } else if (pool.isArchived) {
-      router.push('/pool/[slug]', `/pool/${pool.slug}`)
-    } else {
-      router.push('/pool/[root]/[slug]', `/pool/${pool.id}/${pool.slug}`)
-    }
+  const navigateToPool = (pool: Pool) => {
+    dispatch(loadInvestors('http://localhost:3100/', pool))
     setOpen(false)
   }
+
+  React.useEffect(() => {
+    if (props.pools.length > 0) {
+      dispatch(loadInvestors('http://localhost:3100/', props.pools[0]))
+    }
+  }, [props.pools])
 
   return (
     <DesktopOnlyBox>
@@ -79,7 +81,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
       >
         <PoolTitle>
           <Desc>Investment Pool</Desc>
-          <Title>{props.title}</Title>
+          <Title>{activePool?.metadata.name}</Title>
         </PoolTitle>
         <Caret>
           <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
@@ -110,7 +112,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
                   />
                 </SearchField>
               )}
-              {filterPools().map((pool: PoolData) => (
+              {filterPools().map((pool: any) => (
                 <PoolLink key={pool.id} active={pool.name === props.title} onClick={() => navigateToPool(pool)}>
                   <Icon
                     src={

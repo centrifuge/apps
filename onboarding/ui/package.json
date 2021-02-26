@@ -17,14 +17,18 @@
     "grommet-icons": "^4.5.0",
     "i18n-iso-countries": "^6.5.0",
     "next": "^10.0.0",
+    "next-redux-wrapper": "^6.0.2",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-hotkeys-hook": "^3.1.0",
+    "react-redux": "^7.2.2",
+    "redux-thunk": "^2.3.0",
     "styled-components": "^5.2.1"
   },
   "devDependencies": {
     "@types/node": "^14.14.28",
     "@types/react": "^17.0.2",
+    "@types/react-redux": "^7",
     "@types/styled-components": "^5",
     "typescript": "^4.1.5"
   }

@@ -1,4 +1,4 @@
-import { AgreementMap, UserWithRelations } from '@centrifuge/onboarding-api/src/controllers/user.controller'
+import { UserWithRelations } from '@centrifuge/onboarding-api/src/controllers/user.controller'
 import { Box } from 'grommet'
 import * as React from 'react'
 import styled from 'styled-components'
@@ -8,7 +8,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
 interface Props {
   onboardingApiHost: string
   etherscanUrl: string
-  users: AgreementMap
+  users: UserWithRelations[]
 }
 
 const UserBoard: React.FC<Props> = (props: Props) => {
@@ -31,12 +31,12 @@ const UserBoard: React.FC<Props> = (props: Props) => {
 
   const sortInvestors = (col: string, investors: UserWithRelations[]) => {
     return investors.sort((a, b) => {
-      if (col === 'Whitelisted')
+      if (col === 'Signed, awaiting KYC')
         return new Date(b.agreements[0].counterSignedAt).getTime() - new Date(a.agreements[0].counterSignedAt).getTime()
       if (col === 'Awaiting counter-signature')
         return new Date(b.agreements[0].signedAt).getTime() - new Date(a.agreements[0].signedAt).getTime()
       if (a.user.createdAt && b.user.createdAt)
-        new Date(b.user.createdAt).getTime() - new Date(a.user.createdAt).getTime()
+        return new Date(b.user.createdAt).getTime() - new Date(a.user.createdAt).getTime()
       return 0
     })
   }
@@ -124,7 +124,7 @@ const UserBoard: React.FC<Props> = (props: Props) => {
 
                   <TimeAgo>
                     {col === 'Awaiting counter-signature' && timeAgo(user.agreements[0].signedAt)}
-                    {col === 'Whitelisted' && timeAgo(user.agreements[0].counterSignedAt)}
+                    {col === 'Signed, awaiting KYC' && timeAgo(user.agreements[0].counterSignedAt)}
                     {user.user.createdAt && col === 'Interested' && timeAgo(user.user.createdAt)}
                   </TimeAgo>
                 </Card>
