@@ -331,7 +331,6 @@ class Apollo {
               centAddress
               rewardsAccumulated
             }
-            claimable
     				linkableRewards
             totalRewards
             nonZeroBalanceSince
@@ -346,7 +345,6 @@ class Apollo {
 
     const transformed: UserRewardsData = {
       nonZeroInvestmentSince: null,
-      claimable: false,
       totalEarnedRewards: new BN(0),
       unlinkedRewards: new BN(0),
       links: [],
@@ -356,7 +354,6 @@ class Apollo {
     if (rewardBalance) {
       transformed.nonZeroInvestmentSince =
         rewardBalance.nonZeroBalanceSince && new BN(rewardBalance.nonZeroBalanceSince)
-      transformed.claimable = rewardBalance.claimable
       transformed.totalEarnedRewards = new BN(new Decimal(rewardBalance.totalRewards).toFixed(0))
       transformed.unlinkedRewards = new BN(new Decimal(rewardBalance.linkableRewards).toFixed(0))
       transformed.links = (rewardBalance.links as any[]).map((link: any) => ({
